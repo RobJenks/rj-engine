@@ -1,0 +1,6 @@
+<gamedata>
+
+    <include file="Ships\Sections\Frigate_Small\Frigate_small_sections.xml" />
+    <include file="Ships\Sections\Frigate_Medium\Frigate_medium_sections.xml" />
+  
+</gamedata>

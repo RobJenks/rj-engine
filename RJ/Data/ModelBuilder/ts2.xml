@@ -1,0 +1,10 @@
+<gamedata>
+    <CollisionOBB skip="true" numchildren="2">
+        <CollisionOBB px="-12.559987" py="0.000000" pz="-4.834999" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.719999" ey="3.949999" ez="3.714999" numchildren="0" />
+        <CollisionOBB px="5.539998" py="0.000000" pz="-7.564994" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.000000" ey="3.000000" ez="3.000000" numchildren="1">
+            <CollisionOBB px="-1.715000" py="0.000000" pz="-12.014988" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.000000" ey="3.000000" ez="3.000000" numchildren="0" />
+        </CollisionOBB>
+    </CollisionOBB>
+    <staticterrain code="tmp_terrain_cone" px="4.914999" py="0.000000" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="10.000000" ey="10.000000" ez="10.000000" />
+    <staticterrain code="tmp_terrain_cone" px="-11.149989" py="0.000000" pz="9.049993" ox="0.359346" oy="0.000000" oz="0.000000" ow="0.933205" ex="10.000000" ey="10.000000" ez="10.000000" />
+</gamedata>

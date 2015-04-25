@@ -1,0 +1,30 @@
+<gamedata>
+  <uilayout>
+    <Code>UI_CONSOLE</Code>
+    <Description>Debug Console</Description>
+
+    <!-- Console background -->
+    <Image2DGroup code="console_back" texture="UI\Console\Content\console_back.dds" texturemode="Repeat" render="true">
+      <Instance x="0" y="0" z="0.0015" width="1366" height="300" render="true" />
+    </Image2DGroup>
+
+    <!-- Textbox components -->
+    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_input_fr" x="0" y="268" z="0.001" width="1366" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_input_frf" x="0" y="268" z="0.001" width="1366" height="32" render="true" />
+    </Image2DGroup>
+
+    <!-- Console input textbox -->
+    <TextBlock code="txt_input_text_prefix" text=">" x="12" y="280" render="true" capacity="4" size="1.000000" />
+    <TextBlock code="txt_input_text" text="" x="24" y="280" render="true" capacity="1024" size="1.000000" />
+    <TextBox code="txt_input" frame="textbox_frame" frame_key="txt_input_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_input_frf" text="txt_input_text" render="true" />
+
+    <!-- Console history text display -->
+    <MultiLineTextBlock code="mltb_history" mode="IndividualLines" x="12" y="12" z="0.001" linecount="14" maxlinelength="512" />
+
+
+
+  </uilayout>
+</gamedata>

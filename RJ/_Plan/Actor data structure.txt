@@ -1,0 +1,17 @@
+ActorBase
+	> SkinnedModel
+	> DefaultAnimation etc
+	> Initial parameters (min/max, for generating within via a normal dist)
+	> Acceptable bounds for parameters
+	> Equipment etc. that can be used by this actor
+
+
+Actor
+	> Reference back to the ActorBase
+	> SkinnedModelInstance
+	> Initial generated parameters from the ActorBase class
+	> Final parameter values (following any modifiers etc; calculated via instance method)
+	> RecalculateActorAttributes() - recalcs the final params above
+	> SetAnimationImmediate(...), CurrentAnimation, ...
+	> Equipment being used by this actor
+

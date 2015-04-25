@@ -1,0 +1,52 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Intellisense, symbol & MSVC data
+*.sdf
+*.pdb
+*.idb
+*.dep
+*.ilk
+
+# Exclude debug & release intermediate build directories
+/RJ/Debug/*
+/RJ/Release/*
+
+# Exclude working directories - TODO: FIX THESE, SHOULD BE OUTSIDE OF MAIN PROJECT DIRS
+/RJ/_Working/*
+/RJ/Data/Actors/Human/Soldier_Basic/*
+/RJ/Data/Ships/Ghoul/gftr/*
+/RJ/Data/Ships/Sections/Frigate_Small/working/*
+/RJ/Data/Ships/Sections/Frigate_Small/backups/*
+/RJ/Data/Systems/Omega/working/*
+/RJ/Data/UI/_src/*
+/RJ/Data/UI/ShipDesigner/Content/PS/*
+/RJ/Data/UI/ShipDesigner/Content/Removed/*
+/RJ/Data/UI/ShipDesigner/Content/working/*
+/RJ/DX/*

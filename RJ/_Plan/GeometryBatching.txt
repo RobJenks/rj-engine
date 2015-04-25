@@ -1,0 +1,26 @@
+--- Current ---
+
+Calc world matrix
+Stream vertices to pipeline
+Set world/view/proj matrices in the shader params
+Draw vertices using the P/V shader
+
+
+--- Future ---
+
+RenderParams = { WorldMatrix }
+Add to unordered_map<Model*, RenderParams>
+
+
+
+? Iterate through elements of the map.  For each, perform a cycle of { Set world matrix, render vertices, drawindexed } ?
+
+*** ? Use DrawInstanced, with each instance using a different world matrix?   *Best?* ***
+   - Can pass world matrix as the instancing parameter for each instance?  Seems to duplicate into VS per-vertex params
+   - Or update the constant buffer every 'instance'?  But then lose efficiency of actual instancing.  Many draw calls > inefficient
+   - Check best practice for instancing based on a world matrix
+
+? Premultiply vertices by world matrix, then just stream all at once?  Faster to multiply in shader though?
+
+? Use geometry shader to transform vertices on their way into the VS?
+

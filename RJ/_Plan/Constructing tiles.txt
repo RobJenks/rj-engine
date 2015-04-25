@@ -1,0 +1,84 @@
+********************************
+*** Tile construction status ***
+********************************
+
+Elements have a % constructed status
+Elements have a % health status
+
+Tiles have a % damage modifier that is accounted for when applying damage to elements
+
+When applying a tile, 
+   > Underlying elements retain their health
+   > They also have construction % reset to 0 (although should already be 0)
+
+When unapplying a tile,
+   > Underlying elements retain their health
+   > Construction % is reset to 0
+
+
+Tiles have an aggregate construction % status that is calculated from all underlying elements
+Tiles are only considered constructed when that aggregate % reaches 1.0
+
+
+
+*************************
+*** Placing new tiles ***
+*************************
+
+(*) New elements must be connected to the existing set of elements, such that there is a path from the 
+	1) exit, if this is construction by an external shipyard 
+	2) construction / storage
+
+
+**********************************
+*** Upon creation of new tiles ***
+**********************************
+
+Iterate through each new tile and work out which can already be reached (there must always be one based on (*) above)
+
+- Of all these tiles, select the one which has the least workers already assigned (should give even distribution across building projects, and there should only be 1-2 usually since they must be reachable tiles)
+- Or, select the one which has most assigned up to some threshold (which would focus-build tiles, perhaps better?)
+
+Give worker the order to go and assist with the project
+
+
+******************************
+*** When working on a tile ***
+******************************
+
+
+If we have resources
+   - Find a random reachable element within the tile that still needs resources
+   - Assign sub-order to build with resources there
+
+If we have no resources
+   - Assign order to collect resources from storage
+
+If we have no resources and no resources exist in storage
+   - Warn player that we are out of resources
+   - Return to engineering (?)
+
+
+If we have completed the element construction
+   - Repeat process where we have resources; find another element requiring resources and go there
+
+If we have completed the tile construction
+   - Notify player that tile construction was completed (except corridor)
+   - Search for new tile project by logic in first section above and give that order, if one exists
+   - If no other tile is awaiting construction then 
+      - Return resources to storage
+      - Return to engineering
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,47 @@
+<gamedata>
+  <!-- Load the universe, which will in turn load all systems and system data -->
+  <include file="Universe.xml" />
+
+  <!-- Load all game resources and production data -->
+  <include file="Resources\Resources.xml" />
+  
+  <!-- Load model data -->
+  <include file="Models\BasicModels.xml" />
+  <include file="Ships\ShipModels.xml" />
+  <include file="Ships\TileModels.xml" />
+  
+  <!-- Load terrain objects -->
+  <include file="Terrain\Terrain.xml" />
+  
+  <!-- Load simple ship data -->
+	<include file="Ships\SimpleShips.xml" />
+
+  <!-- Load the set of ship tile classes, then the set of tile definitions -->
+  <include file="Ships\ComplexShipTileClasses.xml" />
+  <include file="Ships\ComplexShipTileDefinitions.xml" />
+  
+  <!-- Load the set of all standard complex ship sections -->
+  <include file="Ships\ComplexShipSections.xml" />
+  
+  <!-- Load the complex ship register, covering all complex ships in the game and their associated sections -->
+  <include file="Ships\ComplexShipRegister.xml" />
+  
+  <!-- Load equipment data-->
+  <include file="Engines.xml" />
+
+  <!-- Load effects and particle emitter data -->
+  <include file="Effects.xml" />
+  <include file="ParticleEmitters.xml" />
+
+  <!-- Load ship loadouts, after both the ships and equipement/objects to be mapped -->
+  <include file="Ships\SimpleShipLoadouts.xml" />
+  
+  <!-- Load user interface data -->
+  <include file="UI\UserInterface.xml" />
+  
+  <!-- Load data on all skinned actor models in the game.  Sequencing is importaant -->
+  <include file="Actors\SkinnedModels.xml" />
+  <include file="Actors\ActorAttributeGeneration.xml" />
+  <include file="Actors\Actors.xml" />
+  
+</gamedata>

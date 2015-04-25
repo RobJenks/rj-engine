@@ -1,0 +1,35 @@
+
+If (not ignoring root0) and (not ignoring root1)
+	Test box0-box1, return false if no collision, 
+	else set collision=true, pcollider[k] = box_k
+if (ignoring root0) and (not ignoring root1)
+	set collision = false, pcollider[k] = box_k		(will be caught at midpoint if none of the children collide with 1)
+if (not ignoring root0) and (ignoring root1)
+	for each child of box1
+		test collision of child vs box0. if colliding, 
+			set pcollider0 = box0, pcollider1 = child, collides=true, break
+
+	if (!collides) return false
+
+else
+
+
+
+for each child of pcollider0
+	test child against pcollider1
+	if colliding,
+		set collision = true, pcollider0 = box0-child, restart i=0
+	
+
+if collision=false here, we must be ignoring root0 node, and none of child0 overlap pcollider1 (which is box1)
+We cannot be here for any other reason: if not ignoring either root, collides=true, and if only ignoring root1 we have already returned false if not colliding with box0
+We can therefore return false here if collision = false.  
+
+
+for each of child of pcollider1 (which is either box1, or one of box1-children depending on ignore1)
+	test child against pcollider0
+	if colliding, 
+		set pcollider1 = pcollider1-child, restart i=0		(no need to set collision=true, based on statement above will always be true at this point)
+
+
+return colliding (which should always be true at this point)

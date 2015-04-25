@@ -1,0 +1,298 @@
+<gamedata>
+  <uilayout>
+    <Code>UI_SHIPDESIGNER</Code>
+    <Description>Ship Designer View</Description>
+
+    <!-- Constants used to construct the ship designer grid -->
+    <Constant code="sd_grid.x" value="50" />
+    <Constant code="sd_grid.y" value="60" />
+    <Constant code="sd_grid.w" value="700" />
+    <Constant code="sd_grid.h" value="600" />
+    <Constant code="sd_grid.gridsize.min" value="8" />
+    <Constant code="sd_grid.gridsize.max" value="128" />
+    <Constant code="sd_grid.gridsize.current" value="32" />
+
+    <!-- Content for the SD grid rendering groups -->
+    <Constant code="sd_grid.inactive.texture" value="UI\ShipDesigner\Content\sdgrid_null.dds" />
+    <Constant code="sd_grid.active.texture" value="UI\ShipDesigner\Content\sdgrid_active.dds" />
+    <Constant code="sd_grid.buildable.texture" value="UI\ShipDesigner\Content\sdgrid_buildable.dds" />
+    <Constant code="sd_grid.blueprint.texture" value="UI\ShipDesigner\Content\sdgrid_blueprint.dds" />
+    <Constant code="sd_grid.placementconflict.texture" value="UI\ShipDesigner\Content\sdgrid_placementconflict.dds" />
+    <Constant code="sd_grid.apoint_standard.texture" value="UI\ShipDesigner\Content\sdgrid_apoint_standard.dds" />
+    <Constant code="sd_grid.apoint_turret.texture" value="UI\ShipDesigner\Content\sdgrid_apoint_turret.dds" />
+    <Constant code="sd_grid.walkable_connect.texture" value="UI\ShipDesigner\Content\sdgrid_walkable_connect.dds" />
+    <Constant code="sd_grid.corridor.texture" value="UI\ShipDesigner\Content\sdgrid_corridor.dds" />
+    <Constant code="sd_grid.tile_border.texture" value="UI\ShipDesigner\Content\sdgrid_tile_border.dds" />
+    <Constant code="sd_grid.tile_civilian.texture" value="UI\ShipDesigner\Content\sdgrid_tile_civilian.dds" />
+    <Constant code="sd_grid.tile_engineering.texture" value="UI\ShipDesigner\Content\sdgrid_tile_engineering.dds" />
+    <Constant code="sd_grid.tile_military.texture" value="UI\ShipDesigner\Content\sdgrid_tile_military.dds" />
+
+    <!-- Defines the rendering order for SD grid rendering groups-->
+    <Constant code="sd_grid.inactive.z" value="0.100000" />
+    <Constant code="sd_grid.active.z" value="0.100000" />
+    <Constant code="sd_grid.buildable.z" value="0.050000" />
+    <Constant code="sd_grid.blueprint.z" value="0.030000" />
+    <Constant code="sd_grid.placementconflict.z" value="0.030000" />
+    <Constant code="sd_grid.apoint_standard.z" value="0.050000" />
+    <Constant code="sd_grid.apoint_turret.z" value="0.050000" />
+    <Constant code="sd_grid.walkable_connect.z" value="0.030000" />
+    <Constant code="sd_grid.corridor.z" value="0.030000" />
+    <Constant code="sd_grid.tile_border.z" value="0.035000" />
+    <Constant code="sd_grid.tile_civilian.z" value="0.030000" />
+    <Constant code="sd_grid.tile_engineering.z" value="0.030000" />
+    <Constant code="sd_grid.tile_military.z" value="0.030000" />
+
+    <!-- Rendering order constants for other types of components -->
+    <Constant code="shipsections.z" value="0.100000" />
+    <Constant code="shippreview.z" value="0.000000" />
+    
+    <!-- Render group detail for other components of the SD -->
+    <Constant code="sd_connectionchangetool.texture" value="UI\ShipDesigner\Content\sd_connectionchangetool.dds" />
+    <Constant code="sd_connectionchangetool.z" value="0.025000" />
+    
+    <!-- Corners of the side control panel -->
+    <Image2DGroup code="control_panel_corners" texture="UI\Common\Content\panel_corner.dds" texturemode="Normal" render="true">
+      <Instance x="800" y="60" z="0.25" width="32" height="32" render="true" rotation="0" />
+      <Instance x="1088" y="60" z="0.25" width="32" height="32" render="true" rotation="90" />
+      <Instance x="1088" y="656" z="0.25" width="32" height="32" render="true" rotation="180" />
+      <Instance x="800" y="656" z="0.25" width="32" height="32" render="true" rotation="270" />
+    </Image2DGroup>
+
+    <!-- Edges of the side control panel -->
+    <Image2DGroup code="control_panel_edges" texture="UI\Common\Content\panel_edge.dds" texturemode="Repeat" render="true">
+      <Instance x="800" y="92" z="0.25" width="32" height="564" render="true" rotation="0" />
+      <Instance x="832" y="60" z="0.25" width="256" height="32" render="true" rotation="90" />
+      <Instance x="1088" y="92" z="0.25" width="32" height="564" render="true" rotation="180" />
+      <Instance x="832" y="656" z="0.25" width="256" height="32" render="true" rotation="270" />
+    </Image2DGroup>
+
+
+    <!-- Active tab components, that are shown when the selected tab is active -->
+    <Image2DGroup code="panel_tab_active" texture="UI\Common\Content\panel_tab_blank_active.dds" texturemode="Normal" render="true">
+      <Instance x="832" y="80" z="0.000000" width="32" height="32" render="false" code="0" />
+      <Instance x="864" y="80" z="0.000000" width="32" height="32" render="false" code="1" />
+      <Instance x="896" y="80" z="0.000000" width="32" height="32" render="false" code="2" />
+      <Instance x="928" y="80" z="0.000000" width="32" height="32" render="false" code="3" />
+      <Instance x="960" y="80" z="0.000000" width="32" height="32" render="false" code="4" />
+      <Instance x="992" y="80" z="0.000000" width="32" height="32" render="false" code="5" />
+      <Instance x="1024" y="80" z="0.000000" width="32" height="32" render="false" code="6" />
+      <Instance x="1056" y="80" z="0.000000" width="32" height="32" render="false" code="7" />
+    </Image2DGroup>
+
+    <!-- Inactive tab components along the top of the control panel -->
+    <Image2DGroup code="panel_tab_inactive" texture="UI\Common\Content\panel_tab_blank_inactive.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance x="832" y="80" z="0.000000" width="32" height="32" render="true" code="0" />
+      <Instance x="864" y="80" z="0.000000" width="32" height="32" render="true" code="1" />
+      <Instance x="896" y="80" z="0.000000" width="32" height="32" render="true" code="2" />
+      <Instance x="928" y="80" z="0.000000" width="32" height="32" render="true" code="3" />
+      <Instance x="960" y="80" z="0.000000" width="32" height="32" render="true" code="4" />
+      <Instance x="992" y="80" z="0.000000" width="32" height="32" render="true" code="5" />
+      <Instance x="1024" y="80" z="0.000000" width="32" height="32" render="true" code="6" />
+      <Instance x="1056" y="80" z="0.000000" width="32" height="32" render="true" code="7" />
+    </Image2DGroup>
+    <Image2DGroup code="panel_tab_inactive_down" texture="UI\Common\Content\panel_tab_blank_inactive_down.dds" texturemode="Normal" render="true">
+      <Instance x="832" y="80" z="0.000000" width="32" height="32" render="false" code="0" />
+      <Instance x="864" y="80" z="0.000000" width="32" height="32" render="false" code="1" />
+      <Instance x="896" y="80" z="0.000000" width="32" height="32" render="false" code="2" />
+      <Instance x="928" y="80" z="0.000000" width="32" height="32" render="false" code="3" />
+      <Instance x="960" y="80" z="0.000000" width="32" height="32" render="false" code="4" />
+      <Instance x="992" y="80" z="0.000000" width="32" height="32" render="false" code="5" />
+      <Instance x="1024" y="80" z="0.000000" width="32" height="32" render="false" code="6" />
+      <Instance x="1056" y="80" z="0.000000" width="32" height="32" render="false" code="7" />
+    </Image2DGroup>
+
+    <!-- Buttons for each of the control panel tabs -->
+    <Button code="panel_tab_0" up="panel_tab_inactive" up_key="0" down="panel_tab_inactive_down" down_key="0" render="true" />
+    <Button code="panel_tab_1" up="panel_tab_inactive" up_key="1" down="panel_tab_inactive_down" down_key="1" render="true" />
+    <Button code="panel_tab_2" up="panel_tab_inactive" up_key="2" down="panel_tab_inactive_down" down_key="2" render="true" />
+    <Button code="panel_tab_3" up="panel_tab_inactive" up_key="3" down="panel_tab_inactive_down" down_key="3" render="true" />
+    <Button code="panel_tab_4" up="panel_tab_inactive" up_key="4" down="panel_tab_inactive_down" down_key="4" render="true" />
+    <Button code="panel_tab_5" up="panel_tab_inactive" up_key="5" down="panel_tab_inactive_down" down_key="5" render="true" />
+    <Button code="panel_tab_6" up="panel_tab_inactive" up_key="6" down="panel_tab_inactive_down" down_key="6" render="true" />
+    <Button code="panel_tab_7" up="panel_tab_inactive" up_key="7" down="panel_tab_inactive_down" down_key="7" render="true" />
+
+    <!-- Button type 1 components -->
+    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="btn_newbp_up" x="832" y="172" z="0.01" width="96" height="32" render="true" />
+      <Instance code="btn_savebp_up" x="940" y="172" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_loadbp_up" x="1024" y="172" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+      <Instance code="btn_newbp_down" x="832" y="172" z="0.01" width="96" height="32" render="true" />
+      <Instance code="btn_savebp_down" x="940" y="172" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_loadbp_down" x="1024" y="172" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+
+    <!-- Textbox components -->
+    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_bpname_fr" x="832" y="130" z="0.01" width="256" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_bpname_frf" x="832" y="130" z="0.01" width="256" height="32" render="true" />
+    </Image2DGroup>
+
+    <!-- ============================================== -->
+    <!-- Tab 0 Controls -->
+    <!-- ============================================== -->
+
+    <!-- Blueprint name textbox -->
+    <TextBlock code="txt_bpname_text" text="TestFrigate1" x="850" y="140" render="true" capacity="128" size="1.000000" />
+    <TextBox code="txt_bpname" frame="textbox_frame" frame_key="txt_bpname_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_bpname_frf" text="txt_bpname_text" render="true" />
+
+    <!-- New blueprint button -->
+    <TextBlock code="btn_newbp_text" text="New Blueprint" render="true" capacity="16" size="1.000000" />
+    <Button code="btn_newbp" up="button1_up" up_key="btn_newbp_up" down="button1_down" down_key="btn_newbp_down" text="btn_newbp_text" render="true"/>
+
+    <!-- Save blueprint button -->
+    <TextBlock code="btn_savebp_text" text="Save" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_savebp" up="button1_up" up_key="btn_savebp_up" down="button1_down" down_key="btn_savebp_down" text="btn_savebp_text" render="true"/>
+
+    <!-- Load blueprint button -->
+    <TextBlock code="btn_loadbp_text" text="Load" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_loadbp" up="button1_up" up_key="btn_loadbp_up" down="button1_down" down_key="btn_loadbp_down" text="btn_loadbp_text" render="true"/>
+
+    
+    <!-- ============================================== -->
+    <!-- Tab 1 Controls -->
+    <!-- ============================================== -->
+
+    <!-- Ship section selection box -->
+    <TextBlock code="txt_shipsec_selector_1" text="Ship" x="836" y="174" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_shipsec_selector_2" text="Section" x="836" y="190" render="true" capacity="12" size="1.000000" />
+    <ComboBox definition="UI_CONTROL_COMBOBOX1" code="shipsec_selector" x="892" y="172" z="0.01" width="192" height="32" expandsize="8" render="true" />
+
+    <!-- Corners of the ship section preview window -->
+    <Image2DGroup code="ship_section_preview_corners" texture="UI\Common\Content\frame_corner.dds" texturemode="Normal" render="true">
+      <Instance x="832" y="400" z="0.075" width="32" height="32" render="true" rotation="0" code="shipsec_prev_tl" />
+      <Instance x="1056" y="400" z="0.075" width="32" height="32" render="true" rotation="90" code="shipsec_prev_tr" />
+      <Instance x="1056" y="624" z="0.075" width="32" height="32" render="true" rotation="180" code="shipsec_prev_br"/>
+      <Instance x="832" y="624" z="0.075" width="32" height="32" render="true" rotation="270" code="shipsec_prev_bl"/>
+    </Image2DGroup>
+
+    <!-- Edges of the ship section preview window -->
+    <Image2DGroup code="ship_section_preview_edges" texture="UI\Common\Content\frame_edge.dds" texturemode="Repeat" render="true">
+      <Instance x="832" y="432" z="0.075" width="32" height="192" render="true" rotation="0" code="shipsec_prev_left" />
+      <Instance x="864" y="400" z="0.075" width="192" height="32" render="true" rotation="90" code="shipsec_prev_top" />
+      <Instance x="1056" y="432" z="0.075" width="32" height="192" render="true" rotation="180" code="shipsec_prev_right" />
+      <Instance x="864" y="624" z="0.075" width="192" height="32" render="true" rotation="270" code="shipsec_prev_bottom" />
+    </Image2DGroup>
+
+    <!-- Solid black backdrop to the ship section preview window -->
+    <Image2DGroup code="ship_section_preview_back" texture="UI\Common\Content\solid_black.dds" texturemode="Repeat" render="true">
+      <Instance x="856" y="424" z="0.1" width="208" height="208" render="true" rotation="0" code="shipsec_prev_back" />
+    </Image2DGroup>
+    
+    <!-- Defined bounds for contents of the ship section preview window -->
+    <Constant code="shipsecprev.x" value="864" />
+    <Constant code="shipsecprev.y" value="432" />
+    <Constant code="shipsecprev.w" value="192" />
+    <Constant code="shipsecprev.h" value="192" />
+
+    <!-- ============================================== -->
+    <!-- Tab 2 Controls -->
+    <!-- ============================================== -->
+    <TextBlock code="txt_corridor_selector_1" text="Select" x="836" y="174" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_corridor_selector_2" text="Mode" x="836" y="190" render="true" capacity="12" size="1.000000" />
+    <ComboBox definition="UI_CONTROL_COMBOBOX1" code="corridor_selector" x="892" y="172" z="0.01" width="192" height="32" expandsize="8" render="true" />
+
+    <!-- Component group for the main, top-level controls in this view -->
+    <ComponentGroup code="corr_main">
+      <include code="corridor_selector" />
+      <include code="txt_corridor_selector_1" />
+      <include code="txt_corridor_selector_2" />
+    </ComponentGroup>
+    
+    <!-- Controls for the normal, single-corridor mode -->
+
+
+
+    <!-- ============================================== -->
+    <!-- Tab 3 Controls -->
+    <!-- ============================================== -->
+    <TextBlock code="txt_tile_selector_1" text="Select" x="836" y="174" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_tile_selector_2" text="Tile" x="836" y="190" render="true" capacity="12" size="1.000000" />
+    <ComboBox definition="UI_CONTROL_COMBOBOX1" code="tile_selector" x="892" y="172" z="0.01" width="192" height="32" expandsize="8" render="true" />
+
+    <!-- Component group for the main, top-level controls in this view -->
+    <ComponentGroup code="tileselector_main">
+      <include code="tile_selector" />
+      <include code="txt_tile_selector_1" />
+      <include code="txt_tile_selector_2" />
+    </ComponentGroup>
+
+    <!-- Controls for the normal, single-corridor mode -->
+
+    
+
+    <!-- ============================================== -->
+    <!-- Other control panel components -->
+    <!-- ============================================== -->
+
+    <!-- Background of the side control panel -->
+    <Image2DGroup code="control_panel_back" texture="UI\Common\Content\panel_back.dds" texturemode="Repeat" render="true">
+      <Instance x="832" y="92" z="0.25" width="256" height="564" render="true" />
+    </Image2DGroup>
+
+
+    <!-- ============================================== -->
+    <!-- UI component groups for each control panel tab -->
+    <!-- ============================================== -->
+
+    <!-- Tab 0: General controls -->
+    <ComponentGroup code="panel_tab_controlgroup_0">
+      <include code="txt_bpname" />
+      <include code="btn_newbp" />
+      <include code="btn_savebp" />
+      <include code="btn_loadbp" />
+    </ComponentGroup>
+
+    <!-- Tab 1: Construction view -->
+    <ComponentGroup code="panel_tab_controlgroup_1">
+      <include code="shipsec_selector" />
+      <include code="txt_shipsec_selector_1" />
+      <include code="txt_shipsec_selector_2" />
+      <include code="ship_section_preview_back" key="shipsec_prev_back" />
+      <include code="ship_section_preview_corners" key="shipsec_prev_tl" />
+      <include code="ship_section_preview_corners" key="shipsec_prev_tr" />
+      <include code="ship_section_preview_corners" key="shipsec_prev_br" />
+      <include code="ship_section_preview_corners" key="shipsec_prev_bl" />
+      <include code="ship_section_preview_edges" key="shipsec_prev_left" />
+      <include code="ship_section_preview_edges" key="shipsec_prev_top" />
+      <include code="ship_section_preview_edges" key="shipsec_prev_right" />
+      <include code="ship_section_preview_edges" key="shipsec_prev_bottom" />
+    </ComponentGroup>
+
+    <!-- Tab 2: Corridor view -->
+    <ComponentGroup code="panel_tab_controlgroup_2">
+      <include code="corr_main" />
+    </ComponentGroup>
+
+    <!-- Tab 3: Tile view -->
+    <ComponentGroup code="panel_tab_controlgroup_3">
+      <include code="tileselector_main" />
+    </ComponentGroup>
+
+    <!-- Tab 4: (Tab name) -->
+    <ComponentGroup code="panel_tab_controlgroup_4">
+    </ComponentGroup>
+
+    <!-- Tab 5: (Tab name) -->
+    <ComponentGroup code="panel_tab_controlgroup_5">
+    </ComponentGroup>
+
+    <!-- Tab 6: (Tab name) -->
+    <ComponentGroup code="panel_tab_controlgroup_6">
+    </ComponentGroup>
+
+    <!-- Tab 7: (Tab name) -->
+    <ComponentGroup code="panel_tab_controlgroup_7">
+    </ComponentGroup>
+
+
+  </uilayout>
+</gamedata>
+
+<!--*** KEEP CORRIDOR_LOW IMG FOR USE AS THE BASE TILE CONNECTOR IMAGE.  GET DARKER BLUE ONE FOR CORRIDOR.  ADJUST BASE
+TILE METHOD TO SHOW CONNECTIONS=TRUE IN THE DARKER BLUE.  ADJUST CORRIDOR METHOD TO ONLY SHOW THE CONNECTIONS THAT ARE MADE
+TO OTHER WALKABLE ELEMENTS.  NOTE ALSO THAT THE CORRIDOR ENV METHOD NEEDS TO CONSIDER NOT ONLY NEIGHBOURING CORRIDORS,
+BUT NEIGHBOURING CORRECTLY-ORIENTED CONNECTIONS FROM A TILE IN GENERAL ***-->

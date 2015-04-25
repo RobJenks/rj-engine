@@ -1,0 +1,18 @@
+--- Top-level scoping ---
+
+CULL: Use octree to determine only those objects in the immediate region that need to go through collision detection.  Anything further away can be ignored.
+
+
+--- Broadphase ---
+
+For each object in scope for collision detection,
+	
+	CULL: Use octree to determine only objects near to the object for collision testing
+
+	CULL: For each object in scope, use bounding sphere test [sphere with radius = max(size.xyz)] to determine broadphase collision pairs
+
+	Record items we have tested this object against; then when we come to test the other object we don't need to consider it (the reverse pairing) again
+
+
+--- Narrowphase ---
+

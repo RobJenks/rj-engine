@@ -1,0 +1,31 @@
+<gamedata>
+  <fireeffect>
+    <Code>FIRE_BASIC_01</Code>
+    <EffectModel>UNIT_SQUARE</EffectModel>
+    <FireTexture>Effects/Fire/Fire_Basic_01/fire.dds</FireTexture>
+    <NoiseTexture>Effects/Fire/Fire_Basic_01/fire_noise.dds</NoiseTexture>
+    <AlphaTexture>Effects/Fire/Fire_Basic_01/fire_alpha.dds</AlphaTexture>
+    <NoiseScrollSpeed x="1.300000" y="2.100000" z="2.300000" />
+    <NoiseScaling x="1.000000" y="2.000000" z="3.000000" />
+    <NoiseDistortion1 x="0.100000" y="0.200000" />
+    <NoiseDistortion2 x="0.100000" y="0.300000" />
+    <NoiseDistortion3 x="0.100000" y="0.100000" />
+    <NoiseDistortionScale>0.800000</NoiseDistortionScale>
+    <NoiseDistortionBias>0.500000</NoiseDistortionBias>
+  </fireeffect>
+
+  <fireeffect>
+    <Code>FIRE_ENGINE_01</Code>
+    <EffectModel>UNIT_SQUARE  </EffectModel>
+    <FireTexture>Effects/Fire/Engine_Thrust_01/fire.dds</FireTexture>
+    <NoiseTexture>Effects/Fire/Engine_Thrust_01/fire_noise.dds</NoiseTexture>
+    <AlphaTexture>Effects/Fire/Engine_Thrust_01/fire_alpha.dds</AlphaTexture>
+    <NoiseScrollSpeed x="4.000000" y="4.500000" z="5.000000" />
+    <NoiseScaling x="1.000000" y="2.000000" z="3.000000" />
+    <NoiseDistortion1 x="0.100000" y="0.200000" />
+    <NoiseDistortion2 x="0.100000" y="0.300000" />
+    <NoiseDistortion3 x="0.100000" y="0.100000" />
+    <NoiseDistortionScale>0.800000</NoiseDistortionScale>
+    <NoiseDistortionBias>0.500000</NoiseDistortionBias>
+  </fireeffect>
+</gamedata>

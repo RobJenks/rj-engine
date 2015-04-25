@@ -1,0 +1,7 @@
+<gamedata>
+  <include file="\Ships\ShipData\null_environment\null_environment.xml" />
+  <include file="\Ships\ShipData\testfrigate12\testfrigate12.xml" />
+  <include file="\Ships\ShipData\testfrigate13\testfrigate13.xml" />
+  <include file="\Ships\ShipData\testfrigatecorridor\testfrigatecorridor.xml" />
+
+</gamedata>

@@ -1,0 +1,13 @@
+Dim s As String
+
+For x = 0 To 3
+    For y = 0 To 6
+        
+        s = s & "<ComplexShipElement x=""" & x & """ y=""" & y & """ z=""1"">" & vbNewLine & _
+                vbTab & "<Active>True</Active>" & vbNewLine & _
+                vbTab & "<Buildable>True</Buildable>" & vbNewLine & _
+                "</ComplexShipElement>"
+    Next y
+Next x
+
+TextBox1.Text = s

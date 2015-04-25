@@ -1,0 +1,20 @@
+<GameData>
+
+  <Model>
+    <Code>null_model</Code>
+    <Type>Ship</Type>
+    <Filename>Models\Misc\unit_square.rjm</Filename>
+    <Texture>Models\Misc\overlay_blueprint.png</Texture>
+    <ActualEffectiveSize y="10.000000"/>
+  </Model>
+
+  <Model>
+    <Code>unit_cone_model</Code>
+    <Type>Terrain</Type>
+    <Filename>Models\Misc\unit_cone.rjm</Filename>
+    <Texture>Models\Misc\overlay_blueprint.png</Texture>
+    <ActualEffectiveSize y="10.000000"/>
+  </Model>
+
+
+</GameData>

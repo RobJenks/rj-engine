@@ -1,0 +1,12 @@
+<gamedata>
+
+  <SkinnedModel>
+    <Code>HUMAN_SOLDIER_BASIC_MODEL</Code>
+    <Model>Actors\Human\Soldier_Basic\soldier.m3d</Model>
+    <Textures>Actors\Human\Soldier_Basic\Textures</Textures>
+    <DefaultAnimation>Take1</DefaultAnimation>
+    <ModelSize y="1.800000" />
+    <ViewOffset y="0.700000" z="0.200000"/>
+  </SkinnedModel>
+
+</gamedata>

@@ -1,0 +1,52 @@
+=================== BEFORE ==================
+
+SetPerFrameParams (for PS)
+
+For each type of skinned model
+
+	For each model of this type
+
+		Set PerObjectParams (per obj and bone transforms for VS)
+
+		RENDER:			
+		For each subset of this model
+		
+			Set PerSubsetParams (material and diff/normal map, for PS)	
+			Draw			
+
+
+=================== INTERIM 1 ================
+
+SetPerFrameParams (for PS)
+	{ Dir lights, eyepos }
+
+For each type of skinned model
+
+	For each model of this type
+
+		Set PerObjectParams 
+			{ Per obj matrices, bone transforms, Materials[], Diff/Normal[] }
+
+		RENDER:	
+		For each subset of this model		
+			Draw	
+
+
+
+=================== FINAL ====================
+
+SetPerFrameParams (for PS)
+	{ Dir lights, eyepos }
+
+For each type of skinned model
+
+	SetPerModelTypeParams
+
+	For each model of this type
+
+		Set PerObjectParams 
+			{ Per obj matrices, bone transforms, Materials[], Diff/Normal[] }
+
+		RENDER:	
+		For each subset of this model		
+			Draw	

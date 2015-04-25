@@ -1,0 +1,21 @@
+
+
+
+METHOD(obj0, obj1)
+
+for each child0 of obj0
+	if (child0 DOES NOT collide with obj1) continue;
+
+	if (child0 has children)
+		if (METHOD(child0, obj1)) return true;
+	else
+		// This child0 is colliding with obj1.  we now want to traverse down the obj1 hierarchy, or take the result, depending on whether obj1 has children
+		if (obj1 has children)
+			if (METHOD(obj1, child0)) return true;
+		else
+			// This is a collision between lowest-level OBBs in the hierarchy.  We can report a collision and return
+			pOut0 = child0; pOut1 = obj1;
+			return true;
+
+// If we got this far then there was no collision
+return false

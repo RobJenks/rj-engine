@@ -1,0 +1,76 @@
+D3DXMATRIX mscale, minterim, mfinal;
+
+	// Create edges in each dimension in turn; first, those relevant to the x dimension
+	D3DXMatrixScaling(&mscale, thickness, thickness, xSize);		// Scale to desired size & thickness
+	D3DXMatrixMultiply(&minterim, &mscale, &m_matrix_yrot);			// Rotate 90 degrees about Y for all x-relevant edges
+	D3DXMatrixMultiply(&minterim, &minterim, world);				// Multiply by the parent world matrix
+	for (int i = 0; i < 4; i++)
+	{break;
+		// Translate the scaling/rot/base world matrix for each of the four dimension-relevant edges, then render the line
+		D3DXMatrixMultiply(&mfinal, &minterim, &( m_matrix_boxtransforms[m_box_dimensions[0][i]] ));
+		RenderLine(&mfinal, colour);
+	}
+
+	// Now create edges relevant to the y dimension
+	D3DXMatrixScaling(&mscale, thickness, thickness, ySize);		// Scale to desired size & thickness
+	D3DXMatrixMultiply(&minterim, &mscale, &m_matrix_xrotneg);		// Rotate -90 degrees about X for all y-relevant edges
+	D3DXMatrixMultiply(&minterim, &minterim, world);				// Multiply by the parent world matrix
+	for (int i = 0; i < 4; i++)
+	{break;
+		// Multiply the scaling/rot/base world matrix for each of the four dimension-relevant edges, then render the line
+		D3DXMatrixMultiply(&mfinal, &minterim, &( m_matrix_boxtransforms[m_box_dimensions[1][i]] ));
+		RenderLine(&mfinal, colour);
+	}
+
+	// Finally create edges relevant to the z dimension
+	D3DXMatrixScaling(&mscale, thickness, thickness, zSize);		// Scale to desired size & thickness.  No rotation required for z edges
+	D3DXMatrixMultiply(&minterim, &mscale, world);					// Multiply by the parent world matrix
+	for (int i = 0; i < 4; i++)
+	{
+		// Multiply the scaling & base world matrix for each of the four dimension-relevant edges, then render the line
+		D3DXMatrixMultiply(&mfinal, &minterim, &( m_matrix_boxtransforms[m_box_dimensions[2][i]] ));
+		RenderLine(&mfinal, colour);
+	}
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------------------
+
+
+
+
+
+	// Bottom edges
+	m_matrix_boxtransforms[0] = ID_MATRIX;													// [0] = fwd from origin
+	D3DXMatrixRotationY(&mtmp, PI/4.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[1]), &(m_matrix_boxtransforms[0]), &mtmp);	// [1] = right from origin
+	D3DXMatrixTranslation(&mtmp, Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[2]), &mtmp, &(m_matrix_boxtransforms[0]), );	// [2] = fwd, to right of origin
+	D3DXMatrixTranslation(&mtmp, -Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[3]), &(m_matrix_boxtransforms[1]), &mtmp);	// [3] = right, above origin
+
+	// Top edges
+	D3DXMatrixTranslation(&mtmp, 0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[4]), &(m_matrix_boxtransforms[0]), &mtmp);	// [4] = fwd, above [0]
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[5]), &(m_matrix_boxtransforms[1]), &mtmp);	// [5] = right, above [1]
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[6]), &(m_matrix_boxtransforms[2]), &mtmp);	// [6] = fwd, above [2]
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[7]), &(m_matrix_boxtransforms[3]), &mtmp);	// [7] = right, above [3]
+
+	// Vertical edges
+	D3DXMatrixRotationX(&mtmp, -PI/4.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[8]), &(m_matrix_boxtransforms[0]), &mtmp);	// [8] = up, from origin
+	D3DXMatrixTranslation(&mtmp, -Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[9]), &(m_matrix_boxtransforms[8]), &mtmp);	// [9] = up, right of origin
+	D3DXMatrixTranslation(&mtmp, 0.0f, -Game::C_CS_ELEMENT_SCALE, 0.0f);
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[10]), &(m_matrix_boxtransforms[8]), &mtmp);	// [10] = up, in front of origin
+	D3DXMatrixMultiply(&(m_matrix_boxtransforms[11]), &(m_matrix_boxtransforms[9]), &mtmp);	// [11] = up, right & in front of origin
+
+}

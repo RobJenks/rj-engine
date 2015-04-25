@@ -1,0 +1,34 @@
+	// Debug info line 3 - temporary debug info
+	D3DXVECTOR3 heading, tgt;
+	double cross, dot;
+	string debugtext;
+	D3DXMATRIX invorient;
+	
+	heading = /*ss->PhysicsState->Heading*/BASIS_VECTOR;		// ************************ Make this the basis
+	tgt = (s2->Location - ss->Location);	
+	//D3DXVec3TransformCoord(&tgt, &tgt, &ss->ModelOrientationMatrix);	//
+	
+	//D3DXVec3Normalize(&heading, &heading);
+
+	//D3DXMatrixInverse(&invorient, NULL, ss->GetOrientationMatrix());	// ********** Precalc this?
+	//D3DXVec3TransformCoord(&heading, &heading, &invorient);				// ******** Remove this
+	D3DXVec3TransformCoord(&tgt, &tgt, ss->GetInverseOrientationMatrix());
+	D3DXVec3Normalize(&tgt, &tgt);
+
+	/*D3DXVec3TransformCoord(&heading, &heading, ss->GetInverseWorldMatrix());
+	D3DXVec3TransformCoord(&tgt, &tgt, ss->GetInverseWorldMatrix());*/ 
+	
+	cross = (heading.z*tgt.x) - (heading.x*tgt.z);
+	dot = (heading.z*tgt.z) + (heading.x*tgt.x);
+	
+	if (cross > 0.05f)				debugtext = "Turn right";
+	else if (cross < -0.05f)		debugtext = "Turn left";
+	else {
+		if (dot < 0.0f)				debugtext = "Turn left";
+		else						debugtext = "Maintain yaw";	
+	}
+
+	sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, "%s | Cross: %.2f, Dot: %.2f", debugtext.c_str(), cross, dot);		
+	Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
+
+

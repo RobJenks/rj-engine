@@ -1,0 +1,42 @@
+--- APPROACH ---
+
+Tiles need floor height data regardless, to determine where nav points should be automatically placed (if they don't exist)
+
+However more complex collision with objects in the tile is only needed in certain cases.  E.g. for the immediate surrounding region of tiles.
+
+*** OR ***
+
+> All collision is against collision objects
+> Use spatial grid to efficiently test collision
+> Still only perform collision for immediate surrounding region of tiles
+> When creating nav nodes, will need to do a test to determine the actual floor height at the proposed node location
+
+
+
+
+--- STRUCTURE ---
+
+Floor height.  Store
+- base height
+- set of specific heights
+   > xmin/xmax/ymin/ymax range
+   > Either
+      - height for this entire range
+      - height at each of the four points, for interpolation
+- int count of number of specific heights.  Can compare int==0 to determine if we just use the base height
+
+
+--- LOADING ---
+
+Loaded from file into vector.  
+
+
+
+
+--- RUNTIME ---
+
+On testing for floor height at current position
+- if (floor height count == 0) return base height
+- else
+    for (i = 0, < count)
+      

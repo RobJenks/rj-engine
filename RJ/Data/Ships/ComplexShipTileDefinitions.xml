@@ -1,0 +1,8 @@
+<GameData>
+
+  <!-- Include each tile dataset in turn -->
+  <include file="Ships\Tiles\CorridorTiles.xml" />
+  <include file="Ships\Tiles\QuartersTiles.xml" />
+  <include file="Ships\Tiles\LifeSupportTiles.xml" />
+
+</GameData>

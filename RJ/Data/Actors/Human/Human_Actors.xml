@@ -1,0 +1,23 @@
+<gamedata>
+
+  <ActorBase>
+    <!-- Key actor data -->
+    <Code>HUMAN_SOLDIER_BASIC</Code>
+    <Name>Basic Human Soldier</Name>
+    <Model>HUMAN_SOLDIER_BASIC_MODEL</Model>
+    <Mass>64.000000</Mass>
+    
+    <!-- Attribute data -->
+    <Attribute type="Base Health" min="90.0" max="110.0" minbound="10.0" maxbound="1000.0" derivation="normal" />
+    <Attribute type="Run Speed" min="16.0" max="20.0" minbound="10.0" maxbound="24.0" derivation="normal" />
+    <Attribute type="Accuracy" min="4.0" max="12.0" minbound="1.0" maxbound="1000.0" derivation="normal" />
+    <Attribute type="Agility" min="4.0" max="12.0" minbound="1.0" maxbound="1000.0" derivation="normal" />
+    <Attribute type="Constitution" min="4.0" max="12.0" minbound="1.0" maxbound="1000.0" derivation="normal" />
+    <Attribute type="Will" min="4.0" max="12.0" minbound="1.0" maxbound="1000.0" derivation="normal" />
+    
+    <!-- Other parameters -->
+    
+
+  </ActorBase>
+
+</gamedata>

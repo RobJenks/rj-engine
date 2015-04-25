@@ -1,0 +1,18 @@
+<gamedata>
+
+  <ActorAttributeGeneration>
+    <!-- Basic values for each attribute -->
+    <AttributeRange name="Accuracy" min="0.0" base="25.0" max="100.0" />
+    <AttributeRange name="Agility" min="0.0" base="25.0" max="100.0" />
+    <AttributeRange name="Constitution" min="0.0" base="25.0" max="100.0" />
+    <AttributeRange name="Will" min="0.0" base="25.0" max="100.0" />
+
+    <!-- Direct effects from one attribute onto another -->
+    <AttributeEffect source="Agility" target="Run Speed" at_min="-0.5" at_max="1.0" />
+    <AttributeEffect source="Constitution" target="Base Health" at_min="-0.9" at_max="10.0" />
+
+
+
+  </ActorAttributeGeneration>
+
+</gamedata>

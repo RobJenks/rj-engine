@@ -1,0 +1,21 @@
+<gamedata>
+    <engine>
+        <Name>Basic Ion Engine</Name>
+        <Code>ION_ENGINE1</Code>
+        <MaxHealth>1200.000000</MaxHealth>
+        <MaxThrust>100.000000</MaxThrust>
+        <MinThrust>-250.000000</MinThrust>
+        <Acceleration>5.000000</Acceleration>
+        <EmitterClass>Ion_Engine_Thrust_01</EmitterClass>
+    </engine>
+
+    <engine>
+      <Name>Frigate Heavy Ion Engine</Name>
+      <Code>FRIGATE_HEAVY_ION_ENGINE1</Code>
+      <MaxHealth>1200.000000</MaxHealth>
+      <MaxThrust>1000000.000000</MaxThrust>
+      <MinThrust>-25000.000000</MinThrust>
+      <Acceleration>40.000000</Acceleration>
+      <EmitterClass>Ion_Engine_Thrust_01</EmitterClass>
+    </engine>
+</gamedata>

@@ -1,0 +1,10 @@
+<gamedata>
+    <system>
+        <Name>Omega</Name>
+        <Code>AB01</Code>
+        <Size x="100000.0" y="100000.0" z="100000.0"/>
+        <SpaceBackdrop>Systems/Omega/omega_backdrop.jpg</SpaceBackdrop>
+
+
+    </system>
+</gamedata>

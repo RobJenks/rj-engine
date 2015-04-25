@@ -1,0 +1,28 @@
+bool HasUniversalFloorHeight
+if (true) > use one height for whole tile
+
+if (false)
+{
+
+{ xval }
+   { zval }
+	float patchbounds(xmin,xmax,zmin,zmax)
+	float baseheight
+	bool hasmultiplelevels
+	float heights[]					(for multiple levels)
+	
+	bool interpolate				(in which case height values above are not directly set)
+	float heightat{xmin,xmax,zmin,zmax}
+}
+
+when checking x/z (which are max values), order lowest to highest.  pick the first of each that our x/z is less than
+
+When checking multiple levels, order highest to lowest.  pick the first once that we are higher than
+actors should be situated some small amount above the floor they are on, to ensure comparisons work as expected
+if not above any of the levels, place onto the lowest level
+
+Should store a pointer to the current tile/height patch we are in, so first test when moving can be if we are still in it
+Pointers should be held within the ACTOR object, not player, since all actors will need them
+
+---
+OR, do we use a more generalised collision detection routine?  How about walls, and other smaller obstacles?

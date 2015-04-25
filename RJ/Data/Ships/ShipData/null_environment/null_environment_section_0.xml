@@ -1,0 +1,24 @@
+<gamedata>
+    <complexshipsection>
+        <Code>null_environment_section_0</Code>
+        <Name>Null Environment Section 0</Name>
+        <StandardObject>True</StandardObject>
+        <Model>null_model</Model>
+        <ElementSize x="1" y="1" z="1" />
+        <PreviewImage w="64" h="64">ui\common\content\solid_black.dds</PreviewImage>
+        <Mass>100.0</Mass>
+        <VelocityLimit>1.0</VelocityLimit>
+        <AngularVelocityLimit>0.1</AngularVelocityLimit>
+        <BrakeFactor>0.1</BrakeFactor>
+        <TurnRate>0.000100</TurnRate>
+        <TurnAngle>0.000100</TurnAngle>
+        <BankExtent x="1.000000" y="1.000000" z="1.000000" />
+        <BankRate>0.1</BankRate>  
+        <VisibilityTestingMode>UseOrientedBoundingBox</VisibilityTestingMode>
+      
+        <complexshipelement x="0" y="0" z="0">
+            <Properties active="true" buildable="true" />
+        </complexshipelement>
+        
+    </complexshipsection>
+</gamedata>

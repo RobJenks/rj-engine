@@ -1,0 +1,1262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Actor.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorAttributes.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorBase.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="BoundingObject.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraClass.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraPath.cpp">
+      <Filter>Engine\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="CapitalShipPerimeterBeacon.cpp">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClCompile>
+    <ClCompile Include="CentralScheduler.cpp">
+      <Filter>Scheduler</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionGeometry.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="CompilerSettings.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShip.cpp">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipObjectClass.cpp">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipSection.cpp">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipInfrastructure.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipTile.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipTileClass.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipTileDefinition.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundLoadoutMap.cpp">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreEngine.cpp">
+      <Filter>Engine\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Crew.cpp">
+      <Filter>Crew</Filter>
+    </ClCompile>
+    <ClCompile Include="CSCorridorTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CSLifeSupportTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CSLifeSupportTileDefinition.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CSQuartersTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMapTexture.cpp">
+      <Filter>Engine\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DMain.cpp">
+      <Filter>Engine\D3D</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DUtility.cpp">
+      <Filter>Engine\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="DataInput.cpp">
+      <Filter>Data input/output</Filter>
+    </ClCompile>
+    <ClCompile Include="DataOutput.cpp">
+      <Filter>Data input/output</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugCommandHandler.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="DustParticle.cpp">
+      <Filter>Engine\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="DXLocaliser.cpp">
+      <Filter>Engine\Localiser</Filter>
+    </ClCompile>
+    <ClCompile Include="DXText.cpp">
+      <Filter>Engine\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectBase.cpp">
+      <Filter>Engine\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="EffectManager.cpp">
+      <Filter>Engine\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="ComplexShipElement.cpp">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Equipment\Equipment classes\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Equipment.cpp">
+      <Filter>Equipment</Filter>
+    </ClCompile>
+    <ClCompile Include="FadeEffect.cpp">
+      <Filter>Engine\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="FastMath.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="FileInput.cpp">
+      <Filter>Data input/output</Filter>
+    </ClCompile>
+    <ClCompile Include="FireEffect.cpp">
+      <Filter>Engine\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="FireShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="FontShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="FontData.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Fonts.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="GameConsoleCommand.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="GameConsole.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="AdjustableParameter.cpp">
+      <Filter>Data structures</Filter>
+    </ClCompile>
+    <ClCompile Include="GameDataExtern.cpp">
+      <Filter>Game data</Filter>
+    </ClCompile>
+    <ClCompile Include="GameVarsExtern.cpp">
+      <Filter>Game data</Filter>
+    </ClCompile>
+    <ClCompile Include="GameInput.cpp">
+      <Filter>Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="GameInputSystem.cpp">
+      <Filter>Engine\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="GamePhysicsEngine.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="GameSpatialPartitioningTrees.cpp">
+      <Filter>Data structures</Filter>
+    </ClCompile>
+    <ClCompile Include="GameUniverse.cpp">
+      <Filter>Universe</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardpoint.cpp">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="Hardpoints.cpp">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="HardpointsInterface.cpp">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="HashFunctions.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Hp.cpp">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClCompile>
+    <ClCompile Include="HpEngine.cpp">
+      <Filter>Equipment\Equipment classes\Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="HpMissileLauncher.cpp">
+      <Filter>Equipment\Equipment classes\Missile Launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="HpShield.cpp">
+      <Filter>Equipment\Equipment classes\Shield</Filter>
+    </ClCompile>
+    <ClCompile Include="HpTorpedoLauncher.cpp">
+      <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="HpWeapon.cpp">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="iActiveObject.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iEnvironmentObject.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iObject.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iSpaceObject.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iSpaceObjectEnvironment.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iStaticObject.cpp">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClCompile>
+    <ClCompile Include="iConsumesOrders.cpp">
+      <Filter>Orders</Filter>
+    </ClCompile>
+    <ClCompile Include="iContainsComplexShipTiles.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="iActorObject.cpp">
+      <Filter>Objects\Actors</Filter>
+    </ClCompile>
+    <ClCompile Include="ImmediateRegion.cpp">
+      <Filter>Regions</Filter>
+    </ClCompile>
+    <ClCompile Include="iUIControl.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="iUIController.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Image2D.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Image2DRenderGroup.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="Image2DRenderGroupInstance.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="LightFadeShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightFadeShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="iShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Light.cpp">
+      <Filter>Engine\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadoutMap.cpp">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClCompile>
+    <ClCompile Include="LogManager.cpp">
+      <Filter>Logging</Filter>
+    </ClCompile>
+    <ClCompile Include="MissileLauncher.cpp">
+      <Filter>Equipment\Equipment classes\Missile Launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="MovementLogic.cpp">
+      <Filter>Game logic</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiLineTextBlock.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="NavNetwork.cpp">
+      <Filter>Pathfinding</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectAttachment.cpp">
+      <Filter>Objects\Attachments</Filter>
+    </ClCompile>
+    <ClCompile Include="Order.cpp">
+      <Filter>Orders</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleBase.cpp">
+      <Filter>Engine\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleDefinition.cpp">
+      <Filter>Engine\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEmitter.cpp">
+      <Filter>Engine\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleEngine.cpp">
+      <Filter>Engine\Particles</Filter>
+    </ClCompile>
+    <ClCompile Include="OverlayRenderer.cpp">
+      <Filter>Engine\Overlay</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
+    <ClCompile Include="ProductionCost.cpp">
+      <Filter>Production</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler.cpp">
+      <Filter>Profiling</Filter>
+    </ClCompile>
+    <ClCompile Include="Quaternion.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="RegionBase.cpp">
+      <Filter>Regions</Filter>
+    </ClCompile>
+    <ClCompile Include="Render2DGroup.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Render2DManager.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderManager.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Resource.cpp">
+      <Filter>Resources</Filter>
+    </ClCompile>
+    <ClCompile Include="Shield.cpp">
+      <Filter>Equipment\Equipment classes\Shield</Filter>
+    </ClCompile>
+    <ClCompile Include="TorpedoLauncher.cpp">
+      <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
+    </ClCompile>
+    <ClCompile Include="Ship.cpp">
+      <Filter>Objects\Ships</Filter>
+    </ClCompile>
+    <ClCompile Include="ShipDetails.cpp">
+      <Filter>Objects\Ships</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleShip.cpp">
+      <Filter>Objects\Ships\SimpleShips</Filter>
+    </ClCompile>
+    <ClCompile Include="ShipTileRequirement.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleShipLoadout.cpp">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulationStateManager.cpp">
+      <Filter>Simulation manager</Filter>
+    </ClCompile>
+    <ClCompile Include="RJ.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RJMain.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadM3d.cpp">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshGeometry.cpp">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedData.cpp">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedModel.cpp">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedNormalMapShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceEmitter.cpp">
+      <Filter>Objects\Emitters</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceSystem.cpp">
+      <Filter>Universe</Filter>
+    </ClCompile>
+    <ClCompile Include="StaticTerrain.cpp">
+      <Filter>Objects\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="SystemRegion.cpp">
+      <Filter>Regions</Filter>
+    </ClCompile>
+    <ClCompile Include="TexcubeShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTransShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextBlock.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderMouseEvent.cpp">
+      <Filter>UI\Components</Filter>
+    </ClCompile>
+    <ClCompile Include="TextManager.cpp">
+      <Filter>Engine\Text</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="XML\tinystr.cpp">
+      <Filter>XML</Filter>
+    </ClCompile>
+    <ClCompile Include="XML\tinyxml.cpp">
+      <Filter>XML</Filter>
+    </ClCompile>
+    <ClCompile Include="XML\tinyxmlerror.cpp">
+      <Filter>XML</Filter>
+    </ClCompile>
+    <ClCompile Include="XML\tinyxmlparser.cpp">
+      <Filter>XML</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_Console.cpp">
+      <Filter>UI\UI Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_ModelBuilder.cpp">
+      <Filter>UI\UI Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="UI_ShipDesigner.cpp">
+      <Filter>UI\UI Controllers</Filter>
+    </ClCompile>
+    <ClCompile Include="UIButton.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="UIComboBox.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="UITextBox.cpp">
+      <Filter>UI\Controls</Filter>
+    </ClCompile>
+    <ClCompile Include="UIComponentGroup.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UIManagedControlDefinition.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="UserInterface.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Weapon.cpp">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewFrustrum.cpp">
+      <Filter>Engine\Frustum</Filter>
+    </ClCompile>
+    <ClCompile Include="XMLGenerator.cpp">
+      <Filter>Data input/output</Filter>
+    </ClCompile>
+    <ClCompile Include="OrientedBoundingBox.cpp">
+      <Filter>Math\Geometry</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Actor.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorAttributes.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorBase.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="BoundingObject.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraClass.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraPath.h">
+      <Filter>Engine\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="CapitalShipPerimeterBeacon.h">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClInclude>
+    <ClInclude Include="CentralScheduler.h">
+      <Filter>Scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionGeometry.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="CompilerSettings.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShip.h">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipObjectClass.h">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipSection.h">
+      <Filter>Objects\Ships\ComplexShips</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipInfrastructure.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipTile.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipTileClass.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipTileDefinition.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundLoadoutMap.h">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClInclude>
+    <ClInclude Include="CopyObject.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreEngine.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Crew.h">
+      <Filter>Crew</Filter>
+    </ClInclude>
+    <ClInclude Include="CrewClassRequirement.h">
+      <Filter>Crew</Filter>
+    </ClInclude>
+    <ClInclude Include="CSCorridorTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSCorridorTileDefinition.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSLifeSupportTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSLifeSupportTileDefinition.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSQuartersTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSQuartersTileDefinition.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapTexture.h">
+      <Filter>Engine\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DMain.h">
+      <Filter>Engine\D3D</Filter>
+    </ClInclude>
+    <ClInclude Include="Damage.h">
+      <Filter>Concepts\Damage</Filter>
+    </ClInclude>
+    <ClInclude Include="DataInput.h">
+      <Filter>Data input/output</Filter>
+    </ClInclude>
+    <ClInclude Include="DataOutput.h">
+      <Filter>Data input/output</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugCommandHandler.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="DustParticle.h">
+      <Filter>Engine\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="DX11_Core.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="DXLocaliser.h">
+      <Filter>Engine\Localiser</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectBase.h">
+      <Filter>Engine\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="EffectManager.h">
+      <Filter>Engine\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementConnection.h">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="ComplexShipElement.h">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Equipment\Equipment classes\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Equip.h">
+      <Filter>Equipment</Filter>
+    </ClInclude>
+    <ClInclude Include="Equipment.h">
+      <Filter>Equipment</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorCodes.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="FadeEffect.h">
+      <Filter>Engine\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="FastMath.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="FileInput.h">
+      <Filter>Data input/output</Filter>
+    </ClInclude>
+    <ClInclude Include="FireEffect.h">
+      <Filter>Engine\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="FireShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FontShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FontData.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Fonts.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="GameConsoleCommand.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="GameConsole.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="AdjustableParameter.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryHeap.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="GameDataExtern.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="Gamedefs.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="GameVarsExtern.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="GameInput.h">
+      <Filter>Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="GameInputSystem.h">
+      <Filter>Engine\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="GamePhysicsEngine.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSpatialPartitioningTrees.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="GameUniverse.h">
+      <Filter>Universe</Filter>
+    </ClInclude>
+    <ClInclude Include="GlobalFlags.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="Hardpoint.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="Hardpoints.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="HardpointsInterface.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="HashFunctions.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="HighlightEffect.h">
+      <Filter>Engine\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="Hp.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="HpEngine.h">
+      <Filter>Equipment\Equipment classes\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="HpMissileLauncher.h">
+      <Filter>Equipment\Equipment classes\Missile Launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="HpShield.h">
+      <Filter>Equipment\Equipment classes\Shield</Filter>
+    </ClInclude>
+    <ClInclude Include="HpTorpedoLauncher.h">
+      <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="HpWeapon.h">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="iAcceptsConsoleCommands.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="iActiveObject.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iEnvironmentObject.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iObject.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iSpaceObject.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iSpaceObjectEnvironment.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iStaticObject.h">
+      <Filter>Objects\Object Hierarchy</Filter>
+    </ClInclude>
+    <ClInclude Include="iConsumesOrders.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="iContainsComplexShipTiles.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="iActorObject.h">
+      <Filter>Objects\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="iHardpoints.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="iContainsHardpoints.h">
+      <Filter>Equipment\Hardpoints</Filter>
+    </ClInclude>
+    <ClInclude Include="iLoadoutMap.h">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClInclude>
+    <ClInclude Include="ImmediateRegion.h">
+      <Filter>Regions</Filter>
+    </ClInclude>
+    <ClInclude Include="iUIComponent.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="iUIComponentRenderable.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="iUIControl.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="iUIController.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Image2D.h">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Image2DRenderGroup.h">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Image2DRenderGroupInstance.h">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="LightFadeShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightFadeShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="iShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Light.h">
+      <Filter>Engine\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadoutMap.h">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClInclude>
+    <ClInclude Include="LogManager.h">
+      <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="MemoryPool.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="MissileLauncher.h">
+      <Filter>Equipment\Equipment classes\Missile Launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="MovementLogic.h">
+      <Filter>Game logic</Filter>
+    </ClInclude>
+    <ClInclude Include="MultiLineTextBlock.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="NavNetwork.h">
+      <Filter>Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="NavNode.h">
+      <Filter>Pathfinding</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectAttachment.h">
+      <Filter>Objects\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="OctreePruner.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Order.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_ActorMoveToPosition.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_ActorMoveToTarget.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_ActorTravelToPosition.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_MoveToPosition.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_MoveToTarget.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleBase.h">
+      <Filter>Engine\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleDefinition.h">
+      <Filter>Engine\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEmitter.h">
+      <Filter>Engine\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleEngine.h">
+      <Filter>Engine\Particles</Filter>
+    </ClInclude>
+    <ClInclude Include="OverlayRenderer.h">
+      <Filter>Engine\Overlay</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Player</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductionCost.h">
+      <Filter>Production</Filter>
+    </ClInclude>
+    <ClInclude Include="ProductionProgress.h">
+      <Filter>Production</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler.h">
+      <Filter>Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Quaternion.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="RegionBase.h">
+      <Filter>Regions</Filter>
+    </ClInclude>
+    <ClInclude Include="Render2DGroup.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Render2DManager.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderComponentGroup.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderManager.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="ResourceAmount.h">
+      <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="RJDEBUG.h">
+      <Filter>_Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ScheduledObject.h">
+      <Filter>Scheduler</Filter>
+    </ClInclude>
+    <ClInclude Include="Shield.h">
+      <Filter>Equipment\Equipment classes\Shield</Filter>
+    </ClInclude>
+    <ClInclude Include="TorpedoLauncher.h">
+      <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="Ship.h">
+      <Filter>Objects\Ships</Filter>
+    </ClInclude>
+    <ClInclude Include="ShipDetails.h">
+      <Filter>Objects\Ships</Filter>
+    </ClInclude>
+    <ClInclude Include="Ships.h">
+      <Filter>Objects\Ships</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleShip.h">
+      <Filter>Objects\Ships\SimpleShips</Filter>
+    </ClInclude>
+    <ClInclude Include="ShipTileRequirement.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleShipLoadout.h">
+      <Filter>Equipment\Loadouts</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationStateManager.h">
+      <Filter>Simulation manager</Filter>
+    </ClInclude>
+    <ClInclude Include="RJ.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RJMain.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadM3d.h">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshGeometry.h">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedData.h">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedModel.h">
+      <Filter>Engine\Models\Skinned mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedNormalMapShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SpaceEmitter.h">
+      <Filter>Objects\Emitters</Filter>
+    </ClInclude>
+    <ClInclude Include="SpaceSystem.h">
+      <Filter>Universe</Filter>
+    </ClInclude>
+    <ClInclude Include="SpatiallyLinkedCollection.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticTerrain.h">
+      <Filter>Objects\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="StaticTerrainDefinition.h">
+      <Filter>Objects\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="SystemRegion.h">
+      <Filter>Regions</Filter>
+    </ClInclude>
+    <ClInclude Include="TexcubeShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTransShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextBlock.h">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderMouseEvent.h">
+      <Filter>UI\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="TextManager.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="XML\tinystr.h">
+      <Filter>XML</Filter>
+    </ClInclude>
+    <ClInclude Include="XML\tinyxml.h">
+      <Filter>XML</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_Console.h">
+      <Filter>UI\UI Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_ModelBuilder.h">
+      <Filter>UI\UI Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="UI_ShipDesigner.h">
+      <Filter>UI\UI Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="UIButton.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="UIComboBox.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="UITextBox.h">
+      <Filter>UI\Controls</Filter>
+    </ClInclude>
+    <ClInclude Include="UIComponentGroup.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UIManagedControlDefinition.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="UserInterface.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Weapon.h">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewFrustrum.h">
+      <Filter>Engine\Frustum</Filter>
+    </ClInclude>
+    <ClInclude Include="XMLGenerator.h">
+      <Filter>Data input/output</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionDetectionResultsStruct.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="OrientedBoundingBox.h">
+      <Filter>Math\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Math\Geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="AABB.h">
+      <Filter>Math\Geometry</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D3DUtility.h">
+      <Filter>Engine\Other</Filter>
+    </CustomBuild>
+    <CustomBuild Include="DXText.h">
+      <Filter>Engine\Other</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{1827cc0b-22c6-41b5-a42a-02b1dd319acc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Object Hierarchy">
+      <UniqueIdentifier>{dfacc321-84f2-45d4-903c-fd9618a0b27e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Actors">
+      <UniqueIdentifier>{9bf913ad-7e5d-490a-8b22-16dfd1d2a6e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships">
+      <UniqueIdentifier>{e13dd516-14d5-43e0-b1f7-10d87f8962b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{481d434c-2641-4919-89cc-6803c4cf4b67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics">
+      <UniqueIdentifier>{629d9183-c6fb-45e4-9ad7-42f6dc98eceb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine">
+      <UniqueIdentifier>{d12e3176-bfa8-4a30-aded-deda68fa0d46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Camera">
+      <UniqueIdentifier>{3b8ae537-3e6c-41d9-864f-8e417c703f8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\SimpleShips">
+      <UniqueIdentifier>{d56d3526-ab4f-4de5-8825-d7d8a6014342}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\ComplexShips">
+      <UniqueIdentifier>{24f2e1f5-3bdd-4556-a68a-f9def39cb002}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scheduler">
+      <UniqueIdentifier>{f4b4a495-35a2-4fa2-8541-bc875aef2a97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Tiles">
+      <UniqueIdentifier>{0e08fdea-c080-4b50-88af-b9c4d71f841f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment">
+      <UniqueIdentifier>{15fc0bc5-5b9b-4aa6-aa65-7832fd1329fb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Loadouts">
+      <UniqueIdentifier>{dc24e302-a44f-4b6a-9bcd-56f3ee972400}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Core">
+      <UniqueIdentifier>{8a5a9a99-d616-4cb0-95f6-2750ae4ea919}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Crew">
+      <UniqueIdentifier>{efb9b670-0ade-4888-a280-fb439c6d45a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Tiles\TileClasses">
+      <UniqueIdentifier>{cc9eb6d8-0f7d-4347-a294-c3107cd3332b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Textures">
+      <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\D3D">
+      <UniqueIdentifier>{4bea18cf-fc13-4314-86bf-b43231d91279}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Other">
+      <UniqueIdentifier>{06c1b5a6-4daf-4bce-a7d7-510e20c84e26}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Concepts">
+      <UniqueIdentifier>{bb296005-9191-4771-8572-1bfff3e9e791}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Concepts\Damage">
+      <UniqueIdentifier>{6a73a941-5cb7-430f-96b6-8d6b1d037609}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data input/output">
+      <UniqueIdentifier>{26726eec-d550-4dd2-b1f0-35d80edf4e52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Console">
+      <UniqueIdentifier>{6d7714f4-6e92-40ca-ad68-0459e80d09d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Particles">
+      <UniqueIdentifier>{1fe277a2-264d-4651-a4a5-dc01f2facfdd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Localiser">
+      <UniqueIdentifier>{e3150443-f475-4f4f-bd2c-dd563678445f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Effects">
+      <UniqueIdentifier>{8951d8d6-2e2b-42da-95ac-b85638800635}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Elements">
+      <UniqueIdentifier>{cfb93545-0734-4472-9fb4-8fa30950675e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Hardpoints">
+      <UniqueIdentifier>{c294c8f7-2603-4c92-9c90-44b1d42ad97b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{a0922b27-16f8-435f-a763-268c41900e8b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Shaders">
+      <UniqueIdentifier>{4c7b2949-521d-4dd7-a657-c92831083931}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Text">
+      <UniqueIdentifier>{e924b094-68a1-4441-8b8a-4911caf8d6eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Data structures">
+      <UniqueIdentifier>{d88b4d82-54b9-45bf-ba7b-35c7f1493637}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game data">
+      <UniqueIdentifier>{f3025428-a7a5-405d-8ea5-31c9613897cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Input">
+      <UniqueIdentifier>{5f1e80df-9994-40c9-a268-2b26c6c17081}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Universe">
+      <UniqueIdentifier>{33e90e24-8cdd-46dd-810c-fe5ce901babe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes">
+      <UniqueIdentifier>{fa546b16-8cb2-425c-9f8d-5bb86ba632d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes\Engine">
+      <UniqueIdentifier>{17babf4c-c2ef-4cf4-bb90-1562208ed4c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes\Missile Launcher">
+      <UniqueIdentifier>{b65efbb3-009f-41d5-b62c-3d343c6ca3e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes\Weapon">
+      <UniqueIdentifier>{443fd187-41db-4466-bcde-43e663c1c0ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes\Torpedo Launcher">
+      <UniqueIdentifier>{b2a61460-86ad-4acb-9b9d-11133714a056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Equipment\Equipment classes\Shield">
+      <UniqueIdentifier>{dd62d165-7608-48a1-854e-db13968b6265}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Orders">
+      <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{0b54db43-8bd7-425b-9a6b-a0c8e5ecc593}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Regions">
+      <UniqueIdentifier>{123f22c1-858a-48fc-9699-b38a5dc0ca47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Components">
+      <UniqueIdentifier>{fbbf325f-0411-4357-9988-78dc5df3b6ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Lighting">
+      <UniqueIdentifier>{aae7d02b-6798-4fb4-8aba-24eb740ee7b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Models">
+      <UniqueIdentifier>{739ba244-aa7d-4ac6-a7cb-0d49e29c5f40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logging">
+      <UniqueIdentifier>{5a60a90d-8246-4740-95e4-e7f398cb82e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Game logic">
+      <UniqueIdentifier>{6067b05f-300f-4b96-b578-6002b1486d49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\Controls">
+      <UniqueIdentifier>{631d6c08-cd88-4035-ad35-dcdb9fb5a0c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Pathfinding">
+      <UniqueIdentifier>{c37c2159-b6ef-42b5-9000-7b94acdcdd4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Attachments">
+      <UniqueIdentifier>{bffe734d-8349-49bc-a93c-5a67617d88a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Overlay">
+      <UniqueIdentifier>{f976adc1-f97d-4fd6-9fc2-808ee82c4cec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Player">
+      <UniqueIdentifier>{e91ff78a-45f7-4433-8139-7f7df52e4be1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Production">
+      <UniqueIdentifier>{4d079992-2272-466e-98a9-bf4658cb6094}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Profiling">
+      <UniqueIdentifier>{5637dd32-0a2c-4281-94e6-8c0ccc193495}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{eda50b86-bbb7-41c9-a91a-42a9d5e66236}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Debug">
+      <UniqueIdentifier>{0e8e7ea4-31e3-45a0-ac75-4a6fd004afd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Simulation manager">
+      <UniqueIdentifier>{2039145f-f00e-421c-91d1-6162a8638e28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main">
+      <UniqueIdentifier>{b4e1f7fa-e7bf-44d7-be7c-b1fcc3459ffa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Models\Static">
+      <UniqueIdentifier>{f9d17025-98b7-4a4f-9acd-610fddb6431a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Models\Skinned mesh">
+      <UniqueIdentifier>{f5a81be1-c492-4172-a96c-fa7b2f032d37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Emitters">
+      <UniqueIdentifier>{cdedac81-8db0-4d27-9694-531faf3921ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Terrain">
+      <UniqueIdentifier>{3644531c-ccbd-45ba-83bb-4592a0ff13e9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="XML">
+      <UniqueIdentifier>{0e43769c-9ece-47f0-8663-00707820ca4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI\UI Controllers">
+      <UniqueIdentifier>{bf7f0123-c379-46ac-990b-7e239dc07085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Frustum">
+      <UniqueIdentifier>{34e911a9-0821-4750-be67-002125f2c4d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Geometry">
+      <UniqueIdentifier>{0cd48c57-bbff-4d4e-b63c-5d204ae0841d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Object Hierarchy.cd" />
+  </ItemGroup>
+</Project>

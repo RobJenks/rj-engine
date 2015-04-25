@@ -1,0 +1,34 @@
+<GameData>
+  
+    <Resource>
+      <Code>RES_IRON_ORE</Code>
+      <Name>Iron Ore</Name>
+      <Value>1.000000</Value>
+      <AsteroidResource>true</AsteroidResource>
+      <PlanetResource>true</PlanetResource>
+
+      <ProductionCost>
+        <!-- This is a mined resource with no precursors, so no resource requirements to be specified -->
+        <TimeRequirement secs="0.500000" />
+      </ProductionCost>
+    </Resource>
+
+  <Resource>
+    <Code>RES_STEEL</Code>
+    <Name>Steel</Name>
+    <Value>1.250000</Value>
+    <AsteroidResource>false</AsteroidResource>
+    <PlanetResource>false</PlanetResource>
+
+    <ProductionCost>
+      <TimeRequirement secs="0.750000" />
+      <ResourceRequirement resource="RES_IRON_ORE" amount="3.000000" />
+      <ShipTileRequirement class="REFINERY" />
+      <ConstructedBy class="REFINERY" />
+    </ProductionCost>
+  </Resource>
+
+
+
+
+</GameData>

@@ -1,0 +1,6 @@
+<GameData>
+  <CollisionOBB skip="true" numchildren="1">
+    <!--CollisionOBB px="-10" py="-5" pz="-10" ex="2" ey="2" ez="2" -->
+    <CollisionOBB px="0.0" py="0.0" pz="0.0" ex="2" ey="2" ez="2" />
+  </CollisionOBB>
+</GameData>

@@ -1,0 +1,23 @@
+<Tile>
+
+	<ProductionCost type="PerElement"|"Total">					{ Relevant for tiles only }
+		<TimeRequirement secs="10.000000" />
+
+		<ResourceRequirement resource="steel" amount="100.000000" />
+		<ResourceRequirement resource="copper" amount="20.000000" />
+
+		<CrewClassRequirement class="engineer" level="5" />			{ Most common format; need an engineer of level >=5 to build this tile }
+		<CrewClassRequirement class="admiral" />				{ Need an admiral (of any level) to build this tile }
+		<CrewClassRequirement level="3" />					{ Uncommon; need a member of crew (of any class) of at least level 3 }
+
+		<ShipTileRequirement class="engineering" />				{ Ship must have an engineering tile of any level }
+		<ShipTileRequirement definition="engineering_basic" />			{ Ship must have the specific engineering_basic tile }
+		<ShipTileRequirement class="engineering" level="2" />			{ Ship must have an engineering tile of >= level 2 }
+
+		<ShipTileRequirement class="engineering" count="2" />			{ Ship must have at least 2 engineering tiles }
+		<ShipTileRequirement definition="engineering_basic" count="2" />	{ Ship must have at least 2 of this specific tile definition }
+		<ShipTileRequirement class="engineering" level="2" count="2"/>		{ Ship must have at least 2 engineering tiles of >= level 2 }
+
+	</ProductionCost>
+
+</Tile>

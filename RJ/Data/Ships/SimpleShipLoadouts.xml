@@ -1,0 +1,12 @@
+<gamedata>
+    <simpleshiploadout>
+        <Code>TESTSHIP_LOADOUT1</Code>
+	      <Ship>TESTSHIP1</Ship>
+        <Map hp="hpengine01" equip="ION_ENGINE1" />
+        <CompoundMap hp="hpweapon01">
+            <Option prob="0.5" equip="lightlaser01" />
+            <Option prob="0.25" equip="lightplasma01" />
+            <Option prob="0.25" equip="null" />
+        </CompoundMap>
+    </simpleshiploadout>
+</gamedata>

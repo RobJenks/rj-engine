@@ -1,0 +1,30 @@
+<GameData>
+
+  <ComplexShipTileDefinition class="quarters">  
+    <Code>QUARTERS_DORM_01</Code>
+    <Name>Basic Dormitory</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <Size x="-1" y="-1" z="-1" />
+    <Level>2</Level>
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+    <CompoundTileModelData>
+      <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="quarters_dorm01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="quarters_dorm01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+
+    <ProductionCost type="PerElement">
+      <TimeRequirement secs="90.000000" />
+      <ResourceRequirement resource="RES_STEEL_PLATING" amount="80.000000" />
+      
+      <ConstructedBy class="FABRICATOR_STATION" />
+      <ConstructedBy class="SHIPYARD" />
+    </ProductionCost>
+    
+  </ComplexShipTileDefinition>
+
+
+</GameData>

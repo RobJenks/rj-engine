@@ -1,0 +1,97 @@
+<GameData>
+
+  <ComplexShipTileDefinition class="lifesupport">  
+    <Code>LIFESUPPORT_BASIC_01</Code>
+    <Name>Basic Life Support Systems</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <Size x="1" y="1" z="1" />
+    <Level>1</Level>
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+<!--
+    <CompoundTileModelData>
+      <Model type="interior" code="lifesupport_basic01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="lifesupport_basic01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="lifesupport_basic01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="lifesupport_basic01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+-->
+    <CompoundTileModelData>
+      <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="quarters_dorm01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="quarters_dorm01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+
+    
+    <ProductionCost type="PerElement">
+      <TimeRequirement secs="300.000000" />
+      <ResourceRequirement resource="RES_STEEL_PLATING" amount="180.000000" />
+      <ResourceRequirement resource="RES_COBALT" amount="30.000000" />
+      <ResourceRequirement resource="RES_SUPERCONDUCTORS" amount="40.000000" />
+      <ResourceRequirement resource="RES_GRAVITON_CLUSTERS" amount="5.000000" />
+      
+      <ConstructedBy class="FABRICATOR_STATION" />
+      <ConstructedBy class="SHIPYARD" />
+    </ProductionCost>
+    
+    <ClassSpecificDefinition>
+      <InitialGravity min="0.0" max="20.0" value="9.8" target="9.8" changerate="1.0" />
+      <InitialOxygenLevel min="0" max="100" value="100" target="100" changerate="2" />
+      <InitialOxygenRange min="10" max="30" value="20" target="20" changerate="1" />
+      <GravityRange>6</GravityRange>
+      <GravityFalloffDelay>0.250000</GravityFalloffDelay>
+      <GravityExponent>3</GravityExponent>
+    </ClassSpecificDefinition>
+  
+  </ComplexShipTileDefinition>
+
+  <ComplexShipTileDefinition class="lifesupport">
+    <Code>LIFESUPPORT_HUGE_01</Code>
+    <Name>Huge Life Support Systems</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <Size x="1" y="1" z="1" />
+    <Level>1</Level>
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+    <!--
+    <CompoundTileModelData>
+      <Model type="interior" code="lifesupport_basic01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="lifesupport_basic01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="lifesupport_basic01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="lifesupport_basic01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+-->
+    <CompoundTileModelData>
+      <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="quarters_dorm01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="quarters_dorm01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+
+
+    <ProductionCost type="PerElement">
+      <TimeRequirement secs="3000.000000" />
+      <ResourceRequirement resource="RES_STEEL_PLATING" amount="1800.000000" />
+      <ResourceRequirement resource="RES_COBALT" amount="300.000000" />
+      <ResourceRequirement resource="RES_SUPERCONDUCTORS" amount="400.000000" />
+      <ResourceRequirement resource="RES_GRAVITON_CLUSTERS" amount="50.000000" />
+
+      <ConstructedBy class="FABRICATOR_STATION" />
+      <ConstructedBy class="SHIPYARD" />
+    </ProductionCost>
+
+    <ClassSpecificDefinition>
+      <InitialGravity min="0.0" max="20.0" value="9.8" target="9.8" changerate="1.0" />
+      <InitialOxygenLevel min="0" max="100" value="100" target="100" changerate="2" />
+      <InitialOxygenRange min="10" max="30" value="20" target="20" changerate="1" />
+      <GravityRange>60</GravityRange>
+      <GravityFalloffDelay>0.250000</GravityFalloffDelay>
+      <GravityExponent>3</GravityExponent>
+    </ClassSpecificDefinition>
+
+  </ComplexShipTileDefinition>
+
+</GameData>

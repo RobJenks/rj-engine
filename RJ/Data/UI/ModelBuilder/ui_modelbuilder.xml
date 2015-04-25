@@ -1,0 +1,91 @@
+<gamedata>
+  <uilayout>
+    <Code>UI_MODELBUILDER</Code>
+    <Description>Model Builder View (Developer)</Description>
+
+    <!-- Side panel for selecting / saving models -->
+    <Image2DGroup code="control_panel_back" texture="UI\Common\Content\panel_back.dds" texturemode="Repeat" render="true">
+      <Instance x="1024" y="64" z="0.25" width="256" height="600" render="true" />
+    </Image2DGroup>
+
+    <!-- Textbox components -->
+    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_modelcode_fr" x="1080" y="80" z="0.01" width="180" height="32" render="true" />
+      <Instance code="txt_colldata_fr" x="1080" y="168" z="0.01" width="180" height="32" render="true" />
+      <Instance code="txt_terraincode_fr" x="1112" y="616" z="0.01" width="136" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_modelcode_frf" x="1080" y="80" z="0.01" width="180" height="32" render="true" />
+      <Instance code="txt_colldata_frf" x="1080" y="168" z="0.01" width="180" height="32" render="true" />
+      <Instance code="txt_terraincode_frf" x="1112" y="616" z="0.01" width="136" height="32" render="true" />
+    </Image2DGroup>
+
+    <!-- Button type 1 components -->
+    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="btn_loadmodel_up" x="1080" y="120" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_savemodel_up" x="1180" y="120" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_loadcolldata_up" x="1080" y="208" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_savecolldata_up" x="1180" y="208" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_addobb_up" x="1040" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_addterrain_up" x="1112" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_removecolldata_up" x="1184" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_clearcolldata_up" x="1040" y="616" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+      <Instance code="btn_loadmodel_down" x="1080" y="120" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_savemodel_down" x="1180" y="120" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_loadcolldata_down" x="1080" y="208" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_savecolldata_down" x="1180" y="208" z="0.01" width="80" height="32" render="true" />
+      <Instance code="btn_addobb_down" x="1040" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_addterrain_down" x="1112" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_removecolldata_down" x="1184" y="576" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_clearcolldata_down" x="1040" y="616" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+    
+
+    <!-- Model code textbox -->
+    <TextBlock code="txt_modeltype_selector_1" text="Model" x="1032" y="80" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_modeltype_selector_2" text="Type" x="1032" y="96" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_modelcode_text" text="" x="1094" y="92" render="true" capacity="128" size="1.000000" />
+    <TextBox code="txt_modelcode" frame="textbox_frame" frame_key="txt_modelcode_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_modelcode_frf" text="txt_modelcode_text" render="true" />
+
+    <!-- Load / save model buttons -->
+    <TextBlock code="btn_loadmodel_text" text="Load model" render="true" capacity="32" size="1.000000" />
+    <TextBlock code="btn_savemodel_text" text="Export data" render="true" capacity="32" size="1.000000" />
+    <Button code="btn_loadmodel" up="button1_up" up_key="btn_loadmodel_up" down="button1_down" down_key="btn_loadmodel_down" text="btn_loadmodel_text" render="true"/>
+    <Button code="btn_savemodel" up="button1_up" up_key="btn_savemodel_up" down="button1_down" down_key="btn_savemodel_down" text="btn_savemodel_text" render="true"/>
+
+    <!-- Collision data textbox -->
+    <TextBlock code="txt_colldata_selector_1" text="Collision" x="1032" y="168" render="true" capacity="16" size="1.000000" />
+    <TextBlock code="txt_colldata_selector_2" text="Data" x="1032" y="184" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_colldata_text" text="" x="1094" y="180" render="true" capacity="128" size="1.000000" />
+    <TextBox code="txt_colldata" frame="textbox_frame" frame_key="txt_colldata_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_colldata_frf" text="txt_colldata_text" render="true" />
+
+    <!-- Load / save collision data buttons -->
+    <TextBlock code="btn_loadcolldata_text" text="Load C.Data" render="true" capacity="32" size="1.000000" />
+    <TextBlock code="btn_savecolldata_text" text="Save C.Data" render="true" capacity="32" size="1.000000" />
+    <Button code="btn_loadcolldata" up="button1_up" up_key="btn_loadcolldata_up" down="button1_down" down_key="btn_loadcolldata_down" text="btn_loadcolldata_text" render="true"/>
+    <Button code="btn_savecolldata" up="button1_up" up_key="btn_savecolldata_up" down="button1_down" down_key="btn_savecolldata_down" text="btn_savecolldata_text" render="true"/>
+
+    <!-- Text box used to show all collision data currently assigned to the model -->
+    <MultiLineTextBlock code="tb_collision_data" mode="IndividualLines" x="1032" y="256" z="0.01" w="228" linecount="16" maxlinelength="64" />
+
+    <!-- Buttons to modify collision data -->
+    <TextBlock code="btn_addobb_text" text="Add OBB" render="true" capacity="32" size="1.000000" />
+    <TextBlock code="btn_addterrain_text" text="Add Terr" render="true" capacity="32" size="1.000000" />
+    <TextBlock code="btn_removecolldata_text" text="Remove" render="true" capacity="32" size="1.000000" />
+    <TextBlock code="btn_clearcolldata_text" text="Clear CD" render="true" capacity="32" size="1.000000" />
+    <Button code="btn_addobb" up="button1_up" up_key="btn_addobb_up" down="button1_down" down_key="btn_addobb_down" text="btn_addobb_text" render="true"/>
+    <Button code="btn_addterrain" up="button1_up" up_key="btn_addterrain_up" down="button1_down" down_key="btn_addterrain_down" text="btn_addterrain_text" render="true"/>
+    <Button code="btn_removecolldata" up="button1_up" up_key="btn_removecolldata_up" down="button1_down" down_key="btn_removecolldata_down" text="btn_removecolldata_text" render="true"/>
+    <Button code="btn_clearcolldata" up="button1_up" up_key="btn_clearcolldata_up" down="button1_down" down_key="btn_clearcolldata_down" text="btn_clearcolldata_text" render="true"/>
+
+    <!-- Terrain code textbox -->
+    <TextBlock code="txt_terraincode_text" text="" x="1126" y="628" render="true" capacity="128" size="1.000000" />
+    <TextBox code="txt_terraincode" frame="textbox_frame" frame_key="txt_terraincode_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_terraincode_frf" text="txt_terraincode_text" render="true" />
+
+  </uilayout>
+</gamedata>
+
+
+

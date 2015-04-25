@@ -1,0 +1,19 @@
+<gamedata>
+  <UIManagedControlDefinition>
+    <Code>UI_CONTROL_COMBOBOX1</Code>
+    <Class>Combobox</Class>
+
+    <!-- Components for when control is in its default mode, i.e. not expanded -->
+    <Component key="mainback" file="UI\Common\Controls\ComboBox1\mainback.dds" />
+    <Component key="expand" file="UI\Common\Controls\ComboBox1\expand.dds" />
+
+    <!-- Additional component for when the control is expanded, but when no scrolling is required to view all items -->
+    <Component key="expandback" file="UI\Common\Controls\ComboBox1\expandback.dds" />
+
+    <!-- Additional components for when scrolling is required to view all items in the collection -->
+    <Component key="scrollbarback" file="UI\Common\Controls\ComboBox1\scrollbarback.dds" />
+    <Component key="scrollbarupdown" file="UI\Common\Controls\ComboBox1\scrollbarupdown.dds" />
+    <Component key="scrollbarhandle" file="UI\Common\Controls\ComboBox1\scrollbarhandle.dds" />
+
+  </UIManagedControlDefinition>
+</gamedata>

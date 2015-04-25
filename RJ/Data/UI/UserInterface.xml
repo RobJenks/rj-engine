@@ -1,0 +1,12 @@
+<gamedata>
+  
+  <!-- Load all managed control definitions -->
+  <include file="UI/Common/Controls/ComboBox1/ui_control_combobox1.xml" />
+  
+  
+  <!-- Load each primary UI controller -->
+  <include file="UI/Console/UI_Console.xml" />
+  <include file="UI/ShipDesigner/UI_ShipDesigner.xml" />
+  <include file="UI/ModelBuilder/UI_ModelBuilder.xml" />
+
+</gamedata>

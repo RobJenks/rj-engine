@@ -1,0 +1,9 @@
+<gamedata>
+
+    <!-- The null system is used for special rendering, cutscenes, testbeds etc. -->
+    <include file ="systems\null_system\nullsystem.xml" />
+  
+    <!-- Initial game systems-->
+    <include file="systems\omega\omega.xml" />
+
+</gamedata>

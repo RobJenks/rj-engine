@@ -1,0 +1,72 @@
+<GameData>
+  
+  <Model>
+    <Code>corridor_ns_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\CorridorTiles\corridor_ns.rjm</Filename>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_ns.jpg</Texture>
+    <EffectiveSize x="100" y="100" z="100" />
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+
+  <Model>
+    <Code>corridor_ne_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\CorridorTiles\corridor_ne.rjm</Filename>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_ne.jpg</Texture>
+    <EffectiveSize x="100" y="100" z="100" />
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+  
+  <Model>
+    <Code>corridor_nse_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\CorridorTiles\corridor_nse.rjm</Filename>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_nse.jpg</Texture>
+    <EffectiveSize x="100" y="100" z="100" />
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+
+  <Model>
+    <Code>corridor_nsew_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\CorridorTiles\corridor_nsew.rjm</Filename>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_nsew.jpg</Texture>
+    <EffectiveSize x="100" y="100" z="100" />
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+
+  
+  <Model>
+    <Code>quarters_dorm01_interior_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm</Filename>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.jpg</Texture>
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+
+  <Model>
+    <Code>quarters_dorm01_wall_straight_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm</Filename>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.jpg</Texture>
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+
+  <Model>
+    <Code>quarters_dorm01_wall_corner_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm</Filename>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.jpg</Texture>
+    <ElementSize x="1" y="1" z="1" /> 
+  </Model>
+
+  <Model>
+    <Code>quarters_dorm01_connection_model</Code>
+    <Type>ComplexShipTile</Type>
+    <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm</Filename>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.jpg</Texture>
+    <ElementSize x="1" y="1" z="1" />
+  </Model>
+  
+</GameData>

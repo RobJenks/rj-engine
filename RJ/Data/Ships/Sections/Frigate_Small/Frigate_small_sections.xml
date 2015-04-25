@@ -1,0 +1,236 @@
+<GameData>
+  <ComplexShipSection>
+    <Code>SFRIG_MIDSECTION_01</Code>
+    <Name>Small Frigate Midsection 1</Name>
+    <StandardSection>True</StandardSection>
+    <Model>frigate_small_midsection1</Model>
+    <Mass>1250.000000</Mass>
+    <VelocityLimit>200.000000</VelocityLimit>
+    <BrakeFactor>0.1</BrakeFactor>
+    <TurnRate>0.001000</TurnRate>
+    <TurnAngle>0.001000</TurnAngle>
+    <BankExtent x="5.000000" y="5.000000" z="2.500000" />
+    <BankRate>0.500000</BankRate>
+    <Image w="64" h="96">Ships\Sections\Frigate_Small\frigate_small_midsection1_prev.dds</Image>
+
+    <AllocateBoundingObjects>1</AllocateBoundingObjects>
+    <BoundingObject id="0" type="cuboid" sizex="200.000000" sizey="50.000000" sizez="350.000000" />
+
+    <Hardpoint code="hpengine01" type="Engine">
+      <Position x="0.0000000" y="10.000000" z="-30.000000" />
+      <Orientation w="0.000000" x="0.000000" y="0.000000" z="1.000000" />
+    </Hardpoint>
+    
+    <Elementsize x="4" y="7" z="1" />
+
+    <ComplexShipElement x="0" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <AttachPoint edge="left" type="standard" />
+      <AttachPoint edge="up" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="1" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="2" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="3" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="4" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="5" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="standard" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="1" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="2" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="3" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="4" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="5" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="1" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="2" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="3" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="4" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="5" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="1" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="2" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="3" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="4" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="5" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="3" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+
+  </ComplexShipSection>
+
+  
+  <ComplexShipSection>
+    <Code>SFRIG_PORT_HULL_1</Code>
+    <Name>Small Frigate Port Hull 1</Name>
+    <StandardSection>True</StandardSection>
+    <Model>frigate_small_midsection1</Model>
+    <Mass>1000.000000</Mass>
+    <VelocityLimit>200.000000</VelocityLimit>
+    <BrakeFactor>0.1</BrakeFactor>
+    <TurnRate>0.001000</TurnRate>
+    <TurnAngle>0.001000</TurnAngle>
+    <BankExtent x="5.000000" y="5.000000" z="2.500000" />
+    <BankRate>0.500000</BankRate>
+    <Image w="64" h="96">Ships\Sections\Frigate_Small\frigate_small_midsection1_prev.dds</Image>
+
+    <AllocateBoundingObjects>1</AllocateBoundingObjects>
+    <BoundingObject id="0" type="cuboid" sizex="150.000000" sizey="50.000000" sizez="350.000000" />
+
+    <Elementsize x="3" y="7" z="1" />
+
+    <ComplexShipElement x="0" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="1" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="2" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="turret" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="3" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="4" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="left" type="turret" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="5" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="0" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="1" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="2" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="3" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="4" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="5" z="0">
+      <Properties active="true" buildable="true" />
+    </ComplexShipElement>
+    <ComplexShipElement x="1" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="down" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="0" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="up" type="standard" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="1" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="2" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="3" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="4" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="5" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+    <ComplexShipElement x="2" y="6" z="0">
+      <Properties active="true" buildable="true" />
+      <Attachpoint edge="down" type="standard" />
+      <Attachpoint edge="right" type="standard" />
+    </ComplexShipElement>
+
+  </ComplexShipSection>
+
+</GameData>

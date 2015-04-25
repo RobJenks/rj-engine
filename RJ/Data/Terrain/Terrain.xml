@@ -1,0 +1,5 @@
+<GameData>
+
+  <include file="Terrain\Debug_Terrain.xml" />
+
+</GameData>

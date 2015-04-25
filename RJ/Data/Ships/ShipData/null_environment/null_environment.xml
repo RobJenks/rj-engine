@@ -1,0 +1,20 @@
+<gamedata>
+    <include file="\Ships\ShipData\null_environment\null_environment_section_0.xml" />
+    <ComplexShip>
+      <Code>null_environment</Code>
+      <Name>Null Environment</Name>
+      <StandardObject>True</StandardObject>
+      <SDOffset x="0" y="0" z="0" />
+      <ElementSize x="1" y="1" z="1" />
+      <complexshipsectioninstance>
+          <Code>null_environment_section_0</Code>
+          <RelativePosition x="0.000000" y="0.000000" z="0.000000" />
+          <ElementLocation x="0" y="0" z="0" />
+          <Rotation>0</Rotation>
+      </complexshipsectioninstance>
+      <complexshipelement x="0" y="0" z="0">
+          <Properties active="true" buildable="true" />
+      </complexshipelement>
+      
+    </ComplexShip>
+</gamedata>
