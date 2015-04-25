@@ -1,5 +1,5 @@
 
-#include "DX11_Core.h"
+#include "DX11_Core.h" //#include "FullDX11.h"
 
 #include <stdio.h>
 #include <cstdio>
