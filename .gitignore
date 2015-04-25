@@ -29,6 +29,7 @@
 
 # Intellisense, symbol & MSVC data
 *.sdf
+*.opensdf
 *.pdb
 *.idb
 *.dep
