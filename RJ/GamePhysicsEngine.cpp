@@ -32,6 +32,7 @@
 GamePhysicsEngine::GamePhysicsEngine(void)
 {
 	// Initialise fields to their default values wherever required
+	m_static_cd_counter = 0U; m_cd_include_static = false;
 
 	// Default physics engine flags
 	m_flag_handle_diverging_collisions = false;
@@ -43,6 +44,12 @@ void GamePhysicsEngine::SimulatePhysics(void)
 {
 	// Initialise the clock state
 	PhysicsClock.RemainingFrameTime = Game::TimeFactor;
+
+	// Increment the counter for testing static/static object collisions, and set the flag if necessary
+	if ((m_static_cd_counter += Game::ClockDelta) > Game::C_STATIC_PAIR_CD_INTERVAL)
+		{ m_cd_include_static = true; m_static_cd_counter = 0U; }
+	else
+		m_cd_include_static = false;
 
 	// Semi-fixed time step will be used to maintain relatively frame rate-independent simulation.  We will use a
 	// target max-delta-time, but with provision to relax that limit in case it would result in the physics simulation
@@ -154,6 +161,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	iSpaceObject *object, *candidate;
 	int numobjects, numcandidates;
 	bool hasexclusions;							// Flag indicating whether the current object has any collision exclusions.  For efficiency
+	bool exclude_static;						// Flag indicating whether we should exclude static/static pairs from the CD
 	OrientedBoundingBox *collider0 = NULL, *collider1 = NULL;	// Oriented bounding boxes that are colliding, determined during narrowphase testing
 	bool result;
 
@@ -218,6 +226,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 
 			// Get basic information on the object that we will need for each comparison
 			hasexclusions = object->HasCollisionExclusions();
+			exclude_static = (!m_cd_include_static && object->IsStatic());
 
 			// 3. Now consider each candidate in the broadphase collision detection, using simple collision sphere comparisons
 			Game::ID_TYPE object_id = object->GetID();
@@ -238,6 +247,11 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 				// If the candidate is a 'fast-mover', don't test for a collision from this side.  All CCD collisions for this candidate
 				// object will be covered in the CCD method when it is the primary object
 				if (candidate->IsFastMover()) continue;
+
+				// If the focal object is static, test whether the candidate is as well.  Only evaluate static pairs of objects on
+				// a periodic basis, since the vast majority of the time they will not be colliding (unless they are somehow placed inside
+				// each other
+				if (exclude_static && candidate->IsStatic()) continue;
 
 				// Record the fact that we are testing the collision pair
 				++CollisionDetectionResults.SpaceCollisions.CollisionChecks;

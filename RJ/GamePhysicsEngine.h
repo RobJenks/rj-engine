@@ -299,6 +299,11 @@ protected:
 	// but can be set during CCD where object trajectories may not be converging at every point along the CCD sweep
 	bool									m_flag_handle_diverging_collisions;
 
+	// Counter & flag that determine whether collision detection should evaluate pairs of static objects this cycle.  In the majority of cases
+	// we can exclude these since static objects will very rarely be colliding
+	unsigned int							m_static_cd_counter;
+	bool									m_cd_include_static;
+
 	// Temporary variables to avoid multiple reallocations per physics cycle
 	D3DXVECTOR3								_diffpos;
 	float									_distsq, _r1r2;

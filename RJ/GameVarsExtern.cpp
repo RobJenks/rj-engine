@@ -109,7 +109,7 @@ namespace Game {
 
 	// General application constants
 	int C_LOG_FLUSH_INTERVAL = 5000;
-	unsigned int C_MAX_FRAME_DELTA = 20;					// Maximum frame delta of 200ms (= minimum 5 FPS)
+	unsigned int C_MAX_FRAME_DELTA = 200;					// Maximum frame delta of 200ms (= minimum 5 FPS)
 
 	// Rendering constants
 	const int C_INSTANCED_RENDER_LIMIT = 1000;				// The maximum number of instances that can be rendered in any one draw call by the engine
@@ -142,7 +142,8 @@ namespace Game {
 	const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD = 1.0f;		// Threshold momentum value, above which we apply an additional collision response
 	const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ =										// Squared threshold momentum value, above which
 		C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD * C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD;	// we apply an additional collision response
-	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;			// The maximum number of collision exclusions that can be applied to an object
+	const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;					// The maximum number of collision exclusions that can be applied to an object
+	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
 	
 	// Camera-related constants
 	float C_DEFAULT_ZOOM_TO_SHIP_SPEED = 1.75f;				// Default number of seconds to zoom the camera from its current location to a ship

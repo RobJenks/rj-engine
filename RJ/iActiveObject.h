@@ -58,6 +58,9 @@ public:
 	// collision sphere in the current frame
 	CMPINLINE bool							IsFastMover(void) const { return (PhysicsState.DeltaMoveDistanceSq > m_collisionsphereradiussq); }
 
+	// Returns a flag indicating whether this object is static, i.e. has no linear or angular momentum
+	CMPINLINE bool							IsStatic(void) const { return (IsZeroVector(PhysicsState.WorldMomentum) && IsZeroVector(PhysicsState.AngularVelocity)); }
+
 	// Methods to apply external forces to the object
 	void									ApplyLocalForce(const D3DXVECTOR3 & localposition, D3DXVECTOR3 localforcevector);
 	void									ApplyWorldSpaceForce(const D3DXVECTOR3 & worldposition, const D3DXVECTOR3 & worldforcevector);
