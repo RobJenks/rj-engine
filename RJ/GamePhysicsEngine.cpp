@@ -32,7 +32,9 @@
 GamePhysicsEngine::GamePhysicsEngine(void)
 {
 	// Initialise fields to their default values wherever required
-	
+
+	// Default physics engine flags
+	m_flag_handle_diverging_collisions = false;
 }
 
 // Primary method to simulate all physics in the world.  Uses semi-fixed time step to maintain reasonably frame-rate 
@@ -151,7 +153,6 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	std::vector<iSpaceObject*> candidates;		// The list of potential collisions around the object being tested
 	iSpaceObject *object, *candidate;
 	int numobjects, numcandidates;
-	D3DXVECTOR3 objpos;
 	bool hasexclusions;							// Flag indicating whether the current object has any collision exclusions.  For efficiency
 	OrientedBoundingBox *collider0 = NULL, *collider1 = NULL;	// Oriented bounding boxes that are colliding, determined during narrowphase testing
 	bool result;
@@ -200,22 +201,23 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 		object = objects[i]; if (!object) continue;
 
 		// Test whether this object is moving at very high speed
-		if (object->PhysicsState.IsFastMover())
+		if (object->IsFastMover())
 		{
-			// If it is, we need to perform swept collision detection
-			//performcontinuouscollisiondetection(object);
+			// If it is, we need to perform continuous collision detection (CDD) instead of the primary discrete method
+			PerformContinuousSpaceCollisionDetection(object);
 		}
 		else
 		{
 			// Otherwise, in the majority of cases, we will handle this object via normal, discrete collision detection
-			objpos = object->GetPosition();
-			hasexclusions = object->HasCollisionExclusions();
-
+			
 			// Get any objects within the current object's collision margin radius; quit here if there are no objects nearby.  Don't
 			// include the focal object boundary since this is already passed in the 'marginradius'.  Include all target object boundaries.
 			candidates.clear();
 			numcandidates = object->GetAllObjectsWithinDistance(object->GetCollisionSphereMarginRadius(), candidates, true, false, true);
 			if (numcandidates == 0) continue;
+
+			// Get basic information on the object that we will need for each comparison
+			hasexclusions = object->HasCollisionExclusions();
 
 			// 3. Now consider each candidate in the broadphase collision detection, using simple collision sphere comparisons
 			Game::ID_TYPE object_id = object->GetID();
@@ -232,6 +234,10 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 				// Also test whether either object has an exclusion in place to prevent collision with the other
 				if ((hasexclusions && object->CollisionExcludedWithObject(candidate->GetID())) ||
 					(candidate->HasCollisionExclusions() && candidate->CollisionExcludedWithObject(object_id))) continue;
+
+				// If the candidate is a 'fast-mover', don't test for a collision from this side.  All CCD collisions for this candidate
+				// object will be covered in the CCD method when it is the primary object
+				if (candidate->IsFastMover()) continue;
 
 				// Record the fact that we are testing the collision pair
 				++CollisionDetectionResults.SpaceCollisions.CollisionChecks;
@@ -267,6 +273,87 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			}
 		}
 	}
+}
+
+// Performs continuous collision detection (CCD) for the specified object, including potentially handling multiple collisions
+// within the same execution cycle and rollback of physics time to simulate high-speed within-frame collisions.  Returns the 
+// object which we collided with, if applicable, otherwise NULL
+iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpaceObject *object)
+{
+	// Parameter check
+	if (!object) return NULL;
+
+	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
+	// Quit immediately if there are no other objects in range
+	std::vector<iSpaceObject*> candidates;
+	int numcandidates = object->GetAllObjectsWithinDistance(GetCCDTestDistance(object), candidates, true, false, true);
+	if (numcandidates == 0) return NULL;
+
+	// The method will test for potentially multiple collisions within the same frame.  It therefore 'dials-back' the physics
+	// clock to the correct within-frame time point in order to correctly handle them.  Clock state is restored at the end 
+	// of the method.
+	float restore_timefactor = PhysicsClock.TimeFactor;
+	iSpaceObject *candidate, *collider, *exclude = NULL, *lastcollider = NULL;
+
+	// Get basic information on the object that will be needed for each comparison
+	bool hasexclusions = object->HasCollisionExclusions();
+
+	// We will handle up to a maximum number of intra-frame collisions
+	bool collision = false; float nearest = 1.01f;
+	for (int i = 0; i < Game::C_MAX_INTRA_FRAME_CCD_COLLISIONS; ++i)
+	{
+		// Loop through each potential candidate in turn
+		collider = NULL;
+		for (int c = 0; c < numcandidates; ++c)
+		{
+			// Make sure the object is valid, and we aren't excluded from colliding with it
+			candidate = candidates[c]; if (!candidate) continue;
+			if (candidate == exclude || (hasexclusions && object->CollisionExcludedWithObject(candidate->GetID()))) continue;
+
+			// We are testing against the candidate's OBB, so update it if it has been invalidated
+			if (candidate->CollisionOBB.IsInvalidated()) candidate->CollisionOBB.UpdateFromObject(*candidate);
+
+			// Test for collisions with this object; if nothing, we can move to the next candidate immediately
+			++CollisionDetectionResults.SpaceCollisions.CCDCollisionChecks;
+			collision = TestContinuousSphereVsOBBCollision(object, candidate);
+			if (!collision) continue;
+
+			// Otherwise, if this collision is closer than any previous one, record it as the collision to be handled
+			if (m_collisiontest.ContinuousTestResult.IntersectionTime < nearest)
+			{
+				collider = candidate;
+				nearest = m_collisiontest.ContinuousTestResult.IntersectionTime;
+			}
+		}
+
+		// If we didn't collide with any of the objects then break out of the loop; there are no further collisions this frame
+		if (collider == NULL) break;
+
+		// Set the flag that enables collision handling for diverging objects; required for CCD collision handling.  Set here
+		// the first time we actually need to handle a collision (in most cases we won't even get here)
+		SetFlag_HandleDivergingCollisions();
+
+		// Handle this collision between the two objects.  Physics clock has been adjusted to the correct intra-frame
+		// time, so the collision response will be correct and proportionate
+		HandleCollision(object, collider, NULL, &(collider->CollisionOBB.Data));
+		++CollisionDetectionResults.SpaceCollisions.CCDCollisions;
+		lastcollider = collider;
+
+		// Adjust intra-frame time forwards to test for any further collision within the frame.  Prevent us from colliding
+		// with the same object immediately again to prevent issues with penetration & multiple impacts
+		exclude = collider;
+		PhysicsClock.TimeFactor *= (1.0f - m_collisiontest.ContinuousTestResult.IntersectionTime);
+		if (PhysicsClock.TimeFactor < Game::C_EPSILON) break;
+	}
+
+	// Restore the physics clock following these intra-frame test
+	PhysicsClock.TimeFactor = restore_timefactor;
+
+	// Revert the flag for testing diverging collisions back to false, now that CCD handling has been completed
+	ClearFlag_HandleDivergingCollisions();
+
+	// Return the last object that we collided with, or NULL if no collisions took place
+	return lastcollider;
 }
 
 // Performs a full cycle of collision detection & collision response in a radius around the specified focal location (which is typically
@@ -727,8 +814,9 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	D3DXVECTOR3 vrel = (v0 - v1);
 	float vn = D3DXVec3Dot(&vrel, &normal);
 
-	// If the objects are moving away from each other then there is no collision response required
-	if (-vn < 0.01f) return;
+	// If the objects are moving away from each other then there is no collision response required, UNLESS
+	// the flag to ignore this test has been set
+	if (!m_flag_handle_diverging_collisions && -vn < 0.01f) return;
 
 	// Transform the inertia tensor for each object into world space
 	D3DXMATRIX worldInvI0, worldInvI1;
@@ -1369,8 +1457,8 @@ bool GamePhysicsEngine::TestContinuousSphereCollision(const iActiveObject *objec
 	// We do not use the current object positions, since they have already moved.  Instead we roll back the position to
 	// the start of the frame (t=0) and then perform continuous collision detection for their movement during the 
 	// frame (until t=1).  
-	D.wm0 = (object0->PhysicsState.WorldMomentum * Game::TimeFactor);
-	D.wm1 = (object1->PhysicsState.WorldMomentum * Game::TimeFactor);
+	D.wm0 = (object0->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
+	D.wm1 = (object1->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
 	D.pos0 = (object0->GetPosition() - D.wm0);
 	D.pos1 = (object1->GetPosition() - D.wm1);
 
@@ -1432,7 +1520,7 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	// We do not use the current sphere position, since it has already moved.  Instead we roll back the position to
 	// the start of the frame (t=0) and then perform continuous collision detection for its movement during the 
 	// frame (until t=1).  The OBB position is taken as-is since we assume it is static in this test
-	D.wm0 = (sphere->PhysicsState.WorldMomentum * Game::TimeFactor);
+	D.wm0 = (sphere->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
 	D.pos0 = (sphere->GetPosition() - D.wm0);
 	
 	// We will use a ray/box intersection test.  Generate a ray to simulate the sphere path and transform
@@ -1450,12 +1538,24 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	// Now test the ray/AABB intersection
 	if (TestRayVsAABBIntersection(ray, box) == false) return false;
 
+	// We have a potential collision.  However the ray test was unbounded and the collision could take place
+	// outside of the current frame.  Test that the collision point is within our ray bounds for the frame
+	//if (RayIntersectionResult.tmin > 1.0f) return false;
+
 	// We have a collision.  Populate the intersection point in the results struct.  If tmin < 0 then
 	// the sphere begain inside the AABB at t=0.  Otherwise, first intersection is at time tmin, therefore
 	// at point (x0 + n*tmin) along the (original) ray.  x0==pos0 and n==wm0
 	m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
 	m_collisiontest.ContinuousTestResult.ContactPoint = (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
 	return true;
+}
+
+float GamePhysicsEngine::GetCCDTestDistance(const iActiveObject *object) const
+{
+	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
+	D3DXVECTOR3 wm = (object->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);	// Base the estimate on the object's current velocity
+	FloorVector(wm, 1.0f);																// Floor to 1.0 so that the squared distance will always be greater
+	return ((wm.x*wm.x) + (wm.y*wm.y) + (wm.z*wm.z)) * 2.0f;							// Add buffer of 2x to be sure of catching any ricochets etc
 }
 
 

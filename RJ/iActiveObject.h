@@ -40,7 +40,6 @@ public:
 
 		// The distance sq that the object moved during this physics cycle
 		float						DeltaMoveDistanceSq;	// m
-		CMPINLINE bool				IsFastMover(void) const { return DeltaMoveDistanceSq > Game::C_OBJECT_FAST_MOVER_THRESHOLD; }
 
 	} PhysicsState;
 
@@ -53,6 +52,11 @@ public:
 	// Methods to retrieve the (automatically-maintained) orientation matrices
 	CMPINLINE D3DXMATRIX *					GetOrientationMatrix(void)			{ return &m_orientationmatrix; }
 	CMPINLINE D3DXMATRIX *					GetInverseOrientationMatrix(void)	{ return &m_inverseorientationmatrix; }
+
+	// Returns a flag indicating whether this object is a 'fast mover' that should be simulated via continuous (CCD) rather
+	// than discrete collision detection.  Definition of a 'fast mover' is an object that will move more than it's own 
+	// collision sphere in the current frame
+	CMPINLINE bool							IsFastMover(void) const { return (PhysicsState.DeltaMoveDistanceSq > m_collisionsphereradiussq); }
 
 	// Methods to apply external forces to the object
 	void									ApplyLocalForce(const D3DXVECTOR3 & localposition, D3DXVECTOR3 localforcevector);

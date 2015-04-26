@@ -168,6 +168,11 @@ public:
 	// This method is specific to space-based collision handling
 	void									PerformSpaceCollisionDetection(iSpaceObject *focalobject, float radius);
 
+	// Performs continuous collision detection (CCD) for the specified object, including potentially handling multiple collisions
+	// within the same execution cycle and rollback of physics time to simulate high-speed within-frame collisions.  Returns the 
+	// object which we collided with, if applicable, otherwise NULL
+	iSpaceObject *							PerformContinuousSpaceCollisionDetection(iSpaceObject *object);
+
 	// Performs a full cycle of collision detection & collision response in a radius around the specified focal location (which is typically
 	// the player) in the specified environment.  Use the existing environment structure to partition & identify potential colliding pairs.  
 	// If radius < 0.0f then all objects in the environment will be considered (which can be inefficient).  This method is specific to 
@@ -206,7 +211,7 @@ public:
 	bool									TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
 	CMPINLINE bool							TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
 	{
-		return TestRayVsAABBIntersection(ray, aabb, 1000000000.0f);		// Effectively no maximum time along the ray
+		return TestRayVsAABBIntersection(ray, aabb, 1.0f);		// By default, limit to the exact extent of the ray
 	}
 
 	// Perform a continuous collision test between two moving objects.  Populates the collision result data with details on the collision
@@ -238,6 +243,15 @@ public:
 	// Struct holding data on a significant impact between an object and the terrain
 	TerrainImpactData						TerrainImpact;
 
+	// Returns the distance that should be tested around an object for CCD contacts.  No parameter checking for efficiency
+	float									GetCCDTestDistance(const iActiveObject *object) const;
+
+	// Set or test the flag that indicates whether the engine will still handle collisions between diverging objects.  Default: no
+	CMPINLINE bool							TestFlag_HandleDivergingCollisions(void) const			{ return m_flag_handle_diverging_collisions; }
+	CMPINLINE void							SetFlag_HandleDivergingCollisions(void)					{ m_flag_handle_diverging_collisions = true; }
+	CMPINLINE void							ClearFlag_HandleDivergingCollisions(void)				{ m_flag_handle_diverging_collisions = false; }
+	CMPINLINE void							SetFlagValue_HandleDivergingCollisions(bool b)			{ m_flag_handle_diverging_collisions = b; }
+	
 	// Default destructor
 	~GamePhysicsEngine(void);
 
@@ -280,6 +294,10 @@ protected:
 
 	// Store the last collision detection result in a structure that can be accessed by collision handling/response functions
 	CollisionDetectionResult				m_collisiontest;
+
+	// Flag that can be set to have the collision engine handle collisions between objects which are diverging.  Not typical behaviour, 
+	// but can be set during CCD where object trajectories may not be converging at every point along the CCD sweep
+	bool									m_flag_handle_diverging_collisions;
 
 	// Temporary variables to avoid multiple reallocations per physics cycle
 	D3DXVECTOR3								_diffpos;

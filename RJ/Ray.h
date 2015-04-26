@@ -54,6 +54,12 @@ public:
 			D3DXVec3Dot(&Direction, &(bases[1])),
 			D3DXVec3Dot(&Direction, &(bases[2]))
 		);
+
+		// Recalculate derived fields
+		InvDirection = D3DXVECTOR3(1.0f / Direction.x, 1.0f / Direction.y, 1.0f / Direction.z);
+		Sign[0] = InvDirection.x < 0.0f;
+		Sign[1] = InvDirection.y < 0.0f;
+		Sign[2] = InvDirection.z < 0.0f;
 	}
 
 };

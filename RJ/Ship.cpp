@@ -317,7 +317,8 @@ void Ship::SimulateObjectPhysics(void)
 	// Apply a drag scalar to the momentum vector to prevent perpetual movement.  Again, weighted by
 	// fraction of a second that has passed.  C_MOVEMENT_DRAG_FACTOR is % momentum decrease per second.
 	if (!IsZeroVector(this->PhysicsState.WorldMomentum))
-		this->PhysicsState.WorldMomentum *= (1 - (Game::C_MOVEMENT_DRAG_FACTOR * Game::TimeFactor));
+		//this->PhysicsState.WorldMomentum *= (1.0f - (Game::C_MOVEMENT_DRAG_FACTOR * Game::TimeFactor));
+		this->PhysicsState.WorldMomentum -= (this->PhysicsState.WorldMomentum * Game::C_MOVEMENT_DRAG_FACTOR * Game::TimeFactor);
 
 	// Also apply a drag factor if the ship is currently braking
 	if (m_isbraking) {

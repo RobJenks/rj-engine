@@ -134,6 +134,7 @@ namespace Game {
 	float C_ENVIRONMENT_MOVE_DRAG_FACTOR = 4.0f;			// The amount of x/z velocity that is lost by environment objects per second due to 'friction'
 	float C_OBJECT_FAST_MOVER_THRESHOLD = 10.0f;			// The threshold distance moved per frame (m) above which we require an object to perform swept- rather than 
 															// discrete-collision detection
+	const int C_MAX_INTRA_FRAME_CCD_COLLISIONS = 5;			// The maximum number of CCD collisions we support WITHIN a frame (e.g. multiple very fast ricochets)
 
 	// Collision-detection constants
 	const float C_ACTIVE_COLLISION_DISTANCE_SHIPLEVEL = 5000.0f;		// Distance within which collision detection is performed (in a ship context)

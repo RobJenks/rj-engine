@@ -123,50 +123,44 @@ D3DXMATRIX GetRotationMatrixInstance(Rotation90Degree rot)
 
 void FloorVector(D3DXVECTOR3 & vec, float low)
 {
-	if (vec.x < low)	vec.x = low;
-	if (vec.y < low)	vec.y = low;
-	if (vec.z < low)	vec.z = low;
+	vec.x = max(vec.x, low);
+	vec.y = max(vec.y, low);
+	vec.z = max(vec.z, low);
 }
 
 void FloorVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & low)
 {
-	if (vec.x < low.x)	vec.x = low.x;
-	if (vec.y < low.y)	vec.y = low.y;
-	if (vec.z < low.z)	vec.z = low.z;
+	vec.x = max(vec.x, low.x);
+	vec.y = max(vec.y, low.y);
+	vec.z = max(vec.z, low.z);
 }
 
 void CeilVector(D3DXVECTOR3 & vec, float high)
 {
-	if (vec.x > high)	vec.x = high;
-	if (vec.y > high)	vec.y = high;
-	if (vec.z > high)	vec.z = high;
+	vec.x = min(vec.x, high);
+	vec.y = min(vec.y, high);
+	vec.z = min(vec.z, high);
 }
 
 void CeilVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & high)
 {
-	if (vec.x > high.x)	vec.x = high.x;
-	if (vec.y > high.y)	vec.y = high.y;
-	if (vec.z > high.z)	vec.z = high.z;
+	vec.x = min(vec.x, high.x);
+	vec.y = min(vec.y, high.y);
+	vec.z = min(vec.z, high.z);
 }
 
 void ClampVector(D3DXVECTOR3 &vec, float low, float high)
 {
-	if (vec.x < low)	vec.x = low;
-	if (vec.x > high)	vec.x = high;
-	if (vec.y < low)	vec.y = low;
-	if (vec.y > high)	vec.y = high;
-	if (vec.z < low)	vec.z = low;
-	if (vec.z > high)	vec.z = high;	
+	vec.x = max(min(vec.x, high), low);
+	vec.y = max(min(vec.y, high), low);
+	vec.z = max(min(vec.z, high), low);
 }
 
 void ClampVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & low, const D3DXVECTOR3 & high)
 {
-	if (vec.x < low.x)	vec.x = low.x;
-	if (vec.x > high.x)	vec.x = high.x;
-	if (vec.y < low.y)	vec.y = low.y;
-	if (vec.y > high.y)	vec.y = high.y;
-	if (vec.z < low.z)	vec.z = low.z;
-	if (vec.z > high.z)	vec.z = high.z;
+	vec.x = max(min(vec.x, high.x), low.x);
+	vec.y = max(min(vec.y, high.y), low.y);
+	vec.z = max(min(vec.z, high.z), low.z);
 }
 
 // Scales a vector to the specified 'magnitude', so that one component is at +/- 'magnitude' with all other components scaled accordingly

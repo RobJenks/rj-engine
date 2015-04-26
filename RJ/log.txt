@@ -1,100 +1,100 @@
 ------------------------------------------------------------
-Initialising main application - 2015-4-25 11:10:59 [64388490]
+Initialising main application - 2015-4-26 0:58:7 [32179325]
 ------------------------------------------------------------
 
-[64388579] Game window initialised successfully
+[32179379] Game window initialised successfully
 
-[64388579] Beginning initialisation of game engine
-[64388579] Render flags initialised
-[64388579] DX Localiser initialised
-[64388813] Direct3D initialisation complete
-[64388814] Camera initialised
-[64388814] Lighting initialisation complete
-[64388884] Shader [Light] initialisation complete
-[64388922] Shader [Light fade] initialisation complete
-[64388974] Shader [Light highlight] initialisation complete
-[64389024] Shader [Light highlight fade] initialisation complete
-[64389052] Shader [Particle] initialisation complete
-[64389074] Shader [Texture] initialisation complete
-[64389075] View frustum created
-[64389104] Shader [Font] initialisation complete
-[64389104] Text rendering initialised
-[64389132] Font initialisation complete
-[64389153] Shader [Texcube] initialisation complete
-[64389190] Shader [Fire] initialisation complete
-[64389220] Effect manager initialised
-[64389843] Shader [Skinned normal map] initialisation complete
-[64389843] Particle engine initialised
-[64389843] 2D render manager initialisation complete
-[64390023] Overlay renderer initialised
-[64390023] Render queue initialised for all shaders
-[64390023] Environment rendering initialised
-[64390023] All game engine initialisation completed successfully
+[32179379] Beginning initialisation of game engine
+[32179379] Render flags initialised
+[32179379] DX Localiser initialised
+[32179544] Direct3D initialisation complete
+[32179545] Camera initialised
+[32179546] Lighting initialisation complete
+[32179604] Shader [Light] initialisation complete
+[32179640] Shader [Light fade] initialisation complete
+[32179685] Shader [Light highlight] initialisation complete
+[32179720] Shader [Light highlight fade] initialisation complete
+[32179745] Shader [Particle] initialisation complete
+[32179769] Shader [Texture] initialisation complete
+[32179769] View frustum created
+[32179787] Shader [Font] initialisation complete
+[32179787] Text rendering initialised
+[32179801] Font initialisation complete
+[32179818] Shader [Texcube] initialisation complete
+[32179851] Shader [Fire] initialisation complete
+[32179875] Effect manager initialised
+[32180497] Shader [Skinned normal map] initialisation complete
+[32180498] Particle engine initialised
+[32180498] 2D render manager initialisation complete
+[32180614] Overlay renderer initialised
+[32180615] Render queue initialised for all shaders
+[32180615] Environment rendering initialised
+[32180615] All game engine initialisation completed successfully
 
-[64390109] DirectInput initialisation complete
-[64390109] Math functions initialised
-[64390109] Universe initialised successfully
-[64390115] User interface initialisation complete
-[64390115] Core data structured initialised
-[64390115] Supporting ship data initialised
-[64390115] Supporting actor data initialised
+[32180643] DirectInput initialisation complete
+[32180644] Math functions initialised
+[32180644] Universe initialised successfully
+[32180649] User interface initialisation complete
+[32180649] Core data structured initialised
+[32180649] Supporting ship data initialised
+[32180649] Supporting actor data initialised
 
-[64390115] Loading game data hierarchy...
-[64390122] Game data file "systems\null_system\nullsystem.xml" processed [2ms]
-[64390123] Game data file "systems\omega\omega.xml" processed [1ms]
-[64390123] Game data file "Universe.xml" processed [4ms]
-[64390126] Game data file "Resources\Resources.xml" processed [3ms]
-[64390128] Game data file "Models\BasicModels.xml" processed [2ms]
-[64390132] Game data file "Ships\ShipModels.xml" processed [4ms]
-[64390139] Game data file "Ships\TileModels.xml" processed [7ms]
-[64390142] Game data file "Terrain\Debug_Terrain.xml" processed [1ms]
-[64390142] Game data file "Terrain\Terrain.xml" processed [3ms]
-[64390147] Game data file "Ships\SimpleShips.xml" processed [5ms]
-[64390151] Game data file "Ships\ComplexShipTileClasses.xml" processed [4ms]
-[64390166] Game data file "Ships\Tiles\CorridorTiles.xml" processed [12ms]
-[64390171] Game data file "Ships\Tiles\QuartersTiles.xml" processed [3ms]
-[64390177] Game data file "Ships\Tiles\LifeSupportTiles.xml" processed [6ms]
-[64390177] Game data file "Ships\ComplexShipTileDefinitions.xml" processed [25ms]
-[64390193] Game data file "Ships\Sections\Frigate_Small\Frigate_small_sections.xml" processed [14ms]
-[64390250] Game data file "Ships\Sections\Frigate_Medium\Frigate_medium_sections.xml" processed [56ms]
-[64390301] Game data file "Ships\ComplexShipSections.xml" processed [124ms]
-[64390309] Game data file "\Ships\ShipData\null_environment\null_environment_section_0.xml" processed [3ms]
-[64390310] Game data file "\Ships\ShipData\null_environment\null_environment.xml" processed [6ms]
-[64390558] Game data file "\Ships\ShipData\TestFrigate12\TestFrigate12_section_0.xml" processed [62ms]
-[64391171] Game data file "\Ships\ShipData\testfrigate12\testfrigate12.xml" processed [861ms]
-[64391368] Game data file "\Ships\ShipData\TestFrigate13\TestFrigate13_section_0.xml" processed [106ms]
-[64391584] Game data file "\Ships\ShipData\testfrigate13\testfrigate13.xml" processed [405ms]
-[64391712] Game data file "\Ships\ShipData\TestFrigateCorridor\TestFrigateCorridor_section_0.xml" processed [53ms]
-[64391949] Game data file "\Ships\ShipData\testfrigatecorridor\testfrigatecorridor.xml" processed [359ms]
-[64391956] Game data file "Ships\ComplexShipRegister.xml" processed [1654ms]
-[64391958] Game data file "Engines.xml" processed [2ms]
-[64392030] Game data file "Effects.xml" processed [72ms]
-[64392049] Game data file "ParticleEmitters.xml" processed [18ms]
-[64392052] Game data file "Ships\SimpleShipLoadouts.xml" processed [3ms]
-[64392059] Game data file "UI/Common/Controls/ComboBox1/ui_control_combobox1.xml" processed [5ms]
-[64392112] Game data file "UI/Console/UI_Console.xml" processed [52ms]
-[64392270] Game data file "UI/ShipDesigner/UI_ShipDesigner.xml" processed [158ms]
-[64392296] Game data file "UI/ModelBuilder/UI_ModelBuilder.xml" processed [24ms]
-[64392297] Game data file "UI\UserInterface.xml" processed [245ms]
-[64398835] Game data file "actors\human\human_skinnedmodels.xml" processed [6537ms]
-[64398835] Game data file "Actors\SkinnedModels.xml" processed [6538ms]
-[64398838] Game data file "Actors\ActorAttributeGeneration.xml" processed [3ms]
-[64398842] Game data file "actors\human\human_actors.xml" processed [3ms]
-[64398842] Game data file "Actors\Actors.xml" processed [4ms]
-[64398842] Game data file "\GameData.xml" processed [8727ms]
-[64398842] All game data files loaded successfully
+[32180649] Loading game data hierarchy...
+[32180655] Game data file "systems\null_system\nullsystem.xml" processed [1ms]
+[32180656] Game data file "systems\omega\omega.xml" processed [1ms]
+[32180657] Game data file "Universe.xml" processed [4ms]
+[32180659] Game data file "Resources\Resources.xml" processed [2ms]
+[32180660] Game data file "Models\BasicModels.xml" processed [1ms]
+[32180663] Game data file "Ships\ShipModels.xml" processed [3ms]
+[32180673] Game data file "Ships\TileModels.xml" processed [10ms]
+[32180675] Game data file "Terrain\Debug_Terrain.xml" processed [1ms]
+[32180675] Game data file "Terrain\Terrain.xml" processed [2ms]
+[32180697] Game data file "Ships\SimpleShips.xml" processed [22ms]
+[32180699] Game data file "Ships\ComplexShipTileClasses.xml" processed [2ms]
+[32180814] Game data file "Ships\Tiles\CorridorTiles.xml" processed [114ms]
+[32180818] Game data file "Ships\Tiles\QuartersTiles.xml" processed [3ms]
+[32180823] Game data file "Ships\Tiles\LifeSupportTiles.xml" processed [5ms]
+[32180824] Game data file "Ships\ComplexShipTileDefinitions.xml" processed [125ms]
+[32180872] Game data file "Ships\Sections\Frigate_Small\Frigate_small_sections.xml" processed [47ms]
+[32180968] Game data file "Ships\Sections\Frigate_Medium\Frigate_medium_sections.xml" processed [94ms]
+[32181015] Game data file "Ships\ComplexShipSections.xml" processed [191ms]
+[32181020] Game data file "\Ships\ShipData\null_environment\null_environment_section_0.xml" processed [2ms]
+[32181021] Game data file "\Ships\ShipData\null_environment\null_environment.xml" processed [4ms]
+[32181228] Game data file "\Ships\ShipData\TestFrigate12\TestFrigate12_section_0.xml" processed [44ms]
+[32181980] Game data file "\Ships\ShipData\testfrigate12\testfrigate12.xml" processed [959ms]
+[32182190] Game data file "\Ships\ShipData\TestFrigate13\TestFrigate13_section_0.xml" processed [104ms]
+[32182396] Game data file "\Ships\ShipData\testfrigate13\testfrigate13.xml" processed [408ms]
+[32182513] Game data file "\Ships\ShipData\TestFrigateCorridor\TestFrigateCorridor_section_0.xml" processed [45ms]
+[32183109] Game data file "\Ships\ShipData\testfrigatecorridor\testfrigatecorridor.xml" processed [707ms]
+[32183115] Game data file "Ships\ComplexShipRegister.xml" processed [2099ms]
+[32183117] Game data file "Engines.xml" processed [2ms]
+[32183161] Game data file "Effects.xml" processed [44ms]
+[32183173] Game data file "ParticleEmitters.xml" processed [12ms]
+[32183175] Game data file "Ships\SimpleShipLoadouts.xml" processed [2ms]
+[32183180] Game data file "UI/Common/Controls/ComboBox1/ui_control_combobox1.xml" processed [4ms]
+[32183213] Game data file "UI/Console/UI_Console.xml" processed [33ms]
+[32183391] Game data file "UI/ShipDesigner/UI_ShipDesigner.xml" processed [178ms]
+[32183414] Game data file "UI/ModelBuilder/UI_ModelBuilder.xml" processed [20ms]
+[32183415] Game data file "UI\UserInterface.xml" processed [240ms]
+[32189019] Game data file "actors\human\human_skinnedmodels.xml" processed [5603ms]
+[32189019] Game data file "Actors\SkinnedModels.xml" processed [5604ms]
+[32189021] Game data file "Actors\ActorAttributeGeneration.xml" processed [2ms]
+[32189024] Game data file "actors\human\human_actors.xml" processed [2ms]
+[32189024] Game data file "Actors\Actors.xml" processed [3ms]
+[32189024] Game data file "\GameData.xml" processed [8375ms]
+[32189024] All game data files loaded successfully
 
-[64398842] Beginning load of all model geometry
-[64401422] Completed load of all model geometry
-[64401425] Post-processing of all model geometry completed
-[64401425] Post-processing of all resource data completed
-[64401425] Post-processing of all tile data completed
-[64401426] Post-processing of all system data completed
-[64401426] Post-processing of all equipment data completed
-[64401920] Post-processing of all UI layouts completed
-[64401920] Simulation state manager initialised
-[64401945] --- Debug scenario created
-[64401948] Player initialisation completed
-[64402134] Region initialisation completed
-[64402134] Initialisation complete
+[32189024] Beginning load of all model geometry
+[32191167] Completed load of all model geometry
+[32191169] Post-processing of all model geometry completed
+[32191169] Post-processing of all resource data completed
+[32191169] Post-processing of all tile data completed
+[32191169] Post-processing of all system data completed
+[32191169] Post-processing of all equipment data completed
+[32191510] Post-processing of all UI layouts completed
+[32191510] Simulation state manager initialised
+[32191534] --- Debug scenario created
+[32191537] Player initialisation completed
+[32191675] Region initialisation completed
+[32191675] Initialisation complete
 

@@ -136,6 +136,7 @@ namespace Game {
 	extern float C_MAX_ANGULAR_VELOCITY;
 	extern float C_ENVIRONMENT_MOVE_DRAG_FACTOR;
 	extern float C_OBJECT_FAST_MOVER_THRESHOLD;			// The threshold beyond which we require an object to perform swept- rather than discrete-collision detection
+	extern const int C_MAX_INTRA_FRAME_CCD_COLLISIONS;	// The maximum number of CCD collisions we support WITHIN a frame (e.g. multiple very fast ricochets)
 	
 	// Collision-detection constants
 	extern const float C_ACTIVE_COLLISION_DISTANCE_SHIPLEVEL;			// Distance within which collision detection is performed (in a ship context)

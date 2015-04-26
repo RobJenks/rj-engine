@@ -16,6 +16,9 @@ public:
 		int BroadphaseCollisions;			// The number of broadphase collisions detected between space objects
 		int Collisions;						// The number of actual collisions detected between space objects
 
+		int CCDCollisionChecks;				// The number of space object pairs tested during continuous collision detection
+		int CCDCollisions;					// The number of actual collisions detected during continuous collision detection
+
 	} SpaceCollisions;
 
 	struct 

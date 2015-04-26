@@ -96,6 +96,7 @@ public:
 	void DebugRenderEnvironmentCollisionBoxes(ComplexShip *parent);
 	void DebugCCDSphereTest(void);
 	void DebugCCDOBBTest(void);
+	void DebugFullCCDTest(void);
 
 
 
@@ -131,6 +132,7 @@ protected:
 
 	// Debug objects for testing; delete after use
 	SimpleShip *ss, *s2, *s3[3];
+	SimpleShip *sproj;
 	ComplexShip *cs;
 	Actor *a1;
 

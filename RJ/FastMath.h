@@ -217,7 +217,11 @@ CMPINLINE bool IsZeroQuaternion(const D3DXQUATERNION &q)
 	// since this adds significant computation time, and at very tiny values around EPSILON have little impact.
 	return ((abs(q.x) + abs(q.y) + abs(q.z) + abs(q.w)) < Game::C_EPSILON);
 }
-
+CMPINLINE bool VectorsApproximatelyEqual(const D3DXVECTOR3 & vec1, const D3DXVECTOR3 & vec2)
+{
+	// Determine whether the vector difference is approximately zero
+	return ((abs(vec1.x - vec2.x) < Game::C_EPSILON) && (abs(vec1.y - vec2.y) < Game::C_EPSILON) && (abs(vec1.z - vec2.z) < Game::C_EPSILON));
+}
 CMPINLINE bool IsFiniteVector(const D3DXVECTOR2 &vec)
 {
 	// Uses the fact that (x == x) holds trivially true for all finite numbers, but (#-1.IND000 != #-1.IND000)

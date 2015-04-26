@@ -117,6 +117,7 @@ RJMain::RJMain(void)
 
 	// Debug fields and settings
 	m_debug_ccdspheretest = m_debug_ccdobbtest = false;
+	sproj = NULL;
 }
 
 // Begins a new internal cycle, calculating frame deltas and the new internal clock values
@@ -418,24 +419,32 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_5])
 	{
-		SimpleShip *obj = (b[DIK_LSHIFT] ? s2 : ss);
-		obj->ApplyLocalForce(D3DXVECTOR3(-10.0f, 0.0f, -10.0f), D3DXVECTOR3(1000000.0f*100.0f, 0.0f, 1000000.0f*100.0f));
-		m_keyboard.LockKey(DIK_5);
-		return;
-
-
 		if (!b[DIK_LSHIFT])
 		{
-			cs->ApplyAngularMomentum(D3DXVECTOR3(1.0f * cs->GetMass(), 0.0f, 0.0f));
+			sproj = SimpleShip::Create("testship1");
+			if (sproj)
+			{
+				D3DXQUATERNION rot;
+				D3DXQuaternionRotationAxis(&rot, &RIGHT_VECTOR, PIOVER2);
+
+				sproj->SetModel(Model::GetModel("unit_cone_model"));
+				sproj->SetSize(D3DXVECTOR3(10.0f, 10.0f, 10.0f));
+				sproj->SetMass(10000.0f);
+				D3DXVECTOR3 pos = (ss->GetPosition() + (ss->PhysicsState.Heading * (ss->GetCollisionSphereRadius() + sproj->GetCollisionSphereRadius()) * 1.5f));
+				sproj->MoveIntoSpaceEnvironment(ss->GetSpaceEnvironment(), pos);
+				sproj->SetOrientation(rot * ss->GetOrientation());
+				sproj->VelocityLimit.SetAllValues(FLT_MAX - 1.0f);					// ** Increased vlimit required for projectile
+				sproj->SetWorldMomentum(ss->PhysicsState.Heading * 10000.0f);
+				sproj->RefreshPositionImmediate();
+
+				sproj->SimulateObject(true);
+			}
 		}
 		else
 		{
-			D3DXQUATERNION q = D3DXQUATERNION(PI * 0.25f, 0.0f, 0.0f, 0.0f);
-			cs->AddDeltaOrientationAndRecalculate(0.5f * q * cs->GetOrientation());
-			cs->RefreshPositionImmediate();
-
-			m_keyboard.LockKey(DIK_5);
+			
 		}
+		m_keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])
 	{
@@ -1365,8 +1374,7 @@ void RJMain::DebugCCDSphereTest(void)
 	Game::TimeFactor = restore_timefactor;
 }
 
-
-// Run the continuous collision detection (CCD) test in the main system environment
+// Run the continuous collision detection (CCD) test between specific objects in the main system environment
 void RJMain::DebugCCDOBBTest(void)
 {
 	static D3DXVECTOR3 sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
@@ -1469,6 +1477,136 @@ void RJMain::DebugCCDOBBTest(void)
 }
 
 
+// Run the full continuous collision detection (CCD) test on all nearby objects in the main system environment
+void RJMain::DebugFullCCDTest(void)
+{
+	static D3DXVECTOR3 sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
+	static D3DXQUATERNION ssorient = ID_QUATERNION;
+	static const float movespeed = 25.0f;
+	static const float turnspeed = 1.0f;
+	BOOL *k = m_keyboard.GetKeys();
+
+	if (k[DIK_LCONTROL] && k[DIK_0])
+	{
+		sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
+		ss->SetOrientation(ID_QUATERNION);
+	}
+
+	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera ||
+		k[DIK_LCONTROL] && k[DIK_0])
+	{
+		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
+		Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(0.0f, 200.0f, 0.0f));
+		D3DXQUATERNION orient;
+		D3DXQuaternionRotationAxis(&orient, &RIGHT_VECTOR, PIOVER2);
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+	}
+
+	D3DXVECTOR3 restore_size = ss->GetSize();
+	ss->SetPosition(sspos);
+	ss->SetOrientation(ssorient);
+	ss->SetSize(D3DXVECTOR3(5.0f, 5.0f, 5.0f));
+	ss->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	ss->RefreshPositionImmediate();
+
+	s2->SetPosition(NULL_VECTOR);
+	s2->SetOrientation(ID_QUATERNION);
+	s2->RefreshPositionImmediate();
+	s2->CollisionOBB.UpdateFromObject(*s2);
+
+	float restore_timefactor = Game::TimeFactor;
+	float restore_physicstime = Game::PhysicsEngine.PhysicsClock.TimeFactor;
+	Game::TimeFactor = 1.0f;
+	Game::PhysicsEngine.PhysicsClock.TimeFactor = 1.0f;
+
+	if (!k[DIK_LCONTROL])
+	{
+		if (k[DIK_LEFTARROW]) sspos -= (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
+		if (k[DIK_RIGHTARROW]) sspos += (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
+		if (k[DIK_UPARROW]) 
+			if (!k[DIK_LSHIFT]) sspos += (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
+			else				sspos += (D3DXVECTOR3(0.0f, movespeed * restore_timefactor, 0.0f));
+		if (k[DIK_DOWNARROW])
+			if (!k[DIK_LSHIFT])	sspos -= (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
+			else				sspos -= (D3DXVECTOR3(0.0f, movespeed * restore_timefactor, 0.0f));
+	}
+	else
+	{
+		D3DXQUATERNION delta;
+		if (k[DIK_LEFTARROW])  {
+			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, -turnspeed * restore_timefactor);
+			ssorient *= delta;
+			ss->SetOrientation(ssorient);
+		}
+		if (k[DIK_RIGHTARROW])  {
+			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, turnspeed * restore_timefactor);
+			ssorient *= delta;
+			ss->SetOrientation(ssorient);
+		}
+	}
+
+	D3DXVECTOR3 wm0 = (ss->PhysicsState.WorldMomentum * Game::TimeFactor);
+	D3DXVECTOR3 pos0 = (ss->GetPosition() - wm0);
+	D3DXVECTOR3 posn = ss->GetPosition();
+	D3DXQUATERNION rotn = ss->GetOrientation();
+
+	// Do collision detection & handling
+	iSpaceObject *collider = Game::PhysicsEngine.PerformContinuousSpaceCollisionDetection(ss);
+	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
+	OverlayRenderer::RenderColour col = (collider ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
+
+	// Render box at origin (pos0)
+	D3DXMATRIX rot, trans, world;
+	D3DXMatrixRotationQuaternion(&rot, &rotn);
+	D3DXMatrixTranslation(&trans, pos0.x, pos0.y, pos0.z);
+	world = (rot * trans);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+
+	// Render box at end (ss->pos, before any collision handling)
+	D3DXMatrixTranslation(&trans, posn.x, posn.y, posn.z);
+	world = (rot * trans);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+
+	// Render line from pos0 to end pos (before any collision handling)
+	Game::Engine->GetOverlayRenderer()->RenderLine(pos0, posn, col, ss->GetCollisionSphereRadius() * 2.0f, -1.0f);
+
+	if (collider)
+	{
+		// Render box at the object we collided with
+		D3DXMatrixRotationQuaternion(&rot, &collider->GetOrientation());
+		D3DXMatrixTranslation(&trans, collider->GetPosition().x, collider->GetPosition().y, collider->GetPosition().z);
+		world = (rot * trans);
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, collider->GetSize().x, collider->GetSize().y, collider->GetSize().z);
+
+		// Render contact point
+		D3DXMatrixTranslation(&world, collision.ContinuousTestResult.ContactPoint.x, collision.ContinuousTestResult.ContactPoint.y, collision.ContinuousTestResult.ContactPoint.z);
+		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
+
+		// If we deflected off the collider, render a line to our resulting position
+		D3DXVECTOR3 endwm = ss->PhysicsState.WorldMomentum;
+		if (true || !VectorsApproximatelyEqual(wm0, endwm))
+		{
+			Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.ContactPoint, (collision.ContinuousTestResult.ContactPoint + endwm), 
+				OverlayRenderer::RenderColour::RC_LightBlue, ss->GetCollisionSphereRadius(), -1.0f);
+		}
+
+		// Remove any momentum added as part of the collision
+		collider->SetWorldMomentum(NULL_VECTOR);
+		collider->PhysicsState.AngularVelocity = NULL_VECTOR;
+		if (collider->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject) {
+			ComplexShipSection *sec = (ComplexShipSection*)collider;
+			if (sec->GetParent()) { sec->GetParent()->SetWorldMomentum(NULL_VECTOR); sec->GetParent()->PhysicsState.AngularVelocity = NULL_VECTOR; }
+		}
+	}
+
+	ss->SetWorldMomentum(NULL_VECTOR);
+	ss->PhysicsState.AngularVelocity = NULL_VECTOR;
+	ss->SetSize(restore_size);
+
+	Game::TimeFactor = restore_timefactor;
+	Game::PhysicsEngine.PhysicsClock.TimeFactor = restore_physicstime;
+}
+
 void RJMain::__CreateDebugScenario(void)
 {
 	// Temp: Create a new ship for the player to use
@@ -1545,6 +1683,10 @@ void RJMain::__CreateDebugScenario(void)
 
 void RJMain::DEBUGDisplayInfo(void)
 {
+	// In-engine tests - display the tests if they have been activated
+	if (m_debug_ccdspheretest) DebugCCDSphereTest();
+	if (m_debug_ccdobbtest) DebugFullCCDTest(); // DebugCCDOBBTest();
+
 	// Debug info line 1 - flight location & orientation
 	if (m_debuginfo_flightstats)
 	{
@@ -1577,8 +1719,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (m_debuginfo_collisiondata)
 	{
 		const CollisionDetectionResultsStruct & coll = Game::PhysicsEngine.CollisionDetectionResults;
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, "Collision data: Space = (O/O:%d > B:%d > C:%d), Environment = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, "Collision data: Space = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
 			coll.SpaceCollisions.CollisionChecks, coll.SpaceCollisions.BroadphaseCollisions, coll.SpaceCollisions.Collisions,
+			coll.SpaceCollisions.CCDCollisionChecks, coll.SpaceCollisions.CCDCollisions, 
 			coll.EnvironmentCollisions.ElementsChecked, coll.EnvironmentCollisions.ObjectsChecked, coll.EnvironmentCollisions.ElementsCheckedAroundObjects,
 			coll.EnvironmentCollisions.ObjectVsTerrainChecks, coll.EnvironmentCollisions.ObjectVsObjectChecks,
 			coll.EnvironmentCollisions.BroadphaseCollisions, coll.EnvironmentCollisions.Collisions);
@@ -1588,16 +1731,16 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		static float timefactor = 0.01f;
-		if (Game::TimeFactor > Game::C_EPSILON) timefactor = Game::TimeFactor;
+		if (sproj)
+		{
+			float ccdPc = (sproj->PhysicsState.DeltaMoveDistanceSq / sproj->GetCollisionSphereRadiusSq());
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.4f  |  %.4f  |    %s   |  %.3f",
-			Game::CurrentPlayer->GetActor()->PhysicsState.LocalMomentum.y, D3DXVec3Length(&Game::CurrentPlayer->GetActor()->PhysicsState.WorldMomentum),
-			(Game::CurrentPlayer->GetActor()->IsOnGround() ? "On ground" : "*** IN THE AIR ***"), Game::CurrentPlayer->GetPlayerShip()->PhysicsState.DeltaMoveDistanceSq);
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player: %.2f  |  Projectile: Wmom = %.2f, CCD%% = %.2f%%, %s",
+				((Game::CurrentPlayer->GetPlayerShip()->PhysicsState.DeltaMoveDistanceSq / Game::CurrentPlayer->GetPlayerShip()->GetCollisionSphereRadiusSq())*100.0f),
+				D3DXVec3Length(&sproj->PhysicsState.WorldMomentum), (ccdPc * 100.0f),
+				(ccdPc >= 1.0f ? "CONTINUOUS" : "Discrete"));
+
+			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		}
 	}
-
-	// CCD tests - display the tests if they have been activated
-	if (m_debug_ccdspheretest) DebugCCDSphereTest();
-	if (m_debug_ccdobbtest) DebugCCDOBBTest();
 }

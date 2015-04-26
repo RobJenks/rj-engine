@@ -55,7 +55,7 @@ public:
 	iObject(void);
 
 	// Method to return the unique ID of this object, or to request a new ID (e.g. when copying objects)
-	CMPINLINE Game::ID_TYPE					GetID(void)						{ return m_id; }
+	CMPINLINE Game::ID_TYPE					GetID(void)	const				{ return m_id; }
 	void									AssignNewUniqueID(void);
 
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
