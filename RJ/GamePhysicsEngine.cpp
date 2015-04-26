@@ -1538,10 +1538,6 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	// Now test the ray/AABB intersection
 	if (TestRayVsAABBIntersection(ray, box) == false) return false;
 
-	// We have a potential collision.  However the ray test was unbounded and the collision could take place
-	// outside of the current frame.  Test that the collision point is within our ray bounds for the frame
-	//if (RayIntersectionResult.tmin > 1.0f) return false;
-
 	// We have a collision.  Populate the intersection point in the results struct.  If tmin < 0 then
 	// the sphere begain inside the AABB at t=0.  Otherwise, first intersection is at time tmin, therefore
 	// at point (x0 + n*tmin) along the (original) ray.  x0==pos0 and n==wm0
