@@ -39,6 +39,10 @@
 /RJ/Debug/*
 /RJ/Release/*
 
+# Exclude log files that are generated per-execution
+/RJ/log.txt
+/RJ/profiling.txt
+
 # Exclude working directories - TODO: FIX THESE, SHOULD BE OUTSIDE OF MAIN PROJECT DIRS
 /RJ/_Working/*
 /RJ/Data/Actors/Human/Soldier_Basic/*
