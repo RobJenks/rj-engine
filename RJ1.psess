@@ -70,13 +70,7 @@
   </Binaries>
   <Reports>
     <Report>
-      <Path>Profiling Reports\Test1.vsp</Path>
-    </Report>
-    <Report>
-      <Path>Profiling Reports\High density objects 2015-04-26.vsp</Path>
-    </Report>
-    <Report>
-      <Path>Profiling Reports\Normal 2015-04-26.vsp</Path>
+      <Path>Profiling Reports\tmp1.vsp</Path>
     </Report>
   </Reports>
   <Launches>
