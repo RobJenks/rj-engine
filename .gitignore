@@ -39,6 +39,9 @@
 /RJ/Debug/*
 /RJ/Release/*
 
+# Exclude all performance profiling data
+/RJ/Profiling Reports/*
+
 # Exclude log files that are generated per-execution
 /RJ/log.txt
 /RJ/profiling.txt
