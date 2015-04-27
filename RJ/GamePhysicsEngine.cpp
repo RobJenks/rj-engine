@@ -221,7 +221,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			// Get any objects within the current object's collision margin radius; quit here if there are no objects nearby.  Don't
 			// include the focal object boundary since this is already passed in the 'marginradius'.  Include all target object boundaries.
 			candidates.clear();
-			numcandidates = object->GetAllObjectsWithinDistance(object->GetCollisionSphereMarginRadius(), candidates, true, false, true);
+			numcandidates = object->GetAllObjectsWithinDistance(object->GetCollisionSphereRadius(), candidates, true, false, true);
 			if (numcandidates == 0) continue;
 
 			// Get basic information on the object that we will need for each comparison
