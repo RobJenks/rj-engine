@@ -146,6 +146,11 @@ namespace Game {
 	extern const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ;	// Squared threshold momentum value, above which we apply an additional collision response
 	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS;					// The maximum number of collision exclusions that can be applied to an object
 
+	// Object management constants
+	extern const int C_OCTREE_MAX_NODE_ITEMS;							// The target object limit per octree node; can be overriden if required
+																		// based on current node size
+	extern const float C_OCTREE_MIN_NODE_SIZE;							// Minimum acceptable octree node size.  Overrides node count limit if required
+
 	// Camera-related constants
 	extern float C_DEFAULT_ZOOM_TO_SHIP_SPEED;				// Default number of seconds to zoom the camera from its current location to a ship
 	extern float C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE;	// Default distance to place the camera above a ship, if it cannot be determined any other way

@@ -6,14 +6,10 @@
 #include <string>
 #include "CompilerSettings.h"
 #include "MemoryPool.h"
-//#include "iSpaceObject.h"
 #include "OverlayRenderer.h"
 #include "ScheduledObject.h"
 #include "CoreEngine.h"
 template <class Octree> class MemoryPool;
-
-// The maximum number of items that can be stored in a node before it will subdivide
-#define OCTREE_MAX_ITEMS 4
 
 // The index into child node pointers for each of the eight possible subdivision directions
 #define OCTREE_NW_UP		0
@@ -76,6 +72,7 @@ public:
 
 	// Inline accessor methods for key properties
 	CMPINLINE Octree<T> *			GetParent(void) const		{ return m_parent; }
+	CMPINLINE float					GetSize(void) const			{ return m_size; }
 	CMPINLINE float					GetAreaSize(void) const		{ return m_areasize; }
 	CMPINLINE int					GetItemCount(void) const	{ return m_itemcount; }
 
@@ -117,7 +114,7 @@ public:
 public:			// We will allow public access to member variables for efficiency.  Only ever accessed by core internal methods.
 
 	// The items within this node, plus the current count of objects stored
-	T											m_items[OCTREE_MAX_ITEMS];
+	std::vector<T>								m_items;
 	int											m_itemcount;
 
 	// Pointers to our parent and child nodes
@@ -132,6 +129,9 @@ public:			// We will allow public access to member variables for efficiency.  On
 
 	// Precalculated centre point of the node, based on bounds.  Used to determine which subdivision is relevant for a particular position
 	float										m_xcentre, m_ycentre, m_zcentre;
+
+	// Precalculated size of the node in each dimension
+	float										m_size;
 
 	// We will also store the size of the grid handled by this octree.  Set in the root, propogated down to all children.  Must be cubic.
 	float										m_areasize;
@@ -159,7 +159,7 @@ MemoryPool<Octree<T>> * Octree<T>::_MemoryPool = new MemoryPool<Octree<T>>();
 
 // Constructor for the root node.  Params specify the position, and length of each edge of the covered area.
 template <typename T> 
-Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize),
+Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize), m_size(areasize),
 															m_parent(0),
 															m_xmin(position.x), m_ymin(position.y), m_zmin(position.z),
 															m_xmax(position.x + areasize), 
@@ -170,14 +170,18 @@ Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize),
 	if (areasize <= 0) throw 1;
 
 	// Precalculate the node centre point for future subdivisions
-	m_xcentre = (m_xmin + m_xmax) / 2.0f;
-	m_ycentre = (m_ymin + m_ymax) / 2.0f;
-	m_zcentre = (m_zmin + m_zmax) / 2.0f;
+	m_xcentre = (m_xmin + m_xmax) * 0.5f;
+	m_ycentre = (m_ymin + m_ymax) * 0.5f;
+	m_zcentre = (m_zmin + m_zmax) * 0.5f;
 
-	// Initialise the storage and pointers to null
+	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
-	memset(m_items, 0, sizeof(T) * OCTREE_MAX_ITEMS);
+
+	// Initialise item storage to the desired maximum item count
+	m_items.reserve(Game::C_OCTREE_MAX_NODE_ITEMS);
 	m_itemcount = 0;
+
+	// Initialise other fields to default values
 	m_pruningflag = false;
 }
 
@@ -199,19 +203,24 @@ void Octree<T>::Initialise(Octree<T> *parent, float x0, float x1, float y0, floa
 	m_parent = parent;
 	m_xmin = x0; m_ymin = y0; m_zmin = z0;
 	m_xmax = x1; m_ymax = y1; m_zmax = z1;
+	m_size = (m_xmax - m_xmin);					// Nodes are cubic, so size will always be the same in x/y/z
 
 	// Propogate the total area size from our parent, which in turn ultimately received it from the root node
 	m_areasize = m_parent->GetAreaSize();
 
-	// Precalculate the node centre point for future subdivisions
-	m_xcentre = (m_xmin + m_xmax) / 2.0f;
-	m_ycentre = (m_ymin + m_ymax) / 2.0f;
-	m_zcentre = (m_zmin + m_zmax) / 2.0f;
+	// Precalculate the node centre point and node size for future subdivisions
+	m_xcentre = (m_xmin + m_xmax) * 0.5f;
+	m_ycentre = (m_ymin + m_ymax) * 0.5f;
+	m_zcentre = (m_zmin + m_zmax) * 0.5f;
 
-	// Initialise the storage and pointers to null	
+	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
-	memset(m_items, 0, sizeof(T) * OCTREE_MAX_ITEMS);
+
+	// Initialise item storage to the desired maximum item count
+	m_items.reserve(Game::C_OCTREE_MAX_NODE_ITEMS);
 	m_itemcount = 0;
+
+	// Initialise other fields to default values
 	m_pruningflag = false;
 }
 
@@ -237,15 +246,12 @@ Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
 	// If we have no children...
 	if (!m_children[0])
 	{
-		// ...and we are under capacity, we can simply add the item to this node and quit
-		if (m_itemcount < OCTREE_MAX_ITEMS)
+		// ...and we are under capacity, OR we are at the minimum node size and so need to accept the object anyway, 
+		// add the item to this node and quit
+		if (m_itemcount < Game::C_OCTREE_MAX_NODE_ITEMS || m_size <= Game::C_OCTREE_MIN_NODE_SIZE)
 		{
-			// Find the next empty index and insert the item there
-			int i = 0;
-			while (m_items[i] && i < OCTREE_MAX_ITEMS) ++i;
-			m_items[i] = item;
-
-			// Increment the count of items in this node
+			// Add to the item collection and increment the count of items in this node
+			m_items.push_back(item);
 			++m_itemcount;
 
 			// Link the object back to this node, and return this pointer as the node at which the item was successfully added
@@ -253,13 +259,9 @@ Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
 			return this;
 		}
 
-		// Otherwise, we are over capacity and so need to subdivide into child nodes now
+		// Otherwise, we are over capacity and want to subdivide into child nodes 
 		else
 		{
-			
-			// Special boundary case: if the size of this node is already at 1.0f then we will not subdivide further; return NULL as an error
-			if ((m_xmax - m_xmin) < 1.0f) return NULL;
-
 			// We need to partition the tree node to avoid going over the per-node item limit
 			// We will request a new node for each child from the memory pool and assign its parameters accordingly
 			m_children[OCTREE_NW_DOWN] = Octree::_MemoryPool->RequestItem();
@@ -280,19 +282,20 @@ Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
 			m_children[OCTREE_SW_UP]->Initialise(this, m_xmin, m_xcentre, m_ycentre, m_ymax, m_zmin, m_zcentre);
 
 			// We now need to reallocate our current items to these new child nodes
-			D3DXVECTOR3 itempos;
-			for (int i = 0; i < OCTREE_MAX_ITEMS; i++)
+			D3DXVECTOR3 itempos; T move;
+			for (int i = 0; i < m_itemcount; ++i)
 			{
 				// Make sure the item is valid, then get its position
-				if (!m_items[i]) continue;
-				itempos = m_items[i]->GetPosition();
+				move = m_items[i];
+				if (!move) continue;
+				itempos = move->GetPosition();
 
 				// Now determine the relevant child node and add the item to it
-				m_children[GetRelevantChildNode(itempos)]->AddItem(m_items[i], itempos);			
+				m_children[GetRelevantChildNode(itempos)]->AddItem(move, itempos);			
 			}
 			
 			// We can now clear the item storage and count for this node, since all items have been reallocated to our children
-			memset(m_items, 0, sizeof(T) * OCTREE_MAX_ITEMS);
+			m_items.clear();
 			m_itemcount = 0;
 		}
 	}
@@ -312,12 +315,14 @@ template <typename T>
 void Octree<T>::RemoveItem(T item)
 {
 	// Loop through the item in this node and remove this item if it is one of them
-	for (int i = 0; i < OCTREE_MAX_ITEMS; i++)
+	int ubound = (m_itemcount - 1);
+	for (int i = 0; i <= ubound; ++i)
 	{
 		if (m_items[i] == item)
 		{
-			// This is the item, so remove it from the node and reduce our item count
-			m_items[i] = NULL;
+			// This is the item, so swap & pop it from the node and reduce our item count
+			if (i != ubound) std::swap(m_items[i], m_items[ubound]);
+			m_items.pop_back();
 			--m_itemcount;
 
 			// Break the reverse link from the object to this node
@@ -342,12 +347,14 @@ bool Octree<T>::RemoveItemRecursive(T item)
 	if (!m_children[0])
 	{
 		// This is a leaf.  Loop through the item in this node and remove this item if it is one of them
-		for (int i = 0; i < OCTREE_MAX_ITEMS; i++)
+		int ubound = (m_itemcount - 1);
+		for (int i = 0; i <= ubound; ++i)
 		{
 			if (m_items[i] == item)
 			{
-				// This is the item, so remove it from the node and reduce our item count
-				m_items[i] = NULL;
+				// This is the item, so swap & pop it from the node and reduce our item count
+				if (i != ubound) std::swap(m_items[i], m_items[ubound]);
+				m_items.pop_back();
 				--m_itemcount;
 
 				// Break the reverse link from the object to this node
@@ -365,10 +372,14 @@ bool Octree<T>::RemoveItemRecursive(T item)
 	else
 	{
 		// If this is a branch node, recurse into each child in turn to search for the object being removed
-		for (int i = 0; i < 8; i++)
-		{
-			if (m_children[i]->RemoveItemRecursive(item) == true) return true;
-		}
+		if (m_children[0]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[1]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[2]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[3]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[4]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[5]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[6]->RemoveItemRecursive(item) == true) return true;
+		if (m_children[7]->RemoveItemRecursive(item) == true) return true;
 	}
 
 	// We didn't find the object, so return false
@@ -403,12 +414,8 @@ void Octree<T>::GetItems(std::vector<T> & outResult)
 		// If we have no items then return immediately
 		if (m_itemcount == 0) return;
 
-		// Loop through our item collection and any any non-NULL items
-		T *p = &m_items[0];
-		for (int i=0; i<OCTREE_MAX_ITEMS; i++, p++)
-		{
-			if (*p) outResult.push_back(*p);
-		}
+		// Otherwise append all elements to the end of the result vector
+		outResult.insert(outResult.end(), m_items.begin(), m_items.end());
 
 		// Return after we have added all the items
 		return;
@@ -416,7 +423,14 @@ void Octree<T>::GetItems(std::vector<T> & outResult)
 	else
 	{
 		// This is not a leaf node, so will have 0 items of its own.  Traverse down the tree to each our our child nodes in turn
-		for (int i=0; i<8; i++) m_children[i]->GetItems(outResult);
+		m_children[0]->GetItems(outResult);
+		m_children[1]->GetItems(outResult);
+		m_children[2]->GetItems(outResult);
+		m_children[3]->GetItems(outResult);
+		m_children[4]->GetItems(outResult);
+		m_children[5]->GetItems(outResult);
+		m_children[6]->GetItems(outResult);
+		m_children[7]->GetItems(outResult);
 	}
 }
 
@@ -425,14 +439,17 @@ template <typename T>
 void Octree<T>::Shutdown(void)
 {
 	// If we have child nodes then recursively deallocate each in turn
-	for (int i = 0; i < 8; i++)
-	{
-		if (m_children[i]) 
-		{
-			m_children[i]->Shutdown();
-			m_children[i] = NULL;
-		}
-	}
+	if (m_children[0]) m_children[0]->Shutdown();
+	if (m_children[1]) m_children[0]->Shutdown();
+	if (m_children[2]) m_children[0]->Shutdown();
+	if (m_children[3]) m_children[0]->Shutdown();
+	if (m_children[4]) m_children[0]->Shutdown();
+	if (m_children[5]) m_children[0]->Shutdown();
+	if (m_children[6]) m_children[0]->Shutdown();
+	if (m_children[7]) m_children[0]->Shutdown();
+
+	// Zero out the child collection
+	memset(m_children, 0, sizeof(Octree<T>*) * 8);
 
 	// Now deallocate this node by returning it to the central memory pool
 	Octree<T>::_MemoryPool->ReturnItem(this);
@@ -460,12 +477,12 @@ string Octree<T>::DebugOutput(void)
 	// Add details on this node to the output string
 	std::ostringstream s;
 	s << "Node " << std::hex << this << std::dec << "(Depth=" << this->DetermineTreeDepth() << ", Items=" << m_itemcount 
-	  << ", Size=" << m_xmax-m_xmin << ", Bounds=[" << m_xmin << "," << m_ymin << "," << m_zmin << "]-[" << m_xmax << "," 
+	  << ", Size=" << m_size << ", Bounds=[" << m_xmin << "," << m_ymin << "," << m_zmin << "]-[" << m_xmax << "," 
 	  << m_ymax << "," << m_zmax << "])\n";
 
 	// Now process each child in turn, if we have children
 	if (m_children[0])
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 8; ++i)
 			s << m_children[i]->DebugOutput();
 
 	// Return the output from this section of the tree
@@ -487,7 +504,7 @@ void Octree<T>::DebugRender(bool include_children)
 
 	// Now also render children if required
 	if (include_children) 
-		for (int i = 0; i < 8; i++)
+		for (int i = 0; i < 8; ++i)
 			if (m_children[i]) m_children[i]->DebugRender(true);
 
 }
@@ -536,7 +553,7 @@ int Octree<T>::DetermineTreeSize(void)
 
 	// Otherwise recursively sum the total number of nodes under each child.  Start at 1 to account for this node
 	int count = 1;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; ++i)
 		if (m_children[i])
 			count += m_children[i]->DetermineTreeSize();
 
@@ -556,7 +573,7 @@ void Octree<T>::PerformPruningCheck(void)
 	// Check whether our children are leaf nodes.  If not there is nothing to prune: we cannot prune nodes from within
 	// the middle of the tree, only the leaves.  In that case, move recursively down the tree
 	bool haveonlyleaves = true;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < 8; ++i)
 	{
 		if (!m_children[i]->IsLeafNode())				// If this child node has its own leaves then we cannot prune here
 		{
@@ -577,29 +594,31 @@ void Octree<T>::PerformPruningCheck(void)
 		// Iterate through our children and keep a note of any items that are found.  If we exceed the maximum
 		// that can be stored within one node then we can quit immediately, since we could not roll all the 
 		// child items up to be stored in this one
-		vector<T> items;
-		for (int i = 0; i < 8; i++)
+		std::vector<T> items;
+		for (int i = 0; i < 8; ++i)
 		{
 			// Call the GetItems method to add this child's items to the vector.  We call on each child in turn (rather
 			// than just calling on this node and having it recurse) since this allows us to stop between each call if 
 			// we exceed the node item limit
 			m_children[i]->GetItems(items);
-			if (items.size() > OCTREE_MAX_ITEMS) return;
+			if (items.size() > (unsigned int)Game::C_OCTREE_MAX_NODE_ITEMS) return;
 		}
 
 		// If we reached this point then our children contain fewer than the node limit worth of items, so we can prune the 
 		// child nodes and roll up to this one.  We have the items already collected in the items vector.  
 		
 		// Deallocate the child nodes first
-		for (int i = 0; i < 8; i++) m_children[i]->ShutdownSingleNode();
+		for (int i = 0; i < 8; ++i) m_children[i]->ShutdownSingleNode();
 		memset(m_children, 0, sizeof(Octree<T>*) * 8);
 
 		// Now add the items to this node.  Change the node link from those items so that it now points to this node
+		T item;
 		m_itemcount = items.size();
-		for (int i = 0; i < m_itemcount; i++)
+		for (int i = 0; i < m_itemcount; ++i)
 		{
-			m_items[i] = items[i];
-			m_items[i]->SetSpatialTreeNode(this);
+			item = items[i];
+			m_items.push_back(item);
+			item->SetSpatialTreeNode(this);
 		}
 
 		// Finally, set the pruning flag on our parent in case we can roll up another level in the next check
@@ -611,7 +630,7 @@ void Octree<T>::PerformPruningCheck(void)
 template <typename T>
 CMPINLINE bool Octree<T>::ContainsPoint(const D3DXVECTOR3 & point)
 {
-	return !(point.x < m_xmin || point.x >= m_xmax || point.y < m_ymin || point.y >= m_ymax || point.z < m_zmin || point.z >= m_zmax);
+	return (point.x >= m_xmin && point.x < m_xmax && point.y >= m_ymin && point.y < m_ymax && point.z >= m_zmin && point.z < m_zmax);
 }
 
 // Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset

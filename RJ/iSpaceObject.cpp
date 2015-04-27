@@ -125,7 +125,7 @@ int iSpaceObject::GetAllObjectsWithinDistance(float distance, std::vector<iSpace
 
 		// We will simply consider the items in this node
 		pObj = &(m_treenode->m_items[0]);
-		numobjects = OCTREE_MAX_ITEMS;
+		numobjects = m_treenode->m_itemcount;
 	}
 	else
 	{

@@ -145,6 +145,11 @@ namespace Game {
 	const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;					// The maximum number of collision exclusions that can be applied to an object
 	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
 	
+	// Object management constants
+	const int C_OCTREE_MAX_NODE_ITEMS = 12;					// The target object limit per octree node; can be overriden if required
+															// based on current node size
+	const float C_OCTREE_MIN_NODE_SIZE = 100.0f;			// Minimum acceptable octree node size.  Overrides node count limit if required
+
 	// Camera-related constants
 	float C_DEFAULT_ZOOM_TO_SHIP_SPEED = 1.75f;				// Default number of seconds to zoom the camera from its current location to a ship
 	float C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE = 75.0f;	// Default distance to place the camera above a ship, if it cannot be determined any other way
