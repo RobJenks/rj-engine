@@ -37,15 +37,6 @@ public:
 	// before finally calling the base iSpaceObject method
 	virtual void							MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location);
 
-	// Searches for all items within the specified distance of this object.  Returns the number of items located
-	// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
-	//		only_colliding_objects - only return items that have m_collides flag == true.  Allows us to use this method for efficient collision detection
-	//		include_focal_object_boundary - include the outer boundary of the focal object when testing distance
-	//		include_target_object_boundaries - include the outer boundary of all target objects when testing distance
-	int										GetAllObjectsWithinDistance(float distance, std::vector<iSpaceObject*> &outResult,
-																		bool only_colliding_objects, bool include_focal_object_boundary,
-																		bool include_target_object_boundaries);
-
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObject::SimulationStateChanged() to maintain the chain
 	void									SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
