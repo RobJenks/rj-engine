@@ -38,6 +38,7 @@
 #include "FastMath.h"
 #include "Utility.h"
 #include "GameDataExtern.h"
+#include "SimulationObjectManager.h"
 #include "SpaceSystem.h"
 #include "ImmediateRegion.h"
 #include "SystemRegion.h"
@@ -1851,16 +1852,18 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::CurrentPlayer->GetParentEnvironment()->GetAllObjectsWithinDistance(10000.0f, objects, true, false, false);
+		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects,
+																   (SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
 
-		// Also include the parent ship environmment(hence why we +1 to the count above)
+		// Also include the parent ship environmment (hence why we +1 to the count above)
 		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetParentEnvironment());
 	}
 	else
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::CurrentPlayer->GetPlayerShip()->GetAllObjectsWithinDistance(10000.0f, objects, true, false, false);
+		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects, 
+																   (SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Also include the player ship (hence why we +1 to the count above)
 		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetPlayerShip());

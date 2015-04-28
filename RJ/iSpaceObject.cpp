@@ -94,8 +94,10 @@ int iSpaceObject::GetAllObjectsWithinDistance(float distance, std::vector<iSpace
 	just moving up the tree.  e.g. if we need to search further in +ve x direction then locate the relevant node(s) to the right of
 	this one.
 	*/
-	
-	static vector<iSpaceObject*> large_objects_recorded;
+unsigned int start_time = (unsigned int)timeGetTime(); // DBG
+
+	static std::vector<Octree<iSpaceObject*>*> search;
+	static std::vector<iSpaceObject*> large_objects_recorded;
 	iSpaceObject *last_large_obj = NULL; 
 	bool found_large_object;
 
@@ -147,7 +149,7 @@ int iSpaceObject::GetAllObjectsWithinDistance(float distance, std::vector<iSpace
 	
 	// We now know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
 	// of all items in its bounds.  Use a non-recursive vector substitute instead of normal recursive search for efficiency
-	std::vector<Octree<iSpaceObject*>*> search;
+	search.clear();
 	search.push_back(node);
 
 	// Initialise the results vector before starting
@@ -166,6 +168,12 @@ int iSpaceObject::GetAllObjectsWithinDistance(float distance, std::vector<iSpace
 	{
 		node = search[index]; if (!node) continue;
 
+		// Check whether the node is valid.  If the search range is entirely outside of the node area
+		// then skip it (and all its children) completely
+		if (xmax < node->m_xmin || xmin >= node->m_xmax || ymax < node->m_ymin ||
+			ymin >= node->m_ymax || zmax < node->m_zmin || zmin >= node->m_zmax) continue;
+		
+		// Otherwise, process the node.  Different action for branch vs leaf nodes
 		if (node->m_children[0] != NULL)
 		{
 			// If this is a branch node, add its children to the search vector
@@ -246,7 +254,8 @@ int iSpaceObject::GetAllObjectsWithinDistance(float distance, std::vector<iSpace
 
 static int dbgc = 0;
 dbgc += outResult.size();
-OutputDebugString(concat("Obj \"")(m_name)("\" (")(m_id)(") - NodeSearch: ")(search.size())(", ObjResults: ")(outResult.size())(", TotalObj = ")(dbgc)("\n").str().c_str());
+OutputDebugString(concat("Obj \"")(m_name)("\" (")(m_id)(") - NodeSearch: ")(search.size())(", ObjResults: ")(outResult.size())(", Time = ")
+	(((unsigned int)timeGetTime() - start_time))("ms\n").str().c_str());
 
 	// Return the total number of items that were located
 	return (outResult.size());

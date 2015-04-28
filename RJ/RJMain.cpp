@@ -40,6 +40,7 @@
 #include "CentralScheduler.h"
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
+#include "SimulationObjectManager.h"
 #include "LogManager.h"
 #include "SpaceSystem.h"
 
@@ -453,24 +454,45 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_7])
 	{
-		if (true)
+		if (!b[DIK_LSHIFT])
 		{
-			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-			Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(298.0f, 75.0f, 1463.0f));
-			D3DXQUATERNION orient = D3DXQUATERNION(0.0546f, -0.99057f, 0.0973f, 0.4090f); D3DXQuaternionNormalize(&orient, &orient);
-			Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+			if (true)
+			{
+				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
+				Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(298.0f, 75.0f, 1463.0f));
+				D3DXQUATERNION orient = D3DXQUATERNION(0.0546f, -0.99057f, 0.0973f, 0.4090f); D3DXQuaternionNormalize(&orient, &orient);
+				Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
 
-			for (int x = 0; x < 10; ++x)
-				for (int y = 0; y < 10; ++y)
-				{ 
-					SimpleShip *tmp = SimpleShip::Create("testship1");
-					SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(tmp);
-					tmp->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(
-						cs->GetPosition().x + ((x - 5)*tmp->GetSize().x*1.2f),
-						cs->GetPosition().y + ((y - 5)*tmp->GetSize().y*1.2f),
-						cs->GetPosition().z + (cs->GetSize().z*0.5f) + 1000.0f));
-					tmp->SetOrientation(ID_QUATERNION);
+				for (int x = 0; x < 10; ++x)
+					for (int y = 0; y < 10; ++y)
+					{
+						SimpleShip *tmp = SimpleShip::Create("testship1");
+						SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(tmp);
+						tmp->SetName("DIK_7_SPAWNED_SHIP");
+						tmp->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(
+							cs->GetPosition().x + ((x - 5)*tmp->GetSize().x*1.2f),
+							cs->GetPosition().y + ((y - 5)*tmp->GetSize().y*1.2f),
+							cs->GetPosition().z + (cs->GetSize().z*0.5f) + 1000.0f));
+						tmp->SetOrientation(ID_QUATERNION);
+
+					}
+			}
+		}
+		else
+		{
+			Game::ObjectRegister::iterator it_end = Game::Objects.end();
+			for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
+			{
+				if (it->second && it->second->GetName() == "DIK_7_SPAWNED_SHIP" && it->second->GetObjectType() == iObject::ObjectType::SimpleShipObject)
+				{
+					SimpleShip *s = (SimpleShip*)it->second;
+					s->CancelAllOrders();
+					s->AssignNewOrder(new Order_MoveToPosition(D3DXVECTOR3(	s->GetPosition().x + frand_lh(-2500.0f, 2500.0f),
+																			0.0f,
+																			s->GetPosition().z + frand_lh(-2500.0f, 2500.0f)), 250.0f));
 				}
+			}
+			
 		}
 		m_keyboard.LockKey(DIK_7);
 	}
@@ -1232,7 +1254,8 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::CurrentPlayer->GetParentEnvironment()->GetAllObjectsWithinDistance(10000.0f, objects, true, false, false);
+		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects, 
+			SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the parent ship environmment(hence why we +1 to the count above)
 		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetParentEnvironment());
@@ -1241,7 +1264,8 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::CurrentPlayer->GetPlayerShip()->GetAllObjectsWithinDistance(10000.0f, objects, true, false, false);
+		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects,
+			SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the player ship (hence why we +1 to the count above)
 		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetPlayerShip());

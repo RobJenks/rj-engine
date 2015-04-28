@@ -466,6 +466,9 @@
     <ClCompile Include="OrientedBoundingBox.cpp">
       <Filter>Math\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="SimulationObjectManager.cpp">
+      <Filter>Object Manager</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1038,6 +1041,9 @@
     <ClInclude Include="AABB.h">
       <Filter>Math\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="SimulationObjectManager.h">
+      <Filter>Object Manager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1254,6 +1260,9 @@
     </Filter>
     <Filter Include="Math\Geometry">
       <UniqueIdentifier>{0cd48c57-bbff-4d4e-b63c-5d204ae0841d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object Manager">
+      <UniqueIdentifier>{8922606a-09d0-4c65-bbff-d63d939dc8f4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

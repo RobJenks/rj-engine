@@ -175,6 +175,7 @@
     <ClCompile Include="LightHighlightFadeShader.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
+    <ClCompile Include="SimulationObjectManager.cpp" />
     <ClCompile Include="UI_Console.cpp" />
     <ClCompile Include="UI_ModelBuilder.cpp" />
     <ClCompile Include="RJMain.cpp" />
@@ -353,6 +354,7 @@
     <ClInclude Include="LightHighlightFadeShader.h" />
     <ClInclude Include="LogManager.h" />
     <ClInclude Include="MultiLineTextBlock.h" />
+    <ClInclude Include="SimulationObjectManager.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="UI_Console.h" />
     <ClInclude Include="UI_ModelBuilder.h" />

@@ -5,6 +5,7 @@
 #include "FastMath.h"
 #include "GameVarsExtern.h"
 #include "Octree.h"
+#include "SimulationObjectManager.h"
 #include "iActiveObject.h"
 #include "iSpaceObject.h"
 #include "Ray.h"
@@ -192,7 +193,8 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	{
 		// Perform a search outwards from the focal object to locate all objects within range.  Don't incorporate any object
 		// boundaries at this point since we are just doing a coarse search of nearby objects
-		numobjects = focalobject->GetAllObjectsWithinDistance(radius, objects, true, false, false);
+		numobjects = Game::ObjectManager.GetAllObjectsWithinDistance(focalobject, radius, objects, 
+																	(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Add the focal object (as long as it collides), since it will not be returned by the ObjectsWithinDistance method
 		if (focalobject->GetCollisionMode() != Game::CollisionMode::NoCollision)
@@ -218,10 +220,11 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 		{
 			// Otherwise, in the majority of cases, we will handle this object via normal, discrete collision detection
 			
-			// Get any objects within the current object's collision margin radius; quit here if there are no objects nearby.  Don't
+			// Get any objects within the current object's collision sphere radius; quit here if there are no objects nearby.  Don't
 			// include the focal object boundary since this is already passed in the 'marginradius'.  Include all target object boundaries.
 			candidates.clear();
-			numcandidates = object->GetAllObjectsWithinDistance(object->GetCollisionSphereRadius(), candidates, true, false, true);
+			numcandidates = Game::ObjectManager.GetAllObjectsWithinDistance(object, object->GetCollisionSphereRadius(), candidates, 
+				(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects | SimulationObjectManager::ObjectSearchOptions::IncludeTargetObjectBoundaries));
 			if (numcandidates == 0) continue;
 
 			// Get basic information on the object that we will need for each comparison
@@ -300,7 +303,8 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
 	// Quit immediately if there are no other objects in range
 	std::vector<iSpaceObject*> candidates;
-	int numcandidates = object->GetAllObjectsWithinDistance(GetCCDTestDistance(object), candidates, true, false, true);
+	int numcandidates = Game::ObjectManager.GetAllObjectsWithinDistance(object, GetCCDTestDistance(object), candidates,
+		(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects | SimulationObjectManager::ObjectSearchOptions::IncludeTargetObjectBoundaries));
 	if (numcandidates == 0) return NULL;
 
 	// The method will test for potentially multiple collisions within the same frame.  It therefore 'dials-back' the physics

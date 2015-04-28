@@ -8,6 +8,7 @@
 #include "CentralScheduler.h"
 #include "GamePhysicsEngine.h"
 #include "SimulationStateManager.h"
+#include "SimulationObjectManager.h"
 #include "LogManager.h"
 #include "GameConsole.h"
 #include "DebugCommandHandler.h"
@@ -81,6 +82,9 @@ namespace Game {
 
 	// State manager, which maintains the simulation state and level for all objects/systems/processes in the game
 	SimulationStateManager			StateManager = SimulationStateManager();
+
+	// Object manager, which handles operations across the set of active objects
+	SimulationObjectManager			ObjectManager = SimulationObjectManager();
 
 	// Central logging component
 	LogManager						Log = LogManager();

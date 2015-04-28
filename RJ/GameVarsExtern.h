@@ -34,6 +34,7 @@ class Ship;
 class Actor;
 class Player;
 class SimulationStateManager;
+class SimulationObjectManager;
 class LogManager;
 class GameConsole;
 class DebugCommandHandler;
@@ -85,6 +86,9 @@ namespace Game {
 
 	// Central scheduler for all scheduled jobs
 	extern CentralScheduler Scheduler;
+
+	// Object manager, which handles operations across the set of active objects
+	extern SimulationObjectManager ObjectManager;
 
 	// State manager, which maintains the simulation state and level for all objects/systems/processes in the game
 	extern SimulationStateManager StateManager;

@@ -54,7 +54,7 @@ public:
 													// 1 = AutoFitObjectBounds, i.e. whether the OBB wil dynamically size itself based on the underlying model size
 
 	// Flag to indicate whether an offset is being applied to this OBB
-	CMPINLINE bool				HasOffset(void) const			{ return CheckBit(Flags, OrientedBoundingBox::OBBFlags::OBBHasOffset); }
+	CMPINLINE bool				HasOffset(void) const			{ return CheckBit_Single(Flags, OrientedBoundingBox::OBBFlags::OBBHasOffset); }
 	CMPINLINE void				SetOffsetFlag(bool hasoffset)
 	{
 		if (hasoffset)			SetBit(Flags, OrientedBoundingBox::OBBFlags::OBBHasOffset);
@@ -62,11 +62,11 @@ public:
 	}
 
 	// Flag that indicates whether the OBB should be auto-calculated to fit object size
-	CMPINLINE bool				AutoFitObjectBounds(void) const { return CheckBit(Flags, OrientedBoundingBox::OBBFlags::OBBAutoFitToObjectBounds); }
+	CMPINLINE bool				AutoFitObjectBounds(void) const { return CheckBit_Single(Flags, OrientedBoundingBox::OBBFlags::OBBAutoFitToObjectBounds); }
 	void						SetAutoFitMode(bool autofit);
 	
 	// Flag that indicates whether the OBB has been invalidated and needs to be recalculated next time it is used
-	CMPINLINE bool				IsInvalidated(void) const { return CheckBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
+	CMPINLINE bool				IsInvalidated(void) const { return CheckBit_Single(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	CMPINLINE void				Invalidate(void) { SetBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	CMPINLINE void				RemoveInvalidation(void) { ClearBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	

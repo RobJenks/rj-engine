@@ -21,10 +21,35 @@ template <class Octree> class MemoryPool;
 #define OCTREE_SE_DOWN		6
 #define OCTREE_SW_DOWN		7
 
+
 template <typename T> 
 class Octree
 {
 public:
+
+	// The eight children of a node can also be specified via 8-bit bitstring
+	enum CHILD_FLAG
+	{
+		OCTREE_FLAG_NW_UP		= 0x01,
+		OCTREE_FLAG_NE_UP		= 0x02,
+		OCTREE_FLAG_SE_UP		= 0x04,
+		OCTREE_FLAG_SW_UP		= 0x08,
+		OCTREE_FLAG_NW_DOWN		= 0x10,
+		OCTREE_FLAG_NE_DOWN		= 0x20,
+		OCTREE_FLAG_SE_DOWN		= 0x40,
+		OCTREE_FLAG_SW_DOWN		= 0x80
+	};
+
+	// Consoldation of nodes into (ovelapping) child groups, for efficiency
+	enum CHILD_GROUP
+	{
+		NODES_X_NEG = (CHILD_FLAG::OCTREE_FLAG_NW_UP | CHILD_FLAG::OCTREE_FLAG_SW_UP | CHILD_FLAG::OCTREE_FLAG_NW_DOWN | CHILD_FLAG::OCTREE_FLAG_SW_DOWN),
+		NODES_X_POS = (CHILD_FLAG::OCTREE_FLAG_NE_UP | CHILD_FLAG::OCTREE_FLAG_SE_UP | CHILD_FLAG::OCTREE_FLAG_NE_DOWN | CHILD_FLAG::OCTREE_FLAG_SE_DOWN),
+		NODES_Y_NEG = (CHILD_FLAG::OCTREE_FLAG_NW_DOWN | CHILD_FLAG::OCTREE_FLAG_NE_DOWN | CHILD_FLAG::OCTREE_FLAG_SE_DOWN | CHILD_FLAG::OCTREE_FLAG_SW_DOWN),
+		NODES_Y_POS = (CHILD_FLAG::OCTREE_FLAG_NW_UP | CHILD_FLAG::OCTREE_FLAG_NE_UP | CHILD_FLAG::OCTREE_FLAG_SE_UP | CHILD_FLAG::OCTREE_FLAG_SW_UP),
+		NODES_Z_NEG = (CHILD_FLAG::OCTREE_FLAG_SE_UP | CHILD_FLAG::OCTREE_FLAG_SW_UP | CHILD_FLAG::OCTREE_FLAG_SE_DOWN | CHILD_FLAG::OCTREE_FLAG_SW_DOWN),
+		NODES_Z_POS = (CHILD_FLAG::OCTREE_FLAG_NE_UP | CHILD_FLAG::OCTREE_FLAG_NW_UP | CHILD_FLAG::OCTREE_FLAG_NE_DOWN | CHILD_FLAG::OCTREE_FLAG_NW_DOWN)
+	};
 
 	// Constructor for the root node.  Params  specifies the position, and length of each edge of the covered area.  
 	// 'areasize' must be a power of 2 (TBC)
@@ -96,7 +121,10 @@ public:
 	int								DetermineTreeSize(void);
 
 	// Returns a value indicating whether this is a leaf node (i.e. has no child nodes below it)
-	CMPINLINE bool					IsLeafNode(void)					{ return (m_children[0] == NULL); }
+	CMPINLINE bool					IsLeafNode(void) const				{ return (m_children[0] == NULL); }
+
+	// Returns a value indicating whether this is a branch node (i.e. has no items, and has child nodes below it)
+	CMPINLINE bool					IsBranchNode(void) const			{ return (m_children[0] != NULL); }
 
 	// Debug method to generate a string output of an Octree and its recursively-defined children
 	string							DebugOutput(void);
@@ -128,7 +156,7 @@ public:			// We will allow public access to member variables for efficiency.  On
 	float										m_zmin, m_zmax;
 
 	// Precalculated centre point of the node, based on bounds.  Used to determine which subdivision is relevant for a particular position
-	float										m_xcentre, m_ycentre, m_zcentre;
+	D3DXVECTOR3									m_centre;
 
 	// Precalculated size of the node in each dimension
 	float										m_size;
@@ -170,9 +198,9 @@ Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize), 
 	if (areasize <= 0) throw 1;
 
 	// Precalculate the node centre point for future subdivisions
-	m_xcentre = (m_xmin + m_xmax) * 0.5f;
-	m_ycentre = (m_ymin + m_ymax) * 0.5f;
-	m_zcentre = (m_zmin + m_zmax) * 0.5f;
+	m_centre.x = (m_xmin + m_xmax) * 0.5f;
+	m_centre.y = (m_ymin + m_ymax) * 0.5f;
+	m_centre.z = (m_zmin + m_zmax) * 0.5f;
 
 	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
@@ -209,9 +237,9 @@ void Octree<T>::Initialise(Octree<T> *parent, float x0, float x1, float y0, floa
 	m_areasize = m_parent->GetAreaSize();
 
 	// Precalculate the node centre point and node size for future subdivisions
-	m_xcentre = (m_xmin + m_xmax) * 0.5f;
-	m_ycentre = (m_ymin + m_ymax) * 0.5f;
-	m_zcentre = (m_zmin + m_zmax) * 0.5f;
+	m_centre.x = (m_xmin + m_xmax) * 0.5f;
+	m_centre.y = (m_ymin + m_ymax) * 0.5f;
+	m_centre.z = (m_zmin + m_zmax) * 0.5f;
 
 	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
@@ -265,21 +293,21 @@ Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
 			// We need to partition the tree node to avoid going over the per-node item limit
 			// We will request a new node for each child from the memory pool and assign its parameters accordingly
 			m_children[OCTREE_NW_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NW_DOWN]->Initialise(this, m_xmin, m_xcentre, m_ymin, m_ycentre, m_zcentre, m_zmax);
+			m_children[OCTREE_NW_DOWN]->Initialise(this, m_xmin, m_centre.x, m_ymin, m_centre.y, m_centre.z, m_zmax);
 			m_children[OCTREE_NE_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NE_DOWN]->Initialise(this, m_xcentre, m_xmax, m_ymin, m_ycentre, m_zcentre, m_zmax);
+			m_children[OCTREE_NE_DOWN]->Initialise(this, m_centre.x, m_xmax, m_ymin, m_centre.y, m_centre.z, m_zmax);
 			m_children[OCTREE_SE_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SE_DOWN]->Initialise(this, m_xcentre, m_xmax, m_ymin, m_ycentre, m_zmin, m_zcentre);
+			m_children[OCTREE_SE_DOWN]->Initialise(this, m_centre.x, m_xmax, m_ymin, m_centre.y, m_zmin, m_centre.z);
 			m_children[OCTREE_SW_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SW_DOWN]->Initialise(this, m_xmin, m_xcentre, m_ymin, m_ycentre, m_zmin, m_zcentre);
+			m_children[OCTREE_SW_DOWN]->Initialise(this, m_xmin, m_centre.x, m_ymin, m_centre.y, m_zmin, m_centre.z);
 			m_children[OCTREE_NW_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NW_UP]->Initialise(this, m_xmin, m_xcentre, m_ycentre, m_ymax, m_zcentre, m_zmax);
+			m_children[OCTREE_NW_UP]->Initialise(this, m_xmin, m_centre.x, m_centre.y, m_ymax, m_centre.z, m_zmax);
 			m_children[OCTREE_NE_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NE_UP]->Initialise(this, m_xcentre, m_xmax, m_ycentre, m_ymax, m_zcentre, m_zmax);
+			m_children[OCTREE_NE_UP]->Initialise(this, m_centre.x, m_xmax, m_centre.y, m_ymax, m_centre.z, m_zmax);
 			m_children[OCTREE_SE_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SE_UP]->Initialise(this, m_xcentre, m_xmax, m_ycentre, m_ymax, m_zmin, m_zcentre);
+			m_children[OCTREE_SE_UP]->Initialise(this, m_centre.x, m_xmax, m_centre.y, m_ymax, m_zmin, m_centre.z);
 			m_children[OCTREE_SW_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SW_UP]->Initialise(this, m_xmin, m_xcentre, m_ycentre, m_ymax, m_zmin, m_zcentre);
+			m_children[OCTREE_SW_UP]->Initialise(this, m_xmin, m_centre.x, m_centre.y, m_ymax, m_zmin, m_centre.z);
 
 			// We now need to reallocate our current items to these new child nodes
 			D3DXVECTOR3 itempos; T move;
@@ -638,15 +666,15 @@ CMPINLINE bool Octree<T>::ContainsPoint(const D3DXVECTOR3 & point)
 template <typename T>
 CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 {
-	if (point.x < m_xcentre) {						// West of centre
-		if (point.y < m_ycentre) {					// Below centre
-			if (point.z < m_zcentre) {				// South of centre
+	if (point.x < m_centre.x) {						// West of centre
+		if (point.y < m_centre.y) {					// Below centre
+			if (point.z < m_centre.z) {				// South of centre
 				return OCTREE_SW_DOWN;					// --> We want the SW-down node
 			} else {								// North of centre
 				return OCTREE_NW_DOWN;					// --> We want the NW-down node
 			} 
 		} else {									// Above centre
-			if (point.z < m_zcentre) {				// South of centre
+			if (point.z < m_centre.z) {				// South of centre
 				return OCTREE_SW_UP;					// --> We want the SW-up node
 			}	
 			else {									// North of centre
@@ -654,14 +682,14 @@ CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 			}
 		} 
 	} else {										// East of centre
-		if (point.y < m_ycentre) {					// Below centre
-			if (point.z < m_zcentre) {				// South of centre
+		if (point.y < m_centre.y) {					// Below centre
+			if (point.z < m_centre.z) {				// South of centre
 				return OCTREE_SE_DOWN;					// --> We want the SE-down node
 			} else {								// North of centre
 				return OCTREE_NE_DOWN;					// --> We want the NE-down node
 			} 
 		} else {									// Above centre
-			if (point.z < m_zcentre) {				// South of centre
+			if (point.z < m_centre.z) {				// South of centre
 				return OCTREE_SE_UP;					// --> We want the SE-up node
 			} else {								// North of centre
 				return OCTREE_NE_UP;					// --> We want the NE-up node

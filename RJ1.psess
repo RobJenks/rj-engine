@@ -72,6 +72,9 @@
     <Report>
       <Path>Profiling Reports\tmp1.vsp</Path>
     </Report>
+    <Report>
+      <Path>Profiling Reports\RJ150427.vsp</Path>
+    </Report>
   </Reports>
   <Launches>
     <ProjBinary>
