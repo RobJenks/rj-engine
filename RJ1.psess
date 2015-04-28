@@ -75,6 +75,9 @@
     <Report>
       <Path>Profiling Reports\RJ150427.vsp</Path>
     </Report>
+    <Report>
+      <Path>Profiling Reports\RJ150427(1).vsp</Path>
+    </Report>
   </Reports>
   <Launches>
     <ProjBinary>

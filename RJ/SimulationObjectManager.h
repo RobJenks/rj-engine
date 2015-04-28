@@ -34,6 +34,8 @@ public:
 		Z_BOTH = (Z_NEG_SEG | Z_POS_SEG)
 	};
 		
+	// Default constructor
+	SimulationObjectManager(void);
 
 	// Searches for all items within the specified distance of an object.  Returns the number of items located
 	// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later

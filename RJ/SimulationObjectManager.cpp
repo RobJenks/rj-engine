@@ -5,6 +5,14 @@
 #include "SimulationObjectManager.h"
 
 
+// Default constructor
+SimulationObjectManager::SimulationObjectManager(void)
+{
+	// Pre-allocate space for the frequently used internal vectors, for runtime efficiency
+	search_candidate_nodes.reserve(1024);
+	search_large_objects.reserve(64);
+}
+
 // Searches for all items within the specified distance of an object.  Returns the number of items located
 // Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
 int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *focalobject, float distance, std::vector<iSpaceObject*> & outResult,
@@ -221,7 +229,7 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 			{
 				// We can ignore this entry if it does not represent an item, or if it is us
 				obj = (iSpaceObject*)(*search_obj_it);
-				if (!obj || obj == focalobject) continue;
+				if (!obj) continue;
 				const D3DXVECTOR3 & objpos = obj->GetPosition();
 
 				// We can also ignore it if the item is non-colliding and we are only interested in colliding objects
