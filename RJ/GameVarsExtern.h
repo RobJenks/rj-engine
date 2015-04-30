@@ -117,6 +117,13 @@ namespace Game {
 	extern CollisionMode TranslateCollisionModeFromString(const std::string & mode);
 	extern std::string TranslateCollisionModeToString(CollisionMode mode);
 
+	// Enumeration of possible collider types; passive colliders will not test for collisions themselves; 
+	// they can only be the candidate object in a collision test.  They will also not perform CCD, so 
+	// potentially-fast moving objects should be classified as active colliders
+	enum ColliderType { ActiveCollider = 0, PassiveCollider };
+	extern ColliderType TranslateColliderTypeFromString(const std::string & type);
+	extern std::string TranslateColliderTypeToString(ColliderType type);
+
 	// General application constants
 	extern int C_LOG_FLUSH_INTERVAL;
 	extern unsigned int C_MAX_FRAME_DELTA;			// Maximum frame delta

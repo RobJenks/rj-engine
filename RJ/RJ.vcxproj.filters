@@ -478,6 +478,9 @@
     <ClCompile Include="SpaceProjectileDefinition.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
+    <ClCompile Include="SpaceTurret.cpp">
+      <Filter>Objects\Ships\Turrets</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1062,6 +1065,9 @@
     <ClInclude Include="SpaceProjectileDefinition.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
+    <ClInclude Include="SpaceTurret.h">
+      <Filter>Objects\Ships\Turrets</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1284,6 +1290,9 @@
     </Filter>
     <Filter Include="Objects\Projectiles">
       <UniqueIdentifier>{ff08c09b-aedf-43b8-af33-5dbbb259ff6c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Turrets">
+      <UniqueIdentifier>{7bdbf2cf-3d69-4bf3-93c7-59d167ca7ff8}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

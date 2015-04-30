@@ -179,6 +179,7 @@
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
     <ClCompile Include="SpaceProjectileLauncher.cpp" />
+    <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="UI_Console.cpp" />
     <ClCompile Include="UI_ModelBuilder.cpp" />
     <ClCompile Include="RJMain.cpp" />
@@ -362,6 +363,7 @@
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />
     <ClInclude Include="SpaceProjectileLauncher.h" />
+    <ClInclude Include="SpaceTurret.h" />
     <ClInclude Include="UI_Console.h" />
     <ClInclude Include="UI_ModelBuilder.h" />
     <ClInclude Include="RJMain.h" />

@@ -14,10 +14,11 @@ public:
 	// Bit flags specifying object search options
 	enum ObjectSearchOptions
 	{
-		NoSearchOptions						= 0x00,
-		OnlyCollidingObjects				= 0x01,
-		IncludeFocalObjectBoundary			= 0x02,
-		IncludeTargetObjectBoundaries		= 0x04
+		NoSearchOptions					= 0x00,
+		OnlyCollidingObjects			= 0x01,
+		IncludeFocalObjectBoundary		= 0x02,
+		IncludeTargetObjectBoundaries	= 0x04,
+		OnlyActiveColliders				= 0x08
 	};
 
 	// Bit flags specifying the conditions for partitioning an Octree node during object search

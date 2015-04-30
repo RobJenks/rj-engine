@@ -188,6 +188,8 @@ public:
 	// Collision detection data
 	CMPINLINE Game::CollisionMode			GetCollisionMode(void) const					{ return m_collisionmode; }	
 	CMPINLINE void							SetCollisionMode(Game::CollisionMode mode)		{ m_collisionmode = mode; }	
+	CMPINLINE Game::ColliderType			GetColliderType(void) const						{ return m_collidertype; }
+	CMPINLINE void							SetColliderType(Game::ColliderType type)		{ m_collidertype = type; }
 
 	// We store the collision sphere data per object for runtime access efficiency, considering it only requires a few floating point values
 	float									GetCollisionSphereRadius(void) const			{ return m_collisionsphereradius; }
@@ -334,6 +336,7 @@ protected:
 	float								m_collisionsphereradius;		// Radius of the object collision sphere
 	float								m_collisionsphereradiussq;		// Squared radius of the collision sphere for runtime efficiency
 	float								m_collisionspheremarginradius;	// Includes a margin to catch edge cases that may otherwise be missed
+	Game::ColliderType					m_collidertype;					// Indicates whether this is an active or passive collider
 
 	VisibilityTestingModeType			m_visibilitytestingmode;		// The method used to test visibility of this object
 

@@ -56,6 +56,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	// Set collision parameters
 	CollisionOBB.Parent = this;
 	SetCollisionMode(Game::CollisionMode::NoCollision);
+	SetColliderType(Game::ColliderType::ActiveCollider);
 	SetVisibilityTestingMode(VisibilityTestingModeType::UseBoundingSphere);
 
 	// Set all flags to default values

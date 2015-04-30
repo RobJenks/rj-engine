@@ -192,9 +192,10 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	else
 	{
 		// Perform a search outwards from the focal object to locate all objects within range.  Don't incorporate any object
-		// boundaries at this point since we are just doing a coarse search of nearby objects
+		// boundaries at this point since we are just doing a coarse search of nearby objects.  We only want to return
+		// active collider objects and can ignore anything else
 		numobjects = Game::ObjectManager.GetAllObjectsWithinDistance(focalobject, radius, objects, 
-																	(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
+			(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects | SimulationObjectManager::ObjectSearchOptions::OnlyActiveColliders));
 
 		// Add the focal object (as long as it collides), since it will not be returned by the ObjectsWithinDistance method
 		if (focalobject->GetCollisionMode() != Game::CollisionMode::NoCollision)
@@ -240,8 +241,9 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 
 				// We only want to test a collision between two objects once, i.e. we don't want to test (object vs candidate) and 
 				// then (candidate vs object).  To do this efficiently we only test collisions where object.ID < candidate.ID.  The 
-				// uniqueness and sequential nature of object IDs means this will always work
-				if (object_id >= candidate->GetID()) continue;
+				// uniqueness and sequential nature of object IDs means this will always work.  Only exception is if the candidate is
+				// a passive collider.  In this case it cannot test for collisions itself, and so we will allow it as the candidate here
+				if (object_id >= candidate->GetID() && candidate->GetColliderType() != Game::ColliderType::PassiveCollider) continue;
 
 				// Also test whether either object has an exclusion in place to prevent collision with the other
 				if ((hasexclusions && object->CollisionExcludedWithObject(candidate->GetID())) ||
@@ -253,7 +255,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 
 				// If the focal object is static, test whether the candidate is as well.  Only evaluate static pairs of objects on
 				// a periodic basis, since the vast majority of the time they will not be colliding (unless they are somehow placed inside
-				// each other
+				// each other)
 				if (exclude_static && candidate->IsStatic()) continue;
 
 				// Record the fact that we are testing the collision pair

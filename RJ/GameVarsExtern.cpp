@@ -244,6 +244,28 @@ namespace Game {
 		}
 	}
 
+	// Translate collider type values to/from their string representation
+	ColliderType TranslateColliderTypeFromString(const std::string & type)
+	{
+		std::string s = type; StrLowerC(s);
+		if (s == "passivecollider")
+			return ColliderType::PassiveCollider;
+		else
+			return ColliderType::ActiveCollider;
+	}
+
+	// Translate collision mode values to/from their string representation
+	std::string TranslateColliderTypeToString(ColliderType type)
+	{
+		switch (type)
+		{
+			case ColliderType::PassiveCollider:
+				return "passivecollider"; break;
+			default:
+				return "activecollider"; break;
+		}
+	}
+
 	// Find an object based on its string code
 	iObject *FindObjectInGlobalRegister(const std::string & instance_code)
 	{

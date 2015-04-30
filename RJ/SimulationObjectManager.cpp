@@ -232,8 +232,10 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 				if (!obj) continue;
 				const D3DXVECTOR3 & objpos = obj->GetPosition();
 
-				// We can also ignore it if the item is non-colliding and we are only interested in colliding objects
-				if (CheckBit_Single(options, ObjectSearchOptions::OnlyCollidingObjects) && (obj->GetCollisionMode() == Game::CollisionMode::NoCollision)) continue;
+				// We can ignore the object if it is non-colliding and we are only interested in colliding objects.  Or, if it IS
+				// colliding, we can also ignore it if it is a passive collider and we only want active collider objects
+				if ( (CheckBit_Single(options, ObjectSearchOptions::OnlyCollidingObjects) && (obj->GetCollisionMode() == Game::CollisionMode::NoCollision)) ||
+					 (CheckBit_Single(options, ObjectSearchOptions::OnlyActiveColliders) && (obj->GetColliderType() != Game::ColliderType::ActiveCollider)) ) continue;
 
 				// Special case: if this is a capital ship beacon then we want to instead treat it like the parent capital ship
 				if (obj->GetObjectType() == iObject::ObjectType::CapitalShipPerimeterBeaconObject)
