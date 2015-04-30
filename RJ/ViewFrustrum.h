@@ -34,7 +34,7 @@ public:
 	Result Initialise(const D3DXMATRIX *projection, const float depth, const float FOV, const float aspect);
 
 	// Builds a new frustrum for the current frame
-	void ConstructFrustrum(D3DXMATRIX view, D3DXMATRIX invview);
+	void ConstructFrustrum(const D3DXMATRIX *view, const D3DXMATRIX *invview);
 
 	CMPINLINE float			GetFOV(void)				{ return m_fov; }
 	CMPINLINE float			GetTanOfHalfFOV(void)		{ return m_fovtan; }

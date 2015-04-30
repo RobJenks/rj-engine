@@ -40,12 +40,12 @@ Result ViewFrustrum::Initialise(const D3DXMATRIX *projection, const float depth,
 	return ErrorCodes::NoError;
 }
 
-void ViewFrustrum::ConstructFrustrum(D3DXMATRIX view, D3DXMATRIX invview)
+void ViewFrustrum::ConstructFrustrum(const D3DXMATRIX *view, const D3DXMATRIX *invview)
 {
 	D3DXMATRIX matrix;
 
 	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix
-	D3DXMatrixMultiply(&matrix, &view, &m_frustrumproj);
+	D3DXMatrixMultiply(&matrix, view, &m_frustrumproj);
 
 	// Calculate near plane of frustum.
 	m_planes[0].a = matrix._14 + matrix._13;
@@ -103,10 +103,10 @@ void ViewFrustrum::ConstructFrustrum(D3DXMATRIX view, D3DXMATRIX invview)
 	m_farplaneworld.TL = D3DXVECTOR3(-m_farplaneworld.TR.x,  m_farplaneworld.TR.y, m_farplaneworld.TR.z);
 
 	// Finally multiply these coordinates by the inverse view matrix to get them in world space
-	D3DXVec3TransformCoord(&m_farplaneworld.TR, &m_farplaneworld.TR, &invview);
-	D3DXVec3TransformCoord(&m_farplaneworld.BR, &m_farplaneworld.BR, &invview);
-	D3DXVec3TransformCoord(&m_farplaneworld.BL, &m_farplaneworld.BL, &invview);
-	D3DXVec3TransformCoord(&m_farplaneworld.TL, &m_farplaneworld.TL, &invview);
+	D3DXVec3TransformCoord(&m_farplaneworld.TR, &m_farplaneworld.TR, invview);
+	D3DXVec3TransformCoord(&m_farplaneworld.BR, &m_farplaneworld.BR, invview);
+	D3DXVec3TransformCoord(&m_farplaneworld.BL, &m_farplaneworld.BL, invview);
+	D3DXVec3TransformCoord(&m_farplaneworld.TL, &m_farplaneworld.TL, invview);
 }
 
 // Primary method for object visibility testing - (replaced with inline always-sphere method)

@@ -1045,7 +1045,7 @@ void CoreEngine::Render(void)
 	if (!r_devicecontext) return;
 
 	// Construct the view frustrum for this frame so we can perform culling calculations
-	m_frustrum->ConstructFrustrum(r_view, r_invview);
+	m_frustrum->ConstructFrustrum(&r_view, &r_invview);
 
 	/*** Perform rendering that is common to all player environment & states ***/
 
