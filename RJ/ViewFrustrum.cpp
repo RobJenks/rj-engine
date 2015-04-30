@@ -109,8 +109,8 @@ void ViewFrustrum::ConstructFrustrum(D3DXMATRIX view, D3DXMATRIX invview)
 	D3DXVec3TransformCoord(&m_farplaneworld.TL, &m_farplaneworld.TL, &invview);
 }
 
-// Primary method for object visibility testing
-bool ViewFrustrum::TestObjectVisibility(iObject *obj)
+// Primary method for object visibility testing - (replaced with inline always-sphere method)
+/*bool ViewFrustrum::TestObjectVisibility(iObject *obj)
 {
 	// Ensure that we have been passed a valid object
 	if (!obj) return false;
@@ -124,7 +124,7 @@ bool ViewFrustrum::TestObjectVisibility(iObject *obj)
 		default:
 			return CheckSphere(&(obj->GetPosition()), obj->GetCollisionSphereRadius());
 	}
-}
+}*/
 
 bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 *pt)
 {

@@ -7,8 +7,13 @@
 
 #include "CompilerSettings.h"
 #include "Utility.h"
-class iObject;
+#include "iObject.h"
 class BoundingObject;
+
+// Algorithm in "D3DXPlaneDotCoord" defined as a macro here for efficiency, since the visibility check method 
+// is used thousands of times per frame and needs to be as fast as possible
+#define DOT_PLANE_COORD(plane, coord) (plane.a * coord.x + plane.b * coord.y + plane.c * coord.z + plane.d)
+#define DOT_PLANE_PCOORD(plane, coord) (plane.a * coord->x + plane.b * coord->y + plane.c * coord->z + plane.d)
 
 class ViewFrustrum
 {
@@ -35,7 +40,24 @@ public:
 	CMPINLINE float			GetTanOfHalfFOV(void)		{ return m_fovtan; }
 
 	// Primary method for object visibility testing
-	bool TestObjectVisibility(iObject *obj);
+	//CMPINLINE bool TestObjectVisibility(iObject *obj) { return (obj ? CheckSphere(&(obj->GetPosition()), obj->GetCollisionSphereRadius()) : false); }
+	CMPINLINE bool TestObjectVisibility(const iObject *obj)
+	{
+		// Get the object centre and collision radius
+		if (!obj) return false;
+		const D3DXVECTOR3 & centre = obj->GetPosition();
+		float neg_radius = -(obj->GetCollisionSphereRadius());
+
+		// If the sphere is 'behind' any plane of the view frustum then return false immediately
+		// Otherwise, it is in view.  Loop unrolled for efficiency
+		if (DOT_PLANE_COORD(m_planes[0], centre) < neg_radius) return false;
+		if (DOT_PLANE_COORD(m_planes[1], centre) < neg_radius) return false;
+		if (DOT_PLANE_COORD(m_planes[2], centre) < neg_radius) return false;
+		if (DOT_PLANE_COORD(m_planes[3], centre) < neg_radius) return false;
+		if (DOT_PLANE_COORD(m_planes[4], centre) < neg_radius) return false;
+		if (DOT_PLANE_COORD(m_planes[5], centre) < neg_radius) return false;
+		return true;
+	}
 
 	bool CheckPoint(const D3DXVECTOR3 *pt);
 	bool CheckCube(float x, float y, float z, float radius);
@@ -47,7 +69,35 @@ public:
 
 	bool CheckBoundingObject(const D3DXVECTOR3 *pos, const D3DXMATRIX *world, BoundingObject *obj);
 
-	CMPINLINE bool CheckSphere(const D3DXVECTOR3 *centre, float radius)
+	CMPINLINE bool CheckSphere(const D3DXVECTOR3 & centre, float radius)
+	{
+		// If the sphere is 'behind' any plane of the view frustum then return false immediately
+		// Loop unrolled for efficiency
+		radius = -radius;
+		if (DOT_PLANE_COORD(m_planes[0], centre) < radius) return false;
+		if (DOT_PLANE_COORD(m_planes[1], centre) < radius) return false;
+		if (DOT_PLANE_COORD(m_planes[2], centre) < radius) return false;
+		if (DOT_PLANE_COORD(m_planes[3], centre) < radius) return false;
+		if (DOT_PLANE_COORD(m_planes[4], centre) < radius) return false;
+		if (DOT_PLANE_COORD(m_planes[5], centre) < radius) return false;
+		return true;
+	}
+
+	CMPINLINE bool CheckSphere(const D3DXVECTOR3 * centre, float radius)
+	{
+		// If the sphere is 'behind' any plane of the view frustum then return false immediately
+		// Loop unrolled for efficiency
+		radius = -radius;
+		if (DOT_PLANE_PCOORD(m_planes[0], centre) < radius) return false;
+		if (DOT_PLANE_PCOORD(m_planes[1], centre) < radius) return false;
+		if (DOT_PLANE_PCOORD(m_planes[2], centre) < radius) return false;
+		if (DOT_PLANE_PCOORD(m_planes[3], centre) < radius) return false;
+		if (DOT_PLANE_PCOORD(m_planes[4], centre) < radius) return false;
+		if (DOT_PLANE_PCOORD(m_planes[5], centre) < radius) return false;
+		return true;
+	}
+
+	/*CMPINLINE bool CheckSphere(const D3DXVECTOR3 *centre, float radius)
 	{
 		// If the sphere is 'behind' any plane of the view frustum then return false immediately
 		for (int i = 0; i < 6; ++i)
@@ -55,7 +105,7 @@ public:
 				return false;
 
 		return true;
-	}
+	}*/
 
 	const CMPINLINE D3DXPLANE *GetPlane(FrustrumPlane plane) { return &m_planes[(int)plane]; }
 

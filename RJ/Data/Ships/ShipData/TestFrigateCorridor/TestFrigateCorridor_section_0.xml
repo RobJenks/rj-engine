@@ -14,7 +14,6 @@
         <TurnAngle>0.500000</TurnAngle>
         <BankExtent x="5.000000" y="5.000000" z="1.000000" />
         <BankRate>0.4</BankRate>  
-        <VisibilityTestingMode>UseOrientedBoundingBox</VisibilityTestingMode>
 
         <Hardpoint code="hpengine01" type="Engine">
           <Position x="0.0000000" y="0.000000" z="-120.000000" />
