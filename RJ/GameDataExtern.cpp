@@ -22,6 +22,7 @@ using namespace std::tr1;
 #include "Resource.h"
 #include "SkinnedModel.h"
 #include "ActorBase.h"
+#include "SpaceProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
 class ImmediateRegion;
 class SystemRegion;
@@ -43,8 +44,9 @@ namespace D {
 	ComplexShipObjectClassRegister	ComplexShipObjectClasses;	// Details of all object classes in the game
 	StaticTerrainRegister			StaticTerrainDefinitions;	// Details of all static terrain classes in the game
 	ResourceRegister				Resources;					// Details of all resources in the game
+	ProjectileRegister				Projectiles;				// Details of all projectile types in the game
 	SkinnedModelRegister			SkinnedModels;				// Details of all skinned models in the game
-	ActorRegister					Actors;
+	ActorRegister					Actors;						// Details of all actor types in the game
 
 
 	// The user interface
@@ -85,6 +87,7 @@ namespace D {
 	const char *NODE_Model = "model";
 	const char *NODE_UIManagedControlDefinition = "uimanagedcontroldefinition";
 	const char *NODE_Resource = "resource";
+	const char *NODE_SpaceProjectileDefinition = "spaceprojectiledefinition";
 	const char *NODE_SkinnedModel = "skinnedmodel";
 	const char *NODE_ActorAttributeGeneration = "actorattributegeneration";
 	const char *NODE_ActorBase = "actorbase";
@@ -112,6 +115,7 @@ namespace D {
 		TerminateAllSkinnedModelRegisterData();
 		TerminateAllActorRegisterData();
 		TerminateAllResourceRegisterData();
+		TerminateAllProjectileRegisterData();
 		TerminateAllStaticTerrainRegisterData();
 	}
 
@@ -266,6 +270,21 @@ namespace D {
 		Resources.clear();
 	}
 
+	// Termination function: Projectile register.  Clears all data.
+	void TerminateAllProjectileRegisterData(void)
+	{
+		ProjectileRegister::const_iterator it_end = Projectiles.end();
+		for (ProjectileRegister::const_iterator it = Projectiles.begin(); it != it_end; ++it) {
+			if (it->second) {
+				// Delete the object and deallocate memory
+				delete (it->second);
+			}
+		}
+
+		// Empty the register now it is full of null/invalid pointers
+		Projectiles.clear();
+	}
+
 	// Termination function: Skinned model data register.  Clears all data.
 	void TerminateAllSkinnedModelRegisterData(void)
 	{
@@ -372,6 +391,13 @@ namespace D {
 		if (r && r->GetCode() != NullString && D::Resources.count(r->GetCode()) == 0)
 		{
 			Resources[r->GetCode()] = r;				// Add the object
+		}
+	}
+	void AddStandardResource(SpaceProjectileDefinition *p)
+	{
+		if (p && p->GetCode() != NullString && D::Projectiles.count(p->GetCode()) == 0)
+		{
+			Projectiles[p->GetCode()] = p;				// Add the object
 		}
 	}
 	void AddStandardSkinnedModel(SkinnedModel *m)

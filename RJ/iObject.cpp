@@ -247,6 +247,10 @@ void iObject::SetSize(const D3DXVECTOR3 &size)
 	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
 	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 
+	// Recalculate the object fast mover threshold
+	m_fastmoverthresholdsq = (min(m_size.x, min(m_size.y, m_size.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
+	m_fastmoverthresholdsq *= m_fastmoverthresholdsq;
+
 	// Invalidate the OBB based on this change in size
 	CollisionOBB.Invalidate();
 
@@ -549,6 +553,7 @@ iObject::ObjectClass iObject::DetermineObjectClass(const iObject & object)
 		case iObject::ObjectType::ComplexShipSectionObject:
 		case iObject::ObjectType::SpaceEmitterObject:
 		case iObject::ObjectType::CapitalShipPerimeterBeaconObject:
+		case iObject::ObjectType::ProjectileObject:
 			return iObject::ObjectClass::SpaceObjectClass;
 
 		case iObject::ObjectType::ActorObject:

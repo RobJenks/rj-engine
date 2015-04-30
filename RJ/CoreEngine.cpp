@@ -1247,10 +1247,17 @@ void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
 			// Pass to different methods depending on the type of object
 			switch (object->GetObjectType())
 			{
+				// Object types with specialised rendering methods
 				case iObject::ObjectType::SimpleShipObject:
 					RenderSimpleShip((SimpleShip*)object);				break;
 				case iObject::ComplexShipObject:
 					RenderComplexShip((ComplexShip*)object, false);		break;
+
+				// Basic object types are directly pushed to the render queue using default shader parameters
+				case iObject::ProjectileObject:
+					if (object && object->GetModel())
+						SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, object->GetModel(), object->GetWorldMatrix());
+					break;
 			}
 		}
 	}

@@ -11,6 +11,7 @@
 #include "GameDataExtern.h"
 class SimpleShip;
 class ComplexShip;
+class SpaceProjectile;
 
 
 class RJMain
@@ -135,6 +136,7 @@ protected:
 	SimpleShip *sproj;
 	ComplexShip *cs;
 	Actor *a1;
+	SpaceProjectile *proj;
 
 };
 

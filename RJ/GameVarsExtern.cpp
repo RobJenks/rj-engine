@@ -128,7 +128,7 @@ namespace Game {
 																					// cycles will be run per frame
 	const float C_MAX_PHYSICS_FRAME_CYCLES = 5.0f;									// The maximum number of phyiscs cycles permitted per render 
 																					// frame, to avoid the 'spiral-of-death'
-	float C_MOVEMENT_DRAG_FACTOR = 0.10f;
+	float C_MOVEMENT_DRAG_FACTOR = 0.025f;
 	float C_ENGINE_SIMULATION_UPDATE_INTERVAL = 0.1f;		// Interval (secs) between updates of the engine simulation
 	bool C_NO_MOMENTUM_LIMIT = false;						// Determines whether the momentum safety limit is enabled
 	float C_ANGULAR_VELOCITY_DAMPING_FACTOR = 0.01f;		// Damping applied to angular rotation, measured in rad/sec
@@ -136,9 +136,11 @@ namespace Game {
 	float C_MAX_LINEAR_VELOCITY = 10000.0f;					// Max linear velocity that any object can attain; to avoid overflows and other physics-based errors
 	float C_MAX_ANGULAR_VELOCITY = 10.0f;					// Max angular velocity that any object can attain; to avoid overflows and other physics-based errors
 	float C_ENVIRONMENT_MOVE_DRAG_FACTOR = 4.0f;			// The amount of x/z velocity that is lost by environment objects per second due to 'friction'
-	float C_OBJECT_FAST_MOVER_THRESHOLD = 10.0f;			// The threshold distance moved per frame (m) above which we require an object to perform swept- rather than 
-															// discrete-collision detection
+	float C_OBJECT_FAST_MOVER_THRESHOLD = 0.75f;			// The percentage of an object's extent that it has to move per frame to qualify as a "fast mover"
 	const int C_MAX_INTRA_FRAME_CCD_COLLISIONS = 5;			// The maximum number of CCD collisions we support WITHIN a frame (e.g. multiple very fast ricochets)
+	float C_PROJECTILE_VELOCITY_LIMIT = 5000.0f;					// Implement a universal limit (m/sec) on the velocity of projectiles, to avoid unexpectedly large calculated velocity
+	float C_PROJECTILE_VELOCITY_LIMIT_SQ = 
+		C_PROJECTILE_VELOCITY_LIMIT * C_PROJECTILE_VELOCITY_LIMIT;	// Squared universal velocity limit (m/sec) for projectiles 
 
 	// Collision-detection constants
 	const float C_ACTIVE_COLLISION_DISTANCE_SHIPLEVEL = 5000.0f;		// Distance within which collision detection is performed (in a ship context)

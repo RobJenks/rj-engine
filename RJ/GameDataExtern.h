@@ -26,6 +26,7 @@ class ComplexShipTileClass;
 class ComplexShipObjectClass;
 class StaticTerrainDefinition;
 class Resource;
+class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
 
@@ -46,6 +47,7 @@ namespace D {
 
 		typedef std::tr1::unordered_map<string, class Equipment*> EquipRegister;
 		typedef std::tr1::unordered_map<string, Resource*> ResourceRegister;
+		typedef std::tr1::unordered_map<string, SpaceProjectileDefinition*> ProjectileRegister;
 
 		typedef std::tr1::unordered_map<string, SkinnedModel*> SkinnedModelRegister;
 		typedef std::tr1::unordered_map<string, ActorBase*> ActorRegister;
@@ -66,6 +68,7 @@ namespace D {
 	extern StaticTerrainRegister			StaticTerrainDefinitions;	// The details of all static terrain classes in the game
 
 	extern ResourceRegister					Resources;					// The details of each resource in the game
+	extern ProjectileRegister				Projectiles;				// The details of each projectile type in the game
 
 	extern SkinnedModelRegister				SkinnedModels;				// The details of all skinned models in the game
 	extern ActorRegister					Actors;						// The details of all actor base objects in the game
@@ -81,6 +84,7 @@ namespace D {
 	CMPINLINE ComplexShipObjectClass *GetComplexShipObjectClass(const string & code) { if (ComplexShipObjectClasses.count(code) > 0) return ComplexShipObjectClasses[code]; else return NULL; }
 	CMPINLINE StaticTerrainDefinition *GetStaticTerrain(const string & code) { if (code != NullString && StaticTerrainDefinitions.count(code) > 0) return StaticTerrainDefinitions[code]; else return NULL; }
 	CMPINLINE Resource *GetResource(const string & code) { if (Resources.count(code) > 0) return Resources[code]; else return NULL; }
+	CMPINLINE SpaceProjectileDefinition *GetProjectile(const string & code) { if (Projectiles.count(code) > 0) return Projectiles[code]; else return NULL; }
 	CMPINLINE SkinnedModel *GetSkinnedModel(const string & code) { if (SkinnedModels.count(code) > 0) return SkinnedModels[code]; else return NULL; }
 	CMPINLINE ActorBase *GetActor(const string & code) { if (Actors.count(code) > 0) return Actors[code]; else return NULL; }
 	CMPINLINE class Equipment *GetEquipment(const string & code) { if (Equipment.count(code) > 0) return Equipment[code]; else return NULL; }
@@ -95,6 +99,7 @@ namespace D {
 	void AddStandardComplexShipObjectClass(ComplexShipObjectClass *c);
 	void AddStaticTerrain(StaticTerrainDefinition *d);
 	void AddStandardResource(Resource *r);
+	void AddStandardProjectile(SpaceProjectileDefinition *p);
 	void AddStandardSkinnedModel(SkinnedModel *m);
 	void AddStandardActor(ActorBase *a);
 	void AddStandardEquipment(class Equipment *e);
@@ -137,6 +142,7 @@ namespace D {
 	extern const char *NODE_Model;
 	extern const char *NODE_UIManagedControlDefinition;
 	extern const char *NODE_Resource;
+	extern const char *NODE_SpaceProjectileDefinition;
 	extern const char *NODE_SkinnedModel;
 	extern const char *NODE_ActorAttributeGeneration;
 	extern const char *NODE_ActorBase;
@@ -160,6 +166,7 @@ namespace D {
 	void TerminateAllComplexShipObjectClassRegisterData(void);
 	void TerminateAllStaticTerrainRegisterData(void);
 	void TerminateAllResourceRegisterData(void);
+	void TerminateAllProjectileRegisterData(void);
 	void TerminateAllSkinnedModelRegisterData(void);
 	void TerminateAllActorRegisterData(void);
 }

@@ -46,7 +46,7 @@ public:
 
 	// Enumeration of all object types
 	enum ObjectType {	Unknown = 0, ShipObject, SimpleShipObject, ComplexShipObject, ComplexShipSectionObject, 
-						SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject };
+						SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject, ProjectileObject };
 
 	// Enumeration of object classes
 	enum ObjectClass { UnknownObjectClass = 0, SpaceObjectClass, EnvironmentObjectClass };
@@ -245,6 +245,11 @@ public:
 	void										AddCollisionExclusion(Game::ID_TYPE object);
 	void										RemoveCollisionExclusion(Game::ID_TYPE object);
 	
+	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
+	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the
+	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z).
+	CMPINLINE float								GetFastMoverThresholdSq(void) const		{ return m_fastmoverthresholdsq; }
+
 	// Indicates whether this object is excluded from colliding with the specified object
 	CMPINLINE bool								CollisionExcludedWithObject(Game::ID_TYPE object)
 	{
@@ -339,6 +344,13 @@ protected:
 	Game::ID_TYPE *						m_nocollision;					// Array of any other objects that this object will NOT collide with
 	int									m_nocollision_count;			// The number of objects that the object will not collide with
 	int									m_nocollision_capacity;			// The capacity of the collision exclusion array
+
+	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
+	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the
+	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z).
+	float								m_fastmoverthresholdsq;
+
+
 };
 
 CMPINLINE void iObject::RegisterObject(iObject *obj)

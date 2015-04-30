@@ -469,6 +469,15 @@
     <ClCompile Include="SimulationObjectManager.cpp">
       <Filter>Object Manager</Filter>
     </ClCompile>
+    <ClCompile Include="SpaceProjectile.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceProjectileLauncher.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="SpaceProjectileDefinition.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1044,6 +1053,15 @@
     <ClInclude Include="SimulationObjectManager.h">
       <Filter>Object Manager</Filter>
     </ClInclude>
+    <ClInclude Include="SpaceProjectile.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="SpaceProjectileLauncher.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="SpaceProjectileDefinition.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1263,6 +1281,9 @@
     </Filter>
     <Filter Include="Object Manager">
       <UniqueIdentifier>{8922606a-09d0-4c65-bbff-d63d939dc8f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Projectiles">
+      <UniqueIdentifier>{ff08c09b-aedf-43b8-af33-5dbbb259ff6c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

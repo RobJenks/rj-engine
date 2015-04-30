@@ -70,13 +70,10 @@
   </Binaries>
   <Reports>
     <Report>
-      <Path>Profiling Reports\tmp1.vsp</Path>
+      <Path>Profiling Reports\Pre-GetObjects update.vsp</Path>
     </Report>
     <Report>
-      <Path>Profiling Reports\RJ150427.vsp</Path>
-    </Report>
-    <Report>
-      <Path>Profiling Reports\RJ150427(1).vsp</Path>
+      <Path>Profiling Reports\Post-GetObjects update.vsp</Path>
     </Report>
   </Reports>
   <Launches>

@@ -13,6 +13,7 @@
 #include "OctreePruner.h"
 #include "GameSpatialPartitioningTrees.h"
 
+#include "iObject.h"
 #include "CoreEngine.h"
 #include "D3DMain.h"
 #include "CameraClass.h"
@@ -72,6 +73,9 @@
 #include "CameraPath.h"						// DBG
 #include "CSLifeSupportTile.h"				// DBG
 #include "AABB.h"							// DBG
+#include "SpaceProjectileDefinition.h"		// DBG
+#include "SpaceProjectile.h"				// DBG
+#include "SpaceProjectileLauncher.h"		// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -418,8 +422,19 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
+	/*static D3DXVECTOR3 lastproj = NULL_VECTOR;
+	if (proj)
+	{
+		D3DXVECTOR3 projdiff = (proj->GetPosition() - lastproj);
+		lastproj = proj->GetPosition();
+		OutputDebugString(concat("Proj: ")(proj->GetPosition().x)(",")(proj->GetPosition().y)(",")(proj->GetPosition().z)("  |  Diff: ")
+			(projdiff.x)(",")(projdiff.y)(",")(projdiff.z)("  | TF: ")(Game::TimeFactor)(", DtSq: ")(proj->PhysicsState.DeltaMoveDistanceSq)
+			(", FM_TSQ: ")(proj->GetFastMoverThresholdSq())(", Pc: ")(((proj->PhysicsState.DeltaMoveDistanceSq) / proj->GetFastMoverThresholdSq()) * 100.0f)
+			(", ")((proj->IsFastMover() ? "> FAST MOVER <" : "Normal"))("\n").str().c_str());
+	}*/
 	if (b[DIK_5])
 	{
+#if 0
 		if (!b[DIK_LSHIFT])
 		{
 			sproj = SimpleShip::Create("testship1");
@@ -441,10 +456,25 @@ void RJMain::ProcessKeyboardInput(void)
 				sproj->SimulateObject(true);
 			}
 		}
-		else
-		{
-			
-		}
+#endif
+		SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
+		def->SetCode("tmp1");
+		def->SetModel(Model::GetModel("unit_cone_model"));
+		def->SetMass(25000.0f);
+		def->SetDefaultLifetime(3.0f);
+
+		SpaceProjectileLauncher *launcher = new SpaceProjectileLauncher();
+		launcher->SetParent(ss);
+		launcher->SetProjectileDefinition(def);
+		launcher->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));
+		launcher->SetRelativeOrientation(ID_QUATERNION);
+		launcher->SetLaunchMethod(SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
+		launcher->SetLaunchImpulse(2500.0f);
+		launcher->SetLinearVelocityDegradeState(false);
+		launcher->SetAngularVelocityDegradeState(false);
+		
+		proj = launcher->LaunchProjectile();
+
 		m_keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])
@@ -1755,14 +1785,13 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		if (sproj)
+		if (Game::TimeFactor > 0.0f)
 		{
-			float ccdPc = (sproj->PhysicsState.DeltaMoveDistanceSq / sproj->GetCollisionSphereRadiusSq());
+			float ccdPc = (ss->PhysicsState.DeltaMoveDistanceSq / ss->GetFastMoverThresholdSq());
 
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player: %.2f  |  Projectile: Wmom = %.2f, CCD%% = %.2f%%, %s",
-				((Game::CurrentPlayer->GetPlayerShip()->PhysicsState.DeltaMoveDistanceSq / Game::CurrentPlayer->GetPlayerShip()->GetCollisionSphereRadiusSq())*100.0f),
-				D3DXVec3Length(&sproj->PhysicsState.WorldMomentum), (ccdPc * 100.0f),
-				(ccdPc >= 1.0f ? "CONTINUOUS" : "Discrete"));
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player: %.1f%%  (%.4f / %.4f)  %s",
+				ccdPc * 100.0f, ss->PhysicsState.DeltaMoveDistanceSq, ss->GetFastMoverThresholdSq(),
+				(ss->IsFastMover() ? "> FAST MOVER <" : ""));
 
 			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		}

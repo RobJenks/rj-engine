@@ -212,16 +212,16 @@ void ComplexShipSection::PerformHardpointChangeRefresh(Hardpoint *hp)
 
 void ComplexShipSection::CalculateShipSizeData(void)
 {
-	// Section size is based upon its underlying model
-	if (!m_model) 
+	// Section is sized to encompass its element space
+	if (m_elementsize.x <= 0 || m_elementsize.y <= 0 || m_elementsize.z <= 0) 
 	{
-		// If we don't have a model for this section then default the section size
-		SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f)); 
+		// If we don't have any elements allocated for this section then default the section size
+		SetSize(D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE));
 	}
 	else
 	{
 		// Otherwise determine the ship section size from its underlying model
-		this->SetSize(m_model->GetModelSize());
+		this->SetSize(Game::ElementLocationToPhysicalPosition(m_elementsize));
 	}
 
 	// Recalculate the section offset matrix based upon this change

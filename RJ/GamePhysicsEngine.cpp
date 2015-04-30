@@ -827,14 +827,33 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	D3DXVec3Cross(&angR1, &object1->PhysicsState.AngularVelocity, &r1);
 
 	// Determine the component of the relative object velocity that is along the normal vector
-	D3DXVECTOR3 v0 = (object0->PhysicsState.WorldMomentum /* * mass0 */) + angR0;
-	D3DXVECTOR3 v1 = (object1->PhysicsState.WorldMomentum /* * mass1 */) + angR1;
+	D3DXVECTOR3 v0 = (obj0_pre_wm + angR0);
+	D3DXVECTOR3 v1 = (obj1_pre_wm + angR1);
 	D3DXVECTOR3 vrel = (v0 - v1);
 	float vn = D3DXVec3Dot(&vrel, &normal);
-
-	// If the objects are moving away from each other then there is no collision response required, UNLESS
-	// the flag to ignore this test has been set
-	if (!m_flag_handle_diverging_collisions && -vn < 0.01f) return;
+	
+	// If the objects are moving away from each other then there is no collision response required, HOWEVER first
+	// run a test to make sure the object centres haven't penetrated past each other within the frame
+	if (-vn < 0.01f)
+	{
+		// Consider the position of each object one frame ago
+		D3DXVECTOR3 past_c0 = (c0 - (obj0_pre_wm * PhysicsClock.TimeFactor));
+		D3DXVECTOR3 past_c1 = (c1 - (obj1_pre_wm * PhysicsClock.TimeFactor));
+		D3DXVECTOR3 past_normal = (past_c0 - past_c1);
+		if (D3DXVec3Dot(&past_normal, &normal) < 0.0f)
+		{
+			// If the projection of our previous collision normal along the new one is negative, the objects have
+			// switched positions along the collision normal this frame.  We will therefore use the prior frame 
+			// normal to ensure the collision is handled correctly, and will know that vn is now valid
+			D3DXVec3Normalize(&normal, &past_normal);
+			vn = D3DXVec3Dot(&vrel, &normal);
+		}
+		else
+		{
+			// The objects are genuinely diverging, so there is no collision to handle
+			return;
+		}
+	}
 
 	// Transform the inertia tensor for each object into world space
 	D3DXMATRIX worldInvI0, worldInvI1;

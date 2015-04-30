@@ -54,9 +54,9 @@ public:
 	CMPINLINE D3DXMATRIX *					GetInverseOrientationMatrix(void)	{ return &m_inverseorientationmatrix; }
 
 	// Returns a flag indicating whether this object is a 'fast mover' that should be simulated via continuous (CCD) rather
-	// than discrete collision detection.  Definition of a 'fast mover' is an object that will move more than it's own 
-	// collision sphere in the current frame
-	CMPINLINE bool							IsFastMover(void) const { return (PhysicsState.DeltaMoveDistanceSq > m_collisionsphereradiussq); }
+	// than discrete collision detection.  Definition of a 'fast mover' is an object that will move more than a defined
+	// percentage of its minimum extent in a single frame
+	CMPINLINE bool							IsFastMover(void) const { return (PhysicsState.DeltaMoveDistanceSq > m_fastmoverthresholdsq); }
 
 	// Returns a flag indicating whether this object is static, i.e. has no linear or angular momentum
 	CMPINLINE bool							IsStatic(void) const { return (IsZeroVector(PhysicsState.WorldMomentum) && IsZeroVector(PhysicsState.AngularVelocity)); }
@@ -162,7 +162,6 @@ protected:
 	// to its environment
 	D3DXMATRIX								m_orientationmatrix;			// Precise orientation matrix for the object, incorporating both orientation and adjustments
 	D3DXMATRIX								m_inverseorientationmatrix;		// Inverse matrix, precalculated for efficiency
-
 };
 
 
