@@ -68,6 +68,9 @@ public:
 	// Apply angular momentum to an object.  Calculates and applies the incremental angular velocity
 	CMPINLINE void							ApplyAngularMomentum(const D3DXVECTOR3 & angular_momentum);
 
+	// Apply angular velocity to an object.  Not scaled by the object intertia tensor
+	CMPINLINE void							ApplyAngularVelocity(const D3DXVECTOR3 & angular_velocity);
+
 	// Set the local momentum of the object, recalculating the object world momentum accordingly
 	CMPINLINE void							SetLocalMomentum(const D3DXVECTOR3 & m)
 	{
@@ -175,6 +178,16 @@ CMPINLINE void iActiveObject::ApplyAngularMomentum(const D3DXVECTOR3 & angular_m
 	// Apply this change in angular velocity
 	PhysicsState.AngularVelocity += avec;
 }
+
+// Apply angular velocity to an object.  Not scaled by the object intertia tensor
+CMPINLINE void iActiveObject::ApplyAngularVelocity(const D3DXVECTOR3 & angular_velocity)
+{
+	// Simply apply this change in angular velocity directly
+	PhysicsState.AngularVelocity += angular_velocity;
+}
+
+
+
 
 
 

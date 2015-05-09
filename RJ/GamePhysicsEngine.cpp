@@ -1604,7 +1604,7 @@ D3DXVECTOR3 GamePhysicsEngine::ClosestPointOnLineSegment(const D3DXVECTOR3 & lin
 	D3DXVECTOR3 ab = (line_ep2 - line_ep1);
 	float t = ( D3DXVec3Dot(&(point - line_ep1), &ab) / D3DXVec3Dot(&ab, &ab) );
 
-	// Constraint the point to line on the line segment; t = in the range [0.0 1.0]
+	// Constrain the point to lie on the line segment; t = in the range [0.0 1.0]
 	if (t < 0.0f) t = 0.0f; if (t > 1.0f) t = 1.0f;
 
 	// Use the standard line equation to get the point 't' along the line

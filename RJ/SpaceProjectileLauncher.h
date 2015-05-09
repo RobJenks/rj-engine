@@ -19,8 +19,12 @@ public:
 	// Default constructor
 	SpaceProjectileLauncher(void);
 
-	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable
-	SpaceProjectile *					LaunchProjectile(void);
+	// Inline wrapper method to launch a projectile.  Only passes on control if we are ready to do so.
+	CMPINLINE SpaceProjectile *			LaunchProjectile(void)
+	{
+		// Only call the internal method to actually launch a projectile if we are ready to do so
+		return ((Game::ClockMs < m_nextlaunch) ? NULL : LaunchProjectile_Internal());
+	}
 
 	// Set or return the projectile type that is used by this launcher
 	CMPINLINE const SpaceProjectileDefinition * GetProjectileDefinition(void) const								{ return m_projectiledef; }
@@ -36,6 +40,13 @@ public:
 
 	CMPINLINE ProjectileLaunchMethod	GetLaunchMethod(void) const									{ return m_launchmethod; }
 	CMPINLINE void						SetLaunchMethod(ProjectileLaunchMethod method)				{ m_launchmethod = method; }
+
+	CMPINLINE float						GetProjectileSpread(void) const								{ return m_spread; }
+	CMPINLINE D3DXQUATERNION			GetProjectileSpreadDelta(void) const						{ return m_spread_delta; }
+
+	CMPINLINE unsigned int				GetLaunchInterval(void) const								{ return m_launchinterval; }
+	CMPINLINE unsigned int				NextAvailableLaunch(void) const								{ return m_nextlaunch; }
+	CMPINLINE bool						IsReadyToFireNow(void) const								{ return (Game::ClockMs >= m_nextlaunch); }
 
 	// Launch impulse is either a force or a velocity, depending on the launch method
 	CMPINLINE float						GetLaunchImpulse(void) const								{ return m_launchimpulse; }
@@ -67,7 +78,23 @@ public:
 	CMPINLINE void						SetLinearVelocityDegradeRate(float pc_per_sec)				{ m_linveldegradation = clamp(pc_per_sec, 0.0f, 1.0f); }
 	CMPINLINE void						SetAngularVelocityDegradeRate(float pc_per_sec)				{ m_angveldegradation = clamp(pc_per_sec, 0.0f, 1.0f); }
 
+	// Sets the degree of spread applied to projectiles (in radians).  Applies in both local yaw and pitch dimensions.  
+	// Measured from origin, so 'spread' is the radius of deviation in radians from actual orientation
+	void								SetProjectileSpread(float s);
+	
+	// Sets the minimum launch interval (ms) for projectiles from this launcher
+	void								SetLaunchInterval(unsigned int interval_ms);
+
+	// Determines a new delta trajectory for the next projectile, based upon projectile spread properties
+	void								DetermineNextProjectileSpreadDelta(void);
+
 protected:
+
+	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Internal
+	// method that is only called if the wrapper LaunchProjectile method validates we are ready to launch a new 
+	// projectile.  Efficiency measure so that the inline method can handle the majority of cases where we are not ready
+	SpaceProjectile *					LaunchProjectile_Internal(void);
+
 
 	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched
 
@@ -75,6 +102,13 @@ protected:
 
 	D3DXVECTOR3							m_relativepos;					// Relative position in the parent object's coordinate space
 	D3DXQUATERNION						m_relativeorient;				// Relative orientation, relative to the parent object
+
+	float								m_spread;						// Spread, in radians, at launcher origin.  Applies in both local yaw & pitch dimensions
+	D3DXQUATERNION						m_spread_delta;					// Delta orientation to account for spread, to be applied to the next projectile
+	float								m_spread_divisor;				// Intermediate calculation; cached for use in each derivation of projectile spread
+
+	unsigned int						m_launchinterval;				// The minimum interval (ms) between projectile launches
+	unsigned int						m_nextlaunch;					// The clock timestamp (ms) at which this turret will be able to fire again
 
 	ProjectileLaunchMethod				m_launchmethod;					// The method used to give projectiles their initial trajectory
 	float								m_launchimpulse;				// The velocity OR force (depending on launch method) applied to objects at launch

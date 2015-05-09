@@ -553,7 +553,7 @@ void Ship::DetermineYawAndPitchToTarget(D3DXVECTOR3 target, float *pOutYaw, floa
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
 	D3DXVECTOR3 tgt = (target - m_position);
 	D3DXVec3TransformCoord(&tgt, &tgt, &m_inverseorientationmatrix);
-	D3DXVec3Normalize(&tgt, &tgt);
+	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
 
 	// Calculate the cross and dot products for ship yaw
 	/* 

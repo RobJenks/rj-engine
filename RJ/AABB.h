@@ -29,14 +29,16 @@ public:
 		Points[0] = vmin; Points[1] = vmax;
 	}
 
-	// Constructor to build an AABB from an OBB.  Generates an AABB centred about (0,0,0)
+	// Constructor to build an AABB from an OBB.  Generates an AABB centred about (0,0,0) in the LOCAL
+	// OBJECT SPACE.  This does NOT create an AABB oriented in world space.
 	AABB(const OrientedBoundingBox & obb)
 	{
 		Points[1] = obb.Data.Extent;
 		Points[0] = -Points[1];
 	}
 
-	// Constructor to build an AABB from OBB core data.  Generates an AABB centred about (0,0,0)
+	// Constructor to build an AABB from OBB core data.  Generates an AABB centred about (0,0,0) in the LOCAL
+	// OBJECT SPACE.  This does NOT create an AABB oriented in world space.
 	AABB(const OrientedBoundingBox::CoreOBBData & obb)
 	{
 		Points[1] = obb.Extent;

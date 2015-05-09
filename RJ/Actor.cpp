@@ -323,6 +323,7 @@ Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition *order)
 void Actor::TurnTowardsPosition(const D3DXVECTOR3 &position)
 {
 	float angle = 0.0f;
+	const D3DXVECTOR2 BASIS_2D = D3DXVECTOR2(0.0f, 1.0f);
 
 	// Transform the target position vector into the actor orientation space
 	D3DXVECTOR3 transformed = D3DXVECTOR3(position.x - m_envposition.x, 0.0f, position.z - m_envposition.z);
@@ -331,13 +332,13 @@ void Actor::TurnTowardsPosition(const D3DXVECTOR3 &position)
 	// Subtract our position vector from this target position to get the delta from the origin, then take the cross product
 	// against the basis vector (representing our heading in this relative position space)
 	D3DXVECTOR2 tgt = D3DXVECTOR2(transformed.x, transformed.z);
-	float crs = CrossProduct2D(0.0f, 1.0f, tgt.x, tgt.y);
+	float crs = CrossProduct2D(BASIS_2D, tgt);
 
 	// The cross product will determine the situation we need to consider
 	if (fast_abs(crs) < 0.01f)
 	{
 		// We are either facing the target or at 180 degrees from it.  Use the dot product to determine which is the case
-		float dot = DotProduct2D(0.0f, 1.0f, tgt.x, tgt.y);
+		float dot = DotProduct2D(BASIS_2D, tgt);
 		if (dot > 0.0f)
 		{
 			// If the dot product is negative then we are at 180 degrees, so turn in either direction
@@ -346,7 +347,7 @@ void Actor::TurnTowardsPosition(const D3DXVECTOR3 &position)
 		else
 		{
 			// Otherwise we are facing roughly towards the target, so calculate the exact angle at this point
-			angle = Angle2D(0.0f, 1.0f, tgt.x, tgt.y);
+			angle = Angle2D(BASIS_2D, tgt);
 			if (fast_abs(angle) < Game::C_EPSILON) return;
 
 			if (angle < 0.0f)	angle = max(angle, -m_turnrate * Game::TimeFactor);

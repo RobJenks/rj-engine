@@ -279,22 +279,22 @@ CMPINLINE float fast_abs(float v)
 }
 
 // Take the dot product of the two 2D vectors (in the xy plane).  Yields a scalar
-CMPINLINE float DotProduct2D(const float & v1x, const float & v1y, const float & v2x, const float & v2y)
+CMPINLINE float DotProduct2D(const D3DXVECTOR2 & v1, const D3DXVECTOR2 & v2)
 {
-	return ((v1x * v2x) + (v1y * v2y));
+	return ((v1.x * v2.x) + (v1.y * v2.y));
 }
 
 // Take the cross product of the two 2D vectors (in the xy plane).  Yields the z component of a third vector perpendicular to xy
-CMPINLINE float CrossProduct2D(const float & v1x, const float & v1y, const float & v2x, const float & v2y)
+CMPINLINE float CrossProduct2D(const D3DXVECTOR2 & v1, const D3DXVECTOR2 & v2)
 {
-	return ((v1x * v2y) - (v1y * v2x));
+	return ((v1.x * v2.y) - (v1.y * v2.x));
 }
 
-CMPINLINE float Angle2D(const float & v1x, const float & v1y, const float & v2x, const float & v2y)
+CMPINLINE float Angle2D(const D3DXVECTOR2 & v1, const D3DXVECTOR2 & v2)
 {
 	// Since the dot product is proportional to the cosine of an angle, and the determinant is proportional to its sine, we can use
 	// the more efficient method [Angle = atan2(det, dot), where [det = x1*y2 - y1*x2] & [dot = x1*x2 + y1*y2]
-	return atan2( (v1x*v2y - v1y*v2x), (v1x*v2x + v1y*v2y) );
+	return atan2( (v1.x*v2.y - v1.y*v2.x), (v1.x*v2.x + v1.y*v2.y) );
 }
 
 CMPINLINE float Angle3D(const D3DXVECTOR3 & v1, const D3DXVECTOR3 & v2)

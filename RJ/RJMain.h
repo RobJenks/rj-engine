@@ -12,7 +12,7 @@
 class SimpleShip;
 class ComplexShip;
 class SpaceProjectile;
-
+class SpaceTurret;
 
 class RJMain
 {
@@ -137,6 +137,7 @@ protected:
 	ComplexShip *cs;
 	Actor *a1;
 	SpaceProjectile *proj;
+	SpaceTurret *turret;
 
 };
 

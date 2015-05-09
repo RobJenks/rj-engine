@@ -237,6 +237,8 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 				if ( (CheckBit_Single(options, ObjectSearchOptions::OnlyCollidingObjects) && (obj->GetCollisionMode() == Game::CollisionMode::NoCollision)) ||
 					 (CheckBit_Single(options, ObjectSearchOptions::OnlyActiveColliders) && (obj->GetColliderType() != Game::ColliderType::ActiveCollider)) ) continue;
 
+				// Ignore the object if we are only interested in objects of a certain disposition (hostile/friendly etc)
+
 				// Special case: if this is a capital ship beacon then we want to instead treat it like the parent capital ship
 				if (obj->GetObjectType() == iObject::ObjectType::CapitalShipPerimeterBeaconObject)
 					obj = ((CapitalShipPerimeterBeacon*)obj)->GetParentShip();

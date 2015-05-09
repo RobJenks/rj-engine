@@ -7,6 +7,7 @@
 
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
+#include "BasicRay.h"
 #include "OrientedBoundingBox.h"
 #include "CollisionDetectionResultsStruct.h"
 class iObject;
@@ -205,6 +206,17 @@ public:
 	bool									TestSpherevsOBBCollision(const D3DXVECTOR3 & sphereCentre, const float sphereRadiusSq, 
 																 	 const OrientedBoundingBox::CoreOBBData & obb);
 
+	// Tests for the intersection of a ray with a sphere.  Returns no details; only whether a collision took place
+	CMPINLINE bool							TestRaySphereIntersection(const D3DXVECTOR3 & ray_origin, const D3DXVECTOR3 & ray_dir,
+																	  const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
+	CMPINLINE bool							TestRaySphereIntersection(const BasicRay & ray, const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
+
+
+	// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
+	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
+	template <typename T>
+	T *										PerformRaycast(const BasicRay & ray, const std::vector<T*> & objects) const;
+
 	// Tests for the intersection of a ray with an AABB.  Results will be populated with min/max intersection points if an intersection
 	// took place.  If min<max then we have an intersection.  Returns a flag indicating whether the intersection took place.  If 
 	// min<0 then the ray began inside the AABB.  
@@ -310,6 +322,97 @@ protected:
 	OrientedBoundingBox::CoreOBBData		_obbdata;
 };
 
+
+CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const D3DXVECTOR3 & ray_origin, const D3DXVECTOR3 & ray_dir,
+															const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const
+{
+	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+	D3DXVECTOR3 diff = (ray_origin - sphere_centre);
+	float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;		// Expanded "D3DXVec3Dot(&diff, &diff)"
+
+	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
+	if (a0 <= 0.0f) return true;
+
+	// Project object difference vector onto the ray
+	float a1 = ((ray_dir.x*diff.x) + (ray_dir.y*diff.y) + (ray_dir.z*diff.z));			// Expanded "D3DXVec3Dot(&ray_dir, &diff)"
+	if (a1 >= 0.0f) return false;
+
+	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+	return (((a1 * a1) - a0) >= 0.0f);
+}
+
+CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const
+{
+	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+	D3DXVECTOR3 diff = (ray.Origin - sphere_centre);
+	float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;				// Expanded "D3DXVec3Dot(&diff, &diff)"
+
+	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
+	if (a0 <= 0.0f) return true;
+
+	// Project object difference vector onto the ray
+	float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+	if (a1 >= 0.0f) return false;
+
+	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+	return (((a1 * a1) - a0) >= 0.0f);
+}
+
+// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
+// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
+template <typename T>
+T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*> & objects) const
+{
+	// We will keep track of the closest object that was intersected
+	T *closest = NULL;
+	float closest_dsq = FLT_MAX;
+	D3DXVECTOR3 diff; float dsq, a0, a1;
+
+	// Loop through each object in turn
+	int n = (int)objects.size();
+	for (int i = 0; i < n; ++i)
+	{
+		// Here we will expand out the ray/sphere intersection test to avoid function calls, and to avoid duplicating
+		// calculations (e.g. difference vector from ray origin to sphere) which are required here & the ray/sphere test
+
+		// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+		// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+		T *obj = objects[i];
+
+		// Get the difference vector from ray origin to sphere centre.  We can early-exit here if it is further away 
+		// than our current closest intersection
+		diff = (ray.Origin - sphere_centre);
+		dsq = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z));
+		if (dsq >= closest_dsq) continue;								// Early-exit if the object is further away than our current best
+		a0 = dsq - obj->GetCollisionSphereRadiusSq();					// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+
+		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
+		if (a0 <= 0.0f) return obj;
+
+		// Project object difference vector onto the ray
+		float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+		if (a1 >= 0.0f) continue;
+
+		// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+		// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+		if (((a1 * a1) - a0) >= 0.0f)
+		{
+			// Test whether this intersection is closer than our current best, and record it if so
+			if (dsq < closest_dsq)
+			{
+				closest = obj;
+				closest_dsq = dsq;
+			}
+		}
+	}
+
+	// Return the closest intersected object, or NULL if no intersections were detected
+	return closest;
+}
 
 
 #endif

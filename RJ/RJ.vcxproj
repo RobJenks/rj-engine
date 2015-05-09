@@ -258,6 +258,8 @@
     <ClInclude Include="ActorAttributes.h" />
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AdjustableParameter.h" />
+    <ClInclude Include="BasicRay.h" />
+    <ClInclude Include="BasicSphere.h" />
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BoundingObject.h" />
     <ClInclude Include="CameraClass.h" />

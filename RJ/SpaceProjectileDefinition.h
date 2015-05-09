@@ -52,6 +52,7 @@ protected:
 	ProjectileType								m_projtype;							// Type of projectile
 	float										m_defaultlifetime;					// The default lifetime (secs) for this projectile type to existt
 	LifetimeEndAction							m_lifeendaction;					// The action taken once projectile lifetime is exceeded
+
 };
 
 

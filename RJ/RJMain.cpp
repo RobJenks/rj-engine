@@ -76,6 +76,7 @@
 #include "SpaceProjectileDefinition.h"		// DBG
 #include "SpaceProjectile.h"				// DBG
 #include "SpaceProjectileLauncher.h"		// DBG
+#include "SpaceTurret.h"
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -456,7 +457,7 @@ void RJMain::ProcessKeyboardInput(void)
 				sproj->SimulateObject(true);
 			}
 		}
-#endif
+
 		SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
 		def->SetCode("tmp1");
 		def->SetModel(Model::GetModel("unit_cone_model"));
@@ -474,6 +475,9 @@ void RJMain::ProcessKeyboardInput(void)
 		launcher->SetAngularVelocityDegradeState(false);
 		
 		proj = launcher->LaunchProjectile();
+#endif
+
+		turret->Fire();
 
 		m_keyboard.LockKey(DIK_5);
 	}
@@ -1731,6 +1735,27 @@ void RJMain::__CreateDebugScenario(void)
 		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), D3DXVECTOR3(72.0f, 0.0f, 71.0f), 1.0f, false);
 		a1->AssignNewOrder(o);
 	}
+
+	SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
+	def->SetCode("tmp1");
+	def->SetModel(Model::GetModel("unit_cone_model"));
+	def->SetMass(25000.0f);
+	def->SetDefaultLifetime(3.0f);
+
+	turret = new SpaceTurret();
+	turret->InitialiseLaunchers(1);
+	SpaceProjectileLauncher *l = turret->GetLauncher(0);
+	l->SetParent(ss);
+	l->SetProjectileDefinition(def);
+	l->SetLaunchInterval(1000U);
+	l->SetProjectileSpread(0.01f);
+	l->SetLaunchImpulse(1000.0f);
+	l->SetLaunchMethod(SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
+	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));
+	l->SetRelativeOrientation(ID_QUATERNION);
+	l->SetProjectileSpin(1.0f);
+	l->SetLinearVelocityDegradeState(false);
+	l->SetAngularVelocityDegradeState(false);
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
