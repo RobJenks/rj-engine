@@ -1074,6 +1074,9 @@
     <ClInclude Include="BasicSphere.h">
       <Filter>Math\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="Arc2D.h">
+      <Filter>Math\Geometry</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">

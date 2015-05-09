@@ -102,11 +102,46 @@ void SpaceTurret::Fire(void)
 
 }
 
+// Sets the relative orientation of the turret on its parent object.  This will be the 'resting' orientation
+void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
+{
+	// Store the new base orientation
+	m_baserelativeorient = orient;
+}
+
+// Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
+void SpaceTurret::SetYawLimits(float y_min, float y_max)
+{
+	// Update the turret firing arc
+	m_yaw_arc = Arc2D(NULL_VECTOR2, 1.0f, y_min, y_max);
+}
+
+// Sets the current target for the turret
+void SpaceTurret::SetTarget(iSpaceObject *target)
+{
+	//*** DO THIS ***
+}
+
+// Designates a target for the turret; will be engaged if possible, otherwise alternative targets
+// will be engaged in the meantime
+void SpaceTurret::DesignateTarget(iSpaceObject *target)
+{
+	//*** DO THIS ***
+}
+
 // Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 
 // test range since turrets should only be passed potential targets that are within their range
 bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 {
-	*** DO THIS ***
+	//*** DO THIS ***
+	return false;
+}
+
+// Searches for a new target in the given vector of enemy contacts and returns the first valid one
+iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts)
+{
+	//*** DO THIS ***
+	return NULL;
 }
 
 // Allocates space for the required number of launcher objects

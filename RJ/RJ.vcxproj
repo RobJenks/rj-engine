@@ -258,6 +258,7 @@
     <ClInclude Include="ActorAttributes.h" />
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AdjustableParameter.h" />
+    <ClInclude Include="Arc2D.h" />
     <ClInclude Include="BasicRay.h" />
     <ClInclude Include="BasicSphere.h" />
     <ClInclude Include="BinaryHeap.h" />

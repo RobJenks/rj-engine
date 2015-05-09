@@ -4,6 +4,7 @@
 #define __SpaceTurretH__
 
 #include "DX11_Core.h"
+#include "Arc2D.h"
 class iSpaceObject;
 class SpaceProjectileLauncher;
 
@@ -24,6 +25,22 @@ public:
 	// Fires a projectile from the turret
 	void							Fire(void);
 
+	// Gets/sets the relative position of the turret on its parent object
+	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
+	CMPINLINE void					SetRelativePosition(const D3DXVECTOR3 & relativepos)	{ m_relativepos = relativepos; }
+
+	// Gets/sets the relative orientation of the turret on its parent object.  This will be the 'resting' orientation
+	CMPINLINE D3DXQUATERNION		GetBaseRelativeOrientation(void) const						{ return m_baserelativeorient; }
+	void							SetBaseRelativeOrientation(const D3DXQUATERNION & orient);
+
+	// Specifies whether the turret is ywa-limited, or can rotate freely about its local up axis
+	CMPINLINE bool					IsYawLimited(void) const								{ return m_yaw_limited; }
+	CMPINLINE void					SetYawLimitFlag(bool limit)								{ m_yaw_limited = limit; }
+
+	// Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
+	CMPINLINE float					GetMinYawLimit(void) const								{ return m_yawmin; }
+	CMPINLINE float					GetMaxYawLimit(void) const								{ return m_yawmin; }
+
 	// Sets the current target for the turret
 	void							SetTarget(iSpaceObject *target);
 
@@ -33,6 +50,9 @@ public:
 
 	// Returns a flag indicating whether the target is within range, and within the firing arc of this turret
 	bool							CanHitTarget(iSpaceObject *target);
+
+	// Searches for a new target in the given vector of enemy contacts and returns the first valid one
+	iSpaceObject *					FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts);
 
 	// Allocates space for the required number of launcher objects
 	void							InitialiseLaunchers(int launcher_count);
@@ -86,6 +106,7 @@ protected:
 	// Turrets have a relative position and orientation from their parent object.  The latter is the base
 	// orientation of the turret, before any pitch or yaw is applied
 	D3DXVECTOR3						m_relativepos;
+	D3DXQUATERNION					m_baserelativeorient;
 	D3DXQUATERNION					m_relativeorient;
 
 	// Pitch and yaw of the turret, and resulting relative relative orientation
@@ -100,6 +121,9 @@ protected:
 	float							m_yawmin, m_yawmax;								// Min/max yaw extents, radians.  Only required if m_yaw_limited == true
 	float							m_pitchmin, m_pitchmax;							// Min/max pitch extents, radians
 	float							m_baseyaw, m_basepitch;							// 'Resting' position of the turret
+
+	// Turret maintains two unit circle arcs, in the yaw & pitch dimensions, to represent its firing cone
+	Arc2D							m_yaw_arc, m_pitch_arc;
 
 };
 

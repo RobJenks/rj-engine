@@ -22,9 +22,13 @@ static const float ONE_BY_ROOT2 = 1.0f / ROOT2;
 #define DegToRad(x) ((x)*PIBY180)
 #define RadToDeg(x) ((x)*_180BYPI)
 
+#define DOT_2D(v0, v1) ((v0.x*v1.x) + (v0.y*v1.y))
+#define DOT_3D(v0, v1) ((v0.x*v1.x) + (v0.y*v1.y) + (v0.z*v1.z))
+#define DOTPERP_2D(v0, v1) ((v0.x*v1.y) + (v0.y*-v1.x))				// DotPerp(v0,v1) == Dot(v0, Perp(v1)), where Perp(u,v) == (v, -u).  [v1.x=v1.y, v1.y=-v1.x]
+
 static const INTVECTOR2 NULL_INTVECTOR2 = INTVECTOR2(0, 0);
 static const INTVECTOR3 NULL_INTVECTOR3 = INTVECTOR3(0, 0, 0);
-static const D3DXVECTOR3 NULL_VECTOR2 = D3DXVECTOR2(0.0f, 0.0f);
+static const D3DXVECTOR2 NULL_VECTOR2 = D3DXVECTOR2(0.0f, 0.0f);
 static const D3DXVECTOR3 NULL_VECTOR = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 static const D3DXVECTOR4 NULL_VECTOR4 = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 0.0f);
 static const D3DXVECTOR3 BASIS_VECTOR = D3DXVECTOR3(0.0f, 0.0f, 1.0f);
