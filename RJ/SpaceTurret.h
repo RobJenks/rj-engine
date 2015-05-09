@@ -53,6 +53,20 @@ public:
 	CMPINLINE void					SetYawRate(float rps)										{ m_yawrate = rps; }
 	CMPINLINE void					SetPitchRate(float rps)										{ m_pitchrate = rps; }
 
+	// Retrieve or manually set the max range of the turret
+	CMPINLINE float					GetMaxRange(void) const										{ return m_maxrange; }
+	CMPINLINE void					SetMaxRange(float r)
+	{
+		m_maxrange = r;
+		m_maxrangesq = (r * r);
+	}
+
+
+	// Determines the max range of the turret based on its component launchers & projectiles.  Is only
+	// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
+	// changes that we cannot simulate accurately here (without actually firing a projectile)
+	void							DetermineApproxRange(void);
+
 	// Yaws or pitches the turret by the specified angle
 	void							Yaw(float angle);
 	void							Pitch(float angle);
@@ -139,6 +153,9 @@ protected:
 
 	// Turret maintains two unit circle arcs, in the yaw & pitch dimensions, to represent its firing cone
 	FiringArc						m_yaw_arc, m_pitch_arc;
+
+	// Turret has a maximum range
+	float							m_maxrange, m_maxrangesq;
 
 };
 

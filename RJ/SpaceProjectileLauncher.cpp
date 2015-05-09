@@ -118,3 +118,40 @@ void SpaceProjectileLauncher::DetermineNextProjectileSpreadDelta(void)
 		0.0f);
 }
 
+// Determines the max range of the launcher based on its launch properties and projectiles.  Is only
+// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
+// changes that we cannot simulate accurately here (without actually firing a projectile)
+float SpaceProjectileLauncher::DetermineApproxRange(void) const
+{
+	float range;
+
+	// We can't do much without information on the projectiles we will be firing
+	if (!m_projectiledef) return 0.0f;
+
+	// Initial estimate is based upon the launch impulse, and represents the range PER SECOND
+	if (m_launchmethod == SpaceProjectileLauncher::ProjectileLaunchMethod::ApplyForce)
+	{
+		range = (m_launchimpulse / m_projectiledef->GetMass());		// a = F/m
+	}
+	else
+	{
+		range = m_launchimpulse;
+	}
+
+	// Scale the range/sec by the maximum projectile lifetime, assuming no collisions/deviations
+	float lifetime = m_projectiledef->GetDefaultLifetime();
+	range *= lifetime;
+
+	// Account for linear velocity degradation in the estimate 
+	if (m_degradelinearvelocity)
+	{
+		// Velocity degrades at 'm_linveldegradation' percent per second, so we will multiply by (1-m_linveldegradation)^lifetime
+		range *= pow((1.0f - m_linveldegradation), lifetime);
+	}
+
+	// Return our best estimate of the launcher range
+	return range;
+}
+
+
+

@@ -25,6 +25,7 @@ SpaceTurret::SpaceTurret(void)
 	m_yawmin = m_yawmax = 0.0f;
 	m_pitchmin = -0.15f;
 	m_pitchmax = +0.15f;
+	m_maxrange = 1000.0f; m_maxrangesq = (1000.0f * 1000.0f);
 	m_nexttargetanalysis = 0U;
 }
 
@@ -134,6 +135,27 @@ void SpaceTurret::Pitch(float angle)
 	m_relativeorient = (m_baserelativeorient * delta);
 }
 
+// Determines the max range of the turret based on its component launchers & projectiles.  Is only
+// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
+// changes that we cannot simulate accurately here (without actually firing a projectile)
+void SpaceTurret::DetermineApproxRange(void)
+{
+	// Make sure we have some launchers set up within the turret; assuming we do, take the max range of 
+	// the first as our initial estimate
+	if (m_launchercount < 1) { SetMaxRange(0.0f); return; }
+	float maxr = m_launchers[0].DetermineApproxRange();
+
+	// Consider any other launchers; if they have a lower max range, take that as the overall range
+	// of the turret so that the turret will only select targets it can engage with all launchers
+	for (int i = 1; i < m_launchercount; ++i)
+	{
+		float r = m_launchers[i].DetermineApproxRange();
+		if (r < maxr) maxr = r;
+	}
+
+	// Set the maximum turret range
+	SetMaxRange(maxr);
+}
 
 // Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
 void SpaceTurret::SetYawLimits(float y_min, float y_max)
@@ -186,6 +208,9 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 	D3DXVECTOR3 tgt_local;
 	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - pos), &invorient);
 
+	// Before testing the firing arcs, make sure this target is actually in range
+	if (D3DXVec3LengthSq(&tgt_local) > m_maxrange) return false;
+
 	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
 	return ( (m_yaw_limited == false || m_yaw_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.z))) &&
 			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.y))) );
@@ -194,7 +219,25 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one
 iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts)
 {
-	//*** DO THIS ***
+	// Consider each candidate in turn
+	iSpaceObject *obj;
+	int n = enemy_contacts.size();
+	for (int i = 0; i < n; ++i)
+	{
+		// Make sure the object is valid
+		obj = enemy_contacts[i]; if (!obj) continue;
+
+		// Make sure we are only targeting hostile objects
+		// TODO: *** DO THIS *** >> continue;
+
+		// Make sure the object is in range and within our firing arc
+		if (!CanHitTarget(obj)) continue;
+
+		// The object has passed all tests, so we can consider it a valid target
+		return obj;
+	}
+
+	// We could not locate any valid targets
 	return NULL;
 }
 

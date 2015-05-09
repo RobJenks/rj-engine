@@ -88,6 +88,11 @@ public:
 	// Determines a new delta trajectory for the next projectile, based upon projectile spread properties
 	void								DetermineNextProjectileSpreadDelta(void);
 
+	// Determines the max range of the launcher based on its launch properties and projectiles.  Is only
+	// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
+	// changes that we cannot simulate accurately here (without actually firing a projectile)
+	float								DetermineApproxRange(void) const;
+
 protected:
 
 	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Internal
