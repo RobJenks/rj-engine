@@ -4,7 +4,7 @@
 #define __SpaceTurretH__
 
 #include "DX11_Core.h"
-#include "Arc2D.h"
+#include "FiringArc.h"
 class iSpaceObject;
 class SpaceProjectileLauncher;
 
@@ -40,6 +40,22 @@ public:
 	// Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
 	CMPINLINE float					GetMinYawLimit(void) const								{ return m_yawmin; }
 	CMPINLINE float					GetMaxYawLimit(void) const								{ return m_yawmin; }
+	void							SetYawLimits(float y_min, float y_max);
+
+	// Specify the pitch limits for this turret, in radians
+	CMPINLINE float					GetMinPitchLimit(void) const								{ return m_pitchmin; }
+	CMPINLINE float					GetMaxPitchLimit(void) const								{ return m_pitchmin; }
+	void							SetPitchLimits(float p_min, float p_max);
+
+	// Sets or retrieves the max yaw/pitch rate of the turret, in radians/sec
+	CMPINLINE float					GetYawRate(void) const										{ return m_yawrate; }
+	CMPINLINE float					GetPitchRate(void) const									{ return m_pitchrate; }
+	CMPINLINE void					SetYawRate(float rps)										{ m_yawrate = rps; }
+	CMPINLINE void					SetPitchRate(float rps)										{ m_pitchrate = rps; }
+
+	// Yaws or pitches the turret by the specified angle
+	void							Yaw(float angle);
+	void							Pitch(float angle);
 
 	// Sets the current target for the turret
 	void							SetTarget(iSpaceObject *target);
@@ -120,10 +136,9 @@ protected:
 	bool							m_yaw_limited;									// Flag indicating whether the turret has yaw extents, or can rotate 360-deg
 	float							m_yawmin, m_yawmax;								// Min/max yaw extents, radians.  Only required if m_yaw_limited == true
 	float							m_pitchmin, m_pitchmax;							// Min/max pitch extents, radians
-	float							m_baseyaw, m_basepitch;							// 'Resting' position of the turret
 
 	// Turret maintains two unit circle arcs, in the yaw & pitch dimensions, to represent its firing cone
-	Arc2D							m_yaw_arc, m_pitch_arc;
+	FiringArc						m_yaw_arc, m_pitch_arc;
 
 };
 

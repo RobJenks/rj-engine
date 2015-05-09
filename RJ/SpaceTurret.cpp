@@ -17,7 +17,7 @@ SpaceTurret::SpaceTurret(void)
 	m_nextlauncher = 0;
 	m_target = m_designatedtarget = NULL;
 	m_relativepos = NULL_VECTOR;
-	m_relativeorient = ID_QUATERNION;
+	m_baserelativeorient = m_relativeorient = ID_QUATERNION;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;
@@ -25,7 +25,6 @@ SpaceTurret::SpaceTurret(void)
 	m_yawmin = m_yawmax = 0.0f;
 	m_pitchmin = -0.15f;
 	m_pitchmax = +0.15f;
-	m_baseyaw = m_basepitch = 0.0f;
 	m_nexttargetanalysis = 0U;
 }
 
@@ -109,32 +108,87 @@ void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
 	m_baserelativeorient = orient;
 }
 
+// Yaws the turret by the specified angle.  Does not check the yaw limits; this is the responsibility
+// of the calling function
+void SpaceTurret::Yaw(float angle)
+{
+	// Update the yaw value
+	m_yaw += angle;
+	
+	// Update the orientation of the turret
+	D3DXQUATERNION delta;
+	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
+	m_relativeorient = (m_baserelativeorient * delta);
+}
+
+// Pitches the turret by the specified angle.  Does not check the pitch limits; this is the responsibility
+// of the calling function
+void SpaceTurret::Pitch(float angle)
+{
+	// Update the pitch value
+	m_pitch += angle;
+
+	// Update the orientation of the turret
+	D3DXQUATERNION delta;
+	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
+	m_relativeorient = (m_baserelativeorient * delta);
+}
+
+
 // Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
 void SpaceTurret::SetYawLimits(float y_min, float y_max)
 {
-	// Update the turret firing arc
-	m_yaw_arc = Arc2D(NULL_VECTOR2, 1.0f, y_min, y_max);
+	// Store new values, and update the turret firing arc
+	m_yawmin = y_min;
+	m_yawmax = y_max;
+	m_yaw_arc = FiringArc(y_min, y_max);
 }
+
+// Specify the pitch limits for this turret, in radians
+void SpaceTurret::SetPitchLimits(float p_min, float p_max)
+{
+	// Store new values, and update the turret firing arc
+	m_pitchmin = p_min;
+	m_pitchmax = p_max;
+	m_pitch_arc = FiringArc(p_min, p_max);
+}
+
 
 // Sets the current target for the turret
 void SpaceTurret::SetTarget(iSpaceObject *target)
 {
-	//*** DO THIS ***
+	m_target = target;
 }
 
 // Designates a target for the turret; will be engaged if possible, otherwise alternative targets
 // will be engaged in the meantime
 void SpaceTurret::DesignateTarget(iSpaceObject *target)
 {
-	//*** DO THIS ***
+	m_designatedtarget = target;
 }
 
 // Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 
 // test range since turrets should only be passed potential targets that are within their range
 bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 {
-	//*** DO THIS ***
-	return false;
+	// Get turret position in world space 
+	D3DXVECTOR3 pos;
+	D3DXVec3Rotate(&pos, &m_relativepos, &m_parent->GetOrientation());
+	pos += m_parent->GetPosition();
+
+	// Compose our base orientation with the parent object to get the turret resting orientation, 
+	// then derive the inverse
+	D3DXQUATERNION orient, invorient;
+	orient = (m_parent->GetOrientation() * m_baserelativeorient);
+	D3DXQuaternionInverse(&invorient, &orient);
+
+	// Transform the target vector by this inverse orientation to get a target vector in local space
+	D3DXVECTOR3 tgt_local;
+	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - pos), &invorient);
+
+	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
+	return ( (m_yaw_limited == false || m_yaw_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.z))) &&
+			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.y))) );
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one

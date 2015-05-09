@@ -315,6 +315,7 @@
     <ClInclude Include="FileInput.h" />
     <ClInclude Include="FireEffect.h" />
     <ClInclude Include="FireShader.h" />
+    <ClInclude Include="FiringArc.h" />
     <ClInclude Include="FontData.h" />
     <ClInclude Include="Fonts.h" />
     <ClInclude Include="FontShader.h" />

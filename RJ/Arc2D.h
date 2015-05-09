@@ -28,6 +28,10 @@ public:
 		ArcPointDiff = (ArcPoints[1] - ArcPoints[0]);
 	}
 
+
+	// Default constructor; does nothing
+	Arc2D(void) { }
+
 	// Contructor; accepts the circle centre/radius and the two arc points on its circumference
 	Arc2D(const D3DXVECTOR2 & centre, float radius, const D3DXVECTOR2 & pt0, const D3DXVECTOR2 & pt1)
 		:
@@ -65,7 +69,7 @@ public:
 
 	// Determines whether the given point lies within the arc.  Point must lie on the circumference
 	// of the arc circle (i.e. the vector CP must have magnitude == 'radius')
-	bool ContainsPoint(const D3DXVECTOR2 & pt)
+	bool ContainsPoint(const D3DXVECTOR2 & pt) const
 	{
 		// Assert: |P-C| = R where P is the input point, C is the circle center,
 		// and R is the circle radius.  For P to be on the arc from A to B, it
