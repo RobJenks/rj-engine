@@ -481,6 +481,12 @@
     <ClCompile Include="SpaceTurret.cpp">
       <Filter>Objects\Ships\Turrets</Filter>
     </ClCompile>
+    <ClCompile Include="Faction.cpp">
+      <Filter>Factions</Filter>
+    </ClCompile>
+    <ClCompile Include="FactionManagerObject.cpp">
+      <Filter>Factions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1080,6 +1086,12 @@
     <ClInclude Include="FiringArc.h">
       <Filter>Math\Geometry</Filter>
     </ClInclude>
+    <ClInclude Include="Faction.h">
+      <Filter>Factions</Filter>
+    </ClInclude>
+    <ClInclude Include="FactionManagerObject.h">
+      <Filter>Factions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1305,6 +1317,9 @@
     </Filter>
     <Filter Include="Objects\Ships\Turrets">
       <UniqueIdentifier>{7bdbf2cf-3d69-4bf3-93c7-59d167ca7ff8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Factions">
+      <UniqueIdentifier>{e8bea911-7222-436d-b508-b0d2d59dbbf2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

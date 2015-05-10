@@ -13,6 +13,7 @@
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
 #include "ObjectAttachment.h"
+#include "Faction.h"
 class Model;
 
 class iObject
@@ -181,6 +182,10 @@ public:
 	CMPINLINE Model *						GetModel(void)						{ return m_model; }
 	CMPINLINE void							SetModel(Model *model)				{ m_model = model; }
 
+	// The faction this object belongs to, or Faction::NullFaction (0) for non-affiliated objects
+	CMPINLINE Faction::F_ID					GetFaction(void) const				{ return m_faction; }
+	CMPINLINE void							SetFaction(Faction::F_ID id)		{ m_faction = id; }
+
 	// Return or set the offset translation required to centre the object model about its local origin
 	CMPINLINE D3DXVECTOR3					GetCentreOffsetTranslation(void) const					{ return m_centreoffset; }
 	CMPINLINE void							SetCentreOffsetTranslation(const D3DXVECTOR3 & offset)	{ m_centreoffset = offset; }
@@ -201,6 +206,10 @@ public:
 
 	// Narrowphase-specific collision data.  We make this public to allow direct & fast manipulation of the data
 	OrientedBoundingBox						CollisionOBB;				// The hierarchy of oriented bounding boxes that make up our collision mesh
+
+	// Returns the disposition of this object towards the target object, based on our respective factions and 
+	// any other modifiers (e.g. if the objects have individually attacked each other)
+	Faction::FactionDisposition				GetDispositionTowardsObject(const iObject *obj) const;
 
 	// Query or set the visibility-testing mode for this object
 	CMPINLINE VisibilityTestingModeType		GetVisibilityTestingMode(void) const						{ return m_visibilitytestingmode; }
@@ -310,6 +319,7 @@ protected:
 	std::string							m_instancecode;					// The unique instance code of the object; concatenation of [code]_[id].  Can be manually overriden
 	HashVal								m_instancecodehash;				// Hash value of the instance code, used for more efficient comparison
 	bool								m_standardobject;				// Flag indicating whether this is a 'standard', centrally-maintained template object
+	Faction::F_ID						m_faction;						// ID of the faction this object belongs to; will be 0 for the null faction if it has no affiliation
 
 	D3DXVECTOR3							m_position;						// Position of the object in world space
 	D3DXQUATERNION						m_orientation;					// Object orientation

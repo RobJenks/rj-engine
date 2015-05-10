@@ -228,7 +228,7 @@ iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_con
 		obj = enemy_contacts[i]; if (!obj) continue;
 
 		// Make sure we are only targeting hostile objects
-		// TODO: *** DO THIS *** >> continue;
+		if (m_parent->GetDispositionTowardsObject(obj) != Faction::FactionDisposition::Hostile) continue;
 
 		// Make sure the object is in range and within our firing arc
 		if (!CanHitTarget(obj)) continue;

@@ -9,6 +9,7 @@
 #include "GamePhysicsEngine.h"
 #include "SimulationStateManager.h"
 #include "SimulationObjectManager.h"
+#include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "GameConsole.h"
 #include "DebugCommandHandler.h"
@@ -85,6 +86,9 @@ namespace Game {
 
 	// Object manager, which handles operations across the set of active objects
 	SimulationObjectManager			ObjectManager = SimulationObjectManager();
+
+	// Faction manager, which maintains the central record of all faction and the relationships between them
+	FactionManagerObject			FactionManager = FactionManagerObject();
 
 	// Central logging component
 	LogManager						Log = LogManager();

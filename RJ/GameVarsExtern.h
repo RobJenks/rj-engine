@@ -35,6 +35,7 @@ class Actor;
 class Player;
 class SimulationStateManager;
 class SimulationObjectManager;
+class FactionManagerObject;
 class LogManager;
 class GameConsole;
 class DebugCommandHandler;
@@ -92,6 +93,9 @@ namespace Game {
 
 	// State manager, which maintains the simulation state and level for all objects/systems/processes in the game
 	extern SimulationStateManager StateManager;
+
+	// Faction manager, which maintains the central record of all faction and the relationships between them
+	extern FactionManagerObject FactionManager;
 
 	// Central logging component
 	extern LogManager Log;

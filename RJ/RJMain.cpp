@@ -42,6 +42,7 @@
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
 #include "SimulationObjectManager.h"
+#include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "SpaceSystem.h"
 
@@ -1272,6 +1273,10 @@ Result RJMain::InitialiseLoadedGameData(void)
 	// User interface: Build all UI layouts using the data loaded from game data files
 	D::UI->BuildUILayouts();
 	Game::Log << LOG_INIT_START << "Post-processing of all UI layouts completed\n";
+
+	// Factions: initialise all faction data once game files have been processed
+	Game::FactionManager.Initialise();
+	Game::Log << LOG_INIT_START << "Post-processing of all faction data completed\n";
 
 	// Return success
 	return ErrorCodes::NoError;

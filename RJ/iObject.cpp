@@ -4,6 +4,8 @@
 #include "Octree.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "ObjectAttachment.h"
+#include "FactionManagerObject.h"
+#include "Faction.h"
 
 #include "iObject.h"
 
@@ -40,6 +42,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_model = NULL;
 	m_codehash = m_instancecodehash = 0U;
 	m_standardobject = false;
+	m_faction = Faction::NullFaction;
 	m_simulationhub = false;
 	m_visible = true;
 	m_position = NULL_VECTOR;
@@ -190,7 +193,21 @@ void iObject::SetObjectType(iObject::ObjectType type)
 	m_objectclass = iObject::DetermineObjectClass(*this);
 }
 
+// Returns the disposition of this object towards the target object, based on our respective factions and 
+// any other modifiers (e.g. if the objects have individually attacked each other)
+Faction::FactionDisposition iObject::GetDispositionTowardsObject(const iObject *obj) const
+{
+	// Make sure the target object is valid
+	if (!obj) return Faction::FactionDisposition::Neutral;
 
+	// Use the disposition of our faction to the other object as a basis
+	Faction::FactionDisposition disp = Game::FactionManager.GetDisposition(m_faction, obj->GetFaction());
+
+	// Consider any other factors, e.g. if the objects have individually attacked each other
+
+	// Return the disposition value
+	return disp;
+}
 
 // Assigns this object as a new simulation hub, around which the universe will be fully simulated
 void iObject::SetAsSimulationHub(void)
