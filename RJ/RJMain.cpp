@@ -480,6 +480,9 @@ void RJMain::ProcessKeyboardInput(void)
 
 		//turret->Fire();
 
+		s2->ApplyLocalLinearForceDirect(D3DXVECTOR3(0.0f, 0.0f, 10000.0f * Game::TimeFactor));
+		return;
+
 		s2->Highlight.Activate();
 		s2->Highlight.SetColour(D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f));
 		std::vector<iSpaceObject*> contacts;
@@ -1845,8 +1848,22 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Can hit: %s",
-			(turret->CanHitTarget(s2) ? "*** YES ***" : "No"));
+		D3DXVECTOR3 tpos = turret->GetRelativePosition();
+		D3DXVec3Rotate(&tpos, &tpos, &ss->GetOrientation());
+		tpos += ss->GetPosition();
+
+		D3DXVECTOR3 heading;
+		D3DXVec3Rotate(&heading, &BASIS_VECTOR, &ss->GetOrientation());
+		D3DXVECTOR3 diff = (s2->GetPosition() - tpos);
+
+		D3DXVec3Normalize(&heading, &heading);
+		D3DXVec3Normalize(&diff, &diff);
+
+		float yaw = Angle2D(D3DXVECTOR2(heading.x, heading.z), D3DXVECTOR2(diff.x, diff.z));
+		float pitch = Angle2D(D3DXVECTOR2(heading.y, heading.z), D3DXVECTOR2(diff.y, diff.z));
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Yaw: %.3f   Pitch: %.3f   Can hit: %s",
+			RadToDeg(yaw), RadToDeg(pitch), (turret->CanHitTarget(s2) ? "*** YES ***" : "No"));
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }
