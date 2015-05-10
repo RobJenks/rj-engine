@@ -93,6 +93,7 @@ namespace D {
 	const char *NODE_ActorBase = "actorbase";
 	const char *NODE_StaticTerrain = "staticterrain";
 	const char *NODE_StaticTerrainDefinition = "staticterraindefinition";
+	const char *NODE_Faction = "faction";
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";

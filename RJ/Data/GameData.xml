@@ -5,6 +5,9 @@
   <!-- Load all game resources and production data -->
   <include file="Resources\Resources.xml" />
   
+  <!-- Load all factions -->
+  <include file="Factions\Factions.xml" />
+  
   <!-- Load model data -->
   <include file="Models\BasicModels.xml" />
   <include file="Ships\ShipModels.xml" />

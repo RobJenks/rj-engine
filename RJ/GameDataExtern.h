@@ -148,6 +148,7 @@ namespace D {
 	extern const char *NODE_ActorBase;
 	extern const char *NODE_StaticTerrain;
 	extern const char *NODE_StaticTerrainDefinition;
+	extern const char *NODE_Faction;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;

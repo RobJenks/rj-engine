@@ -46,6 +46,7 @@ namespace IO { namespace Data {
 	TiXmlDocument *LoadXMLDocument(const string &filename);
 	Result LoadGameDataFile(const string &filename, bool follow_indices);
 	Result LoadGameDataFile(const string &filename);
+	Result LoadXMLFileIndex(TiXmlElement *node);
 	
 	// Common methods to load intermediate class data
 	bool LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object);									// Loads iObject class data
@@ -65,9 +66,7 @@ namespace IO { namespace Data {
 	// Loads an instance of a CS section (which should already be loaded) and adds it to the complex ship, assuming it is valid
 	Result LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip *object);
 
-
-	Result LoadXMLFileIndex(TiXmlElement *node);
-
+	Result LoadFaction(TiXmlElement *node);
 	Hardpoint *LoadHardpoint(TiXmlElement *node);
 	Result LoadSimpleShipLoadout(TiXmlElement *node);
 	CompoundLoadoutMap *LoadCompoundLoadoutMap(TiXmlElement *node, SimpleShipLoadout *L, SimpleShip *targetshiptype);

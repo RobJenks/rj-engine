@@ -240,7 +240,10 @@ namespace ErrorCodes {
 	const Result		UnknownErrorInstantiatingCSSection				= 2646;
 	const Result		CannotLoadTerrainDefinitionWithInvalidParams	= 2647;
 	const Result		CouldNotLoadTerrainDefWithoutRequiredData		= 2648;
-	const Result		CouldNotLoadDuplicateTerrainDefinition = 2649;
+	const Result		CouldNotLoadDuplicateTerrainDefinition			= 2649;
+	const Result		CannotLoadFactionFromNullData					= 2650;
+	const Result		CouldNotLoadFactionWithoutAllRequiredData		= 2651;
+	const Result		CouldNotAddNewLoadedFaction						= 2652;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

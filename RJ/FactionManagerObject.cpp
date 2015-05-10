@@ -23,17 +23,18 @@ FactionManagerObject::FactionManagerObject(void)
 Faction::F_ID FactionManagerObject::AddFaction(Faction *faction)
 {
 	// Make sure this is a valid faction
-	if (!faction) return (Faction::F_ID) - 1;
+	if (!faction) return Faction::NullFaction;
 
-	// The ID of this new faction will be assigned sequentially based on the number of factions
+	// The ID of this new faction will be assigned sequentially based on the number of factions; assign it to the faction now
 	Faction::F_ID id = (Faction::F_ID)m_factioncount;
+	faction->SetFactionID(id);
 
 	// Add the new faction and update the faction count
 	m_factions.push_back(faction);
 	m_factioncount = m_factions.size();
 
-	// Update the faction to assign its new ID
-	faction->SetFactionID(id);
+	// Also update the reverse maps back to faction IDs
+	m_factioncodemap[faction->GetCode()] = id;
 
 	// If we have already initialised the faction manager data (i.e. we are no longer in the pre-game initialisation)
 	// then we need to perform a delta update of the various internal matrices
@@ -44,6 +45,25 @@ Faction::F_ID FactionManagerObject::AddFaction(Faction *faction)
 
 	// Return the ID assigned to the new faction
 	return id;
+}
+
+// Returns a faction ID based upon the faction's unique string code.  Returns the null 
+// faction (0) if the code cannot be found
+Faction::F_ID FactionManagerObject::GetFaction(const std::string & code)
+{
+	if (m_factioncodemap.count(code) == 0)			return Faction::NullFaction;
+	else											return m_factioncodemap[code];
+}
+
+// Changes the disposition of one faction towards another.  Triggered by the faction objects as they analyse all contributing 
+// factors and then notify the faction manager if a major change in their relations has now occured
+void FactionManagerObject::FactionDispositionChanged(Faction::F_ID FactionA, Faction::F_ID FactionB, Faction::FactionDisposition disposition)
+{
+	// Parameter check
+	if (!IsValidFactionID(FactionA) || !IsValidFactionID(FactionB)) return;
+
+	// Update the disposition matrix accordingly
+	m_dispmatrix[FactionA][FactionB] = disposition;
 }
 
 // Initialises the faction manager once all faction data has been loaded

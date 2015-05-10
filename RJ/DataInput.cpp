@@ -53,6 +53,8 @@
 #include "Engine.h"
 #include "GameUniverse.h"
 #include "SpaceSystem.h"
+#include "Faction.h"
+#include "FactionManagerObject.h"
 #include "EffectManager.h"
 #include "FireEffect.h"
 #include "ParticleEngine.h"
@@ -169,6 +171,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadActor(child);
 		} else if (name == D::NODE_StaticTerrainDefinition) {
 			res = IO::Data::LoadStaticTerrainDefinition(child);
+		} else if (name == D::NODE_Faction) {
+			res = IO::Data::LoadFaction(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -1464,6 +1468,52 @@ Result IO::Data::LoadResource(TiXmlElement *node)
 	else
 	{
 		D::AddStandardResource(res);
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Load a new faction and add it to the central collection
+Result IO::Data::LoadFaction(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadFactionFromNullData;
+	std::string key, val; HashVal hash;
+
+	// Create a new faction object to hold this data
+	Faction *f = new Faction();
+
+	// Parse the contents of this node to populate the faction details
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_Code) {
+			val = child->GetText(); StrLowerC(val);
+			f->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Name) {
+			val = child->GetText();
+			f->SetName(val);
+		}
+	}
+
+	// Make sure we have loaded all mandatory parameters
+	if (f->GetCode() == NullString /* || ... || ... */)
+	{
+		SafeDelete(f);
+		return ErrorCodes::CouldNotLoadFactionWithoutAllRequiredData;
+	}
+
+	// Add this faction to the central faction manager collection, & make sure it was successfully added
+	if (Game::FactionManager.AddFaction(f) < 0)
+	{
+		SafeDelete(f);
+		return ErrorCodes::CouldNotAddNewLoadedFaction;
 	}
 
 	// Return success

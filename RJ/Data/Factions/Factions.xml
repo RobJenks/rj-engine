@@ -1,0 +1,12 @@
+<gamedata>
+  
+  <!-- Primary factions -->
+  <include file="Factions\Faction_US.xml" />
+  <include file="Factions\Faction_PRC.xml" />
+
+  
+  <!-- Minor factions -->
+
+  
+
+</gamedata>
