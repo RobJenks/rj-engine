@@ -1773,10 +1773,10 @@ void RJMain::__CreateDebugScenario(void)
 	turret->SetMaxRange(1000.0f);
 	turret->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));	// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
 	turret->SetBaseRelativeOrientation(ID_QUATERNION);
-	turret->SetPitchLimits(-0.15f, +0.15f);
+	turret->SetPitchLimits(-PI / 4.0f, +PI / 4.0f);
 	turret->SetPitchRate(0.1f);
 	turret->SetYawLimitFlag(true);
-	turret->SetYawLimits(-0.15f, +0.15f);
+	turret->SetYawLimits(-PI / 4.0f, +PI / 4.0f);;
 	turret->SetYawRate(0.1f);
 	
 
@@ -1846,7 +1846,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (true)
 	{
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Can hit: %s",
-			(/*turret->CanHitTarget(s2)*/false ? "*** YES ***" : "No"));
+			(turret->CanHitTarget(s2) ? "*** YES ***" : "No"));
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }

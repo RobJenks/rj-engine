@@ -225,10 +225,7 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 
 	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
 	return ( (m_yaw_limited == false || m_yaw_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.z))) &&
-			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.z, tgt_local.y))) );
-
-	*** FIX THIS.  PITCH TEST MAY BE INCORRECT - IT MAY BE THINKING THAT STRAIGHT AHEAD (0 PITCH) IS 'UP' IN THE 2D CIRCLE
-		(IE AT 0,1) WHEREAS IN FACT WHEN WE PROJECT Z/Y INTO 2D, STRAIGHT AHEAD IS ACTUALLY 'RIGHT', or 1,0 ***
+			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.y, tgt_local.z))) );
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one
