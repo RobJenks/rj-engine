@@ -102,6 +102,18 @@ void SpaceTurret::Fire(void)
 
 }
 
+// Sets the parent object to this turret
+void SpaceTurret::SetParent(iSpaceObject *parent)
+{
+	// Store the parent reference
+	m_parent = parent;
+
+	// Also update the parent object of all launchers within this turret
+	for (int i = 0; i < m_launchercount; ++i)
+		m_launchers[i].SetParent(parent);
+}
+
+
 // Sets the relative orientation of the turret on its parent object.  This will be the 'resting' orientation
 void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
 {
@@ -209,16 +221,22 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - pos), &invorient);
 
 	// Before testing the firing arcs, make sure this target is actually in range
-	if (D3DXVec3LengthSq(&tgt_local) > m_maxrange) return false;
+	if (D3DXVec3LengthSq(&tgt_local) > m_maxrangesq) return false;
 
 	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
 	return ( (m_yaw_limited == false || m_yaw_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.z))) &&
-			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.y))) );
+			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.z, tgt_local.y))) );
+
+	*** FIX THIS.  PITCH TEST MAY BE INCORRECT - IT MAY BE THINKING THAT STRAIGHT AHEAD (0 PITCH) IS 'UP' IN THE 2D CIRCLE
+		(IE AT 0,1) WHEREAS IN FACT WHEN WE PROJECT Z/Y INTO 2D, STRAIGHT AHEAD IS ACTUALLY 'RIGHT', or 1,0 ***
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one
 iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts)
 {
+	// Make sure we have required data
+	if (!m_parent) return NULL;
+
 	// Consider each candidate in turn
 	iSpaceObject *obj;
 	int n = enemy_contacts.size();
@@ -260,6 +278,12 @@ void SpaceTurret::InitialiseLaunchers(int launcher_count)
 	m_launchercount = launcher_count;
 	m_launcherubound = (launcher_count - 1);
 	m_nextlauncher = 0;
+	
+	// Set any default properties for the launchers on creation
+	for (int i = 0; i < m_launchercount; ++i)
+	{
+		m_launchers[i].SetParent(m_parent);
+	}
 }
 
 // Shut down the projectile object, deallocating all resources

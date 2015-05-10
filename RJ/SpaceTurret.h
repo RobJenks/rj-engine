@@ -25,6 +25,10 @@ public:
 	// Fires a projectile from the turret
 	void							Fire(void);
 
+	// Gets/sets the parent object to this turret
+	CMPINLINE iSpaceObject *		GetParent(void) const									{ return m_parent; }
+	void							SetParent(iSpaceObject *parent);
+
 	// Gets/sets the relative position of the turret on its parent object
 	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
 	CMPINLINE void					SetRelativePosition(const D3DXVECTOR3 & relativepos)	{ m_relativepos = relativepos; }
@@ -33,7 +37,7 @@ public:
 	CMPINLINE D3DXQUATERNION		GetBaseRelativeOrientation(void) const						{ return m_baserelativeorient; }
 	void							SetBaseRelativeOrientation(const D3DXQUATERNION & orient);
 
-	// Specifies whether the turret is ywa-limited, or can rotate freely about its local up axis
+	// Specifies whether the turret is yaw-limited, or can rotate freely about its local up axis
 	CMPINLINE bool					IsYawLimited(void) const								{ return m_yaw_limited; }
 	CMPINLINE void					SetYawLimitFlag(bool limit)								{ m_yaw_limited = limit; }
 

@@ -478,7 +478,14 @@ void RJMain::ProcessKeyboardInput(void)
 		proj = launcher->LaunchProjectile();
 #endif
 
-		turret->Fire();
+		//turret->Fire();
+
+		s2->Highlight.Activate();
+		s2->Highlight.SetColour(D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f));
+		std::vector<iSpaceObject*> contacts;
+		contacts.push_back(s2);
+
+		iSpaceObject *tgt = turret->FindNewTarget(contacts);
 
 		m_keyboard.LockKey(DIK_5);
 	}
@@ -1672,9 +1679,16 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
+	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
+	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"), 
+		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
+	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_prc"),
+		Game::FactionManager.GetFaction("faction_us"), Faction::FactionDisposition::Hostile);
+
 	// Temp: Create a new ship for the player to use
 	ss = SimpleShip::Create("testship1");
 	ss->SetName("Player ship ss");
+	ss->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	ss->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 200, -200));
 	ss->SetOrientation(ID_QUATERNION);
 	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss);
@@ -1684,6 +1698,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs = ComplexShip::Create("testfrigate12");		// Previously 12
 		cs->SetName("Test frigate cs");
 		cs->GetSection(0)->SetName("cs section 0");
+		cs->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(-100, 0, 225));
 		cs->SetOrientation(ID_QUATERNION);
 
@@ -1696,6 +1711,7 @@ void RJMain::__CreateDebugScenario(void)
 		s2 = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
 		s2->SetName("Test ship s2");
+		s2->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 200, -150));
 		s2->SetOrientation(ID_QUATERNION);
 	}
@@ -1704,6 +1720,7 @@ void RJMain::__CreateDebugScenario(void)
 	if (true) {
 		s3[0] = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[0]);
+		s3[0]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 50, 50));
 		s3[0]->SetOrientation(ID_QUATERNION);
 	}
@@ -1711,6 +1728,7 @@ void RJMain::__CreateDebugScenario(void)
 	if (true) {
 		s3[1] = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
+		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(0, 0, -125));
 		s3[1]->SetOrientation(ID_QUATERNION);
 	}
@@ -1720,6 +1738,7 @@ void RJMain::__CreateDebugScenario(void)
 		{
 			s3[2] = SimpleShip::Create("testship1");
 			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
+			s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 			s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(i * 30.0f, -125, 0));
 			s3[2]->SetOrientation(ID_QUATERNION);
 		}
@@ -1730,6 +1749,7 @@ void RJMain::__CreateDebugScenario(void)
 	{
 		a1 = D::GetActor("human_soldier_basic")->CreateInstance();
 		a1->SetName("A1");
+		a1->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		a1->MoveIntoEnvironment(cs);
 		ComplexShipTile *t = cs->GetFirstTileOfType(D::TileClass::Corridor);
 		if (t)
@@ -1748,15 +1768,25 @@ void RJMain::__CreateDebugScenario(void)
 	def->SetDefaultLifetime(3.0f);
 
 	turret = new SpaceTurret();
+	turret->SetParent(ss);
 	turret->InitialiseLaunchers(1);
+	turret->SetMaxRange(1000.0f);
+	turret->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));	// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
+	turret->SetBaseRelativeOrientation(ID_QUATERNION);
+	turret->SetPitchLimits(-0.15f, +0.15f);
+	turret->SetPitchRate(0.1f);
+	turret->SetYawLimitFlag(true);
+	turret->SetYawLimits(-0.15f, +0.15f);
+	turret->SetYawRate(0.1f);
+	
+
 	SpaceProjectileLauncher *l = turret->GetLauncher(0);
-	l->SetParent(ss);
 	l->SetProjectileDefinition(def);
 	l->SetLaunchInterval(1000U);
 	l->SetProjectileSpread(0.01f);
 	l->SetLaunchImpulse(1000.0f);
 	l->SetLaunchMethod(SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
-	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));
+	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));		// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
 	l->SetRelativeOrientation(ID_QUATERNION);
 	l->SetProjectileSpin(1.0f);
 	l->SetLinearVelocityDegradeState(false);
@@ -1815,15 +1845,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		if (Game::TimeFactor > 0.0f)
-		{
-			float ccdPc = (ss->PhysicsState.DeltaMoveDistanceSq / ss->GetFastMoverThresholdSq());
-
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player: %.1f%%  (%.4f / %.4f)  %s",
-				ccdPc * 100.0f, ss->PhysicsState.DeltaMoveDistanceSq, ss->GetFastMoverThresholdSq(),
-				(ss->IsFastMover() ? "> FAST MOVER <" : ""));
-
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		}
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Can hit: %s",
+			(/*turret->CanHitTarget(s2)*/false ? "*** YES ***" : "No"));
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }
