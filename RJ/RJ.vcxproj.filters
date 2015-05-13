@@ -175,9 +175,6 @@
     <ClCompile Include="Hardpoints.cpp">
       <Filter>Equipment\Hardpoints</Filter>
     </ClCompile>
-    <ClCompile Include="HardpointsInterface.cpp">
-      <Filter>Equipment\Hardpoints</Filter>
-    </ClCompile>
     <ClCompile Include="HashFunctions.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
@@ -340,9 +337,6 @@
     <ClCompile Include="Ship.cpp">
       <Filter>Objects\Ships</Filter>
     </ClCompile>
-    <ClCompile Include="ShipDetails.cpp">
-      <Filter>Objects\Ships</Filter>
-    </ClCompile>
     <ClCompile Include="SimpleShip.cpp">
       <Filter>Objects\Ships\SimpleShips</Filter>
     </ClCompile>
@@ -486,6 +480,9 @@
     </ClCompile>
     <ClCompile Include="FactionManagerObject.cpp">
       <Filter>Factions</Filter>
+    </ClCompile>
+    <ClCompile Include="iContainsHardpoints.cpp">
+      <Filter>Equipment\Hardpoints</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -693,9 +690,6 @@
     <ClInclude Include="Hardpoints.h">
       <Filter>Equipment\Hardpoints</Filter>
     </ClInclude>
-    <ClInclude Include="HardpointsInterface.h">
-      <Filter>Equipment\Hardpoints</Filter>
-    </ClInclude>
     <ClInclude Include="HashFunctions.h">
       <Filter>Utility</Filter>
     </ClInclude>
@@ -749,9 +743,6 @@
     </ClInclude>
     <ClInclude Include="iActorObject.h">
       <Filter>Objects\Actors</Filter>
-    </ClInclude>
-    <ClInclude Include="iHardpoints.h">
-      <Filter>Equipment\Hardpoints</Filter>
     </ClInclude>
     <ClInclude Include="iContainsHardpoints.h">
       <Filter>Equipment\Hardpoints</Filter>
@@ -906,9 +897,6 @@
     <ClInclude Include="ResourceAmount.h">
       <Filter>Resources</Filter>
     </ClInclude>
-    <ClInclude Include="RJDEBUG.h">
-      <Filter>_Debug</Filter>
-    </ClInclude>
     <ClInclude Include="ScheduledObject.h">
       <Filter>Scheduler</Filter>
     </ClInclude>
@@ -919,9 +907,6 @@
       <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
     </ClInclude>
     <ClInclude Include="Ship.h">
-      <Filter>Objects\Ships</Filter>
-    </ClInclude>
-    <ClInclude Include="ShipDetails.h">
       <Filter>Objects\Ships</Filter>
     </ClInclude>
     <ClInclude Include="Ships.h">
@@ -1275,9 +1260,6 @@
     </Filter>
     <Filter Include="Resources">
       <UniqueIdentifier>{eda50b86-bbb7-41c9-a91a-42a9d5e66236}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="_Debug">
-      <UniqueIdentifier>{0e8e7ea4-31e3-45a0-ac75-4a6fd004afd6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Simulation manager">
       <UniqueIdentifier>{2039145f-f00e-421c-91d1-6162a8638e28}</UniqueIdentifier>

@@ -5,7 +5,6 @@
 
 #include "DX11_Core.h"
 #include "Ship.h"
-#include "ShipPhysicsState.h"
 #include "CompilerSettings.h"
 #include "Hardpoint.h"
 

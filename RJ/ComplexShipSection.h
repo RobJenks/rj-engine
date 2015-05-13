@@ -7,7 +7,6 @@
 
 #include "Utility.h"
 #include "iSpaceObject.h"
-#include "iContainsHardpoints.h"
 #include "iContainsComplexShipTiles.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
@@ -20,7 +19,7 @@ class Hardpoints;
 class Texture;
 
 
-class ComplexShipSection : public iSpaceObject, public iContainsHardpoints, public iContainsComplexShipTiles
+class ComplexShipSection : public iSpaceObject
 {
 public:
 	
@@ -31,15 +30,29 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void								InitialiseCopiedObject(ComplexShipSection *source);
+	void										InitialiseCopiedObject(ComplexShipSection *source);
 
 	// Each section belongs to a parent ComplexShip object
 	CMPINLINE ComplexShip *						GetParent(void)						{ return m_parent; }
 	CMPINLINE void								SetParent(ComplexShip *parent)		{ m_parent = parent; }
 
-	// Retrieve or set the section hardpoints collection
-	CMPINLINE Hardpoints *						GetHardpoints(void) { return m_hardpoints; }
-	void										SetHardpoints(Hardpoints *hp);
+	// Retrieve a reference to the section hardpoints collection
+	CMPINLINE const std::vector<Hardpoint*> & 	GetHardpoints(void) const			{ return m_hardpoints; }
+
+	// Add or remove hardpoints to the section.  Updates will be triggered if they are not suspended
+	void										AddHardpoint(Hardpoint *hp);
+	void										RemoveHardpoint(Hardpoint *hp);
+
+	// Clear all hardpoints.  Flag indicates whether the hardpoints should be deallocated, or simply removed from the collection
+	void										ClearAllHardpoints(bool deallocate);
+
+	// Suspend or resume updates based on changes to the section.  Resuming will trigger an immediate update
+	CMPINLINE void								SuspendUpdates(void)				{ m_suspendupdates = true; }
+	CMPINLINE void								ResumeUpdates(void)
+	{
+		m_suspendupdates = false;
+		SetSectionUpdateFlag();
+	}
 
 	// Updates the object before it is rendered.  Called only when the object is processed in the render queue (i.e. not when it is out of view)
 	void										PerformRenderUpdate(void);
@@ -77,10 +90,6 @@ public:
 
 	// Recalculates all section statistics based upon the loadout and base statistics
 	void										RecalculateShipDataFromCurrentState(void);
-
-	// Makes updates to this object based on a change to the specified hardpoint hp.  Alternatively if a NULL
-	// pointer is passed then all potential refreshes are performed on the parent 
-	void										PerformHardpointChangeRefresh(Hardpoint *hp);
 
 	// Implemented to satisfy iSpaceObject interface.  In reality all section positions are determined by the parent ship
 	CMPINLINE void								SimulateObject(bool PermitMovement) { }
@@ -160,15 +169,18 @@ public:
 
 private:
 	ComplexShip *					m_parent;					// The ship that this section belongs to
-	Hardpoints *					m_hardpoints;				// The hardpoint collection for this ship section
 	INTVECTOR3						m_elementlocation;			// x,y,z location of the top-top-left element, in element space
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
 	D3DXVECTOR3						m_relativepos;				// x,y,z position relative to parent ship object, in world space
 
+	std::vector<Hardpoint*>			m_hardpoints;				// The hardpoint collection for this ship section; simple vector HPs, which are 
+																// copied to the parent ship when the section is added
+
 	D3DXMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
 
 	bool							m_sectionupdated;			// Indicates to the parent ship object that it should refresh based on its component sections next cycle
+	bool							m_suspendupdates;			// Flag that indicates all updates (via section update flag) should be suspended until updates resume
 
 	float							m_velocitylimit;			// Velocity limit of the ship section, incorporating base "details" value and modifiers
 	float							m_angularvelocitylimit;		// Angular velocity limit of the ship section, incorporating base "details" value and modifiers

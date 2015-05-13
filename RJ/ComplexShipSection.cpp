@@ -1,6 +1,5 @@
 #include "Utility.h"
 #include "ComplexShip.h"
-#include "ComplexShipDetails.h"
 #include "Hardpoint.h"
 #include "Hardpoints.h"
 #include "FadeEffect.h"
@@ -21,6 +20,7 @@ ComplexShipSection::ComplexShipSection(void)
 	m_parent = NULL;
 	m_model = NULL;
 	m_standardobject = false;
+	m_suspendupdates = false;
 	m_sectionupdated = false;
 	m_elementlocation = NULL_VECTOR;
 	m_elementsize = NULL_VECTOR;
@@ -36,10 +36,6 @@ ComplexShipSection::ComplexShipSection(void)
 	m_brakefactor = m_brakeamount = 1.0f;
 	m_forcerenderinterior = false;
 	m_previewimage = NULL;
-
-	// Create a new hardpoints collection for the ship section
-	m_hardpoints = new Hardpoints();
-	m_hardpoints->SetParent(this, this);
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
@@ -60,28 +56,11 @@ ComplexShipSection *ComplexShipSection::Create(ComplexShipSection *template_sec)
 	// If we are passed an invalid class pointer then return NULL immediately
 	if (template_sec == NULL) return NULL;
 
-	// Create a new instance of the ship from this template
+	// Create a new instance of the ship from this template; class-specific initialisation will all be performed
+	// automatically up the inheritance hierarchy as part of this operation.  If any part of the operation fails, 
+	// the returned value will be NULL (which we then pass on as the return value from this function)
 	ComplexShipSection *sec = CopyObject<ComplexShipSection>(template_sec);
-	if (!sec) return NULL;
 
-	// Remove reference to the template section's parent
-	sec->SetParent(NULL);
-
-	// Initialise the ship element space with new data, since currently the pointer is copied from the source ship
-	// Important: Set to NULL first, otherwise copy method will deallocate the original element space before replacing it
-	// MORE important: if we remove the element base from sections, remove these lines
-	//sec->SetElements(NULL);
-
-	// Remove all references to ship tiles and generate copies for the new ship
-	// Important: remove if we no longer have tiles included in sections...
-	sec->RemoveAllShipTiles();
-	//sec->CopyTileDataFromObject(template_ship);
-	
-	// Copy the hardpoint collection and assign to the new section
-	sec->SetHardpoints(template_sec->GetHardpoints()->Copy());
-	sec->GetHardpoints()->SetParent(sec, sec);
-
-	
 	// Return a pointer to the newly-created ship section
 	return sec;
 }
@@ -94,6 +73,18 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 {
 	// Pass control to all base classes
 	iSpaceObject::InitialiseCopiedObject((iSpaceObject*)source);
+
+
+	/* Now perform ComplexShipSection-specific initialisation logic for new objects */
+
+	// Remove reference to the template section's parent
+	SetParent(NULL);
+
+	// The hardpoints vector will have been shallow-copied from the template.  Perform a deep-copy instead
+	m_hardpoints.clear();
+	int n = source->GetHardpoints().size();
+	m_hardpoints.reserve(n);
+	for (int i = 0; i < n; ++i) m_hardpoints.push_back(source->GetHardpoints()[i]->Clone());
 }
 
 
@@ -102,12 +93,6 @@ void ComplexShipSection::PerformRenderUpdate(void)
 {
 	// Update any render effects that may be active on the object
 	Fade.Update();
-}
-
-void ComplexShipSection::SetHardpoints(Hardpoints *hp)
-{
-	m_hardpoints = hp;
-	if (m_hardpoints) m_hardpoints->SetParent(this, this);
 }
 
 // Sets the section position relative to its parent ship, recalculating required data at the same time
@@ -151,9 +136,6 @@ void ComplexShipSection::UpdatePositionFromParent(void)
 
 void ComplexShipSection::RecalculateShipDataFromCurrentState(void)
 {
-	// Perform an update of the ship based on all hardpoints
-	PerformHardpointChangeRefresh(NULL);
-
 	// Recalculate ship properties based on all our component sections, loadout and any modifiers
 	CalculateShipSizeData();
 	CalculateShipMass();
@@ -196,18 +178,51 @@ void ComplexShipSection::DeriveNewSectionOffsetMatrix(void)
 	m_sectionoffsetmatrix = (centre * rot * trans);
 }
 
-// Makes updates to this object based on a change to the specified hardpoint hp.  Alternatively if a NULL
-// pointer is passed then all potential refreshes are performed on the parent 
-void ComplexShipSection::PerformHardpointChangeRefresh(Hardpoint *hp)
+// Add a hardpoint to the section.  Updates will be triggered if they are not suspended
+void ComplexShipSection::AddHardpoint(Hardpoint *hp)
 {
-	// Get the type of hardpoint being considered, or assign 'unknown' if NULL is provided and we want to make all potential updates
-	Equip::Class hptype = Equip::Class::Unknown;
-	if (hp) hptype = hp->GetType();
+	if (!hp) return;
+	m_hardpoints.push_back(hp);
+	
+	if (!m_suspendupdates) SetSectionUpdateFlag();
+}
 
-	// Make any updates to the section itself
+// Remove a hardpoint from the section.  Updates will be triggered if they are not suspended
+void ComplexShipSection::RemoveHardpoint(Hardpoint *hp)
+{
+	if (!hp) return;
 
-	// Set the section update flag.  Parent ship will then be updated from this section in the next simulation cycle
-	SetSectionUpdateFlag();
+	int n = m_hardpoints.size();
+	for (int i = 0; i < n; ++i)
+	{
+		if (m_hardpoints[i] == hp)
+		{
+			m_hardpoints.erase(m_hardpoints.begin() + i);
+			break;
+		}
+	}
+
+	if (!m_suspendupdates) SetSectionUpdateFlag();
+}
+
+// Clear all hardpoints.  Flag indicates whether the hardpoints should be deallocated, or simply removed from the collection
+void ComplexShipSection::ClearAllHardpoints(bool deallocate)
+{
+	// If we want to deallocate the hardpoints then we need to iterate through each one in turn
+	if (deallocate)
+	{
+		int n = m_hardpoints.size();
+		for (int i = 0; i < n; ++i)
+		{
+			if (m_hardpoints[i]) SafeDelete(m_hardpoints[i]);
+		}
+	}
+
+	// We can now clear the collection
+	m_hardpoints.clear();
+
+	// Flag the change in status if updates are active
+	if (!m_suspendupdates) SetSectionUpdateFlag();
 }
 
 void ComplexShipSection::CalculateShipSizeData(void)
@@ -271,7 +286,8 @@ ComplexShipSection::~ComplexShipSection(void)
 // Shuts down and deallocates the ship section
 void ComplexShipSection::Shutdown(void)
 {
-
+	// Deallocate all hardpoint data
+	ClearAllHardpoints(true);
 }
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject

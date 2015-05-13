@@ -6,13 +6,11 @@
 #include <vector>
 #include "CompilerSettings.h"
 #include "Octree.h"
-#include "HardpointsInterface.h"
 #include "iSpaceObjectEnvironment.h"
 #include "iContainsComplexShipTiles.h"
 #include "FastMath.h"
 #include "Ship.h"
 #include "Utility.h"
-
 class iSpaceObject;
 class ComplexShipSection;
 class CapitalShipPerimeterBeacon;
@@ -36,11 +34,6 @@ public:
 	// their level of the implementation
 	void										InitialiseCopiedObject(ComplexShip *source);
 
-	// Hardpoint-related methods
-	CMPINLINE iHardpoints *						GetHardpoints(void) { return (iHardpoints*)m_hardpoints; }
-	CMPINLINE HardpointsInterface *				GetShipHardpoints(void) { return m_hardpoints; }
-	void										ReplaceShipHardpoints(HardpointsInterface *hp);
-
 	// Methods to add/remove/retrieve the sections that make up this complex ship
 	ComplexShipSection *						GetSection(int index);
 	CMPINLINE ComplexShipSectionCollection *	GetSections(void) { return &(m_sections); }
@@ -56,6 +49,9 @@ public:
 
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
 	void										MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location);
+
+	// Builds the complex ship hardpoint collection based on its constituent ship sections
+	void										BuildHardpointCollection(void);
 
 	// Copies all tiles from another object and adds the copies to this object
 	Result										CopyTileDataFromObject(iContainsComplexShipTiles *src);
@@ -93,6 +89,20 @@ public:
 	bool							HasBeenDirectlyGeneratedFromSD(void)				{ return m_directlygeneratedfromSD; }
 	void							FlagShipAsDirectlyGeneratedFromShipDesigner(bool b)	{ m_directlygeneratedfromSD = b; }
 
+	// Suspend or resume updates based on changes to the ship.  This relates to structural changes, e.g. the addition
+	// or removal of ship sections.  Likely only required during first-time initialisation of the object
+	CMPINLINE void								SuspendUpdates(void)		{ m_suspendupdates = true; }
+	CMPINLINE void								ResumeUpdates(void)			
+	{ 
+		// Clear the flag
+		m_suspendupdates = false; 
+
+		// Perform a full rebuild of structural objects, e.g. hardpoints
+		BuildHardpointCollection();
+
+		// Perform an update of ship statistics based on the current configuration
+		RecalculateAllShipData();
+	}
 
 	// Generats the set of capital ship perimeter beacons used for navigation and collision avoidance
 	void										GenerateCapitalShipPerimeterBeacons(void);
@@ -158,19 +168,17 @@ public:
 
 
 protected:
-	//ComplexShipDetails *						m_classdetails;			// Class-specific details pointer, to avoid repeated casts
-	
+
 	// The sections that make up this ship
 	ComplexShipSectionCollection				m_sections;
-	
-	// Hardpoints collection for the ship
-	HardpointsInterface	* 						m_hardpoints;
 
 	PerimeterBeaconCollection					m_perimeterbeacons;		// Collection of capital ship perimeter beacons for this ship
 	int											m_activebeacons;		// The number of active beacons for this ship
 	vector<Octree<iSpaceObject*>*>				m_activeperimeternodes;	// The nodes currently holding our ship (excluding the main m_treenode)
 
 	bool										m_forcerenderinterior;	// Flag that determines whether the ship interior should always be rendered, regardless of the criteria
+
+	bool										m_suspendupdates;		// Flag that suspends all updates in response to changes, until updates are resumed again
 
 	// The navigation network that actors will use to move around this ship
 	NavNetwork *								m_navnetwork;

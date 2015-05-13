@@ -49,11 +49,9 @@
 #include "Profiler.h"
 
 #include "SpaceEmitter.h"
-#include "SpaceObjectAttachment.h"
 #include "Ship.h"
 #include "Ships.h"
 #include "SimpleShip.h"
-#include "SimpleShipDetails.h"
 #include "ComplexShip.h"
 #include "ComplexShipSection.h"
 #include "ComplexShipElement.h"
@@ -84,7 +82,6 @@
 #include "Engine.h"
 #include "Hardpoint.h"
 #include "HpEngine.h"
-#include "HardpointsInterface.h"
 
 #include "GameUniverse.h"
 #include "ImmediateRegion.h"
@@ -1706,7 +1703,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs->SetOrientation(ID_QUATERNION);
 
 		Engine *eng = (Engine*)D::Equipment["FRIGATE_HEAVY_ION_ENGINE1"];
-		cs->GetShipHardpoints()->GetHardpointsOfType(Equip::Class::Engine)->at(0)->MountEquipment(eng);
+		cs->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
 	}
 
 	// Temp: Create a second ship in this scenario

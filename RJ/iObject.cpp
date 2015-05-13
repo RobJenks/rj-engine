@@ -1,6 +1,5 @@
 #include "GameDataExtern.h"
 #include "SimulationStateManager.h"
-#include "SpaceObjectAttachment.h"
 #include "Octree.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "ObjectAttachment.h"

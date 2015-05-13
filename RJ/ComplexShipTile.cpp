@@ -237,10 +237,10 @@ void ComplexShipTile::LinkToParent(ComplexShip *ship)
 				el->AddShipTile(this, true);
 
 				// IF this element sits within a different ship section, also perform linking to that section
-				if (sec != prevsection) {
+				/*if (sec != prevsection) {
 					prevsection = sec;
 					sec->AddShipTile(this, false);
-				}
+				}*/
 			}
 		}
 	}
@@ -282,10 +282,10 @@ void ComplexShipTile::UnlinkFromParent(void)
 				el->RemoveShipTile(this);
 
 				// IF this element sits within a different ship section, also remove the link from that section
-				if (sec != prevsection) {
+				/*if (sec != prevsection) {
 					prevsection = sec;
 					sec->RemoveShipTile(this);
-				}
+				}*/
 			}
 		}
 	}

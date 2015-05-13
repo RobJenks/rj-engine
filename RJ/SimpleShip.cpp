@@ -21,9 +21,6 @@ SimpleShip::SimpleShip(void)
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
-
-	// Create the hardpoints collection and set the reverse pointer back to this object
-	m_hardpoints = new Hardpoints();
 }
 
 
@@ -34,6 +31,11 @@ void SimpleShip::InitialiseCopiedObject(SimpleShip *source)
 {
 	// Pass control to all base classes
 	Ship::InitialiseCopiedObject((Ship*)source);
+
+	/* Begin SimpleShip-specific initialisation logic here */
+
+	// Recalculate ship statistics before releasing it
+	RecalculateShipDataFromCurrentState();
 }
 
 
@@ -42,16 +44,22 @@ void SimpleShip::Shutdown(void)
 {
 	// Shutdown and deallocate the base class
 	Ship::Shutdown();
+
+	// Deallocate all hardpoints owned by this ship
+	m_hardpoints.ShutdownAllHardpoints();
 }
 
 SimpleShip::~SimpleShip(void)
 {
 }
 
-void SimpleShip::PerformHardpointChangeRefresh(Hardpoint *hp)
+// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
+// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
+// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
+void SimpleShip::HardpointChanged(Hardpoint *hp)
 {
-	// Handled by the base class method; no additional steps required here
-	Ship::PerformHardpointChangeRefresh(hp);
+	// Pass to the base class for common ship event-handling first
+	Ship::HardpointChanged(hp);
 }
 
 // Recalculates all properties, hardpoints & statistics of the ship.  Called once the ship has been created
@@ -67,7 +75,7 @@ void SimpleShip::RecalculateAllShipData(void)
 	this->CameraPositionMatrix = cam;
 
 	// Recalculate all hardpoint data 
-	m_hardpoints->RecalculateHardpoints();
+	m_hardpoints.RecalculateHardpoints();
 
 	// Perform the 'light' update method as well, to update the ship statistics based on its new state & loadout
 	RecalculateShipDataFromCurrentState();
@@ -78,7 +86,7 @@ void SimpleShip::RecalculateAllShipData(void)
 void SimpleShip::RecalculateShipDataFromCurrentState(void) 
 {
 	// Perform an update of the ship based on all hardpoints
-	PerformHardpointChangeRefresh(NULL);
+	HardpointChanged(NULL);
 
 	// Recalculate ship properties based on the base ship details, current loadout and any modifiers
 	CalculateShipSizeData();
@@ -187,16 +195,16 @@ void SimpleShip::CalculateBankExtents()
 void SimpleShip::CalculateEngineStatistics()
 {
 	// Retrieve the vector of all engine hardpoints on the ship
-	iHardpoints::HardpointCollection *engines = m_hardpoints->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = m_hardpoints.GetHardpointsOfType(Equip::Class::Engine);
 
 	// Now sum the total engine acceleration value from each engine to determine an engine angular acceleration value
 	HpEngine *hp; Engine *e; float accel = 0.0f;
-	int n = (int)engines->size(); 
+	int n = (int)engines.size(); 
 	
 	for (int i = 0; i < n; ++i)
 	{
 		// Attempt to get a reference to the hardpoint, and the engine mounted on it (if there is one)
-		hp = (HpEngine*)engines->at(i);	if (!hp) continue;
+		hp = (HpEngine*)engines.at(i);	if (!hp) continue;
 		e = (Engine*)hp->GetEngine();	if (!e) continue;
 
 		// Add the engine acceleration 
@@ -235,21 +243,12 @@ SimpleShip *SimpleShip::Create(SimpleShip *template_ship)
 	// If we are passed an invalid class pointer then return NULL immediately
 	if (template_ship == NULL) return NULL;
 
-	// Create a new instance of the ship
+	// Create a new instance of the ship from this template; class-specific initialisation will all be performed
+	// automatically up the inheritance hierarchy as part of this operation.  If any part of the operation fails, 
+	// the returned value will be NULL (which we then pass on as the return value from this function)
 	SimpleShip *ss = CopyObject<SimpleShip>(template_ship);
-	if (!ss) return NULL;
 
-	// Copy the ship hardpoints and link them to this ship
-	ss->SetHardpoints(template_ship->GetShipHardpoints()->Copy());
-	
-	// Update any other fields that should not be replicated through the standard copy constructor
-	ss->CancelAllOrders();
-	ss->SetTargetThrustOfAllEngines(0.0f);
-
-	// Recalculate ship statistics before releasing it
-	ss->RecalculateShipDataFromCurrentState();
-
-	// Return a pointer to the newly-created ship
+	// Return a pointer to the newly-created ship (or NULL if creation or initialisation failed)
 	return ss;
 }
 

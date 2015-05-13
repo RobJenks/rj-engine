@@ -1,9 +1,8 @@
 #include <vector>
-#include "DX11_Core.h" // #include "FullDX11.h"
+#include "DX11_Core.h"
 #include "GameVarsExtern.h"
 #include "Player.h"
 #include "Ship.h"
-#include "ShipDetails.h"
 #include "Engine.h"
 #include "iSpaceObject.h"
 #include "Utility.h"

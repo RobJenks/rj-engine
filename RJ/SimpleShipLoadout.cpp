@@ -2,7 +2,6 @@
 #include "Equipment.h"
 #include "Hardpoint.h"
 #include "SimpleShip.h"
-#include "SimpleShipDetails.h"
 #include "iLoadoutMap.h"
 #include "LoadoutMap.h"
 #include "CompoundLoadoutMap.h"
@@ -70,7 +69,7 @@ void SimpleShipLoadout::ApplyLoadoutMap(SimpleShip *s, iLoadoutMap *map)
 	if (c_hp == NullString) return;
 	
 	// Get a pointer to the relevant hardpoint (assuming it exists)
-	Hardpoint *h = s->GetHardpoints()->Get(c_hp);
+	Hardpoint *h = s->GetHardpoints().Get(c_hp);
 	if (!h) return; 
 	
 	// Locate the equipment, or potentially NULL if nothing to be mounted.  This method handles all logic to e.g. 

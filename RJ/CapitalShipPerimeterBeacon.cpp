@@ -1,7 +1,6 @@
 #include "ErrorCodes.h"
 #include "iSpaceObject.h"
 #include "Octree.h"
-#include "SpaceObjectAttachment.h"
 #include "GameSpatialPartitioningTrees.h"
 #include "CapitalShipPerimeterBeacon.h"
 

@@ -6,16 +6,15 @@
 
 #include "GameVarsExtern.h"
 #include "Ships.h"
-#include "ShipPhysicsState.h"
 #include "FastMath.h"
 #include "CompilerSettings.h"
 #include "iSpaceObject.h"
 #include "iConsumesOrders.h"
+#include "iContainsHardpoints.h"
 #include "Equip.h"
 #include <vector>
 class SpaceObjectAttachment;
 class Hardpoint;
-class iHardpoints;
 using namespace std;
 
 // Template class used to store ship attributes
@@ -30,7 +29,7 @@ public:
 };
 
 // Main ship class
-class Ship : public iSpaceObject, public iConsumesOrders
+class Ship : public iSpaceObject, public iConsumesOrders, public iContainsHardpoints
 {
 public:
 
@@ -58,9 +57,6 @@ public:
 
 	// The adjustment we apply to effective orientation to allow e.g. banking
 	D3DXMATRIX				OrientationAdjustment;		
-
-	// Virtual method to retreve the ship hardpoint collection
-	virtual iHardpoints	*	GetHardpoints(void) = 0;
 
 	// Default loadout is specified by its string code
 	CMPINLINE std::string	GetDefaultLoadout(void) const					{ return m_defaultloadout; }
@@ -110,10 +106,6 @@ public:
 		DeriveNewWorldMatrix();
 	}
 
-	// Makes updates to this object based on a change to the specified hardpoint hp.  Alternatively if a NULL
-	// pointer is passed then all potential refreshes are performed on the parent 
-	void				PerformHardpointChangeRefresh(Hardpoint *hp);
-
 	// Key ship properties
 	float						BaseMass;					// Note: doesn't use attribute structure since current mass is stored in iActiveObject
 	ShipAttribute<float>		VelocityLimit;				// The maximum velocity this ship can travel
@@ -126,7 +118,6 @@ public:
 	ShipAttribute<float>		BankRate;					// Rate at which the ship will bank on turning
 
 	// Ship size parameters
-	//D3DXVECTOR3			ModelCentre;						// Centre point of the ship model in world coordinates
 	D3DXVECTOR3			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
 
 	// Details on the ship banking range/position
@@ -145,6 +136,11 @@ public:
 
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);
+
+	// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
+	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
+	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
+	void				HardpointChanged(Hardpoint *hp);
 
 	// Method to set the base ship mass, which will automatically recalculate the overall ship mass at the same time
 	CMPINLINE void				SetBaseMass(float m)			{ this->BaseMass = m; CalculateShipSizeData(); }

@@ -14,11 +14,8 @@ using namespace std::tr1;
 class iHardpoints
 {
 public:
+/*
 
-	// Definition of the indexed hardpoint collection
-	typedef vector<Hardpoint*>						HardpointCollection;
-	typedef unordered_map<string, Hardpoint*>		IndexedHardpointCollection;
-	typedef vector<HardpointCollection>				HardpointGroups;
 
 	// Virtual interface method: return a hardpoint based on the code provided
 	virtual Hardpoint *								Get(const string &code)							= 0;
@@ -28,7 +25,7 @@ public:
 
 	// Virtual interface method: returns a reference to all hardpoints maintained by the interface
 	virtual IndexedHardpointCollection *			GetAllHardpoints(void)							= 0;
-
+*/
 };
 
 

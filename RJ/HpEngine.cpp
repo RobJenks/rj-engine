@@ -172,10 +172,10 @@ void HpEngine::InitialiseEngineThrustEmitter()
 	Engine *e = (Engine*)m_equipment;
 	if (e->EmitterClass == NullString) return;
 
-	// Get a reference to the parent iObject of this hardpoint
-	iObject *obj = this->GetShip();
+	// Get a reference to the parent object of this hardpoint
+	iObject *obj = this->GetParentObject();
 	if (!obj) return;
-
+	
 	// Attempt to create a new emitter of this class
 	ParticleEmitter *p = Game::Engine->GetParticleEngine()->CreateNewParticleEmitter(
 		concat("Ship")(obj->GetID())("-")(this->Code)("-ThrustEmitter").str(), e->EmitterClass);
@@ -241,8 +241,8 @@ void HpEngine::UpdateEngineThrustEmitter(void)
 void HpEngine::NotifyParentOfThrustChange(void)
 {
 	// Notify parent object that our thrust vector has changed, or will change, by flagging the change to this hardpoint
-	iContainsHardpoints *s = this->GetHardpointContainingShip();
-	if (s) s->PerformHardpointChangeRefresh(this);
+	iContainsHardpoints *s = this->GetParentHPObject();
+	if (s) s->HardpointChanged(this);
 }
 
 void HpEngine::SetTargetThrust(float f_thrust)

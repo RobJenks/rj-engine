@@ -1,11 +1,9 @@
-#include "ShipDetails.h"
 #include "iContainsHardpoints.h"
 #include "Hardpoint.h"
 #include "HpEngine.h"
 #include "FastMath.h"
 #include "Octree.h"
 #include "iSpaceObject.h"
-#include "SpaceObjectAttachment.h"
 
 #include "Ship.h"
 
@@ -38,6 +36,9 @@ Ship::Ship(void)
 	this->m_targetangularvelocity = NULL_VECTOR;
 	this->m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
 
+	// Link the hardpoints collection to this parent object
+	m_hardpoints.SetParent<Ship>(this);
+
 	this->m_thrustchange_flag = true;		// Force an initial refresh
 	this->m_masschange_flag = true;			// Force an initial refresh
 
@@ -63,6 +64,18 @@ void Ship::InitialiseCopiedObject(Ship *source)
 {
 	// Pass control to all base classes
 	iSpaceObject::InitialiseCopiedObject((iSpaceObject*)source);
+
+
+	/* Begin Ship-specific initialisation logic here */
+
+	// Copy the ship hardpoints and link them to this ship
+	m_hardpoints.Clone(source->GetHardpoints());
+	m_hardpoints.SetParent<Ship>(this);
+
+	// Update any other fields that should not be replicated through the standard copy constructor
+	CancelAllOrders();
+	SetTargetThrustOfAllEngines(0.0f);
+
 }
 
 
@@ -98,11 +111,11 @@ void Ship::Shutdown(void)
 void Ship::SetTargetThrustOfAllEngines(float target)
 {
 	// Get a reference to the set of engines on this ship
-	iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 	// Set the target thrust of each engine in turn
-	iHardpoints::HardpointCollection::iterator it_end = engines->end();
-	for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+	Hardpoints::HardpointCollection::iterator it_end = engines.end();
+	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->SetTargetThrust(target);
 }
 
@@ -110,11 +123,11 @@ void Ship::SetTargetThrustOfAllEngines(float target)
 void Ship::SetTargetThrustPercentageOfAllEngines(float target)
 {
 	// Get a reference to the set of engines on this ship
-	iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 	// Set the target thrust of each engine in turn
-	iHardpoints::HardpointCollection::iterator it_end = engines->end();
-	for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+	Hardpoints::HardpointCollection::iterator it_end = engines.end();
+	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->SetTargetThrustPercentage(target);
 }
 
@@ -122,11 +135,11 @@ void Ship::SetTargetThrustPercentageOfAllEngines(float target)
 void Ship::IncrementTargetThrustOfAllEngines(void)
 {
 	// Get a reference to the set of engines on this ship
-	iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 	// Increment the target thrust of each engine in turn
-	iHardpoints::HardpointCollection::iterator it_end = engines->end();
-	for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+	Hardpoints::HardpointCollection::iterator it_end = engines.end();
+	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->IncrementTargetThrust();
 }
 
@@ -134,29 +147,22 @@ void Ship::IncrementTargetThrustOfAllEngines(void)
 void Ship::DecrementTargetThrustOfAllEngines(void)
 {
 	// Get a reference to the set of engines on this ship
-	iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 	// Decrement the target thrust of each engine in turn
-	iHardpoints::HardpointCollection::iterator it_end = engines->end();
-	for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+	Hardpoints::HardpointCollection::iterator it_end = engines.end();
+	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->DecrementTargetThrust();
 }
 
 
-// Default destructor
-Ship::~Ship(void)
-{
-	
-}
-
-
-// Makes updates to this object based on a change to the specified hardpoint hp.  Alternatively if a NULL
-// pointer is passed then all potential refreshes are performed on the parent 
-void Ship::PerformHardpointChangeRefresh(Hardpoint *hp)
+// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
+// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
+// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
+void Ship::HardpointChanged(Hardpoint *hp)
 {
 	// Get the type of hardpoint being considered, or assign 'unknown' if NULL is provided and we want to make all potential updates
-	Equip::Class hptype = Equip::Class::Unknown;
-	if (hp) hptype = hp->GetType();
+	Equip::Class hptype = (hp ? hp->GetType() : Equip::Class::Unknown);
 
 	/*** HPEngine ***/
 	if (hptype == Equip::Class::Engine || hptype == Equip::Class::Unknown)
@@ -238,11 +244,11 @@ void Ship::DetermineEngineThrustLevels(void)
 void Ship::RunAllEnginesToTargetThrust(void)
 {
 	// We will consider each engine in turn
-	iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 	// Loop through each in turn and run to its target thrust if required
-	iHardpoints::HardpointCollection::iterator it_end = engines->end();
-	for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+	Hardpoints::HardpointCollection::iterator it_end = engines.end();
+	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->RunToTargetThrust();
 	
 }
@@ -258,11 +264,11 @@ void Ship::SimulateAllShipEngines(void)
 		this->PhysicsState.Acceleration = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 		
 		// Get a pointer to the collection of engines on this ship
-		iHardpoints::HardpointCollection *engines = GetHardpoints()->GetHardpointsOfType(Equip::Class::Engine);
+		Hardpoints::HardpointCollection & engines = GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
 
 		// Loop through each engine in turn and add its contribution to the velocity vector
-		iHardpoints::HardpointCollection::iterator it_end = engines->end();
-		for (iHardpoints::HardpointCollection::iterator it = engines->begin(); it != it_end; ++it)
+		Hardpoints::HardpointCollection::iterator it_end = engines.end();
+		for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		{
 			HpEngine* e = (HpEngine*)(*it);
 
@@ -317,7 +323,6 @@ void Ship::SimulateObjectPhysics(void)
 	// Apply a drag scalar to the momentum vector to prevent perpetual movement.  Again, weighted by
 	// fraction of a second that has passed.  C_MOVEMENT_DRAG_FACTOR is % momentum decrease per second.
 	if (!IsZeroVector(this->PhysicsState.WorldMomentum))
-		//this->PhysicsState.WorldMomentum *= (1.0f - (Game::C_MOVEMENT_DRAG_FACTOR * Game::TimeFactor));
 		this->PhysicsState.WorldMomentum -= (this->PhysicsState.WorldMomentum * Game::C_MOVEMENT_DRAG_FACTOR * Game::TimeFactor);
 
 	// Also apply a drag factor if the ship is currently braking
@@ -697,6 +702,13 @@ Order::OrderResult Ship::MoveToTarget(iSpaceObject *target, float closedistance)
 		return MoveToPosition(target->GetPosition(), closedistance);
 	else
 		return Order::OrderResult::InvalidOrder;
+}
+
+
+// Default destructor
+Ship::~Ship(void)
+{
+
 }
 
 

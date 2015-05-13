@@ -8,11 +8,10 @@
 #include "Octree.h"
 #include "Model.h"
 #include "Ship.h"
+#include "Hardpoints.h"
 #include "ComplexShipSection.h"
-#include "ComplexShipSectionDetails.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "ComplexShipTile.h"
-#include "HardpointsInterface.h"
 #include "HpEngine.h"
 #include "Engine.h"
 #include "SpaceSystem.h"
@@ -35,12 +34,12 @@ ComplexShip::ComplexShip(void)
 	m_shipclass = Ships::Class::Complex;
 
 	// Set ship properties to default values on object creation
-	m_hardpoints = new HardpointsInterface();
 	m_navnetwork = NULL;
 	m_perimeterbeacons.clear();
 	m_activeperimeternodes.clear();
 	m_activebeacons = 0;
 	m_forcerenderinterior = false;
+	m_suspendupdates = false;
 	m_gravityupdaterequired = true;
 	m_oxygenupdaterequired = true;
 	m_sdoffset = INTVECTOR3(0, 0, 0);
@@ -58,10 +57,12 @@ void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 
 	/* Now perform ComplexShip-specific initialisation logic for new objects */
 
-	// Clear the ship hardpoints interface so that it is rebuilt as new sections are added
-	this->GetShipHardpoints()->ClearHardpointsLinks();
+	// Clear the ship hardpoints collection so that it is rebuilt as new sections are added
+	GetHardpoints().SuspendUpdates();
+	GetHardpoints().ClearData();
 
 	// Clear the set of ship sections copied from the source, and re-add those ship sections one-by-one
+	// This will also bring across hardpoints etc. and create references within the ship
 	this->GetSections()->clear();
 	ComplexShip::ComplexShipSectionCollection::const_iterator s_it_end = source->GetSections()->end();
 	for (ComplexShip::ComplexShipSectionCollection::const_iterator s_it = source->GetSections()->begin(); s_it != s_it_end; ++s_it)
@@ -72,6 +73,9 @@ void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 		// Assuming the section was copied successfully, add it to this ship
 		if (section) this->AddShipSection(section);
 	}
+
+	// Resume updates once data has been pulled from each section
+	GetHardpoints().ResumeUpdates();
 
 	// Run complex ship-specific method to remove 'standard' flags, since it also needs to propogate to all sections as well
 	this->RemoveStandardComponentFlags();
@@ -149,9 +153,16 @@ Result ComplexShip::AddShipSection(ComplexShipSection *section)
 	// Set the pointer from the section details back to its parent ship object
 	section->SetParent(this);
 
-	// Link this section to our ship hardpoints collection and (automatically) rebuild the interface
-	if (section->GetHardpoints()) m_hardpoints->AddHardpointsLink(section->GetHardpoints());
+	// Update the ship based on the addition of this section, unless updates are currently suspended
+	if (!m_suspendupdates)
+	{
+		// Perform a full rebuild of anything dependent on sections, e.g. hardpoints
+		BuildHardpointCollection();
 
+		// Perform an update of ship statistics based on the current configuration
+		RecalculateAllShipData();
+	}
+		
 	// Return success now that the section is successfully integrated into the ship
 	return ErrorCodes::NoError;
 }
@@ -167,16 +178,21 @@ void ComplexShip::RemoveShipSection(ComplexShipSection *section)
 	{
 		if (m_sections.at(i) == section)
 		{
-			// Unlink this section from the ship hardpoints collection and (automatically) rebuild the interface
-			if (section->GetHardpoints())
-				m_hardpoints->RemoveHardpointsLink(section->GetHardpoints());
-
-			// Swap-and-pop this element to efficiently remove it from the collection
-			std::swap(m_sections.at(i), m_sections.at(n - 1));
-			m_sections.pop_back();
-
 			// Clear the pointer from this section back to its parent ship object
 			section->SetParent(NULL);
+
+			// Remove this section from the collection
+			m_sections.erase(m_sections.begin() + i);
+
+			// Update the ship based on the removal of this section, unless updates are currently suspended
+			if (!m_suspendupdates)
+			{
+				// Perform a full rebuild of anything dependent on sections, e.g. hardpoints
+				BuildHardpointCollection();
+
+				// Perform an update of ship statistics based on the current configuration
+				RecalculateAllShipData();
+			}
 
 			// End the method here if we have removed the specified item
 			return;
@@ -186,22 +202,24 @@ void ComplexShip::RemoveShipSection(ComplexShipSection *section)
 
 void ComplexShip::RemoveShipSection(int index)
 {
-	// Perform bounds checking before we attempt to remove the ship section
-	if (index < 0 || index >= (int)m_sections.size()) return;
+	// Make sure this is a valid section
+	if (index < 0 || index >= (int)m_sections.size() || m_sections.at(index) == NULL) return;
 
-	// Unlink this section from the ship hardpoints collection and (automatically) rebuild the interface
-	if (m_sections.at(index) && m_sections.at(index)->GetHardpoints())
-		m_hardpoints->RemoveHardpointsLink(m_sections.at(index)->GetHardpoints());
-
-	// Remove the pointer from this section back to its parent object (this)
+	// Clear the pointer from this section back to its parent ship object
 	m_sections.at(index)->SetParent(NULL);
 
-	// If this item isn't already the last section in the collection then swap to the end now
-	if (index != (m_sections.size() - 1))
-		std::swap(m_sections.at(index), m_sections.at(m_sections.size() - 1));
+	// Remove this section from the collection
+	m_sections.erase(m_sections.begin() + index);
 
-	// Now that this element is at the end, pop it from the collection to remove
-	m_sections.pop_back();
+	// Update the ship based on the removal of this section, unless updates are currently suspended
+	if (!m_suspendupdates)
+	{
+		// Perform a full rebuild of anything dependent on sections, e.g. hardpoints
+		BuildHardpointCollection();
+
+		// Perform an update of ship statistics based on the current configuration
+		RecalculateAllShipData();
+	}
 }
 
 // Method to handle the addition of a ship tile to this object
@@ -220,6 +238,29 @@ void ComplexShip::ShipTileRemoved(ComplexShipTile *tile)
 
 	// Pass control down to base classes
 	iSpaceObjectEnvironment::ShipTileRemoved(tile);
+}
+
+// Builds the complex ship hardpoint collection based on its constituent ship sections
+void ComplexShip::BuildHardpointCollection(void)
+{
+	// Suspend hardpoint updates and then clear the whole collection
+	m_hardpoints.SuspendUpdates();
+	m_hardpoints.ClearData();
+
+	// We will pull hardpoints from each ship section in turn
+	ComplexShip::ComplexShipSectionCollection::iterator it_end = m_sections.end();
+	for (ComplexShip::ComplexShipSectionCollection::iterator it = m_sections.begin(); it != it_end; ++it)
+	{
+		// Get a reference to the section hardpoint collection
+		const std::vector<Hardpoint*> & h = (*it)->GetHardpoints();
+		int n = h.size();
+
+		// Add a reference to each hardpoint (i.e. NOT a clone) to the ship in turn
+		for (int i = 0; i < n; ++i) if (h[i]) m_hardpoints.AddHardpoint(h[i]);
+	}
+
+	// Resume hardpoint updates, which will trigger the event that updates the ship based on all hardpoints
+	m_hardpoints.ResumeUpdates();
 }
 
 // Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
@@ -252,28 +293,6 @@ void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR
 			// Have the section recalculate its own position based on the parent ship location
 			m_sections[i]->UpdatePositionFromParent();
 		}
-	}
-}
-
-// Replaces the hardpoints interface for this ship with a new one.  Copies data from 'hp' into a new interface for this object
-void ComplexShip::ReplaceShipHardpoints(HardpointsInterface *hp)
-{
-	// Remove any existing hardpoints interface, if one exists
-	if (m_hardpoints) { m_hardpoints->Shutdown(); SafeDelete(m_hardpoints); }
-
-	// Create a new hardpoints interface for this ship
-	m_hardpoints = new HardpointsInterface();
-
-	// Replicate each hardpoints link from the template collection
-	int n = hp->GetHardpointsLinkCount();
-	for (int i = 0; i < n; ++i)
-	{
-		// Get a reference to the hardpoints collection
-		Hardpoints *h = hp->GetHardpointsLink(i);
-		if (!h) continue;
-
-		// Add a link to this collection, which will automatically recalculate hardpoints data for the ship
-		m_hardpoints->AddHardpointsLink(h);
 	}
 }
 
@@ -321,8 +340,9 @@ void ComplexShip::Shutdown(bool IncludeStandardObjects, bool ShutdownSections, b
 	// Detach and deallocate the navigation network assigned to this ship
 	ShutdownNavNetwork();
 
-	// Shutdown the hardpoints interface, which will unlink it from all component ship sections
-	m_hardpoints->Shutdown();
+	// Clear the hardpoints collection, but don't deallocate the hardpoints.  These are the responsibility of the ship 
+	// section that owns them
+	m_hardpoints.ClearData();
 
 	// Shut down the collection of capital ship perimeter beacons, if required
 	if (ShutdownBeacons) ShutdownPerimeterBeacons();
@@ -716,7 +736,7 @@ void ComplexShip::AttachCapitalShipBeacon(D3DXVECTOR3 position)
 void ComplexShip::RecalculateShipDataFromCurrentState() 
 {
 	// Perform an update of the ship based on all hardpoints
-	PerformHardpointChangeRefresh(NULL);
+	HardpointChanged(NULL);
 
 	// Recalculate ship properties based on all our component sections, loadout and any modifiers
 	CalculateShipSizeData();
@@ -728,13 +748,26 @@ void ComplexShip::RecalculateShipDataFromCurrentState()
 	CalculateBankExtents();
 
 	// Iterate through each ship section in turn, pulling any required info and also resetting the update flags
+	bool sections_updated = false;
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
 	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
 	{
-		// Extract information required to perform the ship refresh
+		if ((*it)->SectionIsUpdated())
+		{
+			// Extract information required to perform the ship refresh
+
+			// Record the fact that at least one section has changed, in order to perform any global updates afterwards
+			sections_updated = true;
+		}
 
 		// Reset the section update flag now that we have accounted for its latest info
 		(*it)->ClearSectionUpdateFlag();
+	}
+
+	// Perform any global update, in case any section was updated
+	if (sections_updated)
+	{
+		BuildHardpointCollection();
 	}
 
 	// Recalculate all terrain object positions based on this potential change to the environment size
@@ -1029,16 +1062,16 @@ void ComplexShip::CalculateEngineStatistics()
 	if (m_sections.size() == 0) { this->EngineAngularAcceleration.SetAllValues(1000.0f); return; }
 
 	// Retrieve the vector of all engine hardpoints on the ship
-	iHardpoints::HardpointCollection *engines = m_hardpoints->GetHardpointsOfType(Equip::Class::Engine);
+	Hardpoints::HardpointCollection & engines = m_hardpoints.GetHardpointsOfType(Equip::Class::Engine);
 
 	// Now sum the total engine acceleration value from each engine to determine an engine angular acceleration value
 	HpEngine *hp; Engine *e; float accel = 0.0f;
-	int n = (int)engines->size();
+	int n = (int)engines.size();
 
 	for (int i = 0; i < n; ++i)
 	{
 		// Attempt to get a reference to the hardpoint, and the engine mounted on it (if there is one)
-		hp = (HpEngine*)engines->at(i);	if (!hp) continue;
+		hp = (HpEngine*)engines.at(i);	if (!hp) continue;
 		e = (Engine*)hp->GetEngine();	if (!e) continue;
 
 		// Add the engine acceleration 

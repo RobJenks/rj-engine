@@ -5,7 +5,6 @@
 #include "Ships.h"
 #include "GameDataExtern.h"
 #include "ComplexShip.h"
-#include "ComplexShipDetails.h"
 #include "ComplexShipTile.h"
 #include "iObject.h"
 #include "Actor.h"

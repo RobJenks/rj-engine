@@ -19,6 +19,7 @@
 #include "StaticTerrainDefinition.h"
 #include "StaticTerrain.h"
 #include "CSCorridorTile.h"
+#include "Hardpoint.h"
 #include "Hp.h"
 #include "Engine.h"
 
@@ -172,15 +173,13 @@ Result IO::Data::SaveSimpleShip(TiXmlElement *parent, SimpleShip *object)
 	IO::Data::LinkFloatXMLElement("CameraElasticity", object->CameraElasticity, node);
 
 	// Save data on each hardpoint
-	if (object->GetShipHardpoints() != NULL)
+	Hardpoints::IndexedHardpointCollection::const_iterator it_end = object->GetHardpoints().GetAllHardpoints().end();
+	for (Hardpoints::IndexedHardpointCollection::const_iterator it = object->GetHardpoints().GetAllHardpoints().begin(); it != it_end; ++it)
 	{
-		iHardpoints::IndexedHardpointCollection::const_iterator it_end = object->GetShipHardpoints()->GetAllHardpoints()->end();
-		for (iHardpoints::IndexedHardpointCollection::const_iterator it = object->GetShipHardpoints()->GetAllHardpoints()->begin(); it != it_end; ++it)
-		{
-			// Save data on this hardpoint
-			IO::Data::SaveHardpoint(node, it->second);
-		}
+		// Save data on this hardpoint
+		IO::Data::SaveHardpoint(node, it->second);
 	}
+	
 
 	// Finally, link the new node to the parent and return success
 	parent->LinkEndChild(node);
@@ -273,10 +272,10 @@ Result IO::Data::SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection
 	IO::Data::LinkStringXMLElement("PreviewImage", object->GetPreviewImage()->GetFilename(), node);
 
 	// Save each hardpoint in turn
-	iHardpoints::IndexedHardpointCollection::const_iterator it_end = object->GetHardpoints()->GetAllHardpoints()->end();
-	for (iHardpoints::IndexedHardpointCollection::const_iterator it = object->GetHardpoints()->GetAllHardpoints()->begin(); it != it_end; ++it)
+	std::vector<Hardpoint*>::const_iterator it_end = object->GetHardpoints().end();
+	for (std::vector<Hardpoint*>::const_iterator it = object->GetHardpoints().begin(); it != it_end; ++it)
 	{
-		SaveHardpoint(node, it->second);
+		SaveHardpoint(node, (*it));
 	}
 
 	// Link this ship section to the parent node and return success

@@ -479,6 +479,9 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 	SimpleShip *object = new SimpleShip();
 	object->SetShipClass(Ships::Class::Simple);
 
+	// Suspend updates while loading the data
+	object->GetHardpoints().SuspendUpdates();
+
 	// Now look at each child element in turn
 	std::string key; HashVal hash;
 	TiXmlElement *node = root->FirstChildElement();
@@ -502,7 +505,7 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 			else if (hash == HashedStrings::H_Hardpoint)
 			{
 				Hardpoint *h = LoadHardpoint(node);
-				if (h) object->GetShipHardpoints()->AddHardpoint(h);
+				if (h) object->GetHardpoints().AddHardpoint(h);
 			}
 		}
 	}
@@ -514,7 +517,8 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
 	}
 
-	// Otherwise, calculate the ship data and store in the central collection
+	// Otherwise, resume updates, recalculate the ship data and store in the central collection
+	object->GetHardpoints().ResumeUpdates();
 	object->RecalculateAllShipData();
 	D::AddStandardSimpleShip(object);
 
@@ -528,6 +532,10 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 	// Create a new ComplexShip instance to hold the data
 	ComplexShip *object = new ComplexShip();
 	object->SetShipClass(Ships::Class::Complex);
+
+	// Suspend updates while data is loaded
+	object->SuspendUpdates();
+	object->GetHardpoints().SuspendUpdates();
 
 	// Now look at each node element in turn
 	std::string key; HashVal hash; Result result; ComplexShipTile *tile;
@@ -566,8 +574,9 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 		return ErrorCodes::CannotLoadComplexShipDetailsWithDuplicateCode;
 	}
 
-	// Otherwise, calculate the ship data and store in the central collection
-	object->RecalculateAllShipData();
+	// Otherwise, resume updates, which will calculate the ship data, and store in the central collection
+	object->ResumeUpdates();
+	object->GetHardpoints().ResumeUpdates();
 	D::AddStandardComplexShip(object);
 
 	// Clear the temporary CS section loading buffer; sections are only persisted for loading into the next ship
@@ -582,6 +591,9 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 {
 	// Create a new ComplexShipSection instance to hold the data
 	ComplexShipSection *object = new ComplexShipSection();
+
+	// Suspend updates while the object is being loaded
+	object->SuspendUpdates();
 
 	// Now look at each node element in turn
 	std::string key; HashVal hash;
@@ -612,7 +624,7 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 			else if (hash == HashedStrings::H_Hardpoint)
 			{
 				Hardpoint *h = LoadHardpoint(node);
-				if (h) object->GetHardpoints()->AddHardpoint(h);
+				if (h) object->AddHardpoint(h);
 			}
 		}
 	}
@@ -624,7 +636,8 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 		return ErrorCodes::CannotLoadCSSectionDetailsWithDuplicateCode;
 	}
 
-	// Otherwise, recalculate the section data 
+	// Otherwise, resume all updates and recalculate the section data 
+	object->ResumeUpdates();
 	object->RecalculateShipDataFromCurrentState();
 
 	// Store in either the central collection or the temporary loading buffer, depending on whether this is a standard section
@@ -1598,7 +1611,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 				string c_hp = cc_hp;
 				if (c_hp != NullString) 
 				{
-					Hardpoint *hp = ship->GetShipHardpoints()->Get(c_hp);
+					Hardpoint *hp = ship->GetHardpoints().Get(c_hp);
 					if (hp) 
 					{
 						// Retrieve the equipment name and validate it
@@ -1647,7 +1660,7 @@ CompoundLoadoutMap *IO::Data::LoadCompoundLoadoutMap(TiXmlElement *node, SimpleS
 	string c_hp = cc_hp;
 
 	// Attempt to match the hardpoint to one on this ship; if it does not exist, go no further
-	Hardpoint *hp = targetshiptype->GetShipHardpoints()->Get(c_hp);
+	Hardpoint *hp = targetshiptype->GetHardpoints().Get(c_hp);
 	if (!hp) return NULL;
 
 	// Create a new compound loadout object to hold the data

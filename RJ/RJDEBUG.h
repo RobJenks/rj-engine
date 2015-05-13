@@ -6,7 +6,6 @@
 #include "DX11_Core.h"
 
 #include "DataOutput.h"
-#include "SimpleShipDetails.h"
 #include "Model.h"
 #include "Engine.h"
 

@@ -3,22 +3,40 @@
 #ifndef __iContainsHardpointsH__
 #define __iContainsHardpointsH__
 
-#include <string>
-#include "GameVarsExtern.h"
-#include "iSpaceObject.h"
 class Hardpoint;
-using namespace std;
+#include "Hardpoints.h"
+#include "CompilerSettings.h"
 
 class iContainsHardpoints
 {
 public:
 
-	// Virtual interface method: refreshes the parent object based on a given hardpoint, or all hardpoints if NULL is provided
-	virtual void					PerformHardpointChangeRefresh(Hardpoint *hp)			= 0;
+	// Default constructor
+	iContainsHardpoints(void);
 
-	// Virtual interface method: objects must expose a way back to their base iSpaceObject class (since this interface is not derived 
-	// from it).  This saves virtual inheritance from iSpaceObject
-	virtual iSpaceObject *			GetSpaceObjectReference(void)							= 0;
+	// Returns a reference to the hardpoints collection
+	CMPINLINE Hardpoints &			GetHardpoints(void)							{ return m_hardpoints; }
+
+	// Assigns a new hardpoints collection to this object
+	CMPINLINE void					AssignHardpoints(Hardpoints & hardpoints)
+	{
+		m_hardpoints.Clone(hardpoints);			// Clone from the source collection.  This will clone all hardpoints within it as well
+		m_hardpoints.SetParent(this);			// Make sure that the parent pointer is still pointing at this object
+	}
+
+	// Pure virtual event handler to be implemented by inheriting class.  Called by this class when the hardpoint 
+	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
+	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
+	virtual void					HardpointChanged(Hardpoint *hp)				= 0;
+
+
+	// Default destructor
+	~iContainsHardpoints(void);
+
+protected:
+
+	// Hardpoints collection
+	Hardpoints  					m_hardpoints;
 
 };
 

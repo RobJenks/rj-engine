@@ -51,29 +51,19 @@ Hardpoint& Hardpoint::operator =(const Hardpoint &H)
 	return *this;
 }
 
-/*template <class T> T *Hardpoint::Copy(void)
-{
-	// Create a copy of this hardpoint using the custom copy constructor, templated to call the relevant subclass first
-	T *h = new T(*this);
-
-	// Return the copied hardpoint
-	return h;
-}*/
-
-CMPINLINE Hardpoints *Hardpoint::GetParent() { return this->m_parent; }
-
-// Shortcut method; follows two levels of pointers to locate the parent ship (iObject) object, performing NULL tests on the way
-iObject *Hardpoint::GetShip()
+// Shortcut method; follows two levels of pointers to locate the parent object (iObject)
+// object, performing NULL tests on the way
+iObject *Hardpoint::GetParentObject(void)
 {
 	Hardpoints *hp = this->GetParent();
-	if (!hp) return NULL;
-	return hp->GetParent();
+	return (hp ? hp->GetParent() : NULL);
 }
 
-// Shortcut method; follows two levels of pointers to locate the parent hardpoint container (iContainsHardpoints) object, performing NULL tests on the way
-iContainsHardpoints *Hardpoint::GetHardpointContainingShip(void)
+
+// Shortcut method; follows two levels of pointers to locate the parent hardpoint container (iContainsHardpoints) 
+// object, performing NULL tests on the way
+iContainsHardpoints *Hardpoint::GetParentHPObject(void)
 {
 	Hardpoints *hp = this->GetParent();
-	if (!hp) return NULL;
-	return hp->GetHPParent();
+	return (hp ? hp->GetHPParent() : NULL);
 }

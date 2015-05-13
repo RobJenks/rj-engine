@@ -151,7 +151,6 @@
     <ClCompile Include="GameVarsExtern.cpp" />
     <ClCompile Include="Hardpoint.cpp" />
     <ClCompile Include="Hardpoints.cpp" />
-    <ClCompile Include="HardpointsInterface.cpp" />
     <ClCompile Include="HashFunctions.cpp" />
     <ClCompile Include="Hp.cpp" />
     <ClCompile Include="HpEngine.cpp" />
@@ -162,6 +161,7 @@
     <ClCompile Include="iActiveObject.cpp" />
     <ClCompile Include="iActorObject.cpp" />
     <ClCompile Include="iConsumesOrders.cpp" />
+    <ClCompile Include="iContainsHardpoints.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
     <ClCompile Include="iEnvironmentObject.cpp" />
@@ -221,7 +221,6 @@
     <ClCompile Include="RJ.cpp" />
     <ClCompile Include="Shield.cpp" />
     <ClCompile Include="Ship.cpp" />
-    <ClCompile Include="ShipDetails.cpp" />
     <ClCompile Include="ShipTileRequirement.cpp" />
     <ClCompile Include="SimpleShip.cpp" />
     <ClCompile Include="SimpleShipLoadout.cpp" />
@@ -336,7 +335,6 @@
     <ClInclude Include="GlobalFlags.h" />
     <ClInclude Include="Hardpoint.h" />
     <ClInclude Include="Hardpoints.h" />
-    <ClInclude Include="HardpointsInterface.h" />
     <ClInclude Include="HashFunctions.h" />
     <ClInclude Include="HighlightEffect.h" />
     <ClInclude Include="Hp.h" />
@@ -353,7 +351,6 @@
     <ClInclude Include="iContainsComplexShipTiles.h" />
     <ClInclude Include="iContainsHardpoints.h" />
     <ClInclude Include="iEnvironmentObject.h" />
-    <ClInclude Include="iHardpoints.h" />
     <ClInclude Include="iLoadoutMap.h" />
     <ClInclude Include="Image2D.h" />
     <ClInclude Include="Image2DRenderGroup.h" />
@@ -424,11 +421,9 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ResourceAmount.h" />
     <ClInclude Include="RJ.h" />
-    <ClInclude Include="RJDEBUG.h" />
     <ClInclude Include="ScheduledObject.h" />
     <ClInclude Include="Shield.h" />
     <ClInclude Include="Ship.h" />
-    <ClInclude Include="ShipDetails.h" />
     <ClInclude Include="Ships.h" />
     <ClInclude Include="ShipTileRequirement.h" />
     <ClInclude Include="SimpleShip.h" />

@@ -4,7 +4,6 @@
 #define __SimpleShipH__
 #include "iSpaceObject.h"
 #include "Ship.h"
-#include "SimpleShipDetails.h"
 #include "SimpleShipLoadout.h"
 #include "iContainsHardpoints.h"
 #include "FadeEffect.h"
@@ -13,7 +12,7 @@ class iObject;
 class Hardpoint;
 class Hardpoints;
 
-class SimpleShip : public Ship, public iContainsHardpoints 
+class SimpleShip : public Ship
 {
 
 public:
@@ -25,28 +24,15 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(SimpleShip *source);
+	void				InitialiseCopiedObject(SimpleShip *source);
 
-
-	// Simple ships directly maintain a 'Hardpoints' collection
-	CMPINLINE iHardpoints *				GetHardpoints(void)				{ return (iHardpoints*)m_hardpoints; }
-	CMPINLINE Hardpoints *				GetShipHardpoints(void)			{ return m_hardpoints; }
-	CMPINLINE void						SetHardpoints(Hardpoints *hp)	
-	{ 
-		// Set the new hardpoints pointer
-		m_hardpoints = hp; 
-
-		// Also set the reverse pointer back to the parent object
-		if (m_hardpoints) m_hardpoints->SetParent(this, this);
-	}
-	
 	// Updates the object before it is rendered.  Called only when the object is processed in the render queue (i.e. not when it is out of view)
 	void				PerformRenderUpdate(void);
 
-	// Makes updates to this object based on a change to the specified hardpoint hp.  Alternatively if a NULL
-	// pointer is passed then all potential refreshes are performed on the parent 
-	void				PerformHardpointChangeRefresh(Hardpoint *hp);
-	
+	// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
+	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
+	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
+	void				HardpointChanged(Hardpoint *hp);
 
 	// Recalculates all properties, hardpoints & statistics of the ship.  Called once the ship has been created
 	void				RecalculateAllShipData(void);
@@ -91,16 +77,12 @@ public:
 	// Method called when this object collides with another.  Virtual inheritance from iObject
 	void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
 
-	// Interface method from iContainsHardpoints; returns a reference back to this object's base iSpaceObject object
-	iSpaceObject * GetSpaceObjectReference(void)	{ return (iSpaceObject*)this; }
-
 	// Shut down the ship, deallocating all resources
 	void Shutdown(void);
 
 protected:
 
-	// Hardpoints collection for the ship
-	Hardpoints * 		m_hardpoints;
+	
 
 };
 

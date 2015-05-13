@@ -6,7 +6,6 @@
 #include "DX11_Core.h"
 
 #include "CompilerSettings.h"
-#include "SpaceObjectAttachment.h"
 #include "ParticleEmitter.h"
 
 #include "iSpaceObject.h"
