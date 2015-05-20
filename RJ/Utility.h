@@ -405,28 +405,13 @@ CMPINLINE void _RemoveFromVectorAtIndex_Unchecked(std::vector<T> &vec, int index
 	vec.erase(vec.begin() + index);
 }
 
-/*template <typename T>
-void RemoveFromVectorAtIndex(vector<T> &vec, int index)
+// Clears and deallocates all memory maintained by a vector
+template <typename T>
+CMPINLINE void DeallocateVector(std::vector<T> & t)
 {
-	// Make sure the index is valid
-	int n = vec.size();
-	if (index < 0 || index >= n) return;
-	
-	// If this is the last element then simply pop it from the end, otherwise we need to manipulate the memory
-	if (index == (n-1))
-	{
-		// Simply remove from the end of the vector
-		vec.pop_back();
-	} 
-	else
-	{
-		// Otherwise, move the block of memory back one element to overlap this item
-		memmove(&(vec[index]), &(vec[index+1]), (n-index-1) * sizeof(T));
-		
-		// Now remove the final element
-		vec.pop_back();
-	}
-}*/
+	std::vector<T> tmp;
+	tmp.swap(t);
+}
 
 // Returns the local system time
 CMPINLINE struct tm * GetLocalDateTime(void)
