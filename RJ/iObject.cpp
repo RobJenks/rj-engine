@@ -171,8 +171,8 @@ void iObject::SimulationStateChanged(void)
 	}
 
 	// We also need to pass the change in simulation state to any attached objects
-	std::vector<ObjectAttachment>::iterator it_end = m_childobjects.end();
-	for (std::vector<ObjectAttachment>::iterator it = m_childobjects.begin(); it != it_end; ++it)
+	std::vector<Attachment<iObject*>>::iterator it_end = m_childobjects.end();
+	for (std::vector<Attachment<iObject*>>::iterator it = m_childobjects.begin(); it != it_end; ++it)
 	{
 		if ((*it).Child) (*it).Child->SetSimulationState(m_simulationstate);
 	}
@@ -319,18 +319,19 @@ void iObject::UpdatePositionOfChildObjects(void)
 	for (AttachmentSet::iterator it = m_childobjects.begin(); it != it_end; ++it)
 	{
 		// Get a handle to the specific attachment
-		ObjectAttachment & attach = (*it);
+		Attachment<iObject*> & attach = (*it);
 
 		// Only update this child if it has not already been updated; avoids infinite loops
 		if (attach.Child && !(attach.Child->PositionUpdated()))
 		{
 			// Apply the effect of this attachment on the child
-			attach.ApplyAttachment();
+			attach.Apply();
 
 			// Set the child update flag
 			attach.Child->SetPositionUpdated(true);
 
 			// Update all children of this child
+			// TODO: This could lead to infinite loops if Parent >AttachedTo> Child >AttachedTo> Parent
 			attach.Child->UpdatePositionOfChildObjects();
 		}
 	}
@@ -396,10 +397,12 @@ void iObject::AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, 
 		oldparent->RemoveChildAttachment(child);
 	}
 
-	// Add a new child attachment to this object and recalculate the total attachment count
-	m_childobjects.push_back(ObjectAttachment(this, child, posoffset, orientoffset));
+	// Create a new child attachment, store it and recalculate the total attachment count.  Then apply it to update child position
+	Attachment<iObject*> attach = Attachment<iObject*>(this, child, posoffset, orientoffset);
+	m_childobjects.push_back(attach);
 	m_childcount = (int)m_childobjects.size();
-	
+	attach.Apply();
+
 	// Set the parent pointer in the child object to set the other side of the attachment
 	child->SetParentObjectDirect(this);
 }
@@ -416,7 +419,7 @@ void iObject::RemoveChildAttachment(iObject *child)
 		if (m_childobjects[i].Child == child)
 		{
 			// We have located the attachment, so remove it and break out of the loop
-			RemoveFromVectorAtIndex<ObjectAttachment>(m_childobjects, i);
+			RemoveFromVectorAtIndex<Attachment<iObject*>>(m_childobjects, i);
 			break;
 		}
 	}
@@ -454,14 +457,14 @@ bool iObject::HaveChildAttachment(iObject *child)
 
 // Returns details on the attachment to the specified child object (if there is one).  Returns a NULL struct (with NULL object pointers
 // and offsets) if no attachment exists.  Returns a new object by value so some overheard
-ObjectAttachment iObject::RetrieveChildAttachmentDetails(iObject *child)
+Attachment<iObject*> iObject::RetrieveChildAttachmentDetails(iObject *child)
 {
 	// Search the vector of attachments for this object
 	for (int i = 0; i < m_childcount; ++i)
 		if (m_childobjects[i].Child == child) return m_childobjects[i];
 
 	// No attachment exists, so return NULL data
-	return ObjectAttachment(NULL, NULL, NULL_VECTOR, ID_QUATERNION);
+	return Attachment<iObject*>(NULL, NULL, NULL_VECTOR, ID_QUATERNION);
 }
 
 // Detaches this object from any parent object.  Simply calls the RemoveChildAttachment method on the parent object.

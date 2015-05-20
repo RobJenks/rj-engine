@@ -92,6 +92,7 @@
     <ClCompile Include="ActorAttributes.cpp" />
     <ClCompile Include="ActorBase.cpp" />
     <ClCompile Include="AdjustableParameter.cpp" />
+    <ClCompile Include="Attachment.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CameraPath.cpp" />
@@ -260,6 +261,7 @@
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AdjustableParameter.h" />
     <ClInclude Include="Arc2D.h" />
+    <ClInclude Include="Attachment.h" />
     <ClInclude Include="BasicRay.h" />
     <ClInclude Include="BasicSphere.h" />
     <ClInclude Include="BinaryHeap.h" />

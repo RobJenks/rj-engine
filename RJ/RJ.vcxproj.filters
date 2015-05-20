@@ -484,6 +484,9 @@
     <ClCompile Include="iContainsHardpoints.cpp">
       <Filter>Equipment\Hardpoints</Filter>
     </ClCompile>
+    <ClCompile Include="Attachment.cpp">
+      <Filter>Objects\Attachments</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1076,6 +1079,9 @@
     </ClInclude>
     <ClInclude Include="FactionManagerObject.h">
       <Filter>Factions</Filter>
+    </ClInclude>
+    <ClInclude Include="Attachment.h">
+      <Filter>Objects\Attachments</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

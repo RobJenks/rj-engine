@@ -13,7 +13,6 @@
 #include "iContainsHardpoints.h"
 #include "Equip.h"
 #include <vector>
-class SpaceObjectAttachment;
 class Hardpoint;
 using namespace std;
 

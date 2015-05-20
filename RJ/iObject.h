@@ -10,6 +10,7 @@
 #include "GameVarsExtern.h"
 #include "Utility.h"
 #include "HashFunctions.h"
+#include "Attachment.h"
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
 #include "ObjectAttachment.h"
@@ -21,7 +22,7 @@ class iObject
 public:
 
 	// Static record of the highest ID value in existence, for assigning new objects upon registration
-	static Game::ID_TYPE					InstanceCreationCount;
+	static Game::ID_TYPE						InstanceCreationCount;
 
 	// Enumeration of flags maintained within the iObject class (still using bools, haven't implemented this yet)
 	/*enum ObjectFlags
@@ -36,14 +37,14 @@ public:
 	};*/
 
 	// Enumeration of possible object simulation states
-	enum ObjectSimulationState				{ NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
+	enum ObjectSimulationState					{ NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
 
 	// Define a standard type for the collection of all attachments from this object to others
-	typedef std::vector<ObjectAttachment>	AttachmentSet;
+	typedef std::vector<Attachment<iObject*>>	AttachmentSet;
 
 	// Static modifier for the size of the collision margin around an object's collision sphere.  2.0x the collision sphere
 	// to ensure all cases are caught.  If current object's sphere is larger then 
-	static const float						COLLISION_SPHERE_MARGIN;
+	static const float							COLLISION_SPHERE_MARGIN;
 
 	// Enumeration of all object types
 	enum ObjectType {	Unknown = 0, ShipObject, SimpleShipObject, ComplexShipObject, ComplexShipSectionObject, 
@@ -228,7 +229,7 @@ public:
 	CMPINLINE void								AddChildAttachment(iObject *child);
 	void										AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset);
 	bool										HaveChildAttachment(iObject *child);
-	ObjectAttachment							RetrieveChildAttachmentDetails(iObject *child);
+	Attachment<iObject*>						RetrieveChildAttachmentDetails(iObject *child);
 	void										RemoveChildAttachment(iObject *child);
 
 	// Method to update the position of any attached child objects
@@ -350,7 +351,7 @@ protected:
 
 	VisibilityTestingModeType			m_visibilitytestingmode;		// The method used to test visibility of this object
 
-	std::vector<ObjectAttachment>		m_childobjects;					// Vector of any attachments from this object to child objects
+	std::vector<Attachment<iObject*>>	m_childobjects;					// Vector of any attachments from this object to child objects
 	int									m_childcount;					// The number of child attachments, if any)
 	iObject *							m_parentobject;					// A reference to our parent attachment, if any
 	
@@ -360,7 +361,7 @@ protected:
 
 	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
 	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the
-	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z).
+	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z)).
 	float								m_fastmoverthresholdsq;
 
 

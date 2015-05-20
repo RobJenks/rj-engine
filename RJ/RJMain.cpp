@@ -75,6 +75,7 @@
 #include "SpaceProjectileDefinition.h"		// DBG
 #include "SpaceProjectile.h"				// DBG
 #include "SpaceProjectileLauncher.h"		// DBG
+#include "Attachment.h"						// DBG
 #include "SpaceTurret.h"
 #include "ViewFrustrum.h"
 
@@ -1791,6 +1792,10 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetProjectileSpin(1.0f);
 	l->SetLinearVelocityDegradeState(false);
 	l->SetAngularVelocityDegradeState(false);
+
+	Attachment<iObject*> attach;
+	attach.SetOffset(D3DXVECTOR3(1.0f, 2.0f, 3.0f), GetRotationQuaternion(Rotation90Degree::Rotate90));
+
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
