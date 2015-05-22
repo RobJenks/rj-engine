@@ -33,6 +33,12 @@ using namespace std::tr1;
 // Convenience macro for freeing malloc-ed memory
 #define SafeFree(x) { free(x); x = 0; }
 
+// Accepts either a reference or a pointer and universally returns a pointer
+template<typename T>
+CMPINLINE T * ptr(T & obj) { return &obj; }	// If object is a reference type then return a pointer
+template<typename T>
+CMPINLINE T * ptr(T * obj) { return obj; }	// Otherwise if object is already a pointer type then simply return it
+
 // Convenience macros to manipulate bitstrings
 #define SetBit(bitstring, bit) bitstring |= bit
 #define ClearBit(bitstring, bit) bitstring &= ~bit

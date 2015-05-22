@@ -6,6 +6,7 @@
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
 
+
 class _Attachment_Internal
 {
 public:
@@ -17,6 +18,7 @@ public:
 template <typename T>
 class Attachment
 {
+
 public:
 	T								Parent;					// Parent object
 	T								Child;					// Child object
@@ -36,14 +38,36 @@ public:
 	// only the object world matrix and is relatively fast.  Use when position/orientation are not required
 	void							Apply_TransformOnly(void);
 
+
 	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
 	// the object world matrix and stores its new position, and is relatively fast.  Use when orientation is not required
-	void							Apply_TransformPositionOnly(void);
+	
+	void							Apply_TransformPositionOnly(void)
+	{
+		// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
+		D3DXMatrixMultiply(&_Attachment_Internal::_DATA.m1, &m_mat_offset, Parent->GetWorldMatrix());
+		Child->SetWorldMatrix(_Attachment_Internal::_DATA.m1);
+
+		// Retrieve the new object position from its world matrix translation components
+		Child->SetPosition(D3DXVECTOR3(_Attachment_Internal::_DATA.m1._41, _Attachment_Internal::_DATA.m1._42, _Attachment_Internal::_DATA.m1._43));
+	}
 
 	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
 	// the object world matrix, position and orientation.  Less efficient than other methods since calculating
 	// orientation requires decomposition of the world matrix and at least one sqrt
-	void							Apply(void);
+	void							Apply(void)
+	{
+		// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
+		D3DXMatrixMultiply(&_Attachment_Internal::_DATA.m1, &m_mat_offset, Parent->GetWorldMatrix());
+		Child->SetWorldMatrix(_Attachment_Internal::_DATA.m1);
+
+		// Decompose to yield the world position and orientation of the child object
+		D3DXMatrixDecompose(&_Attachment_Internal::_DATA.v1, &_Attachment_Internal::_DATA.q1,
+			&_Attachment_Internal::_DATA.v2, &_Attachment_Internal::_DATA.m1);
+		Child->SetPosition(_Attachment_Internal::_DATA.v2);
+		Child->SetOrientation(&_Attachment_Internal::_DATA.q1);
+	}
+
 
 	// Constructors to create new attachment objects
 	Attachment(void);
@@ -138,7 +162,7 @@ void Attachment<T>::Apply_TransformOnly(void)
 
 // Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
 // the object world matrix and stores its new position, and is relatively fast.  Use when orientation is not required
-template <typename T>
+/*template <typename T>
 void Attachment<T>::Apply_TransformPositionOnly(void)
 {
 	// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
@@ -147,12 +171,12 @@ void Attachment<T>::Apply_TransformPositionOnly(void)
 
 	// Retrieve the new object position from its world matrix translation components
 	Child->SetPosition(D3DXVECTOR3(_Attachment_Internal::_DATA.m1._41, _Attachment_Internal::_DATA.m1._42, _Attachment_Internal::_DATA.m1._43));
-}
+}*/
 
 // Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
 // the object world matrix, position and orientation.  Less efficient than other methods since calculating
 // orientation requires decomposition of the world matrix and at least one sqrt
-template <typename T>
+/*template <typename T>
 void Attachment<T>::Apply(void)
 {
 	// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
@@ -164,7 +188,7 @@ void Attachment<T>::Apply(void)
 		&_Attachment_Internal::_DATA.v2, &_Attachment_Internal::_DATA.m1);
 	Child->SetPosition(_Attachment_Internal::_DATA.v2);
 	Child->SetOrientation(&_Attachment_Internal::_DATA.q1);
-}
+}*/
 
 
 

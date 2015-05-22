@@ -26,6 +26,7 @@
 
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "ConditionalCompilation.h"		// DBG
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
@@ -1795,7 +1796,7 @@ void RJMain::__CreateDebugScenario(void)
 
 	Attachment<iObject*> attach;
 	attach.SetOffset(D3DXVECTOR3(1.0f, 2.0f, 3.0f), GetRotationQuaternion(Rotation90Degree::Rotate90));
-
+	attach.Apply_TransformPositionOnly();
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

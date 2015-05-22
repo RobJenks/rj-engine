@@ -2,7 +2,6 @@
 #include "SimulationStateManager.h"
 #include "Octree.h"
 #include "CapitalShipPerimeterBeacon.h"
-#include "ObjectAttachment.h"
 #include "FactionManagerObject.h"
 #include "Faction.h"
 

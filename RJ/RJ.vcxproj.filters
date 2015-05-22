@@ -277,9 +277,6 @@
     <ClCompile Include="NavNetwork.cpp">
       <Filter>Pathfinding</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectAttachment.cpp">
-      <Filter>Objects\Attachments</Filter>
-    </ClCompile>
     <ClCompile Include="Order.cpp">
       <Filter>Orders</Filter>
     </ClCompile>
@@ -819,9 +816,6 @@
     <ClInclude Include="NavNode.h">
       <Filter>Pathfinding</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectAttachment.h">
-      <Filter>Objects\Attachments</Filter>
-    </ClInclude>
     <ClInclude Include="Octree.h">
       <Filter>Data structures</Filter>
     </ClInclude>
@@ -1082,6 +1076,9 @@
     </ClInclude>
     <ClInclude Include="Attachment.h">
       <Filter>Objects\Attachments</Filter>
+    </ClInclude>
+    <ClInclude Include="ConditionalCompilation.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

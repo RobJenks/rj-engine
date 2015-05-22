@@ -13,9 +13,9 @@
 #include "Attachment.h"
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
-#include "ObjectAttachment.h"
 #include "Faction.h"
 class Model;
+
 
 class iObject
 {
