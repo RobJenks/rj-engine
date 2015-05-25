@@ -484,6 +484,9 @@
     <ClCompile Include="Attachment.cpp">
       <Filter>Objects\Attachments</Filter>
     </ClCompile>
+    <ClCompile Include="Constraint.cpp">
+      <Filter>Objects\Attachments</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1079,6 +1082,9 @@
     </ClInclude>
     <ClInclude Include="ConditionalCompilation.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Constraint.h">
+      <Filter>Objects\Attachments</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

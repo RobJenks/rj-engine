@@ -433,6 +433,12 @@ void RJMain::ProcessKeyboardInput(void)
 			(", FM_TSQ: ")(proj->GetFastMoverThresholdSq())(", Pc: ")(((proj->PhysicsState.DeltaMoveDistanceSq) / proj->GetFastMoverThresholdSq()) * 100.0f)
 			(", ")((proj->IsFastMover() ? "> FAST MOVER <" : "Normal"))("\n").str().c_str());
 	}*/
+	if (b[DIK_4])
+	{
+		std::vector<Attachment<iObject*>> *attach = ss->GetChildObjects();
+		attach->at(0).Apply();
+	}
+
 	if (b[DIK_5])
 	{
 #if 0
@@ -1793,6 +1799,10 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetProjectileSpin(1.0f);
 	l->SetLinearVelocityDegradeState(false);
 	l->SetAngularVelocityDegradeState(false);
+
+	ss->AddChildAttachment(s2, D3DXVECTOR3(0.0f, 0.0f, 30.0f), ID_QUATERNION);
+
+
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

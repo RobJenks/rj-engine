@@ -109,6 +109,7 @@
     <ClCompile Include="ComplexShipTileClass.cpp" />
     <ClCompile Include="ComplexShipTileDefinition.cpp" />
     <ClCompile Include="CompoundLoadoutMap.cpp" />
+    <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CoreEngine.cpp" />
     <ClCompile Include="Crew.cpp" />
     <ClCompile Include="CSCorridorTile.cpp" />
@@ -282,6 +283,7 @@
     <ClInclude Include="ComplexShipTileDefinition.h" />
     <ClInclude Include="CompoundLoadoutMap.h" />
     <ClInclude Include="ConditionalCompilation.h" />
+    <ClInclude Include="Constraint.h" />
     <ClInclude Include="CopyObject.h" />
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="Crew.h" />
