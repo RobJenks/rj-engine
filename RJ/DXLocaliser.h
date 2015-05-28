@@ -4,6 +4,7 @@
 #define __DXLocaliserH__
 
 #include <string>
+#include <vector>
 #include <d3dcommon.h>
 #include "ErrorCodes.h"
 using namespace std;
@@ -18,41 +19,59 @@ public:
 	static const DXLevel DX_LEVEL_UNINITIALISED		= (DXLevel)-999;
 
 	// Enumeration of all supported shader model levels
-	enum SMLevel { SM_5_0, SM_2_0 };
+	enum SMLevel { SM_2_0 = 0, SM_4_0 = 1, SM_5_0 = 2 };
+
+	// Structure storing the features of a particular D3D feature level
+	struct LOCALISATION_LEVEL
+	{
+		D3D_FEATURE_LEVEL			FeatureLevel;	
+		SMLevel						ShaderModelLevel;
+		const char *				ShaderModelLevelDescription;
+		const char *				VertexShaderLevelDesc;
+		const char *				PixelShaderLevelDesc;
+		D3D_DRIVER_TYPE				RendereringDeviceType;
+	};
 
 	// Constructor
 	DXLocaliser(void);
 
 	// Initialises the component, including localisation tables, and sets an initial localisation level
 	Result					Initialise(void);
-	Result					Initialise(DXLevel DirectXLevel);
+	Result					Initialise(D3D_FEATURE_LEVEL featurelevel);
+
+	// Determines the maximum supported feature level of the current D3D device
+	Result					DetermineMaxSupportedFeatureLevel(D3D_FEATURE_LEVEL & outFeatureLevel) const;
 
 	// Applies a DX localisation level by transferring relevant values from the localisation tables
-	Result					ApplyDXLocalisation(DXLevel DirectXLevel);
+	Result					ApplyDXLocalisation(D3D_FEATURE_LEVEL featurelevel);
+
+	// The current localisation level of this component
+	LOCALISATION_LEVEL		Locale;
+
+	// Set the localisation level to be used
+	void					SetLocale(const LOCALISATION_LEVEL & locale);
+
+	// Determines whether the supplied D3D feature level is valid
+	bool					IsValidFeatureLevel(D3D_FEATURE_LEVEL featurelevel);
+
+	// Returns a string representation of a D3D feature level
+	static std::string		FeatureLevelToString(D3D_FEATURE_LEVEL featurelevel);
+
+	// Returns a string representation of a D3D render device type
+	static std::string		RenderDeviceTypeToString(D3D_DRIVER_TYPE drivertype);
+
 
 	// Destructor
 	~DXLocaliser(void);
 
-	// The parameters that will be modified by the DX localisation component
-	D3D_FEATURE_LEVEL				DXL_D3D_FEATURE_LEVEL;
-	SMLevel							DXL_SM_LEVEL;
-	const char *					DXL_VERTEX_SHADER_LEVEL_S;
-	const char *					DXL_PIXEL_SHADER_LEVEL_S;
-	D3D_DRIVER_TYPE					DXL_DEVICE_DRIVER_TYPE;
+protected:
 
-private:
 	// Builds the localisation tables
-	Result DXLocaliser::BuildDXLocalisationTables(void);
+	void								CompileDXLocalisationData(void);
 
-	// The current localisation level of this component
-	DXLevel							m_DXLevel;
+	// The localiser maintains a list of capabilities provided at each feature level
+	std::vector<LOCALISATION_LEVEL>		m_featurelevels;
 
-	// The localisation tables for each of the parameters controlled by this localisation component
-	D3D_FEATURE_LEVEL				LT_D3D_FEATURE_LEVEL				[DXLevel::Z__COUNT];
-	SMLevel							LT_SM_LEVEL							[DXLevel::Z__COUNT];
-	string							LT_VERTEX_SHADER_LEVEL_S			[DXLevel::Z__COUNT];
-	string							LT_PIXEL_SHADER_LEVEL_S				[DXLevel::Z__COUNT];
-	D3D_DRIVER_TYPE					LT_DEVICE_DRIVER_TYPE				[DXLevel::Z__COUNT];
 };
 
 

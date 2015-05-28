@@ -38,19 +38,18 @@ Result LightFadeShader::Initialise(ID3D11Device* device, HWND hwnd)
 	Result result;
 
 	// Initialise the vertex and pixel shaders, depending on the current DX locale
-	if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_5_0)
+	if (m_locale->Locale.ShaderModelLevel == DXLocaliser::SMLevel::SM_5_0)
 	{
 		// Initialise a Shader Model 5 shader
-		result = InitialiseShader_SM5(device, hwnd, "../RJ/Data/Shaders/lightfade_sm_5_0.vs",			
-													"../RJ/Data/Shaders/lightfade_sm_5_0.ps");
+		result = InitialiseShader_SM5(device, hwnd,	ShaderFilename("lightfade_sm_5_0.vs").c_str(),			
+													ShaderFilename("lightfade_sm_5_0.ps").c_str());
 	}
-	else if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_2_0)
+	else
 	{
 		// Initialise a Shader Model 2 shader
-		result = InitialiseShader_SM2(device, hwnd, "../RJ/Data/Shaders/lightfade_sm_2_0.vs",		
-													"../RJ/Data/Shaders/lightfade_sm_2_0.ps");
+		result = InitialiseShader_SM2(device, hwnd, ShaderFilename("lightfade_sm_2_0.vs").c_str(),		
+													ShaderFilename("lightfade_sm_2_0.ps").c_str());
 	}
-	else { return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel; }
 
 	// If shader initialisation failed then return the error code here
 	if (result != ErrorCodes::NoError) return result;
@@ -118,7 +117,7 @@ Result LightFadeShader::InitialiseShader_SM5(ID3D11Device* device, HWND hwnd, co
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightFadeVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S, 
+									m_locale->Locale.VertexShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -138,7 +137,7 @@ Result LightFadeShader::InitialiseShader_SM5(ID3D11Device* device, HWND hwnd, co
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightFadePixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -277,7 +276,7 @@ Result LightFadeShader::InitialiseShader_SM2(ID3D11Device* device, HWND hwnd, co
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightFadeVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S,
+									m_locale->Locale.VertexShaderLevelDesc,
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -297,7 +296,7 @@ Result LightFadeShader::InitialiseShader_SM2(ID3D11Device* device, HWND hwnd, co
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightFadePixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))

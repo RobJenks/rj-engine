@@ -47,6 +47,8 @@ namespace IO { namespace Data {
 	Result LoadGameDataFile(const string &filename, bool follow_indices);
 	Result LoadGameDataFile(const string &filename);
 	Result LoadXMLFileIndex(TiXmlElement *node);
+	Result LoadConfigFile(const string &filename);
+
 	
 	// Common methods to load intermediate class data
 	bool LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object);									// Loads iObject class data

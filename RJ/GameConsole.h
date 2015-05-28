@@ -45,7 +45,7 @@ public:
 	static std::vector<iAcceptsConsoleCommands*> CommandReceivers;
 
 	// The number of commands that are held in history
-	unsigned int						COMMAND_HISTORY_LENGTH = 100;
+	static unsigned int					COMMAND_HISTORY_LENGTH;
 
 protected:
 

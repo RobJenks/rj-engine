@@ -7,12 +7,18 @@
 // DirectX SDK content.
 #pragma warning( disable : 4005 )
 
+// Flag to enable DX debug mode, if required.  Only available if we are in application debug mode
+#ifdef _DEBUG
+#	define D3D_DEBUG_INFO
+#endif
+
 // Include core DX11 headers for basic functionality
 #include <d3d11.h>
 #include "d3dx10math.h"
 
 // Add compiler commments for the linker to associate with relevant precompiled libraries
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3dx10.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dx11.lib")
 

@@ -3,6 +3,8 @@
 #ifndef __GameInputH__
 #define __GameInputH__
 
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "dxguid.lib")
 #include "DX11_Core.h"
 #include <dinput.h>
 #include "Utility.h"

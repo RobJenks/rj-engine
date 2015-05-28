@@ -231,6 +231,59 @@ Result IO::Data::LoadXMLFileIndex(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
+// Load a configuration file
+Result IO::Data::LoadConfigFile(const string &filename)
+{
+	// Record the time taken to process this file; store the start time before beginning
+	unsigned int processtime = (unsigned int)timeGetTime();
+
+	// Attempt to load the XML config file
+	Result res = ErrorCodes::NoError;
+	TiXmlDocument *doc = IO::Data::LoadXMLDocument(filename);
+	if (doc == NULL) return ErrorCodes::CannotLoadXMLDocument;
+
+	// The first (and only) root node should be a "Config" node; if not then stop
+	TiXmlElement *root = doc->FirstChildElement();
+	if (root == NULL) { delete doc; return ErrorCodes::CannotFindXMLRoot; }
+
+	// Make sure the root name is valid
+	string rname = root->Value(); StrLowerC(rname);
+	if (!(rname == D::NODE_Config)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
+
+	// Now iterate through each child element in turn and pull the relevant configuration
+	string name = "";
+	TiXmlElement *child = root->FirstChildElement();
+	for (child; child; child=child->NextSiblingElement())
+	{
+		// Test the type of this node
+		name = child->Value(); StrLowerC(name);
+
+		if (name == "screenresolution") {
+			int x = 1024, y = 768, hz = 0;
+			child->Attribute("x", &x);
+			child->Attribute("y", &y);
+			child->Attribute("hz", &hz);
+			Game::ScreenWidth = x;
+			Game::ScreenHeight = y;
+			if (hz > 0) Game::ScreenRefresh = hz;
+		}
+		else if (name == "softwarerasterizeroverride")
+		{
+			const char *enabled = child->Attribute("enable");
+			if (enabled && strcmp(enabled, "true") == 0)
+				Game::ForceWARPRenderDevice = true;
+		}
+	}
+
+	// Calculate the total time taken to process this file and log it
+	processtime = ((unsigned int)timeGetTime() - processtime);
+	Game::Log << LOG_INIT_START << "Game config file \"" << filename << "\" processed [" << processtime << "ms]\n";
+
+	// Dispose of memory no longer required and return success
+	if (doc) delete doc;
+	return ErrorCodes::NoError;
+}
+
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
 	Model *model;

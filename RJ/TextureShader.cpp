@@ -8,8 +8,8 @@ Result TextureShader::Initialise(ID3D11Device* device, HWND hwnd)
 {
 	// Attempt to initialise the shader from vs/ps files.  Note that there are no methods tailored per shader
 	// model level, as in many other shaders, since all these functions are supported in SM2 and SM5
-	Result result = InitialiseShader(device, hwnd,	"../RJ/Data/Shaders/texture_sm_all.vs",
-													"../RJ/Data/Shaders/texture_sm_all.ps" );
+	Result result = InitialiseShader(device, hwnd,	iShader::ShaderFilename("texture_sm_all.vs").c_str(),
+													iShader::ShaderFilename("texture_sm_all.ps").c_str());
 
 	// Return the result of the initialisation
 	return result;
@@ -57,7 +57,7 @@ Result TextureShader::InitialiseShader(ID3D11Device* device, HWND hwnd, const ch
 	pixelShaderBuffer = 0;
 
     // Compile the vertex shader code.
-	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "TextureVertexShader", m_locale->DXL_VERTEX_SHADER_LEVEL_S, 
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "TextureVertexShader", m_locale->Locale.VertexShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
 	{
@@ -75,7 +75,7 @@ Result TextureShader::InitialiseShader(ID3D11Device* device, HWND hwnd, const ch
 	}
 
     // Compile the pixel shader code.
-	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
 	{

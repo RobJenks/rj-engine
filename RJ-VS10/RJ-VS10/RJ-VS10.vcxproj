@@ -1,0 +1,453 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{34FE92B1-68EF-4A16-ADB0-575EF436F40E}</ProjectGuid>
+    <RootNamespace>RJVS10</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib;"C:\Program Files\Microsoft DirectX SDK (June 2010)\Lib\x86";"C:\Program Files\Visual Leak Detector\lib\Win32"</LibraryPath>
+    <IncludePath>$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;"C:\Program Files\Microsoft DirectX SDK (June 2010)\Include";"C:\Program Files\Visual Leak Detector\include"</IncludePath>
+    <ExecutablePath>$(ExecutablePath)</ExecutablePath>
+    <ReferencePath>$(ReferencePath)</ReferencePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>"C:\Program Files\Microsoft DirectX SDK (June 2010)\Include";"C:\Program Files\Visual Leak Detector\include"</AdditionalIncludeDirectories>
+      <DisableSpecificWarnings>4482;4995;4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>"C:\Program Files\Microsoft DirectX SDK (June 2010)\Lib\x86";"C:\Program Files\Visual Leak Detector\lib\Win32"</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;dxgi.lib;d3dx10.lib;d3d11.lib;d3dx11.lib;dinput8.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>"C:\Program Files\Microsoft DirectX SDK (June 2010)\Include";"C:\Program Files\Visual Leak Detector\include"</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>"C:\Program Files\Microsoft DirectX SDK (June 2010)\Lib\x86";"C:\Program Files\Visual Leak Detector\lib\Win32"</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\RJ\AABB.h" />
+    <ClInclude Include="..\..\RJ\Actor.h" />
+    <ClInclude Include="..\..\RJ\ActorAttributes.h" />
+    <ClInclude Include="..\..\RJ\ActorBase.h" />
+    <ClInclude Include="..\..\RJ\AdjustableParameter.h" />
+    <ClInclude Include="..\..\RJ\Arc2D.h" />
+    <ClInclude Include="..\..\RJ\Attachment.h" />
+    <ClInclude Include="..\..\RJ\BasicRay.h" />
+    <ClInclude Include="..\..\RJ\BasicSphere.h" />
+    <ClInclude Include="..\..\RJ\BinaryHeap.h" />
+    <ClInclude Include="..\..\RJ\BoundingObject.h" />
+    <ClInclude Include="..\..\RJ\CameraClass.h" />
+    <ClInclude Include="..\..\RJ\CameraPath.h" />
+    <ClInclude Include="..\..\RJ\CapitalShipPerimeterBeacon.h" />
+    <ClInclude Include="..\..\RJ\CentralScheduler.h" />
+    <ClInclude Include="..\..\RJ\ClassDefs.h" />
+    <ClInclude Include="..\..\RJ\CollisionDetectionResultsStruct.h" />
+    <ClInclude Include="..\..\RJ\CollisionGeometry.h" />
+    <ClInclude Include="..\..\RJ\CompilerSettings.h" />
+    <ClInclude Include="..\..\RJ\ComplexShip.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipElement.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipInfrastructure.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipObjectClass.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipSection.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipTile.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipTileClass.h" />
+    <ClInclude Include="..\..\RJ\ComplexShipTileDefinition.h" />
+    <ClInclude Include="..\..\RJ\CompoundLoadoutMap.h" />
+    <ClInclude Include="..\..\RJ\ConditionalCompilation.h" />
+    <ClInclude Include="..\..\RJ\Constraint.h" />
+    <ClInclude Include="..\..\RJ\CopyObject.h" />
+    <ClInclude Include="..\..\RJ\CoreEngine.h" />
+    <ClInclude Include="..\..\RJ\Crew.h" />
+    <ClInclude Include="..\..\RJ\CrewClassRequirement.h" />
+    <ClInclude Include="..\..\RJ\CSCorridorTile.h" />
+    <ClInclude Include="..\..\RJ\CSCorridorTileDefinition.h" />
+    <ClInclude Include="..\..\RJ\CSLifeSupportTile.h" />
+    <ClInclude Include="..\..\RJ\CSLifeSupportTileDefinition.h" />
+    <ClInclude Include="..\..\RJ\CSQuartersTile.h" />
+    <ClInclude Include="..\..\RJ\CSQuartersTileDefinition.h" />
+    <ClInclude Include="..\..\RJ\CubeMapTexture.h" />
+    <ClInclude Include="..\..\RJ\D3DMain.h" />
+    <ClInclude Include="..\..\RJ\D3DUtility.h" />
+    <ClInclude Include="..\..\RJ\Damage.h" />
+    <ClInclude Include="..\..\RJ\DataInput.h" />
+    <ClInclude Include="..\..\RJ\DataOutput.h" />
+    <ClInclude Include="..\..\RJ\DebugCommandHandler.h" />
+    <ClInclude Include="..\..\RJ\DustParticle.h" />
+    <ClInclude Include="..\..\RJ\DX11_Core.h" />
+    <ClInclude Include="..\..\RJ\DXLocaliser.h" />
+    <ClInclude Include="..\..\RJ\EffectBase.h" />
+    <ClInclude Include="..\..\RJ\EffectManager.h" />
+    <ClInclude Include="..\..\RJ\ElementConnection.h" />
+    <ClInclude Include="..\..\RJ\Engine.h" />
+    <ClInclude Include="..\..\RJ\Equip.h" />
+    <ClInclude Include="..\..\RJ\Equipment.h" />
+    <ClInclude Include="..\..\RJ\ErrorCodes.h" />
+    <ClInclude Include="..\..\RJ\Faction.h" />
+    <ClInclude Include="..\..\RJ\FactionManagerObject.h" />
+    <ClInclude Include="..\..\RJ\FadeEffect.h" />
+    <ClInclude Include="..\..\RJ\FastMath.h" />
+    <ClInclude Include="..\..\RJ\FileInput.h" />
+    <ClInclude Include="..\..\RJ\FireEffect.h" />
+    <ClInclude Include="..\..\RJ\FireShader.h" />
+    <ClInclude Include="..\..\RJ\FiringArc.h" />
+    <ClInclude Include="..\..\RJ\FontData.h" />
+    <ClInclude Include="..\..\RJ\Fonts.h" />
+    <ClInclude Include="..\..\RJ\FontShader.h" />
+    <ClInclude Include="..\..\RJ\FullDX11.h" />
+    <ClInclude Include="..\..\RJ\GameConsole.h" />
+    <ClInclude Include="..\..\RJ\GameConsoleCommand.h" />
+    <ClInclude Include="..\..\RJ\GameData.h" />
+    <ClInclude Include="..\..\RJ\GameDataExtern.h" />
+    <ClInclude Include="..\..\RJ\Gamedefs.h" />
+    <ClInclude Include="..\..\RJ\GameFiles.h" />
+    <ClInclude Include="..\..\RJ\GameInput.h" />
+    <ClInclude Include="..\..\RJ\GameInputSystem.h" />
+    <ClInclude Include="..\..\RJ\GamePhysicsEngine.h" />
+    <ClInclude Include="..\..\RJ\GameSpatialPartitioningTrees.h" />
+    <ClInclude Include="..\..\RJ\GameUniverse.h" />
+    <ClInclude Include="..\..\RJ\GameVars.h" />
+    <ClInclude Include="..\..\RJ\GameVarsExtern.h" />
+    <ClInclude Include="..\..\RJ\GlobalFlags.h" />
+    <ClInclude Include="..\..\RJ\Hardpoint.h" />
+    <ClInclude Include="..\..\RJ\Hardpoints.h" />
+    <ClInclude Include="..\..\RJ\HashFunctions.h" />
+    <ClInclude Include="..\..\RJ\HighlightEffect.h" />
+    <ClInclude Include="..\..\RJ\Hp.h" />
+    <ClInclude Include="..\..\RJ\HpEngine.h" />
+    <ClInclude Include="..\..\RJ\HpMissileLauncher.h" />
+    <ClInclude Include="..\..\RJ\HpShield.h" />
+    <ClInclude Include="..\..\RJ\HpTorpedoLauncher.h" />
+    <ClInclude Include="..\..\RJ\HpWeapon.h" />
+    <ClInclude Include="..\..\RJ\HumanActor.h" />
+    <ClInclude Include="..\..\RJ\iAcceptsConsoleCommands.h" />
+    <ClInclude Include="..\..\RJ\iActiveObject.h" />
+    <ClInclude Include="..\..\RJ\iActorObject.h" />
+    <ClInclude Include="..\..\RJ\iConsumesOrders.h" />
+    <ClInclude Include="..\..\RJ\iContainsComplexShipTiles.h" />
+    <ClInclude Include="..\..\RJ\iContainsHardpoints.h" />
+    <ClInclude Include="..\..\RJ\iEnvironmentObject.h" />
+    <ClInclude Include="..\..\RJ\iHardpoints.h" />
+    <ClInclude Include="..\..\RJ\iLoadoutMap.h" />
+    <ClInclude Include="..\..\RJ\Image2D.h" />
+    <ClInclude Include="..\..\RJ\Image2DRenderGroup.h" />
+    <ClInclude Include="..\..\RJ\Image2DRenderGroupInstance.h" />
+    <ClInclude Include="..\..\RJ\ImmediateRegion.h" />
+    <ClInclude Include="..\..\RJ\iObject.h" />
+    <ClInclude Include="..\..\RJ\iShader.h" />
+    <ClInclude Include="..\..\RJ\iSpaceObject.h" />
+    <ClInclude Include="..\..\RJ\iSpaceObjectEnvironment.h" />
+    <ClInclude Include="..\..\RJ\iStaticObject.h" />
+    <ClInclude Include="..\..\RJ\iUIComponent.h" />
+    <ClInclude Include="..\..\RJ\iUIComponentRenderable.h" />
+    <ClInclude Include="..\..\RJ\iUIControl.h" />
+    <ClInclude Include="..\..\RJ\iUIController.h" />
+    <ClInclude Include="..\..\RJ\Light.h" />
+    <ClInclude Include="..\..\RJ\LightFadeShader.h" />
+    <ClInclude Include="..\..\RJ\LightHighlightFadeShader.h" />
+    <ClInclude Include="..\..\RJ\LightHighlightShader.h" />
+    <ClInclude Include="..\..\RJ\LightShader.h" />
+    <ClInclude Include="..\..\RJ\LoadM3d.h" />
+    <ClInclude Include="..\..\RJ\LoadoutMap.h" />
+    <ClInclude Include="..\..\RJ\LogManager.h" />
+    <ClInclude Include="..\..\RJ\MemoryPool.h" />
+    <ClInclude Include="..\..\RJ\MeshGeometry.h" />
+    <ClInclude Include="..\..\RJ\MissileLauncher.h" />
+    <ClInclude Include="..\..\RJ\Model.h" />
+    <ClInclude Include="..\..\RJ\MovementLogic.h" />
+    <ClInclude Include="..\..\RJ\MultiLineTextBlock.h" />
+    <ClInclude Include="..\..\RJ\NavNetwork.h" />
+    <ClInclude Include="..\..\RJ\NavNode.h" />
+    <ClInclude Include="..\..\RJ\Octree.h" />
+    <ClInclude Include="..\..\RJ\OctreePruner.h" />
+    <ClInclude Include="..\..\RJ\Order.h" />
+    <ClInclude Include="..\..\RJ\Order_ActorMoveToPosition.h" />
+    <ClInclude Include="..\..\RJ\Order_ActorMoveToTarget.h" />
+    <ClInclude Include="..\..\RJ\Order_ActorTravelToPosition.h" />
+    <ClInclude Include="..\..\RJ\Order_MoveToPosition.h" />
+    <ClInclude Include="..\..\RJ\Order_MoveToTarget.h" />
+    <ClInclude Include="..\..\RJ\OrientedBoundingBox.h" />
+    <ClInclude Include="..\..\RJ\OverlayRenderer.h" />
+    <ClInclude Include="..\..\RJ\ParticleBase.h" />
+    <ClInclude Include="..\..\RJ\ParticleDefinition.h" />
+    <ClInclude Include="..\..\RJ\ParticleEmitter.h" />
+    <ClInclude Include="..\..\RJ\ParticleEngine.h" />
+    <ClInclude Include="..\..\RJ\ParticleShader.h" />
+    <ClInclude Include="..\..\RJ\Player.h" />
+    <ClInclude Include="..\..\RJ\ProductionCost.h" />
+    <ClInclude Include="..\..\RJ\ProductionProgress.h" />
+    <ClInclude Include="..\..\RJ\Profiler.h" />
+    <ClInclude Include="..\..\RJ\Quaternion.h" />
+    <ClInclude Include="..\..\RJ\Ray.h" />
+    <ClInclude Include="..\..\RJ\RegionBase.h" />
+    <ClInclude Include="..\..\RJ\Render2DGroup.h" />
+    <ClInclude Include="..\..\RJ\Render2DManager.h" />
+    <ClInclude Include="..\..\RJ\RenderComponentGroup.h" />
+    <ClInclude Include="..\..\RJ\RenderManager.h" />
+    <ClInclude Include="..\..\RJ\RenderMouseEvent.h" />
+    <ClInclude Include="..\..\RJ\Resource.h" />
+    <ClInclude Include="..\..\RJ\ResourceAmount.h" />
+    <ClInclude Include="..\..\RJ\RJ.h" />
+    <ClInclude Include="..\..\RJ\RJMain.h" />
+    <ClInclude Include="..\..\RJ\ScheduledObject.h" />
+    <ClInclude Include="..\..\RJ\Shield.h" />
+    <ClInclude Include="..\..\RJ\Ship.h" />
+    <ClInclude Include="..\..\RJ\Ships.h" />
+    <ClInclude Include="..\..\RJ\ShipTileRequirement.h" />
+    <ClInclude Include="..\..\RJ\SimpleShip.h" />
+    <ClInclude Include="..\..\RJ\SimpleShipLoadout.h" />
+    <ClInclude Include="..\..\RJ\SimulationObjectManager.h" />
+    <ClInclude Include="..\..\RJ\SimulationStateManager.h" />
+    <ClInclude Include="..\..\RJ\SkinnedData.h" />
+    <ClInclude Include="..\..\RJ\SkinnedModel.h" />
+    <ClInclude Include="..\..\RJ\SkinnedNormalMapShader.h" />
+    <ClInclude Include="..\..\RJ\SpaceEmitter.h" />
+    <ClInclude Include="..\..\RJ\SpaceProjectile.h" />
+    <ClInclude Include="..\..\RJ\SpaceProjectileDefinition.h" />
+    <ClInclude Include="..\..\RJ\SpaceProjectileLauncher.h" />
+    <ClInclude Include="..\..\RJ\SpaceSystem.h" />
+    <ClInclude Include="..\..\RJ\SpaceTurret.h" />
+    <ClInclude Include="..\..\RJ\SpatiallyLinkedCollection.h" />
+    <ClInclude Include="..\..\RJ\StaticTerrain.h" />
+    <ClInclude Include="..\..\RJ\StaticTerrainDefinition.h" />
+    <ClInclude Include="..\..\RJ\SystemRegion.h" />
+    <ClInclude Include="..\..\RJ\TexcubeShader.h" />
+    <ClInclude Include="..\..\RJ\TextBlock.h" />
+    <ClInclude Include="..\..\RJ\TextManager.h" />
+    <ClInclude Include="..\..\RJ\Texture.h" />
+    <ClInclude Include="..\..\RJ\TextureShader.h" />
+    <ClInclude Include="..\..\RJ\TextureTransShader.h" />
+    <ClInclude Include="..\..\RJ\TorpedoLauncher.h" />
+    <ClInclude Include="..\..\RJ\UIButton.h" />
+    <ClInclude Include="..\..\RJ\UIComboBox.h" />
+    <ClInclude Include="..\..\RJ\UIComponentGroup.h" />
+    <ClInclude Include="..\..\RJ\UIManagedControlDefinition.h" />
+    <ClInclude Include="..\..\RJ\UITextBox.h" />
+    <ClInclude Include="..\..\RJ\UI_Console.h" />
+    <ClInclude Include="..\..\RJ\UI_ModelBuilder.h" />
+    <ClInclude Include="..\..\RJ\UI_ShipDesigner.h" />
+    <ClInclude Include="..\..\RJ\UserInterface.h" />
+    <ClInclude Include="..\..\RJ\Utility.h" />
+    <ClInclude Include="..\..\RJ\ViewFrustrum.h" />
+    <ClInclude Include="..\..\RJ\Weapon.h" />
+    <ClInclude Include="..\..\RJ\XMLGenerator.h" />
+    <ClInclude Include="..\..\RJ\XML\tinystr.h" />
+    <ClInclude Include="..\..\RJ\XML\tinyxml.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\RJ\Actor.cpp" />
+    <ClCompile Include="..\..\RJ\ActorAttributes.cpp" />
+    <ClCompile Include="..\..\RJ\ActorBase.cpp" />
+    <ClCompile Include="..\..\RJ\AdjustableParameter.cpp" />
+    <ClCompile Include="..\..\RJ\Attachment.cpp" />
+    <ClCompile Include="..\..\RJ\BoundingObject.cpp" />
+    <ClCompile Include="..\..\RJ\CameraClass.cpp" />
+    <ClCompile Include="..\..\RJ\CameraPath.cpp" />
+    <ClCompile Include="..\..\RJ\CapitalShipPerimeterBeacon.cpp" />
+    <ClCompile Include="..\..\RJ\CentralScheduler.cpp" />
+    <ClCompile Include="..\..\RJ\CollisionGeometry.cpp" />
+    <ClCompile Include="..\..\RJ\CompilerSettings.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShip.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipDetails.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipElement.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipInfrastructure.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipObjectClass.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipSection.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipTile.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipTileClass.cpp" />
+    <ClCompile Include="..\..\RJ\ComplexShipTileDefinition.cpp" />
+    <ClCompile Include="..\..\RJ\CompoundLoadoutMap.cpp" />
+    <ClCompile Include="..\..\RJ\Constraint.cpp" />
+    <ClCompile Include="..\..\RJ\CoreEngine.cpp" />
+    <ClCompile Include="..\..\RJ\Crew.cpp" />
+    <ClCompile Include="..\..\RJ\CSCorridorTile.cpp" />
+    <ClCompile Include="..\..\RJ\CSLifeSupportTile.cpp" />
+    <ClCompile Include="..\..\RJ\CSLifeSupportTileDefinition.cpp" />
+    <ClCompile Include="..\..\RJ\CSQuartersTile.cpp" />
+    <ClCompile Include="..\..\RJ\CubeMapTexture.cpp" />
+    <ClCompile Include="..\..\RJ\D3DMain.cpp" />
+    <ClCompile Include="..\..\RJ\D3DUtility.cpp" />
+    <ClCompile Include="..\..\RJ\DataInput.cpp" />
+    <ClCompile Include="..\..\RJ\DataOutput.cpp" />
+    <ClCompile Include="..\..\RJ\DebugCommandHandler.cpp" />
+    <ClCompile Include="..\..\RJ\DustParticle.cpp" />
+    <ClCompile Include="..\..\RJ\DXLocaliser.cpp" />
+    <ClCompile Include="..\..\RJ\EffectBase.cpp" />
+    <ClCompile Include="..\..\RJ\EffectManager.cpp" />
+    <ClCompile Include="..\..\RJ\Engine.cpp" />
+    <ClCompile Include="..\..\RJ\Equipment.cpp" />
+    <ClCompile Include="..\..\RJ\Faction.cpp" />
+    <ClCompile Include="..\..\RJ\FactionManagerObject.cpp" />
+    <ClCompile Include="..\..\RJ\FadeEffect.cpp" />
+    <ClCompile Include="..\..\RJ\FastMath.cpp" />
+    <ClCompile Include="..\..\RJ\FileInput.cpp" />
+    <ClCompile Include="..\..\RJ\FireEffect.cpp" />
+    <ClCompile Include="..\..\RJ\FireShader.cpp" />
+    <ClCompile Include="..\..\RJ\FontData.cpp" />
+    <ClCompile Include="..\..\RJ\Fonts.cpp" />
+    <ClCompile Include="..\..\RJ\FontShader.cpp" />
+    <ClCompile Include="..\..\RJ\GameConsole.cpp" />
+    <ClCompile Include="..\..\RJ\GameConsoleCommand.cpp" />
+    <ClCompile Include="..\..\RJ\GameDataExtern.cpp" />
+    <ClCompile Include="..\..\RJ\GameInput.cpp" />
+    <ClCompile Include="..\..\RJ\GameInputSystem.cpp" />
+    <ClCompile Include="..\..\RJ\GamePhysicsEngine.cpp" />
+    <ClCompile Include="..\..\RJ\GameSpatialPartitioningTrees.cpp" />
+    <ClCompile Include="..\..\RJ\GameUniverse.cpp" />
+    <ClCompile Include="..\..\RJ\GameVarsExtern.cpp" />
+    <ClCompile Include="..\..\RJ\Hardpoint.cpp" />
+    <ClCompile Include="..\..\RJ\Hardpoints.cpp" />
+    <ClCompile Include="..\..\RJ\HashFunctions.cpp" />
+    <ClCompile Include="..\..\RJ\Hp.cpp" />
+    <ClCompile Include="..\..\RJ\HpEngine.cpp" />
+    <ClCompile Include="..\..\RJ\HpMissileLauncher.cpp" />
+    <ClCompile Include="..\..\RJ\HpShield.cpp" />
+    <ClCompile Include="..\..\RJ\HpTorpedoLauncher.cpp" />
+    <ClCompile Include="..\..\RJ\HpWeapon.cpp" />
+    <ClCompile Include="..\..\RJ\HumanActor.cpp" />
+    <ClCompile Include="..\..\RJ\iActiveObject.cpp" />
+    <ClCompile Include="..\..\RJ\iActorObject.cpp" />
+    <ClCompile Include="..\..\RJ\iConsumesOrders.cpp" />
+    <ClCompile Include="..\..\RJ\iContainsComplexShipTiles.cpp" />
+    <ClCompile Include="..\..\RJ\iContainsHardpoints.cpp" />
+    <ClCompile Include="..\..\RJ\iEnvironmentObject.cpp" />
+    <ClCompile Include="..\..\RJ\Image2D.cpp" />
+    <ClCompile Include="..\..\RJ\Image2DRenderGroup.cpp" />
+    <ClCompile Include="..\..\RJ\Image2DRenderGroupInstance.cpp" />
+    <ClCompile Include="..\..\RJ\ImmediateRegion.cpp" />
+    <ClCompile Include="..\..\RJ\iObject.cpp" />
+    <ClCompile Include="..\..\RJ\iShader.cpp" />
+    <ClCompile Include="..\..\RJ\iSpaceObject.cpp" />
+    <ClCompile Include="..\..\RJ\iSpaceObjectEnvironment.cpp" />
+    <ClCompile Include="..\..\RJ\iStaticObject.cpp" />
+    <ClCompile Include="..\..\RJ\iUIControl.cpp" />
+    <ClCompile Include="..\..\RJ\iUIController.cpp" />
+    <ClCompile Include="..\..\RJ\Light.cpp" />
+    <ClCompile Include="..\..\RJ\LightFadeShader.cpp" />
+    <ClCompile Include="..\..\RJ\LightHighlightFadeShader.cpp" />
+    <ClCompile Include="..\..\RJ\LightHighlightShader.cpp" />
+    <ClCompile Include="..\..\RJ\LightShader.cpp" />
+    <ClCompile Include="..\..\RJ\LoadM3d.cpp" />
+    <ClCompile Include="..\..\RJ\LoadoutMap.cpp" />
+    <ClCompile Include="..\..\RJ\LogManager.cpp" />
+    <ClCompile Include="..\..\RJ\MeshGeometry.cpp" />
+    <ClCompile Include="..\..\RJ\MissileLauncher.cpp" />
+    <ClCompile Include="..\..\RJ\Model.cpp" />
+    <ClCompile Include="..\..\RJ\MovementLogic.cpp" />
+    <ClCompile Include="..\..\RJ\MultiLineTextBlock.cpp" />
+    <ClCompile Include="..\..\RJ\NavNetwork.cpp" />
+    <ClCompile Include="..\..\RJ\Order.cpp" />
+    <ClCompile Include="..\..\RJ\OrientedBoundingBox.cpp" />
+    <ClCompile Include="..\..\RJ\OverlayRenderer.cpp" />
+    <ClCompile Include="..\..\RJ\ParticleBase.cpp" />
+    <ClCompile Include="..\..\RJ\ParticleDefinition.cpp" />
+    <ClCompile Include="..\..\RJ\ParticleEmitter.cpp" />
+    <ClCompile Include="..\..\RJ\ParticleEngine.cpp" />
+    <ClCompile Include="..\..\RJ\ParticleShader.cpp" />
+    <ClCompile Include="..\..\RJ\Player.cpp" />
+    <ClCompile Include="..\..\RJ\ProductionCost.cpp" />
+    <ClCompile Include="..\..\RJ\Profiler.cpp" />
+    <ClCompile Include="..\..\RJ\Quaternion.cpp" />
+    <ClCompile Include="..\..\RJ\RegionBase.cpp" />
+    <ClCompile Include="..\..\RJ\Render2DGroup.cpp" />
+    <ClCompile Include="..\..\RJ\Render2DManager.cpp" />
+    <ClCompile Include="..\..\RJ\RenderManager.cpp" />
+    <ClCompile Include="..\..\RJ\RenderMouseEvent.cpp" />
+    <ClCompile Include="..\..\RJ\Resource.cpp" />
+    <ClCompile Include="..\..\RJ\RJ.cpp" />
+    <ClCompile Include="..\..\RJ\RJMain.cpp" />
+    <ClCompile Include="..\..\RJ\Shield.cpp" />
+    <ClCompile Include="..\..\RJ\Ship.cpp" />
+    <ClCompile Include="..\..\RJ\ShipTileRequirement.cpp" />
+    <ClCompile Include="..\..\RJ\SimpleShip.cpp" />
+    <ClCompile Include="..\..\RJ\SimpleShipLoadout.cpp" />
+    <ClCompile Include="..\..\RJ\SimulationObjectManager.cpp" />
+    <ClCompile Include="..\..\RJ\SimulationStateManager.cpp" />
+    <ClCompile Include="..\..\RJ\SkinnedData.cpp" />
+    <ClCompile Include="..\..\RJ\SkinnedModel.cpp" />
+    <ClCompile Include="..\..\RJ\SkinnedNormalMapShader.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceEmitter.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceProjectile.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceProjectileDefinition.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceProjectileLauncher.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceSystem.cpp" />
+    <ClCompile Include="..\..\RJ\SpaceTurret.cpp" />
+    <ClCompile Include="..\..\RJ\StaticTerrain.cpp" />
+    <ClCompile Include="..\..\RJ\SystemRegion.cpp" />
+    <ClCompile Include="..\..\RJ\TexcubeShader.cpp" />
+    <ClCompile Include="..\..\RJ\TextBlock.cpp" />
+    <ClCompile Include="..\..\RJ\TextManager.cpp" />
+    <ClCompile Include="..\..\RJ\Texture.cpp" />
+    <ClCompile Include="..\..\RJ\TextureShader.cpp" />
+    <ClCompile Include="..\..\RJ\TextureTransShader.cpp" />
+    <ClCompile Include="..\..\RJ\TorpedoLauncher.cpp" />
+    <ClCompile Include="..\..\RJ\UIButton.cpp" />
+    <ClCompile Include="..\..\RJ\UIComboBox.cpp" />
+    <ClCompile Include="..\..\RJ\UIComponentGroup.cpp" />
+    <ClCompile Include="..\..\RJ\UIManagedControlDefinition.cpp" />
+    <ClCompile Include="..\..\RJ\UITextBox.cpp" />
+    <ClCompile Include="..\..\RJ\UI_Console.cpp" />
+    <ClCompile Include="..\..\RJ\UI_ModelBuilder.cpp" />
+    <ClCompile Include="..\..\RJ\UI_ShipDesigner.cpp" />
+    <ClCompile Include="..\..\RJ\UserInterface.cpp" />
+    <ClCompile Include="..\..\RJ\Utility.cpp" />
+    <ClCompile Include="..\..\RJ\ViewFrustrum.cpp" />
+    <ClCompile Include="..\..\RJ\Weapon.cpp" />
+    <ClCompile Include="..\..\RJ\XMLGenerator.cpp" />
+    <ClCompile Include="..\..\RJ\XML\tinystr.cpp" />
+    <ClCompile Include="..\..\RJ\XML\tinyxml.cpp" />
+    <ClCompile Include="..\..\RJ\XML\tinyxmlerror.cpp" />
+    <ClCompile Include="..\..\RJ\XML\tinyxmlparser.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

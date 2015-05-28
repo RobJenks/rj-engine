@@ -31,7 +31,8 @@ namespace ErrorCodes {
 	const Result		CannotCreateOverlayRenderer						= 1007;
 
 	const Result		InvalidDXLevelPassedToLocaliser					= 1060;
-	const Result		DXLocaliserNotInitialised						= 1061;
+	const Result		CouldNotDetermineSupportedDXFeatureLevels		= 1061;
+	const Result		FailedToApplyDesiredD3DFeatureLevel				= 1062;
 
 	const Result		CannotLoadMesh									= 1100;
 	const Result		MeshOptimisationFailed							= 1101;
@@ -152,6 +153,8 @@ namespace ErrorCodes {
 	const Result		CouldNotObtainLightHighlightFadeShaderBufferLock= 1215;
 	const Result		CouldNotCreateLightHighlightFadeShader			= 1216;
 	const Result		CouldNotInitialiseModelWithInvalidStringParams	= 1217;
+	const Result		NoDisplayModesAvailableForPrimaryAdapter		= 1218;
+	const Result		NoSupportedDisplayModeForResolution				= 1219;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

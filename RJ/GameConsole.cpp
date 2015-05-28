@@ -9,6 +9,9 @@
 // automatically added and removed from this list by the iAcceptsConsoleCommands interface
 std::vector<iAcceptsConsoleCommands*> GameConsole::CommandReceivers;
 
+// The number of commands that are held in history
+unsigned int GameConsole::COMMAND_HISTORY_LENGTH = 100;
+
 // Default constructor
 GameConsole::GameConsole(void)
 {

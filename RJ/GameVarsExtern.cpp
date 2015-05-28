@@ -62,13 +62,15 @@ namespace Game {
 	float FPS = 0.0f;
 	bool FPSDisplay = true;
 
-	// Display settings
-	int ScreenWidth = 1300;// (long)(1366.0f * 0.9f);
-	int ScreenHeight = (int)((float)ScreenWidth * (768.0f / 1366.0f));//(long)(768.0f/1366.0f*600.0f);//768;
+	// Display settings; default values that will be overwritten by game config on load
+	int ScreenWidth = 1024;
+	int ScreenHeight = 768;
+	int ScreenRefresh = 0;
 	INTVECTOR2 ScreenCentre = INTVECTOR2(Game::ScreenWidth / 2, Game::ScreenHeight / 2);
 	INTVECTOR2 FullWindowSize = NULL_INTVECTOR2;
 	INTVECTOR2 WindowPosition = NULL_INTVECTOR2;
 	bool FullScreen = false;
+	bool ForceWARPRenderDevice = false;
 
 	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
 	Game::ObjectRegister					Objects(0);

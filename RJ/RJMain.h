@@ -50,7 +50,8 @@ public:
 	Result				InitialiseShipData(void);
 	Result				InitialiseActorData(void);
 
-	// Methods to load game data
+	// Methods to load game data & config
+	Result				LoadPlayerConfig(void);
 	Result				LoadAllGameData(void);
 	Result				InitialiseLoadedGameData(void);
 

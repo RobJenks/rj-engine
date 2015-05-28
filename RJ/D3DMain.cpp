@@ -1,5 +1,6 @@
 #include "ErrorCodes.h"
 #include "DXLocaliser.h"
+#include "LogManager.h"
 
 #include "D3DMain.h"
 
@@ -10,7 +11,7 @@ D3DMain::D3DMain(const DXLocaliser *locale)
 	m_locale = locale;
 
 	// Default parameter values
-	m_devicetype = m_locale->DXL_DEVICE_DRIVER_TYPE;
+	m_devicetype = m_locale->Locale.RendereringDeviceType;
 
 	// Set pointers to NULL before we attempt to initialise them
 	m_swapChain = 0;
@@ -46,7 +47,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* adapterOutput;
-	unsigned int numModes, i, numerator, denominator, stringLength;
+	unsigned int numModes, i, stringLength;
 	DXGI_MODE_DESC* displayModeList;
 	DXGI_ADAPTER_DESC adapterDesc;
 	int error;
@@ -63,6 +64,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 
 	// Store the vsync setting.
 	m_vsync_enabled = vsync;
+	m_vsync_uint = (vsync ? 1U : 0U);
 
 	// Create a DirectX graphics interface factory.
 	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
@@ -106,21 +108,67 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 		return ErrorCodes::CouldNotEnumerateAdapterDisplayModes;
 	}
 
+	// Make sure we were able to locate at least one display mode
+	if (numModes == 0U)
+	{
+		Game::Log << LOG_INIT_START << "Error: no display modes available for primary adapter\n";
+		return ErrorCodes::NoDisplayModesAvailableForPrimaryAdapter;
+	}
+
 	// Now go through all the display modes and find the one that matches the screen width and height.
 	// When a match is found store the numerator and denominator of the refresh rate for that monitor.
+	std::string modestr = ""; int modeindex = -1;
+	unsigned int numerator = 0U, denominator = 0U;
 	for(i=0; i<numModes; i++)
 	{
+		// Output all the available display modes
+		modestr = concat(modestr)(i == 0 ? "" : ", ")(DisplayModeToString(displayModeList[i])).str();
+
+		// Use the display mode if it matches our desired resolution
 		if(displayModeList[i].Width == (unsigned int)screenWidth)
 		{
 			if(displayModeList[i].Height == (unsigned int)screenHeight)
 			{
+				// Additional check: refresh rate must match if the user has set it specifically
+				if (Game::ScreenRefresh > 0)
+				{
+					if (displayModeList[i].RefreshRate.Denominator == 0 || 
+						((displayModeList[i].RefreshRate.Numerator / 
+						  displayModeList[i].RefreshRate.Denominator) != Game::ScreenRefresh)) continue;
+				}
+
+				// This display mode will work for us, so store it
+				modeindex = (int)i;
 				numerator = displayModeList[i].RefreshRate.Numerator;
 				denominator = displayModeList[i].RefreshRate.Denominator;
 			}
 		}
 	}
 
-	// Get the adapter (video card) description.
+	// Output the available display modes to the log
+	Game::Log << LOG_INIT_START << numModes << " display modes found for primary adapter (" << modestr << ")\n";
+
+	// Make sure we found at least one matching display mode
+	if (modeindex == -1 || (numerator == 0 && denominator == 0))
+	{
+		if (!vsync)
+		{
+			Game::Log << LOG_INIT_START << "Warning: No matching display mode located for [" << screenWidth << "x"
+				<< screenHeight << "]; attempting to proceed since vsync is disabled\n";
+		}
+		else
+		{
+			Game::Log << LOG_INIT_START << "Error: No matching display mode located for [" << screenWidth << "x"
+				<< screenHeight << "]; cannot proceed since vsync is required\n";
+			return ErrorCodes::NoSupportedDisplayModeForResolution;
+		}
+	}
+	else
+	{
+		Game::Log << LOG_INIT_START << "Enabling display mode of " 
+			<< DisplayModeToString(displayModeList[modeindex]) << " on primary adapter\n";
+	}
+
 	result = adapter->GetDesc(&adapterDesc);
 	if(FAILED(result))
 	{
@@ -129,7 +177,8 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 
 	// Store the dedicated video card memory in megabytes.
 	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
-
+	Game::Log << LOG_INIT_START << "Located " << m_videoCardMemory << "MB dedicated memory on primary video adapter\n";
+	
 	// Convert the name of the video card to a character array and store it.
 	error = wcstombs_s(&stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
 	if(error != 0)
@@ -208,8 +257,8 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	// Don't set the advanced flags.
 	swapChainDesc.Flags = 0;
 
-	// Set the DirectX feature level based on our localisation settings; default is DirectX11.
-	featureLevel = m_locale->DXL_D3D_FEATURE_LEVEL;
+	// Set the DirectX feature level based on our localisation settings
+	featureLevel = m_locale->Locale.FeatureLevel;
 
 	// Create the swap chain, Direct3D device, and Direct3D device context.
 	result = D3D11CreateDeviceAndSwapChain(NULL, m_devicetype, NULL, 0, &featureLevel, 1, 
@@ -548,16 +597,14 @@ void D3DMain::BeginScene()
 
 void D3DMain::EndScene()
 {
-	// Present the back buffer to the screen since rendering is complete.
-	if(m_vsync_enabled)
+	// Present the back buffer to the screen.  Either lock to screen refresh rate (sync 
+	// interval = 1, if vsync is enabled) or present as fast as possible (sync 
+	// interval = 0, if it is not)
+	
+	HRESULT hr = m_swapChain->Present(m_vsync_uint, 0);
+	if (FAILED(hr))
 	{
-		// Lock to screen refresh rate.
-		m_swapChain->Present(1, 0);
-	}
-	else
-	{
-		// Present as fast as possible.
-		m_swapChain->Present(0, 0);
+		int a = rand();
 	}
 }
 
@@ -620,4 +667,19 @@ void D3DMain::DisableRasteriserCulling(void)
 	m_deviceContext->RSSetState(m_rasterStateNoCulling);
 }
 
-
+// Static method to convert a display mode to readable string
+std::string D3DMain::DisplayModeToString(const DXGI_MODE_DESC & mode)
+{
+	std::string modestr = "";
+	if (mode.RefreshRate.Denominator == 0)
+	{
+		modestr = concat(modestr)("[")(mode.Width)("|")(mode.Height)("|")
+		(mode.RefreshRate.Numerator)("/")(mode.RefreshRate.Denominator)("]").str();
+	}
+	else
+	{
+		modestr = concat(modestr)("[")(mode.Width)("|")(mode.Height)("|")
+			(mode.RefreshRate.Numerator / mode.RefreshRate.Denominator)("]").str();
+	}
+	return modestr;
+}

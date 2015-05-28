@@ -38,20 +38,9 @@ Result LightHighlightFadeShader::Initialise(ID3D11Device* device, HWND hwnd)
 	Result result;
 
 	// Initialise the vertex and pixel shaders.  This shader is common to all SM levels so no different logic is required.
-	if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_5_0)
-	{
-		// Initialise a Shader Model 5 shader
-		result = InitialiseShader_SM_All(device, hwnd, "../RJ/Data/Shaders/light_highlight_fade_sm_all.vs",
-			"../RJ/Data/Shaders/light_highlight_fade_sm_all.ps");
-	}
-	else if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_2_0)
-	{
-		// Initialise a Shader Model 2 shader
-		result = InitialiseShader_SM_All(device, hwnd, "../RJ/Data/Shaders/light_highlight_fade_sm_all.vs",
-			"../RJ/Data/Shaders/light_highlight_fade_sm_all.ps");
-	}
-	else { return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel; }
-
+	result = InitialiseShader_SM_All(device, hwnd,	ShaderFilename("light_highlight_fade_sm_all.vs").c_str(),
+													ShaderFilename("light_highlight_fade_sm_all.ps").c_str());
+	
 	// If shader initialisation failed then return the error code here
 	if (result != ErrorCodes::NoError) return result;
 
@@ -118,7 +107,7 @@ Result LightHighlightFadeShader::InitialiseShader_SM_All(ID3D11Device* device, H
 
 	// Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightHighlightFadeVertexShader",
-		m_locale->DXL_VERTEX_SHADER_LEVEL_S,
+		m_locale->Locale.VertexShaderLevelDesc,
 		D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
 		&vertexShaderBuffer, &errorMessage, NULL);
 	if (FAILED(result))
@@ -138,7 +127,7 @@ Result LightHighlightFadeShader::InitialiseShader_SM_All(ID3D11Device* device, H
 
 	// Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightHighlightFadePixelShader",
-		m_locale->DXL_PIXEL_SHADER_LEVEL_S,
+		m_locale->Locale.PixelShaderLevelDesc,
 		D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
 		&pixelShaderBuffer, &errorMessage, NULL);
 	if (FAILED(result))

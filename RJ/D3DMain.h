@@ -4,6 +4,7 @@
 #define __D3DMainH__
 
 // Include all DX11-related headers
+#include <string>
 #include "DX11_Core.h" // #include "FullDX11.h"
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
@@ -95,11 +96,14 @@ public:
 		m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, m_alphablendfactor, 0xffffffff); 
 	}
 
+	// Static method to convert a display mode to readable string
+	static std::string				DisplayModeToString(const DXGI_MODE_DESC & mode);
 
 private:
 	const DXLocaliser			*m_locale;
 	D3D_DRIVER_TYPE				m_devicetype;
 	bool						m_vsync_enabled;
+	UINT						m_vsync_uint;
 	int							m_videoCardMemory;
 	char						m_videoCardDescription[128];
 	IDXGISwapChain				*m_swapChain;

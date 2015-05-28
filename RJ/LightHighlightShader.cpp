@@ -38,19 +38,8 @@ Result LightHighlightShader::Initialise(ID3D11Device* device, HWND hwnd)
 	Result result;
 
 	// Initialise the vertex and pixel shaders, depending on the current DX locale
-	if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_5_0)
-	{
-		// Initialise a Shader Model 5 shader
-		result = InitialiseShader_SM5(device, hwnd, "../RJ/Data/Shaders/light_highlight_sm_all.vs",			
-													"../RJ/Data/Shaders/light_highlight_sm_all.ps");
-	}
-	else if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_2_0)
-	{
-		// Initialise a Shader Model 2 shader
-		result = InitialiseShader_SM2(device, hwnd, "../RJ/Data/Shaders/light_highlight_sm_all.vs",		
-													"../RJ/Data/Shaders/light_highlight_sm_all.ps");
-	}
-	else { return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel; }
+	result = InitialiseShader_SM5(device, hwnd,	ShaderFilename("light_highlight_sm_all.vs").c_str(),			
+												ShaderFilename("light_highlight_sm_all.ps").c_str());
 
 	// If shader initialisation failed then return the error code here
 	if (result != ErrorCodes::NoError) return result;
@@ -118,7 +107,7 @@ Result LightHighlightShader::InitialiseShader_SM5(ID3D11Device* device, HWND hwn
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightHighlightVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S, 
+									m_locale->Locale.VertexShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -138,7 +127,7 @@ Result LightHighlightShader::InitialiseShader_SM5(ID3D11Device* device, HWND hwn
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightHighlightPixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -277,7 +266,7 @@ Result LightHighlightShader::InitialiseShader_SM2(ID3D11Device* device, HWND hwn
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightHighlightVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S,
+									m_locale->Locale.VertexShaderLevelDesc,
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -297,7 +286,7 @@ Result LightHighlightShader::InitialiseShader_SM2(ID3D11Device* device, HWND hwn
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightHighlightPixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))

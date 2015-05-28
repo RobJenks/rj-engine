@@ -18,7 +18,14 @@ SpaceProjectile::SpaceProjectile(void)
 }
 
 // Constructor accepting the projectile definition as an initialisation parameter
-SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : SpaceProjectile()
+#ifdef RJ_CPP11_SUPPORT
+	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : SpaceProjectile()
+#else
+	// Perform full construction if C++11 constructor delegation not supported
+	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition)		
+		: m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f), m_degrade_av_pc(0.0f), 
+		m_orient_change(false), m_orient_change_amount(ID_QUATERNION)
+#endif
 {
 	// Store and pull data from the definition, if a valid pointer was provided
 	m_definition = definition;
@@ -27,7 +34,7 @@ SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : 
 		this->SetModel(m_definition->GetModel());
 		this->SetMass(m_definition->GetMass());
 		this->SetLifetime(m_definition->GetDefaultLifetime());
-
+		
 		// Projectile size is derived from the projectile model
 		if (m_model)
 		{

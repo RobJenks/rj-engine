@@ -118,7 +118,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	Game::Log << LOG_INIT_START << "Render flags initialised\n";
 
 	// Initialise the DX localiser, which will configure the D3D etc that is subsequently set up
-	res = InitialiseDXLocaliser(DXLocaliser::DXLevel::DirectX_11_0);
+	res = InitialiseDXLocaliser();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "DX Localiser initialised\n";
 
@@ -204,7 +204,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 
 	// Initialise the skinned normal map shader
 	res = InitialiseSkinnedNormalMapShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	if (false && res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }			// TODO: FIX
 	Game::Log << LOG_INIT_START << "Shader [Skinned normal map] initialisation complete\n";
 
 	// Initialise the particle engine
@@ -290,14 +290,14 @@ Result CoreEngine::InitialiseDirect3D(HWND hwnd)
 	return result;
 }
 
-Result CoreEngine::InitialiseDXLocaliser(DXLocaliser::DXLevel DirectXLevel)
+Result CoreEngine::InitialiseDXLocaliser(void)
 {
 	// Attempt to create a new DX Localiser instance
 	m_dxlocaliser = new DXLocaliser();
 	if ( !m_dxlocaliser ) return ErrorCodes::CannotCreateDXLocaliserComponent;
 
-	// Initialise the localiser with the supplied feature level
-	Result result = m_dxlocaliser->Initialise(DirectXLevel);
+	// Initialise the localiser, which will also analyse the current device and store its capabilities
+	Result result = m_dxlocaliser->Initialise();
 	return result;
 }
 
@@ -607,8 +607,10 @@ Result CoreEngine::InitialiseFonts(void)
 
 	// Initialise each font in turn from its data file and composite texture
 	// TODO: To be loaded from external file?  How to set Game::Fonts::* IDs?
-	result = m_textmanager->InitializeFont("Font_Basic1", 
-				"../RJ/Data/Fonts/font_basic1.txt", "../RJ/Data/Fonts/font_basic1.dds", Game::Fonts::FONT_BASIC1);
+	result = m_textmanager->InitializeFont(	"Font_Basic1", 
+											concat(D::DATA)("/Fonts/font_basic1.txt").str().c_str(), 
+											concat(D::DATA)("/Fonts/font_basic1.dds").str().c_str(), 
+											Game::Fonts::FONT_BASIC1);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Return success when all fonts are loaded
@@ -1087,7 +1089,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 	int instancecount, inst, n;
 
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; i++)
+	for (int i = 0; i < 1/*CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT*/; ++i)
 	{
 		// Set any engine properties required by this specific shader
 		if (m_renderqueueshaders[i].AlphaBlendRequired != m_D3D->GetAlphaBlendState())	

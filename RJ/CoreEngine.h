@@ -164,7 +164,7 @@ public:
 
 	// Actor-rendering methods; actors are queued for rendering in one batch, after other objects are processed, to avoid
 	// multiple engine state changes per frame
-	CMPINLINE void			QueueActorRendering(Actor *actor)	{ if (actor) m_queuedactors.push_back(actor); }
+	CMPINLINE void			QueueActorRendering(Actor *actor)	{return; if (actor) m_queuedactors.push_back(actor); }
 
 	// Processes the actor render queue and renders all actors at once
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_Actors, 
@@ -277,7 +277,7 @@ private:
 	
 	// Private methods to initialise each component in turn
 	Result					InitialiseDirect3D(HWND hwnd);
-	Result					InitialiseDXLocaliser(DXLocaliser::DXLevel DirectXLevel);
+	Result					InitialiseDXLocaliser(void);
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
@@ -328,7 +328,7 @@ private:
 	void					ShutdownEnvironmentRendering(void);
 
 	// Update window size details based on these parameters, recalculating for windowed mode as required
-	void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
+	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
 	// Pointer to each component that makes up this game engine
 	D3DMain					*m_D3D;
@@ -432,9 +432,10 @@ private:
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
 
 	// Process the full render queue for all shaders in scope
+public:
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ProcessRenderQueue, 
 		void, ProcessRenderQueue, void, );
-
+protected:
 	// Clear the render queue ready for the next frame
 	void						ClearRenderingQueue(void);
 

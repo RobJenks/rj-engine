@@ -1,3 +1,4 @@
+#include "CompilerSettings.h"
 #include "FastMath.h"
 #include "SkinnedModel.h"
 #include "iSpaceObjectEnvironment.h"
@@ -15,7 +16,11 @@ Actor::Actor(void)
 }
 
 // Constructor
+#ifdef RJ_CPP11_SUPPORT
 Actor::Actor(ActorBase *actorbase) : Actor()
+#else
+Actor::Actor(ActorBase *actorbase)			// Perform full construction if C++11 constructor delegation not supported
+#endif
 {
 	// Store a reference back to the actor base class from which we were created
 	m_base = actorbase;

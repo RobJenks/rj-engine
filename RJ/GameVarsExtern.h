@@ -73,10 +73,12 @@ namespace Game {
 	// Display settings
 	extern int ScreenWidth;
 	extern int ScreenHeight;
+	extern int ScreenRefresh;
 	extern INTVECTOR2 ScreenCentre;
 	extern INTVECTOR2 FullWindowSize;
 	extern INTVECTOR2 WindowPosition;
 	extern bool FullScreen;
+	extern bool ForceWARPRenderDevice;
 
 	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
 	extern Game::ObjectRegister				Objects;

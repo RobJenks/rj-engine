@@ -1,0 +1,8 @@
+<Config>
+  
+  <!-- Graphics options -->
+  <ScreenResolution x="1024" y="768" />
+  <SoftwareRasterizerOverride enable="true" />
+  
+  
+</Config>

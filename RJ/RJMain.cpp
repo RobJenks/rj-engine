@@ -778,6 +778,7 @@ void RJMain::UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool 
 		// Simply store these window parameters; no difference between window and screen sizes since we are in fullscreen mode
 		Game::ScreenWidth = Game::FullWindowSize.x = screenWidth;
 		Game::ScreenHeight = Game::FullWindowSize.y = screenHeight;
+		Game::ScreenCentre = INTVECTOR2(Game::ScreenWidth / 2, Game::ScreenHeight / 2);
 		Game::WindowPosition = NULL_INTVECTOR2;
 	}
 	else
@@ -788,10 +789,10 @@ void RJMain::UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool 
 		// Store the desired client size as normal
 		Game::ScreenWidth = screenWidth;
 		Game::ScreenHeight = screenHeight;
+		Game::ScreenCentre = INTVECTOR2(Game::ScreenWidth / 2, Game::ScreenHeight / 2);
 
 		// Adjust the window size to get the size of the full application window, including non-client areas
 		RECT win = { 0, 0, screenWidth, screenHeight };
-		//AdjustWindowRectEx(&win, WS_OVERLAPPEDWINDOW, FALSE);
 		AdjustWindowRectEx(&win, m_wndstyle, FALSE, m_wndstyleex);
 		Game::FullWindowSize = INTVECTOR2(win.right - win.left, win.bottom - win.top);
 
@@ -862,6 +863,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 
 	// Initialise the logging component first so we can output details of the initialisation
 	InitialiseLogging();
+
+	// Load player config before initialising the application
+	LoadPlayerConfig();
 
 	// Create a new game window
 	res = InitialiseWindow();
@@ -951,6 +955,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 
 	// Return success if we have completed all initialisation functions
 	Game::Log << LOG_INIT_START << "Initialisation complete\n\n";
+	Game::Log.FlushAllStreams();
 	return ErrorCodes::NoError;
 }
 
@@ -1230,6 +1235,25 @@ void RJMain::TerminateMemoryPools(void)
 	// Run the shutdown function for each central static memory pool in turn.  Method should be called
 	// for each templated class in use by the application
 	Octree<iSpaceObject*>::ShutdownMemoryPool();
+}
+
+// Load player config before initialising the application
+Result RJMain::LoadPlayerConfig(void)
+{
+	// Record a log event when we begin loading game data files
+	Game::Log << LOG_INIT_START << "Loading player configuration\n";
+
+	// Attempt to load the main configuration file
+	Result res = IO::Data::LoadConfigFile("./Config.xml");
+	if (res != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_INIT_START << "*** ERROR during load of configuration data [" << res << "]\n";
+		return res;
+	}
+
+	// We have reached this point without a fatal error
+	Game::Log << LOG_INIT_START << "All player configuration loaded successfully\n";
+	return ErrorCodes::NoError;
 }
 
 Result RJMain::LoadAllGameData()
@@ -1801,7 +1825,6 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetAngularVelocityDegradeState(false);
 
 	ss->AddChildAttachment(s2, D3DXVECTOR3(0.0f, 0.0f, 30.0f), ID_QUATERNION);
-
 
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";

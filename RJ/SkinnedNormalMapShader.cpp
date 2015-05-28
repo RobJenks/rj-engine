@@ -52,20 +52,23 @@ Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
 	Result result;
 
 	// Initialise the vertex and pixel shaders, depending on the current DX locale
-	if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_5_0)		
+	if (m_locale->Locale.ShaderModelLevel == DXLocaliser::SMLevel::SM_5_0)		
 	{
 		// Initialise a Shader Model 5 shader
-		result = InitialiseShader_SM5(device, hwnd, "../RJ/Data/Shaders/skinned_nmap_sm_5_0.hlsl", 
-													"../RJ/Data/Shaders/skinned_nmap_sm_5_0.hlsl");
+		result = InitialiseShader_SM5(device, hwnd, iShader::ShaderFilename("skinned_nmap_sm_5_0.hlsl").c_str(), 
+													iShader::ShaderFilename("skinned_nmap_sm_5_0.hlsl").c_str());
 	}
-	else if (m_locale->DXL_SM_LEVEL == DXLocaliser::SMLevel::SM_2_0)
-	{return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel;
-		// Initialise a Shader Model 2 shader
-		result = InitialiseShader_SM2(device, hwnd, "../RJ/Data/Shaders/light_sm_2_0.vs", 
-													"../RJ/Data/Shaders/light_sm_2_0.ps");
-	}
-	else { return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel; }
+	else 
+	{
+		// TODO: *** SKINNED MODEL RENDERING MAY CURRENTLY REQUIRE SM5.0.  NEED TO DETERMINE IF TRUE, AND/OR
+		// HOW IT CAN BE IMPLEMENTED TO SUPPORT LOWER SHADER MODEL LEVELS ***
+		return ErrorCodes::CouldNotInitialiseShaderToUnsupportedModel;
 
+		// Initialise a Shader Model 2 shader
+		result = InitialiseShader_SM2(device, hwnd, iShader::ShaderFilename("light_sm_2_0.vs").c_str(), 
+													iShader::ShaderFilename("light_sm_2_0.ps").c_str());
+	}
+	
 	// If shader initialisation failed then return the error code here
 	if (result != ErrorCodes::NoError) return result;
 
@@ -119,7 +122,7 @@ Result SkinnedNormalMapShader::InitialiseShader_SM5(ID3D11Device* device, HWND h
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "SkinnedVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S, 
+									m_locale->Locale.VertexShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -139,7 +142,7 @@ Result SkinnedNormalMapShader::InitialiseShader_SM5(ID3D11Device* device, HWND h
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "SkinnedPixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -293,7 +296,7 @@ Result SkinnedNormalMapShader::InitialiseShader_SM2(ID3D11Device* device, HWND h
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "LightVertexShader", 
-									m_locale->DXL_VERTEX_SHADER_LEVEL_S,
+									m_locale->Locale.VertexShaderLevelDesc,
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &vertexShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
@@ -313,7 +316,7 @@ Result SkinnedNormalMapShader::InitialiseShader_SM2(ID3D11Device* device, HWND h
 
     // Compile the pixel shader code.
 	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "LightPixelShader", 
-									m_locale->DXL_PIXEL_SHADER_LEVEL_S, 
+									m_locale->Locale.PixelShaderLevelDesc, 
 									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
 								    &pixelShaderBuffer, &errorMessage, NULL);
 	if(FAILED(result))
