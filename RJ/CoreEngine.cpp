@@ -204,7 +204,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 
 	// Initialise the skinned normal map shader
 	res = InitialiseSkinnedNormalMapShader();
-	if (false && res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }			// TODO: FIX
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Shader [Skinned normal map] initialisation complete\n";
 
 	// Initialise the particle engine
@@ -1089,7 +1089,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 	int instancecount, inst, n;
 
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < 1/*CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT*/; ++i)
+	for (int i = 0; i < CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
 		// Set any engine properties required by this specific shader
 		if (m_renderqueueshaders[i].AlphaBlendRequired != m_D3D->GetAlphaBlendState())	
