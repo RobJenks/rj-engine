@@ -3,9 +3,9 @@
 #ifndef __ErrorCodesH__
 #define __ErrorCodesH__
 
-#define HandleErrors(a,b) (b = a); if (b != ErrorCodes::NoError) return b; 
+#define HandleErrors(expr,result) (result = expr); if (result != ErrorCodes::NoError) return result; 
 
-typedef unsigned int Result;	
+typedef int Result;	
 
 namespace ErrorCodes {
 
