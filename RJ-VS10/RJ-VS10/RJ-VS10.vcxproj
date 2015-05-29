@@ -293,7 +293,6 @@
     <ClCompile Include="..\..\RJ\CollisionGeometry.cpp" />
     <ClCompile Include="..\..\RJ\CompilerSettings.cpp" />
     <ClCompile Include="..\..\RJ\ComplexShip.cpp" />
-    <ClCompile Include="..\..\RJ\ComplexShipDetails.cpp" />
     <ClCompile Include="..\..\RJ\ComplexShipElement.cpp" />
     <ClCompile Include="..\..\RJ\ComplexShipInfrastructure.cpp" />
     <ClCompile Include="..\..\RJ\ComplexShipObjectClass.cpp" />

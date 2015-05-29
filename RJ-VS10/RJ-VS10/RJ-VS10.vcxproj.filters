@@ -680,9 +680,6 @@
     <ClCompile Include="..\..\RJ\ComplexShip.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\RJ\ComplexShipDetails.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\RJ\ComplexShipElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
