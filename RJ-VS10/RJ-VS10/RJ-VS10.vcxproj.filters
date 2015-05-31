@@ -639,6 +639,12 @@
     <ClInclude Include="..\..\RJ\XML\tinyxml.h">
       <Filter>XML</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\RJ\RenderQueueOptimiser.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\RJ\RenderQueue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\RJ\Actor.cpp">
@@ -1126,6 +1132,9 @@
     </ClCompile>
     <ClCompile Include="..\..\RJ\XML\tinyxmlparser.cpp">
       <Filter>XML</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\RJ\RenderQueueOptimiser.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

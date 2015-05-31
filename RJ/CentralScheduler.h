@@ -38,18 +38,10 @@ public:
 	CentralScheduler(void);
 
 	// Add an item for frequent (once per frame) evaluation
-	CMPINLINE ID_TYPE			ScheduleFrequentUpdates(ScheduledObject *object, int interval_ms)	
-	{
-		m_schedule_frequent.push_back(ScheduledItemDetails(object, interval_ms));
-		return CentralScheduler::CurrentSchedulerID;								// This will be the ID just assigned
-	}
-
+	ID_TYPE						ScheduleFrequentUpdates(ScheduledObject *object, int interval_ms);	
+	
 	// Add an item for infrequent (every "InfrequentUpdateEvaluationFrequency" ms) evaluation
-	CMPINLINE ID_TYPE			ScheduleInfrequentUpdates(ScheduledObject *object, int interval_ms)	
-	{
-		m_schedule_infrequent.push_back(ScheduledItemDetails(object, interval_ms));
-		return CentralScheduler::CurrentSchedulerID;								// This will be the ID just assigned
-	}
+	ID_TYPE						ScheduleInfrequentUpdates(ScheduledObject *object, int interval_ms)	;
 
 	// Central scheduling method.  Updates refresh counters and calls update methods where appropriate
 	void						RunScheduler(void);

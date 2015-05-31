@@ -55,6 +55,8 @@ using namespace std::tr1;
 
 
 CoreEngine::CoreEngine(void)
+	:
+	m_rq_optimiser(m_renderqueue)
 {
 	// Reset all component pointers to NULL, in advance of initialisation
 	m_dxlocaliser = NULL;
@@ -338,17 +340,17 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;
 
 	// Initialise the render queue with a blank map for each shader in scope
-	m_renderqueue = CoreEngine::RM_ShaderModelInstanceMap(CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
-	m_renderqueueshaders = CoreEngine::RM_ShaderCollection(CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
+	m_renderqueue = RM_RenderQueue(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
+	m_renderqueueshaders = RM_ShaderCollection(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
 
 	// Set the reference and parameters for each shader in turn
-	m_renderqueueshaders[CoreEngine::RenderQueueShader::RM_LightShader] = 
+	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
 		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled);
-	m_renderqueueshaders[CoreEngine::RenderQueueShader::RM_LightHighlightShader] = 
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
 		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled);
-	m_renderqueueshaders[CoreEngine::RenderQueueShader::RM_LightFadeShader] =
+	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
-	m_renderqueueshaders[CoreEngine::RenderQueueShader::RM_LightHighlightFadeShader] =
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
 
 	// Return success
@@ -1074,6 +1076,9 @@ void CoreEngine::Render(void)
 	if (RenderStageActive(RenderStage::Render_DebugData))
 		RenderDebugData();
 
+	// Activate the render queue optimiser here if it is ready for its next cycle
+	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
+
 	// Final activity: process all items queued for rendering.  Any item that benefits from instanced/batched geometry rendering is
 	// added to the render queue during the process above.  We now use instanced rendering on the entire render queue.  The more 
 	// high-volume items that can be moved to use instanced rendering the better
@@ -1083,14 +1088,16 @@ void CoreEngine::Render(void)
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
 RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 {
-	RM_ShaderModelInstanceMap::iterator smi, smi_end;
-	RM_ModelInstanceMap::iterator mi, mi_end;
+	RM_ModelInstanceData::iterator mi, mi_end;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 	int instancecount, inst, n;
 
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
+		// Skip this shader immediately if there are no models/instances to be rendered by it
+		if (m_renderqueue[i].size() == 0) continue;
+
 		// Set any engine properties required by this specific shader
 		if (m_renderqueueshaders[i].AlphaBlendRequired != m_D3D->GetAlphaBlendState())	
 			m_D3D->SetAlphaBlendState(m_renderqueueshaders[i].AlphaBlendRequired);
@@ -1104,7 +1111,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
 		{
 			// Get the number of instances to be rendered
-			instancecount = mi->second.size();
+			instancecount = mi->second.InstanceData.size();
 			if (instancecount == 0) continue;
 
 			// Loop through the instances in batches, if the total count is larger than our limit
@@ -1116,7 +1123,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				// Update the instance buffer by mapping, updating and unmapping the memory
 				memset(&mappedres, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
 				r_devicecontext->Map(m_instancebuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedres);
-				memcpy(mappedres.pData, &(mi->second[inst]), sizeof(RM_Instance) * n);
+				memcpy(mappedres.pData, &(mi->second.InstanceData[inst]), sizeof(RM_Instance) * n);
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
@@ -1130,7 +1137,8 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 				// Now process all instanced / indexed vertex data through this shader
-				m_renderqueueshaders[i].Shader->Render(	r_devicecontext, mi->first->GetIndexCount(), mi->first->GetIndexCount(), n, 
+				m_renderqueueshaders[i].Shader->Render(	r_devicecontext, mi->first->GetIndexCount(), 
+														mi->first->GetIndexCount(), n, 
 														r_view, r_projection, mi->first->GetTexture());
 
 				// Increment the count of draw calls that have been processed
@@ -1138,7 +1146,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 			}
 
 			// Finally, clear the instance vector for this shader/model now that we have fully processed it
-			mi->second.clear();
+			mi->second.InstanceData.clear();
 		}
 	}	
 
@@ -1154,76 +1162,77 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 	vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 
+	// See whether there are any instances to be rendered
+	int size = m_renderqueueshaders[shaderindex].SortedInstances.size();
+	if (size == 0) return;
+
 	// Sort the vector by z-order.  Uses default "operator<" defined in the RM_ZSortedInstance struct
 	std::sort(m_renderqueueshaders[shaderindex].SortedInstances.begin(), m_renderqueueshaders[shaderindex].SortedInstances.end());
 
 	// Now reverse iterate through the newly-sorted items in the vector, to pull instances in decreasing distance from the camera
 	// Deliberately go to -1, so we can render the final element(s).  Loop will run from (n-1) to -1
-	int size = m_renderqueueshaders[shaderindex].SortedInstances.size();
-	if (size > 0)
+
+	// The starting model will be that of the first element (which we know exists since size>0)
+	model = m_renderqueueshaders[shaderindex].SortedInstances[size-1].ModelPtr;
+	for (int i = size-1; i >= -1; --i)									
 	{
-		// The starting model will be that of the first element (which we know exists since size>0)
-		model = m_renderqueueshaders[shaderindex].SortedInstances[size-1].ModelPtr;
-		for (int i = size-1; i >= -1; --i)									
+		// If this is an instance of the same model as the previous item, and this is not the final (-1) dummy item,
+		// add another element to the render buffer
+		if (i != -1 && m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr == model)
 		{
-			// If this is an instance of the same model as the previous item, and this is not the final (-1) dummy item,
-			// add another element to the render buffer
-			if (i != -1 && m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr == model)
-			{
-				renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
-			}
-
-			// If this is an instance of a different model, or is the dummy end-element, we want to render the buffer that has been accumulated so far
-			if (i == -1 || m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr != model)
-			{
-				// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
-				// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
-				n = renderbuffer.size();
-				if (n > 0)
-				{
-					// Make sure we are not over the instance limit.  If we are, simply truncate.  Should not be rendering many items this way anyway
-					n = min(n, Game::C_INSTANCED_RENDER_LIMIT);
-
-					// Update the instance buffer by mapping, updating and unmapping the memory
-					memset(&mappedres, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
-					r_devicecontext->Map(m_instancebuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedres);
-					memcpy(mappedres.pData, &(renderbuffer[0]), sizeof(RM_Instance) * n);
-					r_devicecontext->Unmap(m_instancebuffer, 0);
-
-					// Update the model VB pointer and then set vertex buffer data
-					m_instancedbuffers[0] = model->GetVertexBuffer();
-					r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
-
-					// Set the model index buffer to active in the input assembler
-					r_devicecontext->IASetIndexBuffer(model->GetIndexBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
-
-					// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-					r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-					// Now process all instanced / indexed vertex data through this shader
-					m_renderqueueshaders[shaderindex].Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
-																		r_view, r_projection, model->GetTexture());
-
-					// Increment the count of draw calls that have been processed
-					++m_renderinfo.DrawCalls;
-				}
-			
-				// Clear the render buffer now that it has been rendered
-				renderbuffer.clear();
-
-				// We are either here because the model has changed, or we are at the -1 element.  If we are not at the -1 element
-				// we now want to update the current model pointer, and add the current element to the render buffer as the first item
-				if (i != -1)
-				{
-					model = m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr;
-					renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
-				}
-			}
+			renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
 		}
 
-		// Clear the sorted instance vector ready for the next frame
-		m_renderqueueshaders[shaderindex].SortedInstances.clear();
+		// If this is an instance of a different model, or is the dummy end-element, we want to render the buffer that has been accumulated so far
+		if (i == -1 || m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr != model)
+		{
+			// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
+			// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
+			n = renderbuffer.size();
+			if (n > 0)
+			{
+				// Make sure we are not over the instance limit.  If we are, simply truncate.  Should not be rendering many items this way anyway
+				n = min(n, Game::C_INSTANCED_RENDER_LIMIT);
+
+				// Update the instance buffer by mapping, updating and unmapping the memory
+				memset(&mappedres, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
+				r_devicecontext->Map(m_instancebuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedres);
+				memcpy(mappedres.pData, &(renderbuffer[0]), sizeof(RM_Instance) * n);
+				r_devicecontext->Unmap(m_instancebuffer, 0);
+
+				// Update the model VB pointer and then set vertex buffer data
+				m_instancedbuffers[0] = model->GetVertexBuffer();
+				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
+
+				// Set the model index buffer to active in the input assembler
+				r_devicecontext->IASetIndexBuffer(model->GetIndexBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+
+				// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
+				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+				// Now process all instanced / indexed vertex data through this shader
+				m_renderqueueshaders[shaderindex].Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
+																	r_view, r_projection, model->GetTexture());
+
+				// Increment the count of draw calls that have been processed
+				++m_renderinfo.DrawCalls;
+			}
+			
+			// Clear the render buffer now that it has been rendered
+			renderbuffer.clear();
+
+			// We are either here because the model has changed, or we are at the -1 element.  If we are not at the -1 element
+			// we now want to update the current model pointer, and add the current element to the render buffer as the first item
+			if (i != -1)
+			{
+				model = m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr;
+				renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
+			}
+		}
 	}
+
+	// Clear the sorted instance vector ready for the next frame
+	m_renderqueueshaders[shaderindex].SortedInstances.clear();
 }
 
 // Renders all objects in the specified system, based on simulation state and visibility testing
@@ -1256,7 +1265,7 @@ void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
 				// Basic object types are directly pushed to the render queue using default shader parameters
 				case iObject::ProjectileObject:
 					if (object && object->GetModel())
-						SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, object->GetModel(), object->GetWorldMatrix());
+						SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), object->GetWorldMatrix());
 					break;
 			}
 		}
@@ -1335,7 +1344,7 @@ void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection 
 			m_instanceparams.x = sec->Fade.GetFadeAlpha();
 			if (m_instanceparams.x < Game::C_EPSILON) return;
 
-			SubmitForZSortedRendering(CoreEngine::RenderQueueShader::RM_LightFadeShader, sec->GetModel(), sec->GetWorldMatrix(), 
+			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, sec->GetModel(), sec->GetWorldMatrix(), 
 									  m_instanceparams, sec->GetPosition());
 		}
 		else
@@ -1343,11 +1352,11 @@ void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection 
 			if (sec->Highlight.IsActive())
 			{
 				m_instanceparams = sec->Highlight.GetColour();
-				SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightHighlightShader, sec->GetModel(), sec->GetWorldMatrix(), m_instanceparams);
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, sec->GetModel(), sec->GetWorldMatrix(), m_instanceparams);
 			}
 			else
 			{
-				SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, sec->GetModel(), sec->GetWorldMatrix());
+				SubmitForRendering(RenderQueueShader::RM_LightShader, sec->GetModel(), sec->GetWorldMatrix());
 			}
 		}
 	}
@@ -1534,7 +1543,7 @@ void CoreEngine::RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *
 			D3DXMatrixMultiply(&m_tmp_matrix, terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
 
 			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-			SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(), &m_tmp_matrix);
+			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(), &m_tmp_matrix);
 			++m_renderinfo.TerrainRenderCount;
 		}
 	}
@@ -1570,7 +1579,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				m_instanceparams.x = tile->Fade.GetFadeAlpha();
 				if (m_instanceparams.x < Game::C_EPSILON) return;
 
-				SubmitForZSortedRendering(	CoreEngine::RenderQueueShader::RM_LightFadeShader, tile->GetModel(), &wm, m_instanceparams, 
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), &wm, m_instanceparams, 
 											D3DXVECTOR3(wm._41, wm._42, wm._43) );	// Position can be taken from trans. components of world matrix
 			}
 			else
@@ -1578,11 +1587,11 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (tile->Highlight.IsActive())
 				{
 					m_instanceparams = tile->Highlight.GetColour();
-					SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), &wm, m_instanceparams);
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), &wm, m_instanceparams);
 				}
 				else
 				{
-					SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, tile->GetModel(), &wm);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel(), &wm);
 				}
 			}
 		}
@@ -1610,12 +1619,12 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			// Submit the tile model for rendering using this adjusted world matrix
 			if (fade)
 			{
-				SubmitForZSortedRendering(	CoreEngine::RenderQueueShader::RM_LightFadeShader, it->model, &modelwm, m_instanceparams, 
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, it->model, &modelwm, m_instanceparams, 
 											D3DXVECTOR3(modelwm._41, modelwm._42, modelwm._43) );	// Take pos from the trans components of the world matrix
 			}
 			else
 			{
-				SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, it->model, &modelwm);
+				SubmitForRendering(RenderQueueShader::RM_LightShader, it->model, &modelwm);
 			}
 
 		}
@@ -1648,18 +1657,18 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		m_instanceparams.x = s->Fade.GetFadeAlpha();
 		if (m_instanceparams.x < Game::C_EPSILON) return;
 
-		SubmitForZSortedRendering(CoreEngine::RenderQueueShader::RM_LightFadeShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams, s->GetPosition());
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams, s->GetPosition());
 	}
 	else
 	{
 		if (s->Highlight.IsActive())
 		{
 			m_instanceparams = s->Highlight.GetColour();
-			SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightHighlightShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams);
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams);
 		}
 		else
 		{
-			SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, s->GetModel(), s->GetWorldMatrix());
+			SubmitForRendering(RenderQueueShader::RM_LightShader, s->GetModel(), s->GetWorldMatrix());
 		}
 	}
 
@@ -1817,18 +1826,17 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 
 void CoreEngine::ClearRenderingQueue(void)
 {
-	RM_ShaderModelInstanceMap::iterator smi, smi_end;
-	RM_ModelInstanceMap::iterator mi, mi_end;
+	RM_ModelInstanceData::iterator mi, mi_end;
 
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < CoreEngine::RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; i++)
+	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
 		// Iterate through each model queued for rendering by this shader
 		mi_end = m_renderqueue[i].end();
 		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
 		{
 			// Clear all instance data from the associated vector
-			mi->second.clear();
+			mi->second.InstanceData.clear();
 		}
 	}
 }

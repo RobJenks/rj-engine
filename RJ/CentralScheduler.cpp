@@ -19,6 +19,28 @@ CentralScheduler::CentralScheduler(void)
 	m_lastinfrequentupdate = 0U;
 }
 
+CentralScheduler::ID_TYPE CentralScheduler::ScheduleFrequentUpdates(ScheduledObject *object, int interval_ms)	
+{
+	// Parameter check
+	if (!object) return 0UL;
+
+	// Schedule the task
+	m_schedule_frequent.push_back(ScheduledItemDetails(object, max(interval_ms, 1UL)));
+	return CentralScheduler::CurrentSchedulerID;								// This will be the ID just assigned
+}
+
+// Add an item for infrequent (every "InfrequentUpdateEvaluationFrequency" ms) evaluation
+CentralScheduler::ID_TYPE CentralScheduler::ScheduleInfrequentUpdates(ScheduledObject *object, int interval_ms)	
+{
+	// Parameter check
+	if (!object) return 0UL;
+
+	// Schedule the task
+	m_schedule_infrequent.push_back(ScheduledItemDetails(object, max(interval_ms, 1UL)));
+	return CentralScheduler::CurrentSchedulerID;								// This will be the ID just assigned
+}
+
+
 // Central scheduling method.  Updates refresh counters and calls update methods where appropriate
 void CentralScheduler::RunScheduler(void)
 {

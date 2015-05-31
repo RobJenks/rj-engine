@@ -12,6 +12,8 @@
 #include "Profiler.h"
 #include "CameraClass.h"
 #include "iAcceptsConsoleCommands.h"
+#include "RenderQueue.h"
+#include "RenderQueueOptimiser.h"
 class iShader;
 class LightShader;
 class LightFadeShader;
@@ -63,21 +65,6 @@ public:
 		Render_UserInterface,
 		Render_DebugData,
 		Render_STAGECOUNT
-	};
-
-	// Enumeration of instancing-enabled shaders; ordered to minimise the number of rendering state changes required.  Also
-	// aim to have all render states back at defaults by the final shader; this avoids having to reset them after processing the queue
-	enum RenderQueueShader
-	{
-		RM_LightShader = 0,					// Requires: none
-		RM_LightHighlightShader,			// Requires: none
-
-		/* Alpha blending cutoff; perform all alpha blend-enabled operations after this point */
-
-		RM_LightFadeShader,					// Requires: alpha blending
-		RM_LightHighlightFadeShader,		// Requires: alpha blending
-
-		RM_RENDERQUEUESHADERCOUNT			// Count of shaders that can be used within the render queue	
 	};
 		
 	// Constructor/destructor/copy constructor/assignment operator
@@ -189,7 +176,7 @@ public:
 	CMPINLINE void			RenderModel(Model *model, D3DXMATRIX *world)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightShader, model, world);
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
@@ -197,7 +184,7 @@ public:
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		m_instanceparams.x = highlight.x; m_instanceparams.y = highlight.y; m_instanceparams.z = highlight.z;
-		SubmitForRendering(CoreEngine::RenderQueueShader::RM_LightHighlightShader, model, world, m_instanceparams);
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, m_instanceparams);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
@@ -205,7 +192,7 @@ public:
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		m_instanceparams.x = alpha;
-		SubmitForZSortedRendering(CoreEngine::RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
@@ -213,7 +200,7 @@ public:
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		m_instanceparams.x = highlight.x; m_instanceparams.y = highlight.y; m_instanceparams.z = highlight.z; m_instanceparams.w = alpha;
-		SubmitForZSortedRendering(CoreEngine::RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
 	}
 
 	// Performs rendering of debug/special data
@@ -364,72 +351,15 @@ private:
 	D3DXMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
 	D3DXMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
 
-	// Structure of a single instance in the instancing model
-	struct					RM_InstanceStructure
-	{
-		D3DXMATRIX			World;								// World matrix to transform into the world
-		D3DXVECTOR4			Params;								// Float-4 of parameters that can be passed for each instance
-
-		// Constructor where only the world transform is required; other params will be unitialised (for efficiency) and should not be used
-		RM_InstanceStructure(const D3DXMATRIX *world) : World(*world) {}
-
-		// Constructor including additional per-instance parameters
-		RM_InstanceStructure(const D3DXMATRIX *world, const D3DXVECTOR4 & params) : World(*world), Params(params) {}
-	};
-
-
-	// Geometry batching parameters, used by the render manager to sequence & minimise render calls
-	typedef						RM_InstanceStructure							RM_Instance;
-	typedef						vector<RM_Instance>								RM_InstanceData;
-	typedef						unordered_map<Model*, RM_InstanceData>			RM_ModelInstanceMap;
-	typedef						vector<RM_ModelInstanceMap>						RM_ShaderModelInstanceMap;
-
-
-
-	// Structure to hold z-sorted instance data, used where objects must be sorted before processing the render queue
-	struct							RM_ZSortedInstance
-	{
-		int							Key;
-		const Model *				ModelPtr;
-		RM_Instance					Item;
-
-		bool operator<(const RM_ZSortedInstance & val) const	{ return (Key < val.Key); }
-
-		RM_ZSortedInstance(int key, const Model *model, const D3DXMATRIX *world, const D3DXVECTOR4 & params) : 
-			Key(key), ModelPtr(model), Item(RM_Instance(world, params)) {}
-	};
-
-
-	// Details on a shader used in the render queue
-	struct							RM_InstancedShaderDetails
-	{
-		iShader *					Shader;							// The shader itself
-		bool						RequiresZSorting;				// Flag determining whether instances must go through an intermediate z-sorting step
-		D3DMain::AlphaBlendState	AlphaBlendRequired;				// Flag indicating if/how alpha blending should be enabled for this shader
-
-		vector<RM_ZSortedInstance>	SortedInstances;				// Vector used for the intermediate sorting step, where required, so that items 
-																	// are sent for rendering in a particular Z order
-
-		// Default constructor, no reference to shader, sets all parameters to defaults
-		RM_InstancedShaderDetails(void) : 
-			Shader(NULL), RequiresZSorting(false), AlphaBlendRequired(D3DMain::AlphaBlendState::AlphaBlendDisabled)
-		{}
-
-		// Constructor allowing all parameters to be specified
-		RM_InstancedShaderDetails(iShader *shader, bool requiresZsorting, D3DMain::AlphaBlendState alphablend) : 
-			Shader(shader), RequiresZSorting(requiresZsorting), AlphaBlendRequired(alphablend)
-		{}
-	};
-
-	typedef						vector<RM_InstancedShaderDetails>				RM_ShaderCollection;
-	
-
 
 	ID3D11Buffer *				m_instancebuffer;
-	RM_ShaderModelInstanceMap	m_renderqueue;
+	RM_RenderQueue				m_renderqueue;
 	RM_ShaderCollection			m_renderqueueshaders;
 	ID3D11Buffer *				m_instancedbuffers[2];
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
+
+	// Optimiser performs periodic maintenance on the engine render queue
+	RenderQueueOptimiser		m_rq_optimiser;
 
 	// Process the full render queue for all shaders in scope
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ProcessRenderQueue, 
@@ -447,7 +377,7 @@ private:
 	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model]).push_back(RM_Instance(transform));
+		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform));
 	}
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
@@ -455,7 +385,7 @@ private:
 	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform, const D3DXVECTOR4 & params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model]).push_back(RM_Instance(transform, params));
+		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, params));
 	}
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 

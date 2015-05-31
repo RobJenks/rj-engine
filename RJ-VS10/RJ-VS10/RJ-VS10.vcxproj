@@ -230,6 +230,8 @@
     <ClInclude Include="..\..\RJ\RenderComponentGroup.h" />
     <ClInclude Include="..\..\RJ\RenderManager.h" />
     <ClInclude Include="..\..\RJ\RenderMouseEvent.h" />
+    <ClInclude Include="..\..\RJ\RenderQueue.h" />
+    <ClInclude Include="..\..\RJ\RenderQueueOptimiser.h" />
     <ClInclude Include="..\..\RJ\Resource.h" />
     <ClInclude Include="..\..\RJ\ResourceAmount.h" />
     <ClInclude Include="..\..\RJ\RJ.h" />
@@ -397,6 +399,7 @@
     <ClCompile Include="..\..\RJ\Render2DManager.cpp" />
     <ClCompile Include="..\..\RJ\RenderManager.cpp" />
     <ClCompile Include="..\..\RJ\RenderMouseEvent.cpp" />
+    <ClCompile Include="..\..\RJ\RenderQueueOptimiser.cpp" />
     <ClCompile Include="..\..\RJ\Resource.cpp" />
     <ClCompile Include="..\..\RJ\RJ.cpp" />
     <ClCompile Include="..\..\RJ\RJMain.cpp" />
