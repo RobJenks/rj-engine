@@ -487,6 +487,9 @@
     <ClCompile Include="Constraint.cpp">
       <Filter>Objects\Attachments</Filter>
     </ClCompile>
+    <ClCompile Include="RenderQueueOptimiser.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1086,6 +1089,12 @@
     <ClInclude Include="Constraint.h">
       <Filter>Objects\Attachments</Filter>
     </ClInclude>
+    <ClInclude Include="RenderQueue.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderQueueOptimiser.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1311,6 +1320,9 @@
     </Filter>
     <Filter Include="Factions">
       <UniqueIdentifier>{e8bea911-7222-436d-b508-b0d2d59dbbf2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Render Queue">
+      <UniqueIdentifier>{44e57015-fb87-443b-a769-992f9b1fef48}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

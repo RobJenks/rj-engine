@@ -179,6 +179,7 @@
     <ClCompile Include="LightHighlightFadeShader.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
+    <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="SimulationObjectManager.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
@@ -367,6 +368,8 @@
     <ClInclude Include="LightHighlightFadeShader.h" />
     <ClInclude Include="LogManager.h" />
     <ClInclude Include="MultiLineTextBlock.h" />
+    <ClInclude Include="RenderQueue.h" />
+    <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="SimulationObjectManager.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="SpaceProjectile.h" />
