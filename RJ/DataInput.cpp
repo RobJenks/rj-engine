@@ -258,7 +258,15 @@ Result IO::Data::LoadConfigFile(const string &filename)
 		// Test the type of this node
 		name = child->Value(); StrLowerC(name);
 
-		if (name == "screenresolution") {
+		if (name == "data") {
+			const char *path = child->Attribute("path");
+			if (path && DirectoryExists(path))
+			{
+				D::DATA = (char*)calloc(strlen(path) + 1, sizeof(char));
+				strcpy(D::DATA, path);
+			}
+		}
+		else if (name == "screenresolution") {
 			int x = 1024, y = 768, hz = 0;
 			child->Attribute("x", &x);
 			child->Attribute("y", &y);

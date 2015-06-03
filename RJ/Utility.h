@@ -241,6 +241,7 @@ struct D3DXFINITEPLANE
 };
 
 bool FileExists(const char *szPath);
+bool DirectoryExists(const char *szPath);
 
 template <typename TKey, typename TVal>
 void VectorFromUnorderedMap(unordered_map<TKey, TVal> &map, vector<TVal> *pOutVector)

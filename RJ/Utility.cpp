@@ -98,6 +98,14 @@ bool FileExists(const char *szPath)
          !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+bool DirectoryExists(const char *szPath)
+{
+	DWORD dwAttrib = GetFileAttributes(szPath);
+
+	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+		   (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
 void QuaternionRotationYawPitch(D3DXQUATERNION *q, float yaw, float pitch)
 {
 	float halfyaw, halfpitch, sinY, cosY, sinP, cosP;

@@ -59,12 +59,8 @@ namespace D {
 		SystemRegion *				System;
 	}
 
-	// Game data location
-	/* Std PC  const char *DATA = "C:\\Users\\Rob\\Documents\\Visual Studio 2008\\Projects\\RJ\\RJ\\Data"; */
-	/* AW PC   const char *DATA = "C:\\Documents and Settings\\Rob\\My Documents\\RJ\\Data\\"; */
-	/* Work PC const char *DATA = "C:\\Users\\rjenks\\Documents\\Visual Studio 2013\\Projects\\RJ\\RJ\\Data"; */
-	/* Main PC const char *DATA = "../RJ/Data"; */
-	/* Vaio */ const char *DATA = "../../RJ/Data";
+	// Game data location; can be updated by configuration
+	char *DATA = "../RJ/Data";
 
 	// Data read/edit/load constants
 	const char *NODE_GameData = "gamedata";
