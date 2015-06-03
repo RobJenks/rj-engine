@@ -174,7 +174,14 @@ public:
 
 	// Static method to shut down the memory pool and release any allocated resources *still within the pool*.  Any items requested
 	// and taken by other processes are the responsibility of the other process to deallocate
-	static void									ShutdownMemoryPool(void) { _MemoryPool->Shutdown(); delete _MemoryPool; _MemoryPool = NULL; }
+	static void									ShutdownMemoryPool(void) 
+	{
+		if (_MemoryPool)
+		{
+			_MemoryPool->Shutdown();
+			SafeDelete(_MemoryPool);
+		}
+	}
 };
 
 

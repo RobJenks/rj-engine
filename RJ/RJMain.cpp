@@ -294,6 +294,12 @@ void RJMain::TerminateApplication()
 	// that could potentially cause a failure before full shutdown
 	Game::Log.FlushAllStreams();
 
+	// Terminate all objects in the game
+	TerminateObjectRegisters();
+
+	// Release all standard model/geometry data
+	Model::TerminateAllModelData();
+
 	// Terminate the user interface and all UI controllers and layouts
 	TerminateUserInterface();
 
@@ -302,12 +308,6 @@ void RJMain::TerminateApplication()
 
 	// Region termination functions
 	TerminateRegions();
-
-	// Release all standard model/geometry data
-	Model::TerminateAllModelData();
-	
-	// Terminate all objects in the game
-	TerminateObjectRegisters();
 
 	// Data register termination functions
 	D::TerminateAllDataRegisters();
@@ -1219,30 +1219,42 @@ void RJMain::TerminateLogging(void)
 void RJMain::TerminateRegions(void)
 {
 	// Terminate the immediate region
-	D::Regions::Immediate->Terminate();
-	delete D::Regions::Immediate;
-	D::Regions::Immediate = NULL;
+	if (D::Regions::Immediate)
+	{
+		D::Regions::Immediate->Terminate();
+		delete D::Regions::Immediate;
+		D::Regions::Immediate = NULL;
+	}
 
 	// Terminate the system region
-	D::Regions::System->Terminate();
-	delete D::Regions::System;
-	D::Regions::System = NULL;
+	if (D::Regions::System)
+	{
+		D::Regions::System->Terminate();
+		delete D::Regions::System;
+		D::Regions::System = NULL;
+	}
 }
 
 void RJMain::TerminateUserInterface(void)
 {
 	// Terminate the user interface object & release resources
-	D::UI->Terminate();
-	delete D::UI;
-	D::UI = NULL;
+	if (D::UI)
+	{
+		D::UI->Terminate();
+		delete D::UI;
+		D::UI = NULL;
+	}
 }
 
 void RJMain::TerminateUniverse(void)
 {
 	// Terminate the universe and all systems within it
-	Game::Universe->TerminateUniverse();
-	delete Game::Universe;
-	Game::Universe = NULL;
+	if (Game::Universe)
+	{
+		Game::Universe->TerminateUniverse();
+		delete Game::Universe;
+		Game::Universe = NULL;
+	}
 }
 
 // Terminate any memory-pooled objects we are maintaining
