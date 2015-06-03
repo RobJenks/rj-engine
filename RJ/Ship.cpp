@@ -362,7 +362,7 @@ void Ship::SimulateObjectPhysics(void)
 }
 
 // Simulates the ship movement and recalculates its new position
-void Ship::SimulateObject(bool PermitMovement)
+void Ship::SimulateObject(void)
 {
 	/* Generalised process:
 			1. Determine any changes to ship behaviour, for example adjustments to orders or objectives by the flight computer
@@ -382,8 +382,9 @@ void Ship::SimulateObject(bool PermitMovement)
 		RunShipFlightComputer();
 	}
 
-	// Handle all ship movement, if permitted by the central simulator (if not, it means we are attached to some other object which will calculate our position)
-	if (PermitMovement)
+	// Handle all ship movement, if permitted by the central simulator (if not, it means we will be moved
+	// some other way, e.g. we attached to some other object which will calculate our position)
+	if (CanSimulateMovement())
 	{
 		// Adjust engine outputs towards target thrust levels
 		RunAllEnginesToTargetThrust();

@@ -395,13 +395,13 @@ void ComplexShip::ShutdownPerimeterBeacons(void)
 }
 
 // Recalculates the ship position.  Extends on the method of the base Ship class
-void ComplexShip::SimulateObject(bool PermitMovement)
+void ComplexShip::SimulateObject(void)
 {
 	// First call the base class method to recalculate position of the ship itself
-	Ship::SimulateObject(PermitMovement);
+	Ship::SimulateObject();
 
 	// Also call the base environment class method to update the interior of the ship
-	iSpaceObjectEnvironment::SimulateObject(PermitMovement);
+	iSpaceObjectEnvironment::SimulateObject();
 
 	// Also recalculate the world position & world matrix of each section in this ship
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();

@@ -24,7 +24,7 @@ public:
 	void						SetEmitter(ParticleEmitter *emitter);
 
 	// Recalculates the current position of this object
-	void						SimulateObject(bool PermitMovement);
+	void						SimulateObject(void);
 
 	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
 	CMPINLINE void				PerformPostSimulationUpdate(void) { }

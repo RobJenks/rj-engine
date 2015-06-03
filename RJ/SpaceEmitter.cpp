@@ -6,7 +6,7 @@
 
 
 // Recalculates the current position of this object
-void SpaceEmitter::SimulateObject(bool PermitMovement)
+void SpaceEmitter::SimulateObject(void)
 {
 	// The only action a space emitter needs to take is ensure that its associated particle emitter is brought along with it
 	if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation)

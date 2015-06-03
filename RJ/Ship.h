@@ -62,7 +62,7 @@ public:
 	CMPINLINE void			SetDefaultLoadout(const std::string & loadout)	{ m_defaultloadout = loadout; }
 
 	// Primary simulation method for the ship object
-	void				SimulateObject(bool PermitMovement);
+	void				SimulateObject(void);
 
 	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
 	void				PerformPostSimulationUpdate(void);

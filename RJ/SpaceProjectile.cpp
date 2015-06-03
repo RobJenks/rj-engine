@@ -47,7 +47,7 @@ SpaceProjectile::SpaceProjectile(void)
 
 // Primary simulation method for the projectile.  Inherited from iObject.  Ignores the PermitMovement 
 // flag for now, since no expected situations where a projectile needs to be attached & static (yet)
-void SpaceProjectile::SimulateObject(bool PermitMovement)
+void SpaceProjectile::SimulateObject(void)
 {
 	// Check whether we have exceeded our lifetime
 	if ((m_lifetime -= Game::TimeFactor) < 0.0f)

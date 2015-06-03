@@ -50,7 +50,7 @@ void iSpaceObjectEnvironment::InitialiseCopiedObject(iSpaceObjectEnvironment *so
 
 
 // Standard object simulation method, used to simulate the contents of this object environment
-void iSpaceObjectEnvironment::SimulateObject(bool PermitMovement)
+void iSpaceObjectEnvironment::SimulateObject(void)
 {
 	// Simulate all ship tiles within the environment that require simulation
 	iContainsComplexShipTiles::ComplexShipTileCollection::iterator t_it_end = m_tiles[0].end();

@@ -24,7 +24,7 @@ public:
 	void						AssignToShip(iSpaceObject *ship, D3DXVECTOR3 position);
 
 	// Implemented to satisfy iObject interface.  In reality all beacon positions are determined by the parent ship
-	CMPINLINE void				SimulateObject(bool PermitMovement) { }
+	CMPINLINE void				SimulateObject(void) { }
 
 	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
 	CMPINLINE void				PerformPostSimulationUpdate(void) { }

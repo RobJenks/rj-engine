@@ -56,7 +56,7 @@ public:
 	std::vector<StaticTerrain*>					TerrainObjects;
 
 	// Standard object simulation method, used to simulate the contents of this object environment
-	void							SimulateObject(bool PermitMovement);
+	void							SimulateObject(void);
 
 	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
 	void							PerformPostSimulationUpdate(void);

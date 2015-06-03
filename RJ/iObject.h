@@ -137,7 +137,7 @@ public:
 	virtual void							RefreshPositionImmediate(void) = 0;
 
 	// All objects must expose a method to simulate themselves.  Flag indicates whether they are allowed to simulate movement (vs if the object is attached)
-	virtual void							SimulateObject(bool PermitMovement) = 0;
+	virtual void							SimulateObject(void) = 0;
 
 	// Method that indicates whether the object requires a post-simulation update or not.  Usually means the object position/orientation has changed.
 	// Use this flag to minimise the number of virtual function calls required where there is nothing to be done
@@ -241,6 +241,13 @@ public:
 	// Methods for setting and testing the object update flag
 	CMPINLINE bool								Simulated(void) const			{ return m_simulated; }
 	CMPINLINE void								SetSimulatedFlag(bool flag)		{ m_simulated = flag; }
+
+	// Returns a flag indicating whether this object is allowed to simulate its own movement this simulation cycle
+	// It may not be if, for example, it is attached to some other parent object
+	CMPINLINE bool								CanSimulateMovement(void) const
+	{
+		return ( !PositionUpdated() && !HaveParentAttachment() );
+	}
 
 	// Methods for setting and testing the position update flag
 	CMPINLINE bool								PositionUpdated(void) const		{ return m_posupdated; }

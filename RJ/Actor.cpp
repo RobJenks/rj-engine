@@ -192,7 +192,7 @@ bool Actor::CanAcceptOrderType(Order::OrderType type)
 }
 
 // Simulates the actor, for example processes the actor's current order queue.  Called every frame.
-void Actor::SimulateObject(bool PermitMovement)
+void Actor::SimulateObject(void)
 {
 	// Degree of simulation is based upon the current simulation state
 	switch (m_simulationstate)

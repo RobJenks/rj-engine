@@ -49,7 +49,7 @@ public:
 	}
 
 	// Simulates the actor, for example processes the actor's current order queue.  Called every frame.
-	void						SimulateObject(bool PermitMovement);
+	void						SimulateObject(void);
 
 	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
 	CMPINLINE void				PerformPostSimulationUpdate(void) { }

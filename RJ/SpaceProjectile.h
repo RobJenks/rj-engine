@@ -35,7 +35,7 @@ public:
 
 
 	// Primary simulation method for the projectile.  Inherited from iSpaceObject
-	void							SimulateObject(bool PermitMovement);
+	void							SimulateObject(void);
 
 	// Method called when this object collides with another.  Inherited from iObject
 	void							CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);

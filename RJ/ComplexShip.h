@@ -112,7 +112,7 @@ public:
 	CMPINLINE const PerimeterBeaconCollection *	GetPerimeterBeaconCollection(void) { return &m_perimeterbeacons; }
 
 	// Recalculates the ship position.  Extends on the method of the base Ship class
-	void							SimulateObject(bool PermitMovement);
+	void							SimulateObject(void);
 
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call ComplexShip::SimulationStateChanged() to maintain the chain

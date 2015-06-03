@@ -24,7 +24,7 @@ void Game::Logic::BeginSimulationCycle(void)
 
 void Game::Logic::SimulateAllObjects(void)
 {
-	iObject *obj; bool permitmovement;
+	iObject *obj;
 	
 	// Process the set of objects in scope for simulation (TODO: in future, this should be the locally-relevant subset) 
 	Game::ObjectRegister::iterator it_end = Game::Objects.end();
@@ -39,11 +39,8 @@ void Game::Logic::SimulateAllObjects(void)
 		// Only simulate the object if it has not already been simulated
 		if (obj->Simulated() == false)
 		{
-			// Determine whether the object should update it's own position, or whether it is attached to another object
-			permitmovement = (!obj->PositionUpdated() && !obj->HaveParentAttachment());
-
 			// Simulate the object, and set the flag once complete
-			obj->SimulateObject(permitmovement);
+			obj->SimulateObject();
 			obj->SetSimulatedFlag(true);
 
 			// Update the position of any child objects, if we have any (checking count!=0 here, instead of in function, avoids unnecessary function calls)
