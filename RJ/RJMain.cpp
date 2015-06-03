@@ -864,12 +864,29 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseLogging();
 
 	// Load player config before initialising the application
-	LoadPlayerConfig();
+	res = LoadPlayerConfig();
+	if (res != ErrorCodes::NoError) {
+		std::string errorstring = concat("Fatal Error: Could not load core configuration data [")((int)res)("]").str();
+		Game::Log << LOG_INIT_START << errorstring << "\n";
+		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
+		return res;
+	}
+
+	// Validate that the game data directory exists before attempting to load data.  In future, may want to move 
+	// into separate method that performs all pre-load checks for key files/directories/assets
+	if (!DirectoryExists(D::DATA)) {
+		std::string errorstring = concat("Fatal Error: Game data directory does not exist; check config.xml").str();
+		Game::Log << LOG_INIT_START << errorstring << "\n";
+		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
+		return res;
+	}
 
 	// Create a new game window
 	res = InitialiseWindow();
 	if (res != ErrorCodes::NoError) {
-		::MessageBox(0, concat("Fatal Error: Could not initialise main window [")((int)res)("]").str().c_str(), "Fatal Error", 0);
+		std::string errorstring = concat("Fatal Error: Could not initialise main window [")((int)res)("]").str();
+		Game::Log << LOG_INIT_START << errorstring << "\n";
+		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
 
