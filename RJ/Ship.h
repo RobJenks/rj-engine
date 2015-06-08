@@ -41,8 +41,7 @@ public:
 	// their level of the implementation
 	void										InitialiseCopiedObject(Ship *source);
 
-	// Methods to update the ship orientation, recalculating other derived fields at the same time
-	CMPINLINE void		SetOrientation(const D3DXQUATERNION &orient);
+	// Ship-specific methods to adjust the ship orientation, recalculating other derived fields at the same time
 	void				ChangeOrientation(const D3DXQUATERNION &rot);
 	void				AddDeltaOrientation(const D3DXQUATERNION &dq);
 
@@ -73,6 +72,8 @@ public:
 	void				SimulateAllShipEngines(void);
 	void				SimulateObjectPhysics(void);
 	void				DetermineNewPosition(void);
+
+	// Derives a new object world matrix
 	void				DeriveNewWorldMatrix(void);
 
 	// Methods to adjust the target thrust of all engines on the ship
@@ -234,28 +235,19 @@ protected:
 
 };
 
-
-
-CMPINLINE void Ship::SetOrientation(const D3DXQUATERNION & orient)
+// Derives a new object world matrix
+CMPINLINE void Ship::DeriveNewWorldMatrix(void)
 {
-	// Call the base object class method to update our orientation
-	iObject::SetOrientation(orient);
-
-	// Recalculate the orientation matrix and based on this the new orientation and any adjustments
+	// Calculate the intermediate rotation & inv-rotation matrices that are stored within Ship objects
 	D3DXMATRIX omatrix;
 	D3DXMatrixRotationQuaternion(&omatrix, &(m_orientation));
 	m_orientationmatrix = (this->OrientationAdjustment * omatrix);
-
-	// Also precalculate the inverse matrix for efficiency
 	D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
-}
 
-
-
-CMPINLINE void Ship::DeriveNewWorldMatrix(void)
-{
-	// Derive a new world matrix from the ship orientation and translated location
+	// Calculate the intermediate translation matrix for this object
 	D3DXMatrixTranslation(&m_transmatrix, m_position.x, m_position.y, m_position.z);
+
+	// Derive a new world matrix from the ship orientation and translated location
 	SetWorldMatrix(m_centretransmatrix * m_orientationmatrix * m_transmatrix);
 }
 

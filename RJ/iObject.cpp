@@ -45,7 +45,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_visible = true;
 	m_position = NULL_VECTOR;
 	m_orientation = ID_QUATERNION;
-	m_worldmatrix = m_inverseworld = ID_MATRIX;
+	m_orientationmatrix = m_worldmatrix = m_inverseworld = ID_MATRIX;
 	m_centreoffset = NULL_VECTOR;
 
 	m_childcount = 0;

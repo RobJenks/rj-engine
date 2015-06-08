@@ -55,22 +55,23 @@ public:
 	void							SetParent(T parent)									{ Parent = parent; }
 	void							SetChild(T child)									{ Child = child; }
 
-	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
-	// only the object world matrix and is relatively fast.  Use when position/orientation are not required
-	void							Apply_TransformOnly(void);
-
 
 	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
-	// the object world matrix and stores its new position, and is relatively fast.  Use when orientation is not required
-	
-	void							Apply_TransformPositionOnly(void)
+	// the object world matrix and stores its new position, and is relatively fast.  Use when orientation is not required	
+	void							Apply_PositionOnly(void)
 	{
-		// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
-		D3DXMatrixMultiply(&_Attachment_Internal::_DATA.m1, &m_mat_offset, Parent->GetWorldMatrix());
-		Child->SetWorldMatrix(_Attachment_Internal::_DATA.m1);
+		// Update the child object position based on the parent world matrix
+		D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &m_posoffset, Parent->GetWorldMatrix());
+		Child->SetPosition(_Attachment_Internal::_DATA.v1);
 
-		// Retrieve the new object position from its world matrix translation components
-		Child->SetPosition(D3DXVECTOR3(_Attachment_Internal::_DATA.m1._41, _Attachment_Internal::_DATA.m1._42, _Attachment_Internal::_DATA.m1._43));
+		// Update the child world matrix immediately, IF it has any children of its own, so that 
+		// its children will be starting with the correct transformation.  If it has no children
+		// then we can afford to wait until the matrix is derived in the next cycle
+		// TODO: Setting the pos/orient will prompt another recalculation of the child world matrix 
+		// next frame, which is a little inefficient if we have also calculated it here.  Could zero-out the 
+		// SpatialDataChanged flag when deriving the new world matrix, assuming this is the ONLY
+		// reason for maintaining the flag
+		if (Child->HasChildAttachments()) Child->RefreshPositionImmediate();
 	}
 
 	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
@@ -78,15 +79,26 @@ public:
 	// orientation requires decomposition of the world matrix and at least one sqrt
 	void							Apply(void)
 	{
-		// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
-		D3DXMatrixMultiply(&_Attachment_Internal::_DATA.m1, &m_mat_offset, Parent->GetWorldMatrix());
-		Child->SetWorldMatrix(_Attachment_Internal::_DATA.m1);
+		// Update the child object position based on the parent world matrix
+		D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &m_posoffset, Parent->GetWorldMatrix());
+		Child->SetPosition(_Attachment_Internal::_DATA.v1);
 
-		// Decompose to yield the world position and orientation of the child object
-		D3DXMatrixDecompose(&_Attachment_Internal::_DATA.v1, &_Attachment_Internal::_DATA.q1,
-			&_Attachment_Internal::_DATA.v2, &_Attachment_Internal::_DATA.m1);
-		Child->SetPosition(_Attachment_Internal::_DATA.v2);
-		Child->SetOrientation(&_Attachment_Internal::_DATA.q1);
+		// Multiply the parent orientation by our offset quaternion to yield the child orientation
+		// TODO: Does not currently account for the Ship::OrientationAdjustment since this was
+		// causing non-affine transformation issues.  Resolve in future, or (ideally) find a way to 
+		// remove the OrientationAdjustment field
+		Child->SetOrientation(Parent->GetOrientation() * m_orientoffset);
+		//D3DXQuaternionRotationMatrix(&_Attachment_Internal::_DATA.q1, Parent->GetOrientationMatrix());
+		//Child->SetOrientation(m_orientoffset * _Attachment_Internal::_DATA.q1);
+		
+		// Update the child world matrix immediately, IF it has any children of its own, so that 
+		// its children will be starting with the correct transformation.  If it has no children
+		// then we can afford to wait until the matrix is derived in the next cycle
+		// TODO: Setting the pos/orient will prompt another recalculation of the child world matrix 
+		// next frame, which is a little inefficient if we have also calculated it here.  Could zero-out the 
+		// SpatialDataChanged flag when deriving the new world matrix, assuming this is the ONLY
+		// reason for maintaining the flag
+		if (Child->HasChildAttachments()) Child->RefreshPositionImmediate();
 	}
 
 
@@ -184,16 +196,6 @@ Attachment<T>::Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, cons
 	: Parent(parent), Child(child), m_posoffset(posoffset), m_orientoffset(orientoffset)
 {
 	RecalculateOffsetParameters();
-}
-
-// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
-// only the object world matrix and is relatively fast.  Use when position/orientation are not required
-template <typename T>
-void Attachment<T>::Apply_TransformOnly(void)
-{
-	// Multiply the child offset matrix by its parent's world matrix, yielding the child world matrix
-	D3DXMatrixMultiply(&_Attachment_Internal::_DATA.m1, &m_mat_offset, Parent->GetWorldMatrix());
-	Child->SetWorldMatrix(_Attachment_Internal::_DATA.m1);
 }
 
 // Assign a new constraint between the two objects, making the attachment dynamic

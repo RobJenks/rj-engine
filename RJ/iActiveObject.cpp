@@ -9,7 +9,7 @@
 iActiveObject::iActiveObject(void)
 {
 	// Set fields to defaults
-	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
+	m_inverseorientationmatrix = ID_MATRIX;
 
 	// Initialise physical state of the object
 	SetMass(10.0f);

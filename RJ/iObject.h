@@ -114,6 +114,22 @@ public:
 		CollisionOBB.Invalidate();
 	}
 
+	CMPINLINE void							SetPositionAndOrientation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient)
+	{
+		m_position = pos; m_orientation = orient;
+		m_spatialdatachanged = true;
+		CollisionOBB.Invalidate();
+	}
+	CMPINLINE void							SetPositionAndOrientation_NoInvalidation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient)
+	{
+		m_position = pos; m_orientation = orient;
+		m_spatialdatachanged = true;
+		CollisionOBB.Invalidate();
+	}
+
+	// The orientation matrix for this object
+	CMPINLINE D3DXMATRIX *					GetOrientationMatrix(void)			{ return &m_orientationmatrix; }
+
 	// The world matrix of this object
 	CMPINLINE D3DXMATRIX *					GetWorldMatrix(void)				{ return &m_worldmatrix; }
 	CMPINLINE D3DXMATRIX *					GetInverseWorldMatrix(void)			{ return &m_inverseworld; }
@@ -122,14 +138,12 @@ public:
 		// Store the new world matrix and calculate the inverse world matrix for rendering efficiency
 		m_worldmatrix = m;
 		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
-		//CollisionOBB.Invalidate();
 	}
 	CMPINLINE void							SetWorldMatrix(D3DXMATRIX *m) 
 	{
 		// Store the new world matrix and calculate the inverse world matrix for rendering efficiency
 		m_worldmatrix = *m;
 		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
-		//CollisionOBB.Invalidate();
 	}
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
@@ -331,6 +345,7 @@ protected:
 
 	D3DXVECTOR3							m_position;						// Position of the object in world space
 	D3DXQUATERNION						m_orientation;					// Object orientation
+	D3DXMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating orientation and any subclass adjustments
 	Model *								m_model;						// Returns a pointer to the model for this object, which is stored in 
 																		// the central collection.  Can be NULL if non-renderable.
 
@@ -371,6 +386,12 @@ protected:
 	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z)).
 	float								m_fastmoverthresholdsq;
 
+	// Static working variables for inline intermediate calculations
+	static struct						_calc_data_struct {
+		D3DXVECTOR3						v1, v2, v3;
+		D3DXQUATERNION					q1, q2, q3;
+		D3DXMATRIX						m1, m2, m3;
+	} _calc_data;
 
 };
 

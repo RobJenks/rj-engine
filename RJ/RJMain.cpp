@@ -1853,6 +1853,7 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetAngularVelocityDegradeState(false);
 
 	ss->AddChildAttachment(s2, D3DXVECTOR3(0.0f, 0.0f, 30.0f), ID_QUATERNION);
+	ss->AddCollisionExclusion(s2->GetID());
 
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
