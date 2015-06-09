@@ -48,7 +48,17 @@ void Game::Logic::SimulateAllObjects(void)
 		}
 
 		// If the object position changed during this frame then recalculate any derived data (e.g. world matrices)
-		if (obj->IsPostSimulationUpdateRequired()) obj->PerformPostSimulationUpdate();
+		if (obj->SpatialDataChanged())
+		{
+			// Perform base object updates required when the object moves, e.g. ensuring quaternions are normalised
+			obj->RenormaliseSpatialData();
+
+			/* if (obj->IsPostSimulationUpdateRequired()) */		// TODO: Add this back if the flag becomes more than just "return (m_spatialdatachanged)"
+			obj->PerformPostSimulationUpdate();
+		}
+
+		// Revert the 'currently visible' flag, which will be updated by the core engine ready for next frame
+		obj->RemoveCurrentVisibilityFlag();
 	}
 
 	// Process any pending object register/deregister requests

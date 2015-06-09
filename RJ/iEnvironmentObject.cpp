@@ -221,24 +221,6 @@ void iEnvironmentObject::CollisionWithTerrain(const GamePhysicsEngine::TerrainIm
 
 }
 
-// Add delta orientation; relative to the object environment
-void iEnvironmentObject::AddDeltaOrientation(const D3DXQUATERNION &dq)
-{
-	// Add the delta value
-	m_envorientation *= dq;
-
-	// Check whether we have passed the threshold number of quaternion operations that would necessitate a re-normalisation
-	if (++m_orientchanges > QUATERNION_NORMALISATION_THRESHOLD)
-	{
-		// Normalise the orientation and reset our counter for the next normalisation
-		D3DXQuaternionNormalize(&m_envorientation, &m_envorientation);
-		m_orientchanges = 0;
-	}
-
-	// Recalculate all derived fields
-	RecalculateEnvironmentOrientationData();
-}
-
 // Performs all physics simulation for this environment object
 void iEnvironmentObject::SimulateObjectPhysics(void)
 {

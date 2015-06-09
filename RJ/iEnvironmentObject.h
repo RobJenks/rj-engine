@@ -43,7 +43,6 @@ public:
 
 	// Methods to add delta position and orientation to the current relative position
 	CMPINLINE void								AddDeltaPosition(const D3DXVECTOR3 & dp)	{ SetEnvironmentPosition(m_envposition + dp); }
-	void										AddDeltaOrientation(const D3DXQUATERNION &dq);
 
 	// Methods to recalculate position & orientation data following a change to the object's environment position & orientation
 	void										RecalculateEnvironmentPositionData(void);

@@ -69,6 +69,9 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 // Perform the post-simulation update.  Pure virtual inherited from iObject base class
 void iSpaceObjectEnvironment::PerformPostSimulationUpdate(void)
 {
+	// TOOD: Need to test for SpatialDataChanged() if the "IsPostSimulationUpdateRequired()" method starts considering
+	// other fields besides the spatial data flag
+
 	// Call the base class method
 	Ship::PerformPostSimulationUpdate();
 

@@ -146,13 +146,13 @@ public:
 
 	// RenderObjectEnvironments(iSpaceObjectEnvironment *environment)
 	// Method to render the interior of an object environment, including any tiles, objects or terrain within it
-	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ObjectEnvironments, 
+	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ObjectEnvironments,
 		void, RenderObjectEnvironment, iSpaceObjectEnvironment *environment, environment)
 
 	// Actor-rendering methods; actors are queued for rendering in one batch, after other objects are processed, to avoid
 	// multiple engine state changes per frame
-	CMPINLINE void			QueueActorRendering(Actor *actor)	{ if (actor) m_queuedactors.push_back(actor); }
-
+	void					QueueActorRendering(Actor *actor);
+	
 	// Processes the actor render queue and renders all actors at once
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_Actors, 
 		void, ProcessQueuedActorRendering, void, )

@@ -87,7 +87,9 @@ public:
 		// TODO: Does not currently account for the Ship::OrientationAdjustment since this was
 		// causing non-affine transformation issues.  Resolve in future, or (ideally) find a way to 
 		// remove the OrientationAdjustment field
-		Child->SetOrientation(Parent->GetOrientation() * m_orientoffset);
+		_Attachment_Internal::_DATA.q1 = (m_orientoffset * Parent->GetOrientation());
+		D3DXQuaternionNormalize(&_Attachment_Internal::_DATA.q1, &_Attachment_Internal::_DATA.q1);
+		Child->SetOrientation(_Attachment_Internal::_DATA.q1);
 		//D3DXQuaternionRotationMatrix(&_Attachment_Internal::_DATA.q1, Parent->GetOrientationMatrix());
 		//Child->SetOrientation(m_orientoffset * _Attachment_Internal::_DATA.q1);
 		
@@ -151,7 +153,7 @@ void Attachment<T>::SetPositionOffset(const D3DXVECTOR3 & off)
 template <typename T>
 void Attachment<T>::SetOrientationOffset(const D3DXQUATERNION & off)
 {
-	m_orientoffset = off;
+	D3DXQuaternionNormalize(&m_orientoffset, &off);
 	RecalculateOffsetParameters();
 }
 
@@ -160,7 +162,7 @@ template <typename T>
 void Attachment<T>::SetOffset(const D3DXVECTOR3 & poff, const D3DXQUATERNION & qoff)
 {
 	m_posoffset = poff;
-	m_orientoffset = qoff;
+	D3DXQuaternionNormalize(&m_orientoffset, &off);
 	RecalculateOffsetParameters();
 }
 
@@ -179,21 +181,23 @@ void Attachment<T>::RecalculateOffsetParameters(void)
 // Creates a new attachment object
 template <typename T>
 Attachment<T>::Attachment(void)
-	: Parent(NULL), Child(NULL), m_posoffset(NULL_VECTOR), m_orientoffset(ID_QUATERNION), m_mat_offset(ID_MATRIX)
+	: Parent(NULL), Child(NULL), m_posoffset(NULL_VECTOR), m_orientoffset(ID_QUATERNION), m_mat_offset(ID_MATRIX),
+	Constraint(NULL)
 {
 }
 
 // Creates a new attachment object
 template <typename T>
 Attachment<T>::Attachment(T parent, T child)
-	: Parent(parent), Child(child), m_posoffset(NULL_VECTOR), m_orientoffset(ID_QUATERNION), m_mat_offset(ID_MATRIX)
+	: Parent(parent), Child(child), m_posoffset(NULL_VECTOR), m_orientoffset(ID_QUATERNION), m_mat_offset(ID_MATRIX), 
+	Constraint(NULL)
 {
 }
 
 // Creates a new attachment object
 template <typename T>
 Attachment<T>::Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset)
-	: Parent(parent), Child(child), m_posoffset(posoffset), m_orientoffset(orientoffset)
+	: Parent(parent), Child(child), m_posoffset(posoffset), m_orientoffset(orientoffset), Constraint(NULL)
 {
 	RecalculateOffsetParameters();
 }
@@ -205,13 +209,16 @@ void Attachment<T>::AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	// Remove any existing constraint before adding another
 	RemoveConstraint();
 
+	// Apply the effect of the attachment before determining constraint details
+	Apply();
+
 	// Create a new constraint with the supplied parameters
 	Constraint = new AttachmentConstraint(axis, parent_point);
 
 	// We also want to determine the point on the child object that the constraint axis passes through
 	D3DXVECTOR3 worldpos; D3DXMATRIX invchildworld;
 	D3DXMatrixInverse(&invchildworld, 0, Child->GetWorldMatrix());
-	D3DXVec3TransformCoord(&worldpos, &parent_point, Parent->GetWorldMatrix*());	// worldpos = (parentpos * parent.world)
+	D3DXVec3TransformCoord(&worldpos, &parent_point, Parent->GetWorldMatrix());		// worldpos = (parentpos * parent.world)
 	D3DXVec3TransformCoord(&Constraint->ChildPoint, &worldpos, &invchildworld);		// childpos = (worldpos * inv(child.world)
 
 	// The attachment state at time of assignment will become the 'base' orientation for each object

@@ -50,9 +50,6 @@ Ship::Ship(void)
 	this->MaxBounds = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
 	this->m_centretransmatrix = m_centreinvtransmatrix = ID_MATRIX;
 	this->OrientationAdjustment = ID_MATRIX;
-
-	// Set the counter of orientation quaterion operations before a normalisation is required
-	this->m_orientchanges = 0;
 }
 
 
@@ -412,70 +409,11 @@ void Ship::SimulateObject(void)
 // Perform the post-simulation update.  Pure virtual inherited from iObject base class
 void Ship::PerformPostSimulationUpdate(void)
 {
-	// Derive a new world matrix based on our updated position/orientation
 	// TOOD: Need to test for SpatialDataChanged() if the "IsPostSimulationUpdateRequired()" method starts considering
 	// other fields besides the spatial data flag
+
+	// Derive a new world matrix based on our updated position/orientation
 	DeriveNewWorldMatrix();
-}
-
-void Ship::ChangeOrientation(const D3DXQUATERNION &rot)
-{
-	// Multiply orientation D3DXQUATERNIONs to generate the new D3DXQUATERNION
-	D3DXQUATERNION orient = (rot * m_orientation);
-
-	// Check whether we have passed the threshold number of quaternion operations that would necessitate a re-normalisation
-	if (++m_orientchanges > QUATERNION_NORMALISATION_THRESHOLD)
-	{
-		// Normalise each of the key quaternions being maintained by this ship
-		D3DXQuaternionNormalize(&orient, &orient);
-		m_orientchanges = 0;
-	}
-
-	// Store the new orientation and recalculate derived data
-	SetOrientation(orient);
-}
-
-void Ship::ChangeOrientationAndRecalculate(const D3DXQUATERNION &rot)
-{
-	// Multiply orientation D3DXQUATERNIONs 
-	D3DXQUATERNION orient = (rot * m_orientation);
-	
-	// Immediately renormalise, resetting the normalisation counter
-	D3DXQuaternionNormalize(&orient, &orient);
-	m_orientchanges = 0;
-	
-	// Store the new orientation and recalculate derived data
-	SetOrientation(orient);
-}
-
-void Ship::AddDeltaOrientation(const D3DXQUATERNION &dq)
-{
-	// Add the incremental quaternion
-	D3DXQUATERNION orient = (m_orientation + dq);
-
-	// Check whether we have passed the threshold number of quaternion operations that would necessitate a re-normalisation
-	if (++m_orientchanges > QUATERNION_NORMALISATION_THRESHOLD)
-	{
-		// Normalise each of the key quaternions being maintained by this ship
-		D3DXQuaternionNormalize(&orient, &orient);
-		m_orientchanges = 0;
-	}
-
-	// Store the new orientation and recalculate derived data
-	SetOrientation(orient);
-}
-
-void Ship::AddDeltaOrientationAndRecalculate(const D3DXQUATERNION &dq)
-{
-	// Add the incremental quaternion
-	D3DXQUATERNION orient = (m_orientation + dq);
-
-	// Immediately renormalise, resetting the normalisation counter
-	D3DXQuaternionNormalize(&orient, &orient);
-	m_orientchanges = 0;
-
-	// Store the new orientation and recalculate derived data
-	SetOrientation(orient);
 }
 
 void Ship::DetermineNewPosition(void)

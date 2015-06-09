@@ -47,6 +47,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_orientation = ID_QUATERNION;
 	m_orientationmatrix = m_worldmatrix = m_inverseworld = ID_MATRIX;
 	m_centreoffset = NULL_VECTOR;
+	m_orientchanges = 0;
 
 	m_childcount = 0;
 	m_parentobject = NULL;
@@ -61,7 +62,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	SetVisibilityTestingMode(VisibilityTestingModeType::UseBoundingSphere);
 
 	// Set all flags to default values
-	m_simulated = m_posupdated = m_spatialdatachanged = false;
+	m_simulated = m_posupdated = m_spatialdatachanged = m_currentlyvisible = false;
 
 	// Set a default value for size
 	SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));

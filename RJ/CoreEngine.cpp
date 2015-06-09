@@ -1313,16 +1313,23 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 		if (render) RenderComplexShipSection(ship, sec);
 	}
 
-	// Pass control to the environment-rendering logic to render all visible objects within the environment, if applicable.
-	// Criteria are that either (a)it was requested, (b) the ship is or contains a simulation hub, or (c) the flag is set 
-	// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
-	if (shiprendered && (renderinterior || is_hub || ship->InteriorShouldAlwaysBeRendered()))
+	// We only need to render the ship & its contents if at least one ship section was rendered
+	if (shiprendered)
 	{
-		RenderObjectEnvironment(ship);
-	}
+		// Pass control to the environment-rendering logic to render all visible objects within the environment, if applicable.
+		// Criteria are that either (a)it was requested, (b) the ship is or contains a simulation hub, or (c) the flag is set 
+		// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
+		if (renderinterior || is_hub || ship->InteriorShouldAlwaysBeRendered())
+		{
+			RenderObjectEnvironment(ship);
+		}
 
-	// Increment the complex ship render count if any of its sections were rendered this frame
-	if (shiprendered) ++m_renderinfo.ComplexShipRenderCount;
+		// Mark the ship to indicate that it was visible this frame
+		ship->MarkAsVisible();
+
+		// Increment the complex ship render count if any of its sections were rendered this frame
+		++m_renderinfo.ComplexShipRenderCount;
+	}
 }
 	
 // Render a complex ship section to the space environment, as part of the rendering of the complex ship itself
@@ -1360,6 +1367,9 @@ void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection 
 			}
 		}
 	}
+
+	// Mark the section to indicate that it is visible
+	sec->MarkAsVisible();
 
 	// Increment the render count
 	++m_renderinfo.ComplexShipSectionRenderCount;
@@ -1635,17 +1645,16 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 }
 
 // Render a simple ship to the space environment
-#ifndef RJ_PROFILER_ACTIVE	
-	void CoreEngine::RenderSimpleShip(SimpleShip *s)
-#else	
-	void CoreEngine::RenderSimpleShip_Profiled(SimpleShip *s)
-#endif
+RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 {
 	// Make sure the ship exists and has a model we can render
 	if (!s || !s->GetModel()) return;
 
 	// Test whether this ship is within the viewing frustrum; if not, no need to render it
 	if (!m_frustrum->TestObjectVisibility(s)) return;
+
+	// Mark the object as visible
+	s->MarkAsVisible();
 
 	// We are rendering this object, so call its pre-render update method
 	s->PerformRenderUpdate();
@@ -1788,6 +1797,17 @@ RJ_PROFILED(void CoreEngine::RenderParticleEmitters, void)
 	m_particleengine->Render(r_view, r_projection, m_D3D, m_camera);
 }
 
+// Push an actor onto the queue for rendering
+void CoreEngine::QueueActorRendering(Actor *actor)
+{
+	if (actor)
+	{
+		actor->MarkAsVisible();
+		m_queuedactors.push_back(actor);
+	}
+}
+
+
 // Renders all actors that have been queued up for rendering
 RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 {
@@ -1797,7 +1817,7 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	// Disable rasteriser culling to prevent loss of intermediate faces in skinned models; we only have to do this once before rendering all actors
 	m_D3D->DisableRasteriserCulling();
 
-	// Get parameters that are used for every actor being rendered (TODO: this can be done once before rendering all actors, to improve efficiency)
+	// Get parameters that are used for every actor being rendered.  This is done once before rendering all actors, to improve efficiency
 	XMFLOAT3 campos = (XMFLOAT3)m_camera->GetPosition();
 	XMFLOAT4X4 view = (XMFLOAT4X4)r_view;
 	XMFLOAT4X4 proj = (XMFLOAT4X4)r_projection;

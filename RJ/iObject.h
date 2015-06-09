@@ -127,6 +127,19 @@ public:
 		CollisionOBB.Invalidate();
 	}
 
+	CMPINLINE void							ChangeOrientation(const D3DXQUATERNION &rot)
+	{
+		// Multiply orientation D3DXQUATERNIONs to generate the new D3DXQUATERNION
+		SetOrientation(rot * m_orientation);
+	}
+
+	CMPINLINE void							AddDeltaOrientation(const D3DXQUATERNION &dq)
+	{
+		// Add the incremental quaternion
+		SetOrientation(m_orientation + dq);
+	}
+
+
 	// The orientation matrix for this object
 	CMPINLINE D3DXMATRIX *					GetOrientationMatrix(void)			{ return &m_orientationmatrix; }
 
@@ -278,6 +291,29 @@ public:
 	void										AddCollisionExclusion(Game::ID_TYPE object);
 	void										RemoveCollisionExclusion(Game::ID_TYPE object);
 	
+	// Flag that indicates whether the object is currently visible.  Set by the core engine each render pass, so the flag
+	// will always relate to object visibility LAST frame
+	CMPINLINE bool								IsCurrentlyVisible(void) const			{ return m_currentlyvisible; }
+	CMPINLINE void								MarkAsVisible(void)						{ m_currentlyvisible = true; }
+	CMPINLINE void								RemoveCurrentVisibilityFlag(void)		{ m_currentlyvisible = false; }
+	CMPINLINE void								SetCurrentVisibilityFlag(bool v)		{ m_currentlyvisible = v; }
+
+	// Renormalise any object spatial data, following a change to the object position/orientation
+	CMPINLINE void								RenormaliseSpatialData(void)
+	{
+		// Normalise every frame if the object is visible, or every *_FULLSIM changes when the object is being fully-simulated
+		// but is not currently visible.  Aside from, we do not bother renormalising to save cycles
+		if (m_currentlyvisible)
+		{
+			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+		}
+		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
+		{
+			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+			m_orientchanges = 0;
+		}
+	}
+
 	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
 	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the
 	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z).
@@ -293,7 +329,10 @@ public:
 
 	// Resets the simulation flags; called at the start of a simulation cycle in which this object is being simulated
 	// TODO: set all at once via one bitwise call once flags are swtiched to the bitwise method?
-	CMPINLINE void								ResetSimulationFlags(void)		{ m_simulated = m_posupdated = m_spatialdatachanged = false; }
+	CMPINLINE void								ResetSimulationFlags(void)		
+	{ 
+		m_simulated = m_posupdated = m_spatialdatachanged = false; 
+	}
 
 	// Static methods which register and deregister an object from the global space object collection, using the unique ID as a lookup key
 	CMPINLINE static void						RegisterObject(iObject *obj);
@@ -330,6 +369,10 @@ protected:
 	// Protected method to set the object type, which also derives and stores the object class
 	void								SetObjectType(iObject::ObjectType type);
 
+	// Threshold (number of changes) for internally renormalising object quaternions, depending on state
+	static const int					ORIENT_NORMALISE_THRESHOLD_FULLSIM = 100;
+	//static const int					ORIENT_NORMALISE_THRESHOLD_DISTANT = 250;
+
 	iObject::ObjectType					m_objecttype;					// The type of object, set by each subclass on creation
 	iObject::ObjectClass				m_objectclass;					// The class of object, set by each subclass on creation
 	bool								m_isenvironment;				// Flag indicating whether this object is itself an environnment
@@ -342,13 +385,13 @@ protected:
 	HashVal								m_instancecodehash;				// Hash value of the instance code, used for more efficient comparison
 	bool								m_standardobject;				// Flag indicating whether this is a 'standard', centrally-maintained template object
 	Faction::F_ID						m_faction;						// ID of the faction this object belongs to; will be 0 for the null faction if it has no affiliation
+	Model *								m_model;						// Returns a pointer to the model for this object, which is stored in 
+																		// the central collection.  Can be NULL if non-renderable.
 
 	D3DXVECTOR3							m_position;						// Position of the object in world space
 	D3DXQUATERNION						m_orientation;					// Object orientation
 	D3DXMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating orientation and any subclass adjustments
-	Model *								m_model;						// Returns a pointer to the model for this object, which is stored in 
-																		// the central collection.  Can be NULL if non-renderable.
-
+	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
 
 	ObjectSimulationState				m_simulationstate;				// Value indicating the extent of simulation (if any) that should be applied to this object
 	ObjectSimulationState				m_nextsimulationstate;			// Any change to simulation state is stored here and takes effect on the next simulation cycle
@@ -358,6 +401,7 @@ protected:
 	bool								m_simulated;					// Flag indicating whether the object has been simulated (may not include position update, if it is attached to something)
 	bool								m_posupdated;					// Flag indicating whether the object position has been updated (may not have been simulated, if it was moved via attachment)
 	bool								m_spatialdatachanged;			// Flag indicating whether the object position or orientation has changed since the previous frame
+	bool								m_currentlyvisible;				// Flag indicating whether the object is visible (last frame); use to avoid render-related updates when object is not visible
 
 	D3DXVECTOR3							m_size;							// Size of the object in world coordinates
 	D3DXVECTOR3							m_centreoffset;					// Any required offset to centre the object model about its local origin

@@ -41,14 +41,6 @@ public:
 	// their level of the implementation
 	void										InitialiseCopiedObject(Ship *source);
 
-	// Ship-specific methods to adjust the ship orientation, recalculating other derived fields at the same time
-	void				ChangeOrientation(const D3DXQUATERNION &rot);
-	void				AddDeltaOrientation(const D3DXQUATERNION &dq);
-
-	// Adjust the ship orientation, forcing a renormalisation of the orientation at the same time
-	void				ChangeOrientationAndRecalculate(const D3DXQUATERNION &rot);
-	void				AddDeltaOrientationAndRecalculate(const D3DXQUATERNION &dq); 
-
 	// Methods to retrieve the centre offset translation matrices for this ship
 	CMPINLINE D3DXMATRIX * 	GetCentreOffsetTranslationMatrix(void)				{ return &m_centretransmatrix; }
 	CMPINLINE D3DXMATRIX * 	GetCentreOffsetInverseTranslationMatrix(void) 		{ return &m_centreinvtransmatrix; }
@@ -199,10 +191,6 @@ public:
 
 protected:
 	Ships::Class		m_shipclass;				// This is either a simple or a complex ship
-
-	int					m_orientchanges;			// The number of orientation changes we have performed since normalising the quaternion
-	D3DXMATRIX			m_transmatrix;				// The translation component of the world matrix
-
 	std::string			m_defaultloadout;			// String ID of the default loadout to be applied to this ship
 
 	float				m_flightcomputerinterval;			// Interval (secs) between executions of the flight computer
@@ -239,16 +227,16 @@ protected:
 CMPINLINE void Ship::DeriveNewWorldMatrix(void)
 {
 	// Calculate the intermediate rotation & inv-rotation matrices that are stored within Ship objects
-	D3DXMATRIX omatrix;
+	D3DXMATRIX omatrix, tmatrix;
 	D3DXMatrixRotationQuaternion(&omatrix, &(m_orientation));
 	m_orientationmatrix = (this->OrientationAdjustment * omatrix);
 	D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
 
 	// Calculate the intermediate translation matrix for this object
-	D3DXMatrixTranslation(&m_transmatrix, m_position.x, m_position.y, m_position.z);
+	D3DXMatrixTranslation(&tmatrix, m_position.x, m_position.y, m_position.z);
 
 	// Derive a new world matrix from the ship orientation and translated location
-	SetWorldMatrix(m_centretransmatrix * m_orientationmatrix * m_transmatrix);
+	SetWorldMatrix(m_centretransmatrix * m_orientationmatrix * tmatrix);
 }
 
 // Determines exact yaw to target; used for precise corrections near the target heading

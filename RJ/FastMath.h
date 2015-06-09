@@ -56,8 +56,6 @@ static const D3DXMATRIX ELEMENT_SCALE_MATRIX = D3DXMATRIX(	Game::C_CS_ELEMENT_SC
 static const float SIN_ZERO = sinf(0.0f);
 static const float COS_ZERO = cosf(0.0f);
 
-static const int QUATERNION_NORMALISATION_THRESHOLD = 250;
-
 // Random number generation functions
 // TODO: Replace with better-optimised versions?
 #define frand()			((float)rand()/(float)RAND_MAX)

@@ -140,6 +140,7 @@ CMPINLINE void Actor::Turn(float angle)
 	D3DXQUATERNION q;
 	D3DXQuaternionRotationAxis(&q, &UP_VECTOR, angle);
 	AddDeltaOrientation(q);
+	RecalculateEnvironmentOrientationData();
 }
 
 
@@ -151,6 +152,7 @@ CMPINLINE void Actor::Turn_NoLimit(float angle)
 	D3DXQUATERNION q;
 	D3DXQuaternionRotationAxis(&q, &UP_VECTOR, angle);
 	AddDeltaOrientation(q);
+	RecalculateEnvironmentOrientationData();
 }
 
 
