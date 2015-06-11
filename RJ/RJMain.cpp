@@ -422,20 +422,12 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
-	/*static D3DXVECTOR3 lastproj = NULL_VECTOR;
-	if (proj)
-	{
-		D3DXVECTOR3 projdiff = (proj->GetPosition() - lastproj);
-		lastproj = proj->GetPosition();
-		OutputDebugString(concat("Proj: ")(proj->GetPosition().x)(",")(proj->GetPosition().y)(",")(proj->GetPosition().z)("  |  Diff: ")
-			(projdiff.x)(",")(projdiff.y)(",")(projdiff.z)("  | TF: ")(Game::TimeFactor)(", DtSq: ")(proj->PhysicsState.DeltaMoveDistanceSq)
-			(", FM_TSQ: ")(proj->GetFastMoverThresholdSq())(", Pc: ")(((proj->PhysicsState.DeltaMoveDistanceSq) / proj->GetFastMoverThresholdSq()) * 100.0f)
-			(", ")((proj->IsFastMover() ? "> FAST MOVER <" : "Normal"))("\n").str().c_str());
-	}*/
 	if (b[DIK_4])
 	{
-		std::vector<Attachment<iObject*>> *attach = ss->GetChildObjects();
-		attach->at(0).Apply();
+		if (!b[DIK_LSHIFT])
+			ss->GetChildObjects()->at(1).Child->GetChildObjects()->at(0).RotateChildAboutConstraint(PI * Game::TimeFactor);
+		else
+			ss->GetChildObjects()->at(1).Child->GetChildObjects()->at(0).RotateChildAboutConstraint(-PI * Game::TimeFactor);
 	}
 
 	if (b[DIK_5])
@@ -1862,17 +1854,17 @@ void RJMain::__CreateDebugScenario(void)
 		tmp[i]->SetOrientation(ID_QUATERNION);
 		OutputDebugString(concat("Creating debug placeholder ship \"")(tmp[i]->GetInstanceCode())("\"\n").str().c_str());
 	}
-	D3DXQuaternionRotationAxis(&tmpq, &RIGHT_VECTOR, PIOVER2);
-	ss->AddChildAttachment(tmp[0], D3DXVECTOR3(0.0f, ss->GetSize().y * 1.0f, 2.0f), ID_QUATERNION);
-	tmp[0]->AddChildAttachment(tmp[1], D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, tmp[1]->GetSize().z * 0.5f), tmpq);
+
+	ss->AddChildAttachment(tmp[0], D3DXVECTOR3(0.0f, ss->GetSize().y * 0.5f + tmp[0]->GetSize().y * 0.5f, 0.0f), ID_QUATERNION);
+	tmp[0]->AddChildAttachment(tmp[1], D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f + tmp[1]->GetSize().y * 0.5f, 0.0f), ID_QUATERNION);
 	
 	ss->AddCollisionExclusion(tmp[0]->GetID());
 	ss->AddCollisionExclusion(tmp[1]->GetID());
 	tmp[0]->AddCollisionExclusion(tmp[1]->GetID());
 
-	tmp[0]->GetChildObjects()->at(0).AssignConstraint(RIGHT_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, tmp[0]->GetSize().z * 0.5f));
-
-	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
+	tmp[0]->GetChildObjects()->at(0).AssignConstraint(RIGHT_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, 0.5f));
+	
+	Game::Log << LOG_INIT_START << "--- Debug scenario createds\n";
 }
 
 void RJMain::DEBUGDisplayInfo(void)
@@ -1955,13 +1947,13 @@ void RJMain::DEBUGDisplayInfo(void)
 		else ++count;
 
 
-		/*sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x0: (%.3f, %.3f, %.3f, %.3f)  |  x1: (%.3f, %.3f, %.3f, %.3f)",
-			x0_ss.x, x0_ss.y, x0_ss.z, x0_ss.w,
-			x1_x0.x, x1_x0.y, x1_x0.z, x1_x0.w);*/
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x1: (%.3f, %.3f, %.3f, %.3f)  |  x1N: (%.3f, %.3f, %.3f, %.3f  |  Diff: %.3f  |  Count: %d  (%d)",
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x1: (%.3f, %.3f, %.3f, %.3f)  |  x1_diff: (%.3f, %.3f, %.3f, %.3f)",
+			x1.Child->GetOrientation().x, x1.Child->GetOrientation().y, x1.Child->GetOrientation().z, x1.Child->GetOrientation().w,
+			x1_x0.x, x1_x0.y, x1_x0.z, x1_x0.w);
+		/*sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x1: (%.3f, %.3f, %.3f, %.3f)  |  x1N: (%.3f, %.3f, %.3f, %.3f  |  Diff: %.3f  |  Count: %d  (%d)",
 			x1_0.x, x1_0.y, x1_0.z, x1_0.w,
 			x1_n.x, x1_n.y, x1_n.z, x1_n.w,
-			delta, last, count);
+			delta, last, count);*/
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

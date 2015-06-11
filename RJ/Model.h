@@ -140,6 +140,8 @@ class Model
 		Result		LoadModel(const char*);
 		void		ReleaseModel();
 
+		void		CentreModelAboutOrigin(void);
+
 	private:
 		// Private variables for buffer / model storage
 		ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
@@ -171,9 +173,6 @@ class Model
 		bool								m_iscompound;
 		CompoundModelComponentCollection	m_compoundmodels;
 		int									m_compoundmodelcount;
-
-		// Collision-related data
-
 	
 };
 

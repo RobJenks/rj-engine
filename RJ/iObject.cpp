@@ -397,6 +397,9 @@ void iObject::AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, 
 		oldparent->RemoveChildAttachment(child);
 	}
 
+	// Make sure the parent object position is up-to-date before applying the attachment
+	RefreshPositionImmediate();
+
 	// Create a new child attachment, store it and recalculate the total attachment count.  Then apply it to update child position
 	Attachment<iObject*> attach = Attachment<iObject*>(this, child, posoffset, orientoffset);
 	m_childobjects.push_back(attach);

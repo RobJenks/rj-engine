@@ -586,10 +586,34 @@ Result Model::LoadModel(const char *filename)
 	// Recalculate other model dimensions based on these min and max bounds
 	RecalculateDimensions();
 
+	// If the model is not centred about (0,0,0) then adjust the vertex data now. This also recalculates
+	// the dependent fields by calling RecalculateDimensions() internally
+	if (!IsZeroVector(m_modelcentre))
+	{
+		CentreModelAboutOrigin();
+	}
+
 	// Close the model file.
 	fin.close();
 
 	return ErrorCodes::NoError;
+}
+
+// Adjusts all vertex data to ensure that the model origin lies at (0,0,0), and recalculates
+// all dependent data based on the new vertices
+void Model::CentreModelAboutOrigin(void)
+{
+	// Determine the offset to be applied uniformly to every vertex
+	
+
+	// Loop through all vertices and apply the offset
+
+	// Adjust the min/max vertex bounds by this known offset
+	m_minbounds += offset; 
+	m_maxbounds += offset;
+
+	// Recalculate all derived fields that are dependent on this vertex data
+	RecalculateDimensions();
 }
 
 
