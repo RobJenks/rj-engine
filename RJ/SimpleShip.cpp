@@ -108,7 +108,6 @@ void SimpleShip::CalculateShipSizeData(void)
 		this->MaxBounds = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
 		this->SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 		this->SetCentreOffsetTranslation(NULL_VECTOR);
-		m_centretransmatrix = m_centreinvtransmatrix = ID_MATRIX;
 		return; 
 	}
 
@@ -116,10 +115,6 @@ void SimpleShip::CalculateShipSizeData(void)
 	this->SetSize(m_model->GetModelSize());
 	D3DXVECTOR3 modelcentre = m_model->GetModelCentre();
 	this->SetCentreOffsetTranslation(-modelcentre);
-
-	// Precalculate the ship-centre translation matrices for rendering efficiency
-	D3DXMatrixTranslation(&m_centretransmatrix, -modelcentre.x, -modelcentre.y, -modelcentre.z);
-	D3DXMatrixTranslation(&m_centreinvtransmatrix, modelcentre.x, modelcentre.y, modelcentre.z);
 }
 
 void SimpleShip::CalculateShipMass()

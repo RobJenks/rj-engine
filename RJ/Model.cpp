@@ -604,9 +604,18 @@ Result Model::LoadModel(const char *filename)
 void Model::CentreModelAboutOrigin(void)
 {
 	// Determine the offset to be applied uniformly to every vertex
-	
+	D3DXVECTOR3 offset = (-1.0f) * ((m_minbounds + m_maxbounds) * 0.5f);
+	if (IsZeroVector(offset)) return;
 
 	// Loop through all vertices and apply the offset
+	// Read in the vertex data.
+	Model::ModelType *v = &(m_model[0]);
+	for (int i = 0; i < m_vertexCount; ++i, ++v)
+	{
+		v->x += offset.x;
+		v->y += offset.y;
+		v->z += offset.z;
+	}
 
 	// Adjust the min/max vertex bounds by this known offset
 	m_minbounds += offset; 

@@ -49,8 +49,7 @@ public:
 	CMPINLINE float							GetInverseMass(void) const			{ return m_invmass; }
 	void									SetMass(const float mass);
 
-	// Methods to retrieve the (automatically-maintained) inverse orientation matrix
-	CMPINLINE D3DXMATRIX *					GetInverseOrientationMatrix(void)	{ return &m_inverseorientationmatrix; }
+
 
 	// Returns a flag indicating whether this object is a 'fast mover' that should be simulated via continuous (CCD) rather
 	// than discrete collision detection.  Definition of a 'fast mover' is an object that will move more than a defined
@@ -157,11 +156,6 @@ protected:
 	// Mass and precalculated inverse mass of the object
 	float									m_mass, m_invmass;				
 
-	// Inverse orientation matrix will be maintained at the iActiveObject level, since it is required for a number 
-	// of physics operations.  Not maintained at the base iObject level since not required for the majority of static objects.
-	// This represents the orientation of a space object in world space, or the LOCAL orientation of an environment object relative
-	// to its environment
-	D3DXMATRIX								m_inverseorientationmatrix;		// Inverse matrix, precalculated for efficiency
 };
 
 

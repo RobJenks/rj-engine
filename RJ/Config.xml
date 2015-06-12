@@ -4,8 +4,8 @@
   <Data path="../RJ/Data" />
 
   <!-- Graphics options -->
-  <ScreenResolution x="1024" y="768" />
-  <SoftwareRasterizerOverride enable="true" />
+  <ScreenResolution x="1152" y="648" />
+  <!--SoftwareRasterizerOverride enable="true" /-->
   
   
 </Config>

@@ -43,25 +43,6 @@ public:
 	// Method called when the projectile exceeds its defined lifetime
 	void							EndProjectileLifetime(void);
 
-	// Perform the post-simulation update.  Pure virtual inherited from iObject
-	CMPINLINE void					PerformPostSimulationUpdate(void) { DetermineWorldMatrix(); }
-
-	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
-	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
-	CMPINLINE void					RefreshPositionImmediate(void)		{ DetermineWorldMatrix(); }
-
-	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
-	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
-	CMPINLINE void					DetermineWorldMatrix(void)
-	{
-		// Derive a new world matrix from the projectile position and orientation
-		D3DXMATRIX trans;
-		D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
-		D3DXMatrixInverse(&m_inverseorientationmatrix, 0, &m_orientationmatrix);
-		D3DXMatrixTranslation(&trans, m_position.x, m_position.y, m_position.z);
-		SetWorldMatrix(m_orientationmatrix * trans);
-	}
-
 	// Shut down the projectile object, deallocating all resources.  Inherited from iObject
 	void							Shutdown(void);
 

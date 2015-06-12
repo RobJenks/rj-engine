@@ -51,9 +51,6 @@ public:
 	// Simulates the actor, for example processes the actor's current order queue.  Called every frame.
 	void						SimulateObject(void);
 
-	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-	CMPINLINE void				PerformPostSimulationUpdate(void) { }
-
 	// Update the actor model for rendering.  NOTE: actor world matrix is calculated here, i.e. only when required for rendeirng
 	void						UpdateForRendering(float timefactor);
 

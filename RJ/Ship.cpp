@@ -48,8 +48,9 @@ Ship::Ship(void)
 
 	this->MinBounds = D3DXVECTOR3(-0.5f, -0.5f, -0.5f);
 	this->MaxBounds = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
-	this->m_centretransmatrix = m_centreinvtransmatrix = ID_MATRIX;
-	this->OrientationAdjustment = ID_MATRIX;
+
+	// All ship objects incorporate a pre-adjustment to their world matrix
+	this->m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment;
 }
 
 
@@ -406,16 +407,6 @@ void Ship::SimulateObject(void)
 	if (m_treenode) m_treenode->ItemMoved(this, m_position);
 }
 
-// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-void Ship::PerformPostSimulationUpdate(void)
-{
-	// TOOD: Need to test for SpatialDataChanged() if the "IsPostSimulationUpdateRequired()" method starts considering
-	// other fields besides the spatial data flag
-
-	// Derive a new world matrix based on our updated position/orientation
-	DeriveNewWorldMatrix();
-}
-
 void Ship::DetermineNewPosition(void)
 {
 	// If we have angular velocity then apply it to the ship orientation now
@@ -470,7 +461,7 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 			this->Bank.z = Clamp(this->Bank.z + (bf_yz * -this->BankExtent.z), -abe_z, abe_z);
 
 			// Now generate the orientation adjustment matrix from these banking values
-			D3DXMatrixRotationYawPitchRoll(&this->OrientationAdjustment,
+			D3DXMatrixRotationYawPitchRoll(&m_worldorientadjustment,
 											this->Bank.y,
 											this->Bank.x,
 											this->Bank.z);
@@ -479,7 +470,7 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 	else
 	{
 		// If no banking is required we can simply use the identity matrix rather than an adjustment
-		this->OrientationAdjustment = ID_MATRIX;
+		this->m_worldorientadjustment = ID_MATRIX;
 	}
 
 	// Signal that the ship is currently turning (until next execution of the flight computer)

@@ -19,6 +19,9 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	// Set the flag that indicates this object is itself an environment that contains objects
 	m_isenvironment = true;
 
+	// This class does implement a post-simulation update method
+	m_canperformpostsimulationupdate = true;
+
 	// Initialise fields to defaults
 	m_elements = NULL;
 	m_elementsize = NULL_VECTOR;
@@ -73,7 +76,7 @@ void iSpaceObjectEnvironment::PerformPostSimulationUpdate(void)
 	// other fields besides the spatial data flag
 
 	// Call the base class method
-	Ship::PerformPostSimulationUpdate();
+	iObject::PerformPostSimulationUpdate();
 
 	// Simulation activities to be performed when the environment is in FULL simulation mode, and our position/orientation has changed
 	// TOOD: Need to test for SpatialDataChanged() if the "IsPostSimulationUpdateRequired()" method starts considering

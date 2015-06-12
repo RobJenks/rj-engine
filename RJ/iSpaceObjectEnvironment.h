@@ -88,7 +88,7 @@ public:
 	CMPINLINE void					RefreshPositionImmediate(void)
 	{
 		// Call the base Ship class method, to recalculate Ship-related position data
-		Ship::RefreshPositionImmediate();
+		iObject::RefreshPositionImmediate();
 
 		// Environments should also recalculate their zero-point world transforms
 		DeriveZeroPointWorldMatrix();

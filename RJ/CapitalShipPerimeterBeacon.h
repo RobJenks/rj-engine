@@ -26,9 +26,6 @@ public:
 	// Implemented to satisfy iObject interface.  In reality all beacon positions are determined by the parent ship
 	CMPINLINE void				SimulateObject(void) { }
 
-	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-	CMPINLINE void				PerformPostSimulationUpdate(void) { }
-
 	// Virtual inheritance from iObject.  This object does not collide with anything so do nothing here.
 	CMPINLINE void				CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 

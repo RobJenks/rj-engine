@@ -39,14 +39,7 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(Ship *source);
-
-	// Methods to retrieve the centre offset translation matrices for this ship
-	CMPINLINE D3DXMATRIX * 	GetCentreOffsetTranslationMatrix(void)				{ return &m_centretransmatrix; }
-	CMPINLINE D3DXMATRIX * 	GetCentreOffsetInverseTranslationMatrix(void) 		{ return &m_centreinvtransmatrix; }
-
-	// The adjustment we apply to effective orientation to allow e.g. banking
-	D3DXMATRIX				OrientationAdjustment;		
+	void										InitialiseCopiedObject(Ship *source);		
 
 	// Default loadout is specified by its string code
 	CMPINLINE std::string	GetDefaultLoadout(void) const					{ return m_defaultloadout; }
@@ -54,9 +47,6 @@ public:
 
 	// Primary simulation method for the ship object
 	void				SimulateObject(void);
-
-	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-	void				PerformPostSimulationUpdate(void);
 
 	// Simulation methods for this ship
 	void				DetermineEngineThrustLevels(void);
@@ -66,7 +56,7 @@ public:
 	void				DetermineNewPosition(void);
 
 	// Derives a new object world matrix
-	void				DeriveNewWorldMatrix(void);
+	void				aDeriveNewWorldMatrix(void);
 
 	// Methods to adjust the target thrust of all engines on the ship
 	void				SetTargetThrustOfAllEngines(float target);
@@ -89,14 +79,6 @@ public:
 
 	// Method to process the specified order.  Called when processing the full queue.  Return value indicates whether order is now completed & can be removed
 	Order::OrderResult	ProcessOrder(Order *order);
-
-	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
-	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
-	CMPINLINE void				RefreshPositionImmediate(void)
-	{
-		// Recalculate the world matrix from our new position/orientation data
-		DeriveNewWorldMatrix();
-	}
 
 	// Key ship properties
 	float						BaseMass;					// Note: doesn't use attribute structure since current mass is stored in iActiveObject
@@ -214,30 +196,11 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
-	D3DXMATRIX			m_centretransmatrix;		// Precalculated translation matrix from model origin to ship centre
-	D3DXMATRIX			m_centreinvtransmatrix;		// Precalculated inverse of the translation matrix above
-
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
 	CMPINLINE float		DetermineExactYawToTarget(D3DXVECTOR3 tgt);
 	CMPINLINE float		DetermineExactPitchToTarget(D3DXVECTOR3 tgt);
 
 };
-
-// Derives a new object world matrix
-CMPINLINE void Ship::DeriveNewWorldMatrix(void)
-{
-	// Calculate the intermediate rotation & inv-rotation matrices that are stored within Ship objects
-	D3DXMATRIX omatrix, tmatrix;
-	D3DXMatrixRotationQuaternion(&omatrix, &(m_orientation));
-	m_orientationmatrix = (this->OrientationAdjustment * omatrix);
-	D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
-
-	// Calculate the intermediate translation matrix for this object
-	D3DXMatrixTranslation(&tmatrix, m_position.x, m_position.y, m_position.z);
-
-	// Derive a new world matrix from the ship orientation and translated location
-	SetWorldMatrix(m_centretransmatrix * m_orientationmatrix * tmatrix);
-}
 
 // Determines exact yaw to target; used for precise corrections near the target heading
 CMPINLINE float	Ship::DetermineExactYawToTarget(D3DXVECTOR3 tgt) 

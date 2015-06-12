@@ -26,9 +26,6 @@ public:
 	// Recalculates the current position of this object
 	void						SimulateObject(void);
 
-	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-	CMPINLINE void				PerformPostSimulationUpdate(void) { }
-
 	// Virtual inheritance from iObject.  No action since this object does not collide with anything
 	CMPINLINE void				CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 

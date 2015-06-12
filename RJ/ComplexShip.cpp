@@ -839,10 +839,6 @@ void ComplexShip::CalculateShipSizeData(void)
 	// Complex ships are all space environments.  Calculate the environment zero-element translation at this point as well, 
 	// based upon the overall object size.  This translates from the object centre to its (0,0,0) element position
 	this->SetZeroPointTranslation(m_size * -0.5f);
-		
-	// Ship objects also maintain cached ship-centre translation matrices for rendering efficiency
-	D3DXMatrixTranslation(&m_centretransmatrix, m_centreoffset.x, m_centreoffset.y, m_centreoffset.z);
-	D3DXMatrixTranslation(&m_centreinvtransmatrix, -m_centreoffset.x, -m_centreoffset.y, -m_centreoffset.z);
 }
 
 

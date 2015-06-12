@@ -51,10 +51,13 @@ void Game::Logic::SimulateAllObjects(void)
 		if (obj->SpatialDataChanged())
 		{
 			// Perform base object updates required when the object moves, e.g. ensuring quaternions are normalised
+			// and deriving a new world transform for the object
 			obj->RenormaliseSpatialData();
+			obj->DeriveNewWorldMatrix();
 
-			/* if (obj->IsPostSimulationUpdateRequired()) */		// TODO: Add this back if the flag becomes more than just "return (m_spatialdatachanged)"
-			obj->PerformPostSimulationUpdate();
+			// Perform a post-simulation update if required, and if available in the class in question
+			if (obj->IsPostSimulationUpdateRequired())
+				obj->PerformPostSimulationUpdate();
 		}
 
 		// Revert the 'currently visible' flag, which will be updated by the core engine ready for next frame

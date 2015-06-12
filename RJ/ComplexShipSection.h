@@ -94,9 +94,6 @@ public:
 	// Implemented to satisfy iSpaceObject interface.  In reality all section positions are determined by the parent ship
 	CMPINLINE void								SimulateObject(void) { }
 
-	// Perform the post-simulation update.  Pure virtual inherited from iObject base class
-	CMPINLINE void								PerformPostSimulationUpdate(void) { }
-
 	// Static methods to create a new instance of the specified complex ship section
 	static ComplexShipSection *					Create(const string & code);
 	static ComplexShipSection *					Create(ComplexShipSection *template_sec);

@@ -13,6 +13,9 @@ Game::ID_TYPE iObject::InstanceCreationCount = 0;
 // Static modifier for the size of the collision margin around an object's collision sphere.  Allows us to catch edge cases that may otherwise be missed
 const float	iObject::COLLISION_SPHERE_MARGIN = 2.0f;
 
+// Static intermediate data struct to support high-performance calculations
+iObject::_calc_data_struct iObject::_calc_data = iObject::_calc_data_struct();
+
 // Static collection that records the relation between different simulation states (relation is from row to column value)
 const ComparisonResult iObject::SimStateRelations[][4] = 
 {							/*   NoSimulation  */			/* Strategic */					/* Tactical */					/* Full Simulation */
@@ -45,7 +48,9 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_visible = true;
 	m_position = NULL_VECTOR;
 	m_orientation = ID_QUATERNION;
-	m_orientationmatrix = m_worldmatrix = m_inverseworld = ID_MATRIX;
+	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
+	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX;
+	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_Normal;
 	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
 
@@ -63,6 +68,9 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 
 	// Set all flags to default values
 	m_simulated = m_posupdated = m_spatialdatachanged = m_currentlyvisible = false;
+
+	// Subclass will set this value if it implements a PerformPostSimulationUpdate() method
+	m_canperformpostsimulationupdate = false;
 
 	// Set a default value for size
 	SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));

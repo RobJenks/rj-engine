@@ -39,6 +39,9 @@ public:
 	// Enumeration of possible object simulation states
 	enum ObjectSimulationState					{ NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
 
+	// Enumeration of different world transform calculations that can be applied
+	enum WorldTransformCalculation				{ WTC_Normal = 0, WTC_None, WTC_IncludeOrientAdjustment };
+
 	// Define a standard type for the collection of all attachments from this object to others
 	typedef std::vector<Attachment<iObject*>>	AttachmentSet;
 
@@ -140,8 +143,9 @@ public:
 	}
 
 
-	// The orientation matrix for this object
+	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
 	CMPINLINE D3DXMATRIX *					GetOrientationMatrix(void)			{ return &m_orientationmatrix; }
+	CMPINLINE D3DXMATRIX *					GetInverseOrientationMatrix(void)	{ return &m_inverseorientationmatrix; }
 
 	// The world matrix of this object
 	CMPINLINE D3DXMATRIX *					GetWorldMatrix(void)				{ return &m_worldmatrix; }
@@ -159,20 +163,34 @@ public:
 		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
 	}
 
+	// Derives a new object world matrix
+	CMPINLINE void							DeriveNewWorldMatrix(void);
+
+	// World adjustment matrix is pre-multiplied into the object world matrix
+	CMPINLINE const D3DXMATRIX *			GetWorldAdjustmentMatrix(void) const			{ return &m_worldorientadjustment; }
+	CMPINLINE void							SetWorldAdjustmentMatrix(const D3DXMATRIX & m)	{ m_worldorientadjustment = m; }
+
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
-	virtual void							RefreshPositionImmediate(void) = 0;
+	virtual void							RefreshPositionImmediate(void)
+	{
+		DeriveNewWorldMatrix();
+	}
 
 	// All objects must expose a method to simulate themselves.  Flag indicates whether they are allowed to simulate movement (vs if the object is attached)
 	virtual void							SimulateObject(void) = 0;
 
 	// Method that indicates whether the object requires a post-simulation update or not.  Usually means the object position/orientation has changed.
 	// Use this flag to minimise the number of virtual function calls required where there is nothing to be done
-	CMPINLINE bool							IsPostSimulationUpdateRequired(void) const			{ return m_spatialdatachanged /* && ... && ... */; }
+	CMPINLINE bool							IsPostSimulationUpdateRequired(void) const			
+	{ 
+		// Only perform an update if the class implements post-simulation updates
+		return m_canperformpostsimulationupdate && m_spatialdatachanged /* && ... && ... */; 
+	}
 
-	// All objects should also expose a method to update object state following a simulation.  Some objects will not require this method; others
-	// will need to e.g. update their world transforms, or update the position of any contained objects following a change in position
-	virtual void							PerformPostSimulationUpdate(void) = 0;
+	// Objects can also expose a method to update object state following a simulation.  Some objects will not require this method; others
+	// will need to e.g. update the position of any contained objects following a change in position
+	virtual void							PerformPostSimulationUpdate(void) { }
 
 	// The simulation state determines what level of simulation (if any) should be run for this object
 	CMPINLINE ObjectSimulationState			SimulationState(void) const							{ return m_simulationstate; }
@@ -307,7 +325,8 @@ public:
 		{
 			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
 		}
-		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
+		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && 
+				 ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
 		{
 			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
 			m_orientchanges = 0;
@@ -390,7 +409,8 @@ protected:
 
 	D3DXVECTOR3							m_position;						// Position of the object in world space
 	D3DXQUATERNION						m_orientation;					// Object orientation
-	D3DXMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating orientation and any subclass adjustments
+	D3DXMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
+	D3DXMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
 	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
 
 	ObjectSimulationState				m_simulationstate;				// Value indicating the extent of simulation (if any) that should be applied to this object
@@ -402,13 +422,19 @@ protected:
 	bool								m_posupdated;					// Flag indicating whether the object position has been updated (may not have been simulated, if it was moved via attachment)
 	bool								m_spatialdatachanged;			// Flag indicating whether the object position or orientation has changed since the previous frame
 	bool								m_currentlyvisible;				// Flag indicating whether the object is visible (last frame); use to avoid render-related updates when object is not visible
+	
+	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
+	bool								m_canperformpostsimulationupdate;
 
 	D3DXVECTOR3							m_size;							// Size of the object in world coordinates
 	D3DXVECTOR3							m_centreoffset;					// Any required offset to centre the object model about its local origin
 	
 	D3DXMATRIX							m_worldmatrix;					// World matrix used for rendering this object
 	D3DXMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
-	
+	D3DXMATRIX							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
+																		// Used to incorporate e.g. pre-scaling, rotation adjustments or other corrections
+	int									m_worldcalcmethod;				// Set by the subclass; indicates the type of world transform calculation to be performed
+
 	Game::CollisionMode					m_collisionmode;				// Value indicating how/whether this object collides with others
 	float								m_collisionsphereradius;		// Radius of the object collision sphere
 	float								m_collisionsphereradiussq;		// Squared radius of the collision sphere for runtime efficiency
@@ -438,6 +464,30 @@ protected:
 	} _calc_data;
 
 };
+
+// Derives a new object world matrix
+CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
+{
+	switch (m_worldcalcmethod)
+	{
+		case iObject::WorldTransformCalculation::WTC_Normal:
+			
+			D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
+			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
+			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
+			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);
+			break;
+
+		case iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment:
+
+			D3DXMatrixRotationQuaternion(&_calc_data.m1, &m_orientation);
+			m_orientationmatrix = (m_worldorientadjustment * _calc_data.m1);
+			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
+			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
+			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);
+			break;
+	}
+}
 
 CMPINLINE void iObject::RegisterObject(iObject *obj)
 {
