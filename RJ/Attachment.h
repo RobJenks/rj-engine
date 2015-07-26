@@ -210,8 +210,11 @@ void Attachment<T>::AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	// Remove any existing constraint before adding another
 	RemoveConstraint();
 
-	// Apply the effect of the attachment before determining constraint details
+	// Apply the effect of the attachment, and force an update of each object's world transform before 
+	// determining constraint details.  This ensures the objects are in the right places when the constraint is formed
 	Apply();
+	Parent->RefreshPositionImmediate();
+	Child->RefreshPositionImmediate();
 
 	// Create a new constraint with the supplied parameters
 	Constraint = new AttachmentConstraint(axis, parent_point);
@@ -221,6 +224,7 @@ void Attachment<T>::AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	D3DXMatrixInverse(&invchildworld, 0, Child->GetWorldMatrix());
 	D3DXVec3TransformCoord(&worldpos, &parent_point, Parent->GetWorldMatrix());		// worldpos = (parentpos * parent.world)
 	D3DXVec3TransformCoord(&Constraint->ChildPoint, &worldpos, &invchildworld);		// childpos = (worldpos * inv(child.world)
+	//Constraint->ChildPoint = (worldpos - Child->GetPosition());
 
 	// The attachment state at time of assignment will become the 'base' position and orientation for each object
 	/*// Derive the base child orientation, relative to the parent, as [ChildBase = (Child * InvParent)]
@@ -260,15 +264,17 @@ void Attachment<T>::RotateChildAboutConstraint(float d_rad)
 	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m3, cpos.x, cpos.y, cpos.z);					// m3 = inv_centre_trans
 
 	// Compose (m1 * m2 * m3) to give the new delta transform matrix m4
-	_Attachment_Internal::_DATA.m4 = (_Attachment_Internal::_DATA.m1 * _Attachment_Internal::_DATA.m2 * _Attachment_Internal::_DATA.m3);
+	_Attachment_Internal::_DATA.m4 = (_Attachment_Internal::_DATA.m1 * _Attachment_Internal::_DATA.m2 *_Attachment_Internal::_DATA.m3);
 
 	// Determine an updated object position by transforming it by this matrix.  Update the orientation by multiplying in the delta
-	D3DXVec3TransformCoord(&m_posoffset, &Constraint->BaseChildPosition, &_Attachment_Internal::_DATA.m4);
+	//D3DXVec3TransformCoord(&m_posoffset, &Constraint->BaseChildPosition, &_Attachment_Internal::_DATA.m4);
+	D3DXVec3TransformCoord(&m_posoffset, &m_posoffset, &_Attachment_Internal::_DATA.m4);
+	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m1, m_posoffset.x, m_posoffset.y, m_posoffset.z);
 	m_orientoffset *= _Attachment_Internal::_DATA.q1;
 
 	// Update the final offset matrix directly rather than calling Recalculate...(), since we have already
 	// derived all the required matrices in this method and would otherwise have to repeat the effort
-	m_mat_offset = _Attachment_Internal::_DATA.m4 * m_mat_offset;
+	//m_mat_offset = _Attachment_Internal::_DATA.m4 * _Attachment_Internal::_DATA.m1;
 	
 	// Apply the change recursively DOWN the hierarchy 
 	Apply();

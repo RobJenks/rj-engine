@@ -424,10 +424,7 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_4])
 	{
-		if (!b[DIK_LSHIFT])
-			ss->GetChildObjects()->at(1).Child->GetChildObjects()->at(0).RotateChildAboutConstraint(PI * Game::TimeFactor);
-		else
-			ss->GetChildObjects()->at(1).Child->GetChildObjects()->at(0).RotateChildAboutConstraint(-PI * Game::TimeFactor);
+
 	}
 
 	if (b[DIK_5])
@@ -1778,7 +1775,7 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 	if (true) {
-		s3[1] = SimpleShip::Create("testship1");
+		s3[1] = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
 		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(0, 0, -125));
@@ -1788,7 +1785,7 @@ void RJMain::__CreateDebugScenario(void)
 	if (true) {
 		for (int i = 0; i < 1; i++)
 		{
-			s3[2] = SimpleShip::Create("testship1");
+			s3[2] = SimpleShip::Create("test_placeholder_ship");
 			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
 			s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 			s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(i * 30.0f, -125, 0));
@@ -1844,8 +1841,8 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetLinearVelocityDegradeState(false);
 	l->SetAngularVelocityDegradeState(false);
 
-	
-	SimpleShip *tmp[2]; D3DXQUATERNION tmpq;
+	/*
+	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
 	for (int i = 0; i < 2; ++i)
 	{
 		tmp[i] = SimpleShip::Create("test_placeholder_ship");
@@ -1855,15 +1852,26 @@ void RJMain::__CreateDebugScenario(void)
 		OutputDebugString(concat("Creating debug placeholder ship \"")(tmp[i]->GetInstanceCode())("\"\n").str().c_str());
 	}
 
-	ss->AddChildAttachment(tmp[0], D3DXVECTOR3(0.0f, ss->GetSize().y * 0.5f + tmp[0]->GetSize().y * 0.5f, 0.0f), ID_QUATERNION);
-	tmp[0]->AddChildAttachment(tmp[1], D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f + tmp[1]->GetSize().y * 0.5f, 0.0f), ID_QUATERNION);
+	D3DXQuaternionRotationAxis(&tmpq, &RIGHT_VECTOR, PIOVER2);
+	D3DXQuaternionRotationAxis(&tmpq2, &UP_VECTOR, PIOVER2);
+	ss->AddChildAttachment(tmp[0], D3DXVECTOR3(0.0f, ss->GetSize().y * 0.5f + tmp[0]->GetSize().y * 0.5f, 0.0f), tmpq2);
+	tmp[0]->AddChildAttachment(tmp[1], D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f + tmp[1]->GetSize().z * 0.5f, 
+		tmp[1]->GetSize().y * 0.5f*0.0f), tmpq);
 	
 	ss->AddCollisionExclusion(tmp[0]->GetID());
 	ss->AddCollisionExclusion(tmp[1]->GetID());
 	tmp[0]->AddCollisionExclusion(tmp[1]->GetID());
 
-	tmp[0]->GetChildObjects()->at(0).AssignConstraint(RIGHT_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, 0.5f));
-	
+	tmp[0]->GetChildObjects()->at(0).AssignConstraint(UP_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, 0.0f-tmp[0]->GetSize().z*0.5f));
+	*/
+
+	D3DXQUATERNION tmpq;
+	D3DXQuaternionRotationAxis(&tmpq, &FORWARD_VECTOR, -PIOVER2);
+	s3[1]->SetPositionAndOrientation(ss->GetPosition() + D3DXVECTOR3(0.0f, 20.0f, 0.0f), ID_QUATERNION);
+	s3[2]->SetPositionAndOrientation(s3[1]->GetPosition() + D3DXVECTOR3(5.0f, 10.0f, 0.0f), tmpq);
+	s3[1]->RefreshPositionImmediate();
+	s3[2]->RefreshPositionImmediate();
+
 	Game::Log << LOG_INIT_START << "--- Debug scenario createds\n";
 }
 
@@ -1914,49 +1922,61 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
 	}
 
+
+	static float rad = 0.0f;
+	rad += PI * Game::TimeFactor;
+	SimpleShip *x0 = s3[1], *x1 = s3[2];
+
+	D3DXQUATERNION ochg1, ochg2;
+	D3DXQuaternionRotationAxis(&ochg1, &UP_VECTOR, frand_h(PI / 12.0f) * Game::TimeFactor);
+	D3DXQuaternionRotationAxis(&ochg2, &RIGHT_VECTOR, frand_h(PI / 12.0f) * Game::TimeFactor);
+	x0->SetPosition(x0->GetPosition() + D3DXVECTOR3(Game::TimeFactor * frand_h(3.0f), Game::TimeFactor * frand_h(3.0f), Game::TimeFactor * frand_h(3.0f)));
+	x0->SetOrientation(x0->GetOrientation() * ochg1 * ochg2);
+	
+	x0->RenormaliseSpatialData();
+	x1->RenormaliseSpatialData();
+	x0->RefreshPositionImmediate();
+	x1->RefreshPositionImmediate();
+
+	D3DXQUATERNION initial_orient;
+	D3DXQuaternionRotationAxis(&initial_orient, &RIGHT_VECTOR, PIOVER2);
+	D3DXQUATERNION orient = initial_orient;
+
+	D3DXQUATERNION dq;
+	D3DXQuaternionRotationAxis(&dq, &UP_VECTOR, rad);
+
+
+	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 10.0f, 0.0f);
+	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f, -5.0f);		// Note: point on the child, but in the PARENT coord frame
+
+
+
+	D3DXMATRIX m1, m2, m3, m4;
+	D3DXMatrixTranslation(&m1, -child_point.x, -child_point.y, -child_point.z);
+	D3DXMatrixRotationQuaternion(&m2, &dq);
+	D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
+
+
+	D3DXVECTOR3 ppos, wpos, cpos;
+	m4 = (m1 * m2);// *m3);
+	D3DXVec3TransformCoord(&ppos, &NULL_VECTOR, &m4);
+	ppos += parent_point;
+
+	D3DXVec3TransformCoord(&wpos, &ppos, x0->GetWorldMatrix());
+
+
+	x1->SetPosition(wpos);
+	x1->SetOrientation(x0->GetOrientation()*initial_orient);// *dq);
+
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		Attachment<iObject*> & x0 = ss->GetChildObjects()->at(1);
-		Attachment<iObject*> & x1 = x0.Child->GetChildObjects()->at(0);
-
-		D3DXQUATERNION ssInv, x0Inv, x1_x0, x0_ss;
-		D3DXQuaternionInverse(&ssInv, &ss->GetOrientation());
-		D3DXQuaternionInverse(&x0Inv, &x0.Child->GetOrientation());
-
-		x0_ss = (ssInv * x0.Child->GetOrientation());
-		x1_x0 = (x0Inv * x1.Child->GetOrientation());
-
-		D3DXQUATERNION x1_0, x1_n;
-		x1_0 = ss->GetOrientation();
-		D3DXQuaternionNormalize(&x1_n, &x1_0);
-
-		float delta = D3DXQuaternionLength(&(x1_n - x1_0));
-		static int count = 0;
-		static int last = 0;
-		if (delta > 0.01f)
-		{
-			last = count; 
-			count = 0;
-			
-			/*D3DXQUATERNION qn;
-			D3DXQuaternionNormalize(&qn, &ss->GetOrientation()); ss->SetOrientation(qn);
-			D3DXQuaternionNormalize(&qn, &x0.Child->GetOrientation()); x0.Child->SetOrientation(qn);
-			D3DXQuaternionNormalize(&qn, &x1.Child->GetOrientation()); x1.Child->SetOrientation(qn);*/
-		}
-		else ++count;
-
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x1: (%.3f, %.3f, %.3f, %.3f)  |  x1_diff: (%.3f, %.3f, %.3f, %.3f)",
-			x1.Child->GetOrientation().x, x1.Child->GetOrientation().y, x1.Child->GetOrientation().z, x1.Child->GetOrientation().w,
-			x1_x0.x, x1_x0.y, x1_x0.z, x1_x0.w);
-		/*sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "x1: (%.3f, %.3f, %.3f, %.3f)  |  x1N: (%.3f, %.3f, %.3f, %.3f  |  Diff: %.3f  |  Count: %d  (%d)",
-			x1_0.x, x1_0.y, x1_0.z, x1_0.w,
-			x1_n.x, x1_n.y, x1_n.z, x1_n.w,
-			delta, last, count);*/
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Length: %.3f", 0.0f);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+
 	}
+
 }
 
 
