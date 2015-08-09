@@ -1938,7 +1938,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	D3DXQuaternionRotationAxis(&dq, &RIGHT_VECTOR, rad);
 
 	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 5.0f*1.0f, 0.0f);
-	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*0.0f, 5.0f*1.0f);		// Note: point on the child, but in an ID orientation
+	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*1.0f, 5.0f*1.0f);		// Note: point on the child, but in an ID orientation
 	
 	// User input to transform parent or rotate child
 	const BOOL *key = m_keyboard.GetKeys();
@@ -1989,6 +1989,9 @@ D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DX
 	D3DXVECTOR3 childpos;
 	D3DXVec3TransformCoord(&childpos, &NULL_VECTOR, &child_wm);
 	x1->SetPosition(parent_pos_oriented + childpos);
+
+parent_pos_oriented is not correct - although we do want to offset by Y = +5 when the child is in ID orientation, 
+the offset changes based on child orientation.  since not rotating about centre  e.g. at initial_orient, the offset should be greater 
 
 	// Determine child orientation and set it
 	x1->SetOrientation(x0->GetOrientation() * neworient);
