@@ -168,7 +168,7 @@ namespace Game {
 	float C_DEFAULT_ZOOM_TO_SHIP_SPEED = 1.75f;				// Default number of seconds to zoom the camera from its current location to a ship
 	float C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE = 75.0f;	// Default distance to place the camera above a ship, if it cannot be determined any other way
 	float C_DEBUG_CAMERA_SPEED = 500.0f;					// The movement speed of the debug camera
-	float C_DEBUG_CAMERA_TURN_SPEED = 1000.0f;				// The turn speed of the debug camera
+	float C_DEBUG_CAMERA_TURN_SPEED = 100.0f;				// The turn speed of the debug camera
 	float C_DEBUG_CAMERA_FAST_MOVE_MODIFIER = 10.0f;		// Modifier to debug camera move speed when fast-travel key is held
 	float C_DEBUG_CAMERA_SLOW_MOVE_MODIFIER = 0.1f;			// Modifier to debug camera move speed when slow-travel key is held
 	float C_DEBUG_CAMERA_ROLL_SPEED = 2.0f;					// The speed at which the debug camera will revert its roll component
