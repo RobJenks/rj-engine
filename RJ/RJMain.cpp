@@ -1937,9 +1937,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	static float rad = 0.0f;
 	D3DXQuaternionRotationAxis(&dq, &RIGHT_VECTOR, rad);
 
-	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 5.0f*.0f, 0.0f);
-	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*.0f, -5.0f*1.0f);		// Note: point on the child, but in the PARENT coord frame
-	initial_orient = ID_QUATERNION; D3DXQuaternionRotationAxis(&dq, &RIGHT_VECTOR, PI / 2.0f);
+	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 5.0f*1.0f, 0.0f);
+	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*0.0f, 5.0f*1.0f);		// Note: point on the child, but in an ID orientation
+	
 	// User input to transform parent or rotate child
 	const BOOL *key = m_keyboard.GetKeys();
 
@@ -1965,25 +1965,33 @@ void RJMain::DEBUGDisplayInfo(void)
 	x0->RefreshPositionImmediate();
 	x1->RefreshPositionImmediate();
 
+	// Determine new child orientation
+	D3DXQUATERNION neworient = (initial_orient * dq);
+
 	// Matrix which transforms child object about its offset origin (child_point)
 	D3DXMATRIX m1, m2, m3, m4;
 	D3DXMatrixTranslation(&m1, -child_point.x, -child_point.y, -child_point.z);
-	D3DXMatrixRotationQuaternion(&m2, &(initial_orient * dq));
+	D3DXMatrixRotationQuaternion(&m2, &neworient);
 	D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
 	m4 = (m1 * m2 *m3); // (m3 * m2 * m1);
 D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DXVec3TransformCoord(&vv2, &NULL_VECTOR, &(m1*m2)); D3DXVec3TransformCoord(&vv3, &NULL_VECTOR, &(m1*m2*m3));
-	// Determine new child origin pos based on this transform
-	D3DXVECTOR3 newchildpos;
-	D3DXVec3TransformCoord(&newchildpos, &NULL_VECTOR, &(m1*m2));
-	//D3DXVec3TransformCoord(&newchildpos, &child_point, &m2);
+
+	// Determine new child world matrix
+	D3DXMATRIX child_wm;
+	//D3DXMatrixMultiply(&child_wm, x0->GetWorldMatrix(), &m4);
+	D3DXMatrixMultiply(&child_wm, &m4, x0->GetWorldMatrix());
+
+	// Determine parent point in world axes (but still local position) so it can be added to the child offset
+	D3DXVECTOR3 parent_pos_oriented; 
+	D3DXVec3TransformCoord(&parent_pos_oriented, &parent_point, x0->GetOrientationMatrix());
 
 	// Determine child position and set it
-	D3DXVECTOR3 childworld;
-	D3DXVec3TransformCoord(&childworld, &(parent_point + newchildpos), x0->GetWorldMatrix());
-	x1->SetPosition(childworld);
-	
+	D3DXVECTOR3 childpos;
+	D3DXVec3TransformCoord(&childpos, &NULL_VECTOR, &child_wm);
+	x1->SetPosition(parent_pos_oriented + childpos);
+
 	// Determine child orientation and set it
-	x1->SetOrientation(x0->GetOrientation() * initial_orient * dq);
+	x1->SetOrientation(x0->GetOrientation() * neworient);
 
 	// Refresh object transforms
 	x0->RefreshPositionImmediate();
