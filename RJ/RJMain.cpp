@@ -1944,18 +1944,40 @@ void RJMain::DEBUGDisplayInfo(void)
 	const BOOL *key = m_keyboard.GetKeys();
 
 	{
-		if (!key[DIK_LSHIFT])
+		if (!key[DIK_LSHIFT] && !key[DIK_LCONTROL])
 		{
-			if (key[DIK_Y])			move.z += amt;
-			else if (key[DIK_H])	move.z -= amt;
-			else if (key[DIK_G])	move.x -= amt;
-			else if (key[DIK_J])	move.x += amt;
-			else if (key[DIK_T])	move.y += amt;
-			else if (key[DIK_B])	move.y -= amt;
+			if (key[DIK_Y])	move.z += amt;
+			if (key[DIK_H])	move.z -= amt;
+			if (key[DIK_G])	move.x -= amt;
+			if (key[DIK_J])	move.x += amt;
+			if (key[DIK_T])	move.y += amt;
+			if (key[DIK_B])	move.y -= amt;
 
 			if (key[DIK_U])			rad -= Game::TimeFactor;
 			else if (key[DIK_I])	rad += Game::TimeFactor;
 		}
+		else if (key[DIK_LSHIFT] && !key[DIK_LCONTROL])
+		{
+			D3DXQUATERNION d = ID_QUATERNION;
+			if (key[DIK_Y])			D3DXQuaternionRotationAxis(&d, &RIGHT_VECTOR, Game::TimeFactor);
+			else if (key[DIK_H])	D3DXQuaternionRotationAxis(&d, &RIGHT_VECTOR, -Game::TimeFactor);
+			else if (key[DIK_G])	D3DXQuaternionRotationAxis(&d, &UP_VECTOR, -Game::TimeFactor);
+			else if (key[DIK_J])	D3DXQuaternionRotationAxis(&d, &UP_VECTOR, Game::TimeFactor);
+			else if (key[DIK_T])	D3DXQuaternionRotationAxis(&d, &FORWARD_VECTOR, -Game::TimeFactor);
+			else if (key[DIK_B])	D3DXQuaternionRotationAxis(&d, &FORWARD_VECTOR, Game::TimeFactor);
+
+			x0->SetOrientation(x0->GetOrientation() * d);
+		}
+		else if (!key[DIK_LSHIFT] && key[DIK_LCONTROL])
+		{
+			if (key[DIK_Y])	parent_point.z += 5.0f;
+			if (key[DIK_H])	parent_point.z += -5.0f;
+			if (key[DIK_G])	parent_point.x += -5.0f;
+			if (key[DIK_J])	parent_point.x += 5.0f;
+			if (key[DIK_T])	parent_point.y += 5.0f;
+			if (key[DIK_B])	parent_point.y += -5.0f;
+		}
+		
 	}
 
 	// Move the parent object based on user input
@@ -1965,48 +1987,45 @@ void RJMain::DEBUGDisplayInfo(void)
 	x0->RefreshPositionImmediate();
 	x1->RefreshPositionImmediate();
 
+	// Determine parent point position, transformed into the child reference frame
+	D3DXQUATERNION inv_initial_orient;
+	D3DXQuaternionInverse(&inv_initial_orient, &initial_orient);
+	//D3DXVec3Rotate(&parent_point, &parent_point, &inv_initial_orient);
+
 	// Determine new child orientation
 	D3DXQUATERNION neworient = (initial_orient * dq);
+	D3DXQuaternionNormalize(&neworient, &neworient);
 
 	// Matrix which transforms child object about its offset origin (child_point)
 	D3DXMATRIX m1, m2, m3, m4;
 	D3DXMatrixTranslation(&m1, -child_point.x, -child_point.y, -child_point.z);
 	D3DXMatrixRotationQuaternion(&m2, &neworient);
 	D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
-	m4 = (m1 * m2 *m3); // (m3 * m2 * m1);
+	m4 = (m1 * m2);// *m3); // (m3 * m2 * m1);
 D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DXVec3TransformCoord(&vv2, &NULL_VECTOR, &(m1*m2)); D3DXVec3TransformCoord(&vv3, &NULL_VECTOR, &(m1*m2*m3));
 
-	// Determine new child world matrix
-	D3DXMATRIX child_wm;
-	//D3DXMatrixMultiply(&child_wm, x0->GetWorldMatrix(), &m4);
-	D3DXMatrixMultiply(&child_wm, &m4, x0->GetWorldMatrix());
+	// Eventual child position will be "ParentWorld( parent_point + m4(child_point) )"
+	D3DXVECTOR3 childpos, interimpos, finalpos;
+	D3DXVec3TransformCoord(&childpos, &NULL_VECTOR, &m4);
+	interimpos = (parent_point + childpos);
+	D3DXVec3TransformCoord(&finalpos, &interimpos, x0->GetWorldMatrix());
 
-	// Determine parent point in world axes (but still local position) so it can be added to the child offset
-	D3DXVECTOR3 parent_pos_oriented; 
-	D3DXVec3TransformCoord(&parent_pos_oriented, &parent_point, x0->GetOrientationMatrix());
-
-	// Determine child position and set it
-	D3DXVECTOR3 childpos;
-	D3DXVec3TransformCoord(&childpos, &NULL_VECTOR, &child_wm);
-	x1->SetPosition(parent_pos_oriented + childpos);
-
-parent_pos_oriented is not correct - although we do want to offset by Y = +5 when the child is in ID orientation, 
-the offset changes based on child orientation.  since not rotating about centre  e.g. at initial_orient, the offset should be greater 
-
-	// Determine child orientation and set it
-	x1->SetOrientation(x0->GetOrientation() * neworient);
+	// Set the new child position and orientation
+	x1->SetPosition(finalpos);
+	x1->SetOrientation(neworient * x0->GetOrientation());// *neworient);
 
 	// Refresh object transforms
 	x0->RefreshPositionImmediate();
 	x1->RefreshPositionImmediate();
-
+	x0->RenormaliseSpatialData();
+	x1->RenormaliseSpatialData();
 
 
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Length: %.3f", 0.0f);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Parent point: %.2f, %.2f, %.2f", parent_point.x, parent_point.y, parent_point.z);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
