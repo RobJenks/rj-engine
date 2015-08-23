@@ -1938,7 +1938,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	D3DXQuaternionRotationAxis(&dq, &RIGHT_VECTOR, rad);
 
 	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 5.0f*1.0f, 0.0f);
-	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*1.0f, 5.0f*1.0f);		// Note: point on the child, but in an ID orientation
+	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*1.0f, 5.0f*1.0f);
 	
 	// User input to transform parent or rotate child
 	const BOOL *key = m_keyboard.GetKeys();
@@ -1982,10 +1982,10 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Move the parent object based on user input
 	x0->SetPosition(x0->GetPosition() + move);
-	x0->RenormaliseSpatialData();
+	/*x0->RenormaliseSpatialData();
 	x1->RenormaliseSpatialData();
 	x0->RefreshPositionImmediate();
-	x1->RefreshPositionImmediate();
+	x1->RefreshPositionImmediate();*/
 
 	// Determine parent point position, transformed into the child reference frame
 	D3DXQUATERNION inv_initial_orient;
@@ -1994,15 +1994,15 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Determine new child orientation
 	D3DXQUATERNION neworient = (initial_orient * dq);
-	D3DXQuaternionNormalize(&neworient, &neworient);
+	//D3DXQuaternionNormalize(&neworient, &neworient);
 
 	// Matrix which transforms child object about its offset origin (child_point)
 	D3DXMATRIX m1, m2, m3, m4;
 	D3DXMatrixTranslation(&m1, -child_point.x, -child_point.y, -child_point.z);
 	D3DXMatrixRotationQuaternion(&m2, &neworient);
-	D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
+	//D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
 	m4 = (m1 * m2);// *m3); // (m3 * m2 * m1);
-D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DXVec3TransformCoord(&vv2, &NULL_VECTOR, &(m1*m2)); D3DXVec3TransformCoord(&vv3, &NULL_VECTOR, &(m1*m2*m3));
+//D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DXVec3TransformCoord(&vv2, &NULL_VECTOR, &(m1*m2)); D3DXVec3TransformCoord(&vv3, &NULL_VECTOR, &(m1*m2*m3));
 
 	// Eventual child position will be "ParentWorld( parent_point + m4(child_point) )"
 	D3DXVECTOR3 childpos, interimpos, finalpos;
@@ -2017,8 +2017,8 @@ D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DX
 	// Refresh object transforms
 	x0->RefreshPositionImmediate();
 	x1->RefreshPositionImmediate();
-	x0->RenormaliseSpatialData();
-	x1->RenormaliseSpatialData();
+	/*x0->RenormaliseSpatialData();
+	x1->RenormaliseSpatialData();*/
 
 
 

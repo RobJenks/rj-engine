@@ -11,23 +11,25 @@ class _Attachment_Internal
 {
 public:
 	// Struct holding temporary fields for intermediate calculations
-	static struct _DATA_STRUCT { D3DXMATRIX m1, m2, m3, m4; D3DXVECTOR3 v1, v2; D3DXQUATERNION q1; } _DATA;
+	static struct _DATA_STRUCT { D3DXMATRIX m1, m2, m3, m4; D3DXVECTOR3 v1, v2, v3; D3DXQUATERNION q1, q2, q3; } _DATA;
 };
 
 // Struct representing a constraint between the two objects, for non-static attachments
 struct AttachmentConstraint
 {
 	D3DXVECTOR3										Axis;					// Axis of rotation, in parent object space
+	float											Rotation;				// Angle of rotation about the axis, in radians, from base orientation
+
 	D3DXVECTOR3										ParentPoint;			// Point on the parent object which the axis passes through
-
-	D3DXVECTOR3										ChildPoint;				// Point on the parent object which the axis passes through
-	D3DXQUATERNION									BaseParentOrient;		// Base orientation of the parent object, relative to the child
+	D3DXVECTOR3										ChildPoint;				// Point on the child object which the axis passes through
+	D3DXMATRIX										InvChildPointOffset;	// Cached translation matrix to (-ChildPoint)
+	
 	D3DXQUATERNION									BaseChildOrient;		// Base orientation of the child object, relative to the parent
-	D3DXVECTOR3										BaseChildPosition;		// Base position of the child relative to the parent
+	D3DXQUATERNION									BaseParentOrient;		// Base orientation of the parent object, relative to the 
+																			// child.  Is Inverse(BaseChildOrient)
 
-	// Constructor to create a new constraint
-	AttachmentConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parent_point)
-		: Axis(axis), ParentPoint(parent_point) { }
+	// Default constructor to create new constraint data; no initialisation performed here
+	AttachmentConstraint(void) { }
 };
 
 template <typename T>
@@ -111,7 +113,8 @@ public:
 	Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset);
 
 	// Assign a new constraint between the two objects, making the attachment dynamic
-	void							AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parent_point);
+	void							CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parentpoint,
+													 const D3DXVECTOR3 & childpoint, const D3DXQUATERNION & baseorient);
 
 	// Removes any constraint in place between the two objects, making the attachment static again
 	void							RemoveConstraint(void);
@@ -205,7 +208,8 @@ Attachment<T>::Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, cons
 
 // Assign a new constraint between the two objects, making the attachment dynamic
 template <typename T>
-void Attachment<T>::AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parent_point)
+void Attachment<T>::CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parentpoint,
+									 const D3DXVECTOR3 & childpoint, const D3DXQUATERNION & baseorient)
 {
 	// Remove any existing constraint before adding another
 	RemoveConstraint();
@@ -216,26 +220,23 @@ void Attachment<T>::AssignConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	Parent->RefreshPositionImmediate();
 	Child->RefreshPositionImmediate();
 
-	// Create a new constraint with the supplied parameters
-	Constraint = new AttachmentConstraint(axis, parent_point);
+	// Create a new constraint object to hold this data
+	Constraint = new AttachmentConstraint();
 
-	// We also want to determine the point on the child object that the constraint axis passes through
-	D3DXVECTOR3 worldpos; D3DXMATRIX invchildworld;
-	D3DXMatrixInverse(&invchildworld, 0, Child->GetWorldMatrix());
-	D3DXVec3TransformCoord(&worldpos, &parent_point, Parent->GetWorldMatrix());		// worldpos = (parentpos * parent.world)
-	D3DXVec3TransformCoord(&Constraint->ChildPoint, &worldpos, &invchildworld);		// childpos = (worldpos * inv(child.world)
-	//Constraint->ChildPoint = (worldpos - Child->GetPosition());
+	// Store initial state of the constraint
+	Constraint->Axis = axis;					// Axis which the constraint lies in
+	Constraint->ParentPoint = parentpoint;		// Point on the parent object which the axis passes through
+	Constraint->ChildPoint = childpoint;		// Point on the child object which the axis passes through
+	Constraint->BaseChildOrient = baseorient;	// Initial relative orientation from the parent to the child
+	
+	// Initial state represents zero rotation about the constraint axis
+	Constraint->Rotation = 0.0f;
 
-	// The attachment state at time of assignment will become the 'base' position and orientation for each object
-	/*// Derive the base child orientation, relative to the parent, as [ChildBase = (Child * InvParent)]
-	D3DXQUATERNION invparent;
-	D3DXQuaternionInverse(&invparent, &Parent->GetOrientation());
-	Constraint->BaseChildOrient = (Child->GetOrientation() * invparent);*/
-	Constraint->BaseChildPosition = m_posoffset;
-	Constraint->BaseChildOrient = m_orientoffset;
+	// Cache the inverse of child base orientation (as parent child orientation)
+	D3DXQuaternionInverse(&Constraint->BaseParentOrient, &baseorient);
 
-	// The orientation of parent relative to child will be the inverse of this delta orientation
-	D3DXQuaternionInverse(&Constraint->BaseParentOrient, &Constraint->BaseChildOrient);
+	// Cache the inverse child translation matrix for runtime efficiency
+	D3DXMatrixTranslation(&Constraint->InvChildPointOffset, -childpoint.x, -childpoint.y, -childpoint.z);
 }
 
 // Removes any constraint in place between the two objects, making the attachment static again
@@ -250,57 +251,51 @@ void Attachment<T>::RemoveConstraint(void)
 template <typename T>
 void Attachment<T>::RotateChildAboutConstraint(float d_rad)
 {
-	// Make sure this attachment does have a valid constraint
+	// Make sure we have a valid constraint
 	if (!Constraint) return;
 
-	// Derive the quaternion corresponding to this rotation
-	D3DXQuaternionRotationAxis(&_Attachment_Internal::_DATA.q1, &Constraint->Axis, d_rad);
-
-	// Derive a delta orientation change for this child rotation
-	const D3DXVECTOR3 & cpos = Constraint->ChildPoint;
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m1, -cpos.x, -cpos.y, -cpos.z);				// m1 = centre_trans
-	//D3DXMatrixRotationAxis(&_Attachment_Internal::_DATA.m2, &Constraint->Axis, d_rad);			// m2 = rot
-	D3DXMatrixRotationQuaternion(&_Attachment_Internal::_DATA.m2, &_Attachment_Internal::_DATA.q1);	// m2 = rot
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m3, cpos.x, cpos.y, cpos.z);					// m3 = inv_centre_trans
-
-	// Compose (m1 * m2 * m3) to give the new delta transform matrix m4
-	_Attachment_Internal::_DATA.m4 = (_Attachment_Internal::_DATA.m1 * _Attachment_Internal::_DATA.m2 *_Attachment_Internal::_DATA.m3);
-
-	// Determine an updated object position by transforming it by this matrix.  Update the orientation by multiplying in the delta
-	//D3DXVec3TransformCoord(&m_posoffset, &Constraint->BaseChildPosition, &_Attachment_Internal::_DATA.m4);
-	D3DXVec3TransformCoord(&m_posoffset, &m_posoffset, &_Attachment_Internal::_DATA.m4);
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m1, m_posoffset.x, m_posoffset.y, m_posoffset.z);
-	m_orientoffset *= _Attachment_Internal::_DATA.q1;
-
-	// Update the final offset matrix directly rather than calling Recalculate...(), since we have already
-	// derived all the required matrices in this method and would otherwise have to repeat the effort
-	//m_mat_offset = _Attachment_Internal::_DATA.m4 * _Attachment_Internal::_DATA.m1;
-	
-	// Apply the change recursively DOWN the hierarchy 
-	Apply();
+	// Update the rotation value using this delta and call the main function
+	SetChildRotationAboutConstraint(modf(Constraint->Rotation + d_rad, TWOPI));
 }
 
 // Rotate the child object about the constraint by setting the rotation directly
 template <typename T>
 void Attachment<T>::SetChildRotationAboutConstraint(float rad)
 {
-	// Make sure this attachment does have a valid constraint
+	/*
+		q1 = dq, delta rotation quaternion
+		q2 = neworient, relative orientation parent > child
+		m1 = rotation matrix for neworient
+		m2 = transform matrix for relative parent > child transform
+
+	*/
+
+	// Make sure we have a valid constraint
 	if (!Constraint) return;
 
-	// Derive the rotation matrix required to rotate 'rad' degrees from the base object orientation
-	D3DXQuaternionRotationAxis(&_Attachment_Internal::_DATA.q1, &Constraint->Axis, rad);
-	_Attachment_Internal::_DATA.q1 *= Constraint->BaseChildOrient;
+	// Store new rotation figure, and determine the corresponding rotation quaternion about our axis
+	Constraint->Rotation = rad;
+	D3DXQuaternionRotationAxis(&_Attachment_Internal::_DATA.q1, &Constraint->Axis, rad);					// q1 = dq (delta quaternion)
 
-	// Build the object offset matrix based on the constraint transformations
-	const D3DXVECTOR3 & cpos = Constraint->ChildPoint;
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m1, -cpos.x, -cpos.y, -cpos.z);				// m1 = centre_trans
-	D3DXMatrixRotationQuaternion(&_Attachment_Internal::_DATA.m2, &_Attachment_Internal::_DATA.q1);	// m2 = rot
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m3, cpos.x, cpos.y, cpos.z);					// m3 = inv_centre_trans
+	// Determine the new overall relative orientation, accounting for base orientation
+	_Attachment_Internal::_DATA.q2 = (Constraint->BaseChildOrient * _Attachment_Internal::_DATA.q1);		// q2 = neworient
 
-	// Set the offset directly, then apply the change down the attachment hierarchy
-	m_mat_offset = (_Attachment_Internal::_DATA.m1 * _Attachment_Internal::_DATA.m2 * _Attachment_Internal::_DATA.m3);
-	Apply();
+	// Derive the matrix representing this new relative orientation, then build a transform matrix for the overall relative transform
+	D3DXMatrixRotationQuaternion(&_Attachment_Internal::_DATA.m1, &_Attachment_Internal::_DATA.q2);			// m1 = rot matrix
+	_Attachment_Internal::_DATA.m2 = (Constraint->InvChildPointOffset * _Attachment_Internal::_DATA.m1);	// m2 = transform
+
+	// Eventual child position will be "ParentWorld( parent_point + transform_m2(child_point) )"
+	// v1 = childpos, v2 = interimpos
+	D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &NULL_VECTOR, &_Attachment_Internal::_DATA.m2);			// v1 = childpos
+
+	// Store these values in the attachment offset parameters
+	m_posoffset = (Constraint->ParentPoint + _Attachment_Internal::_DATA.v1);
+	m_orientoffset = _Attachment_Internal::_DATA.q2;
 }
 
 
 #endif
+
+
+
+
