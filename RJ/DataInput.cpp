@@ -202,7 +202,7 @@ Result IO::Data::LoadXMLFileIndex(TiXmlElement *node)
 	string name; Result res;
 
 	// If we have hit the invocation limit we are most likely in an infinite circular loop
-	if (++_INVOKE_COUNT > IO::Data::_FILE_INDEX_INVOKE_LIMIT) 
+	if (++_INVOKE_COUNT > Game::C_DATA_LOAD_RECURSION_LIMIT) 
 		return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 
 	// Iterate through the attributes of this node looking for a file path
@@ -234,6 +234,9 @@ Result IO::Data::LoadXMLFileIndex(TiXmlElement *node)
 // Load a configuration file
 Result IO::Data::LoadConfigFile(const string &filename)
 {
+	// Maintain a recursion counter to prevent infinite loops when loading configuration
+	static int RECURSION_DEPTH = 0;
+
 	// Record the time taken to process this file; store the start time before beginning
 	unsigned int processtime = (unsigned int)timeGetTime();
 
@@ -250,6 +253,13 @@ Result IO::Data::LoadConfigFile(const string &filename)
 	string rname = root->Value(); StrLowerC(rname);
 	if (!(rname == D::NODE_Config)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
 
+	// The file is valid; increment the recursion counter to track the processing, and make sure we aren't in an infinite loop
+	if (++RECURSION_DEPTH > Game::C_CONFIG_LOAD_RECURSION_LIMIT)
+	{
+		delete doc;
+		return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
+	}
+
 	// Now iterate through each child element in turn and pull the relevant configuration
 	string name = "";
 	TiXmlElement *child = root->FirstChildElement();
@@ -258,7 +268,16 @@ Result IO::Data::LoadConfigFile(const string &filename)
 		// Test the type of this node
 		name = child->Value(); StrLowerC(name);
 
-		if (name == "data") {
+		if (name == D::NODE_FileIndex) {
+			const char *file = child->Attribute("file"); if (!file) continue;
+			std::string sfile = file;
+			res = IO::Data::LoadConfigFile(sfile);
+
+			// If we caught and terminated an infinite file loop we need to propogate the error backwards to stop it simply repeating
+			if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
+				return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
+		}
+		else if (name == "data") {
 			const char *path = child->Attribute("path");
 			if (path && DirectoryExists(path))
 			{
@@ -282,6 +301,9 @@ Result IO::Data::LoadConfigFile(const string &filename)
 				Game::ForceWARPRenderDevice = true;
 		}
 	}
+
+	// Decrement the recursion counter now that this file has been fully processed
+	--RECURSION_DEPTH;
 
 	// Calculate the total time taken to process this file and log it
 	processtime = ((unsigned int)timeGetTime() - processtime);

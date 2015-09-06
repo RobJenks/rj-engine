@@ -121,6 +121,10 @@ namespace Game {
 	int C_LOG_FLUSH_INTERVAL = 5000;
 	unsigned int C_MAX_FRAME_DELTA = 200;					// Maximum frame delta of 200ms (= minimum 5 FPS)
 
+	// File input/output constants
+	const int C_DATA_LOAD_RECURSION_LIMIT = 50;				// Maximum recursion depth when loading data files, to prevent infinite loops
+	const int C_CONFIG_LOAD_RECURSION_LIMIT = 25;			// Maximum recursion depth when loading config files, to prevent infinite loops
+
 	// Rendering constants
 	const int C_INSTANCED_RENDER_LIMIT = 1000;				// The maximum number of instances that can be rendered in any one draw call by the engine
 	const float C_MODEL_SIZE_LIMIT = 10000.0f;				// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values

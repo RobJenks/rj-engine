@@ -132,7 +132,11 @@ namespace Game {
 
 	// General application constants
 	extern int C_LOG_FLUSH_INTERVAL;
-	extern unsigned int C_MAX_FRAME_DELTA;			// Maximum frame delta
+	extern unsigned int C_MAX_FRAME_DELTA;				// Maximum frame delta (ms)
+
+	// File input/output constants
+	extern const int C_DATA_LOAD_RECURSION_LIMIT;		// Maximum recursion depth when loading data files, to prevent infinite loops
+	extern const int C_CONFIG_LOAD_RECURSION_LIMIT;		// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
 	extern const int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine

@@ -37,10 +37,6 @@ class FireEffect;
 
 namespace IO { namespace Data {
 
-	// The maximum number of file indices we can recursively follow without being forcibly terminated.
-	// Prevents circular file indices causing irrecoverable infinite loops and heap failure.
-	const int _FILE_INDEX_INVOKE_LIMIT = 50;
-
 	Result LoadModelData(TiXmlElement *node);
 
 	TiXmlDocument *LoadXMLDocument(const string &filename);
