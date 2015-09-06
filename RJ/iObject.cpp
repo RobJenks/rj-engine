@@ -429,14 +429,16 @@ void iObject::RemoveChildAttachment(iObject *child)
 	{
 		if (m_childobjects[i].Child == child)
 		{
-			// We have located the attachment, so remove it and break out of the loop
+			// We have located the attachment, so remove it from our child collection
 			RemoveFromVectorAtIndex<Attachment<iObject*>>(m_childobjects, i);
+
+			// Remove the reverse child pointer to its parent
+			child->SetParentObjectDirect(NULL);
+
+			// Break out of the loop; no need to search further
 			break;
 		}
 	}
-
-	// Also set the parent pointer of this child object to NULL to signify that it is no longer attached
-	child->SetParentObjectDirect(NULL);
 
 	// Recalculate the child count for this object
 	m_childcount = (int)m_childobjects.size();

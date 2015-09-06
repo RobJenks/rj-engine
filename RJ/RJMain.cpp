@@ -1761,7 +1761,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
 		s2->SetName("Test ship s2");
 		s2->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 200, -150));
+		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(650, 200, -150));
 		s2->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1778,20 +1778,24 @@ void RJMain::__CreateDebugScenario(void)
 		s3[1] = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
 		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(0, 0, -125));
+		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), ss->GetPosition() + D3DXVECTOR3(0.0f, 0.0f, 100.0f));
 		s3[1]->SetOrientation(ID_QUATERNION);
+
+		s3[2] = SimpleShip::Create("test_placeholder_ship");
+		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
+		s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+		s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), s3[1]->GetPosition() + D3DXVECTOR3(0.0f, 25.0f, 0.0f));
+		s3[2]->SetOrientation(ID_QUATERNION);
 	}
 
-	if (true) {
-		for (int i = 0; i < 1; i++)
-		{
-			s3[2] = SimpleShip::Create("test_placeholder_ship");
-			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
-			s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-			s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(i * 30.0f, -125, 0));
-			s3[2]->SetOrientation(ID_QUATERNION);
-		}
-	}
+	
+	D3DXQUATERNION initial_orient;
+	D3DXQuaternionRotationAxis(&initial_orient, &RIGHT_VECTOR, PIOVER2);
+
+	s3[1]->AddChildAttachment(s3[2]);
+	Attachment<iObject*> *attach = &( s3[1]->GetChildObjects()->at(0) );
+	attach->CreateConstraint(RIGHT_VECTOR, D3DXVECTOR3(0.0f, 5.0f, 0.0f), D3DXVECTOR3(0.0f, -5.0f, 5.0f), initial_orient);
+
 
 	// Temp: Create a new actor
 	if (true)
@@ -1865,13 +1869,6 @@ void RJMain::__CreateDebugScenario(void)
 	tmp[0]->GetChildObjects()->at(0).AssignConstraint(UP_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, 0.0f-tmp[0]->GetSize().z*0.5f));
 	*/
 
-	D3DXQUATERNION tmpq;
-	D3DXQuaternionRotationAxis(&tmpq, &FORWARD_VECTOR, -PIOVER2);
-	s3[1]->SetPositionAndOrientation(ss->GetPosition() + D3DXVECTOR3(0.0f, 20.0f, 0.0f), ID_QUATERNION);
-	s3[2]->SetPositionAndOrientation(s3[1]->GetPosition() + D3DXVECTOR3(5.0f, 10.0f, 0.0f), tmpq);
-	s3[1]->RefreshPositionImmediate();
-	s3[2]->RefreshPositionImmediate();
-
 	Game::Log << LOG_INIT_START << "--- Debug scenario createds\n";
 }
 
@@ -1923,22 +1920,15 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 
+	/* Constraint testing */
 	D3DXVECTOR3 move = NULL_VECTOR;
 	const float amt = (Game::TimeFactor * 25.0f);
-	D3DXQUATERNION dq, initial_orient;
 	SimpleShip *x0 = s3[1], *x1 = s3[2];
-	D3DXQuaternionRotationAxis(&initial_orient, &RIGHT_VECTOR, PIOVER2);
+	Attachment<iObject*> *attach = &( x0->GetChildObjects()->at(0) );
 
 	// Force into debug mode
 	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera)
 		Game::Engine->GetCamera()->ActivateDebugCamera();
-
-	// Rotation of child about parent
-	static float rad = 0.0f;
-	D3DXQuaternionRotationAxis(&dq, &RIGHT_VECTOR, rad);
-
-	D3DXVECTOR3 parent_point = D3DXVECTOR3(0.0f, 5.0f*1.0f, 0.0f);
-	D3DXVECTOR3 child_point = D3DXVECTOR3(0.0f, -5.0f*1.0f, 5.0f*1.0f);
 	
 	// User input to transform parent or rotate child
 	const BOOL *key = m_keyboard.GetKeys();
@@ -1953,8 +1943,8 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (key[DIK_T])	move.y += amt;
 			if (key[DIK_B])	move.y -= amt;
 
-			if (key[DIK_U])			rad -= Game::TimeFactor;
-			else if (key[DIK_I])	rad += Game::TimeFactor;
+			if (key[DIK_U])			attach->RotateChildAboutConstraint(-Game::TimeFactor);
+			else if (key[DIK_I])	attach->RotateChildAboutConstraint(+Game::TimeFactor);
 		}
 		else if (key[DIK_LSHIFT] && !key[DIK_LCONTROL])
 		{
@@ -1968,7 +1958,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 			x0->SetOrientation(x0->GetOrientation() * d);
 		}
-		else if (!key[DIK_LSHIFT] && key[DIK_LCONTROL])
+		/*else if (!key[DIK_LSHIFT] && key[DIK_LCONTROL])
 		{
 			if (key[DIK_Y])	parent_point.z += 5.0f;
 			if (key[DIK_H])	parent_point.z += -5.0f;
@@ -1976,56 +1966,21 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (key[DIK_J])	parent_point.x += 5.0f;
 			if (key[DIK_T])	parent_point.y += 5.0f;
 			if (key[DIK_B])	parent_point.y += -5.0f;
-		}
+		}*/
 		
 	}
 
 	// Move the parent object based on user input
 	x0->SetPosition(x0->GetPosition() + move);
-	/*x0->RenormaliseSpatialData();
-	x1->RenormaliseSpatialData();
-	x0->RefreshPositionImmediate();
-	x1->RefreshPositionImmediate();*/
 
-	// Determine parent point position, transformed into the child reference frame
-	D3DXQUATERNION inv_initial_orient;
-	D3DXQuaternionInverse(&inv_initial_orient, &initial_orient);
-	//D3DXVec3Rotate(&parent_point, &parent_point, &inv_initial_orient);
 
-	// Determine new child orientation
-	D3DXQUATERNION neworient = (initial_orient * dq);
-	//D3DXQuaternionNormalize(&neworient, &neworient);
-
-	// Matrix which transforms child object about its offset origin (child_point)
-	D3DXMATRIX m1, m2, m3, m4;
-	D3DXMatrixTranslation(&m1, -child_point.x, -child_point.y, -child_point.z);
-	D3DXMatrixRotationQuaternion(&m2, &neworient);
-	//D3DXMatrixTranslation(&m3, child_point.x, child_point.y, child_point.z);
-	m4 = (m1 * m2);// *m3); // (m3 * m2 * m1);
-//D3DXVECTOR3 vv1, vv2, vv3; D3DXVec3TransformCoord(&vv1, &NULL_VECTOR, &m1); D3DXVec3TransformCoord(&vv2, &NULL_VECTOR, &(m1*m2)); D3DXVec3TransformCoord(&vv3, &NULL_VECTOR, &(m1*m2*m3));
-
-	// Eventual child position will be "ParentWorld( parent_point + m4(child_point) )"
-	D3DXVECTOR3 childpos, interimpos, finalpos;
-	D3DXVec3TransformCoord(&childpos, &NULL_VECTOR, &m4);
-	interimpos = (parent_point + childpos);
-	D3DXVec3TransformCoord(&finalpos, &interimpos, x0->GetWorldMatrix());
-
-	// Set the new child position and orientation
-	x1->SetPosition(finalpos);
-	x1->SetOrientation(neworient * x0->GetOrientation());// *neworient);
-
-	// Refresh object transforms
-	x0->RefreshPositionImmediate();
-	x1->RefreshPositionImmediate();
-	/*x0->RenormaliseSpatialData();
-	x1->RenormaliseSpatialData();*/
-
+	/* End constraint testing*/
 
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Parent point: %.2f, %.2f, %.2f", parent_point.x, parent_point.y, parent_point.z);
+		//sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Parent point: %.2f, %.2f, %.2f", parent_point.x, parent_point.y, parent_point.z);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 

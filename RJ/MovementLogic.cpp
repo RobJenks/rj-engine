@@ -58,6 +58,9 @@ void Game::Logic::SimulateAllObjects(void)
 			// Perform a post-simulation update if required, and if available in the class in question
 			if (obj->IsPostSimulationUpdateRequired())
 				obj->PerformPostSimulationUpdate();
+
+			// Clear the flag that indicates spatial data was changed, since we have now responded to it
+			obj->ClearSpatialChangeFlag();
 		}
 
 		// Revert the 'currently visible' flag, which will be updated by the core engine ready for next frame

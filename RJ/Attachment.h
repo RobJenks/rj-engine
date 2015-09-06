@@ -91,10 +91,8 @@ public:
 		// causing non-affine transformation issues.  Resolve in future, or (ideally) find a way to 
 		// remove the OrientationAdjustment field
 		_Attachment_Internal::_DATA.q1 = (m_orientoffset * Parent->GetOrientation());
-		D3DXQuaternionNormalize(&_Attachment_Internal::_DATA.q1, &_Attachment_Internal::_DATA.q1);
+		//D3DXQuaternionNormalize(&_Attachment_Internal::_DATA.q1, &_Attachment_Internal::_DATA.q1);
 		Child->SetOrientation(_Attachment_Internal::_DATA.q1);
-		//D3DXQuaternionRotationMatrix(&_Attachment_Internal::_DATA.q1, Parent->GetOrientationMatrix());
-		//Child->SetOrientation(m_orientoffset * _Attachment_Internal::_DATA.q1);
 		
 		// Update the child world matrix immediately, IF it has any children of its own, so that 
 		// its children will be starting with the correct transformation.  If it has no children
@@ -214,12 +212,6 @@ void Attachment<T>::CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	// Remove any existing constraint before adding another
 	RemoveConstraint();
 
-	// Apply the effect of the attachment, and force an update of each object's world transform before 
-	// determining constraint details.  This ensures the objects are in the right places when the constraint is formed
-	Apply();
-	Parent->RefreshPositionImmediate();
-	Child->RefreshPositionImmediate();
-
 	// Create a new constraint object to hold this data
 	Constraint = new AttachmentConstraint();
 
@@ -237,6 +229,9 @@ void Attachment<T>::CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 
 	// Cache the inverse child translation matrix for runtime efficiency
 	D3DXMatrixTranslation(&Constraint->InvChildPointOffset, -childpoint.x, -childpoint.y, -childpoint.z);
+
+	// Set the constraint to its resting (0 rad) point, which will trigger a recaluation and set initial state for each object
+	SetChildRotationAboutConstraint(0.0f);
 }
 
 // Removes any constraint in place between the two objects, making the attachment static again
@@ -255,7 +250,7 @@ void Attachment<T>::RotateChildAboutConstraint(float d_rad)
 	if (!Constraint) return;
 
 	// Update the rotation value using this delta and call the main function
-	SetChildRotationAboutConstraint(modf(Constraint->Rotation + d_rad, TWOPI));
+	SetChildRotationAboutConstraint(std::fmodf(Constraint->Rotation + d_rad, TWOPI));
 }
 
 // Rotate the child object about the constraint by setting the rotation directly
@@ -291,6 +286,10 @@ void Attachment<T>::SetChildRotationAboutConstraint(float rad)
 	// Store these values in the attachment offset parameters
 	m_posoffset = (Constraint->ParentPoint + _Attachment_Internal::_DATA.v1);
 	m_orientoffset = _Attachment_Internal::_DATA.q2;
+
+	// Apply the attachment to show the change about this constraint
+	// TOOD: Can use more efficient method rather than simply calling Apply() ?
+	Apply();
 }
 
 

@@ -271,7 +271,7 @@ public:
 	CMPINLINE int								GetChildObjectCount(void) const								{ return m_childcount; }
 	CMPINLINE bool								HasChildAttachments(void) const								{ return (m_childcount != 0); }
 	CMPINLINE AttachmentSet *					GetChildObjects(void)										{ return &m_childobjects; }
-	CMPINLINE void								AddChildAttachment(iObject *child);
+	void										AddChildAttachment(iObject *child);
 	void										AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset);
 	bool										HaveChildAttachment(iObject *child);
 	Attachment<iObject*>						RetrieveChildAttachmentDetails(iObject *child);
@@ -350,7 +350,7 @@ public:
 	// TODO: set all at once via one bitwise call once flags are swtiched to the bitwise method?
 	CMPINLINE void								ResetSimulationFlags(void)		
 	{ 
-		m_simulated = m_posupdated = m_spatialdatachanged = false; 
+		m_simulated = m_posupdated /*= m_spatialdatachanged */= false; 
 	}
 
 	// Static methods which register and deregister an object from the global space object collection, using the unique ID as a lookup key
