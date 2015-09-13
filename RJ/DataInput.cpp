@@ -8,7 +8,9 @@
 #include "Utility.h"
 #include "HashFunctions.h"
 #include "FileInput.h"
+#include "Attachment.h"
 #include "Model.h"
+#include "ArticulatedModel.h"
 
 #include "Hardpoint.h"
 #include "Hardpoints.h"
@@ -3051,6 +3053,129 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
+// Load an articulated model
+Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppOutModel)
+{
+	// Parameter check
+	if (!node || !ppOutModel) return ErrorCodes::CannotLoadArticulatedModelWithNullParameters;
+
+	// Pull the model component count from this node, and use to create the model itself
+	const char *ccount = node->Attribute("components");
+	if (!ccount) return ErrorCodes::ArticulatedModelHasInvalidComponentCount;
+	int count = atoi(ccount);
+
+	// Attempt to create the model; if parameters are incorrect, model will not be initialised
+	(*ppOutModel) = new ArticulatedModel(count);
+	if (!(*ppOutModel) || (*ppOutModel)->GetComponentCount() != count)
+	{
+		if ((*ppOutModel)) SafeDelete((*ppOutModel));
+		return ErrorCodes::CouldNotLoadNewArticulatedModel;
+	}
+
+	// Track the number of attachments that have been created
+	int attachcount = 0;
+
+	// Look at each child node in turn
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Hash the value for more efficient lookups
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		// Test for each required field
+		if (hash == HashedStrings::H_Code)
+		{
+			val = child->GetText();
+			(*ppOutModel)->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Component)
+		{
+			// Pull data from each required attribute
+			const char *cindex = child->Attribute("index");
+			const char *cmodel = child->Attribute("model");
+			if (!cindex || !cmodel)
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+			}
+
+			// Validate the parameters
+			int index = atoi(cindex);
+			std::string model = cmodel;
+			if (index < 0 || index >= count)
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::ArticulatedModelContainsInvalidComponentDef;
+			}
+
+			// Set the component definition
+			Model *m = Model::GetModel(model);
+			(*ppOutModel)->SetComponentDefinition(index, m);
+		}
+		else if (hash == HashedStrings::H_Attachment)
+		{
+			// Make sure we have not already created the maximum number of attachments
+			if (attachcount >= count)
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
+			}
+
+			// Pull parent and child indices from the node attributes
+			const char *cparent = child->Attribute("parent");
+			const char *cchild = child->Attribute("child");
+			if (!cparent || !child)
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
+			}
+
+			// Attempt to convert to integral indices, and make sure that the indices reference valid objects
+			int iparent = atoi(cparent); 
+			int ichild = atoi(cchild);
+			if (iparent < 0 || iparent >= count || ichild < 0 || ichild >= count || iparent == ichild)
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
+			}
+
+			// A component can only ever be attached to one parent
+			ArticulatedModelComponent *mc = (*ppOutModel)->GetComponent(ichild);
+			if (!mc || mc->HasParentAttachment())
+			{
+				SafeDelete((*ppOutModel));
+				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
+			}
+
+			// Set the reference to each object in the current attachment
+			Attachment<ArticulatedModelComponent*> *attach = (*ppOutModel)->GetAttachment(attachcount);
+			attach->Parent = (*ppOutModel)->GetComponent(iparent);
+			attach->Child = (*ppOutModel)->GetComponent(ichild);
+			
+			// Now load attachment data from the contents of this node
+			Result result = attach->LoadAttachmentData(child);
+			if (result != ErrorCodes::NoError)
+			{
+				SafeDelete((*ppOutModel));
+				return result;
+			}
+
+			// Attachment has been fully loaded; increment counter of loaded attachments
+			++attachcount;
+		}
+	}
+
+	// Ensure that all components have been attached together, otherwise return failure
+	if (attachcount != (*ppOutModel)->GetAttachmentCount())
+	{
+		SafeDelete((*ppOutModel));
+		return ErrorCodes::CannotLoadUnlinkedArticulatedModel;
+	}
+
+	
+}
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)

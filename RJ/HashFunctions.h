@@ -209,6 +209,8 @@ namespace HashedStrings
 	DefineHash(H_Ez, "ez");
 	DefineHash(H_NumChildren, "numchildren");
 	DefineHash(H_Skip, "skip");
+	DefineHash(H_Attachment, "attachment");
+	DefineHash(H_ArticulatedModel, "articulatedmodel");
 }
 
 

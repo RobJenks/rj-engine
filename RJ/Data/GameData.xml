@@ -8,10 +8,13 @@
   <!-- Load all factions -->
   <include file="Factions\Factions.xml" />
   
-  <!-- Load model data -->
+  <!-- Load static model data -->
   <include file="Models\BasicModels.xml" />
   <include file="Ships\ShipModels.xml" />
   <include file="Ships\TileModels.xml" />
+
+  <!-- Load articulated model data (must be loaded after static models) -->
+  <include file="Models\TurretModels.xml" />
   
   <!-- Load terrain objects -->
   <include file="Terrain\Terrain.xml" />

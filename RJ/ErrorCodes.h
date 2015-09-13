@@ -153,8 +153,8 @@ namespace ErrorCodes {
 	const Result		CouldNotObtainLightHighlightFadeShaderBufferLock= 1215;
 	const Result		CouldNotCreateLightHighlightFadeShader			= 1216;
 	const Result		CouldNotInitialiseModelWithInvalidStringParams	= 1217;
-	const Result		NoDisplayModesAvailableForPrimaryAdapter		= 1218;
-	const Result		NoSupportedDisplayModeForResolution				= 1219;
+	const Result		FoundNoDisplayModesAvailableForPrimaryAdapter	= 1218;
+	const Result		FoundNoSupportedDisplayModeForResolution		= 1219;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;
@@ -247,6 +247,15 @@ namespace ErrorCodes {
 	const Result		CannotLoadFactionFromNullData					= 2650;
 	const Result		CouldNotLoadFactionWithoutAllRequiredData		= 2651;
 	const Result		CouldNotAddNewLoadedFaction						= 2652;
+	const Result		CannotLoadAttachmentWithNullParameters			= 2653;
+	const Result		CannotLoadAttachmentConstraintWithNullParams	= 2654;
+	const Result		CannotLoadArticulatedModelWithNullParameters	= 2655;
+	const Result		InvalidComponentDataInArticulatedModelNode		= 2656;
+	const Result		ArticulatedModelHasInvalidComponentCount		= 2657;
+	const Result		CouldNotLoadNewArticulatedModel					= 2658;
+	const Result		ArticulatedModelContainsInvalidComponentDef		= 2659;
+	const Result		CannotLoadAttachmentDataForArticulatedModel		= 2660;
+	const Result		CannotLoadUnlinkedArticulatedModel				= 2661;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

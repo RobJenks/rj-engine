@@ -92,6 +92,8 @@
     <ClCompile Include="ActorAttributes.cpp" />
     <ClCompile Include="ActorBase.cpp" />
     <ClCompile Include="AdjustableParameter.cpp" />
+    <ClCompile Include="ArticulatedModel.cpp" />
+    <ClCompile Include="ArticulatedModelComponent.cpp" />
     <ClCompile Include="Attachment.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
     <ClCompile Include="CameraClass.cpp" />
@@ -262,6 +264,8 @@
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AdjustableParameter.h" />
     <ClInclude Include="Arc2D.h" />
+    <ClInclude Include="ArticulatedModel.h" />
+    <ClInclude Include="ArticulatedModelComponent.h" />
     <ClInclude Include="Attachment.h" />
     <ClInclude Include="BasicRay.h" />
     <ClInclude Include="BasicSphere.h" />

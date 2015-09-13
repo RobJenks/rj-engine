@@ -20,6 +20,7 @@ class iStaticObject;
 class iActiveObject;
 class iEnvironmentObject;
 class Model;
+class ArticulatedModel;
 class Hardpoint;
 class SimpleShip;
 class ComplexShip;
@@ -70,6 +71,9 @@ namespace IO { namespace Data {
 	CompoundLoadoutMap *LoadCompoundLoadoutMap(TiXmlElement *node, SimpleShipLoadout *L, SimpleShip *targetshiptype);
 	Result LoadEngine(TiXmlElement *node);
 
+	// Load an articulated model
+	Result LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppOutModel);
+
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 	// 'obb' is the node to be updated
 	void LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBoundingBox & obb, bool isroot);
@@ -82,6 +86,7 @@ namespace IO { namespace Data {
 	Result PostProcessResources(void);					// Resources must be interlinked with their dependencies/ingredients, and also productioncost initialisation
 	Result PostProcessComplexShipTileData(void);		// Tiles must have their productioncost data initialised, with e.g. links to component resources/tile dependencies
 
+	// Load bounding box data into the supplied bounding object
 	void   LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds, int boundscapacity);
 
 	Result LoadFireEffect(TiXmlElement *node);
@@ -115,5 +120,7 @@ namespace IO { namespace Data {
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
 	ComplexShipSection *FindInTemporaryCSSBuffer(const std::string & code);
 }}
+
+
 
 #endif

@@ -5,6 +5,9 @@
 
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
+#include "ErrorCodes.h"
+#include "FastMath.h"
+#include "XML\\tinyxml.h"
 
 
 class _Attachment_Internal
@@ -58,25 +61,6 @@ public:
 	void							SetParent(T parent)									{ Parent = parent; }
 	void							SetChild(T child)									{ Child = child; }
 
-
-	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
-	// the object world matrix and stores its new position, and is relatively fast.  Use when orientation is not required	
-	void							Apply_PositionOnly(void)
-	{
-		// Update the child object position based on the parent world matrix
-		D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &m_posoffset, Parent->GetWorldMatrix());
-		Child->SetPosition(_Attachment_Internal::_DATA.v1);
-
-		// Update the child world matrix immediately, IF it has any children of its own, so that 
-		// its children will be starting with the correct transformation.  If it has no children
-		// then we can afford to wait until the matrix is derived in the next cycle
-		// TODO: Setting the pos/orient will prompt another recalculation of the child world matrix 
-		// next frame, which is a little inefficient if we have also calculated it here.  Could zero-out the 
-		// SpatialDataChanged flag when deriving the new world matrix, assuming this is the ONLY
-		// reason for maintaining the flag
-		if (Child->HasChildAttachments()) Child->RefreshPositionImmediate();
-	}
-
 	// Applies the effect of this attachment to the child object, recursively if necessary.  This method recalculates
 	// the object world matrix, position and orientation.  Less efficient than other methods since calculating
 	// orientation requires decomposition of the world matrix and at least one sqrt
@@ -91,7 +75,6 @@ public:
 		// causing non-affine transformation issues.  Resolve in future, or (ideally) find a way to 
 		// remove the OrientationAdjustment field
 		_Attachment_Internal::_DATA.q1 = (m_orientoffset * Parent->GetOrientation());
-		//D3DXQuaternionNormalize(&_Attachment_Internal::_DATA.q1, &_Attachment_Internal::_DATA.q1);
 		Child->SetOrientation(_Attachment_Internal::_DATA.q1);
 		
 		// Update the child world matrix immediately, IF it has any children of its own, so that 
@@ -125,6 +108,9 @@ public:
 	void							RotateChildAboutConstraint(float d_rad);
 	void							SetChildRotationAboutConstraint(float rad);
 
+	// Loads attachment data from XML specification
+	Result							LoadAttachmentData(TiXmlElement *node);
+
 
 	// Default destructor; no action to be taken, since there is no memory allocated on the heap for these objects
 	~Attachment(void) { }
@@ -141,6 +127,9 @@ protected:
 	// Offset matrix, precalcualted on any change of the offsets to save rendering time
 	D3DXMATRIX						m_mat_offset;
 
+	// Load constraint parameters from XML, for use within an attachment
+	Result							LoadAttachmentConstraintParameters(TiXmlElement *node, D3DXVECTOR3 &outAxis, D3DXVECTOR3 &outParentPoint, 
+																	   D3DXVECTOR3 &outChildPoint, D3DXQUATERNION &outBaseOrientation);
 };
 
 // Sets position offset and recalculates parameters accordingly
@@ -292,6 +281,92 @@ void Attachment<T>::SetChildRotationAboutConstraint(float rad)
 	Apply();
 }
 
+
+template <class T>
+Result Attachment<T>::LoadAttachmentData(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadAttachmentWithNullParameters;
+
+	// Look at each child element in turn and pull data from them
+	std::string key;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Retrieve the xml node key and test it
+		key = child->Value(); StrLowerC(key);
+
+		// Test the hash against each expected field
+		if (key == "posoffset")
+		{
+			D3DXVECTOR3 pos = NULL_VECTOR;
+			IO::GetVector3FromAttr(child, &pos);
+			SetPositionOffset(pos);
+		}
+		else if (key == "orientoffset")
+		{
+			D3DXQUATERNION orient = ID_QUATERNION;
+			IO::GetD3DXQUATERNIONFromAttr(child, &orient);
+			SetOrientationOffset(orient);
+		}
+		else if (key == "constraint")
+		{
+			// Load all the constraint parameters from this sub-node
+			D3DXQUATERNION base_orient = ID_QUATERNION;
+			D3DXVECTOR3 axis = UP_VECTOR, ppos = NULL_VECTOR, cpos = NULL_VECTOR;
+			Result result = LoadAttachmentConstraintParameters(child, axis, ppos, cpos, base_orient);
+
+			// If we could not load constraint data correctly then do not create the constraint
+			if (result != ErrorCodes::NoError) continue;
+
+			// Otherwise we can go ahead and create the constraint between these two objects
+			CreateConstraint(axis, ppos, cpos, base_orient);
+		}
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+// Load constraint parameters for use within an attachment
+template <class T>
+Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, D3DXVECTOR3 &outAxis, D3DXVECTOR3 &outParentPoint,
+														 D3DXVECTOR3 &outChildPoint, D3DXQUATERNION &outBaseOrientation)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadAttachmentConstraintWithNullParams;
+
+	// Look at each child element in turn and pull data from them
+	std::string key;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Retrieve the xml node key and test it
+		key = child->Value(); StrLowerC(key);
+
+		// Test the hash against each expected field
+		if (key == "axis")
+		{
+			IO::GetVector3FromAttr(child, &outAxis);
+		}
+		else if (key == "parentpoint")
+		{
+			IO::GetVector3FromAttr(child, &outParentPoint);
+		}
+		else if (key == "childpoint")
+		{
+			IO::GetVector3FromAttr(child, &outChildPoint);
+		}
+		else if (key == "baseorientation")
+		{
+			IO::GetD3DXQUATERNIONFromAttr(child, &outBaseOrientation);
+		}
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
 
 #endif
 

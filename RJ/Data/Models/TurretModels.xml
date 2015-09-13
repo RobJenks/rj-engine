@@ -1,0 +1,32 @@
+<GameData>
+
+  <ArticulatedModel components="3">
+    <Code>turret_basic1</Code>
+    
+    <Component index="0" model="unit_cone_model" />
+    <Component index="1" model="unit_cone_model" />
+    <Component index="2" model="unit_cone_model" />
+
+    <Attachment parent="0" child="1">
+      <Constraint>
+        <Axis x="0.0" y="1.0" z="0.0" />
+        <ParentPoint x="0.0" y="2.0" z="0.0" />
+        <ChildPoint x="0.0" y="-5.0" z="0.0" />
+        <BaseOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
+      </Constraint>
+    </Attachment>
+    
+    <Attachment parent="1" child="2">
+      <Constraint>
+        <Axis x="1.0" y="0.0" z="0.0" />
+        <ParentPoint x="0.0" y="5.0" z="0.0" />
+        <ChildPoint x="0.0" y="-5.0" z="5.0" />
+        <BaseOrientation x="0.707106709" y="0.0" z="0.0" w="0.707106769" />
+      </Constraint>
+    </Attachment>
+    
+  </ArticulatedModel>
+
+
+
+</GameData>

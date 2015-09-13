@@ -141,6 +141,7 @@ namespace Game {
 	// Rendering constants
 	extern const int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine
 	extern const float C_MODEL_SIZE_LIMIT;			// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values
+	extern const int C_MAX_ARTICULATED_MODEL_SIZE;	// The maximum number of components within any articulated model
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL;		// Time (ms) between pre-optimisation checks of the render queue
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_OPTIMISE_INTERVAL;	// Time (ms) between optimisation passes on the render queue
 

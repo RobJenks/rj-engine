@@ -112,7 +112,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	if (numModes == 0U)
 	{
 		Game::Log << LOG_INIT_START << "Error: no display modes available for primary adapter\n";
-		return ErrorCodes::NoDisplayModesAvailableForPrimaryAdapter;
+		return ErrorCodes::FoundNoDisplayModesAvailableForPrimaryAdapter;
 	}
 
 	// Now go through all the display modes and find the one that matches the screen width and height.
@@ -160,7 +160,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 		{
 			Game::Log << LOG_INIT_START << "Error: No matching display mode located for [" << screenWidth << "x"
 				<< screenHeight << "]; cannot proceed since vsync is required\n";
-			return ErrorCodes::NoSupportedDisplayModeForResolution;
+			return ErrorCodes::FoundNoSupportedDisplayModeForResolution;
 		}
 	}
 	else

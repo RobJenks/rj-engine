@@ -490,6 +490,12 @@
     <ClCompile Include="RenderQueueOptimiser.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
+    <ClCompile Include="ArticulatedModel.cpp">
+      <Filter>Engine\Models\Articulated model</Filter>
+    </ClCompile>
+    <ClCompile Include="ArticulatedModelComponent.cpp">
+      <Filter>Engine\Models\Articulated model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1095,6 +1101,12 @@
     <ClInclude Include="RenderQueueOptimiser.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
+    <ClInclude Include="ArticulatedModel.h">
+      <Filter>Engine\Models\Articulated model</Filter>
+    </ClInclude>
+    <ClInclude Include="ArticulatedModelComponent.h">
+      <Filter>Engine\Models\Articulated model</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1323,6 +1335,9 @@
     </Filter>
     <Filter Include="Engine\Render Queue">
       <UniqueIdentifier>{44e57015-fb87-443b-a769-992f9b1fef48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Models\Articulated model">
+      <UniqueIdentifier>{c87ceaca-0dd5-463b-8ae3-157dcaea2b69}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -76,6 +76,7 @@
 #include "SpaceProjectile.h"				// DBG
 #include "SpaceProjectileLauncher.h"		// DBG
 #include "Attachment.h"						// DBG
+#include "ArticulatedModel.h"				// DBG
 #include "SpaceTurret.h"
 #include "ViewFrustrum.h"
 
@@ -1845,6 +1846,10 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetLinearVelocityDegradeState(false);
 	l->SetAngularVelocityDegradeState(false);
 
+
+	ArticulatedModel *m = new ArticulatedModel(5);
+	SafeDelete(m);
+
 	/*
 	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
 	for (int i = 0; i < 2; ++i)
@@ -1958,15 +1963,6 @@ void RJMain::DEBUGDisplayInfo(void)
 
 			x0->SetOrientation(x0->GetOrientation() * d);
 		}
-		/*else if (!key[DIK_LSHIFT] && key[DIK_LCONTROL])
-		{
-			if (key[DIK_Y])	parent_point.z += 5.0f;
-			if (key[DIK_H])	parent_point.z += -5.0f;
-			if (key[DIK_G])	parent_point.x += -5.0f;
-			if (key[DIK_J])	parent_point.x += 5.0f;
-			if (key[DIK_T])	parent_point.y += 5.0f;
-			if (key[DIK_B])	parent_point.y += -5.0f;
-		}*/
 		
 	}
 
@@ -1975,7 +1971,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 	/* End constraint testing*/
-
+		
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
