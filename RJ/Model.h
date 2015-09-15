@@ -112,9 +112,10 @@ class Model
 		static unsigned int			GetVertexMemorySize(void)				{ return (unsigned int)sizeof(VertexType); }
 
 		// Central model storage methods
-		static Model *GetModel(const std::string & code);
-		static Model *GetModelFromFilename(const std::string & filename);
-		static void AddModel(Model *model);
+		static bool					ModelExists(const std::string & code);
+		static Model *				GetModel(const std::string & code);
+		static Model *				GetModelFromFilename(const std::string & filename);
+		static void					AddModel(Model *model);
 
 		// Deallocates all centrally-maintained model data
 		static void TerminateAllModelData(void);

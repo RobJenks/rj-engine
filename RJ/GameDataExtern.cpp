@@ -84,6 +84,7 @@ namespace D {
 	const char *NODE_ComplexShipElement = "complexshipelement";	
 	const char *NODE_Hardpoint = "hardpoint";
 	const char *NODE_Model = "model";
+	const char *NODE_ArticulatedModel = "articulatedmodel";
 	const char *NODE_UIManagedControlDefinition = "uimanagedcontroldefinition";
 	const char *NODE_Resource = "resource";
 	const char *NODE_SpaceProjectileDefinition = "spaceprojectiledefinition";

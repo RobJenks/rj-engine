@@ -72,7 +72,7 @@ namespace IO { namespace Data {
 	Result LoadEngine(TiXmlElement *node);
 
 	// Load an articulated model
-	Result LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppOutModel);
+	Result LoadArticulatedModel(TiXmlElement *node);
 
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 	// 'obb' is the node to be updated

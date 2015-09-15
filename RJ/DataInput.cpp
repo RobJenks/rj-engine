@@ -157,6 +157,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadUILayout(child);
 		} else if (name == D::NODE_Model) {
 			res = IO::Data::LoadModelData(child);
+		} else if (name == D::NODE_ArticulatedModel) {
+			res = IO::Data::LoadArticulatedModel(child);
 		} else if (name == D::NODE_UIManagedControlDefinition) {
 			res = IO::Data::LoadUIManagedControlDefinition(child);
 		} else if (name == D::NODE_ComplexShipTileClass) {
@@ -3054,10 +3056,10 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 }
 
 // Load an articulated model
-Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppOutModel)
+Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 {
 	// Parameter check
-	if (!node || !ppOutModel) return ErrorCodes::CannotLoadArticulatedModelWithNullParameters;
+	if (!node) return ErrorCodes::CannotLoadArticulatedModelWithNullParameters;
 
 	// Pull the model component count from this node, and use to create the model itself
 	const char *ccount = node->Attribute("components");
@@ -3065,10 +3067,10 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 	int count = atoi(ccount);
 
 	// Attempt to create the model; if parameters are incorrect, model will not be initialised
-	(*ppOutModel) = new ArticulatedModel(count);
-	if (!(*ppOutModel) || (*ppOutModel)->GetComponentCount() != count)
+	ArticulatedModel *model = new ArticulatedModel(count);
+	if (!model || model->GetComponentCount() != count)
 	{
-		if ((*ppOutModel)) SafeDelete((*ppOutModel));
+		if (model) SafeDelete(model);
 		return ErrorCodes::CouldNotLoadNewArticulatedModel;
 	}
 
@@ -3088,7 +3090,7 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 		if (hash == HashedStrings::H_Code)
 		{
 			val = child->GetText();
-			(*ppOutModel)->SetCode(val);
+			model->SetCode(val);
 		}
 		else if (hash == HashedStrings::H_Component)
 		{
@@ -3097,29 +3099,29 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 			const char *cmodel = child->Attribute("model");
 			if (!cindex || !cmodel)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
 			}
 
 			// Validate the parameters
 			int index = atoi(cindex);
-			std::string model = cmodel;
+			std::string smodel = cmodel;
 			if (index < 0 || index >= count)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::ArticulatedModelContainsInvalidComponentDef;
 			}
 
 			// Set the component definition
-			Model *m = Model::GetModel(model);
-			(*ppOutModel)->SetComponentDefinition(index, m);
+			Model *m = Model::GetModel(smodel);
+			model->SetComponentDefinition(index, m);
 		}
 		else if (hash == HashedStrings::H_Attachment)
 		{
 			// Make sure we have not already created the maximum number of attachments
 			if (attachcount >= count)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
 			}
 
@@ -3128,7 +3130,7 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 			const char *cchild = child->Attribute("child");
 			if (!cparent || !child)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
 			}
 
@@ -3137,28 +3139,28 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 			int ichild = atoi(cchild);
 			if (iparent < 0 || iparent >= count || ichild < 0 || ichild >= count || iparent == ichild)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
 			}
 
 			// A component can only ever be attached to one parent
-			ArticulatedModelComponent *mc = (*ppOutModel)->GetComponent(ichild);
+			ArticulatedModelComponent *mc = model->GetComponent(ichild);
 			if (!mc || mc->HasParentAttachment())
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
 			}
 
 			// Set the reference to each object in the current attachment
-			Attachment<ArticulatedModelComponent*> *attach = (*ppOutModel)->GetAttachment(attachcount);
-			attach->Parent = (*ppOutModel)->GetComponent(iparent);
-			attach->Child = (*ppOutModel)->GetComponent(ichild);
+			Attachment<ArticulatedModelComponent*> *attach = model->GetAttachment(attachcount);
+			attach->Parent = model->GetComponent(iparent);
+			attach->Child = model->GetComponent(ichild);
 			
 			// Now load attachment data from the contents of this node
 			Result result = attach->LoadAttachmentData(child);
 			if (result != ErrorCodes::NoError)
 			{
-				SafeDelete((*ppOutModel));
+				SafeDelete(model);
 				return result;
 			}
 
@@ -3168,13 +3170,22 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node, ArticulatedModel **ppO
 	}
 
 	// Ensure that all components have been attached together, otherwise return failure
-	if (attachcount != (*ppOutModel)->GetAttachmentCount())
+	if (attachcount != model->GetAttachmentCount())
 	{
-		SafeDelete((*ppOutModel));
+		SafeDelete(model);
 		return ErrorCodes::CannotLoadUnlinkedArticulatedModel;
 	}
 
+	// Validate the model, and make sure we have no duplicate item already in the central collection
+	if (model->GetCode() == NullString || ArticulatedModel::ModelExists(model->GetCode()))
+	{
+		SafeDelete(model);
+		return ErrorCodes::CannotStoreNewArticulatedModelWithSpecifiedCode;
+	}
 	
+	// Otherwise the model is valid; add to the central collection and return success
+	ArticulatedModel::AddModel(model);
+	return ErrorCodes::NoError;
 }
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists

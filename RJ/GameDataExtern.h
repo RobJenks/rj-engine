@@ -141,6 +141,7 @@ namespace D {
 	extern const char *NODE_ComplexShipTile;
 	extern const char *NODE_ComplexShipTileBaseData;
 	extern const char *NODE_Model;
+	extern const char *NODE_ArticulatedModel;
 	extern const char *NODE_UIManagedControlDefinition;
 	extern const char *NODE_Resource;
 	extern const char *NODE_SpaceProjectileDefinition;

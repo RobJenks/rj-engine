@@ -3,6 +3,9 @@
 
 #include "ArticulatedModel.h"
 
+// The static central collection of model data
+ArticulatedModel::ModelCollection ArticulatedModel::Models;
+
 // Constructor; must set the number of components at creation
 ArticulatedModel::ArticulatedModel(int componentcount)
 {
@@ -83,4 +86,49 @@ ArticulatedModel::~ArticulatedModel(void)
 }
 
 
+// Test whether a model exists in the central collection
+bool ArticulatedModel::ModelExists(const std::string & code)
+{
+	return (code != NullString && ArticulatedModel::Models.count(code) > 0);
+}
+
+// Retrieve a model from the central collection based on its string code
+ArticulatedModel *ArticulatedModel::GetModel(const std::string & code)
+{
+	if (code != NullString && ArticulatedModel::Models.count(code) > 0)	return ArticulatedModel::Models[code];
+	else																return NULL;
+}
+
+// Add a new model to the central collection, indexed by its unique string code
+void ArticulatedModel::AddModel(ArticulatedModel *model)
+{
+	// Make sure the model is valid, and that we do not already have a model with its unique code
+	if (!model || model->GetCode() == NullString || ArticulatedModel::Models.count(model->GetCode()) > 0) return;
+
+	// Add to the central collection, indexed by its string code
+	ArticulatedModel::Models[model->GetCode()] = model;
+}
+
+void ArticulatedModel::TerminateAllModelData(void)
+{
+	// All standard models are contained within the model collection, so we can iterate over it and dispose
+	// of objects one by one via their standard destructor
+	ModelCollection::iterator it_end = ArticulatedModel::Models.end();
+	for (ModelCollection::iterator it = ArticulatedModel::Models.begin(); it != it_end; ++it)
+	{
+		if (it->second)
+		{
+			delete it->second;
+		}
+	}
+
+	// Clear the collection, now that it is simply full of null pointers
+	ArticulatedModel::Models.clear();
+}
+
+// Creates and returns an exact copy of the specified articualated model
+ArticulatedModel * ArticulatedModel::Copy(const ArticulatedModel *source)
+{
+	// TODO
+}
 

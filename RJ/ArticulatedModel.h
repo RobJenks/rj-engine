@@ -2,6 +2,7 @@
 #ifndef __ArticulatedModelH__
 #define __ArticulatedModelH__
 
+#include <unordered_map>
 #include "CompilerSettings.h"
 #include "ArticulatedModelComponent.h"
 #include "Attachment.h"
@@ -9,6 +10,9 @@
 class ArticulatedModel
 {
 public:
+
+	// Model data is stored in static unordered_map collections & indexed by unique string code
+	typedef std::unordered_map<std::string, ArticulatedModel*> ModelCollection;
 
 	// Constructor; must set the number of components at creation
 	ArticulatedModel(int componentcount);
@@ -33,6 +37,17 @@ public:
 	// Destructor; deallocates all resources used by the articulated model
 	~ArticulatedModel(void);
 
+	// Static collection of all articulated models in the game, indexed by string code
+	static ModelCollection						Models;
+
+	// Central model storage methods
+	static bool									ModelExists(const std::string & code);
+	static ArticulatedModel *					GetModel(const std::string & code);
+	static void									AddModel(ArticulatedModel *model);
+	static void									TerminateAllModelData(void);
+
+	// Creates and returns an exact copy of the specified articualated model
+	ArticulatedModel *							Copy(const ArticulatedModel *source);
 
 protected:
 

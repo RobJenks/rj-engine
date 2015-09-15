@@ -637,6 +637,12 @@ void Model::ReleaseModel()
 	return;
 }
 
+// Test whether a model exists in the central collection
+bool Model::ModelExists(const std::string & code)
+{
+	return (code != NullString && Model::Models.count(code) > 0);
+}
+
 // Retrieve a model from the central collection based on its string code
 Model *Model::GetModel(const std::string & code)
 {
