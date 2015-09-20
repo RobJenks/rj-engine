@@ -24,6 +24,16 @@ void ArticulatedModelComponent::RefreshPositionImmediate(void)
 	SetWorldMatrix(_calc_data.m1 * _calc_data.m2);
 }
 
+// Assigns the contents of another model component to this one
+void ArticulatedModelComponent::operator=(const ArticulatedModelComponent & rhs)
+{
+	Model = rhs.Model;
+	SetPosition(rhs.GetPosition());
+	SetOrientation(rhs.GetOrientation());
+	SetWorldMatrix(rhs.GetWorldMatrixInstance());
+	SetParentAttachmentState(rhs.HasParentAttachment());
+	SetChildAttachmentState(rhs.HasChildAttachments());
+}
 
 // Default destructor
 ArticulatedModelComponent::~ArticulatedModelComponent(void)

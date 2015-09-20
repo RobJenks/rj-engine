@@ -3058,6 +3058,8 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 // Load an articulated model
 Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 {
+	Result result;
+
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadArticulatedModelWithNullParameters;
 
@@ -3105,7 +3107,7 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 
 			// Validate the parameters
 			int index = atoi(cindex);
-			std::string smodel = cmodel;
+			std::string smodel = cmodel; StrLowerC(smodel);
 			if (index < 0 || index >= count)
 			{
 				SafeDelete(model);
@@ -3134,30 +3136,19 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
 			}
 
-			// Attempt to convert to integral indices, and make sure that the indices reference valid objects
+			// Attempt to form this attachment, and return an error if any validations fail
 			int iparent = atoi(cparent); 
 			int ichild = atoi(cchild);
-			if (iparent < 0 || iparent >= count || ichild < 0 || ichild >= count || iparent == ichild)
+			result = model->SetAttachment(attachcount, iparent, ichild);
+			if (result != ErrorCodes::NoError)
 			{
 				SafeDelete(model);
-				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
+				return result;
 			}
-
-			// A component can only ever be attached to one parent
-			ArticulatedModelComponent *mc = model->GetComponent(ichild);
-			if (!mc || mc->HasParentAttachment())
-			{
-				SafeDelete(model);
-				return ErrorCodes::CannotLoadAttachmentDataForArticulatedModel;
-			}
-
-			// Set the reference to each object in the current attachment
-			Attachment<ArticulatedModelComponent*> *attach = model->GetAttachment(attachcount);
-			attach->Parent = model->GetComponent(iparent);
-			attach->Child = model->GetComponent(ichild);
 			
 			// Now load attachment data from the contents of this node
-			Result result = attach->LoadAttachmentData(child);
+			Attachment<ArticulatedModelComponent*> *attach = model->GetAttachment(attachcount);
+			result = attach->LoadAttachmentData(child);
 			if (result != ErrorCodes::NoError)
 			{
 				SafeDelete(model);
@@ -3183,6 +3174,9 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 		return ErrorCodes::CannotStoreNewArticulatedModelWithSpecifiedCode;
 	}
 	
+	// Initialise the model now that all its data has been loaded
+	model->PerformPostLoadInitialisation();
+
 	// Otherwise the model is valid; add to the central collection and return success
 	ArticulatedModel::AddModel(model);
 	return ErrorCodes::NoError;

@@ -27,7 +27,8 @@ public:
 
 	// Retrieve or set the component world matrix
 	CMPINLINE D3DXMATRIX *				GetWorldMatrix(void)							{ return &m_worldmatrix; }
-	CMPINLINE void						SetWorldMatrix(D3DXMATRIX &m)					{ m_worldmatrix = m; }
+	CMPINLINE D3DXMATRIX 				GetWorldMatrixInstance(void) const				{ return m_worldmatrix; }
+	CMPINLINE void						SetWorldMatrix(const D3DXMATRIX &m)				{ m_worldmatrix = m; }
 	CMPINLINE void						SetWorldMatrix(D3DXMATRIX *m)					{ m_worldmatrix = *m; }
 
 	// Performs an immediate recalculation of the world transform for this component
@@ -45,8 +46,14 @@ public:
 	// Notifies this component of whether it now has child objects attached
 	CMPINLINE void						SetChildAttachmentState(bool has_children)		{ m_haschildren = has_children; }
 
+	// Notifies this component of whether it is now attached to a parent object
+	CMPINLINE void						SetParentAttachmentState(bool has_parent)		{ m_hasparent = has_parent; }
+
 	// Default destructor
 	~ArticulatedModelComponent(void);
+
+	// Assigns the contents of another model component to this one
+	void								operator=(const ArticulatedModelComponent & rhs);
 
 	// Static working variables for inline intermediate calculations
 	static struct						_calc_data_struct {
@@ -68,7 +75,6 @@ protected:
 	// Flags indicating whether this object has a parent, or any child attachments
 	bool								m_hasparent;
 	bool								m_haschildren;
-
 
 };
 

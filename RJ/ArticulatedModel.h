@@ -31,8 +31,17 @@ public:
 	// Returns a pointer to the specified component, if valid
 	ArticulatedModelComponent *					GetComponent(int index);
 
+	// Replaces a component with a copy of the specified one
+	void										ReplaceComponent(int index, const ArticulatedModelComponent *copy_source);
+
 	// Returns a pointer to the specified attachment, if valid
 	Attachment<ArticulatedModelComponent*> *	GetAttachment(int index);
+
+	// Attempts to create an attachment between the two specified components.  Returns an errorcode if not possible
+	Result										SetAttachment(int attach_index, int parent_index, int child_index);
+
+	// Initialises the model once all data has been loaded, to make sure it is ready for use in-game
+	void										PerformPostLoadInitialisation(void);
 
 	// Destructor; deallocates all resources used by the articulated model
 	~ArticulatedModel(void);
@@ -47,7 +56,7 @@ public:
 	static void									TerminateAllModelData(void);
 
 	// Creates and returns an exact copy of the specified articualated model
-	ArticulatedModel *							Copy(const ArticulatedModel *source);
+	ArticulatedModel *							Copy(void);
 
 protected:
 
@@ -60,8 +69,14 @@ protected:
 	// Collection of model components
 	ArticulatedModelComponent **				m_components;
 
+	// Store a reference to the root component for rendering efficiency
+	int											m_rootcomponent;
+
 	// Collection of attachments and constraints between each component
 	Attachment<ArticulatedModelComponent*> *	m_attachments;
+
+	// Collection of integer pairs describing the attachments, for efficient lookup
+	int *										m_attachment_indices;
 };
 
 
