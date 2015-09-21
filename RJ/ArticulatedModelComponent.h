@@ -15,7 +15,7 @@ public:
 	ArticulatedModelComponent(void);
 
 	// Reference to the model for this component
-	const Model *						Model;
+	Model *								Model;
 
 	// Retrieve or set the component position
 	CMPINLINE D3DXVECTOR3				GetPosition(void) const							{ return m_position; }

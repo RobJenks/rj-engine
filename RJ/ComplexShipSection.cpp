@@ -2,7 +2,6 @@
 #include "ComplexShip.h"
 #include "Hardpoint.h"
 #include "Hardpoints.h"
-#include "FadeEffect.h"
 #include "Texture.h"
 #include "Model.h"
 #include "CopyObject.h"
@@ -85,14 +84,6 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 	int n = source->GetHardpoints().size();
 	m_hardpoints.reserve(n);
 	for (int i = 0; i < n; ++i) m_hardpoints.push_back(source->GetHardpoints()[i]->Clone());
-}
-
-
-// Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)
-void ComplexShipSection::PerformRenderUpdate(void)
-{
-	// Update any render effects that may be active on the object
-	Fade.Update();
 }
 
 // Sets the section position relative to its parent ship, recalculating required data at the same time

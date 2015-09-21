@@ -24,15 +24,16 @@ void ArticulatedModelComponent::RefreshPositionImmediate(void)
 	SetWorldMatrix(_calc_data.m1 * _calc_data.m2);
 }
 
-// Assigns the contents of another model component to this one
+// Assigns the contents of another model component to this one.  Resets the hasparent/haschild flags,
+// since these are driven by the attachments between components in the new model
 void ArticulatedModelComponent::operator=(const ArticulatedModelComponent & rhs)
 {
 	Model = rhs.Model;
 	SetPosition(rhs.GetPosition());
 	SetOrientation(rhs.GetOrientation());
 	SetWorldMatrix(rhs.GetWorldMatrixInstance());
-	SetParentAttachmentState(rhs.HasParentAttachment());
-	SetChildAttachmentState(rhs.HasChildAttachments());
+	SetParentAttachmentState(false);
+	SetChildAttachmentState(false);
 }
 
 // Default destructor

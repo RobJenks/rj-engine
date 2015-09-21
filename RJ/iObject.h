@@ -13,6 +13,8 @@
 #include "Attachment.h"
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
+#include "FadeEffect.h"
+#include "HighlightEffect.h"
 #include "Faction.h"
 class Model;
 
@@ -192,6 +194,13 @@ public:
 	// will need to e.g. update the position of any contained objects following a change in position
 	virtual void							PerformPostSimulationUpdate(void) { }
 
+	// Effects that can be activated on this object
+	FadeEffect								Fade;					// Allows the object to be faded in and out
+	HighlightEffect							Highlight;              // Allows a highlight to be applied over object textures
+
+	// Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)
+	void                                    PerformRenderUpdate(void);
+
 	// The simulation state determines what level of simulation (if any) should be run for this object
 	CMPINLINE ObjectSimulationState			SimulationState(void) const							{ return m_simulationstate; }
 	CMPINLINE ObjectSimulationState			RequestedSimulationState(void) const				{ return m_nextsimulationstate; }
@@ -227,6 +236,10 @@ public:
 	// The model used for rendering this object (or NULL if object is non-renderable)
 	CMPINLINE Model *						GetModel(void)						{ return m_model; }
 	CMPINLINE void							SetModel(Model *model)				{ m_model = model; }
+
+    // The articulated model used for rendering this object (or NULL if not applicable)
+	CMPINLINE ArticulatedModel *            GetArticulatedModel(void)                       { return m_articulatedmodel; }
+	CMPINLINE void                          SetArticulatedModel(ArticulatedModel *model)    { m_articulatedmodel = model; }
 
 	// The faction this object belongs to, or Faction::NullFaction (0) for non-affiliated objects
 	CMPINLINE Faction::F_ID					GetFaction(void) const				{ return m_faction; }
@@ -404,8 +417,10 @@ protected:
 	HashVal								m_instancecodehash;				// Hash value of the instance code, used for more efficient comparison
 	bool								m_standardobject;				// Flag indicating whether this is a 'standard', centrally-maintained template object
 	Faction::F_ID						m_faction;						// ID of the faction this object belongs to; will be 0 for the null faction if it has no affiliation
-	Model *								m_model;						// Returns a pointer to the model for this object, which is stored in 
+	Model *								m_model;						// Pointer to the static model for this object, which is stored in 
 																		// the central collection.  Can be NULL if non-renderable.
+	ArticulatedModel *                  m_articulatedmodel;             // The articulated model to use for this object, if relevant.  If NULL, the object
+                                                                        // will use its static model by default
 
 	D3DXVECTOR3							m_position;						// Position of the object in world space
 	D3DXQUATERNION						m_orientation;					// Object orientation

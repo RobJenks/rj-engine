@@ -31,6 +31,9 @@ public:
 	// Returns a pointer to the specified component, if valid
 	ArticulatedModelComponent *					GetComponent(int index);
 
+	// Returns a pointer to the component collection
+	CMPINLINE ArticulatedModelComponent **		GetComponents(void)							{ return m_components; }
+
 	// Replaces a component with a copy of the specified one
 	void										ReplaceComponent(int index, const ArticulatedModelComponent *copy_source);
 

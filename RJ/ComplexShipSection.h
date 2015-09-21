@@ -54,9 +54,6 @@ public:
 		SetSectionUpdateFlag();
 	}
 
-	// Updates the object before it is rendered.  Called only when the object is processed in the render queue (i.e. not when it is out of view)
-	void										PerformRenderUpdate(void);
-
 	// Flag indicating whether the section has been updated, and signalling to the parent ship that it therefore needs to update itself
 	CMPINLINE bool								SectionIsUpdated(void) const	{ return m_sectionupdated; }
 	CMPINLINE void								SetSectionUpdateFlag(void)		{ m_sectionupdated = true; }
@@ -129,10 +126,6 @@ public:
 
 	// Derives a new offset matrix for the section, based on its ship-related position and rotation
 	void										DeriveNewSectionOffsetMatrix(void);
-
-	// Effects that can be activated on this object
-	FadeEffect									Fade;					// Allows the object to be faded in and out
-	HighlightEffect								Highlight;
 
 	// Methods to force rendering of a section interior even when it does not otherwise meet any criteria for doing so
 	bool										InteriorShouldAlwaysBeRendered(void) const	{ return m_forcerenderinterior; }

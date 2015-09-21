@@ -215,14 +215,6 @@ void SimpleShip::CalculateEngineStatistics()
 	this->EngineAngularAcceleration.Value = accel;
 }
 
-// Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)
-void SimpleShip::PerformRenderUpdate(void)
-{
-	// Update any render effects that may be active on the object
-	if (Fade.IsActive()) Fade.Update();
-}
-
-
 SimpleShip *SimpleShip::Create(const string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL

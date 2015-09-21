@@ -1847,8 +1847,9 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetAngularVelocityDegradeState(false);
 
 
-	ArticulatedModel *m = new ArticulatedModel(5);
-	SafeDelete(m);
+	// Test articulated model rendering
+	ss->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic1")->Copy());
+
 
 	/*
 	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;

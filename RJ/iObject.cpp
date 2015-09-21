@@ -41,6 +41,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_name = "";
 	m_instancecode = "";
 	m_model = NULL;
+	m_articulatedmodel = NULL;
 	m_codehash = m_instancecodehash = 0U;
 	m_standardobject = false;
 	m_faction = Faction::NullFaction;
@@ -198,6 +199,13 @@ void iObject::SetObjectType(iObject::ObjectType type)
 
 	// Derive and store the object class
 	m_objectclass = iObject::DetermineObjectClass(*this);
+}
+
+// Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)
+void iObject::PerformRenderUpdate(void)
+{
+	// Update any render effects that may be active on the object
+	if (Fade.IsActive()) Fade.Update();
 }
 
 // Returns the disposition of this object towards the target object, based on our respective factions and 

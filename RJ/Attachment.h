@@ -153,7 +153,7 @@ template <typename T>
 void Attachment<T>::SetOffset(const D3DXVECTOR3 & poff, const D3DXQUATERNION & qoff)
 {
 	m_posoffset = poff;
-	D3DXQuaternionNormalize(&m_orientoffset, &off);
+	D3DXQuaternionNormalize(&m_orientoffset, &qoff);
 	RecalculateOffsetParameters();
 }
 

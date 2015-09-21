@@ -6,8 +6,6 @@
 #include "Ship.h"
 #include "SimpleShipLoadout.h"
 #include "iContainsHardpoints.h"
-#include "FadeEffect.h"
-#include "HighlightEffect.h"
 class iObject;
 class Hardpoint;
 class Hardpoints;
@@ -25,9 +23,6 @@ public:
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
 	void				InitialiseCopiedObject(SimpleShip *source);
-
-	// Updates the object before it is rendered.  Called only when the object is processed in the render queue (i.e. not when it is out of view)
-	void				PerformRenderUpdate(void);
 
 	// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
 	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
@@ -62,10 +57,6 @@ public:
 
 	// Derive a camera matrix from the ship position/orientation, for use in player flying and tracking of ships
 	void DeriveActualCameraMatrix(D3DXMATRIX &camoffset);
-
-	// Effects that can be activated on this object
-	FadeEffect									Fade;					// Allows the object to be faded in and out
-	HighlightEffect								Highlight;
 
 	// Camera data for when this ship is being controlled by the player
 	D3DXVECTOR3		CameraPosition;			// Coordinates of the camera position

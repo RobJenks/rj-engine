@@ -199,7 +199,16 @@ void ArticulatedModel::Update(	const D3DXVECTOR3 & position, const D3DXQUATERNIO
 	// order is specified correctly in xml data (i.e. from root to children)
 	for (int i = 0; i < m_attachcount; ++i)
 	{
+		// Apply the attachment to move the child into its correct position and orientation
 		m_attachments[i].Apply();
+
+		// Attachment will only recalculate child world matrix if it has children of its own, by default,
+		// since normal objects will recalculate their world matrix on the next cycle.  It would
+		// only then be necessary to recalculate it here if the matrix is needed for updating its child
+		// objects during this cycle.  Articulated model components do not automatically recalculate
+		// their world matrix on per-frame simulation, so force a recalculation for any components that 
+		// wouldn't be covered by the normal attachment logic (i.e. those without children of their own)
+		if (!m_attachments[i].Child->HasChildAttachments()) m_attachments[i].Child->RefreshPositionImmediate();
 	}
 }
 
@@ -285,11 +294,24 @@ ArticulatedModel * ArticulatedModel::Copy(void)
 	int acount = this->GetAttachmentCount();
 	for (int i = 0; i < acount; ++i)
 	{
+		// Link the two relevant objects using this attachment
 		result = model->SetAttachment(i, m_attachment_indices[i], m_attachment_indices[i + 1]);
 		if (result != ErrorCodes::NoError)
 		{
 			SafeDelete(model);
 			return NULL;
+		}
+
+		// Copy other attachment data directly; take different action depending on whether we have a constraint or fixed attachment
+		Attachment<ArticulatedModelComponent*> *new_attach = model->GetAttachment(i);
+		AttachmentConstraint *constraint = m_attachments[i].Constraint;
+		if (constraint)
+		{
+			new_attach->CreateConstraint(constraint->Axis, constraint->ParentPoint, constraint->ChildPoint, constraint->BaseChildOrient);
+		}
+		else
+		{
+			new_attach->SetOffset(m_attachments[i].GetPositionOffset(), m_attachments[i].GetOrientationOffset());
 		}
 	}
 

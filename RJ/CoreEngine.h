@@ -133,6 +133,9 @@ public:
 	// Renders all objects in the specified system, based on simulation state and visibility testing
 	void					RenderAllSystemObjects(SpaceSystem *system);
 
+    // Generic iObject rendering method; used by subclasses wherever possible
+	void                    RenderObject(iObject *object);
+
 	// Simple ship-rendering method
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SimpleShips,
 		void, RenderSimpleShip, SimpleShip *s, s)
@@ -160,9 +163,6 @@ public:
 
 	// Rendering methods for skinned models
 	void					RenderSkinnedModelInstance(SkinnedModelInstance &model);
-
-    // Update and render all components of an articulated model
-	void                    RenderArticulatedModel(const ArticulatedModel *model);
 
 	// User interface, text and all other 2D rendering functions
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_UI, 
@@ -404,6 +404,12 @@ private:
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model, transform, params));
 	}
 
+	// Render an object with a static model.  Protected; called only from RenderObject()
+	void                    RenderObjectWithStaticModel(iObject *object);
+
+	// Render an object with an articulated model.  Protected; called only from RenderObject()
+	void                    RenderObjectWithArticulatedModel(iObject *object);
+
 	// Recursively analsyses and renders a sector of the environment.  Performs binary splitting to efficiently test visibility.
 	// Only called internally so no parameter checks are performed, for efficiency.
 	void					RenderObjectEnvironmentSector(iSpaceObjectEnvironment *environment, const INTVECTOR3 & start, const INTVECTOR3 & size);
@@ -417,7 +423,7 @@ private:
 
 	// Functions for processing the per-frame render info
 	EngineRenderInfoData	m_renderinfo;
-	void ResetRenderInfo(void);
+	void                    ResetRenderInfo(void);
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
 	D3DXVECTOR4				m_instanceparams;

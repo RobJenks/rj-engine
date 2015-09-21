@@ -1236,6 +1236,117 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 	m_renderqueueshaders[shaderindex].SortedInstances.clear();
 }
 
+// Generic iObject rendering method; used by subclasses wherever possible
+void CoreEngine::RenderObject(iObject *object)
+{
+	if (!object) return;
+
+	// Test whether this object is within the viewing frustrum; if not, no need to render it
+	if (!m_frustrum->TestObjectVisibility(object)) return;
+
+	// Mark the object as visible
+	object->MarkAsVisible();
+
+	// We are rendering this object, so call its pre-render update method
+	object->PerformRenderUpdate();
+
+    // Render either articulated or static model depending on object properties
+	if (object->GetArticulatedModel())
+	{
+		RenderObjectWithArticulatedModel(object);
+	}
+	else
+	{
+		RenderObjectWithStaticModel(object);
+	}
+
+}
+
+// Render an object with a static model.  Protected; called only from RenderObject()
+void CoreEngine::RenderObjectWithStaticModel(iObject *object)
+{
+    // Guaranteed: object != NULL, based on validation in RenderModel method, which is the only method which can 
+    // invoke this one. Update to include NULL checks if this situation changes
+
+    // Make sure this object has a valid model; if not, there is nothing to render
+	if (!object->GetModel()) return;
+
+	// Add this object to the render queue for the relevant shader
+	if (object->Fade.AlphaIsActive())
+	{
+		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
+		m_instanceparams.x = object->Fade.GetFadeAlpha();
+		if (m_instanceparams.x < Game::C_EPSILON) return;
+
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), object->GetWorldMatrix(), m_instanceparams, object->GetPosition());
+	}
+	else
+	{
+		if (object->Highlight.IsActive())
+		{
+			m_instanceparams = object->Highlight.GetColour();
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel(), object->GetWorldMatrix(), m_instanceparams);
+		}
+		else
+		{
+			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), object->GetWorldMatrix());
+		}
+	}
+}
+
+// Render an object with an articulated model.  Protected; called only from RenderObject()
+void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
+{
+	// Guaranteed: object != NULL, object->GetArticulatedModel() != NULL,  based on validation in RenderModel 
+    // method, which is the only method which can invoke this one.  Update to include NULL checks if this situation changes
+
+    // Perform an update of the articulated model to ensure all components are correctly positioned
+	ArticulatedModel *model = object->GetArticulatedModel();
+	model->Update(object->GetPosition(), object->GetOrientation(), object->GetWorldMatrix());
+	
+    // Cache data for efficiency
+    int n = model->GetComponentCount();
+
+	// Add this object to the render queue for the relevant shader
+	if (object->Fade.AlphaIsActive())
+	{
+		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
+		m_instanceparams.x = object->Fade.GetFadeAlpha();
+		if (m_instanceparams.x < Game::C_EPSILON) return;
+
+        // Submit each component for rendering in turn
+		ArticulatedModelComponent **component = model->GetComponents();
+		for (int i = 0; i < n; ++i, ++component)
+		{
+			SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(), 
+										m_instanceparams, (*component)->GetPosition());
+		}
+	}
+	else
+	{
+		if (object->Highlight.IsActive())
+		{
+			m_instanceparams = object->Highlight.GetColour();
+
+			// Submit each component for rendering in turn
+			ArticulatedModelComponent **component = model->GetComponents();
+			for (int i = 0; i < n; ++i, ++component)
+			{
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams);
+			}
+		}
+		else
+		{
+			// Submit each component for rendering in turn
+			ArticulatedModelComponent **component = model->GetComponents();
+			for (int i = 0; i < n; ++i, ++component)
+			{
+				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix());
+			}
+		}
+	}
+}
+
 // Renders all objects in the specified system, based on simulation state and visibility testing
 void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
 {
@@ -1336,41 +1447,12 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 // Render a complex ship section to the space environment, as part of the rendering of the complex ship itself
 void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec)
 {
-	// Make sure this is a valid section and that it has a model for rendering
-	if (!sec || !sec->GetModel()) return;
-
 	// Render the exterior of the ship, unless we have the relevant render flag set
 	if (!m_renderflags[CoreEngine::RenderFlag::DisableHullRendering])
-	{	
-		// We are rendering this object, so call its pre-render update method
-		sec->PerformRenderUpdate();
-
-		// Add this ship to the render queue for the relevant shader, for either normal or z-sorted processing
-		if (sec->Fade.AlphaIsActive())
-		{
-			// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-			m_instanceparams.x = sec->Fade.GetFadeAlpha();
-			if (m_instanceparams.x < Game::C_EPSILON) return;
-
-			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, sec->GetModel(), sec->GetWorldMatrix(), 
-									  m_instanceparams, sec->GetPosition());
-		}
-		else
-		{
-			if (sec->Highlight.IsActive())
-			{
-				m_instanceparams = sec->Highlight.GetColour();
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, sec->GetModel(), sec->GetWorldMatrix(), m_instanceparams);
-			}
-			else
-			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, sec->GetModel(), sec->GetWorldMatrix());
-			}
-		}
+	{
+		// Simply pass control to the main object rendering method
+		RenderObject(sec);
 	}
-
-	// Mark the section to indicate that it is visible
-	sec->MarkAsVisible();
 
 	// Increment the render count
 	++m_renderinfo.ComplexShipSectionRenderCount;
@@ -1648,39 +1730,8 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 // Render a simple ship to the space environment
 RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 {
-	// Make sure the ship exists and has a model we can render
-	if (!s || !s->GetModel()) return;
-
-	// Test whether this ship is within the viewing frustrum; if not, no need to render it
-	if (!m_frustrum->TestObjectVisibility(s)) return;
-
-	// Mark the object as visible
-	s->MarkAsVisible();
-
-	// We are rendering this object, so call its pre-render update method
-	s->PerformRenderUpdate();
-
-	// Add this ship to the render queue for the relevant shader
-	if (s->Fade.AlphaIsActive())
-	{
-		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		m_instanceparams.x = s->Fade.GetFadeAlpha();
-		if (m_instanceparams.x < Game::C_EPSILON) return;
-
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams, s->GetPosition());
-	}
-	else
-	{
-		if (s->Highlight.IsActive())
-		{
-			m_instanceparams = s->Highlight.GetColour();
-			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, s->GetModel(), s->GetWorldMatrix(), m_instanceparams);
-		}
-		else
-		{
-			SubmitForRendering(RenderQueueShader::RM_LightShader, s->GetModel(), s->GetWorldMatrix());
-		}
-	}
+	// Simply pass control to the main object rendering method
+	RenderObject(s);
 
 	// Increment the render count
 	++m_renderinfo.ShipRenderCount;
@@ -1690,16 +1741,6 @@ RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 {
 
-}
-
-// Render all components of an articulated model.  
-void CoreEngine::RenderArticulatedModel(const ArticulatedModel *model)
-{
-    // Update all components of the model (TODO: in future, we may be able to skip this where the base model pos/orient
-    // hasn't changed in X updates.  Although need to ensure X>1, since it could take a few frames for all attachments to 
-    // take effect on child components correctly)
-	if (!model) return;
-	
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
