@@ -219,7 +219,7 @@ void SimpleShip::CalculateEngineStatistics()
 void SimpleShip::PerformRenderUpdate(void)
 {
 	// Update any render effects that may be active on the object
-	Fade.Update();
+	if (Fade.IsActive()) Fade.Update();
 }
 
 

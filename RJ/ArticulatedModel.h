@@ -43,6 +43,28 @@ public:
 	// Initialises the model once all data has been loaded, to make sure it is ready for use in-game
 	void										PerformPostLoadInitialisation(void);
 
+	// Performs an update of all components in the articulated model before rendering
+	void										Update(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
+														const D3DXMATRIX * worldmatrix);
+
+	// Rotates about the specified constraint.  If no constraint is defined at this attachment point (i.e. if this is a 
+	// fixed attachment) no action will be taken
+	void										RotateConstraint(int constraint_index, float radians);
+
+	// Rotates the specified component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
+	// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
+	// then no action will be taken
+	void										RotateComponent(int component_index, float radians);
+
+	// Sets the rotation value about the specified constraint.  If no constraint is defined at this attachment point (i.e. if this is a 
+	// fixed attachment) no action will be taken
+	void										SetConstraintRotation(int constraint_index, float radians);
+
+	// Sets the rotation of this component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
+	// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
+	// then no action will be taken
+	void										SetComponentRotation(int component_index, float radians);
+
 	// Destructor; deallocates all resources used by the articulated model
 	~ArticulatedModel(void);
 

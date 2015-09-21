@@ -187,6 +187,79 @@ void ArticulatedModel::PerformPostLoadInitialisation(void)
 	}
 }
 
+// Performs an update of all components in the articulated model before rendering
+void ArticulatedModel::Update(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
+								const D3DXMATRIX * worldmatrix)
+{
+	// Update the root component with this data
+	m_components[m_rootcomponent]->SetAllSpatialData(position, orientation, worldmatrix);
+
+	// Now apply all attachments; no need to apply in sequence, the components will resolve any timing
+	// differences within a couple of frames.  NOTE: there will be no timing differences if attachment
+	// order is specified correctly in xml data (i.e. from root to children)
+	for (int i = 0; i < m_attachcount; ++i)
+	{
+		m_attachments[i].Apply();
+	}
+}
+
+// Rotates about the specified constraint.  If no constraint is defined at this attachment point (i.e. if this is a 
+// fixed attachment) no action will be taken
+void ArticulatedModel::RotateConstraint(int constraint_index, float radians)
+{
+	// Make sure the constraint is valid
+	if (constraint_index < 0 || constraint_index >= m_attachcount) return;
+
+	// Update the constraint
+	m_attachments[constraint_index].RotateChildAboutConstraint(radians);
+}
+
+// Rotates the specified component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
+// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
+// then no action will be taken
+void ArticulatedModel::RotateComponent(int component_index, float radians)
+{
+	// Find the attachment that influences this component (no need to validate component index; if invalid, we won't find an attachment).  Start at 1
+	// and move += 2 each time to only check child indices.  (i-1) is therefore always even and ((i-1)/2) always give the correct attachment index
+	for (int i = 1; i < m_attachcount; i += 2)
+	{
+		if (m_attachment_indices[i] == component_index)
+		{
+			m_attachments[(i - 1) / 2].RotateChildAboutConstraint(radians);
+			break;
+		}
+	}
+}
+
+// Sets the rotation value about the specified constraint.  If no constraint is defined at this attachment point (i.e. if this is a 
+// fixed attachment) no action will be taken
+void ArticulatedModel::SetConstraintRotation(int constraint_index, float radians)
+{
+	// Make sure the constraint is valid
+	if (constraint_index < 0 || constraint_index >= m_attachcount) return;
+
+	// Update the constraint
+	m_attachments[constraint_index].SetChildRotationAboutConstraint(radians);
+}
+
+// Sets the rotation of this component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
+// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
+// then no action will be taken
+void ArticulatedModel::SetComponentRotation(int component_index, float radians)
+{
+	// Find the attachment that influences this component (no need to validate component index; if invalid, we won't find an attachment).  Start at 1
+	// and move += 2 each time to only check child indices.  (i-1) is therefore always even and ((i-1)/2) always give the correct attachment index
+	for (int i = 1; i < m_attachcount; i += 2)
+	{
+		if (m_attachment_indices[i] == component_index)
+		{
+			m_attachments[(i - 1) / 2].SetChildRotationAboutConstraint(radians);
+			break;
+		}
+	}
+}
+
+
 // Creates and returns an exact copy of the specified articualated model
 ArticulatedModel * ArticulatedModel::Copy(void)
 {

@@ -1924,7 +1924,6 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
 	}
 
-
 	/* Constraint testing */
 	D3DXVECTOR3 move = NULL_VECTOR;
 	const float amt = (Game::TimeFactor * 25.0f);

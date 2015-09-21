@@ -42,6 +42,7 @@
 #include "SystemRegion.h"
 #include "UserInterface.h"
 #include "SkinnedModel.h"
+#include "ArticulatedModel.h"
 #include "StaticTerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
@@ -1689,6 +1690,16 @@ RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 {
 
+}
+
+// Render all components of an articulated model.  
+void CoreEngine::RenderArticulatedModel(const ArticulatedModel *model)
+{
+    // Update all components of the model (TODO: in future, we may be able to skip this where the base model pos/orient
+    // hasn't changed in X updates.  Although need to ensure X>1, since it could take a few frames for all attachments to 
+    // take effect on child components correctly)
+	if (!model) return;
+	
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

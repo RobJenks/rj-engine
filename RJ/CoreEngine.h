@@ -38,6 +38,7 @@ class ComplexShipTile;
 class ParticleEngine;
 class Render2DManager;
 class SkinnedModelInstance;
+class ArticulatedModel;
 class OverlayRenderer;
 struct GameConsoleCommand;
 
@@ -159,6 +160,9 @@ public:
 
 	// Rendering methods for skinned models
 	void					RenderSkinnedModelInstance(SkinnedModelInstance &model);
+
+    // Update and render all components of an articulated model
+	void                    RenderArticulatedModel(const ArticulatedModel *model);
 
 	// User interface, text and all other 2D rendering functions
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_UI, 

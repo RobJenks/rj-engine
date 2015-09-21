@@ -41,10 +41,10 @@ public:
 	// Update method, called each frame (or less frequently if object is not visible; will still work).  Updates the fade effect if it is active
 	CMPINLINE void Update(void)
 	{
-		// If the fade effect is not active then we can quit immediately 
+        // This method should only be called where m_active == true; safety check here
 		if (!m_active) return;
 
-		// Otherwise update progress through the fade effect.  If we are done then end the effect
+		// Update progress through the fade effect.  If we are done then end the effect
 		if (Game::ClockMs >= m_effectend)
 		{
 			// Set alpha to the target end value and deactivate the effect

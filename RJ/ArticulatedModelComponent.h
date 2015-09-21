@@ -31,6 +31,15 @@ public:
 	CMPINLINE void						SetWorldMatrix(const D3DXMATRIX &m)				{ m_worldmatrix = m; }
 	CMPINLINE void						SetWorldMatrix(D3DXMATRIX *m)					{ m_worldmatrix = *m; }
 
+	// Set all spatial components at once, to reduce method calls when all information is known
+	CMPINLINE void						SetAllSpatialData(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
+															const D3DXMATRIX * worldmatrix)
+	{
+		m_position = position;
+		m_orientation = orientation;
+		m_worldmatrix = (*worldmatrix);
+	}
+
 	// Performs an immediate recalculation of the world transform for this component
 	void 								RefreshPositionImmediate(void);
 
