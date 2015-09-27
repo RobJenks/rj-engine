@@ -39,6 +39,9 @@ Ship::Ship(void)
 	// Link the hardpoints collection to this parent object
 	m_hardpoints.SetParent<Ship>(this);
 
+	// Notify the turret controller of its parent object
+	TurretController.SetParent(this);
+
 	this->m_thrustchange_flag = true;		// Force an initial refresh
 	this->m_masschange_flag = true;			// Force an initial refresh
 
@@ -69,6 +72,10 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	// Copy the ship hardpoints and link them to this ship
 	m_hardpoints.Clone(source->GetHardpoints());
 	m_hardpoints.SetParent<Ship>(this);
+
+	// Initialise the turret controller, removing all turrets, and link them to this ship
+	TurretController.ForceClearContents();		// To avoid turret parent pointers being reset by a RemoveAll...() call
+	TurretController.SetParent(this);
 
 	// Update any other fields that should not be replicated through the standard copy constructor
 	CancelAllOrders();
@@ -402,6 +409,9 @@ void Ship::SimulateObject(void)
 		// Set the update flag to indicate that this object has now been simulated
 		SetPositionUpdated(true);
 	}
+	
+	// Simulate all ship turrets if applicable (TODO: need to pass contacts array)
+	if (TurretController.IsActive()) TurretController.Update(std::vector<iSpaceObject*>());
 
 	// Update position of the ship in the spatial partitioning tree
 	if (m_treenode) m_treenode->ItemMoved(this, m_position);

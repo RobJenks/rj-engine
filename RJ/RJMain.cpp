@@ -77,7 +77,8 @@
 #include "SpaceProjectileLauncher.h"		// DBG
 #include "Attachment.h"						// DBG
 #include "ArticulatedModel.h"				// DBG
-#include "SpaceTurret.h"
+#include "SpaceTurret.h"					// DBG
+#include "TurretController.h"				// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -482,7 +483,7 @@ void RJMain::ProcessKeyboardInput(void)
 		std::vector<iSpaceObject*> contacts;
 		contacts.push_back(s2);
 
-		iSpaceObject *tgt = turret->FindNewTarget(contacts);
+		//iSpaceObject *tgt = turret->FindNewTarget(contacts);
 
 		m_keyboard.LockKey(DIK_5);
 	}
@@ -1821,7 +1822,7 @@ void RJMain::__CreateDebugScenario(void)
 	def->SetMass(25000.0f);
 	def->SetDefaultLifetime(3.0f);
 
-	turret = new SpaceTurret();
+	/*turret = new SpaceTurret();
 	turret->SetParent(ss);
 	turret->InitialiseLaunchers(1);
 	turret->SetMaxRange(1000.0f);
@@ -1844,12 +1845,21 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetRelativeOrientation(ID_QUATERNION);
 	l->SetProjectileSpin(1.0f);
 	l->SetLinearVelocityDegradeState(false);
-	l->SetAngularVelocityDegradeState(false);
+	l->SetAngularVelocityDegradeState(false);*/
 
 
-	// Test articulated model rendering
-	ss->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic1")->Copy());
-
+	// Turret testing	
+	dbg_turret = new SpaceTurret();
+	dbg_turret->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic1")->Copy());
+	dbg_turret->SetRelativePosition(D3DXVECTOR3(0.0f, 10.0f, -5.0f));
+	dbg_turret->SetBaseRelativeOrientation(ID_QUATERNION);
+	dbg_turret->SetMaxRange(100000.0f);
+	dbg_turret->SetPitchLimits(-999.0f, 999.0f);
+	dbg_turret->SetYawLimitFlag(false);
+	dbg_turret->SetPitchRate(0.25f);
+	dbg_turret->SetYawRate(0.5f);
+	
+	ss->TurretController.AddTurret(dbg_turret);
 
 	/*
 	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
@@ -1972,7 +1982,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	/* End constraint testing*/
 		
-
+	
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{

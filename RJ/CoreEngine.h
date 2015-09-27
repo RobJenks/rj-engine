@@ -39,6 +39,7 @@ class ParticleEngine;
 class Render2DManager;
 class SkinnedModelInstance;
 class ArticulatedModel;
+class TurretController;
 class OverlayRenderer;
 struct GameConsoleCommand;
 
@@ -147,6 +148,9 @@ public:
 	// Methods to render parts of a complex ship
 	void					RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec);
 	void					RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnvironment *environment);
+
+	// Renders a collection of turrets that have already been updated by their turret controller
+	void					RenderTurrets(TurretController & controller);
 
 	// RenderObjectEnvironments(iSpaceObjectEnvironment *environment)
 	// Method to render the interior of an object environment, including any tiles, objects or terrain within it

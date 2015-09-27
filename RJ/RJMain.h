@@ -13,6 +13,7 @@ class SimpleShip;
 class ComplexShip;
 class SpaceProjectile;
 class SpaceTurret;
+class TurretController;
 
 class RJMain
 {
@@ -132,13 +133,15 @@ protected:
 	bool m_debug_ccdspheretest;
 	bool m_debug_ccdobbtest;
 
+
+public:
 	// Debug objects for testing; delete after use
 	SimpleShip *ss, *s2, *s3[3];
 	SimpleShip *sproj;
 	ComplexShip *cs;
 	Actor *a1;
 	SpaceProjectile *proj;
-	SpaceTurret *turret;
+	SpaceTurret *dbg_turret;
 
 };
 

@@ -3,6 +3,7 @@
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
 #include "D3DMain.h"
+#include "RJMain.h"
 #include "Profiler.h"
 #include "CameraClass.h"
 #include "LightShader.h"
@@ -43,6 +44,7 @@
 #include "UserInterface.h"
 #include "SkinnedModel.h"
 #include "ArticulatedModel.h"
+#include "TurretController.h"
 #include "StaticTerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
@@ -1428,6 +1430,9 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 	// We only need to render the ship & its contents if at least one ship section was rendered
 	if (shiprendered)
 	{
+		// Render any turret objects on the exterior of the ship, if applicable
+		if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);
+
 		// Pass control to the environment-rendering logic to render all visible objects within the environment, if applicable.
 		// Criteria are that either (a)it was requested, (b) the ship is or contains a simulation hub, or (c) the flag is set 
 		// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
@@ -1733,9 +1738,112 @@ RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 	// Simply pass control to the main object rendering method
 	RenderObject(s);
 
+	// Render any turret objects on the exterior of the ship, if applicable
+	if (s->TurretController.IsActive()) RenderTurrets(s->TurretController);
+
 	// Increment the render count
 	++m_renderinfo.ShipRenderCount;
 }
+
+// Renders a collection of turrets that have already been updated by their turret controller
+void CoreEngine::RenderTurrets(TurretController & controller)
+{
+	// To store model data during render iterations
+	SpaceTurret *turret;
+	ArticulatedModel *model; int n;
+	ArticulatedModelComponent **component;
+
+	// Account for parent object state when rendering
+	iObject *parent = controller.GetParent(); if (!parent) return;
+	if (parent->Fade.AlphaIsActive())
+	{
+		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
+		m_instanceparams.x = parent->Fade.GetFadeAlpha();
+		if (m_instanceparams.x < Game::C_EPSILON) return;
+
+		// Iterate through each turret in turn
+		TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
+		for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+		{
+			// Get a reference to the model for this turret
+			turret = (*it);
+			model = turret->GetArticulatedModel(); if (!model) continue; 
+			n = model->GetComponentCount();
+
+			// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+			turret->DetermineWorldMatrix();
+
+			// Update the position of all model components before rendering
+			model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+			// Submit each component for rendering in turn
+			component = model->GetComponents();
+			for (int i = 0; i < n; ++i, ++component)
+			{
+				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(),
+					m_instanceparams, (*component)->GetPosition());
+			}
+		}
+	}
+	else
+	{
+		if (parent->Highlight.IsActive())
+		{
+			m_instanceparams = parent->Highlight.GetColour();
+
+			// Iterate through each turret in turn
+			TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
+			for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+			{
+				// Get a reference to the model for this turret
+				turret = (*it);
+				model = turret->GetArticulatedModel(); if (!model) continue;
+				n = model->GetComponentCount();
+
+				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+				turret->DetermineWorldMatrix();
+
+				// Update the position of all model components before rendering
+				model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+				// Submit each component for rendering in turn
+				component = model->GetComponents();
+				for (int i = 0; i < n; ++i, ++component)
+				{
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams);
+				}
+			}
+		}
+		else
+		{
+			// Iterate through each turret in turn
+			TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
+			for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+			{
+				// Get a reference to the model for this turret
+				turret = (*it);
+				model = turret->GetArticulatedModel(); if (!model) continue;
+				n = model->GetComponentCount();
+
+				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+				turret->DetermineWorldMatrix();
+
+				// Update the position of all model components before rendering
+				model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+				// Submit each component for rendering in turn
+				component = model->GetComponents();
+				for (int i = 0; i < n; ++i, ++component)
+				{
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix());
+				}
+			}
+		}
+	}
+}
+
+
+
 
 // Rendering method for skinned models
 void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
@@ -1919,7 +2027,6 @@ void CoreEngine::RenderDebugData(void)
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTree]) DebugRenderSpatialPartitioningTree();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderOBBs]) DebugRenderSpaceCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTerrainBoxes]) DebugRenderEnvironmentCollisionBoxes();
-
 }
 
 void CoreEngine::DebugRenderSpatialPartitioningTree(void)

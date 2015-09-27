@@ -146,8 +146,8 @@ public:
 
 
 	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
-	CMPINLINE D3DXMATRIX *					GetOrientationMatrix(void)			{ return &m_orientationmatrix; }
-	CMPINLINE D3DXMATRIX *					GetInverseOrientationMatrix(void)	{ return &m_inverseorientationmatrix; }
+	CMPINLINE const D3DXMATRIX *			GetOrientationMatrix(void) const		{ return &m_orientationmatrix; }
+	CMPINLINE const D3DXMATRIX *			GetInverseOrientationMatrix(void) const	{ return &m_inverseorientationmatrix; }
 
 	// The world matrix of this object
 	CMPINLINE D3DXMATRIX *					GetWorldMatrix(void)				{ return &m_worldmatrix; }

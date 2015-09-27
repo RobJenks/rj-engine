@@ -7,6 +7,7 @@
 #include <time.h>
 #include <random>
 #include "GameVarsExtern.h"
+#include "iObject.h"
 
 #include "FastMath.h"
 
@@ -214,6 +215,130 @@ float fast_approx_invsqrt(float number)
 	//  y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
 
 	return y;
+}
+
+// Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
+// test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
+void DetermineYawAndPitchToTarget(const iObject *object, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+{
+	// Parameter check
+	if (!object) { outYaw = 0.0f; outPitch = 0.0f; return; }
+
+	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
+	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
+	D3DXVECTOR3 tgt = (target - object->GetPosition());
+	D3DXVec3TransformCoord(&tgt, &tgt, object->GetInverseOrientationMatrix());
+	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+
+	// Calculate the cross and dot products for ship yaw
+	/*
+	heading = BASIS_VECTOR;
+	tgt = (s2->Location - ss->Location);	// (tgt is then transformed by the inverse ship orientation matrix)
+
+	Optimisation: we know heading = the basis vector, so can substitute components for 0,0,1 and simplify accordingly
+	ycross = (heading.z*tgt.x) - (heading.x*tgt.z);		= (1*tgt.x) - (0*tgt.z)		= tgt.x
+	ydot = (heading.z*tgt.z) + (heading.x*tgt.x);		= (1*tgt.z) + (0*tgt.x)		= tgt.z
+	pcross = (heading.y*tgt.z) - (heading.z*tgt.y);		= (0*tgt.z) - (1*tgt.y)		= -tgt.y
+	pdot = (heading.x*tgt.x) + (heading.z*tgt.z);		= (0*tgt.x) + (1*tgt.z)		= tgt.z
+
+	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
+	*/
+
+	// Determine yaw value depending on the current angle to target
+	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+	}
+
+	// Now determine pitch value, also based on the current angle to target
+	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+	}
+}
+
+// Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
+// test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
+void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXQUATERNION & invOrientation, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+{
+	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
+	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
+	D3DXVECTOR3 tgt = (target - position);
+	D3DXVec3Rotate(&tgt, &tgt, &invOrientation);
+	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+
+	// Calculate the cross and dot products for ship yaw
+	/*
+	heading = BASIS_VECTOR;
+	tgt = (s2->Location - ss->Location);	// (tgt is then transformed by the inverse ship orientation matrix)
+
+	Optimisation: we know heading = the basis vector, so can substitute components for 0,0,1 and simplify accordingly
+	ycross = (heading.z*tgt.x) - (heading.x*tgt.z);		= (1*tgt.x) - (0*tgt.z)		= tgt.x
+	ydot = (heading.z*tgt.z) + (heading.x*tgt.x);		= (1*tgt.z) + (0*tgt.x)		= tgt.z
+	pcross = (heading.y*tgt.z) - (heading.z*tgt.y);		= (0*tgt.z) - (1*tgt.y)		= -tgt.y
+	pdot = (heading.x*tgt.x) + (heading.z*tgt.z);		= (0*tgt.x) + (1*tgt.z)		= tgt.z
+
+	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
+	*/
+
+	// Determine yaw value depending on the current angle to target
+	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+	}
+
+	// Now determine pitch value, also based on the current angle to target
+	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+	}
+}
+
+
+// Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
+// test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
+void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXMATRIX *invOrientMatrix, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+{
+	// Parameter check
+	if (!invOrientMatrix) { outYaw = 0.0f; outPitch = 0.0f; return; }
+
+	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
+	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
+	D3DXVECTOR3 tgt = (target - position);
+	D3DXVec3TransformCoord(&tgt, &tgt, invOrientMatrix);
+	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+
+	// Calculate the cross and dot products for ship yaw
+	/*
+	heading = BASIS_VECTOR;
+	tgt = (s2->Location - ss->Location);	// (tgt is then transformed by the inverse ship orientation matrix)
+
+	Optimisation: we know heading = the basis vector, so can substitute components for 0,0,1 and simplify accordingly
+	ycross = (heading.z*tgt.x) - (heading.x*tgt.z);		= (1*tgt.x) - (0*tgt.z)		= tgt.x
+	ydot = (heading.z*tgt.z) + (heading.x*tgt.x);		= (1*tgt.z) + (0*tgt.x)		= tgt.z
+	pcross = (heading.y*tgt.z) - (heading.z*tgt.y);		= (0*tgt.z) - (1*tgt.y)		= -tgt.y
+	pdot = (heading.x*tgt.x) + (heading.z*tgt.z);		= (0*tgt.x) + (1*tgt.z)		= tgt.z
+
+	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
+	*/
+
+	// Determine yaw value depending on the current angle to target
+	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+	}
+
+	// Now determine pitch value, also based on the current angle to target
+	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	else {
+		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+	}
 }
 
 

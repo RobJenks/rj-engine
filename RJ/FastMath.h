@@ -392,10 +392,11 @@ CMPINLINE float GetElementBoundingSphereRadius(int n_elements)
 	return ((n_elements >= 0 && n_elements <= ELEMENT_BOUND_CACHE_SIZE) ? element_bound_cache[n_elements] : DetermineElementBoundingSphereRadius(n_elements));
 }
 
-
-
-
-
+// Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
+// test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
+void DetermineYawAndPitchToTarget(const iObject *object, const D3DXVECTOR3 & target, float & outYaw, float & outPitch);
+void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXQUATERNION & invOrientation, const D3DXVECTOR3 & target, float & outYaw, float & outPitch);
+void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXMATRIX *invOrientMatrix, const D3DXVECTOR3 & target, float & outYaw, float & outPitch);
 
 
 

@@ -166,6 +166,7 @@
     <ClCompile Include="iActorObject.cpp" />
     <ClCompile Include="iConsumesOrders.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
+    <ClCompile Include="iContainsTurrets.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
     <ClCompile Include="iEnvironmentObject.cpp" />
@@ -187,6 +188,7 @@
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
     <ClCompile Include="SpaceProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
+    <ClCompile Include="TurretController.cpp" />
     <ClCompile Include="UI_Console.cpp" />
     <ClCompile Include="UI_ModelBuilder.cpp" />
     <ClCompile Include="RJMain.cpp" />
@@ -356,6 +358,7 @@
     <ClInclude Include="iActiveObject.h" />
     <ClInclude Include="iActorObject.h" />
     <ClInclude Include="iConsumesOrders.h" />
+    <ClInclude Include="iContainsTurrets.h" />
     <ClInclude Include="iSpaceObjectEnvironment.h" />
     <ClInclude Include="iContainsComplexShipTiles.h" />
     <ClInclude Include="iContainsHardpoints.h" />
@@ -380,6 +383,7 @@
     <ClInclude Include="SpaceProjectileDefinition.h" />
     <ClInclude Include="SpaceProjectileLauncher.h" />
     <ClInclude Include="SpaceTurret.h" />
+    <ClInclude Include="TurretController.h" />
     <ClInclude Include="UI_Console.h" />
     <ClInclude Include="UI_ModelBuilder.h" />
     <ClInclude Include="RJMain.h" />

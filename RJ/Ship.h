@@ -11,6 +11,7 @@
 #include "iSpaceObject.h"
 #include "iConsumesOrders.h"
 #include "iContainsHardpoints.h"
+#include "iContainsTurrets.h"
 #include "Equip.h"
 #include <vector>
 class Hardpoint;
@@ -28,7 +29,7 @@ public:
 };
 
 // Main ship class
-class Ship : public iSpaceObject, public iConsumesOrders, public iContainsHardpoints
+class Ship : public iSpaceObject, public iConsumesOrders, public iContainsHardpoints, public iContainsTurrets
 {
 public:
 
@@ -39,7 +40,7 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(Ship *source);		
+	void								InitialiseCopiedObject(Ship *source);		
 
 	// Default loadout is specified by its string code
 	CMPINLINE std::string	GetDefaultLoadout(void) const					{ return m_defaultloadout; }

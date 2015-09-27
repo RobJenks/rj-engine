@@ -217,9 +217,6 @@
     <ClCompile Include="iConsumesOrders.cpp">
       <Filter>Orders</Filter>
     </ClCompile>
-    <ClCompile Include="iContainsComplexShipTiles.cpp">
-      <Filter>Objects\Ships\Tiles</Filter>
-    </ClCompile>
     <ClCompile Include="iActorObject.cpp">
       <Filter>Objects\Actors</Filter>
     </ClCompile>
@@ -478,9 +475,6 @@
     <ClCompile Include="FactionManagerObject.cpp">
       <Filter>Factions</Filter>
     </ClCompile>
-    <ClCompile Include="iContainsHardpoints.cpp">
-      <Filter>Equipment\Hardpoints</Filter>
-    </ClCompile>
     <ClCompile Include="Attachment.cpp">
       <Filter>Objects\Attachments</Filter>
     </ClCompile>
@@ -495,6 +489,18 @@
     </ClCompile>
     <ClCompile Include="ArticulatedModelComponent.cpp">
       <Filter>Engine\Models\Articulated model</Filter>
+    </ClCompile>
+    <ClCompile Include="TurretController.cpp">
+      <Filter>Objects\Ships\Turrets</Filter>
+    </ClCompile>
+    <ClCompile Include="iContainsComplexShipTiles.cpp">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="iContainsHardpoints.cpp">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="iContainsTurrets.cpp">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -750,14 +756,8 @@
     <ClInclude Include="iConsumesOrders.h">
       <Filter>Orders</Filter>
     </ClInclude>
-    <ClInclude Include="iContainsComplexShipTiles.h">
-      <Filter>Objects\Ships\Tiles</Filter>
-    </ClInclude>
     <ClInclude Include="iActorObject.h">
       <Filter>Objects\Actors</Filter>
-    </ClInclude>
-    <ClInclude Include="iContainsHardpoints.h">
-      <Filter>Equipment\Hardpoints</Filter>
     </ClInclude>
     <ClInclude Include="iLoadoutMap.h">
       <Filter>Equipment\Loadouts</Filter>
@@ -1107,6 +1107,18 @@
     <ClInclude Include="ArticulatedModelComponent.h">
       <Filter>Engine\Models\Articulated model</Filter>
     </ClInclude>
+    <ClInclude Include="TurretController.h">
+      <Filter>Objects\Ships\Turrets</Filter>
+    </ClInclude>
+    <ClInclude Include="iContainsComplexShipTiles.h">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="iContainsHardpoints.h">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="iContainsTurrets.h">
+      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1338,6 +1350,9 @@
     </Filter>
     <Filter Include="Engine\Models\Articulated model">
       <UniqueIdentifier>{c87ceaca-0dd5-463b-8ae3-157dcaea2b69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Object Hierarchy\Interfaces">
+      <UniqueIdentifier>{bffd2c32-7982-4134-970f-efc85c02c52a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

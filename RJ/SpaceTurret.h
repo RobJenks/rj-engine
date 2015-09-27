@@ -20,7 +20,10 @@ public:
 	// efficiency when processing multiple turrets per object.  Array should be filtered by the parent
 	// before passing it, and also sorted to prioritise targets if required.  Turret will select the first 
 	// target in the vector that it can engage
-	void							Update(std::vector<iSpaceObject*> enemy_contacts);
+	void							Update(std::vector<iSpaceObject*> & enemy_contacts);
+
+	// Analyse all potential targets in the area and change target if necessary/preferred
+	void							EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts);
 
 	// Fires a projectile from the turret
 	void							Fire(void);
@@ -28,6 +31,10 @@ public:
 	// Gets/sets the parent object to this turret
 	CMPINLINE iSpaceObject *		GetParent(void) const									{ return m_parent; }
 	void							SetParent(iSpaceObject *parent);
+
+	// Retrieve or return a pointer to the articulated model for this turret
+	CMPINLINE ArticulatedModel *	GetArticulatedModel(void)								{ return m_articulatedmodel; }
+	CMPINLINE void					SetArticulatedModel(ArticulatedModel *model)			{ m_articulatedmodel = model; }
 
 	// Gets/sets the relative position of the turret on its parent object
 	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
@@ -92,11 +99,7 @@ public:
 	void							InitialiseLaunchers(int launcher_count);
 
 	// Retrieve a reference to one of the launchers within the turrent
-	SpaceProjectileLauncher *		GetLauncher(int index)
-	{
-		if (index < 0 || index > m_launcherubound)	return NULL;
-		else										return &(m_launchers[index]);
-	}
+	SpaceProjectileLauncher *		GetLauncher(int index);
 
 	// Returns the number of launchers maintained within this turrent
 	int								GetLauncherCount(void) const		{ return m_launchercount; }
@@ -106,10 +109,19 @@ public:
 	{
 		// Derive a new relative world matrix from the turret position & orientation
 		D3DXMATRIX trans, rot;
-		D3DXMatrixRotationQuaternion(&rot, &m_relativeorient);
-		D3DXMatrixTranslation(&trans, m_relativepos.x, m_relativepos.y, m_relativepos.z);
+		D3DXMatrixRotationQuaternion(&rot, &m_orientation);
+		D3DXMatrixTranslation(&trans, m_position.x, m_position.y, m_position.z);
 		m_worldmatrix = (rot * trans);
 	}
+
+	// Perform an update of the turret position and orientation in world space
+	void							UpdatePositioning(void);
+
+	// Retrieve the absolute spatial data for this turret, derived during update method
+	CMPINLINE D3DXVECTOR3			GetPosition(void) const				{ return m_position; }
+	CMPINLINE D3DXQUATERNION		GetOrientation(void) const			{ return m_orientation; }
+	CMPINLINE D3DXQUATERNION		GetInverseOrientation(void) const	{ return m_invorient; }
+	CMPINLINE const D3DXMATRIX *	GetWorldMatrix(void) const			{ return &m_worldmatrix; }
 
 	// Shut down the turret object, deallocating all resources
 	void							Shutdown(void);
@@ -119,6 +131,9 @@ protected:
 
 	// Parent object that this turret is attached to
 	iSpaceObject *					m_parent;
+
+	// Articulated model for this turret
+	ArticulatedModel *				m_articulatedmodel;
 
 	// Array of projectile launchers attached to this turret
 	SpaceProjectileLauncher *		m_launchers;				// Array of launcher objects arrached to the turret
@@ -143,7 +158,11 @@ protected:
 	D3DXQUATERNION					m_baserelativeorient;
 	D3DXQUATERNION					m_relativeorient;
 
-	// Pitch and yaw of the turret, and resulting relative relative orientation
+	// Store world position, orientation and inverse orientation.  Derived during update by turret controller
+	D3DXVECTOR3						m_position;
+	D3DXQUATERNION					m_orientation, m_invorient;
+
+	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;
 
 	// Object world matrix, relative to its parent object
@@ -153,7 +172,8 @@ protected:
 	float							m_yawrate, m_pitchrate;							// Rad/sec
 	bool							m_yaw_limited;									// Flag indicating whether the turret has yaw extents, or can rotate 360-deg
 	float							m_yawmin, m_yawmax;								// Min/max yaw extents, radians.  Only required if m_yaw_limited == true
-	float							m_pitchmin, m_pitchmax;							// Min/max pitch extents, radians
+																					// Specified in the range [0 2PI]
+	float							m_pitchmin, m_pitchmax;							// Min/max pitch extents, radians.  Specified in the range [0 2PI]
 
 	// Turret maintains two unit circle arcs, in the yaw & pitch dimensions, to represent its firing cone
 	FiringArc						m_yaw_arc, m_pitch_arc;

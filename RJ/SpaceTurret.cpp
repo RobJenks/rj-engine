@@ -18,6 +18,8 @@ SpaceTurret::SpaceTurret(void)
 	m_target = m_designatedtarget = NULL;
 	m_relativepos = NULL_VECTOR;
 	m_baserelativeorient = m_relativeorient = ID_QUATERNION;
+	m_position = NULL_VECTOR;
+	m_orientation = m_invorient = ID_QUATERNION;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;
@@ -29,57 +31,85 @@ SpaceTurret::SpaceTurret(void)
 	m_nexttargetanalysis = 0U;
 }
 
-// Primary simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
+// Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
 // a reference to an array of contacts in the immediate area; this cached array is used for greater
 // efficiency when processing multiple turrets per object
-void SpaceTurret::Update(std::vector<iSpaceObject*> enemy_contacts)
+void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 {
+	// Update the turret position and orientation based on its parent
+	UpdatePositioning();
+
 	// We will re-evaluate targets on a less frequent basis; check if we are ready to do so now
 	if (Game::ClockMs >= m_nexttargetanalysis)
 	{
 		// Update the counter to prepare for the next analysis cycle
 		m_nexttargetanalysis = (Game::ClockMs + TARGET_ANALYSIS_INTERVAL);
 
-		// If our current target is null we want to check for new available targets
-		if (m_target == NULL)
+		// Evaluate all available targets and select one if possible and desirable
+		EvaluateTargets(enemy_contacts);			
+	}
+
+	// Track towards the target if we have one, and if needed
+	if (m_target)
+	{
+		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
+		float yaw, pitch;
+		DetermineYawAndPitchToTarget(m_position, m_invorient, m_target->GetPosition(), yaw, pitch);
+
+		// Attempt to yaw and pitch to keep the target in view
+		Yaw(yaw * m_yawrate * Game::TimeFactor);
+		Pitch(pitch * m_pitchrate * Game::TimeFactor);
+	}
+}
+
+// Analyse all potential targets in the area and change target if necessary/preferred
+void SpaceTurret::EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts)
+{
+	// If there are no enemy contacts nearby then we know that no target can be possible
+	if (enemy_contacts.size() == 0)
+	{
+		m_target = NULL;
+		return;
+	}
+
+	// If our current target is null we want to check for new available targets
+	if (m_target == NULL)
+	{
+		// If we have been designated a target then attempt to focus on it now
+		if (m_designatedtarget != NULL)
 		{
-			// If we have been designated a target then attempt to focus on it now
-			if (m_designatedtarget != NULL)
-			{
-				// Only switch to this designated target if we are in range and have line-of-sight
-				if (CanHitTarget(m_designatedtarget))
-				{
-					SetTarget(m_designatedtarget);
-				}
-				else
-				{
-					// We want to find a new target
-					SetTarget(FindNewTarget(enemy_contacts));
-				}
-			}
-			else
-			{
-				// We do not have a designated target, so locate one within the array of contacts
-				SetTarget(FindNewTarget(enemy_contacts));
-			}
-		}
-		else
-		{
-			// We have a target; however, if we can instead engage our designated target (if applicable) then choose it preferentially
-			if (m_designatedtarget != NULL && CanHitTarget(m_designatedtarget))
+			// Only switch to this designated target if we are in range and have line-of-sight
+			if (CanHitTarget(m_designatedtarget))
 			{
 				SetTarget(m_designatedtarget);
 			}
 			else
 			{
-				// Otherwise, test to make sure we can still hit our current target, and select a new one if we cannot
-				if (!CanHitTarget(m_target))
-				{
-					SetTarget(FindNewTarget(enemy_contacts));
-				}
+				// We want to find a new target
+				SetTarget(FindNewTarget(enemy_contacts));
 			}
 		}
-			
+		else
+		{
+			// We do not have a designated target, so locate one within the array of contacts
+			SetTarget(FindNewTarget(enemy_contacts));
+		}
+	}
+	else	/* if m_target != NULL */
+	{
+		// We have a target; however, if we can instead engage our designated target (if applicable) then choose it preferentially
+		if (m_designatedtarget != NULL && CanHitTarget(m_designatedtarget))
+		{
+			SetTarget(m_designatedtarget);
+		}
+		else
+		{
+			// Otherwise, test to make sure we can still hit our current target, and select a new one if we cannot
+			if (!CanHitTarget(m_target))
+			{
+				SetTarget(FindNewTarget(enemy_contacts));
+			}
+		}
 	}
 }
 
@@ -121,12 +151,25 @@ void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
 	m_baserelativeorient = orient;
 }
 
-// Yaws the turret by the specified angle.  Does not check the yaw limits; this is the responsibility
-// of the calling function
+// Yaws the turret by the specified angle
 void SpaceTurret::Yaw(float angle)
 {
+	// Determine the new yaw value that would result
+	float yaw = fmod((m_yaw + angle), TWOPI);
+
+	// If this turret has a yaw limit, validate that we are allowed to execute the move
+	if (m_yaw_limited)
+	{
+		// Limit to the yaw bounds
+		if		(yaw < m_yawmin)	yaw = m_yawmin;
+		else if (yaw > m_yawmax)	yaw = m_yawmax;
+		
+		// Early-exit if this means we can't make any further movement
+		if (fabs(m_yaw - yaw) < Game::C_EPSILON) return;
+	}
+
 	// Update the yaw value
-	m_yaw += angle;
+	m_yaw = yaw;
 	
 	// Update the orientation of the turret
 	D3DXQUATERNION delta;
@@ -134,12 +177,21 @@ void SpaceTurret::Yaw(float angle)
 	m_relativeorient = (m_baserelativeorient * delta);
 }
 
-// Pitches the turret by the specified angle.  Does not check the pitch limits; this is the responsibility
-// of the calling function
+// Pitches the turret by the specified angle
 void SpaceTurret::Pitch(float angle)
 {
-	// Update the pitch value
-	m_pitch += angle;
+	// Determine the new pitch value that would result
+	float pitch = fmod((m_pitch + angle), TWOPI);
+
+	// Limit to the turrent pitch bounds
+	if		(pitch < m_pitchmin)	pitch = m_pitchmin;
+	else if (pitch > m_pitchmax)	pitch = m_pitchmax;
+
+	// Early-exit if this means we can't make any further movement
+	if (fabs(m_pitch - pitch) < Game::C_EPSILON) return;
+	
+	// Update the yaw value
+	m_pitch = pitch;
 
 	// Update the orientation of the turret
 	D3DXQUATERNION delta;
@@ -201,24 +253,26 @@ void SpaceTurret::DesignateTarget(iSpaceObject *target)
 	m_designatedtarget = target;
 }
 
-// Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 
-// test range since turrets should only be passed potential targets that are within their range
-bool SpaceTurret::CanHitTarget(iSpaceObject *target)
+// Perform an update of the turret position and orientation in world space
+void SpaceTurret::UpdatePositioning(void)
 {
-	// Get turret position in world space 
-	D3DXVECTOR3 pos;
-	D3DXVec3Rotate(&pos, &m_relativepos, &m_parent->GetOrientation());
-	pos += m_parent->GetPosition();
+	// Determine turret position in world space 
+	D3DXVec3Rotate(&m_position, &m_relativepos, &m_parent->GetOrientation());
+	m_position += m_parent->GetPosition();
 
 	// Compose our base orientation with the parent object to get the turret resting orientation, 
 	// then derive the inverse
-	D3DXQUATERNION orient, invorient;
-	orient = (m_parent->GetOrientation() * m_baserelativeorient);
-	D3DXQuaternionInverse(&invorient, &orient);
+	m_orientation = (m_parent->GetOrientation() * m_baserelativeorient);
+	D3DXQuaternionInverse(&m_invorient, &m_orientation);
+}
 
-	// Transform the target vector by this inverse orientation to get a target vector in local space
+// Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 
+// test range since turrets should only be passed potential targets that are within their range
+bool SpaceTurret::CanHitTarget(iSpaceObject *target)
+{ 
+	// Transform the target vector by turret inverse orientation to get a target vector in local space
 	D3DXVECTOR3 tgt_local;
-	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - pos), &invorient);
+	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - m_position), &m_invorient);
 
 	// Before testing the firing arcs, make sure this target is actually in range
 	if (D3DXVec3LengthSq(&tgt_local) > m_maxrangesq) return false;
@@ -281,6 +335,13 @@ void SpaceTurret::InitialiseLaunchers(int launcher_count)
 	{
 		m_launchers[i].SetParent(m_parent);
 	}
+}
+
+// Retrieve a reference to one of the launchers within the turrent
+SpaceProjectileLauncher * SpaceTurret::GetLauncher(int index)
+{
+	if (index < 0 || index > m_launcherubound)	return NULL;
+	else										return &(m_launchers[index]);
 }
 
 // Shut down the projectile object, deallocating all resources
