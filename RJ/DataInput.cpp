@@ -177,6 +177,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadStaticTerrainDefinition(child);
 		} else if (name == D::NODE_Faction) {
 			res = IO::Data::LoadFaction(child);
+		} else if (name == D::NODE_Turret) {
+			res = IO::Data::LoadTurret(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -1452,6 +1454,125 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 
 	// Return a reference to the new terrain object
 	return obj;
+}
+
+// Load turret object data from external XML
+Result IO::Data::LoadTurret(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadTurretDataWithInvalidParams;
+
+	// Create a new turret object to store the data
+	SpaceTurret *turret = new SpaceTurret();
+
+	// Parse the contents of this node to populate the tile definition details
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_Code)
+		{
+			val = child->GetText(); StrLowerC(val);
+			turret->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Name)
+		{
+			val = child->GetText();
+			turret->SetName(val);
+		}
+		else if (hash == HashedStrings::H_ArticulatedModel)
+		{
+			val = child->GetText(); StrLowerC(val);
+			turret->SetArticulatedModel(ArticulatedModel::GetModel(val));
+		}
+		else if (hash == HashedStrings::H_Yaw)
+		{
+			// Attempt to pull yaw limit attributes
+			const char *cmin = child->Attribute("min");
+			const char *cmax = child->Attribute("max");
+			if (cmin && cmax)
+			{
+				// We want to limit yaw on this turret (by supplying both required parameters)
+				turret->SetYawLimitFlag(true);
+
+				// Apply the specific values, or keep defaults if not valid
+				float ymin = (float)atof(cmin); float ymax = (float)atof(cmax);
+				if (ymin < ymax)
+				{
+					turret->SetYawLimits(ymin, ymax);
+				}
+			}
+			else
+			{
+				// We do not want to limit yaw on this turret
+				turret->SetYawLimitFlag(false);
+			}
+
+			// We need a yaw rate attribute, or stick with default if not found
+			const char *crate = child->Attribute("rate");
+			if (crate)
+			{
+				float yrate = (float)atof(crate);
+				yrate = min(max(Game::C_EPSILON, yrate), 100.0f);
+				turret->SetYawRate(yrate);
+			}
+		}
+		else if (hash == HashedStrings::H_Pitch)
+		{
+			// Attempt to pull pitch limit attributes; if not specified or not valid we keep defaults (pitch limit is mandatory)
+			const char *cmin = child->Attribute("min");
+			const char *cmax = child->Attribute("max");
+			if (cmin && cmax)
+			{
+				// Apply the specific values, or keep defaults if not valid
+				float pmin = (float)atof(cmin); float pmax = (float)atof(cmax);
+				if (pmin < pmax)
+				{
+					turret->SetPitchLimits(pmin, pmax);
+				}
+			}
+
+			// We need a pitch rate attribute, or stick with default if not found
+			const char *crate = child->Attribute("rate");
+			if (crate)
+			{
+				float prate = (float)atof(crate);
+				prate = min(max(Game::C_EPSILON, prate), 100.0f);
+				turret->SetPitchRate(prate);
+			}
+		}
+		/*else if (hash == HashedStrings::H_Range)	-- REMOVED: RANGE IS DETERMINED BASED ON LAUNCHERS INSTALLED IN THE TURRET --
+		{
+			// Attempt to pull min and max range attributes for the turret
+			int rmin = IO::GetIntegerAttribute(child, "min", 10.0f);
+			int rmax = IO::GetIntegerAttribute(child, "max", 10000.0f);
+
+			// Minimum range must be below maximum, for obvious reasons
+			if (rmin >= rmax) rmax = rmin + 1.0f;
+
+			// Validate these values are within reasonable parameters
+			rmin = clamp(rmin, Game::C_MIN_TURRET_RANGE       , Game::C_MAX_TURRET_RANGE - 1.0f);
+			rmax = clamp(rmax, Game::C_MIN_TURRET_RANGE + 1.0f, Game::C_MAX_TURRET_RANGE       );
+
+			// Set the turret range limits
+			turret->SetRange(rmin, rmax);
+		}*/
+	}
+
+	// Make sure we have any mandatory parameters
+	if (turret->GetCode() == NullString)
+	{
+		SafeDelete(turret);
+		return ErrorCodes::CannotLoadTurretObjectWithoutAllRequiredData;
+	}
+
+	// Add to the central collection of standard turret objects
+	D::AddStandardTurret(turret);
+	return ErrorCodes::NoError;
 }
 
 ProductionCost *IO::Data::LoadProductionCostData(TiXmlElement *node)
@@ -3157,6 +3278,29 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 
 			// Attachment has been fully loaded; increment counter of loaded attachments
 			++attachcount;
+		}
+		else if (hash == HashedStrings::H_ConstraintTag)
+		{
+			// Pull data from each required attribute
+			const char *cparent = child->Attribute("parent");	if (!cparent) continue;
+			const char *cchild = child->Attribute("child");		if (!cchild) continue;
+			const char *ctag = child->Attribute("tag");			if (!ctag) continue;
+			int parent = atoi(cparent); int child = atoi(cchild);
+			std::string tag = ctag;
+
+			// Store the new tag; model will perform validation before creating the tag
+			model->AddConstraintTag(parent, child, tag);
+		}
+		else if (hash == HashedStrings::H_ComponentTag)
+		{
+			// Pull data from each required attribute
+			const char *ccomponent = child->Attribute("parent");	if (!ccomponent) continue;
+			const char *ctag = child->Attribute("tag");				if (!ctag) continue;
+			int component = atoi(ccomponent);
+			std::string tag = ctag;
+
+			// Store the new tag; model will perform validation before creating the tag
+			model->AddComponentTag(component, tag);
 		}
 	}
 

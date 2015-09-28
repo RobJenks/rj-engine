@@ -231,6 +231,10 @@ namespace Game {
 	float C_SPACE_SIMULATION_HUB_RADIUS_SQ	= C_SPACE_SIMULATION_HUB_RADIUS 
 											* C_SPACE_SIMULATION_HUB_RADIUS;
 
+	// Turret simulation and controller constants
+	float C_MIN_TURRET_RANGE = 1.0f;												// Minimum distance within which a turret can fire at a target
+	float C_MAX_TURRET_RANGE = 100000.0f;											// Maximum distance within which a turret can fire at a target
+
 	// Default tile simulation values
 	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 100U;						// Life support tiles will be simulated every 100ms, when active
 

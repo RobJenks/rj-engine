@@ -31,6 +31,9 @@
   
   <!-- Load the complex ship register, covering all complex ships in the game and their associated sections -->
   <include file="Ships\ComplexShipRegister.xml" />
+
+  <!-- Load turret object data -->
+  <include file="Turrets\Turrets.xml" />
   
   <!-- Load equipment data-->
   <include file="Engines.xml" />

@@ -9,9 +9,6 @@
 #include <unordered_map>
 #include "Equipment.h"
 
-using namespace std;
-using namespace std::tr1;
-
 class Equipment;
 class SimpleShipLoadout;
 class ImmediateRegion;
@@ -26,6 +23,7 @@ class ComplexShipTileClass;
 class ComplexShipObjectClass;
 class StaticTerrainDefinition;
 class Resource;
+class SpaceTurret;
 class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
@@ -34,23 +32,25 @@ namespace D {
 
 	#ifndef __GameDataExtern_Types_H__
 	#define __GameDataExtern_Types_H__
-		typedef std::tr1::unordered_map<string, SimpleShip*> SimpleShipRegister;
-		typedef std::tr1::unordered_map<string, SimpleShipLoadout*> SSLoadoutRegister;
+		typedef std::unordered_map<std::string, SimpleShip*> SimpleShipRegister;
+		typedef std::unordered_map<std::string, SimpleShipLoadout*> SSLoadoutRegister;
 		
-		typedef std::tr1::unordered_map<string, ComplexShip*> ComplexShipRegister; 
-		typedef std::tr1::unordered_map<string, ComplexShipSection*> ComplexShipSectionRegister;
-		typedef std::tr1::unordered_map<string, ComplexShipTileDefinition*> ComplexShipTileRegister;
-		typedef std::tr1::unordered_map<string, ComplexShipTileClass*> ComplexShipTileClassRegister;
-		typedef std::tr1::unordered_map<string, ComplexShipObjectClass*> ComplexShipObjectClassRegister;
+		typedef std::unordered_map<std::string, ComplexShip*> ComplexShipRegister;
+		typedef std::unordered_map<std::string, ComplexShipSection*> ComplexShipSectionRegister;
+		typedef std::unordered_map<std::string, ComplexShipTileDefinition*> ComplexShipTileRegister;
+		typedef std::unordered_map<std::string, ComplexShipTileClass*> ComplexShipTileClassRegister;
+		typedef std::unordered_map<std::string, ComplexShipObjectClass*> ComplexShipObjectClassRegister;
 		
-		typedef std::tr1::unordered_map<string, StaticTerrainDefinition*> StaticTerrainRegister;
+		typedef std::unordered_map<std::string, StaticTerrainDefinition*> StaticTerrainRegister;
 
-		typedef std::tr1::unordered_map<string, class Equipment*> EquipRegister;
-		typedef std::tr1::unordered_map<string, Resource*> ResourceRegister;
-		typedef std::tr1::unordered_map<string, SpaceProjectileDefinition*> ProjectileRegister;
+		typedef std::unordered_map<std::string, class Equipment*> EquipRegister;
+		typedef std::unordered_map<std::string, Resource*> ResourceRegister;
 
-		typedef std::tr1::unordered_map<string, SkinnedModel*> SkinnedModelRegister;
-		typedef std::tr1::unordered_map<string, ActorBase*> ActorRegister;
+		typedef std::unordered_map<std::string, SpaceTurret*> TurretRegister;
+		typedef std::unordered_map<std::string, SpaceProjectileDefinition*> ProjectileRegister;
+
+		typedef std::unordered_map<std::string, SkinnedModel*> SkinnedModelRegister;
+		typedef std::unordered_map<std::string, ActorBase*> ActorRegister;
 	#endif
 
 
@@ -68,6 +68,8 @@ namespace D {
 	extern StaticTerrainRegister			StaticTerrainDefinitions;	// The details of all static terrain classes in the game
 
 	extern ResourceRegister					Resources;					// The details of each resource in the game
+
+	extern TurretRegister					Turrets;					// The details of each turret type in the game
 	extern ProjectileRegister				Projectiles;				// The details of each projectile type in the game
 
 	extern SkinnedModelRegister				SkinnedModels;				// The details of all skinned models in the game
@@ -84,6 +86,7 @@ namespace D {
 	CMPINLINE ComplexShipObjectClass *GetComplexShipObjectClass(const string & code) { if (ComplexShipObjectClasses.count(code) > 0) return ComplexShipObjectClasses[code]; else return NULL; }
 	CMPINLINE StaticTerrainDefinition *GetStaticTerrain(const string & code) { if (code != NullString && StaticTerrainDefinitions.count(code) > 0) return StaticTerrainDefinitions[code]; else return NULL; }
 	CMPINLINE Resource *GetResource(const string & code) { if (Resources.count(code) > 0) return Resources[code]; else return NULL; }
+	CMPINLINE SpaceTurret *GetTurret(const string & code) { if (Turrets.count(code) > 0) return Turrets[code]; else return NULL; }
 	CMPINLINE SpaceProjectileDefinition *GetProjectile(const string & code) { if (Projectiles.count(code) > 0) return Projectiles[code]; else return NULL; }
 	CMPINLINE SkinnedModel *GetSkinnedModel(const string & code) { if (SkinnedModels.count(code) > 0) return SkinnedModels[code]; else return NULL; }
 	CMPINLINE ActorBase *GetActor(const string & code) { if (Actors.count(code) > 0) return Actors[code]; else return NULL; }
@@ -99,6 +102,7 @@ namespace D {
 	void AddStandardComplexShipObjectClass(ComplexShipObjectClass *c);
 	void AddStaticTerrain(StaticTerrainDefinition *d);
 	void AddStandardResource(Resource *r);
+	void AddStandardTurret(SpaceTurret *t);
 	void AddStandardProjectile(SpaceProjectileDefinition *p);
 	void AddStandardSkinnedModel(SkinnedModel *m);
 	void AddStandardActor(ActorBase *a);
@@ -151,6 +155,7 @@ namespace D {
 	extern const char *NODE_StaticTerrain;
 	extern const char *NODE_StaticTerrainDefinition;
 	extern const char *NODE_Faction;
+	extern const char *NODE_Turret;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;
@@ -169,6 +174,7 @@ namespace D {
 	void TerminateAllComplexShipObjectClassRegisterData(void);
 	void TerminateAllStaticTerrainRegisterData(void);
 	void TerminateAllResourceRegisterData(void);
+	void TerminateAllTurretRegisterData(void);
 	void TerminateAllProjectileRegisterData(void);
 	void TerminateAllSkinnedModelRegisterData(void);
 	void TerminateAllActorRegisterData(void);

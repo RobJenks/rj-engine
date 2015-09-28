@@ -257,6 +257,9 @@ namespace ErrorCodes {
 	const Result		CannotLoadAttachmentDataForArticulatedModel		= 2660;
 	const Result		CannotLoadUnlinkedArticulatedModel				= 2661;
 	const Result		CannotStoreNewArticulatedModelWithSpecifiedCode = 2662;
+	const Result		CannotLoadTurretDataWithInvalidParams			= 2663;
+	const Result		AttributeDoesNotExist							= 2664;
+	const Result		CannotLoadTurretObjectWithoutAllRequiredData	= 2665;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -433,6 +436,14 @@ namespace ErrorCodes {
 	const Result		SystemDoesNotExist								= 5603;
 	const Result		ObjectIsNotEnvironment							= 5604;
 	const Result		NoSpatialPartitioningTreeToRender				= 5605;
+
+	// Turret simulation / controller errors							(6000-6099)
+	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;
+
 }
 
 #endif
+
+
+
+

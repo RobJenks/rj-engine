@@ -14,6 +14,15 @@ public:
 	// Model data is stored in static unordered_map collections & indexed by unique string code
 	typedef std::unordered_map<std::string, ArticulatedModel*> ModelCollection;
 
+	// Structure holding data on any tagged constraints (parent + child) or components (parent + [Child=-1])
+	struct ModelTag 
+	{
+		int Parent, Child; 
+		std::string Tag;
+		ModelTag(void) : Parent(0), Child(0), Tag(NullString) { }
+		ModelTag(int parent, int child, const std::string & tag) : Parent(parent), Child(child), Tag(tag) { }
+	};
+
 	// Constructor; must set the number of components at creation
 	ArticulatedModel(int componentcount);
 
@@ -67,6 +76,15 @@ public:
 	// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
 	// then no action will be taken
 	void										SetComponentRotation(int component_index, float radians);
+
+	// Collection of any model tags that have been defined for this model.  For tagged constraints we 
+	// have (parent + child), and for tagged components we have (parent + [Child=-1])
+	std::vector<ModelTag>						Tags;
+	void										AddConstraintTag(int parent, int child, const std::string & tag);
+	void										AddComponentTag(int component, const std::string & tag);
+	int											GetConstraintWithTag(const std::string & tag);
+	int											GetComponentWithTag(const std::string & tag);
+	CMPINLINE void								ClearAllTags(void) { Tags.clear(); }
 
 	// Destructor; deallocates all resources used by the articulated model
 	~ArticulatedModel(void);

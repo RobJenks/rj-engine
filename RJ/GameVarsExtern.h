@@ -237,6 +237,10 @@ namespace Game {
 	extern float C_SPACE_SIMULATION_HUB_RADIUS;					// Distance within which objects are fully simulation by a hub
 	extern float C_SPACE_SIMULATION_HUB_RADIUS_SQ;
 
+	// Turret simulation and controller constants
+	extern float C_MIN_TURRET_RANGE;							// Minimum distance within which a turret can fire at a target
+	extern float C_MAX_TURRET_RANGE;							// Maximum distance within which a turret can fire at a target
+
 	// Default tile simulation values
 	extern unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL;
 

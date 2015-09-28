@@ -1849,16 +1849,17 @@ void RJMain::__CreateDebugScenario(void)
 
 
 	// Turret testing	
-	dbg_turret = new SpaceTurret();
-	dbg_turret->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic1")->Copy());
+	/*dbg_turret = new SpaceTurret();
+	dbg_turret->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic01_model")->Copy());
 	dbg_turret->SetRelativePosition(D3DXVECTOR3(0.0f, 10.0f, -5.0f));
 	dbg_turret->SetBaseRelativeOrientation(ID_QUATERNION);
-	dbg_turret->SetMaxRange(100000.0f);
+	dbg_turret->SetRange(1.0f, 10000.0f);									// NOT REQ
 	dbg_turret->SetPitchLimits(-999.0f, 999.0f);
 	dbg_turret->SetYawLimitFlag(false);
 	dbg_turret->SetPitchRate(0.25f);
-	dbg_turret->SetYawRate(0.5f);
+	dbg_turret->SetYawRate(0.5f);*/
 	
+	dbg_turret = D::GetTurret("turret_basic01")->Copy();
 	ss->TurretController.AddTurret(dbg_turret);
 
 	/*

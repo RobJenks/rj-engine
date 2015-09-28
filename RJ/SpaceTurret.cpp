@@ -2,6 +2,7 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "SimulationObjectManager.h"
+#include "ArticulatedModel.h"
 #include "SpaceProjectile.h"
 #include "SpaceProjectileLauncher.h"
 
@@ -27,8 +28,10 @@ SpaceTurret::SpaceTurret(void)
 	m_yawmin = m_yawmax = 0.0f;
 	m_pitchmin = -0.15f;
 	m_pitchmax = +0.15f;
-	m_maxrange = 1000.0f; m_maxrangesq = (1000.0f * 1000.0f);
+	m_minrange = 10.0f; m_minrangesq = (10.0f * 10.0f);
+	m_maxrange = 10000.0f; m_maxrangesq = (10000.0f * 10000.0f);
 	m_nexttargetanalysis = 0U;
+	m_constraint_yaw = m_constraint_pitch = 0;
 }
 
 // Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
@@ -111,6 +114,41 @@ void SpaceTurret::EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts)
 			}
 		}
 	}
+}
+
+// Force new target analysis next frame
+void SpaceTurret::ForceNewTargetAnalysis(void)							
+{ 
+	m_nexttargetanalysis = (Game::ClockMs - 1U); 
+}
+
+// Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 
+// returns an errorcode and the model is defaulted to NULL
+Result SpaceTurret::SetArticulatedModel(ArticulatedModel *model)
+{
+	// If the model is NULL then simply set it and return success
+	if (!model)
+	{
+		m_articulatedmodel = NULL;
+		return ErrorCodes::NoError;
+	}
+
+	// Otherwise, make sure this model has the two required model tags to indicate yaw and pitch axes for the turret
+	int yaw = model->GetConstraintWithTag("turret_yaw");
+	int pitch = model->GetConstraintWithTag("turret_pitch");
+	if (yaw < 0 || pitch < 0)
+	{
+		m_articulatedmodel = NULL;
+		return ErrorCodes::TurretModelDoesNotContainRequiredModelTags;
+	}
+
+	// Set the model, and store the yaw and pitch contraint indices
+	m_articulatedmodel = model;
+	m_constraint_yaw = yaw;
+	m_constraint_pitch = pitch;
+
+	// Return success
+	return ErrorCodes::NoError;
 }
 
 // Fires a projectile from the turret
@@ -199,6 +237,16 @@ void SpaceTurret::Pitch(float angle)
 	m_relativeorient = (m_baserelativeorient * delta);
 }
 
+// Reset the orientation of the turret back to its base (instantly)
+void SpaceTurret::ResetOrientation(void)
+{
+	// Set both yaw and pitch back to starting positions
+	m_yaw = m_pitch = 0.0f;
+
+	// Reset the turret to its base orientation (which is equivalent to yaw/pitch of zero)
+	m_relativeorient = m_baserelativeorient;
+}
+
 // Determines the max range of the turret based on its component launchers & projectiles.  Is only
 // an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
 // changes that we cannot simulate accurately here (without actually firing a projectile)
@@ -206,7 +254,7 @@ void SpaceTurret::DetermineApproxRange(void)
 {
 	// Make sure we have some launchers set up within the turret; assuming we do, take the max range of 
 	// the first as our initial estimate
-	if (m_launchercount < 1) { SetMaxRange(0.0f); return; }
+	if (m_launchercount < 1) { SetRange(1.0f, 2.0f); return; }
 	float maxr = m_launchers[0].DetermineApproxRange();
 
 	// Consider any other launchers; if they have a lower max range, take that as the overall range
@@ -217,8 +265,8 @@ void SpaceTurret::DetermineApproxRange(void)
 		if (r < maxr) maxr = r;
 	}
 
-	// Set the maximum turret range
-	SetMaxRange(maxr);
+	// Set the maximum turret range (TODO: NEED TO INCORPORATE MINIMUM RANGE OF EACH LAUNCHER  HERE TOO)
+	SetRange(1.0f, maxr);
 }
 
 // Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
@@ -344,8 +392,55 @@ SpaceProjectileLauncher * SpaceTurret::GetLauncher(int index)
 	else										return &(m_launchers[index]);
 }
 
+// Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
+void SpaceTurret::ClearLauncherReferences(void)
+{
+	// Reset all launcher data without deallocating it (required when cloning turret data)
+	m_launchers = NULL;
+	m_launchercount = m_launcherubound = m_nextlauncher = 0;
+}
+
 // Shut down the projectile object, deallocating all resources
 void SpaceTurret::Shutdown(void)
 {
 
 }
+
+// Make and return a copy of this turret
+SpaceTurret * SpaceTurret::Copy(void)
+{
+	// Create an initial shallow copy using the default copy constructor
+	SpaceTurret *t = new SpaceTurret(*this);
+
+	// Remove all launcher references and deep-copy the data instead
+	t->ClearLauncherReferences();
+	t->InitialiseLaunchers(m_launchercount);
+	for (int i = 0; i < m_launchercount; ++i)
+	{
+		SpaceProjectileLauncher *l = t->GetLauncher(i);
+		(*l) = SpaceProjectileLauncher(m_launchers[i]);
+		l->SetParent(NULL);
+	}
+
+	// Remove references to parent, since this is instance-specific
+	t->SetParent(NULL);
+
+	// Reset any AI or simulation values that are instance-specific
+	t->SetTarget(NULL);
+	t->DesignateTarget(NULL);
+	t->ForceNewTargetAnalysis();
+
+	// Reset orientation of the new turret
+	t->ResetOrientation();
+
+	// Return the new turret object
+	return t;
+}
+
+
+UPDATE TURRET METHODS TO UPDATE "TURRET"ORIENTATION (OR SIMILAR), WHICH IS USED FOR E.G. FIRING.  BUT ACTUAL ORIENTATION SHOULD
+NOT CHANGE SINCE THAT WOULD ROTATE THE ENTIRE MODEL.  INSTEAD ROTATE MODEL ABOUT THE YAW AND PITCH CONSTRAINTS
+
+
+
+

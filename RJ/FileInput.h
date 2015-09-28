@@ -4,6 +4,7 @@
 #include "DX11_Core.h"
 
 #include "XML\\tinyxml.h"
+#include "ErrorCodes.h"
 #include "Utility.h"
 
 namespace IO 
@@ -50,6 +51,20 @@ namespace IO
 
 	void			GetInt2CoordinatesFromAttr(TiXmlElement *node, int *x, int *y);
 	void			GetInt3CoordinatesFromAttr(TiXmlElement *node, int *x, int *y, int *z);
+
+	// Get the specified integer attribute, returning 0 if the attribute does not exist.  "node" must exist or exception is thrown
+	int				GetIntegerAttribute(TiXmlElement *node, const char *attribute);
+
+	// Get the specified integer attribute, returning 'defaultvalue' if the attribute does not exist.  "node" must exist or exception is thrown
+	int				GetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue);
+
+	// Attempt to get the specified integer attribute, returning 0 and an error code != NoError if the attribute does not exist
+	// "node" must exist or exception is thrown
+	Result			TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int & outValue);
+
+	// Attempt to get the specified integer attribute, returning 'defaultvalue' and an error code != NoError if the attribute does not exist
+	// "node" must exist or exception is thrown
+	Result			TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue, int & outValue);
 
 	CMPINLINE float	GetFloatValue(TiXmlElement *node) 
 	{ 

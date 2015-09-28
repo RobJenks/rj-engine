@@ -211,6 +211,11 @@ namespace HashedStrings
 	DefineHash(H_Skip, "skip");
 	DefineHash(H_Attachment, "attachment");
 	DefineHash(H_ArticulatedModel, "articulatedmodel");
+	DefineHash(H_ConstraintTag, "constrainttag");
+	DefineHash(H_ComponentTag, "componenttag");
+	DefineHash(H_Yaw, "yaw");
+	DefineHash(H_Pitch, "pitch");
+	DefineHash(H_Range, "range");
 }
 
 

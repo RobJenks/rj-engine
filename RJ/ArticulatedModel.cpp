@@ -268,6 +268,76 @@ void ArticulatedModel::SetComponentRotation(int component_index, float radians)
 	}
 }
 
+// Add a new model tag, assuming it is valid
+void ArticulatedModel::AddConstraintTag(int parent, int child, const std::string & tag)
+{
+	if (parent < 0 || parent >= m_componentcount || child < 0 || child >= m_componentcount) return;
+	Tags.push_back(ArticulatedModel::ModelTag(parent, child, tag));
+}
+
+// Add a new model tag, assuming it is valid
+void ArticulatedModel::AddComponentTag(int component, const std::string & tag)
+{
+	if (component < 0 || component >= m_componentcount) return;
+	Tags.push_back(ArticulatedModel::ModelTag(component, -1, tag));
+}
+
+// Retrieve the index of the constraint with the specified tag, or -1 if no such tag exists
+int ArticulatedModel::GetConstraintWithTag(const std::string & tag)
+{
+	int parent = -1, child = -1;
+
+	// Attempt to locate this tag, and the parent/child indices associated to it
+	std::vector<ModelTag>::const_iterator it_end = Tags.end();
+	for (std::vector<ModelTag>::const_iterator it = Tags.begin(); it != it_end; ++it)
+	{
+		if ((*it).Tag == tag)
+		{
+			parent = (*it).Parent;
+			child = (*it).Child;
+			break;
+		}
+	}
+
+	// Return an error if we have no matching tag
+	if (parent < 0 || parent >= m_componentcount || child < 0 || child >= m_componentcount) return -1; 
+
+	// Now attempt to locate this constraint in the attachment array
+	int n = (m_attachcount * 2);
+	for (int i = 0; i < n; i += 2)
+	{
+		if (m_attachment_indices[i] == parent && m_attachment_indices[i + 1] == child)
+		{
+			return (i / 2);			// Will always be a whole number; the index of the relevant attachment
+		}
+	}
+
+	// We could not locate the constraint; return -1 to signal error
+	return -1;
+}
+
+// Retrieve the index of the component with the specified tag, or -1 if no such tag exists
+int ArticulatedModel::GetComponentWithTag(const std::string & tag)
+{
+	int component = -1;
+
+	// Attempt to locate this tag, and the parent/child indices associated to it
+	std::vector<ModelTag>::const_iterator it_end = Tags.end();
+	for (std::vector<ModelTag>::const_iterator it = Tags.begin(); it != it_end; ++it)
+	{
+		if ((*it).Tag == tag)
+		{
+			component = (*it).Parent;
+			break;
+		}
+	}
+
+	// Return an error if we have no matching tag, or if index is invalid
+	if (component < 0 || component >= m_componentcount) return -1;
+
+	// Return the index of the component with this tag
+	return component;
+}
 
 // Creates and returns an exact copy of the specified articualated model
 ArticulatedModel * ArticulatedModel::Copy(void)

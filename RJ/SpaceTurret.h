@@ -14,6 +14,12 @@ public:
 
 	// Default constructor
 	SpaceTurret(void);
+	
+	// Get/set the string name or code of this turret object
+	CMPINLINE const std::string &	GetCode(void) const										{ return m_code; }
+	CMPINLINE void					SetCode(const std::string & code)						{ m_code = code; }
+	CMPINLINE const std::string &	GetName(void) const										{ return m_name; }
+	CMPINLINE void					SetName(const std::string & name)						{ m_name = name; }
 
 	// Primary simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
 	// a reference to an array of ENEMY contacts in the immediate area; this cached array is used for greater
@@ -25,6 +31,9 @@ public:
 	// Analyse all potential targets in the area and change target if necessary/preferred
 	void							EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts);
 
+	// Force new target analysis next frame
+	void							ForceNewTargetAnalysis(void);
+
 	// Fires a projectile from the turret
 	void							Fire(void);
 
@@ -32,9 +41,12 @@ public:
 	CMPINLINE iSpaceObject *		GetParent(void) const									{ return m_parent; }
 	void							SetParent(iSpaceObject *parent);
 
-	// Retrieve or return a pointer to the articulated model for this turret
+	// Retrieve a pointer to the articulated model for this turret
 	CMPINLINE ArticulatedModel *	GetArticulatedModel(void)								{ return m_articulatedmodel; }
-	CMPINLINE void					SetArticulatedModel(ArticulatedModel *model)			{ m_articulatedmodel = model; }
+
+	// Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 
+	// returns an errorcode and the model is defaulted to NULL
+	Result							SetArticulatedModel(ArticulatedModel *model);
 
 	// Gets/sets the relative position of the turret on its parent object
 	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
@@ -65,11 +77,15 @@ public:
 	CMPINLINE void					SetPitchRate(float rps)										{ m_pitchrate = rps; }
 
 	// Retrieve or manually set the max range of the turret
+	CMPINLINE float					GetMinRange(void) const										{ return m_minrange; }
 	CMPINLINE float					GetMaxRange(void) const										{ return m_maxrange; }
-	CMPINLINE void					SetMaxRange(float r)
+	CMPINLINE void					SetRange(float minrange, float maxrange)
 	{
-		m_maxrange = r;
-		m_maxrangesq = (r * r);
+		m_minrange = clamp(minrange, Game::C_MIN_TURRET_RANGE       , Game::C_MAX_TURRET_RANGE - 1.0f);	
+		m_maxrange = clamp(maxrange, Game::C_MIN_TURRET_RANGE + 1.0f, Game::C_MAX_TURRET_RANGE       );
+
+		m_minrangesq = (m_minrange * m_minrange);
+		m_maxrangesq = (m_maxrange * m_maxrange);
 	}
 
 
@@ -81,6 +97,9 @@ public:
 	// Yaws or pitches the turret by the specified angle
 	void							Yaw(float angle);
 	void							Pitch(float angle);
+
+	// Reset the orientation of the turret back to its base (instantly)
+	void							ResetOrientation(void);
 
 	// Sets the current target for the turret
 	void							SetTarget(iSpaceObject *target);
@@ -102,7 +121,10 @@ public:
 	SpaceProjectileLauncher *		GetLauncher(int index);
 
 	// Returns the number of launchers maintained within this turrent
-	int								GetLauncherCount(void) const		{ return m_launchercount; }
+	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
+
+	// Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
+	void							ClearLauncherReferences(void);
 
 	// Recalculates the object world matrix
 	CMPINLINE void					DetermineWorldMatrix(void)
@@ -126,8 +148,14 @@ public:
 	// Shut down the turret object, deallocating all resources
 	void							Shutdown(void);
 
+	// Make and return a copy of this turret
+	SpaceTurret *					Copy(void);
 
 protected:
+
+	// Unique string code, and descriptive string name
+	std::string						m_code;
+	std::string						m_name;
 
 	// Parent object that this turret is attached to
 	iSpaceObject *					m_parent;
@@ -178,8 +206,13 @@ protected:
 	// Turret maintains two unit circle arcs, in the yaw & pitch dimensions, to represent its firing cone
 	FiringArc						m_yaw_arc, m_pitch_arc;
 
-	// Turret has a maximum range
+	// Turret has a maximum range, and usually at least a nominal minimum range within which it cannot hit targets
+	float							m_minrange, m_minrangesq;
 	float							m_maxrange, m_maxrangesq;
+
+	// Model indices for the turret yaw and pitch constraints
+	int								m_constraint_yaw;
+	int								m_constraint_pitch;
 
 };
 

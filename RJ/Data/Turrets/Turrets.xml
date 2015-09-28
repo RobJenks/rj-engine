@@ -1,0 +1,13 @@
+<GameData>
+  <Turret>
+    <Code>turret_basic01</Code>
+    <Name>Basic railgun turret</Name>
+    <ArticulatedModel>turret_basic01_model</ArticulatedModel>
+    <Yaw min="-999.0" max="999.0" rate="0.5" />
+    <Pitch min="-0.5" max="0.5" rate="0.25"/>
+    <Range min="10.0" max="100000.0" />
+    
+    
+    
+  </Turret>
+</GameData>

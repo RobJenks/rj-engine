@@ -2,6 +2,7 @@
 
 #include <malloc.h>
 #include <string.h>
+#include "ErrorCodes.h"
 #include "Utility.h"
 #include "FastMath.h"
 #include "AdjustableParameter.h"
@@ -10,136 +11,6 @@
 const char *	IO::___tmp_loading_cchar;
 std::string		IO::___tmp_loading_string;
 
-/*
-bool IO::IsHeader(char *s) { return (s[0] == '[' && s[strlen(s)-1] == ']'); }
-bool IO::IsData(char *s) { return strchr(s, '=') != 0; }
-
-char *IO::GetHeader(char *s)
-{
-	int l = strlen(s);
-	char *r = (char *)malloc(sizeof(char)*(l-1));
-	strncpy(r, &s[1], l-2); 
-	r[l-2] = '\0';
-
-	return r;
-}
-
-void IO::GetHeader(char *s, char *out)
-{
-	int l = strlen(s);
-	strncpy(out, &s[1], l-2); 
-	out[l-2] = '\0';
-}
-
-char *IO::GetLabel(char *s)
-{
-	int l = strlen(s);
-	char *eq = strchr(s, '=');
-
-	char *r = (char *)malloc(sizeof(char)*(eq-s+1));		// nb assuming sizeof(char)==1
-	strncpy(r, s, eq-s);
-	r[eq-s] = '\0';
-
-	return r;
-}
-
-void IO::GetLabel(char *s, char *out)
-{
-	int l = strlen(s);
-	char *eq = strchr(s, '=');
-
-	strncpy(out, s, eq-s);
-	out[eq-s] = '\0';
-}
-
-char *IO::GetValue(char *s)
-{
-	int l = strlen(s);
-	char *eq = strchr(s, '=');
-	int ln = s+l-eq-1;
-
-	char *r = (char *)malloc(sizeof(char)*(ln+1));		// nb assuming sizeof(char)==1
-	strncpy(r, eq+1, ln);
-	r[ln] = '\0';
-
-	return r;
-}
-
-void IO::GetValue(char *s, char *out)
-{
-	int l = strlen(s);
-	char *eq = strchr(s, '=');
-	int ln = s+l-eq-1;
-
-	strncpy(out, eq+1, ln);
-	out[ln] = '\0';
-}
-
-D3DXVECTOR3 IO::GetVector(char *s)
-{
-	D3DXVECTOR3 v(0.0f, 0.0f, 0.0f);
-	IO::GetVector(s, &v);
-	return v;
-}
-
-void IO::GetVector(char *s, D3DXVECTOR3 *out)
-{
-	// Create a copy of the string as it may be altered by strtok
-	char *sc = (char *)malloc(sizeof(char) * (strlen(s)+1));
-	strcpy(sc, s);
-
-	char *c = strtok(sc, ", ");
-	if (c != NULL) out->x = atof(c);
-	
-	c = strtok(NULL, ", ");
-	if (c != NULL) out->y = atof(c);
-
-	c = strtok(NULL, ", ");
-	if (c != NULL) out->z = atof(c);
-
-	free(sc);
-}
-
-char **IO::GetStringList(char *s, int *count)
-{
-	// Get the required length of array by counting commas
-	int n = 0;
-	char *c = strchr(s, ',');
-	while (c != NULL) {
-		n++;
-		c = strchr(c+1, ',');
-	}
-
-	// Now allocate space for the elements
-	char **list = (char **)malloc(sizeof(char*) * n);
-
-	// Call the overloaded method with this list and then return the result
-	IO::GetStringList(s, list, count);
-	return list;
-}
-
-void IO::GetStringList(char *s, char **list, int *count)
-{
-	// Create a copy of the string as it may be altered by strtok
-	char *sc = (char *)malloc(sizeof(char) * (strlen(s)+1));
-	strcpy(sc, s);
-
-	int n = 0;
-	char *c = strtok(sc, ",");
-	while (c != NULL) {
-		char *el = (char *)malloc(sizeof(char) * (strlen(c)+1));
-		strcpy(el, c);
-
-		list[n++] = el;
-		c = strtok(NULL, ",");
-	}
-
-	// Report back the number of elements that were added if required
-	if (count != NULL) *count = n;
-
-	// Deallocate memory for the string copy
-	free(sc);
-}*/
 
 D3DXVECTOR2 IO::GetVector2FromAttr(TiXmlElement *node)
 {
@@ -426,3 +297,55 @@ INTVECTOR3 IO::GetInt3CoordinatesFromAttr(TiXmlElement *node)
 
 	return vec;
 }
+
+// Get the specified integer attribute, returning 0 if the attribute does not exist
+// "node" and "attribute" must exist or exception is thrown
+int IO::GetIntegerAttribute(TiXmlElement *node, const char *attribute)
+{
+	const char *cattr = node->Attribute(attribute);
+	if (!cattr) return 0;
+	return atoi(cattr);
+}
+
+// Get the specified integer attribute, returning 'defaultvalue' if the attribute does not exist
+// "node" and "attribute" must exist or exception is thrown
+int	IO::GetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue)
+{
+	const char *cattr = node->Attribute(attribute);
+	if (!cattr) return defaultvalue;
+	return atoi(cattr);
+}
+
+// Attempt to get the specified integer attribute, returning 0 and an error code != NoError if the attribute does not exist
+// "node" and "attribute" must exist or exception is thrown
+Result IO::TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int & outValue)
+{
+	const char *cattr = node->Attribute(attribute);
+	if (!cattr)
+	{
+		outValue = 0;
+		return ErrorCodes::AttributeDoesNotExist;
+	}
+
+	outValue = atoi(cattr);
+	return ErrorCodes::NoError;
+}
+
+// Attempt to get the specified integer attribute, returning 'defaultvalue' and an error code != NoError if the attribute does not exist
+// "node" and "attribute" must exist or exception is thrown
+Result IO::TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue, int & outValue)
+{
+	const char *cattr = node->Attribute(attribute);
+	if (!cattr)
+	{
+		outValue = defaultvalue;
+		return ErrorCodes::AttributeDoesNotExist;
+	}
+
+	outValue = atoi(cattr);
+	return ErrorCodes::NoError;
+}
+
+
+
+
