@@ -18,9 +18,10 @@ SpaceTurret::SpaceTurret(void)
 	m_nextlauncher = 0;
 	m_target = m_designatedtarget = NULL;
 	m_relativepos = NULL_VECTOR;
-	m_baserelativeorient = m_relativeorient = ID_QUATERNION;
+	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
+	m_turretorient = m_invturretorient = ID_QUATERNION;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;
@@ -209,10 +210,13 @@ void SpaceTurret::Yaw(float angle)
 	// Update the yaw value
 	m_yaw = yaw;
 	
-	// Update the orientation of the turret
+	// Update the orientation of the turret cannon
 	D3DXQUATERNION delta;
 	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
-	m_relativeorient = (m_baserelativeorient * delta);
+	m_turretrelativeorient = (m_baserelativeorient * delta);
+
+	// Update the model rotation about its yaw constraint
+	m_articulatedmodel->SetConstraintRotation(m_constraint_yaw, m_yaw);
 }
 
 // Pitches the turret by the specified angle
@@ -231,10 +235,13 @@ void SpaceTurret::Pitch(float angle)
 	// Update the yaw value
 	m_pitch = pitch;
 
-	// Update the orientation of the turret
+	// Update the orientation of the turret cannon
 	D3DXQUATERNION delta;
 	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
-	m_relativeorient = (m_baserelativeorient * delta);
+	m_turretrelativeorient = (m_baserelativeorient * delta);
+
+	// Update the model rotation about its pitch constraint
+	m_articulatedmodel->SetConstraintRotation(m_constraint_pitch, m_pitch);
 }
 
 // Reset the orientation of the turret back to its base (instantly)
@@ -244,7 +251,7 @@ void SpaceTurret::ResetOrientation(void)
 	m_yaw = m_pitch = 0.0f;
 
 	// Reset the turret to its base orientation (which is equivalent to yaw/pitch of zero)
-	m_relativeorient = m_baserelativeorient;
+	m_turretrelativeorient = m_baserelativeorient;
 }
 
 // Determines the max range of the turret based on its component launchers & projectiles.  Is only
@@ -422,6 +429,10 @@ SpaceTurret * SpaceTurret::Copy(void)
 		l->SetParent(NULL);
 	}
 
+	// Make a copy of the articulated model data, assuming some exists (if not, return NULL since we must have a model)
+	if (!m_articulatedmodel) { SafeDelete(t); return NULL; }
+	t->SetArticulatedModel(m_articulatedmodel->Copy());
+
 	// Remove references to parent, since this is instance-specific
 	t->SetParent(NULL);
 
@@ -436,11 +447,4 @@ SpaceTurret * SpaceTurret::Copy(void)
 	// Return the new turret object
 	return t;
 }
-
-
-UPDATE TURRET METHODS TO UPDATE "TURRET"ORIENTATION (OR SIMILAR), WHICH IS USED FOR E.G. FIRING.  BUT ACTUAL ORIENTATION SHOULD
-NOT CHANGE SINCE THAT WOULD ROTATE THE ENTIRE MODEL.  INSTEAD ROTATE MODEL ABOUT THE YAW AND PITCH CONSTRAINTS
-
-
-
 

@@ -182,9 +182,13 @@ protected:
 
 	// Turrets have a relative position and orientation from their parent object.  The latter is the base
 	// orientation of the turret, before any pitch or yaw is applied
+	//		m_baserelativeorient = resting orientation, [0 0 0 1] in many cases
+	//		m_orientation = (baserelativeorient * parent_orientation), i.e. resting orientation in world space
+	//		m_turretrelativeorient = (baserelativeorient * delta_from_pitch_yaw), i.e. relative turret cannon orientation
+	//		m_turretorient = (relativeturretorient * parent_orientation), i.e. actual turret cannon orientation in world space
 	D3DXVECTOR3						m_relativepos;
 	D3DXQUATERNION					m_baserelativeorient;
-	D3DXQUATERNION					m_relativeorient;
+	D3DXQUATERNION					m_turretrelativeorient;
 
 	// Store world position, orientation and inverse orientation.  Derived during update by turret controller
 	D3DXVECTOR3						m_position;
@@ -193,8 +197,11 @@ protected:
 	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;
 
-	// Object world matrix, relative to its parent object
+	// Object world matrix, relative to its parent object.  Based on m_position and m_orientation
 	D3DXMATRIX						m_worldmatrix;
+
+	// Store orientation & inverse orientation of the turret heading (which will differ from the base turret orientation)
+	D3DXQUATERNION					m_turretorient, m_invturretorient;
 
 	// Values indicating the yaw & pitch capabilities of the turret
 	float							m_yawrate, m_pitchrate;							// Rad/sec

@@ -424,7 +424,12 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
-	if (b[DIK_4])
+	if (b[DIK_U])		ss->TurretController.Turrets[0]->Yaw(-Game::TimeFactor);
+	else if (b[DIK_I])	ss->TurretController.Turrets[0]->Yaw(Game::TimeFactor);
+	else if (b[DIK_J])	ss->TurretController.Turrets[0]->Pitch(-Game::TimeFactor);
+	else if (b[DIK_M])	ss->TurretController.Turrets[0]->Pitch(Game::TimeFactor);
+
+	else if (b[DIK_4])
 	{
 
 	}
@@ -1937,7 +1942,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 	/* Constraint testing */
-	D3DXVECTOR3 move = NULL_VECTOR;
+	/*D3DXVECTOR3 move = NULL_VECTOR;
 	const float amt = (Game::TimeFactor * 25.0f);
 	SimpleShip *x0 = s3[1], *x1 = s3[2];
 	Attachment<iObject*> *attach = &( x0->GetChildObjects()->at(0) );
@@ -1959,8 +1964,8 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (key[DIK_T])	move.y += amt;
 			if (key[DIK_B])	move.y -= amt;
 
-			if (key[DIK_U])			attach->RotateChildAboutConstraint(-Game::TimeFactor);
-			else if (key[DIK_I])	attach->RotateChildAboutConstraint(+Game::TimeFactor);
+			//if (key[DIK_U])			attach->RotateChildAboutConstraint(-Game::TimeFactor);
+			//else if (key[DIK_I])	attach->RotateChildAboutConstraint(+Game::TimeFactor);
 		}
 		else if (key[DIK_LSHIFT] && !key[DIK_LCONTROL])
 		{
@@ -1979,7 +1984,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Move the parent object based on user input
 	x0->SetPosition(x0->GetPosition() + move);
-
+	*/
 
 	/* End constraint testing*/
 		
