@@ -151,8 +151,8 @@ Result ArticulatedModel::SetAttachment(int attach_index, int parent_index, int c
 	}
 
 	// Also store the indices for more efficient lookups at runtime
-	m_attachment_indices[attach_index]		= parent_index;
-	m_attachment_indices[attach_index + 1]	= child_index;
+	m_attachment_indices[(attach_index * 2)]		= parent_index;
+	m_attachment_indices[(attach_index * 2) + 1]	= child_index;
 
 	// Update the parent and child that they are now members of this attachment
 	attach->Parent->SetChildAttachmentState(true);
@@ -365,7 +365,7 @@ ArticulatedModel * ArticulatedModel::Copy(void)
 	for (int i = 0; i < acount; ++i)
 	{
 		// Link the two relevant objects using this attachment
-		result = model->SetAttachment(i, m_attachment_indices[i], m_attachment_indices[i + 1]);
+		result = model->SetAttachment(i, m_attachment_indices[(i*2)], m_attachment_indices[(i*2) + 1]);
 		if (result != ErrorCodes::NoError)
 		{
 			SafeDelete(model);
@@ -384,6 +384,9 @@ ArticulatedModel * ArticulatedModel::Copy(void)
 			new_attach->SetOffset(m_attachments[i].GetPositionOffset(), m_attachments[i].GetOrientationOffset());
 		}
 	}
+
+	// Copy all model tag data to the new instance
+	model->Tags = Tags;
 
 	// Return a pointer to the new model
 	return model;
