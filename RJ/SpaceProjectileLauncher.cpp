@@ -17,10 +17,11 @@ SpaceProjectileLauncher::SpaceProjectileLauncher(void) :
 	
 }
 
-// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Internal
-// method that is only called if the wrapper LaunchProjectile method validates we are ready to launch a new 
-// projectile.  Efficiency measure so that the inline method can handle the majority of cases where we are not ready
-SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile_Internal(void)
+// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Will 
+// fire even if not ready (i.e. within reload interval), so CanLaunchProjectile() should be checked before firing
+// Accepts a the position and orientation of the parent launch point as an input.  Returns a reference to the 
+// projectile that was fired, or NULL if nothing was launched
+SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & launchpoint, const D3DXQUATERNION & launchorient)
 {
 	// Validate required properties
 	if (!m_projectiledef || !m_parent || !m_parent->GetSpaceEnvironment()) return NULL;
@@ -31,19 +32,20 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile_Internal(void)
 
 	// Determine launch position based upon our parent object
 	D3DXVECTOR3 pos;
-	D3DXVec3TransformCoord(&pos, &m_relativepos, m_parent->GetWorldMatrix());
+	D3DXVec3Rotate(&pos, &m_relativepos, &launchorient);
+	pos += launchpoint;
 	proj->SetPosition(pos);
 
 	// Determine the spread effect for this projectile.  Set the projectile orientation depending on whether
-	// any spready should be applied or now
+	// any spready should be applied or not
 	if (m_spread > Game::C_EPSILON)
 	{
 		DetermineNextProjectileSpreadDelta();
-		proj->SetOrientation(m_spread_delta * m_relativeorient * m_parent->GetOrientation());
+		proj->SetOrientation(m_spread_delta * m_relativeorient * launchorient);
 	}
 	else
 	{
-		proj->SetOrientation(m_relativeorient * m_parent->GetOrientation());
+		proj->SetOrientation(m_relativeorient * launchorient);
 	}
 
 	// Perform an immediate refresh of projectile position/orientation to recalcualate its transform matrices

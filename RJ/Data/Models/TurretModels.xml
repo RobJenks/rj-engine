@@ -27,6 +27,7 @@
     
     <ConstraintTag parent="0" child="1" tag="turret_yaw" />
     <ConstraintTag parent="1" child="2" tag="turret_pitch" />
+    <ComponentTag component="2" tag="turret_cannon" />
     
   </ArticulatedModel>
 

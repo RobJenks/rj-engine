@@ -217,9 +217,10 @@ protected:
 	float							m_minrange, m_minrangesq;
 	float							m_maxrange, m_maxrangesq;
 
-	// Model indices for the turret yaw and pitch constraints
+	// Model indices for key components and constraints
 	int								m_constraint_yaw;
 	int								m_constraint_pitch;
+	int								m_component_cannon;
 
 };
 

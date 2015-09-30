@@ -1,0 +1,11 @@
+<GameData>
+  <ProjectileDefinition>
+    <Code>projectile_basic01</Code>
+    <Name>Basic impactor</Name>
+    <Model>unit_cone_model</Model>
+    <Mass>25000</Mass>
+    <DefaultLifetime>3.0</DefaultLifetime>
+    
+    
+  </ProjectileDefinition>
+</GameData>

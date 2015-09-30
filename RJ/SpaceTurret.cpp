@@ -32,7 +32,7 @@ SpaceTurret::SpaceTurret(void)
 	m_minrange = 10.0f; m_minrangesq = (10.0f * 10.0f);
 	m_maxrange = 10000.0f; m_maxrangesq = (10000.0f * 10000.0f);
 	m_nexttargetanalysis = 0U;
-	m_constraint_yaw = m_constraint_pitch = 0;
+	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
 }
 
 // Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
@@ -134,10 +134,11 @@ Result SpaceTurret::SetArticulatedModel(ArticulatedModel *model)
 		return ErrorCodes::NoError;
 	}
 
-	// Otherwise, make sure this model has the two required model tags to indicate yaw and pitch axes for the turret
+	// Otherwise, make sure this model has the required model tags to identify important turret components
 	int yaw = model->GetConstraintWithTag("turret_yaw");
 	int pitch = model->GetConstraintWithTag("turret_pitch");
-	if (yaw < 0 || pitch < 0)
+	int cannon = model->GetComponentWithTag("turret_cannon");
+	if (yaw < 0 || pitch < 0 || cannon < 0)
 	{
 		m_articulatedmodel = NULL;
 		return ErrorCodes::TurretModelDoesNotContainRequiredModelTags;
@@ -147,6 +148,7 @@ Result SpaceTurret::SetArticulatedModel(ArticulatedModel *model)
 	m_articulatedmodel = model;
 	m_constraint_yaw = yaw;
 	m_constraint_pitch = pitch;
+	m_component_cannon = cannon;
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -155,18 +157,25 @@ Result SpaceTurret::SetArticulatedModel(ArticulatedModel *model)
 // Fires a projectile from the turret
 void SpaceTurret::Fire(void)
 {
-	// Request a projectile be fired from the active launcher.  If no projectile is fired we are likely
-	// within the 'reload' interval and will simply return.  TODO: in future, may want to keep track of 
+	// Check if a projectile can be fired from the active launcher.  If no projectile can be 
+	// fired we are likely within the 'reload' interval and will simply return.  
+	SpaceProjectileLauncher & launcher = m_launchers[m_nextlauncher];
+	if (!launcher.CanLaunchProjectile()) return;
+	
+	// We only need to determine the turret firing position if we are ready to fire a projectile
+	// We use the position and orientation of the model component tagged as "turret_cannon", and each
+	// launcher holds an offset to be applied from that parent component
+	ArticulatedModelComponent *cannon = m_articulatedmodel->GetComponent(m_component_cannon); 
+	if (!cannon) return;	
+
+	// Launch a new projectile.  TODO: in future, may want to keep track of 
 	// last projectile(s) fired?
-	if (m_launchers[m_nextlauncher].LaunchProjectile() == NULL)
-	{
-		return;
-	}
+	launcher.LaunchProjectile(cannon->GetPosition(), cannon->GetOrientation());
 	
 	// If this is a multi-launcher turret, set the next launcher to be fired
 	if (m_launchercount != 1)
 	{
-		m_nextlauncher = max(++m_nextlauncher, m_launchercount);
+		m_nextlauncher = max(m_nextlauncher + 1, m_launchercount);
 	}
 
 }

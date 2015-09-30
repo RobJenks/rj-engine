@@ -19,12 +19,22 @@ public:
 	// Default constructor
 	SpaceProjectileLauncher(void);
 
-	// Inline wrapper method to launch a projectile.  Only passes on control if we are ready to do so.
-	CMPINLINE SpaceProjectile *			LaunchProjectile(void)
-	{
-		// Only call the internal method to actually launch a projectile if we are ready to do so
-		return ((Game::ClockMs < m_nextlaunch) ? NULL : LaunchProjectile_Internal());
-	}
+	// Return or set the unique string code for this projectile launcher type
+	CMPINLINE const std::string & 		GetCode(void) const					{ return m_code; }
+	CMPINLINE void						SetCode(const std::string & code)	{ m_code = code; }
+
+	// Return or set the descriptive string name for this projectile launcher type
+	CMPINLINE const std::string & 		GetName(void) const					{ return m_name; }
+	CMPINLINE void						SetName(const std::string & name)	{ m_name = name; }
+
+	// Returns a value indicating whether we are ready to launch a new projectile
+	CMPINLINE bool						CanLaunchProjectile(void) const								{ return (Game::ClockMs < m_nextlaunch); }
+
+	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Will 
+	// fire even if not ready (i.e. within reload interval), so CanLaunchProjectile() should be checked before firing
+	// Accepts a the position and orientation of the parent launch point as an input.  Returns a reference to the 
+	// projectile that was fired, or NULL if nothing was launched
+	SpaceProjectile *					LaunchProjectile(const D3DXVECTOR3 & launchpoint, const D3DXQUATERNION & launchorient);
 
 	// Set or return the projectile type that is used by this launcher
 	CMPINLINE const SpaceProjectileDefinition * GetProjectileDefinition(void) const								{ return m_projectiledef; }
@@ -95,11 +105,8 @@ public:
 
 protected:
 
-	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Internal
-	// method that is only called if the wrapper LaunchProjectile method validates we are ready to launch a new 
-	// projectile.  Efficiency measure so that the inline method can handle the majority of cases where we are not ready
-	SpaceProjectile *					LaunchProjectile_Internal(void);
-
+	std::string							m_code;							// Unique string code for this launcher type
+	std::string							m_name;							// Descriptive string name for this launcher type
 
 	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched
 

@@ -424,10 +424,11 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
-	if (b[DIK_U])		ss->TurretController.Turrets[0]->Yaw(-Game::TimeFactor);
-	else if (b[DIK_I])	ss->TurretController.Turrets[0]->Yaw(Game::TimeFactor);
-	else if (b[DIK_J])	ss->TurretController.Turrets[0]->Pitch(-Game::TimeFactor);
-	else if (b[DIK_M])	ss->TurretController.Turrets[0]->Pitch(Game::TimeFactor);
+	if (b[DIK_U])			ss->TurretController.Turrets[0]->Yaw(-Game::TimeFactor);
+	else if (b[DIK_I])		ss->TurretController.Turrets[0]->Yaw(Game::TimeFactor);
+	else if (b[DIK_J])		ss->TurretController.Turrets[0]->Pitch(-Game::TimeFactor);
+	else if (b[DIK_M])		ss->TurretController.Turrets[0]->Pitch(Game::TimeFactor);
+	else if (b[DIK_SPACE])	ss->TurretController.Turrets[0]->Fire();
 
 	else if (b[DIK_4])
 	{
