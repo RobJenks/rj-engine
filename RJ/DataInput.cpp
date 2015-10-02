@@ -179,6 +179,10 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadFaction(child);
 		} else if (name == D::NODE_Turret) {
 			res = IO::Data::LoadTurret(child);
+		} else if (name == D::NODE_ProjectileLauncher) {
+			res = IO::Data::LoadProjectileLauncher(child);
+		} else if (name == D::NODE_Projectile) { 
+			res = IO::Data::LoadProjectile(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;

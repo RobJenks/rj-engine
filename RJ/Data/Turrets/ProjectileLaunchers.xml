@@ -1,9 +1,17 @@
 <GameData>
+
   <ProjectileLauncher>
     <Code>projectile_launcher_basic01</Code>
     <Name>Basic kinetic launcher</Name>
-    
-    
+    <Projectile>projectile_basic01</Projectile>
+    <Spread radians="0.1" />
+    <LaunchInterval ms="2000" />
+    <Launch type="SetVelocityDirect" value="2500" />
+    <LaunchAngularVelocity x="0.0" y="0.0" z="1.5" />
+    <DegradeLinearVelocity rate="0.05" />
+    <DegradeAngularVelocity rate="0.01" />
+    <AddOrientationDrift x="0.0" y="0.0" z="0.0" w="0.0" />
 
   </ProjectileLauncher>
+
 </GameData>

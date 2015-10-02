@@ -20,6 +20,7 @@
 #include "SkinnedModel.h"
 #include "ActorBase.h"
 #include "SpaceTurret.h"
+#include "SpaceProjectileLauncher.h"
 #include "SpaceProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
 class ImmediateRegion;
@@ -43,6 +44,7 @@ namespace D {
 	StaticTerrainRegister			StaticTerrainDefinitions;	// Details of all static terrain classes in the game
 	ResourceRegister				Resources;					// Details of all resources in the game
 	TurretRegister					Turrets;					// Details of all turret types in the game
+	ProjectileLauncherRegister		ProjectileLaunchers;		// Details of all projectile launcher types in the game
 	ProjectileRegister				Projectiles;				// Details of all projectile types in the game
 	SkinnedModelRegister			SkinnedModels;				// Details of all skinned models in the game
 	ActorRegister					Actors;						// Details of all actor types in the game
@@ -94,6 +96,8 @@ namespace D {
 	const char *NODE_StaticTerrainDefinition = "staticterraindefinition";
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";
+	const char *NODE_ProjectileLauncher = "projectilelauncher";
+	const char *NODE_Projectile = "projectile":
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";
@@ -117,6 +121,7 @@ namespace D {
 		TerminateAllActorRegisterData();
 		TerminateAllResourceRegisterData();
 		TerminateAllTurretRegisterData();
+		TerminateAllProjectileLauncherRegisterData();
 		TerminateAllProjectileRegisterData();
 		TerminateAllStaticTerrainRegisterData();
 	}
@@ -287,6 +292,21 @@ namespace D {
 		Turrets.clear();
 	}
 
+	// Termination function: Projectile launcher register.  Clears all data.
+	void TerminateAllProjectileLauncherRegisterData(void)
+	{
+		ProjectileLauncherRegister::const_iterator it_end = ProjectileLaunchers.end();
+		for (ProjectileLauncherRegister::const_iterator it = ProjectileLaunchers.begin(); it != it_end; ++it) {
+			if (it->second) {
+				// Delete the object and deallocate memory
+				delete (it->second);
+			}
+		}
+
+		// Empty the register now it is full of null/invalid pointers
+		ProjectileLaunchers.clear();
+	}
+
 	// Termination function: Projectile register.  Clears all data.
 	void TerminateAllProjectileRegisterData(void)
 	{
@@ -361,7 +381,7 @@ namespace D {
 	}
 	void AddStandardSSLoadout(SimpleShipLoadout *l)
 	{
-		if (l && l->Code != NullString && D::SSLoadouts[l->Code] == 0)
+		if (l && l->Code != NullString && D::SSLoadouts.count(l->Code) == 0)
 		{
 			SSLoadouts[l->Code] = l;					// Add the object
 		}
@@ -415,6 +435,13 @@ namespace D {
 		if (t && t->GetCode() != NullString && D::Turrets.count(t->GetCode()) == 0)
 		{
 			Turrets[t->GetCode()] = t;					// Add the object
+		}
+	}
+	void AddStandardProjectileLauncher(SpaceProjectileLauncher *l)
+	{
+		if (l && l->GetCode() != NullString && D::ProjectileLaunchers.count(l->GetCode()) == 0)
+		{
+			ProjectileLaunchers[l->GetCode()] = l;		// Add the object
 		}
 	}
 	void AddStandardProjectile(SpaceProjectileDefinition *p)

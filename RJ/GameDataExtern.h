@@ -24,6 +24,7 @@ class ComplexShipObjectClass;
 class StaticTerrainDefinition;
 class Resource;
 class SpaceTurret;
+class SpaceProjectileLauncher;
 class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
@@ -47,6 +48,7 @@ namespace D {
 		typedef std::unordered_map<std::string, Resource*> ResourceRegister;
 
 		typedef std::unordered_map<std::string, SpaceTurret*> TurretRegister;
+		typedef std::unordered_map<std::string, SpaceProjectileLauncher*> ProjectileLauncherRegister;
 		typedef std::unordered_map<std::string, SpaceProjectileDefinition*> ProjectileRegister;
 
 		typedef std::unordered_map<std::string, SkinnedModel*> SkinnedModelRegister;
@@ -70,6 +72,7 @@ namespace D {
 	extern ResourceRegister					Resources;					// The details of each resource in the game
 
 	extern TurretRegister					Turrets;					// The details of each turret type in the game
+	extern ProjectileLauncherRegister		ProjectileLaunchers;		// The details of each projectile launcher in the game
 	extern ProjectileRegister				Projectiles;				// The details of each projectile type in the game
 
 	extern SkinnedModelRegister				SkinnedModels;				// The details of all skinned models in the game
@@ -87,6 +90,7 @@ namespace D {
 	CMPINLINE StaticTerrainDefinition *GetStaticTerrain(const string & code) { if (code != NullString && StaticTerrainDefinitions.count(code) > 0) return StaticTerrainDefinitions[code]; else return NULL; }
 	CMPINLINE Resource *GetResource(const string & code) { if (Resources.count(code) > 0) return Resources[code]; else return NULL; }
 	CMPINLINE SpaceTurret *GetTurret(const string & code) { if (Turrets.count(code) > 0) return Turrets[code]; else return NULL; }
+	CMPINLINE SpaceProjectileLauncher *GetProjectileLauncher(const string & code) { if (ProjectileLaunchers.count(code) > 0) return ProjectileLaunchers[code]; else return NULL; }
 	CMPINLINE SpaceProjectileDefinition *GetProjectile(const string & code) { if (Projectiles.count(code) > 0) return Projectiles[code]; else return NULL; }
 	CMPINLINE SkinnedModel *GetSkinnedModel(const string & code) { if (SkinnedModels.count(code) > 0) return SkinnedModels[code]; else return NULL; }
 	CMPINLINE ActorBase *GetActor(const string & code) { if (Actors.count(code) > 0) return Actors[code]; else return NULL; }
@@ -103,6 +107,7 @@ namespace D {
 	void AddStaticTerrain(StaticTerrainDefinition *d);
 	void AddStandardResource(Resource *r);
 	void AddStandardTurret(SpaceTurret *t);
+	void AddStandardProjectileLauncher(SpaceProjectileLauncher *l);
 	void AddStandardProjectile(SpaceProjectileDefinition *p);
 	void AddStandardSkinnedModel(SkinnedModel *m);
 	void AddStandardActor(ActorBase *a);
@@ -156,6 +161,8 @@ namespace D {
 	extern const char *NODE_StaticTerrainDefinition;
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;
+	extern const char *NODE_ProjectileLauncher;
+	extern const char *NODE_Projectile;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;
@@ -175,6 +182,7 @@ namespace D {
 	void TerminateAllStaticTerrainRegisterData(void);
 	void TerminateAllResourceRegisterData(void);
 	void TerminateAllTurretRegisterData(void);
+	void TerminateAllProjectileLauncherRegisterData(void);
 	void TerminateAllProjectileRegisterData(void);
 	void TerminateAllSkinnedModelRegisterData(void);
 	void TerminateAllActorRegisterData(void);
