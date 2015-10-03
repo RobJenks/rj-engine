@@ -240,6 +240,8 @@ namespace Game {
 	// Turret simulation and controller constants
 	extern float C_MIN_TURRET_RANGE;							// Minimum distance within which a turret can fire at a target
 	extern float C_MAX_TURRET_RANGE;							// Maximum distance within which a turret can fire at a target
+	extern unsigned int C_PROJECTILE_OWNER_DETACH_PERIOD;		// Period within which a projectile is protected from colliding with its owner (ms)
+	extern int C_MAX_TURRET_LAUNCHERS;							// The maximum number of launchers that a single turret can hold
 
 	// Default tile simulation values
 	extern unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL;

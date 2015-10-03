@@ -6,9 +6,10 @@
 
 // Default constructor; set default values
 SpaceProjectile::SpaceProjectile(void)
-	: m_definition(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false), 
+	: m_definition(NULL), m_owner(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false),
 	m_degrade_lv_pc(0.01f), m_degrade_av_pc(0.0f), 
-	m_orient_change(false), m_orient_change_amount(ID_QUATERNION)
+	m_orient_change(false), m_orient_change_amount(ID_QUATERNION), m_detach_time(0U),
+	m_detached_from_owner(false)
 {
 	// Set the object type
 	this->SetObjectType(iObject::ObjectType::ProjectileObject);
@@ -23,10 +24,17 @@ SpaceProjectile::SpaceProjectile(void)
 #else
 	// Perform full construction if C++11 constructor delegation not supported
 	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition)		
-		: m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f), m_degrade_av_pc(0.0f), 
-		m_orient_change(false), m_orient_change_amount(ID_QUATERNION)
+		: m_owner(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f),
+		m_degrade_av_pc(0.0f), m_orient_change(false), m_orient_change_amount(ID_QUATERNION), 
+		m_detach_time(0U), m_detached_from_owner(false)
 #endif
 {
+	// Set the object type
+	this->SetObjectType(iObject::ObjectType::ProjectileObject);
+
+	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
+	this->SetCollisionMode(Game::CollisionMode::FullCollision);
+
 	// Store and pull data from the definition, if a valid pointer was provided
 	m_definition = definition;
 	if (m_definition)
@@ -49,6 +57,9 @@ SpaceProjectile::SpaceProjectile(void)
 // flag for now, since no expected situations where a projectile needs to be attached & static (yet)
 void SpaceProjectile::SimulateObject(void)
 {
+	// Only simulate if we exist in the world
+	if (m_simulationstate == iObject::ObjectSimulationState::NoSimulation) return;
+
 	// Check whether we have exceeded our lifetime
 	if ((m_lifetime -= Game::TimeFactor) < 0.0f)
 	{
@@ -56,17 +67,38 @@ void SpaceProjectile::SimulateObject(void)
 		return;
 	}
 
+	// Check whether we are inside the projectile detachment period
+	if (!m_detached_from_owner)
+	{
+		// Slight hack; if the detach timer is 0, this is the first frame we are simulating.  In this case,
+		// don't perform any simulation so that the first rendered frame has the projectile in its 
+		// starting location
+		if (m_detach_time == 0U) { m_detach_time += Game::ClockDelta; return; }
+
+		// Reduce the countdown and see if we should now detach
+		if ((m_detach_time += Game::ClockDelta) > Game::C_PROJECTILE_OWNER_DETACH_PERIOD)
+		{
+			// Remove the collision exclusion that has been protecting parent and projectile from colliding with each other
+			if (m_owner)
+			{
+				this->RemoveCollisionExclusion(m_owner->GetID());
+				m_owner->RemoveCollisionExclusion(this->GetID());
+			}
+			m_detached_from_owner = true;
+		}
+	}
+
 	// Degrade linear velocity, if applicable
 	if (m_degrade_lv)
 	{
-		PhysicsState.WorldMomentum *= (m_degrade_lv_pc * Game::TimeFactor);
+		PhysicsState.WorldMomentum -= (PhysicsState.WorldMomentum * m_degrade_lv_pc * Game::TimeFactor);
 		RecalculateLocalMomentum();
 	}
 
 	// Degrade angular velocity, if applicable
 	if (m_degrade_av)
 	{
-		PhysicsState.AngularVelocity *= (m_degrade_av_pc * Game::TimeFactor);
+		PhysicsState.AngularVelocity -= (PhysicsState.AngularVelocity * m_degrade_av_pc * Game::TimeFactor);
 	}
 
 	// Apply a shift in orientation if required

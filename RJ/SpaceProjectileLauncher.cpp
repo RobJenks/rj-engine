@@ -7,7 +7,7 @@
 
 // Default constructor; sets all fields to default values
 SpaceProjectileLauncher::SpaceProjectileLauncher(void) : 
-	m_projectiledef(NULL), m_parent(NULL), m_relativepos(NULL_VECTOR), m_relativeorient(ID_QUATERNION), 
+	m_projectiledef(NULL), m_parent(NULL), m_parentturret(NULL), m_relativepos(NULL_VECTOR), m_relativeorient(ID_QUATERNION), 
 	m_launchmethod(ProjectileLaunchMethod::ApplyForce), m_launchimpulse(250.0f), m_degradelinearvelocity(true), 
 	m_linveldegradation(0.1f), m_launchwithangvel(false), m_launchangularvelocity(NULL_VECTOR), 
 	m_degradeangularvelocity(false), m_angveldegradation(0.0f), m_launchwithorientchange(false), 
@@ -29,6 +29,9 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 	// Attempt to create a new projectile from the definition; return NULL if we cannot create one for any reason
 	SpaceProjectile *proj = m_projectiledef->CreateProjectile();
 	if (!proj) return NULL;
+
+	// Maintain a reference to the object which launched us
+	proj->SetOwner(m_parent);
 
 	// Determine launch position based upon our parent object
 	D3DXVECTOR3 pos;
@@ -73,9 +76,13 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 	proj->SetOrientationShift(m_launchwithorientchange);
 	if (m_launchwithorientchange) proj->SetOrientationShiftAmount(m_projectileorientchange);
 
+	// Set collision exclusions with the "owner" object, which will then be removed a short time after launch
+	proj->AddCollisionExclusion(m_parent->GetID());
+	m_parent->AddCollisionExclusion(proj->GetID());
+
 	// Update the timestamp at which we will be ready to launch our next projectile
 	m_nextlaunch = (Game::ClockMs + m_launchinterval);
-
+	
 	// Finally, move into the world and return a pointer to the new projectile
 	proj->MoveIntoSpaceEnvironment(m_parent->GetSpaceEnvironment(), proj->GetPosition());
 	return proj;
@@ -154,6 +161,49 @@ float SpaceProjectileLauncher::DetermineApproxRange(void) const
 	// Return our best estimate of the launcher range
 	return range;
 }
+
+// Copy all launcher data from the specified source object
+void SpaceProjectileLauncher::CopyFrom(const SpaceProjectileLauncher *source)
+{
+	// Parameter check
+	if (!source) return;
+
+	// Copy all required data from the source object (no instance-specific data like 'parent' or relative pos/orient)
+	SetCode(source->GetCode());
+	SetName(source->GetName());
+	SetProjectileDefinition(source->GetProjectileDefinition());
+	SetLaunchMethod(source->GetLaunchMethod());
+	SetProjectileSpread(source->GetProjectileSpread());
+	SetLaunchInterval(source->GetLaunchInterval());
+	SetLaunchImpulse(source->GetLaunchImpulse());
+	SetProjectileOrientationChange(source->GetProjectileOrientationChange());
+	SetLaunchAngularVelocity(source->GetLaunchAngularVelocity());
+	SetLinearVelocityDegradeState(source->LinearVelocityDegrades());
+	SetLinearVelocityDegradeRate(source->GetLinearVelocityDegradeRate());
+	SetAngularVelocityDegradeState(source->AngularVelocityDegrades());
+	SetAngularVelocityDegradeRate(source->GetAngularVelocityDegradeRate());
+	SetProjectileSpread(source->GetProjectileSpread());
+}
+
+// Static method to translate launch method from its string representation
+SpaceProjectileLauncher::ProjectileLaunchMethod SpaceProjectileLauncher::TranslateLaunchMethodFromString(std::string method)
+{
+	StrLowerC(method);
+
+	if (method == "setvelocitydirect")				return SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect;
+	else											return SpaceProjectileLauncher::ProjectileLaunchMethod::ApplyForce;
+}
+
+// Static method to translate launch method to its string representation
+std::string SpaceProjectileLauncher::TranslateLaunchMethodToString(SpaceProjectileLauncher::ProjectileLaunchMethod method)
+{
+	switch (method)
+	{
+		case SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect:		return "setvelocitydirect";
+		default:																		return "applyforce";
+	}
+}
+
 
 
 

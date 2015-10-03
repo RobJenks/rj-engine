@@ -32,7 +32,9 @@
   <!-- Load the complex ship register, covering all complex ships in the game and their associated sections -->
   <include file="Ships\ComplexShipRegister.xml" />
 
-  <!-- Load turret object data -->
+  <!-- Load turret object data (must load Projectiles > Launchers > Turrets due to dependencies) -->
+  <include file="Turrets\ProjectileDefinitions.xml" />
+  <include file="Turrets\ProjectileLaunchers.xml" />
   <include file="Turrets\Turrets.xml" />
   
   <!-- Load equipment data-->

@@ -52,9 +52,12 @@ public:
 	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
 	CMPINLINE void					SetRelativePosition(const D3DXVECTOR3 & relativepos)	{ m_relativepos = relativepos; }
 
-	// Gets/sets the relative orientation of the turret on its parent object.  This will be the 'resting' orientation
+	// Gets/sets the relative resting orientation of the turret on its parent object.  This will be the 'resting' orientation
 	CMPINLINE D3DXQUATERNION		GetBaseRelativeOrientation(void) const						{ return m_baserelativeorient; }
 	void							SetBaseRelativeOrientation(const D3DXQUATERNION & orient);
+
+	// Return the actual relative orientation of the turret.  This accounts for pitch & yaw
+	CMPINLINE D3DXQUATERNION		GetTurretRelativeOrientation(void) const					{ return m_turretrelativeorient; }
 
 	// Specifies whether the turret is yaw-limited, or can rotate freely about its local up axis
 	CMPINLINE bool					IsYawLimited(void) const								{ return m_yaw_limited; }
@@ -123,6 +126,10 @@ public:
 	// Returns the number of launchers maintained within this turrent
 	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
 
+
+	// Sets a launcher to the specified object
+	Result							SetLauncher(int index, const SpaceProjectileLauncher *launcher);
+
 	// Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
 	void							ClearLauncherReferences(void);
 
@@ -135,6 +142,9 @@ public:
 		D3DXMatrixTranslation(&trans, m_position.x, m_position.y, m_position.z);
 		m_worldmatrix = (rot * trans);
 	}
+
+	// Recalculates all turret statistics based on contents; used post-initialisation to prepare turret for use
+	void							RecalculateTurretStatistics(void); 
 
 	// Perform an update of the turret position and orientation in world space
 	void							UpdatePositioning(void);
@@ -185,7 +195,6 @@ protected:
 	//		m_baserelativeorient = resting orientation, [0 0 0 1] in many cases
 	//		m_orientation = (baserelativeorient * parent_orientation), i.e. resting orientation in world space
 	//		m_turretrelativeorient = (baserelativeorient * delta_from_pitch_yaw), i.e. relative turret cannon orientation
-	//		m_turretorient = (relativeturretorient * parent_orientation), i.e. actual turret cannon orientation in world space
 	D3DXVECTOR3						m_relativepos;
 	D3DXQUATERNION					m_baserelativeorient;
 	D3DXQUATERNION					m_turretrelativeorient;
@@ -199,9 +208,6 @@ protected:
 
 	// Object world matrix, relative to its parent object.  Based on m_position and m_orientation
 	D3DXMATRIX						m_worldmatrix;
-
-	// Store orientation & inverse orientation of the turret heading (which will differ from the base turret orientation)
-	D3DXQUATERNION					m_turretorient, m_invturretorient;
 
 	// Values indicating the yaw & pitch capabilities of the turret
 	float							m_yawrate, m_pitchrate;							// Rad/sec

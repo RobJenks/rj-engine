@@ -23,29 +23,43 @@ public:
 	SpaceProjectileDefinition(void);
 
 	// Return or set the unique string code for this projectile type
-	CMPINLINE const std::string & 		GetCode(void) const					{ return m_code; }
-	CMPINLINE void						SetCode(const std::string & code)	{ m_code = code; }
+	CMPINLINE const std::string & 		GetCode(void) const							{ return m_code; }
+	CMPINLINE void						SetCode(const std::string & code)			{ m_code = code; }
 
 	// Return or set the descriptive string name for this projectile type
-	CMPINLINE const std::string & 		GetName(void) const					{ return m_name; }
-	CMPINLINE void						SetName(const std::string & name)	{ m_name = name; }
+	CMPINLINE const std::string & 		GetName(void) const							{ return m_name; }
+	CMPINLINE void						SetName(const std::string & name)			{ m_name = name; }
 
 	// Set or return the model for this projectile type
-	CMPINLINE Model *					GetModel(void) const				{ return m_model; }
-	CMPINLINE void						SetModel(Model *model)				{ m_model = model; }
+	CMPINLINE Model *					GetModel(void) const						{ return m_model; }
+	CMPINLINE void						SetModel(Model *model)						{ m_model = model; }
 
 	// Set or return other key definition fields
-	CMPINLINE float						GetMass(void) const					{ return m_mass; }
-	CMPINLINE void						SetMass(float m)					{ m_mass = m; }
+	CMPINLINE float						GetMass(void) const							{ return m_mass; }
+	CMPINLINE void						SetMass(float m)							{ m_mass = m; }
+
+	// Set or return the projectile type
+	CMPINLINE ProjectileType			GetProjectileType(void) const				{ return m_projtype; }
+	CMPINLINE void						SetProjectileType(ProjectileType t)			{ m_projtype = t; }
+
+	// Set or return the lifetime-end action for this projectile
+	CMPINLINE LifetimeEndAction			GetLifetimeEndAction(void) const			{ return m_lifeendaction; }
+	CMPINLINE void						SetLifetimeEndAction(LifetimeEndAction a)	{ m_lifeendaction = a; }
 
 	// Return or set other key object fields
-	CMPINLINE float						GetDefaultLifetime(void) const		{ return m_defaultlifetime; }
-	CMPINLINE void						SetDefaultLifetime(float L)			{ m_defaultlifetime = L; }
+	CMPINLINE float						GetDefaultLifetime(void) const				{ return m_defaultlifetime; }
+	CMPINLINE void						SetDefaultLifetime(float L)					{ m_defaultlifetime = L; }
 
 	// Creates and returns a new projectile based upon this definition
 	SpaceProjectile *					CreateProjectile(void) const;
 
+	// Static methods to translate a projectile type to/from its string representation
+	static ProjectileType				TranslateProjectileTypeFromString(std::string type);
+	static std::string					TranslateProjectileTypeToString(ProjectileType type);
 
+	// Static methods to translate a lifetime-end action to/from its string representation
+	static LifetimeEndAction			TranslateLifetimeEndActionFromString(std::string action);
+	static std::string					TranslateLifetimeEndActionToString(LifetimeEndAction action);
 
 protected:
 

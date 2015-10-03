@@ -3,7 +3,7 @@
     <Code>projectile_basic01</Code>
     <Name>Basic impactor</Name>
     <Model>unit_cone_model</Model>
-    <Mass>25000</Mass>
+    <Mass>25000.0</Mass>
     <ProjectileType>Impactor</ProjectileType>
     <DefaultLifetime>3.0</DefaultLifetime>
     <LifetimeEndAction>Disappear</LifetimeEndAction>

@@ -216,6 +216,22 @@ namespace HashedStrings
 	DefineHash(H_Yaw, "yaw");
 	DefineHash(H_Pitch, "pitch");
 	DefineHash(H_Range, "range");
+	DefineHash(H_ProjectileLauncher, "projectilelauncher");
+	DefineHash(H_Projectile, "projectile");
+	DefineHash(H_Spread, "spread");
+	DefineHash(H_Launch, "launch");
+	DefineHash(H_LaunchInterval, "launchinterval");
+	DefineHash(H_LaunchAngularVelocity, "launchangularvelocity");
+	DefineHash(H_DegradeLinearVelocity, "degradelinearvelocity");
+	DefineHash(H_DegradeAngularVelocity, "degradeangularvelocity");
+	DefineHash(H_AddOrientationDrift, "addorientationdrift");
+	DefineHash(H_ProjectileType, "projectiletype");
+	DefineHash(H_DefaultLifetime, "defaultlifetime");
+	DefineHash(H_LifetimeEndAction, "lifetimeendaction");
+	DefineHash(H_CreateLaunchers, "createlaunchers");
+	DefineHash(H_RelativePosition, "relativeposition");
+	DefineHash(H_RelativeOrientation, "relativeorientation");
+
 }
 
 

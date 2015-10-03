@@ -41,6 +41,10 @@
 #include "StaticTerrain.h"
 #include "StaticTerrainDefinition.h"
 
+#include "SpaceTurret.h"
+#include "SpaceProjectileLauncher.h"
+#include "SpaceProjectileDefinition.h"
+
 #include "Resource.h"
 #include "ResourceAmount.h"
 #include "ProductionProgress.h"
@@ -181,8 +185,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadTurret(child);
 		} else if (name == D::NODE_ProjectileLauncher) {
 			res = IO::Data::LoadProjectileLauncher(child);
-		} else if (name == D::NODE_Projectile) { 
-			res = IO::Data::LoadProjectile(child);
+		} else if (name == D::NODE_ProjectileDefinition) { 
+			res = IO::Data::LoadProjectileDefinition(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -1549,22 +1553,10 @@ Result IO::Data::LoadTurret(TiXmlElement *node)
 				turret->SetPitchRate(prate);
 			}
 		}
-		/*else if (hash == HashedStrings::H_Range)	-- REMOVED: RANGE IS DETERMINED BASED ON LAUNCHERS INSTALLED IN THE TURRET --
+		else if (hash == HashedStrings::H_CreateLaunchers)
 		{
-			// Attempt to pull min and max range attributes for the turret
-			int rmin = IO::GetIntegerAttribute(child, "min", 10.0f);
-			int rmax = IO::GetIntegerAttribute(child, "max", 10000.0f);
-
-			// Minimum range must be below maximum, for obvious reasons
-			if (rmin >= rmax) rmax = rmin + 1.0f;
-
-			// Validate these values are within reasonable parameters
-			rmin = clamp(rmin, Game::C_MIN_TURRET_RANGE       , Game::C_MAX_TURRET_RANGE - 1.0f);
-			rmax = clamp(rmax, Game::C_MIN_TURRET_RANGE + 1.0f, Game::C_MAX_TURRET_RANGE       );
-
-			// Set the turret range limits
-			turret->SetRange(rmin, rmax);
-		}*/
+			Result result = LoadTurretLaunchers(child, turret);		// Not currently testing return code for failure
+		}
 	}
 
 	// Make sure we have any mandatory parameters
@@ -1574,10 +1566,247 @@ Result IO::Data::LoadTurret(TiXmlElement *node)
 		return ErrorCodes::CannotLoadTurretObjectWithoutAllRequiredData;
 	}
 
+	// Recalculate all turret statistics to make it ready for use
+	turret->RecalculateTurretStatistics();
+
 	// Add to the central collection of standard turret objects
 	D::AddStandardTurret(turret);
 	return ErrorCodes::NoError;
 }
+
+// Load the launcher block for a space turret
+Result IO::Data::LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret)
+{
+	// Parameter check
+	if (!node || !turret) return ErrorCodes::CannotLoadTurretLauncherBlock;
+
+	// Launcher count should be specified as an attribute at the top level
+	const char *ccount = node->Attribute("count"); if (!ccount) return ErrorCodes::CannotLoadTurretLauncherBlock;
+	int icount = atoi(ccount); if (icount <= 0) return ErrorCodes::CannotLoadTurretLauncherBlock;
+	icount = min(icount, Game::C_MAX_TURRET_LAUNCHERS);
+
+	// Initialise the turret with the specified number of launchers
+	turret->InitialiseLaunchers(icount);
+
+	// Process each launcher definition inside the block
+	Result result, overallresult = ErrorCodes::NoError;
+	std::string bkey, key, val; HashVal hash;
+	TiXmlElement *lblock = node->FirstChildElement();
+	for (lblock; lblock; lblock = lblock->NextSiblingElement())
+	{
+		bkey = lblock->Value(); StrLowerC(bkey);
+		if (bkey == "projectilelauncher")
+		{
+			// Index should be specified as an attribute on the block
+			int index = 0;
+			const char *cindex = lblock->Attribute("index"); if (!cindex) continue;
+			index = atoi(cindex); if (index < 0 || index >= icount) continue;
+
+			// Block references a valid launcher index; pull data for it
+			TiXmlElement *child = lblock->FirstChildElement();
+			for (child; child; child = child->NextSiblingElement())
+			{
+				key = child->Value(); StrLowerC(key);
+				hash = HashString(key);
+				if (hash == HashedStrings::H_Code)
+				{
+					// Copy all data from the specified launcher object
+					val = child->GetText(); StrLowerC(val);
+					result = turret->SetLauncher(index, D::GetProjectileLauncher(val));
+					if (result != ErrorCodes::NoError) overallresult = result;
+				}
+				else if (hash == HashedStrings::H_RelativePosition)
+				{
+					D3DXVECTOR3 pos = NULL_VECTOR;
+					IO::GetVector3FromAttr(child, &pos);
+					turret->GetLauncher(index)->SetRelativePosition(pos);
+				}
+				else if (hash == HashedStrings::H_RelativeOrientation)
+				{
+					D3DXQUATERNION orient = ID_QUATERNION;
+					IO::GetD3DXQUATERNIONFromAttr(child, &orient);
+					D3DXQuaternionNormalize(&orient, &orient);
+					turret->GetLauncher(index)->SetRelativeOrientation(orient);
+				}
+			}
+		}
+	}
+
+	// Return overall status after loading the entire block
+	return overallresult;
+}
+
+// Load projectile launcher data from external XML
+Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadProjectileLauncherWithInvalidParams;
+
+	// Create a new object to store the data
+	SpaceProjectileLauncher *launcher = new SpaceProjectileLauncher();
+
+	// Parse the contents of this node to populate the tile definition details
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_Code)
+		{
+			val = child->GetText(); StrLowerC(val);
+			launcher->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Name)
+		{
+			val = child->GetText();
+			launcher->SetName(val);
+		}
+		else if (hash == HashedStrings::H_Projectile)
+		{
+			val = child->GetText(); StrLowerC(val);
+			launcher->SetProjectileDefinition(D::GetProjectile(val));
+		}
+		else if (hash == HashedStrings::H_LaunchInterval)
+		{
+			const char *cms = child->Attribute("ms"); if (!cms) continue;
+			int ms = atoi(cms); ms = clamp(ms, 1, 1000000);
+			launcher->SetLaunchInterval((unsigned int)ms);
+		}
+		else if (hash == HashedStrings::H_Launch)
+		{
+			const char *ctype = child->Attribute("type");
+			const char *cimp = child->Attribute("impulse");
+			if (!ctype || !cimp) continue;
+
+			val = ctype;
+			float fimp = (float)atof(cimp); fimp = max(1.0f, fimp);
+			launcher->SetLaunchMethod(SpaceProjectileLauncher::TranslateLaunchMethodFromString(val));
+			launcher->SetLaunchImpulse(fimp);
+		}
+		else if (hash == HashedStrings::H_Spread)
+		{
+			const char *cspread = child->Attribute("radians"); if (!cspread) continue;
+			float fspread = (float)atof(cspread); fspread = clamp(fspread, 0.0f, PIOVER2 * 0.5f);	// Clamp between 0 and PI/4 rads (0 to 90 deg)
+			launcher->SetProjectileSpread(fspread);
+		}
+		else if (hash == HashedStrings::H_LaunchAngularVelocity)
+		{
+			D3DXVECTOR3 avel;
+			IO::GetVector3FromAttr(child, &avel);
+			launcher->SetLaunchAngularVelocity(avel);
+		}
+		else if (hash == HashedStrings::H_DegradeLinearVelocity)
+		{
+			const char *crate = child->Attribute("rate");
+			if (!crate) continue;
+			float frate = (float)atof(crate); frate = max(frate, 0.0f);
+			
+			launcher->SetLinearVelocityDegradeState(true);
+			launcher->SetLinearVelocityDegradeRate(frate);
+		}
+		else if (hash == HashedStrings::H_DegradeAngularVelocity)
+		{
+			const char *crate = child->Attribute("rate");
+			if (!crate) continue;
+			float frate = (float)atof(crate); frate = max(frate, 0.0f);
+
+			launcher->SetAngularVelocityDegradeState(true);
+			launcher->SetAngularVelocityDegradeRate(frate);
+		}
+		else if (hash == HashedStrings::H_AddOrientationDrift)
+		{
+			D3DXQUATERNION drift;
+			IO::GetD3DXQUATERNIONFromAttr(child, &drift);
+			launcher->SetProjectileOrientationChange(drift);
+		}
+	}
+
+	// Make sure we have all required fields
+	if (launcher->GetCode() == NullString)
+	{
+		SafeDelete(launcher);
+		return ErrorCodes::CannotLoadProjectileLauncherWithoutRequiredData;
+	}
+
+	// Add to the central collection and return success
+	D::AddStandardProjectileLauncher(launcher);
+	return ErrorCodes::NoError;
+}
+
+// Load projectile definition data from external XML
+Result IO::Data::LoadProjectileDefinition(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadProjectileDefWithInvalidParams;
+	 
+	// Create a new turret object to store the data
+	SpaceProjectileDefinition *proj = new SpaceProjectileDefinition();
+
+	// Parse the contents of this node to populate the tile definition details
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_Code)
+		{
+			val = child->GetText(); StrLowerC(val);
+			proj->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Name)
+		{
+			val = child->GetText();
+			proj->SetName(val);
+		}
+		else if (hash == HashedStrings::H_Model)
+		{
+			val = child->GetText(); StrLowerC(val);
+			proj->SetModel(Model::GetModel(val));
+		}
+		else if (hash == HashedStrings::H_Mass)
+		{
+			const char *cmass = child->GetText();
+			float fmass = (float)atof(cmass); fmass = clamp(fmass, 1.0f, 10000000.0f);
+			proj->SetMass(fmass);
+		}
+		else if (hash == HashedStrings::H_ProjectileType)
+		{
+			val = child->GetText();
+			proj->SetProjectileType(SpaceProjectileDefinition::TranslateProjectileTypeFromString(val));
+		}
+		else if (hash == HashedStrings::H_DefaultLifetime)
+		{
+			const char *clife = child->GetText(); if (!clife) continue;
+			float flife = (float)atof(clife); flife = max(flife, 0.01f);
+			proj->SetDefaultLifetime(flife);
+		}
+		else if (hash == HashedStrings::H_LifetimeEndAction)
+		{
+			val = child->GetText();
+			proj->SetLifetimeEndAction(SpaceProjectileDefinition::TranslateLifetimeEndActionFromString(val));
+		}
+	}
+
+	// Make sure we have all required fields
+	if (proj->GetCode() == NullString)
+	{
+		SafeDelete(proj);
+		return ErrorCodes::CannotLoadProjectileDefWithoutRequiredData;
+	}
+
+	// Add to the central collection and return success
+	D::AddStandardProjectile(proj);
+	return ErrorCodes::NoError;
+}
+
+
+
 
 ProductionCost *IO::Data::LoadProductionCostData(TiXmlElement *node)
 {
@@ -3298,7 +3527,7 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 		else if (hash == HashedStrings::H_ComponentTag)
 		{
 			// Pull data from each required attribute
-			const char *ccomponent = child->Attribute("parent");	if (!ccomponent) continue;
+			const char *ccomponent = child->Attribute("component");	if (!ccomponent) continue;
 			const char *ctag = child->Attribute("tag");				if (!ctag) continue;
 			int component = atoi(ccomponent);
 			std::string tag = ctag;

@@ -428,7 +428,7 @@ void RJMain::ProcessKeyboardInput(void)
 	else if (b[DIK_I])		ss->TurretController.Turrets[0]->Yaw(Game::TimeFactor);
 	else if (b[DIK_J])		ss->TurretController.Turrets[0]->Pitch(-Game::TimeFactor);
 	else if (b[DIK_M])		ss->TurretController.Turrets[0]->Pitch(Game::TimeFactor);
-	else if (b[DIK_SPACE])	ss->TurretController.Turrets[0]->Fire();
+	else if (b[DIK_K])		{ ss->TurretController.Turrets[0]->Fire(); m_keyboard.LockKey(DIK_K); }
 
 	else if (b[DIK_4])
 	{
@@ -1942,59 +1942,19 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_3, D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 1.0f);
 	}
 
-	/* Constraint testing */
-	/*D3DXVECTOR3 move = NULL_VECTOR;
-	const float amt = (Game::TimeFactor * 25.0f);
-	SimpleShip *x0 = s3[1], *x1 = s3[2];
-	Attachment<iObject*> *attach = &( x0->GetChildObjects()->at(0) );
-
-	// Force into debug mode
-	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera)
-		Game::Engine->GetCamera()->ActivateDebugCamera();
-	
-	// User input to transform parent or rotate child
-	const BOOL *key = m_keyboard.GetKeys();
-
-	{
-		if (!key[DIK_LSHIFT] && !key[DIK_LCONTROL])
-		{
-			if (key[DIK_Y])	move.z += amt;
-			if (key[DIK_H])	move.z -= amt;
-			if (key[DIK_G])	move.x -= amt;
-			if (key[DIK_J])	move.x += amt;
-			if (key[DIK_T])	move.y += amt;
-			if (key[DIK_B])	move.y -= amt;
-
-			//if (key[DIK_U])			attach->RotateChildAboutConstraint(-Game::TimeFactor);
-			//else if (key[DIK_I])	attach->RotateChildAboutConstraint(+Game::TimeFactor);
-		}
-		else if (key[DIK_LSHIFT] && !key[DIK_LCONTROL])
-		{
-			D3DXQUATERNION d = ID_QUATERNION;
-			if (key[DIK_Y])			D3DXQuaternionRotationAxis(&d, &RIGHT_VECTOR, Game::TimeFactor);
-			else if (key[DIK_H])	D3DXQuaternionRotationAxis(&d, &RIGHT_VECTOR, -Game::TimeFactor);
-			else if (key[DIK_G])	D3DXQuaternionRotationAxis(&d, &UP_VECTOR, -Game::TimeFactor);
-			else if (key[DIK_J])	D3DXQuaternionRotationAxis(&d, &UP_VECTOR, Game::TimeFactor);
-			else if (key[DIK_T])	D3DXQuaternionRotationAxis(&d, &FORWARD_VECTOR, -Game::TimeFactor);
-			else if (key[DIK_B])	D3DXQuaternionRotationAxis(&d, &FORWARD_VECTOR, Game::TimeFactor);
-
-			x0->SetOrientation(x0->GetOrientation() * d);
-		}
-		
-	}
-
-	// Move the parent object based on user input
-	x0->SetPosition(x0->GetPosition() + move);
-	*/
-
-	/* End constraint testing*/
-		
-	
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		//sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Parent point: %.2f, %.2f, %.2f", parent_point.x, parent_point.y, parent_point.z);
+		/*SpaceTurret *t = ss->TurretController.Turrets[0];
+		t->SetTarget(s2);
+		float yaw, pitch;
+		D3DXQuaternionInverse(&invparent, &t->rela)
 
+
+		DetermineYawAndPitchToTarget(ss->GetPosition(), t->GetInverseOrientation(), m_target->GetPosition(), yaw, pitch);
+
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Proj: %.1f, %.1f, %.1f  |  %.1f", obj->GetPosition().x, obj->GetPosition().y, obj->GetPosition().z,*/
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}

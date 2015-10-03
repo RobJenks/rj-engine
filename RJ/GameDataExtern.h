@@ -162,7 +162,7 @@ namespace D {
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;
 	extern const char *NODE_ProjectileLauncher;
-	extern const char *NODE_Projectile;
+	extern const char *NODE_ProjectileDefinition;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;

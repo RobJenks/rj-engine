@@ -66,7 +66,11 @@ namespace IO { namespace Data {
 	Result LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip *object);
 
 	Result LoadFaction(TiXmlElement *node);
+	
 	Result LoadTurret(TiXmlElement *node);
+	Result LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret);
+	Result LoadProjectileLauncher(TiXmlElement *node);
+	Result LoadProjectileDefinition(TiXmlElement *node);
 
 	Hardpoint *LoadHardpoint(TiXmlElement *node);
 	Result LoadSimpleShipLoadout(TiXmlElement *node);

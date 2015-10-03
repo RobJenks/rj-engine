@@ -6,6 +6,8 @@
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
 class iSpaceObject;
+class SpaceTurret;
+class SpaceProjectile;
 class SpaceProjectileDefinition;
 
 
@@ -28,7 +30,7 @@ public:
 	CMPINLINE void						SetName(const std::string & name)	{ m_name = name; }
 
 	// Returns a value indicating whether we are ready to launch a new projectile
-	CMPINLINE bool						CanLaunchProjectile(void) const								{ return (Game::ClockMs < m_nextlaunch); }
+	CMPINLINE bool						CanLaunchProjectile(void) const		{ return (Game::ClockMs >= m_nextlaunch); }
 
 	// Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Will 
 	// fire even if not ready (i.e. within reload interval), so CanLaunchProjectile() should be checked before firing
@@ -43,6 +45,9 @@ public:
 	// Methods to get or set basic object properties
 	CMPINLINE const iSpaceObject *		GetParent(void) const										{ return m_parent; }
 	CMPINLINE void						SetParent(iSpaceObject *parent)								{ m_parent = parent; }	
+	CMPINLINE const SpaceTurret *		GetParentTurret(void) const									{ return m_parentturret; }
+	CMPINLINE void						SetParentTurret(SpaceTurret *turret)						{ m_parentturret = turret; }
+
 	CMPINLINE D3DXVECTOR3				GetRelativePosition(void) const								{ return m_relativepos; }
 	CMPINLINE void						SetRelativePosition(const D3DXVECTOR3 & pos)				{ m_relativepos = pos; }
 	CMPINLINE D3DXQUATERNION			GetRelativeOrientation(void) const							{ return m_relativeorient; }
@@ -56,7 +61,9 @@ public:
 
 	CMPINLINE unsigned int				GetLaunchInterval(void) const								{ return m_launchinterval; }
 	CMPINLINE unsigned int				NextAvailableLaunch(void) const								{ return m_nextlaunch; }
-	CMPINLINE bool						IsReadyToFireNow(void) const								{ return (Game::ClockMs >= m_nextlaunch); }
+
+	// Restarts the counter until the launcher can next fire
+	CMPINLINE void						ForceReload(void)											{ m_nextlaunch = (Game::ClockMs + m_launchinterval); }
 
 	// Launch impulse is either a force or a velocity, depending on the launch method
 	CMPINLINE float						GetLaunchImpulse(void) const								{ return m_launchimpulse; }
@@ -64,10 +71,12 @@ public:
 
 	CMPINLINE bool						ImpartsOrientationShiftInFlight(void) const					{ return m_launchwithorientchange; }
 	CMPINLINE D3DXQUATERNION			GetProjectileOrientationChange(void) const					{ return m_projectileorientchange; }
-	CMPINLINE void						SetProjectileOrientationChange(const D3DXQUATERNION & dq)	{ 
+	CMPINLINE void						SetProjectileOrientationChange(const D3DXQUATERNION & dq)	
+	{
+		if (fabs(dq.x) < Game::C_EPSILON && fabs(dq.y) < Game::C_EPSILON && fabs(dq.z) < Game::C_EPSILON && fabs(dq.w) < Game::C_EPSILON) return;
 		m_projectileorientchange = dq; 
 		D3DXQuaternionNormalize(&m_projectileorientchange, &m_projectileorientchange);
-		m_launchwithorientchange = (IsIDQuaternion(m_projectileorientchange));
+		m_launchwithorientchange = (!IsIDQuaternion(m_projectileorientchange));
 	}
 
 	CMPINLINE bool						ImpartsAngularVelocityOnLaunch(void) const					{ return m_launchwithangvel; }
@@ -81,6 +90,8 @@ public:
 
 	CMPINLINE bool						LinearVelocityDegrades(void) const							{ return m_degradelinearvelocity; }
 	CMPINLINE bool						AngularVelocityDegrades(void) const							{ return m_degradeangularvelocity; }
+	CMPINLINE float						GetLinearVelocityDegradeRate(void) const					{ return m_linveldegradation; }
+	CMPINLINE float						GetAngularVelocityDegradeRate(void) const					{ return m_angveldegradation; }
 	CMPINLINE void						SetLinearVelocityDegradeState(bool degrades)				{ m_degradelinearvelocity = degrades; }
 	CMPINLINE void						SetAngularVelocityDegradeState(bool degrades)				{ m_degradeangularvelocity = degrades; }
 
@@ -103,6 +114,13 @@ public:
 	// changes that we cannot simulate accurately here (without actually firing a projectile)
 	float								DetermineApproxRange(void) const;
 
+	// Copy all launcher data from the specified source object
+	void								CopyFrom(const SpaceProjectileLauncher *source);
+
+	// Static methods to translate launch method to and from its string representation
+	static ProjectileLaunchMethod		TranslateLaunchMethodFromString(std::string method);
+	static std::string					TranslateLaunchMethodToString(ProjectileLaunchMethod method);
+
 protected:
 
 	std::string							m_code;							// Unique string code for this launcher type
@@ -111,6 +129,7 @@ protected:
 	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched
 
 	iSpaceObject *						m_parent;						// The parent object that this launcher belongs to
+	SpaceTurret *						m_parentturret;					// The parent object turret that this launcher belongs to (or NULL if N/A)
 
 	D3DXVECTOR3							m_relativepos;					// Relative position in the parent object's coordinate space
 	D3DXQUATERNION						m_relativeorient;				// Relative orientation, relative to the parent object

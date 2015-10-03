@@ -16,6 +16,10 @@ public:
 	// Constructor accepting the projectile definition as an initialisation parameter
 	SpaceProjectile(const SpaceProjectileDefinition *definition);
 
+	// Return or set the owner that launched this projectile
+	CMPINLINE iSpaceObject *		GetOwner(void) const											{ return m_owner; }
+	CMPINLINE void					SetOwner(iSpaceObject *owner)									{ m_owner = owner; }
+
 	// Return the amount of time (secs) remaining in this projectile's lifetime
 	CMPINLINE float					GetLifetime(void) const											{ return m_lifetime; }
 
@@ -51,6 +55,13 @@ protected:
 
 	// Pointer back to the projectile definition
 	const SpaceProjectileDefinition *	m_definition;			
+
+	// Maintain a reference back to the object that launched this projectile
+	iSpaceObject *						m_owner;
+
+	// Projectiles will be protected from colliding with their owners for a short period after launch, until this counter reaches the threshold
+	unsigned int						m_detach_time;						// Time that the projectile has existed, until detach takes place (ms)
+	bool								m_detached_from_owner;
 
 	// Other key fields for the projectile object
 	float								m_lifetime;								// The time (secs) remaining of this projectile's lifetime

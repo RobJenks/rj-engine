@@ -6,11 +6,11 @@
     <Projectile>projectile_basic01</Projectile>
     <Spread radians="0.1" />
     <LaunchInterval ms="2000" />
-    <Launch type="SetVelocityDirect" value="2500" />
+    <Launch type="SetVelocityDirect" impulse="1000" />
     <LaunchAngularVelocity x="0.0" y="0.0" z="1.5" />
     <DegradeLinearVelocity rate="0.05" />
     <DegradeAngularVelocity rate="0.01" />
-    <AddOrientationDrift x="0.0" y="0.0" z="0.0" w="0.0" />
+    <!-- AddOrientationDrift x="0.0" y="0.0" z="0.0" w="1.0" /-->
 
   </ProjectileLauncher>
 

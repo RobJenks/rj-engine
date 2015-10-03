@@ -21,7 +21,6 @@ SpaceTurret::SpaceTurret(void)
 	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
-	m_turretorient = m_invturretorient = ID_QUATERNION;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;
@@ -57,8 +56,9 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 	if (m_target)
 	{
 		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
-		float yaw, pitch;
-		DetermineYawAndPitchToTarget(m_position, m_invorient, m_target->GetPosition(), yaw, pitch);
+		float yaw, pitch; D3DXQUATERNION invorient;
+		D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
+		DetermineYawAndPitchToTarget(m_position, invorient, m_target->GetPosition(), yaw, pitch);
 
 		// Attempt to yaw and pitch to keep the target in view
 		Yaw(yaw * m_yawrate * Game::TimeFactor);
@@ -168,14 +168,14 @@ void SpaceTurret::Fire(void)
 	ArticulatedModelComponent *cannon = m_articulatedmodel->GetComponent(m_component_cannon); 
 	if (!cannon) return;	
 
-	// Launch a new projectile.  TODO: in future, may want to keep track of 
-	// last projectile(s) fired?
-	launcher.LaunchProjectile(cannon->GetPosition(), cannon->GetOrientation());
+	// Launch a new projectile.  Use turret (rather than cannon-component) orientation in world space
+	// TODO: in future, may want to keep track of last projectile(s) fired?
+	launcher.LaunchProjectile(cannon->GetPosition(), (m_turretrelativeorient * m_parent->GetOrientation()));
 	
 	// If this is a multi-launcher turret, set the next launcher to be fired
 	if (m_launchercount != 1)
 	{
-		m_nextlauncher = max(m_nextlauncher + 1, m_launchercount);
+		if (++m_nextlauncher >= m_launchercount) m_nextlauncher = 0;
 	}
 
 }
@@ -203,7 +203,10 @@ void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
 void SpaceTurret::Yaw(float angle)
 {
 	// Determine the new yaw value that would result
-	float yaw = fmod((m_yaw + angle), TWOPI);
+	//float yaw = fmod((m_yaw + angle), TWOPI);
+	float yaw = (m_yaw + angle);
+	if (yaw > TWOPI)		yaw -= TWOPI;
+	else if (yaw < -TWOPI)	yaw += TWOPI;
 
 	// If this turret has a yaw limit, validate that we are allowed to execute the move
 	if (m_yaw_limited)
@@ -326,7 +329,7 @@ void SpaceTurret::UpdatePositioning(void)
 
 	// Compose our base orientation with the parent object to get the turret resting orientation, 
 	// then derive the inverse
-	m_orientation = (m_parent->GetOrientation() * m_baserelativeorient);
+	m_orientation = (m_baserelativeorient * m_parent->GetOrientation());
 	D3DXQuaternionInverse(&m_invorient, &m_orientation);
 }
 
@@ -401,12 +404,37 @@ void SpaceTurret::InitialiseLaunchers(int launcher_count)
 	}
 }
 
+// Recalculates all turret statistics based on contents; used post-initialisation to prepare turret for use
+void SpaceTurret::RecalculateTurretStatistics(void)
+{
+	// Determine approximate range of the turret based on all launcher data
+	DetermineApproxRange();
+
+	// Initialise the firing readiness for each launcher
+	for (int i = 0; i < m_launchercount; ++i)
+	{
+		m_launchers[i].ForceReload();
+	}
+}
+
 // Retrieve a reference to one of the launchers within the turrent
 SpaceProjectileLauncher * SpaceTurret::GetLauncher(int index)
 {
 	if (index < 0 || index > m_launcherubound)	return NULL;
 	else										return &(m_launchers[index]);
 }
+
+// Sets a launcher to the specified object
+Result SpaceTurret::SetLauncher(int index, const SpaceProjectileLauncher *launcher)
+{
+	// Parameter checks
+	if (index < 0 || index > m_launcherubound || !launcher)	return ErrorCodes::CannotSetTurretLauncherDefinition;
+
+	// Assign the new launcher object and return success
+	m_launchers[index].CopyFrom(launcher);
+	return ErrorCodes::NoError;
+}
+
 
 // Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
 void SpaceTurret::ClearLauncherReferences(void)
@@ -433,9 +461,7 @@ SpaceTurret * SpaceTurret::Copy(void)
 	t->InitialiseLaunchers(m_launchercount);
 	for (int i = 0; i < m_launchercount; ++i)
 	{
-		SpaceProjectileLauncher *l = t->GetLauncher(i);
-		(*l) = SpaceProjectileLauncher(m_launchers[i]);
-		l->SetParent(NULL);
+		t->SetLauncher(i, &(m_launchers[i]));
 	}
 
 	// Make a copy of the articulated model data, assuming some exists (if not, return NULL since we must have a model)
@@ -452,6 +478,9 @@ SpaceTurret * SpaceTurret::Copy(void)
 
 	// Reset orientation of the new turret
 	t->ResetOrientation();
+	
+	// Recalculate all turret statistics to prepare it for use
+	t->RecalculateTurretStatistics();
 
 	// Return the new turret object
 	return t;

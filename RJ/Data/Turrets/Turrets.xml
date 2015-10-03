@@ -6,8 +6,19 @@
     <Yaw min="-999.0" max="999.0" rate="0.5" />
     <Pitch min="-0.5" max="0.5" rate="0.25"/>
     <Range min="10.0" max="100000.0" />
-    
-    
+
+    <CreateLaunchers count="2">
+      <ProjectileLauncher index="0">
+        <Code>projectile_launcher_basic01</Code>
+        <RelativePosition x="-0.5" y="0.0" z="0.1" />
+        <RelativeOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
+      </ProjectileLauncher>
+      <ProjectileLauncher index="1">
+        <Code>projectile_launcher_basic01</Code>
+        <RelativePosition x="0.5" y="0.0" z="0.1" />
+        <RelativeOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
+      </ProjectileLauncher>
+    </CreateLaunchers>
     
   </Turret>
 </GameData>

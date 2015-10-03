@@ -260,6 +260,11 @@ namespace ErrorCodes {
 	const Result		CannotLoadTurretDataWithInvalidParams			= 2663;
 	const Result		AttributeDoesNotExist							= 2664;
 	const Result		CannotLoadTurretObjectWithoutAllRequiredData	= 2665;
+	const Result		CannotLoadProjectileLauncherWithInvalidParams	= 2666;
+	const Result		CannotLoadProjectileDefWithInvalidParams		= 2667;
+	const Result		CannotLoadProjectileLauncherWithoutRequiredData = 2668;
+	const Result		CannotLoadProjectileDefWithoutRequiredData		= 2669;
+	const Result		CannotLoadTurretLauncherBlock					= 2670;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -439,6 +444,7 @@ namespace ErrorCodes {
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;
+	const Result		CannotSetTurretLauncherDefinition				= 6001;
 
 }
 
