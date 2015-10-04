@@ -462,9 +462,8 @@ protected:
 	int									m_childcount;					// The number of child attachments, if any)
 	iObject *							m_parentobject;					// A reference to our parent attachment, if any
 	
-	Game::ID_TYPE *						m_nocollision;					// Array of any other objects that this object will NOT collide with
+	std::vector<Game::ID_TYPE>			m_nocollision;					// Array of any other objects that this object will NOT collide with
 	int									m_nocollision_count;			// The number of objects that the object will not collide with
-	int									m_nocollision_capacity;			// The capacity of the collision exclusion array
 
 	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
 	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the

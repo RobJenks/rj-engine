@@ -1945,16 +1945,18 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		/*SpaceTurret *t = ss->TurretController.Turrets[0];
+		SpaceTurret *t = ss->TurretController.Turrets[0];
 		t->SetTarget(s2);
+		
 		float yaw, pitch;
-		D3DXQuaternionInverse(&invparent, &t->rela)
+		D3DXQUATERNION orient, invorient; 
+		orient = (t->GetTurretRelativeOrientation() * ss->GetOrientation());
+		D3DXQuaternionInverse(&invorient, &orient);
+		
+		DetermineYawAndPitchToTarget(t->GetPosition(), invorient, s2->GetPosition(), yaw, pitch);
 
-
-		DetermineYawAndPitchToTarget(ss->GetPosition(), t->GetInverseOrientation(), m_target->GetPosition(), yaw, pitch);
-
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Proj: %.1f, %.1f, %.1f  |  %.1f", obj->GetPosition().x, obj->GetPosition().y, obj->GetPosition().z,*/
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %.0f,%.0f,%.0f  |  yaw: %.2f  |  pitch: %.2f", t->GetPosition().x, t->GetPosition().y,
+			t->GetPosition().z, yaw, pitch);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}

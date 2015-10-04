@@ -54,12 +54,10 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_Normal;
 	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
+	m_nocollision_count = 0;
 
 	m_childcount = 0;
 	m_parentobject = NULL;
-
-	m_nocollision = NULL;
-	m_nocollision_count = m_nocollision_capacity = 0;
 
 	// Set collision parameters
 	CollisionOBB.Parent = this;
@@ -128,8 +126,8 @@ void iObject::InitialiseCopiedObject(iObject *source)
 	m_childcount = 0;
 
 	// Remove any collision exclusions from this object; will not be the same as the parent
-	m_nocollision = NULL;
-	m_nocollision_count = m_nocollision_capacity = 0;
+	m_nocollision.clear();
+	m_nocollision_count = 0;
 
 	// Deep-copy the object collision data
 	OrientedBoundingBox::CloneOBBHierarchy(source->CollisionOBB, CollisionOBB);
@@ -504,59 +502,20 @@ void iObject::AddCollisionExclusion(Game::ID_TYPE object)
 	// We only want to add this exclusion if we don't already have it
 	if (CollisionExcludedWithObject(object)) return;
 
-	// If the array of exclusions is at capacity then we want to extend it
-	if (m_nocollision_count == m_nocollision_capacity)
-	{
-		// If we currently have no exclusions, allocate an initial array for just one ID
-		if (m_nocollision_capacity == 0)
-		{
-			m_nocollision = (Game::ID_TYPE*)malloc(sizeof(Game::ID_TYPE));
-			if (m_nocollision) { m_nocollision_count = m_nocollision_capacity = 1; m_nocollision[0] = object; }
-			return;
-		}
+	// Make sure we are not exceeding the capacity limit; if so, simply quit here
+	if (m_nocollision_count >= Game::C_MAX_OBJECT_COLLISION_EXCLUSIONS) return;
 
-		// If we are exceeding the capacity limit then simply quit here
-		// TODO: in future, we could do a pass through the object array to see if any can be excluded..?  Probably not necessary
-		else if (m_nocollision_capacity >= Game::C_MAX_OBJECT_COLLISION_EXCLUSIONS) return;
-
-		// Otherwise, we want to double the array capacity
-		else
-		{
-			// Attempt to allocate new memory.  If this fails, revert the capacity change and return immediately without adding anything
-			m_nocollision_capacity *= 2;
-			Game::ID_TYPE *newdata = (Game::ID_TYPE*)realloc(m_nocollision, sizeof(Game::ID_TYPE) * m_nocollision_capacity);
-			if (!newdata) { m_nocollision_capacity /= 2; return; }
-
-			// Store the ID in the first new element, initialise the remainder to zero and then return
-			m_nocollision[m_nocollision_count] = object;
-			++m_nocollision_count;
-			for (int i = m_nocollision_count; i < m_nocollision_capacity; ++i) m_nocollision[i] = 0;
-			return;
-		}
-	}
-	else
-	{
-		// We did not have to perform any reallocation; simply store the new ID and return
-		m_nocollision[m_nocollision_count] = object;
-		++m_nocollision_count;
-		return;
-	}
+	// Add to the collision exclusion array
+	m_nocollision.push_back(object);
+	m_nocollision_count = m_nocollision.size();
 }
 
 // Remove an exclusion, allowing this object to collide with the specified object again
 void iObject::RemoveCollisionExclusion(Game::ID_TYPE object)
 {
-	// Look for this object in the list of exclusions
-	for (int i = 0; i < m_nocollision_count; ++i)
-	{
-		if (m_nocollision[i] == object)
-		{
-			// If we have found this ID in the array, move any subsequent elements back by one to overlap it
-			for (int j = (i+1); j < m_nocollision_count; ++j) m_nocollision[j-1] = m_nocollision[j];
-			--m_nocollision_count;
-			return;
-		}
-	}
+	// Remove this collision exclusion if it exists in the array
+	RemoveFromVector<Game::ID_TYPE>(m_nocollision, object);
+	m_nocollision_count = m_nocollision.size();
 }
 
 // Static method to translate from an object simulation state to its string representation

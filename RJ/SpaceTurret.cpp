@@ -32,6 +32,7 @@ SpaceTurret::SpaceTurret(void)
 	m_maxrange = 10000.0f; m_maxrangesq = (10000.0f * 10000.0f);
 	m_nexttargetanalysis = 0U;
 	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
+	m_firedelay = 0U;
 }
 
 // Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
@@ -60,9 +61,17 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 		D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
 		DetermineYawAndPitchToTarget(m_position, invorient, m_target->GetPosition(), yaw, pitch);
 
+		// If pitch and yaw are very close to target, we can begin firing
+		float ayaw = fabs(yaw), apitch = fabs(pitch);
+		if (ayaw < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD && apitch < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD)
+		{
+			// We are within the firing threshold.  This will only fire if the turret is ready to do so
+			Fire();
+		}
+		
 		// Attempt to yaw and pitch to keep the target in view
-		Yaw(yaw * m_yawrate * Game::TimeFactor);
-		Pitch(pitch * m_pitchrate * Game::TimeFactor);
+		if (ayaw > Game::C_EPSILON)		Yaw(yaw * m_yawrate * Game::TimeFactor);
+		if (apitch > Game::C_EPSILON)	Pitch(pitch * m_pitchrate * Game::TimeFactor);
 	}
 }
 
@@ -171,11 +180,19 @@ void SpaceTurret::Fire(void)
 	// Launch a new projectile.  Use turret (rather than cannon-component) orientation in world space
 	// TODO: in future, may want to keep track of last projectile(s) fired?
 	launcher.LaunchProjectile(cannon->GetPosition(), (m_turretrelativeorient * m_parent->GetOrientation()));
-	
+
 	// If this is a multi-launcher turret, set the next launcher to be fired
 	if (m_launchercount != 1)
 	{
+		// Update the index of the next launcher
 		if (++m_nextlauncher >= m_launchercount) m_nextlauncher = 0;
+
+		// Make sure the time to next firing is at least the turret inter-launcher fire delay, at minimum
+		unsigned int turretready = (Game::ClockMs + m_firedelay);
+		if (m_launchers[m_nextlauncher].NextAvailableLaunch() < turretready)
+		{
+			m_launchers[m_nextlauncher].SetNextAvailableLaunch(turretready);
+		}
 	}
 
 }

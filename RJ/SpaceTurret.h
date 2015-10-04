@@ -91,6 +91,9 @@ public:
 		m_maxrangesq = (m_maxrange * m_maxrange);
 	}
 
+	// Get or set the fire delay; the minimum delay between shots regardless of launcher readiness
+	CMPINLINE unsigned int			GetTurretFireDelay(void) const								{ return m_firedelay; }
+	CMPINLINE void					SetTurretFireDelay(unsigned int ms)							{ m_firedelay = ms; }
 
 	// Determines the max range of the turret based on its component launchers & projectiles.  Is only
 	// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
@@ -178,6 +181,7 @@ protected:
 	int								m_launchercount;			// The total count of launcher objects
 	int								m_launcherubound;			// Efficiency measure; the upper bound of the launcher array.  (LauncherCount - 1)
 	int								m_nextlauncher;				// The next launcher that will fire a projectile
+	unsigned int					m_firedelay;				// The minimum period between shots, regardless of launcher readiness
 
 	// Current target that the turret is tracking
 	iSpaceObject *					m_target;

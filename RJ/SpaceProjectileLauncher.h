@@ -61,6 +61,7 @@ public:
 
 	CMPINLINE unsigned int				GetLaunchInterval(void) const								{ return m_launchinterval; }
 	CMPINLINE unsigned int				NextAvailableLaunch(void) const								{ return m_nextlaunch; }
+	CMPINLINE void						SetNextAvailableLaunch(unsigned int launchtime)				{ m_nextlaunch = launchtime; }
 
 	// Restarts the counter until the launcher can next fire
 	CMPINLINE void						ForceReload(void)											{ m_nextlaunch = (Game::ClockMs + m_launchinterval); }

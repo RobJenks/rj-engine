@@ -1553,6 +1553,12 @@ Result IO::Data::LoadTurret(TiXmlElement *node)
 				turret->SetPitchRate(prate);
 			}
 		}
+		else if (hash == HashedStrings::H_TurretFireDelay)
+		{
+			const char *cms = child->Attribute("ms"); if (!cms) continue;
+			int ms = atoi(cms); ms = max(ms, 1);
+			turret->SetTurretFireDelay((unsigned int)ms);
+		}
 		else if (hash == HashedStrings::H_CreateLaunchers)
 		{
 			Result result = LoadTurretLaunchers(child, turret);		// Not currently testing return code for failure

@@ -231,7 +231,7 @@ namespace HashedStrings
 	DefineHash(H_CreateLaunchers, "createlaunchers");
 	DefineHash(H_RelativePosition, "relativeposition");
 	DefineHash(H_RelativeOrientation, "relativeorientation");
-
+	DefineHash(H_TurretFireDelay, "turretfiredelay");
 }
 
 

@@ -236,6 +236,7 @@ namespace Game {
 	float C_MAX_TURRET_RANGE = 100000.0f;											// Maximum distance within which a turret can fire at a target
 	unsigned int C_PROJECTILE_OWNER_DETACH_PERIOD = 1000U;							// Period within which a projectile is protected from colliding with its owner (ms)
 	int C_MAX_TURRET_LAUNCHERS = 128;												// The maximum number of launchers that a single turret can hold
+	float C_DEFAULT_FIRING_CIRCLE_THRESHOLD = 0.05f;								// Deviation in pitch/yaw within which a turret will start firing at the target
 
 	// Default tile simulation values
 	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 100U;						// Life support tiles will be simulated every 100ms, when active
