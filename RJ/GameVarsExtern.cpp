@@ -186,9 +186,11 @@ namespace Game {
 	float C_THRUST_INCREMENT_PC = 0.2f;						// Percentage of total thrust range that will be incremented/decremented by player throttle each second
 	float C_MOUSE_FLIGHT_MULTIPLIER = 1.0f;					// Multiplier to avoid mouse flight requiring the full screen bounds to achieve min/max turning
 
-	// Ship movement and manuevering constants
-	float C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL = 0.7f;	// Default turn modifier for ships when not in combat.  Can be overidden per ship/pilot
-	float C_AI_DEFAULT_TURN_MODIFIER_COMBAT = 1.0f;		// Default turn modifier for ships when in combat.  Can be overidden per ship/pilot
+	// Ship simulation, movement and manuevering constants
+	float C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL = 0.7f;			// Default turn modifier for ships when not in combat.  Can be overidden per ship/pilot
+	float C_AI_DEFAULT_TURN_MODIFIER_COMBAT = 1.0f;				// Default turn modifier for ships when in combat.  Can be overidden per ship/pilot
+	float C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE = 5000.0f;		// The default range within which ships will analyse nearby contacts
+	unsigned int C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ = 1000U;	// Default interval between analysis of nearby contacts (ms)
 
 	// Immediate Region-related data
 	float C_IREGION_BOUNDS = 150.0f;				// The maximum bounds in each direction that we will extend the immediate region

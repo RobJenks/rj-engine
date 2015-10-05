@@ -4,6 +4,7 @@
 #include "FastMath.h"
 #include "Octree.h"
 #include "iSpaceObject.h"
+#include "SimulationObjectManager.h"
 
 #include "Ship.h"
 
@@ -30,11 +31,13 @@ Ship::Ship(void)
 	this->BrakeFactor.SetAllValues(1.0f);
 	this->m_flightcomputerinterval = Game::C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;
 	this->m_timesincelastflightcomputereval = 0.0f;
+	this->m_timesincelasttargetanalysis = 0U;
 	this->m_shipenginecontrol = true;
 	this->m_targetspeed = m_targetspeedsq = m_targetspeedsqthreshold = 0.0f;
 	this->m_isturning = false;
 	this->m_targetangularvelocity = NULL_VECTOR;
 	this->m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
+	this->m_cached_contact_count = this->m_cached_enemy_contact_count = 0;
 
 	// Link the hardpoints collection to this parent object
 	m_hardpoints.SetParent<Ship>(this);
@@ -77,7 +80,14 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	TurretController.ForceClearContents();		// To avoid turret parent pointers being reset by a RemoveAll...() call
 	TurretController.SetParent(this);
 
+	// Clear any instance-specific fields
+	m_cached_contacts.clear();
+	m_cached_enemy_contacts.clear();
+	m_cached_contact_count = m_cached_enemy_contact_count = 0;
+
 	// Update any other fields that should not be replicated through the standard copy constructor
+	m_timesincelastflightcomputereval = 0.0f;
+	m_timesincelasttargetanalysis = 0U;
 	CancelAllOrders();
 	SetTargetThrustOfAllEngines(0.0f);
 
@@ -376,15 +386,28 @@ void Ship::SimulateObject(void)
 			4. Update the ship based on physics, e.g. updating the position based on momentum
 	*/
 
-	// Test whether enough time has passed for the flight computer to be evaluated again
+	// Increment the counters that determine when we next perform AI actions
 	m_timesincelastflightcomputereval += Game::TimeFactor;
+	m_timesincelasttargetanalysis += Game::ClockMs;
+
+	// Test whether enough time has passed for the flight computer to be evaluated again
 	if (m_timesincelastflightcomputereval > m_flightcomputerinterval)
 	{
+		// Also test whether we are within the interval for re-analysing nearby contacts.  Run within the flight computer
+		// block so we only have to make this test a few times per second, rather than every frame
+		if (m_timesincelasttargetanalysis > Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ)
+		{
+			// Update the vector of nearby contacts and then reset the counter
+			AnalyseNearbyContacts();
+			m_timesincelasttargetanalysis = 0U;
+		}
+		
 		// Reset any persistence flags that maintain an action between one execution of the flight computer and the next
 		m_isturning = false;
 
-		// Execute the flight computer
+		// Execute the flight computer and reset the counter
 		RunShipFlightComputer();
+		m_timesincelastflightcomputereval = 0.0f;
 	}
 
 	// Handle all ship movement, if permitted by the central simulator (if not, it means we will be moved
@@ -411,10 +434,29 @@ void Ship::SimulateObject(void)
 	}
 	
 	// Simulate all ship turrets if applicable (TODO: need to pass contacts array)
-	if (TurretController.IsActive()) TurretController.Update(std::vector<iSpaceObject*>());
+	if (HasNearbyEnemyContacts() && TurretController.IsActive()) TurretController.Update(m_cached_enemy_contacts);
 
 	// Update position of the ship in the spatial partitioning tree
 	if (m_treenode) m_treenode->ItemMoved(this, m_position);
+}
+
+// Update the collections of nearby contacts
+void Ship::AnalyseNearbyContacts(void)
+{
+	// Locate all objects in the vicinity of this object, and maintain as the cache of nearby objects
+	Game::ObjectManager.GetAllObjectsWithinDistance(this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, m_cached_contacts,
+		SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
+	m_cached_contact_count = m_cached_contacts.size();
+
+	// Also parse out specifically enemy contacts
+	for (int i = 0; i < m_cached_contact_count; ++i)
+	{
+		if (GetDispositionTowardsObject(m_cached_contacts[i]) == Faction::FactionDisposition::Hostile)
+		{
+			m_cached_enemy_contacts.push_back(m_cached_contacts[i]);
+		}
+	}
+	m_cached_enemy_contact_count = m_cached_enemy_contacts.size();
 }
 
 void Ship::DetermineNewPosition(void)

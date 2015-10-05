@@ -129,7 +129,7 @@ void SpaceTurret::EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts)
 // Force new target analysis next frame
 void SpaceTurret::ForceNewTargetAnalysis(void)							
 { 
-	m_nexttargetanalysis = (Game::ClockMs - 1U); 
+	m_nexttargetanalysis = 0U;
 }
 
 // Set the articulated model to be used by this turret.  Performs validation; if the model is not suitable, 

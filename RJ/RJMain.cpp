@@ -1946,7 +1946,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (true)
 	{
 		SpaceTurret *t = ss->TurretController.Turrets[0];
-		t->SetTarget(s2);
+		//t->SetTarget(s2);
 		
 		float yaw, pitch;
 		D3DXQUATERNION orient, invorient; 

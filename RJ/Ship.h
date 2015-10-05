@@ -112,6 +112,12 @@ public:
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);
 
+	// Update the collections of nearby contacts
+	void				AnalyseNearbyContacts(void);
+
+	// Methods relating to nearby contacts and AI analysis of the surrounding area
+	CMPINLINE bool		HasNearbyEnemyContacts(void) const		{ return m_cached_enemy_contact_count != 0; }
+
 	// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
 	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
 	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
@@ -179,6 +185,7 @@ protected:
 	float				m_flightcomputerinterval;			// Interval (secs) between executions of the flight computer
 	float				m_timesincelastflightcomputereval;	// Time (secs) since flight computer was last executed
 	bool				m_shipenginecontrol;				// Determines whether the ship will operate engines/brakes to attain target speed
+	unsigned int		m_timesincelasttargetanalysis;		// Time (ms) since the last analysis of nearby targets
 
 	float				m_targetspeed;				// The speed we want the ship flight computer to attain
 	float				m_targetspeedsq;			// Precalculated squared-target speed, for inflight efficiency
@@ -196,6 +203,11 @@ protected:
 	float				m_turnmodifier;				// Modifier applied to AI ship turns, based upon their current state (peaceful, in combat, etc)
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
+
+	std::vector<iSpaceObject*>	m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
+	std::vector<iSpaceObject*>	m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
+	int							m_cached_contact_count;			// Count of cached contacts
+	int							m_cached_enemy_contact_count;	// Count of cached enemy contacts
 
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
 	CMPINLINE float		DetermineExactYawToTarget(D3DXVECTOR3 tgt);
