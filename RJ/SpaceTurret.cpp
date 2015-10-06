@@ -59,7 +59,7 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
 		float yaw, pitch; D3DXQUATERNION invorient;
 		D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
-		DetermineYawAndPitchToTarget(m_position, invorient, m_target->GetPosition(), yaw, pitch);
+		DetermineYawAndPitchToTarget(CannonPosition(), invorient, m_target->GetPosition(), yaw, pitch);
 
 		// If pitch and yaw are very close to target, we can begin firing
 		float ayaw = fabs(yaw), apitch = fabs(pitch);
@@ -337,7 +337,9 @@ void SpaceTurret::DesignateTarget(iSpaceObject *target)
 	m_designatedtarget = target;
 }
 
-// Perform an update of the turret position and orientation in world space
+// Perform an update of the turret position and orientation in world space.  This is needed for full simulation (even
+// if not being rendered) since it will calculate the position of the cannon components in world space.  When not in 
+// full simulation we can likely approximate as only ship position/orientation
 void SpaceTurret::UpdatePositioning(void)
 {
 	// Determine turret position in world space 

@@ -1946,7 +1946,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (true)
 	{
 		SpaceTurret *t = ss->TurretController.Turrets[0];
-		//t->SetTarget(s2);
+		D3DXVECTOR3 pos = t->GetArticulatedModel()->GetComponent(2)->GetPosition();
 		
 		float yaw, pitch;
 		D3DXQUATERNION orient, invorient; 
@@ -1955,8 +1955,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		
 		DetermineYawAndPitchToTarget(t->GetPosition(), invorient, s2->GetPosition(), yaw, pitch);
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %.0f,%.0f,%.0f  |  yaw: %.2f  |  pitch: %.2f", t->GetPosition().x, t->GetPosition().y,
-			t->GetPosition().z, yaw, pitch);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %.0f,%.0f,%.0f  |  yaw: %.2f  |  pitch: %.2f", pos.x, pos.y, pos.z, yaw, pitch);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}

@@ -5,6 +5,7 @@
 
 #include "DX11_Core.h"
 #include "FiringArc.h"
+#include "ArticulatedModel.h"
 class iSpaceObject;
 class SpaceProjectileLauncher;
 
@@ -129,12 +130,14 @@ public:
 	// Returns the number of launchers maintained within this turrent
 	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
 
-
 	// Sets a launcher to the specified object
 	Result							SetLauncher(int index, const SpaceProjectileLauncher *launcher);
 
 	// Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
 	void							ClearLauncherReferences(void);
+
+	// Returns a constant reference to the cannon position in world space, for use in calculating the firing trajectory
+	CMPINLINE D3DXVECTOR3			CannonPosition(void) const			{ return m_articulatedmodel->GetComponents()[m_component_cannon]->GetPosition(); }
 
 	// Recalculates the object world matrix
 	CMPINLINE void					DetermineWorldMatrix(void)
