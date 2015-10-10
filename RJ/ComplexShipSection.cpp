@@ -38,6 +38,9 @@ ComplexShipSection::ComplexShipSection(void)
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
+
+	// Ship sections objects will calculate their own world transforms based on parent ship data data, not via the normal iObject methods
+	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_None;
 }
 
 ComplexShipSection *ComplexShipSection::Create(const string & code)
@@ -140,33 +143,22 @@ void ComplexShipSection::RecalculateShipDataFromCurrentState(void)
 // Derives a new offset matrix for the section, based on its ship-related position and rotation
 void ComplexShipSection::DeriveNewSectionOffsetMatrix(void)
 {
-	D3DXMATRIX centre, rot, trans;
-
-	// Determine the centre offset matrix to use based upon the section model size / centre point
-	if (m_model && m_model->IsGeometryLoaded())
-	{
-		const D3DXVECTOR3 centrepoint = m_size * 0.5f; //m_model->GetModelCentre();
-		D3DXMatrixTranslation(&centre, -centrepoint.x, -centrepoint.y, -centrepoint.z);
-	}
-	else
-	{
-		centre = ID_MATRIX;
-	}
+	D3DXMATRIX rot, trans;
 
 	// Construct a rotation matrix based upon our rotation value
 	switch (m_rotation)
 	{
-		case Rotation90Degree::Rotate90: D3DXMatrixRotationY(&rot, PIOVER2); break;
-		case Rotation90Degree::Rotate180: D3DXMatrixRotationY(&rot, PI); break;
-		case Rotation90Degree::Rotate270: D3DXMatrixRotationY(&rot, PI + PIOVER2); break;
-		default: rot = ID_MATRIX; break;
+		case Rotation90Degree::Rotate90:	D3DXMatrixRotationY(&rot, PIOVER2);			break;
+		case Rotation90Degree::Rotate180:	D3DXMatrixRotationY(&rot, PI);				break;
+		case Rotation90Degree::Rotate270:	D3DXMatrixRotationY(&rot, PI + PIOVER2);	break;
+		default:							rot = ID_MATRIX;							break;
 	}
 
 	// Translation matrix is simply constructed from the section position offset
 	D3DXMatrixTranslation(&trans, m_relativepos.x, m_relativepos.y, m_relativepos.z);
 
 	// Construct the section offset matrix based on (WM_offset = centretrans * rot * trans)
-	m_sectionoffsetmatrix = (centre * rot * trans);
+	m_sectionoffsetmatrix = (rot * trans);
 }
 
 // Add a hardpoint to the section.  Updates will be triggered if they are not suspended

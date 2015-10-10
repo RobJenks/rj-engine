@@ -137,7 +137,21 @@ void SpaceProjectile::CollisionWithObject(iObject *object, const GamePhysicsEngi
 // Method called when the projectile exceeds its defined lifetime
 void SpaceProjectile::EndProjectileLifetime(void)
 {
-	m_model = NULL;
+	// Take different action depending on the type of projectile
+	if (m_definition)
+	{
+		SpaceProjectileDefinition::LifetimeEndAction action = m_definition->GetLifetimeEndAction();
+
+		// If this projectile detonates at life-end then generate the explosion, damage and impulse here
+		if (action == SpaceProjectileDefinition::LifetimeEndAction::Detonate)
+		{
+
+		}
+	}
+
+	// Regardless of lifetime end action, we finally want to destroy the projectile object and remove it from the simulation
+	this->Shutdown
+
 }
 
 // Shut down the projectile object, deallocating all resources.  Inherited from iObject

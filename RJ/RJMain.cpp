@@ -424,16 +424,9 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
-	if (b[DIK_U])			ss->TurretController.Turrets[0]->Yaw(-Game::TimeFactor);
-	else if (b[DIK_I])		ss->TurretController.Turrets[0]->Yaw(Game::TimeFactor);
-	else if (b[DIK_J])		ss->TurretController.Turrets[0]->Pitch(-Game::TimeFactor);
-	else if (b[DIK_M])		ss->TurretController.Turrets[0]->Pitch(Game::TimeFactor);
-	else if (b[DIK_K])		{ ss->TurretController.Turrets[0]->Fire(); m_keyboard.LockKey(DIK_K); }
-
-	else if (b[DIK_4])
-	{
-
-	}
+	if (b[DIK_U])			cs->ApplyAngularVelocity(D3DXVECTOR3(0.0f, -1.0f * Game::TimeFactor, 0.0f));
+	else if (b[DIK_I])		cs->ApplyAngularVelocity(D3DXVECTOR3(0.0f, +1.0f * Game::TimeFactor, 0.0f));
+	
 
 	if (b[DIK_5])
 	{
@@ -1865,8 +1858,24 @@ void RJMain::__CreateDebugScenario(void)
 	dbg_turret->SetPitchRate(0.25f);
 	dbg_turret->SetYawRate(0.5f);*/
 	
-	dbg_turret = D::GetTurret("turret_basic01")->Copy();
-	ss->TurretController.AddTurret(dbg_turret);
+	D3DXQUATERNION rotleft, rotright;
+	D3DXQuaternionRotationAxis(&rotleft, &UP_VECTOR, -PI / 4.0f);
+	D3DXQuaternionRotationAxis(&rotright, &UP_VECTOR, PI / 4.0f);
+	SpaceTurret *t = D::GetTurret("turret_basic01");
+	D3DXVECTOR3 sz = cs->GetSize();
+	for (int i = 0; i < 4; ++i)
+		for (int j = 0; j < 2; ++j)
+		{
+			D3DXVECTOR3 pos = D3DXVECTOR3(((j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)));
+			pos -= (cs->GetSize() * 0.5f);
+			SpaceTurret *nt = t->Copy();
+			nt->SetRelativePosition(pos);
+			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
+			cs->TurretController.AddTurret(nt);
+			OutputDebugString(concat("Created turret ")(i)(" at ")(pos.x)(",")(pos.y)(",")(pos.z)("\n").str().c_str());
+		}
+
+	ss->TurretController.AddTurret(t->Copy());
 
 	/*
 	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
@@ -1943,7 +1952,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 	// Debug info line 4 - temporary debug data as required
-	if (true)
+	if (false)
 	{
 		SpaceTurret *t = ss->TurretController.Turrets[0];
 		D3DXVECTOR3 pos = t->GetArticulatedModel()->GetComponent(2)->GetPosition();

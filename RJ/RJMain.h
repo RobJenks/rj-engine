@@ -141,7 +141,6 @@ public:
 	ComplexShip *cs;
 	Actor *a1;
 	SpaceProjectile *proj;
-	SpaceTurret *dbg_turret;
 
 };
 
