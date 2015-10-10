@@ -118,7 +118,8 @@ void Ship::SimulationStateChanged(iObject::ObjectSimulationState prevstate, iObj
 // Terminates the ship object and deallocates storage.  Also passes control back to the iSpaceObject interface.
 void Ship::Shutdown(void)
 {
-
+	// Pass control back to the base class
+	iSpaceObject::Shutdown();
 }
 
 

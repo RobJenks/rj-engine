@@ -256,7 +256,15 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	}
 }
 
+// Shut down the environment object, notifying any parent environment of the change
+void iEnvironmentObject::Shutdown(void)
+{
+	// Notify any parent environment that this object is being removed
+	MoveIntoEnvironment(NULL);
 
+	// Pass control to the base class
+	iObject::Shutdown();
+}
 
 
 

@@ -76,6 +76,9 @@ public:
 	// a defined threshold, so excluding e.g. normal floor collisions
 	void										CollisionWithTerrain(const GamePhysicsEngine::TerrainImpactData & impact);
 
+	// Shut down the environment object, notifying any parent environment of the change
+	void										Shutdown(void);
+
 protected:
 
 	// Parent environment that the object is located in, and the element bounds within which it exists

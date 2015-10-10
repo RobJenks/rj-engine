@@ -295,9 +295,21 @@ namespace Game {
 		if (instance_code == NullString) return NULL;
 		HashVal hash = HashString(instance_code);
 
+		// Compare hash values for more efficient comparison
 		ObjectRegister::const_iterator it_end = Game::Objects.end();
 		for (ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
-			if ((it->second) && (it->second)->GetInstanceCodeHash() == hash) return (it->second);
+			if ((it->second.Active) && (it->second.Object) && (it->second.Object)->GetInstanceCodeHash() == hash) return (it->second.Object);
+
+		return NULL;
+	}
+
+	// Find an object based on its instance hash
+	iObject *FindObjectInGlobalRegister(const HashVal & instance_hash)
+	{
+		// Compare hash values for more efficient comparison
+		ObjectRegister::const_iterator it_end = Game::Objects.end();
+		for (ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
+			if ((it->second.Active) && (it->second.Object) && (it->second.Object)->GetInstanceCodeHash() == instance_hash) return (it->second.Object);
 
 		return NULL;
 	}

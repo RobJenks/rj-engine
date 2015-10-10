@@ -150,13 +150,18 @@ void SpaceProjectile::EndProjectileLifetime(void)
 	}
 
 	// Regardless of lifetime end action, we finally want to destroy the projectile object and remove it from the simulation
-	this->Shutdown
-
+	Shutdown();
 }
 
 // Shut down the projectile object, deallocating all resources.  Inherited from iObject
 void SpaceProjectile::Shutdown(void)
 {
-
+	// Pass control to the base class
+	iSpaceObject::Shutdown();
 }
+
+
+
+
+
 

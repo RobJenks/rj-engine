@@ -522,9 +522,10 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::ObjectRegister::iterator it_end = Game::Objects.end();
 			for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
 			{
-				if (it->second && it->second->GetName() == "DIK_7_SPAWNED_SHIP" && it->second->GetObjectType() == iObject::ObjectType::SimpleShipObject)
+				if (it->second.Object && it->second.Object->GetName() == "DIK_7_SPAWNED_SHIP" && 
+					it->second.Object->GetObjectType() == iObject::ObjectType::SimpleShipObject)
 				{
-					SimpleShip *s = (SimpleShip*)it->second;
+					SimpleShip *s = (SimpleShip*)it->second.Object;
 					s->CancelAllOrders();
 					s->AssignNewOrder(new Order_MoveToPosition(D3DXVECTOR3(	s->GetPosition().x + frand_lh(-2500.0f, 2500.0f),
 																			0.0f,
@@ -1091,7 +1092,9 @@ Result RJMain::InitialisePlayer(void)
 Result RJMain::InitialiseCoreDataStructures(void)
 {
 	// Zero the global memstate structure, which may be used for tracking allocations depending on game settings
-	memset(&m_memstate, 0, sizeof(m_memstate));
+#	if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
+		memset(&m_memstate, 0, sizeof(m_memstate));
+#	endif
 
 	// Schedule the central tree-pruning component to run on a regular basis.  It will maintain the tree for 
 	// each system that is added to the universe
@@ -1168,10 +1171,10 @@ void RJMain::TerminateObjectRegisters(void)
 	while (it != it_end)
 	{
 		// Make sure this object still exists
-		if (it->second)
+		if (it->second.Active && it->second.Object)
 		{
-			it->second->Shutdown();			// Call virtual shutdown method on the object
-			delete (it++)->second;			// Delete the object, using post-increment to avoid invalidating the pointer
+			it->second.Object->Shutdown();			// Call virtual shutdown method on the object
+			delete (it++)->second.Object;			// Delete the object, using post-increment to avoid invalidating the pointer
 		}
 		else
 		{
@@ -1875,7 +1878,7 @@ void RJMain::__CreateDebugScenario(void)
 			OutputDebugString(concat("Created turret ")(i)(" at ")(pos.x)(",")(pos.y)(",")(pos.z)("\n").str().c_str());
 		}
 
-	ss->TurretController.AddTurret(t->Copy());
+	//ss->TurretController.AddTurret(t->Copy());
 
 	/*
 	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
@@ -1952,19 +1955,17 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 	// Debug info line 4 - temporary debug data as required
-	if (false)
+	if (true)
 	{
-		SpaceTurret *t = ss->TurretController.Turrets[0];
-		D3DXVECTOR3 pos = t->GetArticulatedModel()->GetComponent(2)->GetPosition();
-		
-		float yaw, pitch;
-		D3DXQUATERNION orient, invorient; 
-		orient = (t->GetTurretRelativeOrientation() * ss->GetOrientation());
-		D3DXQuaternionInverse(&invorient, &orient);
-		
-		DetermineYawAndPitchToTarget(t->GetPosition(), invorient, s2->GetPosition(), yaw, pitch);
+		int count = 0, activecount = 0;
+		Game::ObjectRegister::const_iterator it_end = Game::Objects.end();
+		for (Game::ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
+		{
+			if (it->second.Active) ++activecount;
+			++count;
+		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %.0f,%.0f,%.0f  |  yaw: %.2f  |  pitch: %.2f", pos.x, pos.y, pos.z, yaw, pitch);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Object count: %d (%d active)", count, activecount);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}

@@ -8,3 +8,10 @@ void iStaticObject::InitialiseCopiedObject(iStaticObject *source)
 	// Pass control to all base classes
 	iObject::InitialiseCopiedObject((iObject*)source);
 }
+
+// Shutdown method to remove this object from the simulation
+void iStaticObject::Shutdown(void)
+{
+	// Pass control back to the base class
+	iObject::Shutdown();
+}

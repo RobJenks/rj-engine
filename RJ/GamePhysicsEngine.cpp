@@ -24,10 +24,12 @@
 #ifdef _DEBUG
 //#	define RJ_LOG_COLLISION_DETAILS
 //#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
-#	define RJ_NEW_COLLISION_HANDLING
-//#	define RJ_OLD_COLLISION_HANDLING
-//#	define RJ_OLD_COLLISION_HANDLING_2
 #endif
+
+// Compiler setting to define the collision detection method in use
+#define RJ_NEW_COLLISION_HANDLING
+//#define RJ_OLD_COLLISION_HANDLING
+//#define RJ_OLD_COLLISION_HANDLING_2
 
 // Default constructor
 GamePhysicsEngine::GamePhysicsEngine(void)

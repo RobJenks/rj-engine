@@ -31,6 +31,9 @@ void SpaceEmitter::Shutdown(void)
 	// Shut down the associated particle emitter within the game engine
 	if (m_emitter && m_emittercode != NullString) 
 		Game::Engine->GetParticleEngine()->ShutdownParticleEmitter(m_emittercode);
+
+	// Pass control back to the base class
+	iSpaceObject::Shutdown();
 }
 
 SpaceEmitter::SpaceEmitter(void)

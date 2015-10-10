@@ -19,6 +19,9 @@ public:
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
 	void										InitialiseCopiedObject(iStaticObject *source);
+
+	// Shutdown method to remove this object from the simulation
+	void										Shutdown(void);
 };
 
 

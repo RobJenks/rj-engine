@@ -81,6 +81,9 @@ public:
 	// Determines whether this node contains the specified point.  Simple comparison to node bounds
 	CMPINLINE bool					ContainsPoint(const D3DXVECTOR3 & point);
 
+	// Returns a pointer to the specified child node (use OCTREE_*_* as index)
+	CMPINLINE Octree<T> *			GetChildNode(int child_index)	{ return m_children[child_index]; }
+
 	// Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
 	// about the 3D centre point
 	CMPINLINE int					GetRelevantChildNode(const D3DXVECTOR3 & point);
@@ -215,6 +218,7 @@ Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize), 
 	// Initialise item storage to the desired maximum item count
 	m_items.reserve(Game::C_OCTREE_MAX_NODE_ITEMS);
 	m_itemcount = 0;
+	m_items.clear();
 
 	// Initialise other fields to default values
 	m_pruningflag = false;
@@ -251,9 +255,10 @@ void Octree<T>::Initialise(Octree<T> *parent, float x0, float x1, float y0, floa
 	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
 
-	// Initialise item storage to the desired maximum item count
+	// Initialise item storage to the desired maximum item count, and ensure no items remain in the node from previous uses
 	m_items.reserve(Game::C_OCTREE_MAX_NODE_ITEMS);
 	m_itemcount = 0;
+	m_items.clear();
 
 	// Initialise other fields to default values
 	m_pruningflag = false;

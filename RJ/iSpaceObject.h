@@ -41,6 +41,8 @@ public:
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObject::SimulationStateChanged() to maintain the chain
 	void									SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
 
+	// Shutdown method to remove the space object from simulation
+	void									Shutdown(void);
 
 protected:
 

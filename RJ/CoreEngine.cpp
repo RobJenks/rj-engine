@@ -2093,7 +2093,7 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 	D3DXVECTOR3 v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
 
 	// Get a reference to the environment object
-	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::Objects[m_debug_renderenvboxes];
+	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::Objects[m_debug_renderenvboxes].Object;
 	if (!parent) return;
 
 	// Iterate through all active objects within this parent environment

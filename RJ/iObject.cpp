@@ -250,15 +250,29 @@ void iObject::RemoveSimulationHub(void)
 	}
 }
 
-
-// Default destructor
-iObject::~iObject(void)
+// Virtual shutdown method that must be implemented by all objects
+void iObject::Shutdown(void)
 {
 	// Release any attachments from this object to others
 	ReleaseAllAttachments();
 
-	// De-register from the global collection
+	// If this object is part of any mutual collision exclusions, remove from the other object in the pair
+	iObject *obj;
+	for (int i = 0; i < m_nocollision_count; ++i)
+	{
+		obj = Game::GetObjectByID(m_nocollision[i]);
+		if (obj) obj->RemoveCollisionExclusion(m_id);
+	}
+
+	// De-register from the global collection before the object is finally deallocated.  The per-frame cleanup
+	// code will then process the unregister list and deallocate/delete this object
 	iObject::UnregisterObject(this);
+}
+
+
+// Default destructor
+iObject::~iObject(void)
+{
 }
 
 // Set the size of this object.  Recalculates any dependent fields, e.g. those involved in collision detection
@@ -359,11 +373,19 @@ void iObject::UpdateGlobalObjectCollection(void)
 	if (n != 0)
 	{
 		// Process each request in turn
+		iObject *obj; Game::ID_TYPE id;
 		for (int i = 0; i < n; ++i)
 		{
+			// Get a reference to the object being removed
+			id = Game::UnregisterList[i];
+			obj = Game::Objects[id].Object;
+
 			// Remove each object from the global collection
-			Game::Objects[Game::UnregisterList[i]] = NULL;		// Remove the pointer first; ensures we are deregistered, and also prevents ".erase()" from calling its destructor
-			Game::Objects.erase(Game::UnregisterList[i]);		// Erasing from the map will remove the key and element, reducing search space for the future
+			Game::Objects[id].Object = NULL;	// Remove the pointer first; ensures we are deregistered, and also prevents ".erase()" from calling its destructor
+			Game::Objects.erase(id);			// Erasing from the map will remove the key and element, reducing search space for the future
+
+			// Finally call the destructor for this object to deallocate all resources
+			delete obj;
 		}
 
 		// Clear the pending unregister list
@@ -382,7 +404,7 @@ void iObject::UpdateGlobalObjectCollection(void)
 			obj = Game::RegisterList[i]; if (!obj) continue;
 
 			// Register with the global collection
-			Game::Objects[obj->GetID()] = obj;
+			Game::Objects[obj->GetID()] = Game::ObjectRegisterEntry(obj);
 		}
 
 		// Clear the pending registration list

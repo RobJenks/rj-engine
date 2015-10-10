@@ -227,7 +227,7 @@ public:
 	void									RemoveSimulationHub(void);
 
 	// Virtual shutdown method that must be implemented by all objects
-	virtual void							Shutdown(void) = 0;
+	virtual void							Shutdown(void);
 
 	// The size of this object in world coordinates
 	CMPINLINE D3DXVECTOR3					GetSize(void) const					{ return m_size; }
@@ -512,12 +512,15 @@ CMPINLINE void iObject::RegisterObject(iObject *obj)
 CMPINLINE void iObject::UnregisterObject(iObject *obj)
 {
 	// Check whether this object is in fact registered with the global collection
-	if (obj && Game::Objects.count(obj->GetID()) > 0)
+	if (obj && Game::Objects.count(obj->GetID()) != 0)
 	{
 		// If it is, add it's ID to the shutdown list for removal in the next cycle.  Add the ID rather than
 		// the object since this unregistering could be requested as part of object shutdown, and when the
 		// unregister list is next processed the object may no longer be valid.
 		Game::UnregisterList.push_back(obj->GetID());
+
+		// Flag the object as inactive in the global collection to avoid processing it in the upcoming frame
+		Game::Objects[obj->GetID()].Active = false;
 	}
 }
 

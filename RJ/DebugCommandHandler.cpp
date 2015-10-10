@@ -149,14 +149,14 @@ void DebugCommandHandler::ClearAllSpawnedShips(void)
 	while (it != it_end)
 	{
 		// If this ship was debug-spawned then remove it now
-		if (it->second && it->second->GetName() == "DebugSpawnedShip")
+		if (it->second.Active && it->second.Object && it->second.Object->GetName() == "DebugSpawnedShip")
 		{
-			it->second->Shutdown();			// Call virtual shutdown method on the object
-			delete (it++)->second;			// Delete the object, using post-increment to avoid invalidating the pointer
+			it->second.Object->Shutdown();			// Call virtual shutdown method on the object
+			delete (it++)->second.Object;			// Delete the object, using post-increment to avoid invalidating the pointer
 		}
 		else
 		{
-			++it;							// If this object was not debug-spawned
+			++it;									// If this object was not debug-spawned
 		}
 	}
 	

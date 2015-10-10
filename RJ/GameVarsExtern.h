@@ -4,18 +4,26 @@
 #define __GameVarsExternH__
 
 #include <unordered_map>
-using namespace std;
-using namespace std::tr1;
+#include "HashFunctions.h"
 class iObject;
+
 
 #ifndef __GameVarsExtern_Types_H__
 #define __GameVarsExtern_Types_H__	
 
 namespace Game {
 
-	typedef long											ID_TYPE;
-	typedef unordered_map<Game::ID_TYPE, iObject*>			ObjectRegister;
-	typedef float											HitPoints;
+	struct ObjectRegisterEntry
+	{
+		iObject *	Object;
+		bool		Active;
+		ObjectRegisterEntry(void) : Object(NULL), Active(true) { }
+		ObjectRegisterEntry(iObject *object) : Object(object), Active(true) { }
+	};
+
+	typedef long												ID_TYPE;
+	typedef unordered_map<Game::ID_TYPE, ObjectRegisterEntry>	ObjectRegister;
+	typedef float												HitPoints;
 };
 
 #endif
@@ -316,8 +324,22 @@ namespace Game {
 							elementposition.z * Game::C_CS_ELEMENT_SCALE_RECIP);
 	}
 
-	// Find an object based on its string code
+	// Test whether an object exists with the specified ID
+	CMPINLINE bool						ObjectExists(Game::ID_TYPE id)		
+	{ 
+		return (Objects.count(id) != 0 && Objects[id].Active); 
+	}
+	
+	// Return the object with the specified ID, or NULL if no object exists with that ID
+	CMPINLINE iObject *					GetObjectByID(Game::ID_TYPE id)		
+	{ 
+		return (Objects.count(id) != 0 && Objects[id].Active ? Objects[id].Object : NULL); 
+	}
+
+	// Find an object based on its string code or instance hash
 	iObject *							FindObjectInGlobalRegister(const std::string & instance_code);
+	iObject *							FindObjectInGlobalRegister(const HashVal & instance_hash);
+
 
 };
 

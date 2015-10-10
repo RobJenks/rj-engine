@@ -18,20 +18,21 @@ void Game::Logic::BeginSimulationCycle(void)
 	Game::ObjectRegister::iterator it_end = Game::Objects.end();
 	for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
 	{
-		if (it->second) ((iObject*)(it->second))->ResetSimulationFlags();
+		if (it->second.Active && it->second.Object) ((iObject*)(it->second.Object))->ResetSimulationFlags();
 	}
 }
 
 void Game::Logic::SimulateAllObjects(void)
 {
-	iObject *obj;
+	iObject *obj; Game::ID_TYPE id;
 	
 	// Process the set of objects in scope for simulation (TODO: in future, this should be the locally-relevant subset) 
 	Game::ObjectRegister::iterator it_end = Game::Objects.end();
 	for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
 	{
 		// Get a handle to this object and make sure it is valid
-		obj = it->second; if (!obj) continue;
+		obj = it->second.Object; if (!obj || !it->second.Active) continue;
+		id = obj->GetID();
 
 		// Handle any change to the object simulation state since last cycle
 		if (obj->SimulationStateChangePending()) obj->SimulationStateChanged();
@@ -39,8 +40,13 @@ void Game::Logic::SimulateAllObjects(void)
 		// Only simulate the object if it has not already been simulated
 		if (obj->Simulated() == false)
 		{
-			// Simulate the object, and set the flag once complete
+			// Simulate the object
 			obj->SimulateObject();
+
+			// Objects can be destroyed within their simulation cycle; perform a check here to ensure the object is still active
+			if (!Game::ObjectExists(id)) continue;
+
+			// Set the "simulated" flag for this frame
 			obj->SetSimulatedFlag(true);
 
 			// Update the position of any child objects, if we have any (checking count!=0 here, instead of in function, avoids unnecessary function calls)

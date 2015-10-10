@@ -42,11 +42,11 @@ void SimpleShip::InitialiseCopiedObject(SimpleShip *source)
 // Shuts down the ship object and releases associated memory
 void SimpleShip::Shutdown(void)
 {
-	// Shutdown and deallocate the base class
-	Ship::Shutdown();
-
 	// Deallocate all hardpoints owned by this ship
 	m_hardpoints.ShutdownAllHardpoints();
+
+	// Shutdown and deallocate the base class
+	Ship::Shutdown();
 }
 
 SimpleShip::~SimpleShip(void)

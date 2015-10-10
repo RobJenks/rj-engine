@@ -99,6 +99,9 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 		object->SetSpatialTreeNode(NULL);
 	}
 
+	// Remove from the system collection itself
+	RemoveFromVector<iSpaceObject*>(Objects, object);
+
 	// Remove the reference to this system from the object
 	object->SetSpaceEnvironmentDirect(NULL);
 

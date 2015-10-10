@@ -72,11 +72,20 @@ void iSpaceObject::RemoveFromEnvironment(void)
 	}
 }
 
+// Shutdown method to remove the space object from simulation
+void iSpaceObject::Shutdown(void)
+{
+	// Remove from any environment and spatial partitioning tree we currently exist in
+	RemoveFromEnvironment();
 
-// Destructor; removes the item from the space object register, if it exists
+	// Pass control back to the base class
+	iObject::Shutdown();
+}
+
+
+// Default destructor
 iSpaceObject::~iSpaceObject(void)
 {
-	// Remove from any environment we currently exist in
-	RemoveFromEnvironment();
+	
 }
 

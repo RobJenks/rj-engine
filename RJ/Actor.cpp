@@ -417,7 +417,8 @@ void Actor::CollisionWithObject(iObject *object, const GamePhysicsEngine::Impact
 // Shutdown method to deallocate resources and remove the actor
 void Actor::Shutdown(void)
 {
-	
+	// Pass control back to the base class
+	iEnvironmentObject::Shutdown();
 }
 
 // Destructor

@@ -271,6 +271,9 @@ void ComplexShipSection::Shutdown(void)
 {
 	// Deallocate all hardpoint data
 	ClearAllHardpoints(true);
+
+	// Pass control back to the base class
+	iSpaceObject::Shutdown();
 }
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
