@@ -13,8 +13,8 @@ LogManager::LogManager(void)
 		m_profilingstream = std::ofstream("profiling.txt", std::ofstream::out | std::ofstream::trunc);
 	#endif
 
-	// Default with all logging levels active
-	//for (int i = 0; i < (int)LogManager::Level::_COUNT; ++i) m_levels[i] = true;
+	// By default the log will not flush after every operation
+	m_alwaysflush = false;
 }
 
 

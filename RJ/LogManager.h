@@ -32,7 +32,25 @@ public:
 	CMPINLINE LogManager & operator<<(const T& data) 
 	{
 		m_stream << data;
+		if (m_alwaysflush) m_stream.flush();
 		return (*this);
+	}
+
+	// Function that takes a custom stream and returns it
+	typedef LogManager& (*StreamManipulator)(LogManager&);
+
+	// Stream method that accepts a function and executes it during the stream processing
+	LogManager& operator<<(StreamManipulator manip)
+	{
+		// Call the function and return its value
+		return manip(*this);
+	}
+
+	// Custom function to force a flush of log data during streaming
+	static LogManager& flush(LogManager& stream)
+	{
+		stream.LogStream().flush();
+		return stream;
 	}
 
 	// Inline methods to allow access to the primary log (m_stream is also the default for streaming directly to this object)
@@ -42,6 +60,10 @@ public:
 	#ifdef RJ_PROFILER_ACTIVE
 		CMPINLINE std::ofstream &	ProfilingStream(void)			{ return m_profilingstream; }
 	#endif
+
+	// Enable or disable flushing of the main log data after every stream operation
+	CMPINLINE void				EnableFlushAfterEveryOperation(void)	{ m_alwaysflush = true; }
+	CMPINLINE void				DisableFlushAfterEveryOperation(void)	{ m_alwaysflush = false; }
 
 	// Inherited frequent update method; no action to be taken
 	CMPINLINE void Update(void) { }
@@ -64,6 +86,7 @@ public:
 	// Streaming operators for custom types
 	CMPINLINE LogManager & operator<<(const INTVECTOR2 & rhs) {
 		m_stream << "(" << rhs.x << ", " << rhs.y << ")";
+		if (m_alwaysflush) m_stream.flush();
 		return (*this); 
 	}
 
@@ -85,8 +108,10 @@ protected:
 	#ifdef RJ_PROFILER_ACTIVE
 		std::ofstream			m_profilingstream;
 	#endif
-	// Store flags indicating whether each logging level is active
-	//bool						m_levels[LogManager::Level::_COUNT];
+	
+	// Flag indicating whether the primary log should flush after every stream operation.  Used during initialisation
+	// to make sure that all data is output before any potential crash
+		bool						m_alwaysflush;
 	
 };
 

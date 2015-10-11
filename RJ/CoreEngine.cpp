@@ -215,7 +215,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_START << "Particle engine initialised\n";
+	Game::Log << LOG_INIT_START << "Particle engine initialised\n" << LogManager::flush;
 
 	// Initialise the 2D render manager
 	res = Initialise2DRenderManager();

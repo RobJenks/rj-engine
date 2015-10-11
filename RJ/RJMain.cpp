@@ -851,8 +851,10 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Initialise all component pointers to NULL so we can accurately set up and wind down the component set
 	InitialiseComponentPointers();
 
-	// Initialise the logging component first so we can output details of the initialisation
+	// Initialise the logging component first so we can output details of the initialisation.  Enable flushing after
+	// every operation during the initialisation phase, to ensure that all data is output before any crash
 	InitialiseLogging();
+	Game::Log.EnableFlushAfterEveryOperation();
 
 	// Load player config before initialising the application
 	res = LoadPlayerConfig();
@@ -963,6 +965,8 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Return success if we have completed all initialisation functions
 	Game::Log << LOG_INIT_START << "Initialisation complete\n\n";
 	Game::Log.FlushAllStreams();
+	Game::Log.DisableFlushAfterEveryOperation();
+
 	return ErrorCodes::NoError;
 }
 
