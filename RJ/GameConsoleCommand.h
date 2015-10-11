@@ -79,8 +79,8 @@ struct GameConsoleCommand
 		// Duplicate all input parameters
 		outNewCommand.RawTextInput = RawTextInput;
 		outNewCommand.InputCommand = InputCommand;
-		int paramcount = InputParameters.size();
-		for (int i = 0; i < paramcount; ++i)
+		std::vector<std::string>::size_type paramcount = InputParameters.size();
+		for (std::vector<std::string>::size_type i = 0; i < paramcount; ++i)
 			outNewCommand.InputParameters.push_back(InputParameters[i]);
 
 		// Default all output parameters, so the new command can be executed

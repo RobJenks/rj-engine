@@ -1,0 +1,13 @@
+<Config>
+
+  <!-- Primary configuration -->
+  <Data path="../RJ/RJ/Data" />
+  
+  <!-- Graphics options (defaults) -->
+  <ScreenResolution x="1024" y="768" />
+  <SoftwareRasterizerOverride enable="false" />
+  
+  <!-- Machine-specfic config override -->
+  <include file="./Config_MachineOverride.xml" />
+  
+</Config>

@@ -641,7 +641,7 @@ void Octree<T>::PerformPruningCheck(void)
 			// than just calling on this node and having it recurse) since this allows us to stop between each call if 
 			// we exceed the node item limit
 			m_children[i]->GetItems(items);
-			if (items.size() > (unsigned int)Game::C_OCTREE_MAX_NODE_ITEMS) return;
+			if ((int)items.size() > Game::C_OCTREE_MAX_NODE_ITEMS) return;
 		}
 
 		// If we reached this point then our children contain fewer than the node limit worth of items, so we can prune the 
@@ -653,7 +653,7 @@ void Octree<T>::PerformPruningCheck(void)
 
 		// Now add the items to this node.  Change the node link from those items so that it now points to this node
 		T item;
-		m_itemcount = items.size();
+		m_itemcount = (int)items.size();
 		for (int i = 0; i < m_itemcount; ++i)
 		{
 			item = items[i];

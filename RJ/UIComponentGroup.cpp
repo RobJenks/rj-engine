@@ -20,8 +20,8 @@ void UIComponentGroup::DisableGroupRendering()
 	m_render = false;
 
 	// Loop through the collection and disable rendering at the item level
-	int n = m_items.size();
-	for (int i=0; i<n; i++)
+	ComponentGroupItems::size_type n = m_items.size();
+	for (ComponentGroupItems::size_type i = 0; i < n; ++i)
 	{
 		m_items[i].previousrenderstate = m_items[i].component->GetRenderActive();
 		m_items[i].component->SetRenderActive(false);
@@ -38,8 +38,8 @@ void UIComponentGroup::EnableGroupRendering(bool ignore_previous_state)
 	m_render = true;
 
 	// Loop through the collection and restore rendering at the item level
-	int n = m_items.size();
-	for (int i=0; i<n; i++)
+	ComponentGroupItems::size_type n = m_items.size();
+	for (ComponentGroupItems::size_type i = 0; i < n; ++i)
 	{
 		m_items[i].component->SetRenderActive( (ignore_previous_state ? true : m_items[i].previousrenderstate) );
 	}
@@ -49,10 +49,10 @@ void UIComponentGroup::EnableGroupRendering(bool ignore_previous_state)
 int UIComponentGroup::FindItem(string code)
 {
 	// Loop through the collection and try to locate the item
-	int n = m_items.size();
-	for (int i=0; i<n; i++)
+	ComponentGroupItems::size_type n = m_items.size();
+	for (ComponentGroupItems::size_type i = 0; i < n; ++i)
 	{
-		if (m_items[i].component->GetCode() == code) return i;
+		if (m_items[i].component->GetCode() == code) return (int)i;
 	}
 
 	return -1;
@@ -62,10 +62,10 @@ int UIComponentGroup::FindItem(string code)
 int UIComponentGroup::FindItem(iUIComponent *item)
 {
 	// Loop through the collection and try to locate the item
-	int n = m_items.size();
-	for (int i=0; i<n; i++)
+	ComponentGroupItems::size_type n = m_items.size();
+	for (ComponentGroupItems::size_type i = 0; i < n; ++i)
 	{
-		if (m_items[i].component == item) return i;
+		if (m_items[i].component == item) return (int)i;
 	}
 
 	return -1;

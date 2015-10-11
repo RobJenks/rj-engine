@@ -31,7 +31,7 @@ Faction::F_ID FactionManagerObject::AddFaction(Faction *faction)
 
 	// Add the new faction and update the faction count
 	m_factions.push_back(faction);
-	m_factioncount = m_factions.size();
+	m_factioncount = (int)m_factions.size();
 
 	// Also update the reverse maps back to faction IDs
 	m_factioncodemap[faction->GetCode()] = id;

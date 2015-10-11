@@ -7,7 +7,6 @@
 
 #include <d3dx11tex.h>
 #include "ErrorCodes.h"
-//#include "d3dUtil.h"
 
 class MeshGeometry
 {

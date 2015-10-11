@@ -376,8 +376,8 @@ iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_con
 
 	// Consider each candidate in turn
 	iSpaceObject *obj;
-	int n = enemy_contacts.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<iSpaceObject*>::size_type n = enemy_contacts.size();
+	for (std::vector<iSpaceObject*>::size_type i = 0; i < n; ++i)
 	{
 		// Make sure the object is valid
 		obj = enemy_contacts[i]; if (!obj) continue;

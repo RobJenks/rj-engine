@@ -117,11 +117,11 @@ public:
 	CMPINLINE void					ChangeGravityStrength(float G)	{ m_gravity = G; }
 
 	// Returns the type of attachment allowed on the specified edge of this element.  Returns "NotAllowed" by default if none is specified
-	AttachType								GetAttachPoint(Direction edge);
-	AttachPointCollection *					GetAttachPoints(void) { return &m_attachpoints; }
-	CMPINLINE int							GetAttachPointCount(void) { return m_attachpoints.size(); }
-	CMPINLINE void							AddAttachPoint(ElementAttachPoint attach) { m_attachpoints.push_back(attach); }
-	void									SetAttachPoints(AttachPointCollection *apc) { m_attachpoints = *apc; }
+	AttachType										GetAttachPoint(Direction edge);
+	AttachPointCollection *							GetAttachPoints(void) { return &m_attachpoints; }
+	CMPINLINE AttachPointCollection::size_type		GetAttachPointCount(void) { return m_attachpoints.size(); }
+	CMPINLINE void									AddAttachPoint(ElementAttachPoint attach) { m_attachpoints.push_back(attach); }
+	void											SetAttachPoints(AttachPointCollection *apc) { m_attachpoints = *apc; }
 
 	// Methods to retrieve neighbouring elements in the three-dimensional space
 	CMPINLINE ComplexShipElement *	GetLeft(void)		{ return m_left; }

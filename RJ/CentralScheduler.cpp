@@ -80,8 +80,8 @@ void CentralScheduler::RemoveFrequentUpdate(ID_TYPE id)
 	// The lower bound (binary search) function will return the first element >= to the target value, so test it here to be sure
 	if (it->ID == id)
 	{
-		// Determine the index of this element by pointer arithmetic and remove it from the vector
-		RemoveFromVectorAtIndex<ScheduledItemDetails>(m_schedule_frequent, (it - m_schedule_frequent.begin()));
+		// Remove the element at this iterator
+		m_schedule_frequent.erase(it);
 	}
 }
 
@@ -95,15 +95,15 @@ void CentralScheduler::RemoveInfrequentUpdate(ID_TYPE id)
 	if (it->ID == id)
 	{
 		// Determine the index of this element by pointer arithmetic and remove it from the vector
-		RemoveFromVectorAtIndex<ScheduledItemDetails>(m_schedule_infrequent, (it - m_schedule_infrequent.begin()));
+		m_schedule_infrequent.erase(it);
 	}
 }
 
 // Remove an item based on the object reference itself.  Pass to 
 void CentralScheduler::RemoveFrequentUpdate(ScheduledObject *object)
 {
-	int n = m_schedule_frequent.size();
-	for (int i = 0; i < n; i++)
+	std::vector<CentralScheduler::ScheduledItemDetails>::size_type n = m_schedule_frequent.size();
+	for (std::vector<CentralScheduler::ScheduledItemDetails>::size_type i = 0; i < n; ++i)
 	{
 		if (m_schedule_frequent[i].Object == object)
 		{
@@ -118,8 +118,8 @@ void CentralScheduler::RemoveFrequentUpdate(ScheduledObject *object)
 // Remove an item based on the object reference itself.  Slower than removing based on the ID since requires linear search
 void CentralScheduler::RemoveInfrequentUpdate(ScheduledObject *object)
 {
-	int n = m_schedule_infrequent.size();
-	for (int i = 0; i < n; i++)
+	std::vector<CentralScheduler::ScheduledItemDetails>::size_type n = m_schedule_infrequent.size();
+	for (std::vector<CentralScheduler::ScheduledItemDetails>::size_type i = 0; i < n; ++i)
 	{
 		if (m_schedule_infrequent[i].Object == object)
 		{

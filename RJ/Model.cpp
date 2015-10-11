@@ -250,7 +250,7 @@ void Model::AddCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
 void Model::RemoveCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
 {
 	// Loop through the vector looking for this combination
-	for (int i=0; i<m_compoundmodelcount; i++)
+	for (CompoundModelComponentCollection::size_type i = 0; i < m_compoundmodelcount; ++i)
 	{
 		if (m_compoundmodels[i].model == model && m_compoundmodels[i].offset == offset)
 		{
@@ -265,7 +265,7 @@ void Model::RemoveCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
 void Model::RemoveCompoundModelComponent(D3DXVECTOR3 offset)
 {
 	// Loop through the vector looking for this combination
-	for (int i=0; i<m_compoundmodelcount; i++)
+	for (CompoundModelComponentCollection::size_type i = 0; i < m_compoundmodelcount; ++i)
 	{
 		if (m_compoundmodels[i].offset == offset)
 		{

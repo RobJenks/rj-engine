@@ -18,9 +18,11 @@
 
 // Add compiler commments for the linker to associate with relevant precompiled libraries
 #pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3dx10.lib")
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "d3dx11.lib")
+#pragma comment(lib, "windowscodecs.lib")
 
 // Define the DXI version if it is not already set; fix to prevent compiler warnings where this is not set correctly in the DX SDK
 #ifndef DIRECTINPUT_VERSION

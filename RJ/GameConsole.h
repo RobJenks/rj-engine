@@ -35,7 +35,7 @@ public:
 	const GameConsoleCommand &			GetConsoleHistoryItem(int index);
 
 	// Returns the number of items currently held in the console history
-	CMPINLINE int						GetHistoryLength(void) const { return m_history.size(); }
+	CMPINLINE std::deque<GameConsoleCommand>::size_type		GetHistoryLength(void) const { return m_history.size(); }
 
 	// Default destructor
 	~GameConsole(void);

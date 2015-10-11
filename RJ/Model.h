@@ -170,10 +170,10 @@ class Model
 			Model *model; D3DXVECTOR3 offset; 
 			CompoundModelComponent(Model *_model, D3DXVECTOR3 _offset) { model = _model; offset = _offset; }
 		};
-		typedef								vector<CompoundModelComponent> CompoundModelComponentCollection;
-		bool								m_iscompound;
-		CompoundModelComponentCollection	m_compoundmodels;
-		int									m_compoundmodelcount;
+		typedef											vector<CompoundModelComponent> CompoundModelComponentCollection;
+		bool											m_iscompound;
+		CompoundModelComponentCollection				m_compoundmodels;
+		CompoundModelComponentCollection::size_type		m_compoundmodelcount;
 	
 };
 

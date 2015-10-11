@@ -369,12 +369,12 @@ void iObject::UpdatePositionOfChildObjects(void)
 void iObject::UpdateGlobalObjectCollection(void)
 {
 	// First process any unregister requests
-	int n = Game::UnregisterList.size();
-	if (n != 0)
+	std::vector<Game::ID_TYPE>::size_type nU = Game::UnregisterList.size();
+	if (nU != 0)
 	{
 		// Process each request in turn
 		iObject *obj; Game::ID_TYPE id;
-		for (int i = 0; i < n; ++i)
+		for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nU; ++i)
 		{
 			// Get a reference to the object being removed
 			id = Game::UnregisterList[i];
@@ -393,12 +393,12 @@ void iObject::UpdateGlobalObjectCollection(void)
 	}
 
 	// Now process any register requests
-	n = Game::RegisterList.size();
-	if (n != 0)
+	std::vector<iObject*>::size_type nR = Game::RegisterList.size();
+	if (nR != 0)
 	{
 		// Process each request in turn
 		iObject *obj;
-		for (int i = 0; i < n; ++i)
+		for (std::vector<iObject*>::size_type i = 0; i < nR; ++i)
 		{
 			// Check the object exists
 			obj = Game::RegisterList[i]; if (!obj) continue;
@@ -529,7 +529,7 @@ void iObject::AddCollisionExclusion(Game::ID_TYPE object)
 
 	// Add to the collision exclusion array
 	m_nocollision.push_back(object);
-	m_nocollision_count = m_nocollision.size();
+	m_nocollision_count = (int)m_nocollision.size();
 }
 
 // Remove an exclusion, allowing this object to collide with the specified object again
@@ -537,7 +537,7 @@ void iObject::RemoveCollisionExclusion(Game::ID_TYPE object)
 {
 	// Remove this collision exclusion if it exists in the array
 	RemoveFromVector<Game::ID_TYPE>(m_nocollision, object);
-	m_nocollision_count = m_nocollision.size();
+	m_nocollision_count = (int)m_nocollision.size();
 }
 
 // Static method to translate from an object simulation state to its string representation

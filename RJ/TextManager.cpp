@@ -45,7 +45,7 @@ Result TextManager::InitializeFont(string name, const char *fontdata, const char
 
 	// If all completed successfully then add to the collection and pass the ID of this font back to the calling function
 	m_fonts.push_back(font);
-	fontID = (m_fonts.size()-1);
+	fontID = ((int)m_fonts.size()-1);
 	
 	// Return success
 	return ErrorCodes::NoError;	
@@ -104,15 +104,14 @@ void TextManager::Shutdown()
 Result TextManager::Render(D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix)
 {
 	Result result, overallresult;
-	int sentencecount;
 	SentenceType *sentence;
 
 	// We will report the overall result based on each individual result (to render as much as possible)
 	overallresult = ErrorCodes::NoError;
 
 	// Render each sentence in turn
-	sentencecount = m_sentences.size();
-	for (int i=0; i<sentencecount; i++)
+	std::vector<SentenceType*>::size_type sentencecount = m_sentences.size();
+	for (std::vector<SentenceType*>::size_type i = 0; i<sentencecount; ++i)
 	{
 		// Get a handle to the sentence, and only render if the render flag is set
 		sentence = m_sentences.at(i);

@@ -107,13 +107,13 @@ void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 }
 
 
-ComplexShipSection *ComplexShip::GetSection(int index)
+ComplexShipSection *ComplexShip::GetSection(ComplexShip::ComplexShipSectionCollection::size_type index)
 {
 	// Perform bounds checking before we attempt to return the ship section
-	if (index < 0 || index >= (int)m_sections.size()) return NULL;
+	if (index >= m_sections.size()) return NULL;
 
 	// Return the section at the specified index
-	return m_sections.at(index);
+	return m_sections[index];
 }
 
 
@@ -171,10 +171,10 @@ void ComplexShip::RemoveShipSection(ComplexShipSection *section)
 {
 	// Sanity check; we need a valid section in order to remove it
 	if (!section) return;
-
+	
 	// Loop through the collection and attempt to locate this item
-	int n = m_sections.size();
-	for (int i = 0; i < n; i++)
+	std::vector<ComplexShip::ComplexShipSectionCollection>::size_type n = m_sections.size();
+	for (std::vector<ComplexShip::ComplexShipSectionCollection>::size_type i = 0; i < n; ++i)
 	{
 		if (m_sections.at(i) == section)
 		{
@@ -200,10 +200,10 @@ void ComplexShip::RemoveShipSection(ComplexShipSection *section)
 	}
 }
 
-void ComplexShip::RemoveShipSection(int index)
+void ComplexShip::RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionCollection>::size_type index)
 {
 	// Make sure this is a valid section
-	if (index < 0 || index >= (int)m_sections.size() || m_sections.at(index) == NULL) return;
+	if (index >= m_sections.size() || m_sections.at(index) == NULL) return;
 
 	// Clear the pointer from this section back to its parent ship object
 	m_sections.at(index)->SetParent(NULL);
@@ -253,10 +253,10 @@ void ComplexShip::BuildHardpointCollection(void)
 	{
 		// Get a reference to the section hardpoint collection
 		const std::vector<Hardpoint*> & h = (*it)->GetHardpoints();
-		int n = h.size();
+		std::vector<Hardpoint*>::size_type n = h.size();
 
 		// Add a reference to each hardpoint (i.e. NOT a clone) to the ship in turn
-		for (int i = 0; i < n; ++i) if (h[i]) m_hardpoints.AddHardpoint(h[i]);
+		for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i) if (h[i]) m_hardpoints.AddHardpoint(h[i]);
 	}
 
 	// Resume hardpoint updates, which will trigger the event that updates the ship based on all hardpoints
@@ -282,8 +282,8 @@ void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR
 	RefreshPositionImmediate();
 
 	// Now move each ship section into the environment in turn
-	int n = m_sections.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<ComplexShip::ComplexShipSectionCollection>::size_type n = m_sections.size();
+	for (std::vector<ComplexShip::ComplexShipSectionCollection>::size_type i = 0; i < n; ++i)
 	{
 		if (m_sections[i])
 		{
@@ -1141,8 +1141,8 @@ Result ComplexShip::CopyTileDataFromObject(iContainsComplexShipTiles *src)
 	// terrain objects that are still valid, and then swap the vectors at the end.  More efficient than removing
 	// items from the main vector since the majority will likely be removed here.
 	std::vector<StaticTerrain*> terrain;
-	int n = TerrainObjects.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<StaticTerrain*>::size_type n = TerrainObjects.size();
+	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
 	{
 		if (TerrainObjects[i]->GetParentTileID() == 0) terrain.push_back(TerrainObjects[i]);
 	}

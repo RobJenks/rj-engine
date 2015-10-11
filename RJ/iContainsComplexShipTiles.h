@@ -67,7 +67,7 @@ public:
 	CMPINLINE ConstTileIterator 		GetTileIteratorEnd(void) const		{ return m_tiles[0].end(); }
 	
 	// Returns the number of tiles of a particular type
-	CMPINLINE int						GetTileCountOfType(D::TileClass tileclass) const
+	CMPINLINE ComplexShipTileCollection::size_type		GetTileCountOfType(D::TileClass tileclass) const
 	{
 		if ((int)tileclass > 0 && (int)tileclass < D::TileClass::_COUNT)
 			return m_tiles[(int)tileclass].size();

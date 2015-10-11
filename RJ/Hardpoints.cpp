@@ -45,8 +45,8 @@ void Hardpoints::ClearData(void)
 	m_items.clear();
 
 	// Clear each of the hardpoint groups
-	int n = m_hpgroups.size();
-	for (int i = 0; i < n; ++i)
+	HardpointGroups::size_type n = m_hpgroups.size();
+	for (HardpointGroups::size_type i = 0; i < n; ++i)
 		m_hpgroups[i].clear();
 }
 

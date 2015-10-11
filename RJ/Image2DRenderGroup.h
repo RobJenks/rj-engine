@@ -105,14 +105,17 @@ public:
 
 	// Methods to add/remove/change instances
 	CMPINLINE InstanceCollection *			GetInstances(void) { return &m_instances; }
-	CMPINLINE Instance *					GetInstance(int index) { if (index < 0 || index >= (int)m_instances.size()) return NULL; else return &(m_instances.at(index)); }
-	CMPINLINE Instance *					GetInstanceDirect(int index) { return &(m_instances[index]); }
+	CMPINLINE Instance *					GetInstanceDirect(InstanceCollection::size_type index) { return &(m_instances[index]); }
 	Image2DRenderGroup::Instance *			GetInstanceByCode(string code);
 	Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(string code);
 	Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
 	void									RemoveInstance(Instance *instance);
-	void									RemoveInstance(int index);
-	CMPINLINE int							GetInstanceCount(void) { return m_instances.size(); }	
+	void									RemoveInstance(InstanceCollection::size_type index);
+	CMPINLINE InstanceCollection::size_type	GetInstanceCount(void) { return m_instances.size(); }	
+	CMPINLINE Instance *					GetInstance(InstanceCollection::size_type index) 
+	{ 
+		if (index >= m_instances.size()) return NULL; else return &(m_instances.at(index)); 
+	}
 
 	// Return or set the unique object key
 	CMPINLINE string					GetCode(void) { return m_code; }

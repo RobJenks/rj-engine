@@ -250,8 +250,8 @@ std::string ConcatenateStrings(const std::vector<std::string> & elements, const 
 
 	// Append each string to a string stream in turn
 	std::ostringstream ss;
-	int ubound = elements.size() - 1;
-	for (int i = 0; i <= ubound; ++i)
+	std::vector<std::string>::size_type ubound = (elements.size() - 1);
+	for (std::vector<std::string>::size_type i = 0; i <= ubound; ++i)
 	{
 		ss << elements[i];
 		if (delimit && i < ubound) ss << delimiter;

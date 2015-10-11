@@ -76,10 +76,10 @@ void iConsumesOrders::CancelOrder(Order *order, bool perform_maintenance)
 }
 
 // Cancels the order at the specified index.  Private method for internal use
-void iConsumesOrders::CancelOrderAtIndex(int index, bool perform_maintenance)
+void iConsumesOrders::CancelOrderAtIndex(OrderQueue::size_type index, bool perform_maintenance)
 {
 	// Make sure the index is valid
-	if (index < 0 || index >= (int)Orders.size()) return;
+	if (index >= Orders.size()) return;
 	Order *order = Orders.at(index);
 
 	// Remove the order from this entity's queue
@@ -118,8 +118,8 @@ void iConsumesOrders::ProcessOrderQueue(float interval)
 	bool maintenance_required = false;
 
 	// Iterate through the order queue and consider each item in turn
-	int OrderCount = Orders.size();
-	for (int i = 0; i < OrderCount; i++)
+	OrderQueue::size_type OrderCount = Orders.size();
+	for (OrderQueue::size_type i = 0; i < OrderCount; ++i)
 	{
 		// We will process this order if it is valid and active
 		order = Orders[i];
@@ -151,7 +151,8 @@ void iConsumesOrders::ProcessOrderQueue(float interval)
 // Maintains the order queue and resolves dependencies, to maintain the integrity of the remaining queue
 void iConsumesOrders::MaintainOrderQueue(void)
 {
-	int depcount = 0, id = 0, n = 0;
+	int depcount = 0;
+	OrderQueue::size_type id = 0, n;
 
 	// Reset the counter since last maintenance of the order queue
 	TimeSinceLastMaintenance = 0.0f;
@@ -159,7 +160,7 @@ void iConsumesOrders::MaintainOrderQueue(void)
 	// Pass 1: Loop through the order queue and record any active dependencies 
 	// Also use this first pass to remove any orders that are no longer active.  This is why we loop rather than iterate
 	n = Orders.size();
-	for (int i = 0; i < n; i++)
+	for (OrderQueue::size_type i = 0; i < n; ++i)
 	{
 		// Get a handle to the item
 		Order *order = Orders.at(i);
@@ -171,7 +172,7 @@ void iConsumesOrders::MaintainOrderQueue(void)
 			CancelOrderAtIndex(i, false);
 
 			// Now reduce the current index and size by 1, so we can continue from the next actual item
-			i--; n--;
+			--i; --n;
 		}
 		else	// The item is valid, so check it for dependencies
 		{
@@ -183,7 +184,7 @@ void iConsumesOrders::MaintainOrderQueue(void)
 
 				// Record this item in the dependency vector and increase the count of dependencies found
 				m_dependencycheck.push_back(DependencyInfo(order, order->Dependency, false));
-				depcount++;
+				++depcount;
 			}
 		}
 	}

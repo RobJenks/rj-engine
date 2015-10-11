@@ -27,13 +27,13 @@ CompoundLoadoutMap::~CompoundLoadoutMap(void)
 Equipment *CompoundLoadoutMap::GetEquipment(void) const
 {
 	// Make sure we have enough valid loadout data
-	int i=0; int n = this->Items.size();
+	CompoundLoadoutItems::size_type n = Items.size();
 	if (n == 0) return NULL;
 
 	// Generate a cumulative probability array
 	register float pval = 0.0f;
 	float *cprob = new float[n];
-	for (i=0; i<n; i++)
+	for (CompoundLoadoutItems::size_type i = 0; i < n; ++i)
 	{
 		CompoundLoadoutMapItem *item = this->Items.at(i);
 		pval += item->Probability;
@@ -44,15 +44,18 @@ Equipment *CompoundLoadoutMap::GetEquipment(void) const
 	float r = frand_h(pval);
 	
 	// Move through the cumulative probability array until we find the relevant item
-	for (i=0; i<n; i++)
-		if (r <= cprob[i]) {
+	for (CompoundLoadoutItems::size_type i = 0; i < n; ++i)
+	{
+		if (r <= cprob[i])
+		{
 			delete cprob;
 			return this->Items.at(i)->Equip;
 		}
-	
+	}
+
 	// Default to the last item if necessary, to avoid float rounding errors
 	delete cprob;
-	return this->Items.at(n-1)->Equip;
+	return Items.at(n-1)->Equip;
 }
 
 void CompoundLoadoutMap::AddItem(Equipment *equip, float probability)

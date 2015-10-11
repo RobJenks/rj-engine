@@ -37,7 +37,7 @@ public:
 
 	// Accessor methods for key order queue properties
 	bool									HasOrders(void)					{ return (Orders.size() > 0); }
-	int										GetOrderCount(void)				{ return  Orders.size(); }
+	OrderQueue::size_type					GetOrderCount(void)				{ return  Orders.size(); }
 
 	// Virtual method to process the specified order.  Called when processing the full queue.  Returns result of processing the order
 	virtual Order::OrderResult				ProcessOrder(Order *order) = 0;
@@ -74,7 +74,7 @@ private:
 	float									TimeSinceLastMaintenance;
 
 	// Cancels the order at the specified index
-	void									CancelOrderAtIndex(int index, bool perform_maintenance);
+	void									CancelOrderAtIndex(OrderQueue::size_type index, bool perform_maintenance);
 };
 
 

@@ -258,10 +258,10 @@ void VectorFromUnorderedMap(unordered_map<TKey, TVal> &map, vector<TVal> *pOutVe
 }
 
 template <typename T>
-void InsertIntoVector(vector<T> &vec, T obj, int index)
+void InsertIntoVector(std::vector<T> &vec, T obj, typename std::vector<T>::size_type index)
 {
 	// Get initial parameters
-	int n = vec.size();
+	std::vector<T>::size_type n = vec.size();
 
 	// Make sure the desired index is within the (future) bounds of this vector.  If not, adjust it
 	if (index < 0) index = 0;
@@ -381,6 +381,9 @@ int FindInVector(vector<T> &vec, T obj)
 	return -1;
 }
 
+// TODO: FindInVector method returns an integer (with -1 for no result) however must be case to vector::size_type for methods
+// which use it.  Can't use size_type for FindInVector since size_type is unsigned.  Better solution to avoid casting and
+// allow use of full size_type value range?
 template <typename T>
 CMPINLINE void RemoveFromVector(vector<T> &vec, T obj)
 {
@@ -394,10 +397,10 @@ CMPINLINE void RemoveFromVector(vector<T> &vec, T obj)
 
 // Removes the specified element from a vector, based on its index within the vector
 template <typename T>
-CMPINLINE void RemoveFromVectorAtIndex(std::vector<T> &vec, int index)
+CMPINLINE void RemoveFromVectorAtIndex(std::vector<T> &vec, typename std::vector<T>::size_type index)
 {
 	// Parameter check
-	if (index < 0 || index >= (int)vec.size()) return;
+	if (index < 0 || index >= vec.size()) return;
 
 	// Remove the element at this index
 	vec.erase(vec.begin() + index);
@@ -406,7 +409,7 @@ CMPINLINE void RemoveFromVectorAtIndex(std::vector<T> &vec, int index)
 // Remove an element from the specified vector.  No bounds checking; should only be used internally once
 // index is confirmed as valid
 template <typename T>
-CMPINLINE void _RemoveFromVectorAtIndex_Unchecked(std::vector<T> &vec, int index)
+CMPINLINE void _RemoveFromVectorAtIndex_Unchecked(std::vector<T> &vec, typename std::vector<T>::size_type index)
 {
 	// Remove the element at this index
 	vec.erase(vec.begin() + index);

@@ -158,7 +158,7 @@ void CameraPath::AddNode(const D3DXVECTOR3 & relativeposition, const D3DXQUATERN
 
 	// Otherwise push a new node onto the path and update the path properties
 	m_nodes.push_back(CameraPath::CameraPathNode(relativeposition, relativeorientation, object, time));
-	m_nodecount = m_nodes.size();
+	m_nodecount = (int)m_nodes.size();
 }
 
 // Removes a node at the specified index
@@ -169,7 +169,7 @@ void CameraPath::RemoveNode(int index)
 
 	// Remove from the vector at this index and update the path properties
 	RemoveFromVectorAtIndex<CameraPath::CameraPathNode>(m_nodes, index);
-	m_nodecount = m_nodes.size();
+	m_nodecount = (int)m_nodes.size();
 }
 
 // Clears all nodes from the path

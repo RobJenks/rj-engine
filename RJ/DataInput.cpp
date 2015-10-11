@@ -1264,8 +1264,8 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 {
 	Result result;
 	string key, val;
-	ComplexShipTile *tile = NULL;
-
+	ComplexShipTile *tile = NULL; 
+	
 	// Make sure we have a valid section of document to work on
 	if (!node || !pOutShipTile) return ErrorCodes::CannotLoadTileWithInvalidParameters;
 	
@@ -1281,7 +1281,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 	// Create a new tile from this definition
 	tile = def->CreateTile();
 	if (!tile) return ErrorCodes::UnknownErrorInCreatingTileFromDefinition;
-
+	
 	// Read the XML data in to populate the properties of this tile
 	ComplexShipTile::ReadBaseClassXML(node, tile);
 
@@ -2408,8 +2408,8 @@ Result IO::Data::PostProcessResources(void)
 	VectorFromUnorderedMap<string, Resource*>(D::Resources, &resources);
 
 	// First, we need to build the set of dependencies between resources based on their respective production costs
-	int n = resources.size();
-	for (int i = 0; i < n; i++)
+	std::vector<Resource*>::size_type n = resources.size();
+	for (std::vector<Resource*>::size_type i = 0; i < n; ++i)
 	{
 		// Have the production cost object associated with this resource perform post-processing.  This will resolve
 		// all the links out to other resources that are ingredients for this one
@@ -2423,7 +2423,7 @@ Result IO::Data::PostProcessResources(void)
 
 	// We will now pass through the collection once more.  This time we will follow dependencies (recursively as necessary) to determine
 	// the compound value of each resource
-	for (int i = 0; i < n; i++)
+	for (std::vector<Resource*>::size_type i = 0; i < n; i++)
 	{
 		// Get a reference to this resource
 		res = resources[i];							
@@ -2438,7 +2438,7 @@ Result IO::Data::PostProcessResources(void)
 	}
 
 	// Final safety pass through the resource collection to make sure all resources have a compound value > 0.  If not, we return an error
-	for (int i = 0; i < n; i++)
+	for (std::vector<Resource*>::size_type i = 0; i < n; i++)
 	{
 		if (resources[i]->GetCompoundValue() <= 0.0f) return ErrorCodes::ResourceCompoundValuesCouldNotAllBeDetermined;
 	}
@@ -2458,8 +2458,8 @@ Result IO::Data::PostProcessComplexShipTileData(void)
 	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles, &tiles);
 
 	// We need to run post-processing on the tile production requirements, to link to resources/other tile dependencies
-	int n = tiles.size();
-	for (int i = 0; i < n; i++)
+	vector<ComplexShipTileDefinition*>::size_type n = tiles.size();
+	for (vector<ComplexShipTileDefinition*>::size_type i = 0; i < n; ++i)
 	{
 		// Run post-processing on the production cost data
 		tile = tiles[i];								if (!tile) continue;						// Skip this if the tile doesn't exist

@@ -1,0 +1,8 @@
+<Config>
+
+  <!-- Override of graphics options for this machine -->
+  <ScreenResolution x="1152" y="648" />
+  <SoftwareRasterizerOverride enable="true" />
+  
+  
+</Config>

@@ -1114,7 +1114,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
 		{
 			// Get the number of instances to be rendered
-			instancecount = mi->second.InstanceData.size();
+			instancecount = (int)mi->second.InstanceData.size();
 			if (instancecount == 0) continue;
 
 			// Loop through the instances in batches, if the total count is larger than our limit
@@ -1161,12 +1161,13 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 {
-	const Model *model = NULL; int n;
+	const Model *model = NULL; 
+	int n;
 	vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 
 	// See whether there are any instances to be rendered
-	int size = m_renderqueueshaders[shaderindex].SortedInstances.size();
+	RM_ShaderCollection::size_type size = m_renderqueueshaders[shaderindex].SortedInstances.size();
 	if (size == 0) return;
 
 	// Sort the vector by z-order.  Uses default "operator<" defined in the RM_ZSortedInstance struct
@@ -1177,7 +1178,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 
 	// The starting model will be that of the first element (which we know exists since size>0)
 	model = m_renderqueueshaders[shaderindex].SortedInstances[size-1].ModelPtr;
-	for (int i = size-1; i >= -1; --i)									
+	for (RM_ShaderCollection::size_type i = size - 1; i >= -1; --i)
 	{
 		// If this is an instance of the same model as the previous item, and this is not the final (-1) dummy item,
 		// add another element to the render buffer
@@ -1191,7 +1192,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 		{
 			// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
 			// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
-			n = renderbuffer.size();
+			n = (int)renderbuffer.size();
 			if (n > 0)
 			{
 				// Make sure we are not over the instance limit.  If we are, simply truncate.  Should not be rendering many items this way anyway
@@ -1998,7 +1999,7 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 
 	// Increase the count of actors we processed; we can count every item that was in the queue, since they 
 	// were validated before being placed in the queue so should all render
-	m_renderinfo.ActorRenderCount += m_queuedactors.size();
+	m_renderinfo.ActorRenderCount += (int)m_queuedactors.size();
 
 	// Reset the queue now that it has been processed, so we are ready for adding new items in the next frame
 	m_queuedactors.clear();

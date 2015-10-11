@@ -59,8 +59,8 @@ public:
 
 	// Stores the consolidated result following evaluation of ship section placemnet
 	struct SectionPlacementResult {
-		int								IssueCount;
-		vector<SectionPlacementIssue>	Issues;
+		vector<SectionPlacementIssue>::size_type	IssueCount;
+		vector<SectionPlacementIssue>				Issues;
 	};
 
 	// Struct holding the mapping between ship sections and the images rendered to screen in the SD
@@ -235,7 +235,7 @@ public:
 	void								RenderCorridorTile(CSCorridorTile *tile, INTVECTOR3 tilepos);
 
 	// Renders the section attach points for a complex ship element on the SD grid
-	void								RenderElementAttachPoints(	ComplexShipElement *el, int rendercount, 
+	void								RenderElementAttachPoints(	ComplexShipElement *el, std::vector<ComplexShipElement::ElementAttachPoint>::size_type rendercount,
 																	int shipxpos, int shipypos, INTVECTOR2 gridpos);
 
 	// Rotates the ship section currently being dragged

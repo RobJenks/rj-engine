@@ -79,7 +79,7 @@ int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )
 			(Game::Application.*ptr_display)();
         }
     }
-    return msg.wParam;
+    return (int)msg.wParam;
 }
 
 

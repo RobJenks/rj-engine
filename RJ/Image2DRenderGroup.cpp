@@ -79,7 +79,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	if (m_vertices) { delete[] m_vertices; m_vertices = NULL; }
 
 	// Set the number of vertices in the vertex array.  Six vertices are required per instance.
-	int instancecount = m_instances.size();
+	int instancecount = (int)m_instances.size();
 	m_vertexCount = instancecount * 6;
 	
 	// Set the number of indices in the index array.
@@ -233,7 +233,7 @@ void Image2DRenderGroup::SetTextureDirect(Texture *tex)
 void Image2DRenderGroup::Render(void)
 {
 	// If there are no instances in the collection then we have nothing to render
-	int numinstances = m_instances.size();
+	int numinstances = (int)m_instances.size();
 	if (numinstances == 0) return;
 
 	// If the instance collection has changed in size since the vertex buffers were last constructed
@@ -402,8 +402,8 @@ void Image2DRenderGroup::Shutdown()
 void Image2DRenderGroup::ReleaseAllInstances()
 {
 	// Loop through each instance in turn
-	int n = m_instances.size();
-	for (int i=0; i<n; i++)
+	InstanceCollection::size_type n = m_instances.size();
+	for (InstanceCollection::size_type i = 0; i < n; ++i)
 	{
 		// Call the instance shutdown method 
 		m_instances[i].Shutdown();
@@ -462,7 +462,7 @@ Image2DRenderGroup::Instance *Image2DRenderGroup::AddInstance(INTVECTOR2 pos, fl
 // the instance in question doesn't already exist in the collection
 void Image2DRenderGroup::RemoveInstance(Instance *instance)
 {
-	int size = m_instances.size();
+	InstanceCollection::size_type size = m_instances.size();
 
 	// If we have zero instances (nothing to remove) then return now
 	if (size == 0) return;
@@ -475,12 +475,12 @@ void Image2DRenderGroup::RemoveInstance(Instance *instance)
 	m_instances.pop_back();
 }
 
-void Image2DRenderGroup::RemoveInstance(int index)
+void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 {
-	int size = m_instances.size();
+	InstanceCollection::size_type size = m_instances.size();
 
 	// Make sure this index is valid
-	if (index < 0 || index >= size) return;
+	if (index >= size) return;
 
 	// If this instance is not already the last one then move it to the end now
 	if (index != (size-1))
@@ -497,8 +497,8 @@ void Image2DRenderGroup::RemoveInstance(int index)
 Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(string code)
 {
 	// Loop through the collection to find a matching code
-	int n = m_instances.size();
-	for (int i=0; i<n; i++)
+	InstanceCollection::size_type n = m_instances.size();
+	for (InstanceCollection::size_type i = 0; i < n; ++i)
 	{
 		if (m_instances[i].code == code) return &(m_instances[i]);
 	}
@@ -510,13 +510,13 @@ Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(string code
 Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceByCode(string code)
 {
 	// Loop through the collection to find a matching code
-	int n = m_instances.size();
-	for (int i=0; i<n; i++)
+	InstanceCollection::size_type n = m_instances.size();
+	for (InstanceCollection::size_type i = 0; i < n; ++i)
 	{
 		if (m_instances[i].code == code)
 		{
 			// If we have a match, build a new instance reference object and return it
-			return Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, i, code);
+			return Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, (int)i, code);
 		}
 	}
 

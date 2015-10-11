@@ -189,7 +189,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	if (radius <= Game::C_EPSILON)
 	{
 		node->GetUltimateParent()->GetItems(objects);
-		numobjects = objects.size();
+		numobjects = (int)objects.size();
 	}
 	else
 	{
@@ -427,7 +427,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnviron
 
 	// Loop through each active object in turn and test it for collisions
 	iEnvironmentObject *obj;
-	int n = el->Objects.size();
+	int n = (int)el->Objects.size();
 	for (int i = 0; i < n; ++i)
 	{
 		// Only check this object if the current element is its minimum element bound.  This avoids objects being

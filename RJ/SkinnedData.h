@@ -66,7 +66,7 @@ class SkinnedData
 {
 public:
 
-	UINT BoneCount() const;
+	std::vector<int>::size_type BoneCount() const;
 
 	float GetClipStartTime(const std::string& clipName) const;
 	float GetClipEndTime(const std::string& clipName) const;

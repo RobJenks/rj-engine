@@ -255,10 +255,14 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 					else if (search_last_large_obj == obj)	continue;
 
 					// Check whether we have already recorded this object; ignore the final entry since this was "last_large_obj"
-					int n = (search_large_objects.size() - 1);
-					search_found_large_object = false;
-					for (int i = 0; i < n; ++i) if (search_large_objects[i] == obj) { search_found_large_object = true; break; }
-					if (search_found_large_object) continue;
+					std::vector<iSpaceObject*>::size_type n = (search_large_objects.size());
+					if (n >= 2)		// We don't need to check if n==0 (obviously) or n==1 (since we are ignoring the last item)
+					{
+						--n;		// Ignore the final item
+						search_found_large_object = false;
+						for (std::vector<iSpaceObject*>::size_type i = 0; i < n; ++i) if (search_large_objects[i] == obj) { search_found_large_object = true; break; }
+						if (search_found_large_object) continue;
+					}
 
 					// We have not recorded the object; add it to the list now
 					search_large_objects.push_back(obj);
@@ -303,5 +307,5 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 		(", ObjResults: ")(outResult.size())(", Time = ")(((unsigned int)timeGetTime() - start_time))("ms\n").str().c_str());
 */
 	// Return the total number of items that were located
-	return (outResult.size());
+	return ((int)outResult.size());
 }

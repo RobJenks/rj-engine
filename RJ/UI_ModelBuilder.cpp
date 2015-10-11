@@ -136,18 +136,18 @@ void UI_ModelBuilder::RefreshInterface(void)
 
 	// First, run a recursive traversal of the OBB hierarchy and add all items in flattened hierarchy order
 	BuildOBBHierarchyItemList(&(m_object->CollisionOBB), NullString, -1, items);
-	int obbcount = items.size();
+	std::vector<std::string>::size_type obbcount = items.size();
 
 	// Now add each terrain object to the vector in turn
-	int terraincount = m_terrain.size();
-	for (int i = 0; i < terraincount; ++i)
+	std::vector<StaticTerrain*>::size_type terraincount = m_terrain.size();
+	for (std::vector<StaticTerrain*>::size_type i = 0; i < terraincount; ++i)
 	{
 		items.push_back(concat("Terrain")(i).str());
 	}
 
 	// Now clear the collision data control before adding each item in turn
 	m_collisiondata->Clear();
-	m_colldata_itemcount = items.size();
+	m_colldata_itemcount = (int)items.size();
 	int n = min(m_colldata_itemcount, m_collisiondata->GetLineCount());
 	for (int i = 0; i < n; ++i)
 	{
@@ -661,8 +661,8 @@ void UI_ModelBuilder::RefreshAllCollisionGeometry(void)
 			el->ClearAllTerrain();
 
 			// Now add all terrain objects to this element
-			int n = m_terrain.size();
-			for (int i = 0; i < n; ++i) el->AddTerrainObject(m_terrain[i]);
+			std::vector<StaticTerrain*>::size_type n = m_terrain.size();
+			for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) el->AddTerrainObject(m_terrain[i]);
 		}
 	}
 }
@@ -755,7 +755,7 @@ void UI_ModelBuilder::CollisionData_Clicked(INTVECTOR2 location)
 
 	// Determine the item that was clicked; OBB lines appear first, in hierarchy order, followed by terrain objects in vector order
 	// Use the cached vector of references that was recorded during RefreshInterface() to select the correct item
-	int terraincount = m_terrain.size();
+	int terraincount = (int)m_terrain.size();
 	int obbcount = (m_colldata_itemcount - terraincount);
 	if (line < obbcount)
 	{
@@ -976,7 +976,7 @@ int UI_ModelBuilder::FindTerrainIndex(StaticTerrain *terrain)
 	if (!terrain) return -1; 
 	
 	// Simply check each terrain object in turn and return the first that matches
-	int n = m_terrain.size();
+	int n = (int)m_terrain.size();
 	for (int i = 0; i < n; ++i)
 	{
 		if (m_terrain[i] == terrain) return i;
@@ -1128,8 +1128,8 @@ Result UI_ModelBuilder::SaveCollData_ButtonClicked(void)
 	}
 
 	// Now generate XML entries for each terrain object in turn
-	int n = m_terrain.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<StaticTerrain*>::size_type n = m_terrain.size();
+	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
 	{
 		if (m_terrain[i])
 		{
@@ -1153,8 +1153,8 @@ void UI_ModelBuilder::ClearCollisionData(void)
 	m_nullenv->ClearAllTerrainObjects(false);
 
 	// Delete any terrain objects that have been created, then clear the vector
-	int n = m_terrain.size();
-	for (int i = 0; i < n; ++i) if (m_terrain[i]) SafeDelete(m_terrain[i]);
+	std::vector<StaticTerrain*>::size_type n = m_terrain.size();
+	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) if (m_terrain[i]) SafeDelete(m_terrain[i]);
 	m_terrain.clear();
 
 	// Clear any reference to currently selected objects, since these are no longer valid

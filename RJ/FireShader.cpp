@@ -305,7 +305,7 @@ void FireShader::ShutdownShader()
 void FireShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, const char* shaderFilename)
 {
 	char* compileErrors;
-	unsigned long bufferSize, i;
+	SIZE_T bufferSize, i;
 	ofstream fout;
 
 
@@ -319,7 +319,7 @@ void FireShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, c
 	fout.open("shader-error.txt");
 
 	// Write out the error message.
-	for(i=0; i<bufferSize; i++)
+	for(i = 0; i < bufferSize; ++i)
 	{
 		fout << compileErrors[i];
 	}

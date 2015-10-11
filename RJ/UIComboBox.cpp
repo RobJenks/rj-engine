@@ -144,8 +144,8 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 	m_render = render;
 
 	// Retrieve key values used in rendering this control
-	int expandcount = GetExpandItemCount();
-	int itemcount = GetItemCount();
+	std::vector<TextBlock*>::size_type expandcount = GetExpandItemCount();
+	std::vector<ComboBoxItem>::size_type itemcount = GetItemCount();
 
 	// Set position of main component back panel first
 	mainback = m_mainback->GetInstance(0);
@@ -180,7 +180,7 @@ void UIComboBox::UpdateControl(INTVECTOR2 location, INTVECTOR2 size, float zorde
 		if (m_expandtext.size() > 0) m_expanditemheight = ((int)m_expandtext[0]->GetTextHeight() + (2 * UIComboBox::TEXT_SEPARATION));
 
 		// Now position each text item in the drop-down list in turn
-		for (int i=0; i<expandcount; i++)
+		for (std::vector<TextBlock*>::size_type i = 0; i < expandcount; ++i)
 		{
 			// Update the position of this text block
 			TextBlock *tb = m_expandtext.at(i);
@@ -394,8 +394,8 @@ void UIComboBox::UnregisterFromRenderGroup(void)
 // Returns the current scroll percentage for the expanded list of items
 float UIComboBox::GetScrollPercentage(void)
 {
-	int itemcount = GetItemCount();
-	int expandcount = GetExpandItemCount();
+	std::vector<ComboBoxItem>::size_type itemcount = GetItemCount();
+	std::vector<TextBlock*>::size_type expandcount = GetExpandItemCount();
 
 	// If there are not enough items for scrolling to be relevant then return 0% as a default
 	if (itemcount <= expandcount) return 0.0f;
@@ -456,10 +456,10 @@ void UIComboBox::AddItem(string item, string tag)
 }
 
 // Inserts a new item to the control at the specified index
-void UIComboBox::InsertItem(int index, string item, string tag)
+void UIComboBox::InsertItem(std::vector<ComboBoxItem>::size_type index, string item, string tag)
 {
 	// If the index provided is not valid then simply push onto the items vector
-	if (index < 0 || index >= (int)m_items.size() || m_items.size() == 0) 
+	if (index >= m_items.size() || m_items.size() == 0) 
 		m_items.push_back(ComboBoxItem(item, tag));
 	else
 	{
@@ -482,10 +482,10 @@ void UIComboBox::InsertItem(int index, string item, string tag)
 		
 }
 
-void UIComboBox::SetItem(int index, string item, string tag)
+void UIComboBox::SetItem(std::vector<ComboBoxItem>::size_type index, string item, string tag)
 {
 	// Make sure the index is valid
-	if (index < 0 || index >= (int)m_items.size()) return;
+	if (index >= m_items.size()) return;
 
 	// Set the item to the new supplied value
 	m_items[index] = ComboBoxItem(item, tag);
@@ -494,22 +494,23 @@ void UIComboBox::SetItem(int index, string item, string tag)
 	if (!m_suspendupdates) UpdateControl(true);
 }
 
-void UIComboBox::RemoveItem(int index)
+void UIComboBox::RemoveItem(std::vector<ComboBoxItem>::size_type index)
 {
 	// Make sure the index is valid
-	if (index < 0 || index >= (int)m_items.size()) return;
+	std::vector<ComboBoxItem>::size_type size = m_items.size();
+	if (index >= size) return;
 
 	// If we are attempting to remove the last item then simply pop it from the end of the vector now
-	if (index == (m_items.size()-1)) { m_items.pop_back(); return; }
+	if (index == (size - 1)) { m_items.pop_back(); return; }
 
 	// Otherwise we want to copy the extent of vector past 'index' back by one element, to overwrite the removed item
-	memmove(&(m_items[index]), &(m_items[index+1]), sizeof(ComboBoxItem) * (m_items.size() - index - 1));
+	memmove(&(m_items[index]), &(m_items[index + 1]), sizeof(ComboBoxItem) * (size - index - 1));
 
 	// Remove the item at the end of the vector which is now redundant
 	m_items.pop_back();
 
 	// If our currently-selected item is after this index, adjust the selected item to compensate for the indices moving by one
-	if (m_selectedindex >= index) m_selectedindex--;
+	if (m_selectedindex >= index) --m_selectedindex;
 
 	// Perform an update of the control, as long as we are not holding the refresh as part of a mass update
 	if (!m_suspendupdates) UpdateControl(true);
@@ -536,17 +537,17 @@ void UIComboBox::ScrollItemList(iUIControl::ScrollState scrolldirection)
 }
 
 // Selects an item from the expanded item list
-void UIComboBox::SelectItem(int item)
+void UIComboBox::SelectItem(std::vector<ComboBoxItem>::size_type item)
 {
 	// Make sure a valid item has been specified, based on the expand list capacity
-	if (item < 0 || item >= (int)m_expandtext.size()) return;
+	if (item >= m_expandtext.size()) return;
 
 	// Determine the actual item selected based on current scroll position, and again determine whether this is a valid index
-	int index = (item + m_scrollposition);
-	if (index < 0 || index >= (int)m_items.size()) return;
+	std::vector<ComboBoxItem>::size_type index = (item + m_scrollposition);
+	if (index >= m_items.size()) return;
 
 	// Change the selected item and close the drop-down list
-	int previousindex = m_selectedindex;
+	std::vector<ComboBoxItem>::size_type previousindex = m_selectedindex;
 	m_selectedindex = index;
 	m_expandstate = UIComboBox::ExpandState::Contracted;
 	
@@ -554,7 +555,7 @@ void UIComboBox::SelectItem(int item)
 	UpdateControl(true);
 
 	// Raise an event to signal that the selected item has been changed
-	D::UI->ComboBox_SelectedIndexChanged(this, m_selectedindex, previousindex);
+	D::UI->ComboBox_SelectedIndexChanged(this, (int)m_selectedindex, (int)previousindex);
 }
 
 // Process mouse down events on the control	

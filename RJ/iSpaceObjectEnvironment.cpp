@@ -175,7 +175,7 @@ void iSpaceObjectEnvironment::AddTerrainObject(StaticTerrain *obj)
 // Removes a terrain object from the environment.  Optionally takes a second parameter indicating the index of this 
 // object in the terrain collection; if set, and if the index is correct, it will be used rather than performing
 // a search of the collection for the object.  Deallocates the terrain object.
-void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj, int terrainindex)
+void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj, std::vector<StaticTerrain*>::size_type terrainindex)
 {
 	// Make sure the terrain object is valid
 	if (!obj) return;
@@ -205,7 +205,7 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj, int terrai
 	// Remove from the overall environment terrain collection.  If we have an index supplied, validate
 	// that it is accurate and use to remove the object.  If we don't have one, or if it is not valid, then search for 
 	// the object and remove it.
-	if (terrainindex >= 0 && terrainindex < (int)TerrainObjects.size() && TerrainObjects[terrainindex] &&
+	if (terrainindex >= 0 && terrainindex < TerrainObjects.size() && TerrainObjects[terrainindex] &&
 		TerrainObjects[terrainindex]->GetID() == obj->GetID())
 	{
 		RemoveFromVectorAtIndex(TerrainObjects, terrainindex);
@@ -335,7 +335,7 @@ void iSpaceObjectEnvironment::ShipTileRemoved(ComplexShipTile *tile)
 	
 	// Iterate through all terrain objects in the environment, and remove any which are owned by this tile
 	Game::ID_TYPE id = tile->GetID();
-	int i = 0, n = TerrainObjects.size();
+	std::vector<StaticTerrain*>::size_type i = 0, n = TerrainObjects.size();
 	while (i < n)
 	{
 		if (TerrainObjects[i] && TerrainObjects[i]->GetParentTileID() == id)

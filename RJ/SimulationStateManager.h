@@ -107,15 +107,15 @@ protected:
 protected:
 
 	// The state manager maintains a collection of all simulation hubs, for use in determining the simulation state of other objects
-	std::vector<iSpaceObject*>		 m_space_simhubs;
-	std::vector<iEnvironmentObject*> m_env_simhubs;
+	std::vector<iSpaceObject*>				m_space_simhubs;
+	std::vector<iEnvironmentObject*>		m_env_simhubs;
 
 	// We maintain a list of systems that contain at least one hub object, for efficiency at runtime
-	std::vector<SpaceSystem*>		m_hubsystems;
-	unsigned int					m_hubsystemcount;
+	std::vector<SpaceSystem*>				m_hubsystems;
+	std::vector<SpaceSystem*>::size_type	m_hubsystemcount;
 
 	// Maintain an index of the hub system to be evaluated in the next scheduled update
-	unsigned int					m_nexthubsystem;
+	std::vector<SpaceSystem*>::size_type	m_nexthubsystem;
 };
 
 

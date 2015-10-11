@@ -319,8 +319,8 @@ public:
 		// Remove all the models at the specified index
 		void RemoveModels(int x, int y, int z)
 		{
-			int n = Models.size();
-			for (int i=0; i<n; ++i)
+			int n = (int)Models.size();
+			for (int i = 0; i < n; ++i)
 			{
 				if (Models[i].elementpos.x == x && Models[i].elementpos.y == y && Models[i].elementpos.z == z)
 				{
@@ -386,7 +386,7 @@ public:
 
 			// Iterate over each model in turn
 			Model *model;
-			int n = Models.size();
+			int n = (int)Models.size();
 			for (int i = 0; i < n; ++i)
 			{
 				// Check this model is valid
@@ -614,18 +614,18 @@ public:
 	CMPINLINE ComplexShipElement *			GetParentShipElement(void) const				{ return m_parentelement; }
 
 	// Methods to query and set connection points for elements within the tile
-	CMPINLINE ElementConnectionSet *		GetConnections(void)								{ return &m_connections; }					
-	CMPINLINE ElementConnection				GetConnection(int index) const						{ return m_connections[index]; }
-	int										GetConnection(INTVECTOR3 loc) const;
-	int										GetConnection(INTVECTOR3 loc, Direction dir) const;
-	CMPINLINE int							GetConnectionCount(void) const						{ return m_connections.size(); }
-	CMPINLINE bool							HasConnection(INTVECTOR3 loc, Direction dir) const	{ return (GetConnection(loc, dir) > -1); }
-	void									AddConnection(INTVECTOR3 loc, Direction dir);
-	void									RemoveConnection(int index);
-	void									RemoveConnection(INTVECTOR3 loc, Direction dir);
+	CMPINLINE ElementConnectionSet *			GetConnections(void)										{ return &m_connections; }					
+	CMPINLINE ElementConnection					GetConnection(ElementConnectionSet::size_type index) const	{ return m_connections[index]; }
+	int											GetConnection(INTVECTOR3 loc) const;
+	int											GetConnection(INTVECTOR3 loc, Direction dir) const;
+	CMPINLINE ElementConnectionSet::size_type	GetConnectionCount(void) const						{ return m_connections.size(); }
+	CMPINLINE bool								HasConnection(INTVECTOR3 loc, Direction dir) const	{ return (GetConnection(loc, dir) > -1); }
+	void										AddConnection(INTVECTOR3 loc, Direction dir);
+	void										RemoveConnection(ElementConnectionSet::size_type index);
+	void										RemoveConnection(INTVECTOR3 loc, Direction dir);
 	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorStart(void)			{ return m_connections.begin(); }
 	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorEnd(void)				{ return m_connections.end(); }
-	void									SetConnections(const ElementConnectionSet &source);
+	void										SetConnections(const ElementConnectionSet &source);
 
 	// Compiles the tile based on its definition
 	Result								CompileTile(void);	

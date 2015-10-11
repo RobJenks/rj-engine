@@ -49,7 +49,8 @@ void BoneAnimation::Interpolate(float t, XMFLOAT4X4& M)const
 	}
 	else
 	{
-		for(UINT i = 0; i < Keyframes.size()-1; ++i)
+		std::vector<Keyframe>::size_type kf_upper_limit = (Keyframes.size() - 1); 
+		for (std::vector<Keyframe>::size_type i = 0; i < kf_upper_limit; ++i)
 		{
 			if( t >= Keyframes[i].TimePos && t <= Keyframes[i+1].TimePos )
 			{
@@ -121,7 +122,7 @@ float SkinnedData::GetClipEndTime(const std::string& clipName)const
 	return clip->second.GetClipEndTime();
 }
 
-UINT SkinnedData::BoneCount()const
+std::vector<int>::size_type SkinnedData::BoneCount()const
 {
 	return mBoneHierarchy.size();
 }
@@ -148,7 +149,7 @@ void SkinnedData::GetFinalTransforms(const AnimationClip *clip, float timePos, s
 	if (!clip) return;
 	
 	// Allocate space for the transforms based on the number of bones in this mesh
-	UINT numBones = mBoneOffsets.size();
+	std::vector<XMFLOAT4X4>::size_type numBones = mBoneOffsets.size();
 	std::vector<XMFLOAT4X4> toParentTransforms(numBones);
 
 	// Interpolate all the bones of this clip at the given time instance
@@ -165,7 +166,7 @@ void SkinnedData::GetFinalTransforms(const AnimationClip *clip, float timePos, s
 	toRootTransforms[0] = toParentTransforms[0];
 
 	// Now find the toRootTransform of the children.
-	for(UINT i = 1; i < numBones; ++i)
+	for (std::vector<XMFLOAT4X4>::size_type i = 1; i < numBones; ++i)
 	{
 		XMMATRIX toParent = XMLoadFloat4x4(&toParentTransforms[i]);
 
@@ -178,7 +179,7 @@ void SkinnedData::GetFinalTransforms(const AnimationClip *clip, float timePos, s
 	}
 
 	// Premultiply by the bone offset transform to get the final transform.
-	for(UINT i = 0; i < numBones; ++i)
+	for (std::vector<XMFLOAT4X4>::size_type i = 0; i < numBones; ++i)
 	{
 		XMMATRIX offset = XMLoadFloat4x4(&mBoneOffsets[i]);
 		XMMATRIX toRoot = XMLoadFloat4x4(&toRootTransforms[i]);

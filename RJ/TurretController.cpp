@@ -131,7 +131,7 @@ bool TurretController::HaveTurret(SpaceTurret *turret)
 void TurretController::RefreshTurretCollection(void)
 {
 	// Cache the turret collection size for runtime efficiency
-	m_turretcount = Turrets.size();
+	m_turretcount = (int)Turrets.size();
 
 	// Controller will be considered if it is managing at least one turret
 	m_active = (m_turretcount != 0);

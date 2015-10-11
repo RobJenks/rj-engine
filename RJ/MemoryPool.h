@@ -16,7 +16,7 @@ public:
 	typedef std::vector<T*> PoolItemCollection;
 
 	// Define starting size of each memory pool; pool will double in size from this point whenever required
-	static const int POOL_STARTING_CAPACITY = 32;
+	static const typename PoolItemCollection::size_type POOL_STARTING_CAPACITY = 32;
 
 	// Constructor.  Creates the initial pool of objects ready for use
 	MemoryPool<T>::MemoryPool(void)
@@ -35,7 +35,7 @@ public:
 	void MemoryPool::ExtendPool(void)
 	{
 		// Add new items to the pool to double the existing capacity.  TODO: Can this be done in bulk more efficiently?
-		for (int i=0; i<m_capacity; i++) m_items.push_back(new T());
+		for (PoolItemCollection::size_type i = 0; i < m_capacity; ++i) m_items.push_back(new T());
 
 		// Increase the count of available items, plus the overall capacity, to reflect the addition of these new items
 		m_itemcount = m_items.size();			// This should always be equivalent to m_itemcount += m_capacity
@@ -68,7 +68,7 @@ public:
 	}
 
 	// Method to return the number of items currently checked out to all other processes
-	CMPINLINE int MemoryPool::NumberOfItemsRequested(void)	{ return (m_capacity - m_itemcount); }
+	CMPINLINE typename std::vector<T*>::size_type MemoryPool::NumberOfItemsRequested(void)	{ return (m_capacity - m_itemcount); }
 
 	// Destructor
 	MemoryPool<T>::~MemoryPool(void)
@@ -79,8 +79,8 @@ public:
 	void MemoryPool<T>::Shutdown(void)
 	{
 		// Process each item in the pool in turn
-		int n = m_items.size();
-		for (int i=0; i<n; i++)
+		PoolItemCollection::size_type n = m_items.size();
+		for (PoolItemCollection::size_type i = 0; i < n; ++i)
 		{
 			if (m_items[i]) 
 			{
@@ -99,13 +99,13 @@ public:
 private:
 
 	// The pool of available items
-	PoolItemCollection					m_items;
+	PoolItemCollection							m_items;
 
 	// The number of items currently held in the pool and available for use
-	int									m_itemcount;
+	typename PoolItemCollection::size_type		m_itemcount;
 
 	// The current capacity of the pool, i.e. the total number of objects available in the pool plus those being actively used elsewhere
-	int									m_capacity;
+	typename PoolItemCollection::size_type		m_capacity;
 };
 
 

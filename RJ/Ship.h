@@ -204,10 +204,10 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
-	std::vector<iSpaceObject*>	m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
-	std::vector<iSpaceObject*>	m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
-	int							m_cached_contact_count;			// Count of cached contacts
-	int							m_cached_enemy_contact_count;	// Count of cached enemy contacts
+	std::vector<iSpaceObject*>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
+	std::vector<iSpaceObject*>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
+	std::vector<iSpaceObject*>::size_type	m_cached_contact_count;			// Count of cached contacts
+	std::vector<iSpaceObject*>::size_type	m_cached_enemy_contact_count;	// Count of cached enemy contacts
 
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
 	CMPINLINE float		DetermineExactYawToTarget(D3DXVECTOR3 tgt);

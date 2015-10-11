@@ -215,8 +215,8 @@ bool ProductionCost::CheckIfComplete(void)
 void ProductionCost::ResetToZeroPcProgress(void)
 {
 	// Loop through each resource requirement in turn
-	int n = ResourceRequirements.size();
-	for (int i = 0; i < n; i++)
+	ResourceRequirementCollection::size_type n = ResourceRequirements.size();
+	for (ResourceRequirementCollection::size_type i = 0; i < n; i++)
 	{
 		// Reset the progress for this resource to 0%
 		ResourceRequirements[i].Progress = 0.0f;
@@ -230,8 +230,8 @@ void ProductionCost::ResetToZeroPcProgress(void)
 void ProductionCost::ResetTo100PcProgress(void)
 {
 	// Loop through each resource requirement in turn
-	int n = ResourceRequirements.size();
-	for (int i = 0; i < n; i++)
+	ResourceRequirementCollection::size_type n = ResourceRequirements.size();
+	for (ResourceRequirementCollection::size_type i = 0; i < n; ++i)
 	{
 		// Reset the progress for this resource to be complete
 		ResourceRequirements[i].Progress = ResourceRequirements[i].Requirement.Amount;

@@ -13,11 +13,11 @@ SkinnedModel::SkinnedModel(ID3D11Device* device, const std::string &code, const 
 	M3DLoader m3dLoader;
 	m3dLoader.LoadM3d(BuildStrFilename(D::DATA, modelFilename), Vertices, Indices, Subsets, mats, SkinnedData, Bounds);
 
-	ModelMesh.SetVertices(device, &Vertices[0], Vertices.size());
-	ModelMesh.SetIndices(device, &Indices[0], Indices.size());
+	ModelMesh.SetVertices(device, &Vertices[0], (UINT)Vertices.size());
+	ModelMesh.SetIndices(device, &Indices[0], (UINT)Indices.size());
 	ModelMesh.SetSubsetTable(Subsets);
 
-	SubsetCount = mats.size();
+	SubsetCount = (UINT)mats.size();
 
 	for(UINT i = 0; i < SubsetCount; ++i)
 	{

@@ -84,9 +84,9 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 
 	// The hardpoints vector will have been shallow-copied from the template.  Perform a deep-copy instead
 	m_hardpoints.clear();
-	int n = source->GetHardpoints().size();
+	std::vector<Hardpoint*>::size_type n = source->GetHardpoints().size();
 	m_hardpoints.reserve(n);
-	for (int i = 0; i < n; ++i) m_hardpoints.push_back(source->GetHardpoints()[i]->Clone());
+	for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i) m_hardpoints.push_back(source->GetHardpoints()[i]->Clone());
 }
 
 // Sets the section position relative to its parent ship, recalculating required data at the same time
@@ -175,8 +175,8 @@ void ComplexShipSection::RemoveHardpoint(Hardpoint *hp)
 {
 	if (!hp) return;
 
-	int n = m_hardpoints.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<Hardpoint*>::size_type n = m_hardpoints.size();
+	for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i)
 	{
 		if (m_hardpoints[i] == hp)
 		{
@@ -194,8 +194,8 @@ void ComplexShipSection::ClearAllHardpoints(bool deallocate)
 	// If we want to deallocate the hardpoints then we need to iterate through each one in turn
 	if (deallocate)
 	{
-		int n = m_hardpoints.size();
-		for (int i = 0; i < n; ++i)
+		std::vector<Hardpoint*>::size_type n = m_hardpoints.size();
+		for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i)
 		{
 			if (m_hardpoints[i]) SafeDelete(m_hardpoints[i]);
 		}

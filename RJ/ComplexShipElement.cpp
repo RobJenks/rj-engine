@@ -81,8 +81,8 @@ void ComplexShipElement::AddDamageModifier(Damage modifier)
 {
 	// If we already have a modifier for this damage type then locate it and apply the new modifier.  All
 	// modifiers are multipliers so this is commutative and can be pre-calculated
-	int n = m_damagemodifiers.size();
-	for (int i = 0; i < n; i++)
+	DamageSet::size_type n = m_damagemodifiers.size();
+	for (DamageSet::size_type i = 0; i < n; ++i)
 	{
 		if (m_damagemodifiers[i].Type == modifier.Type)
 		{
@@ -365,7 +365,8 @@ void ComplexShipElement::RotateElementAttachPoints(ComplexShipElement *el, Rotat
 {
 	// Process each attach point in turn
 	AttachPointCollection *points = el->GetAttachPoints();
-	for (int i = 0; i < el->GetAttachPointCount(); i++)
+	std::vector<AttachPointCollection>::size_type n = el->GetAttachPointCount();
+	for (std::vector<AttachPointCollection>::size_type i = 0; i < n; ++i)
 	{
 		// Change the edge value to reflect the rotation being applied
 		points->at(i).Edge = GetRotatedDirection(points->at(i).Edge, rotation);
@@ -376,8 +377,8 @@ void ComplexShipElement::RotateElementAttachPoints(ComplexShipElement *el, Rotat
 ComplexShipElement::AttachType ComplexShipElement::GetAttachPoint(Direction edge)
 {
 	// Look at each possible attach point in turn
-	int n = (int)m_attachpoints.size();
-	for (int i=0; i<n; i++)
+	std::vector<AttachPointCollection>::size_type n = m_attachpoints.size();
+	for (std::vector<AttachPointCollection>::size_type i = 0; i < n; ++i)
 		if (m_attachpoints[i].Edge == edge) return m_attachpoints[i].Type;
 
 	// If no attachment point is specified then we will allow no attachment by default
@@ -454,12 +455,12 @@ bool ComplexShipElement::Equals(ComplexShipElement *e)
 		if (m_properties[i] != e->GetProperty(i)) return false;
 
 	// Compare the attach points on these elements; make sure we have the same number
-	int apcount = e->GetAttachPointCount();
+	AttachPointCollection::size_type apcount = e->GetAttachPointCount();
 	if (m_attachpoints.size() != apcount) return false;
 
 	// Now make sure all attach points are equal
 	ComplexShipElement::AttachPointCollection *apoints = e->GetAttachPoints();
-	for (int i=0; i<apcount; i++)
+	for (AttachPointCollection::size_type i = 0; i < apcount; ++i)
 		if (apoints->at(i).Edge != m_attachpoints[i].Edge || apoints->at(i).Type != m_attachpoints[i].Type)
 			return false;
 

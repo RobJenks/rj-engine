@@ -69,7 +69,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	for (int i = 0; i < linecount; ++i)
 	{
 		// Attempt to create the line
-		tb = D::UI->CreateTextBlock(concat(m_code)(".line")(i).str().c_str(), "", m_maxlinelength, m_font, pos, m_fontsize, m_colour, m_render);
+		tb = D::UI->CreateTextBlock(concat(m_code)(".line")(i).str().c_str(), "", (int)m_maxlinelength, m_font, pos, m_fontsize, m_colour, m_render);
 		if (!tb) return ErrorCodes::CouldNotCreateLineWithinMLTBlock;
 
 		// Store the line and add it to our parent render group 
@@ -125,7 +125,7 @@ void MultiLineTextBlock::SetText(const std::string & text)
 	if (m_mode != MultiLineTextBlock::OperationMode::WordWrap) return;
 
 	int nextchar = 0, wrap, count;
-	int length = text.size();
+	int length = (int)text.size();
 
 	// Store the text locally
 	m_text = text;
@@ -136,7 +136,7 @@ void MultiLineTextBlock::SetText(const std::string & text)
 		if (!m_lines[i]) continue;
 
 		// See if we have any more text to add to this line
-		count = min((length - nextchar), m_maxlinelength);
+		count = min((length - nextchar), (int)m_maxlinelength);
 		if (count > 0)
 		{
 			// Get the ideal word wrap point, then work backwards until we find a separator

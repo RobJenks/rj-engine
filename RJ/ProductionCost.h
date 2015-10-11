@@ -18,9 +18,9 @@ class ProductionCost
 public:
 
 	// Vector of resource requirements for this production
-	typedef vector<ProductionProgress>			ResourceRequirementCollection;
-	ResourceRequirementCollection 				ResourceRequirements;
-	CMPINLINE int								GetResourceRequirementCount(void)	{ return ResourceRequirements.size(); }
+	typedef vector<ProductionProgress>					ResourceRequirementCollection;
+	ResourceRequirementCollection 						ResourceRequirements;
+	CMPINLINE ResourceRequirementCollection::size_type	GetResourceRequirementCount(void)	{ return ResourceRequirements.size(); }
 
 	// Vector of crew class/level requirements for this production (e.g. ship must have an active Engineer of level >5 to build this)
 	typedef vector<CrewClassRequirement>		CrewClassRequirementCollection;

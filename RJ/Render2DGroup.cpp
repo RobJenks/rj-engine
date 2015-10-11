@@ -198,12 +198,12 @@ Image2DRenderGroup::InstanceReference Render2DGroup::GetComponentInstanceAtLocat
 	for (Image2DRenderGroupCollection::const_iterator it = m_componentgroups.begin(); it != it_end; ++it)
 	{
 		// Make sure this component group is being rendered, that it has components to be tested, and that it accepts mouse input (if relevant)
-		int count = it->second->GetInstanceCount();
+		std::deque<Image2DRenderGroup::Instance>::size_type count = it->second->GetInstanceCount();
 		if (!it->second->GetRenderActive() || count == 0) continue;
 		if (only_components_which_accept_mouse_input && !it->second->AcceptsMouseInput()) continue;
 
 		// Look at each instance in the collection in turn
-		for (int i=0; i<count; i++)
+		for (std::deque<Image2DRenderGroup::Instance>::size_type i = 0; i < count; ++i)
 		{
 			instance = it->second->GetInstance(i);
 
@@ -213,7 +213,7 @@ Image2DRenderGroup::InstanceReference Render2DGroup::GetComponentInstanceAtLocat
 				 (location.y < (instance->position.y + instance->size.y)) )
 			{
 				// The point is within the bounds of this component, so return a reference now
-				return Image2DRenderGroup::InstanceReference(instance, it->second, i, instance->code);
+				return Image2DRenderGroup::InstanceReference(instance, it->second, (int)i, instance->code);
 			}
 		}
 	}
@@ -230,8 +230,8 @@ bool Render2DGroup::RegisterRenderableComponent(iUIComponentRenderable *componen
 	float z = component->GetZOrder();
 
 	// Loop through the render queue from start to end
-	int n = m_renderqueue.size();
-	for (int i=0; i<n; i++)
+	RenderQueueCollection::size_type n = m_renderqueue.size();
+	for (RenderQueueCollection::size_type i = 0; i < n; ++i)
 	{
 		// Make sure this item doesn't already exist in the collection
 		if (m_renderqueue[i] == component) return false;

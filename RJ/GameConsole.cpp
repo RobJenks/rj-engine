@@ -59,8 +59,8 @@ void GameConsole::ProcessCommand(GameConsoleCommand & command)
 	// Pass to each potential recipient in turn.  Component will return true if the command
 	// was processed, in which case we can quit early since we only want to process the
 	// command in one place.
-	int n = CommandReceivers.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<iAcceptsConsoleCommands*>::size_type n = CommandReceivers.size();
+	for (std::vector<iAcceptsConsoleCommands*>::size_type i = 0; i < n; ++i)
 	{
 		if (CommandReceivers[i]->ProcessConsoleCommand(command))
 		{
@@ -88,7 +88,7 @@ void GameConsole::ParseCommandRawInput(GameConsoleCommand & command)
 
 	// The first element of the string should always be the command itself.  Assuming we do 
 	// have >= 1 element, take that first element and make it the command name instead
-	int numparams = command.InputParameters.size();
+	std::vector<std::string>::size_type numparams = command.InputParameters.size();
 	if (numparams > 0)
 	{
 		// The first element will become the command name itself

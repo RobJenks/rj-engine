@@ -89,10 +89,10 @@ public:
 	CMPINLINE void			SetTileLevel(int level)							{ m_level = level; }
 
 	// Vector of all terrain objects which are contained within this tile definition
-	std::vector<StaticTerrain*>				TerrainObjects;
-	CMPINLINE void							AddTerrainObject(StaticTerrain *t)		{ TerrainObjects.push_back(t); }
-	CMPINLINE void							RemoveTerrainObject(StaticTerrain *t)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, t); }
-	CMPINLINE unsigned int					GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
+	std::vector<StaticTerrain*>							TerrainObjects;
+	CMPINLINE void										AddTerrainObject(StaticTerrain *t)		{ TerrainObjects.push_back(t); }
+	CMPINLINE void										RemoveTerrainObject(StaticTerrain *t)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, t); }
+	CMPINLINE std::vector<StaticTerrain*>::size_type	GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
 
 	// Production cost of this tile, specified per-element
 	CMPINLINE ProductionCost *	GetProductionCost(void)						{ return m_productioncost; }

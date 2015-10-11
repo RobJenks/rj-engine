@@ -110,7 +110,8 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_lastsimulation = Game::ClockMs;
 
 	// Copy the connection data for this tile 
-	for (int i = C.GetConnectionCount() - 1; i >= 0; i--)
+	//for (int i = C.GetConnectionCount() - 1; i >= 0; i--)
+	for (ElementConnectionSet::size_type i = 0; i < C.GetConnectionCount(); ++i)
 		m_connections.push_back(C.GetConnection(i));
 
 	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
@@ -332,8 +333,8 @@ void ComplexShipTile::ApplyTile(ComplexShipElement *el)
 // Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
 int ComplexShipTile::GetConnection(INTVECTOR3 loc, Direction dir) const
 {
-	int n = m_connections.size();
-	for (int i=0; i<n; i++)
+	int n = (int)m_connections.size();
+	for (int i = 0; i < n; ++i)
 	{
 		if (m_connections[i].Location == loc && m_connections[i].Connection == dir) return i;
 	}
@@ -376,8 +377,8 @@ void ComplexShipTile::UpdateSimulationStateFromParentElements(void)
 // Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
 int ComplexShipTile::GetConnection(INTVECTOR3 loc) const
 {
-	int n = m_connections.size();
-	for (int i=0; i<n; i++)
+	int n = (int)m_connections.size();
+	for (int i = 0; i < n; ++i)
 	{
 		if (m_connections[i].Location == loc) return i;
 	}
@@ -392,10 +393,10 @@ void ComplexShipTile::AddConnection(INTVECTOR3 loc, Direction dir)
 }
 
 // Removes the connection at the specified index
-void ComplexShipTile::RemoveConnection(int index)
+void ComplexShipTile::RemoveConnection(ElementConnectionSet::size_type index)
 {
 	// Make sure the supplied index is valid
-	int size = (int)m_connections.size();
+	ElementConnectionSet::size_type size = m_connections.size();
 	if (index < 0 || index >= size) return;
 
 	// If it is, perform a swap & pop to remove the item efficiently
@@ -455,7 +456,7 @@ void ComplexShipTile::ClearTerrainObjectLinks(void)
 	if (m_definition)
 	{
 		// Reserve space for the number of terrain objects in our terrain definition, if applicable
-		unsigned int n = m_definition->GetTerrainObjectCount();
+		std::vector<StaticTerrain*>::size_type n = m_definition->GetTerrainObjectCount();
 		if (n > 0) m_terrain_ids.reserve(n);
 	}
 }

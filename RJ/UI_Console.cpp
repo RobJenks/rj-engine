@@ -174,8 +174,9 @@ void UI_Console::MoveUpConsoleHistory(void)
 	}
 
 	// Move up (back in time) through the console history
-	if (++m_selected_history_item >= Game::Console.GetHistoryLength())
-		m_selected_history_item = Game::Console.GetHistoryLength() - 1;
+	int history = (int)Game::Console.GetHistoryLength();
+	if (++m_selected_history_item >= history)
+		m_selected_history_item = (history - 1);
 	PopulateWithConsoleHistoryItem(m_selected_history_item);
 }
 

@@ -35,12 +35,12 @@ public:
 	void										InitialiseCopiedObject(ComplexShip *source);
 
 	// Methods to add/remove/retrieve the sections that make up this complex ship
-	ComplexShipSection *						GetSection(int index);
-	CMPINLINE ComplexShipSectionCollection *	GetSections(void) { return &(m_sections); }
-	CMPINLINE int								GetSectionCount(void) { return m_sections.size(); }
-	Result										AddShipSection(ComplexShipSection *section);
-	void										RemoveShipSection(ComplexShipSection *section);
-	void										RemoveShipSection(int index);
+	ComplexShipSection *								GetSection(ComplexShip::ComplexShipSectionCollection::size_type index);
+	CMPINLINE ComplexShipSectionCollection *			GetSections(void) { return &(m_sections); }
+	CMPINLINE ComplexShipSectionCollection::size_type	GetSectionCount(void) { return m_sections.size(); }
+	Result												AddShipSection(ComplexShipSection *section);
+	void												RemoveShipSection(ComplexShipSection *section);
+	void												RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionCollection>::size_type index);
 
 	// Methods triggered based on major events impacting this object
 	void										ShipTileAdded(ComplexShipTile *tile);		// When a tile is added.  Virtual inherited from interface.

@@ -333,9 +333,9 @@ Result IO::Data::SaveComplexShipElement(TiXmlElement *parent, ComplexShipElement
 	if (nprop) node->LinkEndChild(nprop);
 
 	// Add entries for any attach points linked to this element
-	int n = e->GetAttachPointCount();
+	ComplexShipElement::AttachPointCollection::size_type n = e->GetAttachPointCount();
 	ComplexShipElement::AttachPointCollection *points = e->GetAttachPoints();
-	for (int i=0; i<n; i++)
+	for (ComplexShipElement::AttachPointCollection::size_type i = 0; i < n; ++i)
 	{
 		TiXmlElement *apoint = new TiXmlElement( "AttachPoint" );
 		apoint->SetAttribute("edge", DirectionToString(points->at(i).Edge).c_str());

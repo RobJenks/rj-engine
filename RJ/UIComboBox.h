@@ -102,39 +102,45 @@ public:
 	bool				WithinControlBounds(INTVECTOR2 point);
 
 	// Returns the number of items stored in this combo box
-	CMPINLINE int		GetItemCount(void) { return m_items.size(); }
+	CMPINLINE std::vector<ComboBoxItem>::size_type			GetItemCount(void) { return m_items.size(); }
 
 	// Returns a reference to a specific item, or to the item collection itself
-	CMPINLINE string				GetItem(int index)		{ if (index < 0 || index >= (int)m_items.size()) return ""; else return m_items[index].Value; }
-	CMPINLINE string				GetItemTag(int index)	{ if (index < 0 || index >= (int)m_items.size()) return ""; else return m_items[index].Tag; }
 	CMPINLINE vector<ComboBoxItem>*	GetItems(void) { return &m_items; }
+	CMPINLINE string				GetItem(std::vector<ComboBoxItem>::size_type index) const		
+	{ 
+		if (index >= m_items.size()) return ""; else return m_items[index].Value; 
+	}
+	CMPINLINE string				GetItemTag(std::vector<ComboBoxItem>::size_type index) const
+	{
+		if (index >= m_items.size()) return ""; else return m_items[index].Tag;
+	}
 	
 	// Returns the currently-selected item in the combo box
-	CMPINLINE int				GetSelectedIndex(void) { return m_selectedindex; }
-	CMPINLINE string			GetSelectedItem(void) { return GetItem(m_selectedindex); }
-	CMPINLINE string			GetSelectedItemTag(void) { return GetItemTag(m_selectedindex); }
+	CMPINLINE std::vector<ComboBoxItem>::size_type	GetSelectedIndex(void) const	{ return m_selectedindex; }
+	CMPINLINE string								GetSelectedItem(void) const		{ return GetItem(m_selectedindex); }
+	CMPINLINE string								GetSelectedItemTag(void) const	{ return GetItemTag(m_selectedindex); }
 
 	// Methods to add, modify or remove an item
 	CMPINLINE void				AddItem(string item)							{ AddItem(item, ""); }
 	void						AddItem(string item, string tag);
-	CMPINLINE void				InsertItem(int index, string item)				{ InsertItem(index, item, ""); }
-	void						InsertItem(int index, string item, string tag);
-	void						SetItem(int index, string item)					{ SetItem(index, item, ""); }
-	void						SetItem(int index, string item, string tag);
-	void						RemoveItem(int index);
+	CMPINLINE void				InsertItem(std::vector<ComboBoxItem>::size_type index, string item)					{ InsertItem(index, item, ""); }
+	void						InsertItem(std::vector<ComboBoxItem>::size_type index, string item, string tag);
+	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item)					{ SetItem(index, item, ""); }
+	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item, string tag);
+	void						RemoveItem(std::vector<ComboBoxItem>::size_type index);
 
 	// Returns the index of the item currently shown at the top of the combo box expand list
-	CMPINLINE int		GetScrollPosition(void) { return m_scrollposition; }
-	float				GetScrollPercentage(void); 
+	CMPINLINE std::vector<ComboBoxItem>::size_type	GetScrollPosition(void) { return m_scrollposition; }
+	float											GetScrollPercentage(void); 
 
 	// Selects an item from the expanded item list
-	void				SelectItem(int item);
+	void											SelectItem(std::vector<ComboBoxItem>::size_type item);
 
 	// Returns the current state of the control
-	CMPINLINE iUIControl::ControlState			GetControlState(void) { return m_state; }
+	CMPINLINE iUIControl::ControlState				GetControlState(void) { return m_state; }
 	
 	// Returns the number of drop-down items that can be displayed in the expanded combo box
-	CMPINLINE int		GetExpandItemCount(void) { return m_expandtext.size(); }
+	CMPINLINE std::vector<TextBlock*>::size_type	GetExpandItemCount(void) { return m_expandtext.size(); }
 
 	// Toggles the expand state of this control
 	void				ToggleExpandState(void);
@@ -192,10 +198,10 @@ private:
 	vector<ComboBoxItem>										m_items;
 
 	// Currently selected index within the combobox
-	int															m_selectedindex;
+	std::vector<ComboBoxItem>::size_type						m_selectedindex;
 
 	// Index of the current scroll position within this combobox
-	int															m_scrollposition;
+	std::vector<ComboBoxItem>::size_type						m_scrollposition;
 
 	// Flag that can be set to temporarily disable updates to the control, for example when performing a mass update
 	bool														m_suspendupdates;

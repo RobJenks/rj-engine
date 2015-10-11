@@ -14,6 +14,7 @@
 
 #include "ComplexShipTileDefinition.h"
 
+
 // Data struct used to store adjacency info for tile corner elements
 // The struct holds { xpos = [0|1], ypos = [0|1], rotation of a corner tile at this pos, rotation of one edge tile, rotation of the second edge tile }
 const ComplexShipTileDefinition::CornerAdjacencyData ComplexShipTileDefinition::CornerData[] = 
@@ -64,23 +65,25 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
 	// Create a new tile depending on our class
 	ComplexShipTile *tile = ComplexShipTile::New(m_classtype);
 	if (tile == NULL) return NULL;
-
+	
 	// Assuming we have created a new tile object, set the code, name, class and pointer back to this definition object
-	tile->SetCode(m_code);
+	*** ERROR HERE, WHENEVER UNCOMMENTED BELOW.  POSSIBLE ACCESS VIOLATION.  POSSIBLY RELATED TO VIRTUAL METHODS? ***
+	Game::Log << "ADDRESS: " << this << "  TILE: " << tile << "\n";
+	/*tile->SetCode(m_code);
 	tile->SetName(m_name);
 	tile->SetTileDefinition(this);
 	tile->SetTileClass(m_classtype);
 	tile->DefaultProperties = this->DefaultProperties;
-
+	
 	// Set a default tile size; either the class-specified default, or 1x1x1 if it is a resizable tile
 	if (m_elementsize.x > 0 && m_elementsize.y > 0 && m_elementsize.z > 0)
 		tile->SetElementSize(m_elementsize);
 	else
 		tile->SetElementSize(INTVECTOR3(1, 1, 1));
-
+	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
 	if (m_haveclassspecificdata) this->ApplyClassSpecificDefinition(tile);
-
+	*/
 	// Return the newly-created tile
 	return tile;
 }
@@ -334,8 +337,8 @@ void ComplexShipTileDefinition::Shutdown(void)
 	delete m_productioncost;	m_productioncost = NULL;
 
 	// Deallocate all terrain objects stored within the definition
-	int n = TerrainObjects.size();
-	for (int i = 0; i < n; ++i)
+	std::vector<StaticTerrain*>::size_type n = TerrainObjects.size();
+	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
 	{
 		if (TerrainObjects[i]) SafeDelete(TerrainObjects[i]);
 	}

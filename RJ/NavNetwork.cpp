@@ -322,7 +322,7 @@ NavNode * NavNetwork::GetClosestNode(D3DXVECTOR3 pos)
 	if (el && el->IsWalkable() && el->NavNodes.size() > 0)
 	{
 		// Shortcut: If the element only contains one node then return it immediately
-		int count = el->NavNodes.size();
+		std::vector<NavNode*>::size_type count = el->NavNodes.size();
 		if (count == 1) return el->NavNodes[0];
 
 		// Otherwise, we need to perform more work to find the best node 
@@ -336,7 +336,7 @@ NavNode * NavNetwork::GetClosestNode(D3DXVECTOR3 pos)
 		int bestdist = dist;
 
 		// Consider each node (after the first node) in turn and return the one closest to pos
-		for (int i = 1; i < count; i++)
+		for (std::vector<NavNode*>::size_type i = 1; i < count; ++i)
 		{
 			// Calculate the squared distance to this node
 			node = el->NavNodes[i];

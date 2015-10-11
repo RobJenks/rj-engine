@@ -44,7 +44,7 @@ Result Resource::DetermineCompoundValue(void)
 	if (m_value <= 0.0f)	m_value = 1.0f;
 
 	// If this resource has no resource requirements then it is at the base of the resource tree, and has compound value equal to its own value
-	int depcount = m_productioncost->GetResourceRequirementCount();
+	std::vector<ProductionCost::ResourceRequirementCollection>::size_type depcount = m_productioncost->GetResourceRequirementCount();
 	if (depcount == 0)
 	{
 		SetCompoundValue(m_value);			// Store the compound value ( = our own intrinsic value)
@@ -59,7 +59,7 @@ Result Resource::DetermineCompoundValue(void)
 
 	// Start with the intrinsic value of this resource and add that of its component resources one-by-one
 	float totalvalue = m_value;
-	for (int i = 0; i < depcount; i++)
+	for (std::vector<ProductionCost::ResourceRequirementCollection>::size_type i = 0; i < depcount; i++)
 	{
 		// Get a reference to the resource that is a dependency
 		req = m_productioncost->ResourceRequirements[i].Requirement;

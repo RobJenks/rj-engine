@@ -100,7 +100,7 @@ protected:
 	float										m_zvalue;
 	INTVECTOR2									m_size;
 	int											m_linecount;
-	int											m_maxlinelength;
+	std::string::size_type						m_maxlinelength;
 	int											m_font;
 	float										m_fontsize;
 	D3DXVECTOR4									m_colour;

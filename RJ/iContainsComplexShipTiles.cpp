@@ -95,7 +95,7 @@ void iContainsComplexShipTiles::RemoveShipTile(ComplexShipTile *tile)
 void iContainsComplexShipTiles::RecalculateShipTileData(void)
 {
 	// Store the total number of tile currently linked to the object
-	m_tilecount[0] = m_tiles[0].size();
+	m_tilecount[0] = (int)m_tiles[0].size();
 
 	// Precalculate flags to indicate the tile linkage to this object
 	m_hastiles = (m_tilecount[0] > 0);
@@ -121,7 +121,7 @@ void iContainsComplexShipTiles::RecalculateShipTileData(void)
 
 	// Finally store the tile count per tile type, now that each subset vector has been populated
 	for (int i = 1; i < (int)D::TileClass::_COUNT; ++i)
-		m_tilecount[i] = m_tiles[i].size();
+		m_tilecount[i] = (int)m_tiles[i].size();
 }
 
 // Removes all tiles from the collection.  More efficient than removing one-by-one and recalculating each time
@@ -140,7 +140,7 @@ void iContainsComplexShipTiles::RemoveAllShipTiles(void)
 void iContainsComplexShipTiles::ShutdownAllTileData(bool deallocate, bool unlink_all)
 {
 	// Remove tiles from the ship until we have none left.  If any controlled unlinking fails 
-	int remainingattempts = m_tiles[0].size() * 2;
+	int remainingattempts = (int)m_tiles[0].size() * 2;
 	while (m_tiles[0].size() > 0 && (--remainingattempts) > 0)
 	{
 		// Get a handle to the ship tile and make sure it is a valid pointer

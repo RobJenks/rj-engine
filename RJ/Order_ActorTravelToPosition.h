@@ -56,7 +56,7 @@ public:
 		if (result != ErrorCodes::NoError) return;
 
 		// Allocate space for the path.  There will be one additional position: the end point, which is likely different to navnode[n]
-		PathLength = revpath.size() + 1;
+		PathLength = (int)revpath.size() + 1;
 		PathNodes = (INTVECTOR3*)malloc(sizeof(INTVECTOR3) * PathLength);
 
 		// Add each point on the path in turn, using the reverse iterator to retrieve path nodes in turn

@@ -1355,7 +1355,7 @@ void UI_ShipDesigner::UpdateSDGridElementRendering(void)
 void UI_ShipDesigner::UpdateSDGridRendering(void)
 {
 	ComplexShipElement *el;
-	int numattachpoints;
+	std::vector<ComplexShipElement::ElementAttachPoint>::size_type numattachpoints;
 	INTVECTOR2 startpos, endpos, gridpos, index;
 
 	// Clear any previous rendering data before we begin recreating it
@@ -1371,11 +1371,11 @@ void UI_ShipDesigner::UpdateSDGridRendering(void)
 
 	// Retrieve key data up front before processing the ship sections
 	ComplexShip::ComplexShipSectionCollection *sections = m_ship->GetSections();
-	int numsections = sections->size();
+	ComplexShip::ComplexShipSectionCollection::size_type numsections = sections->size();
 	INTVECTOR2 gridend = INTVECTOR2(m_gridstart.x + m_numgx, m_gridstart.y + m_numgy);
 
 	// Process each ship section in turn
-	for (int i = 0; i < numsections; i++)
+	for (ComplexShip::ComplexShipSectionCollection::size_type i = 0; i < numsections; ++i)
 	{
 		// Retrieve data on this ship section
 		ComplexShipSection *section = sections->at(i);
@@ -1623,7 +1623,8 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 	m_sdshipsections.clear();
 
 	// Now recreate a new mapping for each ship section
-	for (int i=0; i<m_ship->GetSectionCount(); i++)
+	ComplexShip::ComplexShipSectionCollection::size_type n = m_ship->GetSectionCount();
+	for (ComplexShip::ComplexShipSectionCollection::size_type i = 0; i < n; ++i)
 	{
 		// Default values before starting
 		rg = NULL; instance = NULL;
@@ -1656,7 +1657,8 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 }
 
 // Renders the section attach points for a complex ship element on the SD grid
-void UI_ShipDesigner::RenderElementAttachPoints(ComplexShipElement *el, int rendercount, int shipxpos, int shipypos, INTVECTOR2 gridpos)
+void UI_ShipDesigner::RenderElementAttachPoints(ComplexShipElement *el, std::vector<ComplexShipElement::ElementAttachPoint>::size_type rendercount, 
+												int shipxpos, int shipypos, INTVECTOR2 gridpos)
 {
 	INTVECTOR2 pos, size;
 
@@ -1667,7 +1669,7 @@ void UI_ShipDesigner::RenderElementAttachPoints(ComplexShipElement *el, int rend
 	ComplexShipElement::AttachPointCollection *points = el->GetAttachPoints();
 
 	// Loop over the points to be rendered
-	for (int i = 0; i < rendercount; i++)
+	for (std::vector<ComplexShipElement::ElementAttachPoint>::size_type i = 0; i < rendercount; ++i)
 	{
 		// Get a reference to the attach point
 		ComplexShipElement::ElementAttachPoint point = points->at(i);
@@ -1820,7 +1822,7 @@ void UI_ShipDesigner::RenderShipSectionPreviewOnSDGrid(INTVECTOR2 gridsquare)
 	else 
 	{
 		// Otherwise visually show each placement conflict that we identified
-		for (int i=0; i<m_consview_section_placement_result->IssueCount; i++)
+		for (std::vector<SectionPlacementIssue>::size_type i = 0; i < m_consview_section_placement_result->IssueCount; ++i)
 		{
 			UI_ShipDesigner::SectionPlacementIssueType type = m_consview_section_placement_result->Issues[i].Type;
 			INTVECTOR2 gridloc = m_consview_section_placement_result->Issues[i].GridLocation;

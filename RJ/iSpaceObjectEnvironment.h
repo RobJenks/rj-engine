@@ -113,7 +113,7 @@ public:
 	// Methods to add, find or remove terrain objects in the environment
 	void							AddTerrainObject(StaticTerrain *obj);
 	CMPINLINE void					RemoveTerrainObject(StaticTerrain *obj)	{ RemoveTerrainObject(obj, -1); }
-	void							RemoveTerrainObject(StaticTerrain *obj, int terrainindex);
+	void							RemoveTerrainObject(StaticTerrain *obj, std::vector<StaticTerrain*>::size_type terrainindex);
 	CMPINLINE int					FindTerrainObject(StaticTerrain *obj)	{ return FindInVector<StaticTerrain*>(TerrainObjects, obj); }
 	void							ClearAllTerrainObjects(void);
 	void							ClearAllTerrainObjects(bool unlink);
