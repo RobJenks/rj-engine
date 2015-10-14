@@ -67,9 +67,8 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
 	if (tile == NULL) return NULL;
 	
 	// Assuming we have created a new tile object, set the code, name, class and pointer back to this definition object
-	*** ERROR HERE, WHENEVER UNCOMMENTED BELOW.  POSSIBLE ACCESS VIOLATION.  POSSIBLY RELATED TO VIRTUAL METHODS? ***
-	Game::Log << "ADDRESS: " << this << "  TILE: " << tile << "\n";
-	/*tile->SetCode(m_code);
+	// TODO: ERROR: Error here on 64-bit when any lines below uncommented
+	tile->SetCode(m_code);
 	tile->SetName(m_name);
 	tile->SetTileDefinition(this);
 	tile->SetTileClass(m_classtype);
@@ -83,7 +82,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
 	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
 	if (m_haveclassspecificdata) this->ApplyClassSpecificDefinition(tile);
-	*/
+	
 	// Return the newly-created tile
 	return tile;
 }

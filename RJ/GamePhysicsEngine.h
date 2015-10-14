@@ -32,6 +32,13 @@ public:
 		float tmin, tmax;				// The min and max intersection points.  Intersection took place if tmin < tmax
 	} RayIntersectionResult;
 
+	// Struct holding data on a line intersection test.  Intersection occured at (p = P1 + [k0|k1] (P2 - P1))
+	struct LineSegmentIntersectionData
+	{
+		float	k1, k2;				// k1 and k2 are the two points of intersection, if an intersection occurred
+		LineSegmentIntersectionData(void) : k1(0.0f), k2(0.0f) { }
+	} LineSegmentIntersectionResult;
+
 	// Struct holding data on a SAT test
 	struct SATIntersectionResult 
 	{ 
@@ -211,6 +218,22 @@ public:
 																	  const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
 	CMPINLINE bool							TestRaySphereIntersection(const BasicRay & ray, const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
 
+	// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
+	bool									TestLineSegmentvsSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
+																				const D3DXVECTOR3 & sphere_centre, float sphere_radius);
+
+	// Tests for the intersection of a line vector (p1 + dp == p2) with a sphere.  Returns no details; only whether an intersection took place
+	bool									TestLineVectorvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
+																				const D3DXVECTOR3 & sphere_centre, float sphere_radius);
+
+	// Tests for the intersection of a line vector (p1 + dp == p2) with a squared-sphere-radius.  Returns no details; only whether an intersection took place
+	bool									TestLineVectorvsSqSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
+																					const D3DXVECTOR3 & sphere_centre, float sphere_radius_sq);
+
+	// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns intersection points within 
+	// the LineSegmentIntersectionResult structure
+	bool									DetermineLineSegmentvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
+																						const D3DXVECTOR3 & sphere_centre, float sphere_radius);
 
 	// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
 	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.

@@ -502,6 +502,12 @@
     <ClCompile Include="iContainsTurrets.cpp">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClCompile>
+    <ClCompile Include="BasicProjectile.cpp">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicProjectileSet.cpp">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1119,6 +1125,15 @@
     <ClInclude Include="iContainsTurrets.h">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClInclude>
+    <ClInclude Include="BasicProjectile.h">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicProjectileDefinition.h">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicProjectileSet.h">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1353,6 +1368,9 @@
     </Filter>
     <Filter Include="Objects\Object Hierarchy\Interfaces">
       <UniqueIdentifier>{bffd2c32-7982-4134-970f-efc85c02c52a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\BasicProjectile">
+      <UniqueIdentifier>{6a3d95f4-542c-4803-8b39-19708230e290}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

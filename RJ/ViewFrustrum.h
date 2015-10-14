@@ -59,7 +59,37 @@ public:
 		return true;
 	}
 
-	bool CheckPoint(const D3DXVECTOR3 *pt);
+	// Check whether a point lies within the frustum
+	bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 &pt)
+	{
+		// Loop unrolled for efficiency; if the point lies outside any of the six frustum planes then return false immediately
+		if (DOT_PLANE_COORD(m_planes[0], pt) < 0.0f) return false;
+		if (DOT_PLANE_COORD(m_planes[1], pt) < 0.0f) return false;
+		if (DOT_PLANE_COORD(m_planes[2], pt) < 0.0f) return false;
+		if (DOT_PLANE_COORD(m_planes[3], pt) < 0.0f) return false;
+		if (DOT_PLANE_COORD(m_planes[4], pt) < 0.0f) return false;
+		if (DOT_PLANE_COORD(m_planes[5], pt) < 0.0f) return false;
+
+		// Point lines inside all planes, therefore is inside the frustum
+		return true;
+	}
+
+	// Check whether a point lies within the frustum
+	bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 *pt)
+	{
+		// Loop unrolled for efficiency; if the point lies outside any of the six frustum planes then return false immediately
+		if (DOT_PLANE_PCOORD(m_planes[0], pt) < 0.0f) return false;
+		if (DOT_PLANE_PCOORD(m_planes[1], pt) < 0.0f) return false;
+		if (DOT_PLANE_PCOORD(m_planes[2], pt) < 0.0f) return false;
+		if (DOT_PLANE_PCOORD(m_planes[3], pt) < 0.0f) return false;
+		if (DOT_PLANE_PCOORD(m_planes[4], pt) < 0.0f) return false;
+		if (DOT_PLANE_PCOORD(m_planes[5], pt) < 0.0f) return false;
+
+		// Point lines inside all planes, therefore is inside the frustum
+		return true;
+	}
+
+
 	bool CheckCube(float x, float y, float z, float radius);
 
 	bool CheckOBB(const OrientedBoundingBox & obb);

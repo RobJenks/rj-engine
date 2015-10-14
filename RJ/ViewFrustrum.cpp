@@ -109,36 +109,6 @@ void ViewFrustrum::ConstructFrustrum(const D3DXMATRIX *view, const D3DXMATRIX *i
 	D3DXVec3TransformCoord(&m_farplaneworld.TL, &m_farplaneworld.TL, invview);
 }
 
-// Primary method for object visibility testing - (replaced with inline always-sphere method)
-/*bool ViewFrustrum::TestObjectVisibility(iObject *obj)
-{
-	// Ensure that we have been passed a valid object
-	if (!obj) return false;
-
-	// Execute a different visibility test depending on the mode specified for this object
-	switch (obj->GetVisibilityTestingMode())
-	{
-		case VisibilityTestingModeType::UseOrientedBoundingBox:
-			return CheckOBB(obj->CollisionOBB);
-
-		default:
-			return CheckSphere(&(obj->GetPosition()), obj->GetCollisionSphereRadius());
-	}
-}*/
-
-bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 *pt)
-{
-	int i;
-
-	// Check if the point is inside all six planes of the view frustum.
-	for(i=0; i<6; i++) 
-		if(D3DXPlaneDotCoord(&m_planes[i], pt) < 0.0f)
-			return false;
- 
-	return true;
-}
-
-
 bool ViewFrustrum::CheckCube(float xCenter, float yCenter, float zCenter, float radius)
 {
 	// Call the rectangle method with equal x/y/z radii

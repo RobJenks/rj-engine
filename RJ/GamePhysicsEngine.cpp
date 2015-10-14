@@ -1485,6 +1485,113 @@ bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & 
 	return (RayIntersectionResult.tmax >= max(0.0, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
 }
 
+// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
+// Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool GamePhysicsEngine::TestLineSegmentvsSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
+															const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+{
+	// There are potentially two points of intersection given by
+	//		p = p1 + k1(p2 - p1)
+	//		p = p1 + k2(p2 - p1)
+	float a, b, c, bb4ac;
+
+	// Determine vector difference of the two line points
+	D3DXVECTOR3 dp = (p2 - p1);
+	
+	// Calculate components of the quadratic line equation
+	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	c -= sphere_radius * sphere_radius;
+	bb4ac = b * b - 4 * a * c;
+
+	// We have an intersection if the quadratic determinant is positive
+	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+}
+
+// Tests for the intersection of a line vector (p1 + dp == p2) with a sphere.  Returns no details; only whether an intersection took place
+// Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool GamePhysicsEngine::TestLineVectorvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
+															const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+{
+	// There are potentially two points of intersection given by
+	//		p = p1 + k1(p2 - p1)
+	//		p = p1 + k2(p2 - p1)
+	float a, b, c, bb4ac;
+
+	// Calculate components of the quadratic line equation
+	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	c -= sphere_radius * sphere_radius;
+	bb4ac = b * b - 4 * a * c;
+
+	// We have an intersection if the quadratic determinant is positive
+	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+}
+
+// Tests for the intersection of a line vector (p1 + dp == p2) with a squared-sphere-radius.  Returns no details; only whether an intersection took place
+// Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool GamePhysicsEngine::TestLineVectorvsSqSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
+															const D3DXVECTOR3 & sphere_centre, float sphere_radius_sq)
+{
+	// There are potentially two points of intersection given by
+	//		p = p1 + k1(p2 - p1)
+	//		p = p1 + k2(p2 - p1)
+	float a, b, c, bb4ac;
+
+	// Calculate components of the quadratic line equation
+	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	c -= sphere_radius_sq;
+	bb4ac = b * b - 4 * a * c;
+
+	// We have an intersection if the quadratic determinant is positive
+	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+}
+
+// Tests for the intersection of a line segment (p1 > p2) with a sphere.  Returns intersection points within 
+// the LineSegmentIntersectionResult structure
+// Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
+bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
+																	const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+{
+	// There are potentially two points of intersection given by
+	//		p = p1 + k1(p2 - p1)
+	//		p = p1 + k2(p2 - p1)
+	float a, b, c, bb4ac;
+
+	// Determine vector difference of the two line points
+	D3DXVECTOR3 dp = (p2 - p1);
+
+	// Calculate components of the quadratic line equation
+	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	c -= sphere_radius * sphere_radius;
+	bb4ac = b * b - 4 * a * c;
+
+	// We have an intersection if the quadratic determinant is positive
+	if (fabs(a) < Game::C_EPSILON || bb4ac < 0) return false;
+
+	// Store the points of intersection and return true to signify an intersection took place
+	float sqrt_bb4ac = sqrtf(bb4ac); float two_a = (2 * a);
+	LineSegmentIntersectionResult.k1 = (-b + sqrt_bb4ac) / two_a;
+	LineSegmentIntersectionResult.k2 = (-b - sqrt_bb4ac) / two_a;
+	return true;
+}
+
+
+
 // Perform a continuous collision test between two moving spheres.  Populates the collision result data with details on the collision
 // points and time t = [0 1] at which the collision occured, if at all.  Returns a flag indicating whether a collision took place.
 // Input from http://studiofreya.com/3d-math-and-physics/little-more-advanced-collision-detection-spheres/
