@@ -41,6 +41,7 @@ class SkinnedModelInstance;
 class ArticulatedModel;
 class TurretController;
 class OverlayRenderer;
+class BasicProjectileSet;
 struct GameConsoleCommand;
 
 using namespace std;
@@ -62,6 +63,7 @@ public:
 		Render_SystemRegion,
 		Render_ImmediateRegion,
 		Render_SystemObjects,
+		Render_BasicProjectiles,
 		Render_Effects,
 		Render_ParticleEmitters,
 		Render_UserInterface,
@@ -151,6 +153,9 @@ public:
 
 	// Renders a collection of turrets that have already been updated by their turret controller
 	void					RenderTurrets(TurretController & controller);
+
+	// Renders all elements of a projectile set which are currently visible
+	void					RenderProjectileSet(BasicProjectileSet & projectiles);
 
 	// RenderObjectEnvironments(iSpaceObjectEnvironment *environment)
 	// Method to render the interior of an object environment, including any tiles, objects or terrain within it

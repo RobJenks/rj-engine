@@ -7,6 +7,8 @@ class BasicProjectileDefinition
 {
 public:
 
+	float									Speed;						// Projectile speed /sec
+	float									SpeedSq;					// Projectile speed sq /sec
 
 
 };

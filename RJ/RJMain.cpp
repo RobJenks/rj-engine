@@ -79,6 +79,9 @@
 #include "ArticulatedModel.h"				// DBG
 #include "SpaceTurret.h"					// DBG
 #include "TurretController.h"				// DBG
+#include "BasicProjectile.h"				// DBG
+#include "BasicProjectileDefinition.h"		// DBG
+#include "BasicProjectileSet.h"				// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -201,11 +204,15 @@ bool RJMain::Display(void)
 		// Calculate time modifiers in ms/secs based on time delta since last frame, then store them globally for use in all methods
 		RunInternalClockCycle();
 
+		// Retrieve required data
+		SpaceSystem *player_system = Game::CurrentPlayer->GetSystem();
+
 		// Begin the simulation cycle
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_BeginCycle)
 		{
 			Game::Logic::BeginSimulationCycle();
 			Game::CurrentPlayer->BeginSimulationCycle();
+			Game::ObjectManager.InitialiseFrame();
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_BeginCycle)
 
@@ -236,7 +243,11 @@ bool RJMain::Display(void)
 		// and more distant simulation that is less frequent/detailed/accurate
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_SimulateSpaceObjectMovement)
 		{
+			// Simulate objects
 			Game::Logic::SimulateAllObjects();
+
+			// Simulate all projectiles in the current player system
+			if (player_system) player_system->Projectiles.SimulateProjectiles(player_system->SpatialPartitioningTree);
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_SimulateSpaceObjectMovement)
 
@@ -424,8 +435,20 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	// Additional debug controls below this point
-	if (b[DIK_U])			cs->ApplyAngularVelocity(D3DXVECTOR3(0.0f, -1.0f * Game::TimeFactor, 0.0f));
-	else if (b[DIK_I])		cs->ApplyAngularVelocity(D3DXVECTOR3(0.0f, +1.0f * Game::TimeFactor, 0.0f));
+	if (b[DIK_U])
+	{
+		static unsigned int dbg_u_counter = 0U;
+		if (Game::ClockMs > dbg_u_counter)
+		{
+			dbg_u_counter = (Game::ClockMs + 2);
+
+			BasicProjectileDefinition *def = new BasicProjectileDefinition();
+			def->Speed = 1000.0f;
+
+			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), ss->GetPosition(), ss->GetOrientation(), 3000U);
+		}
+
+	}
 	
 
 	if (b[DIK_5])
@@ -906,6 +929,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseMathFunctions();
 	Game::Log << LOG_INIT_START << "Math functions initialised\n";
 
+	// Initialise the object manager; disable caching functions during initialisation while objects are being created in large numbers
+	Game::ObjectManager.DisableSearchCache();
+
 	// Initialise the universe
 	res = InitialiseUniverse();
 	if (res != ErrorCodes::NoError) {
@@ -961,6 +987,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
+
+	// Enable the object manager cache now that objects have been created during initialisation
+	Game::ObjectManager.EnableSearchCache();
 
 	// Return success if we have completed all initialisation functions
 	Game::Log << LOG_INIT_START << "Initialisation complete\n\n";
@@ -1769,7 +1798,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
 		s2->SetName("Test ship s2");
 		s2->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(650, 200, -150));
+		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), ss->GetPosition() + D3DXVECTOR3(0.0f, 0.0f, 120.0f));
 		s2->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1938,18 +1967,26 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (m_debuginfo_renderinfo)
 	{
 		const CoreEngine::EngineRenderInfoData & renderinfo = Game::Engine->GetRenderInfo();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: %d Draw Calls [ S.Ship = %d, C.Ship = %d, CS.Sec = %d, Tile = %d, Actor = %d, Terrain = %d ]",
-			renderinfo.DrawCalls, renderinfo.ShipRenderCount, renderinfo.ComplexShipRenderCount,
-			renderinfo.ComplexShipSectionRenderCount, renderinfo.ComplexShipTileRenderCount,
-			renderinfo.ActorRenderCount, renderinfo.TerrainRenderCount);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: %d Draw Calls [%s %s %s %s %s %s ]",
+			renderinfo.DrawCalls,
+			(renderinfo.ShipRenderCount == 0 ? "" : concat(" S.Ship = ")(renderinfo.ShipRenderCount).str().c_str()),
+			(renderinfo.ComplexShipRenderCount == 0 ? "" : concat(" C.Ship = ")(renderinfo.ComplexShipRenderCount).str().c_str()),
+			(renderinfo.ComplexShipSectionRenderCount == 0 ? "" : concat(" CS.Sec = ")(renderinfo.ComplexShipSectionRenderCount).str().c_str()),
+			(renderinfo.ComplexShipTileRenderCount == 0 ? "" : concat(" CS.Tile = ")(renderinfo.ComplexShipTileRenderCount).str().c_str()),
+			(renderinfo.ActorRenderCount == 0 ? "" : concat(" Actor = ")(renderinfo.ActorRenderCount).str().c_str()),
+			(renderinfo.TerrainRenderCount == 0 ? "" : concat(" Terrain = ")(renderinfo.TerrainRenderCount).str().c_str())
+		);
+
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_2, D::UI->TextStrings.C_DBG_FLIGHTINFO_2, 1.0f);
 	}
 
-	// Debug info line 3 - collision data
+	// Debug info line 3 - object and collision data
 	if (m_debuginfo_collisiondata)
 	{
 		const CollisionDetectionResultsStruct & coll = Game::PhysicsEngine.CollisionDetectionResults;
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, "Collision data: Space = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 
+			"Obj cache: Size = %d (Hit: %d / Miss: %d) | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
+			Game::ObjectManager.GetCurrentCacheSize(), Game::ObjectManager.CACHE_HITS, Game::ObjectManager.CACHE_MISSES,
 			coll.SpaceCollisions.CollisionChecks, coll.SpaceCollisions.BroadphaseCollisions, coll.SpaceCollisions.Collisions,
 			coll.SpaceCollisions.CCDCollisionChecks, coll.SpaceCollisions.CCDCollisions, 
 			coll.EnvironmentCollisions.ElementsChecked, coll.EnvironmentCollisions.ObjectsChecked, coll.EnvironmentCollisions.ElementsCheckedAroundObjects,
@@ -1961,15 +1998,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		int count = 0, activecount = 0;
-		Game::ObjectRegister::const_iterator it_end = Game::Objects.end();
-		for (Game::ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
-		{
-			if (it->second.Active) ++activecount;
-			++count;
-		}
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Object count: %d (%d active)", count, activecount);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Proj: %d",
+			Game::CurrentPlayer->GetSystem()->Projectiles.GetActiveProjectileCount());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}

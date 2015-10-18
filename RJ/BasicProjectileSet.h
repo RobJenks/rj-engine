@@ -16,7 +16,9 @@ public:
 	static const std::vector<BasicProjectile>::size_type	MAXIMUM_CAPACITY = 16384;			// Maximum collection size
 	static const unsigned int								DEALLOCATION_TIME = 60000U;			// If we have been below the half-threshold for this length of 
 																								// time (ms) we can shrink the item collection
-
+	static const float										COLLISION_SEARCH_RADIUS;			// Distance within which we will perform projectile collision queries
+	static const float										COLLISION_COMMON_OBJECT_RADIUS_SQ;	// If projectiles are within this same sq-distance of each
+	
 	// Primary item collection
 	std::vector<BasicProjectile>							Items;
 
@@ -35,8 +37,8 @@ public:
 	void													Initialise(std::vector<BasicProjectile>::size_type initial_capacity);
 
 	// Adds a new projectile to the collection
-	void													AddProjectile(	const BasicProjectileDefinition *def, const D3DXVECTOR3 & position,
-																			const D3DXVECTOR3 & velocity, unsigned int lifetime);
+	void													AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const D3DXVECTOR3 & position,
+																			const D3DXQUATERNION & orientation, unsigned int lifetime);
 
 	// Removes the projectile at the specified index
 	void													RemoveProjectile(std::vector<BasicProjectile>::size_type index);
@@ -48,6 +50,15 @@ public:
 	// Shrinks the collection to half of its original size.  Resets the threshold counter
 	void													ShrinkCollection(void);
 
+	// Simulate all projectiles.  Remove any expired projectiles, handle collisions and mark any in-view projectiles for rendering
+	// Accepts a pointer to the spatial partitioning tree for the current area as input
+	void													SimulateProjectiles(Octree<iSpaceObject*> *sp_tree);
+
+	// Returns the number of projectiles currently active in the set
+	CMPINLINE std::vector<BasicProjectile>::size_type		GetActiveProjectileCount(void) const
+	{
+		return (Active ? (LiveIndex + 1U) : 0U);
+	}
 
 protected:
 

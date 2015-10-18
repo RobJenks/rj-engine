@@ -43,11 +43,16 @@ CMPINLINE T * ptr(T * obj) { return obj; }	// Otherwise if object is already a p
 #define SetBit(bitstring, bit) bitstring |= bit
 #define ClearBit(bitstring, bit) bitstring &= ~bit
 #define SetBitState(bitstring, bit, bool_value) (bool_value ? (bitstring |= bit) : (bitstring &= ~bit))
+
 #define CheckBit_All(bitstring, bit) ((bitstring & bit) == bit)
 #define CheckBit_Any(bitstring, bit) ((bitstring & bit) != 0)
 #define CheckBit_AllExclusive(bitstring, bit) (bitstring == bit)
 #define CheckBit_AnyExclusive(bitstring, bit) ((bitstring & bit) != 0 && (bitstring & ~bit) == 0)
 #define CheckBit_Single CheckBit_Any
+
+#define CheckBit_All_NotSet(bitstring, bit) ((bitstring & bit) == 0)
+#define CheckBit_Any_NotSet(bitstring, bit) ((bitstring & bit) != bit)
+#define CheckBit_Single_NotSet CheckBit_All_NotSet
 
 // Convenience macro for min/max clamping of values
 #define clamp(x, min_val, max_val) (min((max_val), max((min_val), (x))))

@@ -1,4 +1,6 @@
 #include "GameVarsExtern.h"
+#include "SimulationObjectManager.h"
+#include "ViewFrustrum.h"
 
 #include "BasicProjectileSet.h"
 
@@ -25,8 +27,8 @@ void BasicProjectileSet::Initialise(std::vector<BasicProjectile>::size_type init
 }
 
 // Adds a new projectile to the collection
-void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, const D3DXVECTOR3 & position,
-										const D3DXVECTOR3 & velocity, unsigned int lifetime)
+void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const D3DXVECTOR3 & position,
+										const D3DXQUATERNION & orientation, unsigned int lifetime)
 {
 	// If we are not active then initialise now; first projectile will be created at [0]
 	if (!Active)
@@ -50,10 +52,7 @@ void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, co
 	}
 
 	// The "LiveIndex" now points to the next suitable element for creating a projectile.  Set the projectile details
-	Items[LiveIndex].Definition = def;
-	Items[LiveIndex].Position = position;
-	Items[LiveIndex].Velocity = velocity;
-	Items[LiveIndex].Lifetime = lifetime;
+	Items[LiveIndex] = BasicProjectile(def, owner, position, orientation, lifetime);
 }
 
 // Extends the size of the collection to allow more elements to be added, as long as we are not at the limit
@@ -122,13 +121,80 @@ void BasicProjectileSet::ShrinkCollection(void)
 	Items.resize(Capacity);
 }
 
+// Simulate all projectiles.  (1) Remove any expired projectiles, (2) handle collisions and (3) move the projectiles
+// along their velocity vector.  Accepts a pointer to the spatial partitioning tree for the current area as input
+void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
+{
+	// Make sure this collection is active
+	if (!Active) return;
 
-CREATE METHOD(S?) TO RUN THROUGH THE COLLECTION AND
-a) Remove any projectiles that are now dead(lifetime < 0).  Cast Game::ClockMs to int once and then use int from that point so we can test for -ve
-b) Test for any collisions with objects using line/sphere test
-c) Render any objects within the frustum(check using sphere test, with speedSq radius [stored in proj def?  No because of pointer dereference?])
+	// Define variables required later in the method
+	Octree<iSpaceObject*> *leaf = NULL;
+	std::vector<iSpaceObject*> contacts;
+	bool collision;
 
+	// Loop through the projectile collection until we reach the LiveIndex (the last active projectile)
+	std::vector<BasicProjectile>::size_type i = 0;
+	while (i <= LiveIndex && Active)
+	{
+		// Get a reference to this projectile
+		BasicProjectile & proj = Items[i];
 
+		/* 1. Test whether the projectile has expired */
+		if (Game::ClockMs > proj.Expiration)
+		{
+			// Projectile has expired; remove it from the collection and do not increment i, since the last 'live'
+			// projectile has now been swapped into this position
+			RemoveProjectile(i); continue;
+		}
+		
+		/* 2. Otherwise if the projectile is still active, test collision for any objects in the path it is about to take */
+			
+		// Determine the relevant octree leaf node for this projectile.  Test the last node that was used as a
+		// first approximation, since many projectiles may exist in the same general area
+		if (!leaf || !leaf->ContainsPoint(proj.Position))
+		{
+			leaf = sp_tree->GetNodeContainingPoint(proj.Position);
+		}
+
+		// Get all contacts potentially within the path of this object
+		int count = Game::ObjectManager.GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
+			contacts, SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+
+		// Test each contact to see if it is actually intersected by the projectile path
+		if (count != 0)
+		{
+			collision = false;
+			std::vector<iSpaceObject*>::iterator it_end = contacts.end();
+			for (std::vector<iSpaceObject*>::iterator it = contacts.begin(); it != it_end; ++it)
+			{
+				// Prevent the projectile from colliding with its owner
+				iSpaceObject *obj = (*it);
+				if (obj->GetID() == proj.Owner) continue;
+
+				// Test for precise intersection along the projectile path
+				if (Game::PhysicsEngine.TestLineVectorvsSqSphereIntersection(proj.Position, proj.Velocity,
+					obj->GetPosition(), obj->GetCollisionSphereRadiusSq()))
+				{
+					// The projectile is impacting this object, so handle the impact here
+					/* Impact handling code */
+
+					// Record the collision and quit here; we cannot combine with more than one object
+					collision = true; break;
+				}
+			}
+
+			// If we collided with an object then remove the projectile and move to the next one, since there will be nothing to render
+			if (collision) { RemoveProjectile(i); continue; }
+		}
+
+		/* 3. Since the projectile hasn't collided we can move it along its velocity vector to its new position */
+		proj.Position += (proj.Velocity * Game::TimeFactor);
+
+		// Finally, increment the collection index to move onto the next projectile
+		++i;
+	}
+}
 
 
 

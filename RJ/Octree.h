@@ -714,17 +714,25 @@ CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 template <typename T>
 CMPINLINE Octree<T> * Octree<T>::GetNodeContainingPoint(const D3DXVECTOR3 & point)
 {
-	// Traverse the hierarchy from the invoking node downwards, recursively looking for the most appropriate node
-	if (m_children[0])
+	// First make sure this node actually contains the point; if not, traverse up to parents as far as possible
+	Octree<T> *node = this;
+	while (node && !node->ContainsPoint(point))
 	{
-		// If we have children then identify the most appropriate child node for this point and move recursively into it
-		return m_children[GetRelevantChildNode(point)]->GetNodeContainingPoint(point);
+		node = node->GetParent();
 	}
-	else
+
+	// If we traverse off the top of the parent hierarchy it means the point does not exist anywhere in the Octree
+	// We don't need to test for NULL here since the downward traversal below will handle a NULL input (and return NULL)
+
+	// We know that 'node' contains the point; continue moving down through child nodes until we reach the most
+	// appropriate leaf node
+	while (node && node->IsBranchNode())
 	{
-		// If we have no children then this is the most specific & appropriate node for the point, so return it
-		return this;
+		node = node->GetChildNode(node->GetRelevantChildNode(point));
 	}
+	
+	// Return the leaf node containing this point
+	return node;
 }
 
 

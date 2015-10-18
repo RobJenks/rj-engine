@@ -45,6 +45,7 @@
 #include "SkinnedModel.h"
 #include "ArticulatedModel.h"
 #include "TurretController.h"
+#include "BasicProjectileSet.h"
 #include "StaticTerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
@@ -1064,8 +1065,17 @@ void CoreEngine::Render(void)
 
 	// Render all objects in the current player system; simulation state & visibility will be taken 
 	// into account to ensure we only render those items that are necessary
-	if (RenderStageActive(RenderStage::Render_SystemObjects)) 
-		RenderAllSystemObjects(Game::CurrentPlayer->GetSystem());
+	SpaceSystem *system = Game::CurrentPlayer->GetSystem();
+	if (system)
+	{
+		// Render all objects
+		if (RenderStageActive(RenderStage::Render_SystemObjects))
+			RenderAllSystemObjects(system);
+
+		// Render all visible basic projectiles
+		if (RenderStageActive(RenderStage::Render_BasicProjectiles))
+			RenderProjectileSet(system->Projectiles);
+	}
 
 	// Render effects and particle emitters
 	if (RenderStageActive(RenderStage::Render_Effects)) RenderEffects();
@@ -1844,7 +1854,27 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 }
 
 
+// Renders all elements of a projectile set which are currently visible
+void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
+{
+	// Make sure the collection is active (which guarantees that it contains >0 projectiles)
+	if (!projectiles.Active) return;
 
+	// Iterate through each element of the projectile set
+	for (std::vector<BasicProjectile>::size_type i = 0; i < projectiles.LiveIndex; ++i)
+	{
+		// Test visibility; we will only render projectiles within the viewing frustum
+		BasicProjectile & proj = projectiles.Items[i];
+		if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
+
+		// FOR NOW, simply render a primitive at the projectile location
+		D3DXMATRIX trans, rot, world;
+		D3DXMatrixTranslation(&trans, proj.Position.x, proj.Position.y, proj.Position.z);
+		D3DXMatrixRotationQuaternion(&rot, &(proj.Orientation));
+		world = (rot * trans);
+		RenderModel(Model::GetModel("unit_cone_model"), &world);
+	}
+}
 
 // Rendering method for skinned models
 void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)

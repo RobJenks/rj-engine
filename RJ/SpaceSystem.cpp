@@ -39,6 +39,9 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 	// Add the spatial partitioning tree for this system to the global tree-pruning maintenance process
 	Game::TreePruner.AddNode(SpatialPartitioningTree);
 
+	// Initialise the per-system projectile collection using default parameters
+	Projectiles.Initialise();
+
 	// Attempt to load the system backdrop, if a valid filename has been provided
 	m_backdrop = new Texture();
 	if (m_backdroplocation != NullString) 

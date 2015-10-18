@@ -5,18 +5,50 @@
 #include "SimulationObjectManager.h"
 
 
+// Static constants
+const float SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER = 3.0f;		// Multiplier attached to all search queries to allow more efficient caching
+const float SimulationObjectManager::MINIMUM_SEARCH_DISTANCE = 1000.0f;		// Minimum distance on searches, for caching purposes
+const float SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE = 100000.0f;	// Maximum search distance when increasing by the multiplier
+
 // Default constructor
 SimulationObjectManager::SimulationObjectManager(void)
 {
 	// Pre-allocate space for the frequently used internal vectors, for runtime efficiency
 	search_candidate_nodes.reserve(1024);
 	search_large_objects.reserve(64);
+
+	// Initialise the search cache and preallocate to the maximum size
+	m_cache_enabled = true;
+	m_searchcache = std::vector<CachedSearchResults>(SimulationObjectManager::MAXIMUM_SEARCH_CACHE_SIZE, CachedSearchResults());
+	m_nextcacheindex = 0;
+	m_cachesize = 0;
+
+	// Initialise the cache hit / miss counters, if debug logging is enabled
+#	ifdef OBJMGR_DEBUG_MODE
+		CACHE_HITS = CACHE_MISSES = 0;
+#	endif
 }
 
-// Searches for all items within the specified distance of an object.  Returns the number of items located
-// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
-int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *focalobject, float distance, std::vector<iSpaceObject*> & outResult,
-														 int options)
+// Initialises the object manager at the start of a frame
+void SimulationObjectManager::InitialiseFrame(void)
+{
+	// Reset the search cache for this frame (TODO: allow some persistence across frames for efficiency?)
+	m_nextcacheindex = m_cachesize = 0;
+
+	// Reset the cache hit / miss counters for this frame, if debug logging is enabled
+#	ifdef OBJMGR_DEBUG_MODE
+		CACHE_HITS = CACHE_MISSES = 0;
+	
+#		ifdef OBJMGR_LOG_DEBUG_OUTPUT
+		OutputDebugString("\nObjMgr: Initialising cache for new frame\n");
+#		endif
+#	endif
+}
+
+// Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
+// appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
+int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*> *node, const D3DXVECTOR3 & position, float distance,
+															std::vector<iSpaceObject*> & outResult, int options)
 {
 	/* For now, we wil take one of two approaches.  If the search distance fits entirely within this item's node (the very likely case)
 	we can efficiently iterate over the items in this node and return them.  If it does not, we will keep moving up the tree until
@@ -25,20 +57,122 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 	just moving up the tree.  e.g. if we need to search further in +ve x direction then locate the relevant node(s) to the right of
 	this one.
 	*/
-	//unsigned int start_time = (unsigned int)timeGetTime(); // DBG
 
-	// We must be a member of the spatial partitioning Octree to search for objects.  If not, return nothing immediately
-	Octree<iSpaceObject*> * node = focalobject->GetSpatialTreeNode();
+	// We a pointer to the relevant spatial partitioning Octree to search for objects.  If we don't have one, return nothing immediately
 	if (!node) return 0;
 
-	// If we want to test from the focal object's boundary then add that boundary to the search distance now
-	if (CheckBit_Single(options, ObjectSearchOptions::IncludeFocalObjectBoundary)) distance += focalobject->GetCollisionSphereRadius();
+	// Clear the fdcal object boundary flag.  If it was required, it has already been applied in the public method.  We want to remove it
+	// here since it has no bearing on cache eligibility
+	ClearBit(options, ObjectSearchOptions::IgnoreFocalObjectBoundary);
 
-	// Get the position of this object.  All comparisons will be based on squared distance to avoid costly sqrt operations
-	const D3DXVECTOR3 & pos = focalobject->GetPosition();
+	// Make a record of whether we want to include target object boundaries, and then remove from the options string as well for the same reason
+	bool ignore_target_boundaries = CheckBit_Single(options, ObjectSearchOptions::IgnoreTargetObjectBoundaries);
+	ClearBit(options, ObjectSearchOptions::IgnoreTargetObjectBoundaries);
+
+	// All comparisons will be based on squared distance to avoid costly sqrt operations
 	float distsq = (distance * distance);
-	float xmin = (pos.x - distance), ymin = (pos.y - distance), zmin = (pos.z - distance),
-		  xmax = (pos.x + distance), ymax = (pos.y + distance), zmax = (pos.z + distance);
+
+	/* Test whether a cached search result can be used without searching */
+	if (m_cache_enabled)
+	{
+		// Test whether any cached search result contains our desired search as a subset; if so, we can return it immediately
+		float cacheposdistsq; D3DXVECTOR3 cacheposdiff;
+		for (std::vector<CachedSearchResults>::size_type i = 0; i < m_cachesize; ++i)
+		{
+			// We can only used cached results that were obtained using the same search options
+			if (m_searchcache[i].Options != options) continue;
+
+			// Determine squared distance between our current search object and the centre of the cached search
+			cacheposdiff = (position - m_searchcache[i].Position);
+			cacheposdistsq = (cacheposdiff.x*cacheposdiff.x) + (cacheposdiff.y*cacheposdiff.y) + (cacheposdiff.z*cacheposdiff.z);
+
+			// We can use these cached results if (cachedsearchdistSQ > (searchdistSQ + posdifferenceSQ))
+			if (m_searchcache[i].SearchDistanceSq > (distsq + cacheposdistsq))
+			{
+				// Clear the results vector 
+				outResult.clear();
+				int matches = 0;
+				iObject *obj;
+
+				// Add any items within the adjusted threshold
+				float threshold = (distsq - cacheposdistsq);
+				std::vector<CachedSearchResult>::const_iterator it_end = m_searchcache[i].Results.end();
+				for (std::vector<CachedSearchResult>::const_iterator it = m_searchcache[i].Results.begin(); it != it_end; ++it)
+				{
+					// Add any items within the threshold
+					if ((*it).DistanceSquared < threshold)
+					{
+						obj = Game::GetObjectByID((*it).ObjectID);
+						if (obj)
+						{
+							outResult.push_back((iSpaceObject*)obj);
+							++matches;
+						}
+					}
+				}
+
+				// Record this as a cache hit, if debug logging is enabled
+#				ifdef OBJMGR_DEBUG_MODE
+					++CACHE_HITS;
+
+#					ifdef OBJMGR_LOG_DEBUG_OUTPUT
+						OutputDebugString(concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)("], opt=")(options)
+							(") met by cache ")(i)(" (")(sqrtf(m_searchcache[i].SearchDistanceSq))(" of [")(m_searchcache[i].Position.x)(",")
+							(m_searchcache[i].Position.y)(",")(m_searchcache[i].Position.z)("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
+#					endif
+#				endif
+
+				// Return the number of matches and quit
+				return matches;
+			}
+		}
+	}
+
+	/* We cannot use a cached search result so perform a proximity search */
+
+	// Record this as a cache miss, if debug logging is enabled
+#	ifdef OBJMGR_DEBUG_MODE
+		++CACHE_MISSES;
+
+#		ifdef OBJMGR_LOG_DEBUG_OUTPUT
+			OutputDebugString(concat("ObjMgr: Cache Miss { Search(")(distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)("], opt=")(options)
+				(") could not be met\n").str().c_str());
+#		endif
+#	endif
+
+	// Increase actual search distance to enable more effective use of caching
+	float search_distance = (distance * SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER);
+	if (search_distance < SimulationObjectManager::MINIMUM_SEARCH_DISTANCE)
+	{
+		search_distance = SimulationObjectManager::MINIMUM_SEARCH_DISTANCE;
+	}
+	else if (search_distance > SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE)
+	{
+		search_distance = max(distance, SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE);
+	}
+
+	// We are ready to perform a full search; initialise the cache that we will be creating
+	CachedSearchResults & cache = m_searchcache[m_nextcacheindex];
+	cache.Position = position;
+	cache.SearchDistanceSq = (search_distance * search_distance);
+	cache.Options = options;
+	cache.Results.clear();
+
+	// Record the new cache that was created if in debug mode
+#	if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
+		OutputDebugString(concat("ObjMgr: Creating cache ")(m_nextcacheindex)(" (")(search_distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)
+			("], opt=")(options)("\n").str().c_str());
+#	endif
+
+	// Increment the cache counter for the next one that will be used
+	if (++m_nextcacheindex == SimulationObjectManager::MAXIMUM_SEARCH_CACHE_SIZE)
+		m_nextcacheindex = 0;
+	else
+		++m_cachesize;
+
+	// Determine the octree bounds that we need to consider
+	float xmin = (position.x - search_distance), ymin = (position.y - search_distance), zmin = (position.z - search_distance),
+		  xmax = (position.x + search_distance), ymax = (position.y + search_distance), zmax = (position.z + search_distance);
 
 	// Starting point for the search will be our current node: "node" is currently set to the focal object treenode
 
@@ -72,7 +206,7 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 		}
 	}
 
-	// We now know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
+	// We know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
 	// of all items in its bounds.  Use a non-recursive vector substitute instead of normal recursive search for efficiency
 	search_candidate_nodes.clear();
 	search_candidate_nodes.push_back(node);
@@ -83,7 +217,7 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 
 	// Initialise any other variables needed for the analysis phase
 	iSpaceObject *obj;
-	float diffx, diffy, diffz;
+	float diffx, diffy, diffz, obj_dist_sq;
 	search_last_large_obj = NULL;
 	int C;
 
@@ -269,29 +403,37 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 					search_last_large_obj = obj;
 
 					// Get the squared distance from our position to the object
-					diffx = (pos.x - objpos.x), diffy = (pos.y - objpos.y), diffz = (pos.z - objpos.z);
+					diffx = (position.x - objpos.x), diffy = (position.y - objpos.y), diffz = (position.z - objpos.z);
 					diffx *= diffx; diffy *= diffy; diffz *= diffz;
+					obj_dist_sq = diffx + diffy + diffz;
+
+					// Add the object to the search cache before culling items in the exact search range
+					cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
 
 					// The object is invalid if it is outside (distsq + collisionradiussq) of the position
-					if ((diffx + diffy + diffz) > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
+					if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
 				}
 
 				// Method 2 - normal objects: any other object type can be treated as a point object, and we use a simple dist ^ 2 test
 				else
 				{
 					// Calculated the squared distance between ourself and this object
-					diffx = (pos.x - objpos.x), diffy = (pos.y - objpos.y), diffz = (pos.z - objpos.z);
+					diffx = (position.x - objpos.x), diffy = (position.y - objpos.y), diffz = (position.z - objpos.z);
 					diffx *= diffx; diffy *= diffy; diffz *= diffz;
+					obj_dist_sq = diffx + diffy + diffz;
 
-					// Test object validity based upon its squared distance to the target position.  Optionally account for
+					// Add the object to the search cache before culling items in the exact search range
+					cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
+
+					// Test object validity based upon its squared distance to the target position.  Optionally ignore 
 					// the target object collision radius as well
-					if (CheckBit_Single(options, ObjectSearchOptions::IncludeTargetObjectBoundaries))
+					if (ignore_target_boundaries)
 					{
-						if ((diffx + diffy + diffz) > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
+						if (obj_dist_sq > distsq) continue; 
 					}
 					else
 					{
-						if ((diffx + diffy + diffz) > distsq) continue;
+						if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
 					}
 				}
 
@@ -301,11 +443,13 @@ int SimulationObjectManager::GetAllObjectsWithinDistance(const iSpaceObject *foc
 		}
 	}
 
-	/*static int dbgc = 0;
-	dbgc += outResult.size();
-	OutputDebugString(concat("Obj \"")(focalobject->GetName())("\" (")(focalobject->GetID())(") - NodeSearch: ")(search_candidate_nodes.size())
-		(", ObjResults: ")(outResult.size())(", Time = ")(((unsigned int)timeGetTime() - start_time))("ms\n").str().c_str());
-*/
+	// If in debug logging mode, determine and record how many objects were added to the last cache
+#	if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
+		int debug_cache_i = (m_nextcacheindex - 1);
+		if (debug_cache_i < 0) debug_cache_i = (SimulationObjectManager::MAXIMUM_SEARCH_CACHE_SIZE - 1); 
+		OutputDebugString(concat("ObjMgr: Cache ")(debug_cache_i)(" populated with ")(m_searchcache[debug_cache_i].Results.size())(" objects\n").str().c_str());
+#	endif
+
 	// Return the total number of items that were located
 	return ((int)outResult.size());
 }

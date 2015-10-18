@@ -11,6 +11,7 @@
 #include "Texture.h"
 #include "Octree.h"
 #include "iSpaceObject.h"
+#include "BasicProjectileSet.h"
 
 using namespace std;
 
@@ -48,6 +49,9 @@ public:
 
 	// Each system maintains a collection of objects that it currently holds
 	std::vector<iSpaceObject*>	Objects;
+
+	// Each system maintains a collection of active projectiles that are present in the environment
+	BasicProjectileSet			Projectiles;
 
 	// Each system maintains an Octree for tracking the position of its objects
 	Octree<iSpaceObject*> *		SpatialPartitioningTree;
