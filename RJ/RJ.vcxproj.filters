@@ -508,6 +508,12 @@
     <ClCompile Include="BasicProjectileSet.cpp">
       <Filter>Objects\BasicProjectile</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Engine\ShaderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="VolLineShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1134,6 +1140,15 @@
     <ClInclude Include="BasicProjectileSet.h">
       <Filter>Objects\BasicProjectile</Filter>
     </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Engine\ShaderManager</Filter>
+    </ClInclude>
+    <ClInclude Include="VolLineShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="InputLayoutDesc.h">
+      <Filter>Engine\ShaderManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1372,8 +1387,26 @@
     <Filter Include="Objects\BasicProjectile">
       <UniqueIdentifier>{6a3d95f4-542c-4803-8b39-19708230e290}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL">
+      <UniqueIdentifier>{333fb0b0-9dd3-420a-a2b7-9340046605e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\ShaderManager">
+      <UniqueIdentifier>{a776cc0f-fea9-473d-93f4-dd0e8c972617}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="VertexShader.hlsl" />
+    <FxCompile Include="Data\Shaders\vol_line.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vol_line.gs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vol_line.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

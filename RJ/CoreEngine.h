@@ -14,6 +14,7 @@
 #include "iAcceptsConsoleCommands.h"
 #include "RenderQueue.h"
 #include "RenderQueueOptimiser.h"
+#include "ShaderManager.h"
 class iShader;
 class LightShader;
 class LightFadeShader;
@@ -250,6 +251,9 @@ public:
 
 	// Returns the alpha blending state.  Passthrough method to the D3D component
 	CMPINLINE D3DMain::AlphaBlendState GetAlphaBlendState(void) const		{ return m_D3D->GetAlphaBlendState(); }
+
+	// Central shader manager for the engine
+	ShaderManager			ShaderManager;
 
 	// Return a flag indicating whether a particular render stage is active this cycle
 	CMPINLINE bool RenderStageActive(RenderStage stage) { return m_renderstages[(int)stage]; }

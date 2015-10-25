@@ -155,7 +155,21 @@ namespace ErrorCodes {
 	const Result		CouldNotInitialiseModelWithInvalidStringParams	= 1217;
 	const Result		FoundNoDisplayModesAvailableForPrimaryAdapter	= 1218;
 	const Result		FoundNoSupportedDisplayModeForResolution		= 1219;
-
+	const Result		ShaderManagerInitialisationFailedOnNullDevice	= 1220; 
+	const Result		CannotLoadCompiledShaderWithNullInputFile		= 1221;
+	const Result		CouldNotOpenCompiledShaderFile					= 1222;
+	const Result		ShaderManagerCouldNotCreateVertexShader			= 1223;
+	const Result		ShaderManagerCouldNotCreatePixelShader			= 1224;
+	const Result		ShaderManagerCouldNotCreateGeometryShader		= 1225;
+	const Result		ShaderManagerCannotCreateInputDescFromNullData	= 1226;
+	const Result		CannotInitialiseVolLineShaderWithNullInput		= 1227;
+	const Result		ErrorCreatingVolLineVertexShader				= 1228;
+	const Result		ErrorCreatingVolLineGeometryShader				= 1229;
+	const Result		ErrorCreatingVolLinePixelShader					= 1230;
+	const Result		ShaderManagerCannotCreateShaderWithNullInput	= 1231;
+	const Result		ShaderManagerCannotCreateInputLayoutWithoutDesc = 1232;
+	const Result		ShaderManagerCouldNotCreateInputLayout			= 1233;
+		
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;
 	const Result		CouldNotAllocateParticleIndexBuffer				= 1502;
@@ -169,9 +183,10 @@ namespace ErrorCodes {
 	const Result		ReceivedNullParticleEmitterKey					= 1510;
 	const Result		CouldNotCreateParticleEngine					= 1511;
 	const Result		CannotLinkAllRequiredShadersToParticleEngine	= 1512;
-
+	
 	const Result		CouldNotCreateEffectManager						= 1600;
 	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1601;
+	
 
 	// External data read/write errors									(2000-2199)
 	const Result		FileDoesNotExist								= 2000;
