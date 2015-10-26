@@ -37,8 +37,8 @@ Result ShaderManager::LoadCompiledShader(const std::string & filename, std::vect
 }
 
 // Creates a new shader from the specified CSO
-Result CreateVertexShader(	ID3D11Device *device, const std::string & filename, InputLayoutDesc *layout_desc,
-							ID3D11VertexShader **ppOutShader, ID3D11InputLayout **ppOutInputLayout)
+Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::string & filename, InputLayoutDesc *layout_desc,
+											ID3D11VertexShader **ppOutShader, ID3D11InputLayout **ppOutInputLayout)
 {
 	// Paramter check
 	if (!device || !layout_desc) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
@@ -119,3 +119,93 @@ Result ShaderManager::CreateGeometryShader(ID3D11Device *device, const std::stri
 	// The shader was created successfully, so return success here
 	return ErrorCodes::NoError;
 }
+
+// Return a standard defined sampler description for use in shader initialisation
+Result ShaderManager::GetStandardSamplerDescription(DefinedSamplerState type, D3D11_SAMPLER_DESC & outSamplerDesc)
+{
+	switch (type)
+	{
+		case DefinedSamplerState::StandardLinearSampler:
+			outSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			outSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+			outSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+			outSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+			outSamplerDesc.MipLODBias = 0.0f;
+			outSamplerDesc.MaxAnisotropy = 1;
+			outSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+			outSamplerDesc.BorderColor[0] = 0;
+			outSamplerDesc.BorderColor[1] = 0;
+			outSamplerDesc.BorderColor[2] = 0;
+			outSamplerDesc.BorderColor[3] = 0;
+			outSamplerDesc.MinLOD = 0;
+			outSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			return ErrorCodes::NoError;
+
+		default:
+			return ErrorCodes::ShaderManagerReceivedUnsupportedSamplerState;
+	}
+}
+
+// Return a standard defined sampler state for use in shader initialisation
+Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, ID3D11Device *device, ID3D11SamplerState **ppOutSamplerState)
+{
+	// Parameter check
+	if (!device || !ppOutSamplerState) return ErrorCodes::ShaderManagerCannotCreateSamplerWithNullInput;
+
+	// We will create a new sampler description
+	D3D11_SAMPLER_DESC desc;
+	memset(&desc, 0, sizeof(desc));
+
+	// Attempt to retrieve the relevant sampler state description
+	Result result = GetStandardSamplerDescription(type, desc);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Attempt to create the sampler state based on this description
+	HRESULT hr = device->CreateSamplerState(&desc, ppOutSamplerState);
+	if (FAILED(hr))
+	{
+		return ErrorCodes::ShaderManagerFailedToCreateSamplerState;
+	}
+
+	// We have created the sampler state so return success
+	return ErrorCodes::NoError;
+}
+
+
+// Create a standard dynamic constant buffer of the specified size (Usage=Dynamic, BindFlags=ConstantBuffer, CPUAccessFlags=Write, 
+// MiscFlags = 0, StructureByteStride = 0, ByteWidth = @bytewidth)
+Result ShaderManager::CreateStandardDynamicConstantBuffer(UINT bytewidth, ID3D11Device *device, ID3D11Buffer **ppOutConstantBuffer)
+{
+	return CreateBuffer(D3D11_USAGE_DYNAMIC, bytewidth, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, 0, 0, device, ppOutConstantBuffer);
+}
+
+// Create a buffer based on the specified parameters
+Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bindflags, UINT cpuaccessflags, UINT miscflags, UINT structurebytestride, 
+									ID3D11Device *device, ID3D11Buffer **ppOutBuffer)
+{
+	// Parameter check
+	if (!device || !ppOutBuffer) return ErrorCodes::ShaderManagerCannotCreateBufferWithNullInput;
+	if (bytewidth <= 0U) return ErrorCodes::ShaderManagerCannotAllocateNullBuffer;
+	if (bytewidth > ShaderManager::MAX_BUFFER_ALLOCATION) return ErrorCodes::ShaderManagerCannotExceedBufferAllocationLimit;
+
+	// Create a new buffer description based on the supplied data
+	D3D11_BUFFER_DESC desc;
+	desc.Usage = usage;
+	desc.ByteWidth = bytewidth;
+	desc.BindFlags = bindflags;
+	desc.CPUAccessFlags = cpuaccessflags;
+	desc.MiscFlags = miscflags;
+	desc.StructureByteStride = structurebytestride;
+
+	// Attempt to create a new buffer based on this description
+	HRESULT hr = device->CreateBuffer(&desc, NULL, ppOutBuffer);
+	if (FAILED(hr))
+	{
+		return ErrorCodes::ShaderManagerCouldNotCreateBuffer;
+	}
+
+	// We have created the buffer so return success
+	return ErrorCodes::NoError;
+}
+
+

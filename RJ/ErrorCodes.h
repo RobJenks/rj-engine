@@ -162,14 +162,27 @@ namespace ErrorCodes {
 	const Result		ShaderManagerCouldNotCreatePixelShader			= 1224;
 	const Result		ShaderManagerCouldNotCreateGeometryShader		= 1225;
 	const Result		ShaderManagerCannotCreateInputDescFromNullData	= 1226;
-	const Result		CannotInitialiseVolLineShaderWithNullInput		= 1227;
+	const Result		CannotInitialiseVolLineShaderVSWithNullInput	= 1227;
 	const Result		ErrorCreatingVolLineVertexShader				= 1228;
 	const Result		ErrorCreatingVolLineGeometryShader				= 1229;
 	const Result		ErrorCreatingVolLinePixelShader					= 1230;
 	const Result		ShaderManagerCannotCreateShaderWithNullInput	= 1231;
 	const Result		ShaderManagerCannotCreateInputLayoutWithoutDesc = 1232;
 	const Result		ShaderManagerCouldNotCreateInputLayout			= 1233;
-		
+	const Result		ShaderManagerReceivedUnsupportedSamplerState	= 1234;
+	const Result		ShaderManagerCannotCreateSamplerWithNullInput	= 1235;
+	const Result		ShaderManagerFailedToCreateSamplerState			= 1236;
+	const Result		ErrorCreatingVolLinePSSamplerState				= 1237;
+	const Result		ShaderManagerCannotCreateBufferWithNullInput	= 1238; 
+	const Result		ShaderManagerCannotAllocateNullBuffer			= 1239; 
+	const Result		ShaderManagerCouldNotCreateBuffer				= 1240;
+	const Result		ShaderManagerCannotExceedBufferAllocationLimit	= 1241;
+	const Result		ErrorCreatingVolLineVSConstantBuffer			= 1242;
+	const Result		CannotInitialiseVolLineShaderGSWithNullInput	= 1243;
+	const Result		CannotInitialiseVolLineShaderPSWithNullInput	= 1244;
+	const Result		ErrorCreatingVolLineGSConstantBuffer			= 1245;
+	const Result		ErrorCreatingVolLinePSConstantBuffer			= 1246;
+
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;
 	const Result		CouldNotAllocateParticleIndexBuffer				= 1502;
