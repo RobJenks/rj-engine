@@ -23,6 +23,7 @@
 #include "ParticleEngine.h"
 #include "Render2DManager.h"
 #include "SkinnedNormalMapShader.h"
+#include "VolLineShader.h"
 #include "OverlayRenderer.h"
 
 #include "Fonts.h"
@@ -79,6 +80,7 @@ CoreEngine::CoreEngine(void)
 	m_fontshader = NULL;
 	m_fireshader = NULL;
 	m_skinnedshader = NULL;
+	m_vollineshader = NULL;
 	m_effectmanager = NULL;
 	m_particleengine = NULL;
 	m_render2d = NULL;
@@ -213,6 +215,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Shader [Skinned normal map] initialisation complete\n";
 
+	// Initialise the volumetric line shader
+	res = InitialiseVolLineShader();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INIT_START << "Shader [Volumetric line] initialisation complete\n";
+	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -263,6 +270,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownFireShader();
 	ShutdownEffectManager();
 	ShutdownSkinnedNormalMapShader();
+	ShutdownVolLineShader();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
 	ShutdownOverlayRenderer();
@@ -712,6 +720,27 @@ Result CoreEngine::InitialiseSkinnedNormalMapShader(void)
 	return ErrorCodes::NoError;
 }
 
+Result CoreEngine::InitialiseVolLineShader(void)
+{
+	// Create a new instance of the shader object
+	m_vollineshader = new VolLineShader(m_dxlocaliser);
+	if (!m_vollineshader)
+	{
+		return ErrorCodes::CannotCreateVolumetricLineShader;
+	}
+
+	// Now attempt to initialise the shader
+	Result result = m_vollineshader->Initialise(m_D3D->GetDevice(), D3DXVECTOR2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
+												m_frustrum->GetNearClipPlane(), m_frustrum->GetFarClipPlane());
+	if (result != ErrorCodes::NoError)
+	{
+		return result;
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseParticleEngine(void)
 {
 	Result result;
@@ -995,6 +1024,16 @@ void CoreEngine::ShutdownSkinnedNormalMapShader(void)
 		m_skinnedshader->Shutdown();
 		delete m_skinnedshader;
 		m_skinnedshader = NULL;
+	}
+}
+
+void CoreEngine::ShutdownVolLineShader(void)
+{
+	if (m_vollineshader)
+	{
+		m_vollineshader->Shutdown();
+		delete m_vollineshader;
+		m_vollineshader = NULL;
 	}
 }
 

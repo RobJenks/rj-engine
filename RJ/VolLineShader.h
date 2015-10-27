@@ -38,12 +38,19 @@ public:
 	VolLineShader(const DXLocaliser *locale);
 
 	// Initialise the shader
-	Result							Initialise(ID3D11Device *device);
+	Result							Initialise(ID3D11Device *device, D3DXVECTOR2 viewport_size, float clip_near, float clip_far);
 
 	// Methods to initialise each shader in the pipeline in turn
 	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
 	Result							InitialiseGeometryShader(ID3D11Device *device, std::string filename);
 	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
+
+	// Renders the shader.
+	Result							Render(	ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount,
+											D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
+
+	// Adjust the radius of lines currently being drawn
+	CMPINLINE void					SetLineRadius(float radius) { m_radius = radius; }
 
 	// Shut down and deallocate all resources
 	void							Shutdown();
@@ -61,6 +68,10 @@ protected:
 	ID3D11Buffer			* m_cbuffer_gs;
 	ID3D11Buffer			* m_cbuffer_ps;
 
+	D3DXVECTOR2				m_viewport_size;
+	float					m_clip_near;
+	float					m_clip_far;
+	float					m_radius;
 };
 
 

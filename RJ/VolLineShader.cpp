@@ -1,4 +1,5 @@
 #include "DX11_Core.h"
+#include "Utility.h"
 #include "DXLocaliser.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
@@ -18,10 +19,16 @@ VolLineShader::VolLineShader(const DXLocaliser *locale)
 	m_cbuffer_vs = NULL;
 	m_cbuffer_gs = NULL;
 	m_cbuffer_ps = NULL;
+
+	// Initialise all shader parameters to default values
+	m_viewport_size = D3DXVECTOR2(1024.0f, 768.0f); 
+	m_clip_near = 1.0f;
+	m_clip_far = 100.0f;
+	m_radius = 4.0f;
 }
 
 
-Result VolLineShader::Initialise(ID3D11Device *device)
+Result VolLineShader::Initialise(ID3D11Device *device, D3DXVECTOR2 viewport_size, float clip_near, float clip_far)
 {
 	Result result;
 
@@ -34,6 +41,11 @@ Result VolLineShader::Initialise(ID3D11Device *device)
 
 	result = InitialisePixelShader(device, ShaderFilename("vol_line.ps.cso"));
 	if (result != ErrorCodes::NoError) return result;
+
+	// Store other static data that is used by the shader
+	m_viewport_size = viewport_size;
+	m_clip_near = clip_near;
+	m_clip_far = clip_far;
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -108,4 +120,87 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 	return ErrorCodes::NoError;
 }
 
+// Renders the shader.
+Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount,
+								D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+{
+	HRESULT hr;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	VSBufferType *vsbuffer; GSBufferType *gsbuffer; PSBufferType *psbuffer;
 
+	// Parameter check
+	if (!deviceContext || vertexCount <= 0 || indexCount <= 0 || instanceCount <= 0 || !texture) return ErrorCodes::InvalidShaderParameters;
+
+	// Transpose the matrices to prepare them for the shader
+	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
+	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
+
+	// Initialise vertex shader constant buffer
+	hr = deviceContext->Map(m_cbuffer_vs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
+	vsbuffer = (VSBufferType*)mappedResource.pData;
+	{
+		vsbuffer->viewmatrix = viewMatrix;
+	}
+	deviceContext->Unmap(m_cbuffer_vs, 0);
+	deviceContext->VSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_vs);
+
+	// Initialise geometry shader constant buffer
+	hr = deviceContext->Map(m_cbuffer_gs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
+	gsbuffer = (GSBufferType*)mappedResource.pData;
+	{
+		gsbuffer->projectionmatrix = projectionMatrix;
+		gsbuffer->radius = m_radius;
+	}
+	deviceContext->Unmap(m_cbuffer_gs, 0);
+	deviceContext->GSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_gs);
+
+	// Initialise pixel shader constant buffer
+	hr = deviceContext->Map(m_cbuffer_ps, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
+	psbuffer = (PSBufferType*)mappedResource.pData;
+	{
+		psbuffer->radius = m_radius;
+		psbuffer->viewport_size = m_viewport_size;
+		psbuffer->clipdistance_front = m_clip_near;
+		psbuffer->clipdistance_far = m_clip_far;
+	}
+	deviceContext->Unmap(m_cbuffer_ps, 0);
+	deviceContext->PSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_ps);
+
+	// Set shader texture resource in the pixel shader.
+	deviceContext->PSSetShaderResources(0, 1, &texture);
+
+	// Set the vertex input layout
+	deviceContext->IASetInputLayout(m_inputlayout);
+
+	// Activate the shaders that will be used to render this model
+	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext->GSSetShader(m_geometryShader, NULL, 0);
+	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+
+	// Set the sampler state in the pixel shader
+	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+
+	// Render the model
+	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+// Shut down and deallocate all resources
+void VolLineShader::Shutdown()
+{
+	// Release all resources
+	ReleaseIfExists(m_cbuffer_vs);
+	ReleaseIfExists(m_cbuffer_gs);
+	ReleaseIfExists(m_cbuffer_ps);
+	ReleaseIfExists(m_inputlayout);
+	ReleaseIfExists(m_sampleState);
+	ReleaseIfExists(m_vertexShader);
+	ReleaseIfExists(m_geometryShader);
+	ReleaseIfExists(m_pixelShader);
+}

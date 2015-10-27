@@ -14,7 +14,13 @@
 ViewFrustrum::ViewFrustrum(void)
 {
 	// Set all fields to defaults
-
+	memset(&m_planes, 0, sizeof(D3DXPLANE) * 6);
+	memset(&m_farplaneworld, 0, sizeof(D3DXFINITEPLANE));
+	m_projection = m_frustrumproj = ID_MATRIX;
+	m_clip_near = 1.0f; m_clip_far = 1000.0f;
+	m_aspect = (1024.0f / 768.0f);
+	m_fov = (PI * 0.25f);
+	m_fovtan = tanf(m_fov * 0.5f);
 }
 
 // Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
@@ -22,7 +28,7 @@ Result ViewFrustrum::Initialise(const D3DXMATRIX *projection, const float depth,
 {
 	// Record the key values within this class 
 	m_projection = D3DXMATRIX(*(projection));
-	m_depth = depth;
+	m_clip_far = depth;
 	m_aspect = aspect;
 
 	// Precalculate values around FOV for efficiency at render time
@@ -31,10 +37,10 @@ Result ViewFrustrum::Initialise(const D3DXMATRIX *projection, const float depth,
 
 	// Calculate the minimum z distance in the frustrum and generate a frustrum-specific proj
 	m_frustrumproj = D3DXMATRIX(m_projection);
-	float zmin = -m_frustrumproj._43 / m_frustrumproj._33;
-	float r = m_depth / (m_depth - zmin);
+	m_clip_near = -m_frustrumproj._43 / m_frustrumproj._33;
+	float r = m_clip_far / (m_clip_far - m_clip_near);
 	m_frustrumproj._33 = r;
-	m_frustrumproj._43 = -r * zmin;
+	m_frustrumproj._43 = -r * m_clip_near;
 
 	// Return success
 	return ErrorCodes::NoError;

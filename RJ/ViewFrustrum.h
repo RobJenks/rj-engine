@@ -36,8 +36,10 @@ public:
 	// Builds a new frustrum for the current frame
 	void ConstructFrustrum(const D3DXMATRIX *view, const D3DXMATRIX *invview);
 
-	CMPINLINE float			GetFOV(void)				{ return m_fov; }
-	CMPINLINE float			GetTanOfHalfFOV(void)		{ return m_fovtan; }
+	CMPINLINE float			GetFOV(void) const				{ return m_fov; }
+	CMPINLINE float			GetTanOfHalfFOV(void) const		{ return m_fovtan; }
+	CMPINLINE float			GetNearClipPlane(void) const	{ return m_clip_near; }
+	CMPINLINE float			GetFarClipPlane(void) const		{ return m_clip_far; }
 
 	// Primary method for object visibility testing
 	//CMPINLINE bool TestObjectVisibility(iObject *obj) { return (obj ? CheckSphere(&(obj->GetPosition()), obj->GetCollisionSphereRadius()) : false); }
@@ -157,7 +159,7 @@ private:
 
 	// Projection matrix and other viewport data
 	D3DXMATRIX			m_projection;
-	float				m_depth, m_aspect;
+	float				m_clip_near, m_clip_far, m_aspect;
 	float				m_fov, m_fovtan;			// m_fovtan = tanf(FOV * 0.5f)
 	D3DXMATRIX			m_frustrumproj;				// Frustrum-specific proj matrix, preacalculate at initialisation
 

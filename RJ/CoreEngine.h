@@ -43,6 +43,7 @@ class ArticulatedModel;
 class TurretController;
 class OverlayRenderer;
 class BasicProjectileSet;
+class VolLineShader;
 struct GameConsoleCommand;
 
 using namespace std;
@@ -104,6 +105,7 @@ public:
 	CMPINLINE	ParticleShader *			GetParticleShader(void)					{ return m_particleshader; }
 	CMPINLINE	TexcubeShader *				GetTexcubeShader(void)					{ return m_texcubeshader; }
 	CMPINLINE	TextureShader *				GetTextureShader(void)					{ return m_textureshader; }	
+	CMPINLINE	VolLineShader *				GetVolLineShader(void)					{ return m_vollineshader; }
 
 	// Methods to retrieve the key render matrices from the engine
 	CMPINLINE void GetRenderViewMatrix(D3DXMATRIX &m)				{ m = r_view; }
@@ -300,6 +302,7 @@ private:
 	Result					InitialiseFireShader(void);
 	Result					InitialiseEffectManager(void);
 	Result					InitialiseSkinnedNormalMapShader(void);
+	Result					InitialiseVolLineShader(void);
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
 	Result					InitialiseOverlayRenderer(void);
@@ -326,6 +329,7 @@ private:
 	void					ShutdownFireShader(void);
 	void					ShutdownEffectManager(void);
 	void					ShutdownSkinnedNormalMapShader(void);
+	void					ShutdownVolLineShader(void);
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
 	void					ShutdownOverlayRenderer(void);
@@ -352,6 +356,7 @@ private:
 	FireShader				*m_fireshader;
 	EffectManager			*m_effectmanager;
 	SkinnedNormalMapShader 	*m_skinnedshader;
+	VolLineShader			*m_vollineshader;
 	ParticleEngine			*m_particleengine;
 	Render2DManager			*m_render2d;
 	OverlayRenderer			*m_overlayrenderer;

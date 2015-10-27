@@ -33,6 +33,9 @@ using namespace std::tr1;
 // Convenience macro for freeing malloc-ed memory
 #define SafeFree(x) { free(x); x = 0; }
 
+// Convenience macro for releasing non-null COM resources
+#define ReleaseIfExists(x) { if (x) { x->Release(); x = 0; } }
+
 // Accepts either a reference or a pointer and universally returns a pointer
 template<typename T>
 CMPINLINE T * ptr(T & obj) { return &obj; }	// If object is a reference type then return a pointer
