@@ -9,6 +9,7 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "CompilerSettings.h"
+#include "ModelBuffer.h"
 #include "Texture.h"
 
 using namespace std;
@@ -60,8 +61,12 @@ class Model
 			else return ErrorCodes::CouldNotInitialiseModelWithInvalidStringParams;
 		}
 
-		CMPINLINE int						GetIndexCount() const	{ return m_indexCount; }
-		CMPINLINE ID3D11ShaderResourceView*	GetTexture() const		{ return m_texture->GetTexture(); }
+		CMPINLINE ModelBuffer *				GetModelBuffer(void)	{ return &m_buffer; }
+		CMPINLINE ID3D11Buffer *			GetVertexBuffer(void)	{ return m_buffer.VertexBuffer; }
+		CMPINLINE ID3D11Buffer *			GetIndexBuffer(void)	{ return m_buffer.IndexBuffer; }
+
+		CMPINLINE UINT						GetIndexCount() const	{ return m_indexCount; }
+		CMPINLINE ID3D11ShaderResourceView*	GetTexture() 			{ return m_buffer.GetTexture()->GetTexture(); }
 
 		// Public accessor/modifer methods for key variables
 		CMPINLINE int				GetID(void) { return m_id; }
@@ -107,9 +112,10 @@ class Model
 		void						RecalculateCompoundModelData(void);
 
 		// Methods providing public access to buffer data, for centralised instanced rendering by the core engine
-		ID3D11Buffer *				GetVertexBuffer(void) const				{ return m_vertexBuffer; }
-		ID3D11Buffer *				GetIndexBuffer(void) const				{ return m_indexBuffer; }
-		static unsigned int			GetVertexMemorySize(void)				{ return (unsigned int)sizeof(VertexType); }
+		CMPINLINE ID3D11Buffer *	GetVertexBuffer(void) const				{ return m_buffer.VertexBuffer; }
+		CMPINLINE ID3D11Buffer *	GetIndexBuffer(void) const				{ return m_buffer.IndexBuffer; }
+		CMPINLINE unsigned int		GetVertexMemorySize(void) const			{ return m_buffer.GetVertexSize(); }
+		CMPINLINE unsigned int		GetIndexMemorySize(void) const			{ return m_buffer.GetIndexSize(); }
 
 		// Central model storage methods
 		static bool					ModelExists(const std::string & code);
@@ -132,11 +138,7 @@ class Model
 
 		// Private methods for individual model class operations
 		Result		InitialiseBuffers(void);
-		void		ShutdownBuffers();
 		void		RenderBuffers(void);
-
-		Result		LoadTexture(const char*);
-		void		ReleaseTexture();
 
 		Result		LoadModel(const char*);
 		void		ReleaseModel();
@@ -145,9 +147,8 @@ class Model
 
 	private:
 		// Private variables for buffer / model storage
-		ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
-		int						m_vertexCount, m_indexCount;
-		Texture*				m_texture;
+		ModelBuffer				m_buffer;
+		unsigned int			m_vertexCount, m_indexCount;
 		ModelType*				m_model;
 
 		// Private variables for other, supporting model information

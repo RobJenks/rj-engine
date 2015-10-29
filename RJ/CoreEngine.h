@@ -15,6 +15,8 @@
 #include "RenderQueue.h"
 #include "RenderQueueOptimiser.h"
 #include "ShaderManager.h"
+#include "Model.h"
+#include "ModelBuffer.h"
 class iShader;
 class LightShader;
 class LightFadeShader;
@@ -30,7 +32,6 @@ class ViewFrustrum;
 class FontShader;
 class TextManager;
 class EffectManager;
-class Model;
 class SimpleShip;
 class ComplexShip;
 class ComplexShipSection;
@@ -45,6 +46,7 @@ class OverlayRenderer;
 class BasicProjectileSet;
 class VolLineShader;
 struct GameConsoleCommand;
+struct VolumetricLine;
 
 using namespace std;
 using namespace std::tr1;
@@ -175,6 +177,9 @@ public:
 
 	// Rendering methods for skinned models
 	void					RenderSkinnedModelInstance(SkinnedModelInstance &model);
+
+	// Renders a volumetric line
+	void					RenderVolumetricLine(const VolumetricLine & line);
 
 	// User interface, text and all other 2D rendering functions
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_UI, 
@@ -393,10 +398,19 @@ private:
 	// Performs an intermediate z-sorting of instances before rendering via the render queue.  Used only for shaders/techniques (e.g. alpha
 	// blending) that require instances to be z-sorted
 	void						PerformZSortedRenderQueueProcessing(int shaderindex);
+public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
 	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
 	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform)
+	{
+		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
+		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform));
+	}
+
+	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
+	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform));
@@ -407,13 +421,49 @@ private:
 	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform, const D3DXVECTOR4 & params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
+		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, params));
+	}
+
+	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
+	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform, const D3DXVECTOR4 & params)
+	{
+		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, params));
+	}
+
+	// Method to submit for rendering where the instance is directly specified.  Will submit directly to
+	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const RM_Instance & instance)
+	{
+		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
+		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(instance);
+	}
+
+	// Method to submit for rendering where the instance is directly specified.  Will submit directly to
+	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const RM_Instance & instance)
+	{
+		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
+		((m_renderqueue[shader])[model]).InstanceData.push_back(instance);
 	}
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
 	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const D3DXMATRIX *transform, 
 															const D3DXVECTOR4 & params, const D3DXVECTOR3 &position)
+	{
+		// Compute the z-value as the distance squared from this object to the camera
+		int z = (int)D3DXVec3LengthSq(&(position - m_camera->GetPosition()));
+
+		// Add to the z-sorted vector with this z-value as the sorting key
+		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model->GetModelBuffer(), transform, params));
+	}
+	
+	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
+	// objects.  Performance overhead; should be used only where specifically required
+	CMPINLINE void				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform,
+		const D3DXVECTOR4 & params, const D3DXVECTOR3 &position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
 		int z = (int)D3DXVec3LengthSq(&(position - m_camera->GetPosition()));

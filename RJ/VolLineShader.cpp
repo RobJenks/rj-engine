@@ -3,9 +3,14 @@
 #include "DXLocaliser.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
+#include "ModelBuffer.h"
 
 #include "VolLineShader.h"
 
+// Static two-vertex base model used as input to the geometry shader, which will then break out into a volumetric line
+ModelBuffer *VolLineShader::BaseModel = NULL;
+
+// Constructor
 VolLineShader::VolLineShader(const DXLocaliser *locale)
 {
 	// Store a reference to the current locale
@@ -13,6 +18,7 @@ VolLineShader::VolLineShader(const DXLocaliser *locale)
 
 	// Set pointers to NULL
 	m_vertexShader = NULL;
+	m_geometryShader = NULL;
 	m_pixelShader = NULL;
 	m_inputlayout = NULL;
 	m_sampleState = NULL;
@@ -61,9 +67,13 @@ Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 
 	// Define the input layout for this vertex shader
 	InputLayoutDesc layout_desc = InputLayoutDesc()
-		.Add("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,								D3D11_INPUT_PER_VERTEX_DATA, 0)
-		.Add("POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_VERTEX_DATA, 0);
-
+		.Add("POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0,								D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("mTransform",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 0,								D3D11_INPUT_PER_INSTANCE_DATA, 1)
+		.Add("mTransform",	1, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1)
+		.Add("mTransform",	2, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1)
+		.Add("mTransform",	3, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1)
+		.Add("iParams",		0, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1);
+		
 	// Attempt to load and create the compiled shader 
 	result = ShaderManager::CreateVertexShader(device, filename, &layout_desc, &m_vertexShader, &m_inputlayout);
 	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingVolLineVertexShader;
@@ -121,7 +131,7 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 }
 
 // Renders the shader.
-Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount,
+Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 								D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
@@ -204,3 +214,32 @@ void VolLineShader::Shutdown()
 	ReleaseIfExists(m_geometryShader);
 	ReleaseIfExists(m_pixelShader);
 }
+
+// Initialise the static data used in volumetric line rendering
+Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
+{
+	// Create a new static base model
+	VolLineShader::BaseModel = NULL;
+	VolLineShader::BaseModel = new ModelBuffer();
+	if (!VolLineShader::BaseModel) return ErrorCodes::CannotInitialiseStaticVolLineShaderData;
+
+	// Create the base vertex and index data
+	D3DXVECTOR4 v[2] = { D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f), D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f) };
+	UINT16 i[2] = { 0U, 1U };
+
+	// Initialise the base model using this data
+	Result result = VolLineShader::BaseModel->Initialise(device, v, sizeof(D3DXVECTOR4), 2U, i, sizeof(UINT16), 2U);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+
+
+
+
+
+
+

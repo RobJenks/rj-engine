@@ -67,7 +67,7 @@ void LightShader::Shutdown()
 	return;
 }
 
-Result LightShader::Render(ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount, 
+Result LightShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 						   D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
@@ -566,7 +566,7 @@ Result LightShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, D3DX
 }
 
 
-void LightShader::RenderShader(ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount)
+void LightShader::RenderShader(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount)
 {
 	// Set the vertex input layout
 	deviceContext->IASetInputLayout(m_layout);
@@ -579,5 +579,5 @@ void LightShader::RenderShader(ID3D11DeviceContext *deviceContext, int vertexCou
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
 	// Render the model
-	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0U, 0, 0U);
 }

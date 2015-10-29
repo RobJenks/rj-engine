@@ -82,6 +82,7 @@
 #include "BasicProjectile.h"				// DBG
 #include "BasicProjectileDefinition.h"		// DBG
 #include "BasicProjectileSet.h"				// DBG
+#include "VolLineShader.h"					// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -1911,31 +1912,66 @@ void RJMain::__CreateDebugScenario(void)
 			OutputDebugString(concat("Created turret ")(i)(" at ")(pos.x)(",")(pos.y)(",")(pos.z)("\n").str().c_str());
 		}
 
-	//ss->TurretController.AddTurret(t->Copy());
+	// Test render - vol line
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
-	/*
-	SimpleShip *tmp[2]; D3DXQUATERNION tmpq, tmpq2;
-	for (int i = 0; i < 2; ++i)
+	// Create the vertex array.
+	m_vertexcount = 2;
+	D3DXVECTOR4 *vertices = new D3DXVECTOR4[m_vertexcount];
+	if (!vertices) throw 1;
+
+	// Create the index array.
+	Model::INDEXFORMAT *indices = new Model::INDEXFORMAT[m_vertexcount];
+	if (!indices) throw 1;
+
+	// Load the vertex array and index array with data.
+	for (unsigned int i = 0; i<m_vertexcount; i++)
 	{
-		tmp[i] = SimpleShip::Create("test_placeholder_ship");
-		tmp[i]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		tmp[i]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
-		tmp[i]->SetOrientation(ID_QUATERNION);
-		OutputDebugString(concat("Creating debug placeholder ship \"")(tmp[i]->GetInstanceCode())("\"\n").str().c_str());
+		vertices[i] = D3DXVECTOR4((float)i, (float)i, (float)i, 1.0f);
+		indices[i] = i;
 	}
 
-	D3DXQuaternionRotationAxis(&tmpq, &RIGHT_VECTOR, PIOVER2);
-	D3DXQuaternionRotationAxis(&tmpq2, &UP_VECTOR, PIOVER2);
-	ss->AddChildAttachment(tmp[0], D3DXVECTOR3(0.0f, ss->GetSize().y * 0.5f + tmp[0]->GetSize().y * 0.5f, 0.0f), tmpq2);
-	tmp[0]->AddChildAttachment(tmp[1], D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f + tmp[1]->GetSize().z * 0.5f, 
-		tmp[1]->GetSize().y * 0.5f*0.0f), tmpq);
-	
-	ss->AddCollisionExclusion(tmp[0]->GetID());
-	ss->AddCollisionExclusion(tmp[1]->GetID());
-	tmp[0]->AddCollisionExclusion(tmp[1]->GetID());
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = sizeof(D3DXVECTOR4) * m_vertexcount;
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
 
-	tmp[0]->GetChildObjects()->at(0).AssignConstraint(UP_VECTOR, D3DXVECTOR3(0.0f, tmp[0]->GetSize().y * 0.5f, 0.0f-tmp[0]->GetSize().z*0.5f));
-	*/
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertices;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	HRESULT hr = Game::Engine->GetDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+	if (FAILED(hr)) throw 1;
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = sizeof(Model::INDEXFORMAT) * m_vertexcount;
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indices;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	hr = Game::Engine->GetDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
+	if (FAILED(hr)) throw 1;
+
+	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	delete[] vertices; vertices = 0;
+	delete[] indices; indices = 0;
+
+
+
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario createds\n";
 }
@@ -2003,6 +2039,20 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 	}
+
+
+	// Test render
+
+	// Line endpoints
+	D3DXVECTOR3 poffset[2] = { D3DXVECTOR3(0.0f, 0.0f, 50.0f), D3DXVECTOR3(100.0f, 0.0f, 50.0f) };
+	D3DXMATRIX t1, t2, w1, w2;
+	D3DXMatrixTranslation(&t1, poffset[0].x, poffset[0].y, poffset[0].z);
+	D3DXMatrixTranslation(&t2, poffset[1].x, poffset[1].y, poffset[1].z);
+	w1 = (t1 * *ss->GetWorldMatrix());
+	w2 = (t2 * *ss->GetWorldMatrix());
+
+	
+
 
 }
 

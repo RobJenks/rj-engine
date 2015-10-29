@@ -142,6 +142,8 @@ public:
 	Actor *a1;
 	SpaceProjectile *proj;
 
+	ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
+	UINT					m_vertexcount;
 };
 
 

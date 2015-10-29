@@ -184,6 +184,10 @@ namespace ErrorCodes {
 	const Result		ErrorCreatingVolLinePSConstantBuffer			= 1246;
 	const Result		CannotCreateVolumetricLineShader				= 1247;
 	const Result		InvalidShaderParameters							= 1248;
+	const Result		CannotInitialiseModelBufferWithInvalidData		= 1249;
+	const Result		CouldNotCreateMBVertexBuffer					= 1250;
+	const Result		CouldNotCreateMBIndexBuffer						= 1251;
+	const Result		CannotInitialiseStaticVolLineShaderData			= 1252;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

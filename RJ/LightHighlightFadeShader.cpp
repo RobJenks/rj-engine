@@ -57,8 +57,8 @@ void LightHighlightFadeShader::Shutdown()
 	return;
 }
 
-Result LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount,
-	D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+Result LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+										D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
 
@@ -329,7 +329,7 @@ void LightHighlightFadeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage
 
 
 Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix,
-	ID3D11ShaderResourceView* texture)
+													 ID3D11ShaderResourceView *texture)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -364,7 +364,7 @@ Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *device
 	// Now set the constant buffer in the vertex shader with the updated values.
 	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
-	// Set shader texture resource in the pixel shader.
+	// Set shader texture resource in the pixel shader
 	deviceContext->PSSetShaderResources(0, 1, &texture);
 
 	// Lock the light constant buffer so it can be written to.
@@ -396,7 +396,7 @@ Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *device
 }
 
 
-void LightHighlightFadeShader::RenderShader(ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount)
+void LightHighlightFadeShader::RenderShader(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount)
 {
 	// Set the vertex input layout
 	deviceContext->IASetInputLayout(m_layout);
@@ -409,5 +409,5 @@ void LightHighlightFadeShader::RenderShader(ID3D11DeviceContext *deviceContext, 
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
 	// Render the model
-	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0U, 0, 0U);
 }

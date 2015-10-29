@@ -8,7 +8,7 @@
 #include "ShaderManager.h"
 
 // Loads a compiled shader object (*.cso) and returns the byte data
-Result ShaderManager::LoadCompiledShader(const std::string & filename, std::vector<char> outShader)
+Result ShaderManager::LoadCompiledShader(const std::string & filename, std::vector<byte> & outShader)
 {
 	// Attempt to open the file
 	if (filename == NullString) return ErrorCodes::CannotLoadCompiledShaderWithNullInputFile;
@@ -19,12 +19,13 @@ Result ShaderManager::LoadCompiledShader(const std::string & filename, std::vect
 	{
 		// Determine the length of the file and clear/reserve sufficient space
 		outShader.clear(); 
-		std::basic_istream<char>::pos_type length = sfile.tellg();
-		outShader.reserve((std::vector<char>::size_type)length);
+		int length = (int)sfile.tellg();
+		outShader.reserve((std::vector<byte>::size_type)length);
+		outShader.insert(outShader.begin(), length, 0);
 
 		// Retrieve the file data
 		sfile.seekg(0, std::ios::beg);
-		sfile.read(reinterpret_cast<char*>(&outShader[0]), length);
+		sfile.read(reinterpret_cast<char*>(outShader.data()), length);
 		sfile.close();
 	}
 	else
@@ -44,12 +45,12 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 	if (!device || !layout_desc) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<char> shader;
+	std::vector<byte> shader;
 	Result result = ShaderManager::LoadCompiledShader(filename, shader);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreateVertexShader(&(shader[0]), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreateVertexShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateVertexShader;
@@ -57,7 +58,7 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 
 	// We now need to create the input layout, assuming we have been provided with valid data
 	if (layout_desc->ElementCount() == 0U) return ErrorCodes::ShaderManagerCannotCreateInputLayoutWithoutDesc;
-	hr = device->CreateInputLayout(layout_desc->Data(), layout_desc->ElementCount(), &(shader[0]), (SIZE_T)shader.size(), ppOutInputLayout);
+	hr = device->CreateInputLayout(layout_desc->Data(), layout_desc->ElementCount(), shader.data(), (SIZE_T)shader.size(), ppOutInputLayout);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateInputLayout;
@@ -77,12 +78,12 @@ Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string 
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<char> shader;
+	std::vector<byte> shader;
 	Result result = ShaderManager::LoadCompiledShader(filename, shader);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreatePixelShader(&(shader[0]), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreatePixelShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreatePixelShader;
@@ -102,12 +103,12 @@ Result ShaderManager::CreateGeometryShader(ID3D11Device *device, const std::stri
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<char> shader;
+	std::vector<byte> shader;
 	Result result = ShaderManager::LoadCompiledShader(filename, shader);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreateGeometryShader(&(shader[0]), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreateGeometryShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateVertexShader;

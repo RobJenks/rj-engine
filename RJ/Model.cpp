@@ -26,11 +26,8 @@ Model::Model()
 	m_geometryloaded = false;
 
 	// Initialise buffers and geometry data
-	m_vertexBuffer = 0;
-	m_indexBuffer = 0;
 	m_vertexCount = 0;
 	m_indexCount = 0;
-	m_texture = 0;
 	m_model = 0;
 	m_minbounds = m_maxbounds = m_modelsize = m_modelcentre = m_effectivesize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_actualsize = m_actualeffectivesize = m_scalingfactor = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
@@ -53,29 +50,19 @@ Result Model::Initialise(const char *modelFilename, const char *textureFilename)
 {
 	Result result;
 
-
 	// Load in the model data,
 	result = LoadModel(modelFilename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
+	if(result != ErrorCodes::NoError) return result;
 
 	// Initialise the vertex and index buffers.
 	result = InitialiseBuffers();
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
+	if(result != ErrorCodes::NoError) return result;
 
 	// Load the texture for this model (optional)
 	if (textureFilename)
 	{
-		result = LoadTexture(textureFilename);
-		if(result != ErrorCodes::NoError)
-		{
-			return result;
-		}
+		result = m_buffer.SetTexture(textureFilename);
+		if (result != ErrorCodes::NoError) return result;
 	}
 
 	// Success, if we have run each of the above stages successfully
@@ -200,7 +187,7 @@ void Model::ScaleModelGeometry(D3DXVECTOR3 scale)
 	if (scale.x <= Game::C_EPSILON || scale.y <= Game::C_EPSILON || scale.z <= Game::C_EPSILON) return;
 
 	// Process each vertex in turn
-	for (int i=0; i<m_vertexCount; i++)
+	for (unsigned int i = 0; i<m_vertexCount; i++)
 	{
 		// Scale the vertex by this factor
 		m_model[i].x *= scale.x;
@@ -216,7 +203,7 @@ void Model::ScaleModelGeometry(D3DXVECTOR3 scale)
 	
 	// We have updated the model geometry, so discard and recreate the vertex buffers 
 	// now (not the most efficient method, but this is not a regular occurence)
-	ShutdownBuffers();
+	m_buffer.ReleaseResources();
 	InitialiseBuffers();
 }
 
@@ -322,16 +309,8 @@ void Model::RecalculateCompoundModelData(void)
 
 void Model::Shutdown()
 {
-	// Release the model texture.
-	ReleaseTexture();
-
-	// Shutdown the vertex and index buffers.
-	ShutdownBuffers();
-
 	// Release the model data.
 	ReleaseModel();
-
-	return;
 }
 
 
@@ -357,29 +336,16 @@ void Model::Render(void)
 
 Result Model::InitialiseBuffers(void)
 {
-	VertexType* vertices;
-	INDEXFORMAT* indices;
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-    D3D11_SUBRESOURCE_DATA vertexData, indexData;
-	HRESULT hresult;
-	int i;
-
 	// Create the vertex array.
-	vertices = new VertexType[m_vertexCount];
-	if(!vertices)
-	{
-		return ErrorCodes::CouldNotAllocateModelVertexArray;
-	}
+	VertexType *vertices = new VertexType[m_vertexCount];
+	if(!vertices) return ErrorCodes::CouldNotAllocateModelVertexArray;
 
 	// Create the index array.
-	indices = new INDEXFORMAT[m_indexCount];
-	if(!indices)
-	{
-		return ErrorCodes::CouldNotAllocateModelIndexArray;
-	}
+	INDEXFORMAT *indices = new INDEXFORMAT[m_indexCount];
+	if(!indices) return ErrorCodes::CouldNotAllocateModelIndexArray;
 
 	// Load the vertex array and index array with data.
-	for(i=0; i<m_vertexCount; i++)
+	for (unsigned int i = 0; i < m_vertexCount; ++i)
 	{
 		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
 		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
@@ -388,76 +354,18 @@ Result Model::InitialiseBuffers(void)
 		indices[i] = i;
 	}
 
-	// Set up the description of the static vertex buffer.
-    vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    vertexBufferDesc.ByteWidth = sizeof(VertexType) * m_vertexCount;
-    vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    vertexBufferDesc.CPUAccessFlags = 0;
-    vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the vertex data.
-    vertexData.pSysMem = vertices;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
-
-	// Now create the vertex buffer.
-	hresult = Game::Engine->GetDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if(FAILED(hresult))
-	{
-		return ErrorCodes::CouldNotCreateModelVertexBuffer;
-	}
-
-	// Set up the description of the static index buffer.
-    indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    indexBufferDesc.ByteWidth = sizeof(INDEXFORMAT) * m_indexCount;
-    indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    indexBufferDesc.CPUAccessFlags = 0;
-    indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
-
-	// Give the subresource structure a pointer to the index data.
-    indexData.pSysMem = indices;
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
-
-	// Create the index buffer.
-	hresult = Game::Engine->GetDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-	if(FAILED(hresult))
-	{
-		return ErrorCodes::CouldNotCreateModelIndexBuffer;
-	}
+	// Initialise the model buffers based on this raw data
+	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), &vertices, sizeof(VertexType), m_vertexCount,
+																   &indices, sizeof(INDEXFORMAT), m_indexCount);
+	if (result != ErrorCodes::NoError) return result;
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
-	delete [] vertices;
-	vertices = 0;
+	SafeDeleteArray(vertices);
+	SafeDeleteArray(indices);
 
-	delete [] indices;
-	indices = 0;
-
+	// Return success
 	return ErrorCodes::NoError;
 }
-
-
-void Model::ShutdownBuffers()
-{
-	// Release the index buffer.
-	if(m_indexBuffer)
-	{
-		m_indexBuffer->Release();
-		m_indexBuffer = 0;
-	}
-
-	// Release the vertex buffer.
-	if(m_vertexBuffer)
-	{
-		m_vertexBuffer->Release();
-		m_vertexBuffer = 0;
-	}
-
-	return;
-}
-
 
 void Model::RenderBuffers(void)
 {
@@ -466,52 +374,17 @@ void Model::RenderBuffers(void)
 
 
 	// Set vertex buffer stride and offset.
-	stride = sizeof(VertexType); 
+	stride = m_buffer.GetVertexSize();
 	offset = 0;
     
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	Game::Engine->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	Game::Engine->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_buffer.VertexBuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
-	Game::Engine->GetDeviceContext()->IASetIndexBuffer(m_indexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+	Game::Engine->GetDeviceContext()->IASetIndexBuffer(m_buffer.IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	Game::Engine->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
-}
-
-Result Model::LoadTexture(const char *filename)
-{
-	Result result;
-
-	// Create the texture object.
-	m_texture = new Texture();
-	if(!m_texture)
-	{
-		return ErrorCodes::CouldNotCreateTextureObject;
-	}
-
-	// Initialise the texture object.
-	result = m_texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	return ErrorCodes::NoError;
-}
-
-
-void Model::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_texture)
-	{
-		m_texture->Shutdown();
-		delete m_texture;
-		m_texture = 0;
-	}
 
 	return;
 }
@@ -521,7 +394,6 @@ Result Model::LoadModel(const char *filename)
 {
 	ifstream fin;
 	char input;
-	int i;
 	D3DXVECTOR3 bmin, bmax;
 
 	// Initialise min and max bounds before we start loading the model
@@ -567,7 +439,7 @@ Result Model::LoadModel(const char *filename)
 	fin.get(input);
 
 	// Read in the vertex data.
-	for(i=0; i<m_vertexCount; i++)
+	for (unsigned int i = 0; i < m_vertexCount; ++i)
 	{
 		// Read in coordinates, texture coords and normals
 		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
@@ -610,7 +482,7 @@ void Model::CentreModelAboutOrigin(void)
 	// Loop through all vertices and apply the offset
 	// Read in the vertex data.
 	Model::ModelType *v = &(m_model[0]);
-	for (int i = 0; i < m_vertexCount; ++i, ++v)
+	for (unsigned int i = 0; i < m_vertexCount; ++i, ++v)
 	{
 		v->x += offset.x;
 		v->y += offset.y;

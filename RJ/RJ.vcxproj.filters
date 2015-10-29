@@ -514,6 +514,9 @@
     <ClCompile Include="VolLineShader.cpp">
       <Filter>Engine\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="ModelBuffer.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1149,6 +1152,12 @@
     <ClInclude Include="InputLayoutDesc.h">
       <Filter>Engine\ShaderManager</Filter>
     </ClInclude>
+    <ClInclude Include="ModelBuffer.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="VolumetricLine.h">
+      <Filter>Engine\Volumetric lines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">
@@ -1392,6 +1401,9 @@
     </Filter>
     <Filter Include="Engine\ShaderManager">
       <UniqueIdentifier>{a776cc0f-fea9-473d-93f4-dd0e8c972617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Volumetric lines">
+      <UniqueIdentifier>{e77a3aa4-60d8-4bc2-b7c5-d454e122ce84}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

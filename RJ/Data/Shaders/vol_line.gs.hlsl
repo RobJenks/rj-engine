@@ -23,8 +23,7 @@ static const float3 RIGHT_AXIS = float3(1.0f, 0.0f, 0.0f);
 
 struct GeomInputType
 {
-	float4 P1 : POSITION0;			// Endpoint p1 (in view space)
-	float4 P2 : POSITION1;			// Endpoint p2 (in view space)
+	float4 P : POSITION;			// Endpoint (in view space)
 };
 
 struct PixelInputType
@@ -44,13 +43,13 @@ struct PixelInputType
 // Geometry Shader
 ////////////////////////////////////////////////////////////////////////////////
 [maxvertexcount(16)]
-void main(point GeomInputType linedata[1], inout TriangleStream<PixelInputType> triStream)
+void main(line GeomInputType linedata[2], inout TriangleStream<PixelInputType> triStream)
 {
 	PixelInputType output;
 
 	// linedata[0/1] = p1/p2.  Both in view space
-	output.p1 = linedata[0].P1.xyz;
-	output.p2 = linedata[0].P2.xyz;
+	output.p1 = linedata[0].P.xyz;
+	output.p2 = linedata[1].P.xyz;
 
 	// Get the difference vector between endpoints and determine line length
 	float3 linedir = (output.p2 - output.p1);

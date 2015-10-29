@@ -258,6 +258,7 @@
     <ClCompile Include="iUIController.cpp" />
     <ClCompile Include="LightHighlightFadeShader.cpp" />
     <ClCompile Include="LogManager.cpp" />
+    <ClCompile Include="ModelBuffer.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -459,6 +460,7 @@
     <ClInclude Include="iStaticObject.h" />
     <ClInclude Include="LightHighlightFadeShader.h" />
     <ClInclude Include="LogManager.h" />
+    <ClInclude Include="ModelBuffer.h" />
     <ClInclude Include="MultiLineTextBlock.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
@@ -553,6 +555,7 @@
     <ClInclude Include="Utility.h" />
     <ClInclude Include="ViewFrustrum.h" />
     <ClInclude Include="VolLineShader.h" />
+    <ClInclude Include="VolumetricLine.h" />
     <ClInclude Include="Weapon.h" />
     <ClInclude Include="XMLGenerator.h" />
     <ClInclude Include="XML\tinystr.h" />

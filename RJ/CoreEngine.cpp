@@ -50,6 +50,7 @@
 #include "StaticTerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
+#include "VolumetricLine.h"
 #include <tchar.h>
 #include <unordered_map>
 
@@ -347,7 +348,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB
 	m_instancedbuffers[1] = m_instancebuffer;		
-	m_instancedstride[0] = Model::GetVertexMemorySize();
+	m_instancedstride[0] = 0U;										// Stride[0] will be populated with the model-specific vertex size
 	m_instancedstride[1] = sizeof(RM_Instance);
 	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;
 
@@ -364,6 +365,8 @@ Result CoreEngine::InitialiseRenderQueue(void)
 		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
+	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -722,6 +725,10 @@ Result CoreEngine::InitialiseSkinnedNormalMapShader(void)
 
 Result CoreEngine::InitialiseVolLineShader(void)
 {
+	// Initialise the static data used in volumetric line rendering
+	Result result = VolLineShader::InitialiseStaticData(GetDevice());
+	if (result != ErrorCodes::NoError) return result;
+
 	// Create a new instance of the shader object
 	m_vollineshader = new VolLineShader(m_dxlocaliser);
 	if (!m_vollineshader)
@@ -730,8 +737,8 @@ Result CoreEngine::InitialiseVolLineShader(void)
 	}
 
 	// Now attempt to initialise the shader
-	Result result = m_vollineshader->Initialise(m_D3D->GetDevice(), D3DXVECTOR2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
-												m_frustrum->GetNearClipPlane(), m_frustrum->GetFarClipPlane());
+	result = m_vollineshader->Initialise(m_D3D->GetDevice(), D3DXVECTOR2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
+										 m_frustrum->GetNearClipPlane(), m_frustrum->GetFarClipPlane());
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -1179,11 +1186,12 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = mi->first->GetVertexBuffer();
+				m_instancedbuffers[0] = mi->first->VertexBuffer;
+				m_instancedstride[0] = mi->first->GetVertexSize();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(mi->first->GetIndexBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(mi->first->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -1191,7 +1199,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				// Now process all instanced / indexed vertex data through this shader
 				m_renderqueueshaders[i].Shader->Render(	r_devicecontext, mi->first->GetIndexCount(), 
 														mi->first->GetIndexCount(), n, 
-														r_view, r_projection, mi->first->GetTexture());
+														r_view, r_projection, mi->first->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1210,7 +1218,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 {
-	const Model *model = NULL; 
+	ModelBuffer *model = NULL; 
 	int n;
 	vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
@@ -1254,18 +1262,18 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = model->GetVertexBuffer();
+				m_instancedbuffers[0] = model->VertexBuffer;
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(model->GetIndexBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(model->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 				// Now process all instanced / indexed vertex data through this shader
 				m_renderqueueshaders[shaderindex].Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
-																	r_view, r_projection, model->GetTexture());
+																	r_view, r_projection, model->GetTexture()->GetTexture());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1919,6 +1927,18 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 {
 
+}
+
+// Renders a volumetric line
+void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
+{
+	// Embed line endpoints within the first two rows of the instance transform
+	RM_Instance m;
+	m.World._11 = line.P1.x; m.World._12 = line.P1.y; m.World._13 = line.P1.z;
+	m.World._21 = line.P2.x; m.World._22 = line.P2.y; m.World._23 = line.P2.z;
+
+	// Submit to the render queue
+	SubmitForRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::BaseModel, m);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

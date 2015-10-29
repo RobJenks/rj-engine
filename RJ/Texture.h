@@ -36,7 +36,7 @@ public:
 	Result	Initialise(const std::string & filename);
 	Result	Initialise(ID3D11Resource *resource, D3D11_SHADER_RESOURCE_VIEW_DESC *resourcedesc);
 
-	CMPINLINE ID3D11ShaderResourceView* GetTexture(void) { return m_texture; };
+	CMPINLINE ID3D11ShaderResourceView *GetTexture(void) { return m_texture; };
 
 	void	Shutdown();
 

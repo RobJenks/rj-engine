@@ -5,10 +5,14 @@
 #include "DX11_Core.h"
 #include "ErrorCodes.h"
 class DXLocaliser;
+class ModelBuffer;
 
 class VolLineShader : public iShader
 {
-protected:
+public:
+
+	// Static two-vertex base model used as input to the geometry shader, which will then break out into a volumetric line
+	static ModelBuffer *	BaseModel;
 
 	// Constant buffers for each shader in the pipeline
 	struct VSBufferType
@@ -46,7 +50,7 @@ public:
 	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
 
 	// Renders the shader.
-	Result							Render(	ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount,
+	Result							Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Adjust the radius of lines currently being drawn
@@ -55,6 +59,8 @@ public:
 	// Shut down and deallocate all resources
 	void							Shutdown();
 
+	// Initialise the static data used in volumetric line rendering
+	static Result					InitialiseStaticData(ID3D11Device *device);
 
 protected:
 

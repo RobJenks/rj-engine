@@ -46,7 +46,7 @@ public:
 	void Shutdown();
 	
 	// Renders the shader.  Conforms to the iShader interface spec
-	Result Render(	ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount, 
+	Result Render(	ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 					D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Sets the parameters specific to the light shader, i.e. light type / direction / colour
@@ -62,7 +62,7 @@ private:
 	Result SetShaderParameters(	ID3D11DeviceContext *deviceContext, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, 
 								ID3D11ShaderResourceView* texture);
 
-	void RenderShader(ID3D11DeviceContext *deviceContext, int vertexCount, int indexCount, int instanceCount);
+	void RenderShader(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount);
 
 private:
 	const DXLocaliser		* m_locale;

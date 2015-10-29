@@ -20,7 +20,7 @@ public:
 	};
 
 	// Loads a compiled shader object (*.cso) and returns the byte data
-	static Result		LoadCompiledShader(const std::string & filename, std::vector<char> outShader);
+	static Result		LoadCompiledShader(const std::string & filename, std::vector<byte> & outShader);
 
 	// Creates a new shader from the specified CSO
 	static Result		CreateVertexShader(	ID3D11Device *device, const std::string & filename, InputLayoutDesc *layout_desc,

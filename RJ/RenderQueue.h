@@ -9,6 +9,7 @@
 #include "D3DMain.h"
 class iShader;
 class Model;
+class ModelBuffer;
 
 /* This header contains all structure and type definitions for the render queue maintained within the core engine */
 
@@ -23,23 +24,26 @@ struct					RM_InstanceStructure
 
 	// Constructor including additional per-instance parameters
 	RM_InstanceStructure(const D3DXMATRIX *world, const D3DXVECTOR4 & params) : World(*world), Params(params) {}
+
+	// Empty constructor
+	RM_InstanceStructure(void) { }
 };													
 
 // Single instance to be rendered; includes the instance-specific data such as transform & params
-typedef						RM_InstanceStructure							RM_Instance;
+typedef						RM_InstanceStructure								RM_Instance;
 
 // Instance collection & supporting data for a particular model
 typedef struct				InstanceDataStruct {
 	std::vector<RM_Instance>	InstanceData;
 	int							TimeoutCounter;
 	InstanceDataStruct(void) :	TimeoutCounter(0) { }
-}																			RM_InstanceData;
+}																				RM_InstanceData;
 
 // Collection holding a map of instances to be rendered using each model
-typedef						std::unordered_map<	Model*, RM_InstanceData >	RM_ModelInstanceData;
+typedef						std::unordered_map<	ModelBuffer*, RM_InstanceData >	RM_ModelInstanceData;
 
 // Set of model/instance data applicable to each shader; the render queue
-typedef						std::vector<RM_ModelInstanceData>				RM_RenderQueue;
+typedef						std::vector<RM_ModelInstanceData>					RM_RenderQueue;
 
 
 
@@ -47,12 +51,12 @@ typedef						std::vector<RM_ModelInstanceData>				RM_RenderQueue;
 struct							RM_ZSortedInstance
 {
 	int							Key;
-	const Model *				ModelPtr;
+	ModelBuffer *				ModelPtr;
 	RM_Instance					Item;
 
 	bool operator<(const RM_ZSortedInstance & val) const	{ return (Key < val.Key); }
 
-	RM_ZSortedInstance(int key, const Model *model, const D3DXMATRIX *world, const D3DXVECTOR4 & params) : 
+	RM_ZSortedInstance(int key, ModelBuffer *model, const D3DXMATRIX *world, const D3DXVECTOR4 & params) : 
 		Key(key), ModelPtr(model), Item(RM_Instance(world, params)) {}
 };
 
@@ -92,6 +96,7 @@ enum RenderQueueShader
 
 	RM_LightFadeShader,					// Requires: alpha blending
 	RM_LightHighlightFadeShader,		// Requires: alpha blending
+	RM_VolLineShader,					// Requires: alpha blending
 
 	RM_RENDERQUEUESHADERCOUNT			// Count of shaders that can be used within the render queue	
 };

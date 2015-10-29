@@ -1,0 +1,129 @@
+#include "Utility.h"
+#include "Texture.h"
+#include "ModelBuffer.h"
+
+
+// Default constructor
+ModelBuffer::ModelBuffer(void)
+{
+	// Default all values
+	VertexBuffer = NULL;
+	IndexBuffer = NULL;
+	m_texture = NULL;
+	m_vertexcount = m_indexcount = 0U;
+	m_vertexsize = m_indexsize = 0U;
+}
+
+// Initialise the buffers based on the supplied model data
+Result ModelBuffer::Initialise(	ID3D11Device *device, const void *vertexdata, unsigned int vertexsize, unsigned int vertexcount,
+								const void *indexdata, unsigned int indexsize, unsigned int indexcount)
+{
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+
+	// Parameter check
+	if (!device || !vertexdata || !indexdata || vertexsize <= 0U || indexsize <= 0U || vertexcount <= 0U || indexcount <= 0U)
+		return ErrorCodes::CannotInitialiseModelBufferWithInvalidData;
+
+	// Store any parameters that we want to maintain within the object
+	m_vertexcount = vertexcount;
+	m_vertexsize = vertexsize;
+	m_indexcount = indexcount;
+	m_indexsize = indexsize;
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = (m_vertexsize * m_vertexcount);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = vertexdata;
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	HRESULT hr = device->CreateBuffer(&vertexBufferDesc, &vertexData, &VertexBuffer);
+	if (FAILED(hr))
+	{
+		return ErrorCodes::CouldNotCreateMBVertexBuffer;
+	}
+
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = (m_indexsize * m_indexcount);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = indexdata;
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	hr = device->CreateBuffer(&indexBufferDesc, &indexData, &IndexBuffer);
+	if (FAILED(hr)) return ErrorCodes::CouldNotCreateMBIndexBuffer;
+
+	// We have initialised all model buffer data so return success
+	return ErrorCodes::NoError;
+}
+
+// Sets the texture for this object
+Result ModelBuffer::SetTexture(const char *filename)
+{
+	// We want to deallocate any texture that already exists
+	if (m_texture)
+	{
+		m_texture->Shutdown();
+		SafeDelete(m_texture);
+	}
+
+	// Now load the model texture, if required (or leave as NULL if a null input was provided)
+	if (filename)
+	{
+		// Create the texture object
+		m_texture = new Texture();
+		if (!m_texture) return ErrorCodes::CouldNotCreateTextureObject;
+
+		// Initialise the texture object
+		Result result = m_texture->Initialise(filename);
+		if (result != ErrorCodes::NoError) return result;
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Releases all resources and initialises back to initial state.  Not required in normal use since this will be
+// handled automatically when the object is deallocated
+void ModelBuffer::ReleaseResources(void)
+{
+	// Release each of the buffers if they have been allocated
+	ReleaseIfExists(VertexBuffer);
+	ReleaseIfExists(IndexBuffer);
+
+	// Deallocate the texture object if relevant
+	if (m_texture)
+	{
+		m_texture->Shutdown();
+		SafeDelete(m_texture);
+	}
+
+	// Initialise other fields back to initial states
+	m_vertexcount = m_indexcount = 0U;
+	m_vertexsize = m_indexsize = 0U;
+}
+
+// Default destructor
+ModelBuffer::~ModelBuffer(void)
+{
+	// Release all buffer resources
+	ReleaseResources();
+}
+
+
+
