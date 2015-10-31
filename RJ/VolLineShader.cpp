@@ -39,7 +39,7 @@ Result VolLineShader::Initialise(ID3D11Device *device, D3DXVECTOR2 viewport_size
 	Result result;
 
 	// Initialise each shader in turn
-	result = InitialiseVertexShader(device, ShaderFilename("vol_line.vs.cso"));
+	result = InitialiseVertexShader(device, ShaderFilename((true ? "vol_line.vs.cso" : "tmp_shader.hlsl")));
 	if (result != ErrorCodes::NoError) return result;
 	
 	result = InitialiseGeometryShader(device, ShaderFilename("vol_line.gs.cso"));
@@ -224,12 +224,16 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 	if (!VolLineShader::BaseModel) return ErrorCodes::CannotInitialiseStaticVolLineShaderData;
 
 	// Create the base vertex and index data
-	D3DXVECTOR4 v[2] = { D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f), D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f) };
-	UINT16 i[2] = { 0U, 1U };
+	D3DXVECTOR4 *v = new D3DXVECTOR4[2] { D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f), D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f) };
+	UINT16 *i = new UINT16[2] { 0U, 1U };
 
 	// Initialise the base model using this data
-	Result result = VolLineShader::BaseModel->Initialise(device, v, sizeof(D3DXVECTOR4), 2U, i, sizeof(UINT16), 2U);
+	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(D3DXVECTOR4), 2U, (const void**)&i, sizeof(UINT16), 2U);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Deallocate the model vertex and index data
+	SafeDelete(v); 
+	SafeDelete(i);
 
 	// Return success
 	return ErrorCodes::NoError;

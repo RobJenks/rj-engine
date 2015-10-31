@@ -1913,7 +1913,7 @@ void RJMain::__CreateDebugScenario(void)
 		}
 
 	// Test render - vol line
-	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	/*D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
 	// Create the vertex array.
@@ -1969,11 +1969,11 @@ void RJMain::__CreateDebugScenario(void)
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices; vertices = 0;
 	delete[] indices; indices = 0;
+	*/
 
 
 
-
-	Game::Log << LOG_INIT_START << "--- Debug scenario createds\n";
+	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
 void RJMain::DEBUGDisplayInfo(void)
@@ -2044,12 +2044,12 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Test render
 
 	// Line endpoints
-	D3DXVECTOR3 poffset[2] = { D3DXVECTOR3(0.0f, 0.0f, 50.0f), D3DXVECTOR3(100.0f, 0.0f, 50.0f) };
+	/*D3DXVECTOR3 poffset[2] = { D3DXVECTOR3(0.0f, 0.0f, 50.0f), D3DXVECTOR3(100.0f, 0.0f, 50.0f) };
 	D3DXMATRIX t1, t2, w1, w2;
 	D3DXMatrixTranslation(&t1, poffset[0].x, poffset[0].y, poffset[0].z);
 	D3DXMatrixTranslation(&t2, poffset[1].x, poffset[1].y, poffset[1].z);
 	w1 = (t1 * *ss->GetWorldMatrix());
-	w2 = (t2 * *ss->GetWorldMatrix());
+	w2 = (t2 * *ss->GetWorldMatrix());*/
 
 	
 

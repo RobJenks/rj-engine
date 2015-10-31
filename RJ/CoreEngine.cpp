@@ -217,9 +217,9 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	Game::Log << LOG_INIT_START << "Shader [Skinned normal map] initialisation complete\n";
 
 	// Initialise the volumetric line shader
-	res = InitialiseVolLineShader();
+	/*res = InitialiseVolLineShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_START << "Shader [Volumetric line] initialisation complete\n";
+	Game::Log << LOG_INIT_START << "Shader [Volumetric line] initialisation complete\n";*/
 	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();

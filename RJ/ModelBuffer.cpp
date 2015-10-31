@@ -15,14 +15,15 @@ ModelBuffer::ModelBuffer(void)
 }
 
 // Initialise the buffers based on the supplied model data
-Result ModelBuffer::Initialise(	ID3D11Device *device, const void *vertexdata, unsigned int vertexsize, unsigned int vertexcount,
-								const void *indexdata, unsigned int indexsize, unsigned int indexcount)
+Result ModelBuffer::Initialise(	ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+								const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount)
 {
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
 	// Parameter check
-	if (!device || !vertexdata || !indexdata || vertexsize <= 0U || indexsize <= 0U || vertexcount <= 0U || indexcount <= 0U)
+	if (!device || !ppVertexdata || !(*ppVertexdata) || !ppIndexdata || !(*ppIndexdata) || 
+		vertexsize <= 0U || indexsize <= 0U || vertexcount <= 0U || indexcount <= 0U)
 		return ErrorCodes::CannotInitialiseModelBufferWithInvalidData;
 
 	// Store any parameters that we want to maintain within the object
@@ -40,7 +41,7 @@ Result ModelBuffer::Initialise(	ID3D11Device *device, const void *vertexdata, un
 	vertexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = vertexdata;
+	vertexData.pSysMem = (*ppVertexdata);
 	vertexData.SysMemPitch = 0;
 	vertexData.SysMemSlicePitch = 0;
 
@@ -60,7 +61,7 @@ Result ModelBuffer::Initialise(	ID3D11Device *device, const void *vertexdata, un
 	indexBufferDesc.StructureByteStride = 0;
 
 	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = indexdata;
+	indexData.pSysMem = (*ppIndexdata);
 	indexData.SysMemPitch = 0;
 	indexData.SysMemSlicePitch = 0;
 
@@ -98,31 +99,39 @@ Result ModelBuffer::SetTexture(const char *filename)
 	return ErrorCodes::NoError;
 }
 
-// Releases all resources and initialises back to initial state.  Not required in normal use since this will be
+// Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
 // handled automatically when the object is deallocated
-void ModelBuffer::ReleaseResources(void)
+void ModelBuffer::ReleaseModelBufferResources(void)
 {
 	// Release each of the buffers if they have been allocated
 	ReleaseIfExists(VertexBuffer);
 	ReleaseIfExists(IndexBuffer);
-
-	// Deallocate the texture object if relevant
-	if (m_texture)
-	{
-		m_texture->Shutdown();
-		SafeDelete(m_texture);
-	}
 
 	// Initialise other fields back to initial states
 	m_vertexcount = m_indexcount = 0U;
 	m_vertexsize = m_indexsize = 0U;
 }
 
+// Releases all resources and initialises back to initial state.  Includes model buffer resources (as per ReleaseModelBufferResources)
+// as well as e.g. texture resources.  Not required in normal use since this will be handled automatically when the object is deallocated
+void ModelBuffer::ReleaseAllResources(void)
+{
+	// Release all the resources allocated to model (VB / IB) buffers
+	ReleaseModelBufferResources();
+	
+	// Also deallocate the texture object if relevant
+	if (m_texture)
+	{
+		m_texture->Shutdown();
+		SafeDelete(m_texture);
+	}
+}
+
 // Default destructor
 ModelBuffer::~ModelBuffer(void)
 {
 	// Release all buffer resources
-	ReleaseResources();
+	ReleaseAllResources();
 }
 
 

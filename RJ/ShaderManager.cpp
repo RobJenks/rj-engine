@@ -3,29 +3,33 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "DX11_Core.h"
+#include "D3DCompiler.h"
 #include "InputLayoutDesc.h"
 
 #include "ShaderManager.h"
 
 // Loads a compiled shader object (*.cso) and returns the byte data
-Result ShaderManager::LoadCompiledShader(const std::string & filename, std::vector<byte> & outShader)
+Result ShaderManager::LoadCompiledShader(const std::string & filename, byte **ppOutShader, SIZE_T *pOutBufferSize)
 {
 	// Attempt to open the file
-	if (filename == NullString) return ErrorCodes::CannotLoadCompiledShaderWithNullInputFile;
+	if (filename == NullString || !ppOutShader || !pOutBufferSize) return ErrorCodes::CannotLoadCompiledShaderWithNullInputData;
 	std::ifstream sfile(filename, std::ios::in | std::ios::binary | std::ios::ate);
 
-	// if open was successful
+	// Test whether file could be successfully opened
 	if (sfile.is_open())
 	{
-		// Determine the length of the file and clear/reserve sufficient space
-		outShader.clear(); 
+		// Determine the length of the file and allocate sufficient space
 		int length = (int)sfile.tellg();
-		outShader.reserve((std::vector<byte>::size_type)length);
-		outShader.insert(outShader.begin(), length, 0);
+		if (length <= 0) return ErrorCodes::CompiledShaderAppearsToHoldNoData;
+
+		// Store the data and attempt to allocate space for the shader
+		(*pOutBufferSize) = (sizeof(byte) * length);
+		(*ppOutShader) = new byte[length];
+		if ((*ppOutShader) == NULL) return ErrorCodes::CouldNotAllocateSpaceForCompiledShader;
 
 		// Retrieve the file data
 		sfile.seekg(0, std::ios::beg);
-		sfile.read(reinterpret_cast<char*>(outShader.data()), length);
+		sfile.read(reinterpret_cast<char*>(&((*ppOutShader)[0])), length);
 		sfile.close();
 	}
 	else
@@ -45,12 +49,17 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 	if (!device || !layout_desc) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<byte> shader;
-	Result result = ShaderManager::LoadCompiledShader(filename, shader);
+	byte *shader = NULL; SIZE_T buffersize = 0;
+	Result result = ShaderManager::LoadCompiledShader(filename, &shader, &buffersize);
 	if (result != ErrorCodes::NoError) return result;
-
+	if (shader == NULL || buffersize <= 0) return ErrorCodes::UnspecifiedErrorWhenLoadingCompiledShader;
+	
+	/*ID3DBlob *filedata = NULL;
+	HRESULT hr = D3DReadFileToBlob((LPCWSTR)filename.c_str(), &filedata);
+	HRESULT hr2 = device->CreateVertexShader(filedata->GetBufferPointer(), filedata->GetBufferSize(), NULL, ppOutShader);*/
+	
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreateVertexShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreateVertexShader(shader, buffersize, NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateVertexShader;
@@ -58,14 +67,14 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 
 	// We now need to create the input layout, assuming we have been provided with valid data
 	if (layout_desc->ElementCount() == 0U) return ErrorCodes::ShaderManagerCannotCreateInputLayoutWithoutDesc;
-	hr = device->CreateInputLayout(layout_desc->Data(), layout_desc->ElementCount(), shader.data(), (SIZE_T)shader.size(), ppOutInputLayout);
+	hr = device->CreateInputLayout(layout_desc->Data(), layout_desc->ElementCount(), shader, buffersize, ppOutInputLayout);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateInputLayout;
 	}
 
-	// Clear the shader bytecode data (although it should be deallocated when the method ends)
-	shader.clear();
+	// Deallocate the shader bytecode data
+	if (shader) SafeDeleteArray(shader);
 
 	// The shader was created successfully, so return success here
 	return ErrorCodes::NoError;
@@ -78,19 +87,20 @@ Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string 
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<byte> shader;
-	Result result = ShaderManager::LoadCompiledShader(filename, shader);
+	byte *shader = NULL; SIZE_T buffersize = 0;
+	Result result = ShaderManager::LoadCompiledShader(filename, &shader, &buffersize);
 	if (result != ErrorCodes::NoError) return result;
+	if (shader == NULL || buffersize <= 0) return ErrorCodes::UnspecifiedErrorWhenLoadingCompiledShader;
 
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreatePixelShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreatePixelShader(shader, buffersize, NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreatePixelShader;
 	}
 
-	// Clear the shader bytecode data (although it should be deallocated when the method ends)
-	shader.clear();
+	// Deallocate the shader bytecode data
+	if (shader) SafeDeleteArray(shader);
 
 	// The shader was created successfully, so return success here
 	return ErrorCodes::NoError;
@@ -103,19 +113,20 @@ Result ShaderManager::CreateGeometryShader(ID3D11Device *device, const std::stri
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
 
 	// Attempt to load the data from external compiled shader object (cso) file
-	std::vector<byte> shader;
-	Result result = ShaderManager::LoadCompiledShader(filename, shader);
+	byte *shader = NULL; SIZE_T buffersize = 0;
+	Result result = ShaderManager::LoadCompiledShader(filename, &shader, &buffersize);
 	if (result != ErrorCodes::NoError) return result;
+	if (shader == NULL || buffersize <= 0) return ErrorCodes::UnspecifiedErrorWhenLoadingCompiledShader;
 
 	// Now attempt to create the shader based on this data
-	HRESULT hr = device->CreateGeometryShader(shader.data(), (SIZE_T)shader.size(), NULL, ppOutShader);
+	HRESULT hr = device->CreateGeometryShader(shader, buffersize, NULL, ppOutShader);
 	if (FAILED(hr))
 	{
 		return ErrorCodes::ShaderManagerCouldNotCreateVertexShader;
 	}
 
-	// Clear the shader bytecode data (although it should be deallocated when the method ends)
-	shader.clear();
+	// Deallocate the shader bytecode data
+	if (shader) SafeDeleteArray(shader);
 
 	// The shader was created successfully, so return success here
 	return ErrorCodes::NoError;

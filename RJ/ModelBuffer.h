@@ -16,8 +16,8 @@ public:
 	ModelBuffer(void);
 
 	// Initialise the buffers based on the supplied model data
-	Result							Initialise(	ID3D11Device *device, const void *vertexdata, unsigned int vertexsize, unsigned int vertexcount,
-												const void *indexdata, unsigned int indexsize, unsigned int indexcount);
+	Result							Initialise(ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+												const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount);
 
 	// Sets the texture for this object
 	Result							SetTexture(const char *filename);
@@ -43,9 +43,14 @@ public:
 		return (m_texture ? m_texture->GetTexture() : NULL);
 	}
 
-	// Releases all resources and initialises back to initial state.  Not required in normal use since this will be
+	// Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
 	// handled automatically when the object is deallocated
-	void							ReleaseResources(void);
+	void							ReleaseModelBufferResources(void);
+
+	// Releases all resources and initialises back to initial state.  Includes model buffer resources (as per ReleaseModelBufferResources)
+	// as well as e.g. texture resources.  Not required in normal use since this will be handled automatically when the object is deallocated
+	void							ReleaseAllResources(void);
+
 
 	// Default destructor
 	~ModelBuffer(void);

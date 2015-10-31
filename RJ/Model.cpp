@@ -203,7 +203,7 @@ void Model::ScaleModelGeometry(D3DXVECTOR3 scale)
 	
 	// We have updated the model geometry, so discard and recreate the vertex buffers 
 	// now (not the most efficient method, but this is not a regular occurence)
-	m_buffer.ReleaseResources();
+	m_buffer.ReleaseModelBufferResources();
 	InitialiseBuffers();
 }
 
@@ -355,8 +355,8 @@ Result Model::InitialiseBuffers(void)
 	}
 
 	// Initialise the model buffers based on this raw data
-	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), &vertices, sizeof(VertexType), m_vertexCount,
-																   &indices, sizeof(INDEXFORMAT), m_indexCount);
+	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), (const void**)&vertices, sizeof(VertexType), m_vertexCount,
+																   (const void**)&indices, sizeof(INDEXFORMAT), m_indexCount);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.

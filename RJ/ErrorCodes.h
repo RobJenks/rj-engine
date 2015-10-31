@@ -156,7 +156,7 @@ namespace ErrorCodes {
 	const Result		FoundNoDisplayModesAvailableForPrimaryAdapter	= 1218;
 	const Result		FoundNoSupportedDisplayModeForResolution		= 1219;
 	const Result		ShaderManagerInitialisationFailedOnNullDevice	= 1220; 
-	const Result		CannotLoadCompiledShaderWithNullInputFile		= 1221;
+	const Result		CannotLoadCompiledShaderWithNullInputData		= 1221;
 	const Result		CouldNotOpenCompiledShaderFile					= 1222;
 	const Result		ShaderManagerCouldNotCreateVertexShader			= 1223;
 	const Result		ShaderManagerCouldNotCreatePixelShader			= 1224;
@@ -188,6 +188,9 @@ namespace ErrorCodes {
 	const Result		CouldNotCreateMBVertexBuffer					= 1250;
 	const Result		CouldNotCreateMBIndexBuffer						= 1251;
 	const Result		CannotInitialiseStaticVolLineShaderData			= 1252;
+	const Result		CompiledShaderAppearsToHoldNoData				= 1253;
+	const Result		CouldNotAllocateSpaceForCompiledShader			= 1254;
+	const Result		UnspecifiedErrorWhenLoadingCompiledShader		= 1255;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

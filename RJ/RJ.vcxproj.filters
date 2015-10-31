@@ -1420,5 +1420,8 @@
     <FxCompile Include="Data\Shaders\vol_line.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Data\Shaders\tmp_shader.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
