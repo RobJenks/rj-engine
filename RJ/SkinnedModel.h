@@ -7,7 +7,7 @@
 #include <vector>
 #include "DX11_Core.h"
 
-#include <d3dx11tex.h>
+//#include <d3dx11tex.h>
 #include <windows.h>
 #include <xnamath.h>
 #include "CompilerSettings.h"

@@ -15,7 +15,7 @@
 void HpEngine::RecalculateHardpointData()
 {
 	// We need to simply multiply a basis vector by our orientation to get the base thrust vector
-	D3DXVec3Rotate(&BaseThrustVector, &BASIS_VECTOR, &Orientation);
+	XMVector3Rotate(&BaseThrustVector, &BASIS_VECTOR, &Orientation);
 	D3DXVec3Normalize(&BaseThrustVector, &BaseThrustVector);
 }
 

@@ -13,17 +13,18 @@ class ModelBuffer;
 
 /* This header contains all structure and type definitions for the render queue maintained within the core engine */
 
-// Structure of a single instance in the instancing model
+// Structure of a single instance in the instancing model.  16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
 struct					RM_InstanceStructure
 {
-	D3DXMATRIX			World;								// World matrix to transform into the world
-	D3DXVECTOR4			Params;								// Float-4 of parameters that can be passed for each instance
+	XMMATRIX			World;								// World matrix to transform into the world
+	XMVECTOR			Params;								// Float-4 of parameters that can be passed for each instance
 
 	// Constructor where only the world transform is required; other params will be unitialised (for efficiency) and should not be used
-	RM_InstanceStructure(const D3DXMATRIX *world) : World(*world) {}
+	RM_InstanceStructure(const FXMMATRIX world) : World(world) {}
 
 	// Constructor including additional per-instance parameters
-	RM_InstanceStructure(const D3DXMATRIX *world, const D3DXVECTOR4 & params) : World(*world), Params(params) {}
+	RM_InstanceStructure(const FXMMATRIX world, const FXMVECTOR params) : World(world), Params(params) {}
 
 	// Empty constructor
 	RM_InstanceStructure(void) { }
@@ -56,7 +57,7 @@ struct							RM_ZSortedInstance
 
 	bool operator<(const RM_ZSortedInstance & val) const	{ return (Key < val.Key); }
 
-	RM_ZSortedInstance(int key, ModelBuffer *model, const D3DXMATRIX *world, const D3DXVECTOR4 & params) : 
+	RM_ZSortedInstance(int key, ModelBuffer *model, const FXMMATRIX world, const FXMVECTOR params) : 
 		Key(key), ModelPtr(model), Item(RM_Instance(world, params)) {}
 };
 

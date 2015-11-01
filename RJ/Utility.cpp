@@ -106,40 +106,28 @@ bool DirectoryExists(const char *szPath)
 		   (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-void QuaternionRotationYawPitch(D3DXQUATERNION *q, float yaw, float pitch)
-{
-	float halfyaw, halfpitch, sinY, cosY, sinP, cosP;
-
-	halfyaw = yaw * 0.5f;
-	halfpitch = pitch * 0.5f;
-
-	sinY = sinf(halfyaw);
-	cosY = cosf(halfyaw);
-
-	sinP = sinf(halfpitch);
-	cosP = cosf(halfpitch);
-
-	q->x = cosY * sinP * COS_ZERO + sinY * cosP * SIN_ZERO;
-	q->y = sinY * cosP * COS_ZERO - cosY * sinP * SIN_ZERO;
-	q->z = cosY * cosP * SIN_ZERO - sinY * sinP * COS_ZERO;
-	q->w = cosY * cosP * COS_ZERO + sinY * sinP * SIN_ZERO;
-}
-
-void MatrixToCharStream(const D3DXMATRIX *m, char *out)
+void MatrixToCharStream(const XMFLOAT4X4 *m, char *out)
 {
 	sprintf(out, "[ %.2f, %.2f, %.2f, %.2f // %.2f, %.2f, %.2f, %.2f // %.2f, %.2f, %.2f, %.2f // %.2f, %.2f, %.2f, %.2f ]",
 		m->_11, m->_12, m->_13, m->_14, m->_21, m->_22, m->_23, m->_24, m->_31, m->_32, m->_33, m->_34, m->_41, m->_42, m->_43, m->_44); 
 }
 
-void MatrixToCharStreamHighPrecision(const D3DXMATRIX *m, char *out)
+void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out)
 {
 	sprintf(out, "[ %.6f, %.6f, %.6f, %.6f // %.6f, %.6f, %.6f, %.6f // %.6f, %.6f, %.6f, %.6f // %.6f, %.6f, %.6f, %.6f ]",
 		m->_11, m->_12, m->_13, m->_14, m->_21, m->_22, m->_23, m->_24, m->_31, m->_32, m->_33, m->_34, m->_41, m->_42, m->_43, m->_44); 
 }
 
-void RotationMatrixFromBasisVectors(D3DXVECTOR3 (&bases)[3], D3DXMATRIX & outMatrix)
+XMMATRIX RotationMatrixFromBasisVectors(XMFLOAT3 (&bases)[3])
 {
-	outMatrix = D3DXMATRIX(	bases[0].x, bases[0].y, bases[0].z, 0.0f,
+	return XMMatrixSet(	bases[0].x, bases[0].y, bases[0].z, 0.0f,
+						bases[1].x, bases[1].y, bases[1].z, 0.0f,
+						bases[2].x, bases[2].y, bases[2].z, 0.0f,
+						0.0f, 0.0f, 0.0f, 1.0f); XMMATRIX x; 
+}
+void RotationMatrixFromBasisVectors(XMFLOAT3 (&bases)[3], XMFLOAT4X4 & outMatrix)
+{
+	outMatrix = XMFLOAT4X4(	bases[0].x, bases[0].y, bases[0].z, 0.0f,
 							bases[1].x, bases[1].y, bases[1].z, 0.0f,
 							bases[2].x, bases[2].y, bases[2].z, 0.0f,
 							0.0f, 0.0f, 0.0f, 1.0f);

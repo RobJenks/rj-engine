@@ -1,4 +1,5 @@
-#include "DX11_Core.h" // #include "FullDX11.h"
+#include "DX11_Compatibility.h"		// Should be included first when performing compatibility checks
+#include "DX11_Core.h" 
 
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
@@ -104,13 +105,11 @@ CoreEngine::CoreEngine(void)
 
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0] = m_cache_el_inc[1] = m_cache_el_inc[2] = NULL_VECTOR;
-	m_tmp_vector3 = NULL_VECTOR;
-	m_tmp_matrix = ID_MATRIX;
-
+	
 	// Initialise the cached increment vectors, representing a +1 element movement in each dimension in turn
-	m_cache_el_inc_base[0] = D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
-	m_cache_el_inc_base[1] = D3DXVECTOR3(0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f);
-	m_cache_el_inc_base[2] = D3DXVECTOR3(0.0f, 0.0f, Game::C_CS_ELEMENT_SCALE);
+	m_cache_el_inc_base[0] = XMVectorSet(Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f, 0.0f);
+	m_cache_el_inc_base[1] = XMVectorSet(0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
+	m_cache_el_inc_base[2] = XMVectorSet(0.0f, 0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f);
 }
 
 
@@ -130,6 +129,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseDXLocaliser();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "DX Localiser initialised\n";
+
+	// Initialise DirectX math functions 
+	res = InitialiseDirectXMath();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INIT_START << "DX Math initialised\n";
 
 	// Initialise the Direct3D component
 	res = InitialiseDirect3D(hwnd);
@@ -314,6 +318,23 @@ Result CoreEngine::InitialiseDXLocaliser(void)
 	// Initialise the localiser, which will also analyse the current device and store its capabilities
 	Result result = m_dxlocaliser->Initialise();
 	return result;
+}
+
+
+Result CoreEngine::InitialiseDirectXMath(void)
+{
+	// Test whether the client system supports SEE/SIMD instruction sets
+	if (PlatformSupportsSSEInstructionSets())
+	{
+		Game::Log << LOG_INIT_START << "Platform supports SSE/SSE2 instruction sets\n";
+	}
+	else
+	{
+		Game::Log << LOG_INIT_START << "Warning: Platform does not support SSE/SSE2 instruction sets\n";
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
 }
 
 Result CoreEngine::InitialiseRenderQueue(void)

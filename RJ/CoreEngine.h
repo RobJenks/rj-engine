@@ -7,6 +7,7 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
+#include "DX11_Core.h"
 #include "D3DMain.h"
 #include "DXLocaliser.h"
 #include "Profiler.h"
@@ -55,6 +56,8 @@ using namespace std::tr1;
 const float SCREEN_DEPTH = 5000.0f;
 const float SCREEN_NEAR = 0.1f;
 
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
 class CoreEngine : public iAcceptsConsoleCommands
 {
 public:
@@ -110,10 +113,10 @@ public:
 	CMPINLINE	VolLineShader *				GetVolLineShader(void)					{ return m_vollineshader; }
 
 	// Methods to retrieve the key render matrices from the engine
-	CMPINLINE void GetRenderViewMatrix(D3DXMATRIX &m)				{ m = r_view; }
-	CMPINLINE void GetRenderInverseViewMatrix(D3DXMATRIX &m)		{ m = r_invview; }
-	CMPINLINE void GetRenderProjectionMatrix(D3DXMATRIX &m)			{ m = r_projection; }
-	CMPINLINE void GetRenderOrthographicMatrix(D3DXMATRIX &m)		{ m = r_orthographic; }
+	CMPINLINE XMMATRIX GetRenderViewMatrix(void)					{ return r_view; }
+	CMPINLINE XMMATRIX GetRenderInverseViewMatrix(void)				{ return r_invview; }
+	CMPINLINE XMMATRIX GetRenderProjectionMatrix(void)				{ return r_projection; }
+	CMPINLINE XMMATRIX GetRenderOrthographicMatrix(void)			{ return r_orthographic; }
 	
 	// Pass-through accessor methods for key engine components
 	CMPINLINE ID3D11Device *		GetDevice(void)			{ return m_D3D->GetDevice(); }
@@ -194,33 +197,32 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void			RenderModel(Model *model, D3DXMATRIX *world)
+	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(Model *model, D3DXMATRIX *world, const D3DXVECTOR3 & highlight)
+	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, CXMVECTOR highlight)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams.x = highlight.x; m_instanceparams.y = highlight.y; m_instanceparams.z = highlight.z;
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, m_instanceparams);
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, highlight);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, D3DXMATRIX *world, const D3DXVECTOR3 & position, float alpha)
+	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, const CXMVECTOR position, float alpha)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams.x = alpha;
+		m_instanceparams = XMVectorReplicate(alpha);
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, D3DXMATRIX *world, const D3DXVECTOR3 & position, const D3DXVECTOR3 & highlight, float alpha)
+	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, const CXMVECTOR position, const XMFLOAT3 & highlight, float alpha)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams.x = highlight.x; m_instanceparams.y = highlight.y; m_instanceparams.z = highlight.z; m_instanceparams.w = alpha;
+		m_instanceparams = XMVectorSet(highlight.x, highlight.y, highlight.z, alpha);
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
 	}
 
@@ -289,6 +291,7 @@ private:
 	// Private methods to initialise each component in turn
 	Result					InitialiseDirect3D(HWND hwnd);
 	Result					InitialiseDXLocaliser(void);
+	Result					InitialiseDirectXMath(void);
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
@@ -316,6 +319,7 @@ private:
 	// Private methods to release each component in turn
 	void					ShutdownDirect3D(void);
 	void					ShutdownDXLocaliser(void);
+	void					ShutdownDXMath(void);
 	void					ShutdownRenderQueue(void);
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
@@ -373,10 +377,10 @@ private:
 	// Render-cycle-specific parameters; denoted by r_*, these are valid for the current render cycle only 
 	// and are used for reasons of render efficiency
 	ID3D11DeviceContext *	r_devicecontext;		// The device context in use for this render cycle
-	D3DXMATRIX				r_view;					// View matrix for the current render cycle
-	D3DXMATRIX				r_projection;			// Projection matrix for the current render cycle
-	D3DXMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
-	D3DXMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
+	XMMATRIX				r_view;					// View matrix for the current render cycle
+	XMMATRIX				r_projection;			// Projection matrix for the current render cycle
+	XMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
+	XMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
 
 
 	ID3D11Buffer *				m_instancebuffer;
@@ -402,7 +406,7 @@ public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
 	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform)
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform));
@@ -410,7 +414,7 @@ public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
 	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform)
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform));
@@ -418,7 +422,7 @@ public:
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const D3DXMATRIX *transform, const D3DXVECTOR4 & params)
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const CXMVECTOR params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, params));
@@ -426,7 +430,7 @@ public:
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform, const D3DXVECTOR4 & params)
+	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const CXMVECTOR params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, params));
@@ -450,11 +454,12 @@ public:
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const D3DXMATRIX *transform, 
-															const D3DXVECTOR4 & params, const D3DXVECTOR3 &position)
+	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const FXMMATRIX transform, 
+															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
-		int z = (int)D3DXVec3LengthSq(&(position - m_camera->GetPosition()));
+		XMVECTOR lsq = XMVector3LengthSq(position - m_camera->GetPosition());
+		int z = (int)XMVectorGetX(lsq);
 
 		// Add to the z-sorted vector with this z-value as the sorting key
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model->GetModelBuffer(), transform, params));
@@ -462,11 +467,12 @@ public:
 	
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, const D3DXMATRIX *transform,
-		const D3DXVECTOR4 & params, const D3DXVECTOR3 &position)
+	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
+															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
-		int z = (int)D3DXVec3LengthSq(&(position - m_camera->GetPosition()));
+		XMVECTOR lsq = XMVector3LengthSq(position - m_camera->GetPosition());
+		int z = (int)XMVectorGetX(lsq);
 
 		// Add to the z-sorted vector with this z-value as the sorting key
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model, transform, params));
@@ -487,14 +493,14 @@ public:
 	void					RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *environment, const INTVECTOR3 & element);
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
-	D3DXMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
+	XMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
 
 	// Functions for processing the per-frame render info
 	EngineRenderInfoData	m_renderinfo;
 	void                    ResetRenderInfo(void);
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
-	D3DXVECTOR4				m_instanceparams;
+	XMVECTOR				m_instanceparams;
 
 	// Vector used to queue up actors for rendering.  This allows us to render them all at once, avoiding multiple state changes
 	std::vector<Actor*>		m_queuedactors;
@@ -506,17 +512,13 @@ public:
 	std::vector<bool>		m_renderflags;
 
 	// Cached & precalculated fields used for rendering an environment
-	D3DXVECTOR3					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
-	D3DXVECTOR3					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
-	D3DXVECTOR3					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
+	XMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
+	XMVECTOR					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
+	XMVECTOR					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedobjects;							// Temporary vector of object IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle
 	
-	// Further temporary fields, used only for intermediate calculations to avoid allocation memory each time
-	D3DXVECTOR3					m_tmp_vector3;
-	D3DXMATRIX					m_tmp_matrix;
-
 	// Persistent storage for objects being debug-rendered
 	Game::ID_TYPE 			m_debug_renderenvboxes;
 };

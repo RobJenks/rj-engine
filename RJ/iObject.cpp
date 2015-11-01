@@ -47,12 +47,12 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_faction = Faction::NullFaction;
 	m_simulationhub = false;
 	m_visible = true;
-	m_position = NULL_VECTOR;
-	m_orientation = ID_QUATERNION;
-	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
-	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX;
+	m_position = NULL_FLOAT3;
+	m_orientation = NULL_FLOAT4;
+	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX_F;
+	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX_F;
 	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_Normal;
-	m_centreoffset = NULL_VECTOR;
+	m_centreoffset = NULL_FLOAT3;
 	m_orientchanges = 0;
 	m_nocollision_count = 0;
 
@@ -72,7 +72,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_canperformpostsimulationupdate = false;
 
 	// Set a default value for size
-	SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+	SetSize(XMFLOAT3(1.0f, 1.0f, 1.0f));
 
 	// By default, the root collision box will auto-fit to the model bounds.  Add after SetSize() so 
 	// that we don't redundantly calculate this twice (since if AutoFit==true, SetSize() will trigger
@@ -276,17 +276,17 @@ iObject::~iObject(void)
 }
 
 // Set the size of this object.  Recalculates any dependent fields, e.g. those involved in collision detection
-void iObject::SetSize(const D3DXVECTOR3 &size)
+void iObject::SetSize(const XMFLOAT3 & size)
 {
 	// Store the size parameter
 	m_size = size;
 
 	// Make sure the supplied parameter is valid; if any dimension is <= epsilon then assign a default size
 	if (m_size.x <= Game::C_EPSILON || m_size.y <= Game::C_EPSILON || m_size.z <= Game::C_EPSILON)
-		m_size = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
+		m_size = XMFLOAT3(1.0f, 1.0f, 1.0f);
 
 	// Recalculate the collision sphere radii for broadphase collision detection
-	m_collisionsphereradiussq = DetermineCuboidBoundingSphereRadiusSq(m_size); 
+	m_collisionsphereradiussq = DetermineCuboidBoundingSphereRadiusSq(XMLoadFloat3(&m_size)); 
 	m_collisionsphereradius = sqrtf(m_collisionsphereradiussq);
 
 	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
@@ -416,12 +416,12 @@ void iObject::UpdateGlobalObjectCollection(void)
 // Add a new attachment from this object to a child.  Sets default (zero) offset parameters.
 void iObject::AddChildAttachment(iObject *child)
 {
-	AddChildAttachment(child, NULL_VECTOR, ID_QUATERNION);
+	AddChildAttachment(child, NULL_FLOAT3, NULL_FLOAT4);
 }
 
 // Add a new attachment from this object to a child, including parameters for offsetting the position & orientation relative 
 // to the parent.  Breaks the attachment from the child side as well.
-void iObject::AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset)
+void iObject::AddChildAttachment(iObject *child, const XMFLOAT3 & posoffset, const XMFLOAT4 & orientoffset)
 {
 	// Parameter check
 	if (!child) return;

@@ -343,7 +343,7 @@ void SpaceTurret::DesignateTarget(iSpaceObject *target)
 void SpaceTurret::UpdatePositioning(void)
 {
 	// Determine turret position in world space 
-	D3DXVec3Rotate(&m_position, &m_relativepos, &m_parent->GetOrientation());
+	XMVector3Rotate(&m_position, &m_relativepos, &m_parent->GetOrientation());
 	m_position += m_parent->GetPosition();
 
 	// Compose our base orientation with the parent object to get the turret resting orientation, 
@@ -358,7 +358,7 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 { 
 	// Transform the target vector by turret inverse orientation to get a target vector in local space
 	D3DXVECTOR3 tgt_local;
-	D3DXVec3Rotate(&tgt_local, &(target->GetPosition() - m_position), &m_invorient);
+	XMVector3Rotate(&tgt_local, &(target->GetPosition() - m_position), &m_invorient);
 
 	// Before testing the firing arcs, make sure this target is actually in range
 	if (D3DXVec3LengthSq(&tgt_local) > m_maxrangesq) return false;

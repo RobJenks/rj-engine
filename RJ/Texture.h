@@ -14,7 +14,6 @@
 #include <unordered_map>
 #include "DX11_Core.h"
 
-#include <d3dx11tex.h>
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "CompilerSettings.h"

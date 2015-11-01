@@ -96,81 +96,90 @@ public:
 	CMPINLINE void							SetIsStandardObject(bool standard)		{ m_standardobject = standard; }
 
 	// Position and orientation; all objects exist somewhere in the world
-	CMPINLINE D3DXVECTOR3					GetPosition(void) const							{ return m_position; }
-	CMPINLINE void							SetPosition(const D3DXVECTOR3 & pos)					
+	CMPINLINE const XMFLOAT3 &				GetPosition(void) const							{ return m_position; }
+	CMPINLINE void							SetPosition(const XMFLOAT3 & pos)					
 	{ 
 		m_position = pos; 
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
-	CMPINLINE void							AddDeltaPosition(const D3DXVECTOR3 & delta)		{ SetPosition(m_position + delta); }
+	CMPINLINE void							AddDeltaPosition(const XMFLOAT3 & delta)		
+	{ 
+		SetPosition(XMFLOAT3(m_position.x + delta.x, m_position.y + delta.y, m_position.z + delta.z));
+	}
 
-	CMPINLINE D3DXQUATERNION				GetOrientation(void) const						{ return m_orientation; }
-	CMPINLINE void							SetOrientation(const D3DXQUATERNION & orient)			
+	CMPINLINE const XMFLOAT4 &				GetOrientation(void) const						{ return m_orientation; }
+	CMPINLINE void							SetOrientation(const XMFLOAT4 & orient)			
 	{ 
 		m_orientation = orient; 
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
-	CMPINLINE void							SetOrientation(const D3DXQUATERNION *orient)	
+	CMPINLINE void							SetOrientation(const XMFLOAT4 *orient)	
 	{ 
 		m_orientation = *orient; 
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
 
-	CMPINLINE void							SetPositionAndOrientation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient)
+	CMPINLINE void							SetPositionAndOrientation(const XMFLOAT3 & pos, const XMFLOAT4 & orient)
 	{
 		m_position = pos; m_orientation = orient;
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
-	CMPINLINE void							SetPositionAndOrientation_NoInvalidation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient)
+	CMPINLINE void							SetPositionAndOrientation_NoInvalidation(const XMFLOAT3 & pos, const XMFLOAT4 & orient)
 	{
 		m_position = pos; m_orientation = orient;
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
 
-	CMPINLINE void							ChangeOrientation(const D3DXQUATERNION &rot)
+	CMPINLINE void							ChangeOrientation(const XMFLOAT4 & rot)
 	{
 		// Multiply orientation D3DXQUATERNIONs to generate the new D3DXQUATERNION
-		SetOrientation(rot * m_orientation);
+		SetOrientation(QuaternionMultiply(rot, m_orientation));
 	}
 
-	CMPINLINE void							AddDeltaOrientation(const D3DXQUATERNION &dq)
+	CMPINLINE void							AddDeltaOrientation(const XMFLOAT4 & dq)
 	{
 		// Add the incremental quaternion
-		SetOrientation(m_orientation + dq);
+		SetOrientation(QuaternionAdd(m_orientation, dq));
 	}
 
 
 	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
-	CMPINLINE const D3DXMATRIX *			GetOrientationMatrix(void) const		{ return &m_orientationmatrix; }
-	CMPINLINE const D3DXMATRIX *			GetInverseOrientationMatrix(void) const	{ return &m_inverseorientationmatrix; }
+	CMPINLINE const XMFLOAT4X4 *			GetOrientationMatrix(void) const		{ return &m_orientationmatrix; }
+	CMPINLINE const XMFLOAT4X4 *			GetInverseOrientationMatrix(void) const	{ return &m_inverseorientationmatrix; }
 
 	// The world matrix of this object
-	CMPINLINE D3DXMATRIX *					GetWorldMatrix(void)				{ return &m_worldmatrix; }
-	CMPINLINE D3DXMATRIX *					GetInverseWorldMatrix(void)			{ return &m_inverseworld; }
-	CMPINLINE void							SetWorldMatrix(D3DXMATRIX &m)
+	CMPINLINE XMFLOAT4X4 *					GetWorldMatrix(void)				{ return &m_worldmatrix; }
+	CMPINLINE XMFLOAT4X4 *					GetInverseWorldMatrix(void)			{ return &m_inverseworld; }
+	CMPINLINE void							SetWorldMatrix(const XMFLOAT4X4 & m)
 	{
-		// Store the new world matrix and calculate the inverse world matrix for rendering efficiency
+		// Store the new world matrix
 		m_worldmatrix = m;
-		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
+
+		// Calculate the inverse world matrix for rendering efficiency
+		XMMATRIX invworld = XMMatrixInverse(NULL, XMLoadFloat4x4(&m_worldmatrix));
+		XMStoreFloat4x4(&m_inverseworld, invworld);
 	}
-	CMPINLINE void							SetWorldMatrix(D3DXMATRIX *m) 
+	CMPINLINE void							SetWorldMatrix(const XMFLOAT4X4 *m) 
 	{
-		// Store the new world matrix and calculate the inverse world matrix for rendering efficiency
+		// Store the new world matrix
 		m_worldmatrix = *m;
-		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
+
+		// Calculate the inverse world matrix for rendering efficiency
+		XMMATRIX invworld = XMMatrixInverse(NULL, XMLoadFloat4x4(&m_worldmatrix));
+		XMStoreFloat4x4(&m_inverseworld, invworld);
 	}
 
 	// Derives a new object world matrix
 	CMPINLINE void							DeriveNewWorldMatrix(void);
 
 	// World adjustment matrix is pre-multiplied into the object world matrix
-	CMPINLINE const D3DXMATRIX *			GetWorldAdjustmentMatrix(void) const			{ return &m_worldorientadjustment; }
-	CMPINLINE void							SetWorldAdjustmentMatrix(const D3DXMATRIX & m)	{ m_worldorientadjustment = m; }
+	CMPINLINE const XMFLOAT4X4 *			GetWorldAdjustmentMatrix(void) const			{ return &m_worldorientadjustment; }
+	CMPINLINE void							SetWorldAdjustmentMatrix(const XMFLOAT4X4 & m)	{ m_worldorientadjustment = m; }
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
@@ -230,8 +239,8 @@ public:
 	virtual void							Shutdown(void);
 
 	// The size of this object in world coordinates
-	CMPINLINE D3DXVECTOR3					GetSize(void) const					{ return m_size; }
-	void									SetSize(const D3DXVECTOR3 & size);
+	CMPINLINE XMFLOAT3						GetSize(void) const					{ return m_size; }
+	void									SetSize(const XMFLOAT3 & size);
 
 	// The model used for rendering this object (or NULL if object is non-renderable)
 	CMPINLINE Model *						GetModel(void)						{ return m_model; }
@@ -246,8 +255,8 @@ public:
 	CMPINLINE void							SetFaction(Faction::F_ID id)		{ m_faction = id; }
 
 	// Return or set the offset translation required to centre the object model about its local origin
-	CMPINLINE D3DXVECTOR3					GetCentreOffsetTranslation(void) const					{ return m_centreoffset; }
-	CMPINLINE void							SetCentreOffsetTranslation(const D3DXVECTOR3 & offset)	{ m_centreoffset = offset; }
+	CMPINLINE XMFLOAT3						GetCentreOffsetTranslation(void) const					{ return m_centreoffset; }
+	CMPINLINE void							SetCentreOffsetTranslation(const XMFLOAT3 & offset)		{ m_centreoffset = offset; }
 	
 	// Collision detection data
 	CMPINLINE Game::CollisionMode			GetCollisionMode(void) const					{ return m_collisionmode; }	
@@ -285,7 +294,7 @@ public:
 	CMPINLINE bool								HasChildAttachments(void) const								{ return (m_childcount != 0); }
 	CMPINLINE AttachmentSet *					GetChildObjects(void)										{ return &m_childobjects; }
 	void										AddChildAttachment(iObject *child);
-	void										AddChildAttachment(iObject *child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset);
+	void										AddChildAttachment(iObject *child, const XMFLOAT3 & posoffset, const XMFLOAT4 & orientoffset);
 	bool										HaveChildAttachment(iObject *child);
 	Attachment<iObject*>						RetrieveChildAttachmentDetails(iObject *child);
 	void										RemoveChildAttachment(iObject *child);
@@ -336,12 +345,12 @@ public:
 		// but is not currently visible.  Aside from, we do not bother renormalising to save cycles
 		if (m_currentlyvisible)
 		{
-			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+			QuaternionNormalise(m_orientation);
 		}
 		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && 
 				 ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
 		{
-			D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+			QuaternionNormalise(m_orientation);
 			m_orientchanges = 0;
 		}
 	}
@@ -422,10 +431,10 @@ protected:
 	ArticulatedModel *                  m_articulatedmodel;             // The articulated model to use for this object, if relevant.  If NULL, the object
                                                                         // will use its static model by default
 
-	D3DXVECTOR3							m_position;						// Position of the object in world space
-	D3DXQUATERNION						m_orientation;					// Object orientation
-	D3DXMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
-	D3DXMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
+	XMFLOAT3							m_position;						// Position of the object in world space
+	XMFLOAT4							m_orientation;					// Object orientation
+	XMFLOAT4X4							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
+	XMFLOAT4X4							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
 	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
 
 	ObjectSimulationState				m_simulationstate;				// Value indicating the extent of simulation (if any) that should be applied to this object
@@ -441,12 +450,12 @@ protected:
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;
 
-	D3DXVECTOR3							m_size;							// Size of the object in world coordinates
-	D3DXVECTOR3							m_centreoffset;					// Any required offset to centre the object model about its local origin
+	XMFLOAT3							m_size;							// Size of the object in world coordinates
+	XMFLOAT3							m_centreoffset;					// Any required offset to centre the object model about its local origin
 	
-	D3DXMATRIX							m_worldmatrix;					// World matrix used for rendering this object
-	D3DXMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
-	D3DXMATRIX							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
+	XMFLOAT4X4							m_worldmatrix;					// World matrix used for rendering this object
+	XMFLOAT4X4							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
+	XMFLOAT4X4							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
 																		// Used to incorporate e.g. pre-scaling, rotation adjustments or other corrections
 	int									m_worldcalcmethod;				// Set by the subclass; indicates the type of world transform calculation to be performed
 
@@ -472,9 +481,9 @@ protected:
 
 	// Static working variables for inline intermediate calculations
 	static struct						_calc_data_struct {
-		D3DXVECTOR3						v1, v2, v3;
-		D3DXQUATERNION					q1, q2, q3;
-		D3DXMATRIX						m1, m2, m3;
+		XMVECTOR						v1, v2, v3;
+		XMVECTOR						q1, q2, q3;
+		XMMATRIX						m1, m2, m3;
 	} _calc_data;
 
 };
@@ -486,19 +495,42 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 	{
 		case iObject::WorldTransformCalculation::WTC_Normal:
 			
-			D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
+			// Calculate new values
+			XMMATRIX m_orient = XMMatrixRotationQuaternion(XMLoadFloat4(&m_orientation));
+			XMMATRIX m_invorient = XMMatrixInverse(NULL, m_orient);
+			_calc_data.m1 = m_orient * XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+			
+			// Store within the object
+			XMStoreFloat4x4(&m_orientationmatrix, m_orient);
+			XMStoreFloat4x4(&m_inverseorientationmatrix, m_invorient);
+			XMStoreFloat4x4(&m_worldmatrix, _calc_data.m1);
+
+			/*D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
 			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
 			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
-			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);
+			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);*/
+
 			break;
 
 		case iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment:
 
-			D3DXMatrixRotationQuaternion(&_calc_data.m1, &m_orientation);
+			// Calculate new values
+			XMMATRIX m_orient = XMMatrixRotationQuaternion(XMLoadFloat4(&m_orientation));
+			m_orient = XMLoadFloat4x4(&m_worldorientadjustment) * m_orient;
+			XMMATRIX m_invorient = XMMatrixInverse(NULL, m_orient);
+			_calc_data.m1 = m_orient * XMMatrixTranslation(m_position.x, m_position.y, m_position.z);
+
+			// Store within the object
+			XMStoreFloat4x4(&m_orientationmatrix, m_orient);
+			XMStoreFloat4x4(&m_inverseorientationmatrix, m_invorient);
+			XMStoreFloat4x4(&m_worldmatrix, _calc_data.m1);
+
+			/*D3DXMatrixRotationQuaternion(&_calc_data.m1, &m_orientation);
 			m_orientationmatrix = (m_worldorientadjustment * _calc_data.m1);
 			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
 			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
-			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);
+			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);*/
+
 			break;
 	}
 }

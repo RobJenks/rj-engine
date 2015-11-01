@@ -17,7 +17,7 @@ BasicProjectile::BasicProjectile(	const BasicProjectileDefinition *definition, G
 { 
 	// Determine the projectile velocity vector by transforming a heading vector by its orientation
 	Velocity = D3DXVECTOR3(0.0f, 0.0f, Speed);
-	D3DXVec3Rotate(&Velocity, &Velocity, &Orientation);
+	XMVector3Rotate(&Velocity, &Velocity, &Orientation);
 }
 
 

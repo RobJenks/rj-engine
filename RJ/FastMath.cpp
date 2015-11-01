@@ -57,10 +57,10 @@ void InitialiseMathFunctions()
 	}
 
 	// Populate the pre-calculated quaternion arrays
-	D3DXQuaternionRotationYawPitchRoll(&(ROT_QUATERNIONS[0]), 0.0f,			0.0f, 0.0f);
-	D3DXQuaternionRotationYawPitchRoll(&(ROT_QUATERNIONS[1]), PIOVER2,		0.0f, 0.0f);
-	D3DXQuaternionRotationYawPitchRoll(&(ROT_QUATERNIONS[2]), PI,			0.0f, 0.0f);
-	D3DXQuaternionRotationYawPitchRoll(&(ROT_QUATERNIONS[3]), PI + PIOVER2, 0.0f, 0.0f);
+	ROT_QUATERNIONS[0] = XMQuaternionRotationRollPitchYaw(0.0f, 0.0f, 0.0f);
+	ROT_QUATERNIONS[1] = XMQuaternionRotationRollPitchYaw(0.0f, PIOVER2, 0.0f);
+	ROT_QUATERNIONS[2] = XMQuaternionRotationRollPitchYaw(0.0f, PI, 0.0f);
+	ROT_QUATERNIONS[3] = XMQuaternionRotationRollPitchYaw(0.0f, PI + PIOVER2, 0.0f);
 
 	// Seed the normal distribution random number generator
 	norm_reng.seed((unsigned long)time(NULL));
@@ -76,29 +76,48 @@ void TerminateMathFunctions()
 	free(sintable); free(costable); free(tantable);
 }
 
-D3DXVECTOR3 *D3DXVec3Rotate( D3DXVECTOR3 *pOut, const D3DXVECTOR3 *pV, const D3DXQUATERNION *pQ )
+/*XMVECTOR XMVector3Rotate(const FXMVECTOR V, const FXMVECTOR Q)
 {    
-	D3DXQUATERNION q1, q2;    
 	D3DXQuaternionConjugate( &q1, pQ );    
 	q2 = q1 * D3DXQUATERNION( pV->x, pV->y, pV->z, 1.0f ) * *pQ;	
 	
 	*pOut = D3DXVECTOR3( q2.x, q2.y, q2.z );    
 	return pOut;
-}
+}*/
 
-const D3DXMATRIX *GetRotationMatrix(Rotation90Degree rot)
+XMMATRIX GetRotationMatrix(Rotation90Degree rot)
 {
 	switch (rot)
 	{
-		case Rotation90Degree::Rotate90:		return &ROT_MATRIX_90;		break;
-		case Rotation90Degree::Rotate180:		return &ROT_MATRIX_180;		break;
-		case Rotation90Degree::Rotate270:		return &ROT_MATRIX_270;		break;
-		default:								return &ROT_MATRIX_0;		break;
+		case Rotation90Degree::Rotate90:		return ROT_MATRIX_90;		break;
+		case Rotation90Degree::Rotate180:		return ROT_MATRIX_180;		break;
+		case Rotation90Degree::Rotate270:		return ROT_MATRIX_270;		break;
+		default:								return ROT_MATRIX_0;		break;
+	}
+}
+const XMFLOAT4X4 *GetRotationMatrixF(Rotation90Degree rot)
+{
+	switch (rot)
+	{
+		case Rotation90Degree::Rotate90:		return &ROT_MATRIX_90_F;		break;
+		case Rotation90Degree::Rotate180:		return &ROT_MATRIX_180_F;		break;
+		case Rotation90Degree::Rotate270:		return &ROT_MATRIX_270_F;		break;
+		default:								return &ROT_MATRIX_0_F;			break;
+	}
+}
+XMFLOAT4X4 GetRotationMatrixInstance(Rotation90Degree rot)
+{
+	switch (rot)
+		{
+		case Rotation90Degree::Rotate90:		return ROT_MATRIX_90_F;		break;
+		case Rotation90Degree::Rotate180:		return ROT_MATRIX_180_F;	break;
+		case Rotation90Degree::Rotate270:		return ROT_MATRIX_270_F;	break;
+		default:								return ROT_MATRIX_0_F;		break;
 	}
 }
 
 // Returns a quaternion that represents the rotation value specified
-const D3DXQUATERNION & GetRotationQuaternion(Rotation90Degree rot)
+XMVECTOR GetRotationQuaternion(Rotation90Degree rot)
 {
 	switch (rot)
 	{
@@ -109,91 +128,149 @@ const D3DXQUATERNION & GetRotationQuaternion(Rotation90Degree rot)
 	}
 }
 
-D3DXMATRIX GetRotationMatrixInstance(Rotation90Degree rot)
+
+
+XMVECTOR FloorVector(FXMVECTOR vec, float low)
 {
-	switch (rot)
-	{
-		case Rotation90Degree::Rotate0:			return ROT_MATRIX_0;		break;
-		case Rotation90Degree::Rotate90:		return ROT_MATRIX_90;		break;
-		case Rotation90Degree::Rotate180:		return ROT_MATRIX_180;		break;
-		case Rotation90Degree::Rotate270:		return ROT_MATRIX_270;		break;
-		default:								return ROT_MATRIX_0;		break;
-	}
+	return XMVectorMax(vec, XMVectorReplicate(low));
 }
 
 
-void FloorVector(D3DXVECTOR3 & vec, float low)
+XMVECTOR FloorVector(FXMVECTOR vec, const FXMVECTOR low)
 {
-	vec.x = max(vec.x, low);
-	vec.y = max(vec.y, low);
-	vec.z = max(vec.z, low);
+	return XMVectorMax(vec, low);
 }
 
-void FloorVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & low)
+XMVECTOR CeilVector(FXMVECTOR vec, float high)
 {
-	vec.x = max(vec.x, low.x);
-	vec.y = max(vec.y, low.y);
-	vec.z = max(vec.z, low.z);
+	return XMVectorMin(vec, XMVectorReplicate(high));
 }
 
-void CeilVector(D3DXVECTOR3 & vec, float high)
+XMVECTOR CeilVector(FXMVECTOR vec, const FXMVECTOR high)
 {
-	vec.x = min(vec.x, high);
-	vec.y = min(vec.y, high);
-	vec.z = min(vec.z, high);
+	return XMVectorMin(vec, high);
 }
 
-void CeilVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & high)
+XMVECTOR ClampVector(FXMVECTOR vec, float low, float high)
 {
-	vec.x = min(vec.x, high.x);
-	vec.y = min(vec.y, high.y);
-	vec.z = min(vec.z, high.z);
+	return XMVectorMax(XMVectorReplicate(low), XMVectorMin(XMVectorReplicate(high), vec));
 }
 
-void ClampVector(D3DXVECTOR3 &vec, float low, float high)
+XMVECTOR ClampVector(FXMVECTOR vec, const FXMVECTOR low, const FXMVECTOR high)
 {
-	vec.x = max(min(vec.x, high), low);
-	vec.y = max(min(vec.y, high), low);
-	vec.z = max(min(vec.z, high), low);
-}
-
-void ClampVector(D3DXVECTOR3 & vec, const D3DXVECTOR3 & low, const D3DXVECTOR3 & high)
-{
-	vec.x = max(min(vec.x, high.x), low.x);
-	vec.y = max(min(vec.y, high.y), low.y);
-	vec.z = max(min(vec.z, high.z), low.z);
+	return XMVectorMax(low, XMVectorMin(high, vec));
 }
 
 // Scales a vector to the specified 'magnitude', so that one component is at +/- 'magnitude' with all other components scaled accordingly
 // Near-zero vectors will not be scaled to avoid div/0 errors.
-void ScaleVectorToMagnitude(D3DXVECTOR3 &vec, float magnitude)
-{
-	float mx = max(max(fabs(vec.x), fabs(vec.y)), fabs(vec.z));
-	if (mx > Game::C_EPSILON) vec *= (magnitude / mx);
+XMVECTOR ScaleVector3ToMagnitude(FXMVECTOR vec, float magnitude)
+{	
+	XMFLOAT3 v; XMStoreFloat3(&v, vec);
+	float mx = max(max(fabs(v.x), fabs(v.y)), fabs(v.z));
+	if (mx > Game::C_EPSILON) return XMVectorScale(vec, (magnitude / mx));
+	return vec;
 }
 
+// Scales a vector to the specified 'magnitude', so that one component is at +/- 'magnitude' with all other components scaled accordingly
+// Near-zero vectors will not be scaled to avoid div/0 errors.
+void ScaleVector3ToMagnitude(XMFLOAT3 & vec, float magnitude)
+{
+	float mx = max(max(fabs(vec.x), fabs(vec.y)), fabs(vec.z));
+	if (mx > Game::C_EPSILON)
+	{
+		float m = (magnitude / mx);
+		vec.x *= m;
+		vec.y *= m;
+		vec.z *= m;
+	}
+}
 
 // Scales a vector to ensure that the (absolute) value of any component does not exceed 'magnitude', with all other components scaled accordingly
-void ScaleVectorWithinMagnitudeLimit(D3DXVECTOR3 &vec, float magnitude)
+XMVECTOR ScaleVector3WithinMagnitudeLimit(FXMVECTOR vec, float magnitude)
 {
-	float mx = max(max(fabs(vec.x), fabs(vec.y)), fabs(vec.z));
-	if (mx > magnitude) vec *= (magnitude / mx);
+	XMFLOAT3 v; XMStoreFloat3(&v, vec);
+	float mx = max(max(fabs(v.x), fabs(v.y)), fabs(v.z));
+	if (mx > magnitude) return XMVectorScale(vec, (magnitude / mx));
+	return vec;
 }
 
-void QuaternionBetweenVectors(D3DXQUATERNION *pOutQuaternion, const D3DXVECTOR3 *v1, const D3DXVECTOR3 *v2)
+// Scales a vector to ensure that the (absolute) value of any component does not exceed 'magnitude', with all other components scaled accordingly
+void ScaleVectorWithinMagnitudeLimit(XMFLOAT3 &vec, float magnitude)
+{
+	float mx = max(max(fabs(vec.x), fabs(vec.y)), fabs(vec.z));
+	if (mx > magnitude)
+	{
+		float m = (magnitude / mx);
+		vec.x *= m;
+		vec.y *= m;
+		vec.z *= m;
+	}
+}
+
+XMVECTOR QuaternionBetweenVectors(const FXMVECTOR v1, const FXMVECTOR v2)
 {
 	// http://lolengine.net/blog/2013/09/18/beautiful-maths-quaternion-from-vectors
 
 	// Take the cross product
-	D3DXVECTOR3 w;
-	D3DXVec3Cross(&w, v1, v2);
+	XMVECTOR q = XMVector3Cross(v1, v2);
 	 
 	// Build a quaternion based on the cross & dot products, and also incorporate the quaternion length
-	D3DXQUATERNION q = D3DXQUATERNION(w.x, w.y, w.z, D3DXVec3Dot(v1, v2));
-	q.w += D3DXQuaternionLength(&q);
-
+	//D3DXQUATERNION q = D3DXQUATERNION(w.x, w.y, w.z, D3DXVec3Dot(v1, v2));
+	float w = XMVectorGetX(XMVector3Dot(v1, v2));
+	q = XMVectorSetW(q, w);
+	//q.w += D3DXQuaternionLength(&q);
+	q = XMVectorSetW(q, w + XMVectorGetX(XMQuaternionLength(q)));
+	
 	// Normalise the vector and send the result to the output quaternion
-	D3DXQuaternionNormalize(pOutQuaternion, &q);
+	//D3DXQuaternionNormalize(pOutQuaternion, &q);
+	return XMQuaternionNormalize(q);
+}
+
+XMFLOAT4 QuaternionMultiply(const XMFLOAT4 & q1, const XMFLOAT4 & q2)
+{
+	return XMFLOAT4(q1.y*q2.z - q1.z*q2.y + q1.x*q2.w + q1.w*q2.x,
+					q1.z*q2.x - q1.x*q2.z + q1.y*q2.w + q1.w*q2.y,
+					q1.x*q2.y - q1.y*q2.x + q1.z*q2.w + q1.w*q2.z,
+					q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z);
+}
+
+void QuaternionMultiply(const XMFLOAT4 & q1, const XMFLOAT4 & q2, XMFLOAT4 & outProduct)
+{
+	outProduct.x = q1.y*q2.z - q1.z*q2.y + q1.x*q2.w + q1.w*q2.x;
+	outProduct.y = q1.z*q2.x - q1.x*q2.z + q1.y*q2.w + q1.w*q2.y;
+	outProduct.z = q1.x*q2.y - q1.y*q2.x + q1.z*q2.w + q1.w*q2.z;
+	outProduct.w = q1.w*q2.w - q1.x*q2.x - q1.y*q2.y - q1.z*q2.z;
+}
+
+XMFLOAT4 QuaternionAdd(const XMFLOAT4 & q1, const XMFLOAT4 & q2)
+{
+	return XMFLOAT4(q1.x + q2.x, q1.y + q2.y, q1.z + q2.z, q1.w + q2.w);
+}
+
+void QuaternionAdd(const XMFLOAT4 & q1, const XMFLOAT4 & q2, XMFLOAT4 & outSum)
+{
+	outSum.x = q1.x + q2.x;
+	outSum.y = q1.y + q2.y;
+	outSum.z = q1.z + q2.z;
+	outSum.w = q1.w + q2.w;
+}
+
+void QuaternionNormalise(XMFLOAT4 & q)
+{
+	float one_over_mag = 1.0f / sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+	q.x *= one_over_mag;
+	q.y *= one_over_mag;
+	q.z *= one_over_mag;
+	q.w *= one_over_mag;
+}
+
+void QuaternionNormalise(const XMFLOAT4 & q, XMFLOAT4 & outQNorm)
+{
+	float one_over_mag = 1.0f / sqrtf(q.x*q.x + q.y*q.y + q.z*q.z + q.w*q.w);
+	outQNorm.x = (q.x * one_over_mag);
+	outQNorm.y = (q.y * one_over_mag);
+	outQNorm.z = (q.z * one_over_mag);
+	outQNorm.w = (q.w * one_over_mag);
 }
 
 // Computes the approximate (but very close) inverse sqrt of a number VERY quickly.
@@ -204,7 +281,7 @@ float fast_approx_invsqrt(float number)
 {
 	long i;
 	float x2, y;
-	const float threehalfs = 1.5F;
+	const float threehalfs = 1.5f;
 
 	x2 = number * 0.5F;
 	y = number;
@@ -219,16 +296,17 @@ float fast_approx_invsqrt(float number)
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const iObject *object, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const iObject *object, const FXMVECTOR target, float & outYaw, float & outPitch)
 {
 	// Parameter check
 	if (!object) { outYaw = 0.0f; outPitch = 0.0f; return; }
 
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
-	D3DXVECTOR3 tgt = (target - object->GetPosition());
-	D3DXVec3TransformCoord(&tgt, &tgt, object->GetInverseOrientationMatrix());
-	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+	XMVECTOR pos = XMLoadFloat3(&object->GetPosition());
+	XMMATRIX invOrient = XMLoadFloat4x4(object->GetInverseOrientationMatrix());
+	XMVECTOR tgt = XMVector3TransformCoord((target - pos), invOrient);
+	tgt = XMVector3NormalizeEst(tgt);
 
 	// Calculate the cross and dot products for ship yaw
 	/*
@@ -244,30 +322,32 @@ void DetermineYawAndPitchToTarget(const iObject *object, const D3DXVECTOR3 & tar
 	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
 	*/
 
+	XMFLOAT3 tgt_f;
+	XMStoreFloat3(&tgt_f, tgt);
+
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
 		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
 		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
 	}
 }
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXQUATERNION & invOrientation, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const FXMVECTOR invOrientation, float & outYaw, float & outPitch)
 {
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
-	D3DXVECTOR3 tgt = (target - position);
-	D3DXVec3Rotate(&tgt, &tgt, &invOrientation);
-	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+	XMVECTOR tgt = XMVector3Rotate((target - position), invOrientation);
+	tgt = XMVector3NormalizeEst(tgt);		
 
 	// Calculate the cross and dot products for ship yaw
 	/*
@@ -283,17 +363,20 @@ void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXQUATER
 	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
 	*/
 
+	XMFLOAT3 tgt_f;
+	XMStoreFloat3(&tgt_f, tgt);
+
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
 		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
 		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
 	}
 }
@@ -301,16 +384,12 @@ void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXQUATER
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXMATRIX *invOrientMatrix, const D3DXVECTOR3 & target, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const CXMMATRIX invOrientMatrix, float & outYaw, float & outPitch)
 {
-	// Parameter check
-	if (!invOrientMatrix) { outYaw = 0.0f; outPitch = 0.0f; return; }
-
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
-	D3DXVECTOR3 tgt = (target - position);
-	D3DXVec3TransformCoord(&tgt, &tgt, invOrientMatrix);
-	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?
+	XMVECTOR tgt = XMVector3TransformCoord((target - position), invOrientMatrix);
+	tgt = XMVector3NormalizeEst(tgt);		
 
 	// Calculate the cross and dot products for ship yaw
 	/*
@@ -326,17 +405,20 @@ void DetermineYawAndPitchToTarget(const D3DXVECTOR3 & position, const D3DXMATRIX
 	We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
 	*/
 
+	XMFLOAT3 tgt_f;
+	XMStoreFloat3(&tgt_f, tgt);
+
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt.x) > 0.01f)	outYaw = tgt.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
 		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt.y) > 0.01f)	outPitch = -tgt.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
+		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
 		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
 	}
 }

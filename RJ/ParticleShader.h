@@ -6,7 +6,7 @@
 
 #include "DX11_Core.h"
 
-#include <d3dx11async.h>
+
 #include <fstream>
 #include "ErrorCodes.h"
 #include "iShader.h"

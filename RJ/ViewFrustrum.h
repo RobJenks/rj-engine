@@ -15,6 +15,8 @@ class BoundingObject;
 #define DOT_PLANE_COORD(plane, coord) (plane.a * coord.x + plane.b * coord.y + plane.c * coord.z + plane.d)
 #define DOT_PLANE_PCOORD(plane, coord) (plane.a * coord->x + plane.b * coord->y + plane.c * coord->z + plane.d)
 
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
 class ViewFrustrum
 {
 public:
@@ -31,10 +33,10 @@ public:
 	~ViewFrustrum(void);
 
 	// Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
-	Result Initialise(const D3DXMATRIX *projection, const float depth, const float FOV, const float aspect);
+	Result Initialise(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
 
 	// Builds a new frustrum for the current frame
-	void ConstructFrustrum(const D3DXMATRIX *view, const D3DXMATRIX *invview);
+	void ConstructFrustrum(const FXMMATRIX view, const CXMMATRIX invview);
 
 	CMPINLINE float			GetFOV(void) const				{ return m_fov; }
 	CMPINLINE float			GetTanOfHalfFOV(void) const		{ return m_fovtan; }
@@ -47,129 +49,92 @@ public:
 	{
 		// Get the object centre and collision radius
 		if (!obj) return false;
-		const D3DXVECTOR3 & centre = obj->GetPosition();
-		float neg_radius = -(obj->GetCollisionSphereRadius());
-
+		XMVECTOR centre = XMLoadFloat3(obj->GetPosition());
+		XMVECTOR neg_radius = XMVectorReplicate(-(obj->GetCollisionSphereRadius()));
+		
 		// If the sphere is 'behind' any plane of the view frustum then return false immediately
 		// Otherwise, it is in view.  Loop unrolled for efficiency
-		if (DOT_PLANE_COORD(m_planes[0], centre) < neg_radius) return false;
-		if (DOT_PLANE_COORD(m_planes[1], centre) < neg_radius) return false;
-		if (DOT_PLANE_COORD(m_planes[2], centre) < neg_radius) return false;
-		if (DOT_PLANE_COORD(m_planes[3], centre) < neg_radius) return false;
-		if (DOT_PLANE_COORD(m_planes[4], centre) < neg_radius) return false;
-		if (DOT_PLANE_COORD(m_planes[5], centre) < neg_radius) return false;
+		
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], centre), neg_radius)) return false;
 		return true;
 	}
 
 	// Check whether a point lies within the frustum
-	bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 &pt)
+	bool ViewFrustrum::CheckPoint(const FXMVECTOR pt)
 	{
 		// Loop unrolled for efficiency; if the point lies outside any of the six frustum planes then return false immediately
-		if (DOT_PLANE_COORD(m_planes[0], pt) < 0.0f) return false;
-		if (DOT_PLANE_COORD(m_planes[1], pt) < 0.0f) return false;
-		if (DOT_PLANE_COORD(m_planes[2], pt) < 0.0f) return false;
-		if (DOT_PLANE_COORD(m_planes[3], pt) < 0.0f) return false;
-		if (DOT_PLANE_COORD(m_planes[4], pt) < 0.0f) return false;
-		if (DOT_PLANE_COORD(m_planes[5], pt) < 0.0f) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], pt), NULL_VECTOR2)) return false;
 
 		// Point lines inside all planes, therefore is inside the frustum
 		return true;
 	}
 
-	// Check whether a point lies within the frustum
-	bool ViewFrustrum::CheckPoint(const D3DXVECTOR3 *pt)
-	{
-		// Loop unrolled for efficiency; if the point lies outside any of the six frustum planes then return false immediately
-		if (DOT_PLANE_PCOORD(m_planes[0], pt) < 0.0f) return false;
-		if (DOT_PLANE_PCOORD(m_planes[1], pt) < 0.0f) return false;
-		if (DOT_PLANE_PCOORD(m_planes[2], pt) < 0.0f) return false;
-		if (DOT_PLANE_PCOORD(m_planes[3], pt) < 0.0f) return false;
-		if (DOT_PLANE_PCOORD(m_planes[4], pt) < 0.0f) return false;
-		if (DOT_PLANE_PCOORD(m_planes[5], pt) < 0.0f) return false;
-
-		// Point lines inside all planes, therefore is inside the frustum
-		return true;
-	}
-
-
+	bool CheckCube(const FXMVECTOR centre, float radius);
 	bool CheckCube(float x, float y, float z, float radius);
 
 	bool CheckOBB(const OrientedBoundingBox & obb);
 
 	bool CheckRectangle(float x, float y, float z, float xsize, float ysize, float zsize);
-	bool CheckRectangle(const D3DXMATRIX *world, float xsize, float ysize, float zsize);
+	bool CheckRectangle(const FXMMATRIX world, float xsize, float ysize, float zsize);
 
-	bool CheckBoundingObject(const D3DXVECTOR3 *pos, const D3DXMATRIX *world, BoundingObject *obj);
+	bool CheckBoundingObject(const FXMVECTOR pos, const CXMMATRIX world, BoundingObject *obj);
 
-	CMPINLINE bool CheckSphere(const D3DXVECTOR3 & centre, float radius)
+	CMPINLINE bool CheckSphere(const FXMVECTOR centre, float f_radius)
 	{
 		// If the sphere is 'behind' any plane of the view frustum then return false immediately
 		// Loop unrolled for efficiency
-		radius = -radius;
-		if (DOT_PLANE_COORD(m_planes[0], centre) < radius) return false;
-		if (DOT_PLANE_COORD(m_planes[1], centre) < radius) return false;
-		if (DOT_PLANE_COORD(m_planes[2], centre) < radius) return false;
-		if (DOT_PLANE_COORD(m_planes[3], centre) < radius) return false;
-		if (DOT_PLANE_COORD(m_planes[4], centre) < radius) return false;
-		if (DOT_PLANE_COORD(m_planes[5], centre) < radius) return false;
+		XMVECTOR radius = XMVectorReplicate(-f_radius);
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], centre), radius)) return false;
 		return true;
 	}
 
-	CMPINLINE bool CheckSphere(const D3DXVECTOR3 * centre, float radius)
-	{
-		// If the sphere is 'behind' any plane of the view frustum then return false immediately
-		// Loop unrolled for efficiency
-		radius = -radius;
-		if (DOT_PLANE_PCOORD(m_planes[0], centre) < radius) return false;
-		if (DOT_PLANE_PCOORD(m_planes[1], centre) < radius) return false;
-		if (DOT_PLANE_PCOORD(m_planes[2], centre) < radius) return false;
-		if (DOT_PLANE_PCOORD(m_planes[3], centre) < radius) return false;
-		if (DOT_PLANE_PCOORD(m_planes[4], centre) < radius) return false;
-		if (DOT_PLANE_PCOORD(m_planes[5], centre) < radius) return false;
-		return true;
-	}
+	CMPINLINE XMVECTOR GetPlane(FrustrumPlane plane) { return m_planes[(int)plane]; }
 
-	/*CMPINLINE bool CheckSphere(const D3DXVECTOR3 *centre, float radius)
-	{
-		// If the sphere is 'behind' any plane of the view frustum then return false immediately
-		for (int i = 0; i < 6; ++i)
-			if (D3DXPlaneDotCoord(&m_planes[i], centre) < -radius)
-				return false;
-
-		return true;
-	}*/
-
-	const CMPINLINE D3DXPLANE *GetPlane(FrustrumPlane plane) { return &m_planes[(int)plane]; }
-
-	const CMPINLINE D3DXPLANE *GetNearPlane(void)const		{ return &m_planes[(int)FrustrumPlane::NearPlane]; }
-	const CMPINLINE D3DXPLANE *GetFarPlane(void) const		{ return &m_planes[(int)FrustrumPlane::FarPlane]; }
-	const CMPINLINE D3DXPLANE *GetLeftPlane(void) const		{ return &m_planes[(int)FrustrumPlane::LeftPlane]; }
-	const CMPINLINE D3DXPLANE *GetRightPlane(void) const	{ return &m_planes[(int)FrustrumPlane::RightPlane]; }
-	const CMPINLINE D3DXPLANE *GetTopPlane(void) const		{ return &m_planes[(int)FrustrumPlane::TopPlane]; }
-	const CMPINLINE D3DXPLANE *GetBottomPlane(void) const	{ return &m_planes[(int)FrustrumPlane::BottomPlane]; }
+	CMPINLINE XMVECTOR GetNearPlane(void)const		{ return m_planes[(int)FrustrumPlane::NearPlane]; }
+	CMPINLINE XMVECTOR GetFarPlane(void) const		{ return m_planes[(int)FrustrumPlane::FarPlane]; }
+	CMPINLINE XMVECTOR GetLeftPlane(void) const		{ return m_planes[(int)FrustrumPlane::LeftPlane]; }
+	CMPINLINE XMVECTOR GetRightPlane(void) const	{ return m_planes[(int)FrustrumPlane::RightPlane]; }
+	CMPINLINE XMVECTOR GetTopPlane(void) const		{ return m_planes[(int)FrustrumPlane::TopPlane]; }
+	CMPINLINE XMVECTOR GetBottomPlane(void) const	{ return m_planes[(int)FrustrumPlane::BottomPlane]; }
 
 	const CMPINLINE D3DXFINITEPLANE *GetFiniteFarPlane(void) const { return &m_farplaneworld; }
 
 private:
 	// The pure mathematical planes that represent this frustrum (stored as ax+by+cz+dw = 0)
-	D3DXPLANE			m_planes[6];
+	XMVECTOR			m_planes[6];
 
 	// The finite world plane that represents the visible far frustrum plane
 	D3DXFINITEPLANE		m_farplaneworld;
 
 	// Projection matrix and other viewport data
-	D3DXMATRIX			m_projection;
+	XMMATRIX			m_projection;
 	float				m_clip_near, m_clip_far, m_aspect;
 	float				m_fov, m_fovtan;			// m_fovtan = tanf(FOV * 0.5f)
-	D3DXMATRIX			m_frustrumproj;				// Frustrum-specific proj matrix, preacalculate at initialisation
+	XMMATRIX			m_frustrumproj;				// Frustrum-specific proj matrix, preacalculate at initialisation
 
 
 	// Private method to perform the visibility test on pre-transformed rectangle vertices
 	bool CheckRectangleVertices(void);
-	bool CheckRectangleVertices(const D3DXVECTOR3 rectverts[8]);
+	bool CheckRectangleVertices(const XMVECTOR rectverts[8]);
 
 	// Private temporary storage for storing cuboid vertices during visibility testing
-	D3DXVECTOR3			m_working_cuboidvertices[8];
+	XMVECTOR			m_working_cuboidvertices[8];
 };
 
 

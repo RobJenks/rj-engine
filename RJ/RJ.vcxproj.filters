@@ -1158,6 +1158,9 @@
     <ClInclude Include="VolumetricLine.h">
       <Filter>Engine\Volumetric lines</Filter>
     </ClInclude>
+    <ClInclude Include="DX11_Compatibility.h">
+      <Filter>Engine\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">

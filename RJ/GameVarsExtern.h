@@ -156,6 +156,8 @@ namespace Game {
 	// Physics constants
 	extern const float C_EPSILON;
 	extern const float C_EPSILON_NEG;
+	extern const XMVECTOR C_EPSILON_V;
+	extern const XMVECTOR C_EPSILON_NEG_V;
 	extern const float C_MAX_PHYSICS_TIME_DELTA;		// The maximum permitted physics time delta, beyond which multiple cycles will be run per frame
 	extern const float C_MIN_PHYSICS_CYCLES_PER_SEC;	// The minimum number of physics cycles that should be run per second (i.e. the physics FPS)
 	extern const float C_MAX_PHYSICS_FRAME_CYCLES;		// The maximum number of phyiscs cycles permitted per render frame, to avoid the 'spiral-of-death'

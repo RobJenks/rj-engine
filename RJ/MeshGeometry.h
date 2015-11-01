@@ -5,7 +5,7 @@
 
 #include "DX11_Core.h"
 
-#include <d3dx11tex.h>
+//#include <d3dx11tex.h>
 #include "ErrorCodes.h"
 
 class MeshGeometry

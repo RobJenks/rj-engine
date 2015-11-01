@@ -35,7 +35,7 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 
 	// Determine launch position based upon our parent object
 	D3DXVECTOR3 pos;
-	D3DXVec3Rotate(&pos, &m_relativepos, &launchorient);
+	XMVector3Rotate(&pos, &m_relativepos, &launchorient);
 	pos += launchpoint;
 	proj->SetPosition(pos);
 

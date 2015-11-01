@@ -72,7 +72,7 @@ struct INTVECTOR2
 	INTVECTOR2(void) { x = 0; y = 0; }
 	INTVECTOR2(int _x, int _y) { x = _x; y = _y; }
 	INTVECTOR2(float _x, float _y) { x = (int)_x; y = (int)_y; }
-	INTVECTOR2(D3DXVECTOR2 v) { x = (int)v.x; y = (int)v.y; }
+	INTVECTOR2(const XMFLOAT2 & v) { x = (int)v.x; y = (int)v.y; }
 	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
 
 	bool IsZeroVector(void) { return (x == 0 && y == 0); }
@@ -97,7 +97,7 @@ struct INTVECTOR3
 	INTVECTOR3(void) { x = 0; y = 0; z = 0; }
 	INTVECTOR3(int _x, int _y, int _z) { x = _x; y = _y; z = _z; }
 	INTVECTOR3(float _x, float _y, float _z) { x = (int)_x; y = (int)_y; z = (int)_z; }
-	INTVECTOR3(const D3DXVECTOR3 &v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
+	INTVECTOR3(const XMFLOAT3 & v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
 
 	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
 
@@ -224,28 +224,27 @@ void StreamToDebugOutput(T obj)
 
 CMPINLINE string IntVectorToString(INTVECTOR2 *v) { return (concat("(")(v->x)(", ")(v->y)(")").str()); }
 CMPINLINE string IntVectorToString(INTVECTOR3 *v) { return (concat("(")(v->x)(", ")(v->y)(", ")(v->z)(")").str()); }
-CMPINLINE string VectorToString(D3DXVECTOR2 *v) { return (concat("(")(v->x)(", ")(v->y)(")").str()); }
-CMPINLINE string VectorToString(D3DXVECTOR3 *v) { return (concat("(")(v->x)(", ")(v->y)(", ")(v->z)(")").str()); }
-CMPINLINE string VectorToString(D3DXVECTOR4 *v) { return (concat("(")(v->x)(", ")(v->y)(", ")(v->z)(", ")(v->w)(")").str()); }
-CMPINLINE string QuaternionToString(D3DXQUATERNION *q) { return (concat("(")(q->x)(", ")(q->y)(", ")(q->z)(", ")(q->w)(")").str()); }
-
-CMPINLINE string VectorToString(D3DXVECTOR3 v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
+CMPINLINE string VectorToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
+CMPINLINE string VectorToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
+CMPINLINE string VectorToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
+CMPINLINE string QuaternionToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
 
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize);
 
-void MatrixToCharStream(const D3DXMATRIX *m, char *out);
-void MatrixToCharStreamHighPrecision(const D3DXMATRIX *m, char *out);
+void MatrixToCharStream(const XMFLOAT4X4 *m, char *out);
+void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
 
-void RotationMatrixFromBasisVectors(D3DXVECTOR3(&bases)[3], D3DXMATRIX & outMatrix);
+XMMATRIX RotationMatrixFromBasisVectors(XMFLOAT3(&bases)[3]);
+void RotationMatrixFromBasisVectors(XMFLOAT3(&bases)[3], XMFLOAT4X4 & outMatrix);
 
-void QuaternionRotationYawPitch(D3DXQUATERNION *q, float yaw, float pitch);
-
+// Struct is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
 struct D3DXFINITEPLANE
 {
-	D3DXVECTOR3		TL;		// Top-left vertex
-	D3DXVECTOR3		TR;		// Top-right vertex
-	D3DXVECTOR3		BR;		// Bottom-right vertex
-	D3DXVECTOR3		BL;		// Bottom-left vertex
+	XMVECTOR		TL;		// Top-left vertex
+	XMVECTOR		TR;		// Top-right vertex
+	XMVECTOR		BR;		// Bottom-right vertex
+	XMVECTOR		BL;		// Bottom-left vertex
 };
 
 bool FileExists(const char *szPath);
