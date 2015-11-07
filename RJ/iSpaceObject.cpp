@@ -46,7 +46,7 @@ void iSpaceObject::SimulationStateChanged(iObject::ObjectSimulationState prevsta
 }
 
 // Moves the space object into a new environment
-void iSpaceObject::MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location)
+void iSpaceObject::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
 {
 	// First, remove the object from its current environment (if applicable)
 	if (m_spaceenvironment)

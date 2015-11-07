@@ -27,9 +27,9 @@ class Model
 	private:
 		struct VertexType
 		{
-			D3DXVECTOR3 position;
-			D3DXVECTOR2 texture;
-			D3DXVECTOR3 normal;
+			XMFLOAT3 position;
+			XMFLOAT2 texture;
+			XMFLOAT3 normal;
 		};
 
 		struct ModelType
@@ -83,31 +83,31 @@ class Model
 		CMPINLINE void				SetGeometryLoaded(bool loaded) { m_geometryloaded = loaded; }
 		CMPINLINE bool				IsStandardModel(void) { return m_standardmodel; }
 		CMPINLINE void				SetStandardModel(bool standard) { m_standardmodel = standard; }
-		CMPINLINE D3DXVECTOR3		GetModelMinBounds(void)	{ return m_minbounds; }
-		CMPINLINE D3DXVECTOR3		GetModelMaxBounds(void) { return m_maxbounds; }
+		CMPINLINE XMFLOAT3			GetModelMinBounds(void)	{ return m_minbounds; }
+		CMPINLINE XMFLOAT3			GetModelMaxBounds(void) { return m_maxbounds; }
 		void						RecalculateDimensions(void);
-		CMPINLINE D3DXVECTOR3		GetModelSize(void)		{ return m_modelsize; }
-		CMPINLINE D3DXVECTOR3		GetModelCentre(void)	{ return m_modelcentre; }
-		CMPINLINE D3DXVECTOR3		GetEffectiveModelSize(void) { return m_effectivesize; }
-		CMPINLINE void				SetEffectiveModelSize(D3DXVECTOR3 size) { m_effectivesize = size; }
+		CMPINLINE XMFLOAT3			GetModelSize(void)		{ return m_modelsize; }
+		CMPINLINE XMFLOAT3			GetModelCentre(void)	{ return m_modelcentre; }
+		CMPINLINE XMFLOAT3			GetEffectiveModelSize(void) { return m_effectivesize; }
+		CMPINLINE void				SetEffectiveModelSize(const XMFLOAT3 & size) { m_effectivesize = size; }
 		CMPINLINE INTVECTOR3		GetElementSize(void)				{ return m_elementsize; }
 		CMPINLINE void				SetElementSize(INTVECTOR3 elsize)	{ m_elementsize = elsize; }
 
 		// Methods which accept either a target effective size, or a scaling factor, and resize the model data accordingly
-		CMPINLINE D3DXVECTOR3		GetActualModelSize(void)	{ return m_actualeffectivesize; }
-		CMPINLINE D3DXVECTOR3		GetModelScalingFactor(void)	{ return m_scalingfactor; }
-		void						SetActualModelSize(D3DXVECTOR3 actualeffectivesize);
-		void						SetModelScalingFactor(D3DXVECTOR3 scalingfactor);
+		CMPINLINE XMFLOAT3			GetActualModelSize(void)	{ return m_actualeffectivesize; }
+		CMPINLINE XMFLOAT3			GetModelScalingFactor(void)	{ return m_scalingfactor; }
+		void						SetActualModelSize(const XMFLOAT3 & actualeffectivesize);
+		void						SetModelScalingFactor(const XMFLOAT3 & scalingfactor);
 		
 		// Scales the model geometry by a specified factor in each dimension
-		void						ScaleModelGeometry(D3DXVECTOR3 scale);
+		void						ScaleModelGeometry(const XMFLOAT3 & scale);
 
 		// Methods to handle compound model operations
 		CMPINLINE bool				IsCompoundModel(void)					{ return m_iscompound; }
 		CMPINLINE void				SetIsCompoundModel(bool compound)		{ m_iscompound = true; RecalculateCompoundModelData(); }
-		void						AddCompoundModelComponent(Model *model, D3DXVECTOR3 offset);
-		void						RemoveCompoundModelComponent(Model *model, D3DXVECTOR3 offset);
-		void						RemoveCompoundModelComponent(D3DXVECTOR3 offset);
+		void						AddCompoundModelComponent(Model *model, const XMFLOAT3 & offset);
+		void						RemoveCompoundModelComponent(Model *model, const XMFLOAT3 & offset);
+		void						RemoveCompoundModelComponent(const XMFLOAT3 & offset);
 		void						ClearCompoundModelData(void);
 		void						RecalculateCompoundModelData(void);
 
@@ -159,8 +159,8 @@ class Model
 		string					m_texturefilename;
 		bool					m_geometryloaded;
 		bool					m_standardmodel;
-		D3DXVECTOR3				m_minbounds, m_maxbounds, m_modelsize, m_modelcentre, m_effectivesize;
-		D3DXVECTOR3				m_actualsize, m_actualeffectivesize, m_scalingfactor;
+		XMFLOAT3				m_minbounds, m_maxbounds, m_modelsize, m_modelcentre, m_effectivesize;
+		XMFLOAT3				m_actualsize, m_actualeffectivesize, m_scalingfactor;
 
 		// Optional ability to specify size in game elements; if set, mesh will be scaled by load post-processing functions
 		INTVECTOR3				m_elementsize;
@@ -168,8 +168,8 @@ class Model
 		// Fields allowing generation of compound models
 		struct					CompoundModelComponent 
 		{ 
-			Model *model; D3DXVECTOR3 offset; 
-			CompoundModelComponent(Model *_model, D3DXVECTOR3 _offset) { model = _model; offset = _offset; }
+			Model *model; XMFLOAT3 offset; 
+			CompoundModelComponent(Model *_model, XMFLOAT3 _offset) { model = _model; offset = _offset; }
 		};
 		typedef											vector<CompoundModelComponent> CompoundModelComponentCollection;
 		bool											m_iscompound;

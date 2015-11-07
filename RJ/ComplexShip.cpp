@@ -272,7 +272,7 @@ void ComplexShip::ElementLayoutChanged(void)
 
 // Overrides the virtual iSpaceObject method to ensure that all ship sections are also moved into 
 // the environment along with the 'ship' itself
-void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location)
+void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
 {
 	// Move the ship itself into the environment by calling the base iSpaceObject method
 	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
@@ -428,9 +428,9 @@ void ComplexShip::SimulateObject(void)
 	// Make sure that the spatial tree node for this ship contains the WHOLE ship
 	if (m_treenode)
 	{
-		if (m_position.x - m_size.x >= m_treenode->m_xmin && m_position.x + m_size.x < m_treenode->m_xmax &&
-			m_position.y - m_size.y >= m_treenode->m_ymin && m_position.y + m_size.y < m_treenode->m_ymax &&
-			m_position.z - m_size.z >= m_treenode->m_zmin && m_position.z + m_size.z < m_treenode->m_zmax)
+		// Test whether the ship lies completely within the node
+		if (XMVector3GreaterOrEqual(XMVectorSubtract(m_position, m_size), m_treenode->m_min) && 
+			XMVectorLess(XMVectorAdd(m_position, m_size), m_treenode->m_max))
 		{
 			// It does, so just make sure that we have no perimeter beacons active
 			if (m_activebeacons != 0) DeactivatePerimeterBeacons();
@@ -536,7 +536,7 @@ void ComplexShip::ShutdownNavNetwork(void)
 // Recalculates any perimeter beacons required to maintain spatial position in the world
 void ComplexShip::UpdatePerimeterBeacons(void)
 {
-	D3DXVECTOR3 pos;
+	XMVECTOR pos;
 	CapitalShipPerimeterBeacon *beacon;
 	Octree<iSpaceObject*> *node;
 
@@ -555,13 +555,11 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 		beacon = (*it); if (!beacon) continue;
 
 		// Translate the perimeter beacon offset into a world location
-		D3DXVec3TransformCoord(&(pos), &(beacon->BeaconPos), &m_worldmatrix);
+		pos = XMVector3TransformCoord(beacon->BeaconPos, m_worldmatrix);
 		beacon->SetPosition(pos);
 
 		// Discount this beacon if it is within the ship node (v likely)
-		if (pos.x >= m_treenode->m_xmin && pos.x < m_treenode->m_xmax && 
-			pos.y >= m_treenode->m_ymin && pos.y < m_treenode->m_ymax && 
-			pos.z >= m_treenode->m_zmin && pos.z < m_treenode->m_zmax )	
+		if (m_treenode->ContainsPoint(pos))
 		{ 
 			if (beacon->Active)
 			{
@@ -580,9 +578,7 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 			node = (*it); if (!node) continue;
 
 			// If the beacon pos is within this node then we already have it covered, so mark as found and stop searching
-			if (pos.x >= node->m_xmin && pos.x < node->m_xmax && 
-				pos.y >= node->m_ymin && pos.y < node->m_ymax && 
-				pos.z >= node->m_zmin && pos.z < node->m_zmax )		{ found = true; break; }
+			if (node->ContainsPoint(pos)) { found = true; break; }
 		}
 
 		// If we don't already have a beacon to cover this node then we will use this one
@@ -593,9 +589,7 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 			if (node)
 			{
 				// If the item has moved then refresh its position for safety
-				if (pos.x < node->m_xmin || pos.x < node->m_xmax || 
-					pos.y < node->m_ymin || pos.y < node->m_ymax || 
-					pos.z < node->m_zmin || pos.z < node->m_zmax )		
+				if (!node->ContainsPoint(pos))
 				{ 
 					node->ItemMoved(beacon, pos); 
 					node = beacon->GetSpatialTreeNode();
@@ -660,26 +654,30 @@ void ComplexShip::GenerateCapitalShipPerimeterBeacons(void)
 	ShutdownPerimeterBeacons();
 
 	// Determine the number of beacons required in each dimension and the distance between each
-	int nx = (int)ceil(m_size.x / Game::C_CS_PERIMETER_BEACON_FREQUENCY) + 1;
-	int ny = (int)ceil(m_size.y / Game::C_CS_PERIMETER_BEACON_FREQUENCY) + 1;
-	int nz = (int)ceil(m_size.z / Game::C_CS_PERIMETER_BEACON_FREQUENCY) + 1;
-	float dx = m_size.x / (float)(nx-1); 
-	float dy = m_size.y / (float)(ny-1);
-	float dz = m_size.z / (float)(nz-1);
+	// For each component:	int nx = (int)ceil(m_size.x / Game::C_CS_PERIMETER_BEACON_FREQUENCY) + 1;
+	//						float dx = m_size.x / (float)(nx-1); 
+	XMVECTOR nv = XMVectorAdd(XMVectorCeiling(XMVectorDivide(m_size, Game::C_CS_PERIMETER_BEACON_FREQUENCY_V)), ONE_VECTOR);
+	XMVECTOR dv = XMVectorDivide(m_size, XMVectorSubtract(nv, ONE_VECTOR));
+	
+	// Store a local integer representation of the beacon count
+	XMFLOAT3 nvf, dvf, sizef; 
+	XMStoreFloat3(&nvf, nv);
+	XMStoreFloat3(&dvf, dv);
+	XMStoreFloat3(&sizef, m_size);
+	int nx = (int)nvf.x; int ny = (int)nvf.y; int nz = (int)nvf.z;
 
 	// First generate beacons in the XY plane, i.e. the ship front and back
-	D3DXVECTOR3 pos;
-	for (int ix = 0; ix < nx; ix++)
+	XMVECTOR pos;
+	for (int ix = 0; ix < nx; ++ix)
 	{
-		for (int iy = 0; iy < ny; iy++)
+		for (int iy = 0; iy < ny; ++iy)
 		{
 			// We will create each xy beacon in two places; once at z=0 and once at z=zmax.  First, at 0 (back)
-			pos = D3DXVECTOR3(ix * dx, iy * dy, 0.0f);
+			pos = XMVectorSet(dvf.x * ix, dvf.y * iy, 0.0f, 0.0f);
 			AttachCapitalShipBeacon(pos);
 
 			// Now also create the beacon at the far z plane (front)
-			pos.z = m_size.z;
-			AttachCapitalShipBeacon(pos);
+			AttachCapitalShipBeacon(XMVectorSetZ(pos, sizef.z));
 		}
 	}
 
@@ -693,12 +691,11 @@ void ComplexShip::GenerateCapitalShipPerimeterBeacons(void)
 
 			// This is a valid intermediate (i.e. not on a z-edge) beacon point.  We want to generate both y = 0 and y = ymax.  
 			// First, where y=0 (bottom)
-			pos = D3DXVECTOR3(ix * dx, 0.0f, iz * dz);
+			pos = XMVectorSet(dvf.x * ix, 0.0f, dvf.z * iz, 0.0f);
 			AttachCapitalShipBeacon(pos);
 
 			// Now also create the beacon at the max y plane (top)
-			pos.y = m_size.y;
-			AttachCapitalShipBeacon(pos);
+			AttachCapitalShipBeacon(XMVectorSetY(pos, sizef.y));
 		}
 	}
 
@@ -712,18 +709,17 @@ void ComplexShip::GenerateCapitalShipPerimeterBeacons(void)
 
 			// This is a valid intermediate (i.e. not on a z-edge or y-edge) beacon point.  We want to generate both x = 0 and x = xmax.  
 			// First, where x=0 (left)
-			pos = D3DXVECTOR3(0.0f, iy * dy, iz * dz);
+			pos = XMVectorSet(0.0f, dvf.y * iy, dvf.z * iz, 0.0f);
 			AttachCapitalShipBeacon(pos);
 
 			// Now also create the beacon at the max x plane (right)
-			pos.x = m_size.x;
-			AttachCapitalShipBeacon(pos);
+			AttachCapitalShipBeacon(XMVectorSetX(pos, sizef.x));
 		}
 	}
 }
 
 // Method to attach a capital ship perimeter beacon to the ship at the specified location
-void ComplexShip::AttachCapitalShipBeacon(D3DXVECTOR3 position)
+void ComplexShip::AttachCapitalShipBeacon(FXMVECTOR position)
 {
 	// Create and assign the beacon to this ship
 	CapitalShipPerimeterBeacon *beacon = new CapitalShipPerimeterBeacon();
@@ -780,25 +776,24 @@ void ComplexShip::RecalculateShipDataFromCurrentState()
 
 void ComplexShip::CalculateShipSizeData(void)
 {
-	ComplexShipSection *sec = NULL;
-	D3DXVECTOR3 bmin, bmax;
-
 	// We need at least one ship section in order to derive meaningful data
 	if (m_sections.size() == 0)
 	{
-		this->MinBounds = D3DXVECTOR3(-0.5f, -0.5f, -0.5f);
-		this->MaxBounds = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
-		this->SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->MinBounds = HALF_VECTOR_N;
+		this->MaxBounds = HALF_VECTOR_P;
+		this->SetSize(ONE_VECTOR);
 		this->SetCentreOffsetTranslation(NULL_VECTOR);
 		this->SetZeroPointTranslation(NULL_VECTOR);
 		return; 
 	}
 	 
 	// Otherwise we want to determine the min and max bounds of the ship based on each section
-	this->MinBounds = D3DXVECTOR3(99999.0f, 99999.0f, 99999.0f);
-	this->MaxBounds = D3DXVECTOR3(-99999.0f, -99999.0f, -99999.0f);
-
+	this->MinBounds = LARGE_VECTOR_P;
+	this->MaxBounds = LARGE_VECTOR_N;
+	XMVECTOR bmin, bmax;
+	
 	// Iterate over each ship section in turn
+	ComplexShipSection *sec = NULL; int processed = 0;
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
 	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
 	{
@@ -810,35 +805,41 @@ void ComplexShip::CalculateShipSizeData(void)
 		sec->CalculateShipSizeData();
 
 		// Determine the min and max bounds of this ship section, based on the model size about its centre point
-		bmin = sec->GetRelativePosition() - (sec->GetSize() * 0.5f);
-		bmax = sec->GetRelativePosition() + (sec->GetSize() * 0.5f);
+		bmin = XMVectorSubtract(sec->GetRelativePosition(), XMVectorMultiply(sec->GetSize(), HALF_VECTOR));
+		bmax = XMVectorAdd(sec->GetRelativePosition(), XMVectorMultiply(sec->GetSize(), HALF_VECTOR));
 
 		// Add the ship section offset to each, to get the actual bounds in world space
 		//bmin += sec->GetPosition(); bmax += sec->GetPosition();
 
 		// If the bounds are now outside our current min & max, record them as the new ship limits
-		if (bmin.x < this->MinBounds.x) this->MinBounds.x = bmin.x;
-		if (bmax.x > this->MaxBounds.x) this->MaxBounds.x = bmax.x;
-		if (bmin.y < this->MinBounds.y) this->MinBounds.y = bmin.y;
-		if (bmax.y > this->MaxBounds.y) this->MaxBounds.y = bmax.y;
-		if (bmin.z < this->MinBounds.z) this->MinBounds.z = bmin.z;
-		if (bmax.z > this->MaxBounds.z) this->MaxBounds.z = bmax.z;
+		MinBounds = XMVectorMin(MinBounds, bmin);
+		MaxBounds = XMVectorMax(MaxBounds, bmax);
+
+		// We have processed this section
+		++processed;
 	}
 	
-	// Now calculate ship size based on these bounds
-	// *** OVERRIDE ship size based on the size of this environment in elements ***
-	/*this->SetSize(D3DXVECTOR3(	this->MaxBounds.x - this->MinBounds.x, this->MaxBounds.y - this->MinBounds.y,
-								this->MaxBounds.z - this->MinBounds.z));*/
+	// Make sure we actually processed something
+	if (processed == 0)
+	{
+		this->MinBounds = HALF_VECTOR_N;
+		this->MaxBounds = HALF_VECTOR_P;
+		this->SetSize(ONE_VECTOR);
+		this->SetCentreOffsetTranslation(NULL_VECTOR);
+		this->SetZeroPointTranslation(NULL_VECTOR);
+		return;
+	}
+
+	// Ship size OVERRIDE - must match size in elements.  TODO: Remove above and based all on elements in future?
 	this->SetSize(Game::ElementLocationToPhysicalPosition(this->GetElementSize()));
 
 	// Also recalculate the ship centre offset
-	this->SetCentreOffsetTranslation(-(D3DXVECTOR3(	(this->MaxBounds.x + this->MinBounds.x) * 0.5f,
-													(this->MaxBounds.y + this->MinBounds.y) * 0.5f,
-													(this->MaxBounds.z + this->MinBounds.z) * 0.5f)));
+	// SetCentreOffsetTranslation(-(D3DXVECTOR3(	(this->MaxBounds.x + this->MinBounds.x) * 0.5f, ..., ...)))
+	SetCentreOffsetTranslation(XMVectorNegate(XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR)));
 
 	// Complex ships are all space environments.  Calculate the environment zero-element translation at this point as well, 
 	// based upon the overall object size.  This translates from the object centre to its (0,0,0) element position
-	this->SetZeroPointTranslation(m_size * -0.5f);
+	this->SetZeroPointTranslation(XMVectorMultiply(m_size, HALF_VECTOR_N));
 }
 
 
@@ -905,6 +906,10 @@ void ComplexShip::CalculateVelocityLimits()
 	// Apply the final velocity limits to this ship
 	this->VelocityLimit.Value = vlimit;
 	this->AngularVelocityLimit.Value = alimit;
+
+	// Also store in vectorised form for fast per-frame calculations
+	m_vlimit_v = XMVectorReplicate(VelocityLimit.Value);
+	m_avlimit_v = XMVectorReplicate(AngularVelocityLimit.Value);
 
 	// Finally, also trigger a recalculation of the (dependent) brake factors for this ship
 	CalculateBrakeFactor();
@@ -987,6 +992,10 @@ void ComplexShip::CalculateTurnRate()
 	// Apply the turn rate limit to this ship
 	this->TurnRate.Value = turnrate;
 	this->TurnAngle.Value = turnangle;
+
+	// Also store turn rate in vectorised form for fast per-frame calculations
+	m_turnrate_v = XMVectorReplicate(TurnRate.Value);
+	m_turnrate_nv = XMVectorNegate(m_turnrate_v);
 }
 
 void ComplexShip::CalculateBankRate()
@@ -1027,7 +1036,7 @@ void ComplexShip::CalculateBankExtents()
 	if (m_sections.size() == 0) { this->BankExtent = NULL_VECTOR; return; }
 	
 	// As a base value, the ship turn rate will be the minimum of all component ship turn rate limits
-	D3DXVECTOR3 bankextent = D3DXVECTOR3(TWOPI, TWOPI, TWOPI); bool haverate = false;
+	XMVECTOR bankextent = XMVectorReplicate(TWOPI); bool haverate = false;
 
 	// Consider each ship section in turn
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
@@ -1037,8 +1046,7 @@ void ComplexShip::CalculateBankExtents()
 		(*it)->CalculateBankExtents();
 
 		// If the bank extent of this section is lower in any dimension than the current ship limit, take the new value as our limiting factor
-		D3DXVECTOR3 section = (*it)->GetBankExtents();
-		bankextent = D3DXVECTOR3(min(bankextent.x, section.x), min(bankextent.y, section.y), min(bankextent.z, section.z));
+		bankextent = XMVectorMin(bankextent, (*it)->GetBankExtents());
 		haverate = true;
 	}
 
@@ -1291,14 +1299,14 @@ std::string ComplexShip::DebugOutputPerimeterBeacons(void)
 
 		// Add basic info from this beacon
 		s = concat(s)("Beacon ")(beacon->GetID())(beacon->Active ? (": ACTIVE") : (": Inactive"))
-												 (", Offset = ")(VectorToString(beacon->BeaconPos))
-												 (", Position = ")(VectorToString(beacon->GetPosition())).str();
+												 (", Offset = ")(Vector3ToString(beacon->BeaconPos))
+												 (", Position = ")(Vector3ToString(beacon->GetPosition())).str();
 
 		// Add additional info on the node this beacon sits within, if relevant
 		if (node)
 			s = concat(s)(", Node (Depth ")(beacon->GetSpatialTreeNode()->DetermineTreeDepth())(") = ")
-						 (VectorToString(beacon->GetSpatialTreeNode()->ConstructMinBoundsVector()))(" to ")
-						 (VectorToString(beacon->GetSpatialTreeNode()->ConstructMaxBoundsVector()))("\n").str();
+						 (Vector3ToString(beacon->GetSpatialTreeNode()->m_min))(" to ")
+						 (Vector3ToString(beacon->GetSpatialTreeNode()->m_max))("\n").str();
 		else
 			s = concat(s)(", No spatial positioning node\n").str();
 	}

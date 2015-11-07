@@ -9,7 +9,9 @@
 #include "Octree.h"
 class SpaceSystem;
 
-class iSpaceObject : public iActiveObject
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class iSpaceObject : public ALIGN16<iSpaceObject>, public iActiveObject
 {
 public:
 
@@ -35,7 +37,7 @@ public:
 
 	// Moves the object into a new space environment.  Declared virtual so that subclasses can implement class-specific logic if required, 
 	// before finally calling the base iSpaceObject method
-	virtual void							MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location);
+	virtual void							MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
 
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObject::SimulationStateChanged() to maintain the chain

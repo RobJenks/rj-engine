@@ -29,7 +29,9 @@ public:
 };
 
 // Main ship class
-class Ship : public iSpaceObject, public iConsumesOrders, public iContainsHardpoints, public iContainsTurrets
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Ship : public ALIGN16<Ship>, public iSpaceObject, public iConsumesOrders, public iContainsHardpoints, public iContainsTurrets
 {
 public:
 
@@ -68,10 +70,10 @@ public:
 	// Methods to turn the ship by specified amounts, or to a specified heading
 	void				TurnShip(float yaw_pc, float pitch_pc, bool bank);
 	void				TurnToTarget(iObject *target, bool bank);
-	void				TurnToTarget(D3DXVECTOR3 target, bool bank);
+	void				TurnToTarget(FXMVECTOR target, bool bank);
 
 	// Determines the yaw and pitch required to turn the ship to face a point in space.  Both values are [0.0-1.0] turn percentages
-	void				DetermineYawAndPitchToTarget(D3DXVECTOR3 target, float *pOutYaw, float *pOutPitch);
+	void				DetermineYawAndPitchToTarget(FXMVECTOR target, float *pOutYaw, float *pOutPitch);
 	CMPINLINE void		DetermineYawAndPitchToTarget(iObject *target, float *pOutYaw, float *pOutPitch)
 						{ DetermineYawAndPitchToTarget(target->GetPosition(), pOutYaw, pOutPitch); }
 
@@ -93,21 +95,11 @@ public:
 	ShipAttribute<float>		BankRate;					// Rate at which the ship will bank on turning
 
 	// Ship size parameters
-	D3DXVECTOR3			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
+	XMVECTOR			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
 
 	// Details on the ship banking range/position
-	D3DXVECTOR3			BankExtent;							// Maximum extent of the banking in each dimension
-	D3DXVECTOR3			Bank;								// The current banking position in all three dimensions
-
-	// Virtual methods to recalculate properties of this ship based on its configuration and current state
-	virtual void		CalculateShipSizeData(void) = 0;		// Recalculate the ship bounds and centre based on meshes & components
-	virtual void		CalculateShipMass(void) = 0;			// Recalculate the total ship mass based on all contributing factors
-	virtual void		CalculateVelocityLimits(void) = 0;		// Recalculates velocity limit based on all contributing factors
-	virtual void		CalculateBrakeFactor(void) = 0;			// Recalculate the brake factor (as % of velocity limit) based on all factors
-	virtual void		CalculateTurnRate(void) = 0;			// Recalculates the overall turn rate based on all contributing factors
-	virtual void		CalculateBankRate(void) = 0;			// Recalculates the overall turn bank based on all contributing factors
-	virtual void		CalculateBankExtents(void) = 0;			// Recalculates the ship banking extents based on all contributing factors
-	virtual void		CalculateEngineStatistics(void) = 0;	// Recalculates the ship data derived from its engine capabilities
+	XMVECTOR			BankExtent;							// Maximum extent of the banking in each dimension
+	XMVECTOR			Bank;								// The current banking position in all three dimensions
 
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);
@@ -123,18 +115,22 @@ public:
 	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
 	void				HardpointChanged(Hardpoint *hp);
 
+	// Recalculates the ship statistics based on its current state & loadout.  Called when the ship state changes during operation
+	virtual void		RecalculateShipDataFromCurrentState(void) = 0;
+
+
 	// Method to set the base ship mass, which will automatically recalculate the overall ship mass at the same time
-	CMPINLINE void				SetBaseMass(float m)			{ this->BaseMass = m; CalculateShipSizeData(); }
+	CMPINLINE void				SetBaseMass(float m)			{ this->BaseMass = m; RecalculateShipDataFromCurrentState(); }
 
 	// Accessor methods for key properties
 	CMPINLINE bool				IsBraking(void)					{ return m_isbraking; }
 	CMPINLINE bool				IsTurning(void)					{ return m_isturning; }
 	
 	// Methods to retrieve the target flight parameters, used by the flight computer to plan engine/turn activity
-	CMPINLINE D3DXVECTOR3		GetTargetAngularVelocity(void) const			{ return m_targetangularvelocity; }
-	CMPINLINE void				OverrideTargetAngularVelocity(D3DXVECTOR3 av)	{ m_targetangularvelocity = av; }
-	CMPINLINE D3DXVECTOR3		GetEngineAngularVelocity(void) const			{ return m_engineangularvelocity; }
-	CMPINLINE D3DXVECTOR3		GetEngineAngularMomentum(void) const			{ return m_engineangularmomentum; }
+	CMPINLINE XMVECTOR			GetTargetAngularVelocity(void) const			{ return m_targetangularvelocity; }
+	CMPINLINE void				OverrideTargetAngularVelocity(FXMVECTOR av)		{ m_targetangularvelocity = av; }
+	CMPINLINE XMVECTOR			GetEngineAngularVelocity(void) const			{ return m_engineangularvelocity; }
+	CMPINLINE XMVECTOR			GetEngineAngularMomentum(void) const			{ return m_engineangularmomentum; }
 
 	// Methods to apply/remove the ship brakes
 	CMPINLINE void				ApplyBrakes(void)				{ m_isbraking = true; }
@@ -151,7 +147,7 @@ public:
 	void						SetTargetSpeedPercentage(float percentage);
 
 	// Order: Moves the ship to a target position, within a certain tolerance
-	Order::OrderResult			MoveToPosition(D3DXVECTOR3 position, float closedistance);
+	Order::OrderResult			MoveToPosition(FXMVECTOR position, float closedistance);
 
 	// Order: Moves the ship to a target object, within a certain tolerance
 	Order::OrderResult			MoveToTarget(iSpaceObject *target, float closedistance);
@@ -193,9 +189,9 @@ protected:
 
 	bool				m_isbraking;				// Indicates whether the ship is currently applying brakes to reduce momentum
 	bool				m_isturning;				// Determines whether the ship is currently turning, and therefore whether the orientation needs to be updated each cycle
-	D3DXVECTOR3 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
-	D3DXVECTOR3			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
-	D3DXVECTOR3			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
+	XMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
+	XMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
+	XMVECTOR			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
 
 	bool				m_thrustchange_flag;		// Flag indicating whether the ship thrust has changed, and requires physics recalc
 	bool				m_masschange_flag;			// Flag indicating whether the ship mass has changed, and requires physics recalc
@@ -204,26 +200,29 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
+	XMVECTOR			m_turnrate_v, m_turnrate_nv;// Vectorised turn rate and negation for faster per-frame calculations
+	XMVECTOR			m_vlimit_v, m_avlimit_v;	// Vectorised linear/angular velocity limits for faster per-frame calculations
+
 	std::vector<iSpaceObject*>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
 	std::vector<iSpaceObject*>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
 	std::vector<iSpaceObject*>::size_type	m_cached_contact_count;			// Count of cached contacts
 	std::vector<iSpaceObject*>::size_type	m_cached_enemy_contact_count;	// Count of cached enemy contacts
 
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
-	CMPINLINE float		DetermineExactYawToTarget(D3DXVECTOR3 tgt);
-	CMPINLINE float		DetermineExactPitchToTarget(D3DXVECTOR3 tgt);
+	CMPINLINE float		DetermineExactYawToTarget(XMFLOAT3 tgt);
+	CMPINLINE float		DetermineExactPitchToTarget(XMFLOAT3 tgt);
 
 };
 
 // Determines exact yaw to target; used for precise corrections near the target heading
-CMPINLINE float	Ship::DetermineExactYawToTarget(D3DXVECTOR3 tgt) 
+CMPINLINE float	Ship::DetermineExactYawToTarget(XMFLOAT3 tgt) 
 {
 	return  -(atan2(tgt.z, tgt.x)-PIOVER2)						// Get angle, correct by 90deg, and inverse to get angle TO target...
 			* Game::C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;	// ...multiplied by the eval interval, i.e. if we eval 2x a second then halve the target angle
 }
 
 // Determines exact pitch to target; used for precise corrections near the target heading
-CMPINLINE float	Ship::DetermineExactPitchToTarget(D3DXVECTOR3 tgt) 
+CMPINLINE float	Ship::DetermineExactPitchToTarget(XMFLOAT3 tgt) 
 {
 	return  -(atan2(tgt.y, tgt.z))								// Get angle, and inverse to get angle TO target...
 			* Game::C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;	// ...multiplied by the eval interval, i.e. if we eval 2x a second then halve the target angle

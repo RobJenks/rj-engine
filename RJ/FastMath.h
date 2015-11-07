@@ -31,7 +31,12 @@ static const XMVECTOR NULL_VECTOR = XMVectorZero();
 static const XMVECTOR NULL_VECTOR2 = XMVectorZero();
 static const XMVECTOR NULL_VECTOR3 = XMVectorZero();
 static const XMVECTOR NULL_VECTOR4 = XMVectorZero();
+static const XMVECTOR HALF_VECTOR_P = XMVectorReplicate(0.5f);
+static const XMVECTOR HALF_VECTOR_N = XMVectorNegate(HALF_VECTOR_P);
+static const XMVECTOR HALF_VECTOR = HALF_VECTOR_P;
 static const XMVECTOR ONE_VECTOR = XMVectorReplicate(1.0f);
+static const XMVECTOR LARGE_VECTOR_P = XMVectorReplicate(1e15f);
+static const XMVECTOR LARGE_VECTOR_N = XMVectorReplicate(-1e15f);
 static const XMFLOAT2 NULL_FLOAT2 = XMFLOAT2(0.0f, 0.0f);
 static const XMFLOAT3 NULL_FLOAT3 = XMFLOAT3(0.0f, 0.0f, 0.0f);
 static const XMFLOAT4 NULL_FLOAT4 = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -114,6 +119,29 @@ void				QuaternionMultiply(const XMFLOAT4 & q1, const XMFLOAT4 & q2, XMFLOAT4 & 
 void				QuaternionNormalise(XMFLOAT4 & q);
 void				QuaternionNormalise(const XMFLOAT4 & q, XMFLOAT4 & outQNorm);
 
+CMPINLINE bool		Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return (fabs(v1.x - v2.x) < Game::C_EPSILON && fabs(v1.y - v2.y) < Game::C_EPSILON && fabs(v1.z - v2.z) < Game::C_EPSILON);
+}
+CMPINLINE bool		IsZeroFloat3(const XMFLOAT3 &v) 
+{ 
+	return (fabs(v.x) < Game::C_EPSILON && fabs(v.y) < Game::C_EPSILON && fabs(v.z) < Game::C_EPSILON);
+}
+
+CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+}
+
+CMPINLINE XMFLOAT3	Float3Subtract(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
+}
+
+CMPINLINE XMFLOAT3	Float3MultiplyScalar(const XMFLOAT3 & v, const float s)
+{
+	return XMFLOAT3(v.x * s, v.y * s, v.z * s);
+}
 
 CMPINLINE XMVECTOR CalculateRotationBetweenQuaternions(const FXMVECTOR qStart, const FXMVECTOR qEnd)
 {
@@ -146,6 +174,32 @@ CMPINLINE float CalculateQuaternionRotationAngle(const FXMVECTOR q)
 //		+ (q.w*q.w - D3DXVec3Dot(&u, &u)) * v
 //		+ 2.0f * q.w * cross;
 //}
+
+//-----------------------------------------------------------------------------
+// Return TRUE if any of the elements of a 3 vector are equal to 0xffffffff.
+// Slightly more efficient than using XMVector3EqualInt.
+//-----------------------------------------------------------------------------
+CMPINLINE bool XMVector3AnyTrue(FXMVECTOR V)
+{
+	// Duplicate the fourth element from the first element.
+	XMVECTOR C = XMVectorSwizzle(V, 0, 1, 2, 0);
+
+	return XMComparisonAnyTrue(XMVector4EqualIntR(C, XMVectorTrueInt()));
+}
+
+
+
+//-----------------------------------------------------------------------------
+// Return TRUE if all of the elements of a 3 vector are equal to 0xffffffff.
+// Slightly more efficient than using XMVector3EqualInt.
+//-----------------------------------------------------------------------------
+CMPINLINE bool XMVector3AllTrue(FXMVECTOR V)
+{
+	// Duplicate the fourth element from the first element.
+	XMVECTOR C = XMVectorSwizzle(V, 0, 1, 2, 0);
+
+	return XMComparisonAllTrue(XMVector4EqualIntR(C, XMVectorTrueInt()));
+}
 
 float _sin(const int theta);
 float _cos(const int theta);

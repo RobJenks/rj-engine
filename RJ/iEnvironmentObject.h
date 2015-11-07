@@ -8,7 +8,9 @@
 class iSpaceObjectEnvironment;
 
 // Extends the iSpaceObject interface for objects that exist within and relative to some environment
-class iEnvironmentObject : public iActiveObject
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class iEnvironmentObject : public ALIGN16<iEnvironmentObject>, public iActiveObject
 {
 public:
 
@@ -36,16 +38,19 @@ public:
 	void										MoveIntoEnvironment(iSpaceObjectEnvironment *env);
 
 	// Methods to get the relative position & orientation of this actor
-	CMPINLINE D3DXVECTOR3						GetEnvironmentPosition(void) const			{ return m_envposition; }
-	CMPINLINE D3DXQUATERNION					GetEnvironmentOrientation(void) const		{ return m_envorientation; }
+	CMPINLINE XMVECTOR							GetEnvironmentPosition(void) const			{ return m_envposition; }
+	CMPINLINE XMVECTOR							GetEnvironmentOrientation(void) const		{ return m_envorientation; }
 
 	// Methods to set the object position/orientation relative to its parent environment, recalculating absolute data as required
-	void										SetEnvironmentPosition(const D3DXVECTOR3 & pos);
-	void										SetEnvironmentOrientation(const D3DXQUATERNION & orient);
-	void										SetEnvironmentPositionAndOrientation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient);
+	void										SetEnvironmentPosition(const FXMVECTOR pos);
+	void										SetEnvironmentOrientation(const FXMVECTOR orient);
+	void										SetEnvironmentPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient);
 
 	// Methods to add delta position and orientation to the current relative position
-	CMPINLINE void								AddDeltaPosition(const D3DXVECTOR3 & dp)	{ SetEnvironmentPosition(m_envposition + dp); }
+	CMPINLINE void								AddDeltaPosition(const FXMVECTOR dp)	
+	{ 
+		SetEnvironmentPosition(XMVectorAdd(m_envposition, dp)); 
+	}
 
 	// Methods to recalculate position & orientation data following a change to the object's environment position & orientation
 	void										RecalculateEnvironmentPositionData(void);
@@ -87,9 +92,9 @@ protected:
 	bool										m_multielement;
 
 	// Stores the object position/orientation relative to the current environment, as opposed to the absolute pos/orient stored in m_position & m_orientation
-	D3DXVECTOR3									m_envposition;
-	D3DXQUATERNION								m_envorientation;
-
+	XMVECTOR									m_envposition;
+	XMVECTOR									m_envorientation;
+	
 	// Keep track of the number of orientation changes made before a re-normalisation is required
 	int											m_orientchanges;
 

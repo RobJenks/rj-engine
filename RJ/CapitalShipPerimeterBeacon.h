@@ -6,7 +6,9 @@
 #include "iSpaceObject.h"
 #include "GameVarsExtern.h"
 
-class CapitalShipPerimeterBeacon : public iSpaceObject 
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class CapitalShipPerimeterBeacon : public ALIGN16<CapitalShipPerimeterBeacon>, public iSpaceObject 
 {
 public:
 	
@@ -21,7 +23,7 @@ public:
 	CMPINLINE Game::ID_TYPE		GetParentShipID(void)		{ return m_parentshipid; }
 	
 	// Links this beacon to the specified parent ship, creating space object attachments to keep it in place during movement
-	void						AssignToShip(iSpaceObject *ship, D3DXVECTOR3 position);
+	void						AssignToShip(iSpaceObject *ship, FXMVECTOR position);
 
 	// Implemented to satisfy iObject interface.  In reality all beacon positions are determined by the parent ship
 	CMPINLINE void				SimulateObject(void) { }
@@ -38,7 +40,7 @@ public:
 
 public:
 	bool						Active;							// If the beacon is currently being simulated in the world
-	D3DXVECTOR3					BeaconPos;						// Position of the beacon relative to the parent ship
+	XMVECTOR					BeaconPos;						// Position of the beacon relative to the parent ship
 
 private:
 

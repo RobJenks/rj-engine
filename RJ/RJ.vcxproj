@@ -353,6 +353,7 @@
     <ClInclude Include="ActorAttributes.h" />
     <ClInclude Include="ActorBase.h" />
     <ClInclude Include="AdjustableParameter.h" />
+    <ClInclude Include="ALIGN16.h" />
     <ClInclude Include="Arc2D.h" />
     <ClInclude Include="ArticulatedModel.h" />
     <ClInclude Include="ArticulatedModelComponent.h" />

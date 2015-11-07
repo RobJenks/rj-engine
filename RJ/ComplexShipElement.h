@@ -24,6 +24,7 @@ using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
+// This class deliberately DOES NOT use any data with alignment requirements
 class ComplexShipElement : public iContainsComplexShipTiles
 {
 public:
@@ -257,8 +258,8 @@ public:
 	static string							TranslatePropertyToName(ComplexShipElement::PROPERTY prop);
 
 	// Returns the coordinates of a point on specific adjoining edges or elements
-	static D3DXVECTOR3						GetEdgePosition(Direction direction);
-	static D3DXVECTOR3						GetAdjacentElementCentrePosition(Direction direction);
+	static XMFLOAT3							GetEdgePosition(Direction direction);
+	static XMFLOAT3							GetAdjacentElementCentrePosition(Direction direction);
 
 	// Method to initialise static data, for use in any static runtime calls
 	static void								InitialiseStaticData(void);

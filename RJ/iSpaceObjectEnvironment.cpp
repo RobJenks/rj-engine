@@ -24,9 +24,10 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 
 	// Initialise fields to defaults
 	m_elements = NULL;
-	m_elementsize = NULL_VECTOR;
+	m_elementsize = NULL_INTVECTOR3;
 	m_containssimulationhubs = false;
 	m_zeropointtranslation = NULL_VECTOR;
+	m_zeropointtranslationf = NULL_FLOAT3;
 	m_zeropointworldmatrix = m_inversezeropointworldmatrix = ID_MATRIX;
 }
 
@@ -268,24 +269,27 @@ void iSpaceObjectEnvironment::AddTerrainObjectFromTile(StaticTerrain *obj, Compl
 	if (sourcetile->GetRotation() != Rotation90Degree::Rotate0)
 	{
 		// First adjust the terrain relative position, by rotating it about the local tile centre by the tile orientation
-		D3DXVECTOR3 localpos; D3DXMATRIX ct, invct, transform;
+		XMVECTOR ctrans, localpos;XMMATRIX ct, invct, transform;
 		
 		// We need to translate to/from the tile centre before rotating, since (0,0,0) represents the top-left corner
-		D3DXVECTOR3 ctrans = Game::ElementLocationToPhysicalPosition(sourcetile->GetElementSize()) * 0.5f;
-		D3DXMatrixTranslation(&ct, -ctrans.x, -ctrans.y, -ctrans.z);
-		D3DXMatrixTranslation(&invct, ctrans.x, ctrans.y, ctrans.z);
-		transform = (ct * GetRotationMatrixInstance(sourcetile->GetRotation()) * invct);
+		ctrans = XMVectorScale(Game::ElementLocationToPhysicalPosition(sourcetile->GetElementSize()), 0.5f);
+		ct = XMMatrixTranslationFromVector(XMVectorScale(ctrans, -0.5f));
+		invct = XMMatrixTranslationFromVector(XMVectorScale(ctrans, 0.5f));
+		transform = XMMatrixMultiply(XMMatrixMultiply(
+			ct,	
+			GetRotationMatrix(sourcetile->GetRotation())),
+			invct);
 
 		// Transform the object position by this matrix
-		D3DXVec3TransformCoord(&localpos, &obj->GetPosition(), &transform);
+		localpos = XMVector3TransformCoord(obj->GetPosition(), transform);
 		obj->SetPosition(localpos);
 
 		// Now adjust the terrain orientation itself to account for the tile orientation
-		obj->SetOrientation(obj->GetOrientation() * GetRotationQuaternion(sourcetile->GetRotation()));
+		obj->SetOrientation(XMQuaternionMultiply(obj->GetOrientation(), GetRotationQuaternion(sourcetile->GetRotation())));
 	}
 
 	// Transform the object position from tile- to environment-space
-	obj->SetPosition(Game::ElementLocationToPhysicalPosition(sourcetile->GetElementLocation()) + obj->GetPosition());
+	obj->SetPosition(XMVectorAdd(Game::ElementLocationToPhysicalPosition(sourcetile->GetElementLocation()), obj->GetPosition()));
 
 	// Resume updates following these changes
 	obj->ResumeUpdates();
@@ -358,19 +362,22 @@ void iSpaceObjectEnvironment::ObjectMoved(iEnvironmentObject *object, const INTV
 	if (object)
 	{
 		// Get references to the key values needed in calculating the new element range
-		const INTVECTOR3 & pos = object->GetEnvironmentPosition();
-		const float & radius = object->GetCollisionSphereRadius();
+		XMVECTOR pos = XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Y, XM_SWIZZLE_W>(object->GetEnvironmentPosition());
+		XMVECTOR radius = XMVectorReplicate(object->GetCollisionSphereRadius());
+		
+		// Determine new min/max bounds based on
+		//		[Min/Max] = (int)floorf((pos [-/+] radius) * ElementScaleRecip)
+		//		[Min/Max] = Floor( Multiply( [Subtract/Add](Pos, Radius), ElementScaleRecip) )
+		XMVECTOR vmin = XMVectorFloor(XMVectorMultiply(XMVectorSubtract(pos, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V));
+		XMVECTOR vmax = XMVectorFloor(XMVectorMultiply(XMVectorAdd(pos, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V));
+		
+		// Retrieve required components 
+		XMFLOAT3 fmin, fmax;
+		XMStoreFloat3(&fmin, vmin);
+		XMStoreFloat3(&fmax, vmax);
 
-		// Determine the new element range and pass control to the overloaded function. Swap Y and Z coord since we are moving from 
-		// space to environment coordinates
-		ObjectMoved(object, old_min_el, old_max_el,
-					INTVECTOR3(	(int)floorf((pos.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP), 
-								(int)floorf((pos.z - radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-								(int)floorf((pos.y - radius) * Game::C_CS_ELEMENT_SCALE_RECIP)),
-					INTVECTOR3(	(int)floorf((pos.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP), 
-								(int)floorf((pos.z + radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-								(int)floorf((pos.y + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))
-			);
+		// Raise the object movement event using these calculated bounds
+		ObjectMoved(object, old_min_el, old_max_el, INTVECTOR3(fmin.x, fmin.y, fmin.z), INTVECTOR3(fmax.x, fmax.y, fmax.z));
 	}
 }
 

@@ -333,13 +333,13 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	Model *model;
 	Model::ModelClass mclass;
 	string key, code, type, fname, tex;
-	D3DXVECTOR3 acteffsize, effsize;
+	XMFLOAT3 acteffsize, effsize;
 	INTVECTOR3 elsize;
 	HashVal hash;
 
 	// Set defaults before loading the model
 	code = type = fname = tex = "";
-	acteffsize = effsize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	acteffsize = effsize = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	elsize = NULL_INTVECTOR3;
 
 	// Look at each child element in turn and pull data from them
@@ -368,10 +368,10 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 			StrLowerC(tex);
 		}
 		else if (hash == HashedStrings::H_EffectiveSize) {					/* Effective size (i.e. not just vertex max-min) for the model */
-			effsize = IO::GetVector3FromAttr(child);
+			effsize = IO::GetFloat3FromAttr(child);
 		}
 		else if (hash == HashedStrings::H_ActualEffectiveSize) {			/* Actual (i.e. in-game) effective size.  Determines scaling if set */
-			acteffsize = IO::GetVector3FromAttr(child);
+			acteffsize = IO::GetFloat3FromAttr(child);
 		}
 		else if (hash == HashedStrings::H_ElementSize) {					/* Mapping to element dimensions; optional, and used to scale to fit elements by load post-processing */
 			elsize = IO::GetInt3CoordinatesFromAttr(child);	
@@ -407,7 +407,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	// with the model is deallocated it will not attempt to deallocate the model data, preserving it for
 	// other entities
 	model->SetStandardModel(true);
-
+	
 	// If an effective model size is not specified, take the actual extent calculated from vertex data as a default
 	if (effsize.x <= Game::C_EPSILON || effsize.y <= Game::C_EPSILON || effsize.z <= Game::C_EPSILON)
 		model->SetEffectiveModelSize(model->GetModelSize());
@@ -434,7 +434,7 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_Name)							object->SetName(node->GetText());
 	else if (hash == HashedStrings::H_StandardObject)				object->SetIsStandardObject(GetBoolValue(node));
 	else if (hash == HashedStrings::H_Position)						object->SetPosition(IO::GetVector3FromAttr(node));
-	else if (hash == HashedStrings::H_Orientation)					object->SetOrientation(IO::GetD3DXQUATERNIONFromAttr(node));
+	else if (hash == HashedStrings::H_Orientation)					object->SetOrientation(IO::GetQuaternionFromAttr(node));
 	else if (hash == HashedStrings::H_Model)
 	{
 		___tmp_loading_string = node->GetText(); StrLowerC(___tmp_loading_string);
@@ -525,7 +525,7 @@ bool IO::Data::LoadSpaceObjectEnvironmentData(TiXmlElement *node, HashVal hash, 
 	if (hash == HashedStrings::H_ElementSize)
 	{
 		// Initialise all elements when the element size is set.  This means element size MUST be set before elements are defined
-		object->SetElementSize(IO::GetVector3FromAttr(node));
+		object->SetElementSize(IO::GetInt3CoordinatesFromAttr(node));
 		object->InitialiseAllElements();
 	}
 	else if (hash == HashedStrings::H_ComplexShipElement)			LoadComplexShipElement(node, object);

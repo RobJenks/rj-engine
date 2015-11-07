@@ -11,11 +11,10 @@
 const char *	IO::___tmp_loading_cchar;
 std::string		IO::___tmp_loading_string;
 
-
-D3DXVECTOR2 IO::GetVector2FromAttr(TiXmlElement *node)
+XMVECTOR IO::GetVector2FromAttr(TiXmlElement *node)
 {
-	char *name; double val; 
-	D3DXVECTOR2 vec = NULL_VECTOR2;
+	char *name; double val;
+	XMFLOAT2 vec = NULL_FLOAT2;
 
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
@@ -31,11 +30,33 @@ D3DXVECTOR2 IO::GetVector2FromAttr(TiXmlElement *node)
 		attr = attr->Next();
 	}
 
-	return vec;
+	return XMLoadFloat2(&vec);
+}
+
+XMFLOAT2 IO::GetFloat2FromAttr(TiXmlElement *node)
+{
+	char *name; double val; 
+	float x = 0.0f, y = 0.0f;
+
+	TiXmlAttribute *attr = node->FirstAttribute();
+	while (attr) {
+		name = lower(attr->Name());
+		if (strcmp(name, "x") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) x = (FLOAT)val;
+		}
+		else if (strcmp(name, "y") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) y = (FLOAT)val;
+		}
+
+		free(name);
+		attr = attr->Next();
+	}
+
+	return XMFLOAT2(x, y);
 }
 
 
-void IO::GetVector2FromAttr(TiXmlElement *node, D3DXVECTOR2 *out)
+void IO::GetFloat2FromAttr(TiXmlElement *node, XMFLOAT2 *out)
 {
 	char *name; double val;
 
@@ -54,10 +75,11 @@ void IO::GetVector2FromAttr(TiXmlElement *node, D3DXVECTOR2 *out)
 	}
 }
 
-D3DXVECTOR3 IO::GetVector3FromAttr(TiXmlElement *node)
+
+XMVECTOR IO::GetVector3FromAttr(TiXmlElement *node)
 {
-	char *name; double val; 
-	D3DXVECTOR3 vec = NULL_VECTOR;
+	char *name; double val;
+	XMFLOAT3 vec = NULL_FLOAT3;
 
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
@@ -71,15 +93,40 @@ D3DXVECTOR3 IO::GetVector3FromAttr(TiXmlElement *node)
 		else if (strcmp(name, "z") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.z = (FLOAT)val;
 		}
+		
+		free(name);
+		attr = attr->Next();
+	}
+
+	return XMLoadFloat3(&vec);
+}
+
+XMFLOAT3 IO::GetFloat3FromAttr(TiXmlElement *node)
+{
+	char *name; double val;
+	float x = 0.0f, y = 0.0f, z = 0.0f;
+
+	TiXmlAttribute *attr = node->FirstAttribute();
+	while (attr) {
+		name = lower(attr->Name());
+		if (strcmp(name, "x") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) x = (FLOAT)val;
+		}
+		else if (strcmp(name, "y") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) y = (FLOAT)val;
+		}
+		else if (strcmp(name, "z") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) z = (FLOAT)val;
+		}
 
 		free(name);
 		attr = attr->Next();
 	}
 
-	return vec;
+	return XMFLOAT3(x, y, z);
 }
 
-void IO::GetVector3FromAttr(TiXmlElement *node, D3DXVECTOR3 *out)
+void IO::GetFloat3FromAttr(TiXmlElement *node, XMFLOAT3 *out)
 {
 	char *name; double val;
 
@@ -101,10 +148,10 @@ void IO::GetVector3FromAttr(TiXmlElement *node, D3DXVECTOR3 *out)
 	}
 }
 
-D3DXVECTOR4 IO::GetVector4FromAttr(TiXmlElement *node)
+XMVECTOR IO::GetVector4FromAttr(TiXmlElement *node)
 {
 	char *name; double val; 
-	D3DXVECTOR4 vec = NULL_VECTOR4;
+	XMFLOAT4 vec = NULL_FLOAT4;
 
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
@@ -126,10 +173,38 @@ D3DXVECTOR4 IO::GetVector4FromAttr(TiXmlElement *node)
 		attr = attr->Next();
 	}
 
-	return vec;
+	return XMLoadFloat4(&vec);
 }
 
-void IO::GetVector4FromAttr(TiXmlElement *node, D3DXVECTOR4 *out)
+XMFLOAT4 IO::GetFloat4FromAttr(TiXmlElement *node)
+{
+	char *name; double val;
+	float x = 0.0f, y = 0.0f, z = 0.0f, w = 0.0f; 
+
+	TiXmlAttribute *attr = node->FirstAttribute();
+	while (attr) {
+		name = lower(attr->Name());
+		if (strcmp(name, "x") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) x = (FLOAT)val;
+		}
+		else if (strcmp(name, "y") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) y = (FLOAT)val;
+		}
+		else if (strcmp(name, "z") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) z = (FLOAT)val;
+		}
+		else if (strcmp(name, "w") == 0) {
+			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) w = (FLOAT)val;
+		}
+
+		free(name);
+		attr = attr->Next();
+	}
+
+	return XMFLOAT4(x, y, z, w);
+}
+
+void IO::GetFloat4FromAttr(TiXmlElement *node, XMFLOAT4 *out)
 {
 	char *name; double val;
 
@@ -152,62 +227,6 @@ void IO::GetVector4FromAttr(TiXmlElement *node, D3DXVECTOR4 *out)
 		free(name);
 		attr = attr->Next();
 	}
-}
-
-
-D3DXQUATERNION IO::GetD3DXQUATERNIONFromAttr(TiXmlElement *node)
-{
-	char *name; double val; 
-	D3DXQUATERNION q = ID_QUATERNION;
-
-	TiXmlAttribute *attr = node->FirstAttribute();
-	while (attr) {
-		name = lower(attr->Name());
-		if (strcmp(name, "w") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) q.w = (FLOAT)val;
-		}
-		else if (strcmp(name, "x") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) q.x = (FLOAT)val;
-		}
-		else if (strcmp(name, "y") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) q.y = (FLOAT)val;
-		}
-		else if (strcmp(name, "z") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) q.z = (FLOAT)val;
-		}
-
-		free(name);
-		attr = attr->Next();
-	}
-
-	return q;
-}
-
-void IO::GetD3DXQUATERNIONFromAttr(TiXmlElement *node, D3DXQUATERNION *out)
-{
-	char *name; double val;
-
-	TiXmlAttribute *attr = node->FirstAttribute();
-	while (attr) {
-		name = lower(attr->Name());
-		if (strcmp(name, "w") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->w = (FLOAT)val;
-		}
-		else if (strcmp(name, "x") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->x = (FLOAT)val;
-		}
-		else if (strcmp(name, "y") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->y = (FLOAT)val;
-		}
-		else if (strcmp(name, "z") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->z = (FLOAT)val;
-		}
-
-		free(name);
-		attr = attr->Next();
-	}
-
-
 }
 
 void IO::GetInt2CoordinatesFromAttr(TiXmlElement *node, int *x, int *y)

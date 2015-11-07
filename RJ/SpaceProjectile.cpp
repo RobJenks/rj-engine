@@ -113,7 +113,7 @@ void SpaceProjectile::SimulateObject(void)
 	PhysicsState.DeltaMoveDistanceSq = (delta.x*delta.x + delta.y*delta.y + delta.z*delta.z);
 
 	// Also rotate the object if it has any angular momentum
-	if (!IsZeroVector(this->PhysicsState.AngularVelocity))
+	if (!IsZeroVector3(this->PhysicsState.AngularVelocity))
 	{
 		this->SetOrientation(m_orientation + (0.5f * D3DXQUATERNION(this->PhysicsState.AngularVelocity.x, this->PhysicsState.AngularVelocity.y,
 																	this->PhysicsState.AngularVelocity.z, 0.0f) * this->m_orientation * Game::TimeFactor));

@@ -47,12 +47,13 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_faction = Faction::NullFaction;
 	m_simulationhub = false;
 	m_visible = true;
-	m_position = NULL_FLOAT3;
-	m_orientation = NULL_FLOAT4;
-	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX_F;
-	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX_F;
+	m_position = NULL_VECTOR;
+	m_positionf = NULL_FLOAT3;
+	m_orientation = NULL_VECTOR;
+	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
+	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX;
 	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_Normal;
-	m_centreoffset = NULL_FLOAT3;
+	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
 	m_nocollision_count = 0;
 
@@ -72,7 +73,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_canperformpostsimulationupdate = false;
 
 	// Set a default value for size
-	SetSize(XMFLOAT3(1.0f, 1.0f, 1.0f));
+	SetSize(XMVectorReplicate(1.0f));
 
 	// By default, the root collision box will auto-fit to the model bounds.  Add after SetSize() so 
 	// that we don't redundantly calculate this twice (since if AutoFit==true, SetSize() will trigger
@@ -276,24 +277,28 @@ iObject::~iObject(void)
 }
 
 // Set the size of this object.  Recalculates any dependent fields, e.g. those involved in collision detection
-void iObject::SetSize(const XMFLOAT3 & size)
+void iObject::SetSize(const FXMVECTOR size)
 {
 	// Store the size parameter
 	m_size = size;
 
 	// Make sure the supplied parameter is valid; if any dimension is <= epsilon then assign a default size
-	if (m_size.x <= Game::C_EPSILON || m_size.y <= Game::C_EPSILON || m_size.z <= Game::C_EPSILON)
-		m_size = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	if (XMVector3AnyTrue(XMVectorLess(m_size, Game::C_EPSILON_V)))
+		m_size = XMVectorReplicate(1.0f);
 
 	// Recalculate the collision sphere radii for broadphase collision detection
-	m_collisionsphereradiussq = DetermineCuboidBoundingSphereRadiusSq(XMLoadFloat3(&m_size)); 
+	m_collisionsphereradiussq = DetermineCuboidBoundingSphereRadiusSq(m_size); 
 	m_collisionsphereradius = sqrtf(m_collisionsphereradiussq);
 
 	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
 	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 
+	// We also need to perform some per-component actions
+	XMFLOAT3 sizef;
+	XMStoreFloat3(&sizef, m_size);
+
 	// Recalculate the object fast mover threshold
-	m_fastmoverthresholdsq = (min(m_size.x, min(m_size.y, m_size.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
+	m_fastmoverthresholdsq = (min(sizef.x, min(sizef.y, sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
 	m_fastmoverthresholdsq *= m_fastmoverthresholdsq;
 
 	// Invalidate the OBB based on this change in size
@@ -416,12 +421,12 @@ void iObject::UpdateGlobalObjectCollection(void)
 // Add a new attachment from this object to a child.  Sets default (zero) offset parameters.
 void iObject::AddChildAttachment(iObject *child)
 {
-	AddChildAttachment(child, NULL_FLOAT3, NULL_FLOAT4);
+	AddChildAttachment(child, NULL_VECTOR3, NULL_VECTOR4);
 }
 
 // Add a new attachment from this object to a child, including parameters for offsetting the position & orientation relative 
 // to the parent.  Breaks the attachment from the child side as well.
-void iObject::AddChildAttachment(iObject *child, const XMFLOAT3 & posoffset, const XMFLOAT4 & orientoffset)
+void iObject::AddChildAttachment(iObject *child, const FXMVECTOR posoffset, const FXMVECTOR orientoffset)
 {
 	// Parameter check
 	if (!child) return;

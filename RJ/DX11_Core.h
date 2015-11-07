@@ -31,6 +31,9 @@
 	#define DIRECTINPUT_VERSION 0x0800
 #endif
 
+// Classes using DirectX functionality are very likely to need 16-bit aligned allocations
+#include "ALIGN16.h"
+
 // Use the DirectX namespace as standard
 using namespace DirectX;
 

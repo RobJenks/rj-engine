@@ -18,7 +18,7 @@ CapitalShipPerimeterBeacon::CapitalShipPerimeterBeacon(void)
 }
 
 // Links this beacon to the specified parent ship, creating space object attachments to keep it in place during movement
-void CapitalShipPerimeterBeacon::AssignToShip(iSpaceObject *ship, D3DXVECTOR3 position)
+void CapitalShipPerimeterBeacon::AssignToShip(iSpaceObject *ship, FXMVECTOR position)
 {
 	// If we already have a parent ship then we need to break links with it now
 	if (m_parentship)

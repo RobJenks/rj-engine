@@ -86,7 +86,7 @@ public:
 	CMPINLINE void						SetLaunchAngularVelocity(const D3DXVECTOR3 & av)			
 	{
 		m_launchangularvelocity = av; 
-		m_launchwithangvel = (!IsZeroVector(m_launchangularvelocity));
+		m_launchwithangvel = (!IsZeroVector3(m_launchangularvelocity));
 	}
 
 	CMPINLINE bool						LinearVelocityDegrades(void) const							{ return m_degradelinearvelocity; }

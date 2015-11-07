@@ -4,12 +4,15 @@
 #define __iSpaceObjectEnvironmentH__
 
 #include "Utility.h"
+#include "DX11_Core.h"
 #include "Ship.h"
 #include "ComplexShipElement.h"
 class iEnvironmentObject;
 class StaticTerrain;
 
-class iSpaceObjectEnvironment : public Ship, public iContainsComplexShipTiles
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class iSpaceObjectEnvironment : public ALIGN16<iSpaceObjectEnvironment>, public Ship, public iContainsComplexShipTiles
 {
 
 
@@ -62,8 +65,13 @@ public:
 	void							PerformPostSimulationUpdate(void);
 
 	// Set or retrieve the zero-element translation for this environment
-	CMPINLINE D3DXVECTOR3			GetZeroPointTranslation(void) const						{ return m_zeropointtranslation; }
-	CMPINLINE void					SetZeroPointTranslation(const D3DXVECTOR3 & offset)		{ m_zeropointtranslation = offset; }
+	CMPINLINE XMVECTOR				GetZeroPointTranslation(void) const						{ return m_zeropointtranslation; }
+	CMPINLINE XMFLOAT3				GetZeroPointTranslationF(void) const					{ return m_zeropointtranslationf; }
+	CMPINLINE void					SetZeroPointTranslation(const FXMVECTOR offset)			
+	{ 
+		m_zeropointtranslation = offset; 
+		XMStoreFloat3(&m_zeropointtranslationf, m_zeropointtranslation);
+	}
 
 	// Derive the world matrix that translates to the (0,0) point of this environment.  Based upon the object world matrix and 
 	// object size.  Called once we know that the environment needs to be rendered this frame; subsequent rendering methods
@@ -71,17 +79,16 @@ public:
 	void							DeriveZeroPointWorldMatrix(void)
 	{
 		// Determine the adjusted world matrix that incorporates the zero-element offset
-		D3DXMATRIX zerotrans;
-		D3DXMatrixTranslation(&zerotrans, m_zeropointtranslation.x, m_zeropointtranslation.y, m_zeropointtranslation.z);
-		m_zeropointworldmatrix = (zerotrans * m_worldmatrix);
+		XMMATRIX zerotrans = XMMatrixTranslationFromVector(m_zeropointtranslation);
+		m_zeropointworldmatrix = XMMatrixMultiply(zerotrans, m_worldmatrix);
 
 		// Also store the inverse zero point matrix, for transforming objects from world space into this environment
-		D3DXMatrixInverse(&m_inversezeropointworldmatrix, 0, &m_zeropointworldmatrix);
+		m_inversezeropointworldmatrix = XMMatrixInverse(NULL, m_zeropointworldmatrix);
 	}
 
 	// Retrieve the zero-point world matrix; should be preceded by a call to DeriveZeroPointWorldMatrix() to calculate the matrix
-	CMPINLINE const D3DXMATRIX *	GetZeroPointWorldMatrix(void)			{ return &m_zeropointworldmatrix; }
-	CMPINLINE const D3DXMATRIX *	GetInverseZeroPointWorldMatrix(void)	{ return &m_inversezeropointworldmatrix; }
+	CMPINLINE const XMMATRIX		GetZeroPointWorldMatrix(void)			{ return m_zeropointworldmatrix; }
+	CMPINLINE const XMMATRIX		GetInverseZeroPointWorldMatrix(void)	{ return m_inversezeropointworldmatrix; }
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
@@ -163,11 +170,12 @@ protected:
 	bool							m_containssimulationhubs;
 
 	// Translation from environment centre to its (0,0,0) point
-	D3DXVECTOR3						m_zeropointtranslation;
+	XMVECTOR						m_zeropointtranslation;
+	XMFLOAT3						m_zeropointtranslationf;
 
 	// Adjusted world matrix, which transforms to/from the element (0,0,0) point rather than the environment centre point
-	D3DXMATRIX						m_zeropointworldmatrix;
-	D3DXMATRIX						m_inversezeropointworldmatrix;
+	XMMATRIX						m_zeropointworldmatrix;
+	XMMATRIX						m_inversezeropointworldmatrix;
 
 };
 

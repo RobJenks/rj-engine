@@ -36,7 +36,7 @@ void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
 	if (m_definition)
 	{
 		// Take the standard object size if not already specified; this will also recalculate e.g. the collision radius
-		if (IsZeroVector(m_data.Extent)) SetExtent(m_definition->GetDefaultExtent());
+		if (IsZeroVector3(m_data.Extent)) SetExtent(m_definition->GetDefaultExtent());
 
 		// Also initialise the health of this instance to the max health specified in its definition, if it has not already been set
 		if (m_health == 0.0f) SetHealth(m_definition->GetMaxHealth());
@@ -191,7 +191,7 @@ StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
 		terrain->SetOrientation(ID_QUATERNION);
 
 		// Assign a default non-zero extent if none is specified in the definition
-		if (IsZeroVector(terrain->GetExtent())) terrain->SetExtent(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		if (IsZeroVector3(terrain->GetExtent())) terrain->SetExtent(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
 	}
 	terrain->ResumeUpdates();
 

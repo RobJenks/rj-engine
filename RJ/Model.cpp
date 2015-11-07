@@ -29,8 +29,8 @@ Model::Model()
 	m_vertexCount = 0;
 	m_indexCount = 0;
 	m_model = 0;
-	m_minbounds = m_maxbounds = m_modelsize = m_modelcentre = m_effectivesize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	m_actualsize = m_actualeffectivesize = m_scalingfactor = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_minbounds = m_maxbounds = m_modelsize = m_modelcentre = m_effectivesize = NULL_FLOAT3;
+	m_actualsize = m_actualeffectivesize = m_scalingfactor = NULL_FLOAT3;
 	m_elementsize = NULL_INTVECTOR3;
 
 	m_iscompound = false; 
@@ -70,7 +70,7 @@ Result Model::Initialise(const char *modelFilename, const char *textureFilename)
 }
 
 // Accepts a target effective size, then calculates a scaling factor and resizes the model data accordingly
-void Model::SetActualModelSize(D3DXVECTOR3 actualeffectivesize)
+void Model::SetActualModelSize(const XMFLOAT3 & actualeffectivesize)
 {
 	// We can accept two types of input here; either a fully-specified target size, or one dimension of the size which 
 	// is then used to calculate the desired scale and derive the other two dimensions (if we have data with which to do that)
@@ -94,15 +94,15 @@ void Model::SetActualModelSize(D3DXVECTOR3 actualeffectivesize)
 			// Test each dimension in turn; do we have the x dimension?
 			if (actualeffectivesize.x > Game::C_EPSILON) { 
 				derivedscale = actualeffectivesize.x / m_effectivesize.x;
-				m_actualeffectivesize = D3DXVECTOR3(actualeffectivesize.x, m_effectivesize.y * derivedscale, m_effectivesize.z * derivedscale);
+				m_actualeffectivesize = XMFLOAT3(actualeffectivesize.x, m_effectivesize.y * derivedscale, m_effectivesize.z * derivedscale);
 			}
 			else if (actualeffectivesize.y > Game::C_EPSILON) {
 				derivedscale = actualeffectivesize.y / m_effectivesize.y;
-				m_actualeffectivesize = D3DXVECTOR3(m_effectivesize.x * derivedscale, actualeffectivesize.y, m_effectivesize.z * derivedscale);			
+				m_actualeffectivesize = XMFLOAT3(m_effectivesize.x * derivedscale, actualeffectivesize.y, m_effectivesize.z * derivedscale);
 			}
 			else if (actualeffectivesize.z > Game::C_EPSILON) {
 				derivedscale = actualeffectivesize.z / m_effectivesize.z;
-				m_actualeffectivesize = D3DXVECTOR3(m_effectivesize.x * derivedscale, m_effectivesize.y * derivedscale, actualeffectivesize.z);
+				m_actualeffectivesize = XMFLOAT3(m_effectivesize.x * derivedscale, m_effectivesize.y * derivedscale, actualeffectivesize.z);
 			}
 			else return;
 		}
@@ -129,13 +129,13 @@ void Model::SetActualModelSize(D3DXVECTOR3 actualeffectivesize)
 	}
 
 	// Calculate a new scaling factor based upon the target actual effective size, and the model effective size
-	D3DXVECTOR3 newscale = D3DXVECTOR3(	m_actualeffectivesize.x / m_effectivesize.x, m_actualeffectivesize.y / m_effectivesize.y, 
-										m_actualeffectivesize.z / m_effectivesize.z);
+	XMFLOAT3 newscale = XMFLOAT3(	m_actualeffectivesize.x / m_effectivesize.x, m_actualeffectivesize.y / m_effectivesize.y,
+									m_actualeffectivesize.z / m_effectivesize.z);
 
 	// If the model is already scaled then we need to determine the delta scaling factor to apply at this point
-	D3DXVECTOR3 deltascale;
+	XMFLOAT3 deltascale;
 	if (m_scalingfactor.x >= Game::C_EPSILON && m_scalingfactor.y >= Game::C_EPSILON && m_scalingfactor.z >= Game::C_EPSILON)
-		deltascale = D3DXVECTOR3(newscale.x / m_scalingfactor.x, newscale.y / m_scalingfactor.y, newscale.z / m_scalingfactor.z);
+		deltascale = XMFLOAT3(newscale.x / m_scalingfactor.x, newscale.y / m_scalingfactor.y, newscale.z / m_scalingfactor.z);
 	else
 		deltascale = newscale;
 	
@@ -152,7 +152,7 @@ void Model::SetActualModelSize(D3DXVECTOR3 actualeffectivesize)
 }
 
 // Accepts a scaling factor, calculates an actual effective size and resizes the model data accordingly
-void Model::SetModelScalingFactor(D3DXVECTOR3 scalingfactor)
+void Model::SetModelScalingFactor(const XMFLOAT3 & scalingfactor)
 {
 	// Make sure we are provided an acceptable scaling parameter before continuing
 	if (scalingfactor.x <= Game::C_EPSILON || scalingfactor.y <= Game::C_EPSILON || scalingfactor.z <= Game::C_EPSILON) return;
@@ -165,11 +165,11 @@ void Model::SetModelScalingFactor(D3DXVECTOR3 scalingfactor)
 	}
 
 	// Calculate a new target actual size based upon the target actual effective size, and the model effective size
-	D3DXVECTOR3 actualeffsize = D3DXVECTOR3(	m_effectivesize.x * scalingfactor.x, m_effectivesize.y * scalingfactor.y, 
-												m_effectivesize.z * scalingfactor.z);
+	XMFLOAT3 actualeffsize = XMFLOAT3(	m_effectivesize.x * scalingfactor.x, m_effectivesize.y * scalingfactor.y,
+										m_effectivesize.z * scalingfactor.z);
 
 	// If the model is already scaled then we need to determine the delta scaling factor to apply at this point
-	D3DXVECTOR3 deltascale = D3DXVECTOR3(scalingfactor.x / m_scalingfactor.x, scalingfactor.y / m_scalingfactor.y, scalingfactor.z / m_scalingfactor.z);
+	XMFLOAT3 deltascale = XMFLOAT3(scalingfactor.x / m_scalingfactor.x, scalingfactor.y / m_scalingfactor.y, scalingfactor.z / m_scalingfactor.z);
 
 	// If the model geometry has been loaded, scale it by this delta scaling value now.  If not, we will check again when the geometry is loaded
 	if (m_geometryloaded) ScaleModelGeometry(deltascale);
@@ -181,7 +181,7 @@ void Model::SetModelScalingFactor(D3DXVECTOR3 scalingfactor)
 }
 
 // Scales the model geometry by a specified factor in each dimension
-void Model::ScaleModelGeometry(D3DXVECTOR3 scale)
+void Model::ScaleModelGeometry(const XMFLOAT3 & scale)
 {
 	// Make sure a valid scaling factor has been provided
 	if (scale.x <= Game::C_EPSILON || scale.y <= Game::C_EPSILON || scale.z <= Game::C_EPSILON) return;
@@ -210,11 +210,11 @@ void Model::ScaleModelGeometry(D3DXVECTOR3 scale)
 void Model::RecalculateDimensions(void)
 {
 	// Recalculate the model centre and total model size using the min & max bounds
-	m_modelcentre = D3DXVECTOR3(	(m_maxbounds.x + m_minbounds.x) * 0.5f,
-									(m_maxbounds.y + m_minbounds.y) * 0.5f,
-									(m_maxbounds.z + m_minbounds.z) * 0.5f );
-	m_modelsize = D3DXVECTOR3(	m_maxbounds.x - m_minbounds.x, m_maxbounds.y - m_minbounds.y,
-								m_maxbounds.z - m_minbounds.z);
+	m_modelcentre = XMFLOAT3(	(m_maxbounds.x + m_minbounds.x) * 0.5f,
+								(m_maxbounds.y + m_minbounds.y) * 0.5f,
+								(m_maxbounds.z + m_minbounds.z) * 0.5f );
+	m_modelsize = XMFLOAT3(	m_maxbounds.x - m_minbounds.x, m_maxbounds.y - m_minbounds.y,
+							m_maxbounds.z - m_minbounds.z);
 
 	// Make sure no model has zero size in any dimension, to avoid divide-by-zero errors down the line
 	if (m_modelsize.x < Game::C_EPSILON) { m_modelsize.x = 0.01f; m_maxbounds.x = m_minbounds.x + 0.01f; }
@@ -223,7 +223,7 @@ void Model::RecalculateDimensions(void)
 }
 
 // Adds a new component to the compound model
-void Model::AddCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
+void Model::AddCompoundModelComponent(Model *model, const XMFLOAT3 & offset)
 {
 	// Add to the vector if this is a valid model
 	if (!model) return;
@@ -234,12 +234,12 @@ void Model::AddCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
 }
 
 // Removes a specified component of the compound model
-void Model::RemoveCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
+void Model::RemoveCompoundModelComponent(Model *model, const XMFLOAT3 & offset)
 {
 	// Loop through the vector looking for this combination
 	for (CompoundModelComponentCollection::size_type i = 0; i < m_compoundmodelcount; ++i)
 	{
-		if (m_compoundmodels[i].model == model && m_compoundmodels[i].offset == offset)
+		if (m_compoundmodels[i].model == model && Float3NearEqual(m_compoundmodels[i].offset, offset))
 		{
 			RemoveFromVectorAtIndex<Model::CompoundModelComponent>(m_compoundmodels, i);
 			m_compoundmodelcount = m_compoundmodels.size();
@@ -249,12 +249,12 @@ void Model::RemoveCompoundModelComponent(Model *model, D3DXVECTOR3 offset)
 }
 
 // Removes a specified component of the compound model
-void Model::RemoveCompoundModelComponent(D3DXVECTOR3 offset)
+void Model::RemoveCompoundModelComponent(const XMFLOAT3 & offset)
 {
 	// Loop through the vector looking for this combination
 	for (CompoundModelComponentCollection::size_type i = 0; i < m_compoundmodelcount; ++i)
 	{
-		if (m_compoundmodels[i].offset == offset)
+		if (Float3NearEqual(m_compoundmodels[i].offset, offset))
 		{
 			RemoveFromVectorAtIndex<Model::CompoundModelComponent>(m_compoundmodels, i);
 			m_compoundmodelcount = m_compoundmodels.size();
@@ -281,18 +281,18 @@ void Model::RecalculateCompoundModelData(void)
 	m_compoundmodelcount = m_compoundmodels.size();
 
 	// We will recalculate the bounds of the model
-	D3DXVECTOR3 minbounds = D3DXVECTOR3( 999999.0f,  999999.0f,  999999.0f);
-	D3DXVECTOR3 maxbounds = D3DXVECTOR3(-999999.0f, -999999.0f, -999999.0f);
-	D3DXVECTOR3 modelmin, modelmax;
+	XMFLOAT3 minbounds = XMFLOAT3(999999.0f, 999999.0f, 999999.0f);
+	XMFLOAT3 maxbounds = XMFLOAT3(-999999.0f, -999999.0f, -999999.0f);
+	XMFLOAT3 modelmin, modelmax;
 
 	// Iterate through the component of this compound model to determine the min and max bounds of the overall model
 	Model::CompoundModelComponentCollection::const_iterator it_end = m_compoundmodels.end();
 	for (Model::CompoundModelComponentCollection::const_iterator it = m_compoundmodels.begin(); it != it_end; ++it)
 	{
 		// Retrieve the bounds of this component, allowing for the per-component offset
-		modelmin = (it->model->GetModelMinBounds() + it->offset);
-		modelmax = (it->model->GetModelMaxBounds() + it->offset);
-
+		modelmin = Float3Add(it->model->GetModelMinBounds(), it->offset);
+		modelmax = Float3Add(it->model->GetModelMaxBounds(), it->offset);
+		
 		// If this component expands the overall model bounds then record that here
 		if (modelmin.x < minbounds.x) minbounds.x = modelmin.x;
 		if (modelmin.y < minbounds.y) minbounds.y = modelmin.y;
@@ -347,9 +347,9 @@ Result Model::InitialiseBuffers(void)
 	// Load the vertex array and index array with data.
 	for (unsigned int i = 0; i < m_vertexCount; ++i)
 	{
-		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
-		vertices[i].texture = D3DXVECTOR2(m_model[i].tu, m_model[i].tv);
-		vertices[i].normal = D3DXVECTOR3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 
 		indices[i] = i;
 	}
@@ -394,11 +394,11 @@ Result Model::LoadModel(const char *filename)
 {
 	ifstream fin;
 	char input;
-	D3DXVECTOR3 bmin, bmax;
+	XMFLOAT3 bmin, bmax;
 
 	// Initialise min and max bounds before we start loading the model
-	m_minbounds = D3DXVECTOR3(99999.0f, 99999.0f, 99999.0f);
-	m_maxbounds = D3DXVECTOR3(-99999.0f, -99999.0f, -99999.0f);
+	m_minbounds = XMFLOAT3(99999.0f, 99999.0f, 99999.0f);
+	m_maxbounds = XMFLOAT3(-99999.0f, -99999.0f, -99999.0f);
 
 	// Open the model file.
 	fin.open(filename);
@@ -460,7 +460,7 @@ Result Model::LoadModel(const char *filename)
 
 	// If the model is not centred about (0,0,0) then adjust the vertex data now. This also recalculates
 	// the dependent fields by calling RecalculateDimensions() internally
-	if (!IsZeroVector(m_modelcentre))
+	if (!IsZeroFloat3(m_modelcentre))
 	{
 		CentreModelAboutOrigin();
 	}
@@ -476,8 +476,8 @@ Result Model::LoadModel(const char *filename)
 void Model::CentreModelAboutOrigin(void)
 {
 	// Determine the offset to be applied uniformly to every vertex
-	D3DXVECTOR3 offset = (-1.0f) * ((m_minbounds + m_maxbounds) * 0.5f);
-	if (IsZeroVector(offset)) return;
+	XMFLOAT3 offset = Float3MultiplyScalar(Float3Add(m_minbounds, m_maxbounds), -0.5f);
+	if (IsZeroFloat3(offset)) return;
 
 	// Loop through all vertices and apply the offset
 	// Read in the vertex data.
@@ -490,9 +490,9 @@ void Model::CentreModelAboutOrigin(void)
 	}
 
 	// Adjust the min/max vertex bounds by this known offset
-	m_minbounds += offset; 
-	m_maxbounds += offset;
-
+	m_minbounds = Float3Add(m_minbounds, offset);
+	m_maxbounds = Float3Add(m_maxbounds, offset);
+	
 	// Recalculate all derived fields that are dependent on this vertex data
 	RecalculateDimensions();
 }

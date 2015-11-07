@@ -1161,6 +1161,9 @@
     <ClInclude Include="DX11_Compatibility.h">
       <Filter>Engine\Core</Filter>
     </ClInclude>
+    <ClInclude Include="ALIGN16.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="D3DUtility.h">

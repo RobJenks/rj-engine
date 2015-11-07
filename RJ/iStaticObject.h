@@ -7,8 +7,9 @@
 
 #include "iObject.h"
 
-
-class iStaticObject : public iObject
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class iStaticObject : public ALIGN16<iStaticObject>, public iObject
 {
 public:
 

@@ -12,7 +12,7 @@
 #include <string>
 
 using namespace std;
-struct D3DXQUATERNION;
+
 class Hardpoints;
 class CoreEngine;
 class iContainsHardpoints;

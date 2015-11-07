@@ -26,8 +26,9 @@ using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
-
-class ComplexShipTile 
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ComplexShipTile : public ALIGN16<ComplexShipTile>
 {
 public:
 

@@ -18,8 +18,9 @@ class Hardpoint;
 class Hardpoints;
 class Texture;
 
-
-class ComplexShipSection : public iSpaceObject
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ComplexShipSection : public ALIGN16<ComplexShipSection>, public iSpaceObject
 {
 public:
 	
@@ -60,8 +61,8 @@ public:
 	CMPINLINE void								ClearSectionUpdateFlag(void)	{ m_sectionupdated = false; }
 
 	// Methods to retrieve and change the section position relative to its parent
-	CMPINLINE D3DXVECTOR3						GetRelativePosition(void) const	{ return m_relativepos; }
-	void										SetRelativePosition(const D3DXVECTOR3 & relativepos);
+	CMPINLINE XMVECTOR							GetRelativePosition(void) const	{ return m_relativepos; }
+	void										SetRelativePosition(const FXMVECTOR relativepos);
 
 	// Update the section based on a change to the parent ship's position or orientation
 	void										UpdatePositionFromParent(void);
@@ -70,8 +71,8 @@ public:
 	// sections are moved by their parent ship objects and cannot change their own state
 	CMPINLINE void								RefreshPositionImmediate(void) { }
 
-	CMPINLINE D3DXMATRIX *						GetSectionOffsetMatrix(void) { return &m_sectionoffsetmatrix; }
-	CMPINLINE void								SetSectionOffsetMatrix(D3DXMATRIX m) { m_sectionoffsetmatrix = m; } 
+	CMPINLINE XMMATRIX							GetSectionOffsetMatrix(void) { return m_sectionoffsetmatrix; }
+	CMPINLINE void								SetSectionOffsetMatrix(FXMMATRIX m) { m_sectionoffsetmatrix = m; } 
 
 	CMPINLINE INTVECTOR3 						GetElementLocation(void)			{ return m_elementlocation; }
 	CMPINLINE void								SetElementLocation(INTVECTOR3 loc)	{ m_elementlocation = loc; } 
@@ -113,7 +114,7 @@ public:
 	CMPINLINE float								GetTurnRate(void)				{ return m_turnrate; }
 	CMPINLINE float								GetTurnAngle(void)				{ return m_turnangle; }
 	CMPINLINE float								GetBankRate(void)				{ return m_bankrate; }
-	CMPINLINE D3DXVECTOR3						GetBankExtents(void)			{ return m_bankextent; }
+	CMPINLINE XMVECTOR							GetBankExtents(void)			{ return m_bankextent; }
 
 	// Methods to set properties directly - those which are not derived by the calculation methods above
 	CMPINLINE void								SetVelocityLimit(float v)		{ m_velocitylimit = v; }
@@ -122,7 +123,7 @@ public:
 	CMPINLINE void								SetTurnRate(float r)			{ m_turnrate = r; }
 	CMPINLINE void								SetTurnAngle(float a)			{ m_turnangle = a; }
 	CMPINLINE void								SetBankRate(float b)			{ m_bankrate = b; }
-	CMPINLINE void								SetBankExtents(D3DXVECTOR3 &e)	{ m_bankextent = e; }
+	CMPINLINE void								SetBankExtents(FXMVECTOR e)		{ m_bankextent = e; }
 
 	// Derives a new offset matrix for the section, based on its ship-related position and rotation
 	void										DeriveNewSectionOffsetMatrix(void);
@@ -158,16 +159,17 @@ public:
 
 
 private:
+
 	ComplexShip *					m_parent;					// The ship that this section belongs to
 	INTVECTOR3						m_elementlocation;			// x,y,z location of the top-top-left element, in element space
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
-	D3DXVECTOR3						m_relativepos;				// x,y,z position relative to parent ship object, in world space
+	XMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
 
 	std::vector<Hardpoint*>			m_hardpoints;				// The hardpoint collection for this ship section; simple vector HPs, which are 
 																// copied to the parent ship when the section is added
 
-	D3DXMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
+	XMMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
 
 	bool							m_sectionupdated;			// Indicates to the parent ship object that it should refresh based on its component sections next cycle
 	bool							m_suspendupdates;			// Flag that indicates all updates (via section update flag) should be suspended until updates resume
@@ -177,7 +179,7 @@ private:
 	float							m_turnrate;					// Turn rate of the ship section, incorporating base "details" value and modifiers
 	float							m_turnangle;				// Max turn angle of the ship section, incorporating base "details" value and modifiers
 	float							m_bankrate;					// Bank rate of the ship section, incorporating base "details" value and modifiers
-	D3DXVECTOR3						m_bankextent;				// Bank extents for the ship section, incorporating base "details" value and modifiers
+	XMVECTOR						m_bankextent;				// Bank extents for the ship section, incorporating base "details" value and modifiers
 	float							m_brakefactor;				// Percentage of total velocity limit we can brake per second
 	float							m_brakeamount;				// Absolute amount of velocity we can brake per second
 

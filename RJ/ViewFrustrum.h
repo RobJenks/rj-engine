@@ -17,7 +17,7 @@ class BoundingObject;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class ViewFrustrum
+class ViewFrustrum : public ALIGN16<ViewFrustrum>
 {
 public:
 	enum FrustrumPlane {

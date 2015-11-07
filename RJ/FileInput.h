@@ -34,17 +34,21 @@ namespace IO
 	void			GetStringList(char *s, char **list, int *count);
 */
 
-	D3DXVECTOR2		GetVector2FromAttr(TiXmlElement *node);
-	void			GetVector2FromAttr(TiXmlElement *node, D3DXVECTOR2 *out);
+	XMVECTOR		GetVector2FromAttr(TiXmlElement *node);
+	XMFLOAT2		GetFloat2FromAttr(TiXmlElement *node);
+	void			GetFloat2FromAttr(TiXmlElement *node, XMFLOAT2 *out);
 
-	D3DXVECTOR3		GetVector3FromAttr(TiXmlElement *node);
-	void			GetVector3FromAttr(TiXmlElement *node, D3DXVECTOR3 *out);
+	XMVECTOR		GetVector3FromAttr(TiXmlElement *node);
+	XMFLOAT3		GetFloat3FromAttr(TiXmlElement *node);
+	void			GetFloat3FromAttr(TiXmlElement *node, XMFLOAT3 *out);
 
-	D3DXVECTOR4		GetVector4FromAttr(TiXmlElement *node);
-	void			GetVector4FromAttr(TiXmlElement *node, D3DXVECTOR4 *out);
+	XMVECTOR		GetVector4FromAttr(TiXmlElement *node);
+	XMFLOAT4		GetFloat4FromAttr(TiXmlElement *node);
+	void			GetFloat4FromAttr(TiXmlElement *node, XMFLOAT4 *out);
 
-	D3DXQUATERNION	GetD3DXQUATERNIONFromAttr(TiXmlElement *node);
-	void			GetD3DXQUATERNIONFromAttr(TiXmlElement *node, D3DXQUATERNION *out);
+	CMPINLINE XMVECTOR	GetQuaternionFromAttr(TiXmlElement *node)					{ return GetVector4FromAttr(node); }
+	CMPINLINE XMFLOAT4	GetQuaternionFromAttrF(TiXmlElement *node)					{ return GetFloat4FromAttr(node); }
+	CMPINLINE void		GetQuaternionFromAttrF(TiXmlElement *node, XMFLOAT4 *out)	{ return GetFloat4FromAttr(node, out); }
 
 	INTVECTOR2		GetInt2CoordinatesFromAttr(TiXmlElement *node);
 	INTVECTOR3		GetInt3CoordinatesFromAttr(TiXmlElement *node);

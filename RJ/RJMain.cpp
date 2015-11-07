@@ -146,6 +146,7 @@ void RJMain::RunInternalClockCycle(void)
 	// Calculate the new persistent clock time based on this delta
 	Game::PersistentClockMs += Game::PersistentClockDelta;
 	Game::PersistentTimeFactor = (float)Game::PersistentClockDelta * 0.001f;
+	Game::PersistentTimeFactorV = XMVectorReplicate(Game::PersistentTimeFactor);
 
 
 	/* In-game clock */
@@ -159,6 +160,7 @@ void RJMain::RunInternalClockCycle(void)
 		// Update the clocks based on this delta value
 		Game::ClockMs += Game::ClockDelta;
 		Game::TimeFactor = (float)Game::ClockDelta * 0.001f;
+		Game::TimeFactorV = XMVectorReplicate(Game::TimeFactor);
 	}
 }
 

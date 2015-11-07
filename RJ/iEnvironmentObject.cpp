@@ -39,7 +39,7 @@ void iEnvironmentObject::MoveIntoEnvironment(iSpaceObjectEnvironment *env)
 }
 
 // Sets the position of this object relative to its parent environment, recalculating all derived fields in the process
-void iEnvironmentObject::SetEnvironmentPosition(const D3DXVECTOR3 & pos)
+void iEnvironmentObject::SetEnvironmentPosition(const FXMVECTOR pos)
 {
 	// Store the new relative position
 	m_envposition = pos;
@@ -49,7 +49,7 @@ void iEnvironmentObject::SetEnvironmentPosition(const D3DXVECTOR3 & pos)
 }
 
 // Sets the orientation of this object relative to its parent environment, recalculating all derived fields in the process
-void iEnvironmentObject::SetEnvironmentOrientation(const D3DXQUATERNION & orient)
+void iEnvironmentObject::SetEnvironmentOrientation(const FXMVECTOR orient)
 {
 	// Store the new relative orientation
 	m_envorientation = orient;
@@ -59,7 +59,7 @@ void iEnvironmentObject::SetEnvironmentOrientation(const D3DXQUATERNION & orient
 }
 
 // Sets the position & orientation of this object relative to its parent environment, recalculating all derived fields in the process
-void iEnvironmentObject::SetEnvironmentPositionAndOrientation(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient)
+void iEnvironmentObject::SetEnvironmentPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
 {
 	// Store the new relative position & orientation
 	m_envposition = pos;
@@ -74,18 +74,20 @@ void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 	if (m_parent)
 	{
 		// Transform the relative position by the parent world matrix to get this object's absolute position
-		D3DXVECTOR3 pos;
-		D3DXVec3TransformCoord(&pos, &m_envposition, m_parent->GetZeroPointWorldMatrix());
-		SetPosition(pos);
+		SetPosition(XMVector3TransformCoord(m_envposition, m_parent->GetZeroPointWorldMatrix()));
+
+		// We need to use components of the environment position vector
+		XMFLOAT3 envposf;
+		XMStoreFloat3(&envposf, m_envposition);
 
 		// Also determine the element range (usually just 1 element) that this object now exists in.  Swap Y and Z coords since we are
 		// moving from space to environment coordinates
-		INTVECTOR3 min_element = INTVECTOR3((int)floorf((m_envposition.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-		INTVECTOR3 max_element = INTVECTOR3((int)floorf((m_envposition.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
+		INTVECTOR3 min_element = INTVECTOR3((int)floorf((envposf.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
+		INTVECTOR3 max_element = INTVECTOR3((int)floorf((envposf.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
 
 		// If the element range has changed, update our record and trigger an update in the parent environment mappings
 		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
@@ -126,8 +128,8 @@ void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 	}
 
 	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance
-	D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
-	D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);		// Cache the inverse orientation matrix, (also relative to the current environment)
+	m_orientationmatrix = XMMatrixRotationQuaternion(m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
+	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);	// Cache the inverse orientation matrix, (also relative to the current environment)
 }
 
 void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
@@ -135,19 +137,21 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 	if (m_parent)
 	{
 		// Derive absolute position & orientation based on the parent object's state
-		D3DXVECTOR3 pos;
-		D3DXVec3TransformCoord(&pos, &m_envposition, m_parent->GetZeroPointWorldMatrix());
-		SetPosition(pos);
-		SetOrientation(m_envorientation * m_parent->GetOrientation());
+		SetPosition(XMVector3TransformCoord(m_envposition, m_parent->GetZeroPointWorldMatrix()));
+		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent->GetOrientation()));
+
+		// We need to use components of the environment position vector
+		XMFLOAT3 envposf;
+		XMStoreFloat3(&envposf, m_envposition);
 
 		// Also determine the element range (usually just 1 element) that this object now exists in.  Swap Y and Z coords since
 		// we are moving from space to environment coordinates
-		INTVECTOR3 min_element = INTVECTOR3((int)floorf((m_envposition.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-		INTVECTOR3 max_element = INTVECTOR3((int)floorf((m_envposition.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((m_envposition.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
+		INTVECTOR3 min_element = INTVECTOR3((int)floorf((envposf.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
+		INTVECTOR3 max_element = INTVECTOR3((int)floorf((envposf.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
+											(int)floorf((envposf.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
 
 		// If the element range has changed, update our record and trigger an update in the parent environment mappings
 		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
@@ -174,8 +178,8 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 	}
 
 	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance
-	D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
-	D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);		// Cache the inverse orientation matrix, (also relative to the current environment)
+	m_orientationmatrix = XMMatrixRotationQuaternion(m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
+	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);	// Cache the inverse orientation matrix, (also relative to the current environment)
 }
 
 
@@ -225,7 +229,8 @@ void iEnvironmentObject::CollisionWithTerrain(const GamePhysicsEngine::TerrainIm
 void iEnvironmentObject::SimulateObjectPhysics(void)
 {
 	// Compose a local momentum change vector during these operations, and then apply one transform at the end
-	D3DXVECTOR3 lm_delta = NULL_VECTOR;
+	XMFLOAT3 lm, lm_delta = NULL_FLOAT3;
+	XMStoreFloat3(&lm, PhysicsState.LocalMomentum);
 
 	// Apply gravity to the object, if it is in a non-zero gravity environment
 	ComplexShipElement *el = m_parent->GetElement(Game::PhysicalPositionToElementLocation(m_envposition));
@@ -238,21 +243,22 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	// Apply drag in the local x & z dimensions, to quickly slow the entity if it is not trying to move
 	float drag = (/*Game::C_ENVIRONMENT_MOVE_DRAG_FACTOR*/ 18.0f * Game::TimeFactor);
 	
-	if		(PhysicsState.LocalMomentum.x > 0.0f) lm_delta.x = -min(drag, PhysicsState.LocalMomentum.x);
-	else if (PhysicsState.LocalMomentum.x < 0.0f) lm_delta.x = min(drag, -PhysicsState.LocalMomentum.x);
+	if		(lm.x > 0.0f) lm_delta.x = -min(drag, lm.x);
+	else if (lm.x < 0.0f) lm_delta.x = min(drag, -lm.x);
 
-	if		(PhysicsState.LocalMomentum.z > 0.0f) lm_delta.z = -min(drag, PhysicsState.LocalMomentum.z);
-	else if (PhysicsState.LocalMomentum.z < 0.0f) lm_delta.z = min(drag, -PhysicsState.LocalMomentum.z);
+	if		(lm.z > 0.0f) lm_delta.z = -min(drag, lm.z);
+	else if (lm.z < 0.0f) lm_delta.z = min(drag, -lm.z);
 
 
 	// We have now composed all dimensions of the delta local momentum vector; apply it to the object now
-	ApplyLocalLinearForceDirect(lm_delta);
+	ApplyLocalLinearForceDirect(XMLoadFloat3(&lm_delta));
 
 	// If we have momentum then apply the change to our position now
-	if (!IsZeroVector(PhysicsState.WorldMomentum))
+	if (!IsZeroVector3(PhysicsState.WorldMomentum))
 	{
 		// Move the object based on its external momentum, relative to the environment
-		SetEnvironmentPosition(m_envposition + (PhysicsState.WorldMomentum * Game::TimeFactor));
+		SetEnvironmentPosition(XMVectorAdd(	m_envposition,
+											XMVectorScale(PhysicsState.WorldMomentum, Game::TimeFactor)));
 	}
 }
 

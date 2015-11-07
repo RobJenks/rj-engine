@@ -10,7 +10,9 @@ class iObject;
 class Hardpoint;
 class Hardpoints;
 
-class SimpleShip : public Ship
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class SimpleShip : public ALIGN16<SimpleShip>, public Ship
 {
 
 public:
@@ -35,17 +37,6 @@ public:
 	// Recalculates the ship statistics based on its current state & loadout.  Called when the ship state changes during operation
 	void				RecalculateShipDataFromCurrentState(void);
 
-
-	// Methods to recalculate properties of this ship based on its configuration and current state
-	void				CalculateShipSizeData(void);		// Recalculates ship size data based on mesh & vertex positions
-	void				CalculateShipMass(void);			// Recalculate the total ship mass based on all contributing factors
-	void				CalculateVelocityLimits(void);		// Recalculates velocity limit based on all contributing factors
-	void				CalculateBrakeFactor(void);			// Recalculates brake factors for the ship (dependent on velocity limit)
-	void				CalculateTurnRate(void);			// Recalculates the overall turn rate based on all contributing factors
-	void				CalculateBankRate(void);			// Recalculates the overall turn bank based on all contributing factors
-	void				CalculateBankExtents(void);			// Recalculates the ship banking extents based on all contributing factors
-	void				CalculateEngineStatistics(void);	// Recalculates the ship data derived from its engine capabilities
-
 	// Methods to create a new ship based on the specified template details
 	static SimpleShip *SimpleShip::Create(const string &code);
 	static SimpleShip *SimpleShip::Create(SimpleShip *template_ship);
@@ -56,12 +47,12 @@ public:
 	Result SimpleShip::AddLoadout(SimpleShip *s, SimpleShipLoadout *loadout);
 
 	// Derive a camera matrix from the ship position/orientation, for use in player flying and tracking of ships
-	void DeriveActualCameraMatrix(D3DXMATRIX &camoffset);
+	XMMATRIX DeriveActualCameraMatrix(void);
 
 	// Camera data for when this ship is being controlled by the player
-	D3DXVECTOR3		CameraPosition;			// Coordinates of the camera position
-	D3DXVECTOR3		CameraRotation;			// Pitch/yaw/roll for the camera, relative to this ship
-	D3DXMATRIX		CameraPositionMatrix;	// Efficiency measure; matrix derived from the camera position & orientation
+	XMVECTOR		CameraPosition;			// Coordinates of the camera position
+	XMVECTOR		CameraRotation;			// Pitch/yaw/roll for the camera, relative to this ship
+	XMMATRIX		CameraPositionMatrix;	// Efficiency measure; matrix derived from the camera position & orientation
 	float			CameraElasticity;		// The amount by which the camera can deviate from centre when maneuvering
 
 
@@ -73,7 +64,16 @@ public:
 
 protected:
 
-	
+	// Methods to recalculate properties of this ship based on its configuration and current state
+	void				CalculateShipSizeData(void);		// Recalculates ship size data based on mesh & vertex positions
+	void				CalculateShipMass(void);			// Recalculate the total ship mass based on all contributing factors
+	void				CalculateVelocityLimits(void);		// Recalculates velocity limit based on all contributing factors
+	void				CalculateBrakeFactor(void);			// Recalculates brake factors for the ship (dependent on velocity limit)
+	void				CalculateTurnRate(void);			// Recalculates the overall turn rate based on all contributing factors
+	void				CalculateBankRate(void);			// Recalculates the overall turn bank based on all contributing factors
+	void				CalculateBankExtents(void);			// Recalculates the ship banking extents based on all contributing factors
+	void				CalculateEngineStatistics(void);	// Recalculates the ship data derived from its engine capabilities
+
 
 };
 

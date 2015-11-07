@@ -49,12 +49,14 @@ namespace Game {
 
 	// Persistent timers, that progress regardless of the state of the game simulation
 	float PersistentTimeFactor = 0.0001f;												// Time (secs) passed since the previous frame
+	XMVECTOR PersistentTimeFactorV = XMVectorReplicate(PersistentTimeFactor);			// Time (secs) passed since the previous frame (vectorised form)
 	unsigned int PersistentClockMs = 0U;												// System time (ms)
 	unsigned int PreviousPersistentClockMs = 0U;										// System time (ms) on the previous cycle
 	unsigned int PersistentClockDelta = 0U;												// Delta time (ms) since the previous frame
 
 	// Game timers, that stop and start as the game pause state is changed
 	float TimeFactor = 0.0001f;															// Time (secs) passed since the previous frame
+	XMVECTOR TimeFactorV = XMVectorReplicate(TimeFactor);								// Time (secs) passed since the previous frame (vectorised form)
 	unsigned int ClockMs = 0U;															// System time (ms)
 	unsigned int PreviousClockMs = 0U;													// System time (ms) on the previous cycle
 	unsigned int ClockDelta = 0U;														// Delta time (ms) since the previous frame
@@ -202,10 +204,15 @@ namespace Game {
 	float C_DUST_PARTICLE_BLEND_RATE = 0.25f;		// The percentage of total colour blended in each second as particles are created
 
 	// Complex ship constants
-	float C_CS_ELEMENT_SCALE = 10.0f;								// The physical size of each CS element in space
-	float C_CS_ELEMENT_MIDPOINT = C_CS_ELEMENT_SCALE * 0.5f;		// Midpoint of an element in each dimension
-	float C_CS_ELEMENT_SCALE_RECIP = (1.0f / C_CS_ELEMENT_SCALE);	// Reiprocal of the element scale (1.0f/scale)
-	float C_CS_PERIMETER_BEACON_FREQUENCY = 400.0f;					// The (approx, max) spacing between perimeter beacons on a capital ship
+	float C_CS_ELEMENT_SCALE = 10.0f;													// The physical size of each CS element in space
+	float C_CS_ELEMENT_MIDPOINT = C_CS_ELEMENT_SCALE * 0.5f;							// Midpoint of an element in each dimension
+	float C_CS_ELEMENT_SCALE_RECIP = (1.0f / C_CS_ELEMENT_SCALE);						// Reciprocal of the element scale (1.0f/scale)
+	XMVECTOR C_CS_ELEMENT_SCALE_V = XMVectorReplicate(C_CS_ELEMENT_SCALE);				// The physical size of each CS element in space (replicated vector form)
+	XMVECTOR C_CS_ELEMENT_MIDPOINT_V = XMVectorReplicate(C_CS_ELEMENT_MIDPOINT);		// Midpoint of an element in each dimension  (replicated vector form)
+	XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V = XMVectorReplicate(C_CS_ELEMENT_SCALE_RECIP);	// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
+	float C_CS_PERIMETER_BEACON_FREQUENCY = 400.0f;										// The (approx, max) spacing between perimeter beacons on a capital ship
+	XMVECTOR C_CS_PERIMETER_BEACON_FREQUENCY_V = 
+		XMVectorReplicate(C_CS_PERIMETER_BEACON_FREQUENCY);								// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)
 
 	// AI, order management and ship computer constants
 	float C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL = 0.1f;		// The default interval for evaluation by the ship flight computer
@@ -222,7 +229,7 @@ namespace Game {
 	float C_ACTOR_DEFAULT_HEAD_BOB_AMOUNT = 0.2f;								// Default height that the player head bob will reach when controlling an actor
 	float C_ACTOR_DEFAULT_JUMP_STRENGTH = 1.0f;									// Default jump strength, as a modifier relative to the actor mass (so resulting
 																				// in a force of equal strength regardless of mass)
-	D3DXVECTOR3 C_ACTOR_DEFAULT_VIEW_OFFSET = D3DXVECTOR3(0.0f, 5.0f, 0.0f);	// Default offset of the player view when controlling an actor, 
+	XMFLOAT3 C_ACTOR_DEFAULT_VIEW_OFFSET = XMFLOAT3(0.0f, 5.0f, 0.0f);			// Default offset of the player view when controlling an actor, 
 																				// if not set directly by the actor
 
 	// Pathfinding constants

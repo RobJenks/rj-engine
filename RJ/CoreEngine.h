@@ -58,7 +58,7 @@ const float SCREEN_NEAR = 0.1f;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class CoreEngine : public iAcceptsConsoleCommands
+class CoreEngine : public ALIGN16<CoreEngine>, public iAcceptsConsoleCommands
 {
 public:
 	int tmprot;
@@ -204,14 +204,14 @@ public:
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, CXMVECTOR highlight)
+	CMPINLINE void			RenderModel(Model *model, FXMVECTOR highlight, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, highlight);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, const CXMVECTOR position, float alpha)
+	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		m_instanceparams = XMVectorReplicate(alpha);
@@ -219,10 +219,10 @@ public:
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world, const CXMVECTOR position, const XMFLOAT3 & highlight, float alpha)
+	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, const FXMVECTOR highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMVectorSet(highlight.x, highlight.y, highlight.z, alpha);
+		m_instanceparams = XMVectorSetW(highlight, alpha);
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
 	}
 

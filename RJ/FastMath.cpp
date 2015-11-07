@@ -105,7 +105,7 @@ const XMFLOAT4X4 *GetRotationMatrixF(Rotation90Degree rot)
 		default:								return &ROT_MATRIX_0_F;			break;
 	}
 }
-XMFLOAT4X4 GetRotationMatrixInstance(Rotation90Degree rot)
+XMFLOAT4X4 GetRotationMatrixInstanceF(Rotation90Degree rot)
 {
 	switch (rot)
 		{
@@ -195,7 +195,7 @@ XMVECTOR ScaleVector3WithinMagnitudeLimit(FXMVECTOR vec, float magnitude)
 }
 
 // Scales a vector to ensure that the (absolute) value of any component does not exceed 'magnitude', with all other components scaled accordingly
-void ScaleVectorWithinMagnitudeLimit(XMFLOAT3 &vec, float magnitude)
+void ScaleVector3WithinMagnitudeLimit(XMFLOAT3 &vec, float magnitude)
 {
 	float mx = max(max(fabs(vec.x), fabs(vec.y)), fabs(vec.z));
 	if (mx > magnitude)

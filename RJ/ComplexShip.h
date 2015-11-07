@@ -17,7 +17,9 @@ class CapitalShipPerimeterBeacon;
 class NavNetwork;
 class StaticTerrain;
 
-class ComplexShip : public iSpaceObjectEnvironment
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ComplexShip : public ALIGN16<ComplexShip>, public iSpaceObjectEnvironment
 {
 public:
 	
@@ -48,7 +50,7 @@ public:
 	void										ElementLayoutChanged(void);					// When the layout (e.g. active/walkable state, connectivity) of elements is changed
 
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
-	void										MoveIntoSpaceEnvironment(SpaceSystem *system, const D3DXVECTOR3 & location);
+	void										MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
 
 	// Builds the complex ship hardpoint collection based on its constituent ship sections
 	void										BuildHardpointCollection(void);
@@ -108,7 +110,7 @@ public:
 	void										GenerateCapitalShipPerimeterBeacons(void);
 
 	// Method to attach a capital ship perimeter beacon to the ship at the specified location
-	void										AttachCapitalShipBeacon(D3DXVECTOR3 position);
+	void										AttachCapitalShipBeacon(FXMVECTOR position);
 	CMPINLINE const PerimeterBeaconCollection *	GetPerimeterBeaconCollection(void) { return &m_perimeterbeacons; }
 
 	// Recalculates the ship position.  Extends on the method of the base Ship class
@@ -124,17 +126,6 @@ public:
 
 	// Recalculates the ship statistics based on its current state & loadout.  Called when the ship state changes during operation
 	void				RecalculateShipDataFromCurrentState(void);
-
-
-	// Methods to recalculate properties of this ship based on its configuration and current state
-	void				CalculateShipSizeData(void);		// Recalculates ship size data by combining component section data
-	void				CalculateShipMass();				// Recalculate the total ship mass based on all contributing factors
-	void				CalculateVelocityLimits();			// Recalculates velocity limits based on all contributing factors
-	void				CalculateBrakeFactor();				// Recalculates ship brake factor based on all factors.  Dependent on velocity limit
-	void				CalculateTurnRate();				// Recalculates the overall turn rate based on all contributing factors
-	void				CalculateBankRate();				// Recalculates the rate at which the ship will bank on turning
-	void				CalculateBankExtents();				// Recalculates the maximum extent in each dimension that the ship can bank
-	void				CalculateEngineStatistics(void);	// Recalculates the ship data derived from its engine capabilities
 
 	// Methods to force rendering of a ship interior even when it does not otherwise meet any criteria for doing so
 	bool										InteriorShouldAlwaysBeRendered(void) const	{ return m_forcerenderinterior; }
@@ -206,6 +197,16 @@ protected:
 	// Deallocates and clears the set of capital ship perimeter beacons attached to this ship
 	void										ShutdownPerimeterBeacons(void);
 
+
+	// Methods to recalculate properties of this ship based on its configuration and current state
+	void										CalculateShipSizeData(void);		// Recalculates ship size data by combining component section data
+	void										CalculateShipMass();				// Recalculate the total ship mass based on all contributing factors
+	void										CalculateVelocityLimits();			// Recalculates velocity limits based on all contributing factors
+	void										CalculateBrakeFactor();				// Recalculates ship brake factor based on all factors.  Dependent on velocity limit
+	void										CalculateTurnRate();				// Recalculates the overall turn rate based on all contributing factors
+	void										CalculateBankRate();				// Recalculates the rate at which the ship will bank on turning
+	void										CalculateBankExtents();				// Recalculates the maximum extent in each dimension that the ship can bank
+	void										CalculateEngineStatistics(void);	// Recalculates the ship data derived from its engine capabilities
 
 };
 

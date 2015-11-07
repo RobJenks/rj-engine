@@ -221,7 +221,7 @@ Result ComplexShipElement::InitialiseElementStorage(ComplexShipElement ***elemen
 	INTVECTOR3 srcsize;
 
 	// Sanity check to make sure we have been passed valid parameters
-	if (!elements || elementsize.IsZeroVector()) return ErrorCodes::CannotInitialiseElementSpaceWithInvalidParams;
+	if (!elements || elementsize.IsZeroVector3()) return ErrorCodes::CannotInitialiseElementSpaceWithInvalidParams;
 
 	// Determine whether we are also copying source element data during initialisation
 	bool havesource = (copysource != NULL);
@@ -634,42 +634,42 @@ ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(strin
 }
 
 // Returns the coordinates of a point on the specified edge of an element
-D3DXVECTOR3 ComplexShipElement::GetEdgePosition(Direction direction)
+XMFLOAT3 ComplexShipElement::GetEdgePosition(Direction direction)
 {
 	static const float midpoint = Game::C_CS_ELEMENT_SCALE / 2.0f;
 
 	// Return a different position depending on the edge specified
 	switch (direction)
 	{
-		case Direction::Left:			return D3DXVECTOR3(0, 0, midpoint);
-		case Direction::Up:				return D3DXVECTOR3(midpoint, 0, 0);
-		case Direction::Right:			return D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, 0, midpoint);
-		case Direction::Down:			return D3DXVECTOR3(midpoint, 0, Game::C_CS_ELEMENT_SCALE);
-		case Direction::UpLeft:			return D3DXVECTOR3(0, 0, 0);
-		case Direction::UpRight:		return D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, 0, 0);
-		case Direction::DownRight:		return D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, 0, Game::C_CS_ELEMENT_SCALE);
-		case Direction::DownLeft:		return D3DXVECTOR3(0, 0, Game::C_CS_ELEMENT_SCALE);
-		case Direction::ZUp:			return D3DXVECTOR3(midpoint, Game::C_CS_ELEMENT_SCALE, midpoint);
-		case Direction::ZDown:			return D3DXVECTOR3(midpoint, 0, midpoint);
-		default:						return D3DXVECTOR3(midpoint, midpoint, midpoint);
+		case Direction::Left:			return XMFLOAT3(0, 0, midpoint);
+		case Direction::Up:				return XMFLOAT3(midpoint, 0, 0);
+		case Direction::Right:			return XMFLOAT3(Game::C_CS_ELEMENT_SCALE, 0, midpoint);
+		case Direction::Down:			return XMFLOAT3(midpoint, 0, Game::C_CS_ELEMENT_SCALE);
+		case Direction::UpLeft:			return XMFLOAT3(0, 0, 0);
+		case Direction::UpRight:		return XMFLOAT3(Game::C_CS_ELEMENT_SCALE, 0, 0);
+		case Direction::DownRight:		return XMFLOAT3(Game::C_CS_ELEMENT_SCALE, 0, Game::C_CS_ELEMENT_SCALE);
+		case Direction::DownLeft:		return XMFLOAT3(0, 0, Game::C_CS_ELEMENT_SCALE);
+		case Direction::ZUp:			return XMFLOAT3(midpoint, Game::C_CS_ELEMENT_SCALE, midpoint);
+		case Direction::ZDown:			return XMFLOAT3(midpoint, 0, midpoint);
+		default:						return XMFLOAT3(midpoint, midpoint, midpoint);
 	}
 }
 
 // Returns the coordinates of the point on the specified edge of an element
-D3DXVECTOR3 ComplexShipElement::GetAdjacentElementCentrePosition(Direction direction)
+XMFLOAT3 ComplexShipElement::GetAdjacentElementCentrePosition(Direction direction)
 {
 	static const float midpoint = Game::C_CS_ELEMENT_SCALE / 2.0f;
 
 	// Return a different position depending on the direction specified
 	switch (direction)
 	{
-		case Direction::Left:			return D3DXVECTOR3(-midpoint, 0, midpoint);
-		case Direction::Up:				return D3DXVECTOR3(midpoint, 0, -midpoint);
-		case Direction::Right:			return D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE + midpoint, 0, midpoint);
-		case Direction::Down:			return D3DXVECTOR3(midpoint, 0, Game::C_CS_ELEMENT_SCALE + midpoint);
-		case Direction::ZUp:			return D3DXVECTOR3(midpoint, Game::C_CS_ELEMENT_SCALE + midpoint, midpoint);
-		case Direction::ZDown:			return D3DXVECTOR3(midpoint, -midpoint, midpoint);
-		default:						return D3DXVECTOR3(midpoint, midpoint, midpoint);	// Note: this doesn't mean much for an adjacent element, would cause issues
+		case Direction::Left:			return XMFLOAT3(-midpoint, 0, midpoint);
+		case Direction::Up:				return XMFLOAT3(midpoint, 0, -midpoint);
+		case Direction::Right:			return XMFLOAT3(Game::C_CS_ELEMENT_SCALE + midpoint, 0, midpoint);
+		case Direction::Down:			return XMFLOAT3(midpoint, 0, Game::C_CS_ELEMENT_SCALE + midpoint);
+		case Direction::ZUp:			return XMFLOAT3(midpoint, Game::C_CS_ELEMENT_SCALE + midpoint, midpoint);
+		case Direction::ZDown:			return XMFLOAT3(midpoint, -midpoint, midpoint);
+		default:						return XMFLOAT3(midpoint, midpoint, midpoint);	// Note: this doesn't mean much for an adjacent element, would cause issues
 	}
 }
 

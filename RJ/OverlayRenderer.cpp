@@ -429,7 +429,7 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 
 void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness)
 {
 	// Make sure the OBB is valid
-	if (IsZeroVector(obb.Data.Extent)) return;
+	if (IsZeroVector3(obb.Data.Extent)) return;
 
 	// Get the vertices that make up this OBB
 	D3DXVECTOR3 v[8];

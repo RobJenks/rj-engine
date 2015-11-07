@@ -21,7 +21,8 @@ template <class Octree> class MemoryPool;
 #define OCTREE_SE_DOWN		6
 #define OCTREE_SW_DOWN		7
 
-
+// Cannot be set as 16-bit aligned here due to the template specification.  Instead, all members requiring alignment
+// are declared with __declspec(align(16)) within the class members below
 template <typename T> 
 class Octree
 {
@@ -79,17 +80,17 @@ public:
 	void							GetItems(std::vector<T> & outResult);
 
 	// Determines whether this node contains the specified point.  Simple comparison to node bounds
-	CMPINLINE bool					ContainsPoint(const D3DXVECTOR3 & point);
+	CMPINLINE bool					ContainsPoint(const FXMVECTOR point);
 
 	// Returns a pointer to the specified child node (use OCTREE_*_* as index)
 	CMPINLINE Octree<T> *			GetChildNode(int child_index)	{ return m_children[child_index]; }
 
 	// Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
 	// about the 3D centre point
-	CMPINLINE int					GetRelevantChildNode(const D3DXVECTOR3 & point);
+	CMPINLINE int					GetRelevantChildNode(const FXMVECTOR point);
 
 	// Returns a pointer to the node containing the specified point.  Returns NULL if point is not within the tree bounds
-	CMPINLINE Octree<T> *			GetNodeContainingPoint(const D3DXVECTOR3 & point);
+	CMPINLINE Octree<T> *			GetNodeContainingPoint(const FXMVECTOR point);
 
 	// Shutdown method.  Moves recursively down the tree, deallocating resources as it goes
 	void							Shutdown(void);
@@ -132,10 +133,6 @@ public:
 	// Debug method to generate a string output of an Octree and its recursively-defined children
 	string							DebugOutput(void);
 
-	// Constructs and returns a vector holding the min or max bounds for this node
-	D3DXVECTOR3						ConstructMinBoundsVector(void)		{ return D3DXVECTOR3(m_xmin, m_ymin, m_zmin); }
-	D3DXVECTOR3						ConstructMaxBoundsVector(void)		{ return D3DXVECTOR3(m_xmax, m_ymax, m_zmax); }
-
 	// Debug method to render node bounds in 3D space
 	void							DebugRender(bool include_children);
 
@@ -157,9 +154,14 @@ public:			// We will allow public access to member variables for efficiency.  On
 	float										m_xmin, m_xmax;
 	float										m_ymin, m_ymax;
 	float										m_zmin, m_zmax;
+	
+	// Also store node extents in vector form
+	__declspec(align(16)) XMVECTOR				m_min;		// 16-bit aligned to allow SIMD/SSE instruction sets
+	__declspec(align(16)) XMVECTOR				m_max;		// 16-bit aligned to allow SIMD/SSE instruction sets
 
 	// Precalculated centre point of the node, based on bounds.  Used to determine which subdivision is relevant for a particular position
-	D3DXVECTOR3									m_centre;
+	__declspec(align(16)) XMVECTOR				m_centre;	// 16-bit aligned to allow SIMD/SSE instruction sets
+	XMFLOAT3									m_centref;	// Maintain to allow easy per-component operations
 
 	// Precalculated size of the node in each dimension
 	float										m_size;
@@ -185,7 +187,8 @@ public:
 			SafeDelete(_MemoryPool);
 		}
 	}
-};
+};		
+
 
 
 // (Begin cpp file)
@@ -197,20 +200,24 @@ MemoryPool<Octree<T>> * Octree<T>::_MemoryPool = new MemoryPool<Octree<T>>();
 
 // Constructor for the root node.  Params specify the position, and length of each edge of the covered area.
 template <typename T> 
-Octree<T>::Octree(D3DXVECTOR3 position, float areasize) :	m_areasize(areasize), m_size(areasize),
-															m_parent(0),
-															m_xmin(position.x), m_ymin(position.y), m_zmin(position.z),
-															m_xmax(position.x + areasize), 
-															m_ymax(position.y + areasize), 
-															m_zmax(position.z + areasize)
+Octree<T>::Octree(CXMVECTOR position, float areasize) :	m_areasize(areasize), m_size(areasize), m_parent(0)															
 {
 	// Make sure we have been given a valid size parameter; if not, this is an unrecoverable error
 	if (areasize <= 0) throw 1;
 
-	// Precalculate the node centre point for future subdivisions
-	m_centre.x = (m_xmin + m_xmax) * 0.5f;
-	m_centre.y = (m_ymin + m_ymax) * 0.5f;
-	m_centre.z = (m_zmin + m_zmax) * 0.5f;
+	// Store the position data locally, and vectorise the area size, for the following calculations
+	XMFLOAT3 pos; XMStoreFloat3(&pos, position);
+	XMVECTOR asize = XMVectorReplicate(areasize);
+
+	// Store the minimum and maximum bounds
+	m_xmin = pos.x; m_ymin = pos.y; m_zmin = pos.z;
+	m_xmax = m_xmin + areasize; m_ymax = m_ymin + areasize; m_zmax = m_zmin + areasize;
+
+	// Store the vectorised bounds and centre point of the node
+	m_min = XMVectorSet(m_xmin, m_ymin, m_zmin, 0.0f);
+	m_max = XMVectorSet(m_xmax, m_ymax, m_zmax, 0.0f);
+	m_centre = XMVectorScale(XMVectorAdd(m_min, m_max), 0.5f);
+	XMStoreFloat3(&m_centref, m_centre);
 
 	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
@@ -248,9 +255,10 @@ void Octree<T>::Initialise(Octree<T> *parent, float x0, float x1, float y0, floa
 	m_areasize = m_parent->GetAreaSize();
 
 	// Precalculate the node centre point and node size for future subdivisions
-	m_centre.x = (m_xmin + m_xmax) * 0.5f;
-	m_centre.y = (m_ymin + m_ymax) * 0.5f;
-	m_centre.z = (m_zmin + m_zmax) * 0.5f;
+	m_min = XMVectorSet(m_xmin, m_ymin, m_zmin, 0.0f);
+	m_max = XMVectorSet(m_xmax, m_ymax, m_zmax, 0.0f);
+	m_centre = XMVectorScale(XMVectorAdd(m_min, m_max), 0.5f);
+	XMStoreFloat3(&m_centref, m_centre);
 
 	// Initialise the child storage to null
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);
@@ -267,7 +275,7 @@ void Octree<T>::Initialise(Octree<T> *parent, float x0, float x1, float y0, floa
 // Adds an item to this node.  Node will automatically handle subdivision if necessary to remain under item limit
 // Returns a pointer to the node that now contains the item (it may not be this one)
 template <typename T> 
-Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
+Octree<T> * Octree<T>::AddItem(T item, const FXMVECTOR pos)
 {
 	// Parameter check
 	if (!item) return NULL;
@@ -305,24 +313,24 @@ Octree<T> * Octree<T>::AddItem(T item, const D3DXVECTOR3 & pos)
 			// We need to partition the tree node to avoid going over the per-node item limit
 			// We will request a new node for each child from the memory pool and assign its parameters accordingly
 			m_children[OCTREE_NW_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NW_DOWN]->Initialise(this, m_xmin, m_centre.x, m_ymin, m_centre.y, m_centre.z, m_zmax);
+			m_children[OCTREE_NW_DOWN]->Initialise(this, m_xmin, m_centref.x, m_ymin, m_centref.y, m_centref.z, m_zmax);
 			m_children[OCTREE_NE_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NE_DOWN]->Initialise(this, m_centre.x, m_xmax, m_ymin, m_centre.y, m_centre.z, m_zmax);
+			m_children[OCTREE_NE_DOWN]->Initialise(this, m_centref.x, m_xmax, m_ymin, m_centref.y, m_centref.z, m_zmax);
 			m_children[OCTREE_SE_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SE_DOWN]->Initialise(this, m_centre.x, m_xmax, m_ymin, m_centre.y, m_zmin, m_centre.z);
+			m_children[OCTREE_SE_DOWN]->Initialise(this, m_centref.x, m_xmax, m_ymin, m_centref.y, m_zmin, m_centref.z);
 			m_children[OCTREE_SW_DOWN] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SW_DOWN]->Initialise(this, m_xmin, m_centre.x, m_ymin, m_centre.y, m_zmin, m_centre.z);
+			m_children[OCTREE_SW_DOWN]->Initialise(this, m_xmin, m_centref.x, m_ymin, m_centref.y, m_zmin, m_centref.z);
 			m_children[OCTREE_NW_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NW_UP]->Initialise(this, m_xmin, m_centre.x, m_centre.y, m_ymax, m_centre.z, m_zmax);
+			m_children[OCTREE_NW_UP]->Initialise(this, m_xmin, m_centref.x, m_centref.y, m_ymax, m_centref.z, m_zmax);
 			m_children[OCTREE_NE_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_NE_UP]->Initialise(this, m_centre.x, m_xmax, m_centre.y, m_ymax, m_centre.z, m_zmax);
+			m_children[OCTREE_NE_UP]->Initialise(this, m_centref.x, m_xmax, m_centref.y, m_ymax, m_centref.z, m_zmax);
 			m_children[OCTREE_SE_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SE_UP]->Initialise(this, m_centre.x, m_xmax, m_centre.y, m_ymax, m_zmin, m_centre.z);
+			m_children[OCTREE_SE_UP]->Initialise(this, m_centref.x, m_xmax, m_centref.y, m_ymax, m_zmin, m_centref.z);
 			m_children[OCTREE_SW_UP] = Octree::_MemoryPool->RequestItem();
-			m_children[OCTREE_SW_UP]->Initialise(this, m_xmin, m_centre.x, m_centre.y, m_ymax, m_zmin, m_centre.z);
+			m_children[OCTREE_SW_UP]->Initialise(this, m_xmin, m_centref.x, m_centref.y, m_ymax, m_zmin, m_centref.z);
 
 			// We now need to reallocate our current items to these new child nodes
-			D3DXVECTOR3 itempos; T move;
+			XMVECTOR itempos; T move;
 			for (int i = 0; i < m_itemcount; ++i)
 			{
 				// Make sure the item is valid, then get its position
@@ -430,10 +438,10 @@ bool Octree<T>::RemoveItemRecursive(T item)
 // Tests whether a moving item is still valid within this node, or whether it needs to be moved to another node in the tree
 // Assumes that the item passed is indeed already part of this node.  'pos' is the new position of the item.
 template <typename T> 
-void Octree<T>::ItemMoved(T item, D3DXVECTOR3 pos)
+void Octree<T>::ItemMoved(T item, FXMVECTOR pos)
 {
 	// We can quit immediately if the item still fits within our bounds (the overwhelmingly likely case)
-	if (pos.x >= m_xmin && pos.x < m_xmax && pos.y >= m_ymin && pos.y < m_ymax && pos.z >= m_zmin && pos.z < m_zmax) return;
+	if (XMVector3GreaterOrEqual(pos, m_min) && XMVector3Less(pos, m_max)) return; 
 
 	// The item no longer fits within this node; remove it
 	RemoveItem(item);
@@ -534,8 +542,7 @@ template <typename T>
 void Octree<T>::DebugRender(bool include_children)
 {
 	// Create a world matrix that will translate the rendered box into position
-	D3DXMATRIX world;
-	D3DXMatrixTranslation(&world, m_xmin, m_ymin, m_zmin);
+	XMMATRIX world = XMMatrixTranslationFromVector(m_min);
 
 	// Send a request to the overlay renderer to render this node of the tree
 	Game::Engine->GetOverlayRenderer()->RenderBox(world, 
@@ -668,9 +675,9 @@ void Octree<T>::PerformPruningCheck(void)
 
 // Determines whether this node contains the specified point.  Simple comparison to node bounds
 template <typename T>
-CMPINLINE bool Octree<T>::ContainsPoint(const D3DXVECTOR3 & point)
+CMPINLINE bool Octree<T>::ContainsPoint(const FXMVECTOR point)
 {
-	return (point.x >= m_xmin && point.x < m_xmax && point.y >= m_ymin && point.y < m_ymax && point.z >= m_zmin && point.z < m_zmax);
+	return (XMVector3GreaterOrEqual(point, m_min) && XMVector3Less(point, m_max));
 }
 
 // Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
@@ -678,15 +685,15 @@ CMPINLINE bool Octree<T>::ContainsPoint(const D3DXVECTOR3 & point)
 template <typename T>
 CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 {
-	if (point.x < m_centre.x) {						// West of centre
-		if (point.y < m_centre.y) {					// Below centre
-			if (point.z < m_centre.z) {				// South of centre
+	if (point.x < m_centref.x) {						// West of centre
+		if (point.y < m_centref.y) {					// Below centre
+			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SW_DOWN;					// --> We want the SW-down node
 			} else {								// North of centre
 				return OCTREE_NW_DOWN;					// --> We want the NW-down node
 			} 
 		} else {									// Above centre
-			if (point.z < m_centre.z) {				// South of centre
+			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SW_UP;					// --> We want the SW-up node
 			}	
 			else {									// North of centre
@@ -694,14 +701,14 @@ CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 			}
 		} 
 	} else {										// East of centre
-		if (point.y < m_centre.y) {					// Below centre
-			if (point.z < m_centre.z) {				// South of centre
+		if (point.y < m_centref.y) {					// Below centre
+			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SE_DOWN;					// --> We want the SE-down node
 			} else {								// North of centre
 				return OCTREE_NE_DOWN;					// --> We want the NE-down node
 			} 
 		} else {									// Above centre
-			if (point.z < m_centre.z) {				// South of centre
+			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SE_UP;					// --> We want the SE-up node
 			} else {								// North of centre
 				return OCTREE_NE_UP;					// --> We want the NE-up node
@@ -712,7 +719,7 @@ CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
 
 // Returns a pointer to the node containing the specified point.  Returns NULL if point is not within the tree bounds
 template <typename T>
-CMPINLINE Octree<T> * Octree<T>::GetNodeContainingPoint(const D3DXVECTOR3 & point)
+CMPINLINE Octree<T> * Octree<T>::GetNodeContainingPoint(const FXMVECTOR point)
 {
 	// First make sure this node actually contains the point; if not, traverse up to parents as far as possible
 	Octree<T> *node = this;

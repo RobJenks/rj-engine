@@ -64,12 +64,14 @@ namespace Game {
 
 	// Persistent timers, that progress regardless of the state of the game simulation
 	extern float PersistentTimeFactor;					// Time (secs) passed since the previous frame
+	extern XMVECTOR PersistentTimeFactorV;				// Time (secs) passed since the previous frame (vectorised form)
 	extern unsigned int PersistentClockMs;				// System time (ms)
 	extern unsigned int PreviousPersistentClockMs;		// System time (ms) on the previous cycle
 	extern unsigned int PersistentClockDelta;			// Delta time (ms) since the previous frame
 
 	// Game timers, that stop and start as the game pause state is changed
 	extern float TimeFactor;							// Time (secs) passed since the previous frame
+	extern XMVECTOR TimeFactorV;						// Time (secs) passed since the previous frame (vectorised form)
 	extern unsigned int ClockMs;						// System time (ms)
 	extern unsigned int PreviousClockMs;				// System time (ms) on the previous cycle
 	extern unsigned int ClockDelta;						// Delta time (ms) since the previous frame
@@ -220,7 +222,12 @@ namespace Game {
 	extern float C_CS_ELEMENT_SCALE;				// The physical size of each CS element in space
 	extern float C_CS_ELEMENT_MIDPOINT;				// Midpoint of an element in each dimension
 	extern float C_CS_ELEMENT_SCALE_RECIP;			// Reiprocal of the element scale (1.0f/scale)
-	extern float C_CS_PERIMETER_BEACON_FREQUENCY;	// The (approx, max) spacing between perimeter beacons on a capital ship
+	extern XMVECTOR C_CS_ELEMENT_SCALE_V;			// The physical size of each CS element in space (replicated vector form)
+	extern XMVECTOR C_CS_ELEMENT_MIDPOINT_V;		// Midpoint of an element in each dimension  (replicated vector form)
+	extern XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V;		// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
+
+	extern float C_CS_PERIMETER_BEACON_FREQUENCY;		// The (approx, max) spacing between perimeter beacons on a capital ship
+	extern XMVECTOR C_CS_PERIMETER_BEACON_FREQUENCY_V;	// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)
 
 	// AI, order management and ship computer constants
 	extern float C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;
@@ -237,7 +244,7 @@ namespace Game {
 	extern float C_ACTOR_DEFAULT_HEAD_BOB_AMOUNT;				// Default height that the player head bob will reach when controlling an actor
 	extern float C_ACTOR_DEFAULT_JUMP_STRENGTH;					// Default jump strength, as a modifier relative to the actor mass (so resulting
 																// in a force of equal strength regardless of mass)
-	extern D3DXVECTOR3 C_ACTOR_DEFAULT_VIEW_OFFSET;				// Default offset of the player view when controlling an actor, if not set directly by the actor
+	extern XMFLOAT3 C_ACTOR_DEFAULT_VIEW_OFFSET;				// Default offset of the player view when controlling an actor, if not set directly by the actor
 
 	// Pathfinding constants
 	extern int C_CS_ELEMENT_MIDPOINT_INT;						// Integer rounded value for midpoint of an element (for efficiency)
@@ -265,12 +272,13 @@ namespace Game {
 										{ return ((float)location * Game::C_CS_ELEMENT_SCALE); }
 	
 	// Convert from three dimensional element location to position in 3D space
-	CMPINLINE D3DXVECTOR3				ElementLocationToPhysicalPosition(const INTVECTOR3 & location)
+	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const INTVECTOR3 & location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return D3DXVECTOR3(	(float)location.x * Game::C_CS_ELEMENT_SCALE, 
+		return XMVectorSet(	(float)location.x * Game::C_CS_ELEMENT_SCALE, 
 							(float)location.z * Game::C_CS_ELEMENT_SCALE, 
-							(float)location.y * Game::C_CS_ELEMENT_SCALE); 
+							(float)location.y * Game::C_CS_ELEMENT_SCALE, 
+							0.0f); 
 	}
 
 	// Convert from a partial grid location (e.g. x = 6.5) to physical position in world space
@@ -280,12 +288,12 @@ namespace Game {
 	}
 	
 	// Convert from three dimensional partial element location to position in 3D space
-	CMPINLINE D3DXVECTOR3				ElementPartialLocationToPhysicalPosition(const D3DXVECTOR3 & location)
+	CMPINLINE XMVECTOR					ElementPartialLocationToPhysicalPosition(const FXMVECTOR location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return D3DXVECTOR3(	location.x * Game::C_CS_ELEMENT_SCALE,
-							location.z * Game::C_CS_ELEMENT_SCALE,
-							location.y * Game::C_CS_ELEMENT_SCALE);
+		return XMVectorScale(
+			XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Y, XM_SWIZZLE_W>(location),
+			Game::C_CS_ELEMENT_SCALE);
 	}
 
 	// Convert from one components of a 3D position to an element location component
@@ -295,7 +303,19 @@ namespace Game {
 	}
 
 	// Convert from a position in 3D space to an element location
-	CMPINLINE INTVECTOR3				PhysicalPositionToElementLocation(const D3DXVECTOR3 & position)
+	CMPINLINE INTVECTOR3				PhysicalPositionToElementLocation(const FXMVECTOR position)
+	{
+		XMFLOAT3 posf; 
+		XMStoreFloat3(&posf, position);
+
+		// Note: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
+		return INTVECTOR3(	(int)floor(posf.x * Game::C_CS_ELEMENT_SCALE_RECIP),
+							(int)floor(posf.z * Game::C_CS_ELEMENT_SCALE_RECIP),
+							(int)floor(posf.y * Game::C_CS_ELEMENT_SCALE_RECIP));
+	}
+
+	// Convert from a position in 3D space to an element location
+	CMPINLINE INTVECTOR3				PhysicalPositionToElementLocation(const XMFLOAT3 & position)
 	{
 		// Note: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
 		return INTVECTOR3(	(int)floor(position.x * Game::C_CS_ELEMENT_SCALE_RECIP),
@@ -309,13 +329,13 @@ namespace Game {
 		return (position * Game::C_CS_ELEMENT_SCALE_RECIP);
 	}
 
-	// Convert from a position in 3D space to an element location
-	CMPINLINE INTVECTOR3				PhysicalPositionToElementPartialLocation(const D3DXVECTOR3 & position)
+	// Convert from a position in 3D space to a partial element location
+	CMPINLINE XMVECTOR					PhysicalPositionToElementPartialLocation(const FXMVECTOR position)
 	{
 		// Note: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return D3DXVECTOR3(	position.x * Game::C_CS_ELEMENT_SCALE_RECIP,
-							position.z * Game::C_CS_ELEMENT_SCALE_RECIP,
-							position.y * Game::C_CS_ELEMENT_SCALE_RECIP);
+		return XMVectorScale(
+			XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Y, XM_SWIZZLE_W>(position),
+			Game::C_CS_ELEMENT_SCALE_RECIP);
 	}
 
 	// Convert from an element position to an element index

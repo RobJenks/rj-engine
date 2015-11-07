@@ -75,7 +75,7 @@ struct INTVECTOR2
 	INTVECTOR2(const XMFLOAT2 & v) { x = (int)v.x; y = (int)v.y; }
 	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
 
-	bool IsZeroVector(void) { return (x == 0 && y == 0); }
+	bool IsZeroVector3(void) { return (x == 0 && y == 0); }
 
 	INTVECTOR2& operator +=(const INTVECTOR2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
 	INTVECTOR2& operator -=(const INTVECTOR2& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }
@@ -99,7 +99,7 @@ struct INTVECTOR3
 	INTVECTOR3(float _x, float _y, float _z) { x = (int)_x; y = (int)_y; z = (int)_z; }
 	INTVECTOR3(const XMFLOAT3 & v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
 
-	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
+	bool IsZeroVector3(void) { return (x == 0 && y == 0 && z == 0); }
 
 	INTVECTOR3& operator +=(const INTVECTOR3& rhs) { this->x += rhs.x; this->y += rhs.y; this->z += rhs.z; return *this; }
 	INTVECTOR3& operator -=(const INTVECTOR3& rhs) { this->x -= rhs.x; this->y -= rhs.y; this->z -= rhs.z; return *this; }	
@@ -224,10 +224,17 @@ void StreamToDebugOutput(T obj)
 
 CMPINLINE string IntVectorToString(INTVECTOR2 *v) { return (concat("(")(v->x)(", ")(v->y)(")").str()); }
 CMPINLINE string IntVectorToString(INTVECTOR3 *v) { return (concat("(")(v->x)(", ")(v->y)(", ")(v->z)(")").str()); }
-CMPINLINE string VectorToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
-CMPINLINE string VectorToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
-CMPINLINE string VectorToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
+CMPINLINE string Vector2ToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
+CMPINLINE string Vector3ToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
+CMPINLINE string Vector4ToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
 CMPINLINE string QuaternionToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
+CMPINLINE string Vector2ToString(const FXMVECTOR v) { XMFLOAT2 vf; XMStoreFloat2(&vf, v); return Vector2ToString(vf); }
+CMPINLINE string Vector3ToString(const FXMVECTOR v) { XMFLOAT3 vf; XMStoreFloat3(&vf, v); return Vector3ToString(vf); }
+CMPINLINE string Vector4ToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
+CMPINLINE string QuaternionToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
+CMPINLINE string VectorToString(const XMFLOAT2 & v) { return Vector2ToString(v); }
+CMPINLINE string VectorToString(const XMFLOAT3 & v) { return Vector3ToString(v); }
+CMPINLINE string VectorToString(const XMFLOAT4 & v) { return Vector4ToString(v); }
 
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize);
 

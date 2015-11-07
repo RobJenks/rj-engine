@@ -26,7 +26,7 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 
 	// Validate critical parameters
 	if (m_code == NullString) return ErrorCodes::CannotInitialiseSystemWithoutValidCode;
-	if (IsZeroVector(m_size) || IsZeroVector(m_minbounds) || IsZeroVector(m_maxbounds)) return ErrorCodes::CannotInitialiseSystemWithInvalidSize;
+	if (IsZeroVector3(m_size) || IsZeroVector3(m_minbounds) || IsZeroVector3(m_maxbounds)) return ErrorCodes::CannotInitialiseSystemWithInvalidSize;
 
 	// Create a new spatial partitioning tree to track objects within the system.  Determine the largest dimension and generate to that extent
 	// in each dimension to ensure coverage.  We should only generally have cubic systems (x==y==z) but this allows flexibility for the future

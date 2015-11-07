@@ -44,7 +44,7 @@ void CollisionGeometry::AddCollisionVolume(int index, const D3DXVECTOR3 & localp
 	m_size[index] = size;
 
 	// Determine whether this adds a non-zero offset, in which case we need to set the flag so that collision tests account for it
-	if (!IsZeroVector(m_position[index])) m_hasoffset = true;
+	if (!IsZeroVector3(m_position[index])) m_hasoffset = true;
 }
 
 

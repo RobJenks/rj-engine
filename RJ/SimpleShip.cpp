@@ -66,13 +66,11 @@ void SimpleShip::HardpointChanged(Hardpoint *hp)
 void SimpleShip::RecalculateAllShipData(void)
 {
 	// Recalculate camera data; generate a translation & rotation matrix for camera position & rotation
-	D3DXMATRIX cam, rot;
-	D3DXMatrixTranslation(&cam, this->CameraPosition.x, this->CameraPosition.y, this->CameraPosition.z);
-	D3DXMatrixRotationYawPitchRoll(&rot, this->CameraRotation.y, this->CameraRotation.x, this->CameraRotation.z);
+	XMMATRIX offset = XMMatrixTranslationFromVector(CameraPosition);
+	XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(CameraRotation);
 
 	// Combine the transformations and store the camera matrix
-	D3DXMatrixMultiply(&cam, &cam, &rot);
-	this->CameraPositionMatrix = cam;
+	CameraPositionMatrix = XMMatrixMultiply(offset, rot);
 
 	// Recalculate all hardpoint data 
 	m_hardpoints.RecalculateHardpoints();
@@ -104,17 +102,16 @@ void SimpleShip::CalculateShipSizeData(void)
 	// We need a base ship hull and mesh at least to calculate ship size
 	if (!m_model || !m_model->IsGeometryLoaded()) 
 	{ 
-		this->MinBounds = D3DXVECTOR3(-0.5f, -0.5f, -0.5f);
-		this->MaxBounds = D3DXVECTOR3(0.5f, 0.5f, 0.5f);
-		this->SetSize(D3DXVECTOR3(1.0f, 1.0f, 1.0f));
+		this->MinBounds = XMVectorReplicate(-0.5f);
+		this->MaxBounds = XMVectorReplicate(0.5f);
+		this->SetSize(ONE_VECTOR);
 		this->SetCentreOffsetTranslation(NULL_VECTOR);
 		return; 
 	}
 
 	// Retrieve the ship mesh size and use that for our size parameter
-	this->SetSize(m_model->GetModelSize());
-	D3DXVECTOR3 modelcentre = m_model->GetModelCentre();
-	this->SetCentreOffsetTranslation(-modelcentre);
+	SetSize(XMLoadFloat3(&m_model->GetModelSize()));
+	SetCentreOffsetTranslation(XMVectorNegate(XMLoadFloat3(&m_model->GetModelCentre())));
 }
 
 void SimpleShip::CalculateShipMass()
@@ -139,6 +136,10 @@ void SimpleShip::CalculateVelocityLimits()
 	// Assign the final values after applying modifiers
 	this->VelocityLimit.Value = vlimit;
 	this->AngularVelocityLimit.Value = alimit;
+
+	// Also store in vectorised form for fast per-frame calculations
+	m_vlimit_v = XMVectorReplicate(VelocityLimit.Value);
+	m_avlimit_v = XMVectorReplicate(AngularVelocityLimit.Value);
 
 	// Also trigger a recalculation of the hull brake factors, which are dependent on this calculation
 	CalculateBrakeFactor();
@@ -169,6 +170,10 @@ void SimpleShip::CalculateTurnRate()
 	// Store the final values after applying modifiers
 	this->TurnRate.Value = turnrate;
 	this->TurnAngle.Value = turnangle;
+
+	// Also store turn rate in vectorised form for fast per-frame calculations
+	m_turnrate_v = XMVectorReplicate(TurnRate.Value);
+	m_turnrate_nv = XMVectorNegate(m_turnrate_v);
 }
 
 void SimpleShip::CalculateBankRate()
@@ -276,25 +281,31 @@ Result SimpleShip::AddLoadout(SimpleShip *s, SimpleShipLoadout *loadout)
 }
 
 
-void SimpleShip::DeriveActualCameraMatrix(D3DXMATRIX &camoffset)
+XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 {
-	D3DXMATRIX trans;
+	XMMATRIX trans;
 
 	// Generate a translation matrix to account for the camera elasticity
-	if (BankExtent.x < Game::C_EPSILON || BankExtent.y < Game::C_EPSILON)
+	// We only need to test if the bank x/y amount is nonzero; the other coords are undefined
+	// if (BankExtent.x < Game::C_EPSILON || BankExtent.y < Game::C_EPSILON)
+	if (XMVector3AnyTrue(XMVectorNearEqual(
+		XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(BankExtent), 
+		NULL_VECTOR3, Game::C_EPSILON_V)))
 	{
-		trans = ID_MATRIX;
+		// No offset due to camera elasticity is required, so simply return the normal camera offset matrix
+		return CameraPositionMatrix;
 	}
 	else
 	{
-		D3DXMatrixTranslation(&trans, (this->Bank.y / BankExtent.y) * (-CameraElasticity),
-									  (this->Bank.x / BankExtent.x) * (-CameraElasticity),
-									   0.0f);
+		// Trans vector: [(Bank.y / BankExtent.y) * (-CameraElasticity), (Bank.x / BankExtent.x) * (-CameraElasticity), 0.0f]
+		XMVECTOR trans = XMVectorDivide(Bank, BankExtent);										// [B.x/BE.x, B.y/BE/y, B.z/BE.z, B.w/BE.w]
+		trans = XMVectorSetW(trans, 0.0f);														// [B.x/BE.x, B.y/BE.y, B.z/BE.z, 0.0f]
+		trans = XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_X, XM_SWIZZLE_W, XM_SWIZZLE_W>(trans);	// [B.y/BE.y, B.x/BE.x, 0, 0]
+		trans = XMVectorScale(trans, -CameraElasticity);										// [B.y/BE.y * -CE, B.x/BE.x * -CE, 0, 0]
+		
+		// Use this translation vector to build the adjusted camera matrix
+		return XMMatrixMultiply(XMMatrixTranslationFromVector(trans), CameraPositionMatrix);
 	}
-
-	// Now combine with the standard camera position matrix to get the actual camera matrix
-	//D3DXMatrixMultiply(&camoffset, &CameraPositionMatrix, &trans);
-	D3DXMatrixMultiply(&camoffset, &trans, &CameraPositionMatrix);
 }
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject

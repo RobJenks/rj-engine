@@ -21,8 +21,8 @@ ComplexShipSection::ComplexShipSection(void)
 	m_standardobject = false;
 	m_suspendupdates = false;
 	m_sectionupdated = false;
-	m_elementlocation = NULL_VECTOR;
-	m_elementsize = NULL_VECTOR;
+	m_elementlocation = NULL_INTVECTOR3;
+	m_elementsize = NULL_INTVECTOR3;
 	m_rotation = Rotation90Degree::Rotate0;
 	m_relativepos = NULL_VECTOR;
 	m_sectionoffsetmatrix = ID_MATRIX;
@@ -90,7 +90,7 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 }
 
 // Sets the section position relative to its parent ship, recalculating required data at the same time
-void ComplexShipSection::SetRelativePosition(const D3DXVECTOR3 & relativepos)
+void ComplexShipSection::SetRelativePosition(const FXMVECTOR relativepos)
 {
 	// Store the new relative position
 	m_relativepos = relativepos;
@@ -116,13 +116,12 @@ void ComplexShipSection::UpdatePositionFromParent(void)
 	if (!m_parent) return;
 
 	// Transform our relative position into parent world space, and thereby determine our actual section position
-	D3DXVECTOR3 pos;
-	D3DXVec3TransformCoord(&pos, &m_relativepos, m_parent->GetOrientationMatrix());
-	SetPosition(m_parent->GetPosition() + pos);
+	// D3DXVec3TransformCoord(&pos, &m_relativepos, m_parent->GetOrientationMatrix()) // SetPosition(m_parent->GetPosition() + pos);
+	SetPosition(XMVectorAdd(m_parent->GetPosition(), XMVector3TransformCoord(m_relativepos, m_parent->GetOrientationMatrix())));
 
 	// Derive a new world matrix for this section by adding the translation in local space (WM = Child * Parent)
 	//D3DXMatrixMultiply(&m_worldmatrix, &m_sectionoffsetmatrix, m_parent->GetWorldMatrix());
-	m_worldmatrix = (m_sectionoffsetmatrix * (*m_parent->GetWorldMatrix()));
+	m_worldmatrix = XMMatrixMultiply(m_sectionoffsetmatrix, m_parent->GetWorldMatrix());
 	
 	// Update position of the ship in the spatial partitioning tree
 	if (m_treenode) m_treenode->ItemMoved(this, m_position);
@@ -143,22 +142,8 @@ void ComplexShipSection::RecalculateShipDataFromCurrentState(void)
 // Derives a new offset matrix for the section, based on its ship-related position and rotation
 void ComplexShipSection::DeriveNewSectionOffsetMatrix(void)
 {
-	D3DXMATRIX rot, trans;
-
-	// Construct a rotation matrix based upon our rotation value
-	switch (m_rotation)
-	{
-		case Rotation90Degree::Rotate90:	D3DXMatrixRotationY(&rot, PIOVER2);			break;
-		case Rotation90Degree::Rotate180:	D3DXMatrixRotationY(&rot, PI);				break;
-		case Rotation90Degree::Rotate270:	D3DXMatrixRotationY(&rot, PI + PIOVER2);	break;
-		default:							rot = ID_MATRIX;							break;
-	}
-
-	// Translation matrix is simply constructed from the section position offset
-	D3DXMatrixTranslation(&trans, m_relativepos.x, m_relativepos.y, m_relativepos.z);
-
-	// Construct the section offset matrix based on (WM_offset = centretrans * rot * trans)
-	m_sectionoffsetmatrix = (rot * trans);
+	// Construct the section offset matrix based on (WM_offset = rot * trans)
+	m_sectionoffsetmatrix = XMMatrixMultiply(GetRotationMatrix(m_rotation), XMMatrixTranslationFromVector(m_relativepos));
 }
 
 // Add a hardpoint to the section.  Updates will be triggered if they are not suspended
@@ -213,8 +198,8 @@ void ComplexShipSection::CalculateShipSizeData(void)
 	// Section is sized to encompass its element space
 	if (m_elementsize.x <= 0 || m_elementsize.y <= 0 || m_elementsize.z <= 0) 
 	{
-		// If we don't have any elements allocated for this section then default the section size
-		SetSize(D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE));
+		// If we don't have any elements allocated for this section then default the section size to 1x1x1
+		SetSize(Game::C_CS_ELEMENT_SCALE_V);
 	}
 	else
 	{
