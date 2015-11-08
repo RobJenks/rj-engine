@@ -6,7 +6,10 @@
 #include "iEnvironmentObject.h"
 #include "Order.h"
 
-class Order_ActorMoveToTarget : public Order
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Order_ActorMoveToTarget : public ALIGN16<Order_ActorMoveToTarget>, public Order
 {
 public:
 	// Specifies the class of order this object represents

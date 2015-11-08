@@ -170,12 +170,12 @@ protected:
 	bool							m_containssimulationhubs;
 
 	// Translation from environment centre to its (0,0,0) point
-	XMVECTOR						m_zeropointtranslation;
-	XMFLOAT3						m_zeropointtranslationf;
+	AXMVECTOR						m_zeropointtranslation;
+	AXMFLOAT3						m_zeropointtranslationf;
 
 	// Adjusted world matrix, which transforms to/from the element (0,0,0) point rather than the environment centre point
-	XMMATRIX						m_zeropointworldmatrix;
-	XMMATRIX						m_inversezeropointworldmatrix;
+	AXMMATRIX						m_zeropointworldmatrix;
+	AXMMATRIX						m_inversezeropointworldmatrix;
 
 };
 

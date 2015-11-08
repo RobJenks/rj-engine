@@ -5,6 +5,7 @@
 
 #include "TurretController.h"
 
+// Class has no special alignment requirements
 class iContainsTurrets
 {
 public:

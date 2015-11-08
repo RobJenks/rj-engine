@@ -217,9 +217,6 @@
     <ClCompile Include="iConsumesOrders.cpp">
       <Filter>Orders</Filter>
     </ClCompile>
-    <ClCompile Include="iActorObject.cpp">
-      <Filter>Objects\Actors</Filter>
-    </ClCompile>
     <ClCompile Include="ImmediateRegion.cpp">
       <Filter>Regions</Filter>
     </ClCompile>
@@ -770,9 +767,6 @@
     </ClInclude>
     <ClInclude Include="iConsumesOrders.h">
       <Filter>Orders</Filter>
-    </ClInclude>
-    <ClInclude Include="iActorObject.h">
-      <Filter>Objects\Actors</Filter>
     </ClInclude>
     <ClInclude Include="iLoadoutMap.h">
       <Filter>Equipment\Loadouts</Filter>

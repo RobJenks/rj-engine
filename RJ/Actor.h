@@ -15,7 +15,9 @@ class Order_ActorTravelToPosition;
 class iSpaceObjectEnvironment;
 
 
-class Actor : public iEnvironmentObject, public iConsumesOrders
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Actor : public ALIGN16<Actor>, public iEnvironmentObject, public iConsumesOrders
 {
 public:
 
@@ -54,11 +56,6 @@ public:
 	// Update the actor model for rendering.  NOTE: actor world matrix is calculated here, i.e. only when required for rendeirng
 	void						UpdateForRendering(float timefactor);
 
-	// Methods for retrieving & setting the object world matrix
-	CMPINLINE XMFLOAT4X4 *		GetXWorldMatrix(void) { return &m_xworldmatrix; }
-	void						SetWorldMatrix(D3DXMATRIX *world);
-	void						SetWorldMatrix(XMMATRIX *world);
-	
 	// Methods to get and set the model associated with this actor
 	CMPINLINE SkinnedModelInstance			GetModel(void)							{ return m_model; }
 	CMPINLINE SkinnedModelInstance *		GetModelReference(void)					{ return &m_model; }
@@ -75,7 +72,7 @@ public:
 	Order::OrderResult						ProcessOrder(Order *order);
 
 	// Order: Moves the actor to a target position in the environment, within a certain tolerance
-	Order::OrderResult						MoveToPosition(D3DXVECTOR3 position, float getwithin, bool run);
+	Order::OrderResult						MoveToPosition(FXMVECTOR position, float getwithin, bool run);
 
 	// Order: Moves the actor to a target object, within a certain tolerance, providing the target is within the same environment
 	Order::OrderResult						MoveToTarget(iEnvironmentObject *target, float getwithin, bool run);
@@ -84,7 +81,7 @@ public:
 	Order::OrderResult						TravelToPosition(Order_ActorTravelToPosition *order);
 
 	// Turns the actor towards the specified position.  Y (vertical) coordinate is ignored.
-	void									TurnTowardsPosition(const D3DXVECTOR3 &position);
+	void									TurnTowardsPosition(const FXMVECTOR position);
 
 	// Move forwards along the current heading, either running or walking
 	void									Move(Direction direction, bool run);
@@ -121,8 +118,6 @@ private:
 	// Movement and physics parameters for this actor
 	float								m_turnrate;						// Radians/sec turn rate
 
-	// X-world matrix for this actor
-	XMFLOAT4X4							m_xworldmatrix;
 };
 
 
@@ -134,9 +129,7 @@ CMPINLINE void Actor::Turn(float angle)
 	else				angle = min(angle, m_turnrate * Game::TimeFactor);
 
 	// Generate a delta quaternion for this angle and apply it to our orientation
-	D3DXQUATERNION q;
-	D3DXQuaternionRotationAxis(&q, &UP_VECTOR, angle);
-	AddDeltaOrientation(q);
+	AddDeltaOrientation(XMQuaternionRotationAxis(UP_VECTOR, angle));
 	RecalculateEnvironmentOrientationData();
 }
 
@@ -146,9 +139,7 @@ CMPINLINE void Actor::Turn(float angle)
 CMPINLINE void Actor::Turn_NoLimit(float angle)
 {
 	// Generate a delta quaternion for this angle and apply it to our orientation
-	D3DXQUATERNION q;
-	D3DXQuaternionRotationAxis(&q, &UP_VECTOR, angle);
-	AddDeltaOrientation(q);
+	AddDeltaOrientation(XMQuaternionRotationAxis(UP_VECTOR, angle)); 
 	RecalculateEnvironmentOrientationData();
 }
 

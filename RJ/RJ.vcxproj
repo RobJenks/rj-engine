@@ -248,7 +248,6 @@
     <ClCompile Include="HpTorpedoLauncher.cpp" />
     <ClCompile Include="HpWeapon.cpp" />
     <ClCompile Include="iActiveObject.cpp" />
-    <ClCompile Include="iActorObject.cpp" />
     <ClCompile Include="iConsumesOrders.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
     <ClCompile Include="iContainsTurrets.cpp" />
@@ -451,7 +450,6 @@
     <ClInclude Include="HpWeapon.h" />
     <ClInclude Include="iAcceptsConsoleCommands.h" />
     <ClInclude Include="iActiveObject.h" />
-    <ClInclude Include="iActorObject.h" />
     <ClInclude Include="iConsumesOrders.h" />
     <ClInclude Include="iContainsTurrets.h" />
     <ClInclude Include="InputLayoutDesc.h" />

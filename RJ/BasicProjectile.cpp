@@ -4,8 +4,8 @@
 #include "BasicProjectile.h"
 
 // Constructor to initialise all values
-BasicProjectile::BasicProjectile(	const BasicProjectileDefinition *definition, Game::ID_TYPE owner, const D3DXVECTOR3 & position, 
-									const D3DXQUATERNION & orientation, unsigned int lifetime)
+BasicProjectile::BasicProjectile(	const BasicProjectileDefinition *definition, Game::ID_TYPE owner, const FXMVECTOR position, 
+									const FXMVECTOR orientation, unsigned int lifetime)
 :
 	Definition(definition), 
 	Owner(owner),
@@ -15,9 +15,8 @@ BasicProjectile::BasicProjectile(	const BasicProjectileDefinition *definition, G
 	Expiration(Game::ClockMs + lifetime), 
 	Speed(definition->Speed)
 { 
-	// Determine the projectile velocity vector by transforming a heading vector by its orientation
-	Velocity = D3DXVECTOR3(0.0f, 0.0f, Speed);
-	XMVector3Rotate(&Velocity, &Velocity, &Orientation);
+	// Determine the projectile velocity vector by transforming a (speed-scaled) heading vector by its orientation
+	Velocity = XMVector3Rotate(XMVectorSetZ(NULL_VECTOR, Speed), Orientation);
 }
 
 

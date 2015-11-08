@@ -35,6 +35,7 @@ enum ActorAttr
 namespace ActorAttributeGeneration
 {
 	// Basic attribute generation data
+	// This class has no special alignment requirements
 	struct ActorAttributeGenerationParams 
 	{ 
 		float min, base, max;
@@ -43,6 +44,7 @@ namespace ActorAttributeGeneration
 	extern ActorAttributeGenerationParams ActorAttributeParams[ActorAttr::A_COUNT];
 
 	// Attribute effects on one another.  NOTE effects are applied in the order that they are loaded, important for (attr1 > effect on attr2) & (attr2 > effect on attr3)
+	// This class has no special alignment requirements
 	struct ActorAttributeEffect
 	{
 		ActorAttr source, target;			// Source and target attributes for this effect; source will have the calculated modifier effect on target.
@@ -80,6 +82,7 @@ enum AttributeDerivationType
 extern AttributeDerivationType TranslateAttributeDerivationTypeFromString(const std::string & name);
 
 // Struct used to store base actor attributes.  Becomes the template type for the ActorAttributes collection
+// This class has no special alignment requirements
 struct ActorBaseAttributeData
 {
 	float						BaseMinValue;		// Low end of the range that the base value can take
@@ -118,6 +121,7 @@ struct ActorBaseAttributeData
 };
 
 // Struct used to store actor instance attributes.  Becomes the template type for the ActorAttributes collection
+// This class has no special alignment requirements
 struct ActorInstanceAttributeData
 {
 	float						BaseValue;			// Base value inherited from the ActorBase object
@@ -125,6 +129,7 @@ struct ActorInstanceAttributeData
 };
 
 // Struct holding all the key actor attributes.  Used in multiple places to ensure consistency
+// This class has no special alignment requirements
 template <typename T>
 struct ActorAttributes
 {

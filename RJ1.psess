@@ -27,7 +27,6 @@
     </PdhSettings>
   </Options>
   <ExcludeSmallFuncs>true</ExcludeSmallFuncs>
-  <InteractionProfilingEnabled>false</InteractionProfilingEnabled>
   <JScriptProfilingEnabled>false</JScriptProfilingEnabled>
   <PreinstrumentEvent>
     <InstrEventExclude>false</InstrEventExclude>
@@ -35,42 +34,4 @@
   <PostinstrumentEvent>
     <InstrEventExclude>false</InstrEventExclude>
   </PostinstrumentEvent>
-  <Binaries>
-    <ProjBinary>
-      <Path>Debug\RJ.exe</Path>
-      <ArgumentTimestamp>01/01/0001 00:00:00</ArgumentTimestamp>
-      <Instrument>true</Instrument>
-      <Sample>true</Sample>
-      <ExternalWebsite>false</ExternalWebsite>
-      <InteractionProfilingEnabled>false</InteractionProfilingEnabled>
-      <IsLocalJavascript>false</IsLocalJavascript>
-      <IsWindowsStoreApp>false</IsWindowsStoreApp>
-      <IsWWA>false</IsWWA>
-      <LaunchProject>true</LaunchProject>
-      <OverrideProjectSettings>false</OverrideProjectSettings>
-      <LaunchMethod>Executable</LaunchMethod>
-      <ExecutablePath>Debug\RJ.exe</ExecutablePath>
-      <StartupDirectory>RJ\</StartupDirectory>
-      <Arguments>
-      </Arguments>
-      <NetAppHost>IIS</NetAppHost>
-      <NetBrowser>InternetExplorer</NetBrowser>
-      <ExcludeSmallFuncs>true</ExcludeSmallFuncs>
-      <JScriptProfilingEnabled>false</JScriptProfilingEnabled>
-      <PreinstrumentEvent>
-        <InstrEventExclude>false</InstrEventExclude>
-      </PreinstrumentEvent>
-      <PostinstrumentEvent>
-        <InstrEventExclude>false</InstrEventExclude>
-      </PostinstrumentEvent>
-      <ProjRef>{502D3CBE-001F-46CB-ABEE-B0F2D515CD0F}|RJ\RJ.vcxproj</ProjRef>
-      <ProjPath>RJ\RJ.vcxproj</ProjPath>
-      <ProjName>RJ</ProjName>
-    </ProjBinary>
-  </Binaries>
-  <Launches>
-    <ProjBinary>
-      <Path>:PB:{502D3CBE-001F-46CB-ABEE-B0F2D515CD0F}|RJ\RJ.vcxproj</Path>
-    </ProjBinary>
-  </Launches>
 </VSPerformanceSession>

@@ -10,7 +10,9 @@ class AnimationClip;
 class Actor;
 
 // Base actor class
-class ActorBase
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ActorBase : public ALIGN16<ActorBase>
 {
 public:
 
@@ -29,7 +31,7 @@ public:
 	CMPINLINE void							SetCode(const std::string & code)		{ m_code = code; }
 	CMPINLINE std::string					GetName(void)							{ return m_name; }
 	CMPINLINE void							SetName(const std::string & name)		{ m_name = name; }
-	CMPINLINE D3DXVECTOR3					GetSize(void) const						{ return m_size; }
+	CMPINLINE XMVECTOR						GetSize(void) const						{ return m_size; }
 
 	// Methods to get or set the model assigned to this actor type
 	CMPINLINE const SkinnedModel *			GetModel(void)							{ return m_model; }
@@ -55,10 +57,7 @@ public:
 
 	// Offset of the player view from the actor position, for use when controlling this actor.  Read-only, determined
 	// by the model data assigned to this actor
-	CMPINLINE D3DXVECTOR3		GetViewOffset(void) const				{ return m_viewoffset; }
-	CMPINLINE D3DXVECTOR3*		GetViewOffsetReference(void)			{ return &m_viewoffset; }
-
-
+	CMPINLINE XMVECTOR			GetViewOffset(void) const				{ return m_viewoffset; }
 
 protected:
 
@@ -70,7 +69,7 @@ protected:
 	SkinnedModel *								m_model;
 
 	// Size of the skinned model, allowing for any scaling applied at the model level
-	D3DXVECTOR3									m_size;
+	AXMVECTOR									m_size;
 
 	// Other key object properties relevant for actors
 	float										m_mass;
@@ -80,7 +79,7 @@ protected:
 
 
 	// Player-specific parameters, relevant if the player takes control of an actor
-	D3DXVECTOR3									m_viewoffset;					
+	AXMVECTOR									m_viewoffset;					
 	float										m_headbobspeed, m_headbobamount;
 
 };

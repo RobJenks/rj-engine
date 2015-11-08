@@ -674,8 +674,8 @@ Order::OrderResult Ship::ProcessOrder(Order *order)
 	{
 		// Move to position.  Specifies position and the distance to which we must move within
 		case Order::OrderType::MoveToPosition:
-			return MoveToPosition(	order->Parameters.Float3_1,		// Target position
-									order->Parameters.Float3_2.x);	// Distance to move within
+			return MoveToPosition(	order->Parameters.Vector_1,		// Target position
+									order->Parameters.Float3_1.x);	// Distance to move within
 
 		// Move to target.  Specifies the target and the distance to which we must move within
 		case Order::OrderType::MoveToTarget:

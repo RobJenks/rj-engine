@@ -8,6 +8,7 @@
 #include "Order.h"
 using namespace std;
 
+// This class does not have any special alignment requirements
 class iConsumesOrders
 {
 public:

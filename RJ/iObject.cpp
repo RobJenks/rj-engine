@@ -13,9 +13,6 @@ Game::ID_TYPE iObject::InstanceCreationCount = 0;
 // Static modifier for the size of the collision margin around an object's collision sphere.  Allows us to catch edge cases that may otherwise be missed
 const float	iObject::COLLISION_SPHERE_MARGIN = 2.0f;
 
-// Static intermediate data struct to support high-performance calculations
-iObject::_calc_data_struct iObject::_calc_data = iObject::_calc_data_struct();
-
 // Static collection that records the relation between different simulation states (relation is from row to column value)
 const ComparisonResult iObject::SimStateRelations[][4] = 
 {							/*   NoSimulation  */			/* Strategic */					/* Tactical */					/* Full Simulation */

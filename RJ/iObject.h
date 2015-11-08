@@ -427,11 +427,11 @@ protected:
 	ArticulatedModel *                  m_articulatedmodel;             // The articulated model to use for this object, if relevant.  If NULL, the object
                                                                         // will use its static model by default
 
-	XMVECTOR							m_position;						// Position of the object in world space
+	AXMVECTOR							m_position;						// Position of the object in world space
 	XMFLOAT3							m_positionf;					// Maintain copy of the position in accessible XMFLOAT3 format as well, for convenience
-	XMVECTOR							m_orientation;					// Object orientation
-	XMMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
-	XMMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
+	AXMVECTOR							m_orientation;					// Object orientation
+	AXMMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
+	AXMMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
 	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
 
 	ObjectSimulationState				m_simulationstate;				// Value indicating the extent of simulation (if any) that should be applied to this object
@@ -447,12 +447,12 @@ protected:
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;
 
-	XMVECTOR							m_size;							// Size of the object in world coordinates
-	XMVECTOR							m_centreoffset;					// Any required offset to centre the object model about its local origin
+	AXMVECTOR							m_size;							// Size of the object in world coordinates
+	AXMVECTOR							m_centreoffset;					// Any required offset to centre the object model about its local origin
 	
-	XMMATRIX							m_worldmatrix;					// World matrix used for rendering this object
-	XMMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
-	XMMATRIX							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
+	AXMMATRIX							m_worldmatrix;					// World matrix used for rendering this object
+	AXMMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
+	AXMMATRIX							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
 																		// Used to incorporate e.g. pre-scaling, rotation adjustments or other corrections
 	int									m_worldcalcmethod;				// Set by the subclass; indicates the type of world transform calculation to be performed
 
@@ -475,14 +475,6 @@ protected:
 	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the
 	// object size is set; it is a defined percentage of the smallest extent in each dimension (min(x,y,z)).
 	float								m_fastmoverthresholdsq;
-
-	// Static working variables for inline intermediate calculations
-	static struct						_calc_data_struct {
-		XMVECTOR						v1, v2, v3;
-		XMVECTOR						q1, q2, q3;
-		XMMATRIX						m1, m2, m3;
-	} _calc_data;
-
 };
 
 // Derives a new object world matrix

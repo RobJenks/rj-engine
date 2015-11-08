@@ -3,6 +3,7 @@
 #ifndef __BasicProjectileDefinitionH__
 #define __BasicProjectileDefinitionH__
 
+// This class has no special alignment requirements
 class BasicProjectileDefinition
 {
 public:

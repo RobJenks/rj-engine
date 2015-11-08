@@ -34,12 +34,12 @@ SkinnedModel::SkinnedModel(ID3D11Device* device, const std::string &code, const 
 	m_defaultanimation = NULL;
 	XMStoreFloat4x4(&m_scalerottransadj, XMMatrixIdentity());
 	m_transadj = 0.0f;
-	m_viewoffset = m_absoluteviewoffset = D3DXVECTOR3(0.0f, 0.9f, 0.0f);
+	m_viewoffset = m_absoluteviewoffset = XMFLOAT3(0.0f, 0.9f, 0.0f);
 
 	// Store the base size of the model mesh
-	m_meshsize = D3DXVECTOR3(	max((Bounds[1].x - Bounds[0].x), Game::C_EPSILON),
-								max((Bounds[1].y - Bounds[0].y), Game::C_EPSILON),
-								max((Bounds[1].z - Bounds[0].z), Game::C_EPSILON));
+	m_meshsize = XMFLOAT3(	max((Bounds[1].x - Bounds[0].x), Game::C_EPSILON),
+							max((Bounds[1].y - Bounds[0].y), Game::C_EPSILON),
+							max((Bounds[1].z - Bounds[0].z), Game::C_EPSILON));
 
 	// Set a default model size equal to the base mesh size
 	SetModelSize(m_meshsize);
@@ -75,7 +75,7 @@ void SkinnedModel::SetDefaultAnimation(const std::string & anim)
 
 // Sets the size of this mode.  Can either accept a full Vector3, to scale in all dimensions, or just one element
 // of a Vector3 in which case the model will be scaled to maintain proportions in the other two dimensions
-void SkinnedModel::SetModelSize(D3DXVECTOR3 size)
+void SkinnedModel::SetModelSize(const XMFLOAT3 & size)
 {
 	// First, test whether we have a full size vector, or whether one component has been provided for derivation of the other two
 	if (size.x > Game::C_EPSILON && size.y > Game::C_EPSILON && size.z > Game::C_EPSILON)
@@ -98,7 +98,7 @@ void SkinnedModel::SetModelSize(D3DXVECTOR3 size)
 		else																						 scale = 1.0f;
 
 		// Set the ultimate model size based on this scaling factor; default will be 1.0 if invalid values were supplied
-		m_modelsize = D3DXVECTOR3(m_meshsize.x * scale, m_meshsize.y * scale, m_meshsize.z * scale);
+		m_modelsize = XMFLOAT3(m_meshsize.x * scale, m_meshsize.y * scale, m_meshsize.z * scale);
 
 		// Set the scaling factor that we have already calculated
 		SetScaleFactor(XMFLOAT3(scale, scale, scale));
@@ -137,15 +137,15 @@ void SkinnedModel::SetScaleFactor(XMFLOAT3 sf)
 
 // Sets the view offset as a percentage of model size.  Measured from the x/z centre between the model feet
 // Valid values within the model bounds (though this is not necessary) are therefore ([-0.5 +0.5], [0.0 1.0], [-0.5 +0.5])
-void SkinnedModel::SetViewOffsetPercentage(const D3DXVECTOR3 & offset_pc)
+void SkinnedModel::SetViewOffsetPercentage(const XMFLOAT3 & offset_pc)
 {
 	// Store the percentage offsets that were provided
 	m_viewoffset = offset_pc;
 
 	// Recalculate the absolute view offset based on this, and the actual model size
-	m_absoluteviewoffset = D3DXVECTOR3(	(m_viewoffset.x * m_modelsize.x),
-										(m_viewoffset.y * m_modelsize.y) - 0.5f,		// Subtract 0.5 since Y is measured from ground level, for convenience
-										(m_viewoffset.z * m_modelsize.z));
+	m_absoluteviewoffset = XMFLOAT3((m_viewoffset.x * m_modelsize.x),
+									(m_viewoffset.y * m_modelsize.y) - 0.5f,		// Subtract 0.5 since Y is measured from ground level, for convenience
+									(m_viewoffset.z * m_modelsize.z));
 }
 
 // Default destructor

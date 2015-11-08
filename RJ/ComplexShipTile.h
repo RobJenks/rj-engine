@@ -39,7 +39,9 @@ public:
 	static Game::ID_TYPE					GenerateNewUniqueID(void)	{ return (++InstanceCreationCount); }
 
 	// Struct holding information on the individual models making up a tile
-	struct TileModel 
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct TileModel : public ALIGN16<TileModel>
 	{ 
 		enum TileModelType 
 		{
@@ -49,7 +51,7 @@ public:
 			WallConnection
 		};
 
-		Model * model; XMVECTOR offset; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type; XMMATRIX rotmatrix;
+		Model * model; AXMVECTOR offset; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type; AXMMATRIX rotmatrix;
 		TileModel(void) { model = NULL; offset = NULL_VECTOR; elementpos = NULL_INTVECTOR3; rotation = Rotation90Degree::Rotate0; type = TileModelType::Unknown; rotmatrix = ID_MATRIX; }
 		TileModel(Model *_model, INTVECTOR3 _elementpos, Rotation90Degree _rotation, TileModelType _type) 
 		{ 
@@ -199,9 +201,9 @@ public:
 		TileModelCollection		Models;					// Linear collection of all models, for rendering efficiency
 		ModelLinkedList	****	ModelLayout;			// Spatial layout of models, for efficient indexing into the collection.  ModelLinkedList*[x][y][z]	
 		INTVECTOR3				Size;					// Size of the compound model, in elements
-		XMVECTOR				MinBounds, MaxBounds;	// Minimum and maximum bounds of the overall compound model, in world space
-		XMVECTOR				CompoundModelSize;		// Actual size of the compound model in world space (max-min bounds)
-		XMVECTOR				CompoundModelCentre;	// Centre point of the compound model in world space (max+min bounds / 2)
+		AXMVECTOR				MinBounds, MaxBounds;	// Minimum and maximum bounds of the overall compound model, in world space
+		AXMVECTOR				CompoundModelSize;		// Actual size of the compound model in world space (max-min bounds)
+		AXMVECTOR				CompoundModelCentre;	// Centre point of the compound model in world space (max+min bounds / 2)
 		
 		// Default constructor
 		TileCompoundModelSet(void) { ModelLayout = NULL; Size = NULL_INTVECTOR3; MinBounds = MaxBounds = CompoundModelSize = CompoundModelCentre = NULL_VECTOR; }
@@ -702,14 +704,14 @@ protected:
 
 	// Location and size in element space
 	INTVECTOR3					m_elementlocation;
-	XMVECTOR					m_elementposition;
+	AXMVECTOR					m_elementposition;
 	INTVECTOR3					m_elementsize;
-	XMVECTOR					m_worldsize;
+	AXMVECTOR					m_worldsize;
 	bool						m_multielement;
 
 	// Position and transform matrix relative to the parent complex ship object, plus the child world matrix
-	XMVECTOR					m_relativeposition;
-	XMMATRIX					m_worldmatrix;
+	AXMVECTOR					m_relativeposition;
+	AXMMATRIX					m_worldmatrix;
 
 	// Pointers to the various parents of this tile
 	ComplexShip *				m_parentship;			// The ship that contains this tile

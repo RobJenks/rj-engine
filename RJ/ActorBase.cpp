@@ -18,7 +18,7 @@ ActorBase::ActorBase(void)
 	m_mass = 10.0f;
 	m_defaultanimation = NULL;
 	
-	m_viewoffset = D3DXVECTOR3(0.0f, 0.9f, 0.0f);
+	m_viewoffset = XMVectorSetY(NULL_VECTOR, 0.9f);				// Default view offset of [0.0f, 0.9f, 0.0f]
 	m_headbobamount = Game::C_ACTOR_DEFAULT_HEAD_BOB_AMOUNT;
 	m_headbobspeed = Game::C_ACTOR_DEFAULT_HEAD_BOB_SPEED;
 }
@@ -30,7 +30,7 @@ Actor *ActorBase::CreateInstance(void)
 	Actor *a = new Actor(this);
 
 	// Create a new instance of the skinned model and assign it to this actor
-	if (!m_model) { delete a; a = NULL; return NULL; }
+	if (!m_model) { SafeDelete(a); return NULL; }
 	m_model->CreateInstance(a->GetModelReference());
 	
 	// Generate a random set of attributes based on the base class traits
@@ -62,10 +62,10 @@ Result ActorBase::SetModel(SkinnedModel *model)
 	m_model = model;
 
 	// Retrieve the actor size from its underlying model data
-	m_size = m_model->GetModelSize();
+	m_size = XMLoadFloat3(&m_model->GetModelSize());
 
 	// Player view offset will be retrieved from the model data
-	m_viewoffset = m_model->GetViewOffset();
+	m_viewoffset = XMLoadFloat3(&m_model->GetViewOffset());
 
 	// Return success
 	return ErrorCodes::NoError;

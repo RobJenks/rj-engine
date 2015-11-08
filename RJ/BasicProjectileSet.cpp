@@ -27,8 +27,8 @@ void BasicProjectileSet::Initialise(std::vector<BasicProjectile>::size_type init
 }
 
 // Adds a new projectile to the collection
-void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const D3DXVECTOR3 & position,
-										const D3DXQUATERNION & orientation, unsigned int lifetime)
+void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const FXMVECTOR position,
+										const FXMVECTOR orientation, unsigned int lifetime)
 {
 	// If we are not active then initialise now; first projectile will be created at [0]
 	if (!Active)
@@ -189,7 +189,9 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 		}
 
 		/* 3. Since the projectile hasn't collided we can move it along its velocity vector to its new position */
-		proj.Position += (proj.Velocity * Game::TimeFactor);
+		// TODO: If velocity vector is only re-tranformed from basis vector by orientation once at start, changes in orientation mid-flight
+		// will have no effect on the projectile trajectory.  This may be fine for basic projectiles
+		proj.Position = XMVectorAdd(proj.Position, XMVectorMultiply(proj.Velocity, Game::TimeFactorV));
 
 		// Finally, increment the collection index to move onto the next projectile
 		++i;

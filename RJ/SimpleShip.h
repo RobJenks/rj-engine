@@ -50,9 +50,9 @@ public:
 	XMMATRIX DeriveActualCameraMatrix(void);
 
 	// Camera data for when this ship is being controlled by the player
-	XMVECTOR		CameraPosition;			// Coordinates of the camera position
-	XMVECTOR		CameraRotation;			// Pitch/yaw/roll for the camera, relative to this ship
-	XMMATRIX		CameraPositionMatrix;	// Efficiency measure; matrix derived from the camera position & orientation
+	AXMVECTOR		CameraPosition;			// Coordinates of the camera position
+	AXMVECTOR		CameraRotation;			// Pitch/yaw/roll for the camera, relative to this ship
+	AXMMATRIX		CameraPositionMatrix;	// Efficiency measure; matrix derived from the camera position & orientation
 	float			CameraElasticity;		// The amount by which the camera can deviate from centre when maneuvering
 
 

@@ -92,8 +92,8 @@ protected:
 	bool										m_multielement;
 
 	// Stores the object position/orientation relative to the current environment, as opposed to the absolute pos/orient stored in m_position & m_orientation
-	XMVECTOR									m_envposition;
-	XMVECTOR									m_envorientation;
+	AXMVECTOR									m_envposition;
+	AXMVECTOR									m_envorientation;
 	
 	// Keep track of the number of orientation changes made before a re-normalisation is required
 	int											m_orientchanges;

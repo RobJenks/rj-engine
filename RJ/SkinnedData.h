@@ -7,11 +7,12 @@
 #include <vector>
 #include <map>
 #include <windows.h>
-#include <xnamath.h>
 #include "CompilerSettings.h"
+#include "DX11_Core.h"
 
 ///<summary>
 /// A Keyframe defines the bone transformation at an instant in time.
+// This class does not have any special alignment requirements
 ///</summary>
 struct Keyframe
 {
@@ -30,6 +31,7 @@ struct Keyframe
 /// two nearest keyframes that bound the time.  
 ///
 /// We assume an animation always has two keyframes.
+// This class does not have any special alignment requirements
 ///</summary>
 struct BoneAnimation
 {
@@ -45,6 +47,7 @@ struct BoneAnimation
 /// Examples of AnimationClips are "Walk", "Run", "Attack", "Defend".
 /// An AnimationClip requires a BoneAnimation for every bone to form
 /// the animation clip.    
+// This class does not have any special alignment requirements
 ///</summary>
 class AnimationClip
 {
@@ -62,6 +65,7 @@ public:
 	AnimationClip(void) { Name = ""; StartTime = 0.0f; EndTime = 0.0f; }
 };
 
+// This class does not have any special alignment requirements
 class SkinnedData
 {
 public:

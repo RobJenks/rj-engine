@@ -10,33 +10,29 @@
 #include "XML\\tinyxml.h"
 
 
-class _Attachment_Internal
-{
-public:
-	// Struct holding temporary fields for intermediate calculations
-	static struct _DATA_STRUCT { D3DXMATRIX m1, m2, m3, m4; D3DXVECTOR3 v1, v2, v3; D3DXQUATERNION q1, q2, q3; } _DATA;
-};
-
 // Struct representing a constraint between the two objects, for non-static attachments
-struct AttachmentConstraint
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+struct AttachmentConstraint : public ALIGN16<AttachmentConstraint>
 {
-	D3DXVECTOR3										Axis;					// Axis of rotation, in parent object space
+	AXMVECTOR										Axis;					// Axis of rotation, in parent object space
 	float											Rotation;				// Angle of rotation about the axis, in radians, from base orientation
 
-	D3DXVECTOR3										ParentPoint;			// Point on the parent object which the axis passes through
-	D3DXVECTOR3										ChildPoint;				// Point on the child object which the axis passes through
-	D3DXMATRIX										InvChildPointOffset;	// Cached translation matrix to (-ChildPoint)
+	AXMVECTOR										ParentPoint;			// Point on the parent object which the axis passes through
+	AXMVECTOR										ChildPoint;				// Point on the child object which the axis passes through
+	AXMMATRIX										InvChildPointOffset;	// Cached translation matrix to (-ChildPoint)
 	
-	D3DXQUATERNION									BaseChildOrient;		// Base orientation of the child object, relative to the parent
-	D3DXQUATERNION									BaseParentOrient;		// Base orientation of the parent object, relative to the 
+	AXMVECTOR										BaseChildOrient;		// Base orientation of the child object, relative to the parent
+	AXMVECTOR										BaseParentOrient;		// Base orientation of the parent object, relative to the 
 																			// child.  Is Inverse(BaseChildOrient)
 
 	// Default constructor to create new constraint data; no initialisation performed here
 	AttachmentConstraint(void) { }
 };
 
+// Class requires 16-bit alignment, however cannot be specified for template class.  All member variables given force-alignment instead
 template <typename T>
-class Attachment
+class Attachment : public ALIGN16<Attachment<T>>
 {
 
 public:
@@ -47,15 +43,15 @@ public:
 
 
 	// Position offset of the child from the parent
-	CMPINLINE D3DXVECTOR3			GetPositionOffset(void) const						{ return m_posoffset; }
-	void							SetPositionOffset(const D3DXVECTOR3 & off);
+	CMPINLINE XMVECTOR				GetPositionOffset(void) const						{ return m_posoffset; }
+	void							SetPositionOffset(const FXMVECTOR off);
 
 	// Orientation offset of the child from the parent
-	CMPINLINE D3DXQUATERNION		GetOrientationOffset(void) const					{ return m_orientoffset; }
-	void							SetOrientationOffset(const D3DXQUATERNION & off);
+	CMPINLINE XMVECTOR				GetOrientationOffset(void) const					{ return m_orientoffset; }
+	void							SetOrientationOffset(const FXMVECTOR off);
 
 	// Set both offsets at once, for efficiency
-	void							SetOffset(const D3DXVECTOR3 & poff, const D3DXQUATERNION & qoff);
+	void							SetOffset(const FXMVECTOR poff, const FXMVECTOR qoff);
 
 	// Update the parent or child object
 	void							SetParent(T parent)									{ Parent = parent; }
@@ -67,15 +63,13 @@ public:
 	void							Apply(void)
 	{
 		// Update the child object position based on the parent world matrix
-		D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &m_posoffset, Parent->GetWorldMatrix());
-		Child->SetPosition(_Attachment_Internal::_DATA.v1);
+		Child->SetPosition(XMVector3TransformCoord(m_posoffset, Parent->GetWorldMatrix));
 
 		// Multiply the parent orientation by our offset quaternion to yield the child orientation
 		// TODO: Does not currently account for the Ship::OrientationAdjustment since this was
 		// causing non-affine transformation issues.  Resolve in future, or (ideally) find a way to 
 		// remove the OrientationAdjustment field
-		_Attachment_Internal::_DATA.q1 = (m_orientoffset * Parent->GetOrientation());
-		Child->SetOrientation(_Attachment_Internal::_DATA.q1);
+		Child->SetOrientation(XMQuaternionMultiply(m_orientoffset, Parent->GetOrientation()));
 		
 		// Update the child world matrix immediately, IF it has any children of its own, so that 
 		// its children will be starting with the correct transformation.  If it has no children
@@ -91,11 +85,11 @@ public:
 	// Constructors to create new attachment objects
 	Attachment(void);
 	Attachment(T parent, T child);
-	Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset);
+	Attachment(T parent, T child, const FXMVECTOR posoffset, const FXMVECTOR orientoffset);
 
 	// Assign a new constraint between the two objects, making the attachment dynamic
-	void							CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parentpoint,
-													 const D3DXVECTOR3 & childpoint, const D3DXQUATERNION & baseorient);
+	void							CreateConstraint(const FXMVECTOR axis, const FXMVECTOR parentpoint,
+													 const FXMVECTOR childpoint, const GXMVECTOR baseorient);
 
 	// Removes any constraint in place between the two objects, making the attachment static again
 	void							RemoveConstraint(void);
@@ -118,23 +112,23 @@ public:
 protected:
 
 	// Position and orientation offsets
-	D3DXVECTOR3						m_posoffset;
-	D3DXQUATERNION					m_orientoffset;
+	AXMVECTOR						m_posoffset;
+	AXMVECTOR						m_orientoffset;
 
 	// Called whenever pos or orient offset changes, to precalculate the offset matrices used in rendering
 	void							RecalculateOffsetParameters(void);
 
 	// Offset matrix, precalcualted on any change of the offsets to save rendering time
-	D3DXMATRIX						m_mat_offset;
+	AXMMATRIX						m_mat_offset;
 
 	// Load constraint parameters from XML, for use within an attachment
-	Result							LoadAttachmentConstraintParameters(TiXmlElement *node, D3DXVECTOR3 &outAxis, D3DXVECTOR3 &outParentPoint, 
-																	   D3DXVECTOR3 &outChildPoint, D3DXQUATERNION &outBaseOrientation);
+	Result							LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outAxis, XMVECTOR & outParentPoint, 
+																	   XMVECTOR &outChildPoint, XMVECTOR & outBaseOrientation);
 };
 
 // Sets position offset and recalculates parameters accordingly
 template <typename T>
-void Attachment<T>::SetPositionOffset(const D3DXVECTOR3 & off)
+void Attachment<T>::SetPositionOffset(const FXMVECTOR off)
 {
 	m_posoffset = off;
 	RecalculateOffsetParameters();
@@ -142,18 +136,18 @@ void Attachment<T>::SetPositionOffset(const D3DXVECTOR3 & off)
 
 // Sets orientation offset and recalculates parameters accordingly
 template <typename T>
-void Attachment<T>::SetOrientationOffset(const D3DXQUATERNION & off)
+void Attachment<T>::SetOrientationOffset(const FXMVECTOR off)
 {
-	D3DXQuaternionNormalize(&m_orientoffset, &off);
+	m_orientoffset = XMQuaternionNormalizeEst(off);
 	RecalculateOffsetParameters();
 }
 
 // Sets position and orientation offsets and recalculates parameters accordingly
 template <typename T>
-void Attachment<T>::SetOffset(const D3DXVECTOR3 & poff, const D3DXQUATERNION & qoff)
+void Attachment<T>::SetOffset(const FXMVECTOR poff, const FXMVECTOR qoff)
 {
 	m_posoffset = poff;
-	D3DXQuaternionNormalize(&m_orientoffset, &qoff);
+	m_orientoffset = XMQuaternionNormalizeEst(qoff);
 	RecalculateOffsetParameters();
 }
 
@@ -161,12 +155,9 @@ void Attachment<T>::SetOffset(const D3DXVECTOR3 & poff, const D3DXQUATERNION & q
 template <typename T>
 void Attachment<T>::RecalculateOffsetParameters(void)
 {
-	// Recalculate component matrices from the attachment offsets
-	D3DXMatrixTranslation(&_Attachment_Internal::_DATA.m1, m_posoffset.x, m_posoffset.y, m_posoffset.z);
-	D3DXMatrixRotationQuaternion(&_Attachment_Internal::_DATA.m2, &m_orientoffset);
-
-	// Use them to calculate and store the combined offset matrix
-	D3DXMatrixMultiply(&m_mat_offset, &_Attachment_Internal::_DATA.m2, &_Attachment_Internal::_DATA.m1);
+	// Calculate and store the combined offset matrix
+	m_mat_offset = XMMatrixMultiply(XMMatrixRotationQuaternion(m_orientoffset),
+									XMMatrixTranslationFromVector(m_posoffset));
 }
 
 // Creates a new attachment object
@@ -187,7 +178,7 @@ Attachment<T>::Attachment(T parent, T child)
 
 // Creates a new attachment object
 template <typename T>
-Attachment<T>::Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, const D3DXQUATERNION & orientoffset)
+Attachment<T>::Attachment(T parent, T child, const FXMVECTOR posoffset, const FXMVECTOR orientoffset)
 	: Parent(parent), Child(child), m_posoffset(posoffset), m_orientoffset(orientoffset), Constraint(NULL)
 {
 	RecalculateOffsetParameters();
@@ -195,8 +186,8 @@ Attachment<T>::Attachment(T parent, T child, const D3DXVECTOR3 & posoffset, cons
 
 // Assign a new constraint between the two objects, making the attachment dynamic
 template <typename T>
-void Attachment<T>::CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3 & parentpoint,
-									 const D3DXVECTOR3 & childpoint, const D3DXQUATERNION & baseorient)
+void Attachment<T>::CreateConstraint(const FXMVECTOR axis, const FXMVECTOR parentpoint,
+									 const FXMVECTOR childpoint, const GXMVECTOR baseorient)
 {
 	// Remove any existing constraint before adding another
 	RemoveConstraint();
@@ -214,10 +205,10 @@ void Attachment<T>::CreateConstraint(const D3DXVECTOR3 & axis, const D3DXVECTOR3
 	Constraint->Rotation = 0.0f;
 
 	// Cache the inverse of child base orientation (as parent child orientation)
-	D3DXQuaternionInverse(&Constraint->BaseParentOrient, &baseorient);
+	Constraint->BaseParentOrient = XMQuaternionInverse(baseorient);
 
 	// Cache the inverse child translation matrix for runtime efficiency
-	D3DXMatrixTranslation(&Constraint->InvChildPointOffset, -childpoint.x, -childpoint.y, -childpoint.z);
+	Constraint->InvChildPointOffset = XMMatrixTranslationFromVector(XMVectorNegate(childpoint));
 
 	// Set the constraint to its resting (0 rad) point, which will trigger a recaluation and set initial state for each object
 	SetChildRotationAboutConstraint(0.0f);
@@ -257,24 +248,20 @@ void Attachment<T>::SetChildRotationAboutConstraint(float rad)
 	// Make sure we have a valid constraint
 	if (!Constraint) return;
 
-	// Store new rotation figure, and determine the corresponding rotation quaternion about our axis
+	// Store new rotation figure
 	Constraint->Rotation = rad;
-	D3DXQuaternionRotationAxis(&_Attachment_Internal::_DATA.q1, &Constraint->Axis, rad);					// q1 = dq (delta quaternion)
-
-	// Determine the new overall relative orientation, accounting for base orientation
-	_Attachment_Internal::_DATA.q2 = (Constraint->BaseChildOrient * _Attachment_Internal::_DATA.q1);		// q2 = neworient
+	
+	// Determine the new overall relative orientation, by adding the delta quaternion to the base orientation
+	XMVECTOR neworient = XMQuaternionMultiply(	Constraint->BaseChildOrient, 
+												XMQuaternionRotationAxis(Constraint->Axis, rad));			// Neworient = (baseQ * deltaQ) q2
 
 	// Derive the matrix representing this new relative orientation, then build a transform matrix for the overall relative transform
-	D3DXMatrixRotationQuaternion(&_Attachment_Internal::_DATA.m1, &_Attachment_Internal::_DATA.q2);			// m1 = rot matrix
-	_Attachment_Internal::_DATA.m2 = (Constraint->InvChildPointOffset * _Attachment_Internal::_DATA.m1);	// m2 = transform
+	XMMATRIX transform = XMMatrixMultiply(Constraint->InvChildPointOffset, XMMatrixRotationQuaternion(neworient)); // m2
 
-	// Eventual child position will be "ParentWorld( parent_point + transform_m2(child_point) )"
-	// v1 = childpos, v2 = interimpos
-	D3DXVec3TransformCoord(&_Attachment_Internal::_DATA.v1, &NULL_VECTOR, &_Attachment_Internal::_DATA.m2);			// v1 = childpos
-
-	// Store these values in the attachment offset parameters
-	m_posoffset = (Constraint->ParentPoint + _Attachment_Internal::_DATA.v1);
-	m_orientoffset = _Attachment_Internal::_DATA.q2;
+	// Eventual child position will be "ParentWorld( parent_point + transform(child_point) )"
+	// Store these new pos and orient values in the attachment offset parameters
+	m_posoffset = XMVectorAdd(Constraint->ParentPoint, XMVector3TransformCoord(NULL_VECTOR, transform));
+	m_orientoffset = neworient; 
 
 	// Apply the attachment to show the change about this constraint
 	// TOOD: Can use more efficient method rather than simply calling Apply() ?
@@ -299,21 +286,17 @@ Result Attachment<T>::LoadAttachmentData(TiXmlElement *node)
 		// Test the hash against each expected field
 		if (key == "posoffset")
 		{
-			D3DXVECTOR3 pos = NULL_VECTOR;
-			IO::GetVector3FromAttr(child, &pos);
-			SetPositionOffset(pos);
+			SetPositionOffset(IO::GetVector3FromAttr(child));
 		}
 		else if (key == "orientoffset")
 		{
-			D3DXQUATERNION orient = ID_QUATERNION;
-			IO::GetD3DXQUATERNIONFromAttr(child, &orient);
-			SetOrientationOffset(orient);
+			SetOrientationOffset(IO::GetVector4FromAttr(child));
 		}
 		else if (key == "constraint")
 		{
 			// Load all the constraint parameters from this sub-node
-			D3DXQUATERNION base_orient = ID_QUATERNION;
-			D3DXVECTOR3 axis = UP_VECTOR, ppos = NULL_VECTOR, cpos = NULL_VECTOR;
+			XMVECTOR base_orient = ID_QUATERNION;
+			XMVECTOR axis = UP_VECTOR, ppos = NULL_VECTOR, cpos = NULL_VECTOR;
 			Result result = LoadAttachmentConstraintParameters(child, axis, ppos, cpos, base_orient);
 
 			// If we could not load constraint data correctly then do not create the constraint
@@ -331,8 +314,8 @@ Result Attachment<T>::LoadAttachmentData(TiXmlElement *node)
 
 // Load constraint parameters for use within an attachment
 template <class T>
-Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, D3DXVECTOR3 &outAxis, D3DXVECTOR3 &outParentPoint,
-														 D3DXVECTOR3 &outChildPoint, D3DXQUATERNION &outBaseOrientation)
+Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outAxis, XMVECTOR & outParentPoint,
+														 XMVECTOR & outChildPoint, XMVECTOR & outBaseOrientation)
 {
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadAttachmentConstraintWithNullParams;
@@ -348,19 +331,19 @@ Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, D3D
 		// Test the hash against each expected field
 		if (key == "axis")
 		{
-			IO::GetVector3FromAttr(child, &outAxis);
+			outAxis = IO::GetVector3FromAttr(child);
 		}
 		else if (key == "parentpoint")
 		{
-			IO::GetVector3FromAttr(child, &outParentPoint);
+			outParentPoint = IO::GetVector3FromAttr(child);
 		}
 		else if (key == "childpoint")
 		{
-			IO::GetVector3FromAttr(child, &outChildPoint);
+			outChildPoint = IO::GetVector3FromAttr(child);
 		}
 		else if (key == "baseorientation")
 		{
-			IO::GetD3DXQUATERNIONFromAttr(child, &outBaseOrientation);
+			outBaseOrientation = IO::GetD3DXQUATERNIONFromAttr(child);
 		}
 	}
 

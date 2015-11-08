@@ -40,7 +40,7 @@ public:
 
 public:
 	bool						Active;							// If the beacon is currently being simulated in the world
-	XMVECTOR					BeaconPos;						// Position of the beacon relative to the parent ship
+	AXMVECTOR					BeaconPos;						// Position of the beacon relative to the parent ship
 
 private:
 

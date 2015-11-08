@@ -7,6 +7,7 @@ class Hardpoint;
 #include "Hardpoints.h"
 #include "CompilerSettings.h"
 
+// Class has no special alignment requirements
 class iContainsHardpoints
 {
 public:

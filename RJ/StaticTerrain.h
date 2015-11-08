@@ -104,8 +104,8 @@ protected:
 																				// Can be null for collision regions that have no associated visible terrain
 
 	OrientedBoundingBox::CoreOBBData		m_data;								// Core OBB data, used for terrain collision.  Also contains object position (as 'Centre')
-	XMVECTOR								m_orientation;						// Orientation relative to the environment
-	XMMATRIX								m_worldmatrix;						// Relative world matrix for the terrain object
+	AXMVECTOR								m_orientation;						// Orientation relative to the environment
+	AXMMATRIX								m_worldmatrix;						// Relative world matrix for the terrain object
 
 	float									m_collisionradius;					// Collision radius is derived based upon the object size
 	float									m_collisionradiussq;				// Precalculated squared collision radius for broadphase testing

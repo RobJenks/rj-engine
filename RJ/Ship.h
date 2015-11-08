@@ -95,11 +95,11 @@ public:
 	ShipAttribute<float>		BankRate;					// Rate at which the ship will bank on turning
 
 	// Ship size parameters
-	XMVECTOR			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
+	AXMVECTOR			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
 
 	// Details on the ship banking range/position
-	XMVECTOR			BankExtent;							// Maximum extent of the banking in each dimension
-	XMVECTOR			Bank;								// The current banking position in all three dimensions
+	AXMVECTOR			BankExtent;							// Maximum extent of the banking in each dimension
+	AXMVECTOR			Bank;								// The current banking position in all three dimensions
 
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);
@@ -189,9 +189,9 @@ protected:
 
 	bool				m_isbraking;				// Indicates whether the ship is currently applying brakes to reduce momentum
 	bool				m_isturning;				// Determines whether the ship is currently turning, and therefore whether the orientation needs to be updated each cycle
-	XMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
-	XMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
-	XMVECTOR			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
+	AXMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
+	AXMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
+	AXMVECTOR			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
 
 	bool				m_thrustchange_flag;		// Flag indicating whether the ship thrust has changed, and requires physics recalc
 	bool				m_masschange_flag;			// Flag indicating whether the ship mass has changed, and requires physics recalc
@@ -200,8 +200,8 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
-	XMVECTOR			m_turnrate_v, m_turnrate_nv;// Vectorised turn rate and negation for faster per-frame calculations
-	XMVECTOR			m_vlimit_v, m_avlimit_v;	// Vectorised linear/angular velocity limits for faster per-frame calculations
+	AXMVECTOR			m_turnrate_v, m_turnrate_nv;// Vectorised turn rate and negation for faster per-frame calculations
+	AXMVECTOR			m_vlimit_v, m_avlimit_v;	// Vectorised linear/angular velocity limits for faster per-frame calculations
 
 	std::vector<iSpaceObject*>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
 	std::vector<iSpaceObject*>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run

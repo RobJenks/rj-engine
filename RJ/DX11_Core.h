@@ -37,6 +37,13 @@
 // Use the DirectX namespace as standard
 using namespace DirectX;
 
+// Define custom types for the vector and matrix class that are individually 16-bit aligned, to avoid issues with unaligned register access
+typedef __declspec(align(16))XMVECTOR AXMVECTOR;	// 16-bit aligned vector class
+typedef __declspec(align(16))XMMATRIX AXMMATRIX;	// 16-bit aligned matrix class
+
+// Custom vector type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
+typedef __declspec(align(16)) struct { AXMVECTOR value; } AXMVECTOR_P;
+
 // Re-enable compiler warnings for macro redefinition, once all DX headers have been processed
 #pragma warning( default : 4005 )
 

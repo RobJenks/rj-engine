@@ -9,7 +9,9 @@
 #include "NavNode.h"
 #include "ComplexShip.h"
 
-class Order_ActorTravelToPosition : public Order
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Order_ActorTravelToPosition : public ALIGN16<Order_ActorTravelToPosition>, public Order
 {
 public:
 	// Specifies the class of order this object represents
@@ -17,17 +19,17 @@ public:
 
 
 	// Constructor including main order parameters
-	Order_ActorTravelToPosition(ComplexShip *environment, D3DXVECTOR3 startpos, D3DXVECTOR3 targetpos, float getwithin, bool run)
+	Order_ActorTravelToPosition(ComplexShip *environment, CXMVECTOR startpos, CXMVECTOR targetpos, float getwithin, bool run)
 	{
 		// Initialise parameters to default values
 		PathNodes = NULL; 
 		PathLength = PathIndex = 0;
 			
 		// Store the input parameters
-		this->Parameters.Float3_1 = targetpos;
-		this->Parameters.Float3_2.x = getwithin;
+		this->Parameters.Vector_1 = startpos;
+		this->Parameters.Vector_2 = targetpos;
+		this->Parameters.Float3_1.x = getwithin;
 		this->Parameters.Flag_1 = run;
-		this->m_startpos = startpos;
 		this->m_env = environment;
 
 		// Determine the path to be followed to reach the target position
@@ -41,8 +43,8 @@ public:
 		if (!m_env || !m_env->GetNavNetwork()) return;
 			
 		// Find the nav nodes closest to our current (start) location, and the target (end) location
-		NavNode *start = m_env->GetNavNetwork()->GetClosestNode(m_startpos);
-		NavNode *end = m_env->GetNavNetwork()->GetClosestNode(Parameters.Float3_1);
+		NavNode *start = m_env->GetNavNetwork()->GetClosestNode(Parameters.Vector_1);
+		NavNode *end = m_env->GetNavNetwork()->GetClosestNode(Parameters.Vector_2);
 
 		// If no node can be found for either the start or end of the path, quit now and generate no path.  Order will
 		// then terminate on its first execution
@@ -70,7 +72,7 @@ public:
 
 		// Add the final position in the path, which will be the target position itself.  We are also done with the node vector
 		// Swap y & z since the nodes are held in element space, and our target position is in world space
-		PathNodes[PathLength-1] = INTVECTOR3(Parameters.Float3_1.x, Parameters.Float3_1.z, Parameters.Float3_1.y);
+		Vector3ToIntVectorSwizzleYZ(Parameters.Vector_2, PathNodes[PathLength - 1]);
 		revpath.clear();
 
 		// Reset the path index so that the actor will begin at the first node 
@@ -94,8 +96,6 @@ private:
 	// Maintain a reference to the parent element-containing environment that the actor is within
 	ComplexShip *			m_env;
 
-	// The position that we started travelling from
-	D3DXVECTOR3						m_startpos;
 };
 
 

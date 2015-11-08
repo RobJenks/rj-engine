@@ -203,19 +203,19 @@ protected:
 	//		m_baserelativeorient = resting orientation, [0 0 0 1] in many cases
 	//		m_orientation = (baserelativeorient * parent_orientation), i.e. resting orientation in world space
 	//		m_turretrelativeorient = (baserelativeorient * delta_from_pitch_yaw), i.e. relative turret cannon orientation
-	XMVECTOR						m_relativepos;
-	XMVECTOR						m_baserelativeorient;
-	XMVECTOR						m_turretrelativeorient;
+	AXMVECTOR						m_relativepos;
+	AXMVECTOR						m_baserelativeorient;
+	AXMVECTOR						m_turretrelativeorient;
 
 	// Store world position, orientation and inverse orientation.  Derived during update by turret controller
-	XMVECTOR						m_position;
-	XMVECTOR						m_orientation, m_invorient;
+	AXMVECTOR						m_position;
+	AXMVECTOR						m_orientation, m_invorient;
 
 	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;
 
 	// Object world matrix, relative to its parent object.  Based on m_position and m_orientation
-	XMMATRIX						m_worldmatrix;
+	AXMMATRIX						m_worldmatrix;
 
 	// Values indicating the yaw & pitch capabilities of the turret
 	float							m_yawrate, m_pitchrate;							// Rad/sec

@@ -8,7 +8,9 @@
 #include "Utility.h"
 class iSpaceObject;
 
-class Order
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Order : public ALIGN16<Order>
 {
 public:
 	// Define the data type used to store order IDs.  ID is always positive with 0 representing 'null'/no order
@@ -59,7 +61,8 @@ public:
 	// Paramters stored by default in the base order class.  Orders can extend with new params if required.  This allows us to avoid casting in simple cases
 	struct 
 	{
-		D3DXVECTOR3								Float3_1,	Float3_2;
+		AXMVECTOR								Vector_1, Vector_2;
+		XMFLOAT3								Float3_1,	Float3_2;
 		INTVECTOR3								Int3_1,		Int3_2;
 		bool									Flag_1, Flag_2, Flag_3;
 		iSpaceObject *							Target_1;

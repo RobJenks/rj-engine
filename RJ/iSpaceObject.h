@@ -46,8 +46,6 @@ public:
 	// Shutdown method to remove the space object from simulation
 	void									Shutdown(void);
 
-protected:
-
 
 protected:
 

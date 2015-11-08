@@ -164,12 +164,12 @@ private:
 	INTVECTOR3						m_elementlocation;			// x,y,z location of the top-top-left element, in element space
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
-	XMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
+	AXMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
 
 	std::vector<Hardpoint*>			m_hardpoints;				// The hardpoint collection for this ship section; simple vector HPs, which are 
 																// copied to the parent ship when the section is added
 
-	XMMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
+	AXMMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
 
 	bool							m_sectionupdated;			// Indicates to the parent ship object that it should refresh based on its component sections next cycle
 	bool							m_suspendupdates;			// Flag that indicates all updates (via section update flag) should be suspended until updates resume
@@ -179,7 +179,7 @@ private:
 	float							m_turnrate;					// Turn rate of the ship section, incorporating base "details" value and modifiers
 	float							m_turnangle;				// Max turn angle of the ship section, incorporating base "details" value and modifiers
 	float							m_bankrate;					// Bank rate of the ship section, incorporating base "details" value and modifiers
-	XMVECTOR						m_bankextent;				// Bank extents for the ship section, incorporating base "details" value and modifiers
+	AXMVECTOR						m_bankextent;				// Bank extents for the ship section, incorporating base "details" value and modifiers
 	float							m_brakefactor;				// Percentage of total velocity limit we can brake per second
 	float							m_brakeamount;				// Absolute amount of velocity we can brake per second
 

@@ -5,7 +5,9 @@
 
 #include "Order.h"
 
-class Order_MoveToTarget : public Order
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Order_MoveToTarget : public ALIGN16<Order_MoveToTarget>, public Order
 {
 public:
 	// Specifies the class of order this object represents

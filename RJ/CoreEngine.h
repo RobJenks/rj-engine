@@ -377,10 +377,10 @@ private:
 	// Render-cycle-specific parameters; denoted by r_*, these are valid for the current render cycle only 
 	// and are used for reasons of render efficiency
 	ID3D11DeviceContext *	r_devicecontext;		// The device context in use for this render cycle
-	XMMATRIX				r_view;					// View matrix for the current render cycle
-	XMMATRIX				r_projection;			// Projection matrix for the current render cycle
-	XMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
-	XMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
+	AXMMATRIX				r_view;					// View matrix for the current render cycle
+	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
+	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
+	AXMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
 
 
 	ID3D11Buffer *				m_instancebuffer;
@@ -493,14 +493,14 @@ public:
 	void					RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *environment, const INTVECTOR3 & element);
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
-	XMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
+	AXMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
 
 	// Functions for processing the per-frame render info
 	EngineRenderInfoData	m_renderinfo;
 	void                    ResetRenderInfo(void);
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
-	XMVECTOR				m_instanceparams;
+	AXMVECTOR				m_instanceparams;
 
 	// Vector used to queue up actors for rendering.  This allows us to render them all at once, avoiding multiple state changes
 	std::vector<Actor*>		m_queuedactors;
@@ -512,9 +512,9 @@ public:
 	std::vector<bool>		m_renderflags;
 
 	// Cached & precalculated fields used for rendering an environment
-	XMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
-	XMVECTOR					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
-	XMVECTOR					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
+	AXMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
+	AXMVECTOR					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
+	AXMVECTOR					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedobjects;							// Temporary vector of object IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle

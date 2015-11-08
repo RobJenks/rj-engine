@@ -28,18 +28,18 @@ public:
 	struct ObjectPhysicsState
 	{
 		// Primary values, i.e. those maintained directly
-		XMVECTOR					Acceleration;			// m/s/s			Derived from sum of all engine thrust & mass
-		XMVECTOR					WorldMomentum;			// m/s				Directional vector momentum in world space
-		XMVECTOR					Heading;				// Vector3			Ship heading, derived from orientation * the basis vector
-		XMVECTOR					AngularVelocity;		// rad/sec			Angular velocity of the ship
+		AXMVECTOR					Acceleration;			// m/s/s			Derived from sum of all engine thrust & mass
+		AXMVECTOR					WorldMomentum;			// m/s				Directional vector momentum in world space
+		AXMVECTOR					Heading;				// Vector3			Ship heading, derived from orientation * the basis vector
+		AXMVECTOR					AngularVelocity;		// rad/sec			Angular velocity of the ship
 
 		// Secondary values, i.e. those derived from the primary values
-		XMVECTOR					LocalMomentum;			// m/s				Current directional vector momentum.  Derived from world momentum once per cycle
-		XMVECTOR					WorldAcceleration;		// m/s/s			Acceleration in world space.  Derived from local acceleration once per cycle
+		AXMVECTOR					LocalMomentum;			// m/s				Current directional vector momentum.  Derived from world momentum once per cycle
+		AXMVECTOR					WorldAcceleration;		// m/s/s			Acceleration in world space.  Derived from local acceleration once per cycle
 
 		// Inertia tensor for performing angular momentum/velocity derivation
-		XMMATRIX					InertiaTensor;
-		XMMATRIX					InverseInertiaTensor;
+		AXMMATRIX					InertiaTensor;
+		AXMMATRIX					InverseInertiaTensor;
 
 		// The distance sq that the object moved during this physics cycle
 		float						DeltaMoveDistanceSq;	// m

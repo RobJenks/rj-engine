@@ -69,11 +69,11 @@ public:
 protected:
 
 	// Position and orientation of the component in world space
-	XMVECTOR							m_position;
-	XMVECTOR							m_orientation;
+	AXMVECTOR							m_position;
+	AXMVECTOR							m_orientation;
 
 	// World matrix for the component
-	XMMATRIX							m_worldmatrix;
+	AXMMATRIX							m_worldmatrix;
 
 	// Flags indicating whether this object has a parent, or any child attachments
 	bool								m_hasparent;

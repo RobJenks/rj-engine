@@ -9,6 +9,7 @@
 class ComplexShipTile;
 using namespace std;
 
+// Class has no special alignment requirements
 class iContainsComplexShipTiles
 {
 

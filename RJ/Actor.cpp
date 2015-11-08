@@ -39,7 +39,6 @@ Actor::Actor(ActorBase *actorbase)			// Perform full construction if C++11 const
 	m_parent = NULL;
 	m_name = "";
 	m_turnrate = Game::C_ACTOR_DEFAULT_TURN_RATE;
-	XMStoreFloat4x4(&m_xworldmatrix, XMMatrixIdentity());
 }
 
 // Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
@@ -97,7 +96,7 @@ void Actor::UpdateForRendering(float timefactor)
 	RecalculateWorldMatrix();
 
 	// Send the new world matrix to our model instance and calculate the correct bone transforms for its current animation
-	m_model.World = m_xworldmatrix;
+	XMStoreFloat4x4(&m_model.World, m_worldmatrix);
 	m_model.Update(timefactor);
 }
 
@@ -111,11 +110,14 @@ void Actor::RecalculateWorldMatrix(void)
 	// WM = Scaling * RotationFix * TranslationFix * ActorRotation * ActorTranslation
 	//	  = [ScaleRotationTranslationAdjustment(Precalculated)] * ActorRotation * ActorTranslation
 	XMMATRIX mscalerottransadj = XMLoadFloat4x4(m_model.Model->GetScaleRotationTranslationAdjustmentReference());
-	XMMATRIX mrot = XMMatrixRotationQuaternion(XMLoadFloat4(&XMFLOAT4(m_orientation.x, m_orientation.y, m_orientation.z, m_orientation.w)));
-	XMMATRIX mtrans = XMMatrixTranslation(	m_position.x, m_position.y, m_position.z );
+	XMMATRIX mrot = XMMatrixRotationQuaternion(m_orientation);
+	XMMATRIX mtrans = XMMatrixTranslationFromVector(m_position);
 
-	// Set the world x-matrix, which will automatically calculate the legacy and inverse required versions
-	SetWorldMatrix(&(mscalerottransadj * mrot * mtrans));
+	// Set the world matrix (World = ScaleRotTransAdjustment * Rot * Trans).  Also manually invalidate the object
+	// collision OBB since we are setting the matrix directly, and may not otherwise trigger the invalidation
+	// through normal SetPosition() / SetOrientation() methods
+	SetWorldMatrix(XMMatrixMultiply(XMMatrixMultiply(mscalerottransadj, mrot), mtrans));
+	CollisionOBB.Invalidate();
 }
 
 void Actor::SetAnimationImmediate(const std::string & anim)
@@ -143,33 +145,8 @@ void Actor::Jump(void)
 	// We can only jump if we are currently on the ground
 	if (IsOnGround())
 	{
-		ApplyLocalLinearForceDirect(D3DXVECTOR3(0.0f, jumpforce, 0.0f));
+		ApplyLocalLinearForceDirect(XMVectorSetY(NULL_VECTOR, jumpforce));
 	}	
-}
-
-// Set the world matrix with a D3D matrix.  Also calculate the XMATRIX equivalent
-void Actor::SetWorldMatrix(D3DXMATRIX *world)
-{ 
-	// Store the world matrix and calculate its inverse
-	m_worldmatrix = (*world);										// Store the world matrix
-	D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);		// and calculate the inverse world matrix
-
-	// Also convert to the XMMATRIX version for efficient rendering
-	m_xworldmatrix = *((XMFLOAT4X4*)&m_worldmatrix);
-}
-
-// Set the world matrix with an XMMATRIX.  Also calculate the D3D equivalent
-void Actor::SetWorldMatrix(XMMATRIX *world)
-{ 
-	// Store the X matrix
-	XMStoreFloat4x4(&m_xworldmatrix, *world);
-
-	// Also convert to the D3D version for compatibility
-	m_worldmatrix = *( ((D3DXMATRIX*)&m_xworldmatrix) );
-	D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);		// and calculate the inverse world matrix
-
-	// Invalidate the collision OBB based on this change (since we are bypassing the root iObject SetWorldMatrix method)
-	CollisionOBB.Invalidate();
 }
 
 // Returns a bool indicating whether an actor can accept a specified class of order.  Can be overrideen by more specific subclasses if necessary
@@ -228,8 +205,8 @@ Order::OrderResult Actor::ProcessOrder(Order *order)
 	{
 		// Move to position.  Specifies position and the distance to which we must move within
 		case Order::OrderType::ActorMoveToPosition:
-			return MoveToPosition(	order->Parameters.Float3_1,		// Target position
-									order->Parameters.Float3_2.x,	// Distance to move within
+			return MoveToPosition(	order->Parameters.Vector_1,		// Target position
+									order->Parameters.Float3_1.x,	// Distance to move within
 									order->Parameters.Flag_1);		// Indicates whether the actor should run
 
 		// Move to target.  Specifies the target and the distance to which we must move within
@@ -252,16 +229,17 @@ Order::OrderResult Actor::ProcessOrder(Order *order)
 
 
 // Order: Moves the actor to a target position in the same environment, within a certain tolerance
-Order::OrderResult Actor::MoveToPosition(D3DXVECTOR3 position, float getwithin, bool run)
+Order::OrderResult Actor::MoveToPosition(FXMVECTOR position, float getwithin, bool run)
 {
 	// Completion check:  See whether we have reached the target position.  Calculated (squared) distance to target and threshold.
 	// Only consider distance in x/z dimensions - y (vertical) dimension is ignored.
-	D3DXVECTOR2 diffvec = D3DXVECTOR2((m_envposition.x - position.x), (m_envposition.z - position.z));
-	float distsq = ((diffvec.x * diffvec.x) + (diffvec.y * diffvec.y));
-	float closedistsq = (getwithin * getwithin);
+	// Swizzle both positions to get x/z as the first two parameters, then treat as 2-vectors when subtracting and taking the lengthsq
+	float distsq = XMVectorGetX(XMVector2LengthSq(
+		XMVectorSubtract(XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(m_envposition),
+						 XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(position))));
 
 	// If we are within the close distance then we can stop moving and complete the order
-	if (distsq < closedistsq)
+	if (distsq < (getwithin * getwithin))
 	{
 		/* Transition to a stopping/idle animation of some kind */
 		return Order::OrderResult::ExecutedAndCompleted;
@@ -303,9 +281,9 @@ Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition *order)
 
 	// Otherwise we want to generate a new direct move order to the next node in the path
 	INTVECTOR3 tgt = order->PathNodes[order->PathIndex];
-	Order_ActorMoveToPosition *move = new Order_ActorMoveToPosition(	
-												D3DXVECTOR3((float)tgt.x, (float)tgt.z, (float)tgt.y),	// Swap y/z since path nodes are in element space 
-												order->Parameters.Float3_2.x, order->Parameters.Flag_1 
+	Order_ActorMoveToPosition *move = new Order_ActorMoveToPosition(
+												XMVectorSet((float)tgt.x, (float)tgt.z, (float)tgt.y, 0.0f), // Swap y/z since path nodes are in element space 
+												order->Parameters.Float3_1.x, order->Parameters.Flag_1 
 											);
 
 	// Assign the new order, which will generate a new unique ID for the child order
@@ -325,42 +303,45 @@ Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition *order)
 }
 
 // Turns the actor towards the specified position.  Y (vertical) coordinate is ignored.
-void Actor::TurnTowardsPosition(const D3DXVECTOR3 &position)
+void Actor::TurnTowardsPosition(const FXMVECTOR position)
 {
 	float angle = 0.0f;
-	const D3DXVECTOR2 BASIS_2D = D3DXVECTOR2(0.0f, 1.0f);
+	
+	// Zero out the Y component of each vector (TODO: for now), get the difference vector and then transform it into the actor orientation space
+	XMVECTOR transformed = XMVector3TransformCoord(
+								XMVectorSubtract(XMVectorSetY(position, 0.0f), XMVectorSetY(m_envposition, 0.0f)),
+								m_inverseorientationmatrix);
 
-	// Transform the target position vector into the actor orientation space
-	D3DXVECTOR3 transformed = D3DXVECTOR3(position.x - m_envposition.x, 0.0f, position.z - m_envposition.z);
-	D3DXVec3TransformCoord(&transformed, &transformed, &m_inverseorientationmatrix);
-
-	// Subtract our position vector from this target position to get the delta from the origin, then take the cross product
-	// against the basis vector (representing our heading in this relative position space)
-	D3DXVECTOR2 tgt = D3DXVECTOR2(transformed.x, transformed.z);
-	float crs = CrossProduct2D(BASIS_2D, tgt);
+	// Take the 2D cross product between this transformed target vector (in local space) and the basis vector (i.e. our local forward direction)
+	XMVECTOR tgt = XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(transformed);
+	XMVECTOR crs = XMVector2Cross(BASIS_VECTOR2, tgt);
 
 	// The cross product will determine the situation we need to consider
-	if (fast_abs(crs) < 0.01f)
+	static const XMVECTOR cthreshold = XMVectorReplicate(0.01f);
+	if (XMVector2Less(XMVectorAbs(crs), cthreshold))
 	{
 		// We are either facing the target or at 180 degrees from it.  Use the dot product to determine which is the case
-		float dot = DotProduct2D(BASIS_2D, tgt);
-		if (dot > 0.0f)
+		XMVECTOR dot = XMVector2Dot(BASIS_VECTOR2, tgt);
+		if (XMVector2Greater(dot, NULL_VECTOR))
 		{
 			// If the dot product is negative then we are at 180 degrees, so turn in either direction
 			angle = (-m_turnrate * Game::TimeFactor);
 		}
 		else
-		{
+		{ 
 			// Otherwise we are facing roughly towards the target, so calculate the exact angle at this point
-			angle = Angle2D(BASIS_2D, tgt);
-			if (fast_abs(angle) < Game::C_EPSILON) return;
+			// If we are near-enough facing the target then simply return here
+			XMVECTOR avec = XMVector2AngleBetweenVectors(BASIS_VECTOR2, tgt);
+			if (XMVector2Less(XMVectorAbs(avec), Game::C_EPSILON_V)) return;
 
+			// We need to make an adjustment; determine the exact required angle
+			angle = XMVectorGetX(avec);
 			if (angle < 0.0f)	angle = max(angle, -m_turnrate * Game::TimeFactor);
 			else				angle = min(angle, m_turnrate * Game::TimeFactor);
 		}
 	}
-	else if (crs < 0.0f)	angle = (m_turnrate * Game::TimeFactor);				// If the cross product is negative then the target is to the left
-	else					angle = (-m_turnrate * Game::TimeFactor);				// If the cross product is positive then the target is to the right
+	else if (XMVector2Less(crs, NULL_VECTOR))	angle = (m_turnrate * Game::TimeFactor);	// If the cross product is negative then the target is to the left
+	else										angle = (-m_turnrate * Game::TimeFactor);	// If the cross product is positive then the target is to the right
 	
 	// If the desired turn angle is lower than epsilon then quit here to avoid calculating miniscule turns
 	if (fast_abs(angle) < Game::C_EPSILON) return;
@@ -376,31 +357,32 @@ void Actor::Move(Direction direction, bool run)
 	if (!IsOnGround()) return;
 
 	// Create a vector for this movement, dependent on travel direction
-	D3DXVECTOR3 delta;
+	XMVECTOR delta;
 
-	if (direction == Direction::Up && PhysicsState.LocalMomentum.z < Attributes[ActorAttr::A_RunSpeed].Value)
-			delta = D3DXVECTOR3(0.0f, 0.0f, (run ?	(Attributes[ActorAttr::A_RunSpeed].Value * 4.0f * Game::TimeFactor) :
-													(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor)));	
+	float lmZ = XMVectorGetZ(PhysicsState.LocalMomentum);
+	if (direction == Direction::Up && lmZ < Attributes[ActorAttr::A_RunSpeed].Value)										// Forward movement
+		delta = XMVectorSetZ(NULL_VECTOR, 
+			(run ?	(Attributes[ActorAttr::A_RunSpeed].Value * 4.0f * Game::TimeFactor) :
+					(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor)));
 
-	else if (direction == Direction::Down && PhysicsState.LocalMomentum.z > -Attributes[ActorAttr::A_RunSpeed].Value)
-			delta = D3DXVECTOR3(0.0f, 0.0f, -(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor));			
+	else if (direction == Direction::Down && lmZ > -Attributes[ActorAttr::A_RunSpeed].Value)								// Backward movement
+		delta = XMVectorSetZ(NULL_VECTOR, Attributes[ActorAttr::A_WalkSpeed].Value * -3.0f * Game::TimeFactor);
 
-	else if (direction == Direction::Left && PhysicsState.LocalMomentum.x > -Attributes[ActorAttr::A_StrafeSpeed].Value)
-			delta = D3DXVECTOR3((run ?	-(Attributes[ActorAttr::A_StrafeSpeed].Value * 4.0f * Game::TimeFactor) :
-										-(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor)), 0.0f, 0.0f);
-
-	else if (direction == Direction::Right && PhysicsState.LocalMomentum.x < Attributes[ActorAttr::A_StrafeSpeed].Value)
-			delta = D3DXVECTOR3((run ?	(Attributes[ActorAttr::A_StrafeSpeed].Value * 4.0f * Game::TimeFactor) :
-										(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor)), 0.0f, 0.0f);	
 	else
-		return;
-	
+	{
+		float lmX = XMVectorGetX(PhysicsState.LocalMomentum);
+		if (direction == Direction::Left && lmX > -Attributes[ActorAttr::A_StrafeSpeed].Value)								// Left strafing movement
+			delta = XMVectorSetX(NULL_VECTOR, 
+					(run ?	(Attributes[ActorAttr::A_StrafeSpeed].Value * -4.0f * Game::TimeFactor) :
+							(Attributes[ActorAttr::A_WalkSpeed].Value * -3.0f * Game::TimeFactor)));
 
-	// Transform this vector into the actor orientation space
-	//D3DXVec3TransformCoord(&delta, &delta, &m_orientationmatrix);
-
-	// Apply this change in movement to the actor
-	//AddDeltaPosition(delta);
+		else if (direction == Direction::Right && lmX < Attributes[ActorAttr::A_StrafeSpeed].Value)							// Right strafing movement
+			delta = XMVectorSetX(NULL_VECTOR, 
+					(run ?	(Attributes[ActorAttr::A_StrafeSpeed].Value * 4.0f * Game::TimeFactor) :
+							(Attributes[ActorAttr::A_WalkSpeed].Value * 3.0f * Game::TimeFactor)));
+		else																												// Unknown movement type
+			return;
+	}
 
 	// Apply this delta vector as a direct change in local object momentum
 	ApplyLocalLinearForceDirect(delta);

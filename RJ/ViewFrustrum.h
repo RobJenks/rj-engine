@@ -117,24 +117,24 @@ public:
 
 private:
 	// The pure mathematical planes that represent this frustrum (stored as ax+by+cz+dw = 0)
-	XMVECTOR			m_planes[6];
+	AXMVECTOR_P			m_planes[6];
 
 	// The finite world plane that represents the visible far frustrum plane
 	D3DXFINITEPLANE		m_farplaneworld;
 
 	// Projection matrix and other viewport data
-	XMMATRIX			m_projection;
+	AXMMATRIX			m_projection;
 	float				m_clip_near, m_clip_far, m_aspect;
 	float				m_fov, m_fovtan;			// m_fovtan = tanf(FOV * 0.5f)
-	XMMATRIX			m_frustrumproj;				// Frustrum-specific proj matrix, preacalculate at initialisation
+	AXMMATRIX			m_frustrumproj;				// Frustrum-specific proj matrix, preacalculate at initialisation
 
 
 	// Private method to perform the visibility test on pre-transformed rectangle vertices
 	bool CheckRectangleVertices(void);
-	bool CheckRectangleVertices(const XMVECTOR rectverts[8]);
+	bool CheckRectangleVertices(const AXMVECTOR_P rectverts[8]);
 
 	// Private temporary storage for storing cuboid vertices during visibility testing
-	XMVECTOR			m_working_cuboidvertices[8];
+	AXMVECTOR_P			m_working_cuboidvertices[8];
 };
 
 

@@ -7,6 +7,7 @@
 #include "BasicProjectile.h"
 
 // Extends the vector class
+// This class has no special alignment requirements
 class BasicProjectileSet
 {
 public:
@@ -37,8 +38,8 @@ public:
 	void													Initialise(std::vector<BasicProjectile>::size_type initial_capacity);
 
 	// Adds a new projectile to the collection
-	void													AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const D3DXVECTOR3 & position,
-																			const D3DXQUATERNION & orientation, unsigned int lifetime);
+	void													AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const FXMVECTOR position,
+																			const FXMVECTOR orientation, unsigned int lifetime);
 
 	// Removes the projectile at the specified index
 	void													RemoveProjectile(std::vector<BasicProjectile>::size_type index);
