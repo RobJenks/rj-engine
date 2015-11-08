@@ -280,6 +280,15 @@ namespace Game {
 							(float)location.y * Game::C_CS_ELEMENT_SCALE, 
 							0.0f); 
 	}
+	
+	// Convert from three dimensional element location to position in 3D space
+	CMPINLINE XMFLOAT3					ElementLocationToPhysicalPositionF(const INTVECTOR3 & location)
+	{
+		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
+		return XMFLOAT3((float)location.x * Game::C_CS_ELEMENT_SCALE,
+						(float)location.z * Game::C_CS_ELEMENT_SCALE,
+						(float)location.y * Game::C_CS_ELEMENT_SCALE);
+	}
 
 	// Convert from a partial grid location (e.g. x = 6.5) to physical position in world space
 	CMPINLINE float						ElementPartialLocationToPhysicalPosition(float location)

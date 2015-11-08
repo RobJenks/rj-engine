@@ -49,7 +49,7 @@ public:
 			WallConnection
 		};
 
-		Model * model; D3DXVECTOR3 offset; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type; D3DXMATRIX rotmatrix;
+		Model * model; XMVECTOR offset; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type; XMMATRIX rotmatrix;
 		TileModel(void) { model = NULL; offset = NULL_VECTOR; elementpos = NULL_INTVECTOR3; rotation = Rotation90Degree::Rotate0; type = TileModelType::Unknown; rotmatrix = ID_MATRIX; }
 		TileModel(Model *_model, INTVECTOR3 _elementpos, Rotation90Degree _rotation, TileModelType _type) 
 		{ 
@@ -68,14 +68,12 @@ public:
 			else
 			{
 				// Calculate temporary translation matrices to translate the model to its centre, so we can then rotate, and then translate back
-				D3DXMATRIX off, invoff;
-				D3DXVECTOR3 halfsize = Game::ElementLocationToPhysicalPosition(model->GetElementSize()) * 0.5f;
-				D3DXMatrixTranslation(&off, -halfsize.x, -halfsize.y, -halfsize.z);
-				D3DXMatrixTranslation(&invoff, halfsize.x, halfsize.y, halfsize.z);
+				XMVECTOR halfsize = XMVectorMultiply(Game::ElementLocationToPhysicalPosition(model->GetElementSize()), HALF_VECTOR);
+				XMMATRIX off = XMMatrixTranslationFromVector(XMVectorNegate(halfsize));
+				XMMATRIX invoff = XMMatrixTranslationFromVector(halfsize);
 
 				// Derive and store the rotation matrix for this model
-				D3DXMatrixMultiply(&rotmatrix, &off, GetRotationMatrix(rotation));
-				D3DXMatrixMultiply(&rotmatrix, &rotmatrix, &invoff);
+				rotmatrix = XMMatrixMultiply(XMMatrixMultiply(off, GetRotationMatrix(rotation)), invoff);
 			}
 		}
 	};
@@ -192,16 +190,18 @@ public:
 
 
 	// Struct holding all compound model data
-	struct TileCompoundModelSet
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct TileCompoundModelSet : public ALIGN16<TileCompoundModelSet>
 	{
-		typedef					vector<TileModel>	TileModelCollection;
+		typedef					vector<TileModel>		TileModelCollection;
 
 		TileModelCollection		Models;					// Linear collection of all models, for rendering efficiency
 		ModelLinkedList	****	ModelLayout;			// Spatial layout of models, for efficient indexing into the collection.  ModelLinkedList*[x][y][z]	
 		INTVECTOR3				Size;					// Size of the compound model, in elements
-		D3DXVECTOR3				MinBounds, MaxBounds;	// Minimum and maximum bounds of the overall compound model, in world space
-		D3DXVECTOR3				CompoundModelSize;		// Actual size of the compound model in world space (max-min bounds)
-		D3DXVECTOR3				CompoundModelCentre;	// Centre point of the compound model in world space (max+min bounds / 2)
+		XMVECTOR				MinBounds, MaxBounds;	// Minimum and maximum bounds of the overall compound model, in world space
+		XMVECTOR				CompoundModelSize;		// Actual size of the compound model in world space (max-min bounds)
+		XMVECTOR				CompoundModelCentre;	// Centre point of the compound model in world space (max+min bounds / 2)
 		
 		// Default constructor
 		TileCompoundModelSet(void) { ModelLayout = NULL; Size = NULL_INTVECTOR3; MinBounds = MaxBounds = CompoundModelSize = CompoundModelCentre = NULL_VECTOR; }
@@ -364,25 +364,25 @@ public:
 
 			// Check whether the min or max bounds for this model would push out the overall bounds
 			// Swap y and z coordinates since we are moving from element to world space
+			// pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(elementlocation.x), _z_, _y_);
 			const INTVECTOR3 & elsize = model->GetElementSize();
-			D3DXVECTOR3 pos = D3DXVECTOR3(	((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(elementlocation.x),
-											((float)elsize.z * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(elementlocation.z),
-											((float)elsize.y * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(elementlocation.y));
+			XMVECTOR pos = XMVectorAdd(	Game::ElementLocationToPhysicalPosition(elementlocation),
+										XMVectorMultiply(VectorFromIntVector3SwizzleYZ(elsize), Game::C_CS_ELEMENT_MIDPOINT_V));
 
 			// Update the model bounds if required
-			VectorMin(MinBounds, pos - model->GetModelMinBounds());
-			VectorMax(MaxBounds, pos + model->GetModelMaxBounds());
+			MinBounds = XMVectorMin(MinBounds, XMVectorSubtract(pos, XMLoadFloat3(&model->GetModelMinBounds())));
+			MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(pos, XMLoadFloat3(&model->GetModelMaxBounds())));
 
 			// Recalculate the model size and centre point based on these values
-			CompoundModelSize = (MaxBounds - MinBounds);
-			CompoundModelCentre = ((MinBounds + MaxBounds) * 0.5f);
+			CompoundModelSize = XMVectorSubtract(MaxBounds, MinBounds);
+			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
 		}
 
 		void RecalculateBounds(void)
 		{
 			// Initialise the min and max bounds before starting
-			MinBounds = D3DXVECTOR3(9999999.0f, 9999999.0f, 9999999.0f); 
-			MaxBounds = D3DXVECTOR3(-9999999.0f, -9999999.0f, -9999999.0f);
+			MinBounds = LARGE_VECTOR_P;
+			MaxBounds = LARGE_VECTOR_N;
 			bool updated = false;
 
 			// Iterate over each model in turn
@@ -396,27 +396,27 @@ public:
 
 				// Check whether the min or max bounds for this model would push out the overall bounds
 				// Swap y and z coordinates since we are moving from element to world space
+				// D3DXVECTOR3 pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.x), _z_, _y_);
 				const INTVECTOR3 & elsize = model->GetElementSize();
 				const INTVECTOR3 & location = Models[i].elementpos;
-				D3DXVECTOR3 pos = D3DXVECTOR3(	((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.x),
-												((float)elsize.z * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.z),
-												((float)elsize.y * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.y));
+				XMVECTOR pos = XMVectorAdd(	Game::ElementLocationToPhysicalPosition(location),
+											XMVectorMultiply(VectorFromIntVector3SwizzleYZ(elsize), Game::C_CS_ELEMENT_MIDPOINT_V));
 
 				// Update the model bounds if required
-				VectorMin(MinBounds, pos - model->GetModelMinBounds());
-				VectorMax(MaxBounds, pos + model->GetModelMaxBounds());
+				MinBounds = XMVectorMin(MinBounds, XMVectorSubtract(pos, XMLoadFloat3(&model->GetModelMinBounds())));
+				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(pos, XMLoadFloat3(&model->GetModelMaxBounds())));
 				updated = true;
 			}
 			
 			// Safety check; if no updates could be made, assign a default min/max bounds
 			if (!updated)
 			{
-				MinBounds = NULL_VECTOR; MaxBounds = MinBounds + D3DXVECTOR3(0.01f, 0.01f, 0.01f);
+				MinBounds = NULL_VECTOR; MaxBounds = XMVectorAdd(MinBounds, XMVectorReplicate(0.0f));
 			}
 
 			// Recalculate the model size and centre point based on these values
-			CompoundModelSize = (MaxBounds - MinBounds);
-			CompoundModelCentre = ((MinBounds + MaxBounds) * 0.5f);
+			CompoundModelSize = XMVectorSubtract(MaxBounds, MinBounds);
+			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
 		}
 	};
 		
@@ -500,9 +500,11 @@ public:
 
 	// Methods to retrieve and set the tile location in element space
 	CMPINLINE INTVECTOR3				GetElementLocation(void) const { return m_elementlocation; }
+	CMPINLINE XMVECTOR					GetElementPosition(void) const { return m_elementposition; }
 	CMPINLINE void						SetElementLocation(INTVECTOR3 loc) 
 	{ 
 		m_elementlocation = loc; 
+		m_elementposition = Game::ElementLocationToPhysicalPosition(m_elementlocation);
 		RecalculateTileData();
 	}
 
@@ -510,6 +512,7 @@ public:
 	CMPINLINE INTVECTOR3				GetElementSize(void) const { return m_elementsize; }
 	CMPINLINE INTVECTOR3 *				GetElementSizePointer(void) { return &m_elementsize; }
 	void								SetElementSize(const INTVECTOR3 & size);
+	CMPINLINE XMVECTOR					GetWorldSize(void) const { return m_worldsize; }
 	
 	// Methods to get and set the string code of this tile
 	CMPINLINE string					GetCode(void) const { return m_code; }
@@ -605,8 +608,8 @@ public:
 	CMPINLINE BoundingObject *			GetBoundingObject(void) const				{ return m_boundingbox; }
 
 	// Retrieve or recalculate the position and transform matrix for this tile relative to its parent ship object
-	CMPINLINE D3DXVECTOR3				GetRelativePosition(void)					{ return m_relativeposition; }
-	CMPINLINE const D3DXMATRIX *		GetWorldMatrix(void)						{ return &m_worldmatrix; }
+	CMPINLINE XMVECTOR					GetRelativePosition(void)					{ return m_relativeposition; }
+	CMPINLINE const XMMATRIX 			GetWorldMatrix(void)						{ return m_worldmatrix; }
 	void								RecalculateWorldMatrix(void);
 
 	// Return pointers to the parent objects associated with this tile
@@ -699,12 +702,14 @@ protected:
 
 	// Location and size in element space
 	INTVECTOR3					m_elementlocation;
+	XMVECTOR					m_elementposition;
 	INTVECTOR3					m_elementsize;
+	XMVECTOR					m_worldsize;
 	bool						m_multielement;
 
 	// Position and transform matrix relative to the parent complex ship object, plus the child world matrix
-	D3DXVECTOR3					m_relativeposition;
-	D3DXMATRIX					m_worldmatrix;
+	XMVECTOR					m_relativeposition;
+	XMMATRIX					m_worldmatrix;
 
 	// Pointers to the various parents of this tile
 	ComplexShip *				m_parentship;			// The ship that contains this tile

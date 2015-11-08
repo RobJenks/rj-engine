@@ -9,6 +9,7 @@
 #include "SpaceTurret.h"
 
 // Represents a collection of turrets, with methods for managing, simulating and rendering them
+// This class has no special alignment requirements
 class TurretController
 {
 public:

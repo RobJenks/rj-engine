@@ -7,6 +7,7 @@
 #include "ArticulatedModelComponent.h"
 #include "Attachment.h"
 
+// This class DOES NOT have any special alignment requirements
 class ArticulatedModel
 {
 public:
@@ -56,8 +57,8 @@ public:
 	void										PerformPostLoadInitialisation(void);
 
 	// Performs an update of all components in the articulated model before rendering
-	void										Update(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
-														const D3DXMATRIX * worldmatrix);
+	void										Update(	const FXMVECTOR position, const FXMVECTOR orientation,
+														const CXMMATRIX worldmatrix);
 
 	// Rotates about the specified constraint.  If no constraint is defined at this attachment point (i.e. if this is a 
 	// fixed attachment) no action will be taken

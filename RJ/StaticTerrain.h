@@ -10,8 +10,9 @@
 class Model;
 class StaticTerrainDefinition;
 
-
-class StaticTerrain
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class StaticTerrain : public ALIGN16<StaticTerrain>
 {
 public:
 
@@ -42,19 +43,19 @@ public:
 	CMPINLINE const iSpaceObjectEnvironment *		GetParentEnvironment(void) const				{ return m_parent; }
 	void											SetParentEnvironment(const iSpaceObjectEnvironment *env);
 	
-	CMPINLINE D3DXVECTOR3							GetPosition(void) const							{ return m_data.Centre; }
-	void											SetPosition(const D3DXVECTOR3 & pos);
+	CMPINLINE XMVECTOR								GetPosition(void) const							{ return m_data.Centre; }
+	void											SetPosition(const FXMVECTOR pos);
 
-	CMPINLINE D3DXQUATERNION						GetOrientation(void) const						{ return m_orientation; }
-	void											SetOrientation(const D3DXQUATERNION & orient);
+	CMPINLINE XMVECTOR								GetOrientation(void) const						{ return m_orientation; }
+	void											SetOrientation(const FXMVECTOR orient);
 
 	CMPINLINE const OrientedBoundingBox::CoreOBBData &	GetOBBData(void) const						{ return m_data; }
 
-	CMPINLINE D3DXMATRIX *							GetWorldMatrix(void)							{ return &m_worldmatrix; }
-	CMPINLINE void									SetWorldMatrix(D3DXMATRIX *m)					{ m_worldmatrix = *m; }
+	CMPINLINE XMMATRIX								GetWorldMatrix(void)							{ return m_worldmatrix; }
+	CMPINLINE void									SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
-	CMPINLINE D3DXVECTOR3							GetExtent(void) const							{ return m_data.Extent; }
-	void											SetExtent(const D3DXVECTOR3 & e);
+	CMPINLINE XMVECTOR								GetExtent(void) const							{ return m_data.Extent; }
+	void											SetExtent(const FXMVECTOR e);
 
 	CMPINLINE float									GetCollisionRadius(void) const					{ return m_collisionradius; }
 	CMPINLINE float									GetCollisionRadiusSq(void) const				{ return m_collisionradiussq; }		// Read-only; derived from extent
@@ -74,7 +75,7 @@ public:
 	void											SetHealth(float h)								{ m_health = h; }
 
 	// Determines the vertices of the surrounding collision volume
-	void											DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, D3DXVECTOR3(&pOutVertices)[8]) const;
+	void											DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, XMVECTOR(&pOutVertices)[8]) const;
 
 	// Method to postpone object updates; can be used to postpone updates until the end of multiple small adjustments
 	void											PostponeUpdates(void)							{ m_postponeupdates = true; }
@@ -103,8 +104,8 @@ protected:
 																				// Can be null for collision regions that have no associated visible terrain
 
 	OrientedBoundingBox::CoreOBBData		m_data;								// Core OBB data, used for terrain collision.  Also contains object position (as 'Centre')
-	D3DXQUATERNION							m_orientation;						// Orientation relative to the environment
-	D3DXMATRIX								m_worldmatrix;						// Relative world matrix for the terrain object
+	XMVECTOR								m_orientation;						// Orientation relative to the environment
+	XMMATRIX								m_worldmatrix;						// Relative world matrix for the terrain object
 
 	float									m_collisionradius;					// Collision radius is derived based upon the object size
 	float									m_collisionradiussq;				// Precalculated squared collision radius for broadphase testing

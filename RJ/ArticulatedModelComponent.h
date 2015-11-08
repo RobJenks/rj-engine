@@ -6,7 +6,10 @@
 #include "DX11_Core.h"
 class Model;
 
-class ArticulatedModelComponent
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ArticulatedModelComponent : public ALIGN16<ArticulatedModelComponent>
 {
 
 public:
@@ -18,26 +21,24 @@ public:
 	Model *								Model;
 
 	// Retrieve or set the component position
-	CMPINLINE D3DXVECTOR3				GetPosition(void) const							{ return m_position; }
-	CMPINLINE void 						SetPosition(const D3DXVECTOR3 &pos)				{ m_position = pos; }
+	CMPINLINE XMVECTOR					GetPosition(void) const							{ return m_position; }
+	CMPINLINE void 						SetPosition(const FXMVECTOR pos)				{ m_position = pos; }
 
 	// Retrieve or set the component orientation
-	CMPINLINE D3DXQUATERNION			GetOrientation(void) const						{ return m_orientation; }
-	CMPINLINE void 						SetOrientation(const D3DXQUATERNION &orient)	{ m_orientation = orient; }
+	CMPINLINE XMVECTOR					GetOrientation(void) const						{ return m_orientation; }
+	CMPINLINE void 						SetOrientation(const FXMVECTOR orient)			{ m_orientation = orient; }
 
 	// Retrieve or set the component world matrix
-	CMPINLINE D3DXMATRIX *				GetWorldMatrix(void)							{ return &m_worldmatrix; }
-	CMPINLINE D3DXMATRIX 				GetWorldMatrixInstance(void) const				{ return m_worldmatrix; }
-	CMPINLINE void						SetWorldMatrix(const D3DXMATRIX &m)				{ m_worldmatrix = m; }
-	CMPINLINE void						SetWorldMatrix(D3DXMATRIX *m)					{ m_worldmatrix = *m; }
+	CMPINLINE XMMATRIX					GetWorldMatrix(void) const						{ return m_worldmatrix; }
+	CMPINLINE void						SetWorldMatrix(FXMMATRIX m)						{ m_worldmatrix = m; }
 
 	// Set all spatial components at once, to reduce method calls when all information is known
-	CMPINLINE void						SetAllSpatialData(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
-															const D3DXMATRIX * worldmatrix)
+	CMPINLINE void						SetAllSpatialData(	const FXMVECTOR position, const FXMVECTOR orientation,
+															const CXMMATRIX worldmatrix)
 	{
 		m_position = position;
 		m_orientation = orientation;
-		m_worldmatrix = (*worldmatrix);
+		m_worldmatrix = worldmatrix;
 	}
 
 	// Performs an immediate recalculation of the world transform for this component
@@ -64,22 +65,15 @@ public:
 	// Assigns the contents of another model component to this one
 	void								operator=(const ArticulatedModelComponent & rhs);
 
-	// Static working variables for inline intermediate calculations
-	static struct						_calc_data_struct {
-		D3DXVECTOR3						v1, v2, v3;
-		D3DXQUATERNION					q1, q2, q3;
-		D3DXMATRIX						m1, m2, m3;
-	} _calc_data;
-
 
 protected:
 
 	// Position and orientation of the component in world space
-	D3DXVECTOR3							m_position;
-	D3DXQUATERNION						m_orientation;
+	XMVECTOR							m_position;
+	XMVECTOR							m_orientation;
 
 	// World matrix for the component
-	D3DXMATRIX							m_worldmatrix;
+	XMMATRIX							m_worldmatrix;
 
 	// Flags indicating whether this object has a parent, or any child attachments
 	bool								m_hasparent;

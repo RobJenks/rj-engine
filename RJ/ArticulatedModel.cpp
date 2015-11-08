@@ -188,8 +188,8 @@ void ArticulatedModel::PerformPostLoadInitialisation(void)
 }
 
 // Performs an update of all components in the articulated model before rendering
-void ArticulatedModel::Update(	const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation,
-								const D3DXMATRIX * worldmatrix)
+void ArticulatedModel::Update(	const FXMVECTOR position, const FXMVECTOR orientation,
+								const CXMMATRIX worldmatrix)
 {
 	// Update the root component with this data
 	m_components[m_rootcomponent]->SetAllSpatialData(position, orientation, worldmatrix);

@@ -57,8 +57,9 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 	if (m_target)
 	{
 		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
-		float yaw, pitch; D3DXQUATERNION invorient;
-		D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
+		// D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
+		float yaw, pitch; 
+		XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
 		DetermineYawAndPitchToTarget(CannonPosition(), invorient, m_target->GetPosition(), yaw, pitch);
 
 		// If pitch and yaw are very close to target, we can begin firing
@@ -210,7 +211,7 @@ void SpaceTurret::SetParent(iSpaceObject *parent)
 
 
 // Sets the relative orientation of the turret on its parent object.  This will be the 'resting' orientation
-void SpaceTurret::SetBaseRelativeOrientation(const D3DXQUATERNION & orient)
+void SpaceTurret::SetBaseRelativeOrientation(const FXMVECTOR orient)
 {
 	// Store the new base orientation
 	m_baserelativeorient = orient;
@@ -239,10 +240,10 @@ void SpaceTurret::Yaw(float angle)
 	// Update the yaw value
 	m_yaw = yaw;
 	
-	// Update the orientation of the turret cannon
-	D3DXQUATERNION delta;
-	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
-	m_turretrelativeorient = (m_baserelativeorient * delta);
+	// Update the orientation of the turret cannon (baseorient * pitch_yaw_delta)
+	m_turretrelativeorient = XMQuaternionMultiply(	
+		m_baserelativeorient, 
+		XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0.0f));
 
 	// Update the model rotation about its yaw constraint
 	m_articulatedmodel->SetConstraintRotation(m_constraint_yaw, m_yaw);
@@ -264,10 +265,10 @@ void SpaceTurret::Pitch(float angle)
 	// Update the yaw value
 	m_pitch = pitch;
 
-	// Update the orientation of the turret cannon
-	D3DXQUATERNION delta;
-	D3DXQuaternionRotationYawPitchRoll(&delta, m_yaw, m_pitch, 0.0f);
-	m_turretrelativeorient = (m_baserelativeorient * delta);
+	// Update the orientation of the turret cannon (baseorient * pitch_yaw_delta)
+	m_turretrelativeorient = XMQuaternionMultiply(
+		m_baserelativeorient,
+		XMQuaternionRotationRollPitchYaw(m_pitch, m_yaw, 0.0f));
 
 	// Update the model rotation about its pitch constraint
 	m_articulatedmodel->SetConstraintRotation(m_constraint_pitch, m_pitch);
@@ -342,14 +343,13 @@ void SpaceTurret::DesignateTarget(iSpaceObject *target)
 // full simulation we can likely approximate as only ship position/orientation
 void SpaceTurret::UpdatePositioning(void)
 {
-	// Determine turret position in world space 
-	XMVector3Rotate(&m_position, &m_relativepos, &m_parent->GetOrientation());
-	m_position += m_parent->GetPosition();
+	// Determine turret position in world space (parentpos + rotate(relativepos))
+	m_position = XMVectorAdd(m_parent->GetPosition(), XMVector3Rotate(m_relativepos, m_parent->GetOrientation()));
 
 	// Compose our base orientation with the parent object to get the turret resting orientation, 
 	// then derive the inverse
-	m_orientation = (m_baserelativeorient * m_parent->GetOrientation());
-	D3DXQuaternionInverse(&m_invorient, &m_orientation);
+	m_orientation = XMQuaternionMultiply(m_baserelativeorient, m_parent->GetOrientation());
+	m_invorient = XMQuaternionInverse(m_orientation);
 }
 
 // Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 
@@ -357,15 +357,17 @@ void SpaceTurret::UpdatePositioning(void)
 bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 { 
 	// Transform the target vector by turret inverse orientation to get a target vector in local space
-	D3DXVECTOR3 tgt_local;
-	XMVector3Rotate(&tgt_local, &(target->GetPosition() - m_position), &m_invorient);
+	XMVECTOR tgt_local = XMVector3Rotate(
+		XMVectorSubtract(target->GetPosition(), m_position),	// Get difference vector from turret to target
+		m_invorient);											// Transform this target vector into local space
 
 	// Before testing the firing arcs, make sure this target is actually in range
-	if (D3DXVec3LengthSq(&tgt_local) > m_maxrangesq) return false;
+	if (XMVectorGetX(XMVector3LengthSq(tgt_local)) > m_maxrangesq) return false;
 
 	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
-	return ( (m_yaw_limited == false || m_yaw_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.x, tgt_local.z))) &&
-			 (							m_pitch_arc.VectorWithinArc(D3DXVECTOR2(tgt_local.y, tgt_local.z))) );
+	return (
+		(m_yaw_limited == false || m_yaw_arc.VectorWithinArc(XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(tgt_local))) &&	// (x, z)
+		(						   m_pitch_arc.VectorWithinArc(XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(tgt_local))));	// (y, z)
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one

@@ -9,7 +9,9 @@
 class iSpaceObject;
 class SpaceProjectileLauncher;
 
-class SpaceTurret
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class SpaceTurret : public ALIGN16<SpaceTurret>
 {
 public:
 
@@ -50,15 +52,15 @@ public:
 	Result							SetArticulatedModel(ArticulatedModel *model);
 
 	// Gets/sets the relative position of the turret on its parent object
-	CMPINLINE D3DXVECTOR3			GetRelativePosition(void) const							{ return m_relativepos; }
-	CMPINLINE void					SetRelativePosition(const D3DXVECTOR3 & relativepos)	{ m_relativepos = relativepos; }
+	CMPINLINE XMVECTOR				GetRelativePosition(void) const							{ return m_relativepos; }
+	CMPINLINE void					SetRelativePosition(const FXMVECTOR relativepos)		{ m_relativepos = relativepos; }
 
 	// Gets/sets the relative resting orientation of the turret on its parent object.  This will be the 'resting' orientation
-	CMPINLINE D3DXQUATERNION		GetBaseRelativeOrientation(void) const						{ return m_baserelativeorient; }
-	void							SetBaseRelativeOrientation(const D3DXQUATERNION & orient);
+	CMPINLINE XMVECTOR				GetBaseRelativeOrientation(void) const					{ return m_baserelativeorient; }
+	void							SetBaseRelativeOrientation(const FXMVECTOR orient);
 
 	// Return the actual relative orientation of the turret.  This accounts for pitch & yaw
-	CMPINLINE D3DXQUATERNION		GetTurretRelativeOrientation(void) const					{ return m_turretrelativeorient; }
+	CMPINLINE XMVECTOR				GetTurretRelativeOrientation(void) const				{ return m_turretrelativeorient; }
 
 	// Specifies whether the turret is yaw-limited, or can rotate freely about its local up axis
 	CMPINLINE bool					IsYawLimited(void) const								{ return m_yaw_limited; }
@@ -137,16 +139,15 @@ public:
 	void							ClearLauncherReferences(void);
 
 	// Returns a constant reference to the cannon position in world space, for use in calculating the firing trajectory
-	CMPINLINE D3DXVECTOR3			CannonPosition(void) const			{ return m_articulatedmodel->GetComponents()[m_component_cannon]->GetPosition(); }
+	CMPINLINE XMVECTOR				CannonPosition(void) const			{ return m_articulatedmodel->GetComponents()[m_component_cannon]->GetPosition(); }
 
 	// Recalculates the object world matrix
 	CMPINLINE void					DetermineWorldMatrix(void)
 	{
-		// Derive a new relative world matrix from the turret position & orientation
-		D3DXMATRIX trans, rot;
-		D3DXMatrixRotationQuaternion(&rot, &m_orientation);
-		D3DXMatrixTranslation(&trans, m_position.x, m_position.y, m_position.z);
-		m_worldmatrix = (rot * trans);
+		// Derive a new relative world matrix from the turret position & orientation (World = Rotation * Translation)
+		m_worldmatrix = XMMatrixMultiply(
+			XMMatrixRotationQuaternion(m_orientation), 
+			XMMatrixTranslationFromVector(m_position));
 	}
 
 	// Recalculates all turret statistics based on contents; used post-initialisation to prepare turret for use
@@ -156,10 +157,10 @@ public:
 	void							UpdatePositioning(void);
 
 	// Retrieve the absolute spatial data for this turret, derived during update method
-	CMPINLINE D3DXVECTOR3			GetPosition(void) const				{ return m_position; }
-	CMPINLINE D3DXQUATERNION		GetOrientation(void) const			{ return m_orientation; }
-	CMPINLINE D3DXQUATERNION		GetInverseOrientation(void) const	{ return m_invorient; }
-	CMPINLINE const D3DXMATRIX *	GetWorldMatrix(void) const			{ return &m_worldmatrix; }
+	CMPINLINE XMVECTOR			GetPosition(void) const				{ return m_position; }
+	CMPINLINE XMVECTOR			GetOrientation(void) const			{ return m_orientation; }
+	CMPINLINE XMVECTOR			GetInverseOrientation(void) const	{ return m_invorient; }
+	CMPINLINE XMMATRIX			GetWorldMatrix(void) const			{ return m_worldmatrix; }
 
 	// Shut down the turret object, deallocating all resources
 	void							Shutdown(void);
@@ -202,19 +203,19 @@ protected:
 	//		m_baserelativeorient = resting orientation, [0 0 0 1] in many cases
 	//		m_orientation = (baserelativeorient * parent_orientation), i.e. resting orientation in world space
 	//		m_turretrelativeorient = (baserelativeorient * delta_from_pitch_yaw), i.e. relative turret cannon orientation
-	D3DXVECTOR3						m_relativepos;
-	D3DXQUATERNION					m_baserelativeorient;
-	D3DXQUATERNION					m_turretrelativeorient;
+	XMVECTOR						m_relativepos;
+	XMVECTOR						m_baserelativeorient;
+	XMVECTOR						m_turretrelativeorient;
 
 	// Store world position, orientation and inverse orientation.  Derived during update by turret controller
-	D3DXVECTOR3						m_position;
-	D3DXQUATERNION					m_orientation, m_invorient;
+	XMVECTOR						m_position;
+	XMVECTOR						m_orientation, m_invorient;
 
 	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;
 
 	// Object world matrix, relative to its parent object.  Based on m_position and m_orientation
-	D3DXMATRIX						m_worldmatrix;
+	XMMATRIX						m_worldmatrix;
 
 	// Values indicating the yaw & pitch capabilities of the turret
 	float							m_yawrate, m_pitchrate;							// Rad/sec

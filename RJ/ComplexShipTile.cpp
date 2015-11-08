@@ -52,10 +52,12 @@ ComplexShipTile::ComplexShipTile(void)
 	m_rotation = Rotation90Degree::Rotate0;
 	m_elementlocation = NULL_INTVECTOR3;
 	m_elementsize = NULL_INTVECTOR3;		
+	m_elementposition = NULL_VECTOR;
+	m_worldsize = NULL_VECTOR;
 	m_multielement = false;
 	m_boundingbox = new BoundingObject();
-	m_relativeposition = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXMatrixIdentity(&m_worldmatrix);
+	m_relativeposition = NULL_VECTOR;
+	m_worldmatrix = ID_MATRIX;
 	m_definition = NULL;
 	m_classtype = D::TileClass::Unknown;
 	m_aggregatehealth = 1.0f;
@@ -87,7 +89,9 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_definition = C.GetTileDefinition();
 	m_classtype = C.GetTileClass();
 	m_elementlocation = C.GetElementLocation();
+	m_elementposition = C.GetElementPosition();
 	m_elementsize = C.GetElementSize();
+	m_worldsize = C.GetWorldSize();
 	m_model = C.GetModel();
 	m_rotation = C.GetRotation();
 	m_boundingbox = BoundingObject::Copy(C.GetBoundingObject());
@@ -142,38 +146,32 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	// Make sure that we have model data, for either single- or compound-model mode.  If not, simply set WM = ID
 	if ((!m_multiplemodels && !m_model) || (m_multiplemodels && !m_models.AllocationPerformed()))
 	{
+		m_relativeposition = NULL_VECTOR;
 		m_worldmatrix = ID_MATRIX;
 		return;
 	}
 
-	// Otherwise, we will calculate as WM = Tcentre * Rot * T(0.5*elsize + elpos)
-	D3DXMATRIX Tcentre, Telement;
-
 	// Tcentre = model translation to its centre point, prior to rotation about its centre
-	const D3DXVECTOR3 & centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : m_model->GetModelCentre());
-	D3DXMatrixTranslation(&Tcentre, -centrepoint.x, -centrepoint.y, -centrepoint.z);
-
-	// Rot = rotation matrix about the model centre, based upon tile rotation value
-	const D3DXMATRIX *rot = GetRotationMatrix(m_rotation);
-
+	XMVECTOR centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : XMLoadFloat3(&m_model->GetModelCentre()));
+	
 	// Telement = translation from model centre to top-left corner (0.5*numelements*elementsize in world coords) + translation to element position
-	// Switch y and z coordinates since we are moving from element to world space
-	m_relativeposition = D3DXVECTOR3(	(float)(m_elementsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.x),
-										(float)(m_elementsize.z * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.z),
-										(float)(m_elementsize.y * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.y));
-	D3DXMatrixTranslation(&Telement, m_relativeposition.x, m_relativeposition.y, m_relativeposition.z);
-
+	// Will switch y and z coordinates since we are moving from element to world space
+	// m_relativeposition = D3DXVECTOR3((float)(m_elementsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.x), ...
+	m_relativeposition = XMVectorAdd(XMVectorMultiply(m_worldsize, Game::C_CS_ELEMENT_MIDPOINT_V), m_elementposition);
+	
 	// Multiply the matrices together to determine the final tile world matrix
-	m_worldmatrix = (Tcentre * (*rot) * Telement);
-	//D3DXMatrixMultiply(&m_worldmatrix, &Tcentre, rot);
-	//D3DXMatrixMultiply(&m_worldmatrix, &m_worldmatrix, &Telement);
+	// World = (CentreTrans * Rotation * ElementPosTranslation)
+	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixTranslationFromVector(XMVectorNegate(centrepoint)),		// Translate to centre point
+		GetRotationMatrix(m_rotation)),									// Rotate about centre
+		XMMatrixTranslationFromVector(m_relativeposition));				// Translate centre point to centre point of element location
 }
 
 // Recalculates the bounding volume for this tile based on the element size in world space
 void ComplexShipTile::RecalculateBoundingVolume(void)
 {
 	// Get the bounding box size in world space based on the element size of the tile.  
-	D3DXVECTOR3 size = Game::ElementLocationToPhysicalPosition(m_elementsize);
+	XMFLOAT3 size = Game::ElementLocationToPhysicalPositionF(m_elementsize);
 
 	// Only recalculate the bounding volume if we have a nonzero positive size in each dimension
 	if (size.x <= 0.0f || size.y <= 0.0f || size.z <= 0.0f) return;
@@ -185,7 +183,7 @@ void ComplexShipTile::RecalculateBoundingVolume(void)
 	}
 
 	// Create a new cuboid bounding volume to cover the tile 
-	m_boundingbox->CreateCuboidBound(&size);
+	m_boundingbox->CreateCuboidBound(size);
 }
 
 // Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)
@@ -439,6 +437,9 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 
 	// Store the new element size
 	m_elementsize = size; 
+
+	// Determine the world size of this tile based on the element size
+	m_worldsize = Game::ElementLocationToPhysicalPosition(m_elementsize);
 
 	// Recalculate properties derived from the element size
 	RecalculateTileData(); 

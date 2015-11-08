@@ -3,10 +3,6 @@
 #include "ArticulatedModelComponent.h"
 
 
-// Static intermediate data struct to support high-performance calculations
-ArticulatedModelComponent::_calc_data_struct ArticulatedModelComponent::_calc_data = ArticulatedModelComponent::_calc_data_struct();
-
-
 // Default constructor
 ArticulatedModelComponent::ArticulatedModelComponent(void)
 	: 
@@ -19,9 +15,10 @@ ArticulatedModelComponent::ArticulatedModelComponent(void)
 // Performs an immediate recalculation of the world transform for this component
 void ArticulatedModelComponent::RefreshPositionImmediate(void)
 {
-	D3DXMatrixRotationQuaternion(&ArticulatedModelComponent::_calc_data.m1, &m_orientation);
-	D3DXMatrixTranslation(&_calc_data.m2, m_position.x, m_position.y, m_position.z);
-	SetWorldMatrix(_calc_data.m1 * _calc_data.m2);
+	// Set world matrix: World = Rotation * Translation
+	SetWorldMatrix(XMMatrixMultiply(
+		XMMatrixRotationQuaternion(m_orientation),
+		XMMatrixTranslationFromVector(m_position)));
 }
 
 // Assigns the contents of another model component to this one.  Resets the hasparent/haschild flags,
@@ -31,7 +28,7 @@ void ArticulatedModelComponent::operator=(const ArticulatedModelComponent & rhs)
 	Model = rhs.Model;
 	SetPosition(rhs.GetPosition());
 	SetOrientation(rhs.GetOrientation());
-	SetWorldMatrix(rhs.GetWorldMatrixInstance());
+	SetWorldMatrix(rhs.GetWorldMatrix());
 	SetParentAttachmentState(false);
 	SetChildAttachmentState(false);
 }

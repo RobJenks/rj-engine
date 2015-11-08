@@ -118,6 +118,10 @@ XMFLOAT4			QuaternionMultiply(const XMFLOAT4 & q1, const XMFLOAT4 & q2);
 void				QuaternionMultiply(const XMFLOAT4 & q1, const XMFLOAT4 & q2, XMFLOAT4 & outProduct);
 void				QuaternionNormalise(XMFLOAT4 & q);
 void				QuaternionNormalise(const XMFLOAT4 & q, XMFLOAT4 & outQNorm);
+CMPINLINE XMVECTOR	VectorFromIntVector2(const INTVECTOR2 & v) { return XMVectorSet((float)v.x, (float)v.y, 0.0f, 0.0f); }
+CMPINLINE XMVECTOR	VectorFromIntVector3(const INTVECTOR3 & v) { return XMVectorSet((float)v.x, (float)v.y, (float)v.z, 0.0f); }
+CMPINLINE XMVECTOR	VectorFromIntVector3SwizzleYZ(const INTVECTOR3 & v) { return XMVectorSet((float)v.x, (float)v.z, (float)v.y, 0.0f); }
+void				Vector3ToIntVector(const FXMVECTOR vec, INTVECTOR3 & outVec);
 
 CMPINLINE bool		Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
@@ -133,6 +137,10 @@ CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
 }
 
+CMPINLINE XMFLOAT2	Float2Subtract(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return XMFLOAT2(v1.x - v2.x, v1.y - v2.y);
+}
 CMPINLINE XMFLOAT3	Float3Subtract(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return XMFLOAT3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
@@ -141,6 +149,12 @@ CMPINLINE XMFLOAT3	Float3Subtract(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 CMPINLINE XMFLOAT3	Float3MultiplyScalar(const XMFLOAT3 & v, const float s)
 {
 	return XMFLOAT3(v.x * s, v.y * s, v.z * s);
+}
+
+void Vector3ToIntVector(const FXMVECTOR vec, INTVECTOR3 & outVec)
+{
+	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
+	outVec.x = (int)vecf.x; outVec.y = (int)vecf.y; outVec.z = (int)vecf.z;
 }
 
 CMPINLINE XMVECTOR CalculateRotationBetweenQuaternions(const FXMVECTOR qStart, const FXMVECTOR qEnd)
