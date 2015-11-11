@@ -13,7 +13,10 @@ class ComplexShipElement;
 class SpaceSystem;
 class Actor;
 
-class Player 
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Player : ALIGN16<Player>
 {
 
 public:
@@ -44,26 +47,26 @@ public:
 
 	// Methods to force-set the player environment , without the player entity needing to be there.  Used for e.g.
 	// rendering scenes within the null system.  Will revert to normal once released.  Game should generally be paused first.
-	void							OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation);
+	void							OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, const FXMVECTOR position, const FXMVECTOR orientation);
 	void							ReleasePlayerEnvironmentOverride(void);
 
 	// Position and orientation of the player (derived either from on-foot or ship state)
-	CMPINLINE D3DXVECTOR3			GetPosition(void)						{ return m_position; }
-	CMPINLINE D3DXQUATERNION		GetOrientation(void)					{ return m_orientation; }
-	CMPINLINE D3DXVECTOR3			GetEnvironmentPosition(void)			{ return m_envposition; }
-	CMPINLINE D3DXQUATERNION		GetEnvironmentOrientation(void)			{ return m_envorientation; }
+	CMPINLINE XMVECTOR				GetPosition(void)						{ return m_position; }
+	CMPINLINE XMVECTOR				GetOrientation(void)					{ return m_orientation; }
+	CMPINLINE XMVECTOR				GetEnvironmentPosition(void)			{ return m_envposition; }
+	CMPINLINE XMVECTOR				GetEnvironmentOrientation(void)			{ return m_envorientation; }
 	
 	// Change the current player position/orientation.  Takes different action depending on whether the player is on foot or in a ship
-	void							SetPosition(D3DXVECTOR3 pos);
-	void							SetOrientation(D3DXQUATERNION orient);
+	void							SetPosition(const FXMVECTOR pos);
+	void							SetOrientation(const FXMVECTOR orient);
 
 	// Offset of the camera from the player position & orientation.  Only required for on-foot camera (otherwise is taking from ship camera details)
-	CMPINLINE D3DXVECTOR3			GetViewPositionOffset(void)		{ return m_viewpositionoffset; }
-	CMPINLINE D3DXQUATERNION		GetViewOrientationOffset(void)	{ return m_vieworientationoffset; }
-	void							SetViewPositionOffset(D3DXVECTOR3 pos);
-	void							SetViewOrientationOffset(D3DXQUATERNION orient);
-	void							SetViewPositionAndOrientationOffset(D3DXVECTOR3 pos, D3DXQUATERNION orient);
-	CMPINLINE const D3DXMATRIX *	GetViewOffsetMatrix(void) const	{ return &m_viewoffsetmatrix; }
+	CMPINLINE XMVECTOR				GetViewPositionOffset(void)		{ return m_viewpositionoffset; }
+	CMPINLINE XMVECTOR				GetViewOrientationOffset(void)	{ return m_vieworientationoffset; }
+	void							SetViewPositionOffset(const FXMVECTOR pos);
+	void							SetViewOrientationOffset(const FXMVECTOR orient);
+	void							SetViewPositionAndOrientationOffset(const FXMVECTOR pos, const FXMVECTOR orient);
+	CMPINLINE const XMMATRIX &		GetViewOffsetMatrix(void) const	{ return m_viewoffsetmatrix; }
 
 	// Methods to retrieve the current player element and location, when located inside a complex ship
 	CMPINLINE INTVECTOR3			GetComplexShipEnvironmentElementLocation(void)	{ return m_complexshipenvelementlocation; }
@@ -126,16 +129,16 @@ public:
 	ComplexShipElement *	m_complexshipenvelement;
 	
 	// The player position & orientation.  Absolute and relative (to environment) values are stored for efficiency
-	D3DXVECTOR3				m_position, m_envposition;
-	D3DXQUATERNION			m_orientation, m_envorientation;
+	AXMVECTOR				m_position, m_envposition;
+	AXMVECTOR				m_orientation, m_envorientation;
 
 	// Matrix representing the orientation of the player in world space
-	D3DXMATRIX				m_orientationmatrix;
+	AXMMATRIX				m_orientationmatrix;
 
 	// View offset from the player position & orientation.  Only relevant for on-foot camera (otherwise is automatically pulled from the ship camera details)
-	D3DXVECTOR3				m_viewpositionoffset;
-	D3DXQUATERNION			m_vieworientationoffset;
-	D3DXMATRIX				m_viewoffsetmatrix;
+	AXMVECTOR				m_viewpositionoffset;
+	AXMVECTOR				m_vieworientationoffset;
+	AXMMATRIX				m_viewoffsetmatrix;
 
 	// Stores the rotation (in radians) about the Y and X axis, plus any pending rotations, for on-foot camera view
 	float					m_viewpitch;
@@ -163,8 +166,8 @@ public:
 	PlayerEnvironmentOverrideType		m_envoverride;
 	StateType							m_overridepriorstate;
 	SpaceSystem *						m_overridesystem;
-	D3DXVECTOR3							m_overrideposition;
-	D3DXQUATERNION						m_overrideorientation;
+	AXMVECTOR							m_overrideposition;
+	AXMVECTOR							m_overrideorientation;
 	Ship *								m_overrideship;
 	Ship *								m_overridepriorship;
 };

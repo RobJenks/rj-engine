@@ -13,6 +13,7 @@
 #include "ShipTileRequirement.h"
 using namespace std;
 
+// This class has no special alignment requirements
 class ProductionCost
 {
 public:

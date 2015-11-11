@@ -8,6 +8,7 @@
 class SpaceProjectile;
 class Model;
 
+// Class does not have any special alignment requirements
 class SpaceProjectileDefinition
 {
 public:

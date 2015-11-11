@@ -21,7 +21,7 @@ SpaceProjectileLauncher::SpaceProjectileLauncher(void) :
 // fire even if not ready (i.e. within reload interval), so CanLaunchProjectile() should be checked before firing
 // Accepts a the position and orientation of the parent launch point as an input.  Returns a reference to the 
 // projectile that was fired, or NULL if nothing was launched
-SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & launchpoint, const D3DXQUATERNION & launchorient)
+SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoint, const FXMVECTOR launchorient)
 {
 	// Validate required properties
 	if (!m_projectiledef || !m_parent || !m_parent->GetSpaceEnvironment()) return NULL;
@@ -34,9 +34,7 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 	proj->SetOwner(m_parent);
 
 	// Determine launch position based upon our parent object
-	D3DXVECTOR3 pos;
-	XMVector3Rotate(&pos, &m_relativepos, &launchorient);
-	pos += launchpoint;
+	XMVECTOR pos = XMVectorAdd(launchpoint, XMVector3Rotate(m_relativepos, launchorient));
 	proj->SetPosition(pos);
 
 	// Determine the spread effect for this projectile.  Set the projectile orientation depending on whether
@@ -44,11 +42,11 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 	if (m_spread > Game::C_EPSILON)
 	{
 		DetermineNextProjectileSpreadDelta();
-		proj->SetOrientation(m_spread_delta * m_relativeorient * launchorient);
+		proj->SetOrientation(XMQuaternionMultiply(XMQuaternionMultiply(m_spread_delta, m_relativeorient), launchorient));
 	}
 	else
 	{
-		proj->SetOrientation(m_relativeorient * launchorient);
+		proj->SetOrientation(XMQuaternionMultiply(m_relativeorient, launchorient));
 	}
 
 	// Perform an immediate refresh of projectile position/orientation to recalcualate its transform matrices
@@ -57,7 +55,7 @@ SpaceProjectile *SpaceProjectileLauncher::LaunchProjectile(const D3DXVECTOR3 & l
 	// Apply launch impulse to the projectile
 	float impulse = (m_launchmethod == ProjectileLaunchMethod::ApplyForce ? (m_launchimpulse * proj->GetInverseMass()) : m_launchimpulse);
 	impulse = clamp(impulse, 0.01f, Game::C_PROJECTILE_VELOCITY_LIMIT);
-	proj->ApplyLocalLinearForceDirect(D3DXVECTOR3(0.0f, 0.0f, impulse));
+	proj->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, impulse));
 
 	// Store linear trajectory properties in the projectile
 	proj->SetLinearVelocityDegradation(m_degradelinearvelocity);
@@ -121,10 +119,9 @@ void SpaceProjectileLauncher::DetermineNextProjectileSpreadDelta(void)
 	// Expand out the frand_lh macro to save repeated calculations: frand_lh(l,h) = (l + rand()/(RAND_MAX/(h-l)))
 	// Divisor has been pre-calculated any time the spread value is changed
 	// We will construct a quaternion to account for the resulting turret pitch/yaw spread
-	D3DXQuaternionRotationYawPitchRoll(&m_spread_delta, 
-		(-m_spread + ((float)rand() / m_spread_divisor)), 
-		(-m_spread + ((float)rand() / m_spread_divisor)), 
-		0.0f);
+	m_spread_delta = XMQuaternionRotationRollPitchYaw(	(-m_spread + ((float)rand() / m_spread_divisor)),
+														(-m_spread + ((float)rand() / m_spread_divisor)),
+														0.0f);
 }
 
 // Determines the max range of the launcher based on its launch properties and projectiles.  Is only

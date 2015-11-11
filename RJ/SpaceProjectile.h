@@ -6,7 +6,9 @@
 #include "iSpaceObject.h"
 class SpaceProjectileDefinition;
 
-class SpaceProjectile : public iSpaceObject
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class SpaceProjectile : public ALIGN16<SpaceProjectile>, public iSpaceObject
 {
 public:
 
@@ -35,7 +37,7 @@ public:
 	CMPINLINE void					SetAngularVelocityDegradePc(float pc)							{ m_degrade_av_pc = pc; }
 	CMPINLINE bool					HasOrientationShiftDuringFlight(void) const						{ return m_orient_change; }
 	CMPINLINE void					SetOrientationShift(bool active)								{ m_orient_change = active; }
-	CMPINLINE void					SetOrientationShiftAmount(const D3DXQUATERNION & dq_per_sec)	{ m_orient_change_amount = dq_per_sec; }
+	CMPINLINE void					SetOrientationShiftAmount(const FXMVECTOR dq_per_sec)			{ m_orient_change_amount = dq_per_sec; }
 
 
 	// Primary simulation method for the projectile.  Inherited from iSpaceObject
@@ -73,7 +75,7 @@ protected:
 
 	// Data determining whether the projectile orientation will change over time
 	bool								m_orient_change;
-	D3DXQUATERNION						m_orient_change_amount;
+	AXMVECTOR							m_orient_change_amount;
 
 };
 

@@ -16,34 +16,33 @@ using namespace std;
 #include "ImmediateRegion.h"
 
 // Initialisation method
-Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particletexture, 
-								    const D3DXVECTOR3 & centre, 
-								    const D3DXVECTOR3 & minbounds, const D3DXVECTOR3 & maxbounds, 
-									const D3DXVECTOR3 & updatethreshold)
+Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particletexture,
+									const FXMVECTOR centre,
+									const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
+									const GXMVECTOR updatethreshold)
 {
 	Result result;
 
-	// Validation of the sizing parameters passed in for initialisation
-	if ((maxbounds.x - minbounds.x < updatethreshold.x) ||
-		(maxbounds.y - minbounds.y < updatethreshold.y) ||
-		(maxbounds.z - minbounds.z < updatethreshold.z) ) return ErrorCodes::RegionTooSmallForSpecifiedUpdateThreshold;
+	// Validation of the sizing parameters passed in for initialisation; (max-min) should be greater than the update threshold
+	if (!XMVector3Greater(XMVectorSubtract(maxbounds, minbounds), updatethreshold))
+		return ErrorCodes::RegionTooSmallForSpecifiedUpdateThreshold;
 		
 	// Initialise position; we also set the previous centre to be equal, then perform the initial update so no boundary update required at start
-	this->m_centre = D3DXVECTOR3(centre);
-	this->m_prevcentre = D3DXVECTOR3(centre);
+	this->m_centre = centre;
+	this->m_prevcentre = centre;
 
 	// Set region size and update thresholds
-	this->m_minbounds = D3DXVECTOR3(minbounds);
-	this->m_maxbounds = D3DXVECTOR3(maxbounds);
-	this->m_threshold = D3DXVECTOR3(updatethreshold);
+	this->m_minbounds = minbounds;
+	this->m_maxbounds = maxbounds;
+	this->m_threshold = updatethreshold;
 
 	// Calculate the max particle creation bounds, which are a constant % smaller than the overall max bounds
 	// This limits the creation of particles right near the max bounds which are immediately removed and replaced again
-	this->m_creationmaxbounds = m_maxbounds * CREATION_DISTANCE_FACTOR;
+	this->m_creationmaxbounds = XMVectorScale(m_maxbounds, CREATION_DISTANCE_FACTOR);
 
 	// Set parameters to their defaults
 	m_cyclessinceupdate = 0;
-	m_dustcolour = D3DXVECTOR4(DEFAULT_DUST_COLOUR);
+	m_dustcolour = DEFAULT_DUST_COLOUR;
 	SetDustSize(DEFAULT_DUST_SIZE);
 
 	// Load the texture resource that will be mapped to each particle
@@ -66,7 +65,7 @@ Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particlete
 }
 
 // Method to move the region to a new centre point; performs the logic to determine whether any updates are necessary
-void ImmediateRegion::MoveRegion(D3DXVECTOR3 centre)
+void ImmediateRegion::MoveRegion(const FXMVECTOR centre)
 {
 	// Store the new region centre
 	this->m_centre = centre;
@@ -78,24 +77,22 @@ void ImmediateRegion::MoveRegion(D3DXVECTOR3 centre)
 		UpdateRegionBoundaries(m_boundary);
 
 		// Register the change in position to this new location
-		this->m_prevcentre = this->m_centre;
+		m_prevcentre = m_centre;
 	}
 }
 
-void ImmediateRegion::UpdateRegionBoundaries(D3DXVECTOR3 boundary)
+void ImmediateRegion::UpdateRegionBoundaries(const FXMVECTOR boundary)
 {
 	// Calculate the new region bounds, now the move has been performed
-	D3DXVECTOR3 bmax = m_centre + m_maxbounds;
-	D3DXVECTOR3 bmin = m_centre - m_maxbounds;
-
+	XMVECTOR bmax = XMVectorAdd(m_centre, m_maxbounds);
+	XMVECTOR bmin = XMVectorSubtract(m_centre, m_maxbounds);
+	
 	// Traverse the collection and repurpose any particles now out of bounds
 	DustParticle *p = &m_dust[0];
 	for (int i=0; i<m_dustactive; i++, p++)
 	{
-		// Test whether it is has left the region bounds
-		if (p->Location.x < bmin.x || p->Location.x > bmax.x || 
-			p->Location.y < bmin.y || p->Location.y > bmax.y ||
-			p->Location.z < bmin.z || p->Location.z > bmax.z)
+		// Test whether this particle has left the region bounds
+		if (!(XMVector3GreaterOrEqual(p->Location, bmin) && XMVector3Less(p->Location, bmax)))
 			{
 				// Refresh the particle and reposition back to a point within the region, UNLESS we want to REDUCE the particle count
 				if (m_dustactive <= m_dustcount)
@@ -116,9 +113,9 @@ void ImmediateRegion::SetDustSize(float size)
 	m_dustsize = size;
 
 	// Precalculate the relevant adjustment vectors for each of the three other vertices (bottom left remains at particle position)
-	m_adj_tl.x = 0.0f;		m_adj_tl.y = -size;		m_adj_tl.z = 0.0f;		// Top-left
-	m_adj_br.x = size;		m_adj_br.y = 0.0f;		m_adj_br.z = 0.0f;		// Bottom-right
-	m_adj_tr.x = size;		m_adj_tr.y = -size;		m_adj_tr.z = 0.0f;		// Top-right
+	m_adj_tl = XMVectorSetY(NULL_VECTOR, -size);							// Top-left:		(0, -size, 0)
+	m_adj_br = XMVectorSetX(NULL_VECTOR, size);								// Bottom-right:	(size, 0, 0)
+	m_adj_tr = XMVectorAdd(m_adj_tl, m_adj_br);								// Top-right:		(size, -size, 0)	[= TL + BR]
 }	
 
 void ImmediateRegion::AddParticle(void)

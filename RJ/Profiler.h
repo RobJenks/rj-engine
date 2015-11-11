@@ -10,6 +10,7 @@
 #include "GameVarsExtern.h"
 #include "LogManager.h"
 
+// The components in this file have no special alignment requirements
 
 /*** Determines the method(s) by which profiling data is reported ***/
 //#define RJ_PROFILE_TO_DEBUG_OUT

@@ -33,7 +33,7 @@ Player::Player(void)
 	m_envposition = NULL_VECTOR;
 	m_orientation = ID_QUATERNION;
 	m_envorientation = ID_QUATERNION;
-	m_viewpositionoffset = Game::C_ACTOR_DEFAULT_VIEW_OFFSET;
+	m_viewpositionoffset = XMLoadFloat3(&Game::C_ACTOR_DEFAULT_VIEW_OFFSET);
 	m_vieworientationoffset = ID_QUATERNION;
 	m_viewoffsetmatrix = ID_MATRIX;
 	m_orientationmatrix = ID_MATRIX;
@@ -184,9 +184,6 @@ void Player::SetShipMouseControlMode(MouseInputControlMode mode)
 // Moves the player in the specified direction.  Only options are forward/back (normal walking) and left/right (strafing)
 void Player::MovePlayerActor(Direction direction, bool run)
 {
-	bool runningmovement = false;	// Indicates whether we are currently running (as opposed to strafing).  For efficiency.
-	D3DXVECTOR3 movevector;			// The move vector that will be applied to the player position
-
 	// Record the fact that we are moving
 	if (!m_actor) return;
 	m_ismoving = true;
@@ -212,7 +209,6 @@ void Player::RotatePlayerView(float y, float x)
 	if (!m_actor) return;
 
 	// Turn the actor by the specified angle about the y axis
-	//m_actor->Turn((y == 0.0f ? 0.0f : (y > 0.0f ? 999999.0f : -999999.0f)));
 	m_actor->Turn(y);
 
 	// Update the X rotation (pitch); clamp values to ensure that we are not pitching outside the valid player look range.
@@ -223,7 +219,7 @@ void Player::RotatePlayerView(float y, float x)
 
 	// Update the view offset orientation (i.e. not the actor) with the PITCH component.  We don't want the actor themself
 	// to be pitching about the x axis, so any pitch is included solely within the view offset quaternion
-	D3DXQuaternionRotationYawPitchRoll(&m_vieworientationoffset, 0.0f, m_viewpitch, 0.0f);
+	m_vieworientationoffset = XMQuaternionRotationRollPitchYaw(m_viewpitch, 0.0f, 0.0f);
 }
 
 // Attempts to perform a jump as the player actor
@@ -305,17 +301,16 @@ void Player::EnterEnvironment(ComplexShip *complexship)
 
 	// Determine an offset to apply that will place the player in the centre of a specific element
 	float centreoffset = Game::ElementLocationToPhysicalPosition(1) * 0.5f;
-	D3DXVECTOR3 offset = D3DXVECTOR3(centreoffset, 0.0f, centreoffset);			// TODO: Set at just above floor height in future
+	XMVECTOR offset = XMVectorSet(centreoffset, 0.0f, centreoffset, 0.0f);			// TODO: Set at just above floor height in future
 
 	// Set the actor's parent environment to this ship
 	if (m_actor) m_actor->MoveIntoEnvironment(complexship);
 
 	// Move the player to be within this identified tile within the ship
-	m_actor->SetEnvironmentPositionAndOrientation(Game::ElementPartialLocationToPhysicalPosition(D3DXVECTOR3(
-		(float)tile->GetElementLocationX() + ((float)tile->GetElementSizeX() * 0.5f),
-		(float)tile->GetElementLocationY() + ((float)tile->GetElementSizeY() * 0.5f),
-		(float)tile->GetElementLocationZ() + ((float)tile->GetElementSizeZ() * 0.5f))), ID_QUATERNION);
-		
+	// Pos = (ELocation + (ESize * 0.5))
+	m_actor->SetEnvironmentPositionAndOrientation(Game::ElementPartialLocationToPhysicalPosition(
+		XMVectorAdd(VectorFromIntVector3(tile->GetElementLocation()), 
+			XMVectorMultiply(VectorFromIntVector3(tile->GetElementSize()), HALF_VECTOR))), ID_QUATERNION);		
 
 	// Update the player state to take account of its new environment
 	UpdatePlayerState();
@@ -367,7 +362,7 @@ void Player::SetActor(Actor *actor)
 }
 
 // Sets the view position offset and recalculates the view offset matrix
-void Player::SetViewPositionOffset(D3DXVECTOR3 pos)
+void Player::SetViewPositionOffset(const FXMVECTOR pos)
 {
 	// Store the new position offset
 	m_viewpositionoffset = pos;
@@ -377,7 +372,7 @@ void Player::SetViewPositionOffset(D3DXVECTOR3 pos)
 }
 
 // Sets the view orientation offset and recalculates the view offset matrix
-void Player::SetViewOrientationOffset(D3DXQUATERNION orient)
+void Player::SetViewOrientationOffset(const FXMVECTOR orient)
 {
 	// Store the new orientation offset
 	m_vieworientationoffset = orient;
@@ -387,7 +382,7 @@ void Player::SetViewOrientationOffset(D3DXQUATERNION orient)
 }
 
 // Sets both the view position and orientation offsets, then recalculates the view offset matrix
-void Player::SetViewPositionAndOrientationOffset(D3DXVECTOR3 pos, D3DXQUATERNION orient)
+void Player::SetViewPositionAndOrientationOffset(const FXMVECTOR pos, const FXMVECTOR orient)
 {
 	// Store the new position offset
 	m_viewpositionoffset = pos; 
@@ -402,19 +397,18 @@ void Player::SetViewPositionAndOrientationOffset(D3DXVECTOR3 pos, D3DXQUATERNION
 // Recalculates the view offset matrix for the player character
 void Player::RecalculatePlayerOffsetMatrix(void)
 {
-	D3DXMATRIX trans, rot;
-
 	// Create a new rotation matrix based upon the view orientation offset quaternion (pitch about the x axis)
-	D3DXMatrixRotationQuaternion(&m_viewoffsetmatrix, &m_vieworientationoffset);
+	m_viewoffsetmatrix = XMMatrixRotationQuaternion(m_vieworientationoffset);
 
-	// Directly set the translation components of this matrix for efficiency
-	m_viewoffsetmatrix._41 = m_viewpositionoffset.x;
-	m_viewoffsetmatrix._42 = m_viewpositionoffset.y + m_headbobposition;		// Also incorporate the head-bob effect
-	m_viewoffsetmatrix._43 = m_viewpositionoffset.z;
+	// Directly set the translation row of this matrix for efficiency
+	m_viewoffsetmatrix.r[3] = 
+		XMVectorSetW(											// 3. Ensure matrix diagonal is always 1.0
+		XMVectorAdd(m_viewpositionoffset,						// 2. The translation row should incorporate the regular view offset translation...
+		XMVectorSetY(NULL_VECTOR, m_headbobposition)), 1.0f);	// 1. ...and an additional Y component to account for 'head bob'
 }
 
 // Change the current player position.  Takes different action depending on whether the player is on foot or in a ship
-void Player::SetPosition(D3DXVECTOR3 pos)
+void Player::SetPosition(const FXMVECTOR pos)
 {
 	// Take different action depending on the current player environment
 	if (m_state == Player::StateType::ShipPilot && m_playership) 
@@ -433,7 +427,7 @@ void Player::SetPosition(D3DXVECTOR3 pos)
 }
 
 // Change the current player position.  Takes different action depending on whether the player is on foot or in a ship
-void Player::SetOrientation(D3DXQUATERNION orient)
+void Player::SetOrientation(const FXMVECTOR orient)
 {
 	// Take different action depending on the current player environment
 	if (m_state == Player::StateType::ShipPilot && m_playership) 
@@ -453,7 +447,7 @@ void Player::SetOrientation(D3DXQUATERNION orient)
 
 // Method to force-set the player environment , without the player entity needing to be there.  Used for e.g.
 // rendering scenes within the null system.  Will revert to normal once released.  Game should generally be paused first.
-void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation)
+void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, const FXMVECTOR position, const FXMVECTOR orientation)
 {
 	// Parameter check
 	if (system)

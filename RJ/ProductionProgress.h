@@ -5,6 +5,7 @@
 
 #include "ResourceAmount.h"
 
+// This class has no special alignment requirements
 class ProductionProgress
 {
 public:

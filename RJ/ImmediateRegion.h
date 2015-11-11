@@ -15,16 +15,19 @@ using namespace std;
 
 #include "RegionBase.h"
 
-class ImmediateRegion :	public RegionBase
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ImmediateRegion : public ALIGN16<ImmediateRegion>, public RegionBase
 {
 public:
 	typedef UINT16 INDEXFORMAT;	
 
 	struct ParticleVertexData
 	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR2 texture;
-		D3DXVECTOR4 colour;
+		XMFLOAT3 position;
+		XMFLOAT2 texture;
+		XMFLOAT4 colour;
 	};
 
 	ImmediateRegion(void);
@@ -34,14 +37,14 @@ public:
 	const float				UPDATE_EPSILON;
 
 	// Initialisation method
-	Result					Initialise( ID3D11Device *device, const char *texturefilename,
-										const D3DXVECTOR3 & centre, 
-										const D3DXVECTOR3 & minbounds, const D3DXVECTOR3 & maxbounds, 
-										const D3DXVECTOR3 & updatethreshold);
+	Result					Initialise(	ID3D11Device *device, const char *particletexture,
+										const FXMVECTOR centre, 
+										const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
+										const GXMVECTOR updatethreshold);
 
 	// Entry method, called whenever the central object which this region is attached to moves.  Only performs an update 
 	// every few cycles, to prevent needless calculations of very small changes
-	CMPINLINE void ImmediateRegion::RegionCentreMoved(D3DXVECTOR3 centre)
+	CMPINLINE void ImmediateRegion::RegionCentreMoved(const FXMVECTOR centre)
 	{
 		if (++m_cyclessinceupdate == UPDATE_FREQUENCY)
 		{
@@ -52,10 +55,10 @@ public:
 
 	
 	// Method to move the region to a new centre point; performs the logic to determine whether any updates are necessary
-	void					MoveRegion(D3DXVECTOR3 centre);
+	void					MoveRegion(const FXMVECTOR centre);
 
 	// Method to update the region boundaries
-	void					UpdateRegionBoundaries(D3DXVECTOR3 boundary);
+	void					UpdateRegionBoundaries(const FXMVECTOR boundary);
 
 	// Method to update the entire region
 	void					UpdateRegion(void);
@@ -95,13 +98,13 @@ public:
 							GetParticleTextureResource(void) { return m_texture->GetTexture(); }
 
 	// Prepares the vertex buffers by filling in the render-time data (positon of vertices 1-5)
-	void					PrepareVertexBuffers(const D3DXMATRIX *view);
+	void					PrepareVertexBuffers(const FXMMATRIX view);
 
 	// Method to render the everything in the region
-	void					Render(ID3D11DeviceContext *devicecontext, const D3DXMATRIX *view);
+	void					Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
 
 	// Render each component of the region to the vertex buffer
-	void					RenderDustParticles(ID3D11DeviceContext *devicecontext, const D3DXMATRIX *view);
+	void					RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
 
 	// Methods to initialise and release the vertex/index buffers
 	Result					InitialiseBuffers(ID3D11Device* device);
@@ -136,18 +139,18 @@ private:
 
 	// Fields relating to particle creation
 	const float							CREATION_DISTANCE_FACTOR;	// % of region size in which we create new particles
-	D3DXVECTOR3							m_creationmaxbounds;		// The creation max bounds, equal to maxbounds * factor above
+	AXMVECTOR							m_creationmaxbounds;		// The creation max bounds, equal to maxbounds * factor above
 
 	// The properties to be applied to particles as they are refreshed
-	D3DXVECTOR4							m_dustcolour;
-	const D3DXVECTOR4					DEFAULT_DUST_COLOUR;
+	AXMVECTOR							m_dustcolour;
+	const AXMVECTOR						DEFAULT_DUST_COLOUR;
 	float								m_dustsize;
 	const float							DEFAULT_DUST_SIZE;
 	
 	// Adjustment vectors for each other three particle vertices to be calculated; saves time at rendering
-	D3DXVECTOR3							m_adj_tl;
-	D3DXVECTOR3							m_adj_br; 
-	D3DXVECTOR3							m_adj_tr;
+	AXMVECTOR							m_adj_tl;
+	AXMVECTOR							m_adj_br;
+	AXMVECTOR							m_adj_tr;
 	
 	// Vertex and index buffers for rendering the particles
 	ID3D11Buffer						*m_vertexbuffer, *m_indexbuffer;

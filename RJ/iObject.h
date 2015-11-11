@@ -341,12 +341,12 @@ public:
 		// but is not currently visible.  Aside from, we do not bother renormalising to save cycles
 		if (m_currentlyvisible)
 		{
-			m_orientation = XMQuaternionNormalize(m_orientation);
+			m_orientation = XMQuaternionNormalizeEst(m_orientation);
 		}
 		else if (m_simulationstate == iObject::ObjectSimulationState::FullSimulation && 
 				 ++m_orientchanges >= iObject::ORIENT_NORMALISE_THRESHOLD_FULLSIM)
 		{
-			m_orientation = XMQuaternionNormalize(m_orientation);
+			m_orientation = XMQuaternionNormalizeEst(m_orientation);
 			m_orientchanges = 0;
 		}
 	}

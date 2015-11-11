@@ -46,7 +46,7 @@ SpaceProjectile::SpaceProjectile(void)
 		// Projectile size is derived from the projectile model
 		if (m_model)
 		{
-			this->SetSize(m_model->GetModelSize());
+			this->SetSize(XMLoadFloat3(&m_model->GetModelSize()));
 			FloorVector(m_size, 1.0f);
 		}
 			
@@ -108,22 +108,29 @@ void SpaceProjectile::SimulateObject(void)
 	}
 
 	// Move the projectile based upon its current linear momentum
-	D3DXVECTOR3 delta = (PhysicsState.WorldMomentum * Game::TimeFactor);
+	XMVECTOR delta = XMVectorMultiply(PhysicsState.WorldMomentum, Game::TimeFactorV);
 	this->AddDeltaPosition(delta);
-	PhysicsState.DeltaMoveDistanceSq = (delta.x*delta.x + delta.y*delta.y + delta.z*delta.z);
+	PhysicsState.DeltaMoveDistanceSq = XMVectorGetX(XMVector3LengthSq(delta));
 
 	// Also rotate the object if it has any angular momentum
 	if (!IsZeroVector3(this->PhysicsState.AngularVelocity))
 	{
-		this->SetOrientation(m_orientation + (0.5f * D3DXQUATERNION(this->PhysicsState.AngularVelocity.x, this->PhysicsState.AngularVelocity.y,
-																	this->PhysicsState.AngularVelocity.z, 0.0f) * this->m_orientation * Game::TimeFactor));
-		D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+		//this->SetOrientation(m_orientation + (0.5f * D3DXQUATERNION(this->PhysicsState.AngularVelocity.x, this->PhysicsState.AngularVelocity.y,
+		//															this->PhysicsState.AngularVelocity.z, 0.0f) * this->m_orientation * Game::TimeFactor));
+		// D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+		AddDeltaOrientation(
+			XMVectorScale(
+				XMQuaternionMultiply(
+					XMVectorSetW(PhysicsState.AngularVelocity, 0.0f), m_orientation),
+			0.5f * Game::TimeFactor));
+
+		RenormaliseSpatialData();
 	}
 	else
 	{
 		// If we applied an orientation change, but didn't normalise final orientation based on angular velocity, normalise 
 		// our orientation now to ensure it always remains a unit quaternion
-		if (m_orient_change) D3DXQuaternionNormalize(&m_orientation, &m_orientation);
+		if (m_orient_change) RenormaliseSpatialData();
 	}
 
 }
