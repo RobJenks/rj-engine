@@ -9,6 +9,7 @@
 class ProductionCost;
 using namespace std;
 
+// This class has no special alignment requirements
 class Resource
 {
 public:

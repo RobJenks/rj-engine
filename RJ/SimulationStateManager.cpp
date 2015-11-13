@@ -69,7 +69,7 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		return iObject::ObjectSimulationState::StrategicSimulation;
 
 	// Otherwise, test our proximity to all registered simulation hubs
-	bool insystem = false; D3DXVECTOR3 diff;
+	bool insystem = false; XMVECTOR distsq;
 	std::vector<iSpaceObject*>::const_iterator it_end = m_space_simhubs.end();
 	for (std::vector<iSpaceObject*>::const_iterator it = m_space_simhubs.begin(); it != it_end; ++it)
 	{
@@ -78,9 +78,8 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		if ((*it)->GetSpaceEnvironment() == object->GetSpaceEnvironment())
 		{
 			// Now test the distance to this hub object; if we are close, we want full simulation
-			diff = (object->GetPosition() - (*it)->GetPosition());
-			float distsq = ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
-			if (distsq <= Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ)
+			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), (*it)->GetPosition()));
+			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::FullSimulation;
 		}
 	}
@@ -94,9 +93,8 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		if ((*it2)->GetParentEnvironment() != NULL && (*it2)->GetParentEnvironment()->GetSpaceEnvironment() == object->GetSpaceEnvironment())
 		{
 			// Test whether the hub's environment is close enough
-			diff = (object->GetPosition() - (*it2)->GetPosition());
-			float distsq = ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
-			if (distsq <= Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ)
+			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), (*it2)->GetPosition()));
+			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::FullSimulation;
 		}
 	}
@@ -124,7 +122,7 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		return iObject::ObjectSimulationState::StrategicSimulation;
 
 	// Otherwise, test our proximity to all registered simulation hubs
-	D3DXVECTOR3 diff; bool proximity = false;
+	bool proximity = false; XMVECTOR distsq;
 	std::vector<iEnvironmentObject*>::const_iterator it_end = m_env_simhubs.end();
 	for (std::vector<iEnvironmentObject*>::const_iterator it = m_env_simhubs.begin(); it != it_end; ++it)
 	{
@@ -135,9 +133,8 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		// Otherwise, test if our environment is at least close to the hub's environment
 		if ((*it)->GetParentEnvironment() != NULL)
 		{
-			diff = (environment->GetPosition() - (*it)->GetParentEnvironment()->GetPosition());
-			float distsq = ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
-			if (distsq <= Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ)
+			distsq = XMVector3LengthSq(XMVectorSubtract(environment->GetPosition(), (*it)->GetParentEnvironment()->GetPosition()));
+			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				proximity = true;
 		}
 	}
@@ -152,9 +149,8 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 		// Test whether the hub is in the same system as our environment
 		if ((*it2)->GetSpaceEnvironment() && (*it2)->GetSpaceEnvironment() == object->GetParentEnvironment()->GetSpaceEnvironment())
 		{
-			diff = (object->GetParentEnvironment()->GetPosition() - (*it2)->GetPosition());
-			float distsq = ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
-			if (distsq <= Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ)
+			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetParentEnvironment()->GetPosition(), (*it2)->GetPosition()));
+			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::TacticalSimulation;
 		}
 	}

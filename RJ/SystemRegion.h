@@ -15,22 +15,24 @@ class Model;
 // OF EVENTS IN THE SYSTEM.  WHEN IT DOES, THIS WILL NEED TO HAVE A MIN EXTENT OF THE OUTERMOST REGION IT CONTAINS, AND
 // EFFECTIVELY INFINITE MAX BOUNDS SINCE IT WILL BE THE OUTERMOST REGION WITHIN A SYSTEM
 
-class SystemRegion
+// Class is 16-bit aligned to allow use of SIMD member variables (not req now, but will be if inherits from RegionBase in future)
+__declspec(align(16))
+class SystemRegion : public ALIGN16<SystemRegion>
 {
 public:
 	typedef UINT16 INDEXFORMAT;	
 
 	struct BasicVertexData
 	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR2 texture;
+		XMFLOAT3 position;
+		XMFLOAT3 texture;
 	};
 
 	Result				Initialise(ID3D11Device *device);
 
 	// Sets the system backdrop texture that will be rendered to the view frustrum far plane
 	Result				SetBackdropTexture(	ID3D11Device* device, const char *filename, 
-											const D3DXVECTOR2 *texturesize );
+											const XMFLOAT2 & texturesize );
 	
 	// Returns a pointer to the texture resource that will be used for rendering the space backdrop
 	CMPINLINE bool		HasSystemBackdrop(void) { return m_hasbackdrop; }

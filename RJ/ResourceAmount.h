@@ -7,6 +7,7 @@
 
 class Resource;
 
+// This class has no special alignment requirements
 class ResourceAmount
 {
 public:

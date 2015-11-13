@@ -22,6 +22,7 @@ class UI_ShipDesigner;
 class UI_ModelBuilder;
 using namespace std;
 
+// This class has no special alignment requirements
 class UserInterface  : public iAcceptsConsoleCommands 
 {
 public:
@@ -60,11 +61,11 @@ public:
 	Result					InitialiseUITextComponents(void);
 
 	// Initialises a new text block.  These are the wrapper classes used for manipulation of string data in the interface
-	TextBlock *				CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, D3DXVECTOR4 col, bool render);
+	TextBlock *				CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render);
 
 	// Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
 	Result					InitialiseTextString(TextManager *tm, TextManager::SentenceType **sentence, char *textbuffer, int fontID, 
-										   int x, int y, int maxlength, float size, D3DXVECTOR4 colour, bool render);
+										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
 
 	// Creates a new component, for addition to one of the UI component sets
 	Image2D *				NewComponent(string code, const char *filename, int x, int y, float z, int width, int height);

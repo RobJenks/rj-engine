@@ -31,7 +31,7 @@ Result SystemRegion::Initialise(ID3D11Device *device)
 	return ErrorCodes::NoError;
 }
 
-Result SystemRegion::SetBackdropTexture(ID3D11Device* device, const char *filename, const D3DXVECTOR2 *texturesize)
+Result SystemRegion::SetBackdropTexture(ID3D11Device* device, const char *filename, const XMFLOAT2 & texturesize)
 {
 	// If we already have a texture set then release and deallocate it first
 	m_hasbackdrop = false;

@@ -7,7 +7,9 @@
 #include "SimpleShip.h"
 #include "iUIController.h"
 
-class UI_ModelBuilder : public iUIController
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class UI_ModelBuilder : public ALIGN16<UI_ModelBuilder>, public iUIController
 {
 public:
 	// Enumeration of possible selection types
@@ -227,7 +229,7 @@ protected:
 	MVSelectionType							m_selection_type;
 	OrientedBoundingBox *					m_selected_obb;
 	StaticTerrain *							m_selected_terrain;
-	D3DXMATRIX								m_selection_transform;
+	AXMMATRIX								m_selection_transform;
 
 	// Store the prior state of certain key variables, in order to restore them when the model viewer is closed
 	bool									m_restore_obbrender;

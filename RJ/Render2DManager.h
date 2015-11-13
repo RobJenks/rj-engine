@@ -16,7 +16,9 @@ using namespace std;
 using namespace std::tr1;
 
 
-class Render2DManager
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Render2DManager : public ALIGN16<Render2DManager>
 {
 public:
 	typedef unordered_map<string, Render2DGroup*> RenderGroupCollection; 
@@ -40,7 +42,7 @@ public:
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 
 	Result Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, 
-					  int screenWidth, int screenHeight, D3DXMATRIX baseviewmatrix);
+					  int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix);
 
 	void Render(void);
 	void Shutdown(void);
@@ -54,8 +56,8 @@ private:
 	HWND					m_hwnd;
 	int						m_screenwidth, m_screenheight;
 
-	D3DXMATRIX				m_baseworldmatrix;
-	D3DXMATRIX				m_baseviewmatrix;
+	AXMMATRIX				m_baseworldmatrix;
+	AXMMATRIX				m_baseviewmatrix;
 };
 
 

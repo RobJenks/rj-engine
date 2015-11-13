@@ -6,7 +6,9 @@
 
 #include "ParticleBase.h"
 
-class DustParticle : public ParticleBase
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class DustParticle : public ALIGN16<DustParticle>, public ParticleBase
 {
 public:
 

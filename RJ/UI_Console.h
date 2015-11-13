@@ -7,6 +7,7 @@
 #include "iUIController.h"
 #include "iAcceptsConsoleCommands.h"
 
+// This class has no special alignment requirements
 class UI_Console : public iUIController, public iAcceptsConsoleCommands 
 {
 public:
@@ -54,10 +55,10 @@ public:
 	void Terminate(void);
 
 	// Colours used for command outputs of each status
-	static const D3DXVECTOR4 RESULT_COLOUR_NORMAL;
-	static const D3DXVECTOR4 RESULT_COLOUR_SUCCESS;
-	static const D3DXVECTOR4 RESULT_COLOUR_WARNING;
-	static const D3DXVECTOR4 RESULT_COLOUR_FAILURE;
+	static const XMFLOAT4 RESULT_COLOUR_NORMAL;
+	static const XMFLOAT4 RESULT_COLOUR_SUCCESS;
+	static const XMFLOAT4 RESULT_COLOUR_WARNING;
+	static const XMFLOAT4 RESULT_COLOUR_FAILURE;
 
 	// Methods to accept mouse events from the UI manager
 	void ProcessMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
@@ -88,7 +89,7 @@ public:
 	void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex) { }
 
 	// Returns the colour to be used for rendering a command with specified status
-	CMPINLINE const D3DXVECTOR4 & GetStatusColour(GameConsoleCommand::CommandResult status)
+	CMPINLINE const XMFLOAT4 & GetStatusColour(GameConsoleCommand::CommandResult status)
 	{
 		switch (status)
 		{

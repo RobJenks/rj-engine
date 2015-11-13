@@ -8,6 +8,7 @@
 #include "ScheduledObject.h"
 #include "iObject.h"
 
+// This class has no special alignment requirements
 class SimulationStateManager : public ScheduledObject
 {
 public:

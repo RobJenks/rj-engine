@@ -12,10 +12,10 @@ class UserInterface;
 #include "UI_Console.h"
 
 // Colours used for command outputs of each status
-const D3DXVECTOR4 UI_Console::RESULT_COLOUR_NORMAL  = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
-const D3DXVECTOR4 UI_Console::RESULT_COLOUR_SUCCESS = D3DXVECTOR4(0.1176f, 1.0f, 0.1176f, 1.0f);
-const D3DXVECTOR4 UI_Console::RESULT_COLOUR_WARNING = D3DXVECTOR4(1.0f, 1.0f, 0.0f, 1.0f);
-const D3DXVECTOR4 UI_Console::RESULT_COLOUR_FAILURE = D3DXVECTOR4(1.0f, 0.0f, 0.0f, 1.0f);
+const XMFLOAT4 UI_Console::RESULT_COLOUR_NORMAL = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+const XMFLOAT4 UI_Console::RESULT_COLOUR_SUCCESS = XMFLOAT4(0.1176f, 1.0f, 0.1176f, 1.0f);
+const XMFLOAT4 UI_Console::RESULT_COLOUR_WARNING = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+const XMFLOAT4 UI_Console::RESULT_COLOUR_FAILURE = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 // Default constructor
 UI_Console::UI_Console(void)

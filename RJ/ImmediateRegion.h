@@ -83,8 +83,17 @@ public:
 	void					SetDustDensity(float dustdensity);
 	
 	// Sets the dust size.  Also precalculates the relative vertex positions to save processing time when rendering
-	void					SetDustSize(float size);
 	CMPINLINE float			GetDustSize(void) { return m_dustsize; }
+	void					SetDustSize(float size);
+
+	// Return or set the dust colour
+	CMPINLINE XMVECTOR		GetDustColour(void) const { return m_dustcolour; }
+	CMPINLINE float			GetDustAlpha(void) const { return m_dustalpha; }
+	CMPINLINE void			SetDustColour(const FXMVECTOR colour)
+	{
+		m_dustcolour = colour;
+		m_dustalpha = XMVectorGetW(colour);
+	}
 
 	// Terminates the region, including all particles within it
 	void					Terminate(void);
@@ -144,7 +153,9 @@ private:
 	// The properties to be applied to particles as they are refreshed
 	AXMVECTOR							m_dustcolour;
 	const AXMVECTOR						DEFAULT_DUST_COLOUR;
+	float								m_dustalpha;			// Taken from the w component of m_dustcolour
 	float								m_dustsize;
+	AXMVECTOR							m_dustsize_v;
 	const float							DEFAULT_DUST_SIZE;
 	
 	// Adjustment vectors for each other three particle vertices to be calculated; saves time at rendering

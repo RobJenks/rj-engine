@@ -89,8 +89,7 @@ Result UserInterface::InitialiseUITextComponents(void)
 	TextManager *tm = Game::Engine->GetTextManager();
 
 	// Standard text colours for use in the text rendering
-	D3DXVECTOR4 colYellow;
-	colYellow = D3DXVECTOR4(1.0f, 1.0f, 0.0f, 0.75f);
+	XMFLOAT4 colYellow = XMFLOAT4(1.0f, 1.0f, 0.0f, 0.75f);
 
 	// FPS counter
 	InitialiseTextString(tm, &TextStrings.S_DBG_FPSCOUNTER, TextStrings.C_DBG_FPSCOUNTER, Game::Fonts::FONT_BASIC1, 
@@ -112,7 +111,7 @@ Result UserInterface::InitialiseUITextComponents(void)
 }
 
 // Initialises a text block.  These are the managed wrapper objects for manipulating text strings in the interface
-TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, D3DXVECTOR4 col, bool render)
+TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
 {
 	Result result;
 	TextManager::SentenceType *sentence;
@@ -134,7 +133,7 @@ TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int max
 
 // Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
 Result UserInterface::InitialiseTextString(TextManager *tm, TextManager::SentenceType **sentence, char *textbuffer, int fontID, 
-										   int x, int y, int maxlength, float size, D3DXVECTOR4 colour, bool render)
+										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render)
 {
 	(*sentence) = tm->CreateSentence(fontID, maxlength);
 	Result res = tm->UpdateSentence((*sentence), "", x, y, render, colour, size);

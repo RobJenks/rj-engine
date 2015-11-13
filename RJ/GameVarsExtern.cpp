@@ -239,9 +239,12 @@ namespace Game {
 
 	// Simulation constants
 	int C_SIMULATION_STATE_MANAGER_UPDATE_INTERVAL = 2000;							// Interval between each evaluation of the state manager (ms)
-	float C_SPACE_SIMULATION_HUB_RADIUS = 5000.0f;									// Distance within which objects are fully simulation by a hub
-	float C_SPACE_SIMULATION_HUB_RADIUS_SQ	= C_SPACE_SIMULATION_HUB_RADIUS 
+	float C_SPACE_SIMULATION_HUB_RADIUS = 5000.0f;									// Distance within which objects are fully simulated by a hub
+	float C_SPACE_SIMULATION_HUB_RADIUS_SQ	= C_SPACE_SIMULATION_HUB_RADIUS			// Squared distance within which objects are fully simulated by a hub
 											* C_SPACE_SIMULATION_HUB_RADIUS;
+	AXMVECTOR C_SPACE_SIMULATION_HUB_RADIUS_SQ_V = 
+						XMVectorReplicate(C_SPACE_SIMULATION_HUB_RADIUS_SQ);		// Vectorised version of the sq distance within which objects are fully simulated by a hub
+
 
 	// Turret simulation and controller constants
 	float C_MIN_TURRET_RANGE = 1.0f;												// Minimum distance within which a turret can fire at a target

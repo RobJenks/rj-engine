@@ -5,6 +5,7 @@
 
 #include "CompilerSettings.h"
 
+// This class has no special alignment requirements
 class ScheduledObject
 {
 public:

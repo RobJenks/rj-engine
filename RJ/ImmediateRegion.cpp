@@ -42,7 +42,7 @@ Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particlete
 
 	// Set parameters to their defaults
 	m_cyclessinceupdate = 0;
-	m_dustcolour = DEFAULT_DUST_COLOUR;
+	SetDustColour(DEFAULT_DUST_COLOUR);
 	SetDustSize(DEFAULT_DUST_SIZE);
 
 	// Load the texture resource that will be mapped to each particle
@@ -111,6 +111,7 @@ void ImmediateRegion::SetDustSize(float size)
 {
 	// Store the new dust size, which will take effect in all new particles
 	m_dustsize = size;
+	m_dustsize_v = XMVectorSetW(XMVectorReplicate(m_dustsize), 0.0f);
 
 	// Precalculate the relevant adjustment vectors for each of the three other vertices (bottom left remains at particle position)
 	m_adj_tl = XMVectorSetY(NULL_VECTOR, -size);							// Top-left:		(0, -size, 0)
@@ -142,35 +143,33 @@ void ImmediateRegion::DeleteParticle(int index)
 
 void ImmediateRegion::RefreshParticle(int index)
 {
-	// Get a pointer to this particle
-	DustParticle *p = &m_dust[index];
+	// Get a reference to this particle
+	DustParticle & p = m_dust[index];
 
 	// Set properties to the current desired starting values.  NOTE alpha begins at zero, and will be blended in to the 
 	// m_dustcolour.w value over a defined period of time
-	p->Colour = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 0.0f); //D3DXVECTOR4(m_dustcolour.x, m_dustcolour.y, m_dustcolour.z, 0.0f);
-	p->Size = m_dustsize;
-
+	p.Colour = NULL_VECTOR;
+	p.Size = m_dustsize;
+	
 	// Reposition the particle to a random location within the region
-	p->Location = D3DXVECTOR3(	m_centre.x + frand_lh((-m_creationmaxbounds.x), m_creationmaxbounds.x), 
-								m_centre.y + frand_lh((-m_creationmaxbounds.y), m_creationmaxbounds.y),
-								m_centre.z + frand_lh((-m_creationmaxbounds.z), m_creationmaxbounds.z)  ); 
-
+	// p.Location = m_centre.x + frand_lh((-m_creationmaxbounds.x), m_creationmaxbounds.x) for each component
+	XMVECTOR randpos = XMVectorSet(frand_lh(-1.0f, 1.0f), frand_lh(-1.0f, 1.0f), frand_lh(-1.0f, 1.0f), 0.0f);
+	p.Location = XMVectorMultiplyAdd(randpos, m_creationmaxbounds, m_centre);
+	
 	// Note that this is the only place where we DO take the minbounds into account, to allow us to avoid 
 	// creating particles right on top of the player.  Move out of the min region if we would be creating there
-	if (fabs(p->Location.x) < m_minbounds.x) 
-		{ if (p->Location.x < 0.0f) p->Location.x -= m_minbounds.x; else p->Location.x += m_minbounds.x; }
-	if (fabs(p->Location.y) < m_minbounds.y) 
-		{ if (p->Location.y < 0.0f) p->Location.y -= m_minbounds.y; else p->Location.y += m_minbounds.y; }
-	if (fabs(p->Location.z) < m_minbounds.z) 
-		{ if (p->Location.z < 0.0f) p->Location.z -= m_minbounds.z; else p->Location.z += m_minbounds.z; }
+	// Multiply by "InBounds" == 1 to ensure we only change required components.  Add either -minbounds or +minbounds
+	// depending on whether the location is -ve or +ve, using "VectorSelect"
+	p.Location = XMVectorAdd(p.Location, XMVectorMultiply(XMVectorInBounds(p.Location, m_minbounds),			
+		XMVectorSelect(XMVectorNegate(m_minbounds), m_minbounds, XMVectorGreater(p.Location, NULL_VECTOR))));	
 
 	// Update the vertex data for this particle; start from a zeroed block of memory
 	ParticleVertexData *v = &m_vertices[index*6];
 	memset((void*)v, 0, sizeof(ParticleVertexData) * 6);
 	{
 		// Bottom left
-		v->position = D3DXVECTOR3(p->Location);				// Set location to the particle location.  Other vertices will be postitioned arond this one
-		v->texture = D3DXVECTOR2(0.0f, 1.0f);
+		XMStoreFloat3(&(v->position), p.Location);			// Set location to the particle location.  Other vertices will be postitioned arond this one
+		v->texture = XMFLOAT2(0.0f, 1.0f);
 		//v->colour = D3DXVECTOR4(p->Colour);				// No need to set the colour; will start at 0 and fade in
 
 		// Top left
@@ -180,7 +179,7 @@ void ImmediateRegion::RefreshParticle(int index)
 
 		// Bottom right
 		v+=2;												// Increment by 2 as we did not need to update the previous vertex
-		v->texture = D3DXVECTOR2(1.0f, 1.0f);
+		v->texture = XMFLOAT2(1.0f, 1.0f);
 		//v->colour = D3DXVECTOR4(p->Colour);				// No need to set the colour; will start at 0 and fade in
 
 		// Bottom right
@@ -193,7 +192,7 @@ void ImmediateRegion::RefreshParticle(int index)
 
 		// Top right
 		v+=2;												// Increment by two as we made no change to the previous vertex
-		v->texture = D3DXVECTOR2(1.0f, 0.0f);
+		v->texture = XMFLOAT2(1.0f, 0.0f);
 		//v->colour = D3DXVECTOR4(p->Colour);				// No need to set the colour; will start at 0 and fade in
 	}
 }
@@ -262,7 +261,7 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	m_dustdensity = dustdensity;
 }
 
-void ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const D3DXMATRIX *view)
+void ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
 {
 	// Render all dust particles to the vertex buffer
 	RenderDustParticles(devicecontext, view);
@@ -271,7 +270,7 @@ void ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const D3DXMATRI
 	RenderBuffers(devicecontext);
 }
 
-void ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devicecontext, const D3DXMATRIX *view)
+void ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -311,24 +310,30 @@ void ImmediateRegion::RenderBuffers(ID3D11DeviceContext *devicecontext)
     devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void ImmediateRegion::PrepareVertexBuffers(const D3DXMATRIX *view)
+void ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
 {
+	// Transpose the input view matrix since we want to retrieve columns of data (and have direct vector access to rows)
+	XMMATRIX viewT = XMMatrixTranspose(view);
+
 	// Precalculate the three adjustments we need (for each other corner vertex) based on the current view matrix 
 	// up & right vectors.  These two vectors can then be applied to all vertices of all particles
-	D3DXVECTOR3 vright = D3DXVECTOR3(view->_11, view->_21, view->_31);
-	D3DXVECTOR3 vup = D3DXVECTOR3(view->_12, view->_22, view->_32);
+	XMVECTOR vright = viewT.r[0];		// Need [_11,_21,_31], is transposed into [_11,_12,_13] / r[0] |  vright = D3DXVECTOR3(view->_11, view->_21, view->_31);
+	XMVECTOR vup = viewT.r[1];			// Need [_12,_22,_32], is transposed into [_21,_22,_23] / r[1] |  vup =    D3DXVECTOR3(view->_12, view->_22, view->_32);
 	
-	// Normalise both vectors
-	D3DXVec3Normalize(&vright, &vright);
-	D3DXVec3Normalize(&vup, &vup);
+	// Normalise both vectors and multiply up to desired particle size
+	vright = XMVectorMultiply(XMVector3NormalizeEst(vright), m_dustsize_v);
+	vup = XMVectorMultiply(XMVector3NormalizeEst(vup), m_dustsize_v);
+	
+	// Convert to local float representations since we want to use in manipulating the vertex struct
+	XMFLOAT3 vright_f, vup_f;
+	XMStoreFloat3(&vright_f, vright);
+	XMStoreFloat3(&vup_f, vup);
 
-	// Finally multiply the vectors by the desired particle size
-	vright *= m_dustsize;
-	vup *= m_dustsize;
-	
 	// Derive an alpha blend-in value for this update cycle, based on the blend-in rate and time elapsed since last update
-	D3DXVECTOR4 blendfactor = m_dustcolour * Game::TimeFactor * Game::C_DUST_PARTICLE_BLEND_RATE;
-
+	// Also define an alpha target vector; we can test each particle is < this since all but the alpha component will automatically be true
+	XMVECTOR blendfactor = XMVectorScale(m_dustcolour, Game::TimeFactor * Game::C_DUST_PARTICLE_BLEND_RATE);
+	XMVECTOR alphatarget = XMVectorSetW(LARGE_VECTOR_P, m_dustalpha);
+	
 	// Now apply to each set of vertices in turn
 	ParticleVertexData *v = &m_vertices[0];
 	DustParticle *p = &m_dust[0];
@@ -337,19 +342,23 @@ void ImmediateRegion::PrepareVertexBuffers(const D3DXMATRIX *view)
 		// Bottom-left vertex (with index 0) is already set with the particle position
 
 		// Top left vertex (with indices 1 and 4) 
-		v[1].position = v[4].position = (v->position + vup);
+		v[1].position = v[4].position = Float3Add(v->position, vup_f);
 
 		// Bottom right vertex (with indices 2 and 3)
-		v[2].position = v[3].position = (v->position + vright);
+		v[2].position = v[3].position = Float3Add(v->position, vright_f);
 
 		// Top right vertex (with index 5) - add an extra up vector to the existing bottom-right vertex
-		v[5].position = (v[3].position + vup);
+		v[5].position = Float3Add(v[3].position, vup_f);
 
 		// Apply a fade-in effect to any particles that are recently created, until they reach the target colour/alpha value
-		if (p->Colour.w < m_dustcolour.w) 
+		if (XMVector4Less(p->Colour, alphatarget))
 		{
-			p->Colour += blendfactor;		// Note: this means the value may go > target value, but adds an element of variety
-			v[0].colour = v[1].colour = v[2].colour = v[3].colour = v[4].colour = v[5].colour = p->Colour;
+			// Update particle data.  Note: this means the value may go > target value, but adds an element of variety
+			p->Colour = XMVectorAdd(p->Colour, blendfactor);		
+
+			// Also update colour of each vertex
+			XMStoreFloat4(&(v[0].colour), p->Colour);
+			v[1].colour = v[2].colour = v[3].colour = v[4].colour = v[5].colour		= v[0].colour;
 		}
 	}
 }
@@ -498,7 +507,7 @@ void ImmediateRegion::DebugPrintParticleCoordinates(void)
 	for (int i=0; i<limit; i++, p++)
 	{
 		if (p)
-			s << "P" << i << ", Pos=" << VectorToString(&(p->Location)) << ", Col=" << VectorToString(&(p->Colour)) << "\n";
+			s << "P" << i << ", Pos=" << Vector3ToString(p->Location) << ", Col=" << Vector3ToString(p->Colour) << "\n";
 		else
 			s << "P" << i << "(NULL), (NULL)\n";
 	}
@@ -506,7 +515,7 @@ void ImmediateRegion::DebugPrintParticleCoordinates(void)
 	// Now stream the contents of each vertex object
 	ParticleVertexData *v = &m_vertices[0];
 	for (int i=0; i<limit*6; i++, v++)
-		s << "V" << i << ", Pos=" << VectorToString(&(v->position)) << ", Col=" << VectorToString(&(v->colour)) << ", Tex=" << VectorToString(&(v->texture)) << "\n";
+		s << "V" << i << ", Pos=" << Vector3ToString(v->position) << ", Col=" << Vector4ToString(v->colour) << ", Tex=" << Vector2ToString(v->texture) << "\n";
 
 	OutputDebugString(s.str().c_str());
 }
@@ -515,7 +524,7 @@ void ImmediateRegion::DebugPrintParticleCoordinates(void)
 // Constructor
 ImmediateRegion::ImmediateRegion(void) :	UPDATE_EPSILON(3.0f), 
 											DEFAULT_DUST_DENSITY(0.000001f),
-											DEFAULT_DUST_COLOUR(D3DXVECTOR4(0.235f, 0.569f, 0.569f, 0.4f)), // (60,145,145)
+											DEFAULT_DUST_COLOUR(XMVectorSet(0.235f, 0.569f, 0.569f, 0.4f)), // (60,145,145)
 											DEFAULT_DUST_SIZE(4.0f),
 											CREATION_DISTANCE_FACTOR(0.8f)
 {

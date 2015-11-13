@@ -6,6 +6,7 @@
 #include <vector>
 class ScheduledObject;
 
+// This class has no special alignment requirements
 class CentralScheduler
 {
 public:

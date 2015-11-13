@@ -24,7 +24,7 @@ Render2DManager::~Render2DManager(void)
 }
 
 Result Render2DManager::Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, 
-								   int screenWidth, int screenHeight, D3DXMATRIX baseviewmatrix)
+								   int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix)
 {
 	// Store references to the key supplied parameters
 	m_device = device;
@@ -82,7 +82,6 @@ void Render2DManager::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevi
 
 void Render2DManager::Render(void)
 {
-	D3DXMATRIX ortho;
 	Render2DGroup *group;
 
 	// Look at each render group in turn
