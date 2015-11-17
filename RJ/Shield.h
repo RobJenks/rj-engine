@@ -8,6 +8,8 @@
 #include "Equipment.h"
 #include "CompilerSettings.h"
 
+
+// This class has no special alignment requirements
 class Shield : public Equipment
 {
 public:

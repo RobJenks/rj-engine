@@ -5,6 +5,7 @@
 class TiXmlElement;
 
 // Adjustable parameters are templated classes, that can work on parameter which have defined standard (e.g. <, >) parameters
+// This class has no special alignment requirements (as long as it is not used for alignment-requiring data)
 template <typename T>
 struct AdjustableParameter
 {

@@ -114,16 +114,17 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 	if (!template_ship || count <= 0 || !Game::CurrentPlayer || !Game::CurrentPlayer->GetPlayerShip()) return;
 
 	// Determine the best spawn point
-	D3DXVECTOR3 spawnpos = D3DXVECTOR3(0.0f, 0.0f, max(template_ship->GetCollisionSphereRadius()*1.2f, 25.0f));			// Relative position of spawn location
-	D3DXVECTOR3 spawninterval = D3DXVECTOR3(max(template_ship->GetCollisionSphereRadius()*1.1f, 30.0f), 0.0f, 0.0f);	// Spacing between spawned ships
+	XMVECTOR spawnpos = XMVectorSetZ(NULL_VECTOR, max(template_ship->GetCollisionSphereRadius()*1.2f, 25.0f));			// Player-relative spawn point for ships
+	XMVECTOR spawninterval = XMVectorSetX(NULL_VECTOR, max(template_ship->GetCollisionSphereRadius()*1.1f, 30.0f));	// Spacing between spawned ships
+	
 	if (Game::CurrentPlayer->GetState() == Player::StateType::ShipPilot)
 	{
-		D3DXVec3TransformCoord(&spawnpos, &spawnpos, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
-		D3DXVec3TransformCoord(&spawninterval, &spawninterval, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
-		spawninterval -= Game::CurrentPlayer->GetPlayerShip()->GetPosition();
+		spawnpos = XMVector3TransformCoord(spawnpos, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
+		spawninterval = XMVector3TransformCoord(spawninterval, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
+		spawninterval = XMVectorSubtract(spawninterval, Game::CurrentPlayer->GetPlayerShip()->GetPosition());
 	}
 	else {
-		spawnpos += Game::CurrentPlayer->GetPosition();
+		spawnpos = XMVectorAdd(spawnpos, Game::CurrentPlayer->GetPosition());
 	}
 
 	// Spawn ships either side of the spawn point
@@ -136,7 +137,8 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 		s->SetOrientation(ID_QUATERNION);
 		
 		// Assign a default order for now
-		Order_MoveToPosition *o = new Order_MoveToPosition(D3DXVECTOR3(frand_lh(-1000.0f, 1000.0f), frand_lh(-400.0f, 400.0f), frand_lh(-1000.0f, 1000.0f)), 25.0f);
+		Order_MoveToPosition *o = new Order_MoveToPosition(
+			XMVectorSet(frand_lh(-1000.0f, 1000.0f), frand_lh(-400.0f, 400.0f), frand_lh(-1000.0f, 1000.0f), 0.0f), 25.0f);
 		s->AssignNewOrder(o);
 	}
 }

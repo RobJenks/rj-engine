@@ -12,6 +12,7 @@ class iObject;
 class iContainsHardpoints;
 class Hardpoint;
 
+// This class has no special alignment requirements
 class Hardpoints
 {
 public:

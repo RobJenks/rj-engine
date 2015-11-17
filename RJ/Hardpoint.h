@@ -17,8 +17,9 @@ class Hardpoints;
 class CoreEngine;
 class iContainsHardpoints;
 
-
-class Hardpoint
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class Hardpoint : public ALIGN16<Hardpoint>
 {
 public:
 
@@ -27,8 +28,8 @@ public:
 	virtual CMPINLINE Equip::Class	GetType() const					= 0;
 
 	string							Code;
-	D3DXVECTOR3						Position;
-	D3DXQUATERNION					Orientation;
+	AXMVECTOR						Position;
+	AXMVECTOR						Orientation;
 
 	// Virtual clone and delete methods to allow dynamic overriding by each subclass
 	virtual Hardpoint *				Clone() const					= 0;

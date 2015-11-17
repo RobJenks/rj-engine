@@ -40,7 +40,7 @@ const float UI_ShipDesigner::ELEMENT_EDGE_THRESHOLD = 0.4f;
 UI_ShipDesigner::UI_ShipDesigner(void)
 {
 	m_grid = NULL;
-	m_gridpos = D3DXVECTOR2(0.0f, 0.0f);
+	m_gridpos = NULL_FLOAT2;
 	m_gridstart.x = 0; m_gridstart.y = 0; m_gridzpos = 0;
 	
 	m_mouse = m_keyboard = NULL;
@@ -2612,7 +2612,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 	if (en) {	
 		nbr = en->GetPrimaryTile();
 		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_VECTOR, Direction::Left) || nbr->HasConnection(NULL_VECTOR, Direction::Right))
+			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Left) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Right))
 				(*pOutLeft) = true;
 	}
 
@@ -2621,7 +2621,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 	if (en) {	
 		nbr = en->GetPrimaryTile();
 		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_VECTOR, Direction::Up) || nbr->HasConnection(NULL_VECTOR, Direction::Down))
+			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Up) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Down))
 				(*pOutUp) = true;
 	}
 
@@ -2630,7 +2630,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 	if (en) {	
 		nbr = en->GetPrimaryTile();
 		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_VECTOR, Direction::Right) || nbr->HasConnection(NULL_VECTOR, Direction::Left))
+			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Right) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Left))
 				(*pOutRight) = true;
 	}
 
@@ -2639,7 +2639,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 	if (en) {
 		nbr = en->GetPrimaryTile();
 		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_VECTOR, Direction::Down) || nbr->HasConnection(NULL_VECTOR, Direction::Up))
+			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Down) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Up))
 				(*pOutDown) = true;
 	}
 }
@@ -2720,10 +2720,10 @@ CSCorridorTile *UI_ShipDesigner::CreateCorridorTile(bool left, bool up, bool rig
 	// Now set tile-to-tile connections depennding on the surrounding environment.  Note that we only need to
 	// set the connection from this tile outwards; the reciprocal connection will be established when updating
 	// the surrounding corridor environment after this
-	if (left)	tile->AddConnection(NULL_VECTOR, Direction::Left);
-	if (up)		tile->AddConnection(NULL_VECTOR, Direction::Up);
-	if (right)	tile->AddConnection(NULL_VECTOR, Direction::Right);
-	if (down)	tile->AddConnection(NULL_VECTOR, Direction::Down);
+	if (left)	tile->AddConnection(NULL_INTVECTOR3, Direction::Left);
+	if (up)		tile->AddConnection(NULL_INTVECTOR3, Direction::Up);
+	if (right)	tile->AddConnection(NULL_INTVECTOR3, Direction::Right);
+	if (down)	tile->AddConnection(NULL_INTVECTOR3, Direction::Down);
 
 	// Return the new tile
 	return tile;

@@ -7,6 +7,8 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 
+
+// This file contains no objects with special alignment requirements
 namespace IO 
 {
 	extern const char *		___tmp_loading_cchar;

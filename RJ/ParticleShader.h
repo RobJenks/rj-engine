@@ -13,14 +13,15 @@
 class DXLocaliser;
 using namespace std;
 
+// This class has no special alignment requirements
 class ParticleShader 
 {
 	private:
 		struct MatrixBufferType
 		{
-			D3DXMATRIX world;
-			D3DXMATRIX view;
-			D3DXMATRIX projection;
+			XMFLOAT4X4 world;
+			XMFLOAT4X4 view;
+			XMFLOAT4X4 projection;
 		};
 
 	public:
@@ -30,7 +31,7 @@ class ParticleShader
 
 		Result Initialize(ID3D11Device*, HWND);
 		void Shutdown();
-		Result Render(ID3D11DeviceContext*, int, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*);
+		Result Render(ID3D11DeviceContext*, int, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
 
 	private:
 		Result InitializeShader_SM2(ID3D11Device*, HWND, const char *, const char *);
@@ -38,7 +39,7 @@ class ParticleShader
 		void ShutdownShader();
 		void OutputShaderErrorMessage(ID3D10Blob*, HWND, const char*);
 
-		Result SetShaderParameters(ID3D11DeviceContext*, D3DXMATRIX, D3DXMATRIX, D3DXMATRIX, ID3D11ShaderResourceView*);
+		Result SetShaderParameters(ID3D11DeviceContext*, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
 		void RenderShader(ID3D11DeviceContext*, int);
 
 	private:

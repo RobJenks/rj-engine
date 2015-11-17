@@ -500,11 +500,11 @@ void RJMain::ProcessKeyboardInput(void)
 
 		//turret->Fire();
 
-		s2->ApplyLocalLinearForceDirect(D3DXVECTOR3(0.0f, 0.0f, 10000.0f * Game::TimeFactor));
+		s2->ApplyLocalLinearForceDirect(XMVectorSet(0.0f, 0.0f, 10000.0f * Game::TimeFactor, 0.0f));
 		return;
 
 		s2->Highlight.Activate();
-		s2->Highlight.SetColour(D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f));
+		s2->Highlight.SetColour(XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
 		std::vector<iSpaceObject*> contacts;
 		contacts.push_back(s2);
 
@@ -524,8 +524,10 @@ void RJMain::ProcessKeyboardInput(void)
 			if (true)
 			{
 				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-				Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(298.0f, 75.0f, 1463.0f));
-				D3DXQUATERNION orient = D3DXQUATERNION(0.0546f, -0.99057f, 0.0973f, 0.4090f); D3DXQuaternionNormalize(&orient, &orient);
+				Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(298.0f, 75.0f, 1463.0f, 0.0f));
+				XMVECTOR orient = XMQuaternionNormalize(XMVectorSet(0.0546f, -0.99057f, 0.0973f, 0.4090f));
+				XMFLOAT3 pos; XMStoreFloat3(&pos, cs->GetPosition());
+				XMFLOAT3 size; XMStoreFloat3(&size, cs->GetSize());
 				Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
 
 				for (int x = 0; x < 10; ++x)
@@ -533,11 +535,13 @@ void RJMain::ProcessKeyboardInput(void)
 					{
 						SimpleShip *tmp = SimpleShip::Create("testship1");
 						SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(tmp);
+						XMFLOAT3 tmpsize; XMStoreFloat3(&tmpsize, tmp->GetSize());
+						
 						tmp->SetName("DIK_7_SPAWNED_SHIP");
-						tmp->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(
-							cs->GetPosition().x + ((x - 5)*tmp->GetSize().x*1.2f),
-							cs->GetPosition().y + ((y - 5)*tmp->GetSize().y*1.2f),
-							cs->GetPosition().z + (cs->GetSize().z*0.5f) + 1000.0f));
+						tmp->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(
+							pos.x + ((x - 5)*tmpsize.x*1.2f),
+							pos.y + ((y - 5)*tmpsize.y*1.2f),
+							pos.z + (size.z*0.5f) + 1000.0f, 0.0f));
 						tmp->SetOrientation(ID_QUATERNION);
 
 					}
@@ -552,10 +556,12 @@ void RJMain::ProcessKeyboardInput(void)
 					it->second.Object->GetObjectType() == iObject::ObjectType::SimpleShipObject)
 				{
 					SimpleShip *s = (SimpleShip*)it->second.Object;
+					XMFLOAT3 spos; XMStoreFloat3(&spos, s->GetPosition());
 					s->CancelAllOrders();
-					s->AssignNewOrder(new Order_MoveToPosition(D3DXVECTOR3(	s->GetPosition().x + frand_lh(-2500.0f, 2500.0f),
-																			0.0f,
-																			s->GetPosition().z + frand_lh(-2500.0f, 2500.0f)), 250.0f));
+					s->AssignNewOrder(new Order_MoveToPosition(XMLoadFloat3(&XMFLOAT3(
+						spos.x + frand_lh(-2500.0f, 2500.0f),
+						0.0f,
+						spos.z + frand_lh(-2500.0f, 2500.0f))), 250.0f));
 				}
 			}
 			
@@ -566,13 +572,13 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_8])
 	{
 		if (s2->HasOrders()) s2->CancelAllOrders();
-		D3DXVECTOR3 tpos[10]; Order_MoveToPosition *orders[10];
+		XMFLOAT3 tpos[10]; Order_MoveToPosition *orders[10];
 		for (int i = 0; i<10; i++)
 		{
-			tpos[i] = D3DXVECTOR3(((float)((float)rand() / (float)RAND_MAX) * 300.0f) + 200.0f,
-				((float)((float)rand() / (float)RAND_MAX) * 300.0f),
-				((float)((float)rand() / (float)RAND_MAX) * 3400.0f) - 400.0f);
-			orders[i] = new Order_MoveToPosition(tpos[i], 100.0f);
+			tpos[i] = XMFLOAT3(		((float)((float)rand() / (float)RAND_MAX) * 300.0f) + 200.0f,
+									((float)((float)rand() / (float)RAND_MAX) * 300.0f),
+									((float)((float)rand() / (float)RAND_MAX) * 3400.0f) - 400.0f);
+			orders[i] = new Order_MoveToPosition(XMLoadFloat3(&tpos[i]), 100.0f);
 			if (i > 0) orders[i]->Dependency = orders[i - 1]->ID;
 			s2->AssignNewOrder(orders[i]);
 		}
@@ -731,7 +737,7 @@ void RJMain::AcceptDebugCameraKeyboardInput(void)
 
 	// Determine any camera movement required
 	bool move = false;
-	D3DXVECTOR3 delta = NULL_VECTOR;
+	XMFLOAT3 delta = NULL_FLOAT3;
 
 	// Forward/back movement
 	if (b[DIK_W])		{ delta.z = (Game::C_DEBUG_CAMERA_SPEED * Game::PersistentTimeFactor); move = true; }
@@ -749,16 +755,15 @@ void RJMain::AcceptDebugCameraKeyboardInput(void)
 	if (move)
 	{
 		// Scale movement speed if we have the fast- or slow-travel keys held
-		if (b[DIK_LSHIFT] == TRUE || b[DIK_RSHIFT] == TRUE) delta *= Game::C_DEBUG_CAMERA_FAST_MOVE_MODIFIER;
-		else if (b[DIK_LCONTROL] == TRUE || b[DIK_RCONTROL] == TRUE) delta *= Game::C_DEBUG_CAMERA_SLOW_MOVE_MODIFIER;
+		if (b[DIK_LSHIFT] == TRUE || b[DIK_RSHIFT] == TRUE) delta = Float3MultiplyScalar(delta, Game::C_DEBUG_CAMERA_FAST_MOVE_MODIFIER);
+		else if (b[DIK_LCONTROL] == TRUE || b[DIK_RCONTROL] == TRUE) delta = Float3MultiplyScalar(delta, Game::C_DEBUG_CAMERA_SLOW_MOVE_MODIFIER);
 
 		// Build a transform matrix for the camera orientation
-		D3DXMATRIX rot;
-		D3DXMatrixRotationQuaternion(&rot, &Game::Engine->GetCamera()->GetDebugCameraOrientation());
+		XMMATRIX rot = XMMatrixRotationQuaternion(Game::Engine->GetCamera()->GetDebugCameraOrientation());
 
 		// Transform the delta movement by this rotation, and apply it to the current debug camera position
-		D3DXVec3TransformCoord(&delta, &delta, &rot);
-		Game::Engine->GetCamera()->AddDeltaDebugCameraPosition(delta);
+		XMVECTOR vdelta = XMVector3TransformCoord(XMLoadFloat3(&delta), rot);
+		Game::Engine->GetCamera()->AddDeltaDebugCameraPosition(vdelta);
 	}
 
 	// Apply camera roll if required
@@ -1045,10 +1050,10 @@ Result RJMain::InitialiseRegions(void)
 	res = D::Regions::Immediate->Initialise(
 		Game::Engine->GetDevice(),																		// Pointer to the D3D device
 		BuildStrFilename(D::DATA, "Particles\\dust_particle.dds").c_str(),								// Texture to be mapped onto all dust particles
-		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),																			// Starting centre point = player location
-		D3DXVECTOR3(Game::C_IREGION_MIN, Game::C_IREGION_MIN, Game::C_IREGION_MIN),						// Minimum region bounds
-		D3DXVECTOR3(Game::C_IREGION_BOUNDS, Game::C_IREGION_BOUNDS, Game::C_IREGION_BOUNDS),			// Maximum region bounds
-		D3DXVECTOR3(Game::C_IREGION_THRESHOLD, Game::C_IREGION_THRESHOLD, Game::C_IREGION_THRESHOLD)	// Region update threshold
+		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),											// Starting centre point = player location
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),										// Minimum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),									// Maximum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_THRESHOLD), 0.0f)								// Region update threshold
 		);
 
 	// If initialisation of the immediate region failed then return with an error here
@@ -1061,11 +1066,10 @@ Result RJMain::InitialiseRegions(void)
 	if (res != ErrorCodes::NoError) return res;
 
 	// DEBUG: SET BACKDROP
-	D3DXVECTOR2 texsize;
-	texsize = D3DXVECTOR2(2048, 1024);
+	XMFLOAT2 texsize = XMFLOAT2(2048.0f, 1024.0f);
 	if (true) D::Regions::System->SetBackdropTexture(Game::Engine->GetDevice(),
 		BuildStrFilename(D::DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(),
-		&texsize);
+		texsize);
 
 
 	// Return success if we have reached the end

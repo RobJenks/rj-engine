@@ -2,7 +2,7 @@
 
 ParticleDefinition::ParticleDefinition(void)
 {
-	}
+}
 
 ParticleDefinition::~ParticleDefinition(void)
 {

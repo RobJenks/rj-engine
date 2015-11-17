@@ -8,6 +8,7 @@
 
 template <class Octree> class MemoryPool;
 
+// This class has no special alignment requirements
 template <typename T> class MemoryPool
 {
 public:

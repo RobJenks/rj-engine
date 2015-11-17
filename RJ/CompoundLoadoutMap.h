@@ -9,6 +9,8 @@
 #include "iLoadoutMap.h"
 class Equipment;
 
+
+// This class has no special alignment requirements
 class CompoundLoadoutMap : iLoadoutMap
 {
 public:

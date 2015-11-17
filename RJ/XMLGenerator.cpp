@@ -64,43 +64,55 @@ TiXmlElement *IO::Data::NewBoolXMLElement(const string &name, bool b)
 	return el;
 }
 
-TiXmlElement *IO::Data::NewVectorAttrXMLElement(const string &name, D3DXVECTOR3 *v)
+TiXmlElement *IO::Data::NewVector2AttrXMLElement(const string &name, const FXMVECTOR v)
 {
+	XMFLOAT2 vf; XMStoreFloat2(&vf, v);
+
 	TiXmlElement *el = new TiXmlElement( name.c_str() );
-	el->SetDoubleAttribute("x", v->x);
-	el->SetDoubleAttribute("y", v->y);
-	el->SetDoubleAttribute("z", v->z);
+	el->SetDoubleAttribute("x", vf.x);
+	el->SetDoubleAttribute("y", vf.y);
+
+	return el;
+}
+TiXmlElement *IO::Data::NewVector3AttrXMLElement(const string &name, const FXMVECTOR v)
+{
+	XMFLOAT3 vf; XMStoreFloat3(&vf, v);
+
+	TiXmlElement *el = new TiXmlElement(name.c_str());
+	el->SetDoubleAttribute("x", vf.x);
+	el->SetDoubleAttribute("y", vf.y);
+	el->SetDoubleAttribute("z", vf.z);
+
+	return el;
+}
+TiXmlElement *IO::Data::NewVector4AttrXMLElement(const string &name, const FXMVECTOR v)
+{
+	XMFLOAT4 vf; XMStoreFloat4(&vf, v);
+
+	TiXmlElement *el = new TiXmlElement(name.c_str());
+	el->SetDoubleAttribute("x", vf.x);
+	el->SetDoubleAttribute("y", vf.y);
+	el->SetDoubleAttribute("z", vf.z);
+	el->SetDoubleAttribute("w", vf.w);
 
 	return el;
 }
 
-TiXmlElement *IO::Data::NewVectorAttrXMLElement(const string &name, D3DXVECTOR3 &v)
+
+TiXmlElement *IO::Data::NewIntVector2AttrXMLElement(const string &name, const INTVECTOR2 & v)
 {
 	TiXmlElement *el = new TiXmlElement(name.c_str());
-	el->SetDoubleAttribute("x", v.x);
-	el->SetDoubleAttribute("y", v.y);
-	el->SetDoubleAttribute("z", v.z);
+	el->SetAttribute("x", v.x);
+	el->SetAttribute("y", v.y);
 
 	return el;
 }
-
-TiXmlElement *IO::Data::NewIntVectorAttrXMLElement(const string &name, INTVECTOR3 &v)
+TiXmlElement *IO::Data::NewIntVector3AttrXMLElement(const string &name, const INTVECTOR3 & v)
 {
 	TiXmlElement *el = new TiXmlElement( name.c_str() );
 	el->SetAttribute("x", v.x);
 	el->SetAttribute("y", v.y);
 	el->SetAttribute("z", v.z);
-
-	return el;
-}
-
-TiXmlElement *IO::Data::NewQuaternionAttrXMLElement(const string &name, D3DXQUATERNION &q)
-{
-	TiXmlElement *el = new TiXmlElement(name.c_str());
-	el->SetDoubleAttribute("x", q.x);
-	el->SetDoubleAttribute("y", q.y);
-	el->SetDoubleAttribute("z", q.z);
-	el->SetDoubleAttribute("w", q.w);
 
 	return el;
 }
@@ -135,26 +147,29 @@ void IO::Data::LinkBoolXMLElement(const string &name, bool b, TiXmlElement *pare
 	if (parent) parent->LinkEndChild(el);
 }
 
-void IO::Data::LinkVectorAttrXMLElement(const string &name, D3DXVECTOR3 *v, TiXmlElement *parent)
+void IO::Data::LinkVector2AttrXMLElement(const string &name, const FXMVECTOR v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewVectorAttrXMLElement(name, v);
+	TiXmlElement *el = NewVector2AttrXMLElement(name, v);
+	if (parent) parent->LinkEndChild(el);
+}
+void IO::Data::LinkVector3AttrXMLElement(const string &name, const FXMVECTOR v, TiXmlElement *parent)
+{
+	TiXmlElement *el = NewVector3AttrXMLElement(name, v);
+	if (parent) parent->LinkEndChild(el);
+}
+void IO::Data::LinkVector4AttrXMLElement(const string &name, const FXMVECTOR v, TiXmlElement *parent)
+{
+	TiXmlElement *el = NewVector4AttrXMLElement(name, v);
 	if (parent) parent->LinkEndChild(el);
 }
 
-void IO::Data::LinkVectorAttrXMLElement(const string &name, D3DXVECTOR3 &v, TiXmlElement *parent)
+void IO::Data::LinkIntVector2AttrXMLElement(const string &name, const INTVECTOR2 & v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewVectorAttrXMLElement(name, &v);
+	TiXmlElement *el = NewIntVector2AttrXMLElement(name, v);
 	if (parent) parent->LinkEndChild(el);
 }
-
-void IO::Data::LinkIntVectorAttrXMLElement(const string &name, INTVECTOR3 &v, TiXmlElement *parent)
+void IO::Data::LinkIntVector3AttrXMLElement(const string &name, const INTVECTOR3 & v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewIntVectorAttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
-}
-
-void IO::Data::LinkQuaternionAttrXMLElement(const string &name, D3DXQUATERNION &q, TiXmlElement *parent)
-{
-	TiXmlElement *el = NewQuaternionAttrXMLElement(name, q);
+	TiXmlElement *el = NewIntVector3AttrXMLElement(name, v);
 	if (parent) parent->LinkEndChild(el);
 }

@@ -10,13 +10,10 @@
 //////////////
 #include <windows.h>
 #include "DX11_Core.h"
-#include <xnamath.h>
 #include "CompilerSettings.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: Light
-////////////////////////////////////////////////////////////////////////////////
-class Light
+// This class has no special alignment requirements
+class Light : public ALIGN16<Light>
 {
 public:
 	Light();
@@ -27,14 +24,14 @@ public:
 	void SetDiffuseColor(float, float, float, float);
 	void SetDirection(float, float, float);
 
-	CMPINLINE D3DXVECTOR4 GetAmbientColor() { return m_ambientColor; }
-	CMPINLINE D3DXVECTOR4 GetDiffuseColor() { return m_diffuseColor; }
-	CMPINLINE D3DXVECTOR3 GetDirection() { return m_direction; }
+	CMPINLINE XMFLOAT4 GetAmbientColor()	{ return m_ambientColor; }
+	CMPINLINE XMFLOAT4 GetDiffuseColor()	{ return m_diffuseColor; }
+	CMPINLINE XMFLOAT3 GetDirection()		{ return m_direction; }
 
 private:
-	D3DXVECTOR4 m_ambientColor;
-	D3DXVECTOR4 m_diffuseColor;
-	D3DXVECTOR3 m_direction;
+	XMFLOAT4 m_ambientColor;
+	XMFLOAT4 m_diffuseColor;
+	XMFLOAT3 m_direction;
 };
 
 
@@ -52,7 +49,7 @@ struct DirectionalLight
 
 	
 	DirectionalLight(void) { ZeroMemory(this, sizeof(this)); }
-	DirectionalLight(XMFLOAT3 direction, XMFLOAT4 ambient, XMFLOAT4 diffuse, XMFLOAT4 specular)
+	DirectionalLight(const XMFLOAT3 & direction, const XMFLOAT4 & ambient, const XMFLOAT4 & diffuse, const XMFLOAT4 & specular)
 					{ Direction = direction; Ambient = ambient; Diffuse = diffuse; Specular = specular; }
 };
 

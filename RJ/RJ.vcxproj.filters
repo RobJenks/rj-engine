@@ -79,9 +79,6 @@
     <ClCompile Include="D3DMain.cpp">
       <Filter>Engine\D3D</Filter>
     </ClCompile>
-    <ClCompile Include="D3DUtility.cpp">
-      <Filter>Engine\Other</Filter>
-    </ClCompile>
     <ClCompile Include="DataInput.cpp">
       <Filter>Data input/output</Filter>
     </ClCompile>
@@ -96,9 +93,6 @@
     </ClCompile>
     <ClCompile Include="DXLocaliser.cpp">
       <Filter>Engine\Localiser</Filter>
-    </ClCompile>
-    <ClCompile Include="DXText.cpp">
-      <Filter>Engine\Other</Filter>
     </ClCompile>
     <ClCompile Include="EffectBase.cpp">
       <Filter>Engine\Effects</Filter>
@@ -690,9 +684,6 @@
     <ClInclude Include="GameDataExtern.h">
       <Filter>Game data</Filter>
     </ClInclude>
-    <ClInclude Include="Gamedefs.h">
-      <Filter>Game data</Filter>
-    </ClInclude>
     <ClInclude Include="GameVarsExtern.h">
       <Filter>Game data</Filter>
     </ClInclude>
@@ -1160,14 +1151,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="D3DUtility.h">
-      <Filter>Engine\Other</Filter>
-    </CustomBuild>
-    <CustomBuild Include="DXText.h">
-      <Filter>Engine\Other</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
     <Filter Include="Objects">
       <UniqueIdentifier>{1827cc0b-22c6-41b5-a42a-02b1dd319acc}</UniqueIdentifier>
     </Filter>
@@ -1224,9 +1207,6 @@
     </Filter>
     <Filter Include="Engine\D3D">
       <UniqueIdentifier>{4bea18cf-fc13-4314-86bf-b43231d91279}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Other">
-      <UniqueIdentifier>{06c1b5a6-4daf-4bce-a7d7-510e20c84e26}</UniqueIdentifier>
     </Filter>
     <Filter Include="Concepts">
       <UniqueIdentifier>{bb296005-9191-4771-8572-1bfff3e9e791}</UniqueIdentifier>

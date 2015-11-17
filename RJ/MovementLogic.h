@@ -5,6 +5,8 @@
 
 class Ship;
 
+
+// This file contains no objects with special alignment requirements
 namespace Game { namespace Logic { 
 
 	// Initialises all simulation data for a new cycle

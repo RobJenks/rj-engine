@@ -8,6 +8,8 @@
 #include "GameConsoleCommand.h"
 class iAcceptsConsoleCommands;
 
+
+// This class has no special alignment requirements
 class GameConsole
 {
 public:

@@ -111,9 +111,9 @@ public:
 	void CreateScenarioObjects(void);
 
 	// Methods to modify the selected object
-	void MoveSelection(float x, float y, float z);
-	void ResizeSelection(float x, float y, float z);
-	void RotateSelection(float x, float y, float z);
+	void MoveSelection(FXMVECTOR mv);
+	void ResizeSelection(FXMVECTOR rsz);
+	void RotateSelection(FXMVECTOR axis);
 
 	// Terminates the UI layout and disposes of all relevant components
 	void Terminate(void);

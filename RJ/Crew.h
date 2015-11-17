@@ -7,6 +7,8 @@
 #include "Utility.h"
 using namespace std;
 
+
+// This file contains no objects with special alignment requirements
 class Crew
 {
 public:

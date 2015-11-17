@@ -106,19 +106,16 @@ void ParticleEngine::ShutdownParticleEmitter(string key)
 	m_emitters[key] = NULL;
 }
 
-void ParticleEngine::Render(const D3DXMATRIX view, const D3DXMATRIX proj, D3DMain *D3D, CameraClass *camera)
+void ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
 {
-	D3DXVECTOR3 vright, vup;
-
 	// Enable alpha blending and disable writing to the depth buffer (for correct alpha rendering) before rendering any particles
 	// TODO: Currently use additive alpha.  Make dependent on the prototypes being rendered (disabled vs enabled vs additive vs ...)
 	D3D->SetAlphaBlendModeAdditive();
 	D3D->DisableZBufferWriting();
 
 	// Retrieve the camera basis vectors for use in billboarding particles
-	D3DXMATRIX world;
-	vright = *(camera->GetViewRightBasisVector());
-	vup = *(camera->GetViewUpBasisVector());
+	XMFLOAT3 vright = camera->GetViewRightBasisVectorF();
+	XMFLOAT3 vup = camera->GetViewUpBasisVectorF();
 
 	// Operate on each particle emitter in turn
 	ParticleEmitterCollection::const_iterator it_end = m_emitters.end();
@@ -132,11 +129,10 @@ void ParticleEngine::Render(const D3DXMATRIX view, const D3DXMATRIX proj, D3DMai
 		if (false) continue;
 
 		// Prepare all particles, calculate vertex data and promote all to the buffer ready for shader rendering
-		e->Render(D3D->GetDeviceContext(), &vright, &vup);
+		e->Render(D3D->GetDeviceContext(), vright, vup);
 
 		// Render particles using the particle shader
-		world = ID_MATRIX;
-		m_pshader->Render( D3D->GetDeviceContext(), e->GetVertexLimit(), world,
+		m_pshader->Render( D3D->GetDeviceContext(), e->GetVertexLimit(), ID_MATRIX,
 						   view, proj, e->GetParticleTexture() );
 	}
 

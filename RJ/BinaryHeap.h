@@ -8,7 +8,7 @@
 #include <algorithm>
 #include "CompilerSettings.h"
 
-
+// This class has no special alignment requirements
 template <typename TVal, typename TItem>
 class BinaryHeap
 {

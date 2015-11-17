@@ -6,6 +6,8 @@
 #include <string>
 #include "CompilerSettings.h"
 
+
+// This class has no special alignment requirements
 class Faction
 {
 public:

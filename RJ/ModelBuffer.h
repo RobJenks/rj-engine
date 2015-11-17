@@ -8,6 +8,7 @@
 #include "DX11_Core.h"
 #include "Texture.h"
 
+// This class has no special alignment requirements
 class ModelBuffer
 {
 public:

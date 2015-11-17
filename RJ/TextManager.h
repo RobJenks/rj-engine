@@ -13,15 +13,18 @@ class FontShader;
 class DXLocaliser;
 using namespace std;
 
-class TextManager
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class TextManager : public ALIGN16<TextManager>
 {
 private:
 	typedef UINT16 INDEXFORMAT;		
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-	    D3DXVECTOR2 texture;
+		XMFLOAT3 position;
+	    XMFLOAT2 texture;
 	};
 
 public:
@@ -29,7 +32,7 @@ public:
 	{
 		bool render;
 		int x, y;
-		D3DXVECTOR4 colour;
+		XMFLOAT4 colour;
 		ID3D11Buffer *vertexBuffer, *indexBuffer;
 		int vertexCount, indexCount, maxLength;
 		int fontID;
@@ -41,7 +44,7 @@ public:
 	~TextManager();
 
 	// Initialises the text manager
-	Result Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, D3DXMATRIX, FontShader*);
+	Result Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
 	Result InitializeFont(string name, const char *fontdata, const char *fonttexture, int &fontID);
@@ -51,10 +54,10 @@ public:
 
 	// Updates a sentence to set the text, position, colour and render flag as necessary
 	Result UpdateSentence(SentenceType* sentence, char* text, int xpos, int ypos, bool render, 
-							D3DXVECTOR4 textcolour, float size);
+							const XMFLOAT4 & textcolour, float size);
 
 	// Renders all text sentences (dependent on render flag) using the font shader instance
-	Result Render(D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix);
+	Result Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix);
 
 	// Shuts down the text manager instance and releases all resources (including fonts and text sentences)
 	void Shutdown(void);
@@ -64,7 +67,7 @@ public:
 	CMPINLINE void DisableSentenceRendering(SentenceType *sentence) { sentence->render = false; }
 	CMPINLINE void SetSentenceRendering(SentenceType *sentence, bool render) { sentence->render = render; }
 	CMPINLINE void SetSentencePosition(SentenceType *sentence, int x, int y) { sentence->x = x; sentence->y = y; }
-	CMPINLINE void SetSentenceColour(SentenceType *sentence, D3DXVECTOR4 colour) { sentence->colour = colour; }
+	CMPINLINE void SetSentenceColour(SentenceType *sentence, XMFLOAT4 colour) { sentence->colour = colour; }
 
 	// Set the sentence text, which invokes regeneration of the vertex buffers
 	Result SetSentenceText(SentenceType *sentence, char *text, float size);
@@ -74,7 +77,7 @@ public:
 private:
 	Result InitializeSentence(SentenceType** sentence, int maxLength, int fontID);
 	void ReleaseSentence(SentenceType**);
-	Result RenderSentence(SentenceType*, D3DXMATRIX, D3DXMATRIX);
+	Result RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
 
 private:
 	vector<FontData*> m_fonts;
@@ -86,7 +89,7 @@ private:
 	int m_screenWidth, m_screenHeight;
 	float m_sentencewidth;
 	
-	D3DXMATRIX m_baseViewMatrix;
+	AXMMATRIX m_baseViewMatrix;
 	FontShader *m_fontshader;
 
 

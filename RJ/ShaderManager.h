@@ -9,6 +9,7 @@
 #include "DX11_Core.h"
 class InputLayoutDesc;
 
+// This class has no special alignment requirements
 class ShaderManager
 {
 public:

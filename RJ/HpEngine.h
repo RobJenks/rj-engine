@@ -13,7 +13,9 @@ class SpaceEmitter;
 class CoreEngine;
 class Hardpoint;
 
-class HpEngine : public Hardpoint
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class HpEngine : public ALIGN16<HpEngine>, public Hardpoint
 {
 public:
 	// Returns the type of this hardpoint subclass
@@ -24,7 +26,7 @@ public:
 	void							SetThrust(float);					// Sets the engine thrust level
 	CMPINLINE float					GetThrust(void);					// Gets the current thrust level
 
-	CMPINLINE D3DXVECTOR3*			GetThrustVector(void);				// Gets the thrust vector for this engine
+	CMPINLINE XMVECTOR				GetThrustVector(void);				// Gets the thrust vector for this engine
 	
 	CMPINLINE float					GetTargetThrust(void) { return TargetThrust; }
 	void							SetTargetThrust(float f_thrust);
@@ -63,8 +65,8 @@ public:
 	HpEngine& operator=(const HpEngine&H);
 
 //private:
-	D3DXVECTOR3			BaseThrustVector;		// Directional thrust vector relative to ship body
-	D3DXVECTOR3			CachedThrustVector;		// A cached thrust vector to avoid recalculation
+	AXMVECTOR			BaseThrustVector;		// Directional thrust vector relative to ship body
+	AXMVECTOR			CachedThrustVector;		// A cached thrust vector to avoid recalculation
 
 	float				Thrust;					// Current thrust produced by this engine
 	float				TargetThrust;			// The thrust level we are aiming to reach
@@ -74,13 +76,13 @@ public:
 	// Properties relating to the engine thrust emitter, since we will be adjusting the emitter itself based on engine state
 	float				m_emit_freqlow, m_emit_freqhigh;			// Emission frequency high/low, at 100% thrust
 	float				m_emit_freqlowrange, m_emit_freqhighrange;	// Emission frequency maximum, at lowest non-zero thrust
-	D3DXVECTOR3			m_emit_vellow, m_emit_velhigh;				// Velocity high/low, at 100% thrust
+	XMFLOAT3			m_emit_vellow, m_emit_velhigh;				// Velocity high/low, at 100% thrust
 
 };
 
 
 CMPINLINE float HpEngine::GetThrust() { return Thrust; }
-CMPINLINE D3DXVECTOR3 *HpEngine::GetThrustVector() { return &CachedThrustVector; }
+CMPINLINE XMVECTOR HpEngine::GetThrustVector() { return CachedThrustVector; }
 
 CMPINLINE Engine *HpEngine::GetEngine() { return (Engine*)m_equipment; }
 

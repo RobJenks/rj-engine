@@ -182,20 +182,19 @@ void UI_ModelBuilder::RenderCurrentSelection(void)
 	// Take different action depending on the type of object selected
 	if (m_selection_type == UI_ModelBuilder::MVSelectionType::OBBSelected && m_selected_obb)
 	{
-		D3DXMATRIX world;
-		m_selected_obb->GenerateWorldMatrix(&world);
-		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_Green, m_selected_obb->Data.Extent.x * 2.0f,
-			m_selected_obb->Data.Extent.y * 2.0f, m_selected_obb->Data.Extent.z * 2.0f, 0.5f, m_object->GetPosition());
+		XMMATRIX world;
+		m_selected_obb->GenerateWorldMatrix(world);
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_Green, m_selected_obb->Data.ExtentF.x * 2.0f,
+			m_selected_obb->Data.ExtentF.y * 2.0f, m_selected_obb->Data.ExtentF.z * 2.0f, 0.5f, m_object->GetPosition());
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain && m_nullenv)
 	{
 		// We want to subtract the terrain centre-translation from its world matrix, since the selection box that we are rendering
 		// is already centred about its local (0,0,0) origin
-		D3DXMATRIX removeoffset;
+		XMMATRIX removeoffset;
 		if (m_selected_terrain->GetDefinition() && m_selected_terrain->GetDefinition()->GetModel())
 		{
-			D3DXVECTOR3 vec = m_selected_terrain->GetDefinition()->GetModel()->GetModelCentre();
-			D3DXMatrixTranslation(&removeoffset, vec.x, vec.y, vec.z);
+			removeoffset = XMMatrixTranslationFromVector(XMLoadFloat3(&m_selected_terrain->GetDefinition()->GetModel()->GetModelCentre()));
 		}
 		else
 		{
@@ -203,9 +202,9 @@ void UI_ModelBuilder::RenderCurrentSelection(void)
 		}
 		
 		// Construct the world matrix and use it to render the selection box
-		D3DXMATRIX world = ( (*m_selected_terrain->GetWorldMatrix()) * removeoffset * (*m_nullenv->GetZeroPointWorldMatrix()) );
-		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, m_selected_terrain->GetExtent().x * 2.0f,
-			m_selected_terrain->GetExtent().y * 2.0f, m_selected_terrain->GetExtent().z * 2.0f, 0.5f, m_object->GetPosition());
+		XMMATRIX world = XMMatrixMultiply(XMMatrixMultiply(m_selected_terrain->GetWorldMatrix(), removeoffset), m_nullenv->GetZeroPointWorldMatrix());
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, m_selected_terrain->GetExtentF().x * 2.0f,
+			m_selected_terrain->GetExtentF().y * 2.0f, m_selected_terrain->GetExtentF().z * 2.0f, 0.5f, m_object->GetPosition());
 	}
 }
 
@@ -217,18 +216,21 @@ void UI_ModelBuilder::UpdateModel(void)
 	{
 		// Update the model ship orientation by desired pitch & yaw values [ delta quaternion 
 		// is defined as (0.5 * orient_change * current_orient) ]
-		m_object->AddDeltaOrientation(0.5f * D3DXQUATERNION(m_rotate_pitch, m_rotate_yaw, 0.0f, 0.0f) * m_object->GetOrientation());
+		// m_object->AddDeltaOrientation(0.5f * D3DXQUATERNION(m_rotate_pitch, m_rotate_yaw, 0.0f, 0.0f) * m_object->GetOrientation());
+		m_object->AddDeltaOrientation(
+			XMVectorScale(
+				XMQuaternionMultiply(
+					XMVectorSetX(XMVectorSetY(NULL_VECTOR, m_rotate_yaw), m_rotate_pitch), 
+				m_object->GetOrientation()),
+			0.5f));
 	}
 
 	// If the model is reverting to its original orientation then determine the delta change and apply it here
 	if (m_revertingmodelrotation)
 	{
-		D3DXQUATERNION current, orient;
-
 		// Perform linear interpolation between current and target orientation, then apply the changes immediately
 		float revert_pc = 1.0f - (m_reverttimeremaining / UI_ModelBuilder::ORIENTATION_REVERT_TIME);
-		current = m_object->GetOrientation();
-		D3DXQuaternionSlerp(&orient, &current, &ID_QUATERNION, revert_pc);
+		XMVECTOR orient = XMQuaternionSlerp(m_object->GetOrientation(), ID_QUATERNION, revert_pc);
 		m_object->SetOrientation(orient);
 
 		// We should also revert back to the default zoom level, if we aren't there already, based on the same revert timer
@@ -310,7 +312,7 @@ Result UI_ModelBuilder::LoadModel(const std::string & code)
 	// Force the placeholder 'ship' to update its size data, which will generate the appropriate root OBB for this model.  Also
 	// ensure this root OBB is set to auto-fit by default
 	m_object->CollisionOBB.SetAutoFitMode(true);
-	m_object->CalculateShipSizeData();
+	m_object->RecalculateShipDataFromCurrentState();
 
 	// Set the base zoom level to be a constant percentage of the model bounding sphere radius, to ensure the model always begins
 	// at a sensible distance from the camera.  Subtract current level so we get ((CurrentZoom + Delta) - CurrentZoom) = Delta
@@ -335,7 +337,7 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	if (m_playerviewpoint)
 	{
 		// Player viewpoint is at the origin
-		m_playerviewpoint->SetPosition(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+		m_playerviewpoint->SetPosition(NULL_VECTOR);
 		m_playerviewpoint->SetOrientation(ID_QUATERNION);
 
 		// Remove any model from the player ship, and manually remove the OBB data so it is not rendered
@@ -355,7 +357,7 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	if (m_object)
 	{
 		// Default the position and orientation of this ship
-		m_object->SetPosition(D3DXVECTOR3(0.0f, 0.0f, 10.0f));
+		m_object->SetPosition(XMVectorSetZ(NULL_VECTOR, 10.0f));
 		m_object->SetOrientation(ID_QUATERNION);
 
 		// Remove any model reference from the ship, and also the collision data so it is not rendered
@@ -467,39 +469,39 @@ void UI_ModelBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 		// All movement or resize operations can be performed in parallel, as long as other keys are not being pressed
 		if (keyboard->GetKey(DIK_W))
 		{
-			if (m_key_shift)							ResizeSelection(0.0f, 0.0f, 1.0f);
-			else if (m_key_ctrl)						RotateSelection(1.0f, 0.0f, 0.0f);
-			else										MoveSelection(0.0f, 0.0f, 1.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetZ(NULL_VECTOR, 1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetX(NULL_VECTOR, 1.0f));
+			else										MoveSelection(XMVectorSetZ(NULL_VECTOR, 1.0f));
 		}
 		if (keyboard->GetKey(DIK_S))
 		{
-			if (m_key_shift)							ResizeSelection(0.0f, 0.0f, -1.0f);
-			else if (m_key_ctrl)						RotateSelection(-1.0f, 0.0f, 0.0f);
-			else										MoveSelection(0.0f, 0.0f, -1.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetZ(NULL_VECTOR, -1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetX(NULL_VECTOR, -1.0f));
+			else										MoveSelection(XMVectorSetZ(NULL_VECTOR, -1.0f));
 		}
 		if (keyboard->GetKey(DIK_A))
 		{
-			if (m_key_shift)							ResizeSelection(-1.0f, 0.0f, 0.0f);
-			else if (m_key_ctrl)						RotateSelection(0.0f, -1.0f, 0.0f);
-			else										MoveSelection(-1.0f, 0.0f, 0.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetX(NULL_VECTOR, -1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetY(NULL_VECTOR, -1.0f));
+			else										MoveSelection(XMVectorSetX(NULL_VECTOR, -1.0f));
 		}
 		if (keyboard->GetKey(DIK_D))
 		{
-			if (m_key_shift)							ResizeSelection(1.0f, 0.0f, 0.0f);
-			else if (m_key_ctrl)						RotateSelection(0.0f, 1.0f, 0.0f);
-			else										MoveSelection(1.0f, 0.0f, 0.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetX(NULL_VECTOR, 1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetY(NULL_VECTOR, 1.0f));
+			else										MoveSelection(XMVectorSetX(NULL_VECTOR, 1.0f));
 		}
 		if (keyboard->GetKey(DIK_Q))
 		{
-			if (m_key_shift)							ResizeSelection(0.0f, 1.0f, 0.0f);
-			else if (m_key_ctrl)						RotateSelection(0.0f, 0.0f, -1.0f);
-			else										MoveSelection(0.0f, 1.0f, 0.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetY(NULL_VECTOR, 1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetZ(NULL_VECTOR, -1.0f));
+			else										MoveSelection(XMVectorSetY(NULL_VECTOR, 1.0f));
 		}
 		if (keyboard->GetKey(DIK_Z))
 		{
-			if (m_key_shift)							ResizeSelection(0.0f, -1.0f, 0.0f);
-			else if (m_key_ctrl)						RotateSelection(0.0f, 0.0f, 1.0f);
-			else										MoveSelection(0.0f, -1.0f, 0.0f);
+			if (m_key_shift)							ResizeSelection(XMVectorSetY(NULL_VECTOR, -1.0f));
+			else if (m_key_ctrl)						RotateSelection(XMVectorSetZ(NULL_VECTOR, 1.0f));
+			else										MoveSelection(XMVectorSetY(NULL_VECTOR, -1.0f));
 		}
 	}
 }
@@ -583,7 +585,7 @@ void UI_ModelBuilder::AddNewOBB(void)
 	// Otherwise we want to append a new child node to this OBB, by deallocating/reallocating the child data.  Update any
 	// fields that should differ from their defaults
 	m_selected_obb->AppendNewChildNode();
-	m_selected_obb->Children[m_selected_obb->ChildCount - 1].Data.Extent = D3DXVECTOR3(3.0f, 3.0f, 3.0f);
+	m_selected_obb->Children[m_selected_obb->ChildCount - 1].UpdateExtent(XMVectorSetW(XMVectorReplicate(3.0f), 0.0f));
 
 	// Force a refresh of the interface after the new OBB is added
 	RefreshInterface();
@@ -686,7 +688,7 @@ void UI_ModelBuilder::AddNewTerrain(void)
 	
 	// If the shift key is held then inherit the extents of the currently selected terrain object
 	if (m_key_shift && m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain != NULL)
-		terrain->SetExtent(m_selected_terrain->GetExtent());
+		terrain->SetExtent(XMLoadFloat3(&m_selected_terrain->GetExtentF()));
 	
 	// Add this terrain object to the model
 	AddTerrain(terrain);
@@ -824,20 +826,16 @@ void UI_ModelBuilder::SelectTerrain(StaticTerrain *terrain)
 }
 
 // Move the selected object
-void UI_ModelBuilder::MoveSelection(float x, float y, float z)
+void UI_ModelBuilder::MoveSelection(FXMVECTOR mv)
 {
 	// Determine the amount of movement required, based upon the base movement speed and current time delta
-	D3DXVECTOR3 move = D3DXVECTOR3(	x * UI_ModelBuilder::SELECTION_MOVE_SPEED * Game::PersistentTimeFactor,
-									y * UI_ModelBuilder::SELECTION_MOVE_SPEED * Game::PersistentTimeFactor,
-									z * UI_ModelBuilder::SELECTION_MOVE_SPEED * Game::PersistentTimeFactor);
+	XMVECTOR move = XMVectorScale(mv, UI_ModelBuilder::SELECTION_MOVE_SPEED * Game::PersistentTimeFactor);
 
 	// Move the currently-selected object
 	if (m_selection_type == UI_ModelBuilder::MVSelectionType::OBBSelected && m_selected_obb)
 	{
 		// Generate a delta translation matrix and apply it to the current object offset matrix
-		D3DXMATRIX delta, offset;
-		D3DXMatrixTranslation(&delta, move.x, move.y, move.z);
-		offset = (delta * m_selected_obb->Offset);
+		XMMATRIX offset = XMMatrixMultiply(XMMatrixTranslationFromVector(move), m_selected_obb->Offset);
 
 		// Assign this new offset matrix and update all the way down the OBB hierarchy
 		m_selected_obb->UpdateOffset(offset);
@@ -845,7 +843,7 @@ void UI_ModelBuilder::MoveSelection(float x, float y, float z)
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain)
 	{
 		// Update the terrain object relative position by this delta, which will recalculate all derived fields automatically
-		m_selected_terrain->SetPosition(m_selected_terrain->GetPosition() + move);
+		m_selected_terrain->SetPosition(XMVectorAdd(m_selected_terrain->GetPosition(), move));
 	}
 
 	// Perform a full update of the collision geometry based on this change
@@ -853,26 +851,22 @@ void UI_ModelBuilder::MoveSelection(float x, float y, float z)
 }
 
 // Resize the selected object
-void UI_ModelBuilder::ResizeSelection(float x, float y, float z)
+void UI_ModelBuilder::ResizeSelection(FXMVECTOR rsz)
 {
 	// Determine the amount of resizing required, based upon the base resize speed and current time delta
-	D3DXVECTOR3 resize = D3DXVECTOR3(	x * UI_ModelBuilder::SELECTION_RESIZE_SPEED * Game::PersistentTimeFactor,
-										y * UI_ModelBuilder::SELECTION_RESIZE_SPEED * Game::PersistentTimeFactor,
-										z * UI_ModelBuilder::SELECTION_RESIZE_SPEED * Game::PersistentTimeFactor);
+	XMVECTOR resize = XMVectorScale(rsz, UI_ModelBuilder::SELECTION_RESIZE_SPEED * Game::PersistentTimeFactor);
 
-	// Move the currently-selected object
+	// Resize the currently-selected object
 	if (m_selection_type == UI_ModelBuilder::MVSelectionType::OBBSelected && m_selected_obb)
 	{
 		// Update the extent of this OBB, including bounds checking
-		D3DXVECTOR3 extent = (m_selected_obb->Data.Extent + resize);
-		FloorVector(extent, Game::C_EPSILON);
+		XMVECTOR extent = XMVectorMax(XMVectorAdd(XMLoadFloat3(&m_selected_obb->Data.ExtentF), resize), Game::C_EPSILON_V);
 		m_selected_obb->UpdateExtent(extent);
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain)
 	{
 		// Update the extent of this terrain object, including bounds checking
-		D3DXVECTOR3 extent = (m_selected_terrain->GetExtent() + resize);
-		FloorVector(extent, Game::C_EPSILON);
+		XMVECTOR extent = XMVectorMax(XMVectorAdd(XMLoadFloat3(&m_selected_terrain->GetExtentF()), resize), Game::C_EPSILON_V);
 		m_selected_terrain->SetExtent(extent);
 	}
 
@@ -881,27 +875,25 @@ void UI_ModelBuilder::ResizeSelection(float x, float y, float z)
 }
 
 // Rotate the selected object about the specified axis
-void UI_ModelBuilder::RotateSelection(float x, float y, float z)
+void UI_ModelBuilder::RotateSelection(FXMVECTOR axis)
 {
 	// Take different action depending on the type of object that is selected
 	if (m_selection_type == UI_ModelBuilder::MVSelectionType::OBBSelected && m_selected_obb)
 	{
 		// Generate a delta rotation matrix about the specified axis, plus centre- and inverse-centre translation matrices
-		D3DXMATRIX delta;
-		D3DXMatrixRotationAxis(&delta, &D3DXVECTOR3(x, y, z), UI_ModelBuilder::SELECTION_ROTATE_SPEED * Game::PersistentTimeFactor);
+		XMMATRIX delta = XMMatrixRotationAxis(axis, UI_ModelBuilder::SELECTION_ROTATE_SPEED * Game::PersistentTimeFactor);
 
 		// Assign this new offset matrix and update all the way down the OBB hierarchy
-		D3DXMATRIX offset = (delta * m_selected_obb->Offset);
+		XMMATRIX offset = XMMatrixMultiply(delta, m_selected_obb->Offset);
 		m_selected_obb->UpdateOffset(offset);
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain)
 	{
 		// Generate a quaternion for this delta rotation about the specified axis
-		D3DXQUATERNION delta;
-		D3DXQuaternionRotationAxis(&delta, &D3DXVECTOR3(x, y, z), UI_ModelBuilder::SELECTION_ROTATE_SPEED * Game::PersistentTimeFactor);
+		XMVECTOR delta = XMQuaternionRotationAxis(axis, UI_ModelBuilder::SELECTION_ROTATE_SPEED * Game::PersistentTimeFactor);
 
 		// Apply this delta rotation to the terrain orientation and apply it
-		D3DXQUATERNION orient = (m_selected_terrain->GetOrientation() * delta);
+		XMVECTOR orient = XMQuaternionMultiply(m_selected_terrain->GetOrientation(), delta);
 		m_selected_terrain->SetOrientation(orient);
 	}
 }
@@ -913,16 +905,14 @@ void UI_ModelBuilder::RevertSelectionOrientation()
 	{
 		// If this is an OBB object, replace its offset matrix with a direct translation to its current 
 		// position (thereby removing any rotation component)
-		D3DXMATRIX offset; D3DXVECTOR3 transformedpos, transformedcentre;
 
 		// Transform both the object & OBB positions back into the same local space, then determine the translation between them
-		D3DXVec3TransformCoord(&transformedpos, &m_object->GetPosition(), m_object->GetInverseWorldMatrix());
-		D3DXVec3TransformCoord(&transformedcentre, &m_selected_obb->Data.Centre, m_object->GetInverseWorldMatrix());
-		D3DXVECTOR3 trans = (transformedcentre - transformedpos);
+		XMVECTOR transformedpos = XMVector3TransformCoord(m_object->GetPosition(), m_object->GetInverseWorldMatrix());
+		XMVECTOR transformedcentre = XMVector3TransformCoord(m_selected_obb->Data.Centre, m_object->GetInverseWorldMatrix());
+		XMVECTOR trans = XMVectorSubtract(transformedcentre, transformedpos);
 
 		// Replace the OBB offset matrix with this direct transform, effectively removing any rotation components
-		D3DXMatrixTranslation(&offset, trans.x, trans.y, trans.z);
-		m_selected_obb->UpdateOffset(offset);
+		m_selected_obb->UpdateOffset(XMMatrixTranslationFromVector(trans));
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain)
 	{
@@ -1040,7 +1030,7 @@ void UI_ModelBuilder::PerformZoom(float zoom)
 	m_zoomlevel = max(UI_ModelBuilder::MIN_ZOOM_LEVEL, m_zoomlevel + zoom);
 
 	// Simply set the model z-axis position to this zoom level
-	m_object->SetPosition(D3DXVECTOR3(0.0f, 0.0f, m_zoomlevel));
+	m_object->SetPosition(XMVectorSetZ(NULL_VECTOR, m_zoomlevel));
 }
 
 // Processes the user request to load a new model
@@ -1176,7 +1166,7 @@ void UI_ModelBuilder::GenerateRootOBB(void)
 	if (m_object)
 	{
 		m_object->CollisionOBB.SetAutoFitMode(true);
-		m_object->CalculateShipSizeData();
+		m_object->RecalculateShipDataFromCurrentState();
 	}
 
 	// Perform a full update of the collision geometry based on this change
@@ -1222,7 +1212,7 @@ Result UI_ModelBuilder::LoadCollisionData(const std::string & filename)
 	}
 
 	// Update the placeholder ship data, so that if the root OBB is set to auto-calculate it will be updated based on model size
-	m_object->CalculateShipSizeData();
+	m_object->RecalculateShipDataFromCurrentState();
 
 	// Refresh the interface once all objects have been loaded
 	RefreshInterface();

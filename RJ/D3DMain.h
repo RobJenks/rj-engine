@@ -13,10 +13,10 @@ class DXLocaliser;
 // Constant values for buffer background colour; each frame reset to this base colour before rendering begins
 const float					m_bufferbg[4] = {0.0f, 0.0f, 0.0f, 1.0f};
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: D3DMain
-////////////////////////////////////////////////////////////////////////////////
-class D3DMain
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class D3DMain : public ALIGN16<D3DMain>
 {
 public:
 	// Enumeration of possible alpha blending values
@@ -35,9 +35,12 @@ public:
 	CMPINLINE ID3D11Device*			GetDevice()					{ return m_device; }
 	CMPINLINE ID3D11DeviceContext*	GetDeviceContext()	{ return m_deviceContext; }
 
-	void							GetProjectionMatrix(D3DXMATRIX&);
-	void							GetWorldMatrix(D3DXMATRIX&);
-	void							GetOrthoMatrix(D3DXMATRIX&);
+	CMPINLINE void					GetProjectionMatrix(XMMATRIX & outMatrix) const		{ outMatrix = m_projectionMatrix; }
+	CMPINLINE void					GetWorldMatrix(XMMATRIX & outMatrix) const			{ outMatrix = m_worldMatrix; }
+	CMPINLINE void					GetOrthoMatrix(XMMATRIX & outMatrix) const			{ outMatrix = m_orthoMatrix; }
+	CMPINLINE XMMATRIX				GetProjectionMatrix(void) const						{ return m_projectionMatrix; }
+	CMPINLINE XMMATRIX				GetWorldMatrix(void) const							{ return m_worldMatrix; }
+	CMPINLINE XMMATRIX				GetOrthoMatrix(void) const							{ return m_orthoMatrix; }
 
 	void							GetVideoCardInfo(char*, int&);
 
@@ -117,9 +120,9 @@ private:
 	ID3D11DepthStencilView		*m_depthStencilView;
 	ID3D11RasterizerState		*m_rasterState;							// Normal rasterising state
 	ID3D11RasterizerState		*m_rasterStateNoCulling;				// Performs no culling; used for drawing e.g. inside of the skybox
-	D3DXMATRIX					m_projectionMatrix;
-	D3DXMATRIX					m_worldMatrix;
-	D3DXMATRIX					m_orthoMatrix;
+	AXMMATRIX					m_projectionMatrix;
+	AXMMATRIX					m_worldMatrix;
+	AXMMATRIX					m_orthoMatrix;
 	D3D11_FILL_MODE				m_fillmode;
 	ID3D11BlendState			*m_alphaEnableBlendingState;
 	ID3D11BlendState			*m_alphaDisableBlendingState;

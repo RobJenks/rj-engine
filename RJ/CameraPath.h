@@ -9,7 +9,10 @@
 #include "CompilerSettings.h"
 #include "Utility.h"
 
-class CameraPath
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class CameraPath : public ALIGN16<CameraPath>
 {
 public:
 	// Enumeration of possible path modes
@@ -19,17 +22,19 @@ public:
 	enum CameraPathCompletionAction	{ ReleaseOnCompletion = 0, FixInPositionOnCompletion, StartNewPathOnCompletion };
 
 	// Struct holding information on a node in the camera path
-	struct CameraPathNode
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct CameraPathNode : public ALIGN16<CameraPathNode>
 	{
-		D3DXVECTOR3					Position;				// Position of the node
-		D3DXQUATERNION				Orientation;			// Orientation of the camera at this node
+		AXMVECTOR					Position;				// Position of the node
+		AXMVECTOR					Orientation;			// Orientation of the camera at this node
 		float						Time;					// Time at this node (secs), used for interpolation
 		iSpaceObject *				Object;					// Object that this node is relative to, if applicable
 
-		CameraPathNode(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient, float time)
+		CameraPathNode(const FXMVECTOR pos, const FXMVECTOR orient, float time)
 		{ Position = pos; Orientation = orient; Time = time; Object = NULL; }
 
-		CameraPathNode(const D3DXVECTOR3 & relativepos, const D3DXQUATERNION & relativeorient, iSpaceObject *obj, float time)
+		CameraPathNode(const FXMVECTOR relativepos, const FXMVECTOR relativeorient, iSpaceObject *obj, float time)
 		{ Position = relativepos; Orientation = relativeorient; Time = time; Object = obj; }
 	};
 
@@ -51,8 +56,8 @@ public:
 	void							SetPathToBeInitiatedOnCompletion(CameraPath *path)			{ m_completionpath = path; }
 
 	// Retrieves pointers to the current camera position & orientation
-	CMPINLINE const D3DXVECTOR3 * 	 GetCurrentCameraPosition(void) const			{ return &m_camerapos; }
-	CMPINLINE const D3DXQUATERNION * GetCurrentCameraOrientation(void) const		{ return &m_cameraorient; }
+	CMPINLINE const XMVECTOR	 	 GetCurrentCameraPosition(void) const			{ return m_camerapos; }
+	CMPINLINE const XMVECTOR		 GetCurrentCameraOrientation(void) const		{ return m_cameraorient; }
 
 	// Flag indicating whether the path is running in reverse
 	CMPINLINE bool					IsRunningInReverse(void)						{ return m_reversepath; }
@@ -61,8 +66,8 @@ public:
 	CMPINLINE float					GetPathTime(void)								{ return m_time; }
 
 	// Methods to query, add or update nodes
-	void							AddNode(const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation, float time);
-	void							AddNode(const D3DXVECTOR3 & relativeposition, const D3DXQUATERNION & relativeorientation, iSpaceObject *object, float time);
+	void							AddNode(const FXMVECTOR position, const FXMVECTOR orientation, float time);
+	void							AddNode(const FXMVECTOR relativeposition, const FXMVECTOR relativeorientation, iSpaceObject *object, float time);
 	void							RemoveNode(int index);
 	void							ClearNodes(void);
 	CMPINLINE int					GetNodeCount(void)									{ return m_nodecount; }
@@ -87,8 +92,8 @@ private:
 
 	float							m_time;					// Current time value along the path
 
-	D3DXVECTOR3						m_camerapos;			// Current position of the camera
-	D3DXQUATERNION					m_cameraorient;			// Current orientation of the camera
+	AXMVECTOR						m_camerapos;			// Current position of the camera
+	AXMVECTOR						m_cameraorient;			// Current orientation of the camera
 
 	CameraPathCompletionAction		m_completionaction;		// Action to be taken upon completion of the path
 	CameraPath *					m_completionpath;		// Path to be followed on completion of this one, if the completion action is set appropriately

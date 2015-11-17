@@ -156,11 +156,11 @@ public:			// We will allow public access to member variables for efficiency.  On
 	float										m_zmin, m_zmax;
 	
 	// Also store node extents in vector form
-	__declspec(align(16)) XMVECTOR				m_min;		// 16-bit aligned to allow SIMD/SSE instruction sets
-	__declspec(align(16)) XMVECTOR				m_max;		// 16-bit aligned to allow SIMD/SSE instruction sets
+	AXMVECTOR									m_min;		// 16-bit aligned to allow SIMD/SSE instruction sets
+	AXMVECTOR									m_max;		// 16-bit aligned to allow SIMD/SSE instruction sets
 
 	// Precalculated centre point of the node, based on bounds.  Used to determine which subdivision is relevant for a particular position
-	__declspec(align(16)) XMVECTOR				m_centre;	// 16-bit aligned to allow SIMD/SSE instruction sets
+	AXMVECTOR									m_centre;	// 16-bit aligned to allow SIMD/SSE instruction sets
 	XMFLOAT3									m_centref;	// Maintain to allow easy per-component operations
 
 	// Precalculated size of the node in each dimension

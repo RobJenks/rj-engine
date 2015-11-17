@@ -11,6 +11,7 @@ class iObject;
 #ifndef __GameVarsExtern_Types_H__
 #define __GameVarsExtern_Types_H__	
 
+// This file contains no objects with special alignment requirements
 namespace Game {
 
 	struct ObjectRegisterEntry
@@ -50,6 +51,7 @@ class DebugCommandHandler;
 class GameUniverse;
 
 
+// This file contains no objects with special alignment requirements
 namespace Game {
 	
 	// Main application instance
@@ -276,13 +278,10 @@ namespace Game {
 	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const INTVECTOR3 & location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return XMVectorSet(	(float)location.x * Game::C_CS_ELEMENT_SCALE, 
-							(float)location.z * Game::C_CS_ELEMENT_SCALE, 
-							(float)location.y * Game::C_CS_ELEMENT_SCALE, 
-							0.0f); 
+		return XMVectorMultiply(XMVectorSet((float)location.x, (float)location.z, (float)location.y, 0.0f), Game::C_CS_ELEMENT_SCALE_V);
 	}
-	
-	// Convert from three dimensional element location to position in 3D space
+
+	// Convert from three dimensional element location to position in 3D space, returning a float representation of the resulting vector
 	CMPINLINE XMFLOAT3					ElementLocationToPhysicalPositionF(const INTVECTOR3 & location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each

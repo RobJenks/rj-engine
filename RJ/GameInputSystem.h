@@ -8,6 +8,7 @@
 #include "GameInput.h"
 #include "ErrorCodes.h"
 
+// This file contains no objects with special alignment requirements
 namespace GameInputSystem {
 
 	Result Initialise(HINSTANCE hInstance, HWND hwnd, LPDIRECTINPUT8 m_di, GameInputDevice *m_keyboard, GameInputDevice *m_mouse)

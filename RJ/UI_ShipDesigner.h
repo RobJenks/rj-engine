@@ -21,6 +21,7 @@ class ComplexShipTileDefinition;
 class CSCorridorTile;
 using namespace std;
 
+// This class has no special alignment requirements
 class UI_ShipDesigner : public iUIController
 {
 public: 
@@ -373,7 +374,7 @@ private:
 	int							m_gridxmax;			// The maximum number of grid cells that will be rendered in the x direction
 	int							m_gridymax;			// The maximum number of grid cells that will be rendered in the y direction
 
-	D3DXVECTOR2					m_gridpos;			// Exact position within the grid that is currently at the top-left corner
+	XMFLOAT3					m_gridpos;			// Exact position within the grid that is currently at the top-left corner
 	INTVECTOR2					m_gridstart;		// Grid square that is currently in the top-left of the SD grid
 	int							m_gridzpos;			// The z-level that we are currently viewing in the ship designer
 

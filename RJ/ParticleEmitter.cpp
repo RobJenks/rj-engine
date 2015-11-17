@@ -7,11 +7,11 @@
 
 // The constant set of particle texture coordinate orientations.  Ordered clockwise from bottom-left vertex,
 // i.e. 0=BL, 1=TL, 2=TR, 3=BR
-const D3DXVECTOR2 ParticleEmitter::TexCoord[4][4] = { 
-	{ D3DXVECTOR2(0.0f, 1.0f), D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f) }, 
-	{ D3DXVECTOR2(1.0f, 1.0f), D3DXVECTOR2(0.0f, 1.0f), D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 0.0f) }, 
-	{ D3DXVECTOR2(1.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), D3DXVECTOR2(0.0f, 1.0f), D3DXVECTOR2(0.0f, 0.0f) }, 
-	{ D3DXVECTOR2(0.0f, 0.0f), D3DXVECTOR2(1.0f, 0.0f), D3DXVECTOR2(1.0f, 1.0f), D3DXVECTOR2(0.0f, 1.0f) } 
+const XMFLOAT2 ParticleEmitter::TexCoord[4][4] = { 
+	{ XMFLOAT2(0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) }, 
+	{ XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) }, 
+	{ XMFLOAT2(1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) }, 
+	{ XMFLOAT2(0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) } 
 };
 
 // Initialises the particle emitter.  Properties should have been set first.
@@ -146,12 +146,12 @@ Result ParticleEmitter::InitialiseBuffers(ID3D11Device *device)
 	return ErrorCodes::NoError;
 }
 
-void ParticleEmitter::UpdateParticles(const D3DXVECTOR3 *rightbasisvector, const D3DXVECTOR3 *upbasisvector)
+void ParticleEmitter::UpdateParticles(const XMFLOAT3 & rightbasisvector, const XMFLOAT3 & upbasisvector)
 {
 	// Pointer to the first inactive particle, plus basis vectors to be used later
 	int inactiveid = -1;
-	D3DXVECTOR3 vright, vup;
-	D3DXVECTOR4 newcolour;
+	XMFLOAT3 vright, vup;
+	XMFLOAT4 newcolour;
 
 	// For each particle in this emitter
 	Particle *p = m_particles;
@@ -181,7 +181,7 @@ void ParticleEmitter::UpdateParticles(const D3DXVECTOR3 *rightbasisvector, const
 		{
 			// Update colour, if required
 			if (m_updateflag_colour) {
-				newcolour = D3DXVECTOR4(	v->colour.x + ((frand_lh(m_updatecolour[0].x, m_updatecolour[1].x) * Game::TimeFactor)), 
+				newcolour = XMFLOAT4	(	v->colour.x + ((frand_lh(m_updatecolour[0].x, m_updatecolour[1].x) * Game::TimeFactor)), 
 											v->colour.y + ((frand_lh(m_updatecolour[0].y, m_updatecolour[1].y) * Game::TimeFactor)), 
 											v->colour.z + ((frand_lh(m_updatecolour[0].z, m_updatecolour[1].z) * Game::TimeFactor)), 
 											v->colour.w + ((frand_lh(m_updatecolour[0].w, m_updatecolour[1].w) * Game::TimeFactor)) );
@@ -199,21 +199,21 @@ void ParticleEmitter::UpdateParticles(const D3DXVECTOR3 *rightbasisvector, const
 
 			// Update velocity, if required
 			if (m_updateflag_velocity) {
-				p->Velocity = D3DXVECTOR3(	p->Velocity.x + ((frand_lh(m_updatevelocity[0].x, m_updatevelocity[1].x)) * Game::TimeFactor),
+				p->Velocity = XMFLOAT3	(	p->Velocity.x + ((frand_lh(m_updatevelocity[0].x, m_updatevelocity[1].x)) * Game::TimeFactor),
 											p->Velocity.y + ((frand_lh(m_updatevelocity[0].y, m_updatevelocity[1].y)) * Game::TimeFactor),
 											p->Velocity.z + ((frand_lh(m_updatevelocity[0].z, m_updatevelocity[1].z)) * Game::TimeFactor) );
 			}
 
 			// Move the particle (vertex 0 position) by its velocity
-			v[0].position += (p->Velocity * Game::TimeFactor);						// Vertex 0 is the bottom-left
+			v[0].position = Float3Add(v[0].position, Float3MultiplyScalar(p->Velocity, Game::TimeFactor));		// Vertex 0 is the bottom-left
 
 			// Now set the other (1-5) vertex coordinates using basis vectors and the particle size
-			vright = (*rightbasisvector) * p->Size;
-			vup = (*upbasisvector) * p->Size;
+			vright = Float3MultiplyScalar(rightbasisvector, p->Size);
+			vup = Float3MultiplyScalar(upbasisvector, p->Size);
 
-			v[1].position = v[4].position = (v[0].position + vup);			// Vertices 1 & 4 are top-left
-			v[2].position = v[3].position = (v[0].position + vright);		// Vertices 2 & 3 are bottom-right
-			v[5].position = (v[3].position + vup);							// Vertex 5 is the top-right; add an additional up vector to bottom right
+			v[1].position = v[4].position = Float3Add(v[0].position, vup);			// Vertices 1 & 4 are top-left
+			v[2].position = v[3].position = Float3Add(v[0].position, vright);		// Vertices 2 & 3 are bottom-right
+			v[5].position = Float3Add(v[3].position, vup);							// Vertex 5 is the top-right; add an additional up vector to bottom right
 		}
 	}
 
@@ -246,29 +246,32 @@ void ParticleEmitter::AddParticle(int id)
 	m_particles[id].Size = frand_lh(m_initialsize[0], m_initialsize[1]);
 
 	// Initial velocity is based on world orientation
-	m_particles[id].Velocity = D3DXVECTOR3( frand_lh(m_initialvelocity[0].x, m_initialvelocity[1].x), 
+	m_particles[id].Velocity = XMFLOAT3(	frand_lh(m_initialvelocity[0].x, m_initialvelocity[1].x), 
 											frand_lh(m_initialvelocity[0].y, m_initialvelocity[1].y), 
 											frand_lh(m_initialvelocity[0].z, m_initialvelocity[1].z) );
 
 
 	// Transform the velocity vector by our world orientation matrix
-	D3DXVec3TransformCoord(&m_particles[id].Velocity, &m_particles[id].Velocity, &m_orientmatrix);
+	// D3DXVec3TransformCoord(&m_particles[id].Velocity, &m_particles[id].Velocity, &m_orientmatrix);
+	XMVECTOR vec = XMVector3TransformCoord(XMLoadFloat3(&m_particles[id].Velocity), m_orientmatrix);
+	XMStoreFloat3(&m_particles[id].Velocity, vec);	
 
 	// Set initial position.  Note we initially set all to v[0] position; will be updated properly next frame by the update method
-	v[0].position = D3DXVECTOR3(	frand_lh(m_initialposition[0].x, m_initialposition[1].x),
-									frand_lh(m_initialposition[0].y, m_initialposition[1].y),
-									frand_lh(m_initialposition[0].z, m_initialposition[1].z) );
+	v[0].position = XMFLOAT3(	frand_lh(m_initialposition[0].x, m_initialposition[1].x),
+								frand_lh(m_initialposition[0].y, m_initialposition[1].y),
+								frand_lh(m_initialposition[0].z, m_initialposition[1].z) );
 
 	// Transform initial position by the world matrix, then set all other vertices to match
-	D3DXVec3TransformCoord(&v[0].position, &v[0].position, &m_worldmatrix);
+	vec = XMVector3TransformCoord(XMLoadFloat3(&v[0].position), m_worldmatrix);
+	XMStoreFloat3(&v[0].position, vec);
 	v[1].position = v[2].position = v[3].position = v[4].position = v[5].position = v[0].position;
 
 	// Set initial colour
 	v[0].colour = v[1].colour = v[2].colour = v[3].colour = v[4].colour = v[5].colour = 
-		D3DXVECTOR4(	frand_lh(m_initialcolour[0].x, m_initialcolour[1].x), 
-						frand_lh(m_initialcolour[0].y, m_initialcolour[1].y), 
-						frand_lh(m_initialcolour[0].z, m_initialcolour[1].z), 
-						frand_lh(m_initialcolour[0].w, m_initialcolour[1].w) ); 
+		XMFLOAT4(	frand_lh(m_initialcolour[0].x, m_initialcolour[1].x), 
+					frand_lh(m_initialcolour[0].y, m_initialcolour[1].y), 
+					frand_lh(m_initialcolour[0].z, m_initialcolour[1].z), 
+					frand_lh(m_initialcolour[0].w, m_initialcolour[1].w) ); 
 	
 	// Increment active count.  Also, if this is the 'furthest' particle we have ever created then update that counter
 	++m_numactiveparticles;
@@ -278,7 +281,7 @@ void ParticleEmitter::AddParticle(int id)
 	//if (m_maxparticleidcreated >= m_particlelimit) m_maxparticleidcreated = m_particlelimit-1;
 }
 
-void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const D3DXVECTOR3 *vright, const D3DXVECTOR3 *vup)
+void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup)
 {
 	// Update the particle data
 	UpdateParticles(vright, vup);
@@ -434,15 +437,15 @@ ParticleEmitter::ParticleEmitter(void)
 	m_exists = false;
 
 	m_emissionfreq[0] = 0.0f; m_emissionfreq[1] = 0.0f;
-	m_initialposition[0] = NULL_VECTOR; m_initialposition[1] = NULL_VECTOR;
+	m_initialposition[0] = NULL_FLOAT3; m_initialposition[1] = NULL_FLOAT3;
 	m_initiallifetime[0] = 0.0f; m_initiallifetime[1] = 0.0f;
-	m_initialcolour[0] = NULL_VECTOR4; m_initialcolour[1] = NULL_VECTOR4;
+	m_initialcolour[0] = NULL_FLOAT4; m_initialcolour[1] = NULL_FLOAT4;
 	m_initialsize[0] = 0.0f, m_initialsize[1] = 0.0f;
-	m_initialvelocity[0] = NULL_VECTOR; m_initialvelocity[1] = NULL_VECTOR;
+	m_initialvelocity[0] = NULL_FLOAT3; m_initialvelocity[1] = NULL_FLOAT3;
 
-	m_updatecolour[0] = NULL_VECTOR4; m_updatecolour[1] = NULL_VECTOR4;
+	m_updatecolour[0] = NULL_FLOAT4; m_updatecolour[1] = NULL_FLOAT4;
 	m_updatesize[0] = 0.0f; m_updatesize[1] = 0.0f;
-	m_updatevelocity[0] = NULL_VECTOR; m_updatevelocity[1] = NULL_VECTOR;
+	m_updatevelocity[0] = NULL_FLOAT3; m_updatevelocity[1] = NULL_FLOAT3;
 
 	// Flags that determine whether each property is updated per frame
 	m_updateflag_colour = false;

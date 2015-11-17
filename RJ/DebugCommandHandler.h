@@ -8,6 +8,7 @@ class Actor;
 
 #include "iAcceptsConsoleCommands.h"
 
+// This class has no special alignment requirements
 class DebugCommandHandler : public iAcceptsConsoleCommands
 {
 public:

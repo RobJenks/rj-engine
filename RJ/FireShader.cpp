@@ -22,11 +22,11 @@ void FireShader::Shutdown(void)
 }
 
 
-Result FireShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-							 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+Result FireShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
-							 D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, D3DXVECTOR2 distortion2,
-							 D3DXVECTOR2 distortion3, float distortionScale, float distortionBias)
+							 XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, XMFLOAT2 distortion2,
+							 XMFLOAT2 distortion3, float distortionScale, float distortionBias)
 {
 	// Set the shader parameters that the shader will use for rendering.
 	Result result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, fireTexture, noiseTexture, alphaTexture, 
@@ -63,7 +63,7 @@ Result FireShader::InitialiseShader(ID3D11Device* device, HWND hwnd, const char*
 
     // Compile the vertex shader code.
 	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "FireVertexShader", m_locale->Locale.VertexShaderLevelDesc, 
-									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &vertexShaderBuffer, &errorMessage, NULL);
+									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, &vertexShaderBuffer, &errorMessage, NULL);	
 	if(FAILED(result))
 	{
 		// If the shader failed to compile it should have writen something to the error message.
@@ -332,11 +332,11 @@ void FireShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, c
 	errorMessage = 0;
 }
 
-Result FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
-										  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+Result FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
+										  const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 										  ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, 
-										  float frameTime, D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, 
-										  D3DXVECTOR2 distortion2, D3DXVECTOR2 distortion3, float distortionScale, 
+										  float frameTime, XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, 
+										  XMFLOAT2 distortion2, XMFLOAT2 distortion3, float distortionScale, 
 										  float distortionBias)
 {
 	HRESULT result;
@@ -345,11 +345,6 @@ Result FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXM
 	NoiseBufferType* dataPtr2;
 	DistortionBufferType* dataPtr3;
 	unsigned int bufferNumber;
-
-	// Transpose the matrices to prepare them for the shader.
-	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
 
 	// Lock the matrix constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -361,10 +356,10 @@ Result FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXM
 	// Get a pointer to the data in the matrix constant buffer.
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	// Copy the matrices into the matrix constant buffer.
-	dataPtr->world = worldMatrix;
-	dataPtr->view = viewMatrix;
-	dataPtr->projection = projectionMatrix;
+	// Transpose and copy the matrices into the matrix constant buffer.
+	XMStoreFloat4x4(&dataPtr->world, XMMatrixTranspose(worldMatrix));
+	XMStoreFloat4x4(&dataPtr->view, XMMatrixTranspose(viewMatrix));
+	XMStoreFloat4x4(&dataPtr->projection, XMMatrixTranspose(projectionMatrix));
 
 	// Unlock the buffer.
     deviceContext->Unmap(m_matrixBuffer, 0);

@@ -203,18 +203,11 @@
     <ClCompile Include="CSQuartersTile.cpp" />
     <ClCompile Include="CubeMapTexture.cpp" />
     <ClCompile Include="D3DMain.cpp" />
-    <ClCompile Include="D3DUtility.cpp" />
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataOutput.cpp" />
     <ClCompile Include="DebugCommandHandler.cpp" />
     <ClCompile Include="DustParticle.cpp" />
     <ClCompile Include="DXLocaliser.cpp" />
-    <ClCompile Include="DXText.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -394,7 +387,6 @@
     <ClInclude Include="CSQuartersTileDefinition.h" />
     <ClInclude Include="CubeMapTexture.h" />
     <ClInclude Include="D3DMain.h" />
-    <CustomBuild Include="D3DUtility.h" />
     <ClInclude Include="Damage.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataOutput.h" />
@@ -403,12 +395,6 @@
     <ClInclude Include="DX11_Compatibility.h" />
     <ClInclude Include="DX11_Core.h" />
     <ClInclude Include="DXLocaliser.h" />
-    <CustomBuild Include="DXText.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </CustomBuild>
     <ClInclude Include="EffectBase.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="ElementConnection.h" />
@@ -430,7 +416,6 @@
     <ClInclude Include="GameConsole.h" />
     <ClInclude Include="GameConsoleCommand.h" />
     <ClInclude Include="GameDataExtern.h" />
-    <ClInclude Include="Gamedefs.h" />
     <ClInclude Include="GameInput.h" />
     <ClInclude Include="GameInputSystem.h" />
     <ClInclude Include="GamePhysicsEngine.h" />

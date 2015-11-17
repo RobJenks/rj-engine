@@ -5,6 +5,7 @@
 
 #include "texture.h"
 
+// This class has no special alignment requirements
 class CubeMapTexture :
 	public Texture
 {

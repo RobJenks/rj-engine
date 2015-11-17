@@ -17,7 +17,10 @@ class iObject;
 	The 8 vertices can be determined from these values when required
 */
 
-class OrientedBoundingBox
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class OrientedBoundingBox : public ALIGN16<OrientedBoundingBox>
 {
 
 public:
@@ -31,11 +34,15 @@ public:
 	};
 
 	// Struct containing the core OBB data, which can be reused in 'lighter' OBB implementations if required
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
 	struct CoreOBBData
 	{
-		D3DXVECTOR3				Centre;				// Centre point of the OBB
-		D3DXVECTOR3				Axis[3];			// The orthonormal unit vectors defining this OBB's coordinate basis
-		D3DXVECTOR3				Extent;				// The half-extent of this OBB in each of its three dimensions (i.e. from centre to edge)
+		AXMVECTOR				Centre;				// Centre point of the OBB
+		AXMVECTOR_P				Axis[3];			// The orthonormal unit vectors defining this OBB's coordinate basis
+		AXMVECTOR_P				Extent[3];			// The half-extent of this OBB in each of its three dimensions (i.e. from centre to edge), 
+													// replicated in each vector. i.e. Extent[0] = { HalfExtent.x, HalfExtent.x, HalfExtent.x, HalfExtent.x }
+		XMFLOAT3				ExtentF;			// Float representation of object extents, for easier access to opaque XMVECTOR Extent[3]
 	};
 
 	
@@ -43,7 +50,7 @@ public:
 
 	iObject *					Parent;				// The parent object that this OBB relates to 
 	
-	D3DXMATRIX					Offset;				// The offset of this OBB from its parent object, if applicable.  Offsets are always relative to the object 
+	AXMMATRIX					Offset;				// The offset of this OBB from its parent object, if applicable.  Offsets are always relative to the object 
 													// position, rather than that of any OBB above it in the hierarchy
 
 	OrientedBoundingBox *		Children;			// Array of child OBBs below this one, for hierarchical collision detection
@@ -71,14 +78,14 @@ public:
 	CMPINLINE void				RemoveInvalidation(void) { ClearBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	
 	// Intermediate calculations; basis axes * extent along each of those axes
-	D3DXVECTOR3					ExtentAlongAxis[3];
+	AXMVECTOR_P					ExtentAlongAxis[3];
 
 
 	// Constructors to create a new OBB object
 	OrientedBoundingBox(void);
 	OrientedBoundingBox(iObject *parent);
-	OrientedBoundingBox(iObject *parent, const D3DXVECTOR3 & size);
-	OrientedBoundingBox(iObject *parent, const D3DXVECTOR3 & centre, const D3DXVECTOR3 & size);
+	OrientedBoundingBox(iObject *parent, const FXMVECTOR size);
+	OrientedBoundingBox(iObject *parent, const FXMVECTOR centre, const FXMVECTOR size);
 
 	// Inline flags to return properties of the OBB
 	CMPINLINE bool				IsRoot(void) const						{ return (Parent != NULL); }
@@ -91,21 +98,24 @@ public:
 	void						DeallocateChildren(void);
 
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from the given extent values
-	CMPINLINE void				UpdateExtent(const D3DXVECTOR3 & extent)
+	CMPINLINE void				UpdateExtent(const FXMVECTOR extent)
 	{
-		Data.Extent = extent;
+		XMStoreFloat3(&Data.ExtentF, extent);
+
+		Data.Extent[0].value = XMVectorReplicate(Data.ExtentF.x);
+		Data.Extent[1].value = XMVectorReplicate(Data.ExtentF.y);
+		Data.Extent[2].value = XMVectorReplicate(Data.ExtentF.z);
 		RecalculateData();
 	}
 
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
-	CMPINLINE void				UpdateExtentFromSize(const D3DXVECTOR3 & size)
+	CMPINLINE void				UpdateExtentFromSize(const FXMVECTOR size)
 	{
-		Data.Extent = (size * 0.5f);
-		RecalculateData();
+		UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
 	}
 
 	// Updates the matrix to offset this OBB from its parent
-	CMPINLINE void				UpdateOffset(const D3DXMATRIX & offset)
+	CMPINLINE void				UpdateOffset(const FXMMATRIX offset)
 	{
 		Offset = offset;
 		SetOffsetFlag(true);
@@ -126,16 +136,16 @@ public:
 	CMPINLINE void				RecalculateData(void)
 	{
 		// Store intermediate calculations of basis axes * extent along those axes
-		ExtentAlongAxis[0] = Data.Extent[0] * Data.Axis[0];
-		ExtentAlongAxis[1] = Data.Extent[1] * Data.Axis[1];
-		ExtentAlongAxis[2] = Data.Extent[2] * Data.Axis[2];
+		ExtentAlongAxis[0].value = XMVectorMultiply(Data.Extent[0].value, Data.Axis[0].value);
+		ExtentAlongAxis[1].value = XMVectorMultiply(Data.Extent[1].value, Data.Axis[1].value);
+		ExtentAlongAxis[2].value = XMVectorMultiply(Data.Extent[2].value, Data.Axis[2].value);
 	}
 
 	// Method to determine the vertices of this bounding box in world space
-	void						DetermineVertices(D3DXVECTOR3 (&pOutVertices)[8]) const;
+	void						DetermineVertices(AXMVECTOR_P (&pOutVertices)[8]) const;
 
 	// Generates a world matrix that will transform to the position & orientation of this OBB
-	void						GenerateWorldMatrix(D3DXMATRIX *pOutMatrix) const;
+	void						GenerateWorldMatrix(XMMATRIX & outMatrix) const;
 
 	// Clear all data for this OBB, and deallocate any children in the tree below us
 	void						Clear(void);
@@ -153,6 +163,8 @@ public:
 	// Default destructor; deallocates memory assigned to any child OBBs below this one
 	~OrientedBoundingBox(void);
 
+	// Static array of vectors used to store negative axis extents, to reduce allocations required at runtime
+	static AXMVECTOR_P			NegAxisExtent[3];
 
 };
 

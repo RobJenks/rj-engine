@@ -58,7 +58,7 @@ void LightHighlightFadeShader::Shutdown()
 }
 
 Result LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
-										D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+										const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
 
@@ -77,7 +77,7 @@ Result LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT
 }
 
 // Sets the parameters specific to the light shader, i.e. light type / direction / colour
-Result LightHighlightFadeShader::SetLightParameters(D3DXVECTOR3 lightDirection, D3DXVECTOR4 ambientColor, D3DXVECTOR4 diffuseColor)
+Result LightHighlightFadeShader::SetLightParameters(XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
 {
 	// Store the new light/alpha parameters; these will take effect in the next call to SetShaderParameters (each frame)
 	m_lightdirection = lightDirection;
@@ -328,7 +328,7 @@ void LightHighlightFadeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage
 }
 
 
-Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix,
+Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix,
 													 ID3D11ShaderResourceView *texture)
 {
 	HRESULT result;
@@ -336,10 +336,6 @@ Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *device
 	unsigned int bufferNumber;
 	MatrixBufferType* dataPtr;
 	LightHighlightFadeBufferType* dataPtr2;
-
-	// Transpose the matrices to prepare them for the shader
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
 
 	// Lock the constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -351,9 +347,9 @@ Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *device
 	// Get a pointer to the data in the constant buffer.
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	// Copy the matrices into the constant buffer.
-	dataPtr->view = viewMatrix;
-	dataPtr->projection = projectionMatrix;
+	// Transpose and copy the matrices into the matrix constant buffer
+	XMStoreFloat4x4(&dataPtr->view, XMMatrixTranspose(viewMatrix));
+	XMStoreFloat4x4(&dataPtr->projection, XMMatrixTranspose(projectionMatrix));
 
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_matrixBuffer, 0);

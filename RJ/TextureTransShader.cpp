@@ -22,8 +22,8 @@ void TextureTransShader::Shutdown(void)
 }
 
 
-Result TextureTransShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, 
-								D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
+Result TextureTransShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, 
+								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								float transX, float transY)
 {
 	// Set the shader parameters that the shader will use for rendering.
@@ -274,8 +274,8 @@ void TextureTransShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 	errorMessage = 0;
 }
 
-Result TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-											   D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
+Result TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+											   const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 											   float transX, float transY)
 {
 	HRESULT result;
@@ -283,12 +283,6 @@ Result TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	MatrixBufferType* dataPtr;
 	unsigned int bufferNumber;
 	TranslateBufferType* dataPtr2;
-
-
-	// Transpose the matrices to prepare them for the shader.
-	D3DXMatrixTranspose(&worldMatrix, &worldMatrix);
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
 
 	// Lock the matrix constant buffer so it can be written to.
 	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -300,10 +294,10 @@ Result TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContex
 	// Get a pointer to the data in the matrix constant buffer.
 	dataPtr = (MatrixBufferType*)mappedResource.pData;
 
-	// Copy the matrices into the matrix constant buffer.
-	dataPtr->world = worldMatrix;
-	dataPtr->view = viewMatrix;
-	dataPtr->projection = projectionMatrix;
+	// Transpose and copy the matrices into the matrix constant buffer.
+	XMStoreFloat4x4(&dataPtr->world, XMMatrixTranspose(worldMatrix));
+	XMStoreFloat4x4(&dataPtr->view, XMMatrixTranspose(viewMatrix));
+	XMStoreFloat4x4(&dataPtr->projection, XMMatrixTranspose(projectionMatrix));
 
 	// Unlock the buffer.
     deviceContext->Unmap(m_matrixBuffer, 0);

@@ -15,6 +15,8 @@ class SpaceProjectile;
 class SpaceTurret;
 class TurretController;
 
+
+// This class has no special alignment requirements
 class RJMain
 {
 

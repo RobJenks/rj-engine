@@ -11,30 +11,30 @@
 #include "iShader.h"
 using namespace std;
 
-
+// This class has no special alignment requirements
 class FireShader 
 {
 private:
 	struct MatrixBufferType
 	{
-		D3DXMATRIX world;
-		D3DXMATRIX view;
-		D3DXMATRIX projection;
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 projection;
 	};
 
 	struct NoiseBufferType
 	{
 		float frameTime;
-		D3DXVECTOR3 scrollSpeeds;
-		D3DXVECTOR3 scales;
+		XMFLOAT3 scrollSpeeds;
+		XMFLOAT3 scales;
 		float padding;
 	};
 
 	struct DistortionBufferType
 	{
-		D3DXVECTOR2 distortion1;
-		D3DXVECTOR2 distortion2;
-		D3DXVECTOR2 distortion3;
+		XMFLOAT2 distortion1;
+		XMFLOAT2 distortion2;
+		XMFLOAT2 distortion3;
 		float distortionScale;
 		float distortionBias;
 	};
@@ -46,22 +46,22 @@ public:
 
 	Result Initialise(ID3D11Device* device, HWND hwnd);
 	void Shutdown();
-	Result Render(ID3D11DeviceContext* deviceContext, int indexCount, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix, 
-							 D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+	Result Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
-							 D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, D3DXVECTOR2 distortion2,
-							 D3DXVECTOR2 distortion3, float distortionScale, float distortionBias);
+							 XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, XMFLOAT2 distortion2,
+							 XMFLOAT2 distortion3, float distortionScale, float distortionBias);
 
 private:
 	Result InitialiseShader(ID3D11Device*, HWND, const char*, const char*);
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, const char* shaderFilename);
 
-	Result SetShaderParameters(ID3D11DeviceContext* deviceContext, D3DXMATRIX worldMatrix, D3DXMATRIX viewMatrix,
-										  D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
+	Result SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
+										  const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 										  ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, 
-										  float frameTime, D3DXVECTOR3 scrollSpeeds, D3DXVECTOR3 scales, D3DXVECTOR2 distortion1, 
-										  D3DXVECTOR2 distortion2, D3DXVECTOR2 distortion3, float distortionScale, 
+										  float frameTime, XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, 
+										  XMFLOAT2 distortion2, XMFLOAT2 distortion3, float distortionScale, 
 										  float distortionBias);
 
 	void RenderShader(ID3D11DeviceContext*, int);

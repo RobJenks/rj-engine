@@ -8,6 +8,8 @@
 #include "Octree.h"
 #include "OctreePruner.h"
 
+
+// This file contains no declarations with special alignment requirements
 namespace Game {
 
 	// Data structures used to maintain object / positioning data 

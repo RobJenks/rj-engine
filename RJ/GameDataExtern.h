@@ -29,6 +29,8 @@ class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
 
+
+// This file contains no objects with special alignment requirements
 namespace D {
 
 	#ifndef __GameDataExtern_Types_H__

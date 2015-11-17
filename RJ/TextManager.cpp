@@ -4,8 +4,8 @@
 #include "TextManager.h"
 
 
-Result TextManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight, 
-						   D3DXMATRIX baseViewMatrix, FontShader *fontshader)
+Result TextManager::Initialize(	ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight, 
+								const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
 	// Store pointers to the D3D device and device context
 	m_device = device;
@@ -101,7 +101,7 @@ void TextManager::Shutdown()
 }
 
 
-Result TextManager::Render(D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix)
+Result TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	Result result, overallresult;
 	SentenceType *sentence;
@@ -241,7 +241,7 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 
 
 Result TextManager::UpdateSentence(SentenceType* sentence, char* text, int positionX, int positionY, bool render, 
-								   D3DXVECTOR4 textcolour, float size)
+								   const XMFLOAT4 & textcolour, float size)
 {
 	// Make sure that we have been passed a valid sentence pointer
 	if (!sentence) return ErrorCodes::CannotPerformUpdateOnNullSentencePointer;
@@ -350,10 +350,9 @@ void TextManager::ReleaseSentence(SentenceType** sentence)
 }
 
 
-Result TextManager::RenderSentence(SentenceType* sentence, D3DXMATRIX worldMatrix, D3DXMATRIX orthoMatrix)
+Result TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	unsigned int stride, offset;
-	D3DXVECTOR4 pixelColor;
 
 	// Set vertex buffer stride and offset.
     stride = sizeof(VertexType); 

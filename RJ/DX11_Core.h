@@ -44,6 +44,9 @@ typedef __declspec(align(16))XMMATRIX AXMMATRIX;	// 16-bit aligned matrix class
 // Custom vector type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
 typedef __declspec(align(16)) struct { AXMVECTOR value; } AXMVECTOR_P;
 
+// Custom matrix type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
+typedef __declspec(align(16)) struct { AXMMATRIX value; } AXMMATRIX_P;
+
 // Re-enable compiler warnings for macro redefinition, once all DX headers have been processed
 #pragma warning( default : 4005 )
 

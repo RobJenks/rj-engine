@@ -8,6 +8,7 @@ using namespace std;
 
 class Hardpoint;
 
+// This class has no special alignment requirements
 class Hp
 {
 public:

@@ -9,13 +9,15 @@
 #include "DX11_Core.h"
 #include "GameDataExtern.h"
 
+
+// This class has no special alignment requirements
 class iShader
 {
 public:
 
 	// Renders the shader.
 	virtual Result Render(	ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
-							D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)		= 0;
+							const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)		= 0;
 
 
 	// Static method; returns a full filename for the specified shader file

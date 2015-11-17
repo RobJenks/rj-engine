@@ -95,7 +95,7 @@ bool CameraPath::Advance(float timefactor)
 	if ( (!m_reversepath && m_index <= 0) || (m_reversepath && m_index >= (m_nodecount-1)) ) return false;
 
 	// Target position & orientation will always be those held in node[index].  Transform from object to world space if required
-	D3DXVECTOR3 targetpos; D3DXQUATERNION targetorient; 
+	XMVECTOR targetpos, targetorient; 
 	if (m_nodes[m_index].Object == NULL)
 	{
 		targetpos = m_nodes[m_index].Position;
@@ -103,8 +103,8 @@ bool CameraPath::Advance(float timefactor)
 	}
 	else
 	{
-		D3DXVec3TransformCoord(&targetpos, &(m_nodes[m_index].Position), m_nodes[m_index].Object->GetWorldMatrix());
-		targetorient = (m_nodes[m_index].Object->GetOrientation() * m_nodes[m_index].Orientation);
+		targetpos = XMVector3TransformCoord(m_nodes[m_index].Position, m_nodes[m_index].Object->GetWorldMatrix());
+		targetorient = XMQuaternionMultiply(m_nodes[m_index].Object->GetOrientation(), m_nodes[m_index].Orientation);
 	}
 
 	// Determine which node we are interpolating from, towards node[index]
@@ -121,7 +121,7 @@ bool CameraPath::Advance(float timefactor)
 	}
 
 	// Now get the source position & orientation, again transforming from local space if required
-	D3DXVECTOR3 sourcepos; D3DXQUATERNION sourceorient; 
+	XMVECTOR sourcepos, sourceorient; 
 	if (m_nodes[previndex].Object == NULL)
 	{
 		sourcepos = m_nodes[previndex].Position;
@@ -129,27 +129,27 @@ bool CameraPath::Advance(float timefactor)
 	}
 	else
 	{
-		D3DXVec3TransformCoord(&sourcepos, &(m_nodes[previndex].Position), m_nodes[previndex].Object->GetWorldMatrix());
-		sourceorient = (m_nodes[previndex].Object->GetOrientation() * m_nodes[previndex].Orientation);
+		sourcepos = XMVector3TransformCoord(m_nodes[previndex].Position, m_nodes[previndex].Object->GetWorldMatrix());
+		sourceorient = XMQuaternionMultiply(m_nodes[previndex].Object->GetOrientation(), m_nodes[previndex].Orientation);
 	}
 
 	// We can now interpolate between the two relevant path nodes to get the current camera state
-	m_camerapos = sourcepos + (pc * (targetpos - sourcepos));
-	D3DXQuaternionSlerp(&m_cameraorient, &(sourceorient), &(targetorient), pc);
+	m_camerapos = XMVectorLerp(sourcepos, targetpos, pc);
+	m_cameraorient = XMQuaternionSlerp(sourceorient, targetorient, pc);
 	
 	// Return false to indicate that the path is still running
 	return false;
 }
 
 // Adds a node to the end of the path.  Overloaded method that creates an absolute position/orient node
-void CameraPath::AddNode(const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation, float time)
+void CameraPath::AddNode(const FXMVECTOR position, const FXMVECTOR orientation, float time)
 {
 	// Call the overloaded function with no relative-position object
 	AddNode(position, orientation, NULL, time);
 }
 
 // Adds a node to the end of the path.  Adds a node that is positioned/oriented relative to the specified object
-void CameraPath::AddNode(const D3DXVECTOR3 & relativeposition, const D3DXQUATERNION & relativeorientation, iSpaceObject *object, float time)
+void CameraPath::AddNode(const FXMVECTOR relativeposition, const FXMVECTOR relativeorientation, iSpaceObject *object, float time)
 {
 	// Make sure the time values are progressing sequentially; disallow a node that would go back in time
 	if (m_nodecount > 0)

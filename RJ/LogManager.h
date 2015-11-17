@@ -17,6 +17,8 @@
 // begins, since the internal clocks will not be running until that point
 #define LOG_INIT_START "[" << (unsigned int)timeGetTime() << "] "
 
+
+// This class has no special alignment requirements
 class LogManager : public ScheduledObject
 {
 public:

@@ -11,6 +11,8 @@ class EffectBase;
 class FireEffect;
 class FireShader;
 
+
+// This class has no special alignment requirements
 class EffectManager
 {
 public:
@@ -33,9 +35,9 @@ public:
 	void					AddFireEffectType(FireEffect *e);
 	CMPINLINE FireEffect*	GetFireEffectType(int effectIndex) { return m_fireeffects.at(effectIndex); }
 	Result					RenderFireEffect(FireEffect *e, ID3D11DeviceContext* deviceContext, 
-											 D3DXMATRIX world, D3DXMATRIX view, D3DXMATRIX projection);
+											 FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection);
 	CMPINLINE Result		RenderFireEffect(int effectindex, ID3D11DeviceContext* deviceContext, 
-											 D3DXMATRIX world, D3DXMATRIX view, D3DXMATRIX projection)
+											 FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection)
 											{ return RenderFireEffect(m_fireeffects.at(effectindex), deviceContext, world, view, projection); }
 
 

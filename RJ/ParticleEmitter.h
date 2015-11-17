@@ -11,7 +11,9 @@
 #include "ErrorCodes.h"
 #include "Texture.h"
 
-class ParticleEmitter
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ParticleEmitter : public ALIGN16<ParticleEmitter>
 {
 public:
 	enum Prop { MinValue = 0, MaxValue = 1 };						// Index into particle properties when setting min or max values
@@ -23,7 +25,7 @@ public:
 		//				Colour				// Is not specified here, since included within the vertex definition
 		bool			Active;				// Is the particle currently active?
 		float			Life;				// Remaining particle lifetime (secs)
-		D3DXVECTOR3		Velocity;			// Velocity of the particle
+		XMFLOAT3		Velocity;			// Velocity of the particle
 		float			Size;				// Size of the particle
 	};
 
@@ -33,23 +35,23 @@ public:
 	// Definition of a particle vertex; position & colour are located here and so not also in the Particle def to avoid duplication
 	struct ParticleVertex
 	{
-		D3DXVECTOR3 position;
-		D3DXVECTOR2 texture;
-		D3DXVECTOR4 colour;
+		XMFLOAT3 position;
+		XMFLOAT2 texture;
+		XMFLOAT4 colour;
 	};
 
 	// Static collection of possible texture coordinate orientations.  Ordered clockwise from bottom-left vertex
-	static const D3DXVECTOR2	TexCoord[4][4];
+	static const XMFLOAT2	TexCoord[4][4];
 
 	// Initialisation function
 	Result						Initialise(ID3D11Device *device);
 
 	// Methods for adding and per-frame updating of particles
 	void						AddParticle(int id);
-	void						UpdateParticles(const D3DXVECTOR3 *rightbasisvector, const D3DXVECTOR3 *upbasisvector);
+	void						UpdateParticles(const XMFLOAT3 & rightbasisvector, const XMFLOAT3 & upbasisvector);
 
 	// Rendering method
-	void						Render(ID3D11DeviceContext *devicecontext, const D3DXVECTOR3 *vright, const D3DXVECTOR3 *vup);
+	void						Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup);
 
 	// Shutdown functions
 	void						Shutdown(void);
@@ -62,42 +64,42 @@ public:
 	CMPINLINE void				SetCode(string code) { m_code = code; }
 
 	// Accessor functions for emitter location properties
-	CMPINLINE D3DXVECTOR3		*GetPosition(void) { return &m_position; }
-	CMPINLINE D3DXQUATERNION	*GetOrientation(void) { return &m_orientation; }
-	CMPINLINE D3DXMATRIX		*GetEmitterWorldMatrix(void) { return &m_worldmatrix; }
+	CMPINLINE XMVECTOR			GetPosition(void) const { return m_position; }
+	CMPINLINE XMVECTOR			GetOrientation(void) const { return m_orientation; }
+	CMPINLINE XMMATRIX			GetEmitterWorldMatrix(void) const { return m_worldmatrix; }
 	
 	// Returns the inverse world matrix for this emitter.  Note: this is calculated when called
-	CMPINLINE D3DXMATRIX		*GetEmitterInverseWorldMatrix(void) 
+	CMPINLINE XMMATRIX GetEmitterInverseWorldMatrix(void)
 	{ 
-		D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
-		return &m_inverseworld; 
+		m_inverseworld = XMMatrixInverse(NULL, m_worldmatrix);
+		return m_inverseworld; 
 	}
 
 	// Methods to set pos/orient of the emitter; also recalculate the world matrix upon update
-	CMPINLINE void				SetPosition(const D3DXVECTOR3 *pos)				{ m_position = *pos;		RecalculateWorldMatrix(); }
-	CMPINLINE void				SetOrientation(const D3DXQUATERNION *orient)	{ m_orientation = *orient;	RecalculateWorldMatrix(); }
-	CMPINLINE void				SetPositionAndOrientation(const D3DXVECTOR3 *pos, const D3DXQUATERNION *orient)
-									{ m_position = *pos; m_orientation = *orient; RecalculateWorldMatrix(); }
+	CMPINLINE void				SetPosition(const FXMVECTOR pos)				{ m_position = pos;			RecalculateWorldMatrix(); }
+	CMPINLINE void				SetOrientation(const FXMVECTOR orient)			{ m_orientation = orient;	RecalculateWorldMatrix(); }
+	CMPINLINE void				SetPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
+																{ m_position = pos; m_orientation = orient; RecalculateWorldMatrix(); }
 
 	// Methods to set the position & orientation, specifically WITHOUT also recalculating the world matrix.  Useful where
 	// we are recalculating elsewhere, or even calculating first and then decomposing to get pos & orient (e.g. in iSpaceObject)
-	CMPINLINE void				SetPositionNoRecalc(const D3DXVECTOR3 pos)				{ m_position = pos; }
-	CMPINLINE void				SetOrientationNoRecalc(const D3DXQUATERNION orient)		
+	CMPINLINE void				SetPositionNoRecalc(const FXMVECTOR pos)				{ m_position = pos; }
+	CMPINLINE void				SetOrientationNoRecalc(const FXMVECTOR orient)		
 	{ 
 		// Store the new orientation value
 		m_orientation = orient; 
 
 		// Also recalculate the orientation matrix
-		D3DXMatrixRotationQuaternion(&m_orientmatrix, &orient);
+		m_orientmatrix = XMMatrixRotationQuaternion(m_orientation);
 	}
 
 	// We also allow setting of the world matrix directly, if it has been calculated elsewhere.  Note this could leave it
 	// out of sync with the pos/orient unless these are also updated
-	CMPINLINE void				SetEmitterWorldMatrix(const D3DXMATRIX world)			{ m_worldmatrix = world; }
+	CMPINLINE void				SetEmitterWorldMatrix(const FXMMATRIX world)			{ m_worldmatrix = world; }
 
 
 	// Set the position, orientation and world matrix directly.  Used for efficiency when a parent object has already done these calculations
-	CMPINLINE void SetPositionOrientAndWorldNoRecalc(const D3DXVECTOR3 & pos, const D3DXQUATERNION & orient, const D3DXMATRIX & world)
+	CMPINLINE void SetPositionOrientAndWorldNoRecalc(const FXMVECTOR pos, const FXMVECTOR orient, const CXMMATRIX world)
 	{
 		// Set the parameters directly
 		m_position = pos;
@@ -105,7 +107,7 @@ public:
 		m_worldmatrix = world;
 
 		// Also calculate the orientation matrix, used for orienting particles in space
-		D3DXMatrixRotationQuaternion(&m_orientmatrix, &m_orientation);
+		m_orientmatrix = XMMatrixRotationQuaternion(m_orientation);
 	}
 
 
@@ -130,24 +132,24 @@ public:
 	CMPINLINE void				SetParticleEmissionFrequency(Prop prop, float freq) { m_emissionfreq[(int)prop] = freq; }
 
 	// Methods to set and get initial particle properties
-	CMPINLINE D3DXVECTOR3		GetInitialParticleLocation(Prop prop) { return m_initialposition[(int)prop]; }
-	CMPINLINE void				SetInitialParticleLocation(Prop prop, D3DXVECTOR3 pos) { m_initialposition[(int)prop] = pos; }
+	CMPINLINE XMFLOAT3			GetInitialParticleLocation(Prop prop) { return m_initialposition[(int)prop]; }
+	CMPINLINE void				SetInitialParticleLocation(Prop prop, XMFLOAT3 & pos) { m_initialposition[(int)prop] = pos; }
 	CMPINLINE float				GetInitialParticleLifetime(Prop prop) { return m_initiallifetime[(int)prop]; }
 	CMPINLINE void				SetInitialParticleLifetime(Prop prop, float life) { m_initiallifetime[(int)prop] = life; }
-	CMPINLINE D3DXVECTOR4		GetInitialParticleColour(Prop prop) { return m_initialcolour[(int)prop]; }
-	CMPINLINE void				SetInitialParticleColour(Prop prop, D3DXVECTOR4 col) { m_initialcolour[(int)prop] = col; }
+	CMPINLINE XMFLOAT4			GetInitialParticleColour(Prop prop) { return m_initialcolour[(int)prop]; }
+	CMPINLINE void				SetInitialParticleColour(Prop prop, XMFLOAT4 & col) { m_initialcolour[(int)prop] = col; }
 	CMPINLINE float				GetInitialParticleSize(Prop prop) { return m_initialsize[(int)prop]; }
 	CMPINLINE void				SetInitialParticleSize(Prop prop, float size) { m_initialsize[(int)prop] = size; }
-	CMPINLINE D3DXVECTOR3		GetInitialParticleVelocity(Prop prop) { return m_initialvelocity[(int)prop]; }
-	CMPINLINE void				SetInitialParticleVelocity(Prop prop, D3DXVECTOR3 vel) { m_initialvelocity[(int)prop] = vel; }
+	CMPINLINE XMFLOAT3			GetInitialParticleVelocity(Prop prop) { return m_initialvelocity[(int)prop]; }
+	CMPINLINE void				SetInitialParticleVelocity(Prop prop, XMFLOAT3 & vel) { m_initialvelocity[(int)prop] = vel; }
 
 	// Methods to set and get particle update properties
-	CMPINLINE D3DXVECTOR4		GetParticleColourUpdate(Prop prop) { return m_updatecolour[(int)prop]; }
-	CMPINLINE void				SetParticleColourUpdate(Prop prop, D3DXVECTOR4 col) { m_updatecolour[(int)prop] = col; m_updateflag_colour = true; }
+	CMPINLINE XMFLOAT4			GetParticleColourUpdate(Prop prop) { return m_updatecolour[(int)prop]; }
+	CMPINLINE void				SetParticleColourUpdate(Prop prop, XMFLOAT4 & col) { m_updatecolour[(int)prop] = col; m_updateflag_colour = true; }
 	CMPINLINE float				GetParticleSizeUpdate(Prop prop) { return m_updatesize[(int)prop]; }
 	CMPINLINE void				SetParticleSizeUpdate(Prop prop, float size) { m_updatesize[(int)prop] = size; m_updateflag_size = true; }
-	CMPINLINE D3DXVECTOR3		GetParticleVelocityUpdate(Prop prop) { return m_updatevelocity[(int)prop]; }
-	CMPINLINE void				SetParticleVelocityUpdate(Prop prop, D3DXVECTOR3 vel) { m_updatevelocity[(int)prop] = vel; m_updateflag_velocity = true; }
+	CMPINLINE XMFLOAT3			GetParticleVelocityUpdate(Prop prop) { return m_updatevelocity[(int)prop]; }
+	CMPINLINE void				SetParticleVelocityUpdate(Prop prop, XMFLOAT3 & vel) { m_updatevelocity[(int)prop] = vel; m_updateflag_velocity = true; }
 
 	ParticleEmitter(void);
 	~ParticleEmitter(void);
@@ -170,11 +172,11 @@ private:
 	// Emitter properties
 	string						m_code;								// String key of the unique emitter object
 	string						m_typecode;							// String key of the prototype, or the prototye this instance is based on
-	D3DXVECTOR3					m_position;							// Position of this emitter
-	D3DXQUATERNION				m_orientation;						// Orientation of this emitter
-	D3DXMATRIX					m_worldmatrix;						// World matrix for this emitter calculated from pos+orient whenever changed
-	D3DXMATRIX					m_inverseworld;						// Inverse world matrix for the emitter, precalculated for rendering efficiency
-	D3DXMATRIX					m_orientmatrix;						// Rotation component only of the world matrix
+	AXMVECTOR					m_position;							// Position of this emitter
+	AXMVECTOR					m_orientation;						// Orientation of this emitter
+	AXMMATRIX					m_worldmatrix;						// World matrix for this emitter calculated from pos+orient whenever changed
+	AXMMATRIX					m_inverseworld;						// Inverse world matrix for the emitter, precalculated for rendering efficiency
+	AXMMATRIX					m_orientmatrix;						// Rotation component only of the world matrix
 
 	bool						m_emitting;							// Determines whether the emitter is currently active (i.e. emitting particles)
 	bool						m_exists;							// Determines whether the emitter even exists (i.e. whether to even render)
@@ -191,15 +193,15 @@ private:
 
 	// Initial properties; each are [2] for the min/max range in which the value can fall
 	float						m_initiallifetime[2];				// Initial lifetime for each particle (secs)
-	D3DXVECTOR3					m_initialposition[2];				// Particle starting position, as offset from emitter location
-	D3DXVECTOR4					m_initialcolour[2];					// Initial colour for each particle
+	XMFLOAT3					m_initialposition[2];				// Particle starting position, as offset from emitter location
+	XMFLOAT4					m_initialcolour[2];					// Initial colour for each particle
 	float						m_initialsize[2];					// Initial size of each particle
-	D3DXVECTOR3					m_initialvelocity[2];				// Initial velocity of each particle
+	XMFLOAT3					m_initialvelocity[2];				// Initial velocity of each particle
 
 	// Update properties for per-frame updates; each are again [2] to allow specification of min/max
-	D3DXVECTOR4					m_updatecolour[2];					// Change to particle colour (/sec)
+	XMFLOAT4					m_updatecolour[2];					// Change to particle colour (/sec)
 	float						m_updatesize[2];					// Change to particle size (/sec)
-	D3DXVECTOR3					m_updatevelocity[2];				// Change to particle velocity (/sec)
+	XMFLOAT3					m_updatevelocity[2];				// Change to particle velocity (/sec)
 
 	// Flags that indicate whether each property needs to be updated per frame
 	bool						m_updateflag_colour;
@@ -210,16 +212,10 @@ private:
 	CMPINLINE void RecalculateWorldMatrix(void) 
 	{ 
 		// Set the world matrix to a rotation as specified by the orientation quaternion
-		D3DXMatrixRotationQuaternion(&m_orientmatrix, &m_orientation);
+		m_orientmatrix = XMMatrixRotationQuaternion(m_orientation);
 		
-		// Now set the translation components as per the emitter position
-		D3DXMATRIX trans;
-		D3DXMatrixTranslation(&trans, m_position.x, m_position.y, m_position.z);
-		D3DXMatrixMultiply(&m_worldmatrix, &m_orientmatrix, &trans);
-
-		// Finally also calculate the inverse world matrix for rendering efficiency (not any more; calculated 
-		// when accessed since this is never used during normal execution)
-		//D3DXMatrixInverse(&m_inverseworld, NULL, &m_worldmatrix);
+		// World matrix = rot * trans
+		m_worldmatrix = XMMatrixMultiply(m_orientmatrix, XMMatrixTranslationFromVector(m_position));
 	}
 
 };

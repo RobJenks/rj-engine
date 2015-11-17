@@ -53,7 +53,7 @@ bool IO::Data::SaveObjectData(TiXmlElement *node, iObject *object)
 	IO::Data::LinkStringXMLElement("Code", object->GetCode(), node);
 	IO::Data::LinkStringXMLElement("Name", object->GetName(), node);
 	IO::Data::LinkBoolXMLElement("StandardObject", object->IsStandardObject(), node);
-	IO::Data::LinkVectorAttrXMLElement("Position", object->GetPosition(), node);
+	IO::Data::LinkVector3AttrXMLElement("Position", object->GetPosition(), node);
 	IO::Data::LinkQuaternionAttrXMLElement("Orientation", object->GetOrientation(), node);
 	if (object->GetModel()) IO::Data::LinkStringXMLElement("Model", object->GetModel()->GetCode(), node);
 	IO::Data::LinkBoolXMLElement("Visible", object->IsVisible(), node);
@@ -120,7 +120,7 @@ bool IO::Data::SaveSpaceObjectEnvironmentData(TiXmlElement *node, iSpaceObjectEn
 
 	// Save each key iContainsComplexShipElements field below the supplied node
 	INTVECTOR3 elsize = object->GetElementSize();
-	IO::Data::LinkIntVectorAttrXMLElement("ElementSize", elsize, node);
+	IO::Data::LinkIntVector3AttrXMLElement("ElementSize", elsize, node);
 
 	// Add an entry for each complex ship element
 	for (int x = 0; x < elsize.x; ++x)
@@ -144,7 +144,7 @@ bool IO::Data::SaveShipData(TiXmlElement *node, Ship *object)
 	IO::Data::LinkFloatXMLElement("TurnAngle", object->TurnAngle.BaseValue, node);
 	IO::Data::LinkFloatXMLElement("TurnRate", object->TurnRate.BaseValue, node);
 	IO::Data::LinkFloatXMLElement("BankRate", object->BankRate.BaseValue, node);
-	IO::Data::LinkVectorAttrXMLElement("BankExtent", (object->BankExtent * _180BYPI), node);	// Convert radians>degrees
+	IO::Data::LinkVector3AttrXMLElement("BankExtent", (object->BankExtent * _180BYPI), node);	// Convert radians>degrees
 	IO::Data::LinkStringXMLElement("DefaultLoadout", object->GetDefaultLoadout(), node);
 	IO::Data::LinkStringXMLElement("VisibilityTestingMode", TranslateVisibilityModeToString(object->GetVisibilityTestingMode()), node);
 
@@ -168,8 +168,8 @@ Result IO::Data::SaveSimpleShip(TiXmlElement *parent, SimpleShip *object)
 	IO::Data::SaveShipData(node, object);
 
 	// Now save any data that is specific to this class
-	IO::Data::LinkVectorAttrXMLElement("CameraPosition", object->CameraPosition, node);
-	IO::Data::LinkVectorAttrXMLElement("CameraRotation", (object->CameraPosition * _180BYPI), node);	// Convert radians>degrees
+	IO::Data::LinkVector3AttrXMLElement("CameraPosition", object->CameraPosition, node);
+	IO::Data::LinkVector3AttrXMLElement("CameraRotation", (object->CameraPosition * _180BYPI), node);	// Convert radians>degrees
 	IO::Data::LinkFloatXMLElement("CameraElasticity", object->CameraElasticity, node);
 
 	// Save data on each hardpoint
@@ -233,7 +233,7 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 	}
 
 	// Now save any other data that is specific to this class
-	IO::Data::LinkIntVectorAttrXMLElement("SDOffset", object->GetSDOffset(), node);
+	IO::Data::LinkIntVector3AttrXMLElement("SDOffset", object->GetSDOffset(), node);
 
 	// We want to first link any include files to the parent node, so that dependent data is alwards loaded first
 	std::vector<TiXmlElement*>::const_iterator it_end = includefiles.end();
@@ -259,7 +259,7 @@ Result IO::Data::SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection
 	IO::Data::SaveSpaceObjectData(node, object);
 
 	// Now save fields specific to this class
-	IO::Data::LinkIntVectorAttrXMLElement("ElementLocation", object->GetElementLocation(), node);
+	IO::Data::LinkIntVector3AttrXMLElement("ElementLocation", object->GetElementLocation(), node);
 	//IO::Data::LinkIntVectorAttrXMLElement("ElementSize", object->GetElementSize(), node);
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)object->GetRotation(), node);
 	IO::Data::LinkFloatXMLElement("VelocityLimit", object->GetVelocityLimit(), node);
@@ -268,7 +268,7 @@ Result IO::Data::SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection
 	IO::Data::LinkFloatXMLElement("TurnAngle", object->GetTurnAngle(), node);
 	IO::Data::LinkFloatXMLElement("TurnRate", object->GetTurnRate(), node);
 	IO::Data::LinkFloatXMLElement("BankRate", object->GetBankRate(), node);
-	IO::Data::LinkVectorAttrXMLElement("BankExtent", (object->GetBankExtents() * _180BYPI), node);		// Convert radians to degrees
+	IO::Data::LinkVector3AttrXMLElement("BankExtent", (object->GetBankExtents() * _180BYPI), node);		// Convert radians to degrees
 	IO::Data::LinkStringXMLElement("PreviewImage", object->GetPreviewImage()->GetFilename(), node);
 
 	// Save each hardpoint in turn
@@ -294,8 +294,8 @@ Result IO::Data::SaveComplexShipSectionInstance(TiXmlElement *parent, ComplexShi
 
 	// Save the necessary data for this instance
 	IO::Data::LinkStringXMLElement("Code", object->GetCode(), node);
-	IO::Data::LinkVectorAttrXMLElement("Position", object->GetPosition(), node);
-	IO::Data::LinkIntVectorAttrXMLElement("ElementLocation", object->GetElementLocation(), node);
+	IO::Data::LinkVector3AttrXMLElement("Position", object->GetPosition(), node);
+	IO::Data::LinkIntVector3AttrXMLElement("ElementLocation", object->GetElementLocation(), node);
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)object->GetRotation(), node);
 
 	// Link to the parent node and return success
@@ -312,7 +312,7 @@ Result IO::Data::SaveComplexShipElement(TiXmlElement *parent, ComplexShipElement
 	if (!e->IsActive()) return ErrorCodes::NoError;
 
 	// Create a node for this element, with location specified in the attributes
-	TiXmlElement *node = IO::Data::NewIntVectorAttrXMLElement(D::NODE_ComplexShipElement, e->GetLocation());
+	TiXmlElement *node = IO::Data::NewIntVector3AttrXMLElement(D::NODE_ComplexShipElement, e->GetLocation());
 
 	// Create a node for any element properties that aren't set to their default values
 	TiXmlElement *nprop = NULL;
@@ -361,7 +361,7 @@ Result IO::Data::SaveHardpoint(TiXmlElement *parent, Hardpoint *object)
 	node->SetAttribute("Code", object->Code.c_str());
 
 	// Now add child nodes for other required parameters
-	IO::Data::LinkVectorAttrXMLElement("Position", object->Position, node);
+	IO::Data::LinkVector3AttrXMLElement("Position", object->Position, node);
 	IO::Data::LinkQuaternionAttrXMLElement("Orientation", object->Orientation, node);
 
 	// Link this ship section to the parent node and return success
@@ -386,19 +386,23 @@ Result IO::Data::SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb
 		if (obb->HasOffset())
 		{
 			// Decompose the OBB offset matrix
-			D3DXVECTOR3 scale, trans; D3DXQUATERNION rot;
-			D3DXMatrixDecompose(&scale, &rot, &trans, &(obb->Offset));
+			XMVECTOR scale, trans, rot;
+			XMMatrixDecompose(&scale, &rot, &trans, obb->Offset);
+			
+			// Store a local float representation
+			XMFLOAT3 pos; XMStoreFloat3(&pos, trans);
+			XMFLOAT4 orient; XMStoreFloat4(&orient, rot);
 
 			// Set position
-			node->SetDoubleAttribute("px", trans.x);
-			node->SetDoubleAttribute("py", trans.y);
-			node->SetDoubleAttribute("pz", trans.z);
+			node->SetDoubleAttribute("px", pos.x);
+			node->SetDoubleAttribute("py", pos.y);
+			node->SetDoubleAttribute("pz", pos.z);
 
 			// Set orientation
-			node->SetDoubleAttribute("ox", rot.x);
-			node->SetDoubleAttribute("oy", rot.y);
-			node->SetDoubleAttribute("oz", rot.z);
-			node->SetDoubleAttribute("ow", rot.w);
+			node->SetDoubleAttribute("ox", orient.x);
+			node->SetDoubleAttribute("oy", orient.y);
+			node->SetDoubleAttribute("oz", orient.z);
+			node->SetDoubleAttribute("ow", orient.w);
 		}
 		else
 		{
@@ -413,9 +417,9 @@ Result IO::Data::SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb
 		}
 
 		// Set extents
-		node->SetDoubleAttribute("ex", obb->Data.Extent.x);
-		node->SetDoubleAttribute("ey", obb->Data.Extent.y);
-		node->SetDoubleAttribute("ez", obb->Data.Extent.z);
+		node->SetDoubleAttribute("ex", obb->Data.ExtentF.x);
+		node->SetDoubleAttribute("ey", obb->Data.ExtentF.y);
+		node->SetDoubleAttribute("ez", obb->Data.ExtentF.z);
 	}
 
 	// Specify the number of child OBBs to be allocated below this one
@@ -446,17 +450,21 @@ Result IO::Data::SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain)
 	// If the terrain is tied to a definition then store the definition code here
 	if (terrain->GetDefinition()) node->SetAttribute("code", terrain->GetDefinition()->GetCode().c_str());
 
+	// Get local float representations so we can store per-component data
+	XMFLOAT3 centre; XMStoreFloat3(&centre, terrain->GetOBBData().Centre);
+	XMFLOAT4 orient; XMStoreFloat4(&orient, terrain->GetOrientation());
+
 	// Add other key parameters
-	node->SetDoubleAttribute("px", terrain->GetOBBData().Centre.x);
-	node->SetDoubleAttribute("py", terrain->GetOBBData().Centre.y);
-	node->SetDoubleAttribute("pz", terrain->GetOBBData().Centre.z);
-	node->SetDoubleAttribute("ox", terrain->GetOrientation().x);
-	node->SetDoubleAttribute("oy", terrain->GetOrientation().y);
-	node->SetDoubleAttribute("oz", terrain->GetOrientation().z);
-	node->SetDoubleAttribute("ow", terrain->GetOrientation().w);
-	node->SetDoubleAttribute("ex", terrain->GetOBBData().Extent.x);
-	node->SetDoubleAttribute("ey", terrain->GetOBBData().Extent.y);
-	node->SetDoubleAttribute("ez", terrain->GetOBBData().Extent.z);
+	node->SetDoubleAttribute("px", centre.x);
+	node->SetDoubleAttribute("py", centre.y);
+	node->SetDoubleAttribute("pz", centre.z);
+	node->SetDoubleAttribute("ox", orient.x);
+	node->SetDoubleAttribute("oy", orient.y);
+	node->SetDoubleAttribute("oz", orient.z);
+	node->SetDoubleAttribute("ow", orient.w);
+	node->SetDoubleAttribute("ex", terrain->GetOBBData().ExtentF.x);
+	node->SetDoubleAttribute("ey", terrain->GetOBBData().ExtentF.y);
+	node->SetDoubleAttribute("ez", terrain->GetOBBData().ExtentF.z);
 
 	// Link this new node to its parent and return success
 	parent->LinkEndChild(node);

@@ -3,7 +3,6 @@
 #include "math.h"
 #include "FastMath.h"
 #include "Utility.h"
-#include "D3DUtility.h"
 #include "iContainsHardpoints.h"
 #include "Engine.h"
 #include "SpaceEmitter.h"
@@ -15,8 +14,7 @@
 void HpEngine::RecalculateHardpointData()
 {
 	// We need to simply multiply a basis vector by our orientation to get the base thrust vector
-	XMVector3Rotate(&BaseThrustVector, &BASIS_VECTOR, &Orientation);
-	D3DXVec3Normalize(&BaseThrustVector, &BaseThrustVector);
+	BaseThrustVector = XMVector3Normalize(XMVector3Rotate(BASIS_VECTOR, Orientation));
 }
 
 // Virtual method to allow mounting of class-specific equipment by a call to the base class instance
@@ -97,8 +95,8 @@ HpEngine::HpEngine(const HpEngine &H) : Hardpoint(H)
 	m_equipment = NULL;
 	m_emitter = NULL;
 
-	this->BaseThrustVector = D3DXVECTOR3(H.BaseThrustVector);
-	this->CachedThrustVector = D3DXVECTOR3(H.Position);
+	this->BaseThrustVector = H.BaseThrustVector;
+	this->CachedThrustVector = H.Position;
 
 	// All copied engine hardpoints should begin inactive.  This must come last as it relies on e.g. the above base vectors
 	this->SetThrust(0.0f);
@@ -110,8 +108,8 @@ HpEngine &HpEngine::operator =(const HpEngine &H)
 {
 	Hardpoint::operator=(H);
 
-	this->BaseThrustVector = D3DXVECTOR3(H.BaseThrustVector);
-	this->CachedThrustVector = D3DXVECTOR3(H.Position);
+	this->BaseThrustVector = H.BaseThrustVector;
+	this->CachedThrustVector = H.Position;
 
 	// All copied engine hardpoints should begin inactive.  This must come last as it relies on e.g. the above base vectors
 	this->SetThrust(0.0f);
@@ -233,8 +231,8 @@ void HpEngine::UpdateEngineThrustEmitter(void)
 	p->SetEmitting(true);
 	p->SetParticleEmissionFrequency(ParticleEmitter::Prop::MinValue, m_emit_freqlow + (invpcsq * m_emit_freqlowrange));
 	p->SetParticleEmissionFrequency(ParticleEmitter::Prop::MaxValue, m_emit_freqhigh + (invpcsq * m_emit_freqhighrange));
-	p->SetInitialParticleVelocity(ParticleEmitter::Prop::MinValue, (thrustpc * m_emit_vellow));
-	p->SetInitialParticleVelocity(ParticleEmitter::Prop::MaxValue, (thrustpc * m_emit_velhigh));
+	p->SetInitialParticleVelocity(ParticleEmitter::Prop::MinValue, Float3MultiplyScalar(m_emit_vellow, thrustpc));
+	p->SetInitialParticleVelocity(ParticleEmitter::Prop::MaxValue, Float3MultiplyScalar(m_emit_velhigh, thrustpc));
 
 }
 

@@ -104,12 +104,12 @@ CoreEngine::CoreEngine(void)
 	m_instanceparams = NULL_VECTOR4;										// x component holds fade alpha
 
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
-	m_cache_zeropoint = m_cache_el_inc[0] = m_cache_el_inc[1] = m_cache_el_inc[2] = NULL_VECTOR;
+	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
 	
 	// Initialise the cached increment vectors, representing a +1 element movement in each dimension in turn
-	m_cache_el_inc_base[0] = XMVectorSet(Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f, 0.0f);
-	m_cache_el_inc_base[1] = XMVectorSet(0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
-	m_cache_el_inc_base[2] = XMVectorSet(0.0f, 0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f);
+	m_cache_el_inc_base[0].value = XMVectorSet(Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f, 0.0f);
+	m_cache_el_inc_base[1].value = XMVectorSet(0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f);
+	m_cache_el_inc_base[2].value = XMVectorSet(0.0f, 0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f);
 }
 
 
@@ -395,8 +395,6 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 Result CoreEngine::InitialiseCamera(void)
 {
-	D3DXVECTOR3 pos;
-
 	// Attempt to create a new camera instance
 	m_camera = new CameraClass();
 	if ( !m_camera ) return ErrorCodes::CannotCreateCameraComponent;
@@ -408,9 +406,8 @@ Result CoreEngine::InitialiseCamera(void)
 		return result;
 	}
 
-	// Use the camera rendering functions to generate a temporary view matrix for all 2D text rendering
-	pos = D3DXVECTOR3(0.0f, 0.0f, -1.0f);
-	m_camera->CalculateViewMatrixFromPositionData(&pos, &ID_QUATERNION, &ID_MATRIX);
+	// Use the camera rendering functions to generate a temporary view matrix for all 2D text rendering (from a position of [0,0,-1])
+	m_camera->CalculateViewMatrixFromPositionData(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), ID_QUATERNION, ID_MATRIX);
 	m_camera->GetViewMatrix(m_baseviewmatrix);
 
 	// Return success
@@ -577,12 +574,8 @@ Result CoreEngine::InitialiseFrustrum()
 	m_frustrum = new ViewFrustrum();
 	if (!m_frustrum) return ErrorCodes::CannotCreateViewFrustrum;
 	
-	// Get a reference to the projection matrix for the initialisation calculations
-	D3DXMATRIX proj;
-	m_D3D->GetProjectionMatrix(proj);
-
 	// Run the initialisation function with viewport/projection data that can be precaulcated
-	Result res = m_frustrum->Initialise(&proj, SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
+	Result res = m_frustrum->Initialise(m_D3D->GetProjectionMatrix(), SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
 	if (res != ErrorCodes::NoError) return res;	
 
 	// Return success if the frustrum was created
@@ -614,7 +607,6 @@ Result CoreEngine::InitialiseFontShader(void)
 Result CoreEngine::InitialiseTextRendering(void)
 {
 	Result result;
-	D3DXVECTOR3 pos;
 
 	// Create the text manager object
 	m_textmanager = new TextManager(m_dxlocaliser);
@@ -758,7 +750,7 @@ Result CoreEngine::InitialiseVolLineShader(void)
 	}
 
 	// Now attempt to initialise the shader
-	result = m_vollineshader->Initialise(m_D3D->GetDevice(), D3DXVECTOR2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
+	result = m_vollineshader->Initialise(m_D3D->GetDevice(), XMFLOAT2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
 										 m_frustrum->GetNearClipPlane(), m_frustrum->GetFarClipPlane());
 	if (result != ErrorCodes::NoError)
 	{
@@ -1114,11 +1106,17 @@ void CoreEngine::Render(void)
 	m_camera->GetInverseViewMatrix(r_invview);
 	m_D3D->GetOrthoMatrix(r_orthographic);
 
+	// Store local float representations of each key matrix for runtime efficiency
+	XMStoreFloat4x4(&r_view_f, r_view);
+	XMStoreFloat4x4(&r_invview_f, r_invview);
+	XMStoreFloat4x4(&r_projection_f, r_projection);
+	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
+
 	// Validate render cycle parameters before continuing with the render process
 	if (!r_devicecontext) return;
 
 	// Construct the view frustrum for this frame so we can perform culling calculations
-	m_frustrum->ConstructFrustrum(&r_view, &r_invview);
+	m_frustrum->ConstructFrustrum(r_view, r_invview);
 
 	/*** Perform rendering that is common to all player environment & states ***/
 
@@ -1356,8 +1354,9 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		m_instanceparams.x = object->Fade.GetFadeAlpha();
-		if (m_instanceparams.x < Game::C_EPSILON) return;
+		float alpha = object->Fade.GetFadeAlpha();
+		if (alpha < Game::C_EPSILON) return;
+		m_instanceparams = XMVectorReplicate(alpha);
 
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), object->GetWorldMatrix(), m_instanceparams, object->GetPosition());
 	}
@@ -1392,8 +1391,9 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		m_instanceparams.x = object->Fade.GetFadeAlpha();
-		if (m_instanceparams.x < Game::C_EPSILON) return;
+		float alpha = object->Fade.GetFadeAlpha();
+		if (alpha < Game::C_EPSILON) return;
+		m_instanceparams = XMVectorReplicate(alpha);
 
         // Submit each component for rendering in turn
 		ArticulatedModelComponent **component = model->GetComponents();
@@ -1549,11 +1549,13 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 	if (!environment) return;
 
 	// Precalculate the environment (0,0,0) point in world space, from which we can calculate element/tile/object positions.  
-	D3DXVec3TransformCoord(&m_cache_zeropoint, &NULL_VECTOR, environment->GetZeroPointWorldMatrix());
+	m_cache_zeropoint = XMVector3TransformCoord(NULL_VECTOR, environment->GetZeroPointWorldMatrix());
 
 	// Also calculate a set of effective 'basis' vectors, that indicate the change in world space 
 	// required to move in +x, +y and +z directions
-	D3DXVec3TransformCoordArray(m_cache_el_inc, sizeof(D3DXVECTOR3), m_cache_el_inc_base, sizeof(D3DXVECTOR3), environment->GetOrientationMatrix(), 3U);
+	m_cache_el_inc[0].value = XMVector3TransformCoord(m_cache_el_inc_base[0].value, environment->GetOrientationMatrix());
+	m_cache_el_inc[1].value = XMVector3TransformCoord(m_cache_el_inc_base[1].value, environment->GetOrientationMatrix());
+	m_cache_el_inc[2].value = XMVector3TransformCoord(m_cache_el_inc_base[2].value, environment->GetOrientationMatrix());
 	
 	// Clear the temporary vectors used to prevent potential multiple rendering of objects that span >1 element
 	m_tmp_renderedtiles.clear();
@@ -1574,20 +1576,23 @@ void CoreEngine::RenderObjectEnvironmentSector(iSpaceObjectEnvironment *environm
 	if (size.x <= 0 || size.y <= 0 || size.z <= 0) return;
 
 	// Determine the centre point of this element range.  Swap Y and Z coordinates since we are moving from environment to world space
-	D3DXVECTOR3 centre = m_cache_zeropoint + (((float)start.x + ((float)size.x * 0.5f)) * m_cache_el_inc[0]) +
-											 (((float)start.z + ((float)size.z * 0.5f)) * m_cache_el_inc[1]) +
-											 (((float)start.y + ((float)size.y * 0.5f)) * m_cache_el_inc[2]);
-
-	/*D3DXVECTOR3 centre = D3DXVECTOR3(	m_cache_zeropoint.x + (((float)start.x + ((float)size.x * 0.5f)) * m_cache_el_inc.x),
-										m_cache_zeropoint.y + (((float)start.z + ((float)size.z * 0.5f)) * m_cache_el_inc.y),
-										m_cache_zeropoint.z + (((float)start.y + ((float)size.y * 0.5f)) * m_cache_el_inc.z) );*/
+	//D3DXVECTOR3 centre = m_cache_zeropoint + (((float)start.x + ((float)size.x * 0.5f)) * m_cache_el_inc[0]) +
+	//										   (((float)start.z + ((float)size.z * 0.5f)) * m_cache_el_inc[1]) +
+	//										   (((float)start.y + ((float)size.y * 0.5f)) * m_cache_el_inc[2]);
+	XMVECTOR multiplier = XMVectorMultiplyAdd(VectorFromIntVector3SwizzleYZ(size), HALF_VECTOR, VectorFromIntVector3SwizzleYZ(start));	// Start+(Size*0.5)
+	XMFLOAT3 multiplier_f; XMStoreFloat3(&multiplier_f, multiplier);
+	XMVECTOR centre = XMVectorAdd(XMVectorAdd(XMVectorAdd(
+		m_cache_zeropoint,
+		XMVectorScale(m_cache_el_inc[0].value, multiplier_f.x)),
+		XMVectorScale(m_cache_el_inc[1].value, multiplier_f.y)),
+		XMVectorScale(m_cache_el_inc[2].value, multiplier_f.z));
 
 	// Determine the maximum dimension, and then perform a lookup of the bounding sphere radius that completely encloses it
 	float radius = GetElementBoundingSphereRadius(max(max(size.x, size.y), size.z));
 
 	// Test visibility of this element range via a simple bounding sphere test.  
 	// TOOD: Later, may be worth switching to bounding box test to more strictly exclude content (at the slight expense of test complexity)
-	if (m_frustrum->CheckSphere(&centre, radius) == false) return;
+	if (m_frustrum->CheckSphere(centre, radius) == false) return;
 
 	// This area is within the viewing frustum.  If the range is currently greater than 1x1x1 element then we want
 	// to subdivide and move recursively downwards
@@ -1717,10 +1722,9 @@ void CoreEngine::RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *
 					continue;
 
 			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-			D3DXMatrixMultiply(&m_tmp_matrix, terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
-
 			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(), &m_tmp_matrix);
+			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
+								XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
 			++m_renderinfo.TerrainRenderCount;
 		}
 	}
@@ -1733,13 +1737,8 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 	// Parameter check
 	if (!tile) return;
 
-	// Calculate the world matrix for this tile based on its parent and the tile offset matrix
-	D3DXMATRIX wm;
-	const D3DXMATRIX *mship = environment->GetZeroPointWorldMatrix();
-	const D3DXMATRIX *mtile = tile->GetWorldMatrix();
-
 	// Calculate the absolute world matrix for this tile as (WM = Child * Parent)
-	D3DXMatrixMultiply(&wm, mtile, mship); 
+	XMMATRIX world = XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
 
 	// We are rendering this object, so call its pre-render update method
 	tile->PerformRenderUpdate();
@@ -1753,33 +1752,34 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			if (tile->Fade.AlphaIsActive())
 			{
 				// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-				m_instanceparams.x = tile->Fade.GetFadeAlpha();
-				if (m_instanceparams.x < Game::C_EPSILON) return;
+				float alpha = tile->Fade.GetFadeAlpha();
+				if (alpha < Game::C_EPSILON) return;
+				m_instanceparams = XMVectorReplicate(alpha);
 
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), &wm, m_instanceparams, 
-											D3DXVECTOR3(wm._41, wm._42, wm._43) );	// Position can be taken from trans. components of world matrix
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), world, m_instanceparams, 
+											world.r[3]);	// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
 			{
 				if (tile->Highlight.IsActive())
 				{
 					m_instanceparams = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), &wm, m_instanceparams);
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), world, m_instanceparams);
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel(), &wm);
+					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel(), world);
 				}
 			}
 		}
 	}
 	else
 	{	
-		D3DXMATRIX offset, modelwm; 
+		XMMATRIX modelwm; 
 
 		// Determine whether any effects are active on the tile; these will need to be propogated across to constituent parts here
 		bool fade = false;
-		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams.x = tile->Fade.GetFadeAlpha(); }
+		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams = XMVectorReplicate(tile->Fade.GetFadeAlpha()); }
 
 		// Iterate through all models to be rendered
 		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
@@ -1789,19 +1789,17 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			if (!it->model) continue;
 			
 			// Apply a transformation of (ModelRotation * CurrentWorldMatrix * ModelTranslation)
-			D3DXMatrixTranslation(&offset, it->offset.x, it->offset.y, it->offset.z);
-			D3DXMatrixMultiply(&modelwm, &it->rotmatrix, &wm);
-			D3DXMatrixMultiply(&modelwm, &modelwm, &offset);
+			modelwm = XMMatrixMultiply(XMMatrixMultiply(it->rotmatrix, world), XMMatrixTranslationFromVector(it->offset));
 
 			// Submit the tile model for rendering using this adjusted world matrix
 			if (fade)
 			{
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, it->model, &modelwm, m_instanceparams, 
-											D3DXVECTOR3(modelwm._41, modelwm._42, modelwm._43) );	// Take pos from the trans components of the world matrix
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, it->model, modelwm, m_instanceparams,
+											modelwm.r[3]);	// Take pos from the trans components of the world matrix (_41 to _43)
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, it->model, &modelwm);
+				SubmitForRendering(RenderQueueShader::RM_LightShader, it->model, modelwm);
 			}
 
 		}
@@ -1837,8 +1835,9 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 	if (parent->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		m_instanceparams.x = parent->Fade.GetFadeAlpha();
-		if (m_instanceparams.x < Game::C_EPSILON) return;
+		float alpha = parent->Fade.GetFadeAlpha();
+		if (alpha < Game::C_EPSILON) return;
+		m_instanceparams = XMVectorReplicate(alpha);
 
 		// Iterate through each turret in turn
 		TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
@@ -1936,11 +1935,9 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 		if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
 
 		// FOR NOW, simply render a primitive at the projectile location
-		D3DXMATRIX trans, rot, world;
-		D3DXMatrixTranslation(&trans, proj.Position.x, proj.Position.y, proj.Position.z);
-		D3DXMatrixRotationQuaternion(&rot, &(proj.Orientation));
-		world = (rot * trans);
-		RenderModel(Model::GetModel("unit_cone_model"), &world);
+		RenderModel(Model::GetModel("unit_cone_model"), XMMatrixMultiply(
+			XMMatrixRotationQuaternion(proj.Orientation),		// World = (Rot * Trans)
+			XMMatrixTranslationFromVector(proj.Position)));		// World = (Rot * Trans)
 	}
 }
 
@@ -1954,10 +1951,12 @@ void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 {
 	// Embed line endpoints within the first two rows of the instance transform
+	// m.World._11 = line.P1.x; m.World._12 = line.P1.y; m.World._13 = line.P1.z;
+	// m.World._21 = line.P2.x; m.World._22 = line.P2.y; m.World._23 = line.P2.z;
 	RM_Instance m;
-	m.World._11 = line.P1.x; m.World._12 = line.P1.y; m.World._13 = line.P1.z;
-	m.World._21 = line.P2.x; m.World._22 = line.P2.y; m.World._23 = line.P2.z;
-
+	m.World.r[0] = line.P1;
+	m.World.r[1] = line.P2;
+	
 	// Submit to the render queue
 	SubmitForRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::BaseModel, m);
 }
@@ -1965,20 +1964,15 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 {
 	// Prepare all region particles, calculate vertex data and promote all to the buffer ready for shader rendering
-	D::Regions::Immediate->Render(m_D3D->GetDeviceContext(), &r_view);
-
-	// Get a handle to the world matrix (required?  correct?  will this not be the last matrix set in previous methods?  and will it actually be used?)
-	D3DXMATRIX world;
-	m_D3D->GetWorldMatrix(world);
-	D3DXMatrixIdentity(&world);
+	D::Regions::Immediate->Render(m_D3D->GetDeviceContext(), r_view);
 
 	// Enable alpha blending before rendering any particles
 	m_D3D->SetAlphaBlendModeEnabled();
 	m_D3D->DisableZBufferWriting();
 
-	// Render dust particles using the particle shader
+	// Render dust particles using the particle shader.  World matrix is set to the ID since all computations are in local/view space
 	m_particleshader->Render( r_devicecontext, D::Regions::Immediate->GetActiveParticleCount() * 6, 
-							  world, r_view, r_projection, D::Regions::Immediate->GetParticleTextureResource() );
+							  ID_MATRIX, r_view, r_projection, D::Regions::Immediate->GetParticleTextureResource() );
 
 	// Disable alpha blending after rendering the particles
 	// TODO: Move to somewhere more global once we have further rendering that requires alpha effects.  Avoid multiple on/off switches
@@ -1988,10 +1982,9 @@ RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 
 RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 {
-	// We will simply use ID for the world matrix as it is not relevant here
-	D3DXMATRIX world;
-	D3DXMatrixIdentity(&world);
-	world._41 = r_invview._41; world._42 = r_invview._42; world._43 = r_invview._43;
+	// Use ID for the world matrix, except use the last (translation) row of the inverse view matrix for r[3] (_41 to _43)
+	XMMATRIX world = ID_MATRIX;
+	world.r[3] = r_invview.r[3];
 
 	// Render system backdrop using the standard texture shader, if there is a backdrop to render
 	if (D::Regions::System->HasSystemBackdrop())
@@ -2042,9 +2035,10 @@ RJ_PROFILED(void CoreEngine::RenderEffects, void)
 
 	// Update the effect manager frame timer to ensure effects are rendered consistently regardless of FPS
 	m_effectmanager->BeginEffectRendering();
-//TODO: REMOVE
+	
+	//TODO: REMOVE
 	// Render a test fire effect
-	if (false) {
+	/*if (false) {
 		D3DXMATRIX world, tmpT, tmpR, tmpS;
 		D3DXQUATERNION *tmpQ;
 		D3DXMatrixTranslation(&tmpT, 0,0,125);
@@ -2056,7 +2050,7 @@ RJ_PROFILED(void CoreEngine::RenderEffects, void)
 		D3DXMatrixMultiply(&tmpS, &tmpR, &tmpS);
 		D3DXMatrixMultiply(&world, &tmpS, &tmpT);
 		m_effectmanager->RenderFireEffect(0, r_devicecontext, world, r_view, r_projection);
-	}
+	}*/
 
 	// Disable alpha blending after all effects are rendered
 	m_D3D->SetAlphaBlendModeDisabled();
@@ -2089,10 +2083,8 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	m_D3D->DisableRasteriserCulling();
 
 	// Get parameters that are used for every actor being rendered.  This is done once before rendering all actors, to improve efficiency
-	XMFLOAT3 campos = (XMFLOAT3)m_camera->GetPosition();
-	XMFLOAT4X4 view = (XMFLOAT4X4)r_view;
-	XMFLOAT4X4 proj = (XMFLOAT4X4)r_projection;
-
+	XMFLOAT3 campos; XMStoreFloat3(&campos, m_camera->GetPosition());
+	
 	// Iterate through the vector of queued actors
 	std::vector<Actor*>::iterator it_end = m_queuedactors.end();
 	for (std::vector<Actor*>::iterator it = m_queuedactors.begin(); it != it_end; ++it)
@@ -2101,7 +2093,7 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 		(*it)->UpdateForRendering(Game::TimeFactor);
 
 		// Render using the skinned model shader
-		m_skinnedshader->Render(r_devicecontext, (*it)->GetModel(), campos, view, proj);
+		m_skinnedshader->Render(r_devicecontext, (*it)->GetModel(), campos, r_view_f, r_projection_f);
 	}
 
 	// Enable rasteriser culling again once all actors have been rendered
@@ -2150,7 +2142,7 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 {
 	iSpaceObject *object;
 	std::vector<iSpaceObject*> objects; int count = 0;
-	D3DXVECTOR3 pos; float radius; bool invalidated;
+	float radius; bool invalidated;
 
 	// Find all active space objects around the player; take a different approach depending on whether the player is in a ship or on foot
 	if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
@@ -2179,7 +2171,6 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	for (std::vector<iSpaceObject*>::iterator it = objects.begin(); it != it_end; ++it)
 	{
 		object = (*it);
-		pos = object->GetPosition();
 		radius = object->GetCollisionSphereRadius();
 
 		// Render the oriented bounding box(es) used for narrowphase collision detection, if applicable for this object
@@ -2201,7 +2192,7 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 {
 	// Parameter check
 	if (m_debug_renderenvboxes == 0 || Game::Objects.count(m_debug_renderenvboxes) == 0) return;
-	D3DXVECTOR3 v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
+	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
 
 	// Get a reference to the environment object
 	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::Objects[m_debug_renderenvboxes].Object;

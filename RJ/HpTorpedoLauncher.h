@@ -8,7 +8,10 @@
 class Hardpoint;
 class TorpedoLauncher;
 
-class HpTorpedoLauncher : public Hardpoint
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class HpTorpedoLauncher : public ALIGN16<HpTorpedoLauncher>, public Hardpoint
 {
 public:
 	// Returns the type of this hardpoint subclass

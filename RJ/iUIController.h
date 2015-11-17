@@ -10,6 +10,7 @@ class Render2DGroup;
 class iUIControl;
 class UIComboBox;
 
+// This class has no special alignment requirements
 class iUIController
 {
 

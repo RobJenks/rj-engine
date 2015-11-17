@@ -18,6 +18,7 @@ enum DamageType
 };
 
 // Class holding information on a specific amount of damage of a particular type
+// This class has no special alignment requirements
 class Damage
 {
 public:

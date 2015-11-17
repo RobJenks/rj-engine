@@ -10,6 +10,7 @@
 #include "Equipment.h"
 using namespace std;
 
+// This class has no special alignment requirements
 class Engine : public Equipment
 {
 public:

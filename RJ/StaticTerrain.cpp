@@ -18,8 +18,9 @@ StaticTerrain::StaticTerrain()
 		m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), m_multielement(false), m_postponeupdates(false), m_parenttile(0)
 {
 	m_data.Centre = NULL_VECTOR;
-	m_data.Extent = NULL_VECTOR;
-	m_data.Axis[0] = m_data.Axis[1] = m_data.Axis[2] = NULL_VECTOR;
+	m_data.ExtentF = NULL_FLOAT3;
+	m_data.Extent[0].value = m_data.Extent[1].value = m_data.Extent[2].value = NULL_VECTOR;
+	m_data.Axis[0].value = UNIT_BASES[0]; m_data.Axis[1].value = UNIT_BASES[1]; m_data.Axis[2].value = UNIT_BASES[2];
 
 	// Assign a new unique ID for this terrain object
 	m_id = StaticTerrain::GenerateNewUniqueID();
@@ -36,7 +37,7 @@ void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
 	if (m_definition)
 	{
 		// Take the standard object size if not already specified; this will also recalculate e.g. the collision radius
-		if (IsZeroVector3(m_data.Extent)) SetExtent(m_definition->GetDefaultExtent());
+		if (IsZeroFloat3(m_data.ExtentF)) SetExtent(XMLoadFloat3(&m_definition->GetDefaultExtent()));
 
 		// Also initialise the health of this instance to the max health specified in its definition, if it has not already been set
 		if (m_health == 0.0f) SetHealth(m_definition->GetMaxHealth());
@@ -80,11 +81,15 @@ void StaticTerrain::SetOrientation(const FXMVECTOR orient)
 void StaticTerrain::SetExtent(const FXMVECTOR e)
 {
 	// Store the new extents; ensure no negative values
-	m_data.Extent = XMVectorMax(e, NULL_VECTOR);
+	XMVECTOR ex = XMVectorSetW(XMVectorMax(e, NULL_VECTOR), 0.0f);
+	XMStoreFloat3(&m_data.ExtentF, ex);
+	m_data.Extent[0].value = XMVectorReplicate(m_data.ExtentF.x);
+	m_data.Extent[1].value = XMVectorReplicate(m_data.ExtentF.y);
+	m_data.Extent[2].value = XMVectorReplicate(m_data.ExtentF.z);
 
 	// Recalculate the collision radius of this terrain object based on its maximum extents
 	// Multiply all dimensions by 2 since we want the size, not the extent
-	m_collisionradiussq = DetermineCuboidBoundingSphereRadiusSq(XMVectorMultiply(m_data.Extent, XMVectorReplicate(2.0f)));	
+	m_collisionradiussq = DetermineCuboidBoundingSphereRadiusSq(XMVectorMultiply(ex, XMVectorReplicate(2.0f)));	
 	m_collisionradius = sqrtf(m_collisionradiussq);
 
 	// Recalculate positional data, since e.g. the range of elements this object covers may now be different
@@ -119,9 +124,9 @@ void StaticTerrain::RecalculatePositionalData(void)
 	/*m_data.Axis[0] = D3DXVECTOR3(m_worldmatrix._11, m_worldmatrix._12, m_worldmatrix._13);
 	  m_data.Axis[1] = D3DXVECTOR3(m_worldmatrix._21, m_worldmatrix._22, m_worldmatrix._23);
 	  m_data.Axis[2] = D3DXVECTOR3(m_worldmatrix._31, m_worldmatrix._32, m_worldmatrix._33);*/
-	m_data.Axis[0] = m_worldmatrix.r[0];
-	m_data.Axis[1] = m_worldmatrix.r[1];
-	m_data.Axis[2] = m_worldmatrix.r[2];
+	m_data.Axis[0].value = m_worldmatrix.r[0];
+	m_data.Axis[1].value = m_worldmatrix.r[1];
+	m_data.Axis[2].value = m_worldmatrix.r[2];
 
 	// Determine the range of elements that this object covers
 	XMVECTOR cradius = XMVectorReplicate(m_collisionradius);
@@ -137,14 +142,14 @@ void StaticTerrain::RecalculatePositionalData(void)
 }
 
 // Determines the vertices of the surrounding collision volume
-void StaticTerrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, XMVECTOR(&pOutVertices)[8]) const
+void StaticTerrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, AXMVECTOR_P(&pOutVertices)[8]) const
 {
 	// Determine the extent along each basis vector
 	static const int E_POS = 0; static const int E_NEG = 1;
 	XMVECTOR AxisExtent[3][2];
-	AxisExtent[0][E_POS] = XMVectorMultiply(m_data.Extent[0], m_data.Axis[0]);
-	AxisExtent[1][E_POS] = XMVectorMultiply(m_data.Extent[1], m_data.Axis[1]);
-	AxisExtent[2][E_POS] = XMVectorMultiply(m_data.Extent[2], m_data.Axis[2]);
+	AxisExtent[0][E_POS] = XMVectorMultiply(m_data.Extent[0].value, m_data.Axis[0].value);
+	AxisExtent[1][E_POS] = XMVectorMultiply(m_data.Extent[1].value, m_data.Axis[1].value);
+	AxisExtent[2][E_POS] = XMVectorMultiply(m_data.Extent[2].value, m_data.Axis[2].value);
 
 	// We also need the negated versions
 	AxisExtent[0][E_NEG] = XMVectorNegate(AxisExtent[0][E_POS]);
@@ -152,29 +157,29 @@ void StaticTerrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *paren
 	AxisExtent[2][E_NEG] = XMVectorNegate(AxisExtent[2][E_POS]);
 	
 	// Now use these values to determine the location of each bounding volume vertex in local space
-	pOutVertices[0] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_NEG]), AxisExtent[2][E_NEG]); // -x, -y, -z	(End face #1)
-	pOutVertices[1] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_NEG]), AxisExtent[2][E_NEG]); // +x, -y, -z	(End face #1)
-	pOutVertices[2] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_POS]), AxisExtent[2][E_NEG]); // +x, +y, -z	(End face #1)
-	pOutVertices[3] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_POS]), AxisExtent[2][E_NEG]); // -x, +y, -z	(End face #1)
+	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_NEG]), AxisExtent[2][E_NEG]); // -x, -y, -z	(End face #1)
+	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_NEG]), AxisExtent[2][E_NEG]); // +x, -y, -z	(End face #1)
+	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_POS]), AxisExtent[2][E_NEG]); // +x, +y, -z	(End face #1)
+	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_POS]), AxisExtent[2][E_NEG]); // -x, +y, -z	(End face #1)
 
-	pOutVertices[4] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_NEG]), AxisExtent[2][E_POS]); // -x, -y, +z	(End face #2)
-	pOutVertices[5] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_NEG]), AxisExtent[2][E_POS]); // +x, -y, +z	(End face #2)
-	pOutVertices[6] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_POS]), AxisExtent[2][E_POS]); // +x, +y, +z	(End face #2)
-	pOutVertices[7] = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_POS]), AxisExtent[2][E_POS]); // -x, +y, +z	(End face #2)
+	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_NEG]), AxisExtent[2][E_POS]); // -x, -y, +z	(End face #2)
+	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_NEG]), AxisExtent[2][E_POS]); // +x, -y, +z	(End face #2)
+	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_POS]), AxisExtent[1][E_POS]), AxisExtent[2][E_POS]); // +x, +y, +z	(End face #2)
+	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(m_data.Centre, AxisExtent[0][E_NEG]), AxisExtent[1][E_POS]), AxisExtent[2][E_POS]); // -x, +y, +z	(End face #2)
 
 	// Now transform by the parent object's zero-element world matrix (since the terrain coordinates assume (0,0) equals
 	// element (0,0,0) location, whereas in world space (0,0) is the model centre point), to yield the final world coordinates
 	if (parent)
 	{
 		XMMATRIX zpworld = parent->GetZeroPointWorldMatrix();
-		pOutVertices[0] = XMVector3TransformCoord(pOutVertices[0], zpworld);
-		pOutVertices[1] = XMVector3TransformCoord(pOutVertices[1], zpworld);
-		pOutVertices[2] = XMVector3TransformCoord(pOutVertices[2], zpworld);
-		pOutVertices[3] = XMVector3TransformCoord(pOutVertices[3], zpworld);
-		pOutVertices[4] = XMVector3TransformCoord(pOutVertices[4], zpworld);
-		pOutVertices[5] = XMVector3TransformCoord(pOutVertices[5], zpworld);
-		pOutVertices[6] = XMVector3TransformCoord(pOutVertices[6], zpworld);
-		pOutVertices[7] = XMVector3TransformCoord(pOutVertices[7], zpworld);
+		pOutVertices[0].value = XMVector3TransformCoord(pOutVertices[0].value, zpworld);
+		pOutVertices[1].value = XMVector3TransformCoord(pOutVertices[1].value, zpworld);
+		pOutVertices[2].value = XMVector3TransformCoord(pOutVertices[2].value, zpworld);
+		pOutVertices[3].value = XMVector3TransformCoord(pOutVertices[3].value, zpworld);
+		pOutVertices[4].value = XMVector3TransformCoord(pOutVertices[4].value, zpworld);
+		pOutVertices[5].value = XMVector3TransformCoord(pOutVertices[5].value, zpworld);
+		pOutVertices[6].value = XMVector3TransformCoord(pOutVertices[6].value, zpworld);
+		pOutVertices[7].value = XMVector3TransformCoord(pOutVertices[7].value, zpworld);
 	}
 }
 
@@ -193,7 +198,7 @@ StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
 		terrain->SetOrientation(ID_QUATERNION);
 
 		// Assign a default non-zero extent if none is specified in the definition
-		if (IsZeroVector3(terrain->GetExtent())) terrain->SetExtent(ONE_VECTOR);
+		if (IsZeroFloat3(terrain->GetExtentF())) terrain->SetExtent(ONE_VECTOR);
 	}
 	terrain->ResumeUpdates();
 

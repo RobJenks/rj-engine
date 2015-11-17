@@ -12,6 +12,7 @@ struct GameConsoleCommand;
 // be reserved for only a few, core components.  Should also be reserved for components that are onlhy 
 // instantiated once, otherwise the first instance of an implementing class will process the command and
 // subsequent instances will not, which is probably not the intended outcome.
+// This class has no special alignment requirements
 class iAcceptsConsoleCommands
 {
 public:

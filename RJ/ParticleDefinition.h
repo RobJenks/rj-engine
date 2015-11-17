@@ -7,11 +7,11 @@
 #include "DX11_Core.h"
 
 
-
+// This class has no special alignment requirements
 class ParticleDefinition
 {
 public:
-	D3DXVECTOR3						InitialColour;
+	XMFLOAT3						InitialColour;
 	float							InitialSize;
 
 	bool							HasSizeDecay;

@@ -176,29 +176,29 @@ void FontData::BuildVertexArray(void* vertices, const char *sentence, float draw
 		else
 		{
 			// First triangle in quad.
-			vertexPtr[index].position = D3DXVECTOR3(drawX, drawY, 0.0f);  // Top left.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.left, 0.0f);
+			vertexPtr[index].position = XMFLOAT3(drawX, drawY, 0.0f);  // Top left.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.left, 0.0f);
 			index++;
 
-			vertexPtr[index].position = D3DXVECTOR3((drawX + letterwidth), (drawY - letterheight), 0.0f);  // Bottom right.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.right, 1.0f);
+			vertexPtr[index].position = XMFLOAT3((drawX + letterwidth), (drawY - letterheight), 0.0f);  // Bottom right.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.right, 1.0f);
 			index++;
 
-			vertexPtr[index].position = D3DXVECTOR3(drawX, (drawY - letterheight), 0.0f);  // Bottom left.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.left, 1.0f);
+			vertexPtr[index].position = XMFLOAT3(drawX, (drawY - letterheight), 0.0f);  // Bottom left.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.left, 1.0f);
 			index++;
 
 			// Second triangle in quad.
-			vertexPtr[index].position = D3DXVECTOR3(drawX, drawY, 0.0f);  // Top left.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.left, 0.0f);
+			vertexPtr[index].position = XMFLOAT3(drawX, drawY, 0.0f);  // Top left.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.left, 0.0f);
 			index++;
 
-			vertexPtr[index].position = D3DXVECTOR3(drawX + letterwidth, drawY, 0.0f);  // Top right.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.right, 0.0f);
+			vertexPtr[index].position = XMFLOAT3(drawX + letterwidth, drawY, 0.0f);  // Top right.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.right, 0.0f);
 			index++;
 
-			vertexPtr[index].position = D3DXVECTOR3((drawX + letterwidth), (drawY - letterheight), 0.0f);  // Bottom right.
-			vertexPtr[index].texture = D3DXVECTOR2(fontitem.right, 1.0f);
+			vertexPtr[index].position = XMFLOAT3((drawX + letterwidth), (drawY - letterheight), 0.0f);  // Bottom right.
+			vertexPtr[index].texture = XMFLOAT2(fontitem.right, 1.0f);
 			index++;
 
 			// Update the x location for drawing by the size of the letter and (one pixel * size multiplier)

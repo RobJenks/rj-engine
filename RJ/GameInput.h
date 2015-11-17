@@ -24,6 +24,7 @@ enum MouseInputControlMode
 };
 
 
+// This class has no special alignment requirements
 class GameInputDevice
 {
 public:

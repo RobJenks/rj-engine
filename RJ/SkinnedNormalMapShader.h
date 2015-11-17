@@ -6,8 +6,6 @@
 #include <windows.h>
 #include "DX11_Core.h"
 
-
-#include <xnamath.h>
 #include <fstream>
 #include "iShader.h"
 #include "Light.h"
@@ -16,9 +14,7 @@ class DXLocaliser;
 using namespace std;
 
 
-////////////////////////////////////////////////////////////////////////////////
-// Class name: SkinnedNormalMapShader
-////////////////////////////////////////////////////////////////////////////////
+// This class has no special alignment requirements
 class SkinnedNormalMapShader //: iShader
 {
 private:

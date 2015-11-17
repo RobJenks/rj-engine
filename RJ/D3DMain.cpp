@@ -1,6 +1,8 @@
 #include "ErrorCodes.h"
 #include "DXLocaliser.h"
 #include "LogManager.h"
+#include "DX11_Core.h"
+#include "FastMath.h"
 
 #include "D3DMain.h"
 
@@ -27,11 +29,13 @@ D3DMain::D3DMain(const DXLocaliser *locale)
 	m_alphaDisableBlendingState = 0;
 	m_alphaEnableAdditiveBlendingState = 0;
 	m_alphablendstate = D3DMain::AlphaBlendState::AlphaBlendDisabled;
+	m_worldMatrix = m_projectionMatrix = m_orthoMatrix = ID_MATRIX;
 }
 
 
 D3DMain::D3DMain(const D3DMain& other)
 {
+	throw "Primary D3D component cannot be copied";
 }
 
 
@@ -412,17 +416,17 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
     m_deviceContext->RSSetViewports(1, &viewport);
 
 	// Setup the projection matrix.
-	m_FOV = (float)D3DX_PI / 4.0f;
+	m_FOV = (float)PI / 4.0f;
 	m_aspectratio = (float)screenWidth / (float)screenHeight;
 
 	// Create the projection matrix for 3D rendering.
-	D3DXMatrixPerspectiveFovLH(&m_projectionMatrix, m_FOV, m_aspectratio, screenNear, screenDepth);
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(m_FOV, m_aspectratio, screenNear, screenDepth);
 
     // Initialise the world matrix to the identity matrix.
-    D3DXMatrixIdentity(&m_worldMatrix);
+	m_worldMatrix = ID_MATRIX;
 
 	// Create an orthographic projection matrix for 2D rendering.
-	D3DXMatrixOrthoLH(&m_orthoMatrix, (float)screenWidth, (float)screenHeight, screenNear, screenDepth);
+	m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
 
 	// Clear the depth-disabled stencil state before setting the parameters.
 	ZeroMemory(&depthDisabledStencilDesc, sizeof(depthDisabledStencilDesc));
@@ -608,27 +612,6 @@ void D3DMain::EndScene()
 		int a = rand();
 	}
 }
-
-void D3DMain::GetProjectionMatrix(D3DXMATRIX& projectionMatrix)
-{
-	projectionMatrix = m_projectionMatrix;
-	return;
-}
-
-
-void D3DMain::GetWorldMatrix(D3DXMATRIX& worldMatrix)
-{
-	worldMatrix = m_worldMatrix;
-	return;
-}
-
-
-void D3DMain::GetOrthoMatrix(D3DXMATRIX& orthoMatrix)
-{
-	orthoMatrix = m_orthoMatrix;
-	return;
-}
-
 
 void D3DMain::GetVideoCardInfo(char* cardName, int& memory)
 {

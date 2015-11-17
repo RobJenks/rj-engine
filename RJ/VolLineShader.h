@@ -7,6 +7,8 @@
 class DXLocaliser;
 class ModelBuffer;
 
+
+// This class has no special alignment requirements
 class VolLineShader : public iShader
 {
 public:
@@ -17,14 +19,14 @@ public:
 	// Constant buffers for each shader in the pipeline
 	struct VSBufferType
 	{
-		D3DXMATRIX viewmatrix;
+		XMFLOAT4X4 viewmatrix;
 	};
 
 	struct GSBufferType
 	{
-		D3DXMATRIX	projectionmatrix;
+		XMFLOAT4X4	projectionmatrix;
 		float		radius;
-		D3DXVECTOR3	PADDING;		// Add extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
+		XMFLOAT3	PADDING;		// Add extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
 	};
 
 	struct PSBufferType
@@ -32,8 +34,8 @@ public:
 		float radius;				// Radius of the line
 		float clipdistance_far;		// Distance to the far clip plane
 		float clipdistance_front;	// Distance to the near clip plane
-		D3DXVECTOR2 viewport_size;	// Size of the viewport
-		D3DXVECTOR3	PADDING;		// Add extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
+		XMFLOAT2 viewport_size;		// Size of the viewport
+		XMFLOAT3 PADDING;			// Add extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
 	};
 
 public:
@@ -42,7 +44,7 @@ public:
 	VolLineShader(const DXLocaliser *locale);
 
 	// Initialise the shader
-	Result							Initialise(ID3D11Device *device, D3DXVECTOR2 viewport_size, float clip_near, float clip_far);
+	Result							Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far);
 
 	// Methods to initialise each shader in the pipeline in turn
 	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
@@ -51,7 +53,7 @@ public:
 
 	// Renders the shader.
 	Result							Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
-											D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
+											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Adjust the radius of lines currently being drawn
 	CMPINLINE void					SetLineRadius(float radius) { m_radius = radius; }
@@ -74,7 +76,7 @@ protected:
 	ID3D11Buffer			* m_cbuffer_gs;
 	ID3D11Buffer			* m_cbuffer_ps;
 
-	D3DXVECTOR2				m_viewport_size;
+	XMFLOAT2				m_viewport_size;
 	float					m_clip_near;
 	float					m_clip_far;
 	float					m_radius;

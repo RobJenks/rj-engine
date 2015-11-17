@@ -8,6 +8,7 @@
 #include "ScheduledObject.h"
 template <class T> class Octree;
 
+// This class has no special alignment requirements
 template <typename T> 
 class OctreePruner : public ScheduledObject
 {

@@ -6,6 +6,7 @@
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
 
+// This class has no special alignment requirements
 class FadeEffect
 {
 public:

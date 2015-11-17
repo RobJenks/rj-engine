@@ -7,6 +7,8 @@
 #include "CompilerSettings.h"
 #include "Faction.h"
 
+
+// This class has no special alignment requirements
 class FactionManagerObject
 {
 public:

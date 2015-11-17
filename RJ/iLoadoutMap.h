@@ -6,6 +6,8 @@
 #include <string>
 class Equipment;
 
+
+// This class has no special alignment requirements
 class iLoadoutMap
 {
 public:

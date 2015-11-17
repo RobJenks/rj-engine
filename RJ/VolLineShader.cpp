@@ -27,14 +27,14 @@ VolLineShader::VolLineShader(const DXLocaliser *locale)
 	m_cbuffer_ps = NULL;
 
 	// Initialise all shader parameters to default values
-	m_viewport_size = D3DXVECTOR2(1024.0f, 768.0f); 
+	m_viewport_size = XMFLOAT2(1024.0f, 768.0f); 
 	m_clip_near = 1.0f;
 	m_clip_far = 100.0f;
 	m_radius = 4.0f;
 }
 
 
-Result VolLineShader::Initialise(ID3D11Device *device, D3DXVECTOR2 viewport_size, float clip_near, float clip_far)
+Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far)
 {
 	Result result;
 
@@ -132,7 +132,7 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 
 // Renders the shader.
 Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
-								D3DXMATRIX viewMatrix, D3DXMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+								const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -141,16 +141,12 @@ Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int v
 	// Parameter check
 	if (!deviceContext || vertexCount <= 0 || indexCount <= 0 || instanceCount <= 0 || !texture) return ErrorCodes::InvalidShaderParameters;
 
-	// Transpose the matrices to prepare them for the shader
-	D3DXMatrixTranspose(&viewMatrix, &viewMatrix);
-	D3DXMatrixTranspose(&projectionMatrix, &projectionMatrix);
-
 	// Initialise vertex shader constant buffer
 	hr = deviceContext->Map(m_cbuffer_vs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
 	vsbuffer = (VSBufferType*)mappedResource.pData;
 	{
-		vsbuffer->viewmatrix = viewMatrix;
+		XMStoreFloat4x4(&vsbuffer->viewmatrix, XMMatrixTranspose(viewMatrix));				// Transpose matrix
 	}
 	deviceContext->Unmap(m_cbuffer_vs, 0);
 	deviceContext->VSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_vs);
@@ -160,7 +156,7 @@ Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int v
 	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
 	gsbuffer = (GSBufferType*)mappedResource.pData;
 	{
-		gsbuffer->projectionmatrix = projectionMatrix;
+		XMStoreFloat4x4(&gsbuffer->projectionmatrix, XMMatrixTranspose(projectionMatrix));	// Transpose matrix
 		gsbuffer->radius = m_radius;
 	}
 	deviceContext->Unmap(m_cbuffer_gs, 0);
@@ -224,11 +220,11 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 	if (!VolLineShader::BaseModel) return ErrorCodes::CannotInitialiseStaticVolLineShaderData;
 
 	// Create the base vertex and index data
-	D3DXVECTOR4 *v = new D3DXVECTOR4[2] { D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f), D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f) };
+	XMFLOAT4 *v = new XMFLOAT4[2] { XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) };
 	UINT16 *i = new UINT16[2] { 0U, 1U };
 
 	// Initialise the base model using this data
-	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(D3DXVECTOR4), 2U, (const void**)&i, sizeof(UINT16), 2U);
+	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(XMFLOAT4), 2U, (const void**)&i, sizeof(UINT16), 2U);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Deallocate the model vertex and index data

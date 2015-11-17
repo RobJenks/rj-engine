@@ -13,6 +13,7 @@
 using namespace std;
 
 
+// This class has no special alignment requirements
 class FontData
 {
 private:
@@ -24,8 +25,8 @@ private:
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-	    D3DXVECTOR2 texture;
+		XMFLOAT3 position;
+	    XMFLOAT2 texture;
 	};
 
 public:

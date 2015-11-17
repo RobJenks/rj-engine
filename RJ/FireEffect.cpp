@@ -59,11 +59,11 @@ void FireEffect::Shutdown(void)
 }
 
 // Set other properties of the flame effect
-void FireEffect::SetScrollSpeeds(const D3DXVECTOR3 &scrollspeed) { m_scrollspeeds = scrollspeed; }
-void FireEffect::SetScaling(const D3DXVECTOR3 &scaling) { m_scaling = scaling; }
-void FireEffect::SetDistortionParameters1(const D3DXVECTOR2 &distortion) { m_distortion1 = distortion; }
-void FireEffect::SetDistortionParameters2(const D3DXVECTOR2 &distortion) { m_distortion2 = distortion; }
-void FireEffect::SetDistortionParameters3(const D3DXVECTOR2 &distortion) { m_distortion3 = distortion; }
+void FireEffect::SetScrollSpeeds(const XMFLOAT3 &scrollspeed) { m_scrollspeeds = scrollspeed; }
+void FireEffect::SetScaling(const XMFLOAT3 &scaling) { m_scaling = scaling; }
+void FireEffect::SetDistortionParameters1(const XMFLOAT2 &distortion) { m_distortion1 = distortion; }
+void FireEffect::SetDistortionParameters2(const XMFLOAT2 &distortion) { m_distortion2 = distortion; }
+void FireEffect::SetDistortionParameters3(const XMFLOAT2 &distortion) { m_distortion3 = distortion; }
 void FireEffect::SetDistortionScale(float dscale) { m_distortionscale = dscale; }
 void FireEffect::SetDistortionBias(float dbias) { m_distortionbias = dbias; }
 
@@ -77,11 +77,11 @@ FireEffect::FireEffect(const DXLocaliser *locale)
 	m_firetexture = 0;
 	m_noisetexture = 0;
 	m_alphatexture = 0;
-	m_scrollspeeds = D3DXVECTOR3(0, 0, 0);
-	m_scaling = D3DXVECTOR3(0, 0, 0);
-	m_distortion1 = D3DXVECTOR2(0, 0); 
-	m_distortion2 = D3DXVECTOR2(0, 0); 
-	m_distortion3 = D3DXVECTOR2(0, 0); 
+	m_scrollspeeds = XMFLOAT3(0, 0, 0);
+	m_scaling = XMFLOAT3(0, 0, 0);
+	m_distortion1 = XMFLOAT2(0, 0); 
+	m_distortion2 = XMFLOAT2(0, 0); 
+	m_distortion3 = XMFLOAT2(0, 0); 
 	m_distortionscale = 0.0f;
 	m_distortionbias = 0.0f;
 }

@@ -117,7 +117,11 @@ public:
 	CMPINLINE XMMATRIX GetRenderInverseViewMatrix(void)				{ return r_invview; }
 	CMPINLINE XMMATRIX GetRenderProjectionMatrix(void)				{ return r_projection; }
 	CMPINLINE XMMATRIX GetRenderOrthographicMatrix(void)			{ return r_orthographic; }
-	
+	CMPINLINE const XMFLOAT4X4 & GetRenderViewMatrixF(void)			{ return r_view_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewMatrixF(void)	{ return r_invview_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void)	{ return r_projection_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void)	{ return r_orthographic_f; }
+
 	// Pass-through accessor methods for key engine components
 	CMPINLINE ID3D11Device *		GetDevice(void)			{ return m_D3D->GetDevice(); }
 	CMPINLINE ID3D11DeviceContext *	GetDeviceContext(void)	{ return m_D3D->GetDeviceContext(); }
@@ -381,6 +385,10 @@ private:
 	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
 	AXMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
+	XMFLOAT4X4				r_view_f;				// Local float representation of the current frame view matrix
+	XMFLOAT4X4				r_projection_f;			// Local float representation of the current frame projection matrix
+	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
+	XMFLOAT4X4				r_invview_f;			// Local float representation of the current frame inverse view matrix
 
 
 	ID3D11Buffer *				m_instancebuffer;
@@ -513,8 +521,8 @@ public:
 
 	// Cached & precalculated fields used for rendering an environment
 	AXMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
-	AXMVECTOR					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
-	AXMVECTOR					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
+	AXMVECTOR_P					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
+	AXMVECTOR_P					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedobjects;							// Temporary vector of object IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle

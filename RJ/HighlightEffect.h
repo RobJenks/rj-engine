@@ -9,7 +9,10 @@
 #include "FastMath.h"
 #include "GameVarsExtern.h"
 
-class HighlightEffect
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class HighlightEffect : public ALIGN16<HighlightEffect>
 {
 public:
 
@@ -17,7 +20,7 @@ public:
 	HighlightEffect(void)
 	{
 		m_active = false;
-		m_colour = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+		m_colour = XMVectorReplicate(1.0f);
 	}
 
 	// Change the activation state of this effect
@@ -27,8 +30,8 @@ public:
 	CMPINLINE void			SetActiveState(bool active)					{ m_active = active; }
 
 	// Retrieve or set the colour to be used in this highlight effect
-	CMPINLINE D3DXVECTOR4	GetColour(void)								{ return m_colour; }
-	CMPINLINE void			SetColour(const D3DXVECTOR4 & colour)		{ m_colour = colour; }
+	CMPINLINE XMVECTOR		GetColour(void)								{ return m_colour; }
+	CMPINLINE void			SetColour(const FXMVECTOR colour)			{ m_colour = colour; }
 
 	// Default destructor
 	~HighlightEffect(void) { }
@@ -37,7 +40,7 @@ public:
 protected:
 
 	bool					m_active;		// Flag indicating whether highlight effect is active
-	D3DXVECTOR4				m_colour;		// Colour to be applied when highlighting
+	AXMVECTOR				m_colour;		// Colour to be applied when highlighting
 
 };
 

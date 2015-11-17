@@ -9,6 +9,7 @@
 #include "SkinnedData.h"
 #include "SkinnedModel.h"
 
+// This class has no special alignment requirements
 struct M3dMaterial
 {
 	SkinnedModel::SM_Material Mat;
@@ -18,6 +19,7 @@ struct M3dMaterial
 	std::string NormalMapName;		// Was std::wstring
 };
 
+// This class has no special alignment requirements
 class M3DLoader
 {
 public:

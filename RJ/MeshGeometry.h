@@ -4,10 +4,9 @@
 #define __MeshGeometryH__
 
 #include "DX11_Core.h"
-
-//#include <d3dx11tex.h>
 #include "ErrorCodes.h"
 
+// This class has no special alignment requirements
 class MeshGeometry
 {
 public:

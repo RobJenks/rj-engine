@@ -54,7 +54,13 @@ public:
 	CMPINLINE XMMATRIX								GetWorldMatrix(void)							{ return m_worldmatrix; }
 	CMPINLINE void									SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
-	CMPINLINE XMVECTOR								GetExtent(void) const							{ return m_data.Extent; }
+	CMPINLINE XMFLOAT3								GetExtentF(void) const							{ return m_data.ExtentF; }
+	CMPINLINE void									GetExtent(AXMVECTOR_P(&outExtent)[3]) const		
+	{ 
+		outExtent[0] = m_data.Extent[0]; 
+		outExtent[1] = m_data.Extent[1];
+		outExtent[2] = m_data.Extent[2];
+	}
 	void											SetExtent(const FXMVECTOR e);
 
 	CMPINLINE float									GetCollisionRadius(void) const					{ return m_collisionradius; }
@@ -75,7 +81,7 @@ public:
 	void											SetHealth(float h)								{ m_health = h; }
 
 	// Determines the vertices of the surrounding collision volume
-	void											DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, XMVECTOR(&pOutVertices)[8]) const;
+	void											DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, AXMVECTOR_P(&pOutVertices)[8]) const;
 
 	// Method to postpone object updates; can be used to postpone updates until the end of multiple small adjustments
 	void											PostponeUpdates(void)							{ m_postponeupdates = true; }

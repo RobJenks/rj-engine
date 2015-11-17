@@ -758,7 +758,7 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 {
 	// Look at each node element in turn, storing required values for now
 	std::string key; HashVal hash; 
-	std::string a_code = ""; D3DXVECTOR3 a_pos = NULL_VECTOR; INTVECTOR3 a_elpos = NULL_INTVECTOR3; 
+	std::string a_code = ""; XMVECTOR a_pos = NULL_VECTOR; INTVECTOR3 a_elpos = NULL_INTVECTOR3; 
 	Rotation90Degree a_rot = Rotation90Degree::Rotate0;
 	TiXmlElement *node = root->FirstChildElement();
 	for (node; node; node = node->NextSiblingElement())
@@ -1373,7 +1373,7 @@ Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
 		}
 		else if (key == "defaultextent")
 		{
-			def->SetDefaultExtent(IO::GetVector3FromAttr(child));
+			def->SetDefaultExtent(IO::GetFloat3FromAttr(child));
 		}
 		else if (key == "destructible")
 		{
@@ -1413,8 +1413,8 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 {
 	std::string name, val;
 	StaticTerrainDefinition *def;
-	D3DXVECTOR3 vpos, vextent;
-	D3DXQUATERNION qorient;
+	XMFLOAT3 vpos, vextent;
+	XMFLOAT4 qorient;
 
 	// Parameter check
 	if (!node) return NULL;
@@ -1422,8 +1422,8 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 	// Create a new terrain object to hold the data, and default placeholders to hold the data
 	StaticTerrain *obj = new StaticTerrain();
 	def = NULL;
-	vpos = vextent = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	qorient = D3DXQUATERNION(0.0f, 0.0f, 0.0f, 0.0f);
+	vpos = vextent = NULL_FLOAT3; 
+	qorient = ID_QUATERNIONF;
 
 	// The terrain details are fully contained within the attributes of this one elemnet
 	TiXmlAttribute *attr = node->FirstAttribute();
@@ -1451,10 +1451,15 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 		attr = attr->Next();
 	}
 
+	// Convert to vectorised form
+	XMVECTOR pos = XMLoadFloat3(&vpos);
+	XMVECTOR orient = XMLoadFloat4(&qorient);
+	XMVECTOR extent = XMLoadFloat3(&vextent);
+
 	// Apply the placeholder data, if it was correctly & fully set from the node attributes
-	if (vpos != NULL_VECTOR) obj->SetPosition(vpos);
-	if (!(qorient.x == 0.0f && qorient.y == 0.0f && qorient.z == 0.0f && qorient.w == 0.0f)) obj->SetOrientation(qorient);
-	if (vextent != NULL_VECTOR) obj->SetExtent(vextent);
+	if (!IsZeroVector3(pos)) obj->SetPosition(pos);
+	if (!IsIDQuaternion(orient)) obj->SetOrientation(orient);
+	if (!IsZeroVector3(extent)) obj->SetExtent(extent);
 
 	// Assign the terrain definition last, if it was provided, since this will default some values (e.g. extent) if they have
 	// not already been set.  Can be NULL, in the case of non-renderable collision volumes
@@ -1623,15 +1628,14 @@ Result IO::Data::LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret)
 				}
 				else if (hash == HashedStrings::H_RelativePosition)
 				{
-					D3DXVECTOR3 pos = NULL_VECTOR;
-					IO::GetVector3FromAttr(child, &pos);
+					XMVECTOR pos = NULL_VECTOR;
+					pos = IO::GetVector3FromAttr(child);
 					turret->GetLauncher(index)->SetRelativePosition(pos);
 				}
 				else if (hash == HashedStrings::H_RelativeOrientation)
 				{
-					D3DXQUATERNION orient = ID_QUATERNION;
-					IO::GetD3DXQUATERNIONFromAttr(child, &orient);
-					D3DXQuaternionNormalize(&orient, &orient);
+					XMVECTOR orient = ID_QUATERNION;
+					orient = XMQuaternionNormalize(IO::GetQuaternionFromAttr(child));
 					turret->GetLauncher(index)->SetRelativeOrientation(orient);
 				}
 			}
@@ -1700,9 +1704,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_LaunchAngularVelocity)
 		{
-			D3DXVECTOR3 avel;
-			IO::GetVector3FromAttr(child, &avel);
-			launcher->SetLaunchAngularVelocity(avel);
+			launcher->SetLaunchAngularVelocity(IO::GetVector3FromAttr(child));
 		}
 		else if (hash == HashedStrings::H_DegradeLinearVelocity)
 		{
@@ -1724,9 +1726,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_AddOrientationDrift)
 		{
-			D3DXQUATERNION drift;
-			IO::GetD3DXQUATERNIONFromAttr(child, &drift);
-			launcher->SetProjectileOrientationChange(drift);
+			launcher->SetProjectileOrientationChange(IO::GetQuaternionFromAttr(child));
 		}
 	}
 
@@ -2013,7 +2013,7 @@ Hardpoint *IO::Data::LoadHardpoint(TiXmlElement *node)
 		}
 		else if (key == "orientation") {
 			// Read the orientation D3DXQUATERNION from this node
-			hp->Orientation = IO::GetD3DXQUATERNIONFromAttr(child);
+			hp->Orientation = IO::GetQuaternionFromAttr(child);
 		}
 	}
 
@@ -2212,9 +2212,9 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 	if (!object || !node) return;
 
 	// Fields to store data as it is being loaded
-	D3DXVECTOR3 pos = NULL_VECTOR;
-	D3DXVECTOR3 extent = NULL_VECTOR;
-	D3DXQUATERNION orient = ID_QUATERNION;
+	XMFLOAT3 posf = NULL_FLOAT3;
+	XMFLOAT3 extentf = NULL_FLOAT3;
+	XMFLOAT4 orientf = NULL_FLOAT4;
 	int numchildren = 0; bool skip = false;
 
 	// Get required data from the node attributes
@@ -2225,16 +2225,16 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 		hash = HashString(key);
 
 		// Set values based on this hash
-		if (hash == HashedStrings::H_Px)					pos.x = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Py)				pos.y = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Pz)				pos.z = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Ox)				orient.x = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Oy)				orient.y = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Oz)				orient.z = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Ow)				orient.w = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Ex)				extent.x = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Ey)				extent.y = (float)atof(attr->Value());
-		else if (hash == HashedStrings::H_Ez)				extent.z = (float)atof(attr->Value());
+		if (hash == HashedStrings::H_Px)					posf.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Py)				posf.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Pz)				posf.z = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ox)				orientf.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Oy)				orientf.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Oz)				orientf.z = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ow)				orientf.w = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ex)				extentf.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ey)				extentf.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ez)				extentf.z = (float)atof(attr->Value());
 		else if (hash == HashedStrings::H_NumChildren)		numchildren = atoi(attr->Value());
 		else if (hash == HashedStrings::H_Skip)
 		{
@@ -2242,40 +2242,44 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 			skip = (val == "true");
 		}
 	}
-	
+
+	// Convert to vectorised form
+	XMVECTOR pos = XMLoadFloat3(&posf);
+	XMVECTOR orient = XMLoadFloat4(&orientf);
+	XMVECTOR extent = XMLoadFloat3(&extentf);
+
 	// Only update the data for this node if the 'skip' flag was not set.  Usually used to skip the (auto-calculated) root obb
 	if (!skip)
 	{
 		// We do not want to autocalculate this OBB if we have explicit data for it
 		obb.SetAutoFitMode(false);
 
-		// Build a transform matrix to determine the obb basis vectors
-		D3DXMATRIX mrot, mtrans, mworld;
-		D3DXMatrixRotationQuaternion(&mrot, &orient);
-		D3DXMatrixTranslation(&mtrans, pos.x, pos.y, pos.z);
-		mworld = (mrot * mtrans);
+		// Build a transform matrix to determine the obb basis vectors (world = rot * trans)
+		XMMATRIX mworld = XMMatrixMultiply(XMMatrixRotationQuaternion(orient), XMMatrixTranslationFromVector(pos));
 
 		// Take different action depending on whether this is the root node
 		if (isroot)
 		{
 			// Set the obb centre, extent and axes based upon this loaded data
+			// obb.Data.Axis[0] = D3DXVECTOR3(mworld._11, mworld._12, mworld._13); D3DXVec3Normalize(&obb.Data.Axis[0], &obb.Data.Axis[0]);
 			obb.Data.Centre = object->GetPosition();
-			obb.Data.Axis[0] = D3DXVECTOR3(mworld._11, mworld._12, mworld._13); D3DXVec3Normalize(&obb.Data.Axis[0], &obb.Data.Axis[0]);
-			obb.Data.Axis[1] = D3DXVECTOR3(mworld._21, mworld._22, mworld._23); D3DXVec3Normalize(&obb.Data.Axis[1], &obb.Data.Axis[1]);
-			obb.Data.Axis[2] = D3DXVECTOR3(mworld._31, mworld._32, mworld._33); D3DXVec3Normalize(&obb.Data.Axis[2], &obb.Data.Axis[2]);
-			obb.Data.Extent = extent;
+			obb.Data.Axis[0].value = XMVector3Normalize(mworld.r[0]);
+			obb.Data.Axis[1].value = XMVector3Normalize(mworld.r[1]);
+			obb.Data.Axis[2].value = XMVector3Normalize(mworld.r[2]);
 			obb.SetOffsetFlag(false);
 
-			// Recalculate the OBB data
-			obb.RecalculateData();
+			// Update the OBB extents, which will also trigger a full recalculation of the OBB data based on all the above parameters
+			obb.UpdateExtent(extent);
 		}
 		else
 		{
 			// This is not the root, so instead of setting axes we will set the offset matrix
 			obb.Data.Centre = object->GetPosition();
-			obb.Data.Extent = extent;
 			obb.SetOffsetFlag(true);
 			obb.Offset = mworld;
+
+			// Update the OBB extents, which will also trigger a full recalculation of the OBB data based on all the above parameters
+			obb.UpdateExtent(extent);
 		}
 	}
 	else
@@ -2359,7 +2363,7 @@ Result IO::Data::LoadModelGeometry(Model *model)
 	if (model->IsGeometryLoaded())	
 	{
 		// If no effective model size was specified in the xml data, calculate a default now by exactly fitting bounds around the mesh data	
-		D3DXVECTOR3 size = model->GetEffectiveModelSize();
+		XMFLOAT3 size = model->GetEffectiveModelSize();
 		if (size.x < Game::C_EPSILON || size.y < Game::C_EPSILON || size.z < Game::C_EPSILON)
 			model->SetEffectiveModelSize(model->GetModelSize());
 
@@ -2389,7 +2393,7 @@ Result IO::Data::PostProcessAllModelGeometry(void)
 		if (elsize.x > 0 && elsize.y > 0 && elsize.z > 0)
 		{
 			// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
-			model->SetActualModelSize(Game::ElementLocationToPhysicalPosition(elsize));
+			model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
 		}
 	}
 
@@ -2494,8 +2498,9 @@ Result IO::Data::LoadSystem(TiXmlElement *node)
 			s->SetCode(val);
 		}
 		else if (key == "size") {				/* Size of the system; system will extend from -X/2 to +X/2 for each dimension of size X */
-			D3DXVECTOR3 size = D3DXVECTOR3(1000.0f, 1000.0f, 1000.0f);
-			IO::GetVector3FromAttr(child, &size);
+			XMVECTOR size = XMVectorSetW(															// System size will always be a 
+							XMVectorMax(IO::GetVector3FromAttr(child), XMVectorReplicate(1000.0f)), // minimum of 1000 units in each 
+							0.0f);																	// dimension, with W cleared to zero
 			s->SetSize(size);
 		}
 		else if (key == "spacebackdrop") {		/* The location of the space backdrop texture */
@@ -2549,19 +2554,19 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 			e->SetAlphaTexture(filename.c_str());				
 		}
 		else if (key == "noisescrollspeed") {
-			e->SetScrollSpeeds(IO::GetVector3FromAttr(child));				// 3x scroll speeds for the texture translation
+			e->SetScrollSpeeds(IO::GetFloat3FromAttr(child));				// 3x scroll speeds for the texture translation
 		}
 		else if (key == "noisescaling") {									// 3x scaling factors for the texture sampling
-			e->SetScaling(IO::GetVector3FromAttr(child));
+			e->SetScaling(IO::GetFloat3FromAttr(child));
 		}
 		else if (key == "noisedistortion1") {
-			e->SetDistortionParameters1(IO::GetVector2FromAttr(child));	// Noise distortion for sample #1
+			e->SetDistortionParameters1(IO::GetFloat2FromAttr(child));	// Noise distortion for sample #1
 		}
 		else if (key == "noisedistortion2") {
-			e->SetDistortionParameters2(IO::GetVector2FromAttr(child));	// Noise distortion for sample #2
+			e->SetDistortionParameters2(IO::GetFloat2FromAttr(child));	// Noise distortion for sample #2
 		}
 		else if (key == "noisedistortion3") {
-			e->SetDistortionParameters3(IO::GetVector2FromAttr(child));	// Noise distortion for sample #3
+			e->SetDistortionParameters3(IO::GetFloat2FromAttr(child));	// Noise distortion for sample #3
 		}
 		else if (key == "noisedistortionscale") {
 			val = child->GetText();
@@ -2620,16 +2625,16 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			if (mx) e->SetInitialParticleLifetime(ParticleEmitter::Prop::MaxValue, (float)atof(mx));
 		}
 		else if (key == "initialposition.min") {
-			e->SetInitialParticleLocation(ParticleEmitter::Prop::MinValue, (IO::GetVector3FromAttr(child)));
+			e->SetInitialParticleLocation(ParticleEmitter::Prop::MinValue, (IO::GetFloat3FromAttr(child)));
 		}
 		else if (key == "initialposition.max") {
-			e->SetInitialParticleLocation(ParticleEmitter::Prop::MaxValue, (IO::GetVector3FromAttr(child)));
+			e->SetInitialParticleLocation(ParticleEmitter::Prop::MaxValue, (IO::GetFloat3FromAttr(child)));
 		}
 		else if (key == "initialcolour.min") {
-			e->SetInitialParticleColour(ParticleEmitter::Prop::MinValue, (IO::GetVector4FromAttr(child)));
+			e->SetInitialParticleColour(ParticleEmitter::Prop::MinValue, (IO::GetFloat4FromAttr(child)));
 		}
 		else if (key == "initialcolour.max") {
-			e->SetInitialParticleColour(ParticleEmitter::Prop::MaxValue, (IO::GetVector4FromAttr(child)));
+			e->SetInitialParticleColour(ParticleEmitter::Prop::MaxValue, (IO::GetFloat4FromAttr(child)));
 		}
 		else if (key == "initialsize") {
 			const char *mn = child->Attribute("min");
@@ -2638,16 +2643,16 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			if (mx) e->SetInitialParticleSize(ParticleEmitter::Prop::MaxValue, (float)atof(mx));
 		}
 		else if (key == "initialvelocity.min") {
-			e->SetInitialParticleVelocity(ParticleEmitter::Prop::MinValue, (IO::GetVector3FromAttr(child)));
+			e->SetInitialParticleVelocity(ParticleEmitter::Prop::MinValue, (IO::GetFloat3FromAttr(child)));
 		}
 		else if (key == "initialvelocity.max") {
-			e->SetInitialParticleVelocity(ParticleEmitter::Prop::MaxValue, (IO::GetVector3FromAttr(child)));
+			e->SetInitialParticleVelocity(ParticleEmitter::Prop::MaxValue, (IO::GetFloat3FromAttr(child)));
 		}
 		else if (key == "updatecolour.min") {
-			e->SetParticleColourUpdate(ParticleEmitter::Prop::MinValue, (IO::GetVector4FromAttr(child)));
+			e->SetParticleColourUpdate(ParticleEmitter::Prop::MinValue, (IO::GetFloat4FromAttr(child)));
 		}
 		else if (key == "updatecolour.max") {
-			e->SetParticleColourUpdate(ParticleEmitter::Prop::MaxValue, (IO::GetVector4FromAttr(child)));
+			e->SetParticleColourUpdate(ParticleEmitter::Prop::MaxValue, (IO::GetFloat4FromAttr(child)));
 		}
 		else if (key == "updatesize") {
 			const char *mn = child->Attribute("min");
@@ -2656,10 +2661,10 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			if (mx) e->SetParticleSizeUpdate(ParticleEmitter::Prop::MaxValue, (float)atof(mx));
 		}
 		else if (key == "updatevelocity.min") {
-			e->SetParticleVelocityUpdate(ParticleEmitter::Prop::MinValue, (IO::GetVector3FromAttr(child)));
+			e->SetParticleVelocityUpdate(ParticleEmitter::Prop::MinValue, (IO::GetFloat3FromAttr(child)));
 		}
 		else if (key == "updatevelocity.max") {
-			e->SetParticleVelocityUpdate(ParticleEmitter::Prop::MaxValue, (IO::GetVector3FromAttr(child)));
+			e->SetParticleVelocityUpdate(ParticleEmitter::Prop::MaxValue, (IO::GetFloat3FromAttr(child)));
 		}
 	}
 
@@ -2707,7 +2712,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			// Attempt to retrieve all the required data for an Image2D component
 			string code = child->Attribute("code");
 			string texture = child->Attribute("texture");
-			D3DXVECTOR3 pos = IO::GetVector3FromAttr(child);
+			XMFLOAT3 pos = IO::GetFloat3FromAttr(child);
 			const char *cwidth = child->Attribute("width");
 			const char *cheight = child->Attribute("height");
 			string brender = child->Attribute("render");
@@ -2773,7 +2778,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			// Set default values for anything not specified
 			int maxlength;
 			string srender; bool render;
-			D3DXVECTOR4 col;
+			XMFLOAT4 col;
 			
 			// Default position
 			int ix, iy;
@@ -2794,9 +2799,9 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 
 			// Default colour
 			if (r && g && b && a) 
-				col = D3DXVECTOR4((FLOAT)atof(r), (FLOAT)atof(g), (FLOAT)atof(b), (FLOAT)atof(a));
+				col = XMFLOAT4((FLOAT)atof(r), (FLOAT)atof(g), (FLOAT)atof(b), (FLOAT)atof(a));
 			else
-				col = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+				col = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 			// Default capacity
 			if (capacity) maxlength = atoi(capacity); else maxlength = 256;
@@ -2862,11 +2867,11 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			if (csize) fontsize = (float)atof(csize); 
 
 			// Default colour
-			D3DXVECTOR4 col;
+			XMFLOAT4 col;
 			if (r && g && b && a)
-				col = D3DXVECTOR4((FLOAT)atof(r), (FLOAT)atof(g), (FLOAT)atof(b), (FLOAT)atof(a));
+				col = XMFLOAT4((FLOAT)atof(r), (FLOAT)atof(g), (FLOAT)atof(b), (FLOAT)atof(a));
 			else
-				col = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+				col = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 			// Default max line length
 			int linelength = 256;
@@ -3319,10 +3324,10 @@ Result IO::Data::LoadSkinnedModel(TiXmlElement *node)
 				sm->SetDefaultAnimation(val);
 			}
 			else if (key == "modelsize") {							// Sets the ultimate model size, which the base mesh will be scaled to at render-time
-				sm->SetModelSize(IO::GetVector3FromAttr(child));
+				sm->SetModelSize(IO::GetFloat3FromAttr(child));
 			}
 			else if (key == "viewoffset") {
-				sm->SetViewOffsetPercentage(IO::GetVector3FromAttr(child));
+				sm->SetViewOffsetPercentage(IO::GetFloat3FromAttr(child));
 			}
 		}
 	}

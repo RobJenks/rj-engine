@@ -3,6 +3,7 @@
 #define __EquipmentInfoH__
 
 
+// This file contains no objects with special alignment requirements
 namespace Equip { 
 	
 	enum Class { 

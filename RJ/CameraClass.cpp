@@ -15,12 +15,12 @@ CameraClass::CameraClass(void)
 	// Set default parameters
 	m_camerastate = CameraClass::CameraState::NormalCamera;
 	m_shipclass = Ships::Class::Simple;
-	m_fixedposition = m_debugposition = NULL_VECTOR;
-	m_fixedorientation = m_debugorientation = ID_QUATERNION;
+	m_position = m_fixedposition = m_debugposition = NULL_VECTOR;
+	m_orientation = m_fixedorientation = m_debugorientation = ID_QUATERNION;
+	m_view = m_invview = ID_MATRIX;
+	m_vright = m_vup = m_vforward = NULL_VECTOR;
+	m_vrightf = m_vupf = m_vforwardf = NULL_FLOAT3;
 	m_camerapath = NULL;
-	
-	// Clear the initial view matrix
-	memset((void*)&m_view, 0, sizeof(D3DXMATRIX));
 }
 
 CameraClass::~CameraClass(void)
@@ -46,26 +46,25 @@ void CameraClass::CalculateViewMatrix(void)
 			SimpleShip *ship = (SimpleShip*)Game::CurrentPlayer->GetPlayerShip();
 
 			// Derive the camera offset matrix
-			D3DXMATRIX camoffset;
-			ship->DeriveActualCameraMatrix(camoffset);
+			XMMATRIX camoffset = ship->DeriveActualCameraMatrix();
 
 			// Calculate the view matrix based on positional data & the additional offset matrix.  We can use the chase camera
 			// orientation which was calculated above based on the current ship movement
-			CalculateViewMatrixFromPositionData(&(Game::CurrentPlayer->GetPosition()), 
-												&(Game::CurrentPlayer->GetOrientation()), &camoffset);
+			CalculateViewMatrixFromPositionData(Game::CurrentPlayer->GetPosition(), 
+												Game::CurrentPlayer->GetOrientation(), camoffset);
 		}
 		else
 		{
 			// Otherwise we apply no offset and simply calculate a position/orientation-based view matrix
-			CalculateViewMatrixFromPositionData(&(Game::CurrentPlayer->GetPosition()), 
-												&(Game::CurrentPlayer->GetOrientation()), 
-												 (Game::CurrentPlayer->GetViewOffsetMatrix()));
+			CalculateViewMatrixFromPositionData(Game::CurrentPlayer->GetPosition(), 
+												Game::CurrentPlayer->GetOrientation(), 
+												Game::CurrentPlayer->GetViewOffsetMatrix());
 		}
 	}
 	else if (m_camerastate == CameraClass::CameraState::FixedCamera)
 	{
 		// If we are using a fixed camera then simply calculate the view matrix based on the fixed position/orientation
-		CalculateViewMatrixFromPositionData(&m_fixedposition, &m_fixedorientation, &ID_MATRIX);
+		CalculateViewMatrixFromPositionData(m_fixedposition, m_fixedorientation, ID_MATRIX);
 	}
 	else if (m_camerastate == CameraClass::CameraState::PathCamera)
 	{
@@ -79,13 +78,13 @@ void CameraClass::CalculateViewMatrix(void)
 		{
 			// Otherwise calculate the view matrix based upon the current camera path position & orientation
 			CalculateViewMatrixFromPositionData(m_camerapath->GetCurrentCameraPosition(), 
-												m_camerapath->GetCurrentCameraOrientation(), &ID_MATRIX);
+												m_camerapath->GetCurrentCameraOrientation(), ID_MATRIX);
 		}
 	}
 	else if (m_camerastate == CameraClass::CameraState::DebugCamera)
 	{
 		// Calculate a view matrix based upon the debug camera position
-		CalculateViewMatrixFromPositionData(&m_debugposition, &m_debugorientation, &ID_MATRIX);
+		CalculateViewMatrixFromPositionData(m_debugposition, m_debugorientation, ID_MATRIX);
 	}
 	else
 	{
@@ -94,26 +93,25 @@ void CameraClass::CalculateViewMatrix(void)
 	}
 }
 
-void CameraClass::CalculateViewMatrixFromPositionData(const D3DXVECTOR3 *position, const D3DXQUATERNION *orientation, const D3DXMATRIX *offsetmatrix)
+void CameraClass::CalculateViewMatrixFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix)
 {
 	// Store location/orientation values for use throughout the frame
-	m_position = *(position);
-	m_orientation = *(orientation);
-	m_offsetmatrix = *(offsetmatrix);
+	m_position = position;
+	m_orientation = orientation;
+	m_offsetmatrix = offsetmatrix;
 		
 	// First convert the orientation D3DXQUATERNION into a rotation matrix
-	D3DXMatrixRotationQuaternion(&m_rot, orientation);
+	m_rot = XMMatrixRotationQuaternion(orientation);
 			
 	// Generate translation matrix for the position vector
-	D3DXMatrixTranslation(&m_trans, m_position.x, m_position.y, m_position.z);
+	m_trans = XMMatrixTranslationFromVector(m_position);
 
 	// Calculate the inverse view matrix by performing (translation[location] > rotation[orient] > translation [camoffset])
-	D3DXMatrixMultiply(&m_inter, &m_rot, &m_trans);
-	D3DXMatrixMultiply(&m_invview, offsetmatrix, &m_inter);
-	//m_invview = m_rot * m_trans * (*offsetmatrix);
+	m_inter = XMMatrixMultiply(m_rot, m_trans);
+	m_invview = XMMatrixMultiply(offsetmatrix, m_inter);
 
 	// Invert since view matrix is transform from world space into the camera coordinate system, then we are done
-	D3DXMatrixInverse(&m_view, NULL, &m_invview);
+	m_view = XMMatrixInverse(NULL, m_invview);
 
 	// Decompose into components that other methods can use for rendering; more efficient to do once here
 	DecomposeViewMatrix();
@@ -122,20 +120,30 @@ void CameraClass::CalculateViewMatrixFromPositionData(const D3DXVECTOR3 *positio
 void CameraClass::DecomposeViewMatrix(void)
 {
 	// Decompose view matrix into the constituent parts, which can then be used by other methods as required
-	D3DXVECTOR3 tmp;
-	D3DXMatrixDecompose(&tmp, &m_vrot, &m_vtrans, &m_view);
+	XMVECTOR tmp;
+	XMMatrixDecompose(&tmp, &m_vrot, &m_vtrans, m_view);
 
 	// Also decompose the view matrix into its component basis vectors and store them
-	m_vright =		D3DXVECTOR3(m_view._11, m_view._21, m_view._31);
-	m_vup =			D3DXVECTOR3(m_view._12, m_view._22, m_view._32);
-	m_vforward =	D3DXVECTOR3(m_view._13, m_view._23, m_view._33);
+	// Since these are stored in columns, we take the transpose and then use direct row-access methods to retrieve them
+	// m_vright =		D3DXVECTOR3(m_view._11, m_view._21, m_view._31);
+	// m_vup =			D3DXVECTOR3(m_view._12, m_view._22, m_view._32);
+	// m_vforward =		D3DXVECTOR3(m_view._13, m_view._23, m_view._33);
+	XMMATRIX viewT = XMMatrixTranspose(m_view);
+	m_vright =		XMVectorSetW(viewT.r[0], 0.0f);
+	m_vup =			XMVectorSetW(viewT.r[1], 0.0f);
+	m_vforward =	XMVectorSetW(viewT.r[2], 0.0f);
+
+	// Also store local float representations of the basis vectors for more efficient per-component access
+	XMStoreFloat3(&m_vrightf, m_vright);
+	XMStoreFloat3(&m_vupf, m_vup);
+	XMStoreFloat3(&m_vforwardf, m_vforward);
 
 	// Use the forward basis vector (which we can assume is normalised, if DX is following correct matrix algebra,
 	// to derive the camera yaw and pitch values.  Note roll cannot be derived & we don't need it here
 
-// DEBUG:	
-m_yaw = atan2(m_vforward.x, m_vforward.z);
-m_pitch = atan2(m_vforward.y, sqrtf(m_vforward.x*m_vforward.x + m_vforward.z*m_vforward.z));	
+// TODO: DEBUG:	
+m_yaw = atan2(m_vforwardf.x, m_vforwardf.z);
+m_pitch = atan2(m_vforwardf.y, sqrtf(m_vforwardf.x*m_vforwardf.x + m_vforwardf.z*m_vforwardf.z));	
 
 }
 
@@ -154,7 +162,7 @@ void CameraClass::ReleaseCamera(void)
 }
 
 // Fixes the camera in a specific position & orientation
-void CameraClass::FixCamera(const D3DXVECTOR3 & position, const D3DXQUATERNION & orientation)
+void CameraClass::FixCamera(const FXMVECTOR position, const FXMVECTOR orientation)
 {
 	// Check whether we are currently following a path; if so, dispose of the path first
 	if (m_camerastate == CameraClass::CameraState::PathCamera && m_camerapath)
@@ -264,11 +272,10 @@ void CameraClass::DeactivateDebugCamera(void)
 void CameraClass::DebugCameraYaw(float radians)
 {
 	// Determine the local up vector
-	D3DXVECTOR3 up; D3DXQUATERNION yaw;
-	RotateVectorByQuaternion(UP_VECTOR, m_debugorientation, up);
-
+	XMVECTOR up = XMVector3Rotate(UP_VECTOR, m_debugorientation);
+	
 	// Generate a rotation quaternion about this local axis
-	D3DXQuaternionRotationAxis(&yaw, &up, radians);
+	XMVECTOR yaw = XMQuaternionRotationAxis(up, radians);
 
 	// Apply the delta quaternion to our current orientation
 	AddDeltaDebugCameraOrientation(yaw);
@@ -278,11 +285,10 @@ void CameraClass::DebugCameraYaw(float radians)
 void CameraClass::DebugCameraPitch(float radians)
 {
 	// Determine the local right vector
-	D3DXVECTOR3 right; D3DXQUATERNION pitch;
-	RotateVectorByQuaternion(RIGHT_VECTOR, m_debugorientation, right);
+	XMVECTOR right = XMVector3Rotate(RIGHT_VECTOR, m_debugorientation);
 
 	// Generate a rotation quaternion about this local axis
-	D3DXQuaternionRotationAxis(&pitch, &right, radians);
+	XMVECTOR pitch = XMQuaternionRotationAxis(right, radians);
 
 	// Apply the delta quaternion to our current orientation
 	AddDeltaDebugCameraOrientation(pitch);
@@ -292,11 +298,10 @@ void CameraClass::DebugCameraPitch(float radians)
 void CameraClass::DebugCameraRoll(float radians)
 {
 	// Determine the local forward vector
-	D3DXVECTOR3 forward; D3DXQUATERNION roll;
-	RotateVectorByQuaternion(FORWARD_VECTOR, m_debugorientation, forward);
+	XMVECTOR forward = XMVector3Rotate(FORWARD_VECTOR, m_debugorientation);
 
 	// Generate a rotation quaternion about this local axis
-	D3DXQuaternionRotationAxis(&roll, &forward, radians);
+	XMVECTOR roll = XMQuaternionRotationAxis(forward, radians);
 
 	// Apply the delta quaternion to our current orientation
 	AddDeltaDebugCameraOrientation(roll);
@@ -318,8 +323,8 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float time)
 	if (!target || time < Game::C_EPSILON) return false;
 
 	// Determine the distance we need to zoom from this target.  First test trivial case if object has no size
-	D3DXVECTOR3 objectsize = target->GetSize();
-	if (objectsize.x < Game::C_EPSILON || objectsize.y < Game::C_EPSILON || objectsize.z < Game::C_EPSILON)
+	XMVECTOR objectsize = target->GetSize();
+	if (!XMVector3GreaterOrEqual(objectsize, Game::C_EPSILON_V))
 	{
 		return ZoomToOverheadShipView(target, Game::C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE, time);
 	}
@@ -331,7 +336,7 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float time)
 		//		d = distance to move from the ship
 		//		s = size of the object (z dimension will be considered)
 		//		a = camera FOV.  (use precalculated tan(FOV/2) exposed by frustum in GetTanOfHalfFOV())
-		float distance = ((objectsize.z * 1.25f) / 2.0f) / Game::Engine->GetViewFrustrum()->GetTanOfHalfFOV();
+		float distance = ((XMVectorGetZ(objectsize) * 1.25f) / 2.0f) / Game::Engine->GetViewFrustrum()->GetTanOfHalfFOV();
 		return ZoomToOverheadShipView(target, distance, time);
 	}
 }
@@ -350,19 +355,17 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, f
 	path->AddNode(m_position, m_orientation, 0.0f);
 
 	// Get the vector from camera > centre of target in world space
-	D3DXVECTOR3 targetpos, targetvec, targetvec_norm, localcentre; 
-	localcentre = (target->GetSize() * 0.5f);
-	D3DXVec3TransformCoord(&targetpos, &localcentre, target->GetWorldMatrix());
+	XMVECTOR localcentre = XMVectorMultiply(target->GetSize(), HALF_VECTOR);
+	XMVECTOR targetpos = XMVector3TransformCoord(localcentre, target->GetWorldMatrix());
+	XMVECTOR targetvec = XMVectorSubtract(targetpos, m_position);
+	XMVECTOR targetvec_norm = XMVector3NormalizeEst(targetvec);
 
-	targetvec = (targetpos - m_position);
-	D3DXVec3Normalize(&targetvec_norm, &targetvec);
-	
 	// Specify constants for the boundary distance, and the portion of total time allocated to getting to that boundary
 	float boundarydist = distance * 1.0f;
 	float boundary_time_pc = 0.5f;
 
 	// Test whether we are outside the ship boundary radius, and therefore need to create node 2
-	float disttotarget = D3DXVec3Length(&targetvec);
+	float disttotarget = XMVectorGetX(XMVector3LengthEst(targetvec));
 	if (disttotarget > boundarydist)
 	{
 		// Node 2 = a point on the boundary radius surrounding the target ship
@@ -370,16 +373,15 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, f
 		// We can get a vector to the point on the boundary by negating the normalised (unit length) target vector
 		// and multiplying by the boundary distance (to get vector from target to boundary point).  We then transform
 		// by the inverse world matrix of the target to get the coordinates in local target space
-		D3DXVECTOR3 boundaryvec = (-targetvec_norm * boundarydist);
-		D3DXVec3TransformCoord(&boundaryvec, &boundaryvec, target->GetInverseWorldMatrix());
+		XMVECTOR boundaryvec = XMVectorScale(targetvec_norm, -boundarydist);
+		boundaryvec = XMVector3TransformCoord(boundaryvec, target->GetInverseWorldMatrix());
 
 		// Adjust the local boundary vector so that it is at the target distance above the ship
-		boundaryvec.y = distance;
+		boundaryvec = XMVectorSetY(boundaryvec, distance);
 
 		// The required change in orientation will be the quaternion between the basis (fwd) vector and the 
 		// vector from boundary point to target (the negation of boundaryvec, which is target>boundary)
-		D3DXQUATERNION orienttotarget;
-		QuaternionBetweenVectors(&orienttotarget, &BASIS_VECTOR, &(-boundaryvec));
+		XMVECTOR orienttotarget = QuaternionBetweenVectors(BASIS_VECTOR, XMVectorNegate(boundaryvec));
 
 		// Create the target-relative node using these delta vector/quaternion values
 		path->AddNode(boundaryvec, orienttotarget, target, (time * boundary_time_pc));
@@ -391,11 +393,10 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, f
 	}
 
 	// Node 3 = final position above the target object.  Will be a relative node, tied to the target object
-	D3DXVECTOR3 overheadpos; D3DXQUATERNION rot90x, overheadorient;
-
+	
 	// Simply specify the relative transformation required from target pos/orient
-	overheadpos = D3DXVECTOR3(localcentre.x, distance, localcentre.z);
-	D3DXQuaternionRotationYawPitchRoll(&overheadorient, 0.0f, PIOVER2, 0.0f);
+	XMVECTOR overheadpos = XMVectorSetY(localcentre, distance);
+	XMVECTOR overheadorient = XMQuaternionRotationRollPitchYaw(PIOVER2, 0.0f, 0.0f);
 
 	// Create the final node above the target object
 	path->AddNode(overheadpos, overheadorient, target, time);

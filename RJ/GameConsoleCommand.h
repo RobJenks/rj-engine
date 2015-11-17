@@ -11,6 +11,7 @@
 
 // Represents one full command to the game console, including original text input (if applicable),
 // input parameters and output results
+// This class has no special alignment requirements
 struct GameConsoleCommand
 {
 	// Enumeration of possible output results

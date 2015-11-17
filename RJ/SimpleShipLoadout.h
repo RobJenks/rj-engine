@@ -18,6 +18,8 @@ class iLoadoutMap;
 class LoadoutMap;
 class CompoundLoadoutMap;
 
+
+// This class has no special alignment requirements
 class SimpleShipLoadout
 {
 public:

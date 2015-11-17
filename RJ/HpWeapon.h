@@ -9,7 +9,9 @@ class Hardpoint;
 class Weapon;
 
 
-class HpWeapon : public Hardpoint
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class HpWeapon : public ALIGN16<HpWeapon>, public Hardpoint
 {
 public:
 	// Returns the type of this hardpoint subclass

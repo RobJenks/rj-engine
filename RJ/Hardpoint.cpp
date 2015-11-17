@@ -14,8 +14,8 @@ Hardpoint::Hardpoint(void)
 
 	// Default values for all other fields
 	this->Code = "";
-	this->Position =	D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	this->Orientation = D3DXQUATERNION (ID_QUATERNION);
+	this->Position = NULL_VECTOR;
+	this->Orientation = ID_QUATERNION;
 
 }
 
@@ -33,8 +33,8 @@ Hardpoint::Hardpoint(const Hardpoint &H)
 
 	// All other fields copied via member-wise clone
 	this->Code = H.Code;
-	this->Position = D3DXVECTOR3(H.Position);
-	this->Orientation = D3DXQUATERNION(H.Orientation);
+	this->Position = H.Position;
+	this->Orientation = H.Orientation;
 }
 
 Hardpoint& Hardpoint::operator =(const Hardpoint &H)
@@ -45,8 +45,8 @@ Hardpoint& Hardpoint::operator =(const Hardpoint &H)
 
 	// All other fields copied via member-wise clone
 	this->Code = H.Code;
-	this->Position = D3DXVECTOR3(H.Position);
-	this->Orientation = D3DXQUATERNION(H.Orientation);
+	this->Position = H.Position;
+	this->Orientation = H.Orientation;
 
 	return *this;
 }

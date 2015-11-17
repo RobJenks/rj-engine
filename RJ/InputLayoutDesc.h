@@ -7,6 +7,7 @@
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
 
+// This class has no special alignment requirements
 class InputLayoutDesc
 {
 public:

@@ -49,19 +49,18 @@ public:
 	{
 		// Get the object centre and collision radius
 		if (!obj) return false;
-		XMVECTOR centre = XMLoadFloat3(obj->GetPosition());
+		XMVECTOR centre = obj->GetPosition();
 		XMVECTOR neg_radius = XMVectorReplicate(-(obj->GetCollisionSphereRadius()));
 		
 		// If the sphere is 'behind' any plane of the view frustum then return false immediately
 		// Otherwise, it is in view.  Loop unrolled for efficiency
 		
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], centre), neg_radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0].value, centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1].value, centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2].value, centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3].value, centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4].value, centre), neg_radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5].value, centre), neg_radius)) return false;
 		return true;
 	}
 
@@ -69,12 +68,12 @@ public:
 	bool ViewFrustrum::CheckPoint(const FXMVECTOR pt)
 	{
 		// Loop unrolled for efficiency; if the point lies outside any of the six frustum planes then return false immediately
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], pt), NULL_VECTOR2)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], pt), NULL_VECTOR2)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], pt), NULL_VECTOR2)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], pt), NULL_VECTOR2)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], pt), NULL_VECTOR2)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0].value, pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1].value, pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2].value, pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3].value, pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4].value, pt), NULL_VECTOR2)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5].value, pt), NULL_VECTOR2)) return false;
 
 		// Point lines inside all planes, therefore is inside the frustum
 		return true;
@@ -95,23 +94,23 @@ public:
 		// If the sphere is 'behind' any plane of the view frustum then return false immediately
 		// Loop unrolled for efficiency
 		XMVECTOR radius = XMVectorReplicate(-f_radius);
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[0], centre), radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[1], centre), radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[2], centre), radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[3], centre), radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[4], centre), radius)) return false;
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[5], centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[0].value, centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[1].value, centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[2].value, centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[3].value, centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[4].value, centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[5].value, centre), radius)) return false;
 		return true;
 	}
 
-	CMPINLINE XMVECTOR GetPlane(FrustrumPlane plane) { return m_planes[(int)plane]; }
+	CMPINLINE XMVECTOR GetPlane(FrustrumPlane plane) { return m_planes[(int)plane].value; }
 
-	CMPINLINE XMVECTOR GetNearPlane(void)const		{ return m_planes[(int)FrustrumPlane::NearPlane]; }
-	CMPINLINE XMVECTOR GetFarPlane(void) const		{ return m_planes[(int)FrustrumPlane::FarPlane]; }
-	CMPINLINE XMVECTOR GetLeftPlane(void) const		{ return m_planes[(int)FrustrumPlane::LeftPlane]; }
-	CMPINLINE XMVECTOR GetRightPlane(void) const	{ return m_planes[(int)FrustrumPlane::RightPlane]; }
-	CMPINLINE XMVECTOR GetTopPlane(void) const		{ return m_planes[(int)FrustrumPlane::TopPlane]; }
-	CMPINLINE XMVECTOR GetBottomPlane(void) const	{ return m_planes[(int)FrustrumPlane::BottomPlane]; }
+	CMPINLINE XMVECTOR GetNearPlane(void)const		{ return m_planes[(int)FrustrumPlane::NearPlane].value; }
+	CMPINLINE XMVECTOR GetFarPlane(void) const		{ return m_planes[(int)FrustrumPlane::FarPlane].value; }
+	CMPINLINE XMVECTOR GetLeftPlane(void) const		{ return m_planes[(int)FrustrumPlane::LeftPlane].value; }
+	CMPINLINE XMVECTOR GetRightPlane(void) const	{ return m_planes[(int)FrustrumPlane::RightPlane].value; }
+	CMPINLINE XMVECTOR GetTopPlane(void) const		{ return m_planes[(int)FrustrumPlane::TopPlane].value; }
+	CMPINLINE XMVECTOR GetBottomPlane(void) const	{ return m_planes[(int)FrustrumPlane::BottomPlane].value; }
 
 	const CMPINLINE D3DXFINITEPLANE *GetFiniteFarPlane(void) const { return &m_farplaneworld; }
 

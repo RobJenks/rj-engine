@@ -5,6 +5,8 @@
 
 #include "Crew.h"
 
+
+// This file contains no objects with special alignment requirements
 class CrewClassRequirement
 {
 public:

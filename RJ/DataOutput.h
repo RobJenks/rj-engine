@@ -20,6 +20,7 @@ class OrientedBoundingBox;
 class BoundingObject;
 class Engine;
 
+// This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
 
 	Result SaveXMLDocument(TiXmlElement *root, const string &filename);

@@ -7,6 +7,8 @@
 class Hardpoint;
 class Equipment;
 
+
+// This class has no special alignment requirements
 class LoadoutMap : iLoadoutMap
 {
 public:
