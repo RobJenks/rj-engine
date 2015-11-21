@@ -151,6 +151,7 @@ namespace Game {
 	bool C_NO_MOMENTUM_LIMIT = false;						// Determines whether the momentum safety limit is enabled
 	float C_ANGULAR_VELOCITY_DAMPING_FACTOR = 0.01f;		// Damping applied to angular rotation, measured in rad/sec
 	float C_COLLISION_SPACE_COEFF_ELASTICITY = 0.9f;		// Coefficient of elasticity for space-based collisions
+	AXMVECTOR C_COLLISION_SPACE_COEFF_ELASTICITY_V = XMVectorReplicate(C_COLLISION_SPACE_COEFF_ELASTICITY);
 	float C_MAX_LINEAR_VELOCITY = 10000.0f;					// Max linear velocity that any object can attain; to avoid overflows and other physics-based errors
 	float C_MAX_ANGULAR_VELOCITY = 10.0f;					// Max angular velocity that any object can attain; to avoid overflows and other physics-based errors
 	float C_ENVIRONMENT_MOVE_DRAG_FACTOR = 4.0f;			// The amount of x/z velocity that is lost by environment objects per second due to 'friction'
@@ -166,6 +167,8 @@ namespace Game {
 	const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD = 1.0f;		// Threshold momentum value, above which we apply an additional collision response
 	const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ =										// Squared threshold momentum value, above which
 		C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD * C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD;	// we apply an additional collision response
+	const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V = XMVectorReplicate(C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD);
+	const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V = XMVectorReplicate(C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ);
 	const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;					// The maximum number of collision exclusions that can be applied to an object
 	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
 	

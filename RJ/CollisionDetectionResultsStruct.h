@@ -6,6 +6,7 @@
 #include "CompilerSettings.h"
 
 // Struct holding details on the collision detection performed per frame
+// This class has no special alignment requirements
 struct CollisionDetectionResultsStruct
 {
 public:

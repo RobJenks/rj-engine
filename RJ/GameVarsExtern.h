@@ -170,6 +170,7 @@ namespace Game {
 	extern bool C_NO_MOMENTUM_LIMIT;
 	extern float C_ANGULAR_VELOCITY_DAMPING_FACTOR;
 	extern float C_COLLISION_SPACE_COEFF_ELASTICITY;
+	extern AXMVECTOR C_COLLISION_SPACE_COEFF_ELASTICITY_V;
 	extern float C_MAX_LINEAR_VELOCITY;
 	extern float C_MAX_ANGULAR_VELOCITY;
 	extern float C_ENVIRONMENT_MOVE_DRAG_FACTOR;
@@ -184,6 +185,8 @@ namespace Game {
 	extern const float C_ACTIVE_COLLISION_DISTANCE_ACTORLEVEL;			// Distance within which collision detection is performed (in an actor context)
 	extern const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD;		// Threshold momentum value, above which we apply an additional collision response
 	extern const float C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ;	// Squared threshold momentum value, above which we apply an additional collision response
+	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V;	// Threshold momentum value, above which we apply an additional collision response (vectorised form)
+	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V;	// Squared threshold momentum value, above which we apply an additional collision response (vectorised form)
 	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS;					// The maximum number of collision exclusions that can be applied to an object
 
 	// Object management constants

@@ -8,6 +8,7 @@ class ComplexShipElement;
 class NavNode;
 
 // Struct holding details of a connection between two nav nodes
+// This class has no special alignment requirements
 struct NavNodeConnection
 {
 	NavNode *				Target;				// The nav node we are connecting to
@@ -18,6 +19,7 @@ struct NavNodeConnection
 };
 
 // Struct holding data on a navigation node, used by actors to route around the interior of ships/stations
+// This class has no special alignment requirements
 class NavNode
 {
 public:

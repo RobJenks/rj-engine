@@ -614,10 +614,10 @@ void RJMain::ProcessKeyboardInput(void)
 			ss->Highlight.Deactivate();
 		else
 		{
-			D3DXVECTOR4 options[6] = { D3DXVECTOR4(1.0f, 0.0f, 0.0f, 1.0f), D3DXVECTOR4(0.0f, 1.0f, 0.0f, 1.0f), D3DXVECTOR4(0.0f, 0.0f, 1.0f, 1.0f),
-				D3DXVECTOR4(1.0f, 1.0f, 0.0f, 1.0f), D3DXVECTOR4(1.0f, 0.0f, 1.0f, 1.0f), D3DXVECTOR4(0.0f, 1.0f, 1.0f, 1.0f) };
+			XMFLOAT4 options[6] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
+				XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) };
 			ss->Highlight.Activate();
-			ss->Highlight.SetColour(options[(int)floor(frand_lh(0, 6))]);
+			ss->Highlight.SetColour(XMLoadFloat4(&options[(int)floor(frand_lh(0, 6))]));
 		}
 
 		m_keyboard.LockKey(DIK_EQUALS);
@@ -643,8 +643,8 @@ void RJMain::ProcessKeyboardInput(void)
 		for (int x = 0; x < cs->GetElementSizeX(); ++x)
 			for (int y = 0; y < cs->GetElementSizeY(); ++y)
 				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs, INTVECTOR3(x, y, 0),
-				D3DXVECTOR3(1.0f - (cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value),
-				cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f), 0.2f);
+				XMVectorSet(1.0f - (cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value),
+				cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
 	}
 
 	if (false && b[DIK_U]) {
@@ -656,9 +656,8 @@ void RJMain::ProcessKeyboardInput(void)
 		a1->CancelAllOrders();
 		for (int i = 0; i<3; i++)
 		{
-			o[i] = new Order_ActorMoveToPosition(D3DXVECTOR3(Game::CurrentPlayer->GetPosition().x + frand_lh(-15.0f, 15.0f),
-				0.0f,
-				Game::CurrentPlayer->GetPosition().z + frand_lh(-15.0f, 15.0f)),
+			o[i] = new Order_ActorMoveToPosition(XMVectorSetY(XMVectorSetW(
+				XMVectorAdd(Game::CurrentPlayer->GetPosition(), Vector3Random(-15.0f, 15.0f)), 0.0f), 0.0f),
 				2.0f, false);
 			if (i > 0) o[i]->Dependency = o[i - 1]->ID;
 			a1->AssignNewOrder(o[i]);
@@ -677,7 +676,7 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		cs->ApplyAngularMomentum(D3DXVECTOR3(0.0f, 1.0f * cs->GetMass(), 0.0f));
+		cs->ApplyAngularMomentum(XMVectorSetY(NULL_VECTOR, 1.0f * cs->GetMass()));
 		//m_keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
@@ -1386,7 +1385,6 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 {
 	iSpaceObject *object;
 	std::vector<iSpaceObject*> objects; int count = 0;
-	D3DXVECTOR3 pos; float radius;
 
 	// Find all active space objects around the player; take a different approach depending on whether the player is in a ship or on foot
 	if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
@@ -1411,22 +1409,35 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 	}
 
 	// Iterate through the active objects
+	XMFLOAT3 pos; float radius;
 	std::vector<iSpaceObject*>::iterator it_end = objects.end();
 	for (std::vector<iSpaceObject*>::iterator it = objects.begin(); it != it_end; ++it)
 	{
 		object = (*it);
-		pos = object->GetPosition();
-		radius = object->GetCollisionSphereRadius();
 
-		// Render the collision sphere extent in each axis
-		/*Game::Engine->GetOverlayRenderer()->RenderLine(D3DXVECTOR3(pos.x - radius, pos.y, pos.z), D3DXVECTOR3(pos.x + radius, pos.y, pos.z), OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
-		Game::Engine->GetOverlayRenderer()->RenderLine(D3DXVECTOR3(pos.x, pos.y - radius, pos.z), D3DXVECTOR3(pos.x, pos.y + radius, pos.z), OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
-		Game::Engine->GetOverlayRenderer()->RenderLine(D3DXVECTOR3(pos.x, pos.y, pos.z - radius), D3DXVECTOR3(pos.x, pos.y, pos.z + radius), OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
-		*/
-		// Render the oriented bounding box(es) used for narrowphase collision detection, if applicable for this object
-		if (object->GetCollisionMode() == Game::CollisionMode::FullCollision)
+		/* If we want to render collision sphere extents */
+		if (false)
 		{
-			Game::Engine->GetOverlayRenderer()->RenderOBB(object->CollisionOBB, true, OverlayRenderer::RenderColour::RC_LightBlue, 0.4f);
+			XMStoreFloat3(&pos, object->GetPosition());
+			radius = object->GetCollisionSphereRadius();
+
+			// Render the collision sphere extent in each axis
+			Game::Engine->GetOverlayRenderer()->RenderLine(	XMVectorSet(pos.x - radius, pos.y, pos.z, 0.0f), XMVectorSet(pos.x + radius, pos.y, pos.z, 0.0f), 
+															OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
+			Game::Engine->GetOverlayRenderer()->RenderLine(XMVectorSet(pos.x, pos.y - radius, pos.z, 0.0f), XMVectorSet(pos.x, pos.y + radius, pos.z, 0.0f), 
+															OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
+			Game::Engine->GetOverlayRenderer()->RenderLine(XMVectorSet(pos.x, pos.y, pos.z - radius, 0.0f), XMVectorSet(pos.x, pos.y, pos.z + radius, 0.0f), 
+															OverlayRenderer::RenderColour::RC_Green, 1.0f, radius*2.0f);
+		}
+
+		/* If we want to render the OBBs themselves */
+		if (true)
+		{
+			// Render the oriented bounding box(es) used for narrowphase collision detection, if applicable for this object
+			if (object->GetCollisionMode() == Game::CollisionMode::FullCollision)
+			{
+				Game::Engine->GetOverlayRenderer()->RenderOBB(object->CollisionOBB, true, OverlayRenderer::RenderColour::RC_LightBlue, 0.4f);
+			}
 		}
 	}
 }
@@ -1441,15 +1452,15 @@ RJMain::~RJMain(void)
 // Run the continuous collision detection (CCD) test in the main system environment
 void RJMain::DebugCCDSphereTest(void)
 {
-	static D3DXVECTOR3 sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
-	static D3DXQUATERNION ssorient = ID_QUATERNION;
+	static AXMVECTOR sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
+	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
 	BOOL *k = m_keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
-		sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
+		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
 		ss->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1457,20 +1468,18 @@ void RJMain::DebugCCDSphereTest(void)
 		k[DIK_LCONTROL] && k[DIK_0])
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-		Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(0.0f, 200.0f, 0.0f));
-		D3DXQUATERNION orient;
-		D3DXQuaternionRotationAxis(&orient, &RIGHT_VECTOR, PIOVER2);
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
 	}
 
 	ss->SetPosition(sspos);
 	ss->SetOrientation(ssorient);
-	ss->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
 	ss->RefreshPositionImmediate();
 	ss->CollisionOBB.UpdateFromObject(*ss);
 	s2->SetPosition(NULL_VECTOR);
 	s2->SetOrientation(ID_QUATERNION);
-	s2->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	s2->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
 	s2->RefreshPositionImmediate();
 	s2->RefreshPositionImmediate();
 	s2->CollisionOBB.UpdateFromObject(*s2);
@@ -1480,23 +1489,20 @@ void RJMain::DebugCCDSphereTest(void)
 
 	if (!k[DIK_LCONTROL])
 	{
-		if (k[DIK_LEFTARROW]) sspos -= (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_RIGHTARROW]) sspos += (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_UPARROW]) sspos += (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
-		if (k[DIK_DOWNARROW]) sspos -= (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
+		if (k[DIK_LEFTARROW]) sspos = XMVectorSubtract(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_RIGHTARROW]) sspos = XMVectorAdd(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_UPARROW]) sspos = XMVectorAdd(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
+		if (k[DIK_DOWNARROW]) sspos = XMVectorSubtract(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
 	}
 	else
 	{
-		D3DXQUATERNION delta;
 		if (k[DIK_LEFTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, -turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
@@ -1504,21 +1510,19 @@ void RJMain::DebugCCDSphereTest(void)
 	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
 	OverlayRenderer::RenderColour col = (b ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
-	D3DXMATRIX world, trans; D3DXVECTOR3 move;
-	ss->CollisionOBB.GenerateWorldMatrix(&world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
-	s2->CollisionOBB.GenerateWorldMatrix(&world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize().x, s2->GetSize().y, s2->GetSize().z);
+	XMMATRIX world; XMVECTOR move;
+	ss->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
+	s2->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize());
 
-	move = -collision.ContinuousTestResult.InterimCalculations.wm0;
-	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);
-	world = (*(ss->GetWorldMatrix()) * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm0);
+	world = XMMatrixMultiply(ss->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
 
-	move = -collision.ContinuousTestResult.InterimCalculations.wm1;
-	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);
-	world = (*(s2->GetWorldMatrix()) * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2->GetSize().x, s2->GetSize().y, s2->GetSize().z);
+	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm1);
+	world = XMMatrixMultiply(s2->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2->GetSize());
 
 	Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.InterimCalculations.pos0,
 		ss->GetPosition(), col, 5.0f, -1.0f);
@@ -1527,7 +1531,7 @@ void RJMain::DebugCCDSphereTest(void)
 
 	if (b)
 	{
-		D3DXMatrixTranslation(&world, collision.ContinuousTestResult.ContactPoint.x, collision.ContinuousTestResult.ContactPoint.y, collision.ContinuousTestResult.ContactPoint.z);
+		world = XMMatrixTranslationFromVector(collision.ContinuousTestResult.ContactPoint);
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 	}
 
@@ -1540,15 +1544,15 @@ void RJMain::DebugCCDSphereTest(void)
 // Run the continuous collision detection (CCD) test between specific objects in the main system environment
 void RJMain::DebugCCDOBBTest(void)
 {
-	static D3DXVECTOR3 sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
-	static D3DXQUATERNION ssorient = ID_QUATERNION;
+	static AXMVECTOR sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
+	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
 	BOOL *k = m_keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
-		sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
+		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
 		ss->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1556,22 +1560,20 @@ void RJMain::DebugCCDOBBTest(void)
 		k[DIK_LCONTROL] && k[DIK_0])
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-		Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(0.0f, 200.0f, 0.0f));
-		D3DXQUATERNION orient;
-		D3DXQuaternionRotationAxis(&orient, &RIGHT_VECTOR, PIOVER2);
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
 	}
 
-	D3DXVECTOR3 restore_size = ss->GetSize();
+	XMVECTOR restore_size = ss->GetSize();
 	ss->SetPosition(sspos);
 	ss->SetOrientation(ssorient);
-	ss->SetSize(D3DXVECTOR3(5.0f, 5.0f, 5.0f));
-	ss->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	ss->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
+	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
 	ss->RefreshPositionImmediate();
 
 	s2->SetPosition(NULL_VECTOR);
 	s2->SetOrientation(ID_QUATERNION);
-	s2->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	s2->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
 	s2->RefreshPositionImmediate();
 	s2->RefreshPositionImmediate();
 	s2->CollisionOBB.UpdateFromObject(*s2);
@@ -1581,23 +1583,20 @@ void RJMain::DebugCCDOBBTest(void)
 
 	if (!k[DIK_LCONTROL])
 	{
-		if (k[DIK_LEFTARROW]) sspos -= (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_RIGHTARROW]) sspos += (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_UPARROW]) sspos += (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
-		if (k[DIK_DOWNARROW]) sspos -= (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
+		if (k[DIK_LEFTARROW]) sspos = XMVectorSubtract(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_RIGHTARROW]) sspos = XMVectorAdd(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_UPARROW]) sspos = XMVectorAdd(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
+		if (k[DIK_DOWNARROW]) sspos = XMVectorSubtract(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
 	}
 	else
 	{
-		D3DXQUATERNION delta;
 		if (k[DIK_LEFTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, -turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
@@ -1605,16 +1604,15 @@ void RJMain::DebugCCDOBBTest(void)
 	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
 	OverlayRenderer::RenderColour col = (b ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
-	D3DXMATRIX world, trans; D3DXVECTOR3 move;
-	ss->CollisionOBB.GenerateWorldMatrix(&world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
-	s2->CollisionOBB.GenerateWorldMatrix(&world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize().x, s2->GetSize().y, s2->GetSize().z);
+	XMMATRIX world; XMVECTOR move;
+	ss->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
+	s2->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize());
 
-	move = -collision.ContinuousTestResult.InterimCalculations.wm0;
-	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);
-	world = (*(ss->GetWorldMatrix()) * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm0);
+	world = XMMatrixMultiply(ss->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize()_;
 
 	/*move = -collision.ContinuousTestResult.InterimCalculations.wm1;
 	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);
@@ -1628,7 +1626,7 @@ void RJMain::DebugCCDOBBTest(void)
 
 	if (b)
 	{
-		D3DXMatrixTranslation(&world, collision.ContinuousTestResult.ContactPoint.x, collision.ContinuousTestResult.ContactPoint.y, collision.ContinuousTestResult.ContactPoint.z);
+		world = XMMatrixTranslationFromVector(collision.ContinuousTestResult.ContactPoint);
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 	}
 
@@ -1643,15 +1641,15 @@ void RJMain::DebugCCDOBBTest(void)
 // Run the full continuous collision detection (CCD) test on all nearby objects in the main system environment
 void RJMain::DebugFullCCDTest(void)
 {
-	static D3DXVECTOR3 sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
-	static D3DXQUATERNION ssorient = ID_QUATERNION;
+	static AXMVECTOR sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
+	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
 	BOOL *k = m_keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
-		sspos = D3DXVECTOR3(50.0f, 0.0f, 50.0f);
+		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
 		ss->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1659,17 +1657,15 @@ void RJMain::DebugFullCCDTest(void)
 		k[DIK_LCONTROL] && k[DIK_0])
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-		Game::Engine->GetCamera()->SetDebugCameraPosition(D3DXVECTOR3(0.0f, 200.0f, 0.0f));
-		D3DXQUATERNION orient;
-		D3DXQuaternionRotationAxis(&orient, &RIGHT_VECTOR, PIOVER2);
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
 	}
 
-	D3DXVECTOR3 restore_size = ss->GetSize();
+	XMVECTOR restore_size = ss->GetSize();
 	ss->SetPosition(sspos);
 	ss->SetOrientation(ssorient);
-	ss->SetSize(D3DXVECTOR3(5.0f, 5.0f, 5.0f));
-	ss->SetLocalMomentum(D3DXVECTOR3(0.0f, 0.0f, 200.0f));
+	ss->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
+	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
 	ss->RefreshPositionImmediate();
 
 	s2->SetPosition(NULL_VECTOR);
@@ -1684,34 +1680,31 @@ void RJMain::DebugFullCCDTest(void)
 
 	if (!k[DIK_LCONTROL])
 	{
-		if (k[DIK_LEFTARROW]) sspos -= (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_RIGHTARROW]) sspos += (D3DXVECTOR3(movespeed * restore_timefactor, 0.0f, 0.0f));
-		if (k[DIK_UPARROW]) 
-			if (!k[DIK_LSHIFT]) sspos += (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
-			else				sspos += (D3DXVECTOR3(0.0f, movespeed * restore_timefactor, 0.0f));
+		if (k[DIK_LEFTARROW])	sspos = XMVectorSubtract(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_RIGHTARROW])	sspos = XMVectorAdd(sspos, XMVectorSet(movespeed * restore_timefactor, 0.0f, 0.0f, 0.0f));
+		if (k[DIK_UPARROW])
+			if (!k[DIK_LSHIFT]) sspos = XMVectorAdd(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
+			else				sspos = XMVectorAdd(sspos, XMVectorSet(0.0f, movespeed * restore_timefactor, 0.0f, 0.0f));
 		if (k[DIK_DOWNARROW])
-			if (!k[DIK_LSHIFT])	sspos -= (D3DXVECTOR3(0.0f, 0.0f, movespeed * restore_timefactor));
-			else				sspos -= (D3DXVECTOR3(0.0f, movespeed * restore_timefactor, 0.0f));
+			if (!k[DIK_LSHIFT])	sspos = XMVectorSubtract(sspos, XMVectorSet(0.0f, 0.0f, movespeed * restore_timefactor, 0.0f));
+			else				sspos = XMVectorSubtract(sspos, XMVectorSet(0.0f, movespeed * restore_timefactor, 0.0f, 0.0f));
 	}
 	else
 	{
-		D3DXQUATERNION delta;
 		if (k[DIK_LEFTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, -turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			D3DXQuaternionRotationAxis(&delta, &UP_VECTOR, turnspeed * restore_timefactor);
-			ssorient *= delta;
-			ss->SetOrientation(ssorient);
+			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
-	D3DXVECTOR3 wm0 = (ss->PhysicsState.WorldMomentum * Game::TimeFactor);
-	D3DXVECTOR3 pos0 = (ss->GetPosition() - wm0);
-	D3DXVECTOR3 posn = ss->GetPosition();
-	D3DXQUATERNION rotn = ss->GetOrientation();
+	XMVECTOR wm0 = XMVectorMultiply(ss->PhysicsState.WorldMomentum, Game::TimeFactorV);
+	XMVECTOR pos0 = XMVectorSubtract(ss->GetPosition(), wm0);
+	XMVECTOR posn = ss->GetPosition();
+	XMVECTOR rotn = ss->GetOrientation();
 
 	// Do collision detection & handling
 	iSpaceObject *collider = Game::PhysicsEngine.PerformContinuousSpaceCollisionDetection(ss);
@@ -1719,16 +1712,16 @@ void RJMain::DebugFullCCDTest(void)
 	OverlayRenderer::RenderColour col = (collider ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
 	// Render box at origin (pos0)
-	D3DXMATRIX rot, trans, world;
-	D3DXMatrixRotationQuaternion(&rot, &rotn);
-	D3DXMatrixTranslation(&trans, pos0.x, pos0.y, pos0.z);
-	world = (rot * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+	XMMATRIX rot, trans, world;
+	rot = XMMatrixRotationQuaternion(rotn);
+	trans = XMMatrixTranslationFromVector(pos0);
+	world = XMMatrixMultiply(rot, trans);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
 
 	// Render box at end (ss->pos, before any collision handling)
-	D3DXMatrixTranslation(&trans, posn.x, posn.y, posn.z);
-	world = (rot * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize().x, ss->GetSize().y, ss->GetSize().z);
+	trans = XMMatrixTranslationFromVector(posn);
+	world = XMMatrixMultiply(rot, trans);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
 
 	// Render line from pos0 to end pos (before any collision handling)
 	Game::Engine->GetOverlayRenderer()->RenderLine(pos0, posn, col, ss->GetCollisionSphereRadius() * 2.0f, -1.0f);
@@ -1736,20 +1729,22 @@ void RJMain::DebugFullCCDTest(void)
 	if (collider)
 	{
 		// Render box at the object we collided with
-		D3DXMatrixRotationQuaternion(&rot, &collider->GetOrientation());
-		D3DXMatrixTranslation(&trans, collider->GetPosition().x, collider->GetPosition().y, collider->GetPosition().z);
-		world = (rot * trans);
-		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, collider->GetSize().x, collider->GetSize().y, collider->GetSize().z);
+		rot = XMMatrixRotationQuaternion(collider->GetOrientation());
+		trans = XMMatrixTranslationFromVector(collider->GetPosition());
+		world = XMMatrixMultiply(rot, trans);
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, collider->GetSize());
 
 		// Render contact point
-		D3DXMatrixTranslation(&world, collision.ContinuousTestResult.ContactPoint.x, collision.ContinuousTestResult.ContactPoint.y, collision.ContinuousTestResult.ContactPoint.z);
+		world = XMMatrixTranslationFromVector(collision.ContinuousTestResult.ContactPoint);
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 
 		// If we deflected off the collider, render a line to our resulting position
-		D3DXVECTOR3 endwm = ss->PhysicsState.WorldMomentum;
-		if (true || !VectorsApproximatelyEqual(wm0, endwm))
+		XMVECTOR endwm = ss->PhysicsState.WorldMomentum;
+		if (true || !XMVector3NearEqual(wm0, endwm, Game::C_EPSILON_V))
 		{
-			Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.ContactPoint, (collision.ContinuousTestResult.ContactPoint + endwm), 
+			Game::Engine->GetOverlayRenderer()->RenderLine(
+				collision.ContinuousTestResult.ContactPoint, 
+				XMVectorAdd(collision.ContinuousTestResult.ContactPoint, endwm), 
 				OverlayRenderer::RenderColour::RC_LightBlue, ss->GetCollisionSphereRadius(), -1.0f);
 		}
 
@@ -1782,7 +1777,7 @@ void RJMain::__CreateDebugScenario(void)
 	ss = SimpleShip::Create("testship1");
 	ss->SetName("Player ship ss");
 	ss->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	ss->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 200, -200));
+	ss->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
 	ss->SetOrientation(ID_QUATERNION);
 	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss);
 
@@ -1792,7 +1787,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs->SetName("Test frigate cs");
 		cs->GetSection(0)->SetName("cs section 0");
 		cs->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(-100, 0, 225));
+		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
 		cs->SetOrientation(ID_QUATERNION);
 
 		Engine *eng = (Engine*)D::Equipment["FRIGATE_HEAVY_ION_ENGINE1"];
@@ -1805,7 +1800,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
 		s2->SetName("Test ship s2");
 		s2->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), ss->GetPosition() + D3DXVECTOR3(0.0f, 0.0f, 120.0f));
+		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
 		s2->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1814,7 +1809,7 @@ void RJMain::__CreateDebugScenario(void)
 		s3[0] = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[0]);
 		s3[0]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), D3DXVECTOR3(600, 50, 50));
+		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600.0f, 50.0f, 50.0f, 0.0f));
 		s3[0]->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1822,23 +1817,21 @@ void RJMain::__CreateDebugScenario(void)
 		s3[1] = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
 		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), ss->GetPosition() + D3DXVECTOR3(0.0f, 0.0f, 100.0f));
+		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
 		s3[1]->SetOrientation(ID_QUATERNION);
 
 		s3[2] = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
 		s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), s3[1]->GetPosition() + D3DXVECTOR3(0.0f, 25.0f, 0.0f));
+		s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s3[1]->GetPosition(), XMVectorSet(0.0f, 25.0f, 0.0f, 0.0f)));
 		s3[2]->SetOrientation(ID_QUATERNION);
 	}
 
-	
-	D3DXQUATERNION initial_orient;
-	D3DXQuaternionRotationAxis(&initial_orient, &RIGHT_VECTOR, PIOVER2);
 
 	s3[1]->AddChildAttachment(s3[2]);
 	Attachment<iObject*> *attach = &( s3[1]->GetChildObjects()->at(0) );
-	attach->CreateConstraint(RIGHT_VECTOR, D3DXVECTOR3(0.0f, 5.0f, 0.0f), D3DXVECTOR3(0.0f, -5.0f, 5.0f), initial_orient);
+	XMVECTOR initial_orient = XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2);
+	attach->CreateConstraint(RIGHT_VECTOR, XMVectorSet(0.0f, 5.0f, 0.0f, 0.0f), XMVectorSet(0.0f, -5.0f, 5.0f, 0.0f), initial_orient);
 
 
 	// Temp: Create a new actor
@@ -1850,11 +1843,12 @@ void RJMain::__CreateDebugScenario(void)
 		a1->MoveIntoEnvironment(cs);
 		ComplexShipTile *t = cs->GetFirstTileOfType(D::TileClass::Corridor);
 		if (t)
-			a1->SetEnvironmentPositionAndOrientation(t->GetRelativePosition() + D3DXVECTOR3(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f), ID_QUATERNION);
+			a1->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(), 
+				XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
 		else
 			a1->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
-		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), D3DXVECTOR3(72.0f, 0.0f, 71.0f), 1.0f, false);
+		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, false);
 		a1->AssignNewOrder(o);
 	}
 
@@ -1901,21 +1895,20 @@ void RJMain::__CreateDebugScenario(void)
 	dbg_turret->SetPitchRate(0.25f);
 	dbg_turret->SetYawRate(0.5f);*/
 	
-	D3DXQUATERNION rotleft, rotright;
-	D3DXQuaternionRotationAxis(&rotleft, &UP_VECTOR, -PI / 4.0f);
-	D3DXQuaternionRotationAxis(&rotright, &UP_VECTOR, PI / 4.0f);
+	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
+	XMVECTOR rotright = XMQuaternionRotationAxis(UP_VECTOR, PI / 4.0f);
 	SpaceTurret *t = D::GetTurret("turret_basic01");
-	D3DXVECTOR3 sz = cs->GetSize();
+	XMFLOAT3 sz; XMStoreFloat3(&sz, cs->GetSize());
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 2; ++j)
 		{
-			D3DXVECTOR3 pos = D3DXVECTOR3(((j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)));
-			pos -= (cs->GetSize() * 0.5f);
+			XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
+			pos = XMVectorSubtract(pos, XMVectorMultiply(cs->GetSize(), HALF_VECTOR));
 			SpaceTurret *nt = t->Copy();
 			nt->SetRelativePosition(pos);
 			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
 			cs->TurretController.AddTurret(nt);
-			OutputDebugString(concat("Created turret ")(i)(" at ")(pos.x)(",")(pos.y)(",")(pos.z)("\n").str().c_str());
+			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
 		}
 
 	// Test render - vol line
@@ -1996,11 +1989,18 @@ void RJMain::DEBUGDisplayInfo(void)
 										(const iActiveObject*)Game::CurrentPlayer->GetPlayerShip());
 		if (a_obj)
 		{
+			// Get local float representations of this data
+			XMFLOAT3 pos; XMStoreFloat3(&pos, Game::CurrentPlayer->GetPosition());
+			XMFLOAT3 epos; XMStoreFloat3(&epos, Game::CurrentPlayer->GetEnvironmentPosition());
+			const INTVECTOR3 & csepos = Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation();
+			XMFLOAT3 wm; XMStoreFloat3(&wm, a_obj->PhysicsState.WorldMomentum);
+
+			// Output debug string
 			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_1, "Pos: (%.2f, %.2f, %.2f), EnvPos: (%.2f, %.2f, %.2f), El: (%d, %d, %d), LMom: (%.4f, %.4f, %.4f)",
-					Game::CurrentPlayer->GetPosition().x, Game::CurrentPlayer->GetPosition().y, Game::CurrentPlayer->GetPosition().z,
-					Game::CurrentPlayer->GetEnvironmentPosition().x, Game::CurrentPlayer->GetEnvironmentPosition().y, Game::CurrentPlayer->GetEnvironmentPosition().z,
-					Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation().x, Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation().y, Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation().z,
-					a_obj->PhysicsState.WorldMomentum.x, a_obj->PhysicsState.WorldMomentum.y, a_obj->PhysicsState.WorldMomentum.z);
+					pos.x, pos.y, pos.z,
+					epos.x, epos.y, epos.z,
+					csepos.x, csepos.y, csepos.z,
+					wm.x, wm.y, wm.z);
 			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_1, D::UI->TextStrings.C_DBG_FLIGHTINFO_1, 1.0f);
 		}
 	}

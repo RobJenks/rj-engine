@@ -11,7 +11,7 @@ Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 {
 	Data.Centre = NULL_VECTOR;
 	Data.ExtentF = NULL_FLOAT3;
-	Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
+	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
 	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
 
 	RecalculateData();
@@ -23,7 +23,7 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent) :
 {
 	Data.Centre = NULL_VECTOR;
 	Data.ExtentF = NULL_FLOAT3;
-	Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
+	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
 	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
 
 	RecalculateData();
@@ -143,7 +143,7 @@ void OrientedBoundingBox::Clear(void)
 	// Clear all primary fields and then recalculate to clear the derived fields
 	Data.Centre = NULL_VECTOR;
 	Data.ExtentF = NULL_FLOAT3;
-	Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
+	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
 	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
 	Flags = 0; Offset = ID_MATRIX;
 	RecalculateData();
@@ -279,6 +279,7 @@ void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, 
 {
 	// Copy the primary fields by value from the source
 	dest.Data.Centre = source.Data.Centre;
+	dest.Data.ExtentV = source.Data.ExtentV;
 	dest.Data.ExtentF = source.Data.ExtentF;
 	dest.Data.Axis[0] = source.Data.Axis[0]; dest.Data.Axis[1] = source.Data.Axis[1]; dest.Data.Axis[2] = source.Data.Axis[2];
 	dest.Data.Extent[0] = source.Data.Extent[0]; dest.Data.Extent[1] = source.Data.Extent[1]; dest.Data.Extent[2] = source.Data.Extent[2];

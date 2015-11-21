@@ -22,8 +22,8 @@
 
 // Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds
 #ifdef _DEBUG
-//#	define RJ_LOG_COLLISION_DETAILS
-//#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
+#	define RJ_LOG_COLLISION_DETAILS
+#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 #endif
 
 // Compiler setting to define the collision detection method in use
@@ -47,6 +47,7 @@ void GamePhysicsEngine::SimulatePhysics(void)
 {
 	// Initialise the clock state
 	PhysicsClock.RemainingFrameTime = Game::TimeFactor;
+	PhysicsClock.RemainingFrameTimeV = XMVectorReplicate(Game::TimeFactor);
 
 	// Increment the counter for testing static/static object collisions, and set the flag if necessary
 	if ((m_static_cd_counter += Game::ClockDelta) > Game::C_STATIC_PAIR_CD_INTERVAL)
@@ -67,12 +68,14 @@ void GamePhysicsEngine::SimulatePhysics(void)
 	{
 		// Store the new physics engine delta time (this may only be a portion of the total frame time)
 		PhysicsClock.TimeFactor = min(PhysicsClock.RemainingFrameTime, PhysicsClock.FrameCycleTimeLimit);
+		PhysicsClock.TimeFactorV = XMVectorReplicate(PhysicsClock.TimeFactor);
 
 		// Perform a full cycle of physics simulation based on this delta time
 		PerformPhysicsCycle();
 
 		// Decrement the remaining frame time
 		PhysicsClock.RemainingFrameTime -= PhysicsClock.TimeFactor;
+		PhysicsClock.RemainingFrameTimeV = XMVectorReplicate(PhysicsClock.RemainingFrameTime);
 
 		// *** We are not doing a semi-fixed timestep for now, the logic above can be removed later if it works across all FPS ***
 		break;
@@ -365,10 +368,12 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 		exclude = collider;
 		PhysicsClock.TimeFactor *= (1.0f - m_collisiontest.ContinuousTestResult.IntersectionTime);
 		if (PhysicsClock.TimeFactor < Game::C_EPSILON) break;
+		PhysicsClock.TimeFactorV = XMVectorReplicate(PhysicsClock.TimeFactor);
 	}
 
 	// Restore the physics clock following these intra-frame test
 	PhysicsClock.TimeFactor = restore_timefactor;
+	PhysicsClock.TimeFactorV = XMVectorReplicate(PhysicsClock.TimeFactor);
 
 	// Revert the flag for testing diverging collisions back to false, now that CCD handling has been completed
 	ClearFlag_HandleDivergingCollisions();
@@ -381,7 +386,7 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 // the player) in the specified environment.  Use the existing environment structure to partition & identify potential colliding pairs.  
 // If radius < 0.0f then all objects in the environment will be considered (which can be inefficient).  This method is specific to 
 // environment-based collision handling
-void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, const D3DXVECTOR3 & location, float radius)
+void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, const FXMVECTOR location, float radius)
 {
 	// Parameter check
 	if (!env) return;
@@ -391,12 +396,14 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnviron
 
 	// Determine the range of elements which will need to be checked for collision around this focal location.  Swap Y and Z coords as we 
 	// transition from space coordinates to environment coordinates
-	INTVECTOR3 min_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP))),
-										max(0, min(envbound.y, (int)floorf((location.z - radius) * Game::C_CS_ELEMENT_SCALE_RECIP))),
-										max(0, min(envbound.z, (int)floorf((location.y - radius) * Game::C_CS_ELEMENT_SCALE_RECIP))));
-	INTVECTOR3 max_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))),
-										max(0, min(envbound.y, (int)floorf((location.z + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))),
-										max(0, min(envbound.z, (int)floorf((location.y + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))));
+	// INTVECTOR3 min_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP))), ..., ...
+	// INTVECTOR3 max_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))), ..., ...
+	XMVECTOR radiusv = XMVectorReplicate(radius);
+	XMVECTOR minv = XMVectorMax(NULL_VECTOR, XMVectorFloor(XMVectorMultiply(XMVectorSubtract(location, radiusv), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
+	XMVECTOR maxv = XMVectorMax(NULL_VECTOR, XMVectorFloor(XMVectorMultiply(XMVectorAdd(location, radiusv), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
+	
+	INTVECTOR3 min_element = IntVector3Min(Vector3ToIntVectorSwizzleYZ(minv), envbound);
+	INTVECTOR3 max_element = IntVector3Max(Vector3ToIntVectorSwizzleYZ(minv), envbound);
 
 	// Peform environment collision handling on the objects in each element in turn.  All elements should be valid since we
 	// clamped to the environment size
@@ -458,21 +465,19 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 	OrientedBoundingBox *collider0, *collider1;
 
 	// Store references to the key fields we will require
-	const D3DXVECTOR3 & location = obj->GetEnvironmentPosition();
-	const float & radius = obj->GetCollisionSphereRadius();
+	const XMVECTOR & location = obj->GetEnvironmentPosition();
+	XMVECTOR radius = XMVectorReplicate(obj->GetCollisionSphereRadius());	
 
 	// Store the object local vertical momentum before handling any collisions.  We can then test this later to determine if the 
 	// object is on the 'ground'
-	float pre_lmY = obj->PhysicsState.LocalMomentum.y;
+	float pre_lmY = XMVectorGetY(obj->PhysicsState.LocalMomentum);
 
 	// Determine the range of elements which will need to be checked for collision around this object (typically just 1, or a couple of adjacent elements)
 	// Swap Y and Z coords since we are moving from space to environment coordinates
-	INTVECTOR3 min_element = INTVECTOR3((int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-										(int)floorf((location.z - radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-										(int)floorf((location.y - radius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-	INTVECTOR3 max_element = INTVECTOR3((int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-										(int)floorf((location.z + radius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-										(int)floorf((location.y + radius) * Game::C_CS_ELEMENT_SCALE_RECIP));
+	// INTVECTOR3 min_element = INTVECTOR3((int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP), ..., ...
+	// INTVECTOR3 max_element = INTVECTOR3((int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP), ..., ...
+	INTVECTOR3 min_element = Vector3ToIntVectorSwizzleYZ(XMVectorFloor(XMVectorMultiply(XMVectorSubtract(location, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
+	INTVECTOR3 max_element = Vector3ToIntVectorSwizzleYZ(XMVectorFloor(XMVectorMultiply(XMVectorAdd(location, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
 	
 	// Check each of these elements in turn
 	for (int x = min_element.x; x <= max_element.x; ++x)
@@ -561,7 +566,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 
 	// Test whether our downward momentum was cancelled out during collision detection; if so, we can be pretty confident
 	// that we are on the 'ground', or at least on top of an object that is temporarily acting like ground
-	const float & post_lmY = obj->PhysicsState.LocalMomentum.y;
+	const float & post_lmY = XMVectorGetY(obj->PhysicsState.LocalMomentum);
 
 	// On the ground if (1) our initial velocity was significantly negative (i.e. we were falling), (2) our new velocity
 	// is more positive than it was before collision detection (i.e. some was cancelled out by a collision), (3) our 
@@ -577,9 +582,11 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 	// The actor OBB is in world space while the terrain OBB is in local environment space.  Convert the former to local environment
 	// space for this comparison, since we will need to apply the response in local space in case of a collision
-	D3DXVec3TransformCoord(&_obbdata.Centre, &object->CollisionOBB.Data.Centre, env->GetInverseZeroPointWorldMatrix());
-	D3DXVec3TransformCoordArray(_obbdata.Axis, sizeof(D3DXVECTOR3), object->CollisionOBB.Data.Axis, sizeof(D3DXVECTOR3), env->GetInverseOrientationMatrix(), 3);
-	_obbdata.Extent = object->CollisionOBB.Data.Extent;
+	_obbdata.Centre = XMVector3TransformCoord(object->CollisionOBB.Data.Centre, env->GetInverseZeroPointWorldMatrix());
+	_obbdata.Axis[0].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[0].value, env->GetInverseOrientationMatrix());
+	_obbdata.Axis[1].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[1].value, env->GetInverseOrientationMatrix());
+	_obbdata.Axis[2].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[2].value, env->GetInverseOrientationMatrix());
+	_obbdata.UpdateExtent(object->CollisionOBB.Data);
 
 	// Perform an SAT test between the object OBBs to see if there is a collision
 	if (TestOBBvsOBBCollision(_obbdata, terrain->GetOBBData()))
@@ -590,44 +597,47 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		// Use the last SAT result to determine the minimum separating axis that should be used to separate the objects
 		// Also use the returned axis distance to determine whether the response should be +ve or -ve along the axis.  We test 
 		// Object1 first since it is more frequently the reference frame returned by SAT
-		D3DXVECTOR3 response = BASIS_VECTOR;
+		XMVECTOR response = BASIS_VECTOR;
 		if (m_collisiontest.SATResult.Object1Axis != -1)
 		{
-			response = (m_collisiontest.SATResult.AxisDist1[m_collisiontest.SATResult.Object1Axis] < 0.0f ? terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis] :
-																			  -(terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis]));
+			response = (m_collisiontest.SATResult.AxisDist1[m_collisiontest.SATResult.Object1Axis] < 0.0f ? 
+								terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value :
+				XMVectorNegate(	terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value));
 		}
 		else if (m_collisiontest.SATResult.Object0Axis != -1)
 		{
-			response = (m_collisiontest.SATResult.AxisDist0[m_collisiontest.SATResult.Object0Axis] < 0.0f ? _obbdata.Axis[m_collisiontest.SATResult.Object0Axis] :
-																			  -(_obbdata.Axis[m_collisiontest.SATResult.Object0Axis]));
+			response = (m_collisiontest.SATResult.AxisDist0[m_collisiontest.SATResult.Object0Axis] < 0.0f ? 
+								_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value :
+				XMVectorNegate(	_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value));
 		}
 
 		// Normalise the vector (although it should be normalised already since we are working with basis vectors)
-		D3DXVec3Normalize(&response, &response);
+		response = XMVector3NormalizeEst(response);
 
 		// We also want to update the object momentum; take the dot product of its current momentum along the response vector to
 		// determine the equal and opposite force that should be applied
-		float mom = D3DXVec3Dot(&object->PhysicsState.LocalMomentum, &response);
-		float absmom = fabs(mom);
-		if (absmom > Game::C_EPSILON)
+		XMVECTOR mom = XMVector3Dot(object->PhysicsState.LocalMomentum, response);
+		XMVECTOR mom_n = XMVectorNegate(mom);
+		XMVECTOR absmom = XMVectorAbs(mom);
+		if (XMVector2Greater(absmom, Game::C_EPSILON_V))		// Use vector2 comparison since all components are replicated anyway
 		{
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat("Applying momentum of ")(-mom)(" along response vector (")(response.x)(",")(response.y)(",")(response.z)
-						("); world momentum change from (")(object->PhysicsState.WorldMomentum.x)(",")(object->PhysicsState.WorldMomentum.y)(",")
-						(object->PhysicsState.WorldMomentum.z)(")").str().c_str());
+					OutputDebugString(concat("Applying momentum of ")(XMVectorGetX(mom_n))(" along response vector (")(XMVectorGetX(response))(",")
+						(XMVectorGetY(response))(",")(XMVectorGetZ(response))("); world momentum change from (")(XMVectorGetX(object->PhysicsState.WorldMomentum))
+						(",")(XMVectorGetY(object->PhysicsState.WorldMomentum))(",")(XMVectorGetX(object->PhysicsState.WorldMomentum))(")").str().c_str());
 #			endif
 
 			// Apply a direct force (i.e. no division through by mass) in the object local frame, to nullify current momentum along the response vector
-			object->ApplyLocalLinearForceDirect(response * -mom);
+			object->ApplyLocalLinearForceDirect(XMVectorMultiply(response, mom_n));
 
 			// Also test whether this momentum change exceeds our 'impact threshold'.  If it does, we consider this a significant impact (vs
 			// e.g. a normal floor collision) and may apply an additional response such as object or terrain damage
-			if (absmom > Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD)
+			if (XMVector2Greater(absmom, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
 			{
 				TerrainImpact.Terrain = terrain;
 				TerrainImpact.ResponseVector = response;
-				TerrainImpact.ResponseVelocity = -mom;
+				TerrainImpact.ResponseVelocity = mom_n;
 				TerrainImpact.ImpactVelocity = absmom;
 				TerrainImpact.ImpactForce = (absmom * object->GetMass());
 				object->CollisionWithTerrain(TerrainImpact);
@@ -635,27 +645,30 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat(" to (")(object->PhysicsState.WorldMomentum.x)(",")(object->PhysicsState.WorldMomentum.y)(",")
-						(object->PhysicsState.WorldMomentum.z)(")\n").str().c_str());
+					OutputDebugString(concat(" to (")(XMVectorGetX(object->PhysicsState.WorldMomentum))(",")(XMVectorGetY(object->PhysicsState.WorldMomentum))(",")
+						(XMVectorGetZ(object->PhysicsState.WorldMomentum))(")\n").str().c_str());
 #			endif
 		}
 
 		// We now want to scale the response vector by the penetration distance (since we want to move the object by the exact inverse 
 		// of that distance, out of the collision) to determine the collision response
-		response *= m_collisiontest.Penetration;
+		response = XMVectorScale(response, m_collisiontest.Penetration);
 
 #		ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 			if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-				OutputDebugString(concat("Adjusting position by penentration of ")(m_collisiontest.Penetration)(" along response vector (")(response.x)(",")(response.y)(",")(response.z)("); position change from ")
-					("(")(object->GetEnvironmentPosition().x)(",")(object->GetEnvironmentPosition().y)(",")(object->GetEnvironmentPosition().z)(")").str().c_str());
+				OutputDebugString(concat("Adjusting position by penentration of ")(m_collisiontest.Penetration)(" along response vector (")
+				(XMVectorGetX(response))(",")(XMVectorGetY(response))(",")(XMVectorGetZ(response))("); position change from ")
+					("(")(XMVectorGetX(object->GetEnvironmentPosition()))(",")(XMVectorGetY(object->GetEnvironmentPosition()))
+					(",")(XMVectorGetZ(object->GetEnvironmentPosition()))(")").str().c_str());
 #		endif
 
 		// Apply the change in location to the object
-		object->SetEnvironmentPosition(object->GetEnvironmentPosition() + response);
+		object->SetEnvironmentPosition(XMVectorAdd(object->GetEnvironmentPosition(), response));
 
 #		ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 			if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-				OutputDebugString(concat(" to (")(object->GetEnvironmentPosition().x)(",")(object->GetEnvironmentPosition().y)(",")(object->GetEnvironmentPosition().z)(")\n").str().c_str());
+				OutputDebugString(concat(" to (")(XMVectorGetX(object->GetEnvironmentPosition()))(",")(XMVectorGetY(object->GetEnvironmentPosition()))
+				(",")(XMVectorGetZ(object->GetEnvironmentPosition()))(")\n").str().c_str());
 #		endif
 
 		// Force an immediate refresh so that the collision volume remains in sync for the remainder of this frame
@@ -684,12 +697,12 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 CMPINLINE bool GamePhysicsEngine::CheckBroadphaseCollision(const iObject *obj0, const iObject *obj1)
 {
 	// Perform a simple bounding spehere test on the objects
-	_diffpos = (obj0->GetPosition() - obj1->GetPosition());
-	_distsq = (_diffpos.x * _diffpos.x) + (_diffpos.y * _diffpos.y) + (_diffpos.z * _diffpos.z);
+	//_diffpos = (obj0->GetPosition() - obj1->GetPosition());
+	//_distsq = (_diffpos.x * _diffpos.x) + (_diffpos.y * _diffpos.y) + (_diffpos.z * _diffpos.z);
 	_r1r2 = (obj0->GetCollisionSphereRadius() + obj1->GetCollisionSphereRadius());
 
 	// Test the values to see if there is a broadphase collision
-	m_collisiontest.BroadphasePenetrationSq = ((_r1r2 * _r1r2) - _distsq);
+	m_collisiontest.BroadphasePenetrationSq = ((_r1r2 * _r1r2) - XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(obj0->GetPosition(), obj1->GetPosition()))));
 	return (m_collisiontest.BroadphasePenetrationSq > 0.0f);
 }
 
@@ -697,15 +710,15 @@ CMPINLINE bool GamePhysicsEngine::CheckBroadphaseCollision(const iObject *obj0, 
 // Broadphase collision is tested by a bounding sphere test; objects may be colliding if (d^2 < (r1 + r2)^2), where
 //		d = distance between centre of the two bounding spheres
 //		r1, r2 = the radius of each object's bounding spheres
-CMPINLINE bool GamePhysicsEngine::CheckBroadphaseCollision(const D3DXVECTOR3 & pos0, float collisionradius0, const D3DXVECTOR3 & pos1, float collisionradius1)
+CMPINLINE bool GamePhysicsEngine::CheckBroadphaseCollision(const FXMVECTOR pos0, float collisionradius0, const FXMVECTOR pos1, float collisionradius1)
 {
 	// Perform a simple bounding sphere test on the objects
-	_diffpos = (pos0 - pos1);
-	_distsq = (_diffpos.x * _diffpos.x) + (_diffpos.y * _diffpos.y) + (_diffpos.z * _diffpos.z);
+	//_diffpos = (pos0 - pos1);
+	//_distsq = (_diffpos.x * _diffpos.x) + (_diffpos.y * _diffpos.y) + (_diffpos.z * _diffpos.z);
 	_r1r2 = (collisionradius0 + collisionradius1);
 
 	// Test the values to see if there is a broadphase collision
-	m_collisiontest.BroadphasePenetrationSq = ((_r1r2 * _r1r2) - _distsq);
+	m_collisiontest.BroadphasePenetrationSq = ((_r1r2 * _r1r2) - XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(pos0, pos1))));
 	return (m_collisiontest.BroadphasePenetrationSq > 0.0f);
 }
 
@@ -795,61 +808,58 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	}
 
 	// Store the momentum of each object before applying a response, to allow calculation of the impact force
-	D3DXVECTOR3 obj0_pre_wm = object0->PhysicsState.WorldMomentum;
-	D3DXVECTOR3 obj1_pre_wm = object1->PhysicsState.WorldMomentum;
+	XMVECTOR obj0_pre_wm = object0->PhysicsState.WorldMomentum;
+	XMVECTOR obj1_pre_wm = object1->PhysicsState.WorldMomentum;
 
 	/* Apply collision response using the impulse method - first, apply the normal component */
 
 	// Get a reference to the object centre points, and the normal between them
-	D3DXVECTOR3 normal;
-	const D3DXVECTOR3 & c0 = (collider0 ? collider0->Centre : object0->GetPosition());
-	const D3DXVECTOR3 & c1 = (collider1 ? collider1->Centre : object1->GetPosition());
-	normal = (c0 - c1);
-	D3DXVec3Normalize(&normal, &normal);
+	const XMVECTOR & c0 = (collider0 ? collider0->Centre : object0->GetPosition());
+	const XMVECTOR & c1 = (collider1 ? collider1->Centre : object1->GetPosition());
+	XMVECTOR normal = XMVector3Normalize(XMVectorSubtract(c0, c1));
 
 	// Determine hit point on the surface of each object 
-	D3DXVECTOR3 hit0, hit1;
+	XMVECTOR hit0, hit1;
 	if (collider0)			  hit0 = ClosestPointOnOBB(*collider0, c1);
-	else					  hit0 = (c0 - (normal * object0->GetCollisionSphereRadius()));
+	else					  hit0 = XMVectorSubtract(c0, XMVectorScale(normal, object0->GetCollisionSphereRadius()));  // (c0 - (normal * object0->GetCollisionSphereRadius()));
 	if (collider1)			  hit1 = ClosestPointOnOBB(*collider1, c0);
-	else					  hit1 = (c1 + (normal * object1->GetCollisionSphereRadius()));
+	else					  hit1 = XMVectorAdd(c1, XMVectorScale(normal, object1->GetCollisionSphereRadius()));		// (c1 + (normal * object1->GetCollisionSphereRadius()));
 
 	// Get vectors from object centres to their hitpoints
-	D3DXVECTOR3 r0 = (hit0 - c0);
-	D3DXVECTOR3 r1 = (hit1 - c1);
+	XMVECTOR r0 = XMVectorSubtract(hit0, c0);
+	XMVECTOR r1 = XMVectorSubtract(hit1, c1);
 
-	// Store mass & inverse mass reference parameters for convenience
-	const float & mass0 = object0->GetMass(); 
-	const float & mass1 = object1->GetMass();
-	const float & invMass0 = object0->GetInverseMass();
-	const float & invMass1 = object1->GetInverseMass();
+	// Store inverse mass reference parameters in vectorised form for convenience
+	XMVECTOR invMass0 = XMVectorReplicate(object0->GetInverseMass());
+	XMVECTOR invMass1 = XMVectorReplicate(object1->GetInverseMass());
+	XMVECTOR invMass01 = XMVectorAdd(invMass0, invMass1);
 
 	// Cross the angular velocity of each object with its hitpoint contact vector
-	D3DXVECTOR3 angR0, angR1;
-	D3DXVec3Cross(&angR0, &object0->PhysicsState.AngularVelocity, &r0);
-	D3DXVec3Cross(&angR1, &object1->PhysicsState.AngularVelocity, &r1);
+	XMVECTOR angR0 = XMVector3Cross(object0->PhysicsState.AngularVelocity, r0);
+	XMVECTOR angR1 = XMVector3Cross(object1->PhysicsState.AngularVelocity, r1);
 
 	// Determine the component of the relative object velocity that is along the normal vector
-	D3DXVECTOR3 v0 = (obj0_pre_wm + angR0);
-	D3DXVECTOR3 v1 = (obj1_pre_wm + angR1);
-	D3DXVECTOR3 vrel = (v0 - v1);
-	float vn = D3DXVec3Dot(&vrel, &normal);
+	XMVECTOR v0 = XMVectorAdd(obj0_pre_wm, angR0);
+	XMVECTOR v1 = XMVectorAdd(obj1_pre_wm, angR1);
+	XMVECTOR vrel = XMVectorSubtract(v0, v1);
+	XMVECTOR vn = XMVector3Dot(vrel, normal);
 	
 	// If the objects are moving away from each other then there is no collision response required, HOWEVER first
 	// run a test to make sure the object centres haven't penetrated past each other within the frame
-	if (-vn < 0.01f)
+	static const AXMVECTOR diverge_threshold = XMVectorReplicate(0.01f);
+	if (XMVector2Less(XMVectorNegate(vn), diverge_threshold))						// if (-vn < 0.01f)
 	{
 		// Consider the position of each object one frame ago
-		D3DXVECTOR3 past_c0 = (c0 - (obj0_pre_wm * PhysicsClock.TimeFactor));
-		D3DXVECTOR3 past_c1 = (c1 - (obj1_pre_wm * PhysicsClock.TimeFactor));
-		D3DXVECTOR3 past_normal = (past_c0 - past_c1);
-		if (D3DXVec3Dot(&past_normal, &normal) < 0.0f)
+		XMVECTOR past_c0 = XMVectorSubtract(c0, XMVectorMultiply(obj0_pre_wm, PhysicsClock.TimeFactorV));	// (c0 - (obj0_pre_wm * PhysicsClock.TimeFactor));
+		XMVECTOR past_c1 = XMVectorSubtract(c1, XMVectorMultiply(obj1_pre_wm, PhysicsClock.TimeFactorV));	// (c1 - (obj1_pre_wm * PhysicsClock.TimeFactor));
+		XMVECTOR past_normal = XMVectorSubtract(past_c0, past_c1);
+		if (XMVector2Less(XMVector3Dot(past_normal, normal), NULL_VECTOR))									// if (D3DXVec3Dot(&past_normal, &normal) < 0.0f)
 		{
 			// If the projection of our previous collision normal along the new one is negative, the objects have
 			// switched positions along the collision normal this frame.  We will therefore use the prior frame 
 			// normal to ensure the collision is handled correctly, and will know that vn is now valid
-			D3DXVec3Normalize(&normal, &past_normal);
-			vn = D3DXVec3Dot(&vrel, &normal);
+			normal = XMVector3Normalize(past_normal);														// D3DXVec3Normalize(&normal, &past_normal);
+			vn = XMVector3Dot(vrel, normal);																// vn = D3DXVec3Dot(&vrel, &normal);
 		}
 		else
 		{
@@ -859,47 +869,50 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	}
 
 	// Transform the inertia tensor for each object into world space
-	D3DXMATRIX worldInvI0, worldInvI1;
-	D3DXMatrixMultiply(&worldInvI0, object0->GetOrientationMatrix(), &(object0->PhysicsState.InverseInertiaTensor));	
-	D3DXMatrixMultiply(&worldInvI1, object1->GetOrientationMatrix(), &(object1->PhysicsState.InverseInertiaTensor));	
+	// D3DXMatrixMultiply(&worldInvI0, object0->GetOrientationMatrix(), &(object0->PhysicsState.InverseInertiaTensor));	
+	XMMATRIX worldInvI0 = XMMatrixMultiply(object0->GetOrientationMatrix(), object0->PhysicsState.InverseInertiaTensor);
+	XMMATRIX worldInvI1 = XMMatrixMultiply(object1->GetOrientationMatrix(), object1->PhysicsState.InverseInertiaTensor);
 
 	// Derive the impulse 'jn' that should be applied along the contact normal, incorporating both linear and angular momentum
-	D3DXVECTOR3 Crn0, Crn1, ICrn0, ICrn1, CICrn0, CICrn1;
-	D3DXVec3Cross(&Crn0, &r0, &normal);
-	D3DXVec3Cross(&Crn1, &r1, &normal);
-	D3DXVec3TransformCoord(&ICrn0, &Crn0, &worldInvI0);
-	D3DXVec3TransformCoord(&ICrn1, &Crn1, &worldInvI1);
-	D3DXVec3Cross(&CICrn0, &ICrn0, &r0);
-	D3DXVec3Cross(&CICrn1, &ICrn1, &r1);
+	XMVECTOR Crn0, Crn1, ICrn0, ICrn1, CICrn0, CICrn1;
+	Crn0 = XMVector3Cross(r0, normal);
+	Crn1 = XMVector3Cross(r1, normal);
+	ICrn0 = XMVector3TransformCoord(Crn0, worldInvI0);
+	ICrn1 = XMVector3TransformCoord(Crn1, worldInvI1);
+	CICrn0 = XMVector3Cross(ICrn0, r0);
+	CICrn1 = XMVector3Cross(ICrn1, r1);
 
-	float jn = ((-Game::C_COLLISION_SPACE_COEFF_ELASTICITY * vn) - vn)
-			 /
-			   (invMass0 + invMass1 + D3DXVec3Dot(&normal, &CICrn0) + D3DXVec3Dot(&normal, &CICrn1));
+	// float jn =	((-Game::C_COLLISION_SPACE_COEFF_ELASTICITY * vn) - vn)			// == (Game::C_COLL..._ITY * -vn) - n)
+	// 				/
+	// 				(invMass0 + invMass1 + D3DXVec3Dot(&normal, &CICrn0) + D3DXVec3Dot(&normal, &CICrn1));
+	XMVECTOR vn_n = XMVectorNegate(vn);
+	XMVECTOR jn = XMVectorDivide((XMVectorMultiplyAdd(Game::C_COLLISION_SPACE_COEFF_ELASTICITY_V, vn_n, vn_n))
+								,
+								(XMVectorAdd(invMass01, XMVectorAdd(XMVector3Dot(normal, CICrn0), XMVector3Dot(normal, CICrn1)))));
 
 	// Adjustment; scale normal impulse by the degree of penetration to avoid 'sinking' of low-velocity objects into one another
 	//jn += (m_collisiontest.DeterminePenetration() * 1.5f);
 
 	// The impulse will be applied along the normal vector between the two object hitpoints
-	D3DXVECTOR3 impulse = (normal * jn);
+	XMVECTOR impulse = XMVectorMultiply(normal, jn);
+	XMVECTOR impulse_n = XMVectorNegate(impulse);
 
 	// Calculate change in angular velocity
-	D3DXVECTOR3 angInc0, angInc1;
-	D3DXVec3Cross(&angInc0, &r0, &(impulse));
-	D3DXVec3Cross(&angInc1, &r1, &(-impulse));
-	D3DXVec3TransformCoord(&angInc0, &angInc0, &worldInvI0);
-	D3DXVec3TransformCoord(&angInc1, &angInc1, &worldInvI1);
+	// D3DXVec3Cross(&angInc0, &r0, &(impulse));  // D3DXVec3TransformCoord(&angInc0, &angInc0, &worldInvI0);
+	// D3DXVec3Cross(&angInc1, &r1, &(-impulse)); // D3DXVec3TransformCoord(&angInc1, &angInc1, &worldInvI1);
+	XMVECTOR angInc0 = XMVector3TransformCoord(XMVector3Cross(r0, impulse), worldInvI0);
+	XMVECTOR angInc1 = XMVector3TransformCoord(XMVector3Cross(r1, impulse_n), worldInvI1);
 
 	// Apply change in linear and angular velocity to each object
-	object0->PhysicsState.WorldMomentum += (impulse * invMass0);
-	object0->PhysicsState.AngularVelocity += angInc0;
-	object1->PhysicsState.WorldMomentum += (-impulse * invMass1);
-	object1->PhysicsState.AngularVelocity += angInc1;
-	
+	// object0->PhysicsState.WorldMomentum += (impulse * invMass0);	 // object0->PhysicsState.AngularVelocity += angInc0;
+	// object1->PhysicsState.WorldMomentum += (-impulse * invMass1); // object1->PhysicsState.AngularVelocity += angInc1;
+	object0->PhysicsState.WorldMomentum = XMVectorMultiplyAdd(impulse, invMass0, object0->PhysicsState.WorldMomentum);
+	object1->PhysicsState.WorldMomentum = XMVectorMultiplyAdd(impulse_n, invMass1, object1->PhysicsState.WorldMomentum);
 
 	// Log details of the collision to the debug output, if the relevant compiler flag is set
 #	ifdef RJ_LOG_COLLISION_DETAILS 
 		OutputDebugString("\n\n*** Collision = { \n");
-		OutputDebugString(concat("\t Object0 = \"")(object0->GetName())("\" [")((int)object0->GetCollisionMode())("], Object1 = \"")
+		/*OutputDebugString(concat("\t Object0 = \"")(object0->GetName())("\" [")((int)object0->GetCollisionMode())("], Object1 = \"")
 			(object1->GetName())("\" [")((int)object1->GetCollisionMode())("] \n").str().c_str());
 		OutputDebugString(concat("\t collision normal = [")(normal.x)(",")(normal.y)(",")(normal.z)("]\n").str().c_str());
 		OutputDebugString(concat("\t v0 = (object0 momentum [")(object0->PhysicsState.WorldMomentum.x)(",")(object0->PhysicsState.WorldMomentum.y)(",")(object0->PhysicsState.WorldMomentum.z)
@@ -922,7 +935,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 			(",")(object0->PhysicsState.AngularVelocity.y)(",")(object0->PhysicsState.AngularVelocity.z)("]\n").str().c_str());
 		OutputDebugString(concat("\t Object1 post-normal collision state: world momentum = [")(object1->PhysicsState.WorldMomentum.x)(",")
 			(object1->PhysicsState.WorldMomentum.y)(",")(object1->PhysicsState.WorldMomentum.z)("], angular velocity = [")(object1->PhysicsState.AngularVelocity.x)
-			(",")(object1->PhysicsState.AngularVelocity.y)(",")(object1->PhysicsState.AngularVelocity.z)("]\n").str().c_str());
+			(",")(object1->PhysicsState.AngularVelocity.y)(",")(object1->PhysicsState.AngularVelocity.z)("]\n").str().c_str());*/
 #	endif
 
 
@@ -930,69 +943,79 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	/* Now apply tangent component to simulate friction at the contact point */
 	
 	// Recalculate velocity data, since it has been changed by the normal impulse above.  TODO: REQUIRED?
-	D3DXVec3Cross(&angR0, &object0->PhysicsState.AngularVelocity, &r0);
-	D3DXVec3Cross(&angR1, &object1->PhysicsState.AngularVelocity, &r1);
-	v0 = object0->PhysicsState.WorldMomentum + angR0;
-	v1 = object1->PhysicsState.WorldMomentum + angR1;
-	vrel = (v0 - v1);
-	vn = D3DXVec3Dot(&vrel, &normal);
+	angR0 = XMVector3Cross(object0->PhysicsState.AngularVelocity, r0);
+	angR1 = XMVector3Cross(object1->PhysicsState.AngularVelocity, r1);
+	v0 = XMVectorAdd(object0->PhysicsState.WorldMomentum, angR0);
+	v1 = XMVectorAdd(object1->PhysicsState.WorldMomentum, angR1);
+	vrel = XMVectorSubtract(v0, v1);
+	vn = XMVector3Dot(vrel, normal);
 
 	// Determine tangent vector, perpendicular to the collision normal
-	D3DXVECTOR3 tangent = vrel - (D3DXVec3Dot(&vrel, &normal) * normal);
-	float tangent_mag = D3DXVec3Length(&tangent);
+	// D3DXVECTOR3 tangent = vrel - (D3DXVec3Dot(&vrel, &normal) * normal);
+	// XMVectorNegativeMultiplySubtract(V1,V2,V3) = (V3 - (V1 * V2))
+	XMVECTOR tangent = XMVectorNegativeMultiplySubtract(XMVector3Dot(vrel, normal), normal, vrel);
+	XMVECTOR tangent_mag = XMVector3LengthEst(tangent);
 
-	// Only proceed with calcualting the tangential velocity if the tangent is valid
-	if (tangent_mag > Game::C_EPSILON)
+	// Only proceed with calcualting the tangential velocity if the tangent is valid.  Use vector2 comparison since all components are replicated
+	if (XMVector2Greater(tangent_mag, Game::C_EPSILON_V))
 	{
 		// Safety feature: if objects somehow become merged together (e.g. spawned inside each other) the derived tangent can exceed -1e38 and leave
 		// us with an undefined float error.  In such cases, we will apply a default tangent to prevent overflow
 		// Use the fact that (x == x) will trivially return true for all finite numbers, but where x = -1.#IND000, (-1.#IND000 != -1.#IND000)
 		// TODO: this isn't perfect, and prevents some collisions registering at shallow impact angles.  Issue with calc?  Or need double precision here?
-		if (!(tangent.x == tangent.x)) tangent = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
-		D3DXVECTOR3 T = (-tangent / tangent_mag);
+		//   if (!(tangent.x == tangent.x)) tangent = D3DXVECTOR3(1.0f, 0.0f, 0.0f);
+		//   3DXVECTOR3 T = (-tangent / tangent_mag);
+		if (XMVector3IsNaN(tangent)) { tangent = XMVectorSetX(NULL_VECTOR, 1.0f); tangent_mag = XMVector3LengthEst(tangent); }
+		XMVECTOR T = XMVectorDivide(XMVectorNegate(tangent), tangent_mag);
 
 		// Calculate intermediate cross products 
-		D3DXVECTOR3 Cr0tan, Cr1tan, transformedCr0tan, transformedCr1tan, Ctransr0, Ctransr1;
-		D3DXVec3Cross(&Cr0tan, &r0, &T);
-		D3DXVec3Cross(&Cr1tan, &r1, &T);
-		D3DXVec3TransformCoord(&transformedCr0tan, &Cr0tan, &worldInvI0);
-		D3DXVec3TransformCoord(&transformedCr1tan, &Cr1tan, &worldInvI1);
-		D3DXVec3Cross(&Ctransr0, &transformedCr0tan, &r0);
-		D3DXVec3Cross(&Ctransr1, &transformedCr1tan, &r1);
+		XMVECTOR Cr0tan, Cr1tan, transformedCr0tan, transformedCr1tan, Ctransr0, Ctransr1;
+		Cr0tan = XMVector3Cross(r0, T);
+		Cr1tan = XMVector3Cross(r1, T);
+		transformedCr0tan = XMVector3TransformCoord(Cr0tan, worldInvI0);
+		transformedCr1tan = XMVector3TransformCoord(Cr1tan, worldInvI1);
+		Ctransr0 = XMVector3Cross(transformedCr0tan, r0);
+		Ctransr1 = XMVector3Cross(transformedCr1tan, r1);
 
 		// Now determine the tangential impulse 'jt'
-		float denom = (invMass0 + invMass1 + D3DXVec3Dot(&T, &Ctransr0) + D3DXVec3Dot(&T, &Ctransr1));
-		if (denom > Game::C_EPSILON)
+		// float denom = (invMass0 + invMass1 + D3DXVec3Dot(&T, &Ctransr0) + D3DXVec3Dot(&T, &Ctransr1));
+		XMVECTOR denom = XMVectorAdd(XMVectorAdd(invMass01, XMVector3Dot(T, Ctransr0)), XMVector3Dot(T, Ctransr1));
+		if (XMVector2Greater(denom, Game::C_EPSILON_V))				// Use vector2 comparison since all vectors are replicated anyway
 		{
-			float jt, jt_initial = (tangent_mag / denom);
+			XMVECTOR jt;
+			XMVECTOR jt_initial = XMVectorDivide(tangent_mag, denom);
 
 			// Test whether the friction imparted by the normal impulse vector is more appropriate 
 			// than this calculated tangent impulse.  If so, replace it with the normal impulse derived above
-			const float STATIC_FRICTION = 0.7f;
-			const float DYNAMIC_FRICTION = 0.5f;
+			static const XMVECTOR STATIC_FRICTION = XMVectorReplicate(0.7f);
+			static const XMVECTOR DYNAMIC_FRICTION = XMVectorReplicate(0.5f);
 			
 			// Perform the comparison and pull in normal-derived impulse if more appropriate
-			float normal_derived_impulse = (jn * STATIC_FRICTION);
-			if (jt_initial < normal_derived_impulse)
+			XMVECTOR normal_derived_impulse = XMVectorMultiply(jn, STATIC_FRICTION);
+			if (XMVector2Less(jt_initial, normal_derived_impulse))
 				jt = jt_initial;
 			else
-				jt = (jn * DYNAMIC_FRICTION);
+				jt = XMVectorMultiply(jn, DYNAMIC_FRICTION);
 
 			// Calculate change in angular velocity
-			D3DXVECTOR3 tangent_impulse = (T * jt);
-			D3DXVec3Cross(&angInc0, &r0, &(tangent_impulse));
-			D3DXVec3Cross(&angInc1, &r1, &(-tangent_impulse));
-			D3DXVec3TransformCoord(&angInc0, &angInc0, &worldInvI0);
-			D3DXVec3TransformCoord(&angInc1, &angInc1, &worldInvI1);
+			// D3DXVECTOR3 tangent_impulse = (T * jt);
+			// D3DXVec3Cross(&angInc0, &r0, &(tangent_impulse));  // D3DXVec3TransformCoord(&angInc0, &angInc0, &worldInvI0);
+			// D3DXVec3Cross(&angInc1, &r1, &(-tangent_impulse)); // D3DXVec3TransformCoord(&angInc1, &angInc1, &worldInvI1);
+			XMVECTOR tangent_impulse = XMVectorMultiply(T, jt);
+			XMVECTOR tangent_impulse_n = XMVectorNegate(tangent_impulse);
+			angInc0 = XMVector3TransformCoord(XMVector3Cross(r0, tangent_impulse), worldInvI0);
+			angInc1 = XMVector3TransformCoord(XMVector3Cross(r1, XMVectorNegate(tangent_impulse)), worldInvI1);
 
 			// Apply the change in linear and angular impulse to each object
-			object0->PhysicsState.WorldMomentum += (tangent_impulse * invMass0);
-			object0->PhysicsState.AngularVelocity += angInc0;
-			object1->PhysicsState.WorldMomentum += (-tangent_impulse * invMass1);
-			object1->PhysicsState.AngularVelocity += angInc1;
+			// object0->PhysicsState.WorldMomentum += (tangent_impulse * invMass0);  // object0->PhysicsState.AngularVelocity += angInc0;
+			// object1->PhysicsState.WorldMomentum += (-tangent_impulse * invMass1); // object1->PhysicsState.AngularVelocity += angInc1;
+			object0->PhysicsState.WorldMomentum = XMVectorMultiplyAdd(tangent_impulse, invMass0, object0->PhysicsState.WorldMomentum);
+			object0->PhysicsState.AngularVelocity = XMVectorAdd(object0->PhysicsState.AngularVelocity, angInc0);
+			object1->PhysicsState.WorldMomentum = XMVectorMultiplyAdd(tangent_impulse_n, invMass1, object1->PhysicsState.WorldMomentum);
+			object1->PhysicsState.AngularVelocity = XMVectorAdd(object1->PhysicsState.AngularVelocity, angInc1);
 
 #		ifdef RJ_LOG_COLLISION_DETAILS
-			OutputDebugString(concat("\n\t Normalised tangent vector = [")(tangent.x)(",")(tangent.y)(",")(tangent.z)("]\n").str().c_str());
+			/*OutputDebugString(concat("\n\t Normalised tangent vector = [")(tangent.x)(",")(tangent.y)(",")(tangent.z)("]\n").str().c_str());
 			OutputDebugString(concat("\t jt = symmetric impulse along collision tangent = ")(jt)("\n").str().c_str());
 			OutputDebugString(concat("\t AngInc0 = change in tangential angular velocity for object0 = [")(angInc0.x)(",")(angInc0.y)(",")(angInc0.z)("]\n").str().c_str());
 			OutputDebugString(concat("\t AngInc1 = change in tangential angular velocity for object1 = [")(angInc1.x)(",")(angInc1.y)(",")(angInc1.z)("]\n").str().c_str());
@@ -1010,7 +1033,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 				object1->PhysicsState.WorldMomentum.z > Game::C_MAX_LINEAR_VELOCITY || object1->PhysicsState.AngularVelocity.x > Game::C_MAX_ANGULAR_VELOCITY ||
 				object1->PhysicsState.AngularVelocity.y > Game::C_MAX_ANGULAR_VELOCITY || object1->PhysicsState.AngularVelocity.z > Game::C_MAX_ANGULAR_VELOCITY)
 				OutputDebugString("\t Object1 exceeds physical limits on linear and/or angular velocity; state will be scaled within limits\n");
-			OutputDebugString("}\n\n");
+			*/OutputDebugString("}\n\n");
 #		endif
 		}
 	}
@@ -1028,13 +1051,13 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	// Determine the impact force on each object by comparing pre- & post-collision momentum
 	ObjectImpact.Object.PreImpactVelocity = obj0_pre_wm;
 	ObjectImpact.Collider.PreImpactVelocity = obj1_pre_wm;
-	ObjectImpact.Object.VelocityChange = (object0->PhysicsState.WorldMomentum - obj0_pre_wm);
-	ObjectImpact.Collider.VelocityChange = (object1->PhysicsState.WorldMomentum - obj1_pre_wm);
-	ObjectImpact.Object.VelocityChangeMagnitude = D3DXVec3Length(&ObjectImpact.Object.VelocityChange);
-	ObjectImpact.Collider.VelocityChangeMagnitude = D3DXVec3Length(&ObjectImpact.Collider.VelocityChange);
-	ObjectImpact.Object.ImpactForce = (ObjectImpact.Object.VelocityChangeMagnitude * object0->GetMass());
-	ObjectImpact.Collider.ImpactForce = (ObjectImpact.Collider.VelocityChangeMagnitude * object1->GetMass());
-	ObjectImpact.TotalImpactForce = (ObjectImpact.Object.ImpactForce + ObjectImpact.Collider.ImpactForce);
+	ObjectImpact.Object.VelocityChange = XMVectorSubtract(object0->PhysicsState.WorldMomentum, obj0_pre_wm);
+	ObjectImpact.Collider.VelocityChange = XMVectorSubtract(object1->PhysicsState.WorldMomentum, obj1_pre_wm);
+	ObjectImpact.Object.VelocityChangeMagnitude = XMVector3LengthEst(ObjectImpact.Object.VelocityChange);
+	ObjectImpact.Collider.VelocityChangeMagnitude = XMVector3LengthEst(ObjectImpact.Collider.VelocityChange);
+	ObjectImpact.Object.ImpactForce = XMVectorScale(ObjectImpact.Object.VelocityChangeMagnitude, object0->GetMass());
+	ObjectImpact.Collider.ImpactForce = XMVectorScale(ObjectImpact.Collider.VelocityChangeMagnitude, object1->GetMass());
+	ObjectImpact.TotalImpactForce = XMVectorAdd(ObjectImpact.Object.ImpactForce, ObjectImpact.Collider.ImpactForce);
 
 	// Notify object 0 of the collision
 	object0->CollisionWithObject(object1, ObjectImpact);
@@ -1173,7 +1196,18 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 	bool parallelPairExists = false;
 
 	// Determine the distance between box centre points
-	D3DXVECTOR3 dist = (box1.Centre - box0.Centre);
+	XMVECTOR vdist = XMVectorSubtract(box1.Centre, box0.Centre);
+
+	// Obtain local float copies of key vectors; calculations are performed at component level and we do not 
+	// gain efficiency by vectorising
+	XMFLOAT3 dist, box0Axis[3], box1Axis[3];
+	XMStoreFloat3(&dist, vdist);
+	XMStoreFloat3(&box0Axis[0], box0.Axis[0].value);
+	XMStoreFloat3(&box0Axis[1], box0.Axis[1].value);
+	XMStoreFloat3(&box0Axis[2], box0.Axis[2].value);
+	XMStoreFloat3(&box1Axis[0], box1.Axis[0].value);
+	XMStoreFloat3(&box1Axis[1], box1.Axis[1].value);
+	XMStoreFloat3(&box1Axis[2], box1.Axis[2].value);
 
 	// Declare storage for key intermediate calculations
     float dot01[3][3];       // dot01[i][j] = Dot(A0[i],A1[j]) = A1[j][i]
@@ -1189,17 +1223,17 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 	// Test for separation on the axis box0.Centre + t*box0.Axis[0].
     for (int i = 0; i < 3; ++i)
     {
-        dot01[0][i] = D3DXVec3Dot(&box0.Axis[0], &box1.Axis[i]);
+        dot01[0][i] = DOT_3D(box0Axis[0], box1Axis[i]);
         absDot01[0][i] = fabs(dot01[0][i]);
         if (absDot01[0][i] > cutoff)
         {
             parallelPairExists = true;
         }
     }
-    m_collisiontest.SATResult.AxisDist0[0] = D3DXVec3Dot(&dist, &box0.Axis[0]);
+    m_collisiontest.SATResult.AxisDist0[0] = DOT_3D(dist, box0Axis[0]);
     r = fabs(m_collisiontest.SATResult.AxisDist0[0]);
-    r1 = box1.Extent[0] * absDot01[0][0] + box1.Extent[1] * absDot01[0][1] + box1.Extent[2] * absDot01[0][2];
-    r01 = box0.Extent[0] + r1;
+    r1 = box1.ExtentF.x * absDot01[0][0] + box1.ExtentF.y * absDot01[0][1] + box1.ExtentF.z * absDot01[0][2];
+    r01 = box0.ExtentF.x + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = -1; }
     if (r01_r < 0.0f)
@@ -1210,17 +1244,17 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 	// Test for separation on the axis box0.Centre + t*box0.Axis[1].
     for (int i = 0; i < 3; ++i)
     {
-        dot01[1][i] = D3DXVec3Dot(&box0.Axis[1], &box1.Axis[i]);
+        dot01[1][i] = DOT_3D(box0Axis[1], box1Axis[i]);
         absDot01[1][i] = fabs(dot01[1][i]);
         if (absDot01[1][i] > cutoff)
         {
             parallelPairExists = true;
         }
     }
-    m_collisiontest.SATResult.AxisDist0[1] = D3DXVec3Dot(&dist, &box0.Axis[1]);
+    m_collisiontest.SATResult.AxisDist0[1] = DOT_3D(dist, box0Axis[1]);
     r = fabs(m_collisiontest.SATResult.AxisDist0[1]);
-    r1 = box1.Extent[0] * absDot01[1][0] + box1.Extent[1] * absDot01[1][1] + box1.Extent[2] * absDot01[1][2];
-    r01 = box0.Extent[1] + r1;
+    r1 = box1.ExtentF.x * absDot01[1][0] + box1.ExtentF.y * absDot01[1][1] + box1.ExtentF.z * absDot01[1][2];
+    r01 = box0.ExtentF.y + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
@@ -1231,17 +1265,17 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 	// Test for separation on the axis box0.Centre + t*box0.Axis[2].
     for (int i = 0; i < 3; ++i)
     {
-        dot01[2][i] = D3DXVec3Dot(&box0.Axis[2], &box1.Axis[i]);
+        dot01[2][i] = DOT_3D(box0Axis[2], box1Axis[i]);
         absDot01[2][i] = fabs(dot01[2][i]);
         if (absDot01[2][i] > cutoff)
         {
             parallelPairExists = true;
         }
     }
-    m_collisiontest.SATResult.AxisDist0[2] = D3DXVec3Dot(&dist, &box0.Axis[2]);
+    m_collisiontest.SATResult.AxisDist0[2] = DOT_3D(dist, box0Axis[2]);
     r = fabs(m_collisiontest.SATResult.AxisDist0[2]);
-    r1 = box1.Extent[0] * absDot01[2][0] + box1.Extent[1] * absDot01[2][1] + box1.Extent[2] * absDot01[2][2];
-    r01 = box0.Extent[2] + r1;
+    r1 = box1.ExtentF.x * absDot01[2][0] + box1.ExtentF.y * absDot01[2][1] + box1.ExtentF.z * absDot01[2][2];
+    r01 = box0.ExtentF.z + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
@@ -1250,10 +1284,10 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
     }
 
     // Test for separation on the axis box0.Centre + t*box1.Axis[0].
-	m_collisiontest.SATResult.AxisDist1[0] = D3DXVec3Dot(&dist, &box1.Axis[0]);
+	m_collisiontest.SATResult.AxisDist1[0] = DOT_3D(dist, box1Axis[0]);
 	r = fabs(m_collisiontest.SATResult.AxisDist1[0]);
-    r0 = box0.Extent[0] * absDot01[0][0] + box0.Extent[1] * absDot01[1][0] + box0.Extent[2] * absDot01[2][0];
-    r01 = r0 + box1.Extent[0];
+    r0 = box0.ExtentF.x * absDot01[0][0] + box0.ExtentF.y * absDot01[1][0] + box0.ExtentF.z * absDot01[2][0];
+    r01 = r0 + box1.ExtentF.x;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
@@ -1262,10 +1296,10 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
     }
 
     // Test for separation on the axis box0.Centre + t*box1.Axis[1].
-	m_collisiontest.SATResult.AxisDist1[1] = D3DXVec3Dot(&dist, &box1.Axis[1]);
+	m_collisiontest.SATResult.AxisDist1[1] = DOT_3D(dist, box1Axis[1]);
 	r = fabs(m_collisiontest.SATResult.AxisDist1[1]);
-    r0 = box0.Extent[0] * absDot01[0][1] + box0.Extent[1] * absDot01[1][1] + box0.Extent[2] * absDot01[2][1];
-    r01 = r0 + box1.Extent[1];
+    r0 = box0.ExtentF.x * absDot01[0][1] + box0.ExtentF.y * absDot01[1][1] + box0.ExtentF.z * absDot01[2][1];
+    r01 = r0 + box1.ExtentF.y;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
@@ -1274,10 +1308,10 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
     }
 
     // Test for separation on the axis box0.Centre + t*box1.Axis[2].
-	m_collisiontest.SATResult.AxisDist1[2] = D3DXVec3Dot(&dist, &box1.Axis[2]);
+	m_collisiontest.SATResult.AxisDist1[2] = DOT_3D(dist, box1Axis[2]);
 	r = fabs(m_collisiontest.SATResult.AxisDist1[2]);
-    r0 = box0.Extent[0] * absDot01[0][2] + box0.Extent[1] * absDot01[1][2] + box0.Extent[2] * absDot01[2][2];
-    r01 = r0 + box1.Extent[2];
+    r0 = box0.ExtentF.x * absDot01[0][2] + box0.ExtentF.y * absDot01[1][2] + box0.ExtentF.z * absDot01[2][2];
+    r01 = r0 + box1.ExtentF.z;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
@@ -1294,8 +1328,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[0]xA1[0].
     r = fabs(m_collisiontest.SATResult.AxisDist0[2] * dot01[1][0] - m_collisiontest.SATResult.AxisDist0[1] * dot01[2][0]);
-    r0 = box0.Extent[1] * absDot01[2][0] + box0.Extent[2] * absDot01[1][0];
-    r1 = box1.Extent[1] * absDot01[0][2] + box1.Extent[2] * absDot01[0][1];
+    r0 = box0.ExtentF.y * absDot01[2][0] + box0.ExtentF.z * absDot01[1][0];
+    r1 = box1.ExtentF.y * absDot01[0][2] + box1.ExtentF.z * absDot01[0][1];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 0; }
@@ -1306,8 +1340,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[0]xA1[1].
     r = fabs(m_collisiontest.SATResult.AxisDist0[2] * dot01[1][1] - m_collisiontest.SATResult.AxisDist0[1] * dot01[2][1]);
-    r0 = box0.Extent[1] * absDot01[2][1] + box0.Extent[2] * absDot01[1][1];
-    r1 = box1.Extent[0] * absDot01[0][2] + box1.Extent[2] * absDot01[0][0];
+    r0 = box0.ExtentF.y * absDot01[2][1] + box0.ExtentF.z * absDot01[1][1];
+    r1 = box1.ExtentF.x * absDot01[0][2] + box1.ExtentF.z * absDot01[0][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 1; }
@@ -1318,8 +1352,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[0]xA1[2].
     r = fabs(m_collisiontest.SATResult.AxisDist0[2] * dot01[1][2] - m_collisiontest.SATResult.AxisDist0[1] * dot01[2][2]);
-    r0 = box0.Extent[1] * absDot01[2][2] + box0.Extent[2] * absDot01[1][2];
-    r1 = box1.Extent[0] * absDot01[0][1] + box1.Extent[1] * absDot01[0][0];
+    r0 = box0.ExtentF.y * absDot01[2][2] + box0.ExtentF.z * absDot01[1][2];
+    r1 = box1.ExtentF.x * absDot01[0][1] + box1.ExtentF.y * absDot01[0][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 2; }
@@ -1330,8 +1364,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 	
     // Test for separation on the axis box0.Centre + t*box0.Axis[1]xA1[0].
     r = fabs(m_collisiontest.SATResult.AxisDist0[0] * dot01[2][0] - m_collisiontest.SATResult.AxisDist0[2] * dot01[0][0]);
-    r0 = box0.Extent[0] * absDot01[2][0] + box0.Extent[2] * absDot01[0][0];
-    r1 = box1.Extent[1] * absDot01[1][2] + box1.Extent[2] * absDot01[1][1];
+    r0 = box0.ExtentF.x * absDot01[2][0] + box0.ExtentF.z * absDot01[0][0];
+    r1 = box1.ExtentF.y * absDot01[1][2] + box1.ExtentF.z * absDot01[1][1];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 0; }
@@ -1342,8 +1376,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[1]xA1[1].
     r = fabs(m_collisiontest.SATResult.AxisDist0[0] * dot01[2][1] - m_collisiontest.SATResult.AxisDist0[2] * dot01[0][1]);
-    r0 = box0.Extent[0] * absDot01[2][1] + box0.Extent[2] * absDot01[0][1];
-    r1 = box1.Extent[0] * absDot01[1][2] + box1.Extent[2] * absDot01[1][0];
+    r0 = box0.ExtentF.x * absDot01[2][1] + box0.ExtentF.z * absDot01[0][1];
+    r1 = box1.ExtentF.x * absDot01[1][2] + box1.ExtentF.z * absDot01[1][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 1; }
@@ -1354,8 +1388,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[1]xA1[2].
     r = fabs(m_collisiontest.SATResult.AxisDist0[0] * dot01[2][2] - m_collisiontest.SATResult.AxisDist0[2] * dot01[0][2]);
-    r0 = box0.Extent[0] * absDot01[2][2] + box0.Extent[2] * absDot01[0][2];
-    r1 = box1.Extent[0] * absDot01[1][1] + box1.Extent[1] * absDot01[1][0];
+    r0 = box0.ExtentF.x * absDot01[2][2] + box0.ExtentF.z * absDot01[0][2];
+    r1 = box1.ExtentF.x * absDot01[1][1] + box1.ExtentF.y * absDot01[1][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 2; }
@@ -1366,8 +1400,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[2]xA1[0].
     r = fabs(m_collisiontest.SATResult.AxisDist0[1] * dot01[0][0] - m_collisiontest.SATResult.AxisDist0[0] * dot01[1][0]);
-    r0 = box0.Extent[0] * absDot01[1][0] + box0.Extent[1] * absDot01[0][0];
-    r1 = box1.Extent[1] * absDot01[2][2] + box1.Extent[2] * absDot01[2][1];
+    r0 = box0.ExtentF.x * absDot01[1][0] + box0.ExtentF.y * absDot01[0][0];
+    r1 = box1.ExtentF.y * absDot01[2][2] + box1.ExtentF.z * absDot01[2][1];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 0; }
@@ -1378,8 +1412,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[2]xA1[1].
     r = fabs(m_collisiontest.SATResult.AxisDist0[1] * dot01[0][1] - m_collisiontest.SATResult.AxisDist0[0] * dot01[1][1]);
-    r0 = box0.Extent[0] * absDot01[1][1] + box0.Extent[1] * absDot01[0][1];
-    r1 = box1.Extent[0] * absDot01[2][2] + box1.Extent[2] * absDot01[2][0];
+    r0 = box0.ExtentF.x * absDot01[1][1] + box0.ExtentF.y * absDot01[0][1];
+    r1 = box1.ExtentF.x * absDot01[2][2] + box1.ExtentF.z * absDot01[2][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 1; }
@@ -1390,8 +1424,8 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
     // Test for separation on the axis box0.Centre + t*box0.Axis[2]xA1[2].
     r = fabs(m_collisiontest.SATResult.AxisDist0[1] * dot01[0][2] - m_collisiontest.SATResult.AxisDist0[0] * dot01[1][2]);
-    r0 = box0.Extent[0] * absDot01[1][2] + box0.Extent[1] * absDot01[0][2];
-    r1 = box1.Extent[0] * absDot01[2][1] + box1.Extent[1] * absDot01[2][0];
+    r0 = box0.ExtentF.x * absDot01[1][2] + box0.ExtentF.y * absDot01[0][2];
+    r1 = box1.ExtentF.x * absDot01[2][1] + box1.ExtentF.y * absDot01[2][0];
     r01 = r0 + r1;
 	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 2; }
@@ -1405,7 +1439,7 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 }
 
 // Tests for the intersection of a bounding sphere with an OBB collision hierarchy 
-bool GamePhysicsEngine::TestSpherevsOBBHierarchyCollision(	const D3DXVECTOR3 & sphereCentre, const float sphereRadiusSq, 
+bool GamePhysicsEngine::TestSpherevsOBBHierarchyCollision(	const FXMVECTOR sphereCentre, const float sphereRadiusSq, 
 															OrientedBoundingBox & obb, OrientedBoundingBox ** ppOutOBBCollider)
 {
 	// Test the intersection at this level of the OBB hierarchy; if it fails then return false immediately
@@ -1439,7 +1473,7 @@ bool GamePhysicsEngine::TestSpherevsOBBHierarchyCollision(	const D3DXVECTOR3 & s
 
 // Tests for the intersection of a bounding sphere and an oriented bounding box (OBB)
 // Input taken from http://www.gamedev.net/topic/579584-obb---sphere-collision-detection/
-bool GamePhysicsEngine::TestSpherevsOBBCollision(	const D3DXVECTOR3 & sphereCentre, const float sphereRadiusSq, 
+bool GamePhysicsEngine::TestSpherevsOBBCollision(	const FXMVECTOR sphereCentre, const float sphereRadiusSq, 
 													const OrientedBoundingBox::CoreOBBData & obb)
 {
 	// We will update the collision detection data struct with the results of this test
@@ -1447,11 +1481,11 @@ bool GamePhysicsEngine::TestSpherevsOBBCollision(	const D3DXVECTOR3 & sphereCent
 
 	// Get the closest point in/on the sphere to the OBB, and subtract the sphere centre to get a vector
 	// from the centre of the sphere to the closest/intersection point with the OBB
-	D3DXVECTOR3 v = (ClosestPointOnOBB(obb, sphereCentre) - sphereCentre);
+	XMVECTOR v = (ClosestPointOnOBB(obb, sphereCentre) - sphereCentre);
 
 	// Dot(v,v) = v.LengthSq.  If Dot(v,v) <= SphereRadiusSq then it means the closest point to the 
 	// OBB is actually intersecting the OBB.  
-	m_collisiontest.Penetration = (sphereRadiusSq - D3DXVec3Dot(&v, &v));
+	m_collisiontest.Penetration = (sphereRadiusSq - XMVectorGetX(XMVector3Dot(v, v)));
 	return (m_collisiontest.Penetration > 0.0f);
 }
 
@@ -1461,131 +1495,148 @@ bool GamePhysicsEngine::TestSpherevsOBBCollision(	const D3DXVECTOR3 & sphereCent
 // Input from http://tavianator.com/cgit/dimension.git/tree/libdimension/bvh.c#n191
 bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t)
 {
-	float tx1, tx2, ty1, ty2, tz1, tz2;
+	//tx1 = (aabb.P0.x - ray.Origin.x)*ray.InvDirection.x;
+	//tx2 = (aabb.P1.x - ray.Origin.x)*ray.InvDirection.x;
+	//RayIntersectionResult.tmin = min(tx1, tx2);
+	//RayIntersectionResult.tmax = max(tx1, tx2);
+	//ty1 = (aabb.P0.y - ray.Origin.y)*ray.InvDirection.y;
+	//ty2 = (aabb.P1.y - ray.Origin.y)*ray.InvDirection.y;
+	//RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(ty1, ty2));
+	//RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(ty1, ty2));
+	//tz1 = (aabb.P0.z - ray.Origin.z)*ray.InvDirection.z;
+	//tz2 = (aabb.P1.z - ray.Origin.z)*ray.InvDirection.z;
+	//RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(tz1, tz2));
+	//RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(tz1, tz2));
 
-	tx1 = (aabb.Points[0].x - ray.Origin.x)*ray.InvDirection.x;
-	tx2 = (aabb.Points[1].x - ray.Origin.x)*ray.InvDirection.x;
+	// Perform intersection test
+	XMVECTOR t1 = XMVectorMultiply(XMVectorSubtract(aabb.P0, ray.Origin), ray.InvDirection);
+	XMVECTOR t2 = XMVectorMultiply(XMVectorSubtract(aabb.P1, ray.Origin), ray.InvDirection);
 
-	RayIntersectionResult.tmin = min(tx1, tx2);
-	RayIntersectionResult.tmax = max(tx1, tx2);
+	// Get the minimum value for each component
+	XMVECTOR tmin = XMVectorMin(t1, t2);
+	XMVECTOR tmax = XMVectorMax(t1, t2);
 
-	ty1 = (aabb.Points[0].y - ray.Origin.y)*ray.InvDirection.y;
-	ty2 = (aabb.Points[1].y - ray.Origin.y)*ray.InvDirection.y;
+	// We want to choose the largest of all min components, and the smallest of all max components, as the intersection times
+	XMFLOAT3 tminf, tmaxf;
+	XMStoreFloat3(&tminf, tmin); XMStoreFloat3(&tmaxf, tmax);
+	RayIntersectionResult.tmin = max(max(tminf.x, tminf.y), tminf.z);
+	RayIntersectionResult.tmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
 
-	RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(ty1, ty2));
-	RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(ty1, ty2));
-
-	tz1 = (aabb.Points[0].z - ray.Origin.z)*ray.InvDirection.z;
-	tz2 = (aabb.Points[1].z - ray.Origin.z)*ray.InvDirection.z;
-
-	RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(tz1, tz2));
-	RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(tz1, tz2));
-
+	// If min<max then we have an intersection
 	return (RayIntersectionResult.tmax >= max(0.0, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
 }
 
 // Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
 // Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
-bool GamePhysicsEngine::TestLineSegmentvsSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
-															const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+bool GamePhysicsEngine::TestLineSegmentvsSphereIntersection(const FXMVECTOR p1, const FXMVECTOR p2,
+															const FXMVECTOR sphere_centre, float sphere_radius)
 {
 	// There are potentially two points of intersection given by
 	//		p = p1 + k1(p2 - p1)
 	//		p = p1 + k2(p2 - p1)
-	float a, b, c, bb4ac;
 
 	// Determine vector difference of the two line points
-	D3DXVECTOR3 dp = (p2 - p1);
+	XMVECTOR dp = XMVectorSubtract(p2, p1);
 	
 	// Calculate components of the quadratic line equation
-	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
-	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
-	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
-	c -= sphere_radius * sphere_radius;
-	bb4ac = b * b - 4 * a * c;
+	
+	// a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	XMVECTOR a = XMVector3LengthSq(dp);
+
+	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+
+	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	XMVECTOR c = XMVectorAdd(XMVector3LengthSq(sphere_centre), XMVector3LengthSq(p1));
+
+	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	// c -= sphere_radius * sphere_radius;
+	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+
+	// bb4ac = b * b - 4 * a * c;
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
-	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+	//return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+	return (XMVector2Greater(XMVectorAbs(a), Game::C_EPSILON_V) && XMVector2GreaterOrEqual(bb4ac, NULL_VECTOR));
 }
 
 // Tests for the intersection of a line vector (p1 + dp == p2) with a sphere.  Returns no details; only whether an intersection took place
 // Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
-bool GamePhysicsEngine::TestLineVectorvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
-															const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+bool GamePhysicsEngine::TestLineVectorvsSphereIntersection(	const FXMVECTOR p1, const FXMVECTOR dp,
+															const FXMVECTOR sphere_centre, float sphere_radius)
 {
 	// There are potentially two points of intersection given by
 	//		p = p1 + k1(p2 - p1)
 	//		p = p1 + k2(p2 - p1)
-	float a, b, c, bb4ac;
 
 	// Calculate components of the quadratic line equation
-	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
-	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
-	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
-	c -= sphere_radius * sphere_radius;
-	bb4ac = b * b - 4 * a * c;
+
+	// a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	XMVECTOR a = XMVector3LengthSq(dp);
+
+	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+
+	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	XMVECTOR c = XMVectorAdd(XMVector3LengthSq(sphere_centre), XMVector3LengthSq(p1));
+
+	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	// c -= sphere_radius * sphere_radius;
+	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+
+	// bb4ac = b * b - 4 * a * c;
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
-	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
-}
-
-// Tests for the intersection of a line vector (p1 + dp == p2) with a squared-sphere-radius.  Returns no details; only whether an intersection took place
-// Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
-bool GamePhysicsEngine::TestLineVectorvsSqSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
-															const D3DXVECTOR3 & sphere_centre, float sphere_radius_sq)
-{
-	// There are potentially two points of intersection given by
-	//		p = p1 + k1(p2 - p1)
-	//		p = p1 + k2(p2 - p1)
-	float a, b, c, bb4ac;
-
-	// Calculate components of the quadratic line equation
-	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
-	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
-	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
-	c -= sphere_radius_sq;
-	bb4ac = b * b - 4 * a * c;
-
-	// We have an intersection if the quadratic determinant is positive
-	return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+	//return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
+	return (XMVector2Greater(XMVectorAbs(a), Game::C_EPSILON_V) && XMVector2GreaterOrEqual(bb4ac, NULL_VECTOR));
 }
 
 // Tests for the intersection of a line segment (p1 > p2) with a sphere.  Returns intersection points within 
 // the LineSegmentIntersectionResult structure
 // Info from http://paulbourke.net/geometry/circlesphere/index.html#linesphere and http://paulbourke.net/geometry/circlesphere/raysphere.c
-bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
-																	const D3DXVECTOR3 & sphere_centre, float sphere_radius)
+bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const FXMVECTOR p1, const FXMVECTOR p2,
+																	const FXMVECTOR sphere_centre, float sphere_radius)
 {
 	// There are potentially two points of intersection given by
 	//		p = p1 + k1(p2 - p1)
 	//		p = p1 + k2(p2 - p1)
-	float a, b, c, bb4ac;
 
 	// Determine vector difference of the two line points
-	D3DXVECTOR3 dp = (p2 - p1);
+	XMVECTOR dp = XMVectorSubtract(p2, p1);
 
 	// Calculate components of the quadratic line equation
-	a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
-	b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
-	c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
-	c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
-	c -= sphere_radius * sphere_radius;
-	bb4ac = b * b - 4 * a * c;
+
+	// a = dp.x * dp.x + dp.y * dp.y + dp.z * dp.z;
+	XMVECTOR a = XMVector3LengthSq(dp);
+
+	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
+	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+
+	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
+	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
+	XMVECTOR c = XMVectorAdd(XMVector3LengthSq(sphere_centre), XMVector3LengthSq(p1));
+
+	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
+	// c -= sphere_radius * sphere_radius;
+	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+
+	// bb4ac = b * b - 4 * a * c;
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
-	if (fabs(a) < Game::C_EPSILON || bb4ac < 0) return false;
+	// if (fabs(a) < Game::C_EPSILON || bb4ac < 0) return false;
+	if (XMVector2Less(XMVectorAbs(a), Game::C_EPSILON_V) || XMVector2Less(bb4ac, NULL_VECTOR)) return false;
 
 	// Store the points of intersection and return true to signify an intersection took place
-	float sqrt_bb4ac = sqrtf(bb4ac); float two_a = (2 * a);
-	LineSegmentIntersectionResult.k1 = (-b + sqrt_bb4ac) / two_a;
-	LineSegmentIntersectionResult.k2 = (-b - sqrt_bb4ac) / two_a;
+	// LineSegmentIntersectionResult.k1 = (-b + sqrt_bb4ac) / two_a;
+	// LineSegmentIntersectionResult.k2 = (-b - sqrt_bb4ac) / two_a;
+	float sqrt_bb4ac = sqrtf(XMVectorGetX(bb4ac)); float two_a = (2.0f * XMVectorGetX(a)); float bf_n = -XMVectorGetX(b);
+	LineSegmentIntersectionResult.k1 = (bf_n + sqrt_bb4ac) / two_a;
+	LineSegmentIntersectionResult.k2 = (bf_n - sqrt_bb4ac) / two_a;
 	return true;
 }
 
@@ -1604,52 +1655,59 @@ bool GamePhysicsEngine::TestContinuousSphereCollision(const iActiveObject *objec
 	// We do not use the current object positions, since they have already moved.  Instead we roll back the position to
 	// the start of the frame (t=0) and then perform continuous collision detection for their movement during the 
 	// frame (until t=1).  
-	D.wm0 = (object0->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
-	D.wm1 = (object1->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
-	D.pos0 = (object0->GetPosition() - D.wm0);
-	D.pos1 = (object1->GetPosition() - D.wm1);
+	D.wm0 = XMVectorMultiply(object0->PhysicsState.WorldMomentum, PhysicsClock.TimeFactorV);
+	D.wm1 = XMVectorMultiply(object1->PhysicsState.WorldMomentum, PhysicsClock.TimeFactorV);
+	D.pos0 = XMVectorSubtract(object0->GetPosition(), D.wm0);
+	D.pos1 = XMVectorSubtract(object1->GetPosition(), D.wm1);
 
 	// Get the vector between these (adjusted) object centres, the relative velocity between objects, and the combined collision radii
-	D.s = (D.pos0 - D.pos1);
-	D.v = (D.wm0 - D.wm1);
-	D.r = (object0->GetCollisionSphereRadius() + object1->GetCollisionSphereRadius());
+	D.s = XMVectorSubtract(D.pos0, D.pos1);
+	D.v = XMVectorSubtract(D.wm0, D.wm1);
+	D.r = XMVectorReplicate(object0->GetCollisionSphereRadius() + object1->GetCollisionSphereRadius());
 
 	// If c is negative, the objects already overlap and we can return immediately
-	D.c = D3DXVec3Dot(&D.s, &D.s) - (D.r * D.r);
-	if (D.c < 0.0f)
+	// D.c = D3DXVec3Dot(&D.s, &D.s) - (D.r * D.r);
+	D.c = XMVectorSubtract(XMVector3Dot(D.s, D.s), XMVectorMultiply(D.r, D.r));
+	if (XMVector2Less(D.c, NULL_VECTOR))
 	{
 		m_collisiontest.ContinuousTestResult.IntersectionTime = 0.0f;
 		return true;
 	}
 
-	D.a = D3DXVec3Dot(&D.v, &D.v);
-	D.b = D3DXVec3Dot(&D.v, &D.s);
+	D.a = XMVector3Dot(D.v, D.v);
+	D.b = XMVector3Dot(D.v, D.s);
 
 	// If b is >= 0 then the objects are not moving towards each other, so we can again return immediately
-	if (D.b >= 0.0f) return false;
+	if (XMVector2GreaterOrEqual(D.b, NULL_VECTOR)) return false;
 
 	// Calculate d as the result of the simultaneous linear equations; if it is negative then there are no 
 	// real roots to the solution "t = (-b - sqrt(d)) / a" so we can report no collision
-	D.d = D.b*D.b - D.a*D.c;
-	if (D.d < 0.0f) return false;
+	// D.d = D.b*D.b - D.a*D.c;
+	D.d = XMVectorSubtract(XMVectorMultiply(D.b, D.b), XMVectorMultiply(D.a, D.c));
+	if (XMVector2Less(D.d, NULL_VECTOR)) return false;
 
 	// The time of intersection can be found as the solution "t = (-b - sqrt(d)) / a"
-	m_collisiontest.ContinuousTestResult.IntersectionTime = (-D.b - sqrt(D.d)) / D.a;
-
+	m_collisiontest.ContinuousTestResult.IntersectionTime = (-XMVectorGetX(D.b) - sqrtf(XMVectorGetX(D.d))) / XMVectorGetX(D.a);
+	
 	// We know there is a collision in the future.  However it is only a collision in this test if it occurs within the frame time
 	if (m_collisiontest.ContinuousTestResult.IntersectionTime > 1.0f) return false;
 
 	// Get the object collision sphere centres at the time of intersection.  Calculated by advancing the object
 	// positions by the proportion of their world momentum that is covered by collision time t
-	m_collisiontest.ContinuousTestResult.CollisionPos0 = (D.pos0 + (D.wm0 * m_collisiontest.ContinuousTestResult.IntersectionTime));
-	m_collisiontest.ContinuousTestResult.CollisionPos1 = (D.pos1 + (D.wm1 * m_collisiontest.ContinuousTestResult.IntersectionTime));
+	//m_collisiontest.ContinuousTestResult.CollisionPos0 = (D.pos0 + (D.wm0 * m_collisiontest.ContinuousTestResult.IntersectionTime));
+	//m_collisiontest.ContinuousTestResult.CollisionPos1 = (D.pos1 + (D.wm1 * m_collisiontest.ContinuousTestResult.IntersectionTime));
+	m_collisiontest.ContinuousTestResult.CollisionPos0 = XMVectorAdd(D.pos0, XMVectorScale(D.wm0, m_collisiontest.ContinuousTestResult.IntersectionTime));
+	m_collisiontest.ContinuousTestResult.CollisionPos1 = XMVectorAdd(D.pos1, XMVectorScale(D.wm1, m_collisiontest.ContinuousTestResult.IntersectionTime));
 	
 	// Determine the contact point between the two objects; this will be the point on the contact normal that is 
 	// Radius0 away from Object0
-	m_collisiontest.ContinuousTestResult.ContactNormal = (m_collisiontest.ContinuousTestResult.CollisionPos1 - m_collisiontest.ContinuousTestResult.CollisionPos0);
-	D3DXVec3Normalize(&m_collisiontest.ContinuousTestResult.NormalisedContactNormal, &m_collisiontest.ContinuousTestResult.ContactNormal);
-	m_collisiontest.ContinuousTestResult.ContactPoint = 
-		(m_collisiontest.ContinuousTestResult.CollisionPos0 + (m_collisiontest.ContinuousTestResult.NormalisedContactNormal * object0->GetCollisionSphereRadius()));
+	m_collisiontest.ContinuousTestResult.ContactNormal = XMVectorSubtract(	m_collisiontest.ContinuousTestResult.CollisionPos1, 
+																			m_collisiontest.ContinuousTestResult.CollisionPos0);
+	m_collisiontest.ContinuousTestResult.NormalisedContactNormal = XMVector3NormalizeEst(m_collisiontest.ContinuousTestResult.ContactNormal);
+	
+	// m_collisiontest.ContinuousTestResult.ContactPoint = (m_collisiontest.ContinuousTestResult.CollisionPos0 + (m_collisiontest.ContinuousTestResult.NormalisedContactNormal * object0->GetCollisionSphereRadius()));
+	m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(m_collisiontest.ContinuousTestResult.CollisionPos0, 
+		XMVectorScale(m_collisiontest.ContinuousTestResult.NormalisedContactNormal, object0->GetCollisionSphereRadius()));
 
 	// We can now report the collision that was detected
 	return true;
@@ -2257,3 +2315,9 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 
 
 #endif
+
+
+
+
+
+RESET DEBUG DEFINES TO //

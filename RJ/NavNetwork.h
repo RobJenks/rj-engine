@@ -11,6 +11,8 @@
 class iSpaceObjectEnvironment;
 class NavNode;
 
+
+// This class has no special alignment requirements
 class NavNetwork
 {
 public:
@@ -27,7 +29,14 @@ public:
 	Result						FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> *outPathReverse);
 
 	// Finds the navigation node closest to the specified position
-	NavNode *					GetClosestNode(D3DXVECTOR3 pos);
+	CMPINLINE NavNode *			GetClosestNode(const FXMVECTOR pos)
+	{
+		XMStoreFloat3(&m_float3, pos);
+		return GetClosestNode(m_float3);
+	}
+
+	// Finds the navigation node closest to the specified position
+	NavNode *					GetClosestNode(const XMFLOAT3 & pos);
 
 	// Outputs a string representation of the network
 	std::string					OutputAsString(void);
@@ -70,6 +79,9 @@ private:
 		NavNode *src; NavNode *tgt; int cost;
 		tmpconndata(NavNode *_src, NavNode *_tgt, int _cost) { src = _src; tgt = _tgt; cost = _cost; }
 	};
+
+	// Temporary storage for local float representations of vector data
+	XMFLOAT3											m_float3;
 };
 
 

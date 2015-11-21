@@ -297,7 +297,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 }
 
 // Finds the navigation node closest to the specified position
-NavNode * NavNetwork::GetClosestNode(D3DXVECTOR3 pos)
+NavNode * NavNetwork::GetClosestNode(const XMFLOAT3 & pos)
 {
 	// Parameter & initialisation checks
 	if (!m_parent) return NULL;

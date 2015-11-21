@@ -14,7 +14,9 @@
 #endif
 
 
-class SimulationObjectManager
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class SimulationObjectManager : public ALIGN16<SimulationObjectManager>
 {
 public:
 
@@ -22,6 +24,9 @@ public:
 	static const float					SEARCH_DISTANCE_MULTIPLIER;
 	static const float					MINIMUM_SEARCH_DISTANCE;
 	static const float					MAXIMUM_SEARCH_DISTANCE;
+	static const AXMVECTOR				SEARCH_DISTANCE_MULTIPLIER_V;
+	static const AXMVECTOR				MINIMUM_SEARCH_DISTANCE_V;
+	static const AXMVECTOR				MAXIMUM_SEARCH_DISTANCE_V;
 
 	// Bit flags specifying object search options
 	enum ObjectSearchOptions
@@ -51,23 +56,27 @@ public:
 	};
 
 	// Sturcture holding information on one cached search result
-	struct CachedSearchResult
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct CachedSearchResult : public ALIGN16<CachedSearchResult>
 	{
 		Game::ID_TYPE 						ObjectID;
-		float								DistanceSquared;
+		AXMVECTOR							DistanceSquared;
 
-		CachedSearchResult(Game::ID_TYPE obj_id, float distsq) : ObjectID(obj_id), DistanceSquared(distsq) { }
+		CachedSearchResult(Game::ID_TYPE obj_id, const FXMVECTOR distsq) : ObjectID(obj_id), DistanceSquared(distsq) { }
 	};
 
 	// Structure holding cached object search information
-	struct CachedSearchResults
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct CachedSearchResults : public ALIGN16<CachedSearchResults>
 	{
-		D3DXVECTOR3							Position;
-		float								SearchDistanceSq;
+		AXMVECTOR							Position;
+		AXMVECTOR							SearchDistanceSq;	// Vectorised form of the search distance squared
 		SearchOptions						Options;
 		std::vector<CachedSearchResult>		Results;
 
-		CachedSearchResults(void) : Position(NULL_VECTOR), SearchDistanceSq(0.0f), Options(0) { }
+		CachedSearchResults(void) : Position(NULL_VECTOR), SearchDistanceSq(NULL_VECTOR), Options(0) { }
 	};
 
 	// Maximum accepted search cache size
@@ -92,7 +101,7 @@ public:
 	// Searches for all items within the specified distance of a position.  Returns the number of items located
 	// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
 	// Requires us to locate the most relevant Octree node, so less efficient than the method that supplies a space object
-	CMPINLINE int GetAllObjectsWithinDistance(	const D3DXVECTOR3 & position, Octree<iSpaceObject*> *sp_tree, float distance, 
+	CMPINLINE int GetAllObjectsWithinDistance(	const FXMVECTOR position, Octree<iSpaceObject*> *sp_tree, float distance, 
 												std::vector<iSpaceObject*> & outResult, int options)
 	{
 		if (sp_tree) return _GetAllObjectsWithinDistance(sp_tree->GetNodeContainingPoint(position), position, distance, outResult, options);
@@ -122,7 +131,7 @@ protected:
 
 	// Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
 	// appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
-	int _GetAllObjectsWithinDistance(Octree<iSpaceObject*> *node, const D3DXVECTOR3 & position, float distance, 
+	int _GetAllObjectsWithinDistance(Octree<iSpaceObject*> *node, const FXMVECTOR position, float distance, 
 										std::vector<iSpaceObject*> & outResult, int options);
 
 	// Data used in the process of searching for objects

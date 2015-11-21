@@ -321,6 +321,20 @@ void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::Rende
 	Game::Engine->RenderModel(m_models[(int)colour], mworld);
 }
 
+// Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
+void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size)
+{
+	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
+	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
+	// D3DXMatrixTranslation(&mtrans, xSize * -0.5f, ySize * -0.5f, zSize * -0.5f);
+	XMMATRIX scale = XMMatrixScalingFromVector(size);
+	XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorMultiply(size, HALF_VECTOR_N));
+
+	// Scale & translate the current world matrix before passing it to the engine rendering method
+	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
+	Game::Engine->RenderModel(m_models[(int)colour], mworld);
+}
+
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes alpha blending.
 // Therefore also requires the position to be provided for efficient depth-sorting
 void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position)

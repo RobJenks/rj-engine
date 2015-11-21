@@ -5,15 +5,17 @@
 
 #include "DX11_Core.h"
 
-class BasicRay
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class BasicRay : public ALIGN16<BasicRay>
 {
 public:
 
-	D3DXVECTOR3				Origin;					// Origin point of the ray 
-	D3DXVECTOR3				Direction;				// Ray direction in world space
+	AXMVECTOR				Origin;					// Origin point of the ray 
+	AXMVECTOR				Direction;				// Ray direction in world space
 
 	// Constructor; accepts value to initialise the ray
-	BasicRay(const D3DXVECTOR3 & origin, const D3DXVECTOR3 & direction)
+	BasicRay(const FXMVECTOR origin, const FXMVECTOR direction)
 		: Origin(origin), Direction(direction)
 	{
 	}

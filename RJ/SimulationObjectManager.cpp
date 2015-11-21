@@ -9,6 +9,9 @@
 const float SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER = 3.0f;		// Multiplier attached to all search queries to allow more efficient caching
 const float SimulationObjectManager::MINIMUM_SEARCH_DISTANCE = 1000.0f;		// Minimum distance on searches, for caching purposes
 const float SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE = 100000.0f;	// Maximum search distance when increasing by the multiplier
+const AXMVECTOR	SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER_V = XMVectorReplicate(SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER);
+const AXMVECTOR	SimulationObjectManager::MINIMUM_SEARCH_DISTANCE_V = XMVectorReplicate(SimulationObjectManager::MINIMUM_SEARCH_DISTANCE);
+const AXMVECTOR	SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE_V = XMVectorReplicate(SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE);
 
 // Default constructor
 SimulationObjectManager::SimulationObjectManager(void)
@@ -40,14 +43,14 @@ void SimulationObjectManager::InitialiseFrame(void)
 		CACHE_HITS = CACHE_MISSES = 0;
 	
 #		ifdef OBJMGR_LOG_DEBUG_OUTPUT
-		OutputDebugString("\nObjMgr: Initialising cache for new frame\n");
+			OutputDebugString("\nObjMgr: Initialising cache for new frame\n");
 #		endif
 #	endif
 }
 
 // Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
 // appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
-int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*> *node, const D3DXVECTOR3 & position, float distance,
+int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*> *node, const FXMVECTOR position, float distance,
 															std::vector<iSpaceObject*> & outResult, int options)
 {
 	/* For now, we wil take one of two approaches.  If the search distance fits entirely within this item's node (the very likely case)
@@ -71,23 +74,25 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 
 	// All comparisons will be based on squared distance to avoid costly sqrt operations
 	float distsq = (distance * distance);
+	XMVECTOR vdistsq = XMVectorReplicate(distsq);
 
 	/* Test whether a cached search result can be used without searching */
 	if (m_cache_enabled)
 	{
 		// Test whether any cached search result contains our desired search as a subset; if so, we can return it immediately
-		float cacheposdistsq; D3DXVECTOR3 cacheposdiff;
+		XMVECTOR cacheposdiff, cacheposdistsq;
 		for (std::vector<CachedSearchResults>::size_type i = 0; i < m_cachesize; ++i)
 		{
 			// We can only used cached results that were obtained using the same search options
 			if (m_searchcache[i].Options != options) continue;
 
 			// Determine squared distance between our current search object and the centre of the cached search
-			cacheposdiff = (position - m_searchcache[i].Position);
-			cacheposdistsq = (cacheposdiff.x*cacheposdiff.x) + (cacheposdiff.y*cacheposdiff.y) + (cacheposdiff.z*cacheposdiff.z);
+			cacheposdiff = XMVectorSubtract(position, m_searchcache[i].Position);
+			cacheposdistsq = XMVector3LengthSq(cacheposdiff);
 
 			// We can use these cached results if (cachedsearchdistSQ > (searchdistSQ + posdifferenceSQ))
-			if (m_searchcache[i].SearchDistanceSq > (distsq + cacheposdistsq))
+			// Use a vector2 comparison since the distance values are replicated across all elements anyway
+			if (XMVector2Greater(m_searchcache[i].SearchDistanceSq, XMVectorAdd(vdistsq, cacheposdistsq))) 
 			{
 				// Clear the results vector 
 				outResult.clear();
@@ -95,12 +100,12 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 				iObject *obj;
 
 				// Add any items within the adjusted threshold
-				float threshold = (distsq - cacheposdistsq);
+				XMVECTOR threshold = XMVectorSubtract(vdistsq, cacheposdistsq);
 				std::vector<CachedSearchResult>::const_iterator it_end = m_searchcache[i].Results.end();
 				for (std::vector<CachedSearchResult>::const_iterator it = m_searchcache[i].Results.begin(); it != it_end; ++it)
 				{
-					// Add any items within the threshold
-					if ((*it).DistanceSquared < threshold)
+					// Add any items within the threshold.  Use vector2 comparison since values are replicated throughout vector anyway
+					if (XMVector2Less((*it).DistanceSquared, threshold))
 					{
 						obj = Game::GetObjectByID((*it).ObjectID);
 						if (obj)
@@ -116,9 +121,9 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 					++CACHE_HITS;
 
 #					ifdef OBJMGR_LOG_DEBUG_OUTPUT
-						OutputDebugString(concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)("], opt=")(options)
-							(") met by cache ")(i)(" (")(sqrtf(m_searchcache[i].SearchDistanceSq))(" of [")(m_searchcache[i].Position.x)(",")
-							(m_searchcache[i].Position.y)(",")(m_searchcache[i].Position.z)("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
+					OutputDebugString(concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(XMVectorGetX(position))(",")(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)
+							(") met by cache ")(i)(" (")(sqrtf(XMVectorGetX(m_searchcache[i].SearchDistanceSq)))(" of [")(XMVectorGetX(m_searchcache[i].Position))(",")
+							(XMVectorGetY(m_searchcache[i].Position))(",")(XMVectorGetZ(m_searchcache[i].Position))("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
 #					endif
 #				endif
 
@@ -135,33 +140,34 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 		++CACHE_MISSES;
 
 #		ifdef OBJMGR_LOG_DEBUG_OUTPUT
-			OutputDebugString(concat("ObjMgr: Cache Miss { Search(")(distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)("], opt=")(options)
+		OutputDebugString(concat("ObjMgr: Cache Miss { Search(")(distance)(" of [")(position)(",")(position)(",")(position)("], opt=")(options)
 				(") could not be met\n").str().c_str());
 #		endif
 #	endif
 
-	// Increase actual search distance to enable more effective use of caching
-	float search_distance = (distance * SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER);
-	if (search_distance < SimulationObjectManager::MINIMUM_SEARCH_DISTANCE)
+	// Increase actual search distance to enable more effective use of caching (distance *= SEARCH_DIST_MULTIPLIER)
+	// Use vector2 comparisons for efficiency since all components are replicated anyway
+	XMVECTOR search_distance = XMVectorScale(SimulationObjectManager::SEARCH_DISTANCE_MULTIPLIER_V, distance);
+	if (XMVector2Less(search_distance, SimulationObjectManager::MINIMUM_SEARCH_DISTANCE_V))
 	{
-		search_distance = SimulationObjectManager::MINIMUM_SEARCH_DISTANCE;
+		search_distance = SimulationObjectManager::MINIMUM_SEARCH_DISTANCE_V;
 	}
-	else if (search_distance > SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE)
+	else if (XMVector2Greater(search_distance, SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE_V))
 	{
-		search_distance = max(distance, SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE);
+		search_distance = XMVectorMax(XMVectorReplicate(distance), SimulationObjectManager::MAXIMUM_SEARCH_DISTANCE_V);
 	}
 
 	// We are ready to perform a full search; initialise the cache that we will be creating
 	CachedSearchResults & cache = m_searchcache[m_nextcacheindex];
 	cache.Position = position;
-	cache.SearchDistanceSq = (search_distance * search_distance);
+	cache.SearchDistanceSq = XMVectorMultiply(search_distance, search_distance);
 	cache.Options = options;
 	cache.Results.clear();
 
 	// Record the new cache that was created if in debug mode
 #	if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
-		OutputDebugString(concat("ObjMgr: Creating cache ")(m_nextcacheindex)(" (")(search_distance)(" of [")(pos.x)(",")(pos.y)(",")(pos.z)
-			("], opt=")(options)("\n").str().c_str());
+		OutputDebugString(	concat("ObjMgr: Creating cache ")(m_nextcacheindex)(" (")(search_distance)(" of [")(XMVectorGetX(position))(",")
+							(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)("\n").str().c_str());
 #	endif
 
 	// Increment the cache counter for the next one that will be used
@@ -171,14 +177,15 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 		++m_cachesize;
 
 	// Determine the octree bounds that we need to consider
-	float xmin = (position.x - search_distance), ymin = (position.y - search_distance), zmin = (position.z - search_distance),
-		  xmax = (position.x + search_distance), ymax = (position.y + search_distance), zmax = (position.z + search_distance);
+	XMVECTOR vmin = XMVectorSubtract(position, search_distance);
+	XMVECTOR vmax = XMVectorAdd(position, search_distance);
+	XMFLOAT3 fmin; XMStoreFloat3(&fmin, vmin);
+	XMFLOAT3 fmax; XMStoreFloat3(&fmax, vmax);
 
 	// Starting point for the search will be our current node: "node" is currently set to the focal object treenode
 
 	// Determine whether we can take approach 1, i.e. considering only the contents of our current node
-	if ((xmin >= node->m_xmin) && (xmax < node->m_xmax) && (ymin >= node->m_ymin) &&
-		(ymax < node->m_ymax) && (zmin >= node->m_zmin) && (zmax < node->m_zmax))
+	if (XMVector3GreaterOrEqual(vmin, node->m_min) && XMVector3Less(vmax, node->m_max))
 	{
 		// The search area does fit within this node, so we can take approach 1.  Make sure we have any items besides ourself; 
 		// if not, we can stop here
@@ -197,8 +204,7 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 			node = node->m_parent;
 
 			// Test whether this now fully contains the search area
-			if ((xmin >= node->m_xmin) && (xmax < node->m_xmax) && (ymin >= node->m_ymin) &&
-				(ymax < node->m_ymax) && (zmin >= node->m_zmin) && (zmax < node->m_zmax))
+			if (XMVector3GreaterOrEqual(vmin, node->m_min) && XMVector3Less(vmax, node->m_max))
 			{
 				// It does, so break out of the loop and use this node for locating objects
 				break;
@@ -217,7 +223,8 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 
 	// Initialise any other variables needed for the analysis phase
 	iSpaceObject *obj;
-	float diffx, diffy, diffz, obj_dist_sq;
+	XMFLOAT3 centre;
+	XMVECTOR obj_dist_sq;
 	search_last_large_obj = NULL;
 	int C;
 
@@ -231,14 +238,14 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 		if (node->IsBranchNode())
 		{
 			// If this is a branch node, work out which of its children are actually relevant to us
-			const D3DXVECTOR3 & centre = node->m_centre; 
+			XMStoreFloat3(&centre, node->m_centre); 
 			C = (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH);
-			if		(xmin >= centre.x)	ClearBit(C, NodeSubdiv::X_NEG_SEG);
-			else if (xmax < centre.x)	ClearBit(C, NodeSubdiv::X_POS_SEG);
-			if		(ymin >= centre.y)	ClearBit(C, NodeSubdiv::Y_NEG_SEG);
-			else if (ymax < centre.y)	ClearBit(C, NodeSubdiv::Y_POS_SEG);
-			if		(zmin >= centre.z)	ClearBit(C, NodeSubdiv::Z_NEG_SEG);
-			else if (zmax < centre.z)	ClearBit(C, NodeSubdiv::Z_POS_SEG);
+			if		(fmin.x >= centre.x)	ClearBit(C, NodeSubdiv::X_NEG_SEG);
+			else if (fmax.x < centre.x)		ClearBit(C, NodeSubdiv::X_POS_SEG);
+			if		(fmin.y >= centre.y)	ClearBit(C, NodeSubdiv::Y_NEG_SEG);
+			else if (fmax.y < centre.y)		ClearBit(C, NodeSubdiv::Y_POS_SEG);
+			if		(fmin.z >= centre.z)	ClearBit(C, NodeSubdiv::Z_NEG_SEG);
+			else if (fmax.z < centre.z)		ClearBit(C, NodeSubdiv::Z_POS_SEG);
 
 			// Now add only those child nodes which are still considered relevant.  Unrolled as switch/lookup table for efficiency
 			switch (C)
@@ -364,8 +371,7 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 				// We can ignore this entry if it does not represent an item, or if it is us
 				obj = (iSpaceObject*)(*search_obj_it);
 				if (!obj) continue;
-				const D3DXVECTOR3 & objpos = obj->GetPosition();
-
+				
 				// We can ignore the object if it is non-colliding and we are only interested in colliding objects.  Or, if it IS
 				// colliding, we can also ignore it if it is a passive collider and we only want active collider objects
 				if ( (CheckBit_Single(options, ObjectSearchOptions::OnlyCollidingObjects) && (obj->GetCollisionMode() == Game::CollisionMode::NoCollision)) ||
@@ -403,37 +409,34 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 					search_last_large_obj = obj;
 
 					// Get the squared distance from our position to the object
-					diffx = (position.x - objpos.x), diffy = (position.y - objpos.y), diffz = (position.z - objpos.z);
-					diffx *= diffx; diffy *= diffy; diffz *= diffz;
-					obj_dist_sq = diffx + diffy + diffz;
+					obj_dist_sq = XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition()));
 
 					// Add the object to the search cache before culling items in the exact search range
 					cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
 
 					// The object is invalid if it is outside (distsq + collisionradiussq) of the position
-					if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
+					// Use vector2 comparison since values are replicated anyway
+					if (XMVector2Greater(obj_dist_sq, XMVectorReplicate(distsq + obj->GetCollisionSphereRadiusSq()))) continue;
 				}
 
 				// Method 2 - normal objects: any other object type can be treated as a point object, and we use a simple dist ^ 2 test
 				else
 				{
 					// Calculated the squared distance between ourself and this object
-					diffx = (position.x - objpos.x), diffy = (position.y - objpos.y), diffz = (position.z - objpos.z);
-					diffx *= diffx; diffy *= diffy; diffz *= diffz;
-					obj_dist_sq = diffx + diffy + diffz;
+					obj_dist_sq = XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition()));
 
 					// Add the object to the search cache before culling items in the exact search range
 					cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
 
 					// Test object validity based upon its squared distance to the target position.  Optionally ignore 
-					// the target object collision radius as well
+					// the target object collision radius as well.  Use vector2 comparison since all components are replicated
 					if (ignore_target_boundaries)
 					{
-						if (obj_dist_sq > distsq) continue; 
+						if (XMVector2Greater(obj_dist_sq, vdistsq)) continue; 
 					}
 					else
 					{
-						if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
+						if (XMVector2Greater(obj_dist_sq, XMVectorReplicate(distsq + obj->GetCollisionSphereRadiusSq()))) continue;
 					}
 				}
 

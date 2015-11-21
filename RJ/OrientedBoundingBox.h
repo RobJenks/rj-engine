@@ -40,9 +40,31 @@ public:
 	{
 		AXMVECTOR				Centre;				// Centre point of the OBB
 		AXMVECTOR_P				Axis[3];			// The orthonormal unit vectors defining this OBB's coordinate basis
+		AXMVECTOR				ExtentV;			// The half-extent of this OBB in each of its three dimensions (i.e. from centre to edge), 
 		AXMVECTOR_P				Extent[3];			// The half-extent of this OBB in each of its three dimensions (i.e. from centre to edge), 
 													// replicated in each vector. i.e. Extent[0] = { HalfExtent.x, HalfExtent.x, HalfExtent.x, HalfExtent.x }
 		XMFLOAT3				ExtentF;			// Float representation of object extents, for easier access to opaque XMVECTOR Extent[3]
+
+		// Updates the extent data and recalculates based on the new values
+		CMPINLINE void			UpdateExtent(const FXMVECTOR extent)
+		{
+			ExtentV = extent;
+			XMStoreFloat3(&ExtentF, extent);
+
+			Extent[0].value = XMVectorReplicate(ExtentF.x);
+			Extent[1].value = XMVectorReplicate(ExtentF.y);
+			Extent[2].value = XMVectorReplicate(ExtentF.z);
+		}
+
+		// Updates the extent data by copying from another source data structure
+		CMPINLINE void			UpdateExtent(const CoreOBBData & source)
+		{
+			ExtentV = source.ExtentV;
+			ExtentF = source.ExtentF;
+			Extent[0].value = source.Extent[0].value;
+			Extent[1].value = source.Extent[1].value;
+			Extent[2].value = source.Extent[2].value;
+		}
 	};
 
 	
@@ -100,6 +122,7 @@ public:
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from the given extent values
 	CMPINLINE void				UpdateExtent(const FXMVECTOR extent)
 	{
+		Data.ExtentV = extent;
 		XMStoreFloat3(&Data.ExtentF, extent);
 
 		Data.Extent[0].value = XMVectorReplicate(Data.ExtentF.x);

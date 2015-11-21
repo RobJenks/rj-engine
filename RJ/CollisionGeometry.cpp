@@ -19,8 +19,8 @@ CollisionGeometry::CollisionGeometry(void)
 void CollisionGeometry::Initialise(int volumecount)
 {
 	// If there is already memory allocated then delete it here
-	if (m_position) SafeFree(m_position); 
-	if (m_size) SafeFree(m_size);
+	if (m_position) SafeDeleteArray(m_position); 
+	if (m_size) SafeDeleteArray(m_size);
 	m_numvolumes = 0;
 	m_hasoffset = false;
 
@@ -29,22 +29,22 @@ void CollisionGeometry::Initialise(int volumecount)
 
 	// Store the new volume count and allocate memory for each volume
 	m_numvolumes = volumecount;
-	m_position = (D3DXVECTOR3*)malloc(sizeof(D3DXVECTOR3) * volumecount);
-	m_size =	 (D3DXVECTOR3*)malloc(sizeof(D3DXVECTOR3) * volumecount);
+	m_position = new AXMVECTOR_P[volumecount];
+	m_size =	 new AXMVECTOR_P[volumecount];
 }
 
 // Adds a new collision volume to the geometry
-void CollisionGeometry::AddCollisionVolume(int index, const D3DXVECTOR3 & localpos, const D3DXVECTOR3 & size)
+void CollisionGeometry::AddCollisionVolume(int index, const FXMVECTOR localpos, const FXMVECTOR size)
 {
 	// Make sure the index is valid 
 	if (index < 0 || index >= m_numvolumes) return;
 
 	// Store the values
-	m_position[index] = localpos;
-	m_size[index] = size;
+	m_position[index].value = localpos;
+	m_size[index].value = size;
 
 	// Determine whether this adds a non-zero offset, in which case we need to set the flag so that collision tests account for it
-	if (!IsZeroVector3(m_position[index])) m_hasoffset = true;
+	if (!IsZeroVector3(m_position[index].value)) m_hasoffset = true;
 }
 
 
@@ -52,6 +52,6 @@ void CollisionGeometry::AddCollisionVolume(int index, const D3DXVECTOR3 & localp
 CollisionGeometry::~CollisionGeometry(void)
 {
 	// If memory has been allocated then free it here
-	if (m_position) SafeFree(m_position); 
-	if (m_size) SafeFree(m_size);
+	if (m_position) SafeDeleteArray(m_position); 
+	if (m_size) SafeDeleteArray(m_size);
 }

@@ -19,7 +19,10 @@ class iSpaceObjectEnvironment;
 class AABB;
 class Ray;
 
-class GamePhysicsEngine
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class GamePhysicsEngine : public ALIGN16<GamePhysicsEngine>
 {
 public:
 
@@ -27,12 +30,14 @@ public:
 	enum CollisionDetectionType { Unknown = 0, SphereVsSphere, SphereVsOBB, OBBvsOBB, ContinuousSphereVsSphere, ContinuousSphereVsOBB };
 
 	// Struct holding data on a ray intersection test
+	// Class has no special alignment requirements
 	struct RayIntersectionTestResult
 	{
 		float tmin, tmax;				// The min and max intersection points.  Intersection took place if tmin < tmax
 	} RayIntersectionResult;
 
 	// Struct holding data on a line intersection test.  Intersection occured at (p = P1 + [k0|k1] (P2 - P1))
+	// Class has no special alignment requirements
 	struct LineSegmentIntersectionData
 	{
 		float	k1, k2;				// k1 and k2 are the two points of intersection, if an intersection occurred
@@ -40,6 +45,7 @@ public:
 	} LineSegmentIntersectionResult;
 
 	// Struct holding data on a SAT test
+	// Class has no special alignment requirments
 	struct SATIntersectionResult 
 	{ 
 		int Object0Axis, Object1Axis;
@@ -53,35 +59,41 @@ public:
 	};
 
 	// Struct holding intermediate data used in performing a continuous collision detection
-	struct ContinuousCollisionTestInterimData
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct ContinuousCollisionTestInterimData : public ALIGN16<ContinuousCollisionTestInterimData>
 	{
-		D3DXVECTOR3 wm0, wm1;					// World velocity of each object
-		D3DXVECTOR3 pos0, pos1;					// Initial position of each object, at (t=0)
-		D3DXVECTOR3 s;							// Distance between object centers at (t=0)
-		D3DXVECTOR3 v;							// Relative velocity between objects
-		float r;								// Combined collision radii of the two objects
+		AXMVECTOR wm0, wm1;						// World velocity of each object
+		AXMVECTOR pos0, pos1;					// Initial position of each object, at (t=0)
+		AXMVECTOR s;							// Distance between object centers at (t=0)
+		AXMVECTOR v;							// Relative velocity between objects
+		AXMVECTOR r;							// Combined collision radii of the two objects
 
-		float a, b, c, d;						// Results of the sphere/sphere intersection test
+		AXMVECTOR a, b, c, d;					// Results of the sphere/sphere intersection test
 	};
 
 	// Struct holding data on a continuous collision test
-	struct ContinuousCollisionTestResult
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct ContinuousCollisionTestResult : public ALIGN16<ContinuousCollisionTestResult>
 	{
 		ContinuousCollisionTestInterimData	InterimCalculations;		// Data used during the continuous collision detection algorithms, 
 																		// allowing it to be efficiently shared
 
 		float								IntersectionTime;			// The time of intersection, in the range [0 1]
-		D3DXVECTOR3							CollisionPos0;				// Object0 centre point at the time of collision
-		D3DXVECTOR3							CollisionPos1;				// Object1 centre point at the time of collision
-		D3DXVECTOR3							ContactNormal;				// The contact normal from object 0 to object 1
-		D3DXVECTOR3							NormalisedContactNormal;	// Normalised contact normal from object 0 to object 1
-		D3DXVECTOR3							ContactPoint;				// The contact point between the two objects
+		AXMVECTOR							CollisionPos0;				// Object0 centre point at the time of collision
+		AXMVECTOR							CollisionPos1;				// Object1 centre point at the time of collision
+		AXMVECTOR							ContactNormal;				// The contact normal from object 0 to object 1
+		AXMVECTOR							NormalisedContactNormal;	// Normalised contact normal from object 0 to object 1
+		AXMVECTOR							ContactPoint;				// The contact point between the two objects
 
 		ContinuousCollisionTestResult(void) { memset(this, 0, sizeof(this)); }
 	};
 
 	// Struct holding the result of the last collision detection that was performed
-	struct CollisionDetectionResult
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct CollisionDetectionResult : public ALIGN16<CollisionDetectionResult>
 	{
 		CollisionDetectionType			Type;							// The collision detection method that was used
 		float							BroadphasePenetrationSq;		// The squared penetration distance measured during broadphase testing
@@ -102,49 +114,66 @@ public:
 	};
 
 	// Struct holding data on an impact between two objects
-	struct ImpactData
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct ImpactData : public ALIGN16<ImpactData>
 	{
-		struct ObjectImpactData
+		// Class is 16-bit aligned to allow use of SIMD member variables
+		__declspec(align(16))
+		struct ObjectImpactData : public ALIGN16<ObjectImpactData>
 		{
-			D3DXVECTOR3		PreImpactVelocity;				// Our velocity before the impact
-			D3DXVECTOR3		VelocityChange;					// The change in our velocity following the impact
-			float			VelocityChangeMagnitude;		// The magnitude of our change in velocity (VelocityChange.Length)
-			float			ImpactForce;					// The force with which we have been impacted (The momentum we were hit with)
+			AXMVECTOR		PreImpactVelocity;				// Our velocity before the impact
+			AXMVECTOR		VelocityChange;					// The change in our velocity following the impact
+			AXMVECTOR		VelocityChangeMagnitude;		// The magnitude of our change in velocity (VelocityChange.Length) (vectorised single value)
+			AXMVECTOR		ImpactForce;					// The force with which we have been impacted (The momentum we were hit with) (vectorised single value)
 
-			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = D3DXVECTOR3(0.0f, 0.0f, 0.0f); VelocityChangeMagnitude = ImpactForce = 0.0f; }
+			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = NULL_VECTOR; }
 		};
 
-		float				TotalImpactForce;				// The combined closing momentum at the collision point
+		AXMVECTOR			TotalImpactForce;				// The combined closing momentum at the collision point (vectorised single value)
 
 		ObjectImpactData	Object;							// Impact data for the current object
 		ObjectImpactData	Collider;						// Impact data for the colliding object
 
-		ImpactData(void)	{ TotalImpactForce = 0.0f; }
+		ImpactData(void)	{ TotalImpactForce = NULL_VECTOR; }
 	};
 
 	// Struct holding data on an impact between an object and the terrain
-	struct TerrainImpactData
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct TerrainImpactData : public ALIGN16<TerrainImpactData>
 	{
 		StaticTerrain *		Terrain;						// The terrain object that was impacted
-		D3DXVECTOR3			ResponseVector;					// The vector direction of the collision response
-		float				ResponseVelocity;				// The resulting velocity along the collision response vector
-		float				ImpactVelocity;					// The object velocity at point of impact
-		float				ImpactForce;					// The force of the impact, i.e. the change in velocity * object momentum
+		AXMVECTOR			ResponseVector;					// The vector direction of the collision response
+		AXMVECTOR			ResponseVelocity;				// The resulting velocity along the collision response vector (vectorised single value)
+		AXMVECTOR			ImpactVelocity;					// The object velocity at point of impact  (vectorised single value)
+		AXMVECTOR			ImpactForce;					// The force of the impact, i.e. the change in velocity * object momentum  (vectorised single value)
 
-		TerrainImpactData(void) { Terrain = NULL; ResponseVector = D3DXVECTOR3(0.0f, 0.0f, 0.0f); ResponseVelocity = ImpactVelocity = ImpactForce = 0.0f; }
+		TerrainImpactData(void) { Terrain = NULL; ResponseVector = ResponseVelocity = ImpactVelocity = ImpactForce = NULL_VECTOR; }
 	};
 
 	// Struct holding the internal clock state of the physics engine, which may differ from the global clock state
-	struct PhysicsClockData
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct PhysicsClockData : public ALIGN16<PhysicsClockData>
 	{
 		float				TimeFactor;						// The clock delta (secs) for this physics cycle
+		AXMVECTOR			TimeFactorV;					// The clock delta (secs) for this physics cycle (vectorised form)
 		float				RemainingFrameTime;				// The remaining time (secs) in the render frame (e.g. multiple physics cycles
 															// could fill one render frame; at 0.002s per render frame and 0.001s per physics cycle
 															// this field would be 0.001 followed by 0.000)
+		AXMVECTOR			RemainingFrameTimeV;			// The remaining time (secs) in the render frame (e.g. multiple physics cycles
+															// could fill one render frame; at 0.002s per render frame and 0.001s per physics cycle
+															// this field would be 0.001 followed by 0.000) (vectorised form)
+
 		float				FrameCycleTimeLimit;			// The maximum cycle time for this iteration of the game loop.  Will be increased from 
 															// the game default if FPS starts to slow, to ensure the simulation can keep up
 
-		PhysicsClockData(void) { TimeFactor = RemainingFrameTime = FrameCycleTimeLimit = 0.0f; }
+		PhysicsClockData(void) 
+		{ 
+			TimeFactor = RemainingFrameTime = FrameCycleTimeLimit = 0.0f; 
+			TimeFactorV = RemainingFrameTimeV = NULL_VECTOR;
+		}
 	};
 
 	// Default constructor
@@ -185,7 +214,7 @@ public:
 	// the player) in the specified environment.  Use the existing environment structure to partition & identify potential colliding pairs.  
 	// If radius < 0.0f then all objects in the environment will be considered (which can be inefficient).  This method is specific to 
 	// environment-based collision handling
-	void									PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, const D3DXVECTOR3 & location, float radius);
+	void									PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, const FXMVECTOR location, float radius);
 
 	// Performs collision detection for all objects in the specified element of an environment
 	void									PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, int x, int y, int z);
@@ -206,34 +235,30 @@ public:
 	CMPINLINE const CollisionDetectionResult & LastCollisionTest(void) const				{ return m_collisiontest; }
 
 	// Tests for the intersection of a bounding sphere with an OBB collision hierarchy 
-	bool									TestSpherevsOBBHierarchyCollision(	const D3DXVECTOR3 & sphereCentre, const float sphereRadiusSq, 
+	bool									TestSpherevsOBBHierarchyCollision(	const FXMVECTOR sphereCentre, const float sphereRadiusSq, 
 																				OrientedBoundingBox & obb, OrientedBoundingBox ** ppOutOBBCollider);
 
 	// Tests for the intersection of a bounding sphere and an oriented bounding box (OBB)
-	bool									TestSpherevsOBBCollision(const D3DXVECTOR3 & sphereCentre, const float sphereRadiusSq, 
+	bool									TestSpherevsOBBCollision(const FXMVECTOR sphereCentre, const float sphereRadiusSq, 
 																 	 const OrientedBoundingBox::CoreOBBData & obb);
 
 	// Tests for the intersection of a ray with a sphere.  Returns no details; only whether a collision took place
-	CMPINLINE bool							TestRaySphereIntersection(const D3DXVECTOR3 & ray_origin, const D3DXVECTOR3 & ray_dir,
-																	  const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
-	CMPINLINE bool							TestRaySphereIntersection(const BasicRay & ray, const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const;
+	CMPINLINE bool							TestRaySphereIntersection(const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
+																	  const FXMVECTOR sphere_centre, const GXMVECTOR sphere_radiussq) const;
+	CMPINLINE bool							TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const;
 
 	// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
-	bool									TestLineSegmentvsSphereIntersection(const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
-																				const D3DXVECTOR3 & sphere_centre, float sphere_radius);
+	bool									TestLineSegmentvsSphereIntersection(const FXMVECTOR p1, const FXMVECTOR p2,
+																				const FXMVECTOR sphere_centre, float sphere_radius);
 
 	// Tests for the intersection of a line vector (p1 + dp == p2) with a sphere.  Returns no details; only whether an intersection took place
-	bool									TestLineVectorvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
-																				const D3DXVECTOR3 & sphere_centre, float sphere_radius);
-
-	// Tests for the intersection of a line vector (p1 + dp == p2) with a squared-sphere-radius.  Returns no details; only whether an intersection took place
-	bool									TestLineVectorvsSqSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & dp,
-																					const D3DXVECTOR3 & sphere_centre, float sphere_radius_sq);
+	bool									TestLineVectorvsSphereIntersection(	const FXMVECTOR p1, const FXMVECTOR dp,
+																				const FXMVECTOR sphere_centre, float sphere_radius);
 
 	// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns intersection points within 
 	// the LineSegmentIntersectionResult structure
-	bool									DetermineLineSegmentvsSphereIntersection(	const D3DXVECTOR3 & p1, const D3DXVECTOR3 & p2,
-																						const D3DXVECTOR3 & sphere_centre, float sphere_radius);
+	bool									DetermineLineSegmentvsSphereIntersection(	const FXMVECTOR p1, const FXMVECTOR p2,
+																						const FXMVECTOR sphere_centre, float sphere_radius);
 
 	// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
 	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
@@ -258,19 +283,19 @@ public:
 	bool									TestContinuousSphereVsOBBCollision(const iActiveObject *sphere, const iActiveObject *obb);
 	
 	// Determines the closest point on a line segment to the specified point
-	D3DXVECTOR3								ClosestPointOnLineSegment(	const D3DXVECTOR3 & line_ep1, const D3DXVECTOR3 & line_ep2, 
-																		const D3DXVECTOR3 & point );
+	XMVECTOR								ClosestPointOnLineSegment(	const FXMVECTOR line_ep1, const FXMVECTOR line_ep2, 
+																		const FXMVECTOR point );
 
 	// Determines the closest point on an AABB to the specified point
-	D3DXVECTOR3								ClosestPointOnAABB(	const D3DXVECTOR3 & AABB_min, const D3DXVECTOR3 & AABB_max, 
-																const D3DXVECTOR3 & point );
+	XMVECTOR								ClosestPointOnAABB(	const FXMVECTOR AABB_min, const FXMVECTOR AABB_max, 
+																const FXMVECTOR point );
 
 	// Determines the closest point on an OBB to the specified point
-	D3DXVECTOR3								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const D3DXVECTOR3 & point);
+	XMVECTOR								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point);
 
 	// Determines the closest point on an OBB to the specified location.  Also returns an output parameter that indicates how close the point
 	// is to the OBB centre in each of the OBB's basis axes.  Any distance < the extent in that axis means the point is inside the OBB.
-	D3DXVECTOR3								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const D3DXVECTOR3 & point, D3DXVECTOR3 & outDistance);
+	XMVECTOR								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point, FXMVECTOR outDistance);
 
 	// Struct holding data on an impact between two objects
 	ImpactData								ObjectImpact;
@@ -294,7 +319,7 @@ protected:
 
 	// Checks for a broadphase collision between the two objects.  No parameter checking since this should only be called internally on pre-validated parameters
 	CMPINLINE bool							CheckBroadphaseCollision(const iObject *obj0, const iObject *obj1);
-	CMPINLINE bool							CheckBroadphaseCollision(const D3DXVECTOR3 & pos0, float collisionradius0, const D3DXVECTOR3 & pos1, float collisionradius1);
+	CMPINLINE bool							CheckBroadphaseCollision(const FXMVECTOR pos0, float collisionradius0, const FXMVECTOR pos1, float collisionradius1);
 
 	// Performs full collision detection between the two objects.  No parameter checking since this should only be called internally on pre-validated parameters
 	bool									CheckFullCollision(iObject *obj0, iObject *obj1, OrientedBoundingBox ** ppOutCollider0, OrientedBoundingBox ** ppOutCollider1);
@@ -340,49 +365,61 @@ protected:
 	bool									m_cd_include_static;
 
 	// Temporary variables to avoid multiple reallocations per physics cycle
-	D3DXVECTOR3								_diffpos;
+	AXMVECTOR								_diffpos;
 	float									_distsq, _r1r2;
 	OrientedBoundingBox::CoreOBBData		_obbdata;
 };
 
 
-CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const D3DXVECTOR3 & ray_origin, const D3DXVECTOR3 & ray_dir,
-															const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const
+CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
+															const FXMVECTOR sphere_centre, const GXMVECTOR sphere_radiussq) const
 {
 	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
 	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
-	D3DXVECTOR3 diff = (ray_origin - sphere_centre);
-	float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;		// Expanded "D3DXVec3Dot(&diff, &diff)"
+	//D3DXVECTOR3 diff = (ray_origin - sphere_centre);
+	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;		// Expanded "D3DXVec3Dot(&diff, &diff)"
+	XMVECTOR diff = XMVectorSubtract(ray_origin, sphere_centre);
+	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
 
 	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
-	if (a0 <= 0.0f) return true;
+	//if (a0 <= 0.0f) return true;
+	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
 
 	// Project object difference vector onto the ray
-	float a1 = ((ray_dir.x*diff.x) + (ray_dir.y*diff.y) + (ray_dir.z*diff.z));			// Expanded "D3DXVec3Dot(&ray_dir, &diff)"
-	if (a1 >= 0.0f) return false;
+	//float a1 = ((ray_dir.x*diff.x) + (ray_dir.y*diff.y) + (ray_dir.z*diff.z));			// Expanded "D3DXVec3Dot(&ray_dir, &diff)"
+	//if (a1 >= 0.0f) return false;
+	XMVECTOR a1 = XMVector3Dot(ray_dir, diff);
+	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
 
 	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
 	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
-	return (((a1 * a1) - a0) >= 0.0f);
+	//return (((a1 * a1) - a0) >= 0.0f);
+	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
 }
 
-CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const D3DXVECTOR3 & sphere_centre, float sphere_radiussq) const
+CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const
 {
 	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
 	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
-	D3DXVECTOR3 diff = (ray.Origin - sphere_centre);
-	float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;				// Expanded "D3DXVec3Dot(&diff, &diff)"
+	//D3DXVECTOR3 diff = (ray.Origin - sphere_centre);
+	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;				// Expanded "D3DXVec3Dot(&diff, &diff)"
+	XMVECTOR diff = XMVectorSubtract(ray.Origin, sphere_centre);
+	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
 
 	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
-	if (a0 <= 0.0f) return true;
+	//if (a0 <= 0.0f) return true;
+	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
 
 	// Project object difference vector onto the ray
-	float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
-	if (a1 >= 0.0f) return false;
+	//float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+	//if (a1 >= 0.0f) return false;
+	XMVECTOR a1 = XMVector3Dot(ray.Direction, diff);
+	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
 
 	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
 	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
-	return (((a1 * a1) - a0) >= 0.0f);
+	//return (((a1 * a1) - a0) >= 0.0f);
+	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
 }
 
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
@@ -392,8 +429,8 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 {
 	// We will keep track of the closest object that was intersected
 	T *closest = NULL;
-	float closest_dsq = FLT_MAX;
-	D3DXVECTOR3 diff; float dsq, a0, a1;
+	XMVECTOR diff, dsq, a0, a1;
+	XMVECTOR closest_dsq = XMVectorReplicate(FLT_MAX);
 
 	// Loop through each object in turn
 	int n = (int)objects.size();
@@ -408,24 +445,26 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 
 		// Get the difference vector from ray origin to sphere centre.  We can early-exit here if it is further away 
 		// than our current closest intersection
-		diff = (ray.Origin - sphere_centre);
-		dsq = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z));
-		if (dsq >= closest_dsq) continue;								// Early-exit if the object is further away than our current best
-		a0 = dsq - obj->GetCollisionSphereRadiusSq();					// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+		diff = XMVectorSubtract(ray.Origin, sphere_centre);
+		dsq = XMVector3LengthSq(diff);
+		if (XMVector2GreaterOrEqual(dsq, closest_dsq)) continue;							// Early-exit if the object is further away than our current best
+		a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));	// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
 
 		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
-		if (a0 <= 0.0f) return obj;
+		if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return obj;
 
 		// Project object difference vector onto the ray
-		float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
-		if (a1 >= 0.0f) continue;
+		a1 = XMVector3Dot(ray.Direction, diff);												// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+		if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) continue;
 
 		// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
 		// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
-		if (((a1 * a1) - a0) >= 0.0f)
+		// if (((a1 * a1) - a0) >= 0.0f)
+		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR))
 		{
 			// Test whether this intersection is closer than our current best, and record it if so
-			if (dsq < closest_dsq)
+			//if (dsq < closest_dsq)
+			if (XMVector2Less(dsq, closest_dsq))
 			{
 				closest = obj;
 				closest_dsq = dsq;

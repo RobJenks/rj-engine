@@ -31,10 +31,13 @@ static const XMVECTOR NULL_VECTOR = XMVectorZero();
 static const XMVECTOR NULL_VECTOR2 = XMVectorZero();
 static const XMVECTOR NULL_VECTOR3 = XMVectorZero();
 static const XMVECTOR NULL_VECTOR4 = XMVectorZero();
+static const XMVECTOR ZERO_VECTOR = XMVectorZero();
 static const XMVECTOR HALF_VECTOR_P = XMVectorReplicate(0.5f);
 static const XMVECTOR HALF_VECTOR_N = XMVectorNegate(HALF_VECTOR_P);
 static const XMVECTOR HALF_VECTOR = HALF_VECTOR_P;
-static const XMVECTOR ONE_VECTOR = XMVectorReplicate(1.0f);
+static const XMVECTOR ONE_VECTOR_P = XMVectorReplicate(1.0f);
+static const XMVECTOR ONE_VECTOR_N = XMVectorReplicate(-1.0f);
+static const XMVECTOR ONE_VECTOR = ONE_VECTOR;
 static const XMVECTOR LARGE_VECTOR_P = XMVectorReplicate(1e15f);
 static const XMVECTOR LARGE_VECTOR_N = XMVectorReplicate(-1e15f);
 static const XMVECTOR RAND_MAX_V = XMVectorReplicate(RAND_MAX);
@@ -168,11 +171,32 @@ CMPINLINE void Vector3ToIntVector(const FXMVECTOR vec, INTVECTOR3 & outVec)
 	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
 	outVec.x = (int)vecf.x; outVec.y = (int)vecf.y; outVec.z = (int)vecf.z;
 }
+CMPINLINE INTVECTOR3 Vector3ToIntVector(const FXMVECTOR vec)
+{
+	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
+	return INTVECTOR3((int)vecf.x, (int)vecf.y, (int)vecf.z);
+}
 CMPINLINE void Vector3ToIntVectorSwizzleYZ(const FXMVECTOR vec, INTVECTOR3 & outVec)
 {
 	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
 	outVec.x = (int)vecf.x; outVec.y = (int)vecf.z; outVec.z = (int)vecf.y;
 }
+CMPINLINE INTVECTOR3 Vector3ToIntVectorSwizzleYZ(const FXMVECTOR vec)
+{
+	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
+	return INTVECTOR3((int)vecf.x, (int)vecf.z, (int)vecf.y);
+}
+CMPINLINE INTVECTOR3 IntVector3Min(const INTVECTOR3 & v1, const INTVECTOR3 & v2) { return INTVECTOR3(min(v1.x, v2.x), min(v1.y, v2.y), min(v1.z, v2.z)); }
+CMPINLINE INTVECTOR3 IntVector3Max(const INTVECTOR3 & v1, const INTVECTOR3 & v2) { return INTVECTOR3(max(v1.x, v2.x), max(v1.y, v2.y), max(v1.z, v2.z)); }
+CMPINLINE void IntVector3Min(const INTVECTOR3 & v1, const INTVECTOR3 & v2, INTVECTOR3 & outvec) 
+{ 
+	outvec.x = min(v1.x, v2.x); outvec.y = min(v1.y, v2.y); outvec.z = min(v1.z, v2.z);
+}
+CMPINLINE void IntVector3Max(const INTVECTOR3 & v1, const INTVECTOR3 & v2, INTVECTOR3 & outvec)
+{
+	outvec.x = max(v1.x, v2.x); outvec.y = max(v1.y, v2.y); outvec.z = max(v1.z, v2.z);
+}
+
 
 CMPINLINE XMVECTOR CalculateRotationBetweenQuaternions(const FXMVECTOR qStart, const FXMVECTOR qEnd)
 {
