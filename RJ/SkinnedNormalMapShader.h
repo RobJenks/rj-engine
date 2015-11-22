@@ -3,19 +3,13 @@
 #ifndef __SkinnedNormalMapShaderH__
 #define __SkinnedNormalMapShaderH__
 
-#include <windows.h>
 #include "DX11_Core.h"
-
-#include <fstream>
-#include "iShader.h"
 #include "Light.h"
 #include "SkinnedModel.h"
-class DXLocaliser;
-using namespace std;
 
 
 // This class has no special alignment requirements
-class SkinnedNormalMapShader //: iShader
+class SkinnedNormalMapShader
 {
 private:
 	struct PerFrameBuffer
@@ -48,11 +42,16 @@ private:
 
 
 public:
-	SkinnedNormalMapShader(const DXLocaliser *locale);
-	SkinnedNormalMapShader(const SkinnedNormalMapShader&);
+	SkinnedNormalMapShader(void);
 	~SkinnedNormalMapShader();
 
 	Result Initialise(ID3D11Device*, HWND);
+
+	// Methods to initialise each shader in the pipeline in turn
+	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
+	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
+	Result							InitialiseCommonConstantBuffers(ID3D11Device *device);
+
 	void Shutdown();
 	
 	// Renders the shader.  Conforms to the iShader interface spec
@@ -61,25 +60,17 @@ public:
 
 
 private:
-	Result InitialiseShader_SM5(ID3D11Device*, HWND, const char*, const char*);	// Initialise a shader model 5 shader
-	Result InitialiseShader_SM2(ID3D11Device*, HWND, const char*, const char*);	// Initialise a shader model 2 shader
-
-	void ShutdownShader();
-	void OutputShaderErrorMessage(ID3D10Blob*, HWND, const char*);
 
 	Result SetPerFrameShaderParameters(		ID3D11DeviceContext *deviceContext, DirectionalLight *lights3, XMFLOAT3 eyepos);
 
 	Result SetPerObjectShaderParameters(	ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model, 
 											XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
-	void RenderShader(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model);
-
 private:
-	const DXLocaliser		* m_locale;
+	
 	ID3D11VertexShader		* m_vertexShader;
 	ID3D11PixelShader		* m_pixelShader;
-	ID3D11InputLayout		* m_layout;
-	ID3D11SamplerState		* m_sampleState;
+	ID3D11InputLayout		* m_inputlayout;
 	ID3D11Buffer			* m_perFrameBuffer;
 	ID3D11Buffer			* m_perObjectBuffer;
 	ID3D11Buffer			* m_perSubsetBuffer;

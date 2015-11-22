@@ -3,47 +3,31 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
-#include "FastMath.h"
-#include "DXLocaliser.h"
+#include "iShader.h"
+#include "ShaderManager.h"
+#include "InputLayoutDesc.h"
 
 #include "SkinnedNormalMapShader.h"
 
 
-SkinnedNormalMapShader::SkinnedNormalMapShader(const DXLocaliser *locale)
+SkinnedNormalMapShader::SkinnedNormalMapShader(void)
 {
-	// Store a reference to the current locale
-	m_locale = locale;
-
 	// Set pointers to NULL
 	m_vertexShader = 0;
 	m_pixelShader = 0;
-	m_layout = 0;
-	m_sampleState = 0;
+	m_inputlayout = 0;
 	m_perFrameBuffer = 0;
 	m_perObjectBuffer = 0;
 	m_perSubsetBuffer = 0;
 
 	// TODO: TEMP: Create temporary directional lights for now.  Set by light update method in future
 	m_lights = new DirectionalLight[3];
-	m_lights[0] = DirectionalLight(XMFLOAT3(-0.57735f, -0.57735f, 0.57735f), XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), XMFLOAT4(1.0f, 0.9f, 0.9f, 1.0f), XMFLOAT4
-
-(0.8f, 0.8f, 0.7f, 1.0f));
-	m_lights[1] = DirectionalLight(XMFLOAT3(0.707f, -0.707f, 0.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.40f, 0.40f, 0.40f, 1.0f), XMFLOAT4(0.2f, 
-
-0.2f, 0.2f, 1.0f));
-	m_lights[2] = DirectionalLight(XMFLOAT3(0.0f, 0.0, -1.0f), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f), XMFLOAT4(0.2f, 0.2f, 0.2f, 
-
-1.0f));
-}
-
-
-SkinnedNormalMapShader::SkinnedNormalMapShader(const SkinnedNormalMapShader& other)
-{
-}
-
-
-SkinnedNormalMapShader::~SkinnedNormalMapShader()
-{
+	m_lights[0] = DirectionalLight(	XMFLOAT3(-0.57735f, -0.57735f, 0.57735f),	XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), 
+									XMFLOAT4(1.0f, 0.9f, 0.9f, 1.0f),			XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f));
+	m_lights[1] = DirectionalLight(	XMFLOAT3(0.707f, -0.707f, 0.0f),			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), 
+									XMFLOAT4(0.40f, 0.40f, 0.40f, 1.0f),		XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f));
+	m_lights[2] = DirectionalLight(	XMFLOAT3(0.0f, 0.0, -1.0f),					XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), 
+									XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f),			XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f));
 }
 
 
@@ -51,31 +35,103 @@ Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
 {
 	Result result;
 
-	// Initialise the vertex and pixel shaders.  Designed for SM5.0.  Used for all versions, for now.
-	// TODO: determine if alternative version is required for SM < 5.0
-	result = InitialiseShader_SM5(device, hwnd, iShader::ShaderFilename("skinned_nmap_sm_5_0.hlsl").c_str(), 
-												iShader::ShaderFilename("skinned_nmap_sm_5_0.hlsl").c_str());
-	
-	// If shader initialisation failed then return the error code here
+	// Initialise each shader in turn
+	result = InitialiseVertexShader(device, iShader::ShaderFilename("skinned_nmap.cso"));
 	if (result != ErrorCodes::NoError) return result;
 
-	// Otherwise return success
+	result = InitialisePixelShader(device, iShader::ShaderFilename("skinned_nmap.cso"));
+	if (result != ErrorCodes::NoError) return result;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+// Initialise shader
+Result SkinnedNormalMapShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+{
+	Result result;
+
+	// Parameter check
+	if (!device || filename == NullString) return ErrorCodes::NullInputToCreateSkinnedNMShaderVS;
+
+	// Define the input layout for this vertex shader
+	InputLayoutDesc layout_desc = InputLayoutDesc()
+		.Add("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("WEIGHTS", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("BONEINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 60, D3D11_INPUT_PER_VERTEX_DATA, 0);
+
+	// Attempt to load and create the compiled shader 
+	result = ShaderManager::CreateVertexShader(device, filename, &layout_desc, &m_vertexShader, &m_inputlayout);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderVS;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+// Initialise shader
+Result SkinnedNormalMapShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+{
+	Result result;
+
+	// Parameter check
+	if (!device || filename == NullString) return ErrorCodes::NullInputToCreateSkinnedNMShaderPS;
+
+	// Attempt to load and create the compiled shader 
+	result = ShaderManager::CreatePixelShader(device, filename, &m_pixelShader);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderPS;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Initialise constant buffers used across all pipeline shaders
+Result SkinnedNormalMapShader::InitialiseCommonConstantBuffers(ID3D11Device *device)
+{
+	Result result;
+
+	// Parameter check
+	if (!device) return ErrorCodes::NullInputToCreateSkinnedNMConstBuffers;
+
+	// Create the per-frame shader constant buffer
+	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PerFrameBuffer), device, &m_perFrameBuffer);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderConstBuffers;
+
+	// Create the per-object shader constant buffer
+	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PerObjectBuffer), device, &m_perObjectBuffer);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderConstBuffers;
+
+	// Create the per-subset shader constant buffer
+	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PerSubsetBuffer), device, &m_perSubsetBuffer);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderConstBuffers;
+
+	// Return success
 	return ErrorCodes::NoError;
 }
 
 
 void SkinnedNormalMapShader::Shutdown()
 {
-	// Shutdown the vertex and pixel shaders as well as the related objects.
-	ShutdownShader();
-
-	return;
+	// Release all resources
+	ReleaseIfExists(m_perFrameBuffer);
+	ReleaseIfExists(m_perObjectBuffer);
+	ReleaseIfExists(m_perSubsetBuffer);
+	ReleaseIfExists(m_inputlayout);
+	ReleaseIfExists(m_vertexShader);
+	ReleaseIfExists(m_pixelShader);
 }
 
 Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
 									  XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
 {
 	Result result;
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	PerSubsetBuffer *cbSubset;
+	ID3D11ShaderResourceView *SRVs[2];
 
 	// TODO: TEMP: Set the per-frame shader parameters here for now, for simplicity
 	result = SetPerFrameShaderParameters(deviceContext, m_lights, eyepos);
@@ -85,270 +141,40 @@ Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceCon
 	result = SetPerObjectShaderParameters(deviceContext, model, viewMatrix, projectionMatrix);
 	if(result != ErrorCodes::NoError) return result;
 
-	// Now render the prepared buffers with the shader.
-	RenderShader(deviceContext, model);
 
+	// Set the vertex input layout
+	deviceContext->IASetInputLayout(m_inputlayout);
+
+	// Set the vertex and pixel shaders that will be used to render this model
+	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+
+	// Render each subset of the model in turn
+	for (UINT subset = 0; subset < model.Model->SubsetCount; ++subset)
+	{
+		// We have to update the material buffer with the material for this subset
+		result = deviceContext->Map(m_perSubsetBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+		if (FAILED(result)) return ErrorCodes::SkinnedNormalMapSubsetRenderingFailure;
+
+		// Update the material
+		cbSubset = (PerSubsetBuffer*)mappedResource.pData;
+		cbSubset->gMaterial = model.Model->Mat[subset];
+
+		// Unlock and set the constant buffer
+		deviceContext->Unmap(m_perSubsetBuffer, 0);
+		deviceContext->PSSetConstantBuffers((unsigned int)1, 1, &m_perSubsetBuffer);
+
+		// Send the texture resources corresponding to this subset of the mesh
+		SRVs[0] = model.Model->DiffuseMapSRV[subset];
+		SRVs[1] = model.Model->NormalMapSRV[subset];
+		deviceContext->PSSetShaderResources(0, 2, SRVs);
+
+		// Finally, send the subset vertices through the shader pipeline for rendering
+		model.Model->ModelMesh.Draw(deviceContext, subset);
+	}
+
+	// Return success
 	return ErrorCodes::NoError;
-}
-
-Result SkinnedNormalMapShader::InitialiseShader_SM5(ID3D11Device* device, HWND hwnd, const char* vsFilename, const char* psFilename)
-{
-	HRESULT result;
-	ID3D10Blob* errorMessage;
-	ID3D10Blob* vertexShaderBuffer;
-	ID3D10Blob* pixelShaderBuffer;
-	unsigned int numElements;
-	D3D11_BUFFER_DESC perFrameBufferDesc;
-	D3D11_BUFFER_DESC perObjectBufferDesc;
-	D3D11_BUFFER_DESC perSubsetBufferDesc;
-
-	// Initialise the pointers this function will use to null.
-	errorMessage = 0;
-	vertexShaderBuffer = 0;
-	pixelShaderBuffer = 0;
-
-    // Compile the vertex shader code.
-	result = D3DX11CompileFromFile((LPCSTR)vsFilename, NULL, NULL, "SkinnedVertexShader", 
-									m_locale->Locale.VertexShaderLevelDesc, 
-									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
-								    &vertexShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
-		// If the shader failed to compile it should have writen something to the error message.
-		if(errorMessage)
-		{
-			OutputShaderErrorMessage(errorMessage, hwnd, vsFilename);	
-			return ErrorCodes::SkinnedVertexShaderCompilationFailed;
-		}
-		// If there was nothing in the error message then it simply could not find the shader file itself.
-		else
-		{
-			return ErrorCodes::SkinnedVertexShaderFileMissing;
-		}
-	}
-
-    // Compile the pixel shader code.
-	result = D3DX11CompileFromFile((LPCSTR)psFilename, NULL, NULL, "SkinnedPixelShader", 
-									m_locale->Locale.PixelShaderLevelDesc, 
-									D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL, 
-								    &pixelShaderBuffer, &errorMessage, NULL);
-	if(FAILED(result))
-	{
-		// If the shader failed to compile it should have writen something to the error message.
-		if(errorMessage)
-		{
-			OutputShaderErrorMessage(errorMessage, hwnd, psFilename);
-			return ErrorCodes::SkinnedPixelShaderCompilationFailed;
-		}
-		// If there was nothing in the error message then it simply could not find the file itself.
-		else
-		{
-			return ErrorCodes::SkinnedPixelShaderFileMissing;
-		}
-	}
-
-    // Create the vertex shader from the buffer.
-    result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CannotCreateSkinnedVertexShader;
-	}
-
-    // Create the pixel shader from the buffer.
-    result = device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CannotCreateSkinnedPixelShader;
-	}
-
-	// Create the vertex input layout description
-    const D3D11_INPUT_ELEMENT_DESC polygonLayout[] =
-	{
-		{"POSITION",     0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,		D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"NORMAL",       0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12,		D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TEXCOORD",     0, DXGI_FORMAT_R32G32_FLOAT,    0, 24,		D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"TANGENT",      0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 32,	D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"WEIGHTS",      0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 48,		D3D11_INPUT_PER_VERTEX_DATA, 0},
-		{"BONEINDICES",  0, DXGI_FORMAT_R8G8B8A8_UINT,   0, 60,		D3D11_INPUT_PER_VERTEX_DATA, 0}
-	};
-
-	// Get a count of the elements in the layout.
-    numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
-
-	// Create the vertex input layout.
-	result = device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), 
-		                               &m_layout);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CouldNotCreateVertexShaderInputLayout;
-	}
-
-	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
-	vertexShaderBuffer->Release();
-	vertexShaderBuffer = 0;
-
-	pixelShaderBuffer->Release();
-	pixelShaderBuffer = 0;
-
-	//// Create a texture sampler state description.
- //   samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
- //   samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
- //   samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
- //   samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
- //   samplerDesc.MipLODBias = 0.0f;
- //   samplerDesc.MaxAnisotropy = 1;
- //   samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
- //   samplerDesc.BorderColor[0] = 0;
-	//samplerDesc.BorderColor[1] = 0;
-	//samplerDesc.BorderColor[2] = 0;
-	//samplerDesc.BorderColor[3] = 0;
- //   samplerDesc.MinLOD = 0;
- //   samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	//// Create the texture sampler state.
- //   result = device->CreateSamplerState(&samplerDesc, &m_sampleState);
-	//if(FAILED(result))
-	//{
-	//	return ErrorCodes::CouldNotCreateVertexShaderSamplerState;
-	//}
-
-	// Setup the description of the dynamic per-frame constant buffer used in the shaders
-	perFrameBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	perFrameBufferDesc.ByteWidth = sizeof(PerFrameBuffer);
-    perFrameBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-    perFrameBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    perFrameBufferDesc.MiscFlags = 0;
-	perFrameBufferDesc.StructureByteStride = 0;
-
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	size_t sz = sizeof(PerFrameBuffer);
-	result = device->CreateBuffer(&perFrameBufferDesc, NULL, &m_perFrameBuffer);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CouldNotCreateVertexShaderPerFrameConstBuffer;
-	}
-
-	// Setup the description of the per-object constant buffer used in the shaders
-	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-	perObjectBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	perObjectBufferDesc.ByteWidth = sizeof(PerObjectBuffer);
-	perObjectBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	perObjectBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	perObjectBufferDesc.MiscFlags = 0;
-	perObjectBufferDesc.StructureByteStride = 0;
-
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&perObjectBufferDesc, NULL, &m_perObjectBuffer);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CouldNotCreateVertexShaderPerObjectConstBuffer;
-	}
-
-	// Setup the description of the per-subset constant buffer used in the shaders
-	// Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
-	perSubsetBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	perSubsetBufferDesc.ByteWidth = sizeof(PerSubsetBuffer);
-	perSubsetBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	perSubsetBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	perSubsetBufferDesc.MiscFlags = 0;
-	perSubsetBufferDesc.StructureByteStride = 0;
-
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = device->CreateBuffer(&perSubsetBufferDesc, NULL, &m_perSubsetBuffer);
-	if(FAILED(result))
-	{
-		return ErrorCodes::CouldNotCreateVertexShaderPerSubsetConstBuffer;
-	}
-
-	// Return success if we have created all the components above
-	return ErrorCodes::NoError;
-}
-
-void SkinnedNormalMapShader::ShutdownShader()
-{
-	// Release the per-subset constant buffer.
-	if(m_perSubsetBuffer)
-	{
-		m_perSubsetBuffer->Release();
-		m_perSubsetBuffer = 0;
-	}
-
-	// Release the per-object constant buffer.
-	if(m_perObjectBuffer)
-	{
-		m_perObjectBuffer->Release();
-		m_perObjectBuffer = 0;
-	}
-
-	// Release the per-frame constant buffer.
-	if(m_perFrameBuffer)
-	{
-		m_perFrameBuffer->Release();
-		m_perFrameBuffer = 0;
-	}
-
-	// Release the sampler state.
-	/*if(m_sampleState)
-	{
-		m_sampleState->Release();
-		m_sampleState = 0;
-	}*/
-
-	// Release the layout.
-	if(m_layout)
-	{
-		m_layout->Release();
-		m_layout = 0;
-	}
-
-	// Release the pixel shader.
-	if(m_pixelShader)
-	{
-		m_pixelShader->Release();
-		m_pixelShader = 0;
-	}
-
-	// Release the vertex shader.
-	if(m_vertexShader)
-	{
-		m_vertexShader->Release();
-		m_vertexShader = 0;
-	}
-
-	return;
-}
-
-
-void SkinnedNormalMapShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, const char* shaderFilename)
-{
-	char* compileErrors;
-	SIZE_T bufferSize, i;
-	ofstream fout;
-
-
-	// Get a pointer to the error message text buffer.
-	compileErrors = (char*)(errorMessage->GetBufferPointer());
-
-	// Get the length of the message.
-	bufferSize = errorMessage->GetBufferSize();
-
-	// Open a file to write the error message to.
-	fout.open("shader-error.txt");
-
-	// Write out the error message.
-	for(i = 0; i < bufferSize; ++i)
-	{
-		fout << compileErrors[i];
-	}
-
-	// Close the file.
-	fout.close();
-
-	// Release the error message.
-	errorMessage->Release();
-	errorMessage = 0;
-
-	return;
 }
 
 // Set the per-frame shader parameters in this method.  This includes only PS parameters
@@ -436,44 +262,7 @@ Result SkinnedNormalMapShader::SetPerObjectShaderParameters(ID3D11DeviceContext 
 }
 
 
-void SkinnedNormalMapShader::RenderShader(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model)
+SkinnedNormalMapShader::~SkinnedNormalMapShader()
 {
-	HRESULT result;
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-	PerSubsetBuffer *cbSubset;
-	ID3D11ShaderResourceView *SRVs[2];
-
-	// Set the vertex input layout
-	deviceContext->IASetInputLayout(m_layout);
-
-    // Set the vertex and pixel shaders that will be used to render this model
-    deviceContext->VSSetShader(m_vertexShader, NULL, 0);
-    deviceContext->PSSetShader(m_pixelShader, NULL, 0);
-
-	// Set the sampler state in the pixel shader
-	//deviceContext->PSSetSamplers(0, 1, &m_sampleState);
-
-	// Render each subset of the model in turn
-	for(UINT subset = 0; subset < model.Model->SubsetCount; ++subset)
-	{
-		// We have to update the material buffer with the material for this subset
-		result = deviceContext->Map(m_perSubsetBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-		if(FAILED(result)) return;		// TODO: Error handling
-
-		// Update the material
-		cbSubset = (PerSubsetBuffer*)mappedResource.pData;
-		cbSubset->gMaterial = model.Model->Mat[subset];
-
-		// Unlock and set the constant buffer
-		deviceContext->Unmap(m_perSubsetBuffer, 0);
-		deviceContext->PSSetConstantBuffers((unsigned int)1, 1, &m_perSubsetBuffer);
-
-		// Send the texture resources corresponding to this subset of the mesh
-		SRVs[0] = model.Model->DiffuseMapSRV[subset];
-		SRVs[1] = model.Model->NormalMapSRV[subset];
-		deviceContext->PSSetShaderResources(0, 2, SRVs);
-
-		// Finally, send the subset vertices through the shader pipeline for rendering
-		model.Model->ModelMesh.Draw(deviceContext, subset);
-	}
-}	
+	SafeDeleteArray(m_lights);
+}

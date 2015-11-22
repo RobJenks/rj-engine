@@ -1,6 +1,6 @@
 #include "DX11_Core.h"
 #include "Utility.h"
-#include "DXLocaliser.h"
+
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
 #include "ModelBuffer.h"
@@ -11,11 +11,8 @@
 ModelBuffer *VolLineShader::BaseModel = NULL;
 
 // Constructor
-VolLineShader::VolLineShader(const DXLocaliser *locale)
+VolLineShader::VolLineShader(void)
 {
-	// Store a reference to the current locale
-	m_locale = locale;
-
 	// Set pointers to NULL
 	m_vertexShader = NULL;
 	m_geometryShader = NULL;
@@ -39,7 +36,7 @@ Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, f
 	Result result;
 
 	// Initialise each shader in turn
-	result = InitialiseVertexShader(device, ShaderFilename((true ? "vol_line.vs.cso" : "tmp_shader.hlsl")));
+	result = InitialiseVertexShader(device, ShaderFilename("vol_line.vs.cso"));
 	if (result != ErrorCodes::NoError) return result;
 	
 	result = InitialiseGeometryShader(device, ShaderFilename("vol_line.gs.cso"));

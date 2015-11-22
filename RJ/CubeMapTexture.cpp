@@ -1,17 +1,16 @@
+#include "DirectXTK\Inc\DDSTextureLoader.h"
+
 #include "CubeMapTexture.h"
 
 Result CubeMapTexture::Initialise(ID3D11Device *device, const char *filename)
 {
 	HRESULT result;
 
-	// Set flags to signify that the data should be loaded into a cubemap texture
-	D3DX11_IMAGE_LOAD_INFO imgloadinfo;
-	imgloadinfo.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;	
-
-	// Load the data into a texture object
+	// Load the data into a 2D cubemap texture object
 	ID3D11Texture2D *SMTexture = 0;
-	result = D3DX11CreateTextureFromFile(device, (LPCSTR)filename, &imgloadinfo, NULL, (ID3D11Resource**)&SMTexture, NULL);
-	if (FAILED(result))
+	result = CreateDDSTextureFromFileEx(device, ConvertStringToWString(filename).c_str(), 0U, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE,
+										0U, D3D11_RESOURCE_MISC_TEXTURECUBE, false, (ID3D11Resource**)SMTexture, NULL);
+	if (FAILED(result) || !SMTexture)
 	{
 		return ErrorCodes::CouldNotLoadTextureData;
 	}

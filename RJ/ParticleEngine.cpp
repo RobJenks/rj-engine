@@ -3,7 +3,7 @@
 #include "DX11_Core.h"
 
 #include "ErrorCodes.h"
-#include "DXLocaliser.h"
+
 #include "D3DMain.h"
 #include "CameraClass.h"
 #include "ParticleEmitter.h"
@@ -165,11 +165,8 @@ void ParticleEngine::Shutdown(void)
 }
 
 
-ParticleEngine::ParticleEngine(const DXLocaliser *locale)
+ParticleEngine::ParticleEngine(void)
 {
-	// Store reference to the current DX locale
-	m_locale = locale;
-
 	// Set all key pointers to NULL
 	m_pshader = NULL;
 }

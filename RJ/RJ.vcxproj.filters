@@ -91,9 +91,6 @@
     <ClCompile Include="DustParticle.cpp">
       <Filter>Engine\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="DXLocaliser.cpp">
-      <Filter>Engine\Localiser</Filter>
-    </ClCompile>
     <ClCompile Include="EffectBase.cpp">
       <Filter>Engine\Effects</Filter>
     </ClCompile>
@@ -508,6 +505,9 @@
     <ClCompile Include="ModelBuffer.cpp">
       <Filter>Engine\Models\Static</Filter>
     </ClCompile>
+    <ClCompile Include="CapabilityTester.cpp">
+      <Filter>Engine\Capabilities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -617,9 +617,6 @@
     </ClInclude>
     <ClInclude Include="DX11_Core.h">
       <Filter>Engine\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="DXLocaliser.h">
-      <Filter>Engine\Localiser</Filter>
     </ClInclude>
     <ClInclude Include="EffectBase.h">
       <Filter>Engine\Effects</Filter>
@@ -1149,6 +1146,9 @@
     <ClInclude Include="ALIGN16.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="CapabilityTester.h">
+      <Filter>Engine\Capabilities</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1222,9 +1222,6 @@
     </Filter>
     <Filter Include="Engine\Particles">
       <UniqueIdentifier>{1fe277a2-264d-4651-a4a5-dc01f2facfdd}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Localiser">
-      <UniqueIdentifier>{e3150443-f475-4f4f-bd2c-dd563678445f}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Effects">
       <UniqueIdentifier>{8951d8d6-2e2b-42da-95ac-b85638800635}</UniqueIdentifier>
@@ -1385,6 +1382,9 @@
     <Filter Include="Engine\Volumetric lines">
       <UniqueIdentifier>{e77a3aa4-60d8-4bc2-b7c5-d454e122ce84}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Capabilities">
+      <UniqueIdentifier>{ab1c5f64-ca63-4ac9-a0e7-c98a9fe1363e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -1400,7 +1400,70 @@
     <FxCompile Include="Data\Shaders\vol_line.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\tmp_shader.hlsl">
+    <FxCompile Include="Data\Shaders\light.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_highlight.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_highlight.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_highlight_fade.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_highlight_fade.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texture.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texture.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texcube.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texcube.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texturetrans.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\texturetrans.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_fade.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_fade.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\particle.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\particle.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\font.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\font.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\fire.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\fire.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\skinned_nmap.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\skinned_nmap.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

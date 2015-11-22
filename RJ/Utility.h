@@ -8,6 +8,8 @@
 #include <time.h>
 #include <sstream>
 #include <string>
+#include <locale>
+#include <codecvt>
 #include <vector>
 #include <unordered_map>
 #include "CompilerSettings.h"
@@ -187,6 +189,21 @@ Direction GetOppositeDirection(Direction dir);
 
 // Null string, to avoid repeated instantiation at runtime
 const std::string NullString = "";
+
+// C++ standard object for converting between UTF8 (std::string) and UTF16 (std::wstring)
+extern std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> utf_converter;
+
+// Convert a UTF8 string (std::string) to UTF16 wstring (std::wstring)
+CMPINLINE std::wstring ConvertStringToWString(const std::string & utf8_string)
+{
+	return utf_converter.from_bytes(utf8_string);
+}
+
+// Convert a UTF16 wstring (std::wstring) to UTF8 string (std::string)
+CMPINLINE std::string ConvertWStringToString(const std::wstring & utf16_string)
+{
+	return utf_converter.to_bytes(utf16_string);
+}
 
 // String concatenation class
 class concat

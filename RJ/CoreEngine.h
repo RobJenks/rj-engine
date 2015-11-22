@@ -9,7 +9,7 @@
 #include "GlobalFlags.h"
 #include "DX11_Core.h"
 #include "D3DMain.h"
-#include "DXLocaliser.h"
+
 #include "Profiler.h"
 #include "CameraClass.h"
 #include "iAcceptsConsoleCommands.h"
@@ -61,7 +61,9 @@ __declspec(align(16))
 class CoreEngine : public ALIGN16<CoreEngine>, public iAcceptsConsoleCommands
 {
 public:
-	int tmprot;
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(CoreEngine)
 
 	// Enumeration of all rendering stages
 	enum RenderStage
@@ -92,7 +94,6 @@ public:
 	// Accessor/modifier methods for key game engine components
 	CMPINLINE D3DMain		*GetDirect3D()				{ return m_D3D; }
 	CMPINLINE CameraClass	*GetCamera()				{ return m_camera; }
-	CMPINLINE DXLocaliser	*GetDXLocaliser()			{ return m_dxlocaliser; }
 	CMPINLINE ViewFrustrum	*GetViewFrustrum()			{ return m_frustrum; }
 	CMPINLINE TextManager	*GetTextManager()			{ return m_textmanager; }
 	CMPINLINE EffectManager *GetEffectManager()			{ return m_effectmanager; }
@@ -294,7 +295,6 @@ private:
 	
 	// Private methods to initialise each component in turn
 	Result					InitialiseDirect3D(HWND hwnd);
-	Result					InitialiseDXLocaliser(void);
 	Result					InitialiseDirectXMath(void);
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
@@ -322,7 +322,6 @@ private:
 
 	// Private methods to release each component in turn
 	void					ShutdownDirect3D(void);
-	void					ShutdownDXLocaliser(void);
 	void					ShutdownDXMath(void);
 	void					ShutdownRenderQueue(void);
 	void					ShutdownTextureData(void);
@@ -353,7 +352,6 @@ private:
 
 	// Pointer to each component that makes up this game engine
 	D3DMain					*m_D3D;
-	DXLocaliser				*m_dxlocaliser;
 	CameraClass				*m_camera;
 	LightShader				*m_lightshader;
 	LightFadeShader			*m_lightfadeshader;

@@ -9,7 +9,7 @@
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
 class Texture;
-class DXLocaliser;
+
 using namespace std;
 
 // This class has no special alignment requirements
@@ -39,7 +39,6 @@ public:
 	~EffectBase(void);
 
 protected:
-	const DXLocaliser *m_locale;			// Pointer to the DX locale, for localising e.g. shader calls
 	string m_code;							// String ID that uniquely identifies the effect
 	EffectModelType m_effectmodel;			// Determines the underlying effect model used to render this effect
 	

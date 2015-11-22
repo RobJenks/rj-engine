@@ -9,7 +9,7 @@
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
 #include "Render2DGroup.h"
-class DXLocaliser;
+
 class TextureShader;
 class GameInputDevice;
 using namespace std;
@@ -23,7 +23,7 @@ class Render2DManager : public ALIGN16<Render2DManager>
 public:
 	typedef unordered_map<string, Render2DGroup*> RenderGroupCollection; 
 
-	Render2DManager(const DXLocaliser *locale);
+	Render2DManager(void);
 	~Render2DManager(void);
 
 	CMPINLINE RenderGroupCollection *RenderGroups(void) { return &m_rendergroups; }
@@ -50,7 +50,6 @@ public:
 private:
 	RenderGroupCollection	m_rendergroups;
 
-	const DXLocaliser*		m_locale;
 	ID3D11Device*			m_device;
 	ID3D11DeviceContext*	m_devicecontext;
 	HWND					m_hwnd;

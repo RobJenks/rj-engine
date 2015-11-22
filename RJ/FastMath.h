@@ -341,34 +341,34 @@ CMPINLINE XMMATRIX MatrixInverseTranspose(FXMMATRIX M)
 }
 
 // Returns a vector with random components in the range [0 1)
-XMVECTOR			Vector2Random(void)	{ return XMVectorSet(frand(), frand(), 0.0f, 0.0f); }
+CMPINLINE XMVECTOR			Vector2Random(void)	{ return XMVectorSet(frand(), frand(), 0.0f, 0.0f); }
 // Returns a vector with random components in the range [0 1)
-XMVECTOR			Vector3Random(void) { return XMVectorSet(frand(), frand(), frand(), 0.0f); }
+CMPINLINE XMVECTOR			Vector3Random(void) { return XMVectorSet(frand(), frand(), frand(), 0.0f); }
 // Returns a vector with random components in the range [0 1)
-XMVECTOR			Vector4Random(void) { return XMVectorSet(frand(), frand(), frand(), frand()); }
+CMPINLINE XMVECTOR			Vector4Random(void) { return XMVectorSet(frand(), frand(), frand(), frand()); }
 
 // Returns a vector with random components in the range [rmin rmax)
-XMVECTOR			Vector2Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), 0.0f, 0.0f); }
+CMPINLINE XMVECTOR			Vector2Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), 0.0f, 0.0f); }
 // Returns a vector with random components in the range [rmin rmax)
-XMVECTOR			Vector3Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax), 0.0f); }
+CMPINLINE XMVECTOR			Vector3Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax), 0.0f); }
 // Returns a vector with random components in the range [rmin rmax)
-XMVECTOR			Vector4Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax)); }
+CMPINLINE XMVECTOR			Vector4Random(float rmin, float rmax)	{ return XMVectorSet(frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax), frand_lh(rmin, rmax)); }
 
 // Returns a vector with random components in the range [rmin._ rmax._) for each component individually
 // Vectorised version of "#define frand_lh(l,h)	((l) + (float)rand()/((float)RAND_MAX/((h)-(l))))"
-XMVECTOR			Vector2Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
+CMPINLINE XMVECTOR			Vector2Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
 {
 	return XMVectorAdd(vmin, XMVectorDivide(Vector2Random(), XMVectorDivide(RAND_MAX_V, XMVectorSubtract(vmax, vmin))));
 }
 // Returns a vector with random components in the range [rmin._ rmax._) for each component individually
 // Vectorised version of "#define frand_lh(l,h)	((l) + (float)rand()/((float)RAND_MAX/((h)-(l))))"
-XMVECTOR			Vector3Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
+CMPINLINE XMVECTOR			Vector3Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
 {
 	return XMVectorAdd(vmin, XMVectorDivide(Vector3Random(), XMVectorDivide(RAND_MAX_V, XMVectorSubtract(vmax, vmin))));
 }
 // Returns a vector with random components in the range [rmin._ rmax._) for each component individually
 // Vectorised version of "#define frand_lh(l,h)	((l) + (float)rand()/((float)RAND_MAX/((h)-(l))))"
-XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
+CMPINLINE XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
 {
 	return XMVectorAdd(vmin, XMVectorDivide(Vector4Random(), XMVectorDivide(RAND_MAX_V, XMVectorSubtract(vmax, vmin))));
 }

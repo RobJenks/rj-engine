@@ -5,7 +5,7 @@
 
 
 #include <vector>
-class DXLocaliser;
+
 class Model;
 class EffectBase;
 class FireEffect;
@@ -16,7 +16,7 @@ class FireShader;
 class EffectManager
 {
 public:
-	EffectManager(const DXLocaliser *locale);
+	EffectManager(void);
 	~EffectManager(void);
 
 	// Initialisation and preparation functions
@@ -43,7 +43,6 @@ public:
 
 
 private:
-	const DXLocaliser			*m_locale;						// Current DX locale
 	float						m_effecttimer;					// Current effect timer (secs), wraps at 1000.0
 
 	// Effect collections

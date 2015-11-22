@@ -1,4 +1,4 @@
-#include "DXLocaliser.h"
+
 #include "Model.h"
 #include "GameDataExtern.h"
 #include "Utility.h"
@@ -131,11 +131,8 @@ Result XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, ID3D11DeviceCo
 
 
 
-EffectManager::EffectManager(const DXLocaliser *locale)
+EffectManager::EffectManager(void)
 {
-	// Store a reference to the current DX locale
-	m_locale = locale;
-
 	// Reset the effect timer
 	m_effecttimer = 0.0f;
 }

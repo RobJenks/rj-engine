@@ -6,7 +6,10 @@
 
 #include "Utility.h"
 
-using namespace std;
+
+// C++ standard object for converting between UTF8 (std::string) and UTF16 (std::wstring)
+std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> utf_converter;
+
 
 void clower(char *str) 
 {

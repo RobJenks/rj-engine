@@ -377,11 +377,8 @@ Result XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXM
 }
 
 
-TextManager::TextManager(const DXLocaliser *locale)
+TextManager::TextManager(void)
 {
-	// Store a reference to the current DX localisation
-	m_locale = locale;
-
 	// Set all key pointers to NULL before initialising
 	m_fonts.clear();
 	m_sentences.clear();

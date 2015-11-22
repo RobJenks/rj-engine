@@ -18,12 +18,13 @@
 // Include core DX11 headers for basic functionality
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include <dxgi.h>
 
 // Add compiler commments for the linker to associate with relevant precompiled libraries
-//#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "dxgi.lib")
 //#pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "directxmath.lib")
+//#pragma comment(lib, "directxmath.lib")
 #pragma comment(lib, "windowscodecs.lib")
 
 // Define the DXI version if it is not already set; fix to prevent compiler warnings where this is not set correctly in the DX SDK
@@ -42,10 +43,10 @@ typedef __declspec(align(16))XMVECTOR AXMVECTOR;	// 16-bit aligned vector class
 typedef __declspec(align(16))XMMATRIX AXMMATRIX;	// 16-bit aligned matrix class
 
 // Custom vector type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
-typedef __declspec(align(16)) struct { AXMVECTOR value; } AXMVECTOR_P;
+typedef __declspec(align(16)) struct AXMVECTOR_P_T : public ALIGN16<AXMVECTOR_P_T> { AXMVECTOR value; } AXMVECTOR_P;
 
 // Custom matrix type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
-typedef __declspec(align(16)) struct { AXMMATRIX value; } AXMMATRIX_P;
+typedef __declspec(align(16)) struct AXMMATRIX_P_T : public ALIGN16<AXMMATRIX_P_T> { AXMMATRIX value; } AXMMATRIX_P;
 
 // Re-enable compiler warnings for macro redefinition, once all DX headers have been processed
 #pragma warning( default : 4005 )

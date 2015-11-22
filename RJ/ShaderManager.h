@@ -17,7 +17,8 @@ public:
 	// Enumeration of defined sampler states
 	enum DefinedSamplerState
 	{
-		StandardLinearSampler = 0
+		StandardLinearSampler = 0,
+		StandardLinearClampSampler
 	};
 
 	// Loads a compiled shader object (*.cso) and returns the byte data

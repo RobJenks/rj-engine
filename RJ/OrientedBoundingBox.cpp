@@ -5,6 +5,9 @@
 
 #include "OrientedBoundingBox.h"
 
+// Initialise static variables
+AXMVECTOR_P OrientedBoundingBox::NegAxisExtent[3];
+
 // Default constructor, where no parameters are provided
 OrientedBoundingBox::OrientedBoundingBox(void) :
 Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)

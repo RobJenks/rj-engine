@@ -3,11 +3,10 @@
 #ifndef __CubeMapTextureH__
 #define __CubeMapTextureH__
 
-#include "texture.h"
+#include "Texture.h"
 
 // This class has no special alignment requirements
-class CubeMapTexture :
-	public Texture
+class CubeMapTexture : public Texture
 {
 public:
 	CubeMapTexture(void);

@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "DX11_Core.h"
+#include "DirectXTK\Inc\DDSTextureLoader.h"
 
 #include "ErrorCodes.h"
 #include "Utility.h"
@@ -78,8 +79,8 @@ Result Texture::Initialise(const std::string & filename)
 	else
 	{
 		// Load the texture in from an external file
-		result = D3DX11CreateShaderResourceViewFromFile(Game::Engine->GetDevice(), (LPCSTR)filename.c_str(), NULL, NULL, &m_texture, NULL);
-		if(FAILED(result))
+		result = CreateDDSTextureFromFile(Game::Engine->GetDevice(), ConvertStringToWString(filename).c_str(), NULL, &m_texture);
+		if(FAILED(result) || !m_texture)
 		{
 			return ErrorCodes::CouldNotCreateShaderFromTextureFile;
 		}
@@ -109,8 +110,8 @@ ID3D11ShaderResourceView *Texture::CreateSRV(const string & filename)
 	else
 	{
 		// Otherwise, attempt to create a new resource from the specified file
-		HRESULT result = D3DX11CreateShaderResourceViewFromFile(Game::Engine->GetDevice(), (LPCSTR)filename.c_str(), NULL, NULL, &res, NULL);
-		if(FAILED(result))
+		HRESULT result = CreateDDSTextureFromFile(Game::Engine->GetDevice(), (wchar_t*)filename.c_str(), NULL, &res);
+		if(FAILED(result) || !res)
 		{
 			return NULL;
 		}

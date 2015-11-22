@@ -3,54 +3,42 @@
 #ifndef __ParticleShaderH__
 #define __ParticleShaderH__
 
-
 #include "DX11_Core.h"
 
-
-#include <fstream>
-#include "ErrorCodes.h"
-#include "iShader.h"
-class DXLocaliser;
-using namespace std;
-
 // This class has no special alignment requirements
-class ParticleShader 
+class ParticleShader
 {
-	private:
-		struct MatrixBufferType
-		{
-			XMFLOAT4X4 world;
-			XMFLOAT4X4 view;
-			XMFLOAT4X4 projection;
-		};
+private:
+	struct VSBufferType
+	{
+		XMFLOAT4X4 world;
+		XMFLOAT4X4 view;
+		XMFLOAT4X4 projection;
+	};
 
-	public:
-		ParticleShader(const DXLocaliser *locale);
-		ParticleShader(const ParticleShader&);
-		~ParticleShader();
+public:
+	ParticleShader(void);
+	~ParticleShader(void);
 
-		Result Initialize(ID3D11Device*, HWND);
-		void Shutdown();
-		Result XM_CALLCONV Render(ID3D11DeviceContext*, int, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
+	Result Initialise(ID3D11Device* device, HWND hwnd);
 
-	private:
-		Result InitializeShader_SM2(ID3D11Device*, HWND, const char *, const char *);
-		Result InitializeShader_SM5(ID3D11Device*, HWND, const char *, const char *);
-		void ShutdownShader();
-		void OutputShaderErrorMessage(ID3D10Blob*, HWND, const char*);
+	// Methods to initialise each shader in the pipeline in turn
+	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
+	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
 
-		Result XM_CALLCONV SetShaderParameters(ID3D11DeviceContext*, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
-		void RenderShader(ID3D11DeviceContext*, int);
+	void Shutdown();
 
-	private:
-		const DXLocaliser		* m_locale;
-		ID3D11VertexShader* m_vertexShader;
-		ID3D11PixelShader* m_pixelShader;
-		ID3D11InputLayout* m_layout;
-		ID3D11Buffer* m_matrixBuffer;
-		ID3D11SamplerState* m_sampleState;
+	Result XM_CALLCONV Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+		const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
+
+private:
+	ID3D11VertexShader* m_vertexShader;
+	ID3D11PixelShader* m_pixelShader;
+	ID3D11InputLayout* m_inputlayout;
+	ID3D11Buffer* m_cbuffer_vs;
+	ID3D11SamplerState* m_sampleState;
+
 };
-
 
 
 #endif

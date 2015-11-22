@@ -57,9 +57,6 @@ Ship::Ship(void)
 
 	// All ship objects incorporate a pre-adjustment to their world matrix
 	this->m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment;
-
-	// Recalculate base ship stats so they are consistent with the above
-	RecalculateShipDataFromCurrentState();
 }
 
 

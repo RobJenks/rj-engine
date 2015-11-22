@@ -44,6 +44,9 @@ ComplexShip::ComplexShip(void)
 	m_oxygenupdaterequired = true;
 	m_sdoffset = INTVECTOR3(0, 0, 0);
 	m_directlygeneratedfromSD = false;
+
+	// Recalculate ship stats so they are consistent with the properties set during object construction
+	RecalculateShipDataFromCurrentState();
 }
 
 

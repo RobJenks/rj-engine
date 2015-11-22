@@ -66,7 +66,6 @@ CoreEngine::CoreEngine(void)
 	m_rq_optimiser(m_renderqueue)
 {
 	// Reset all component pointers to NULL, in advance of initialisation
-	m_dxlocaliser = NULL;
 	m_D3D = NULL;
 	m_camera = NULL;
 	m_lightshader = NULL;
@@ -124,11 +123,6 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseRenderFlags();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Render flags initialised\n";
-
-	// Initialise the DX localiser, which will configure the D3D etc that is subsequently set up
-	res = InitialiseDXLocaliser();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_START << "DX Localiser initialised\n";
 
 	// Initialise DirectX math functions 
 	res = InitialiseDirectXMath();
@@ -283,7 +277,6 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownEnvironmentRendering();
 	ShutdownTextureData();
 	ShutdownDirect3D();
-	ShutdownDXLocaliser();	
 }
 
 Result CoreEngine::InitialiseRenderFlags(void)
@@ -300,7 +293,7 @@ Result CoreEngine::InitialiseDirect3D(HWND hwnd)
 	m_hwnd = hwnd; 
 
 	// Attempt to create the Direct3D object.
-	m_D3D = new D3DMain(m_dxlocaliser);
+	m_D3D = new D3DMain();
 	if ( !m_D3D ) return ErrorCodes::CannotCreateDirect3DDevice;
 
 	// Initialise the Direct3D object.
@@ -308,18 +301,6 @@ Result CoreEngine::InitialiseDirect3D(HWND hwnd)
 									  SCREEN_DEPTH, SCREEN_NEAR);
 	return result;
 }
-
-Result CoreEngine::InitialiseDXLocaliser(void)
-{
-	// Attempt to create a new DX Localiser instance
-	m_dxlocaliser = new DXLocaliser();
-	if ( !m_dxlocaliser ) return ErrorCodes::CannotCreateDXLocaliserComponent;
-
-	// Initialise the localiser, which will also analyse the current device and store its capabilities
-	Result result = m_dxlocaliser->Initialise();
-	return result;
-}
-
 
 Result CoreEngine::InitialiseDirectXMath(void)
 {
@@ -418,7 +399,7 @@ Result CoreEngine::InitialiseCamera(void)
 Result CoreEngine::InitialiseLightShader(void)
 {
 	// Create the light shader object.
-	m_lightshader = new LightShader(m_dxlocaliser);
+	m_lightshader = new LightShader();
 	if(!m_lightshader)
 	{
 		return ErrorCodes::CouldNotCreateLightShader;
@@ -441,7 +422,7 @@ Result CoreEngine::InitialiseLightShader(void)
 Result CoreEngine::InitialiseLightFadeShader(void)
 {
 	// Create the light shader object.
-	m_lightfadeshader = new LightFadeShader(m_dxlocaliser);
+	m_lightfadeshader = new LightFadeShader();
 	if(!m_lightfadeshader)
 	{
 		return ErrorCodes::CouldNotCreateLightFadeShader;
@@ -465,7 +446,7 @@ Result CoreEngine::InitialiseLightFadeShader(void)
 Result CoreEngine::InitialiseLightHighlightShader(void)
 {
 	// Create the light shader object.
-	m_lighthighlightshader = new LightHighlightShader(m_dxlocaliser);
+	m_lighthighlightshader = new LightHighlightShader();
 	if(!m_lighthighlightshader)
 	{
 		return ErrorCodes::CouldNotCreateLightHighlightShader;
@@ -489,7 +470,7 @@ Result CoreEngine::InitialiseLightHighlightShader(void)
 Result CoreEngine::InitialiseLightHighlightFadeShader(void)
 {
 	// Create the light shader object.
-	m_lighthighlightfadeshader = new LightHighlightFadeShader(m_dxlocaliser);
+	m_lighthighlightfadeshader = new LightHighlightFadeShader();
 	if (!m_lighthighlightfadeshader)
 	{
 		return ErrorCodes::CouldNotCreateLightHighlightFadeShader;
@@ -513,14 +494,14 @@ Result CoreEngine::InitialiseLightHighlightFadeShader(void)
 Result CoreEngine::InitialiseParticleShader(void)
 {
 	// Create the particle shader object
-	m_particleshader = new ParticleShader(m_dxlocaliser);
+	m_particleshader = new ParticleShader();
 	if (!m_particleshader)
 	{
 		return ErrorCodes::CouldNotCreateParticleShader;
 	}
 
 	// Initialise the particle shader
-	Result result = m_particleshader->Initialize(m_D3D->GetDevice(), m_hwnd);
+	Result result = m_particleshader->Initialise(m_D3D->GetDevice(), m_hwnd);
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -533,7 +514,7 @@ Result CoreEngine::InitialiseParticleShader(void)
 Result CoreEngine::InitialiseTextureShader(void)
 {
 	// Create the texture shader object
-	m_textureshader = new TextureShader(m_dxlocaliser);
+	m_textureshader = new TextureShader();
 	if (!m_textureshader)
 	{
 		return ErrorCodes::CouldNotCreateTextureShader;
@@ -587,7 +568,7 @@ Result CoreEngine::InitialiseFontShader(void)
 	Result result;
 
 	// Create the font shader object.
-	m_fontshader = new FontShader(m_dxlocaliser);
+	m_fontshader = new FontShader();
 	if(!m_fontshader)
 	{
 		return ErrorCodes::CannotCreateFontShader;
@@ -609,7 +590,7 @@ Result CoreEngine::InitialiseTextRendering(void)
 	Result result;
 
 	// Create the text manager object
-	m_textmanager = new TextManager(m_dxlocaliser);
+	m_textmanager = new TextManager();
 	if (!m_textmanager)
 	{
 		return ErrorCodes::CannotCreateTextRenderer;
@@ -650,7 +631,7 @@ Result CoreEngine::InitialiseFonts(void)
 Result CoreEngine::InitialiseTexcubeShader(void)
 {
 	// Create the texture shader object
-	m_texcubeshader = new TexcubeShader(m_dxlocaliser);
+	m_texcubeshader = new TexcubeShader();
 	if (!m_texcubeshader)
 	{
 		return ErrorCodes::CouldNotCreateTexcubeShader;
@@ -670,7 +651,7 @@ Result CoreEngine::InitialiseTexcubeShader(void)
 Result CoreEngine::InitialiseFireShader(void)
 {
 	// Create the fire shader object
-	m_fireshader = new FireShader(m_dxlocaliser);
+	m_fireshader = new FireShader();
 	if (!m_fireshader)
 	{
 		return ErrorCodes::CouldNotCreateFireShader;
@@ -692,7 +673,7 @@ Result CoreEngine::InitialiseEffectManager(void)
 	Result result;
 
 	// Create the fire shader object
-	m_effectmanager = new EffectManager(m_dxlocaliser);
+	m_effectmanager = new EffectManager();
 	if (!m_effectmanager)
 	{
 		return ErrorCodes::CouldNotCreateEffectManager;
@@ -719,7 +700,7 @@ Result CoreEngine::InitialiseEffectManager(void)
 Result CoreEngine::InitialiseSkinnedNormalMapShader(void)
 {
 	// Create a new instance of the shader object
-	m_skinnedshader = new SkinnedNormalMapShader(m_dxlocaliser);
+	m_skinnedshader = new SkinnedNormalMapShader();
 	if (!m_skinnedshader)
 	{
 		return ErrorCodes::CannotCreateSkinnedNormalMapShader;
@@ -743,7 +724,7 @@ Result CoreEngine::InitialiseVolLineShader(void)
 	if (result != ErrorCodes::NoError) return result;
 
 	// Create a new instance of the shader object
-	m_vollineshader = new VolLineShader(m_dxlocaliser);
+	m_vollineshader = new VolLineShader();
 	if (!m_vollineshader)
 	{
 		return ErrorCodes::CannotCreateVolumetricLineShader;
@@ -766,7 +747,7 @@ Result CoreEngine::InitialiseParticleEngine(void)
 	Result result;
 
 	// Create the particle engine object
-	m_particleengine = new ParticleEngine(m_dxlocaliser);
+	m_particleengine = new ParticleEngine();
 	if (!m_particleengine)
 	{
 		return ErrorCodes::CouldNotCreateParticleEngine;
@@ -793,7 +774,7 @@ Result CoreEngine::InitialiseParticleEngine(void)
 Result CoreEngine::Initialise2DRenderManager(void)
 {
 	// Create a new 2D render manager instance
-	m_render2d = new Render2DManager(m_dxlocaliser);
+	m_render2d = new Render2DManager();
 	if (!m_render2d)
 	{
 		return ErrorCodes::CannotCreate2DRenderManager;
@@ -850,16 +831,6 @@ void CoreEngine::ShutdownDirect3D(void)
 	{
 		m_D3D->Shutdown();
 		delete m_D3D; m_D3D = NULL;
-	}
-}
-
-void CoreEngine::ShutdownDXLocaliser(void)
-{
-	// Attempt to release the localiser component
-	if ( m_dxlocaliser )
-	{
-		delete m_dxlocaliser; 
-		m_dxlocaliser = NULL;
 	}
 }
 

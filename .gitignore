@@ -45,6 +45,9 @@
 /RJ-VS10/RJ-VS10/Release/*
 /RJ-VS10/ipch/*
 
+# Exclude binary/output folders for DirectX supporting projects
+/RJ/DirectXTK/Bin/*
+
 # Exclude machine-specific configuration files
 /RJ/Config_MachineOverride.xml
 

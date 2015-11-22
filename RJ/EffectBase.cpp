@@ -39,7 +39,6 @@ EffectBase::EffectModelType EffectBase::DeriveEffectModel(const string modelname
 EffectBase::EffectBase(void)
 {
 	// Set variables to NULL prior to initialisation
-	m_locale = NULL;
 	m_code = "";
 	m_effectmodel = EffectModelType::UnitSquare;
 }

@@ -21,6 +21,9 @@ SimpleShip::SimpleShip(void)
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
+
+	// Recalculate ship stats so they are consistent with the properties set during object construction
+	RecalculateShipDataFromCurrentState();
 }
 
 

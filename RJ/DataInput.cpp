@@ -2524,7 +2524,7 @@ Result IO::Data::LoadSystem(TiXmlElement *node)
 Result IO::Data::LoadFireEffect(TiXmlElement *node)
 {
 	// Create a new effect object to hold the data
-	FireEffect *e = new FireEffect(Game::Engine->GetDXLocaliser());
+	FireEffect *e = new FireEffect();
 	
 	// Local variables for extracting data
 	string key, val;

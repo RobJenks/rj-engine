@@ -3,26 +3,21 @@
 #ifndef __FireShaderH__
 #define __FireShaderH__
 
-
 #include "DX11_Core.h"
-
-
-#include <fstream>
 #include "iShader.h"
-using namespace std;
 
 // This class has no special alignment requirements
 class FireShader 
 {
 private:
-	struct MatrixBufferType
+	struct VSBufferType1
 	{
 		XMFLOAT4X4 world;
 		XMFLOAT4X4 view;
 		XMFLOAT4X4 projection;
 	};
 
-	struct NoiseBufferType
+	struct VSBufferType2
 	{
 		float frameTime;
 		XMFLOAT3 scrollSpeeds;
@@ -30,7 +25,7 @@ private:
 		float padding;
 	};
 
-	struct DistortionBufferType
+	struct PSBufferType
 	{
 		XMFLOAT2 distortion1;
 		XMFLOAT2 distortion2;
@@ -40,12 +35,17 @@ private:
 	};
 
 public:
-	FireShader(const DXLocaliser *locale);
-	FireShader(const FireShader &other);
+	FireShader(void);
 	~FireShader(void);
 
 	Result Initialise(ID3D11Device* device, HWND hwnd);
+
+	// Methods to initialise each shader in the pipeline in turn
+	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
+	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
+
 	void Shutdown();
+
 	Result XM_CALLCONV Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
 							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
@@ -53,29 +53,14 @@ public:
 							 XMFLOAT2 distortion3, float distortionScale, float distortionBias);
 
 private:
-	Result InitialiseShader(ID3D11Device*, HWND, const char*, const char*);
-	void ShutdownShader();
-	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, const char* shaderFilename);
-
-	Result XM_CALLCONV SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
-										  const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
-										  ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, 
-										  float frameTime, XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, 
-										  XMFLOAT2 distortion2, XMFLOAT2 distortion3, float distortionScale, 
-										  float distortionBias);
-
-	void RenderShader(ID3D11DeviceContext*, int);
-
-private:
-	const DXLocaliser *m_locale;
 	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader* m_pixelShader;
-	ID3D11InputLayout* m_layout;
-	ID3D11Buffer* m_matrixBuffer;
-	ID3D11Buffer* m_noiseBuffer;
-	ID3D11SamplerState* m_sampleState;
+	ID3D11InputLayout* m_inputlayout;
+	ID3D11Buffer* m_cbuffer_vs1;
+	ID3D11Buffer* m_cbuffer_vs2;
+	ID3D11Buffer* m_cbuffer_ps;
+	ID3D11SamplerState* m_sampleState1;
 	ID3D11SamplerState* m_sampleState2;
-	ID3D11Buffer* m_distortionBuffer;
 
 };
 

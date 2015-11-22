@@ -13,7 +13,7 @@
 using namespace std;
 using namespace std::tr1;
 class D3DMain;
-class DXLocaliser;
+
 class CameraClass;
 class ParticleShader;
 
@@ -46,12 +46,10 @@ public:
 	// Shutdown methods
 	void Shutdown(void);
 
-	ParticleEngine(const DXLocaliser *locale);
+	ParticleEngine(void);
 	~ParticleEngine(void);
 
 private:
-	// Current DX locale
-	const DXLocaliser *m_locale;
 
 	// Collection of particle emitter prototypes, that are used to create new instances of particle emitter
 	unordered_map<string, ParticleEmitter*> m_prototypes;

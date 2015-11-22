@@ -5,7 +5,7 @@
 
 #include "EffectBase.h"
 #include "Texture.h"
-class DXLocaliser;
+
 
 
 // This class has no special alignment requirements
@@ -13,7 +13,7 @@ class FireEffect : public EffectBase
 {
 public:
 	
-	FireEffect(const DXLocaliser *locale);
+	FireEffect(void);
 	~FireEffect(void);
 
 	Result Initialise(void);

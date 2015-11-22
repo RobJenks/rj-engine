@@ -2,7 +2,7 @@
 
 #include "ErrorCodes.h"
 #include "Texture.h"
-#include "DXLocaliser.h"
+
 
 #include "FireEffect.h"
 
@@ -68,11 +68,8 @@ void FireEffect::SetDistortionScale(float dscale) { m_distortionscale = dscale; 
 void FireEffect::SetDistortionBias(float dbias) { m_distortionbias = dbias; }
 
 
-FireEffect::FireEffect(const DXLocaliser *locale)
+FireEffect::FireEffect(void)
 {
-	// Store reference to the DX localiser instance
-	m_locale = locale;
-
 	// Set values to 0/NULL prior to initialisation
 	m_firetexture = 0;
 	m_noisetexture = 0;

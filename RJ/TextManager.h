@@ -10,7 +10,7 @@
 #include "CompilerSettings.h"
 class FontData;
 class FontShader;
-class DXLocaliser;
+
 using namespace std;
 
 
@@ -39,7 +39,7 @@ public:
 		float sentencewidth, sentenceheight;
 	};
 
-	TextManager(const DXLocaliser *locale);
+	TextManager(void);
 	TextManager(const TextManager&);
 	~TextManager();
 
@@ -92,8 +92,6 @@ private:
 	AXMMATRIX m_baseViewMatrix;
 	FontShader *m_fontshader;
 
-
-	const DXLocaliser *m_locale;
 };
 
 #endif

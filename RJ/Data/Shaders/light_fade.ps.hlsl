@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
-// Filename: light_highlight_sm_all.ps
+// Filename: lightfade_sm_5_0.ps
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -9,12 +9,12 @@
 Texture2D shaderTexture;
 SamplerState SampleType;
 
-cbuffer LightBuffer
+cbuffer LightFadeBuffer
 {
     float4 ambientColor;
     float4 diffuseColor;
     float3 lightDirection;
-	float padding;
+    float padding;
 };
 
 
@@ -24,16 +24,15 @@ cbuffer LightBuffer
 struct PixelInputType
 {
     float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-    float3 normal : NORMAL;
-    float3 highlight : TEXCOORD1;	// Highlight colour for the object
+    float3 tex_alpha : TEXCOORD0;		// Share semantic for efficiency.  xy = tex, z = alpha
+    float3 normal : TEXCOORD1;
 };
 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
-float4 LightHighlightPixelShader(PixelInputType input) : SV_TARGET
+float4 main(PixelInputType input) : SV_TARGET
 {
     float4 textureColor;
     float3 lightDir;
@@ -42,7 +41,7 @@ float4 LightHighlightPixelShader(PixelInputType input) : SV_TARGET
 
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+    textureColor = shaderTexture.Sample(SampleType, input.tex_alpha.xy);
 
     // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
     color = ambientColor;
@@ -60,18 +59,14 @@ float4 LightHighlightPixelShader(PixelInputType input) : SV_TARGET
         color += (diffuseColor * lightIntensity);
     }
 
-    // Determine the average color intensity across all components, then use the highlight colour weighted by this value
-    float intensity = (color.r + color.g + color.b) * 0.3333f;
-    color.rgb = input.highlight * intensity;
-
-
     // Saturate the final light colour
     color = saturate(color);
 
     // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
     color = color * textureColor;
 
-
+    // Apply the desired alpha value to this colour
+    color.a = input.tex_alpha.z;
 
     return color;
 }

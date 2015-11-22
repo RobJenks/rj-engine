@@ -8,7 +8,7 @@
 #include "DX11_Core.h" // #include "FullDX11.h"
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
-class DXLocaliser;
+
 
 // Constant values for buffer background colour; each frame reset to this base colour before rendering begins
 const float					m_bufferbg[4] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -22,9 +22,8 @@ public:
 	// Enumeration of possible alpha blending values
 	enum AlphaBlendState { AlphaBlendDisabled = 0, AlphaBlendEnabledNormal, AlphaBlendEnabledAdditive };
 
-	D3DMain(const DXLocaliser *locale);		// Constructor; must provide a localiser component
-	D3DMain(const D3DMain &copy);			// Copy constructor; currently empty
-	~D3DMain();
+	D3DMain(void);		// Constructor
+	~D3DMain();			// Destructor
 
 	Result							Initialise(int, int, bool, HWND, bool, float, float);
 	void							Shutdown();
@@ -33,7 +32,7 @@ public:
 	void							EndScene();
 
 	CMPINLINE ID3D11Device*			GetDevice()					{ return m_device; }
-	CMPINLINE ID3D11DeviceContext*	GetDeviceContext()	{ return m_deviceContext; }
+	CMPINLINE ID3D11DeviceContext*	GetDeviceContext()			{ return m_deviceContext; }
 
 	CMPINLINE void					GetProjectionMatrix(XMMATRIX & outMatrix) const		{ outMatrix = m_projectionMatrix; }
 	CMPINLINE void					GetWorldMatrix(XMMATRIX & outMatrix) const			{ outMatrix = m_worldMatrix; }
@@ -103,7 +102,8 @@ public:
 	static std::string				DisplayModeToString(const DXGI_MODE_DESC & mode);
 
 private:
-	const DXLocaliser			*m_locale;
+	
+	D3D_FEATURE_LEVEL			m_featurelevel;
 	D3D_DRIVER_TYPE				m_devicetype;
 	bool						m_vsync_enabled;
 	UINT						m_vsync_uint;

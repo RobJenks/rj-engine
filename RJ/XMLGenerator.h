@@ -25,7 +25,7 @@ namespace IO { namespace Data {
 	TiXmlElement *				NewFloat2AttrXMLElement(const string &name, const XMFLOAT2 & v);
 	TiXmlElement *				NewFloat3AttrXMLElement(const string &name, const XMFLOAT3 & v);
 	TiXmlElement *				NewFloat4AttrXMLElement(const string &name, const XMFLOAT4 & v);
-	TiXmlElement *				NewQuaternionAttrXMLElement(const string &name, const FXMVECTOR q)		
+	CMPINLINE TiXmlElement *	NewQuaternionAttrXMLElement(const string &name, const FXMVECTOR q)		
 	{ 
 		return NewVector4AttrXMLElement(name, q); 
 	}
@@ -41,7 +41,7 @@ namespace IO { namespace Data {
 	void						LinkVector4AttrXMLElement(const string &name, const FXMVECTOR v, TiXmlElement *parent);
 	void						LinkIntVector2AttrXMLElement(const string &name, const INTVECTOR2 &v, TiXmlElement *parent);
 	void						LinkIntVector3AttrXMLElement(const string &name, const INTVECTOR3 &v, TiXmlElement *parent);
-	void						LinkQuaternionAttrXMLElement(const string &name, const FXMVECTOR q, TiXmlElement *parent) 
+	CMPINLINE void				LinkQuaternionAttrXMLElement(const string &name, const FXMVECTOR q, TiXmlElement *parent) 
 	{ 
 		return LinkVector4AttrXMLElement(name, q, parent); 
 	}

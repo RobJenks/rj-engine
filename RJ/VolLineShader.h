@@ -4,7 +4,7 @@
 #include "iShader.h"
 #include "DX11_Core.h"
 #include "ErrorCodes.h"
-class DXLocaliser;
+
 class ModelBuffer;
 
 
@@ -41,7 +41,7 @@ public:
 public:
 
 	// Constructor
-	VolLineShader(const DXLocaliser *locale);
+	VolLineShader(void);
 
 	// Initialise the shader
 	Result							Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far);
@@ -66,7 +66,7 @@ public:
 
 protected:
 
-	const DXLocaliser		* m_locale;
+	
 	ID3D11VertexShader		* m_vertexShader;
 	ID3D11GeometryShader	* m_geometryShader;
 	ID3D11PixelShader		* m_pixelShader;

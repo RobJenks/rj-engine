@@ -10,7 +10,7 @@
 #include "ErrorCodes.h"
 #include "Texture.h"
 class ParticleShader;
-class DXLocaliser;
+
 using namespace std;
 
 #include "RegionBase.h"

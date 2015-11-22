@@ -153,6 +153,22 @@ Result ShaderManager::GetStandardSamplerDescription(DefinedSamplerState type, D3
 			outSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 			return ErrorCodes::NoError;
 
+		case DefinedSamplerState::StandardLinearClampSampler:
+			outSamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+			outSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+			outSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+			outSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+			outSamplerDesc.MipLODBias = 0.0f;
+			outSamplerDesc.MaxAnisotropy = 1;
+			outSamplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+			outSamplerDesc.BorderColor[0] = 0;
+			outSamplerDesc.BorderColor[1] = 0;
+			outSamplerDesc.BorderColor[2] = 0;
+			outSamplerDesc.BorderColor[3] = 0;
+			outSamplerDesc.MinLOD = 0;
+			outSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+			return ErrorCodes::NoError;
+
 		default:
 			return ErrorCodes::ShaderManagerReceivedUnsupportedSamplerState;
 	}

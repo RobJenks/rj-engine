@@ -20,7 +20,7 @@ struct VertexInputType
 {
     float4 position : POSITION;
     float2 tex : TEXCOORD0;
-    float3 normal : TEXCOORD1;
+    float3 normal : NORMAL;
     row_major float4x4 mTransform : mTransform;
     float4 iParams : iParams;
 };
@@ -28,8 +28,8 @@ struct VertexInputType
 struct PixelInputType
 {
     float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
-	float3 normal : TEXCOORD1;
+    float3 tex_alpha : TEXCOORD0;		// Share semantic for efficiency.  xy = tex, z = alpha
+    float3 normal : NORMAL;
 };
 
 
@@ -49,8 +49,8 @@ PixelInputType main(VertexInputType input)
     output.position = mul(output.position, viewMatrix);
     output.position = mul(output.position, projectionMatrix);
     
-	// Store the texture coordinates for the pixel shader.
-	output.tex = input.tex;
+	// Store the texture coordinates for the pixel shader (in xy).  Also pass alpha in this field (in z)
+	output.tex_alpha = float3(input.tex, input.iParams.x);
     
 	// Calculate the normal vector against the world matrix only.
     output.normal = mul(input.normal, (float3x3)input.mTransform);

@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 #include "ErrorCodes.h"
-#include "DXLocaliser.h"
+
 #include "FastMath.h"
 #include "Image2D.h"
 #include "Render2DGroup.h"
@@ -13,10 +13,9 @@ using namespace std;
 using namespace std::tr1;
 
 
-Render2DManager::Render2DManager(const DXLocaliser *locale)
+Render2DManager::Render2DManager(void)
 {
-	// Store a reference to the DX locale
-	m_locale = locale;
+
 }
 
 Render2DManager::~Render2DManager(void)

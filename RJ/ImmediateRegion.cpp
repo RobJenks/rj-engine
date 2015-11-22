@@ -10,7 +10,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include <tchar.h>
-class DXLocaliser;
+
 using namespace std;
 
 #include "ImmediateRegion.h"

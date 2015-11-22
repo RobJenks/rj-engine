@@ -1,5 +1,5 @@
 #include "ErrorCodes.h"
-#include "DXLocaliser.h"
+
 #include "LogManager.h"
 #include "DX11_Core.h"
 #include "FastMath.h"
@@ -7,13 +7,12 @@
 #include "D3DMain.h"
 
 
-D3DMain::D3DMain(const DXLocaliser *locale)
+D3DMain::D3DMain(void)
 {
-	// Store a pointer to the localiser componenet
-	m_locale = locale;
-
+	
 	// Default parameter values
-	m_devicetype = m_locale->Locale.RendereringDeviceType;
+	m_featurelevel = D3D_FEATURE_LEVEL_11_0;
+	m_devicetype = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE;
 
 	// Set pointers to NULL before we attempt to initialise them
 	m_swapChain = 0;
@@ -31,13 +30,6 @@ D3DMain::D3DMain(const DXLocaliser *locale)
 	m_alphablendstate = D3DMain::AlphaBlendState::AlphaBlendDisabled;
 	m_worldMatrix = m_projectionMatrix = m_orthoMatrix = ID_MATRIX;
 }
-
-
-D3DMain::D3DMain(const D3DMain& other)
-{
-	throw "Primary D3D component cannot be copied";
-}
-
 
 D3DMain::~D3DMain()
 {
@@ -57,7 +49,6 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	DXGI_ADAPTER_DESC adapterDesc;
 	int error;
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
-	D3D_FEATURE_LEVEL featureLevel;
 	ID3D11Texture2D* backBufferPtr;
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc, depthDisabledStencilDesc;
@@ -262,11 +253,13 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	// Don't set the advanced flags.
 	swapChainDesc.Flags = 0;
 
-	// Set the DirectX feature level based on our localisation settings
-	featureLevel = m_locale->Locale.FeatureLevel;
-
+	// Set the DirectX feature level and device type; for now, just force to DirectX11 with SM5.0
+	m_featurelevel = D3D_FEATURE_LEVEL_11_0;
+	m_devicetype = (Game::ForceWARPRenderDevice ?	D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP :
+													D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_HARDWARE);
+	
 	// Create the swap chain, Direct3D device, and Direct3D device context.
-	result = D3D11CreateDeviceAndSwapChain(NULL, m_devicetype, NULL, 0, &featureLevel, 1, 
+	result = D3D11CreateDeviceAndSwapChain(NULL, m_devicetype, NULL, 0, &m_featurelevel, 1, 
 										   D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
 	if(FAILED(result))
 	{
