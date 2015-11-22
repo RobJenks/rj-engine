@@ -67,7 +67,7 @@ void LightShader::Shutdown()
 	return;
 }
 
-Result LightShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+Result XM_CALLCONV LightShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 						   const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
@@ -498,7 +498,7 @@ void LightShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, 
 }
 
 
-Result LightShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, 
+Result XM_CALLCONV LightShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix,
 										ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;

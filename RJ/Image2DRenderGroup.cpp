@@ -18,7 +18,7 @@ Image2DRenderGroup::Image2DRenderGroup(void)
 	m_Texture = 0;
 	m_texturemode = Texture::APPLY_MODE::Normal;
 	m_texturesize = INTVECTOR2(1, 1);
-	m_ftexturesize = D3DXVECTOR2(1.0f, 1.0f);
+	m_ftexturesize = XMFLOAT2(1.0f, 1.0f);
 	m_vertices = NULL;
 	m_zorder = 0.0f;
 	m_render = true;
@@ -202,7 +202,7 @@ Result Image2DRenderGroup::LoadTexture(ID3D11Device* device, const char *filenam
 
 	// Also store the texture size locally, for efficiency
 	m_texturesize = m_Texture->GetTextureSize();
-	m_ftexturesize = D3DXVECTOR2((float)m_texturesize.x, (float)m_texturesize.y);
+	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -227,7 +227,7 @@ void Image2DRenderGroup::SetTextureDirect(Texture *tex)
 	
 	// Also store the texture size locally, for efficiency
 	m_texturesize = m_Texture->GetTextureSize();
-	m_ftexturesize = D3DXVECTOR2((float)m_texturesize.x, (float)m_texturesize.y);
+	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
 }
 
 void Image2DRenderGroup::Render(void)
@@ -336,14 +336,14 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 
 		// Load the vertex array with data.
 		// First triangle.
-		m_vertices[vertexindex].position = D3DXVECTOR3(left, top, zorder);		vertexindex++;		// Top left.
-		m_vertices[vertexindex].position = D3DXVECTOR3(right, bottom, zorder);	vertexindex++;		// Bottom right.
-		m_vertices[vertexindex].position = D3DXVECTOR3(left, bottom, zorder);	vertexindex++;		// Bottom left.
+		m_vertices[vertexindex].position = XMFLOAT3(left, top, zorder);		vertexindex++;		// Top left.
+		m_vertices[vertexindex].position = XMFLOAT3(right, bottom, zorder);	vertexindex++;		// Bottom right.
+		m_vertices[vertexindex].position = XMFLOAT3(left, bottom, zorder);	vertexindex++;		// Bottom left.
 
 		// Second triangle.
-		m_vertices[vertexindex].position = D3DXVECTOR3(left, top, zorder);		vertexindex++;		// Top left.
-		m_vertices[vertexindex].position = D3DXVECTOR3(right, top, zorder);		vertexindex++;		// Top right.
-		m_vertices[vertexindex].position = D3DXVECTOR3(right, bottom, zorder);	vertexindex++;		// Bottom right.
+		m_vertices[vertexindex].position = XMFLOAT3(left, top, zorder);		vertexindex++;		// Top left.
+		m_vertices[vertexindex].position = XMFLOAT3(right, top, zorder);		vertexindex++;		// Top right.
+		m_vertices[vertexindex].position = XMFLOAT3(right, bottom, zorder);	vertexindex++;		// Bottom right.
 	}
 
 	// If no instances were modified then we do not need to update the buffer and can return now
@@ -530,39 +530,39 @@ void Image2DRenderGroup::UpdateVertexTextureMappingCoords(Image2DRenderGroup::Ve
 	switch (rotation)
 	{
 		case Rotation90Degree::Rotate90:
-			(v+0)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
-			(v+1)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
-			(v+2)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
-			(v+3)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
-			(v+4)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-			(v+5)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
+			(v+0)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
+			(v+1)->texture = XMFLOAT2(umax, 0.0f);			// Top right
+			(v+2)->texture = XMFLOAT2(umax, vmax);			// Bottom right
+			(v+3)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
+			(v+4)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+			(v+5)->texture = XMFLOAT2(umax, 0.0f);			// Top right
 			return;
 
 		case Rotation90Degree::Rotate180:
-			(v+0)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
-			(v+1)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-			(v+2)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
-			(v+3)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
-			(v+4)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
-			(v+5)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
+			(v+0)->texture = XMFLOAT2(umax, vmax);			// Bottom right
+			(v+1)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+			(v+2)->texture = XMFLOAT2(umax, 0.0f);			// Top right
+			(v+3)->texture = XMFLOAT2(umax, vmax);			// Bottom right
+			(v+4)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
+			(v+5)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
 			return;
 
 		case Rotation90Degree::Rotate270:
-			(v+0)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
-			(v+1)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
-			(v+2)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-			(v+3)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
-			(v+4)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
-			(v+5)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
+			(v+0)->texture = XMFLOAT2(umax, 0.0f);			// Top right
+			(v+1)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
+			(v+2)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+			(v+3)->texture = XMFLOAT2(umax, 0.0f);			// Top right
+			(v+4)->texture = XMFLOAT2(umax, vmax);			// Bottom right
+			(v+5)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
 			return;
 
 		default:	// i.e. zero degrees of rotation
-			(v+0)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-			(v+1)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
-			(v+2)->texture = D3DXVECTOR2(0.0f, vmax);			// Bottom left
-			(v+3)->texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-			(v+4)->texture = D3DXVECTOR2(umax, 0.0f);			// Top right
-			(v+5)->texture = D3DXVECTOR2(umax, vmax);			// Bottom right
+			(v+0)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+			(v+1)->texture = XMFLOAT2(umax, vmax);			// Bottom right
+			(v+2)->texture = XMFLOAT2(0.0f, vmax);			// Bottom left
+			(v+3)->texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+			(v+4)->texture = XMFLOAT2(umax, 0.0f);			// Top right
+			(v+5)->texture = XMFLOAT2(umax, vmax);			// Bottom right
 			return;
 	}
 }

@@ -29,7 +29,7 @@ public:
 
 	Result Initialise(ID3D11Device* device, HWND hwnd);
 	void Shutdown();
-	Result Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, 
+	Result XM_CALLCONV Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 						  const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 private:
@@ -37,7 +37,7 @@ private:
 	void ShutdownShader();
 	void OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, const char* shaderFilename);
 
-	Result SetShaderParameters(ID3D11DeviceContext*, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
+	Result XM_CALLCONV SetShaderParameters(ID3D11DeviceContext*, const FXMMATRIX, const CXMMATRIX, const CXMMATRIX, ID3D11ShaderResourceView*);
 	void RenderShader(ID3D11DeviceContext*, int);
 
 private:

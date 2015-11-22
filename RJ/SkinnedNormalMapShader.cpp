@@ -72,7 +72,7 @@ void SkinnedNormalMapShader::Shutdown()
 	return;
 }
 
-Result SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
+Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
 									  XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
 {
 	Result result;

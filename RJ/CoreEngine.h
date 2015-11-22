@@ -201,7 +201,7 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void			RenderModel(Model *model, FXMMATRIX world)
+	CMPINLINE void XM_CALLCONV			RenderModel(Model *model, FXMMATRIX world)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world);
@@ -414,7 +414,7 @@ public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
 	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform)
+	CMPINLINE void XM_CALLCONV	SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform));
@@ -422,7 +422,7 @@ public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
 	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform)
+	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform));
@@ -430,7 +430,7 @@ public:
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const CXMVECTOR params)
+	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const CXMVECTOR params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, params));
@@ -438,7 +438,7 @@ public:
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const CXMVECTOR params)
+	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const CXMVECTOR params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
 		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, params));
@@ -462,7 +462,7 @@ public:
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const FXMMATRIX transform, 
+	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform,
 															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
@@ -475,7 +475,7 @@ public:
 	
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void				SubmitForZSortedRendering(	RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
+	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
 															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera

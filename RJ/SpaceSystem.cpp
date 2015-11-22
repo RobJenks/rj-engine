@@ -14,6 +14,7 @@ SpaceSystem::SpaceSystem(void)
 	m_initialised = false;
 	m_code = m_name = "";
 	m_size = m_minbounds = m_maxbounds = NULL_VECTOR;
+	m_sizef = m_minboundsf = m_maxboundsf = NULL_FLOAT3;
 	SpatialPartitioningTree = NULL;
 	m_backdroplocation = "";
 	m_backdrop = NULL;
@@ -30,10 +31,10 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 
 	// Create a new spatial partitioning tree to track objects within the system.  Determine the largest dimension and generate to that extent
 	// in each dimension to ensure coverage.  We should only generally have cubic systems (x==y==z) but this allows flexibility for the future
-	float largestdimension = max(m_size.x, max(m_size.y, m_size.z));
+	float largestdimension = max(m_sizef.x, max(m_sizef.y, m_sizef.z));
 	SpatialPartitioningTree = new Octree<iSpaceObject*>(
-		D3DXVECTOR3(-largestdimension*0.5f, -largestdimension*0.5f, -largestdimension*0.5f),
-		largestdimension);
+		XMVectorMultiply(XMVectorReplicate(largestdimension), HALF_VECTOR_N),						// Centre point is at -0.5f * size (e.g. -50k to +50k for a size of 100k)
+		largestdimension);																			
 	if (!SpatialPartitioningTree) return ErrorCodes::CouldNotInitialiseSpatialPartitioningTree;
 
 	// Add the spatial partitioning tree for this system to the global tree-pruning maintenance process
@@ -58,10 +59,10 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 }
 
 // Handles the entry of an object into the system, adding it to the system collections and updating the simulation state accordingly
-Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, D3DXVECTOR3 location)
+Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, const FXMVECTOR location)
 {
 	// Parameter check; ensure this is a valid object, and that it doesn't already belong to another system
-	//if (object == NULL)							return ErrorCodes::CannotAddNullObjectToSystem;
+	if (object == NULL)								return ErrorCodes::CannotAddNullObjectToSystem;
 	if (object->GetSpaceEnvironment())				return ErrorCodes::ObjectAlreadyExistsInOtherSystem;
 	if (object->GetSpatialTreeNode())				return ErrorCodes::ObjectAlreadyExistsInOtherSpatialTree;
 
@@ -69,17 +70,17 @@ Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, D3DXVECTOR3 locatio
 	Objects.push_back(object);
 
 	// Clamp the entry position to the bounds of the system
-	ClampVector(location, m_minbounds, m_maxbounds);
+	XMVECTOR pos = XMVectorClamp(location, m_minbounds, m_maxbounds);
 
 	// Store a reference to the new system this object exists in
 	object->SetSpaceEnvironmentDirect(this);
 
 	// Set the position of the object in the system, and add it to the system spatial positioning tree
-	object->SetPosition(location);
+	object->SetPosition(pos);
 	object->RefreshPositionImmediate();
 	if (SpatialPartitioningTree)
 	{
-		SpatialPartitioningTree->AddItem(object, location);
+		SpatialPartitioningTree->AddItem(object, pos);
 	}
 
 	// Notify the state manager that this object has entered the system
@@ -93,7 +94,7 @@ Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, D3DXVECTOR3 locatio
 Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 {
 	// Parameter check; ensure that this is a valid object
-	//if (!object) return ErrorCodes::CannotRemoveNullObjectFromSystem;
+	if (!object) return ErrorCodes::CannotRemoveNullObjectFromSystem;
 
 	// Remove from the spatial partitioning tree for this system
 	if (SpatialPartitioningTree && object->GetSpatialTreeNode() != NULL)
@@ -116,7 +117,7 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 }
 
 // Set the size of the system.  Cannot be changed post-initialisation.
-void SpaceSystem::SetSize(const D3DXVECTOR3 & size)
+void SpaceSystem::SetSize(const FXMVECTOR size)
 {
 	// We will only allow the size to be changed if the system has not yet been initialised; cannot be changed post-initialisation
 	if (m_initialised) return;
@@ -125,8 +126,13 @@ void SpaceSystem::SetSize(const D3DXVECTOR3 & size)
 	m_size = size;
 
 	// Calculate the minimum and maximum bounds for the system, maintained to save calculations at runtime
-	m_minbounds = -(m_size * 0.5f);
-	m_maxbounds = +(m_size * 0.5f);
+	m_maxbounds = XMVectorMultiply(m_size, HALF_VECTOR_P);
+	m_minbounds = XMVectorNegate(m_maxbounds);
+
+	// Also store local float representations for convenience
+	XMStoreFloat3(&m_sizef, m_size);
+	XMStoreFloat3(&m_minboundsf, m_minbounds);
+	XMStoreFloat3(&m_maxboundsf, m_maxbounds);
 }
 
 void SpaceSystem::TerminateSystem(void)

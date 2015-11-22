@@ -430,7 +430,7 @@ void ComplexShip::SimulateObject(void)
 	{
 		// Test whether the ship lies completely within the node
 		if (XMVector3GreaterOrEqual(XMVectorSubtract(m_position, m_size), m_treenode->m_min) && 
-			XMVectorLess(XMVectorAdd(m_position, m_size), m_treenode->m_max))
+			XMVector3Less(XMVectorAdd(m_position, m_size), m_treenode->m_max))
 		{
 			// It does, so just make sure that we have no perimeter beacons active
 			if (m_activebeacons != 0) DeactivatePerimeterBeacons();

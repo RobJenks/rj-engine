@@ -21,6 +21,9 @@ class Actor : public ALIGN16<Actor>, public iEnvironmentObject, public iConsumes
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(Actor)
+
 	// Methods to retrieve and set basic properties of the actor
 	CMPINLINE std::string 		GetName(void) const					{ return m_name; }
 	CMPINLINE void				SetName(const std::string & name)	{ m_name = name; }

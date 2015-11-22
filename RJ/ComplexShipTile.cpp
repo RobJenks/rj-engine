@@ -720,8 +720,8 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 	// Add nodes for each key attribute of the base class
 	//IO::Data::LinkStringXMLElement("Code", tile->GetCode(), node);
 	//IO::Data::LinkStringXMLElement("Name", tile->GetName(), node);
-	IO::Data::LinkIntVectorAttrXMLElement("Location", tile->GetElementLocation(), node);
-	IO::Data::LinkIntVectorAttrXMLElement("Size", tile->GetElementSize(), node);
+	IO::Data::LinkIntVector3AttrXMLElement("Location", tile->GetElementLocation(), node);
+	IO::Data::LinkIntVector3AttrXMLElement("Size", tile->GetElementSize(), node);
 	//if (tile->GetModel()) IO::Data::LinkStringXMLElement("Model", tile->GetModel()->GetCode(), node);
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)tile->GetRotation(), node);
 

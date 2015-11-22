@@ -12,6 +12,9 @@ class SpaceProjectile : public ALIGN16<SpaceProjectile>, public iSpaceObject
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(SpaceProjectile)
+
 	// Default constructor
 	SpaceProjectile(void);
 

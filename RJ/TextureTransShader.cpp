@@ -22,7 +22,7 @@ void TextureTransShader::Shutdown(void)
 }
 
 
-Result TextureTransShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, 
+Result XM_CALLCONV TextureTransShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								float transX, float transY)
 {
@@ -274,7 +274,7 @@ void TextureTransShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 	errorMessage = 0;
 }
 
-Result TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV TextureTransShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 											   const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 											   float transX, float transY)
 {

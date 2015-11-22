@@ -106,7 +106,7 @@ void ParticleEngine::ShutdownParticleEmitter(string key)
 	m_emitters[key] = NULL;
 }
 
-void ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
+void XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
 {
 	// Enable alpha blending and disable writing to the depth buffer (for correct alpha rendering) before rendering any particles
 	// TODO: Currently use additive alpha.  Make dependent on the prototypes being rendered (disabled vs enabled vs additive vs ...)

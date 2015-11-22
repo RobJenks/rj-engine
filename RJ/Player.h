@@ -16,7 +16,7 @@ class Actor;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Player : ALIGN16<Player>
+class Player : public ALIGN16<Player>
 {
 
 public:

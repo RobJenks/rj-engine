@@ -41,7 +41,7 @@ public:
 
 
 	// Rendering methods
-	void Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera);
+	void XM_CALLCONV Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera);
 
 	// Shutdown methods
 	void Shutdown(void);

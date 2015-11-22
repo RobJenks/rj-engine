@@ -64,7 +64,7 @@ void ParticleShader::Shutdown()
 }
 
 
-Result ParticleShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV ParticleShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 								const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
@@ -464,7 +464,7 @@ void ParticleShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwn
 }
 
 
-Result ParticleShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV ParticleShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 											 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;

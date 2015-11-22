@@ -22,8 +22,8 @@
 
 // Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds
 #ifdef _DEBUG
-#	define RJ_LOG_COLLISION_DETAILS
-#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
+//#	define RJ_LOG_COLLISION_DETAILS
+//#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 #endif
 
 // Compiler setting to define the collision detection method in use
@@ -1640,6 +1640,57 @@ bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const FXMVECTO
 	return true;
 }
 
+bool GamePhysicsEngine::TestRaySphereIntersection(	const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
+													const FXMVECTOR sphere_centre, const GXMVECTOR sphere_radiussq) const
+{
+	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+	//D3DXVECTOR3 diff = (ray_origin - sphere_centre);
+	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;		// Expanded "D3DXVec3Dot(&diff, &diff)"
+	XMVECTOR diff = XMVectorSubtract(ray_origin, sphere_centre);
+	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
+
+	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
+	//if (a0 <= 0.0f) return true;
+	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
+
+	// Project object difference vector onto the ray
+	//float a1 = ((ray_dir.x*diff.x) + (ray_dir.y*diff.y) + (ray_dir.z*diff.z));			// Expanded "D3DXVec3Dot(&ray_dir, &diff)"
+	//if (a1 >= 0.0f) return false;
+	XMVECTOR a1 = XMVector3Dot(ray_dir, diff);
+	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
+
+	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+	//return (((a1 * a1) - a0) >= 0.0f);
+	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
+}
+
+bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const
+{
+	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+	//D3DXVECTOR3 diff = (ray.Origin - sphere_centre);
+	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;				// Expanded "D3DXVec3Dot(&diff, &diff)"
+	XMVECTOR diff = XMVectorSubtract(ray.Origin, sphere_centre);
+	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
+
+	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
+	//if (a0 <= 0.0f) return true;
+	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
+
+	// Project object difference vector onto the ray
+	//float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+	//if (a1 >= 0.0f) return false;
+	XMVECTOR a1 = XMVector3Dot(ray.Direction, diff);
+	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
+
+	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+	//return (((a1 * a1) - a0) >= 0.0f);
+	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
+}
+
 
 
 // Perform a continuous collision test between two moving spheres.  Populates the collision result data with details on the collision
@@ -1725,8 +1776,8 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	// We do not use the current sphere position, since it has already moved.  Instead we roll back the position to
 	// the start of the frame (t=0) and then perform continuous collision detection for its movement during the 
 	// frame (until t=1).  The OBB position is taken as-is since we assume it is static in this test
-	D.wm0 = (sphere->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);
-	D.pos0 = (sphere->GetPosition() - D.wm0);
+	D.wm0 = XMVectorMultiply(sphere->PhysicsState.WorldMomentum, PhysicsClock.TimeFactorV);
+	D.pos0 = XMVectorSubtract(sphere->GetPosition(), D.wm0);
 	
 	// We will use a ray/box intersection test.  Generate a ray to simulate the sphere path and transform
 	// it into the OBB's coordinate frame.  We are now in the OBB's frame so can treat it as an AABB
@@ -1736,10 +1787,10 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	
 	// Extend the AABB extent to account for the radius of the moving sphere, so we can then treat the
 	// ray as having point-width for simplicity
-	const float & radius = sphere->GetCollisionSphereRadius();
-	box.Points[0].x -= radius; box.Points[0].y -= radius; box.Points[0].z -= radius;
-	box.Points[1].x += radius; box.Points[1].y += radius; box.Points[1].z += radius;
-
+	XMVECTOR radius = XMVectorReplicate(sphere->GetCollisionSphereRadius());
+	box.P0 = XMVectorSubtract(box.P0, radius);
+	box.P1 = XMVectorAdd(box.P1, radius);
+	
 	// Now test the ray/AABB intersection
 	if (TestRayVsAABBIntersection(ray, box) == false) return false;
 
@@ -1754,121 +1805,92 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 float GamePhysicsEngine::GetCCDTestDistance(const iActiveObject *object) const
 {
 	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
-	D3DXVECTOR3 wm = (object->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);	// Base the estimate on the object's current velocity
-	FloorVector(wm, 1.0f);																// Floor to 1.0 so that the squared distance will always be greater
-	return ((wm.x*wm.x) + (wm.y*wm.y) + (wm.z*wm.z)) * 2.0f;							// Add buffer of 2x to be sure of catching any ricochets etc
+	//D3DXVECTOR3 wm = (object->PhysicsState.WorldMomentum * PhysicsClock.TimeFactor);	// Base the estimate on the object's current velocity
+	//FloorVector(wm, 1.0f);															// Floor to 1.0 so that the squared distance will always be greater
+	//return ((wm.x*wm.x) + (wm.y*wm.y) + (wm.z*wm.z)) * 2.0f;							// Add buffer of 2x to be sure of catching any ricochets etc
+	XMVECTOR wm = XMVectorMax(XMVectorMultiply(object->PhysicsState.WorldMomentum, PhysicsClock.TimeFactorV), ONE_VECTOR);
+	return (XMVectorGetX(XMVector3LengthSq(wm)) * 2.0f);
 }
 
 
 // Determines the closest point on a line segment to the specified point
-D3DXVECTOR3 GamePhysicsEngine::ClosestPointOnLineSegment(const D3DXVECTOR3 & line_ep1, const D3DXVECTOR3 & line_ep2, 
-														 const D3DXVECTOR3 & point)
+XMVECTOR GamePhysicsEngine::ClosestPointOnLineSegment(const FXMVECTOR line_ep1, const FXMVECTOR line_ep2, 
+														 const FXMVECTOR point)
 {
 	// Inputs taken from http://notmagi.me/closest-point-on-line-aabb-and-obb-to-point/
 
 	// Determine the relative distance along the line segment by taking a perpendicular dot product
-	D3DXVECTOR3 ab = (line_ep2 - line_ep1);
-	float t = ( D3DXVec3Dot(&(point - line_ep1), &ab) / D3DXVec3Dot(&ab, &ab) );
+	// float t = ( D3DXVec3Dot(&(point - line_ep1), &ab) / D3DXVec3Dot(&ab, &ab) );
+	XMVECTOR ab = XMVectorSubtract(line_ep2, line_ep1);
+	XMVECTOR t = XMVectorDivide(XMVector3Dot(XMVectorSubtract(point, line_ep1), ab), XMVector3Dot(ab, ab));
 
 	// Constrain the point to lie on the line segment; t = in the range [0.0 1.0]
-	if (t < 0.0f) t = 0.0f; if (t > 1.0f) t = 1.0f;
+	t = XMVectorClamp(t, NULL_VECTOR, ONE_VECTOR);
 
 	// Use the standard line equation to get the point 't' along the line
-	return (line_ep1 + (t * ab));
+	//return (line_ep1 + (t * ab));
+	return XMVectorMultiplyAdd(t, ab, line_ep1);
 }
 
 // Determines the closest point on an AABB to the specified point
-D3DXVECTOR3 GamePhysicsEngine::ClosestPointOnAABB(	const D3DXVECTOR3 & AABB_min, const D3DXVECTOR3 & AABB_max, 
-													const D3DXVECTOR3 & point )
+XMVECTOR GamePhysicsEngine::ClosestPointOnAABB(	const FXMVECTOR AABB_min, const FXMVECTOR AABB_max, 
+												const FXMVECTOR point )
 {
 	// Inputs taken from http://notmagi.me/closest-point-on-line-aabb-and-obb-to-point/
 	
 	// By default, set the point itself to be the closest point, and then we will adjust if it is outside the AABB
-	D3DXVECTOR3 result = point;
-
-	// Compare the x dimension
-	if		(point.x < AABB_min.x)	result.x = AABB_min.x;
-	else if (point.x > AABB_max.x)	result.x = AABB_max.x;
-
-	// Compare the y dimension
-	if		(point.y < AABB_min.y)	result.y = AABB_min.y;
-	else if (point.y > AABB_max.y)	result.y = AABB_max.y;
-
-	// Compare the z dimension
-	if		(point.z < AABB_min.z)	result.z = AABB_min.z;
-	else if (point.z > AABB_max.z)	result.z = AABB_max.z;
-
-	// Return the resulting point
-	return result;
+	// (Comparison for all dimensions)
+	// if	  (point.x < AABB_min.x)	result.x = AABB_min.x;
+	//else if (point.x > AABB_max.x)	result.x = AABB_max.x;
+	return XMVectorClamp(point, AABB_min, AABB_max);
 }
 
 
 // Determines the closest point on an OBB to the specified location
-D3DXVECTOR3 GamePhysicsEngine::ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const D3DXVECTOR3 & point)
+XMVECTOR GamePhysicsEngine::ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point)
 {
 	// Input taken from http://www.gamedev.net/topic/579584-obb---sphere-collision-detection/, http://notmagi.me/closest-point-on-line-aabb-and-obb-to-point/
-	float dist;
 
 	// Get the vector from this point to the centre of the OBB
-	D3DXVECTOR3 d = (point - obb.Centre);
+	XMVECTOR d = XMVectorSubtract(point, obb.Centre);
 
-	// Start the result point at the centre of the obb
-	D3DXVECTOR3 result = obb.Centre;
+	// Used the following logic for each axis; clamping the dot product dist to each extent and multiplying by axis
+	// dist = D3DXVec3Dot(&d, &obb.Axis[1]);
+	// if (dist > obb.Extent[1])			result += (obb.Extent[1] * obb.Axis[1]);	// Full +ve extent along axis
+	// else if (dist < -obb.Extent[1])		result -= (obb.Extent[1] * obb.Axis[1]);	// Full -ve extent along axis
+	// else									result += (dist * obb.Axis[1]);				// Partial extent along axis
 
-	// Check each axis in turn.  Unroll loop just in case the compiler doesn't.  First, axis[0]
-	dist = D3DXVec3Dot(&d, &obb.Axis[0]);
-	if		(dist > obb.Extent[0])			result += (obb.Extent[0] * obb.Axis[0]);	// Full +ve extent along axis
-	else if	(dist < -obb.Extent[0])			result -= (obb.Extent[0] * obb.Axis[0]);	// Full -ve extent along axis
-	else									result += (dist * obb.Axis[0]);				// Partial extent along axis
-
-	// Repeat for axis[1]
-	dist = D3DXVec3Dot(&d, &obb.Axis[1]);
-	if		(dist > obb.Extent[1])			result += (obb.Extent[1] * obb.Axis[1]);	// Full +ve extent along axis
-	else if	(dist < -obb.Extent[1])			result -= (obb.Extent[1] * obb.Axis[1]);	// Full -ve extent along axis
-	else									result += (dist * obb.Axis[1]);				// Partial extent along axis
-
-	// Finally repeat for axis[2]
-	dist = D3DXVec3Dot(&d, &obb.Axis[2]);
-	if		(dist > obb.Extent[2])			result += (obb.Extent[2] * obb.Axis[2]);	// Full +ve extent along axis
-	else if	(dist < -obb.Extent[2])			result -= (obb.Extent[2] * obb.Axis[2]);	// Full -ve extent along axis
-	else									result += (dist * obb.Axis[2]);				// Partial extent along axis
-
-// TODO: can use ExtentAlongAxis rather than the multiplications above?
-	
-	// Return the final point
-	return result;
+	// Can combine all three blocks into one SSE statement
+	return XMVectorAdd(XMVectorAdd(XMVectorAdd(
+		obb.Centre,
+		XMVectorMultiply(obb.Axis[0].value, XMVectorClamp(XMVector3Dot(d, obb.Axis[0].value), XMVectorNegate(obb.Extent[0].value), obb.Extent[0].value))),
+		XMVectorMultiply(obb.Axis[1].value, XMVectorClamp(XMVector3Dot(d, obb.Axis[1].value), XMVectorNegate(obb.Extent[1].value), obb.Extent[1].value))),
+		XMVectorMultiply(obb.Axis[2].value, XMVectorClamp(XMVector3Dot(d, obb.Axis[2].value), XMVectorNegate(obb.Extent[2].value), obb.Extent[2].value)));
 }
 
 // Determines the closest point on an OBB to the specified location.  Also returns an output parameter that indicates how close the point
 // is to the OBB centre in each of the OBB's basis axes.  Any distance < the extent in that axis means the point is inside the OBB.
-D3DXVECTOR3 GamePhysicsEngine::ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const D3DXVECTOR3 & point, D3DXVECTOR3 & outDistance)
+XMVECTOR GamePhysicsEngine::ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point, XMVECTOR & outDistance)
 {
 	// Get the vector from this point to the centre of the OBB
-	D3DXVECTOR3 d = (point - obb.Centre);
+	XMVECTOR d = XMVectorSubtract(point, obb.Centre);
 
-	// Start the result point at the centre of the obb
-	D3DXVECTOR3 result = obb.Centre;
+	// Calculate the dot products separately since we want to return them
+	XMVECTOR dot0, dot1, dot2;
+	dot0 = XMVector3Dot(d, obb.Axis[0].value);
+	dot1 = XMVector3Dot(d, obb.Axis[1].value);
+	dot2 = XMVector3Dot(d, obb.Axis[2].value);
 
-	// Check each axis in turn.  Unroll loop just in case the compiler doesn't.  First, axis[0]
-	outDistance.x = D3DXVec3Dot(&d, &obb.Axis[0]);
-	if (outDistance.x > obb.Extent[0])			result += (obb.Extent[0] * obb.Axis[0]);		// Full +ve extent along axis
-	else if (outDistance.x < -obb.Extent[0])	result -= (obb.Extent[0] * obb.Axis[0]);		// Full -ve extent along axis
-	else										result += (outDistance.x * obb.Axis[0]);		// Partial extent along axis
+	// Set the output vector to contain relevant components of 0/1/2 for x/y/z
+	static const AXMVECTOR CTRL_SWIZZLE = XMVectorSelectControl(XM_SELECT_0, XM_SELECT_1, XM_SELECT_0, XM_SELECT_0);
+	outDistance = XMVectorSetZ(XMVectorSelect(dot0, dot1, CTRL_SWIZZLE), XMVectorGetX(dot2));
 
-	// Repeat for axis[1]
-	outDistance.y = D3DXVec3Dot(&d, &obb.Axis[1]);
-	if (outDistance.y > obb.Extent[1])			result += (obb.Extent[1] * obb.Axis[1]);		// Full +ve extent along axis
-	else if (outDistance.y < -obb.Extent[1])	result -= (obb.Extent[1] * obb.Axis[1]);		// Full -ve extent along axis
-	else										result += (outDistance.y * obb.Axis[1]);		// Partial extent along axis
-
-	// Finally repeat for axis[2]
-	outDistance.z = D3DXVec3Dot(&d, &obb.Axis[2]);
-	if (outDistance.z > obb.Extent[2])			result += (obb.Extent[2] * obb.Axis[2]);		// Full +ve extent along axis
-	else if (outDistance.z < -obb.Extent[2])	result -= (obb.Extent[2] * obb.Axis[2]);		// Full -ve extent along axis
-	else										result += (outDistance.z * obb.Axis[2]);		// Partial extent along axis
-
-	// Return the final point
-	return result;
+	// Return the combined result vector
+	return XMVectorAdd(XMVectorAdd(XMVectorAdd(
+		obb.Centre,
+		XMVectorMultiply(obb.Axis[0].value, XMVectorClamp(dot0, XMVectorNegate(obb.Extent[0].value), obb.Extent[0].value))),
+		XMVectorMultiply(obb.Axis[1].value, XMVectorClamp(dot1, XMVectorNegate(obb.Extent[1].value), obb.Extent[1].value))),
+		XMVectorMultiply(obb.Axis[2].value, XMVectorClamp(dot2, XMVectorNegate(obb.Extent[2].value), obb.Extent[2].value)));
 }
 
 #ifdef RJ_OLD_COLLISION_HANDLING
@@ -2317,7 +2339,3 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 #endif
 
 
-
-
-
-RESET DEBUG DEFINES TO //

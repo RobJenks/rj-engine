@@ -7,6 +7,7 @@
 
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
+#include "FastMath.h"
 #include "BasicRay.h"
 #include "OrientedBoundingBox.h"
 #include "CollisionDetectionResultsStruct.h"
@@ -127,7 +128,7 @@ public:
 			AXMVECTOR		VelocityChangeMagnitude;		// The magnitude of our change in velocity (VelocityChange.Length) (vectorised single value)
 			AXMVECTOR		ImpactForce;					// The force with which we have been impacted (The momentum we were hit with) (vectorised single value)
 
-			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = NULL_VECTOR; }
+			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = XMVectorZero(); }
 		};
 
 		AXMVECTOR			TotalImpactForce;				// The combined closing momentum at the collision point (vectorised single value)
@@ -135,7 +136,7 @@ public:
 		ObjectImpactData	Object;							// Impact data for the current object
 		ObjectImpactData	Collider;						// Impact data for the colliding object
 
-		ImpactData(void)	{ TotalImpactForce = NULL_VECTOR; }
+		ImpactData(void)	{ TotalImpactForce = XMVectorZero(); }
 	};
 
 	// Struct holding data on an impact between an object and the terrain
@@ -149,7 +150,7 @@ public:
 		AXMVECTOR			ImpactVelocity;					// The object velocity at point of impact  (vectorised single value)
 		AXMVECTOR			ImpactForce;					// The force of the impact, i.e. the change in velocity * object momentum  (vectorised single value)
 
-		TerrainImpactData(void) { Terrain = NULL; ResponseVector = ResponseVelocity = ImpactVelocity = ImpactForce = NULL_VECTOR; }
+		TerrainImpactData(void) { Terrain = NULL; ResponseVector = ResponseVelocity = ImpactVelocity = ImpactForce = XMVectorZero(); }
 	};
 
 	// Struct holding the internal clock state of the physics engine, which may differ from the global clock state
@@ -172,7 +173,7 @@ public:
 		PhysicsClockData(void) 
 		{ 
 			TimeFactor = RemainingFrameTime = FrameCycleTimeLimit = 0.0f; 
-			TimeFactorV = RemainingFrameTimeV = NULL_VECTOR;
+			TimeFactorV = RemainingFrameTimeV = XMVectorZero();
 		}
 	};
 
@@ -243,9 +244,9 @@ public:
 																 	 const OrientedBoundingBox::CoreOBBData & obb);
 
 	// Tests for the intersection of a ray with a sphere.  Returns no details; only whether a collision took place
-	CMPINLINE bool							TestRaySphereIntersection(const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
+	bool									TestRaySphereIntersection(const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
 																	  const FXMVECTOR sphere_centre, const GXMVECTOR sphere_radiussq) const;
-	CMPINLINE bool							TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const;
+	bool									TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const;
 
 	// Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
 	bool									TestLineSegmentvsSphereIntersection(const FXMVECTOR p1, const FXMVECTOR p2,
@@ -295,7 +296,7 @@ public:
 
 	// Determines the closest point on an OBB to the specified location.  Also returns an output parameter that indicates how close the point
 	// is to the OBB centre in each of the OBB's basis axes.  Any distance < the extent in that axis means the point is inside the OBB.
-	XMVECTOR								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point, FXMVECTOR outDistance);
+	XMVECTOR								ClosestPointOnOBB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR point, XMVECTOR & outDistance);
 
 	// Struct holding data on an impact between two objects
 	ImpactData								ObjectImpact;
@@ -370,58 +371,6 @@ protected:
 	OrientedBoundingBox::CoreOBBData		_obbdata;
 };
 
-
-CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const FXMVECTOR ray_origin, const FXMVECTOR ray_dir,
-															const FXMVECTOR sphere_centre, const GXMVECTOR sphere_radiussq) const
-{
-	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
-	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
-	//D3DXVECTOR3 diff = (ray_origin - sphere_centre);
-	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;		// Expanded "D3DXVec3Dot(&diff, &diff)"
-	XMVECTOR diff = XMVectorSubtract(ray_origin, sphere_centre);
-	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
-
-	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
-	//if (a0 <= 0.0f) return true;
-	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
-
-	// Project object difference vector onto the ray
-	//float a1 = ((ray_dir.x*diff.x) + (ray_dir.y*diff.y) + (ray_dir.z*diff.z));			// Expanded "D3DXVec3Dot(&ray_dir, &diff)"
-	//if (a1 >= 0.0f) return false;
-	XMVECTOR a1 = XMVector3Dot(ray_dir, diff);
-	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
-
-	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
-	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
-	//return (((a1 * a1) - a0) >= 0.0f);
-	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
-}
-
-CMPINLINE bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const FXMVECTOR sphere_centre, const FXMVECTOR sphere_radiussq) const
-{
-	// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
-	// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
-	//D3DXVECTOR3 diff = (ray.Origin - sphere_centre);
-	//float a0 = ((diff.x*diff.x) + (diff.y*diff.y) + (diff.z*diff.z)) - sphere_radiussq;				// Expanded "D3DXVec3Dot(&diff, &diff)"
-	XMVECTOR diff = XMVectorSubtract(ray.Origin, sphere_centre);
-	XMVECTOR a0 = XMVectorSubtract(XMVector3Dot(diff, diff), sphere_radiussq);
-
-	// If a0 is <= 0 then the ray began inside the sphere, so we can return true immediately
-	//if (a0 <= 0.0f) return true;
-	if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return true;
-
-	// Project object difference vector onto the ray
-	//float a1 = ((ray.Direction.x*diff.x) + (ray.Direction.y*diff.y) + (ray.Direction.z*diff.z));	// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
-	//if (a1 >= 0.0f) return false;
-	XMVECTOR a1 = XMVector3Dot(ray.Direction, diff);
-	if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) return false;
-
-	// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
-	// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
-	//return (((a1 * a1) - a0) >= 0.0f);
-	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
-}
-
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
 // partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
 template <typename T>
@@ -431,6 +380,7 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 	T *closest = NULL;
 	XMVECTOR diff, dsq, a0, a1;
 	XMVECTOR closest_dsq = XMVectorReplicate(FLT_MAX);
+	static const AXMVECTOR nullvec = XMVectorZero();
 
 	// Loop through each object in turn
 	int n = (int)objects.size();
@@ -451,16 +401,16 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 		a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));	// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
 
 		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
-		if (XMVector2LessOrEqual(a0, NULL_VECTOR)) return obj;
+		if (XMVector2LessOrEqual(a0, nullvec)) return obj;
 
 		// Project object difference vector onto the ray
 		a1 = XMVector3Dot(ray.Direction, diff);												// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
-		if (XMVector2GreaterOrEqual(a1, NULL_VECTOR)) continue;
-
+		if (XMVector2GreaterOrEqual(a1, nullvec)) continue;
+		
 		// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
 		// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
 		// if (((a1 * a1) - a0) >= 0.0f)
-		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR))
+		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), nullvec))
 		{
 			// Test whether this intersection is closer than our current best, and record it if so
 			//if (dsq < closest_dsq)

@@ -10,6 +10,8 @@
 class Render2DGroup;
 class TextBlock;
 
+
+// This class has no special alignment requirements
 class MultiLineTextBlock : public iUIComponent
 {
 public:
@@ -25,7 +27,7 @@ public:
 
 	// Initialise the component and set up all resources
 	Result										Initialise(	Render2DGroup *parent, std::string code, MultiLineTextBlock::OperationMode mode, INTVECTOR2 location, float z,
-															INTVECTOR2 size, int linecount, int maxlinelength, int font, float fontsize, D3DXVECTOR4 col, bool render);
+															INTVECTOR2 size, int linecount, int maxlinelength, int font, float fontsize, XMFLOAT4 col, bool render);
 
 	// Methods to set/retrieve the string code
 	CMPINLINE std::string						GetCode(void) { return m_code; }
@@ -51,10 +53,10 @@ public:
 	const std::string &							GetText(int line);
 
 	// Set the text colour for a particular line of this component
-	void										SetColour(int line_number, const D3DXVECTOR4 & colour);
+	void										SetColour(int line_number, const XMFLOAT4 & colour);
 
 	// Set the text colour for all lines of this component
-	void										SetColour(const D3DXVECTOR4 & colour);
+	void										SetColour(const XMFLOAT4 & colour);
 
 	// Get or set the position of the multi-line text block, updating all child components as necessary
 	CMPINLINE INTVECTOR2						GetPosition(void) const { return m_location; }
@@ -103,7 +105,7 @@ protected:
 	std::string::size_type						m_maxlinelength;
 	int											m_font;
 	float										m_fontsize;
-	D3DXVECTOR4									m_colour;
+	XMFLOAT4									m_colour;
 	Image2D *									m_back;
 
 };

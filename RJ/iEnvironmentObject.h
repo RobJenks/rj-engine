@@ -14,6 +14,9 @@ class iEnvironmentObject : public ALIGN16<iEnvironmentObject>, public iActiveObj
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(iEnvironmentObject)
+
 	// Default constructor; initialise fields to default values
 	iEnvironmentObject(void) : m_parent(NULL), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_orientchanges(0),
 								m_parent_element_min(INTVECTOR3(1, 1, 1)), m_parent_element_max(INTVECTOR3(-1, -1, -1)),

@@ -37,19 +37,19 @@ public:
 	}
 
 	// Transforms the ray into a different coordinate system
-	void TransformIntoCoordinateSystem(const FXMVECTOR origin, const XMVECTOR(&bases)[3])
+	void TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_P(&bases)[3])
 	{
 		XMVECTOR diff = XMVectorSubtract(Origin, origin);
 		
 		// Transform the ray origin
-		Origin = XMVectorSet(	XMVectorGetX(XMVector3Dot(diff, bases[0])),
-								XMVectorGetX(XMVector3Dot(diff, bases[1])),
-								XMVectorGetX(XMVector3Dot(diff, bases[2])), 0.0f);
+		Origin = XMVectorSet(	XMVectorGetX(XMVector3Dot(diff, bases[0].value)),
+								XMVectorGetX(XMVector3Dot(diff, bases[1].value)),
+								XMVectorGetX(XMVector3Dot(diff, bases[2].value)), 0.0f);
 
 		// Transform the ray direction
-		Direction = XMVectorSet(XMVectorGetX(XMVector3Dot(Direction, bases[0])),
-								XMVectorGetX(XMVector3Dot(Direction, bases[1])),
-								XMVectorGetX(XMVector3Dot(Direction, bases[2])), 0.0f);
+		Direction = XMVectorSet(XMVectorGetX(XMVector3Dot(Direction, bases[0].value)),
+								XMVectorGetX(XMVector3Dot(Direction, bases[1].value)),
+								XMVectorGetX(XMVector3Dot(Direction, bases[2].value)), 0.0f);
 			
 		// Recalculate derived fields
 		InvDirection = XMVectorReciprocal(Direction);

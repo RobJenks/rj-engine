@@ -23,6 +23,9 @@ __declspec(align(16))
 class ComplexShipSection : public ALIGN16<ComplexShipSection>, public iSpaceObject
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(ComplexShipSection)
 	
 	// Default constructor / destructor
 	ComplexShipSection(void);
@@ -72,7 +75,7 @@ public:
 	CMPINLINE void								RefreshPositionImmediate(void) { }
 
 	CMPINLINE XMMATRIX							GetSectionOffsetMatrix(void) { return m_sectionoffsetmatrix; }
-	CMPINLINE void								SetSectionOffsetMatrix(FXMMATRIX m) { m_sectionoffsetmatrix = m; } 
+	CMPINLINE void	XM_CALLCONV 				SetSectionOffsetMatrix(FXMMATRIX m) { m_sectionoffsetmatrix = m; }
 
 	CMPINLINE INTVECTOR3 						GetElementLocation(void)			{ return m_elementlocation; }
 	CMPINLINE void								SetElementLocation(INTVECTOR3 loc)	{ m_elementlocation = loc; } 

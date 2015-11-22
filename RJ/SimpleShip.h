@@ -17,6 +17,9 @@ class SimpleShip : public ALIGN16<SimpleShip>, public Ship
 
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(SimpleShip)
+
 	// Default constructor & destructor
 	SimpleShip(void);
 	~SimpleShip(void);

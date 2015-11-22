@@ -2,7 +2,6 @@
 #include <string>
 using namespace std;
 
-#include "D3DUtility.h"
 #include "GameDataExtern.h"
 #include "FastMath.h"
 #include "Utility.h"

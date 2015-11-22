@@ -22,7 +22,7 @@ void FontShader::Shutdown(void)
 }
 
 
-Result FontShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, 
+Result XM_CALLCONV FontShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								XMFLOAT4 pixelColor)
 {
@@ -274,7 +274,7 @@ void FontShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, c
 	errorMessage = 0;
 }
 
-Result FontShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV FontShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 											   const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 											   XMFLOAT4 pixelColor)
 {

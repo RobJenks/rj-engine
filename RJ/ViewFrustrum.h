@@ -33,10 +33,10 @@ public:
 	~ViewFrustrum(void);
 
 	// Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
-	Result Initialise(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
+	Result XM_CALLCONV Initialise(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
 
 	// Builds a new frustrum for the current frame
-	void ConstructFrustrum(const FXMMATRIX view, const CXMMATRIX invview);
+	void XM_CALLCONV ConstructFrustrum(const FXMMATRIX view, const CXMMATRIX invview);
 
 	CMPINLINE float			GetFOV(void) const				{ return m_fov; }
 	CMPINLINE float			GetTanOfHalfFOV(void) const		{ return m_fovtan; }
@@ -85,7 +85,7 @@ public:
 	bool CheckOBB(const OrientedBoundingBox & obb);
 
 	bool CheckRectangle(float x, float y, float z, float xsize, float ysize, float zsize);
-	bool CheckRectangle(const FXMMATRIX world, float xsize, float ysize, float zsize);
+	bool XM_CALLCONV CheckRectangle(const FXMMATRIX world, float xsize, float ysize, float zsize);
 
 	bool CheckBoundingObject(const FXMVECTOR pos, const CXMMATRIX world, BoundingObject *obj);
 

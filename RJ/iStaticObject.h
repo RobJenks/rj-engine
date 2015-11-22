@@ -13,6 +13,9 @@ class iStaticObject : public ALIGN16<iStaticObject>, public iObject
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(iStaticObject)
+
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate.  Nothing to do at this point.
 	void										SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate) { }
 

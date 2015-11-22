@@ -41,7 +41,7 @@ public:
 
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 
-	Result Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, 
+	Result XM_CALLCONV Initialise(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd,
 					  int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix);
 
 	void Render(void);

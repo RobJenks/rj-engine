@@ -27,7 +27,7 @@ ViewFrustrum::ViewFrustrum(void)
 }
 
 // Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
-Result ViewFrustrum::Initialise(const FXMMATRIX projection, const float depth, const float FOV, const float aspect)
+Result XM_CALLCONV ViewFrustrum::Initialise(const FXMMATRIX projection, const float depth, const float FOV, const float aspect)
 {
 	// Record the key values within this class 
 	m_projection = projection;
@@ -51,7 +51,7 @@ Result ViewFrustrum::Initialise(const FXMMATRIX projection, const float depth, c
 	return ErrorCodes::NoError;
 }
 
-void ViewFrustrum::ConstructFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
+void XM_CALLCONV ViewFrustrum::ConstructFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
 {
 	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix
 	XMFLOAT4X4 matrix;
@@ -150,7 +150,7 @@ bool ViewFrustrum::CheckRectangle(float xCenter, float yCenter, float zCenter, f
 	return CheckRectangleVertices();
 }
 
-bool ViewFrustrum::CheckRectangle(const FXMMATRIX world, float xsize, float ysize, float zsize)
+bool XM_CALLCONV ViewFrustrum::CheckRectangle(const FXMMATRIX world, float xsize, float ysize, float zsize)
 {
 	// Calculate each plane of this rectangle relative to the origin, in model space, then transform into world space
 	m_working_cuboidvertices[0].value = XMVector2TransformCoord(XMVectorSet(-xsize, -ysize, -zsize, 0.0f), world);

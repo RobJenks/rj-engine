@@ -223,7 +223,7 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	// Calculate the total dust particle count as a function of region size.  Multiply by 8 as is (2x2x2) which accounts
 	// for the fact that the maxbounds extend in +ve and -ve direction.  e.g. 3^3 = 27, 6^6 = 216, 216/27 = 8 = 2^3
 	// NOTE we ignore the minbounds as this should always be zero for the immediate area
-	dustcount = (int)ceil( m_maxbounds.x * m_maxbounds.y * m_maxbounds.z * 8.0f * dustdensity );
+	dustcount = (int)ceil( m_maxboundsf.x * m_maxboundsf.y * m_maxboundsf.z * 8.0f * dustdensity );
 
 	// Ensure the parameters remain in a valid range
 	dustcount = max(0, dustcount);
@@ -233,20 +233,20 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	if (dustcount > m_dustcapacity)
 	{
 		// Attempt to allocate new memory.  Always go for twice as much as required now, to avoid some future repeats
-		DustParticle *dust				= new (nothrow) DustParticle		[dustcount * 2];
-		ParticleVertexData *vertices	= new (nothrow) ParticleVertexData	[dustcount * 2 * 6];
+		DustParticle *dust				= new DustParticle			[dustcount * 2];
+		ParticleVertexData *vertices	= new ParticleVertexData	[dustcount * 2 * 6];
 
 		// If either allocation failed then attempt to recover the memory and return; no change will have been made
-		if (!dust)		{ if (vertices) delete[] vertices; return; }
-		if (!vertices)	{ if (dust) delete[] dust; return; }
+		if (!dust)		{ if (vertices) SafeDeleteArray(vertices); return; }
+		if (!vertices)	{ if (dust)		SafeDeleteArray(dust); return; }
 
 		// Copy memory into the new allocations
 		memcpy(dust, m_dust, sizeof(DustParticle) * m_dustcount);
 		memcpy(vertices, m_vertices, sizeof(ParticleVertexData) * m_dustcount * 6);
 
 		// Now free the existing memory 
-		delete[] m_dust; m_dust = NULL;
-		delete[] m_vertices; m_vertices = NULL;
+		SafeDelete(m_dust);
+		SafeDelete(m_vertices);
 
 		// Set pointers to reference the newly-allocated memory
 		m_dust = dust;
@@ -261,7 +261,7 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	m_dustdensity = dustdensity;
 }
 
-void ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
 {
 	// Render all dust particles to the vertex buffer
 	RenderDustParticles(devicecontext, view);
@@ -270,7 +270,7 @@ void ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX
 	RenderBuffers(devicecontext);
 }
 
-void ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -310,7 +310,7 @@ void ImmediateRegion::RenderBuffers(ID3D11DeviceContext *devicecontext)
     devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
 {
 	// Transpose the input view matrix since we want to retrieve columns of data (and have direct vector access to rows)
 	XMMATRIX viewT = XMMatrixTranspose(view);

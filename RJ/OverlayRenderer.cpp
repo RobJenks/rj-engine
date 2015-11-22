@@ -143,14 +143,14 @@ void OverlayRenderer::SetNodeSpinSpeed(float speed)
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
-void OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
+void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
 {
 	// Add a request to the core engine to render this line
 	Game::Engine->RenderModel(m_models[(int)colour], world);
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
-void OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness)
+void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness)
 {
 	// Scale the current world matrix and pass it to the engine rendering method
 	XMMATRIX mworld = XMMatrixMultiply(XMMatrixScaling(thickness, thickness, length), world);
@@ -195,7 +195,7 @@ void OverlayRenderer::DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVE
 
 // Method to render a box at the specified location.  World matrix specifies transforming to the target location/orientation.  Size/thickness
 // are used to derive the scaling matrix
-void OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize)
+void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize)
 {
 	XMMATRIX mfinal, scale, trans, scale_x_rot;
 
@@ -307,7 +307,7 @@ void OverlayRenderer::RenderBoxAtRelativeElementLocation(iSpaceObject* ship, con
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
-void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize)
+void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -322,7 +322,7 @@ void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::Rende
 }
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.
-void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size)
+void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -337,7 +337,7 @@ void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::Rende
 
 // Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes alpha blending.
 // Therefore also requires the position to be provided for efficient depth-sorting
-void OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position)
+void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position)
 {
 	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
 	// D3DXMatrixScaling(&mscale, xSize, ySize, zSize);
@@ -461,7 +461,7 @@ void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive,
 }
 
 // Method to add a node for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Spins in place.
-void OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
+void XM_CALLCONV OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
 {
 	// Determine the rotation matrix to be used based on current clock time
 	XMMATRIX mrot = XMMatrixRotationY((Game::ClockMs % 1000) * m_nodespinradians);

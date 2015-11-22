@@ -21,6 +21,10 @@ __declspec(align(16))
 class ImmediateRegion : public ALIGN16<ImmediateRegion>, public RegionBase
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(ImmediateRegion)
+
 	typedef UINT16 INDEXFORMAT;	
 
 	struct ParticleVertexData
@@ -107,13 +111,13 @@ public:
 							GetParticleTextureResource(void) { return m_texture->GetTexture(); }
 
 	// Prepares the vertex buffers by filling in the render-time data (positon of vertices 1-5)
-	void					PrepareVertexBuffers(const FXMMATRIX view);
+	void XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
 
 	// Method to render the everything in the region
-	void					Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void XM_CALLCONV 		Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
 
 	// Render each component of the region to the vertex buffer
-	void					RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void XM_CALLCONV 		RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
 
 	// Methods to initialise and release the vertex/index buffers
 	Result					InitialiseBuffers(ID3D11Device* device);

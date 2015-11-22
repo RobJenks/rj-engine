@@ -12,6 +12,8 @@ class DustParticle : public ALIGN16<DustParticle>, public ParticleBase
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(DustParticle)
 
 	DustParticle(void);
 	~DustParticle(void);

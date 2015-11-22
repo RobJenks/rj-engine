@@ -13,6 +13,7 @@ using namespace std;
 #define DEBUG_LOGINSTANCECREATION
 
 
+// Class has no special alignment requirements
 class TextBlock : public iUIComponent
 {
 public:
@@ -29,7 +30,7 @@ public:
 	void SetText(const char *text, float size);
 
 	// Method to peform a full update of the text block
-	void UpdateTextBlock(const char *text, int positionX, int positionY, bool render, D3DXVECTOR4 textcolour, float size);
+	void UpdateTextBlock(const char *text, int positionX, int positionY, bool render, XMFLOAT4 textcolour, float size);
 
 	// Methods to change the render state of the textblock
 	void SetRenderActive(bool render);
@@ -41,7 +42,7 @@ public:
 	void SetPosition(const INTVECTOR2 & pos);
 
 	// Sets the colour of the text in this block
-	void SetColour(const D3DXVECTOR4 & colour);
+	void SetColour(const XMFLOAT4 & colour);
 
 	// Methods to set/retrieve text block properties
 	CMPINLINE string	GetCode(void) { return m_code; }
@@ -50,7 +51,7 @@ public:
 	CMPINLINE float		GetSize(void) { return m_size; }
 	const std::string &	GetText(void);
 	INTVECTOR2			GetPosition(void);
-	D3DXVECTOR4			GetTextColour(void);
+	XMFLOAT4			GetTextColour(void);
 	float				GetTextWidth(void);
 	float				GetTextHeight(void);
 	

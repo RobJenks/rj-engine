@@ -73,6 +73,12 @@ void OrientedBoundingBox::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
 	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	  // -x, +y, +z	(End face #2)
 }
 
+// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
+void OrientedBoundingBox::UpdateExtentFromSize(const FXMVECTOR size)
+{
+	UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
+}
+
 // Allocates space for new child OBBs below this one
 void OrientedBoundingBox::AllocateChildren(int children)
 {

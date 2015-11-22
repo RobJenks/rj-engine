@@ -16,6 +16,7 @@ class GameInputDevice;
 using namespace std;
 
 
+// This class has no special alignment requirements
 class UIComboBox : public iUIControl
 {
 public:

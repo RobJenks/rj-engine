@@ -22,7 +22,10 @@ __declspec(align(16))
 class ComplexShip : public ALIGN16<ComplexShip>, public iSpaceObjectEnvironment
 {
 public:
-	
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(ComplexShip)
+
 	// Typedefs for this object
 	typedef std::vector<ComplexShipSection*>			ComplexShipSectionCollection;
 	typedef std::vector<CapitalShipPerimeterBeacon*>	PerimeterBeaconCollection;

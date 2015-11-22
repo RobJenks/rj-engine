@@ -35,6 +35,9 @@ class Ship : public ALIGN16<Ship>, public iSpaceObject, public iConsumesOrders, 
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(Ship)
+
 	// Get or set the ship class value
 	CMPINLINE Ships::Class				GetShipClass(void) const		{ return m_shipclass; }
 	CMPINLINE void						SetShipClass(Ships::Class cls)	{ m_shipclass = cls; }

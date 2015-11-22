@@ -21,10 +21,10 @@ struct					RM_InstanceStructure
 	XMVECTOR			Params;								// Float-4 of parameters that can be passed for each instance
 
 	// Constructor where only the world transform is required; other params will be unitialised (for efficiency) and should not be used
-	RM_InstanceStructure(const FXMMATRIX world) : World(world) {}
+	RM_InstanceStructure(const CXMMATRIX world) : World(world) {}
 
 	// Constructor including additional per-instance parameters
-	RM_InstanceStructure(const FXMMATRIX world, const FXMVECTOR params) : World(world), Params(params) {}
+	RM_InstanceStructure(const CXMMATRIX world, const CXMVECTOR params) : World(world), Params(params) {}
 
 	// Empty constructor
 	RM_InstanceStructure(void) { }
@@ -57,7 +57,7 @@ struct							RM_ZSortedInstance
 
 	bool operator<(const RM_ZSortedInstance & val) const	{ return (Key < val.Key); }
 
-	RM_ZSortedInstance(int key, ModelBuffer *model, const FXMMATRIX world, const FXMVECTOR params) : 
+	RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world, const CXMVECTOR params) : 
 		Key(key), ModelPtr(model), Item(RM_Instance(world, params)) {}
 };
 

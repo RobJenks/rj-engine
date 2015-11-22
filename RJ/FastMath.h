@@ -10,13 +10,13 @@
 #include "GameVarsExtern.h"
 #include "CompilerSettings.h"
 
-static const float PI = 3.14159265358979f;
-static const float PIBY180 = 0.0174532925199433f;
-static const float _180BYPI = 57.2957795130823208f;
-static const float TWOPI = PI*2.0f;
-static const float PIOVER2 = PI / 2.0f;
-static const float ROOT2 = 1.414213562f;
-static const float ONE_BY_ROOT2 = 1.0f / ROOT2;
+extern const float PI;
+extern const float PIBY180;
+extern const float _180BYPI;
+extern const float TWOPI;
+extern const float PIOVER2;
+extern const float ROOT2;
+extern const float ONE_BY_ROOT2;
 
 #define DegToRad(x) ((x)*PIBY180)
 #define RadToDeg(x) ((x)*_180BYPI)
@@ -25,55 +25,61 @@ static const float ONE_BY_ROOT2 = 1.0f / ROOT2;
 #define DOT_3D(v0, v1) ((v0.x*v1.x) + (v0.y*v1.y) + (v0.z*v1.z))
 #define DOTPERP_2D(v0, v1) ((v0.x*v1.y) + (v0.y*-v1.x))				// DotPerp(v0,v1) == Dot(v0, Perp(v1)), where Perp(u,v) == (v, -u).  [v1.x=v1.y, v1.y=-v1.x]
 
-static const INTVECTOR2 NULL_INTVECTOR2 = INTVECTOR2(0, 0);
-static const INTVECTOR3 NULL_INTVECTOR3 = INTVECTOR3(0, 0, 0);
-static const XMVECTOR NULL_VECTOR = XMVectorZero(); 
-static const XMVECTOR NULL_VECTOR2 = XMVectorZero();
-static const XMVECTOR NULL_VECTOR3 = XMVectorZero();
-static const XMVECTOR NULL_VECTOR4 = XMVectorZero();
-static const XMVECTOR ZERO_VECTOR = XMVectorZero();
-static const XMVECTOR HALF_VECTOR_P = XMVectorReplicate(0.5f);
-static const XMVECTOR HALF_VECTOR_N = XMVectorNegate(HALF_VECTOR_P);
-static const XMVECTOR HALF_VECTOR = HALF_VECTOR_P;
-static const XMVECTOR ONE_VECTOR_P = XMVectorReplicate(1.0f);
-static const XMVECTOR ONE_VECTOR_N = XMVectorReplicate(-1.0f);
-static const XMVECTOR ONE_VECTOR = ONE_VECTOR;
-static const XMVECTOR LARGE_VECTOR_P = XMVectorReplicate(1e15f);
-static const XMVECTOR LARGE_VECTOR_N = XMVectorReplicate(-1e15f);
-static const XMVECTOR RAND_MAX_V = XMVectorReplicate(RAND_MAX);
-static const XMFLOAT2 NULL_FLOAT2 = XMFLOAT2(0.0f, 0.0f);
-static const XMFLOAT3 NULL_FLOAT3 = XMFLOAT3(0.0f, 0.0f, 0.0f);
-static const XMFLOAT4 NULL_FLOAT4 = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
-static const XMVECTOR BASIS_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-static const XMVECTOR BASIS_VECTOR_NEGZ = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
-static const XMVECTOR BASIS_VECTOR2 = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-static const XMVECTOR BASIS_VECTOR2_NEGY = XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f);
-static const XMVECTOR UP_VECTOR = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-static const XMVECTOR RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-static const XMVECTOR FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-static const XMVECTOR ID_QUATERNION = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-static const XMFLOAT4 ID_QUATERNIONF = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
-static const XMMATRIX NULL_MATRIX = XMMatrixSet( 0.0f, 0.0f, 0.0f, 0.0f, 
-												 0.0f, 0.0f, 0.0f, 0.0f,
-												 0.0f, 0.0f, 0.0f, 0.0f, 
-												 0.0f, 0.0f, 0.0f, 0.0f);
-static const XMMATRIX ID_MATRIX = XMMatrixSet(	 1.0f, 0.0f, 0.0f, 0.0f,
-												 0.0f, 1.0f, 0.0f, 0.0f,
-												 0.0f, 0.0f, 1.0f, 0.0f, 
-												 0.0f, 0.0f, 0.0f, 1.0f);
-static const XMMATRIX ELEMENT_SCALE_MATRIX = XMMatrixSet(	Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f, 0.0f,
-															0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f, 0.0f,
-															0.0f, 0.0f, Game::C_CS_ELEMENT_SCALE, 0.0f,
-															0.0f, 0.0f, 0.0f, 1.0f);
+extern const INTVECTOR2 NULL_INTVECTOR2;
+extern const INTVECTOR3 NULL_INTVECTOR3;
+extern const XMVECTOR NULL_VECTOR;
+extern const XMVECTOR NULL_VECTOR2;
+extern const XMVECTOR NULL_VECTOR3;
+extern const XMVECTOR NULL_VECTOR4;
+extern const XMVECTOR ZERO_VECTOR;
+extern const XMVECTOR HALF_VECTOR_P;
+extern const XMVECTOR HALF_VECTOR_N;
+extern const XMVECTOR HALF_VECTOR;
+extern const XMVECTOR ONE_VECTOR_P;
+extern const XMVECTOR ONE_VECTOR_N;
+extern const XMVECTOR ONE_VECTOR;
+extern const XMVECTOR LARGE_VECTOR_P;
+extern const XMVECTOR LARGE_VECTOR_N;
+extern const XMVECTOR RAND_MAX_V;
 
-static const XMFLOAT4X4 ID_MATRIX_F = XMFLOAT4X4(	1.0f, 0.0f, 0.0f, 0.0f,
-													0.0f, 1.0f, 0.0f, 0.0f,
-													0.0f, 0.0f, 1.0f, 0.0f,
-													0.0f, 0.0f, 0.0f, 1.0f);
+extern const XMFLOAT2 NULL_FLOAT2;
+extern const XMFLOAT3 NULL_FLOAT3;
+extern const XMFLOAT4 NULL_FLOAT4;
 
+extern const XMVECTOR BASIS_VECTOR;
+extern const XMVECTOR BASIS_VECTOR_NEGZ;
+extern const XMVECTOR BASIS_VECTOR2;
+extern const XMVECTOR BASIS_VECTOR2_NEGY;
+extern const XMVECTOR UP_VECTOR;
+extern const XMVECTOR RIGHT_VECTOR;
+extern const XMVECTOR FORWARD_VECTOR;
 
-static const float SIN_ZERO = sinf(0.0f);
-static const float COS_ZERO = cosf(0.0f);
+extern const XMVECTOR ID_QUATERNION;
+extern const XMFLOAT4 ID_QUATERNIONF;
+extern const XMMATRIX NULL_MATRIX;
+extern const XMMATRIX ID_MATRIX;
+extern const XMMATRIX ELEMENT_SCALE_MATRIX;
+extern const XMFLOAT4X4 ID_MATRIX_F;
+
+extern const float SIN_ZERO;
+extern const float COS_ZERO;
+
+extern const AXMVECTOR VCTRL_0000;
+extern const AXMVECTOR VCTRL_0001;
+extern const AXMVECTOR VCTRL_0010;
+extern const AXMVECTOR VCTRL_0011;
+extern const AXMVECTOR VCTRL_0100;
+extern const AXMVECTOR VCTRL_0101;
+extern const AXMVECTOR VCTRL_0110;
+extern const AXMVECTOR VCTRL_0111;
+extern const AXMVECTOR VCTRL_1000;
+extern const AXMVECTOR VCTRL_1001;
+extern const AXMVECTOR VCTRL_1010;
+extern const AXMVECTOR VCTRL_1011;
+extern const AXMVECTOR VCTRL_1100;
+extern const AXMVECTOR VCTRL_1101;
+extern const AXMVECTOR VCTRL_1110;
+extern const AXMVECTOR VCTRL_1111;
 
 // Random number generation functions
 // TODO: Replace with better-optimised versions?
@@ -91,15 +97,12 @@ XMVECTOR			ScaleVector3ToMagnitude(FXMVECTOR vec, float magnitude);
 void				ScaleVector3ToMagnitude(XMFLOAT3 & vec, float magnitude);
 XMVECTOR			ScaleVector3WithinMagnitudeLimit(FXMVECTOR vec, float magnitude);
 void				ScaleVector3WithinMagnitudeLimit(XMFLOAT3 &vec, float magnitude);
-CMPINLINE bool		IsZeroVector2(const FXMVECTOR vec) { return XMVector2NearEqual(vec, NULL_VECTOR2, Game::C_EPSILON_V); }
-CMPINLINE bool		IsZeroVector3(const FXMVECTOR vec) { return XMVector3NearEqual(vec, NULL_VECTOR3, Game::C_EPSILON_V); }
-CMPINLINE bool		IsZeroVector4(const FXMVECTOR vec) { return XMVector4NearEqual(vec, NULL_VECTOR4, Game::C_EPSILON_V); }
-CMPINLINE bool		IsZeroQuaternion(const FXMVECTOR q) { return XMVector4NearEqual(q, NULL_VECTOR4, Game::C_EPSILON_V); }
-CMPINLINE bool		IsIDQuaternion(const FXMVECTOR q) { return XMVector4NearEqual(q, ID_QUATERNION, Game::C_EPSILON_V); }
-CMPINLINE bool		IsFiniteVector2(const FXMVECTOR vec) { return XMVector2Equal(vec, vec); }
-CMPINLINE bool		IsFiniteVector3(const FXMVECTOR vec) { return XMVector3Equal(vec, vec); }
-CMPINLINE bool		IsFiniteVector4(const FXMVECTOR vec) { return XMVector4Equal(vec, vec); }
-CMPINLINE bool		IsFiniteQuaternion(const FXMVECTOR q) { return XMVector4Equal(q, q); }
+bool				IsZeroVector2(const FXMVECTOR vec);
+bool				IsZeroVector3(const FXMVECTOR vec);
+bool				IsZeroVector4(const FXMVECTOR vec);
+bool				IsZeroQuaternion(const FXMVECTOR q);
+bool				IsIDQuaternion(const FXMVECTOR q);
+
 void				Clamp (float &v, float min, float max);
 float				Clamp (float v, float min, float max);
 XMVECTOR			FloorVector(FXMVECTOR vec, float low);
@@ -138,14 +141,8 @@ XMVECTOR			Vector2Random(const FXMVECTOR vmin, const FXMVECTOR vmax);
 XMVECTOR			Vector3Random(const FXMVECTOR vmin, const FXMVECTOR vmax);
 XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax);
 
-CMPINLINE bool		Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
-{
-	return (fabs(v1.x - v2.x) < Game::C_EPSILON && fabs(v1.y - v2.y) < Game::C_EPSILON && fabs(v1.z - v2.z) < Game::C_EPSILON);
-}
-CMPINLINE bool		IsZeroFloat3(const XMFLOAT3 &v) 
-{ 
-	return (fabs(v.x) < Game::C_EPSILON && fabs(v.y) < Game::C_EPSILON && fabs(v.z) < Game::C_EPSILON);
-}
+bool				Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2);
+bool				IsZeroFloat3(const XMFLOAT3 &v);
 
 CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
@@ -278,45 +275,19 @@ XMMATRIX GetRotationMatrix(Rotation90Degree rot);
 const XMFLOAT4X4 * GetRotationMatrixF(Rotation90Degree rot);
 XMFLOAT4X4 GetRotationMatrixInstance(Rotation90Degree rot);
 
-static const XMMATRIX ROT_MATRIX_0 = XMMatrixSet(1.000000, 0.000000, -0.000000, 0.000000, 
-												  0.000000, 1.000000, 0.000000, 0.000000, 
-												  0.000000, 0.000000, 1.000000, 0.000000, 
-												  0.000000, 0.000000, 0.000000, 1.000000  );
-static const XMMATRIX ROT_MATRIX_90 = XMMatrixSet(-0.000000, 0.000000, -1.000000, 0.000000,
-												   0.000000, 1.000000, 0.000000, 0.000000, 
-												   1.000000, 0.000000, -0.000000, 0.000000, 
-												   0.000000, 0.000000, 0.000000, 1.000000 );
-static const XMMATRIX ROT_MATRIX_180 = XMMatrixSet(-1.000000, 0.000000, 0.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000, 
-													-0.000000, 0.000000, -1.000000, 0.000000, 
-													0.000000, 0.000000, 0.000000, 1.000000 );
-static const XMMATRIX ROT_MATRIX_270 = XMMatrixSet(0.000000, 0.000000, 1.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000, 
-													-1.000000, 0.000000, 0.000000, 0.000000, 
-													0.000000, 0.000000, 0.000000, 1.000000 );
-static const XMFLOAT4X4 ROT_MATRIX_0_F = XMFLOAT4X4(1.000000, 0.000000, -0.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000,
-													0.000000, 0.000000, 1.000000, 0.000000,
-													0.000000, 0.000000, 0.000000, 1.000000);
-static const XMFLOAT4X4 ROT_MATRIX_90_F = XMFLOAT4X4(-0.000000, 0.000000, -1.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000,
-													1.000000, 0.000000, -0.000000, 0.000000,
-													0.000000, 0.000000, 0.000000, 1.000000);
-static const XMFLOAT4X4 ROT_MATRIX_180_F = XMFLOAT4X4(-1.000000, 0.000000, 0.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000,
-													-0.000000, 0.000000, -1.000000, 0.000000,
-													0.000000, 0.000000, 0.000000, 1.000000);
-static const XMFLOAT4X4 ROT_MATRIX_270_F = XMFLOAT4X4(0.000000, 0.000000, 1.000000, 0.000000,
-													0.000000, 1.000000, 0.000000, 0.000000,
-													-1.000000, 0.000000, 0.000000, 0.000000,
-													0.000000, 0.000000, 0.000000, 1.000000);
+extern const XMMATRIX ROT_MATRIX_0;
+extern const XMMATRIX ROT_MATRIX_90;
+extern const XMMATRIX ROT_MATRIX_180;
+extern const XMMATRIX ROT_MATRIX_270;
+extern const XMFLOAT4X4 ROT_MATRIX_0_F;
+extern const XMFLOAT4X4 ROT_MATRIX_90_F;
+extern const XMFLOAT4X4 ROT_MATRIX_180_F;
+extern const XMFLOAT4X4 ROT_MATRIX_270_F;
+extern const XMMATRIX* ROT_MATRICES[4];
+extern XMVECTOR ROT_QUATERNIONS[4];
 
-static const XMMATRIX* ROT_MATRICES[4] = { &ROT_MATRIX_0, &ROT_MATRIX_90, &ROT_MATRIX_180, &ROT_MATRIX_270 };
-static XMVECTOR ROT_QUATERNIONS[4];
-
-// Orthornormal unit basis vectors
-static const XMVECTOR UNIT_BASES[3] = { XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) };
-
+// Orthornormal unit basis vectors;
+extern const XMVECTOR UNIT_BASES[3];
 
 // Uses the Padé approximation to avoid sqrt, where the approximation holds, within a certain tolerance 
 // of the actual result.  If outside that tolerance then perform the sqrt to retain acceptable precision
@@ -403,64 +374,31 @@ XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
 }
 
 // Returns the squared diameter of a bounding sphere that completely encloses a cuboid with sides of length x/y/z
-CMPINLINE float DetermineCuboidBoundingSphereDiameterSq(const FXMVECTOR xyz)
-{
-	// Use Phythagorus; cube diameter will be the 3D diagonal across the cuboid; D^2 = (A^2 + B^2 + C^2)
-	//return ((xyz.x * xyz.x) + (xyz.y * xyz.y) + (xyz.z * xyz.z));
-	return XMVectorGetX(XMVector3LengthSq(xyz));
-}
+float DetermineCuboidBoundingSphereDiameterSq(const FXMVECTOR xyz);
 
 // Returns the diameter of a bounding sphere that completely encloses a cuboid with sides of length x/y/z
-CMPINLINE float DetermineCuboidBoundingSphereDiameter(const FXMVECTOR xyz)
-{
-	return sqrtf(DetermineCuboidBoundingSphereDiameterSq(xyz));
-}
+float DetermineCuboidBoundingSphereDiameter(const FXMVECTOR xyz);
 
 // Returns the squared radius of a bounding sphere that completely encloses a cuboid with sides of length x/y/z
-CMPINLINE float DetermineCuboidBoundingSphereRadiusSq(const FXMVECTOR xyz)
-{
-	// [d = 2r] > [d^2 = (2r)^2] > [d^2 = (2*r*2*r)] > [d^2 = 4(r^2)] > [r^2 = (d^2)/4]
-	return (DetermineCuboidBoundingSphereDiameterSq(xyz) * 0.25f);
-}
+float DetermineCuboidBoundingSphereRadiusSq(const FXMVECTOR xyz);
 
 // Returns the radius of a bounding sphere that completely encloses a cuboid with sides of length x/y/z
-CMPINLINE float DetermineCuboidBoundingSphereRadius(const FXMVECTOR xyz)
-{
-	return sqrtf(DetermineCuboidBoundingSphereRadiusSq(xyz));
-}
+float DetermineCuboidBoundingSphereRadius(const FXMVECTOR xyz);
 
 // Returns the squared diameter of a bounding sphere that completely encloses a cube with sides of the specified length
-CMPINLINE float DetermineCubeBoundingSphereDiameterSq(float cube_length)
-{
-	// Use shortcut to Pythagorus for efficiency; where A==B==C, D^2 = (A^2 + B^2 + C^2) >>> D^2 = 3(A^2)
-	cube_length *= cube_length;
-	return (cube_length + cube_length + cube_length);
-}
+float DetermineCubeBoundingSphereDiameterSq(float cube_length);
 
 // Returns the diameter of a bounding sphere that completely encloses a cube with sides of the specified length
-CMPINLINE float DetermineCubeBoundingSphereDiameter(float cube_length)
-{
-	return sqrt(DetermineCubeBoundingSphereDiameterSq(cube_length));
-}
+float DetermineCubeBoundingSphereDiameter(float cube_length);
 
 // Returns the squared radius of a bounding sphere that completely encloses a cube with sides of the specified length
-CMPINLINE float DetermineCubeBoundingSphereRadiusSq(float cube_length)
-{
-	// [d = 2r] > [d^2 = (2r)^2] > [d^2 = (2*r*2*r)] > [d^2 = 4(r^2)] > [r^2 = (d^2)/4]
-	return (DetermineCubeBoundingSphereDiameterSq(cube_length) * 0.25f);
-}
+float DetermineCubeBoundingSphereRadiusSq(float cube_length);
 
 // Returns the radius of a bounding sphere that completely encloses a cube with sides of the specified length
-CMPINLINE float DetermineCubeBoundingSphereRadius(float cube_length)
-{
-	return sqrtf(DetermineCubeBoundingSphereRadiusSq(cube_length));
-}
+float DetermineCubeBoundingSphereRadius(float cube_length);
 
 // Returns the radius of a bounding sphere that completely encloses a cube with sides of n ComplexShipElements in length
-CMPINLINE float DetermineElementBoundingSphereRadius(int n_elements)
-{
-	return DetermineCubeBoundingSphereRadius(((float)n_elements) * Game::C_CS_ELEMENT_SCALE);
-}
+float DetermineElementBoundingSphereRadius(int n_elements);
 
 // Returns the radius of a sphere completely bounding a cube with sides of n ComplexShipElements in length
 #define ELEMENT_BOUND_CACHE_SIZE 1000

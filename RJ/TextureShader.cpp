@@ -22,7 +22,7 @@ void TextureShader::Shutdown(void)
 }
 
 
-Result TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, 
+Result XM_CALLCONV TextureShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	// Make sure we have valid shader input
@@ -253,7 +253,7 @@ void TextureShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd
 	errorMessage = 0;
 }
 
-Result TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV TextureShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 											   const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;

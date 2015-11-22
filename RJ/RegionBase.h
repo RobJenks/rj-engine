@@ -15,13 +15,6 @@ public:
 	RegionBase(void);
 	~RegionBase(void);
 
-	// Initialisation method - not currently specified as part of the interface, since each region will require very different data
-
-	/*virtual Result					Initialise(const D3DXVECTOR3 & centre, 
-										const D3DXVECTOR3 & minbounds, 
-										const D3DXVECTOR3 & maxbounds, 
-										const D3DXVECTOR3 & updatethreshold)		= 0;*/
-
 	// Method to move the region to a new centre point; performs the logic to determine whether any updates are necessary
 	virtual void					MoveRegion(const FXMVECTOR centre)					= 0;
 
@@ -35,12 +28,22 @@ public:
 	CMPINLINE XMVECTOR				GetRegionCentre(void) { return m_centre; }
 
 	// Minimum bounds of the region
-	CMPINLINE XMVECTOR				GetMinBounds(void) { return m_minbounds; }
-	CMPINLINE void					SetMinBounds(const FXMVECTOR min) { m_minbounds = min; }
+	CMPINLINE XMVECTOR				GetMinBounds(void) const { return m_minbounds; }
+	CMPINLINE XMFLOAT3				GetMinBoundsF(void) const { return m_minboundsf; }
+	CMPINLINE void					SetMinBounds(const FXMVECTOR min) 
+	{ 
+		m_minbounds = min; 
+		XMStoreFloat3(&m_minboundsf, m_minbounds);
+	}
 
 	// Maximum bounds of the region
-	CMPINLINE XMVECTOR				GetMaxBounds(void) { return m_maxbounds; }
-	CMPINLINE void					SetMaxBounds(const FXMVECTOR max) { m_maxbounds = max; }
+	CMPINLINE XMVECTOR				GetMaxBounds(void) const { return m_maxbounds; }
+	CMPINLINE XMFLOAT3				GetMaxBoundsF(void) const { return m_maxboundsf; }
+	CMPINLINE void					SetMaxBounds(const FXMVECTOR max) 
+	{ 
+		m_maxbounds = max; 
+		XMStoreFloat3(&m_maxboundsf, m_maxbounds);
+	}
 
 	// Region update threshold in each dimension
 	CMPINLINE XMVECTOR				GetUpdateThreshold(void) { return m_threshold; }
@@ -63,6 +66,8 @@ protected:
 	AXMVECTOR						m_prevcentre;			// Previous centre point; to calculate whether an update is required
 	AXMVECTOR						m_boundary;				// The boundary region requiring update, following each calculation cycle
 
+	XMFLOAT3						m_minboundsf;			// Local float representation of key field for convenience
+	XMFLOAT3						m_maxboundsf;			// Local float representation of key field for convenience
 
 };
 

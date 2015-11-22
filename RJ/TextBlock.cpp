@@ -67,13 +67,13 @@ void TextBlock::SetText(const char *text, float size)
 }
 
 // Sets the colour of the text in this block
-void TextBlock::SetColour(const D3DXVECTOR4 & colour)
+void TextBlock::SetColour(const XMFLOAT4 & colour)
 {
 	m_textmanager->SetSentenceColour(m_sentence, colour);
 }
 
 // Performs a full update of the text block, including characteristics such as position, size and colour
-void TextBlock::UpdateTextBlock(const char *text, int positionX, int positionY, bool render, D3DXVECTOR4 textcolour, float size)
+void TextBlock::UpdateTextBlock(const char *text, int positionX, int positionY, bool render, XMFLOAT4 textcolour, float size)
 {
 	// Store this text and text size in the local string buffer
 	SetText(text, size);
@@ -125,7 +125,7 @@ INTVECTOR2 TextBlock::GetPosition(void)
 	return (INTVECTOR2(m_sentence->x, m_sentence->y));
 }
 
-D3DXVECTOR4	TextBlock::GetTextColour(void)
+XMFLOAT4	TextBlock::GetTextColour(void)
 {
 	return m_sentence->colour;
 }

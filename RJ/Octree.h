@@ -22,11 +22,16 @@ template <class Octree> class MemoryPool;
 #define OCTREE_SW_DOWN		7
 
 // Cannot be set as 16-bit aligned here due to the template specification.  Instead, all members requiring alignment
-// are declared with __declspec(align(16)) within the class members below
+// are declared with __declspec(align(16)) within the class members below.  We also still inherit from
+// the ALIGN16 base class to override new/delete operators and ensure correct heap allocation alignment
 template <typename T> 
-class Octree
+class Octree : public ALIGN16<Octree<T>>
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	// This also ensures that heap allocations of the templated class by e.g. MemoryPool objects are correctly aligned
+	USE_ALIGN16_ALLOCATORS(Octree<T>)
 
 	// The eight children of a node can also be specified via 8-bit bitstring
 	enum CHILD_FLAG
@@ -54,7 +59,7 @@ public:
 
 	// Constructor for the root node.  Params  specifies the position, and length of each edge of the covered area.  
 	// 'areasize' must be a power of 2 (TBC)
-	Octree(D3DXVECTOR3 position, float areasize);
+	Octree(FXMVECTOR position, float areasize);
 
 	// Default constructor; used for creating nodes that will ultimately be initialised as non-root nodes
 	Octree(void);
@@ -63,7 +68,7 @@ public:
 	void							Initialise(Octree<T> *parent, float x0, float x1, float y0, float y1, float z0, float z1);
 
 	// Adds an item to this node.  Node will automatically handle subdivision if necessary to remain under item limit
-	Octree<T> *						AddItem(T item, const D3DXVECTOR3 & pos);
+	Octree<T> *						AddItem(T item, const FXMVECTOR pos);
 
 	// Removes an item from this node.  Node will automatically handle merging back up to the parent if the reduced number of items now makes this possible
 	void							RemoveItem(T item);
@@ -74,7 +79,7 @@ public:
 
 	// Tests whether a moving item is still valid within this node, or whether it needs to be moved to another node in the tree
 	// Assumes that the item passed is indeed already part of this node.  'pos' is the new position of the item
-	void							ItemMoved(T item, D3DXVECTOR3 pos);
+	void							ItemMoved(T item, const FXMVECTOR pos);
 
 	// Returns the set of items within scope of this node.  If this is not a leaf then it will progress recursively downwards
 	void							GetItems(std::vector<T> & outResult);
@@ -88,6 +93,10 @@ public:
 	// Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
 	// about the 3D centre point
 	CMPINLINE int					GetRelevantChildNode(const FXMVECTOR point);
+
+	// Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
+	// about the 3D centre point
+	CMPINLINE int					GetRelevantChildNode(const XMFLOAT3 & point);
 
 	// Returns a pointer to the node containing the specified point.  Returns NULL if point is not within the tree bounds
 	CMPINLINE Octree<T> *			GetNodeContainingPoint(const FXMVECTOR point);
@@ -200,7 +209,7 @@ MemoryPool<Octree<T>> * Octree<T>::_MemoryPool = new MemoryPool<Octree<T>>();
 
 // Constructor for the root node.  Params specify the position, and length of each edge of the covered area.
 template <typename T> 
-Octree<T>::Octree(CXMVECTOR position, float areasize) :	m_areasize(areasize), m_size(areasize), m_parent(0)															
+Octree<T>::Octree(FXMVECTOR position, float areasize) :	m_areasize(areasize), m_size(areasize), m_parent(0)															
 {
 	// Make sure we have been given a valid size parameter; if not, this is an unrecoverable error
 	if (areasize <= 0) throw 1;
@@ -438,7 +447,7 @@ bool Octree<T>::RemoveItemRecursive(T item)
 // Tests whether a moving item is still valid within this node, or whether it needs to be moved to another node in the tree
 // Assumes that the item passed is indeed already part of this node.  'pos' is the new position of the item.
 template <typename T> 
-void Octree<T>::ItemMoved(T item, FXMVECTOR pos)
+void Octree<T>::ItemMoved(T item, const FXMVECTOR pos)
 {
 	// We can quit immediately if the item still fits within our bounds (the overwhelmingly likely case)
 	if (XMVector3GreaterOrEqual(pos, m_min) && XMVector3Less(pos, m_max)) return; 
@@ -683,37 +692,83 @@ CMPINLINE bool Octree<T>::ContainsPoint(const FXMVECTOR point)
 // Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
 // about the 3D centre point
 template <typename T>
-CMPINLINE int Octree<T>::GetRelevantChildNode(const D3DXVECTOR3 & point)
+CMPINLINE int Octree<T>::GetRelevantChildNode(const FXMVECTOR point)
+{
+	// Maintain constant array of indices
+	const int nodes[2][2][2] = {
+		{
+			{
+				OCTREE_SW_DOWN, OCTREE_NW_DOWN			// 000 (-x, -y, -z) and 001 (-x, -y, +z)
+			},
+			{
+				OCTREE_SW_UP, OCTREE_NW_UP				// 010 (-x, +y, -z) and 011 (-x, +y, +z)
+			}
+		},
+		{
+			{
+				OCTREE_SE_DOWN, OCTREE_NE_DOWN			// 100 (+x, -y, -z) and 101 (+x, -y, +z)
+			},
+			{
+				OCTREE_SE_UP, OCTREE_NE_UP				// 110 (x, +y, -z) and 111 (+x, +y, +z)
+			}
+		}
+	};
+
+	// Test whether point is less than the centre point in each dimension
+	XMVECTOR test = XMVectorLess(point, m_centre);
+
+	// Store control values as uint
+	uint32_t ui[3];
+	XMStoreInt3(&ui[0], test);
+
+	// +1 so that
+	//		True (point < centre) is	(0U-1U) + 1		= 0
+	//		False (point >= centre) is	(0U) + 1		= 1
+	// and use as array index to quickly return the correct value
+	return nodes[(uint32_t)ui[0] + 1U][(uint32_t)ui[1] + 1U][(uint32_t)ui[2] + 1];
+}
+
+
+// Returns a numeric value indicating which child of this node is relevant for the specified point.  Based on offset
+// about the 3D centre point
+template <typename T>
+CMPINLINE int Octree<T>::GetRelevantChildNode(const XMFLOAT3 & point)
 {
 	if (point.x < m_centref.x) {						// West of centre
 		if (point.y < m_centref.y) {					// Below centre
 			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SW_DOWN;					// --> We want the SW-down node
-			} else {								// North of centre
+			}
+			else {								// North of centre
 				return OCTREE_NW_DOWN;					// --> We want the NW-down node
-			} 
-		} else {									// Above centre
+			}
+		}
+		else {									// Above centre
 			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SW_UP;					// --> We want the SW-up node
-			}	
+			}
 			else {									// North of centre
 				return OCTREE_NW_UP;					// --> We want the NW-up node
 			}
-		} 
-	} else {										// East of centre
+		}
+	}
+	else {										// East of centre
 		if (point.y < m_centref.y) {					// Below centre
 			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SE_DOWN;					// --> We want the SE-down node
-			} else {								// North of centre
+			}
+			else {								// North of centre
 				return OCTREE_NE_DOWN;					// --> We want the NE-down node
-			} 
-		} else {									// Above centre
+			}
+		}
+		else {									// Above centre
 			if (point.z < m_centref.z) {				// South of centre
 				return OCTREE_SE_UP;					// --> We want the SE-up node
-			} else {								// North of centre
+			}
+			else {								// North of centre
 				return OCTREE_NE_UP;					// --> We want the NE-up node
-			} 
-		} 
+			}
+		}
 	}
 }
 

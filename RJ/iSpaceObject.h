@@ -15,6 +15,9 @@ class iSpaceObject : public ALIGN16<iSpaceObject>, public iActiveObject
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(iSpaceObject)
+
 	// Default constructor and destructor
 	iSpaceObject(void);
 	~iSpaceObject(void);

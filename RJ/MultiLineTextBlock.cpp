@@ -28,13 +28,13 @@ MultiLineTextBlock::MultiLineTextBlock(void)
 	m_maxlinelength = 0;
 	m_font = 0;
 	m_fontsize = 0.0f;
-	m_colour = NULL_VECTOR4;
+	m_colour = NULL_FLOAT4;
 	m_back = NULL;
 }
 
 // Initialise the component and set up all resources
 Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, MultiLineTextBlock::OperationMode mode, INTVECTOR2 location, float z, INTVECTOR2 size,
-										int linecount, int maxlinelength, int font, float fontsize, D3DXVECTOR4 col, bool render)
+										int linecount, int maxlinelength, int font, float fontsize, XMFLOAT4 col, bool render)
 {
 	// Parameter check
 	if (parent == NULL) return ErrorCodes::CannotInitialiseMLTBlockWithoutParent;
@@ -215,7 +215,7 @@ const std::string & MultiLineTextBlock::GetText(int line)
 }
 
 // Set the text colour for a particular line of this component
-void MultiLineTextBlock::SetColour(int line_number, const D3DXVECTOR4 & colour)
+void MultiLineTextBlock::SetColour(int line_number, const XMFLOAT4 & colour)
 {
 	// Make sure the line index is valid
 	if (line_number < 0 || line_number >= m_linecount || m_lines[line_number] == NULL) return;
@@ -225,7 +225,7 @@ void MultiLineTextBlock::SetColour(int line_number, const D3DXVECTOR4 & colour)
 }
 
 // Set the text colour for all lines of this component
-void MultiLineTextBlock::SetColour(const D3DXVECTOR4 & colour)
+void MultiLineTextBlock::SetColour(const XMFLOAT4 & colour)
 {
 	// Iterate over all lines in the component
 	for (int i = 0; i < m_linecount; ++i)

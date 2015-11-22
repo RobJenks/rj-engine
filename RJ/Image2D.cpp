@@ -136,14 +136,14 @@ Result Image2D::InitializeBuffers(ID3D11Device* device)
 
 	// Load the vertex array with constant data, e.g. texture coords, that we do not need to set each frame
 	// First triangle.
-	m_vertices[0].texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-	m_vertices[1].texture = D3DXVECTOR2(1.0f, 1.0f);			// Bottom right
-	m_vertices[2].texture = D3DXVECTOR2(0.0f, 1.0f);			// Bottom left
+	m_vertices[0].texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+	m_vertices[1].texture = XMFLOAT2(1.0f, 1.0f);			// Bottom right
+	m_vertices[2].texture = XMFLOAT2(0.0f, 1.0f);			// Bottom left
 
 	// Second triangle.
-	m_vertices[3].texture = D3DXVECTOR2(0.0f, 0.0f);			// Top left
-	m_vertices[4].texture = D3DXVECTOR2(1.0f, 0.0f);			// Top right
-	m_vertices[5].texture = D3DXVECTOR2(1.0f, 1.0f);			// Bottom right
+	m_vertices[3].texture = XMFLOAT2(0.0f, 0.0f);			// Top left
+	m_vertices[4].texture = XMFLOAT2(1.0f, 0.0f);			// Top right
+	m_vertices[5].texture = XMFLOAT2(1.0f, 1.0f);			// Bottom right
 
 	// Load the index array with data.
 	for(i=0; i<m_indexCount; i++) indices[i] = i;
@@ -255,14 +255,14 @@ Result Image2D::UpdateBuffers(void)
 
 	// Load the vertex array with data.
 	// First triangle.
-	m_vertices[0].position = D3DXVECTOR3(left, top, m_z);		// Top left.
-	m_vertices[1].position = D3DXVECTOR3(right, bottom, m_z);	// Bottom right.
-	m_vertices[2].position = D3DXVECTOR3(left, bottom, m_z);	// Bottom left.
+	m_vertices[0].position = XMFLOAT3(left, top, m_z);		// Top left.
+	m_vertices[1].position = XMFLOAT3(right, bottom, m_z);	// Bottom right.
+	m_vertices[2].position = XMFLOAT3(left, bottom, m_z);	// Bottom left.
 
 	// Second triangle.
-	m_vertices[3].position = D3DXVECTOR3(left, top, m_z);		// Top left.
-	m_vertices[4].position = D3DXVECTOR3(right, top, m_z);		// Top right.
-	m_vertices[5].position = D3DXVECTOR3(right, bottom, m_z);	// Bottom right.
+	m_vertices[3].position = XMFLOAT3(left, top, m_z);		// Top left.
+	m_vertices[4].position = XMFLOAT3(right, top, m_z);		// Top right.
+	m_vertices[5].position = XMFLOAT3(right, bottom, m_z);	// Bottom right.
 	
 	// Lock the vertex buffer so it can be written to.
 	result = m_devicecontext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);

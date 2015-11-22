@@ -4,7 +4,6 @@
 #define __OrientedBoundingBoxH__
 
 #include "DX11_Core.h"
-
 #include "CompilerSettings.h"
 class iObject;
 
@@ -132,13 +131,10 @@ public:
 	}
 
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
-	CMPINLINE void				UpdateExtentFromSize(const FXMVECTOR size)
-	{
-		UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
-	}
-
+	void						UpdateExtentFromSize(const FXMVECTOR size);
+	
 	// Updates the matrix to offset this OBB from its parent
-	CMPINLINE void				UpdateOffset(const FXMMATRIX offset)
+	void XM_CALLCONV			UpdateOffset(const FXMMATRIX offset)
 	{
 		Offset = offset;
 		SetOffsetFlag(true);

@@ -39,10 +39,10 @@ public:
 	void				SetNodeSpinSpeed(float speed);
 
 	// Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
-	void				RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness);
+	void XM_CALLCONV	RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness);
 
 	// Method to add a line for rendering.  Accepts a world matrix for the line
-	void				RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
+	void XM_CALLCONV	RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
 
 	// Determines the world matrix required to transform a line model into the correct position, given only
 	// the coordinates of each line end point.  Also optionally accepts a line length parameter to avoid 
@@ -60,10 +60,10 @@ public:
 
 	// Method to render a box at the specified location.  World matrix specifies transforming to the target location/orientation.  Size/thickness
 	// are used to derive the scaling matrix
-	void				RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
+	void XM_CALLCONV	RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
 
 	// Method to render a box at the specified location.  Overloaded method that renders a cube rather than cuboid
-	CMPINLINE void		RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float size)
+	CMPINLINE void XM_CALLCONV	RenderBox(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float thickness, float size)
 	{
 		RenderBox(world, colour, thickness, size, size, size);
 	}
@@ -74,9 +74,9 @@ public:
 	void				RenderBoxAtRelativeElementLocation(iSpaceObject *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
 
 	// Methods to add a cuboid for rendering.  Uses line model scaled to the size of the cuboid.
-	void				RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize);
-	void				RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size);
-	void				RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position);
+	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize);
+	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size);
+	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness, const CXMVECTOR size);
 	void				RenderCuboidAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
@@ -90,7 +90,7 @@ public:
 	void				RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness);
 
 	// Methods to add a node for rendering.  Uses line model.  Spins in place.
-	void				RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
+	void XM_CALLCONV	RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
 	void				RenderNodeAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour);
 
 	// Methods to render the path being taken by an actor through a complex ship environment

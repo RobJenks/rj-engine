@@ -63,7 +63,7 @@ public:
 	void							Apply(void)
 	{
 		// Update the child object position based on the parent world matrix
-		Child->SetPosition(XMVector3TransformCoord(m_posoffset, Parent->GetWorldMatrix));
+		Child->SetPosition(XMVector3TransformCoord(m_posoffset, Parent->GetWorldMatrix()));
 
 		// Multiply the parent orientation by our offset quaternion to yield the child orientation
 		// TODO: Does not currently account for the Ship::OrientationAdjustment since this was
@@ -343,7 +343,7 @@ Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, XMV
 		}
 		else if (key == "baseorientation")
 		{
-			outBaseOrientation = IO::GetD3DXQUATERNIONFromAttr(child);
+			outBaseOrientation = IO::GetQuaternionFromAttr(child);
 		}
 	}
 

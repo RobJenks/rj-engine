@@ -52,7 +52,7 @@ public:
 	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
 
 	// Renders the shader.
-	Result							Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+	Result XM_CALLCONV				Render(ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Adjust the radius of lines currently being drawn

@@ -4,7 +4,7 @@
 #include "TextManager.h"
 
 
-Result TextManager::Initialize(	ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight, 
+Result XM_CALLCONV TextManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
 								const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
 	// Store pointers to the D3D device and device context
@@ -101,7 +101,7 @@ void TextManager::Shutdown()
 }
 
 
-Result TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result XM_CALLCONV TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	Result result, overallresult;
 	SentenceType *sentence;
@@ -350,7 +350,7 @@ void TextManager::ReleaseSentence(SentenceType** sentence)
 }
 
 
-Result TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	unsigned int stride, offset;
 

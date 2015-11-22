@@ -98,9 +98,8 @@ iUIComponent *Render2DGroup::FindUIComponent(string code, string key)
 }
 
 // Renders the render group by processing its queue of renderable components in sequence
-void Render2DGroup::Render(D3DXMATRIX baseviewmatrix)
+void XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
 {
-	D3DXMATRIX baseworld, ortho;
 	TextureShader *tshader; 
 	iUIComponentRenderable *component;
 	ID3D11DeviceContext *devicecontext;
@@ -109,10 +108,6 @@ void Render2DGroup::Render(D3DXMATRIX baseviewmatrix)
 	devicecontext = Game::Engine->GetDeviceContext();
 	tshader = Game::Engine->GetTextureShader();
 	if (!devicecontext || !tshader) return;
-
-	// Get the matrices we will use for rendering
-	Game::Engine->GetRenderOrthographicMatrix(ortho);
-	baseworld = ID_MATRIX;
 	
 	// Now process each item registered for rendering in turn
 	RenderQueueCollection::const_iterator it_end = m_renderqueue.end();
@@ -126,7 +121,8 @@ void Render2DGroup::Render(D3DXMATRIX baseviewmatrix)
 		component->Render();
 
 		// Now render these vertices using the engine texture shader
-		tshader->Render(devicecontext, component->GetIndexCount(), baseworld, baseviewmatrix, ortho, component->GetTexture());
+		tshader->Render(devicecontext, component->GetIndexCount(), ID_MATRIX, baseviewmatrix, 
+						Game::Engine->GetRenderOrthographicMatrix(), component->GetTexture());
 	}
 }
 

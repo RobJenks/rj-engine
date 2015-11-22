@@ -1612,7 +1612,7 @@ void RJMain::DebugCCDOBBTest(void)
 
 	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm0);
 	world = XMMatrixMultiply(ss->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize()_;
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
 
 	/*move = -collision.ContinuousTestResult.InterimCalculations.wm1;
 	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);

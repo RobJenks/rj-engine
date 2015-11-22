@@ -6,6 +6,14 @@
 #include <malloc.h>
 #include <new>
 
+// Define an include block to force the use of aligned allocation functions in multiple-inheritance
+// situations, where the compiler cannot otherwise determine which allocation/deallocation functions to use
+#define USE_ALIGN16_ALLOCATORS(T) \
+		using ALIGN16<T>::operator new; \
+		using ALIGN16<T>::operator new[]; \
+		using ALIGN16<T>::operator delete; \
+		using ALIGN16<T>::operator delete[]; \
+
 
 template <typename T>
 class ALIGN16
@@ -39,6 +47,7 @@ public:
 	{
 		_aligned_free(static_cast<T*>(p));
 	}
+
 };
 
 

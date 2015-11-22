@@ -131,7 +131,7 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 }
 
 // Renders the shader.
-Result VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 								const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

@@ -22,7 +22,7 @@ void FireShader::Shutdown(void)
 }
 
 
-Result FireShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+Result XM_CALLCONV FireShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
 							 XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, XMFLOAT2 distortion2,
@@ -332,7 +332,7 @@ void FireShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, c
 	errorMessage = 0;
 }
 
-Result FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
+Result XM_CALLCONV FireShader::SetShaderParameters(ID3D11DeviceContext* deviceContext, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 										  const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 										  ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, 
 										  float frameTime, XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, 

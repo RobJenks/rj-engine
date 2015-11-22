@@ -173,8 +173,8 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 				if (obj->GetID() == proj.Owner) continue;
 
 				// Test for precise intersection along the projectile path
-				if (Game::PhysicsEngine.TestLineVectorvsSqSphereIntersection(proj.Position, proj.Velocity,
-					obj->GetPosition(), obj->GetCollisionSphereRadiusSq()))
+				if (Game::PhysicsEngine.TestLineVectorvsSphereIntersection(proj.Position, proj.Velocity,
+					obj->GetPosition(), obj->GetCollisionSphereRadius()))
 				{
 					// The projectile is impacting this object, so handle the impact here
 					/* Impact handling code */

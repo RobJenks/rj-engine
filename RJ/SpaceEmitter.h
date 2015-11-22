@@ -15,7 +15,10 @@ __declspec(align(16))
 class SpaceEmitter : public ALIGN16<SpaceEmitter>, public iSpaceObject
 {
 public:
-	
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(SpaceEmitter)
+
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation

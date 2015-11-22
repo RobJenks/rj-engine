@@ -18,6 +18,10 @@ __declspec(align(16))
 class HpEngine : public ALIGN16<HpEngine>, public Hardpoint
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(HpEngine)
+
 	// Returns the type of this hardpoint subclass
 	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Engine; }
 

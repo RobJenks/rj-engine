@@ -161,7 +161,7 @@ public:
 	// The world matrix of this object
 	CMPINLINE XMMATRIX						GetWorldMatrix(void)				{ return m_worldmatrix; }
 	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)			{ return m_inverseworld; }
-	CMPINLINE void							SetWorldMatrix(const FXMMATRIX m)
+	CMPINLINE void XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
 		m_worldmatrix = m;
@@ -175,7 +175,7 @@ public:
 
 	// World adjustment matrix is pre-multiplied into the object world matrix
 	CMPINLINE const XMMATRIX				GetWorldAdjustmentMatrix(void) const			{ return m_worldorientadjustment; }
-	CMPINLINE void							SetWorldAdjustmentMatrix(const FXMMATRIX m)		{ m_worldorientadjustment = m; }
+	CMPINLINE void XM_CALLCONV				SetWorldAdjustmentMatrix(const FXMMATRIX m)		{ m_worldorientadjustment = m; }
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)

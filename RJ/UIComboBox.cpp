@@ -85,7 +85,7 @@ Result UIComboBox::Initialise(UIManagedControlDefinition *def, string code, int 
 	m_scrollbarupdown->GetInstance(1)->rotation = Rotation90Degree::Rotate180;
 
 	// Now create the main text block
-	m_maintext = D::UI->CreateTextBlock(concat(m_code)(".maintext").str(), "", 256, 0, INTVECTOR2(0,0), 1.0f, D3DXVECTOR4(1.0, 1.0f, 1.0f, 1.0f), true);
+	m_maintext = D::UI->CreateTextBlock(concat(m_code)(".maintext").str(), "", 256, 0, INTVECTOR2(0,0), 1.0f, XMFLOAT4(1.0, 1.0f, 1.0f, 1.0f), true);
 	if (!m_maintext) return ErrorCodes::CouldNotCreateTextComponentForManagedControl;
 
 	// Create text blocks for each of the entries potentially visible in the expanded drop-down 
@@ -93,7 +93,7 @@ Result UIComboBox::Initialise(UIManagedControlDefinition *def, string code, int 
 	{
 		// Create a new text block; note that all start with rendering disabled
 		TextBlock *t = D::UI->CreateTextBlock(	concat(m_code)(".expandtext.")(i).str(), "", UIComboBox::DEFAULT_TEXT_CAPACITY, 0, 
-												INTVECTOR2(0, 0), 1.0f, D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f), false);
+												INTVECTOR2(0, 0), 1.0f, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), false);
 
 		// Make sure we could create the text block
 		if (!t) return ErrorCodes::CouldNotCreateTextComponentForManagedControl;

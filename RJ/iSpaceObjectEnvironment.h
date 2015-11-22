@@ -18,6 +18,9 @@ class iSpaceObjectEnvironment : public ALIGN16<iSpaceObjectEnvironment>, public 
 
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(iSpaceObjectEnvironment)
+
 	// Default constructor
 	iSpaceObjectEnvironment(void);
 
@@ -171,7 +174,7 @@ protected:
 
 	// Translation from environment centre to its (0,0,0) point
 	AXMVECTOR						m_zeropointtranslation;
-	AXMFLOAT3						m_zeropointtranslationf;
+	XMFLOAT3						m_zeropointtranslationf;
 
 	// Adjusted world matrix, which transforms to/from the element (0,0,0) point rather than the environment centre point
 	AXMMATRIX						m_zeropointworldmatrix;

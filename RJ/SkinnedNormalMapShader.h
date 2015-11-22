@@ -56,7 +56,7 @@ public:
 	void Shutdown();
 	
 	// Renders the shader.  Conforms to the iShader interface spec
-	Result Render(	ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
+	Result XM_CALLCONV Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
 					XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
 

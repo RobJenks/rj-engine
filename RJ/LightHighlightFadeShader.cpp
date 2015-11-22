@@ -57,7 +57,7 @@ void LightHighlightFadeShader::Shutdown()
 	return;
 }
 
-Result LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+Result XM_CALLCONV LightHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 										const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	Result result;
@@ -328,7 +328,7 @@ void LightHighlightFadeShader::OutputShaderErrorMessage(ID3D10Blob* errorMessage
 }
 
 
-Result LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix,
+Result XM_CALLCONV LightHighlightFadeShader::SetShaderParameters(ID3D11DeviceContext *deviceContext, const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix,
 													 ID3D11ShaderResourceView *texture)
 {
 	HRESULT result;

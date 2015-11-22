@@ -18,14 +18,15 @@ class iUIControl;
 using namespace std;
 
 
+// This class has no special alignment requirements
 class Image2DRenderGroup : public iUIComponentRenderable
 {
 private:
 
 	struct VertexType
 	{
-		D3DXVECTOR3 position;
-	    D3DXVECTOR2 texture;
+		XMFLOAT3 position;
+	    XMFLOAT2 texture;
 	};
 
 public:
@@ -188,7 +189,7 @@ private:
 	Texture*							m_Texture;
 	Texture::APPLY_MODE					m_texturemode;		// Method to use for applying this texture to each instance
 	INTVECTOR2							m_texturesize;		// Size of the texture to be applied to this render group
-	D3DXVECTOR2							m_ftexturesize;		// Texture size, stored in floating point representation to avoid casts later
+	XMFLOAT2							m_ftexturesize;		// Texture size, stored in floating point representation to avoid casts later
 
 	bool								m_render;
 	bool								m_forcefullupdate;

@@ -23,6 +23,7 @@ using namespace std;
 using namespace std::tr1;
 
 
+// This class has no special alignment requirements
 class Render2DGroup
 {
 public:
@@ -92,7 +93,7 @@ public:
 	iUIComponent *FindUIComponent(string code, string key);
 
 	// Render function, which will process each registered renderable component in turn
-	void Render(D3DXMATRIX baseviewmatrix);
+	void XM_CALLCONV Render(const FXMMATRIX baseviewmatrix);
 
 	// Methods to add and remove specific renderable components, so they are handled correctly by the render queue
 	bool RegisterRenderableComponent(iUIComponentRenderable *component);

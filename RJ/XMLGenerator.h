@@ -43,7 +43,7 @@ namespace IO { namespace Data {
 	void						LinkIntVector3AttrXMLElement(const string &name, const INTVECTOR3 &v, TiXmlElement *parent);
 	void						LinkQuaternionAttrXMLElement(const string &name, const FXMVECTOR q, TiXmlElement *parent) 
 	{ 
-		return LinkQuaternionAttrXMLElement(name, q, parent); 
+		return LinkVector4AttrXMLElement(name, q, parent); 
 	}
 
 }}
