@@ -36,10 +36,10 @@ Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
 	Result result;
 
 	// Initialise each shader in turn
-	result = InitialiseVertexShader(device, iShader::ShaderFilename("skinned_nmap.cso"));
+	result = InitialiseVertexShader(device, iShader::ShaderFilename("skinned_nmap.vs.cso"));
 	if (result != ErrorCodes::NoError) return result;
 
-	result = InitialisePixelShader(device, iShader::ShaderFilename("skinned_nmap.cso"));
+	result = InitialisePixelShader(device, iShader::ShaderFilename("skinned_nmap.ps.cso"));
 	if (result != ErrorCodes::NoError) return result;
 
 	// Return success

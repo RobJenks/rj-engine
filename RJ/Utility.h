@@ -437,6 +437,18 @@ CMPINLINE void RemoveFromVectorAtIndex(std::vector<T> &vec, typename std::vector
 	vec.erase(vec.begin() + index);
 }
 
+// Removes the specified element from a vector, based on its index within the vector.  Accepts the vector type
+// as an additional template parameter, to allow us to handle e.g. vectors with custom allocators
+template <typename T, typename vector_type>
+CMPINLINE void RemoveFromVectorAtIndex(vector_type &vec, typename vector_type::size_type index)
+{
+	// Parameter check
+	if (index < 0 || index >= vec.size()) return;
+
+	// Remove the element at this index
+	vec.erase(vec.begin() + index);
+}
+
 // Remove an element from the specified vector.  No bounds checking; should only be used internally once
 // index is confirmed as valid
 template <typename T>

@@ -1149,6 +1149,9 @@
     <ClInclude Include="CapabilityTester.h">
       <Filter>Engine\Capabilities</Filter>
     </ClInclude>
+    <ClInclude Include="AlignedAllocator.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

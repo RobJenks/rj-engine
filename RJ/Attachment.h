@@ -31,7 +31,7 @@ struct AttachmentConstraint : public ALIGN16<AttachmentConstraint>
 };
 
 // Class requires 16-bit alignment, however cannot be specified for template class.  All member variables given force-alignment instead
-template <typename T>
+template <typename T> 
 class Attachment : public ALIGN16<Attachment<T>>
 {
 
@@ -113,7 +113,7 @@ protected:
 
 	// Position and orientation offsets
 	AXMVECTOR						m_posoffset;
-	AXMVECTOR						m_orientoffset;
+	AXMVECTOR 						m_orientoffset;
 
 	// Called whenever pos or orient offset changes, to precalculate the offset matrices used in rendering
 	void							RecalculateOffsetParameters(void);

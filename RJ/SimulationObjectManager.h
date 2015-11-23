@@ -57,30 +57,30 @@ public:
 
 	// Sturcture holding information on one cached search result
 	// Class is 16-bit aligned to allow use of SIMD member variables
-	__declspec(align(16))
-	struct CachedSearchResult : public ALIGN16<CachedSearchResult>
+	//__declspec(align(16))
+	struct CachedSearchResult //: public ALIGN16<CachedSearchResult>
 	{
 		Game::ID_TYPE 						ObjectID;
-		AXMVECTOR							DistanceSquared;
+		float								DistanceSquared;
 
-		CachedSearchResult(Game::ID_TYPE obj_id, const FXMVECTOR distsq) : ObjectID(obj_id), DistanceSquared(distsq) { }
+		CachedSearchResult(Game::ID_TYPE obj_id, float distsq) : ObjectID(obj_id), DistanceSquared(distsq) { }
 	};
 
 	// Structure holding cached object search information
 	// Class is 16-bit aligned to allow use of SIMD member variables
-	__declspec(align(16))
-	struct CachedSearchResults : public ALIGN16<CachedSearchResults>
+	//__declspec(align(16))
+	struct CachedSearchResults //: public ALIGN16<CachedSearchResults>
 	{
-		AXMVECTOR							Position;
-		AXMVECTOR							SearchDistanceSq;	// Vectorised form of the search distance squared
-		SearchOptions						Options;
-		std::vector<CachedSearchResult>		Results;
+		XMFLOAT3												Position;
+		float													SearchDistanceSq;	// Vectorised form of the search distance squared
+		SearchOptions											Options;
+		std::vector<CachedSearchResult>							Results;
 
-		CachedSearchResults(void) : Position(NULL_VECTOR), SearchDistanceSq(NULL_VECTOR), Options(0) { }
+		CachedSearchResults(void) : Position(NULL_FLOAT3), SearchDistanceSq(0.0f), Options(0) { }
 	};
 
 	// Maximum accepted search cache size
-	static const std::vector<CachedSearchResults>::size_type		MAXIMUM_SEARCH_CACHE_SIZE = 32;
+	static const std::vector<CachedSearchResults>::size_type	MAXIMUM_SEARCH_CACHE_SIZE = 32;
 
 	// Default constructor
 	SimulationObjectManager(void);

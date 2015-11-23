@@ -32,8 +32,7 @@ Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particlete
 	this->m_prevcentre = centre;
 
 	// Set region size and update thresholds
-	this->m_minbounds = minbounds;
-	this->m_maxbounds = maxbounds;
+	SetRegionBounds(minbounds, maxbounds);
 	this->m_threshold = updatethreshold;
 
 	// Calculate the max particle creation bounds, which are a constant % smaller than the overall max bounds

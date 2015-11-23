@@ -284,7 +284,7 @@ void ComplexShipSection::ShipTileRemoved(ComplexShipTile *tile)
 void ComplexShipSection::SetPreviewImage(const std::string & filename)
 {
 	// Texture manager logic will deal with loading an external texture if required, or returning a pointer to an existing resource if not
-	m_previewimage = new Texture(filename);
+	m_previewimage = new Texture(concat(D::DATA)("\\")(filename).str());
 }
 
 // Returns the file path where XML data relating to this ship section should be stored.  This is either within the "Sections"

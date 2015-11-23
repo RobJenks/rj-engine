@@ -460,7 +460,8 @@ void iObject::RemoveChildAttachment(iObject *child)
 		if (m_childobjects[i].Child == child)
 		{
 			// We have located the attachment, so remove it from our child collection
-			RemoveFromVectorAtIndex<Attachment<iObject*>>(m_childobjects, i);
+			//RemoveFromVectorAtIndex<Attachment<iObject*>>(m_childobjects, i);
+			RemoveFromVectorAtIndex<Attachment<iObject*>, iObject::AttachmentSet>(m_childobjects, i);
 
 			// Remove the reverse child pointer to its parent
 			child->SetParentObjectDirect(NULL);

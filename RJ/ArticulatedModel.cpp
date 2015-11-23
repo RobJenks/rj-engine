@@ -30,7 +30,7 @@ ArticulatedModel::ArticulatedModel(int componentcount)
 	}
 	
 	// Allocate space for the attachments between model components
-	m_attachments = new Attachment<ArticulatedModelComponent*>[m_attachcount];
+	m_attachments = new Attachment<ArticulatedModelComponent*>[m_attachcount]; 
 
 	// Allocate space for the array of index pairs that describe these attachments
 	m_attachment_indices = new int[m_attachcount * 2];

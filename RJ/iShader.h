@@ -23,7 +23,7 @@ public:
 	// Static method; returns a full filename for the specified shader file
 	CMPINLINE static std::string ShaderFilename(const std::string & file)
 	{
-		return concat(D::DATA)("/Shaders/")(file).str();
+		return concat("./Shaders/")(file).str();
 	}
 
 	iShader(void);

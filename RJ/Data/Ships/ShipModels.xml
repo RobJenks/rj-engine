@@ -4,7 +4,7 @@
     <Code>testship1_model</Code>
     <Type>Ship</Type>
     <Filename>Ships\Ghoul\Ghoul.obj.rjm</Filename>
-    <Texture>Ships\Ghoul\ghoul_map_jpg.jpg</Texture>
+    <Texture>Ships\Ghoul\ghoul_map.dds</Texture>
     <ActualEffectiveSize y="10.000000"/>
   </Model>
 
@@ -12,7 +12,7 @@
     <Code>frigate_small_midsection1</Code>
     <Type>ComplexShipSection</Type>
     <Filename>Ships\Sections\Frigate_Small\frigate_small_midsection1.rjm</Filename>
-    <Texture>Ships\Sections\Frigate_Small\frigate_small_midsection1.jpg</Texture>
+    <Texture>Ships\Sections\Frigate_Small\frigate_small_midsection1.dds</Texture>
     <EffectiveSize x="400.000000" y="100.000000" z="700.000000"/>
     <ElementSize x="4" y="7" z="1" />
   </Model>
@@ -21,7 +21,7 @@
     <Code>frigate_medium_midsection1</Code>
     <Type>ComplexShipSection</Type>
     <Filename>Ships\Sections\Frigate_Medium\frigate_medium_midsection1.rjm</Filename>
-    <Texture>Ships\Sections\Frigate_Medium\frigate_medium_midsection1.jpg</Texture>
+    <Texture>Ships\Sections\Frigate_Medium\frigate_medium_midsection1.dds</Texture>
     <EffectiveSize x="400.000000" y="100.000000" z="700.000000"/>
     <ElementSize x="10" y="24" z="2" />
   </Model>

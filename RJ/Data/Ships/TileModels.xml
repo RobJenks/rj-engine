@@ -4,7 +4,7 @@
     <Code>corridor_ns_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_ns.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_ns.jpg</Texture>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_ns.dds</Texture>
     <EffectiveSize x="100" y="100" z="100" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
@@ -13,7 +13,7 @@
     <Code>corridor_ne_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_ne.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_ne.jpg</Texture>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_ne.dds</Texture>
     <EffectiveSize x="100" y="100" z="100" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
@@ -22,7 +22,7 @@
     <Code>corridor_nse_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nse.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nse.jpg</Texture>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_nse.dds</Texture>
     <EffectiveSize x="100" y="100" z="100" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
@@ -31,7 +31,7 @@
     <Code>corridor_nsew_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nsew.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nsew.jpg</Texture>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_nsew.dds</Texture>
     <EffectiveSize x="100" y="100" z="100" />
     <ElementSize x="1" y="1" z="1" />
   </Model>
@@ -41,7 +41,7 @@
     <Code>quarters_dorm01_interior_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.jpg</Texture>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.dds</Texture>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -49,7 +49,7 @@
     <Code>quarters_dorm01_wall_straight_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.jpg</Texture>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.dds</Texture>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -57,7 +57,7 @@
     <Code>quarters_dorm01_wall_corner_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.jpg</Texture>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.dds</Texture>
     <ElementSize x="1" y="1" z="1" /> 
   </Model>
 
@@ -65,7 +65,7 @@
     <Code>quarters_dorm01_connection_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.jpg</Texture>
+    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.dds</Texture>
     <ElementSize x="1" y="1" z="1" />
   </Model>
   

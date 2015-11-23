@@ -1829,7 +1829,7 @@ void RJMain::__CreateDebugScenario(void)
 
 
 	s3[1]->AddChildAttachment(s3[2]);
-	Attachment<iObject*> *attach = &( s3[1]->GetChildObjects()->at(0) );
+	Attachment<iObject*> *attach = &( s3[1]->GetChildObjects().at(0) );
 	XMVECTOR initial_orient = XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2);
 	attach->CreateConstraint(RIGHT_VECTOR, XMVectorSet(0.0f, 5.0f, 0.0f, 0.0f), XMVectorSet(0.0f, -5.0f, 5.0f, 0.0f), initial_orient);
 
@@ -2027,8 +2027,13 @@ void RJMain::DEBUGDisplayInfo(void)
 	{
 		const CollisionDetectionResultsStruct & coll = Game::PhysicsEngine.CollisionDetectionResults;
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 
-			"Obj cache: Size = %d (Hit: %d / Miss: %d) | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
-			Game::ObjectManager.GetCurrentCacheSize(), Game::ObjectManager.CACHE_HITS, Game::ObjectManager.CACHE_MISSES,
+#			ifdef OBJMGR_DEBUG_MODE
+				"Obj cache: Size = %d (Hit: %d / Miss: %d) | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
+				Game::ObjectManager.GetCurrentCacheSize(), Game::ObjectManager.CACHE_HITS, Game::ObjectManager.CACHE_MISSES,
+#			else
+				"Obj cache: Size = %d | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
+				Game::ObjectManager.GetCurrentCacheSize(), 
+#			endif
 			coll.SpaceCollisions.CollisionChecks, coll.SpaceCollisions.BroadphaseCollisions, coll.SpaceCollisions.Collisions,
 			coll.SpaceCollisions.CCDCollisionChecks, coll.SpaceCollisions.CCDCollisions, 
 			coll.EnvironmentCollisions.ElementsChecked, coll.EnvironmentCollisions.ObjectsChecked, coll.EnvironmentCollisions.ElementsCheckedAroundObjects,

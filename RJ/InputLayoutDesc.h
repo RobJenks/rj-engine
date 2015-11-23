@@ -26,7 +26,7 @@ public:
 	CMPINLINE D3D11_INPUT_ELEMENT_DESC *			Data(void)					{ return (m_elements.empty() ? NULL : &(m_elements[0])); }
 
 	// Returns the number of elements in the layout
-	CMPINLINE UINT									ElementCount(void) const	{ return m_elements.size(); }
+	CMPINLINE UINT									ElementCount(void) const	{ return (UINT)m_elements.size(); }
 
 	// Returns the total size of the data
 	CMPINLINE SIZE_T								BufferSize(void) const		{ return (sizeof(D3D11_INPUT_ELEMENT_DESC) * m_elements.size()); }

@@ -9,6 +9,7 @@
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
+#include "AlignedAllocator.h"
 #include "HashFunctions.h"
 #include "Attachment.h"
 #include "Octree.h"
@@ -47,7 +48,7 @@ public:
 	enum WorldTransformCalculation				{ WTC_Normal = 0, WTC_None, WTC_IncludeOrientAdjustment };
 
 	// Define a standard type for the collection of all attachments from this object to others
-	typedef std::vector<Attachment<iObject*>>	AttachmentSet;
+	typedef std::vector<Attachment<iObject*>, AlignedAllocator<Attachment<iObject*>, 16>>	AttachmentSet;
 
 	// Static modifier for the size of the collision margin around an object's collision sphere.  2.0x the collision sphere
 	// to ensure all cases are caught.  If current object's sphere is larger then 
@@ -288,7 +289,7 @@ public:
 	// Methods to update/retrieve attachment details for any child objects, where we are the parent
 	CMPINLINE int								GetChildObjectCount(void) const								{ return m_childcount; }
 	CMPINLINE bool								HasChildAttachments(void) const								{ return (m_childcount != 0); }
-	CMPINLINE AttachmentSet *					GetChildObjects(void)										{ return &m_childobjects; }
+	CMPINLINE AttachmentSet &					GetChildObjects(void)										{ return m_childobjects; }
 	void										AddChildAttachment(iObject *child);
 	void										AddChildAttachment(iObject *child, const FXMVECTOR posoffset, const FXMVECTOR orientoffset);
 	bool										HaveChildAttachment(iObject *child);
@@ -464,7 +465,7 @@ protected:
 
 	VisibilityTestingModeType			m_visibilitytestingmode;		// The method used to test visibility of this object
 
-	std::vector<Attachment<iObject*>>	m_childobjects;					// Vector of any attachments from this object to child objects
+	AttachmentSet						m_childobjects;					// Vector of any attachments from this object to child objects
 	int									m_childcount;					// The number of child attachments, if any)
 	iObject *							m_parentobject;					// A reference to our parent attachment, if any
 	

@@ -55,9 +55,9 @@ Result OverlayRenderer::Initialise(void)
 	const char *modelname = s_modelname.c_str();
 
 	// Specify the filename for each line type in turn
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Green] = "overlay_green.png";
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Red] = "overlay_red.png";
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_LightBlue] = "overlay_lblue.png";
+	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Green] = "overlay_green.dds";
+	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Red] = "overlay_red.dds";
+	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_LightBlue] = "overlay_lblue.dds";
 
 	// Now load each overlay texture in turn
 	overallresult = ErrorCodes::NoError;
@@ -76,7 +76,7 @@ Result OverlayRenderer::Initialise(void)
 	// Initialise blueprint overlay model
 	m_blueprintoverlay = new Model();
 	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
-											concat(D::DATA)("\\Models\\Misc\\overlay_blueprint.png").str());
+											concat(D::DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
 	if (result != ErrorCodes::NoError) overallresult = result;
 
 	// Initialise all pre-cached transform matrices for render efficiency
@@ -99,7 +99,7 @@ void OverlayRenderer::InitialiseCachedMatrices()
 	m_matrix_stdelementscale = XMMatrixScaling(DEFAULT_LINE_THICKNESS, DEFAULT_LINE_THICKNESS, Game::C_CS_ELEMENT_SCALE);
 
 	/* Array of matrices for a default element-sized box */
-	m_matrix_boxtransforms = (AXMMATRIX_P*)malloc(sizeof(AXMMATRIX_P) * 12);	// 12 edges to a box
+	m_matrix_boxtransforms = new AXMMATRIX_P[12];												// 12 edges to a box
 	
 	// Bottom edges
 	m_matrix_boxtransforms[0].value = ID_MATRIX;												// [0] = fwd from origin

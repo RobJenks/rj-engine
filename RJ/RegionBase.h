@@ -45,6 +45,15 @@ public:
 		XMStoreFloat3(&m_maxboundsf, m_maxbounds);
 	}
 
+	// Set the region bounds
+	CMPINLINE void					SetRegionBounds(const FXMVECTOR bmin, const FXMVECTOR bmax)
+	{
+		m_minbounds = bmin; m_maxbounds = bmax;
+		XMStoreFloat3(&m_minboundsf, m_minbounds);
+		XMStoreFloat3(&m_maxboundsf, m_maxbounds);
+	}
+
+
 	// Region update threshold in each dimension
 	CMPINLINE XMVECTOR				GetUpdateThreshold(void) { return m_threshold; }
 	CMPINLINE void					SetUpdateThreshold(const FXMVECTOR threshold) { m_threshold = threshold; }
