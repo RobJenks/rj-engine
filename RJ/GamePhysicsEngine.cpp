@@ -1544,7 +1544,9 @@ bool GamePhysicsEngine::TestLineSegmentvsSphereIntersection(const FXMVECTOR p1, 
 	XMVECTOR a = XMVector3LengthSq(dp);
 
 	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+	XMVECTOR bv = XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre));
+	XMFLOAT3 bf; XMStoreFloat3(&bf, bv);
+	float b = (2.0f * (bf.x + bf.y + bf.z));
 
 	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
 	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
@@ -1552,10 +1554,11 @@ bool GamePhysicsEngine::TestLineSegmentvsSphereIntersection(const FXMVECTOR p1, 
 
 	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
 	// c -= sphere_radius * sphere_radius;
-	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+	c = XMVectorSubtract(c, XMVectorScale(XMVector3Dot(sphere_centre, p1), 2.0f));
+	c = XMVectorSubtract(c, XMVectorReplicate(sphere_radius * sphere_radius));
 
 	// bb4ac = b * b - 4 * a * c;
-	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(bv, bv), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
 	//return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
@@ -1577,7 +1580,9 @@ bool GamePhysicsEngine::TestLineVectorvsSphereIntersection(	const FXMVECTOR p1, 
 	XMVECTOR a = XMVector3LengthSq(dp);
 
 	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+	XMVECTOR bv = XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre));
+	XMFLOAT3 bf; XMStoreFloat3(&bf, bv);
+	float b = (2.0f * (bf.x + bf.y + bf.z));
 
 	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
 	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
@@ -1585,10 +1590,11 @@ bool GamePhysicsEngine::TestLineVectorvsSphereIntersection(	const FXMVECTOR p1, 
 
 	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
 	// c -= sphere_radius * sphere_radius;
-	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+	c = XMVectorSubtract(c, XMVectorScale(XMVector3Dot(sphere_centre, p1), 2.0f));
+	c = XMVectorSubtract(c, XMVectorReplicate(sphere_radius * sphere_radius));
 
 	// bb4ac = b * b - 4 * a * c;
-	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(bv, bv), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
 	//return (fabs(a) > Game::C_EPSILON && bb4ac >= 0);
@@ -1614,7 +1620,9 @@ bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const FXMVECTO
 	XMVECTOR a = XMVector3LengthSq(dp);
 
 	// b = 2 * (dp.x * (p1.x - sphere_centre.x) + dp.y * (p1.y - sphere_centre.y) + dp.z * (p1.z - sphere_centre.z));
-	XMVECTOR b = XMVectorScale(XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre)), 2.0f);
+	XMVECTOR bv = XMVectorMultiply(dp, XMVectorSubtract(p1, sphere_centre));
+	XMFLOAT3 bf; XMStoreFloat3(&bf, bv);
+	float b = (2.0f * (bf.x + bf.y + bf.z));
 
 	// c = sphere_centre.x * sphere_centre.x + sphere_centre.y * sphere_centre.y + sphere_centre.z * sphere_centre.z;
 	// c += p1.x * p1.x + p1.y * p1.y + p1.z * p1.z;
@@ -1622,10 +1630,11 @@ bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const FXMVECTO
 
 	// c -= 2 * (sphere_centre.x * p1.x + sphere_centre.y * p1.y + sphere_centre.z * p1.z);
 	// c -= sphere_radius * sphere_radius;
-	c = XMVectorSubtract(c, XMVectorMultiply(XMVector3Dot(sphere_centre, p1), XMVectorReplicate(2.0f * sphere_radius * sphere_radius)));
+	c = XMVectorSubtract(c, XMVectorScale(XMVector3Dot(sphere_centre, p1), 2.0f));
+	c = XMVectorSubtract(c, XMVectorReplicate(sphere_radius * sphere_radius));
 
 	// bb4ac = b * b - 4 * a * c;
-	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(b, b), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
+	XMVECTOR bb4ac = XMVectorSubtract(XMVectorMultiply(bv, bv), XMVectorScale(XMVectorMultiply(a, c), 4.0f));
 
 	// We have an intersection if the quadratic determinant is positive
 	// if (fabs(a) < Game::C_EPSILON || bb4ac < 0) return false;
@@ -1634,7 +1643,7 @@ bool GamePhysicsEngine::DetermineLineSegmentvsSphereIntersection(	const FXMVECTO
 	// Store the points of intersection and return true to signify an intersection took place
 	// LineSegmentIntersectionResult.k1 = (-b + sqrt_bb4ac) / two_a;
 	// LineSegmentIntersectionResult.k2 = (-b - sqrt_bb4ac) / two_a;
-	float sqrt_bb4ac = sqrtf(XMVectorGetX(bb4ac)); float two_a = (2.0f * XMVectorGetX(a)); float bf_n = -XMVectorGetX(b);
+	float sqrt_bb4ac = sqrtf(XMVectorGetX(bb4ac)); float two_a = (2.0f * XMVectorGetX(a)); float bf_n = -b;
 	LineSegmentIntersectionResult.k1 = (bf_n + sqrt_bb4ac) / two_a;
 	LineSegmentIntersectionResult.k2 = (bf_n - sqrt_bb4ac) / two_a;
 	return true;

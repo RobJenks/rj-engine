@@ -469,6 +469,7 @@ void Ship::AnalyseNearbyContacts(void)
 	m_cached_contact_count = m_cached_contacts.size();
 
 	// Also parse out specifically enemy contacts
+	m_cached_enemy_contacts.clear();
 	for (std::vector<iSpaceObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
 	{
 		if (GetDispositionTowardsObject(m_cached_contacts[i]) == Faction::FactionDisposition::Hostile)

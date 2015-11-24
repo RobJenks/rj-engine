@@ -452,66 +452,6 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 
 	}
-	
-
-	if (b[DIK_5])
-	{
-#if 0
-		if (!b[DIK_LSHIFT])
-		{
-			sproj = SimpleShip::Create("testship1");
-			if (sproj)
-			{
-				D3DXQUATERNION rot;
-				D3DXQuaternionRotationAxis(&rot, &RIGHT_VECTOR, PIOVER2);
-
-				sproj->SetModel(Model::GetModel("unit_cone_model"));
-				sproj->SetSize(D3DXVECTOR3(10.0f, 10.0f, 10.0f));
-				sproj->SetMass(10000.0f);
-				D3DXVECTOR3 pos = (ss->GetPosition() + (ss->PhysicsState.Heading * (ss->GetCollisionSphereRadius() + sproj->GetCollisionSphereRadius()) * 1.5f));
-				sproj->MoveIntoSpaceEnvironment(ss->GetSpaceEnvironment(), pos);
-				sproj->SetOrientation(rot * ss->GetOrientation());
-				sproj->VelocityLimit.SetAllValues(FLT_MAX - 1.0f);					// ** Increased vlimit required for projectile
-				sproj->SetWorldMomentum(ss->PhysicsState.Heading * 10000.0f);
-				sproj->RefreshPositionImmediate();
-
-				sproj->SimulateObject(true);
-			}
-		}
-
-		SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
-		def->SetCode("tmp1");
-		def->SetModel(Model::GetModel("unit_cone_model"));
-		def->SetMass(25000.0f);
-		def->SetDefaultLifetime(3.0f);
-
-		SpaceProjectileLauncher *launcher = new SpaceProjectileLauncher();
-		launcher->SetParent(ss);
-		launcher->SetProjectileDefinition(def);
-		launcher->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));
-		launcher->SetRelativeOrientation(ID_QUATERNION);
-		launcher->SetLaunchMethod(SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
-		launcher->SetLaunchImpulse(2500.0f);
-		launcher->SetLinearVelocityDegradeState(false);
-		launcher->SetAngularVelocityDegradeState(false);
-		
-		proj = launcher->LaunchProjectile();
-#endif
-
-		//turret->Fire();
-
-		s2->ApplyLocalLinearForceDirect(XMVectorSet(0.0f, 0.0f, 10000.0f * Game::TimeFactor, 0.0f));
-		return;
-
-		s2->Highlight.Activate();
-		s2->Highlight.SetColour(XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f));
-		std::vector<iSpaceObject*> contacts;
-		contacts.push_back(s2);
-
-		//iSpaceObject *tgt = turret->FindNewTarget(contacts);
-
-		m_keyboard.LockKey(DIK_5);
-	}
 	if (b[DIK_6])
 	{
 		D::UI->ActivateUIState("UI_MODELBUILDER");
@@ -676,8 +616,9 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		cs->ApplyAngularMomentum(XMVectorSetY(NULL_VECTOR, 1.0f * cs->GetMass()));
-		//m_keyboard.LockKey(DIK_3);
+		ss->SetPosition(XMVectorAdd(cs->TurretController.Turrets[0]->GetPosition(), XMVectorSet(50.0f, 0.0f, 0.0f, 0.0f)));
+
+		m_keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
 		Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, !b[DIK_LSHIFT]);
@@ -1909,6 +1850,7 @@ void RJMain::__CreateDebugScenario(void)
 			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
 			cs->TurretController.AddTurret(nt);
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
+			return;
 		}
 
 	// Test render - vol line
@@ -2045,10 +1987,22 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Proj: %d",
-			Game::CurrentPlayer->GetSystem()->Projectiles.GetActiveProjectileCount());
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		float yaw = 0.0f, pitch = 0.0f; bool fire = false;
+		SpaceTurret *t = cs->TurretController.Turrets[0];
+		if (t->HasTarget())
+		{
+			XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(t->GetTurretRelativeOrientation(), cs->GetOrientation()));
+			DetermineYawAndPitchToTarget(t->CannonPosition(), invorient, t->GetTarget()->GetPosition(), yaw, pitch);
+			float ayaw = fabs(yaw), apitch = fabs(pitch);
+			if (ayaw < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD && apitch < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD)
+				fire = true;
+		}
 
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Yaw: %.2f (%.2f)  |  Pitch: %.2f (%.2f)  |  %s  | %d contacts (%d enemy)",
+			yaw, cs->TurretController.Turrets[0]->GetYaw(), pitch, cs->TurretController.Turrets[0]->GetPitch(), (fire ? "* FIRE *" : "---"),
+			cs->GetContactCount(), cs->GetEnemyContactCount());
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		
 	}
 
 

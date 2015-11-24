@@ -107,6 +107,10 @@ public:
 	void							Yaw(float angle);
 	void							Pitch(float angle);
 
+	// Retrieve the current pitch and yaw values for this turret
+	CMPINLINE float					GetPitch(void) const										{ return m_pitch; }
+	CMPINLINE float					GetYaw(void) const											{ return m_yaw; }
+
 	// Reset the orientation of the turret back to its base (instantly)
 	void							ResetOrientation(void);
 
@@ -122,6 +126,18 @@ public:
 
 	// Searches for a new target in the given vector of enemy contacts and returns the first valid one
 	iSpaceObject *					FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts);
+
+	// Returns a value indicating whether the turret currently has a target
+	CMPINLINE bool					HasTarget(void) const										{ return (m_target != NULL); }
+
+	// Returns a value indicating whether the turret has been given a designated target
+	CMPINLINE bool					HasDesignatedTarget(void) const								{ return (m_designatedtarget != NULL); }
+
+	// Retrieves the current target of this turret, or NULL if the turret currently has no target
+	CMPINLINE iSpaceObject *		GetTarget(void) const										{ return m_target; }
+
+	// Retrieves the current target designation, or NULL if no target has been designated
+	CMPINLINE iSpaceObject *		GetDesignatedTarget(void) const								{ return m_designatedtarget; }
 
 	// Allocates space for the required number of launcher objects
 	void							InitialiseLaunchers(int launcher_count);

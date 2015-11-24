@@ -149,6 +149,13 @@ public:
 	void						SetTargetSpeed(float target);
 	void						SetTargetSpeedPercentage(float percentage);
 
+	// Retrieve the contacts currently registered by this ship
+	CMPINLINE const std::vector<iSpaceObject*> &		GetContacts(void) const				{ return m_cached_contacts; }
+	CMPINLINE const std::vector<iSpaceObject*> &		GetEnemyContacts(void) const		{ return m_cached_enemy_contacts; }
+	CMPINLINE std::vector<iSpaceObject*>::size_type		GetContactCount(void) const			{ return m_cached_contact_count; }
+	CMPINLINE std::vector<iSpaceObject*>::size_type		GetEnemyContactCount(void) const	{ return m_cached_enemy_contact_count; }
+
+
 	// Order: Moves the ship to a target position, within a certain tolerance
 	Order::OrderResult			MoveToPosition(FXMVECTOR position, float closedistance);
 
