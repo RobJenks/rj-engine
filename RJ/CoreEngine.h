@@ -394,6 +394,7 @@ private:
 	RM_ShaderCollection			m_renderqueueshaders;
 	ID3D11Buffer *				m_instancedbuffers[2];
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
+	D3D_PRIMITIVE_TOPOLOGY		m_current_topology;
 
 	// Optimiser performs periodic maintenance on the engine render queue
 	RenderQueueOptimiser		m_rq_optimiser;
@@ -407,7 +408,7 @@ private:
 
 	// Performs an intermediate z-sorting of instances before rendering via the render queue.  Used only for shaders/techniques (e.g. alpha
 	// blending) that require instances to be z-sorted
-	void						PerformZSortedRenderQueueProcessing(int shaderindex);
+	void						PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader);
 public:
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
@@ -464,8 +465,7 @@ public:
 															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
-		XMVECTOR lsq = XMVector3LengthSq(position - m_camera->GetPosition());
-		int z = (int)XMVectorGetX(lsq);
+		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
 		// Add to the z-sorted vector with this z-value as the sorting key
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model->GetModelBuffer(), transform, params));
@@ -477,11 +477,32 @@ public:
 															const CXMVECTOR params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
-		XMVECTOR lsq = XMVector3LengthSq(position - m_camera->GetPosition());
-		int z = (int)XMVectorGetX(lsq);
+		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
 		// Add to the z-sorted vector with this z-value as the sorting key
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model, transform, params));
+	}
+
+	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
+	// objects.  Performance overhead; should be used only where specifically required
+	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, const RM_Instance & instance, const CXMVECTOR position)
+	{
+		// Compute the z-value as the distance squared from this object to the camera
+		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
+
+		// Add to the z-sorted vector with this z-value as the sorting key
+		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model->GetModelBuffer(), instance));
+	}
+
+	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
+	// objects.  Performance overhead; should be used only where specifically required
+	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, const RM_Instance & instance, const CXMVECTOR position)
+	{
+		// Compute the z-value as the distance squared from this object to the camera
+		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
+
+		// Add to the z-sorted vector with this z-value as the sorting key
+		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model, instance));
 	}
 
 	// Render an object with a static model.  Protected; called only from RenderObject()

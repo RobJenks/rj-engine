@@ -3,10 +3,11 @@
 #ifndef __RJMainH__
 #define __RJMainH__
 
-#define DEBUG_LOGINSTANCECREATION
-#define DEBUG_LOGALLOCATEDMEMORY
-#include "vld.h"
+//#define DEBUG_LOGINSTANCECREATION
+//#define DEBUG_LOGALLOCATEDMEMORY
+//#include "vld.h"
 
+#pragma comment(lib, "pathcch.lib")
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
 class SimpleShip;
@@ -30,6 +31,9 @@ public:
 
 	// Creates the main application window
 	HWND				CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc);
+
+	// Retrieve data on the executable and working directory
+	Result				RetrieveExecutableData(void);
 
 	// Initialises and runs the internal clocks that are used to manage game execution 
 	void				InitialiseInternalClock(void);

@@ -39,6 +39,8 @@ namespace Game {
 
 	// Main application instance
 	RJMain Application;
+	std::string ExeName = "";
+	std::string ExePath = "";
 
 	// The core game engine
 	CoreEngine *Engine = NULL;

@@ -1469,5 +1469,8 @@
     <FxCompile Include="Data\Shaders\skinned_nmap.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="volumetric_cloud.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -14,7 +14,8 @@ cbuffer ConstantBuffer
 	float radius;				// Radius of the line
 	float clipdistance_far;		// Distance to the far clip plane
 	float clipdistance_front;	// Distance to the near clip plane
-	float2 viewport_size;		// Size of the viewport
+	float viewport_width;		// Size of the viewport
+	float viewport_height;		// Size of the viewport
 	float3 PADDING;
 };
 
@@ -92,7 +93,7 @@ float2 intersectCylinder(float3 P, float3 D, float radius_sq, float linelength)
 // Pixel Shader
 ////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
-{
+{ 
 	// Determine back and front intersection with cylinder and spheres in line space
 	float3 norm_linespace_ViewDir = normalize(input.line_viewdir);
 	float2 t1 = intersectCylinder(input.line_viewpos, norm_linespace_ViewDir, input.radius_sq, input.linelength);
@@ -106,7 +107,7 @@ float4 main(PixelInputType input) : SV_TARGET
 	back = max(back, t1.y);
 
 	// Intersection with environment
-	float envLinearDepth = clipdistance_far * shaderTexture.Sample(SampleType, input.position.xy / viewport_size).r;
+	float envLinearDepth = clipdistance_far * shaderTexture.Sample(SampleType, input.position.xy / float2(viewport_width, viewport_height)).r;
 	front = min(front, envLinearDepth);
 	back = min(back, envLinearDepth);
 

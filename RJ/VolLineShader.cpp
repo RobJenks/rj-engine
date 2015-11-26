@@ -24,7 +24,7 @@ VolLineShader::VolLineShader(void)
 	m_cbuffer_ps = NULL;
 
 	// Initialise all shader parameters to default values
-	m_viewport_size = XMFLOAT2(1024.0f, 768.0f); 
+	m_viewport_size = XMFLOAT2(1024.0f, 768.0f);
 	m_clip_near = 1.0f;
 	m_clip_far = 100.0f;
 	m_radius = 4.0f;
@@ -64,7 +64,7 @@ Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 
 	// Define the input layout for this vertex shader
 	InputLayoutDesc layout_desc = InputLayoutDesc()
-		.Add("POSITION",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	0, 0,								D3D11_INPUT_PER_VERTEX_DATA, 0)
+		.Add("POSITION",	0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,									D3D11_INPUT_PER_VERTEX_DATA, 0)
 		.Add("mTransform",	0, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, 0,								D3D11_INPUT_PER_INSTANCE_DATA, 1)
 		.Add("mTransform",	1, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1)
 		.Add("mTransform",	2, DXGI_FORMAT_R32G32B32A32_FLOAT,	1, D3D11_APPEND_ALIGNED_ELEMENT,	D3D11_INPUT_PER_INSTANCE_DATA, 1)
@@ -165,9 +165,10 @@ Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, uns
 	psbuffer = (PSBufferType*)mappedResource.pData;
 	{
 		psbuffer->radius = m_radius;
-		psbuffer->viewport_size = m_viewport_size;
 		psbuffer->clipdistance_front = m_clip_near;
 		psbuffer->clipdistance_far = m_clip_far;
+		psbuffer->viewport_size = m_viewport_size;
+		psbuffer->PADDING = NULL_FLOAT3;
 	}
 	deviceContext->Unmap(m_cbuffer_ps, 0);
 	deviceContext->PSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_ps);
@@ -188,6 +189,9 @@ Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, uns
 
 	// Render the model
 	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
+
+	// Deactivate any non-standard pipeline shaders (anything except the mandatory vertex and pixel shader)
+	deviceContext->GSSetShader(NULL, NULL, 0);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -217,11 +221,15 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 	if (!VolLineShader::BaseModel) return ErrorCodes::CannotInitialiseStaticVolLineShaderData;
 
 	// Create the base vertex and index data
-	XMFLOAT4 *v = new XMFLOAT4[2] { XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) };
-	UINT16 *i = new UINT16[2] { 0U, 1U };
+	XMFLOAT3 *v = new XMFLOAT3[1] { XMFLOAT3(0.0f, 0.0f, 0.0f)};// , XMFLOAT3(1.0f, 1.0f, 1.0f)
+	UINT16 *i = new UINT16[1] { 0U}; // , 1U};
 
 	// Initialise the base model using this data
-	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(XMFLOAT4), 2U, (const void**)&i, sizeof(UINT16), 2U);
+	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT16), 1U);
+	if (result != ErrorCodes::NoError) return result;
+	
+	// Assign the base model texture
+	result = VolLineShader::BaseModel->SetTexture(concat(D::DATA)("/Rendering/vol_line1.dds").str().c_str());
 	if (result != ErrorCodes::NoError) return result;
 
 	// Deallocate the model vertex and index data

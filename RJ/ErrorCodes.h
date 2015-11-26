@@ -19,6 +19,8 @@ namespace ErrorCodes {
 	const Result		CouldNotInitialiseCentralLoggingComponent		= 6;
 	const Result		InvalidParameters								= 7;
 	const Result		UnknownDataNodeType								= 8;
+	const Result		CouldNotDetermineExecutablePath					= 9;
+	const Result		CouldNotParseExecutablePath						= 10;
 
 	// DirectX error codes												(1000-1999)
 	const Result		CannotCreateDirect3DDevice						= 1000;

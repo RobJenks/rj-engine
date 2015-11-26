@@ -17,11 +17,13 @@ public:
 	static ModelBuffer *	BaseModel;
 
 	// Constant buffers for each shader in the pipeline
+	__declspec(align(16))
 	struct VSBufferType
 	{
 		XMFLOAT4X4 viewmatrix;
 	};
 
+	__declspec(align(16))
 	struct GSBufferType
 	{
 		XMFLOAT4X4	projectionmatrix;
@@ -29,6 +31,7 @@ public:
 		XMFLOAT3	PADDING;		// Add extra padding so structure is a multiple of 16 for CreateBuffer function requirements.
 	};
 
+	__declspec(align(16))
 	struct PSBufferType
 	{
 		float radius;				// Radius of the line

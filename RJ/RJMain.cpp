@@ -6,6 +6,7 @@
 #include <string.h>
 #include <iostream>
 #include <tchar.h>
+#include <pathcch.h>
 #include "time.h"
 
 #include "FastMath.h"
@@ -83,6 +84,7 @@
 #include "BasicProjectileDefinition.h"		// DBG
 #include "BasicProjectileSet.h"				// DBG
 #include "VolLineShader.h"					// DBG
+#include "VolumetricLine.h"					// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -129,6 +131,30 @@ RJMain::RJMain(void)
 	// Debug fields and settings
 	m_debug_ccdspheretest = m_debug_ccdobbtest = false;
 	sproj = NULL;
+}
+
+// Retrieve data on the executable and working directory
+Result RJMain::RetrieveExecutableData(void)
+{
+	// Determine the full path (including filename) of the executable and store it
+	const char *cexe = new char[4096];
+	if (0 == GetModuleFileName(NULL, (LPSTR)cexe, 4096)) return ErrorCodes::CouldNotDetermineExecutablePath;
+	Game::ExeName = std::string(cexe);
+
+	// Convert to a wstring for input into the subsequent cch function
+	std::wstring wspath = ConvertStringToWString(Game::ExeName);
+	const WCHAR *wpath = wspath.c_str();
+	WCHAR *cpath = new WCHAR[4096];
+	wcsncpy(cpath, wpath, 4096);
+
+	// Parse the executable path to remove the filename, and store the resulting executable directory
+	if (FAILED(PathCchRemoveFileSpec((PWSTR)cpath, 4096))) return ErrorCodes::CouldNotParseExecutablePath;
+	std::wstring wsnewpath = std::wstring(cpath);
+	Game::ExePath = ConvertWStringToString(wsnewpath);
+
+	// Deallocate any temporary data and return success
+	delete cexe; delete cpath;
+	return ErrorCodes::NoError;
 }
 
 // Begins a new internal cycle, calculating frame deltas and the new internal clock values
@@ -616,9 +642,9 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		ss->SetPosition(XMVectorAdd(cs->TurretController.Turrets[0]->GetPosition(), XMVectorSet(50.0f, 0.0f, 0.0f, 0.0f)));
+		//ss->SetPosition(XMVectorAdd(cs->TurretController.Turrets[0]->GetPosition(), XMVectorSet(50.0f, 0.0f, 0.0f, 0.0f)));
 
-		m_keyboard.LockKey(DIK_3);
+		//m_keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
 		Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, !b[DIK_LSHIFT]);
@@ -818,6 +844,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
+
+	// Record the name of and path to the current executable (TODO: Windows only)
+	RetrieveExecutableData();
 
 	// Initialise all component pointers to NULL so we can accurately set up and wind down the component set
 	InitialiseComponentPointers();
@@ -2009,15 +2038,28 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Test render
 
 	// Line endpoints
-	/*D3DXVECTOR3 poffset[2] = { D3DXVECTOR3(0.0f, 0.0f, 50.0f), D3DXVECTOR3(100.0f, 0.0f, 50.0f) };
-	D3DXMATRIX t1, t2, w1, w2;
-	D3DXMatrixTranslation(&t1, poffset[0].x, poffset[0].y, poffset[0].z);
-	D3DXMatrixTranslation(&t2, poffset[1].x, poffset[1].y, poffset[1].z);
-	w1 = (t1 * *ss->GetWorldMatrix());
-	w2 = (t2 * *ss->GetWorldMatrix());*/
+	static float zval = 0.0f;
+	XMVECTOR poffset[2] = { XMVectorSet(0.0f, 0.0f, zval, 0.0f), XMVectorSet(100.0f, 0.0f, zval, 0.0f) };
+	XMMATRIX w0 = XMMatrixMultiply(XMMatrixTranslationFromVector(poffset[0]), ss->GetWorldMatrix());
+	XMMATRIX w1 = XMMatrixMultiply(XMMatrixTranslationFromVector(poffset[1]), ss->GetWorldMatrix());
 
+	XMVECTOR p0 = XMVector3TransformCoord(NULL_VECTOR, w0);
+	XMVECTOR p1 = XMVector3TransformCoord(NULL_VECTOR, w1);
 	
+	VolumetricLine v;
+	v.P1 = p0; v.P2 = p1;
 
+	if (m_keyboard.GetKeys()[DIK_3]) Game::Engine->RenderVolumetricLine(v);
+
+	zval += (Game::TimeFactor * 0.0f);
+	/*
+	XMVECTOR sspos = ss->GetPosition();
+	XMVECTOR vp1 = XMVector3TransformCoord(sspos, Game::Engine->GetRenderViewMatrix());
+	XMVECTOR vp2 = XMVector3TransformCoord(XMVectorAdd(sspos, XMVectorSet(100.0f, 2.0f, 2.0f, 0.0f)), Game::Engine->GetRenderViewMatrix());
+	XMFLOAT3 fp1, fp2;
+	XMStoreFloat3(&fp1, vp1); XMStoreFloat3(&fp2, vp2);
+	OutputDebugString(concat("fp1: ")(fp1.x)(",")(fp1.y)(",")(fp1.z)(" | fp2: ")(fp2.x)(",")(fp2.y)(",")(fp2.z)("\n").str().c_str());
+	*/
 
 }
 

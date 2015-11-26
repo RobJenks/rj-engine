@@ -88,6 +88,7 @@ CoreEngine::CoreEngine(void)
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = 0;
+	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 	
 	// Set default values for game engine parameters
 	m_hwnd = NULL;
@@ -215,9 +216,9 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	Game::Log << LOG_INIT_START << "Shader [Skinned normal map] initialisation complete\n";
 
 	// Initialise the volumetric line shader
-	/*res = InitialiseVolLineShader();
+	res = InitialiseVolLineShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_START << "Shader [Volumetric line] initialisation complete\n";*/
+	Game::Log << LOG_INIT_START << "Shader [Volumetric line] initialisation complete\n";
 	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
@@ -360,15 +361,20 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled);
+		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
+		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
-		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal);
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
+		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -1144,16 +1150,20 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 	// Iterate through each shader in the render queue
 	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		// Skip this shader immediately if there are no models/instances to be rendered by it
-		if (m_renderqueue[i].size() == 0) continue;
+		// Get a reference to this specific render queue 
+		RM_InstancedShaderDetails & rq_shader = m_renderqueueshaders[i];
+
+		// Skip this shader immediately if there are no models/instances to be rendered by it (different check depending on whether this is a z-sorted shader)
+		if (rq_shader.RequiresZSorting == false)	{ if (m_renderqueue[i].size() == 0) continue; }
+		else										{ if (rq_shader.SortedInstances.size() == 0) continue; }
 
 		// Set any engine properties required by this specific shader
-		if (m_renderqueueshaders[i].AlphaBlendRequired != m_D3D->GetAlphaBlendState())	
-			m_D3D->SetAlphaBlendState(m_renderqueueshaders[i].AlphaBlendRequired);
+		if (rq_shader.AlphaBlendRequired != m_D3D->GetAlphaBlendState())
+			m_D3D->SetAlphaBlendState(rq_shader.AlphaBlendRequired);
 
 		// If this is a shader that requires z-sorting, perform that sort and render by the sorted method.  We can 
 		// then skip the remainder of the process for this shader and move on to the next one
-		if (m_renderqueueshaders[i].RequiresZSorting) { PerformZSortedRenderQueueProcessing(i); continue; }
+		if (rq_shader.RequiresZSorting) { PerformZSortedRenderQueueProcessing(rq_shader); continue; }
 
 		// Iterate through each model queued for rendering by this shader
 		mi_end = m_renderqueue[i].end();
@@ -1183,13 +1193,14 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				// Set the model index buffer to active in the input assembler
 				r_devicecontext->IASetIndexBuffer(mi->first->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
-				// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
+				if (rq_shader.PrimitiveTopology != m_current_topology) 
+					r_devicecontext->IASetPrimitiveTopology(rq_shader.PrimitiveTopology);
 
 				// Now process all instanced / indexed vertex data through this shader
-				m_renderqueueshaders[i].Shader->Render(	r_devicecontext, mi->first->GetIndexCount(), 
-														mi->first->GetIndexCount(), n, 
-														r_view, r_projection, mi->first->GetTextureResource());
+				rq_shader.Shader->Render(	r_devicecontext, mi->first->GetIndexCount(),
+											mi->first->GetIndexCount(), n, 
+											r_view, r_projection, mi->first->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1206,7 +1217,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 
 // Performs an intermediate z-sorting of instances before populating and processing the render queue.  Used only for 
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
-void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
+void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
 	ModelBuffer *model = NULL; 
 	int n;
@@ -1214,28 +1225,28 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 
 	// See whether there are any instances to be rendered
-	RM_ShaderCollection::size_type size = m_renderqueueshaders[shaderindex].SortedInstances.size();
+	int size = (int)shader.SortedInstances.size();
 	if (size == 0) return;
 
 	// Sort the vector by z-order.  Uses default "operator<" defined in the RM_ZSortedInstance struct
-	std::sort(m_renderqueueshaders[shaderindex].SortedInstances.begin(), m_renderqueueshaders[shaderindex].SortedInstances.end());
+	std::sort(shader.SortedInstances.begin(), shader.SortedInstances.end());
 
 	// Now reverse iterate through the newly-sorted items in the vector, to pull instances in decreasing distance from the camera
 	// Deliberately go to -1, so we can render the final element(s).  Loop will run from (n-1) to -1
 
 	// The starting model will be that of the first element (which we know exists since size>0)
-	model = m_renderqueueshaders[shaderindex].SortedInstances[size-1].ModelPtr;
-	for (RM_ShaderCollection::size_type i = size - 1; i >= -1; --i)
+	model = shader.SortedInstances[size-1].ModelPtr;
+	for (int i = size - 1; i >= -1; --i)
 	{
 		// If this is an instance of the same model as the previous item, and this is not the final (-1) dummy item,
 		// add another element to the render buffer
-		if (i != -1 && m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr == model)
+		if (i != -1 && shader.SortedInstances[i].ModelPtr == model)
 		{
-			renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
+			renderbuffer.push_back(shader.SortedInstances[i].Item);
 		}
 
 		// If this is an instance of a different model, or is the dummy end-element, we want to render the buffer that has been accumulated so far
-		if (i == -1 || m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr != model)
+		if (i == -1 || shader.SortedInstances[i].ModelPtr != model)
 		{
 			// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
 			// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
@@ -1253,16 +1264,18 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 
 				// Update the model VB pointer and then set vertex buffer data
 				m_instancedbuffers[0] = model->VertexBuffer;
+				m_instancedstride[0] = model->GetVertexSize();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
 				r_devicecontext->IASetIndexBuffer(model->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
-				// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-				r_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
+				if (shader.PrimitiveTopology != m_current_topology)
+					r_devicecontext->IASetPrimitiveTopology(shader.PrimitiveTopology);
 
 				// Now process all instanced / indexed vertex data through this shader
-				m_renderqueueshaders[shaderindex].Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
+				shader.Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
 																	r_view, r_projection, model->GetTexture()->GetTexture());
 
 				// Increment the count of draw calls that have been processed
@@ -1276,14 +1289,14 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(int shaderindex)
 			// we now want to update the current model pointer, and add the current element to the render buffer as the first item
 			if (i != -1)
 			{
-				model = m_renderqueueshaders[shaderindex].SortedInstances[i].ModelPtr;
-				renderbuffer.push_back(m_renderqueueshaders[shaderindex].SortedInstances[i].Item);
+				model = shader.SortedInstances[i].ModelPtr;
+				renderbuffer.push_back(shader.SortedInstances[i].Item);
 			}
 		}
 	}
 
 	// Clear the sorted instance vector ready for the next frame
-	m_renderqueueshaders[shaderindex].SortedInstances.clear();
+	shader.SortedInstances.clear();
 }
 
 // Generic iObject rendering method; used by subclasses wherever possible
@@ -1929,7 +1942,7 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	m.World.r[1] = line.P2;
 	
 	// Submit to the render queue
-	SubmitForRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::BaseModel, m);
+	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::BaseModel, m, line.P1);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

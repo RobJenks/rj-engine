@@ -56,6 +56,8 @@ namespace Game {
 	
 	// Main application instance
 	extern RJMain Application;
+	extern std::string ExeName;
+	extern std::string ExePath;
 
 	// The core game engine
 	extern CoreEngine *Engine;
