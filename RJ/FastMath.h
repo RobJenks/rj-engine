@@ -45,6 +45,9 @@ extern const XMVECTOR RAND_MAX_V;
 extern const XMFLOAT2 NULL_FLOAT2;
 extern const XMFLOAT3 NULL_FLOAT3;
 extern const XMFLOAT4 NULL_FLOAT4;
+extern const XMFLOAT2 ONE_FLOAT2;
+extern const XMFLOAT3 ONE_FLOAT3;
+extern const XMFLOAT4 ONE_FLOAT4;
 
 extern const XMVECTOR BASIS_VECTOR;
 extern const XMVECTOR BASIS_VECTOR_NEGZ;

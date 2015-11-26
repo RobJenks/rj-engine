@@ -269,6 +269,11 @@ namespace ErrorCodes {
 	const Result		ErrorCreatingSkinnedNMShaderConstBuffers		= 1329;
 	const Result		ErrorCreatingSkinnedNMShaderSamplerPS			= 1330;
 	const Result		SkinnedNormalMapSubsetRenderingFailure			= 1331;
+	const Result		CouldNotInitialiseStaticVolumetricLineData		= 1332;
+	const Result		CannotInitialiseVolLineShaderTexPSWithNullInput = 1333;
+	const Result		ErrorCreatingVolLineTexPixelShader				= 1334;
+	const Result		ErrorCreatingVolLineTexPSSamplerState			= 1335;
+	const Result		ErrorCreatingVolLineTexPSConstantBuffer			= 1336;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

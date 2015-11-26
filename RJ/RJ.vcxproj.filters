@@ -508,6 +508,9 @@
     <ClCompile Include="CapabilityTester.cpp">
       <Filter>Engine\Capabilities</Filter>
     </ClCompile>
+    <ClCompile Include="VolumetricLine.cpp">
+      <Filter>Engine\Volumetric lines</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1470,6 +1473,9 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="volumetric_cloud.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vol_line_tex.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

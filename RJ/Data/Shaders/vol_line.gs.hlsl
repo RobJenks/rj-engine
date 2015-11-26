@@ -9,8 +9,6 @@
 cbuffer ConstantBuffer
 {
 	matrix projectionmatrix;
-	float radius;
-	float3 PADDING;
 };
 
 
@@ -26,6 +24,8 @@ struct GeomInputType
 {
 	float4 P0 : POSITION0;
 	float4 P1 : POSITION1;
+	float4 Colour : COLOUR;
+	float Radius : RADIUS;
 };
 
 struct PixelInputType
@@ -34,10 +34,12 @@ struct PixelInputType
 	float3 p1 : P1;						// P1 in view space
 	float linelength : LENGTH;			// Length between P1 and P2
 	float3 p2 : P2;						// P2 in view space
+	float radius : RADIUS;				// Radius of the line
 	float radius_sq : RADIUS_SQ;		// Squared radius of the line
 	float3 view_pos : VIEWPOS;			// Position in view space
 	float3 line_viewpos : LINE_VIEWPOS;	// View position in line space
 	float3 line_viewdir : LINE_VIEWDIR;	// View direction in line space
+	float4 colour : COLOUR;				// Colour (including alpha) of the line
 };
 
 
@@ -49,15 +51,17 @@ void main(point GeomInputType linedata[1], inout TriangleStream<PixelInputType> 
 {
 	PixelInputType output;
 
-	// linedata[0/1] = p1/p2.  Both in view space
+	// linedata[0/1] = p1/p2.  Both in view space.  Also pass colour straight through
 	output.p1 = linedata[0].P0.xyz;
 	output.p2 = linedata[0].P1.xyz;
+	output.colour = linedata[0].Colour;
 
 	// Get the difference vector between endpoints and determine line length
 	float3 linedir = (output.p2 - output.p1);
 	output.linelength = length(linedir);
 	float3 normLineDir = (linedir / output.linelength);
-	output.radius_sq = (radius * radius);
+	output.radius = linedata[0].Radius;
+	output.radius_sq = (output.radius * output.radius);
 
 	// Construct orthonormal basis of the line
 	float3 d2 = cross(normLineDir, UP_AXIS);
@@ -68,9 +72,9 @@ void main(point GeomInputType linedata[1], inout TriangleStream<PixelInputType> 
 
 	float3 d2norm = d2;
 	float3 d3norm = d3;
-	d2 *= radius; d3 *= radius;
+	d2 *= output.radius; d3 *= output.radius;
 
-	float3 lineDirOffsetM = radius * normLineDir;
+	float3 lineDirOffsetM = output.radius * normLineDir;
 	float3 lineDirOffsetP = linedir + lineDirOffsetM;
 
 	// Compute view position in line space (used by pixel shader)

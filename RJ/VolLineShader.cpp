@@ -4,11 +4,17 @@
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
 #include "ModelBuffer.h"
+#include "CoreEngine.h"
+#include "Texture.h"
 
 #include "VolLineShader.h"
 
-// Static two-vertex base model used as input to the geometry shader, which will then break out into a volumetric line
-ModelBuffer *VolLineShader::BaseModel = NULL;
+// Static resources used during line rendering
+ModelBuffer *										VolLineShader::BaseModel = NULL;
+std::unordered_map<Texture*, ModelBuffer*>			VolLineShader::LineModels;
+Texture *											VolLineShader::LinearDepthTextureObject = NULL;
+ID3D11ShaderResourceView *							VolLineShader::LinearDepthTexture = NULL;
+ID3D11ShaderResourceView **							VolLineShader::PSShaderResources = NULL;
 
 // Constructor
 VolLineShader::VolLineShader(void)
@@ -17,6 +23,7 @@ VolLineShader::VolLineShader(void)
 	m_vertexShader = NULL;
 	m_geometryShader = NULL;
 	m_pixelShader = NULL;
+	m_pixelShader_tex = NULL;
 	m_inputlayout = NULL;
 	m_sampleState = NULL;
 	m_cbuffer_vs = NULL;
@@ -43,6 +50,9 @@ Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, f
 	if (result != ErrorCodes::NoError) return result;
 
 	result = InitialisePixelShader(device, ShaderFilename("vol_line.ps.cso"));
+	if (result != ErrorCodes::NoError) return result;
+
+	result = InitialisePixelShaderTextured(device, ShaderFilename("vol_line_tex.ps.cso"));
 	if (result != ErrorCodes::NoError) return result;
 
 	// Store other static data that is used by the shader
@@ -127,16 +137,34 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 	return ErrorCodes::NoError;
 }
 
+// Initialise shader
+Result VolLineShader::InitialisePixelShaderTextured(ID3D11Device *device, std::string filename)
+{
+	Result result;
+
+	// Parameter check
+	if (!device || filename == NullString) return ErrorCodes::CannotInitialiseVolLineShaderTexPSWithNullInput;
+
+	// Attempt to load and create the compiled shader 
+	result = ShaderManager::CreatePixelShader(device, filename, &m_pixelShader_tex);
+	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingVolLineTexPixelShader;
+
+	// We do not need to create other resources, e.g. sampler states or constant buffers, since we can share with the base pixel shader
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
 // Renders the shader.
-Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
-								const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+Result XM_CALLCONV VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	VSBufferType *vsbuffer; GSBufferType *gsbuffer; PSBufferType *psbuffer;
 
 	// Parameter check
-	if (!deviceContext || vertexCount <= 0 || indexCount <= 0 || instanceCount <= 0 || !texture) return ErrorCodes::InvalidShaderParameters;
+	if (!deviceContext || vertexCount <= 0 || indexCount <= 0 || instanceCount <= 0) return ErrorCodes::InvalidShaderParameters;
 
 	// Initialise vertex shader constant buffer
 	hr = deviceContext->Map(m_cbuffer_vs, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -154,7 +182,6 @@ Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, uns
 	gsbuffer = (GSBufferType*)mappedResource.pData;
 	{
 		XMStoreFloat4x4(&gsbuffer->projectionmatrix, XMMatrixTranspose(projectionMatrix));	// Transpose matrix
-		gsbuffer->radius = m_radius;
 	}
 	deviceContext->Unmap(m_cbuffer_gs, 0);
 	deviceContext->GSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_gs);
@@ -164,28 +191,37 @@ Result XM_CALLCONV VolLineShader::Render(ID3D11DeviceContext *deviceContext, uns
 	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
 	psbuffer = (PSBufferType*)mappedResource.pData;
 	{
-		psbuffer->radius = m_radius;
 		psbuffer->clipdistance_front = m_clip_near;
 		psbuffer->clipdistance_far = m_clip_far;
 		psbuffer->viewport_size = m_viewport_size;
-		psbuffer->PADDING = NULL_FLOAT3;
 	}
 	deviceContext->Unmap(m_cbuffer_ps, 0);
 	deviceContext->PSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_ps);
 
-	// Set shader texture resource in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
-
 	// Set the vertex input layout
 	deviceContext->IASetInputLayout(m_inputlayout);
 
-	// Activate the shaders that will be used to render this model
-	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
-	deviceContext->GSSetShader(m_geometryShader, NULL, 0);
-	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
-
 	// Set the sampler state in the pixel shader
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+
+	// Activate the vertex and geometry shaders that will be used to render this model
+	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
+	deviceContext->GSSetShader(m_geometryShader, NULL, 0);
+
+	// This shader will select from different pixel shaders depending on the type of rendering required
+	if (texture)
+	{
+		// Render texture is required; use the textured rendering shader and assign additional shader resoures as required
+		VolLineShader::PSShaderResources[1] = texture;
+		deviceContext->PSSetShaderResources(0, 2, VolLineShader::PSShaderResources);
+		deviceContext->PSSetShader(m_pixelShader_tex, NULL, 0);
+	}
+	else
+	{
+		// No render texture required; we need only the standard linear depth texture and regular pixel shader
+		deviceContext->PSSetShaderResources(0, 1, &VolLineShader::LinearDepthTexture);
+		deviceContext->PSSetShader(m_pixelShader, NULL, 0);
+	}
 
 	// Render the model
 	deviceContext->DrawIndexedInstanced(indexCount, instanceCount, 0, 0, 0);
@@ -215,32 +251,77 @@ void VolLineShader::Shutdown()
 // Initialise the static data used in volumetric line rendering
 Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 {
-	// Create a new static base model
+	// Initialise the static model storage
 	VolLineShader::BaseModel = NULL;
-	VolLineShader::BaseModel = new ModelBuffer();
-	if (!VolLineShader::BaseModel) return ErrorCodes::CannotInitialiseStaticVolLineShaderData;
+	VolLineShader::LineModels.clear();
 
-	// Create the base vertex and index data
-	XMFLOAT3 *v = new XMFLOAT3[1] { XMFLOAT3(0.0f, 0.0f, 0.0f)};// , XMFLOAT3(1.0f, 1.0f, 1.0f)
-	UINT16 *i = new UINT16[1] { 0U}; // , 1U};
+	// Create a new static base model for non-textured lines
+	VolLineShader::BaseModel = VolLineShader::CreateLineModel(NULL);
 
-	// Initialise the base model using this data
-	Result result = VolLineShader::BaseModel->Initialise(device, (const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT16), 1U);
-	if (result != ErrorCodes::NoError) return result;
+	// Load the linear depth texture as a static resource for each rendering cycle
+	VolLineShader::LinearDepthTextureObject = new Texture();
+	Result result = VolLineShader::LinearDepthTextureObject->Initialise(concat(D::DATA)("\\Rendering\\linear_depth.dds").str().c_str());
+	if (result != ErrorCodes::NoError) return ErrorCodes::CouldNotInitialiseStaticVolumetricLineData;
+	VolLineShader::LinearDepthTexture = VolLineShader::LinearDepthTextureObject->GetTexture();
 	
-	// Assign the base model texture
-	result = VolLineShader::BaseModel->SetTexture(concat(D::DATA)("/Rendering/vol_line1.dds").str().c_str());
-	if (result != ErrorCodes::NoError) return result;
-
-	// Deallocate the model vertex and index data
-	SafeDelete(v); 
-	SafeDelete(i);
+	// We will maintain a two-resource array as input parameter for textured line rendering.  The second parameter
+	// will be filled at runtime by the shader texture required
+	PSShaderResources = new ID3D11ShaderResourceView*[2];
+	PSShaderResources[0] = VolLineShader::LinearDepthTexture;
+	PSShaderResources[1] = NULL;
 
 	// Return success
 	return ErrorCodes::NoError;
 }
 
+// Returns a model appropriate for rendering volumetric lines with the specified texture, or for pure
+// non-textured volumetric lines if render_texture == NULL
+ModelBuffer * VolLineShader::LineModel(Texture *render_texture)
+{
+	// If we want pure volumetric line rendering then simply return the base model
+	if (!render_texture) return VolLineShader::BaseModel;
 
+	// Otherwise check whether we already have a model for this render texture
+	if (VolLineShader::LineModels.count(render_texture) == 0)
+	{
+		// We do not have a model for this texture, so create one now before returning it
+		ModelBuffer *buffer = VolLineShader::CreateLineModel(render_texture);
+		LineModels[render_texture] = buffer;
+		return buffer;
+	}
+	else
+	{
+		// We already have a model for this texture, so simply return it here
+		return LineModels[render_texture];
+	}
+}
+
+// Creates a new line model appropriate for rendering volumetric lines with the specified texture, or for pure
+// non-textured volumetric lines if render_texture == NULL
+ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
+{
+	ModelBuffer *buffer = new ModelBuffer();
+	if (!buffer) return NULL;
+
+	// Create the base vertex and index data
+	XMFLOAT3 *v = new XMFLOAT3[1] { XMFLOAT3(0.0f, 0.0f, 0.0f) }; 
+	UINT16 *i = new UINT16[1] { 0U }; 
+
+	// Initialise the base model using this data
+	Result result = buffer->Initialise(Game::Engine->GetDevice(), (const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT16), 1U);
+	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
+
+	// Assign the base model texture
+	result = buffer->SetTexture(render_texture);
+	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
+
+	// Deallocate the model vertex and index data
+	SafeDelete(v);
+	SafeDelete(i);
+
+	// Return the new line model
+	return buffer;
+}
 
 
 

@@ -22,6 +22,7 @@ public:
 
 	// Sets the texture for this object
 	Result							SetTexture(const char *filename);
+	Result							SetTexture(Texture *texture);
 
 	// Vertex buffer
 	ID3D11Buffer *					VertexBuffer;

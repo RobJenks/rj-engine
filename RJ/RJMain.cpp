@@ -2046,8 +2046,13 @@ void RJMain::DEBUGDisplayInfo(void)
 	XMVECTOR p0 = XMVector3TransformCoord(NULL_VECTOR, w0);
 	XMVECTOR p1 = XMVector3TransformCoord(NULL_VECTOR, w1);
 	
-	VolumetricLine v;
-	v.P1 = p0; v.P2 = p1;
+	static Texture *t = NULL;
+	if (!t)
+	{
+		t = new Texture();
+		Result result = t->Initialise(concat(D::DATA)("\\Rendering\\grad2.dds").str().c_str());
+	}
+	VolumetricLine v = VolumetricLine(p0, p1, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f), t);
 
 	if (m_keyboard.GetKeys()[DIK_3]) Game::Engine->RenderVolumetricLine(v);
 

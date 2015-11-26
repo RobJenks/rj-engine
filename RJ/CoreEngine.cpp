@@ -1276,7 +1276,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 
 				// Now process all instanced / indexed vertex data through this shader
 				shader.Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
-																	r_view, r_projection, model->GetTexture()->GetTexture());
+										r_view, r_projection, model->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1940,9 +1940,15 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	RM_Instance m;
 	m.World.r[0] = line.P1;
 	m.World.r[1] = line.P2;
+
+	// Embed line colour & alpha within the third matrix row
+	m.World.r[2] = line.Colour;
+
+	// Provide additional parameters as required.  x = line radius
+	m.Params = line.Params;
 	
 	// Submit to the render queue
-	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::BaseModel, m, line.P1);
+	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), m, line.P1);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

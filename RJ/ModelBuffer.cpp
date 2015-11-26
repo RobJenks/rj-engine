@@ -99,6 +99,23 @@ Result ModelBuffer::SetTexture(const char *filename)
 	return ErrorCodes::NoError;
 }
 
+// Sets the texture for this object
+Result ModelBuffer::SetTexture(Texture *texture)
+{
+	// We want to deallocate any texture that already exists
+	if (m_texture)
+	{
+		m_texture->Shutdown();
+		SafeDelete(m_texture);
+	}
+
+	// Now simply store the texture object
+	m_texture = texture;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
 // Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
 // handled automatically when the object is deallocated
 void ModelBuffer::ReleaseModelBufferResources(void)
