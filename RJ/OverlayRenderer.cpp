@@ -64,7 +64,7 @@ Result OverlayRenderer::Initialise(void)
 	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; i++)
 	{
 		// Load the model and texture from file
-		s_filename = concat(D::DATA)("\\Models\\Misc\\")(m_modelfilenames[i]).str();
+		s_filename = concat(D::IMAGE_DATA)("\\Models\\Misc\\")(m_modelfilenames[i]).str();
 		filename = s_filename.c_str();
 		m_models[i] = new Model();
 		result = m_models[i]->Initialise(modelname, filename);
@@ -76,7 +76,7 @@ Result OverlayRenderer::Initialise(void)
 	// Initialise blueprint overlay model
 	m_blueprintoverlay = new Model();
 	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
-											concat(D::DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
+											concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
 	if (result != ErrorCodes::NoError) overallresult = result;
 
 	// Initialise all pre-cached transform matrices for render efficiency

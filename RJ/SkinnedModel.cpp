@@ -23,10 +23,10 @@ SkinnedModel::SkinnedModel(ID3D11Device* device, const std::string &code, const 
 	{
 		Mat.push_back(mats[i].Mat);
 
-		ID3D11ShaderResourceView* diffuseMapSRV = Texture::CreateSRV(concat(D::DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str());
+		ID3D11ShaderResourceView* diffuseMapSRV = Texture::CreateSRV(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str());
 		DiffuseMapSRV.push_back(diffuseMapSRV);		// TODO: Check for NULL in case of failure?  Or will render without texture if == NULL?
 
-		ID3D11ShaderResourceView* normalMapSRV = Texture::CreateSRV(concat(D::DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str());
+		ID3D11ShaderResourceView* normalMapSRV = Texture::CreateSRV(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str());
 		NormalMapSRV.push_back(normalMapSRV);		// TODO: Check for NULL in case of failure?  Or will render without texture if == NULL?
 	}
 

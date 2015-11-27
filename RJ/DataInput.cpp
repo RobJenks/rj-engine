@@ -295,8 +295,8 @@ Result IO::Data::LoadConfigFile(const string &filename)
 			const char *path = child->Attribute("path");
 			if (path && DirectoryExists(path))
 			{
-				D::DATA = (char*)calloc(strlen(path) + 1, sizeof(char));
-				strcpy(D::DATA, path);
+				// Store the data path in string form; other dependent fields will be initialised in a post-processing step
+				D::DATA_S = std::string(path);
 			}
 		}
 		else if (name == "screenresolution") {
@@ -390,7 +390,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	
 	// Construct full filenames from the info specified
 	string filename = BuildStrFilename(D::DATA, fname);
-	string texture = BuildStrFilename(D::DATA, tex);
+	string texture = BuildStrFilename(D::IMAGE_DATA, tex);
 
 	// Otherwise create a new model here
 	model = new Model();
@@ -2542,15 +2542,15 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 			e->SetEffectModel(child->GetText());							// The underlying effect model used for rendering
 		}
 		else if (key == "firetexture") {
-			string filename = BuildStrFilename(D::DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
+			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
 			e->SetFireTexture(filename.c_str());				
 		}
 		else if (key ==	"noisetexture") { 
-			string filename = BuildStrFilename(D::DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
+			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
 			e->SetNoiseTexture(filename.c_str());				
 		}
 		else if (key == "alphatexture") {
-			string filename = BuildStrFilename(D::DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
+			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
 			e->SetAlphaTexture(filename.c_str());				
 		}
 		else if (key == "noisescrollspeed") {
@@ -2610,7 +2610,7 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			e->SetParticleLimit(atoi(child->GetText()));					
 		}
 		else if (key == "particletexture") {
-			e->LoadTexture(Game::Engine->GetDevice(), BuildStrFilename(D::DATA, child->GetText()).c_str());
+			e->LoadTexture(Game::Engine->GetDevice(), BuildStrFilename(D::IMAGE_DATA, child->GetText()).c_str());
 		}
 		else if (key == "emissionfrequency") {
 			const char *mn = child->Attribute("min");
@@ -2722,7 +2722,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 
 			// Process relevant fields to get the correct format
 			StrLowerC(code); 
-			string texfile = BuildStrFilename(D::DATA, texture);
+			string texfile = BuildStrFilename(D::IMAGE_DATA, texture);
 			int width = (int)floor(atof(cwidth));
 			int height = (int)floor(atof(cheight));
 
@@ -3090,7 +3090,7 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 	if (!code || !texture || !tmode) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
 
 	// Process the parameters and convert as required
-	string stexfile = BuildStrFilename(D::DATA, texture);
+	string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
 	const char *texfile = stexfile.c_str();
 	string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
 	string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);

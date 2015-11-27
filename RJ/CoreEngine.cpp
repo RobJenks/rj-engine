@@ -627,7 +627,7 @@ Result CoreEngine::InitialiseFonts(void)
 	// TODO: To be loaded from external file?  How to set Game::Fonts::* IDs?
 	result = m_textmanager->InitializeFont(	"Font_Basic1", 
 											concat(D::DATA)("/Fonts/font_basic1.txt").str().c_str(), 
-											concat(D::DATA)("/Fonts/font_basic1.dds").str().c_str(), 
+											concat(D::IMAGE_DATA)("/Fonts/font_basic1.dds").str().c_str(), 
 											Game::Fonts::FONT_BASIC1);
 	if (result != ErrorCodes::NoError) return result;
 

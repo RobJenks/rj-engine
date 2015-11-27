@@ -261,7 +261,7 @@ Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
 
 	// Load the linear depth texture as a static resource for each rendering cycle
 	VolLineShader::LinearDepthTextureObject = new Texture();
-	Result result = VolLineShader::LinearDepthTextureObject->Initialise(concat(D::DATA)("\\Rendering\\linear_depth.dds").str().c_str());
+	Result result = VolLineShader::LinearDepthTextureObject->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\linear_depth.dds").str().c_str());
 	if (result != ErrorCodes::NoError) return ErrorCodes::CouldNotInitialiseStaticVolumetricLineData;
 	VolLineShader::LinearDepthTexture = VolLineShader::LinearDepthTextureObject->GetTexture();
 	

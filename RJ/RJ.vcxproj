@@ -109,11 +109,15 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <FxCompile>
-      <ObjectFileOutput>$(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </FxCompile>
+    <ImageContentTask>
+      <ContentOutput>$(OutDir)\Data\ImageContent\%(RelativeDir)\%(Filename).dds</ContentOutput>
+      <GeneratePremultipliedAlpha>true</GeneratePremultipliedAlpha>
+    </ImageContentTask>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -138,11 +142,15 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <FxCompile>
-      <ObjectFileOutput>$(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </FxCompile>
+    <ImageContentTask>
+      <ContentOutput>$(OutDir)\Data\ImageContent\%(RelativeDir)\%(Filename).dds</ContentOutput>
+      <GeneratePremultipliedAlpha>true</GeneratePremultipliedAlpha>
+    </ImageContentTask>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -167,11 +175,15 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <FxCompile>
-      <ObjectFileOutput>$(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </FxCompile>
+    <ImageContentTask>
+      <ContentOutput>$(OutDir)\Data\ImageContent\%(RelativeDir)\%(Filename).dds</ContentOutput>
+      <GeneratePremultipliedAlpha>true</GeneratePremultipliedAlpha>
+    </ImageContentTask>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -196,11 +208,15 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <FxCompile>
-      <ObjectFileOutput>$(OutDir)\Shaders\%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
       <ShaderModel>5.0</ShaderModel>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
     </FxCompile>
+    <ImageContentTask>
+      <ContentOutput>$(OutDir)\Data\ImageContent\%(RelativeDir)\%(Filename).dds</ContentOutput>
+      <GeneratePremultipliedAlpha>true</GeneratePremultipliedAlpha>
+    </ImageContentTask>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />

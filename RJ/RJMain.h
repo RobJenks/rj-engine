@@ -60,6 +60,7 @@ public:
 	// Methods to load game data & config
 	Result				LoadPlayerConfig(void);
 	Result				LoadAllGameData(void);
+	Result				InitialiseGameDataDependencies(void);
 	Result				InitialiseLoadedGameData(void);
 
 	// Primary display method to execute each cycle

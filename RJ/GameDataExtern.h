@@ -130,7 +130,10 @@ namespace D {
 	}
 
 	// String constant data for loading external game data
-	extern char *DATA;
+	extern const char *DATA;
+	extern std::string DATA_S;
+	extern const char *IMAGE_DATA;
+	extern std::string IMAGE_DATA_S;
 	extern const char *NODE_GameData;
 	extern const char *NODE_Config;
 	extern const char *NODE_FileIndex;

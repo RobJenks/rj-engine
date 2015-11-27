@@ -484,7 +484,7 @@ void RJMain::ProcessKeyboardInput(void)
 				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.75));
 				
 				Texture *t = new Texture();
-				if (ErrorCodes::NoError == t->Initialise(concat(D::DATA)("\\Rendering\\grad2.dds").str().c_str()))
+				if (ErrorCodes::NoError == t->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
 				{
 					def->SetTexture(t);
 				}
@@ -887,10 +887,10 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 		return res;
 	}
 
-	// Validate that the game data directory exists before attempting to load data.  In future, may want to move 
-	// into separate method that performs all pre-load checks for key files/directories/assets
-	if (!DirectoryExists(D::DATA)) {
-		std::string errorstring = concat("Fatal Error: Game data directory does not exist; check config.xml").str();
+	// Validate that the game data directory and all other dependencies exist before attempting to load data
+	res = InitialiseGameDataDependencies();
+	if (res != ErrorCodes::NoError) {
+		std::string errorstring = concat("Fatal Error: Game data dependencies could not be initialised; check config.xml [")((int)res)("]").str();
 		Game::Log << LOG_INIT_START << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
@@ -998,6 +998,46 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	return ErrorCodes::NoError;
 }
 
+// Initialise all game data dependencies and make sure that all required dependencies are available
+Result RJMain::InitialiseGameDataDependencies(void)
+{
+	// Attempt to resolve the provided data path to its full absolute directory string
+	std::wstring wdata = ConvertStringToWString(D::DATA_S);
+	wchar_t *wcfull = new wchar_t[4096];
+	if (0 == GetFullPathNameW(wdata.c_str(), 4096, wcfull, NULL))
+	{
+		return ErrorCodes::CouldNotDetermineAbsoluteDataPath;
+	}
+	else
+	{
+		// Retrieve full directory name and store it
+		std::wstring wfull = std::wstring(wcfull);
+		D::DATA_S = ConvertWStringToString(wfull);
+		D::DATA = D::DATA_S.c_str();
+
+		// Make sure the directory is valid
+		if (!DirectoryExists(D::DATA))
+		{
+			return ErrorCodes::AbsoluteDataPathIsNotValid;
+		}
+	}
+	delete[] wcfull;
+
+	// Derive other required application paths
+	D::IMAGE_DATA_S = std::string(Game::ExePath + "\\Data\\ImageContent\\Data\\");
+	D::IMAGE_DATA = D::IMAGE_DATA_S.c_str();
+
+	// Make sure paths are valid
+	if (!DirectoryExists(D::IMAGE_DATA)) 
+	{
+		return ErrorCodes::ImageResourcePathIsNotValid;
+	}
+
+	// Return success
+	Game::Log << LOG_INIT_START << "Game data dependencies initialised successfully\n";
+	return ErrorCodes::NoError;
+}
+
 void RJMain::InitialiseComponentPointers()
 {
 	// Initialise all component pointers to NULL.  This is important so that the setup and wind-down processes
@@ -1040,7 +1080,7 @@ Result RJMain::InitialiseRegions(void)
 	D::Regions::Immediate = new ImmediateRegion();
 	res = D::Regions::Immediate->Initialise(
 		Game::Engine->GetDevice(),																		// Pointer to the D3D device
-		BuildStrFilename(D::DATA, "Particles\\dust_particle.dds").c_str(),								// Texture to be mapped onto all dust particles
+		BuildStrFilename(D::IMAGE_DATA, "Particles\\dust_particle.dds").c_str(),								// Texture to be mapped onto all dust particles
 		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),											// Starting centre point = player location
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),										// Minimum region bounds
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),									// Maximum region bounds
@@ -1059,7 +1099,7 @@ Result RJMain::InitialiseRegions(void)
 	// DEBUG: SET BACKDROP
 	XMFLOAT2 texsize = XMFLOAT2(2048.0f, 1024.0f);
 	if (true) D::Regions::System->SetBackdropTexture(Game::Engine->GetDevice(),
-		BuildStrFilename(D::DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(),
+		BuildStrFilename(D::IMAGE_DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(),
 		texsize);
 
 

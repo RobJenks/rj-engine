@@ -21,6 +21,9 @@ namespace ErrorCodes {
 	const Result		UnknownDataNodeType								= 8;
 	const Result		CouldNotDetermineExecutablePath					= 9;
 	const Result		CouldNotParseExecutablePath						= 10;
+	const Result		CouldNotDetermineAbsoluteDataPath				= 11;
+	const Result		AbsoluteDataPathIsNotValid						= 12;
+	const Result		ImageResourcePathIsNotValid						= 13;
 
 	// DirectX error codes												(1000-1999)
 	const Result		CannotCreateDirect3DDevice						= 1000;

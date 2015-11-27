@@ -61,7 +61,10 @@ namespace D {
 	}
 
 	// Game data location; can be updated by configuration
-	char *DATA = "../RJ/Data";
+	const char *DATA = "../RJ/Data";
+	std::string DATA_S = DATA;
+	const char *IMAGE_DATA = "../RJ/Data/ImageContent/Data";
+	std::string IMAGE_DATA_S = IMAGE_DATA;
 
 	// Data read/edit/load constants
 	const char *NODE_GameData = "gamedata";

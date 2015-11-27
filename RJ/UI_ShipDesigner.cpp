@@ -396,7 +396,7 @@ Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, s
 	{
 		// Construct the texture filename
 		texname = render->GetConstant(texturekey);
-		texfname = BuildStrFilename(D::DATA, texname);
+		texfname = BuildStrFilename(D::IMAGE_DATA, texname);
 		filename = texfname.c_str();	
 
 		// Retrieve the component z order

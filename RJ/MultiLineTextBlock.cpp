@@ -101,7 +101,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	SetRenderActive(m_render);
 
 	// Create a backdrop component for the control
-	std::string back_filename = concat(D::DATA)(MultiLineTextBlock::BACKDROP_COMPONENT).str();
+	std::string back_filename = concat(D::IMAGE_DATA)(MultiLineTextBlock::BACKDROP_COMPONENT).str();
 	m_back = D::UI->NewComponent(concat(m_code)(".back").str(), back_filename.c_str(), m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
 	if (m_back)
 	{
