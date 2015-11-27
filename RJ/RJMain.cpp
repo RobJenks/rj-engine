@@ -478,7 +478,7 @@ void RJMain::ProcessKeyboardInput(void)
 			if (!def)
 			{
 				def = new BasicProjectileDefinition();
-				def->SetProjectileSpeed(1000.0f/100.0f);
+				def->SetProjectileSpeed(1000.0f);
 				def->SetProjectileBeamLength(200.0f);
 				def->SetProjectileBeamRadius(3.5f);
 				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.75));

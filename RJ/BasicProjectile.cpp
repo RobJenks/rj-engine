@@ -46,10 +46,12 @@ BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, G
 void BasicProjectile::GenerateRenderInstance(RM_Instance & outInstance)
 {
 	// Volumetric line endpoints are embedded within the first two rows of the instance matrix 
+	// P1 will be scaled so that the beam grows from zero to its full length during the 
+	// first 'Speed' seconds after launch
 	float beam_mult = (float)(Game::ClockMs - LaunchTime) * 0.001f;
 	outInstance.World.r[0] = Position;
 	outInstance.World.r[1] = XMVectorSubtract(Position, XMVectorScale(Velocity,
-		min(beam_mult * Speed, 1.0f)));// *Definition->ProjectileBeamLength));
+		min(beam_mult, ProjectileBeamLengthMultiplier)));
 
 	// Line colour and alpha are stored within the third matrix row
 	outInstance.World.r[2] = Definition->VolumetricLineData.Colour;
