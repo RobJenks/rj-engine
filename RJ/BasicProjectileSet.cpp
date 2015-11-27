@@ -28,7 +28,7 @@ void BasicProjectileSet::Initialise(std::vector<BasicProjectile>::size_type init
 
 // Adds a new projectile to the collection
 void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const FXMVECTOR position,
-										const FXMVECTOR orientation, unsigned int lifetime)
+										const FXMVECTOR orientation, unsigned int lifetime, const FXMVECTOR base_world_velocity)
 {
 	// If we are not active then initialise now; first projectile will be created at [0]
 	if (!Active)
@@ -52,7 +52,7 @@ void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Ga
 	}
 
 	// The "LiveIndex" now points to the next suitable element for creating a projectile.  Set the projectile details
-	Items[LiveIndex] = BasicProjectile(def, owner, position, orientation, lifetime);
+	Items[LiveIndex] = BasicProjectile(def, owner, position, orientation, lifetime, base_world_velocity);
 }
 
 // Extends the size of the collection to allow more elements to be added, as long as we are not at the limit
@@ -148,6 +148,12 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 			RemoveProjectile(i); continue;
 		}
 		
+		// Slight hack; if the current clock time equals the projectile launch time this is the first frame in which it
+		// has been active.  Don't do any simulation in this first frame so it is rendered from its starting location (and not 
+		// one velocity step ahead) and move onto the next projectile
+		if (Game::ClockMs == proj.LaunchTime) { ++i;  continue; }
+
+
 		/* 2. Otherwise if the projectile is still active, test collision for any objects in the path it is about to take */
 			
 		// Determine the relevant octree leaf node for this projectile.  Test the last node that was used as a

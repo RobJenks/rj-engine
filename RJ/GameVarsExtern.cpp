@@ -50,6 +50,7 @@ namespace Game {
 	MouseInputControlMode MouseControlMode = MouseInputControlMode::MC_MOUSE_FLIGHT;
 
 	// Persistent timers, that progress regardless of the state of the game simulation
+	float PersistentClockTime = 0.0f;													// Time (secs)
 	float PersistentTimeFactor = 0.0001f;												// Time (secs) passed since the previous frame
 	XMVECTOR PersistentTimeFactorV = XMVectorReplicate(PersistentTimeFactor);			// Time (secs) passed since the previous frame (vectorised form)
 	unsigned int PersistentClockMs = 0U;												// System time (ms)
@@ -57,6 +58,7 @@ namespace Game {
 	unsigned int PersistentClockDelta = 0U;												// Delta time (ms) since the previous frame
 
 	// Game timers, that stop and start as the game pause state is changed
+	float ClockTime = 0.0f;																// Time (secs)
 	float TimeFactor = 0.0001f;															// Time (secs) passed since the previous frame
 	XMVECTOR TimeFactorV = XMVectorReplicate(TimeFactor);								// Time (secs) passed since the previous frame (vectorised form)
 	unsigned int ClockMs = 0U;															// System time (ms)

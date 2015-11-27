@@ -72,5 +72,4 @@ struct VolumetricLine : public ALIGN16<VolumetricLine>
 };
 
 
-
 #endif

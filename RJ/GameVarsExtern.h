@@ -67,6 +67,7 @@ namespace Game {
 	extern MouseInputControlMode MouseControlMode;
 
 	// Persistent timers, that progress regardless of the state of the game simulation
+	extern float PersistentClockTime;					// Time (secs)
 	extern float PersistentTimeFactor;					// Time (secs) passed since the previous frame
 	extern XMVECTOR PersistentTimeFactorV;				// Time (secs) passed since the previous frame (vectorised form)
 	extern unsigned int PersistentClockMs;				// System time (ms)
@@ -74,6 +75,7 @@ namespace Game {
 	extern unsigned int PersistentClockDelta;			// Delta time (ms) since the previous frame
 
 	// Game timers, that stop and start as the game pause state is changed
+	extern float ClockTime;								// Time (secs)
 	extern float TimeFactor;							// Time (secs) passed since the previous frame
 	extern XMVECTOR TimeFactorV;						// Time (secs) passed since the previous frame (vectorised form)
 	extern unsigned int ClockMs;						// System time (ms)

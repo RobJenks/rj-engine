@@ -48,6 +48,7 @@
 #include "ArticulatedModel.h"
 #include "TurretController.h"
 #include "BasicProjectileSet.h"
+#include "BasicProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
@@ -1912,16 +1913,18 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 	if (!projectiles.Active) return;
 
 	// Iterate through each element of the projectile set
-	for (std::vector<BasicProjectile>::size_type i = 0; i < projectiles.LiveIndex; ++i)
+	RM_Instance instance;
+	for (std::vector<BasicProjectile>::size_type i = 0; i <= projectiles.LiveIndex; ++i)
 	{
 		// Test visibility; we will only render projectiles within the viewing frustum
 		BasicProjectile & proj = projectiles.Items[i];
 		if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
+		
+		// Update the render instance using data from this projectile
+		proj.GenerateRenderInstance(instance);
 
-		// FOR NOW, simply render a primitive at the projectile location
-		RenderModel(Model::GetModel("unit_cone_model"), XMMatrixMultiply(
-			XMMatrixRotationQuaternion(proj.Orientation),		// World = (Rot * Trans)
-			XMMatrixTranslationFromVector(proj.Position)));		// World = (Rot * Trans)
+		// Submit directly for rendering using this instance data and the cached model/texture data in the projectile definition
+		SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, instance, proj.Position);
 	}
 }
 
@@ -1935,8 +1938,6 @@ void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 {
 	// Embed line endpoints within the first two rows of the instance transform
-	// m.World._11 = line.P1.x; m.World._12 = line.P1.y; m.World._13 = line.P1.z;
-	// m.World._21 = line.P2.x; m.World._22 = line.P2.y; m.World._23 = line.P2.z;
 	RM_Instance m;
 	m.World.r[0] = line.P1;
 	m.World.r[1] = line.P2;

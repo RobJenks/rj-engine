@@ -511,6 +511,9 @@
     <ClCompile Include="VolumetricLine.cpp">
       <Filter>Engine\Volumetric lines</Filter>
     </ClCompile>
+    <ClCompile Include="BasicProjectileDefinition.cpp">
+      <Filter>Objects\BasicProjectile</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

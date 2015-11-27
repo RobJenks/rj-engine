@@ -134,7 +134,7 @@ float4 main(PixelInputType input) : SV_TARGET
 	float back = max(t2.y, t3.y);
 	front = min(front, t1.x);
 	back = max(back, t1.y);
-
+	
 	// Compute the two closest points on the volumetric line and current view ray
 	float3 p4 = input.view_pos + input.view_pos;									// Note that p3 = input.view_pos, no need to duplicate
 	float2 muab = LineLineIntersect(input.p1, input.p2, input.view_pos, p4);
@@ -145,7 +145,7 @@ float4 main(PixelInputType input) : SV_TARGET
 
 	// Use this to determine the texture sample coordinate
 	float fsample = length(pa - pb) / input.radius;
-
+	
 	// Intersection with environment
 	float envLinearDepth = clipdistance_far * linearDepthTexture.Sample(SampleType, input.position.xy / float2(viewport_width, viewport_height)).r;
 	front = min(front, envLinearDepth);

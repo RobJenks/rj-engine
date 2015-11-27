@@ -5,7 +5,9 @@
 #include "DX11_Core.h"
 #include "ErrorCodes.h"
 
+class Texture;
 class ModelBuffer;
+class VolumetricLineRenderData;
 
 
 // This class has no special alignment requirements

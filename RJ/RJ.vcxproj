@@ -211,6 +211,7 @@
     <ClCompile Include="ArticulatedModelComponent.cpp" />
     <ClCompile Include="Attachment.cpp" />
     <ClCompile Include="BasicProjectile.cpp" />
+    <ClCompile Include="BasicProjectileDefinition.cpp" />
     <ClCompile Include="BasicProjectileSet.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
     <ClCompile Include="CameraClass.cpp" />

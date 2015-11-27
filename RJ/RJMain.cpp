@@ -173,6 +173,7 @@ void RJMain::RunInternalClockCycle(void)
 	Game::PersistentClockMs += Game::PersistentClockDelta;
 	Game::PersistentTimeFactor = (float)Game::PersistentClockDelta * 0.001f;
 	Game::PersistentTimeFactorV = XMVectorReplicate(Game::PersistentTimeFactor);
+	Game::PersistentClockTime += Game::PersistentTimeFactor;
 
 
 	/* In-game clock */
@@ -187,6 +188,7 @@ void RJMain::RunInternalClockCycle(void)
 		Game::ClockMs += Game::ClockDelta;
 		Game::TimeFactor = (float)Game::ClockDelta * 0.001f;
 		Game::TimeFactorV = XMVectorReplicate(Game::TimeFactor);
+		Game::ClockTime += Game::TimeFactor;
 	}
 }
 
@@ -467,14 +469,34 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_U])
 	{
 		static unsigned int dbg_u_counter = 0U;
+		static bool lhs = true;
 		if (Game::ClockMs > dbg_u_counter)
 		{
-			dbg_u_counter = (Game::ClockMs + 2);
+			dbg_u_counter = (Game::ClockMs + 100);
 
-			BasicProjectileDefinition *def = new BasicProjectileDefinition();
-			def->Speed = 1000.0f;
+			static BasicProjectileDefinition *def = NULL;
+			if (!def)
+			{
+				def = new BasicProjectileDefinition();
+				def->SetProjectileSpeed(1000.0f/100.0f);
+				def->SetProjectileBeamLength(200.0f);
+				def->SetProjectileBeamRadius(3.5f);
+				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.75));
+				
+				Texture *t = new Texture();
+				if (ErrorCodes::NoError == t->Initialise(concat(D::DATA)("\\Rendering\\grad2.dds").str().c_str()))
+				{
+					def->SetTexture(t);
+				}
 
-			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), ss->GetPosition(), ss->GetOrientation(), 3000U);
+				def->GenerateProjectileRenderingData();
+			}
+
+			const float foffset = 10.0f;
+			XMVECTOR pos = (lhs ? XMVectorSetX(NULL_VECTOR, -foffset) : XMVectorSetX(NULL_VECTOR, foffset));
+			pos = XMVector3TransformCoord(pos, ss->GetWorldMatrix());
+			lhs = !lhs;
+			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), pos, ss->GetOrientation(), 3000U, ss->PhysicsState.WorldMomentum);
 		}
 
 	}
@@ -2033,38 +2055,6 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}
-
-
-	// Test render
-
-	// Line endpoints
-	static float zval = 0.0f;
-	XMVECTOR poffset[2] = { XMVectorSet(0.0f, 0.0f, zval, 0.0f), XMVectorSet(100.0f, 0.0f, zval, 0.0f) };
-	XMMATRIX w0 = XMMatrixMultiply(XMMatrixTranslationFromVector(poffset[0]), ss->GetWorldMatrix());
-	XMMATRIX w1 = XMMatrixMultiply(XMMatrixTranslationFromVector(poffset[1]), ss->GetWorldMatrix());
-
-	XMVECTOR p0 = XMVector3TransformCoord(NULL_VECTOR, w0);
-	XMVECTOR p1 = XMVector3TransformCoord(NULL_VECTOR, w1);
-	
-	static Texture *t = NULL;
-	if (!t)
-	{
-		t = new Texture();
-		Result result = t->Initialise(concat(D::DATA)("\\Rendering\\grad2.dds").str().c_str());
-	}
-	VolumetricLine v = VolumetricLine(p0, p1, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f), t);
-
-	if (m_keyboard.GetKeys()[DIK_3]) Game::Engine->RenderVolumetricLine(v);
-
-	zval += (Game::TimeFactor * 0.0f);
-	/*
-	XMVECTOR sspos = ss->GetPosition();
-	XMVECTOR vp1 = XMVector3TransformCoord(sspos, Game::Engine->GetRenderViewMatrix());
-	XMVECTOR vp2 = XMVector3TransformCoord(XMVectorAdd(sspos, XMVectorSet(100.0f, 2.0f, 2.0f, 0.0f)), Game::Engine->GetRenderViewMatrix());
-	XMFLOAT3 fp1, fp2;
-	XMStoreFloat3(&fp1, vp1); XMStoreFloat3(&fp2, vp2);
-	OutputDebugString(concat("fp1: ")(fp1.x)(",")(fp1.y)(",")(fp1.z)(" | fp2: ")(fp2.x)(",")(fp2.y)(",")(fp2.z)("\n").str().c_str());
-	*/
 
 }
 

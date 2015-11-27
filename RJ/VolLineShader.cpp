@@ -6,6 +6,7 @@
 #include "ModelBuffer.h"
 #include "CoreEngine.h"
 #include "Texture.h"
+#include "VolumetricLine.h"
 
 #include "VolLineShader.h"
 
