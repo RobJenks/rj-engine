@@ -169,8 +169,9 @@ float4 main(PixelInputType input) : SV_TARGET
 	//float3 shading = shaderTexture.Sample(SampleType, float2(fsample, 0.5)).rgb;
 	float4 shading = shaderTexture.Sample(SampleType, float2(fsample, 0.5));
 
-	// Return the final pixel colour
-	//return float4(intens * input.colour.x, intens * input.colour.y, intens * input.colour.z, input.colour.w) * inVolumeLine;
-	//return (float4(shading, attenuation) /* input.colour*/ /* float4(intens,intens,intens,1.0f)*/) /* inVolumeLine*/;
-	return (shading * input.colour * float4(intens, intens, intens, attenuation) * inVolumeLine);
+		// Return the final pixel colour
+		//return float4(intens * input.colour.x, intens * input.colour.y, intens * input.colour.z, input.colour.w) * inVolumeLine;
+		//return (float4(shading, attenuation) /* input.colour*/ /* float4(intens,intens,intens,1.0f)*/) /* inVolumeLine*/;
+		//return (shading * input.colour * float4(intens, intens, intens, attenuation) * inVolumeLine);
+		return float4(shading.xyz, shading.a * attenuation) * input.colour;
 }

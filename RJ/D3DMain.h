@@ -69,11 +69,15 @@ public:
 		switch (state)
 		{
 			case AlphaBlendState::AlphaBlendEnabledNormal: 
-				SetAlphaBlendModeEnabled(); return;
+				SetAlphaBlendModeEnabled();
+				DisableZBufferWriting();
+				return;
 			//case AlphaBlendState::AlphaBlendEnabledAdditive:
 			//	SetAlphaBlendModeAdditive(); return;
 			default:
-				SetAlphaBlendModeDisabled(); return;
+				SetAlphaBlendModeDisabled(); 
+				EnableZBuffer();
+				return;
 		}
 	}
 
