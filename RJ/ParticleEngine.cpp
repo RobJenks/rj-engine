@@ -110,7 +110,7 @@ void XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX pr
 {
 	// Enable alpha blending and disable writing to the depth buffer (for correct alpha rendering) before rendering any particles
 	// TODO: Currently use additive alpha.  Make dependent on the prototypes being rendered (disabled vs enabled vs additive vs ...)
-	D3D->SetAlphaBlendModeAdditive();
+	D3D->SetAlphaBlendModeEnabled();
 	D3D->DisableZBufferWriting();
 
 	// Retrieve the camera basis vectors for use in billboarding particles

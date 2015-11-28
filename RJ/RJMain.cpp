@@ -480,8 +480,8 @@ void RJMain::ProcessKeyboardInput(void)
 				def = new BasicProjectileDefinition();
 				def->SetProjectileSpeed(1000.0f);
 				def->SetProjectileBeamLength(200.0f);
-				def->SetProjectileBeamRadius(3.5f);
-				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.75));
+				def->SetProjectileBeamRadius(5.0f);
+				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f));
 				
 				Texture *t = new Texture();
 				if (ErrorCodes::NoError == t->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
@@ -2095,6 +2095,29 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}
+
+	static float move = 0.0f;
+	move += (Game::TimeFactor * 7.5f);
+
+	XMVECTOR p1 = XMVectorSet(0.0f, 10.0f, 150.0f, 0.0f);
+	XMVECTOR p2 = XMVectorAdd(p1, XMVectorSet(100.0f, 0.0f, 0.0f, 0.0f));
+	XMVECTOR p2_1 = XMVectorAdd(p1, XMVectorSet(0.0f, -20.0f, -50.0f + move, 0.0));
+	XMVECTOR p2_2 = XMVectorAdd(p2_1, XMVectorSet(80.0f, 50.0f, 0.0f, 0.0f));
+	p1 = XMVector3TransformCoord(p1, ss->GetWorldMatrix());
+	p2 = XMVector3TransformCoord(p2, ss->GetWorldMatrix());
+	p2_1 = XMVector3TransformCoord(p2_1, ss->GetWorldMatrix());
+	p2_2 = XMVector3TransformCoord(p2_2, ss->GetWorldMatrix()); 
+	Texture *tex = new Texture();
+	tex->Initialise(std::string(D::IMAGE_DATA_S + "\\Rendering\\grad2.dds").c_str());
+
+	VolumetricLine v1 = VolumetricLine(p1, p2, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f), tex);
+	v1.SetLineRadius(5.0f);
+	VolumetricLine v2 = VolumetricLine(p2_1, p2_2, XMVectorSet(1.0f, 1.0f, 1.0f, 1.0f), tex);
+	v2.SetLineRadius(5.0f);
+
+	Game::Engine->RenderVolumetricLine(v1);
+	Game::Engine->RenderVolumetricLine(v2); 
+	
 
 }
 

@@ -70,8 +70,8 @@ public:
 		{
 			case AlphaBlendState::AlphaBlendEnabledNormal: 
 				SetAlphaBlendModeEnabled(); return;
-			case AlphaBlendState::AlphaBlendEnabledAdditive:
-				SetAlphaBlendModeAdditive(); return;
+			//case AlphaBlendState::AlphaBlendEnabledAdditive:
+			//	SetAlphaBlendModeAdditive(); return;
 			default:
 				SetAlphaBlendModeDisabled(); return;
 		}
@@ -85,11 +85,11 @@ public:
 	}
 	
 	// Enables alpha blending and applies additive filters (for e.g. effect rendering)
-	CMPINLINE void					SetAlphaBlendModeAdditive(void) 
+	/*CMPINLINE void					SetAlphaBlendModeAdditive(void) 
 	{
 		m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
 		m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff); 
-	}
+	}*/
 
 	// Disables alpha blending
 	CMPINLINE void					SetAlphaBlendModeDisabled(void) 
