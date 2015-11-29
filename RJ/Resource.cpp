@@ -79,7 +79,8 @@ Result Resource::DetermineCompoundValue(void)
 		{
 			// Otherwise we need to move recurisvely down the tree and calculate the compound values below this one in the tree
 			// Get a non-const reference to this resource so that we can modify its contents
-			Resource *r = D::GetResource(res->GetCode());
+			Resource *r = D::Resources.Get(res->GetCode());
+			if (!r) return ErrorCodes::ResourceCouldNotBeLocatedWhileCalcCompoundValue;
 
 			// Determine the compound value of this resource (by recursively moving down the tree)
 			result = r->DetermineCompoundValue();

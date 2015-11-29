@@ -7,6 +7,7 @@
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include "DataRegister.h"
 #include "Equipment.h"
 
 class Equipment;
@@ -29,91 +30,30 @@ class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
 
-
 // This file contains no objects with special alignment requirements
 namespace D {
 
-	#ifndef __GameDataExtern_Types_H__
-	#define __GameDataExtern_Types_H__
-		typedef std::unordered_map<std::string, SimpleShip*> SimpleShipRegister;
-		typedef std::unordered_map<std::string, SimpleShipLoadout*> SSLoadoutRegister;
-		
-		typedef std::unordered_map<std::string, ComplexShip*> ComplexShipRegister;
-		typedef std::unordered_map<std::string, ComplexShipSection*> ComplexShipSectionRegister;
-		typedef std::unordered_map<std::string, ComplexShipTileDefinition*> ComplexShipTileRegister;
-		typedef std::unordered_map<std::string, ComplexShipTileClass*> ComplexShipTileClassRegister;
-		typedef std::unordered_map<std::string, ComplexShipObjectClass*> ComplexShipObjectClassRegister;
-		
-		typedef std::unordered_map<std::string, StaticTerrainDefinition*> StaticTerrainRegister;
-
-		typedef std::unordered_map<std::string, class Equipment*> EquipRegister;
-		typedef std::unordered_map<std::string, Resource*> ResourceRegister;
-
-		typedef std::unordered_map<std::string, SpaceTurret*> TurretRegister;
-		typedef std::unordered_map<std::string, ProjectileLauncher*> ProjectileLauncherRegister;
-		typedef std::unordered_map<std::string, SpaceProjectileDefinition*> ProjectileRegister;
-
-		typedef std::unordered_map<std::string, SkinnedModel*> SkinnedModelRegister;
-		typedef std::unordered_map<std::string, ActorBase*> ActorRegister;
-	#endif
-
-
 	// Primary data collections
-	extern SimpleShipRegister				SimpleShips;				// The details of all simple ship classes in the game
-	extern SSLoadoutRegister				SSLoadouts;					// The details of all simple ship loadouts in the game
-	extern EquipRegister					Equipment;					// The details of all equipment in the game
+	extern DataRegister<SimpleShip>						SimpleShips;				// The details of all simple ship classes in the game
+	extern DataRegister<SimpleShipLoadout>				SSLoadouts;					// The details of all simple ship loadouts in the game
+	extern DataRegister<class Equipment>				Equipment;					// The details of all equipment in the game
 
-	extern ComplexShipRegister				ComplexShips;				// The details of all complex ships in the game
-	extern ComplexShipSectionRegister		ComplexShipSections;		// The details of all complex ship sections in the game
-	extern ComplexShipTileRegister			ComplexShipTiles;			// The details of all complex ship tiles in the game
-	extern ComplexShipTileClassRegister		ComplexShipTileClasses;		// The details of all complex ship tile classes in the game
-	extern ComplexShipObjectClassRegister	ComplexShipObjectClasses;	// The details of all object classes in the game
+	extern DataRegister<ComplexShip>					ComplexShips;				// The details of all complex ships in the game
+	extern DataRegister<ComplexShipSection>				ComplexShipSections;		// The details of all complex ship sections in the game
+	extern DataRegister<ComplexShipTileDefinition>		ComplexShipTiles;			// The details of all complex ship tiles in the game
+	extern DataRegister<ComplexShipTileClass>			ComplexShipTileClasses;		// The details of all complex ship tile classes in the game
+	extern DataRegister<ComplexShipObjectClass>			ComplexShipObjectClasses;	// The details of all object classes in the game
 
-	extern StaticTerrainRegister			StaticTerrainDefinitions;	// The details of all static terrain classes in the game
+	extern DataRegister<StaticTerrainDefinition>		StaticTerrainDefinitions;	// The details of all static terrain classes in the game
 
-	extern ResourceRegister					Resources;					// The details of each resource in the game
+	extern DataRegister<Resource>						Resources;					// The details of each resource in the game
 
-	extern TurretRegister					Turrets;					// The details of each turret type in the game
-	extern ProjectileLauncherRegister		ProjectileLaunchers;		// The details of each projectile launcher in the game
-	extern ProjectileRegister				Projectiles;				// The details of each projectile type in the game
+	extern DataRegister<SpaceTurret>					Turrets;					// The details of each turret type in the game
+	extern DataRegister<ProjectileLauncher>				ProjectileLaunchers;		// The details of each projectile launcher in the game
+	extern DataRegister<SpaceProjectileDefinition>		SpaceProjectiles;			// The details of each space projectile type in the game
 
-	extern SkinnedModelRegister				SkinnedModels;				// The details of all skinned models in the game
-	extern ActorRegister					Actors;						// The details of all actor base objects in the game
-
-
-	// Managed accessor methods for each primary data collection
-	CMPINLINE SimpleShip *GetSimpleShip(const string & code) { if (SimpleShips.count(code) > 0) return SimpleShips[code]; else return NULL; }
-	CMPINLINE SimpleShipLoadout *GetSSLoadout(const string & code) { if (SSLoadouts.count(code) > 0) return SSLoadouts[code]; else return NULL; }
-	CMPINLINE ComplexShip *GetComplexShip(const string & code) { if (ComplexShips.count(code) > 0) return ComplexShips[code]; else return NULL; }
-	CMPINLINE ComplexShipSection *GetComplexShipSection(const string & code) { if (ComplexShipSections.count(code) > 0) return ComplexShipSections[code]; else return NULL; }
-	CMPINLINE ComplexShipTileDefinition *GetComplexShipTile(const string & code) { if (ComplexShipTiles.count(code) > 0) return ComplexShipTiles[code]; else return NULL; }
-	CMPINLINE ComplexShipTileClass *GetComplexShipTileClass(const string & code) { if (ComplexShipTileClasses.count(code) > 0) return ComplexShipTileClasses[code]; else return NULL; }
-	CMPINLINE ComplexShipObjectClass *GetComplexShipObjectClass(const string & code) { if (ComplexShipObjectClasses.count(code) > 0) return ComplexShipObjectClasses[code]; else return NULL; }
-	CMPINLINE StaticTerrainDefinition *GetStaticTerrain(const string & code) { if (code != NullString && StaticTerrainDefinitions.count(code) > 0) return StaticTerrainDefinitions[code]; else return NULL; }
-	CMPINLINE Resource *GetResource(const string & code) { if (Resources.count(code) > 0) return Resources[code]; else return NULL; }
-	CMPINLINE SpaceTurret *GetTurret(const string & code) { if (Turrets.count(code) > 0) return Turrets[code]; else return NULL; }
-	CMPINLINE ProjectileLauncher *GetProjectileLauncher(const string & code) { if (ProjectileLaunchers.count(code) > 0) return ProjectileLaunchers[code]; else return NULL; }
-	CMPINLINE SpaceProjectileDefinition *GetProjectile(const string & code) { if (Projectiles.count(code) > 0) return Projectiles[code]; else return NULL; }
-	CMPINLINE SkinnedModel *GetSkinnedModel(const string & code) { if (SkinnedModels.count(code) > 0) return SkinnedModels[code]; else return NULL; }
-	CMPINLINE ActorBase *GetActor(const string & code) { if (Actors.count(code) > 0) return Actors[code]; else return NULL; }
-	CMPINLINE class Equipment *GetEquipment(const string & code) { if (Equipment.count(code) > 0) return Equipment[code]; else return NULL; }
-
-	// Managed methods to add items to each primary data collection.  Unregister any iObjects since we do not want them to be simulated in-game
-	void AddStandardSimpleShip(SimpleShip *s); 
-	void AddStandardSSLoadout(SimpleShipLoadout *l);
-	void AddStandardComplexShip(ComplexShip *s);
-	void AddStandardComplexShipSection(ComplexShipSection *s);
-	void AddStandardComplexShipTileDefinition(ComplexShipTileDefinition *t);
-	void AddStandardComplexShipTileClass(ComplexShipTileClass *c);
-	void AddStandardComplexShipObjectClass(ComplexShipObjectClass *c);
-	void AddStaticTerrain(StaticTerrainDefinition *d);
-	void AddStandardResource(Resource *r);
-	void AddStandardTurret(SpaceTurret *t);
-	void AddStandardProjectileLauncher(ProjectileLauncher *l);
-	void AddStandardProjectile(SpaceProjectileDefinition *p);
-	void AddStandardSkinnedModel(SkinnedModel *m);
-	void AddStandardActor(ActorBase *a);
-	void AddStandardEquipment(class Equipment *e);
+	extern DataRegister<SkinnedModel>					SkinnedModels;				// The details of all skinned models in the game
+	extern DataRegister<ActorBase>						Actors;						// The details of all actor base objects in the game
 
 
 	// Enumeration of possible complex ship tile types
@@ -134,6 +74,7 @@ namespace D {
 	extern std::string DATA_S;
 	extern const char *IMAGE_DATA;
 	extern std::string IMAGE_DATA_S;
+
 	extern const char *NODE_GameData;
 	extern const char *NODE_Config;
 	extern const char *NODE_FileIndex;
@@ -172,25 +113,6 @@ namespace D {
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;
 
-	// Termination function for all game data registers
-	void TerminateAllDataRegisters(void);
-
-	// Termination functions for each individual data register
-	void TerminateAllSimpleShipRegisterData(void);
-	void TerminateAllSSLoadoutRegisterData(void);
-	void TerminateAllEquipmentRegisterData(void);
-	void TerminateAllComplexShipRegisterData(void);
-	void TerminateAllComplexShipSectionRegisterData(void);
-	void TerminateAllComplexShipTileRegisterData(void);
-	void TerminateAllComplexShipTileClassRegisterData(void);
-	void TerminateAllComplexShipObjectClassRegisterData(void);
-	void TerminateAllStaticTerrainRegisterData(void);
-	void TerminateAllResourceRegisterData(void);
-	void TerminateAllTurretRegisterData(void);
-	void TerminateAllProjectileLauncherRegisterData(void);
-	void TerminateAllProjectileRegisterData(void);
-	void TerminateAllSkinnedModelRegisterData(void);
-	void TerminateAllActorRegisterData(void);
 }
 
 

@@ -801,10 +801,10 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 ComplexShipTile * ComplexShipTile::Create(string code)
 {
 	// See whether we have a definition matching this code
-	if (code == NullString || D::ComplexShipTiles.count(code) == 0) return NULL;
+	if (code == NullString || D::ComplexShipTiles.Exists(code) == false) return NULL;
 
 	// Since we do, generate and return a new tile from the definition
-	return D::ComplexShipTiles[code]->CreateTile();
+	return D::ComplexShipTiles.Get(code)->CreateTile();
 }
 
 // Compiles the tile based on its definition

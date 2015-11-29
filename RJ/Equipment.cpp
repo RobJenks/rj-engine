@@ -67,8 +67,8 @@ void Equipment::InitialiseLoadedEquipmentData(void)
 	return;
 
 	// Process each item of equipment in turn
-	D::EquipRegister::const_iterator it_end = D::Equipment.end();
-	for (D::EquipRegister::const_iterator it = D::Equipment.begin(); it != it_end; ++it) {
+	DataRegister<Equipment>::RegisterType::const_iterator it_end = D::Equipment.Data.end();
+	for (DataRegister<Equipment>::RegisterType::const_iterator it = D::Equipment.Data.begin(); it != it_end; ++it) {
 		if (it->second) {
 			// Take different action depending on the equipment type
 			type = it->second->GetType();

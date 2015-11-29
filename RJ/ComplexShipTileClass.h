@@ -70,6 +70,9 @@ public:
 	ObjectRequirementCollection								ObjectRequirements;
 	SizeRequirement											SizeRequirements;
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 	// Constructor / destructor
 	ComplexShipTileClass(void);
 	~ComplexShipTileClass(void);

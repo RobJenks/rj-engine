@@ -46,7 +46,7 @@ ComplexShipSection::ComplexShipSection(void)
 ComplexShipSection *ComplexShipSection::Create(const string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
-	ComplexShipSection *template_sec = D::GetComplexShipSection(code);
+	ComplexShipSection *template_sec = D::ComplexShipSections.Get(code);
 	if (template_sec == NULL) return NULL;
 
 	// Invoke the spawn function using these template details & return the result

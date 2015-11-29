@@ -226,8 +226,8 @@ Result UI_ShipDesigner::InitialiseShipSectionView(void)
 	if (!m_shipsectionselector) return ErrorCodes::CouldNotInitialiseSDSectionView;
 
 	// Populate the ship section selector
-	D::ComplexShipSectionRegister::const_iterator it_end = D::ComplexShipSections.end();
-	for (D::ComplexShipSectionRegister::const_iterator it = D::ComplexShipSections.begin(); it != it_end; ++it)
+	DataRegister<ComplexShipSection>::RegisterType::const_iterator it_end = D::ComplexShipSections.Data.end();
+	for (DataRegister<ComplexShipSection>::RegisterType::const_iterator it = D::ComplexShipSections.Data.begin(); it != it_end; ++it)
 		if (it->second && it->second->IsStandardObject() && it->second->GetName() != NullString)
 			m_shipsectionselector->AddItem(it->second->GetName(), it->second->GetCode());
 
@@ -585,8 +585,8 @@ void UI_ShipDesigner::BuildShipSectionImageMap(void)
 	if (!devicecontext) return;
 
 	// Iterate through the set of all complex ship sections
-	D::ComplexShipSectionRegister::const_iterator it_end = D::ComplexShipSections.end();
-	for (D::ComplexShipSectionRegister::const_iterator it = D::ComplexShipSections.begin(); it != it_end; ++it)
+	DataRegister<ComplexShipSection>::RegisterType::const_iterator it_end = D::ComplexShipSections.Data.end();
+	for (DataRegister<ComplexShipSection>::RegisterType::const_iterator it = D::ComplexShipSections.Data.begin(); it != it_end; ++it)
 	{
 		// Make sure this instance is valid
 		if (!it->second || !it->second->GetPreviewImage()) continue;
@@ -690,7 +690,7 @@ Result UI_ShipDesigner::LoadShip(string code)
 {
 	// Validate the ship code exists
 	StrLowerC(code);
-	if (code == NullString || D::ComplexShips.count(code) == 0) return ErrorCodes::ShipDesignerCannotLoadInvalidShipCode;
+	if (code == NullString || D::ComplexShips.Exists(code) == false) return ErrorCodes::ShipDesignerCannotLoadInvalidShipCode;
 
 	// If we already have a ship loaded in the designer then deallocate it first, to avoid memory leaks
 	if (m_ship) ShutdownSDShip();
@@ -783,9 +783,9 @@ Result UI_ShipDesigner::SaveShip(string code)
 	string loadfile = ship->DetermineXMLDataFullFilename();
 
 	// Make sure the ship doesn't already exist, and remove it if it does
-	if (D::ComplexShips.count(code) > 0)
-		if (D::ComplexShips[code])
-			SafeDelete(D::ComplexShips[code]);
+	if (D::ComplexShips.Exists(code))
+		if (D::ComplexShips.Get(code) != NULL)
+			delete(D::ComplexShips.Get(code));
 
 	// Also shut down the temporary ship copy now that we have saved it, and are about to load it properly from disk
 	ship->Shutdown(); delete ship; ship = NULL;
@@ -1130,7 +1130,7 @@ void UI_ShipDesigner::ShipSectionSelector_SelectedIndexChanged(UIComboBox *contr
 void UI_ShipDesigner::ShipSectionSelectedInConstructionView(string code)
 {
 	// Validate that the parameter corresponds to a valid ship section
-	if (code == NullString || D::ComplexShipSections.count(code) == 0)
+	if (code == NullString || D::ComplexShipSections.Exists(code) == false)
 	{
 		m_consview_selected_code = "";
 		m_consview_selected = NULL;
@@ -1146,7 +1146,7 @@ void UI_ShipDesigner::ShipSectionSelectedInConstructionView(string code)
 	m_consview_selected_code = code;
 
 	// Get and store a reference to this complex ship section in the central collection
-	m_consview_selected = D::GetComplexShipSection(code);
+	m_consview_selected = D::ComplexShipSections.Get(code);
 
 	// Calculate the size of this ship section on the SD grid
 	m_consview_selected_gridsize = INTVECTOR2(	m_consview_selected->GetElementSizeX() * m_gridsize, 
@@ -1288,7 +1288,7 @@ void UI_ShipDesigner::TileSelector_SelectedIndexChanged(UIComboBox *control, int
 {
 	// Attempt to retrieve a pointer to the tile definition that was selected
 	string code = control->GetSelectedItemTag(); StrLowerC(code);
-	m_selectedtiletype = D::GetComplexShipTile(code);
+	m_selectedtiletype = D::ComplexShipTiles.Get(code);
 }
 
 

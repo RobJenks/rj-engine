@@ -54,6 +54,9 @@ public:
 	// Creates and returns a new projectile based upon this definition
 	SpaceProjectile *					CreateProjectile(void) const;
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 	// Static methods to translate a projectile type to/from its string representation
 	static ProjectileType				TranslateProjectileTypeFromString(std::string type);
 	static std::string					TranslateProjectileTypeToString(ProjectileType type);

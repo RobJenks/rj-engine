@@ -36,6 +36,9 @@ public:
 	CMPINLINE float							GetMaxHealth(void) const			{ return m_maxhealth; }
 	CMPINLINE void							SetMaxHealth(float h)				{ m_maxhealth = h; }
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 	// Default destructor
 	~StaticTerrainDefinition(void) { }
 

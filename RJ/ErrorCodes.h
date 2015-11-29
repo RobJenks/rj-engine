@@ -541,11 +541,13 @@ namespace ErrorCodes {
 	const Result		ResourceCompoundValuesCouldNotAllBeDetermined	= 4801;
 	const Result		EncounteredRecursionLimitValuingResources		= 4802;
 	const Result		UnreportedErrorCalculatingResourceCompoundValue	= 4803;
+	const Result		ResourceCouldNotBeLocatedWhileCalcCompoundValue = 4804;
 
 	// Skinned / actor models and animation errors						(5000-5299)
 	const Result		CouldNotSetSkinnedModelVertexBuffer				= 5000;
 	const Result		CouldNotSetSkinnedModelIndexBuffer				= 5001;
 	const Result		CannotInitialiseActorWithInvalidModelCode		= 5002;
+	const Result		CouldNotCreatePlayerFromUndefinedActorBase		= 5003;
 
 	// Pathfinding errors												(5300-5599)
 	const Result		CannotGenerateNavNetworkForNullParentEntity		= 5300;

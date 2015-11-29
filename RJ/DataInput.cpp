@@ -608,7 +608,7 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 	}
 
 	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
-	if (object->GetCode() == NullString || D::SimpleShips.count(object->GetCode()) > 0)
+	if (object->GetCode() == NullString || D::SimpleShips.Exists(object->GetCode()))
 	{
 		SafeDelete(object);
 		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
@@ -617,7 +617,7 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 	// Otherwise, resume updates, recalculate the ship data and store in the central collection
 	object->GetHardpoints().ResumeUpdates();
 	object->RecalculateAllShipData();
-	D::AddStandardSimpleShip(object);
+	D::SimpleShips.Store(object);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -664,7 +664,7 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 	}
 
 	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
-	if (object->GetCode() == NullString || D::ComplexShips.count(object->GetCode()) > 0)
+	if (object->GetCode() == NullString || D::ComplexShips.Exists(object->GetCode()))
 	{
 		SafeDelete(object);
 		__TemporaryCSSLoadingBuffer.clear();
@@ -674,7 +674,7 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 	// Otherwise, resume updates, which will calculate the ship data, and store in the central collection
 	object->ResumeUpdates();
 	object->GetHardpoints().ResumeUpdates();
-	D::AddStandardComplexShip(object);
+	D::ComplexShips.Store(object);
 
 	// Clear the temporary CS section loading buffer; sections are only persisted for loading into the next ship
 	__TemporaryCSSLoadingBuffer.clear();
@@ -727,7 +727,7 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 	}
 
 	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
-	if (object->GetCode() == NullString || D::ComplexShipSections.count(object->GetCode()) > 0)
+	if (object->GetCode() == NullString || D::ComplexShipSections.Exists(object->GetCode()))
 	{
 		SafeDelete(object);
 		return ErrorCodes::CannotLoadCSSectionDetailsWithDuplicateCode;
@@ -741,7 +741,7 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 	if (object->IsStandardObject())
 	{
 		// If this is a standard section, simply add to the central data collection
-		D::AddStandardComplexShipSection(object);
+		D::ComplexShipSections.Store(object);
 	}
 	else
 	{
@@ -782,7 +782,7 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 	// Check whether a section exists with this code
 	StrLowerC(a_code);
 	ComplexShipSection *sec = NULL;
-	if (D::ComplexShipSections.count(a_code) > 0)
+	if (D::ComplexShipSections.Exists(a_code))
 	{
 		// The section exists in the central collection, so create an instance from it now
 		sec = ComplexShipSection::Create(a_code);
@@ -1057,7 +1057,7 @@ Result IO::Data::LoadComplexShipTileClass(TiXmlElement *node)
 			if (!aobj || (!amin && !amax)) continue;
 
 			// Make sure we have a valid class
-			ComplexShipObjectClass *obj = D::GetComplexShipObjectClass(aobj);
+			ComplexShipObjectClass *obj = D::ComplexShipObjectClasses.Get(aobj);
 			if (!obj) continue;
 
 			// Create a new object requirement
@@ -1092,14 +1092,14 @@ Result IO::Data::LoadComplexShipTileClass(TiXmlElement *node)
 	}
 
 	// Make sure we don't have a duplicate class already defined
-	if (D::ComplexShipTileClasses.count(cls->GetCode()) > 0)
+	if (D::ComplexShipTileClasses.Exists(cls->GetCode()))
 	{
 		delete cls; cls = NULL; 
 		return ErrorCodes::CouldNotLoadTileClassWithDuplicateCode;
 	}
 	
 	// Add the class to the global collection and return success
-	D::AddStandardComplexShipTileClass(cls);
+	D::ComplexShipTileClasses.Store(cls);
 	return ErrorCodes::NoError;
 }
 
@@ -1119,7 +1119,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 	if (val == NullString) return ErrorCodes::NullComplexShipTileDefinitionClass;
 
 	// Attempt to resolve the class type
-	ComplexShipTileClass *tc = D::GetComplexShipTileClass(val);
+	ComplexShipTileClass *tc = D::ComplexShipTileClasses.Get(val);
 	if (!tc) return ErrorCodes::InvalidComplexShipTileDefinitionClass;
 
 	// Create a new tile definition to hold this data, based on the desired subclass type
@@ -1247,13 +1247,13 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 	}
 
 	// Make sure we don't already have a tile definition with this code; if not, add to the central collection
-	if (D::ComplexShipTiles.count(tiledef->GetCode()) != 0)
+	if (D::ComplexShipTiles.Exists(tiledef->GetCode()))
 	{
 		tiledef->Shutdown(); delete tiledef; tiledef = NULL;
 	}
 	else
 	{
-		D::AddStandardComplexShipTileDefinition(tiledef);
+		D::ComplexShipTiles.Store(tiledef);
 	}
 
 	// Return success
@@ -1275,7 +1275,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 
 	// Attempt to get the tile definition corresponding to this code
 	string stcode = ctcode; StrLowerC(stcode);
-	ComplexShipTileDefinition *def = D::GetComplexShipTile(stcode);
+	ComplexShipTileDefinition *def = D::ComplexShipTiles.Get(stcode);
 	if (!def) return ErrorCodes::CannotLoadTileWithInvalidDefinitionCode;
 
 	// Create a new tile from this definition
@@ -1395,7 +1395,7 @@ Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
 	}
 
 	// Add to the central collection, assuming no terrain object exists with the same code already
-	if (D::GetStaticTerrain(def->GetCode()) != NULL)
+	if (D::StaticTerrainDefinitions.Exists(def->GetCode()))
 	{
 		SafeDelete(def);
 		return ErrorCodes::CouldNotLoadDuplicateTerrainDefinition;
@@ -1403,7 +1403,7 @@ Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
 	else
 	{
 		// Add to the collection and return success
-		D::AddStaticTerrain(def);
+		D::StaticTerrainDefinitions.Store(def);
 		return ErrorCodes::NoError;
 	}
 }
@@ -1435,7 +1435,7 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 		{
 			// Attempt to get the terrain definition with this code
 			val = attr->Value(); StrLowerC(val);
-			def = D::GetStaticTerrain(val);								// This can be null, for e.g. pure non-renderable collision volumes
+			def = D::StaticTerrainDefinitions.Get(val);								// This can be null, for e.g. pure non-renderable collision volumes
 		}
 		else if (name == "px") vpos.x = (float)atof(attr->Value());
 		else if (name == "py") vpos.y = (float)atof(attr->Value());
@@ -1581,7 +1581,7 @@ Result IO::Data::LoadTurret(TiXmlElement *node)
 	turret->RecalculateTurretStatistics();
 
 	// Add to the central collection of standard turret objects
-	D::AddStandardTurret(turret);
+	D::Turrets.Store(turret);
 	return ErrorCodes::NoError;
 }
 
@@ -1623,7 +1623,7 @@ Result IO::Data::LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret)
 				{
 					// Copy all data from the specified launcher object
 					val = child->GetText(); StrLowerC(val);
-					result = turret->SetLauncher(index, D::GetProjectileLauncher(val));
+					result = turret->SetLauncher(index, D::ProjectileLaunchers.Get(val));
 					if (result != ErrorCodes::NoError) overallresult = result;
 				}
 				else if (hash == HashedStrings::H_RelativePosition)
@@ -1677,7 +1677,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 		else if (hash == HashedStrings::H_Projectile)
 		{
 			val = child->GetText(); StrLowerC(val);
-			launcher->SetProjectileDefinition(D::GetProjectile(val));
+			launcher->SetProjectileDefinition(D::SpaceProjectiles.Get(val));
 		}
 		else if (hash == HashedStrings::H_LaunchInterval)
 		{
@@ -1738,7 +1738,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 	}
 
 	// Add to the central collection and return success
-	D::AddStandardProjectileLauncher(launcher);
+	D::ProjectileLaunchers.Store(launcher);
 	return ErrorCodes::NoError;
 }
 
@@ -1807,7 +1807,7 @@ Result IO::Data::LoadProjectileDefinition(TiXmlElement *node)
 	}
 
 	// Add to the central collection and return success
-	D::AddStandardProjectile(proj);
+	D::SpaceProjectiles.Store(proj);
 	return ErrorCodes::NoError;
 }
 
@@ -1921,13 +1921,13 @@ Result IO::Data::LoadResource(TiXmlElement *node)
 	if (res->GetCode() == NullString) return ErrorCodes::CannotLoadResourceWithoutRequiredParameters;
 
 	// Make sure we don't already have a resource definition with this code; if not, add to the central collection
-	if (D::Resources.count(res->GetCode()) != 0)
+	if (D::Resources.Exists(res->GetCode()))
 	{
 		delete res; res = NULL;
 	}
 	else
 	{
-		D::AddStandardResource(res);
+		D::Resources.Store(res);
 	}
 
 	// Return success
@@ -2042,7 +2042,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 			string cval = val; StrLowerC(cval);			// Make lowercase, non-const std::string copy
 			
 			// Attempt to locate this ship; if it cannot be found then return an error now
-			ship = D::GetSimpleShip(cval);
+			ship = D::SimpleShips.Get(cval);
 			if (!ship) return ErrorCodes::InvalidShipSpecifiedForLoadout;
 
 			// Otherwise store a reference to the ship and continue parsing
@@ -2069,7 +2069,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 							if (c_eq != NullString)
 							{
 								// Add a map to this loadout;  no (equip!=NULL) check since NULL is valid, to set an empty HP
-								Equipment *e = D::Equipment[c_eq];
+								Equipment *e = D::Equipment.Get(c_eq);
 								L->AddMap(c_hp, e);
 							}
 						}
@@ -2087,12 +2087,12 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 	}
 
 	// Add this loadout to the collection, assuming there isn't already one with the same code
-	if (L->Code == NullString || D::SSLoadouts.count(L->Code))
+	if (L->Code == NullString || D::SSLoadouts.Exists(L->Code))
 		return ErrorCodes::CannotLoadSimpleShipLoadoutWithDuplicateCode;
 	else
 	{
 		// Add the loadout and return success
-		D::AddStandardSSLoadout(L);
+		D::SSLoadouts.Store(L);
 		return ErrorCodes::NoError;
 	}
 }
@@ -2136,7 +2136,7 @@ CompoundLoadoutMap *IO::Data::LoadCompoundLoadoutMap(TiXmlElement *node, SimpleS
 				{
 					// Attempt to locate this item of equipment and add an entry to the map
 					// No (!= NULL) check since NULL is valid, to specify the chance of an empty HP in the loadout
-					Equipment *e = D::GetEquipment(c_eqp);
+					Equipment *e = D::Equipment.Get(c_eqp);
 					map->AddItem(e, prob);
 				}
 
@@ -2192,7 +2192,7 @@ Result IO::Data::LoadEngine(TiXmlElement *node)
 
 	// Add this engine to the global collection, IF it has at least an internal code to identify it
 	if (e->Code != NullString) {
-		D::AddStandardEquipment(e);
+		D::Equipment.Store(e);
 		return ErrorCodes::NoError;
 	}
 	else {
@@ -2409,7 +2409,7 @@ Result IO::Data::PostProcessResources(void)
 
 	// Create a temporary vector of resource pointers for linear processing reasons
 	vector<Resource*> resources; 
-	VectorFromUnorderedMap<string, Resource*>(D::Resources, &resources);
+	VectorFromUnorderedMap<string, Resource*>(D::Resources.Data, &resources);
 
 	// First, we need to build the set of dependencies between resources based on their respective production costs
 	std::vector<Resource*>::size_type n = resources.size();
@@ -2459,7 +2459,7 @@ Result IO::Data::PostProcessComplexShipTileData(void)
 	
 	// Create a temporary vector of tile definition pointers for linear processing reasons
 	vector<ComplexShipTileDefinition*> tiles;
-	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles, &tiles);
+	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles.Data, &tiles);
 
 	// We need to run post-processing on the tile production requirements, to link to resources/other tile dependencies
 	vector<ComplexShipTileDefinition*>::size_type n = tiles.size();
@@ -3336,10 +3336,10 @@ Result IO::Data::LoadSkinnedModel(TiXmlElement *node)
 	if (!sm || !modelcreated) return ErrorCodes::SkinnedModelCreationFailedDuringLoad; 
 
 	// Make sure a model doesn't already exist with this code
-	if (D::SkinnedModels.count(code) > 0) return ErrorCodes::CouldNotLoadDuplicateSkinnedModel;
+	if (D::SkinnedModels.Exists(code)) return ErrorCodes::CouldNotLoadDuplicateSkinnedModel;
 
 	// Store the newly-created model in the central collection
-	D::AddStandardSkinnedModel(sm);
+	D::SkinnedModels.Store(sm);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -3413,10 +3413,10 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 	if (a->GetCode() == NullString || a->GetModel() == NULL) return ErrorCodes::CannotLoadActorBaseWithInsufficientData;
 
 	// Make sure this isn't a duplicate actor
-	if (D::Actors.count(a->GetCode()) > 0) return ErrorCodes::CouldNotLoadDuplicateActorBaseData;
+	if (D::Actors.Exists(a->GetCode())) return ErrorCodes::CouldNotLoadDuplicateActorBaseData;
 
 	// Store the new actor base data in the central collection and return success
-	D::AddStandardActor(a);
+	D::Actors.Store(a);
 	return ErrorCodes::NoError;
 }
 

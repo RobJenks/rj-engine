@@ -1097,7 +1097,7 @@ void ComplexShip::CalculateEngineStatistics()
 ComplexShip *ComplexShip::Create(const string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
-	ComplexShip *template_ship = D::GetComplexShip(code);
+	ComplexShip *template_ship = D::ComplexShips.Get(code);
 	if (template_ship == NULL) return NULL;
 
 	// Invoke the spawn function using these template details & return the result

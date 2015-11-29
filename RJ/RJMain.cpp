@@ -353,9 +353,6 @@ void RJMain::TerminateApplication()
 	// Region termination functions
 	TerminateRegions();
 
-	// Data register termination functions
-	D::TerminateAllDataRegisters();
-
 	// Terminate all key game data structures (e.g. the space object Octree)
 	TerminateCoreDataStructures();
 
@@ -1148,7 +1145,10 @@ Result RJMain::InitialisePlayer(void)
 	Game::CurrentPlayer = new Player();
 
 	// Create a new human actor and assign it as the player character
-	Game::CurrentPlayer->SetActor(D::GetActor("human_soldier_basic")->CreateInstance());
+	ActorBase *actorbase = D::Actors.Get("human_soldier_basic");
+	if (!actorbase) return ErrorCodes::CouldNotCreatePlayerFromUndefinedActorBase;
+
+	Game::CurrentPlayer->SetActor(actorbase->CreateInstance());
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs);
 
@@ -1825,7 +1825,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs->SetOrientation(ID_QUATERNION);
 		cs->Fade.SetFadeAlpha(0.5f);
 
-		Engine *eng = (Engine*)D::Equipment["FRIGATE_HEAVY_ION_ENGINE1"];
+		Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
 		cs->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
 	}
 
@@ -1872,7 +1872,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create a new actor
 	if (true)
 	{
-		a1 = D::GetActor("human_soldier_basic")->CreateInstance();
+		a1 = D::Actors.Get("human_soldier_basic")->CreateInstance();
 		a1->SetName("A1");
 		a1->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		a1->MoveIntoEnvironment(cs);
@@ -1946,7 +1946,7 @@ void RJMain::__CreateDebugScenario(void)
 
 	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationAxis(UP_VECTOR, PI / 4.0f);
-	SpaceTurret *t = D::GetTurret("turret_basic01");
+	SpaceTurret *t = D::Turrets.Get("turret_basic01");
 	XMFLOAT3 sz; XMStoreFloat3(&sz, cs->GetSize());
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 2; ++j)

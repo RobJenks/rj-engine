@@ -681,6 +681,9 @@ public:
 	FadeEffect							Fade;					// Allows the object to be faded in and out
 	HighlightEffect						Highlight;				
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 	// Default constructor/copy constructor/destructor
 	ComplexShipTile(void);
 	ComplexShipTile(const ComplexShipTile &C);

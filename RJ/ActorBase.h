@@ -59,6 +59,9 @@ public:
 	// by the model data assigned to this actor
 	CMPINLINE XMVECTOR			GetViewOffset(void) const				{ return m_viewoffset; }
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 protected:
 
 	// Basic details for the actor type

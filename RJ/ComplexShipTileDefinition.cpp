@@ -307,7 +307,7 @@ bool ComplexShipTileDefinition::SetClass(const std::string & cls)
 	// Attempt to retrieve a tile class with this code
 	if (cls == NullString) return false;
 	std::string s = cls; StrLowerC(s);
-	ComplexShipTileClass *tc = D::GetComplexShipTileClass(cls);
+	ComplexShipTileClass *tc = D::ComplexShipTileClasses.Get(cls);
 
 	// Pass control to the overloaded function with this class object
 	return SetClass(tc);

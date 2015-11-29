@@ -226,7 +226,7 @@ void SimpleShip::CalculateEngineStatistics()
 SimpleShip *SimpleShip::Create(const string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
-	SimpleShip *template_ship = D::GetSimpleShip(code);
+	SimpleShip *template_ship = D::SimpleShips.Get(code);
 	if (template_ship == NULL) return NULL;
 
 	// Invoke the spawn function using these template details & return the result
@@ -267,7 +267,7 @@ Result SimpleShip::AddLoadout(SimpleShip *s, const string &loadout)
 	if (!s || !loadout.empty()) return ErrorCodes::InvalidParametersForShipLoadoutAssignment;
 
 	// Make sure the supplied loadout code exists
-	SimpleShipLoadout *L = SimpleShipLoadout::Get(loadout);
+	SimpleShipLoadout *L = D::SSLoadouts.Get(loadout);
 	if (!L) return ErrorCodes::CannotAssignNullLoadoutToShip;
 
 	// If the loadout is valid then call the function to assign a loadout to a ship

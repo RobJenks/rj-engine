@@ -99,6 +99,9 @@ public:
 	CMPINLINE XMFLOAT3					GetViewOffset(void) const				{ return m_absoluteviewoffset; }
 	CMPINLINE XMFLOAT3					GetViewOffsetPercentage(void) const		{ return m_viewoffset; }
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 protected:
 
 	std::string							m_code;

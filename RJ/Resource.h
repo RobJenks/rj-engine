@@ -47,6 +47,8 @@ public:
 	// Recursive method which will determine the compound value of the resource based on its dependencies.  Handles stack/infinite loop issues
 	Result									DetermineCompoundValue(void);
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	// Default destructor
 	~Resource(void);

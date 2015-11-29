@@ -1161,6 +1161,9 @@
     <ClInclude Include="BasicProjectileSet.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
+    <ClInclude Include="DataRegister.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

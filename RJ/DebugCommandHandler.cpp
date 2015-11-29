@@ -59,7 +59,7 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 			{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters, 
 				"Invalid parameters; format is \"spawn_ships <template> <count>\""); return true; }
 		
-		SimpleShip *ship = D::GetSimpleShip(command.Parameter(0));
+		SimpleShip *ship = D::SimpleShips.Get(command.Parameter(0));
 		if (!ship) { command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
 				concat("Cannot locate template ship with code \"")(command.Parameter(0))("\"").str()); return true; }
 

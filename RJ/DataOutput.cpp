@@ -526,8 +526,8 @@ Result IO::Data::GenerateComplexShipRegisterXMLFile(void)
 	TiXmlElement *root = IO::Data::NewGameDataXMLNode();
 
 	// Now iterate through all ships in the register
-	D::ComplexShipRegister::const_iterator it_end = D::ComplexShips.end();
-	for (D::ComplexShipRegister::const_iterator it = D::ComplexShips.begin(); it != it_end; ++it)
+	DataRegister<ComplexShip>::RegisterType::const_iterator it_end = D::ComplexShips.Data.end();
+	for (DataRegister<ComplexShip>::RegisterType::const_iterator it = D::ComplexShips.Data.begin(); it != it_end; ++it)
 	{
 		// Make sure this is a valid entry in the register
 		if (!it->second) continue;

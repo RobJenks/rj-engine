@@ -25,10 +25,12 @@ public:
 	string					Name;					// The string name of this equipment
 	string					Code;					// The internal string code for this equipment
 	
-	Game::HitPoints			GetMaxHealth(void);				// Get max HP level
+	CMPINLINE std::string	GetCode(void) const		{ return Code; }
+
+	Game::HitPoints			GetMaxHealth(void);						// Get max HP level
 	void					SetMaxHealth(Game::HitPoints h);		// Set max HP
 
-	Game::HitPoints			GetHealth(void);				// Get current HP level
+	Game::HitPoints			GetHealth(void);						// Get current HP level
 	void					SetHealth(Game::HitPoints h);			// Set current HP
 
 	Equipment(void);
@@ -36,6 +38,9 @@ public:
 	Equipment(const Equipment &E);
 
 	virtual Equipment * Clone() const = 0;
+
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	static void InitialiseLoadedEquipmentData(void);
 };

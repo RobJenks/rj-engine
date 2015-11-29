@@ -49,7 +49,7 @@ Actor *ActorBase::CreateInstance(void)
 // Attempts to look up the model from its code and calls the overloaded method
 Result ActorBase::SetModel(const std::string & model)
 {
-	return SetModel(D::GetSkinnedModel(model));
+	return SetModel(D::SkinnedModels.Get(model));
 }
 
 // Sets the model used by this actor type

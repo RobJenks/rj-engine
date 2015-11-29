@@ -31,7 +31,7 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	for (vector<tmpstring_resreq>::const_iterator it = m_tmpstring_resourcerequirements.begin(); it != it_end; ++it)
 	{
 		// Attempt to resolve the resource code specified in this requirement
-		resource = D::GetResource(it->res);
+		resource = D::Resources.Get(it->res);
 		if (resource) ResourceRequirements.push_back(ProductionProgress(ResourceAmount(resource, it->amt)));
 	}
 
@@ -40,8 +40,8 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	for (vector<tmpstring_shiptilereq>::const_iterator it2 = m_tmpstring_shiptilerequirements.begin(); it2 != it2_end; ++it2)
 	{
 		// Attempt to resolve the class and definition specified in this requirement
-		cls = D::GetComplexShipTileClass(it2->tilecls);
-		if (cls) ShipTileRequirements.push_back(ShipTileRequirement(cls, D::GetComplexShipTile(it2->tiledef),
+		cls = D::ComplexShipTileClasses.Get(it2->tilecls);
+		if (cls) ShipTileRequirements.push_back(ShipTileRequirement(cls, D::ComplexShipTiles.Get(it2->tiledef),
 																	it2->level, it2->count));
 	}
 
@@ -50,7 +50,7 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	for (vector<string>::const_iterator it3 = m_tmpstring_constructedby.begin(); it3 != it3_end; ++it3)
 	{
 		// Attempt to get a reference to the tile with this code
-		tile = D::GetComplexShipTile(*it3);
+		tile = D::ComplexShipTiles.Get(*it3);
 		if (tile) ConstructedBy.push_back(tile);
 	}
 

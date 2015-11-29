@@ -141,6 +141,9 @@ public:
 	// Copy all launcher data from the specified source object
 	void								CopyFrom(const ProjectileLauncher *source);
 
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+
 	// Static methods to translate launch method to and from its string representation
 	static ProjectileLaunchMethod		TranslateLaunchMethodFromString(std::string method);
 	static std::string					TranslateLaunchMethodToString(ProjectileLaunchMethod method);

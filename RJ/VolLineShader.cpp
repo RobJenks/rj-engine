@@ -314,8 +314,11 @@ ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
 	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
 
 	// Assign the base model texture - make a clone so that this buffer owns its own texture object
-	result = buffer->SetTexture(render_texture->Clone());
-	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
+	if (render_texture)
+	{
+		result = buffer->SetTexture(render_texture->Clone());
+		if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
+	}
 
 	// Deallocate the model vertex and index data
 	SafeDelete(v);

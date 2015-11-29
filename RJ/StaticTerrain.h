@@ -27,7 +27,7 @@ public:
 
 	// Static method to create a new terrain object.  If no definition is provided, a null-model (pure collision volume) will be created
 	CMPINLINE static StaticTerrain *				Create(void) { return StaticTerrain::Create(NULL); }
-	CMPINLINE static StaticTerrain *				Create(const std::string & def) { return StaticTerrain::Create(D::GetStaticTerrain(def)); }
+	CMPINLINE static StaticTerrain *				Create(const std::string & def) { return StaticTerrain::Create(D::StaticTerrainDefinitions.Get(def)); }
 	static StaticTerrain *							Create(const StaticTerrainDefinition *def);
 
 	// Method to create a copy of a terrain object
@@ -98,6 +98,9 @@ public:
 
 	// Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 	StaticTerrain *									Copy(void) const;
+
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	// Default destructor
 	~StaticTerrain();

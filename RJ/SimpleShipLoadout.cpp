@@ -19,7 +19,7 @@ Result SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(SimpleShip *s)
 	if (c_loadout == NullString) return ErrorCodes::ShipHasNoDefaultLoadoutSpecified;
 
 	// Look up this loadout code in the global collection
-	SimpleShipLoadout *loadout = SimpleShipLoadout::Get(c_loadout);
+	SimpleShipLoadout *loadout = D::SSLoadouts.Get(c_loadout);
 	if (!loadout) return ErrorCodes::ShipDefaultLoadoutDoesNotExist;
 
 	// If we have got this far the loadout exists; assign it to the ship and return the result
@@ -83,17 +83,6 @@ void SimpleShipLoadout::ApplyLoadoutMap(SimpleShip *s, iLoadoutMap *map)
 	// Mount this equipment (or NULL) on the hardpoint
 	h->MountEquipment(equip);
 
-}
-
-SimpleShipLoadout *SimpleShipLoadout::Get(const string &code)
-{
-	// Attempt to retrieve loadout based on string code
-	if (code == NullString) return NULL;
-	SimpleShipLoadout *loadout = D::SSLoadouts[code];
-
-	// Return a pointer to the loadout if it is valid
-	if (loadout)				return loadout;
-	else						return NULL;
 }
 
 SimpleShipLoadout::SimpleShipLoadout(void) : Code(""), Ship("")
