@@ -1,3 +1,4 @@
+#include "Texture.h"
 #include "VolLineShader.h"
 #include "BasicProjectileDefinition.h"
 
@@ -40,5 +41,39 @@ void BasicProjectileDefinition::GenerateProjectileRenderingData(void)
 {
 	// Retrieve or create a model buffer for rendering of this line data
 	Buffer = VolLineShader::LineModel(VolumetricLineData.RenderTexture);
+}
+
+// Set the texture for this projectile type from an external texture resource
+Result BasicProjectileDefinition::SetTexture(const std::string & filename)
+{
+	// Parameter check
+	if (filename == NullString) return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+
+	// Attempt to initialise a new texture object from the specified file
+	Texture *tex = new Texture();
+	Result result = tex->Initialise(filename);
+
+	// We won't store the resulting texture if an error occured during initialisation
+	if (result != ErrorCodes::NoError)
+	{
+		SafeDelete(tex);
+		return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+	}
+	
+	// Pass control to the overloaded method and return the result of storing this texture
+	return SetTexture(tex);
+}
+
+Result BasicProjectileDefinition::SetTexture(Texture *texture)
+{
+	// If a texture already exists then deallocate it first
+	if (VolumetricLineData.RenderTexture)
+	{
+		SafeDelete(VolumetricLineData.RenderTexture);
+	}
+
+	// Simply store the texture reference and return success
+	VolumetricLineData.RenderTexture = texture; 
+	return ErrorCodes::NoError;
 }
 

@@ -71,7 +71,8 @@ namespace IO { namespace Data {
 	Result LoadTurret(TiXmlElement *node);
 	Result LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret);
 	Result LoadProjectileLauncher(TiXmlElement *node);
-	Result LoadProjectileDefinition(TiXmlElement *node);
+	Result LoadBasicProjectileDefinition(TiXmlElement *node);
+	Result LoadSpaceProjectileDefinition(TiXmlElement *node);
 
 	Hardpoint *LoadHardpoint(TiXmlElement *node);
 	Result LoadSimpleShipLoadout(TiXmlElement *node);

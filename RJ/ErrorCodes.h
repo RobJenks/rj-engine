@@ -388,6 +388,9 @@ namespace ErrorCodes {
 	const Result		CannotLoadProjectileLauncherWithoutRequiredData = 2668;
 	const Result		CannotLoadProjectileDefWithoutRequiredData		= 2669;
 	const Result		CannotLoadTurretLauncherBlock					= 2670;
+	const Result		CouldNotInitialiseBasicProjectileTexture		= 2671;
+	const Result		CannotLoadBasicProjectileDefWithoutRequiredData = 2672;
+	const Result		CannotLoadBasicProjectileDefWithInvalidParams	= 2673;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

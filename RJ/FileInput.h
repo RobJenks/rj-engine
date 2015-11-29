@@ -48,6 +48,10 @@ namespace IO
 	XMFLOAT4		GetFloat4FromAttr(TiXmlElement *node);
 	void			GetFloat4FromAttr(TiXmlElement *node, XMFLOAT4 *out);
 
+	XMVECTOR		GetColourVectorFromAttr(TiXmlElement *node);
+	XMFLOAT4		GetColourFloatFromAttr(TiXmlElement *node);
+	void			GetColourFloatFromAttr(TiXmlElement *node, XMFLOAT4 *out);
+
 	CMPINLINE XMVECTOR	GetQuaternionFromAttr(TiXmlElement *node)					{ return GetVector4FromAttr(node); }
 	CMPINLINE XMFLOAT4	GetQuaternionFromAttrF(TiXmlElement *node)					{ return GetFloat4FromAttr(node); }
 	CMPINLINE void		GetQuaternionFromAttrF(TiXmlElement *node, XMFLOAT4 *out)	{ return GetFloat4FromAttr(node, out); }

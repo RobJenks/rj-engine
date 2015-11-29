@@ -43,6 +43,7 @@
 
 #include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
+#include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 
 #include "Resource.h"
@@ -185,8 +186,10 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadTurret(child);
 		} else if (name == D::NODE_ProjectileLauncher) {
 			res = IO::Data::LoadProjectileLauncher(child);
-		} else if (name == D::NODE_ProjectileDefinition) { 
-			res = IO::Data::LoadProjectileDefinition(child);
+		} else if (name == D::NODE_BasicProjectileDefinition) {
+			res = IO::Data::LoadBasicProjectileDefinition(child);
+		} else if (name == D::NODE_SpaceProjectileDefinition) { 
+			res = IO::Data::LoadSpaceProjectileDefinition(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -1742,13 +1745,96 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
-// Load projectile definition data from external XML
-Result IO::Data::LoadProjectileDefinition(TiXmlElement *node)
+// Load basic projectile definition data from external XML
+Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadBasicProjectileDefWithInvalidParams;
+
+	// Create a new basic projectile object to store the data
+	BasicProjectileDefinition *proj = new BasicProjectileDefinition();
+
+	// Parse the contents of this node to populate the projectile definition details
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_Code)
+		{
+			val = child->GetText(); StrLowerC(val);
+			proj->SetCode(val);
+		}
+		else if (hash == HashedStrings::H_Name)
+		{
+			val = child->GetText();
+			proj->SetName(val);
+		}
+		else if (hash == HashedStrings::H_Speed)
+		{
+			const char *cval = child->GetText();
+			float fval = (float)atof(cval); fval = clamp(fval, 1.0f, 100000.0f);
+			proj->SetProjectileSpeed(fval);
+		}
+		else if (hash == HashedStrings::H_ProjectileBeamLength)
+		{
+			const char *cval = child->GetText();
+			float fval = (float)atof(cval); fval = clamp(fval, 1.0f, 10000.0f);
+			proj->SetProjectileBeamLength(fval);
+		}
+		else if (hash == HashedStrings::H_ProjectileBeamRadius)
+		{
+			const char *cval = child->GetText();
+			float fval = (float)atof(cval); fval = clamp(fval, 0.0f, 1000.0f);
+			proj->SetProjectileBeamRadius(fval);
+		}
+		else if (hash == HashedStrings::H_Lifetime)
+		{
+			const char *cval = child->GetText();
+			int ival = (int)atoi(cval); ival = clamp(ival, 0, 10000);
+			proj->SetProjectileLifetime((unsigned int)ival);
+		}
+		else if (hash == HashedStrings::H_Colour)
+		{
+			XMVECTOR vec = IO::GetColourVectorFromAttr(child);
+			proj->SetProjectileColour(vec);
+		}
+		else if (hash == HashedStrings::H_Texture)
+		{
+			val = child->GetText();
+			if (val != NullString)
+			{
+				// Note: not testing return code of this method at the moment
+				proj->SetTexture(BuildStrFilename(D::IMAGE_DATA_S, val));
+			}
+		}
+	}
+
+	// Make sure we have all required fields
+	if (proj->GetCode() == NullString)
+	{
+		SafeDelete(proj);
+		return ErrorCodes::CannotLoadBasicProjectileDefWithoutRequiredData;
+	}
+
+	// Initialise the projectile rendering data based on these loaded properties
+	proj->GenerateProjectileRenderingData();
+
+	// Add to the central collection and return success
+	D::BasicProjectiles.Store(proj);
+	return ErrorCodes::NoError;
+}
+
+// Load space projectile definition data from external XML
+Result IO::Data::LoadSpaceProjectileDefinition(TiXmlElement *node)
 {
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadProjectileDefWithInvalidParams;
 	 
-	// Create a new turret object to store the data
+	// Create a new space projectile object to store the data
 	SpaceProjectileDefinition *proj = new SpaceProjectileDefinition();
 
 	// Parse the contents of this node to populate the tile definition details

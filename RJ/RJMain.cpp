@@ -471,7 +471,7 @@ void RJMain::ProcessKeyboardInput(void)
 		{
 			dbg_u_counter = (Game::ClockMs + 100);
 
-			static BasicProjectileDefinition *def = NULL;
+			/*static BasicProjectileDefinition *def = NULL;
 			if (!def)
 			{
 				def = new BasicProjectileDefinition();
@@ -488,13 +488,14 @@ void RJMain::ProcessKeyboardInput(void)
 				}
 
 				def->GenerateProjectileRenderingData();
-			}
+			}*/
 
 			const float foffset = 10.0f;
 			XMVECTOR pos = (lhs ? XMVectorSetX(NULL_VECTOR, -foffset) : XMVectorSetX(NULL_VECTOR, foffset));
 			pos = XMVector3TransformCoord(pos, ss->GetWorldMatrix());
 			lhs = !lhs;
-			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), pos, ss->GetOrientation(), ss->PhysicsState.WorldMomentum);
+			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(D::BasicProjectiles.Get("basiclaser01"), ss->GetID(), 
+																		pos, ss->GetOrientation(), ss->PhysicsState.WorldMomentum);
 		}
 
 	}
@@ -1930,7 +1931,7 @@ void RJMain::__CreateDebugScenario(void)
 	dbg_turret->SetPitchRate(0.25f);
 	dbg_turret->SetYawRate(0.5f);*/
 
-	BasicProjectileDefinition *bdef = new BasicProjectileDefinition();
+	/*BasicProjectileDefinition *bdef = new BasicProjectileDefinition();
 	bdef->SetProjectileSpeed(1000.0f);
 	bdef->SetProjectileBeamLength(200.0f);
 	bdef->SetProjectileBeamRadius(3.0f);
@@ -1941,7 +1942,7 @@ void RJMain::__CreateDebugScenario(void)
 	{
 		bdef->SetTexture(bt);
 	}
-	bdef->GenerateProjectileRenderingData();
+	bdef->GenerateProjectileRenderingData();*/
 
 
 	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
@@ -1960,7 +1961,7 @@ void RJMain::__CreateDebugScenario(void)
 			// Update to use basic proj
 			for (int l = 0; l < nt->GetLauncherCount(); ++l)
 			{
-				nt->GetLauncher(l)->SetProjectileDefinition(bdef);
+				nt->GetLauncher(l)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
 				nt->GetLauncher(l)->SetLaunchInterval(100U);
 			}
 

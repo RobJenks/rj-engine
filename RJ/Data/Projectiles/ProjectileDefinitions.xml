@@ -1,0 +1,9 @@
+<gamedata>
+
+  <!-- Include all basic projectile definitions -->
+  <include file="Projectiles\Basic\BasicProjectiles.xml" />
+
+  <!-- Include all space projectile definitions -->
+  <include file="Projectiles\Space\SpaceProjectiles.xml" />
+  
+</gamedata>

@@ -1,5 +1,5 @@
 <GameData>
-  <ProjectileDefinition>
+  <SpaceProjectileDefinition>
     <Code>projectile_basic01</Code>
     <Name>Basic impactor</Name>
     <Model>unit_cone_model</Model>
@@ -9,5 +9,5 @@
     <LifetimeEndAction>Disappear</LifetimeEndAction>
     
     
-  </ProjectileDefinition>
+  </SpaceProjectileDefinition>
 </GameData>

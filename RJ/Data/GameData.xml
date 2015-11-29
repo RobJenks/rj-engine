@@ -33,7 +33,7 @@
   <include file="Ships\ComplexShipRegister.xml" />
 
   <!-- Load turret object data (must load Projectiles > Launchers > Turrets due to dependencies) -->
-  <include file="Turrets\ProjectileDefinitions.xml" />
+  <include file="Projectiles\ProjectileDefinitions.xml" />
   <include file="Turrets\ProjectileLaunchers.xml" />
   <include file="Turrets\Turrets.xml" />
   

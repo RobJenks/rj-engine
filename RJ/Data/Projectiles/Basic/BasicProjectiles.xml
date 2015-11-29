@@ -1,0 +1,14 @@
+<gamedata>
+
+  <BasicProjectileDefinition>
+    <Code>BasicLaser01</Code>
+    <Name>Basic testing laser</Name>
+    <Speed>1000.0</Speed>
+    <ProjectileBeamLength>200.0</ProjectileBeamLength>
+    <ProjectileBeamRadius>3.0</ProjectileBeamRadius>
+    <Lifetime>3000</Lifetime>
+    <ProjectileBeamColour r="1.0" g="1.0" b="1.0" a="0.5" />
+    <Texture>Rendering\grad2.dds</Texture>
+  </BasicProjectileDefinition>
+  
+</gamedata>

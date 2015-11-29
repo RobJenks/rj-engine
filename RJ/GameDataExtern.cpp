@@ -21,6 +21,7 @@
 #include "ActorBase.h"
 #include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
+#include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
 class ImmediateRegion;
@@ -35,7 +36,6 @@ namespace D {
 	DataRegister<SimpleShip>					SimpleShips(true);					// The details of all simple ship classes in the game	
 	DataRegister<SimpleShipLoadout>				SSLoadouts(false);					// The details of all simple ship loadouts in the game
 	DataRegister<class Equipment>				Equipment(false);					// The details of all equipment items in the game
-
 	DataRegister<ComplexShip>					ComplexShips(true);					// The details of all complex ships in the game
 	DataRegister<ComplexShipSection>			ComplexShipSections(true);			// The details of all complex ship sections in the game
 	DataRegister<ComplexShipTileDefinition>		ComplexShipTiles(true);				// The details of all complex ship tiles in the game
@@ -45,7 +45,8 @@ namespace D {
 	DataRegister<Resource>						Resources(false);					// Details of all resources in the game
 	DataRegister<SpaceTurret>					Turrets(true);						// Details of all turret types in the game
 	DataRegister<ProjectileLauncher>			ProjectileLaunchers(false);			// Details of all projectile launcher types in the game
-	DataRegister<SpaceProjectileDefinition>		SpaceProjectiles(false);			// Details of all projectile types in the game
+	DataRegister<BasicProjectileDefinition>		BasicProjectiles(false);			// Details of all basic projectile types in the game
+	DataRegister<SpaceProjectileDefinition>		SpaceProjectiles(false);			// Details of all space projectile types in the game
 	DataRegister<SkinnedModel>					SkinnedModels(false);				// Details of all skinned models in the game
 	DataRegister<ActorBase>						Actors(false);						// Details of all actor types in the game
 
@@ -90,6 +91,7 @@ namespace D {
 	const char *NODE_ArticulatedModel = "articulatedmodel";
 	const char *NODE_UIManagedControlDefinition = "uimanagedcontroldefinition";
 	const char *NODE_Resource = "resource";
+	const char *NODE_BasicProjectileDefinition = "basicprojectiledefinition";
 	const char *NODE_SpaceProjectileDefinition = "spaceprojectiledefinition";
 	const char *NODE_SkinnedModel = "skinnedmodel";
 	const char *NODE_ActorAttributeGeneration = "actorattributegeneration";
@@ -99,7 +101,6 @@ namespace D {
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";
 	const char *NODE_ProjectileLauncher = "projectilelauncher";
-	const char *NODE_ProjectileDefinition = "projectiledefinition";
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";

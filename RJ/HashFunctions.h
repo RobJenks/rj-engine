@@ -232,6 +232,11 @@ namespace HashedStrings
 	DefineHash(H_RelativePosition, "relativeposition");
 	DefineHash(H_RelativeOrientation, "relativeorientation");
 	DefineHash(H_TurretFireDelay, "turretfiredelay");
+	DefineHash(H_Speed, "speed");
+	DefineHash(H_ProjectileBeamLength, "projectilebeamlength");
+	DefineHash(H_ProjectileBeamRadius, "projectilebeamradius");
+	DefineHash(H_Lifetime, "lifetime");
+	DefineHash(H_Colour, "colour");
 }
 
 

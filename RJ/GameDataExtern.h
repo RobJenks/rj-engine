@@ -26,6 +26,7 @@ class StaticTerrainDefinition;
 class Resource;
 class SpaceTurret;
 class ProjectileLauncher;
+class BasicProjectileDefinition;
 class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
@@ -50,6 +51,7 @@ namespace D {
 
 	extern DataRegister<SpaceTurret>					Turrets;					// The details of each turret type in the game
 	extern DataRegister<ProjectileLauncher>				ProjectileLaunchers;		// The details of each projectile launcher in the game
+	extern DataRegister<BasicProjectileDefinition>		BasicProjectiles;			// The details of each basic projectile type in the game
 	extern DataRegister<SpaceProjectileDefinition>		SpaceProjectiles;			// The details of each space projectile type in the game
 
 	extern DataRegister<SkinnedModel>					SkinnedModels;				// The details of all skinned models in the game
@@ -99,6 +101,7 @@ namespace D {
 	extern const char *NODE_ArticulatedModel;
 	extern const char *NODE_UIManagedControlDefinition;
 	extern const char *NODE_Resource;
+	extern const char *NODE_BasicProjectileDefinition; 
 	extern const char *NODE_SpaceProjectileDefinition;
 	extern const char *NODE_SkinnedModel;
 	extern const char *NODE_ActorAttributeGeneration;
@@ -108,7 +111,6 @@ namespace D {
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;
 	extern const char *NODE_ProjectileLauncher;
-	extern const char *NODE_ProjectileDefinition;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;

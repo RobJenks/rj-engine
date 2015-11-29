@@ -4,6 +4,7 @@
 #define __BasicProjectileDefinitionH__
 
 #include "VolumetricLine.h"
+#include "ErrorCodes.h"
 class Texture;
 class ModelBuffer;
 
@@ -21,6 +22,14 @@ public:
 	float									ProjectileBeamLength;				// Extent of the projectile beam that trails the projectile point
 	float									ProjectileBeamLengthMultiplier;		// The scaling factor to be applied to projectile velocity to generate the beam
 	unsigned int							Lifetime;							// Projectile lifetime (ms) before it expires and is removed
+
+	// Get or set the unique string code for this projectile definition
+	CMPINLINE std::string					GetCode(void) const								{ return m_code; }
+	CMPINLINE void							SetCode(const std::string & code)				{ m_code = code; }
+
+	// Get or set the unique string code for this projectile definition
+	CMPINLINE std::string					GetName(void) const								{ return m_name; }
+	CMPINLINE void							SetName(const std::string & code)				{ m_name = code; }
 
 	// Set the projectile speed
 	void									SetProjectileSpeed(float speed);
@@ -45,18 +54,23 @@ public:
 
 	// Return or store a reference to the texture for this projectile type
 	CMPINLINE Texture *						GetTexture(void) const			{ return VolumetricLineData.RenderTexture; }
-	CMPINLINE void							SetTexture(Texture *texture)	{ VolumetricLineData.RenderTexture = texture; }
+	Result									SetTexture(Texture *texture);
+	Result									SetTexture(const std::string & filename);
 
 	// Return or store the default projectile lifetime 
 	CMPINLINE unsigned int					GetProjectileLifetime(void) const				{ return Lifetime; }
 	CMPINLINE void							SetProjectileLifetime(unsigned int lifetime)	{ Lifetime = lifetime; }
 
 	// Volumetric line data for this projectile type
-	VolumetricLine							VolumetricLineData;			
+	VolumetricLine							VolumetricLineData;		
+
+	// Shutdown method - not required for this class
+	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 protected:
 
-
+	std::string								m_code;
+	std::string								m_name;
 
 
 
