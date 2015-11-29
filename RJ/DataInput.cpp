@@ -42,7 +42,7 @@
 #include "StaticTerrainDefinition.h"
 
 #include "SpaceTurret.h"
-#include "SpaceProjectileLauncher.h"
+#include "ProjectileLauncher.h"
 #include "SpaceProjectileDefinition.h"
 
 #include "Resource.h"
@@ -1653,7 +1653,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 	if (!node) return ErrorCodes::CannotLoadProjectileLauncherWithInvalidParams;
 
 	// Create a new object to store the data
-	SpaceProjectileLauncher *launcher = new SpaceProjectileLauncher();
+	ProjectileLauncher *launcher = new ProjectileLauncher();
 
 	// Parse the contents of this node to populate the tile definition details
 	std::string key, val; HashVal hash;
@@ -1693,7 +1693,7 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 
 			val = ctype;
 			float fimp = (float)atof(cimp); fimp = max(1.0f, fimp);
-			launcher->SetLaunchMethod(SpaceProjectileLauncher::TranslateLaunchMethodFromString(val));
+			launcher->SetLaunchMethod(ProjectileLauncher::TranslateLaunchMethodFromString(val));
 			launcher->SetLaunchImpulse(fimp);
 		}
 		else if (hash == HashedStrings::H_Spread)

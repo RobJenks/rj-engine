@@ -448,9 +448,6 @@
     <ClCompile Include="SpaceProjectile.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
-    <ClCompile Include="SpaceProjectileLauncher.cpp">
-      <Filter>Objects\Projectiles</Filter>
-    </ClCompile>
     <ClCompile Include="SpaceProjectileDefinition.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
@@ -513,6 +510,9 @@
     </ClCompile>
     <ClCompile Include="BasicProjectileDefinition.cpp">
       <Filter>Objects\BasicProjectile</Filter>
+    </ClCompile>
+    <ClCompile Include="ProjectileLauncher.cpp">
+      <Filter>Objects\Projectiles</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1062,9 +1062,6 @@
     <ClInclude Include="SpaceProjectile.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
-    <ClInclude Include="SpaceProjectileLauncher.h">
-      <Filter>Objects\Projectiles</Filter>
-    </ClInclude>
     <ClInclude Include="SpaceProjectileDefinition.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
@@ -1157,6 +1154,12 @@
     </ClInclude>
     <ClInclude Include="AlignedAllocator.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Projectile.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="ProjectileLauncher.h">
+      <Filter>Objects\Projectiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

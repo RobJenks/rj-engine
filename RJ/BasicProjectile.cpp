@@ -5,7 +5,7 @@
 
 // Constructor to initialise all values
 BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, Game::ID_TYPE owner, const FXMVECTOR position,
-	const FXMVECTOR orientation, unsigned int lifetime)
+	const FXMVECTOR orientation)
 	:
 	Definition(definition),
 	Owner(owner),
@@ -13,7 +13,7 @@ BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, G
 	Orientation(orientation),
 
 	LaunchTime(Game::ClockMs),
-	Expiration(Game::ClockMs + lifetime), 
+	Expiration(Game::ClockMs + definition->Lifetime), 
 	Speed(definition->Speed), 
 	ProjectileBeamLengthMultiplier(definition->ProjectileBeamLengthMultiplier)
 { 
@@ -23,7 +23,7 @@ BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, G
 
 // Constructor to initialise all values, including an initial velocity imparted by a moving parent object
 BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, Game::ID_TYPE owner, const FXMVECTOR position,
-	const FXMVECTOR orientation, unsigned int lifetime, const FXMVECTOR base_world_velocity)
+	const FXMVECTOR orientation, const FXMVECTOR base_world_velocity)
 	:
 	Definition(definition),
 	Owner(owner),
@@ -31,7 +31,7 @@ BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, G
 	Orientation(orientation),
 
 	LaunchTime(Game::ClockMs),
-	Expiration(Game::ClockMs + lifetime)
+	Expiration(Game::ClockMs + definition->Lifetime)
 {
 	
 	// We also need to account for the initial (parent) velocity when defining our overall velocity vector

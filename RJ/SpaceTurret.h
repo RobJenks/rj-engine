@@ -7,7 +7,7 @@
 #include "FiringArc.h"
 #include "ArticulatedModel.h"
 class iSpaceObject;
-class SpaceProjectileLauncher;
+class ProjectileLauncher;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -143,13 +143,13 @@ public:
 	void							InitialiseLaunchers(int launcher_count);
 
 	// Retrieve a reference to one of the launchers within the turrent
-	SpaceProjectileLauncher *		GetLauncher(int index);
+	ProjectileLauncher *		GetLauncher(int index);
 
 	// Returns the number of launchers maintained within this turrent
 	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
 
 	// Sets a launcher to the specified object
-	Result							SetLauncher(int index, const SpaceProjectileLauncher *launcher);
+	Result							SetLauncher(int index, const ProjectileLauncher *launcher);
 
 	// Clears the reference to all turret launcher data; used during object clone to allow deep-copy of launcher data
 	void							ClearLauncherReferences(void);
@@ -197,7 +197,7 @@ protected:
 	ArticulatedModel *				m_articulatedmodel;
 
 	// Array of projectile launchers attached to this turret
-	SpaceProjectileLauncher *		m_launchers;				// Array of launcher objects arrached to the turret
+	ProjectileLauncher *		m_launchers;				// Array of launcher objects arrached to the turret
 	int								m_launchercount;			// The total count of launcher objects
 	int								m_launcherubound;			// Efficiency measure; the upper bound of the launcher array.  (LauncherCount - 1)
 	int								m_nextlauncher;				// The next launcher that will fire a projectile

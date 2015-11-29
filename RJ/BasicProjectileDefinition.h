@@ -20,6 +20,7 @@ public:
 	float									Speed;								// Projectile speed /sec
 	float									ProjectileBeamLength;				// Extent of the projectile beam that trails the projectile point
 	float									ProjectileBeamLengthMultiplier;		// The scaling factor to be applied to projectile velocity to generate the beam
+	unsigned int							Lifetime;							// Projectile lifetime (ms) before it expires and is removed
 
 	// Set the projectile speed
 	void									SetProjectileSpeed(float speed);
@@ -45,6 +46,10 @@ public:
 	// Return or store a reference to the texture for this projectile type
 	CMPINLINE Texture *						GetTexture(void) const			{ return VolumetricLineData.RenderTexture; }
 	CMPINLINE void							SetTexture(Texture *texture)	{ VolumetricLineData.RenderTexture = texture; }
+
+	// Return or store the default projectile lifetime 
+	CMPINLINE unsigned int					GetProjectileLifetime(void) const				{ return Lifetime; }
+	CMPINLINE void							SetProjectileLifetime(unsigned int lifetime)	{ Lifetime = lifetime; }
 
 	// Volumetric line data for this projectile type
 	VolumetricLine							VolumetricLineData;			

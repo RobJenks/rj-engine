@@ -316,7 +316,7 @@
     <ClCompile Include="SimulationObjectManager.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
-    <ClCompile Include="SpaceProjectileLauncher.cpp" />
+    <ClCompile Include="ProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="TurretController.cpp" />
     <ClCompile Include="UI_Console.cpp" />
@@ -508,6 +508,7 @@
     <ClInclude Include="LogManager.h" />
     <ClInclude Include="ModelBuffer.h" />
     <ClInclude Include="MultiLineTextBlock.h" />
+    <ClInclude Include="Projectile.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -515,7 +516,7 @@
     <ClInclude Include="Ray.h" />
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />
-    <ClInclude Include="SpaceProjectileLauncher.h" />
+    <ClInclude Include="ProjectileLauncher.h" />
     <ClInclude Include="SpaceTurret.h" />
     <ClInclude Include="TurretController.h" />
     <ClInclude Include="UI_Console.h" />

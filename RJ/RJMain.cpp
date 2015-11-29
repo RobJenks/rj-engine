@@ -75,7 +75,7 @@
 #include "AABB.h"							// DBG
 #include "SpaceProjectileDefinition.h"		// DBG
 #include "SpaceProjectile.h"				// DBG
-#include "SpaceProjectileLauncher.h"		// DBG
+#include "ProjectileLauncher.h"		// DBG
 #include "Attachment.h"						// DBG
 #include "ArticulatedModel.h"				// DBG
 #include "SpaceTurret.h"					// DBG
@@ -482,6 +482,7 @@ void RJMain::ProcessKeyboardInput(void)
 				def->SetProjectileBeamLength(200.0f);
 				def->SetProjectileBeamRadius(5.0f);
 				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.25f));
+				def->SetProjectileLifetime(3000U);
 				
 				Texture *t = new Texture();
 				if (ErrorCodes::NoError == t->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
@@ -496,7 +497,7 @@ void RJMain::ProcessKeyboardInput(void)
 			XMVECTOR pos = (lhs ? XMVectorSetX(NULL_VECTOR, -foffset) : XMVectorSetX(NULL_VECTOR, foffset));
 			pos = XMVector3TransformCoord(pos, ss->GetWorldMatrix());
 			lhs = !lhs;
-			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), pos, ss->GetOrientation(), 3000U, ss->PhysicsState.WorldMomentum);
+			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(def, ss->GetID(), pos, ss->GetOrientation(), ss->PhysicsState.WorldMomentum);
 		}
 
 	}
@@ -664,9 +665,10 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		//ss->SetPosition(XMVectorAdd(cs->TurretController.Turrets[0]->GetPosition(), XMVectorSet(50.0f, 0.0f, 0.0f, 0.0f)));
-
-		//m_keyboard.LockKey(DIK_3);
+		for (int t = 0; t < cs->TurretController.TurretCount(); ++t)
+		{
+			cs->TurretController.Turrets[t]->Fire();
+		}
 	}
 	if (b[DIK_4]) {
 		Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, !b[DIK_LSHIFT]);
@@ -1821,6 +1823,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
 		cs->SetOrientation(ID_QUATERNION);
+		cs->Fade.SetFadeAlpha(0.5f);
 
 		Engine *eng = (Engine*)D::Equipment["FRIGATE_HEAVY_ION_ENGINE1"];
 		cs->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
@@ -1903,12 +1906,12 @@ void RJMain::__CreateDebugScenario(void)
 	turret->SetYawRate(0.1f);
 	
 
-	SpaceProjectileLauncher *l = turret->GetLauncher(0);
+	ProjectileLauncher *l = turret->GetLauncher(0);
 	l->SetProjectileDefinition(def);
 	l->SetLaunchInterval(1000U);
 	l->SetProjectileSpread(0.01f);
 	l->SetLaunchImpulse(1000.0f);
-	l->SetLaunchMethod(SpaceProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
+	l->SetLaunchMethod(ProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
 	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));		// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
 	l->SetRelativeOrientation(ID_QUATERNION);
 	l->SetProjectileSpin(1.0f);
@@ -1927,6 +1930,20 @@ void RJMain::__CreateDebugScenario(void)
 	dbg_turret->SetPitchRate(0.25f);
 	dbg_turret->SetYawRate(0.5f);*/
 	
+	BasicProjectileDefinition *bdef = new BasicProjectileDefinition();
+	bdef->SetProjectileSpeed(1000.0f);
+	bdef->SetProjectileBeamLength(200.0f);
+	bdef->SetProjectileBeamRadius(3.0f);
+	bdef->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.65f));
+	bdef->SetProjectileLifetime(3000U);
+	Texture *bt = new Texture();
+	if (ErrorCodes::NoError == bt->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
+	{
+		bdef->SetTexture(bt);
+	}
+	bdef->GenerateProjectileRenderingData();
+	
+
 	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationAxis(UP_VECTOR, PI / 4.0f);
 	SpaceTurret *t = D::GetTurret("turret_basic01");
@@ -1939,9 +1956,16 @@ void RJMain::__CreateDebugScenario(void)
 			SpaceTurret *nt = t->Copy();
 			nt->SetRelativePosition(pos);
 			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
+
+			// Update to use basic proj
+			for (int l = 0; l < nt->GetLauncherCount(); ++l)
+			{
+				nt->GetLauncher(l)->SetProjectileDefinition(bdef);
+				nt->GetLauncher(l)->SetLaunchInterval(100U);
+			}
+
 			cs->TurretController.AddTurret(nt);
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
-			return;
 		}
 
 	// Test render - vol line
@@ -2089,9 +2113,8 @@ void RJMain::DEBUGDisplayInfo(void)
 				fire = true;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Yaw: %.2f (%.2f)  |  Pitch: %.2f (%.2f)  |  %s  | %d contacts (%d enemy)",
-			yaw, cs->TurretController.Turrets[0]->GetYaw(), pitch, cs->TurretController.Turrets[0]->GetPitch(), (fire ? "* FIRE *" : "---"),
-			cs->GetContactCount(), cs->GetEnemyContactCount());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Active: %d",
+			ss->GetSpaceEnvironment()->Projectiles.GetActiveProjectileCount());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}

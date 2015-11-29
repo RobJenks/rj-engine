@@ -39,7 +39,7 @@ public:
 
 	// Adds a new projectile to the collection
 	void													AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const FXMVECTOR position,
-																			const FXMVECTOR orientation, unsigned int lifetime, const FXMVECTOR base_world_velocity);
+																			const FXMVECTOR orientation, const FXMVECTOR base_world_velocity);
 
 	// Removes the projectile at the specified index
 	void													RemoveProjectile(std::vector<BasicProjectile>::size_type index);

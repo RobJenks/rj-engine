@@ -1,18 +1,20 @@
 #pragma once
 
-#ifndef __SpaceProjectileLauncherH__
-#define __SpaceProjectileLauncherH__
+#ifndef __ProjectileLauncherH__
+#define __ProjectileLauncherH__
 
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
+#include "Projectile.h"
 class iSpaceObject;
 class SpaceTurret;
 class SpaceProjectile;
+class BasicProjectileDefinition;
 class SpaceProjectileDefinition;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class SpaceProjectileLauncher : public ALIGN16<SpaceProjectileLauncher>
+class ProjectileLauncher : public ALIGN16<ProjectileLauncher>
 {
 public:
 
@@ -20,7 +22,7 @@ public:
 	enum ProjectileLaunchMethod { ApplyForce = 0, SetVelocityDirect };
 
 	// Default constructor
-	SpaceProjectileLauncher(void);
+	ProjectileLauncher(void);
 
 	// Return or set the unique string code for this projectile launcher type
 	CMPINLINE const std::string & 		GetCode(void) const					{ return m_code; }
@@ -39,9 +41,19 @@ public:
 	// projectile that was fired, or NULL if nothing was launched
 	SpaceProjectile *					LaunchProjectile(const FXMVECTOR launchpoint, const FXMVECTOR launchorient);
 
-	// Set or return the projectile type that is used by this launcher
+	// Returns or changes the projectile class used by this launcher
+	CMPINLINE Projectile::ProjectileType		GetProjectileType(void) const									{ return m_projectiletype; }
+	CMPINLINE void								ChangeProjectileType(Projectile::ProjectileType projtype)		{ m_projectiletype = projtype; }
+
+	// Set the projectile definition to be used by this launcher.  Also sets the projectiletype to match
+	void										SetProjectileDefinition(const BasicProjectileDefinition *def);
+	void										SetProjectileDefinition(const SpaceProjectileDefinition *def);
+
+	// Returns the basic projectile type that is used by this launcher (if type == basicprojectile)
+	CMPINLINE const BasicProjectileDefinition *	GetBasicProjectileDefinition(void) const						{ return m_basicprojdef; }
+	
+	// Returns the space projectile type that is used by this launcher (if type == spaceprojectile)
 	CMPINLINE const SpaceProjectileDefinition * GetProjectileDefinition(void) const								{ return m_projectiledef; }
-	CMPINLINE void								SetProjectileDefinition(const SpaceProjectileDefinition *def)	{ m_projectiledef = def; }
 
 	// Methods to get or set basic object properties
 	CMPINLINE const iSpaceObject *		GetParent(void) const										{ return m_parent; }
@@ -127,7 +139,7 @@ public:
 	float								DetermineApproxRange(void) const;
 
 	// Copy all launcher data from the specified source object
-	void								CopyFrom(const SpaceProjectileLauncher *source);
+	void								CopyFrom(const ProjectileLauncher *source);
 
 	// Static methods to translate launch method to and from its string representation
 	static ProjectileLaunchMethod		TranslateLaunchMethodFromString(std::string method);
@@ -138,7 +150,9 @@ protected:
 	std::string							m_code;							// Unique string code for this launcher type
 	std::string							m_name;							// Descriptive string name for this launcher type
 
-	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched
+	Projectile::ProjectileType			m_projectiletype;				// Indicates the type of projectile (basic or full) which will be launched
+	const BasicProjectileDefinition *	m_basicprojdef;					// The type of projectile that will be launched (if we are launching basic projectiles)
+	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched (if we are launching full projectiles)
 
 	iSpaceObject *						m_parent;						// The parent object that this launcher belongs to
 	SpaceTurret *						m_parentturret;					// The parent object turret that this launcher belongs to (or NULL if N/A)

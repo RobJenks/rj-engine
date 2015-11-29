@@ -28,7 +28,7 @@ void BasicProjectileSet::Initialise(std::vector<BasicProjectile>::size_type init
 
 // Adds a new projectile to the collection
 void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Game::ID_TYPE owner, const FXMVECTOR position,
-										const FXMVECTOR orientation, unsigned int lifetime, const FXMVECTOR base_world_velocity)
+										const FXMVECTOR orientation, const FXMVECTOR base_world_velocity)
 {
 	// If we are not active then initialise now; first projectile will be created at [0]
 	if (!Active)
@@ -52,7 +52,7 @@ void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Ga
 	}
 
 	// The "LiveIndex" now points to the next suitable element for creating a projectile.  Set the projectile details
-	Items[LiveIndex] = BasicProjectile(def, owner, position, orientation, lifetime, base_world_velocity);
+	Items[LiveIndex] = BasicProjectile(def, owner, position, orientation, base_world_velocity);
 }
 
 // Extends the size of the collection to allow more elements to be added, as long as we are not at the limit

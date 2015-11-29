@@ -4,7 +4,7 @@
 #include "SimulationObjectManager.h"
 #include "ArticulatedModel.h"
 #include "SpaceProjectile.h"
-#include "SpaceProjectileLauncher.h"
+#include "ProjectileLauncher.h"
 
 #include "SpaceTurret.h"
 
@@ -169,7 +169,7 @@ void SpaceTurret::Fire(void)
 {
 	// Check if a projectile can be fired from the active launcher.  If no projectile can be 
 	// fired we are likely within the 'reload' interval and will simply return.  
-	SpaceProjectileLauncher & launcher = m_launchers[m_nextlauncher];
+	ProjectileLauncher & launcher = m_launchers[m_nextlauncher];
 	if (!launcher.CanLaunchProjectile()) return;
 	
 	// We only need to determine the turret firing position if we are ready to fire a projectile
@@ -180,7 +180,7 @@ void SpaceTurret::Fire(void)
 
 	// Launch a new projectile.  Use turret (rather than cannon-component) orientation in world space
 	// TODO: in future, may want to keep track of last projectile(s) fired?
-	launcher.LaunchProjectile(cannon->GetPosition(), (m_turretrelativeorient * m_parent->GetOrientation()));
+	launcher.LaunchProjectile(cannon->GetPosition(), XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
 
 	// If this is a multi-launcher turret, set the next launcher to be fired
 	if (m_launchercount != 1)
@@ -411,7 +411,7 @@ void SpaceTurret::InitialiseLaunchers(int launcher_count)
 	}
 
 	// Allocate new space for the launcher objects
-	m_launchers = new SpaceProjectileLauncher[launcher_count];
+	m_launchers = new ProjectileLauncher[launcher_count];
 
 	// Update the count of launcher objects, and reset the related parameters accordingly
 	m_launchercount = launcher_count;
@@ -439,14 +439,14 @@ void SpaceTurret::RecalculateTurretStatistics(void)
 }
 
 // Retrieve a reference to one of the launchers within the turrent
-SpaceProjectileLauncher * SpaceTurret::GetLauncher(int index)
+ProjectileLauncher * SpaceTurret::GetLauncher(int index)
 {
 	if (index < 0 || index > m_launcherubound)	return NULL;
 	else										return &(m_launchers[index]);
 }
 
 // Sets a launcher to the specified object
-Result SpaceTurret::SetLauncher(int index, const SpaceProjectileLauncher *launcher)
+Result SpaceTurret::SetLauncher(int index, const ProjectileLauncher *launcher)
 {
 	// Parameter checks
 	if (index < 0 || index > m_launcherubound || !launcher)	return ErrorCodes::CannotSetTurretLauncherDefinition;

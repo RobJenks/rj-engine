@@ -1,5 +1,6 @@
 #include "Octree.h"
 #include "iSpaceObject.h"
+#include "ComplexShipSection.h"
 #include "CapitalShipPerimeterBeacon.h"
 
 #include "SimulationObjectManager.h"
@@ -380,15 +381,20 @@ int SimulationObjectManager::_GetAllObjectsWithinDistance(	Octree<iSpaceObject*>
 
 				// Ignore the object if we are only interested in objects of a certain disposition (hostile/friendly etc)
 
-				// Special case: if this is a capital ship beacon then we want to instead treat it like the parent capital ship
+				// Special cases: if this is a capital ship beacon or ship section then we want to instead treat it like the parent capital ship
 				if (obj->GetObjectType() == iObject::ObjectType::CapitalShipPerimeterBeaconObject)
+				{
 					obj = ((CapitalShipPerimeterBeacon*)obj)->GetParentShip();
+				}
+				else if (obj->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject)
+				{
+					obj = (iSpaceObject*)(((ComplexShipSection*)obj)->GetParent());
+				}
 
 				// Method 1 - Large objects: if this is a large object, avoid multiple-counting the objects based on any
 				// beacons it may have deployed.  Test distance using a conservative test of (distsq + collradiussq) < targetdistsq, 
 				// which may yield some false positives but which is much quicker at this stage than a proper distance test
-				if (obj->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject ||
-					obj->GetObjectType() == iObject::ObjectType::ComplexShipObject)
+				if (obj->GetObjectType() == iObject::ObjectType::ComplexShipObject)
 				{
 					// Check whether we have already found this object; continue to the next object if we have
 					// Also clear the static large object vector if this is the first time we are using it

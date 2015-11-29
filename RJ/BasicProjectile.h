@@ -29,11 +29,11 @@ public:
 
 	// Constructor to initialise all values
 	BasicProjectile(const BasicProjectileDefinition *definition, Game::ID_TYPE owner, const FXMVECTOR position, 
-					const FXMVECTOR orientation, unsigned int lifetime);
+					const FXMVECTOR orientation);
 
 	// Constructor to initialise all values, including an initial velocity imparted by a moving parent object
 	BasicProjectile(const BasicProjectileDefinition * definition, Game::ID_TYPE owner, const FXMVECTOR position,
-					const FXMVECTOR orientation, unsigned int lifetime, const FXMVECTOR base_world_velocity);
+					const FXMVECTOR orientation, const FXMVECTOR base_world_velocity);
 
 	// Generate a render instance for this projectile, using data from this instance and the projectile definition
 	void GenerateRenderInstance(RM_Instance & outInstance);

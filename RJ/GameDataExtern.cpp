@@ -20,7 +20,7 @@
 #include "SkinnedModel.h"
 #include "ActorBase.h"
 #include "SpaceTurret.h"
-#include "SpaceProjectileLauncher.h"
+#include "ProjectileLauncher.h"
 #include "SpaceProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
 class ImmediateRegion;
@@ -440,7 +440,7 @@ namespace D {
 			Turrets[t->GetCode()] = t;					// Add the object
 		}
 	}
-	void AddStandardProjectileLauncher(SpaceProjectileLauncher *l)
+	void AddStandardProjectileLauncher(ProjectileLauncher *l)
 	{
 		if (l && l->GetCode() != NullString && D::ProjectileLaunchers.count(l->GetCode()) == 0)
 		{
