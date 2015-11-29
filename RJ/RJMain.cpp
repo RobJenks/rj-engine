@@ -1802,7 +1802,7 @@ void RJMain::DebugFullCCDTest(void)
 void RJMain::__CreateDebugScenario(void)
 {
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
-	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"), 
+	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"),
 		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_prc"),
 		Game::FactionManager.GetFaction("faction_us"), Faction::FactionDisposition::Hostile);
@@ -1864,7 +1864,7 @@ void RJMain::__CreateDebugScenario(void)
 
 
 	s3[1]->AddChildAttachment(s3[2]);
-	Attachment<iObject*> *attach = &( s3[1]->GetChildObjects().at(0) );
+	Attachment<iObject*> *attach = &(s3[1]->GetChildObjects().at(0));
 	XMVECTOR initial_orient = XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2);
 	attach->CreateConstraint(RIGHT_VECTOR, XMVectorSet(0.0f, 5.0f, 0.0f, 0.0f), XMVectorSet(0.0f, -5.0f, 5.0f, 0.0f), initial_orient);
 
@@ -1878,8 +1878,8 @@ void RJMain::__CreateDebugScenario(void)
 		a1->MoveIntoEnvironment(cs);
 		ComplexShipTile *t = cs->GetFirstTileOfType(D::TileClass::Corridor);
 		if (t)
-			a1->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(), 
-				XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
+			a1->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
+			XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
 		else
 			a1->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
@@ -1904,7 +1904,7 @@ void RJMain::__CreateDebugScenario(void)
 	turret->SetYawLimitFlag(true);
 	turret->SetYawLimits(-PI / 4.0f, +PI / 4.0f);;
 	turret->SetYawRate(0.1f);
-	
+
 
 	ProjectileLauncher *l = turret->GetLauncher(0);
 	l->SetProjectileDefinition(def);
@@ -1929,7 +1929,7 @@ void RJMain::__CreateDebugScenario(void)
 	dbg_turret->SetYawLimitFlag(false);
 	dbg_turret->SetPitchRate(0.25f);
 	dbg_turret->SetYawRate(0.5f);*/
-	
+
 	BasicProjectileDefinition *bdef = new BasicProjectileDefinition();
 	bdef->SetProjectileSpeed(1000.0f);
 	bdef->SetProjectileBeamLength(200.0f);
@@ -1942,7 +1942,7 @@ void RJMain::__CreateDebugScenario(void)
 		bdef->SetTexture(bt);
 	}
 	bdef->GenerateProjectileRenderingData();
-	
+
 
 	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationAxis(UP_VECTOR, PI / 4.0f);
@@ -1968,65 +1968,47 @@ void RJMain::__CreateDebugScenario(void)
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
 		}
 
-	// Test render - vol line
-	/*D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
-	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 
-	// Create the vertex array.
-	m_vertexcount = 2;
-	D3DXVECTOR4 *vertices = new D3DXVECTOR4[m_vertexcount];
-	if (!vertices) throw 1;
+	// Test targeting logic
+	XMVECTOR pos = XMVectorSet(100, 200, 300, 0);
+	XMVECTOR target = XMVectorAdd(pos, XMVectorSet(0, 0, 50, 0));
+	float yaw = 0.0f, pitch = 0.0f; 
+	
+	XMVECTOR idq = XMQuaternionIdentity();
 
-	// Create the index array.
-	Model::INDEXFORMAT *indices = new Model::INDEXFORMAT[m_vertexcount];
-	if (!indices) throw 1;
+	XMVECTOR orient = XMQuaternionRotationAxis(UP_VECTOR, 0.0f);
+	XMVECTOR invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Load the vertex array and index array with data.
-	for (unsigned int i = 0; i<m_vertexcount; i++)
-	{
-		vertices[i] = D3DXVECTOR4((float)i, (float)i, (float)i, 1.0f);
-		indices[i] = i;
-	}
+	orient = XMQuaternionRotationAxis(UP_VECTOR, PI/2.0f);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Set up the description of the static vertex buffer.
-	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	vertexBufferDesc.ByteWidth = sizeof(D3DXVECTOR4) * m_vertexcount;
-	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vertexBufferDesc.CPUAccessFlags = 0;
-	vertexBufferDesc.MiscFlags = 0;
-	vertexBufferDesc.StructureByteStride = 0;
+	orient = XMQuaternionRotationAxis(UP_VECTOR, -PI / 2.0f);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Give the subresource structure a pointer to the vertex data.
-	vertexData.pSysMem = vertices;
-	vertexData.SysMemPitch = 0;
-	vertexData.SysMemSlicePitch = 0;
+	orient = XMQuaternionRotationAxis(UP_VECTOR, PI);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Now create the vertex buffer.
-	HRESULT hr = Game::Engine->GetDevice()->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
-	if (FAILED(hr)) throw 1;
+	target = XMVectorAdd(pos, XMVectorSet(0, 25, 50, 0));
 
-	// Set up the description of the static index buffer.
-	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	indexBufferDesc.ByteWidth = sizeof(Model::INDEXFORMAT) * m_vertexcount;
-	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	indexBufferDesc.CPUAccessFlags = 0;
-	indexBufferDesc.MiscFlags = 0;
-	indexBufferDesc.StructureByteStride = 0;
+	orient = XMQuaternionRotationAxis(UP_VECTOR, 0.0f);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Give the subresource structure a pointer to the index data.
-	indexData.pSysMem = indices;
-	indexData.SysMemPitch = 0;
-	indexData.SysMemSlicePitch = 0;
+	orient = XMQuaternionRotationAxis(UP_VECTOR, PI/2.0f);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Create the index buffer.
-	hr = Game::Engine->GetDevice()->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
-	if (FAILED(hr)) throw 1;
+	orient = XMQuaternionRotationAxis(UP_VECTOR, -PI/2.0f);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
-	// Release the arrays now that the vertex and index buffers have been created and loaded.
-	delete[] vertices; vertices = 0;
-	delete[] indices; indices = 0;
-	*/
-
+	orient = XMQuaternionRotationAxis(UP_VECTOR, PI);
+	invOrient = XMQuaternionInverse(orient);
+	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
 
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";

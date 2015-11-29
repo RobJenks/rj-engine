@@ -12,7 +12,7 @@
 
 // Static resources used during line rendering
 ModelBuffer *										VolLineShader::BaseModel = NULL;
-std::unordered_map<Texture*, ModelBuffer*>			VolLineShader::LineModels;
+std::unordered_map<std::string, ModelBuffer*>		VolLineShader::LineModels;
 Texture *											VolLineShader::LinearDepthTextureObject = NULL;
 ID3D11ShaderResourceView *							VolLineShader::LinearDepthTexture = NULL;
 ID3D11ShaderResourceView **							VolLineShader::PSShaderResources = NULL;
@@ -283,17 +283,18 @@ ModelBuffer * VolLineShader::LineModel(Texture *render_texture)
 	if (!render_texture) return VolLineShader::BaseModel;
 
 	// Otherwise check whether we already have a model for this render texture
-	if (VolLineShader::LineModels.count(render_texture) == 0)
+	const std::string & filename = render_texture->GetFilename();
+	if (VolLineShader::LineModels.count(filename) == 0)
 	{
 		// We do not have a model for this texture, so create one now before returning it
 		ModelBuffer *buffer = VolLineShader::CreateLineModel(render_texture);
-		LineModels[render_texture] = buffer;
+		LineModels[filename] = buffer;
 		return buffer;
 	}
 	else
 	{
 		// We already have a model for this texture, so simply return it here
-		return LineModels[render_texture];
+		return LineModels[filename];
 	}
 }
 
@@ -312,8 +313,8 @@ ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
 	Result result = buffer->Initialise(Game::Engine->GetDevice(), (const void**)&v, sizeof(XMFLOAT3), 1U, (const void**)&i, sizeof(UINT16), 1U);
 	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
 
-	// Assign the base model texture
-	result = buffer->SetTexture(render_texture);
+	// Assign the base model texture - make a clone so that this buffer owns its own texture object
+	result = buffer->SetTexture(render_texture->Clone());
 	if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
 
 	// Deallocate the model vertex and index data
@@ -324,7 +325,26 @@ ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
 	return buffer;
 }
 
+// Deallocates all static data used in volumetric line rendering
+void VolLineShader::ShutdownStaticData(void)
+{
+	// Deallocate each standard line model in turn
+	std::unordered_map<std::string, ModelBuffer*>::iterator it_end = VolLineShader::LineModels.end();
+	for (std::unordered_map<std::string, ModelBuffer*>::iterator it = VolLineShader::LineModels.begin(); it != it_end; ++it)
+	{
+		if (it->second) delete(it->second);
+	}
+	VolLineShader::LineModels.clear();
 
+	// Deallocate the linear depth texture
+	VolLineShader::LinearDepthTextureObject->Shutdown();
+
+	// Deallocate the static base model for pure volumetric rendering 
+	SafeDelete(VolLineShader::BaseModel);
+
+	// Deallocate the cached rendering resource array
+	SafeDeleteArray(VolLineShader::PSShaderResources);
+}
 
 
 

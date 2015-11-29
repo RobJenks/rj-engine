@@ -18,8 +18,8 @@ public:
 	// Static one-vertex base model used as input to the geometry shader, which will then break out into a volumetric line
 	static ModelBuffer *										BaseModel;
 
-	// Static collection of line models, indexed by render texture
-	static std::unordered_map<Texture*, ModelBuffer*>			LineModels;
+	// Static collection of line models, indexed by render texture filename
+	static std::unordered_map<std::string, ModelBuffer*>		LineModels;
 
 	// Constant buffers for each shader in the pipeline
 	__declspec(align(16))
@@ -68,6 +68,9 @@ public:
 
 	// Initialise the static data used in volumetric line rendering
 	static Result					InitialiseStaticData(ID3D11Device *device);
+
+	// Deallocates all static data used in volumetric line rendering
+	static void						ShutdownStaticData(void);
 
 	// Returns a model appropriate for rendering volumetric lines with the specified texture, or for pure
 	// non-textured volumetric lines if render_texture == NULL

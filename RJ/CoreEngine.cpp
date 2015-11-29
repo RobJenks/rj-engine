@@ -1027,6 +1027,10 @@ void CoreEngine::ShutdownSkinnedNormalMapShader(void)
 
 void CoreEngine::ShutdownVolLineShader(void)
 {
+	// Deallocate all static data
+	VolLineShader::ShutdownStaticData();
+
+	// Deallocate the shader itself and any remaining resources
 	if (m_vollineshader)
 	{
 		m_vollineshader->Shutdown();

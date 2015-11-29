@@ -487,12 +487,6 @@
     <ClCompile Include="iContainsTurrets.cpp">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClCompile>
-    <ClCompile Include="BasicProjectile.cpp">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClCompile>
-    <ClCompile Include="BasicProjectileSet.cpp">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
@@ -508,10 +502,16 @@
     <ClCompile Include="VolumetricLine.cpp">
       <Filter>Engine\Volumetric lines</Filter>
     </ClCompile>
-    <ClCompile Include="BasicProjectileDefinition.cpp">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClCompile>
     <ClCompile Include="ProjectileLauncher.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicProjectile.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicProjectileDefinition.cpp">
+      <Filter>Objects\Projectiles</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicProjectileSet.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1119,15 +1119,6 @@
     <ClInclude Include="iContainsTurrets.h">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="BasicProjectile.h">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicProjectileDefinition.h">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClInclude>
-    <ClInclude Include="BasicProjectileSet.h">
-      <Filter>Objects\BasicProjectile</Filter>
-    </ClInclude>
     <ClInclude Include="ShaderManager.h">
       <Filter>Engine\ShaderManager</Filter>
     </ClInclude>
@@ -1159,6 +1150,15 @@
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
     <ClInclude Include="ProjectileLauncher.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicProjectile.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicProjectileDefinition.h">
+      <Filter>Objects\Projectiles</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicProjectileSet.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1381,9 +1381,6 @@
     </Filter>
     <Filter Include="Objects\Object Hierarchy\Interfaces">
       <UniqueIdentifier>{bffd2c32-7982-4134-970f-efc85c02c52a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Objects\BasicProjectile">
-      <UniqueIdentifier>{6a3d95f4-542c-4803-8b39-19708230e290}</UniqueIdentifier>
     </Filter>
     <Filter Include="HLSL">
       <UniqueIdentifier>{333fb0b0-9dd3-420a-a2b7-9340046605e5}</UniqueIdentifier>
