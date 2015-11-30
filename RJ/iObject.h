@@ -488,7 +488,7 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 			// Calculate new values
 			m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
 			m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-			m_worldmatrix = XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position));
+			SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
 			
 			/*D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
 			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
@@ -502,7 +502,7 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 			// Calculate new values
 			m_orientationmatrix = XMMatrixMultiply(m_worldorientadjustment, XMMatrixRotationQuaternion(m_orientation));
 			m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-			m_worldmatrix = XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position));
+			SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
 
 			/*D3DXMatrixRotationQuaternion(&_calc_data.m1, &m_orientation);
 			m_orientationmatrix = (m_worldorientadjustment * _calc_data.m1);
