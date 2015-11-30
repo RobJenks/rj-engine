@@ -108,6 +108,10 @@ public:
 	CMPINLINE void					SetYawRate(float rps)										{ m_yawrate = rps; }
 	CMPINLINE void					SetPitchRate(float rps)										{ m_pitchrate = rps; }
 
+	// Retrieve a reference to the firing arcs for this turret
+	CMPINLINE const FiringArc &		GetYawFiringArc(void)										{ return m_yaw_arc; }
+	CMPINLINE const FiringArc &		GetPitchFiringArc(void)										{ return m_pitch_arc; }
+
 	// Retrieve or manually set the max range of the turret
 	CMPINLINE float					GetMinRange(void) const										{ return m_minrange; }
 	CMPINLINE float					GetMaxRange(void) const										{ return m_maxrange; }
