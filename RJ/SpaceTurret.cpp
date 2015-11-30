@@ -45,9 +45,25 @@ void SpaceTurret::ManualUpdate(void)
 	UpdatePositioning();
 }
 
-// Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
-// a reference to an array of contacts in the immediate area; this cached array is used for greater
-// efficiency when processing multiple turrets per object
+// Full-simulation mode for a fixed turret (i.e. no rotation/target selection capability) under
+// ship computer control.  Will fire if targets are within the possible firing arcs
+void SpaceTurret::AutoUpdateFixed(std::vector<iSpaceObject*> & enemy_contacts)
+{
+	// Iterate through each target in turn to see if any can be hit
+	iSpaceObject *obj;
+	std::vector<iSpaceObject*>::iterator it_end = enemy_contacts.end();
+	for (std::vector<iSpaceObject*>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
+	{
+		// Make sure the object is valid
+		obj = (*it); if (!obj) continue;
+	}
+}
+
+// Full-simulation method for the turret when it is under ship computer control.  Tracks towards targets 
+// and fires when possible.  Accepts a reference to an array of ENEMY contacts in the immediate area; 
+// this cached array is used for greater efficiency when processing multiple turrets per object.  Array 
+// should be filtered by the parent before passing it, and also sorted to prioritise targets if required.  
+// Turret will select the first target in the vector that it can engage
 void SpaceTurret::AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts)
 {
 	// Update the turret position and orientation based on its parent
@@ -411,11 +427,11 @@ iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_con
 
 	// Consider each candidate in turn
 	iSpaceObject *obj;
-	std::vector<iSpaceObject*>::size_type n = enemy_contacts.size();
-	for (std::vector<iSpaceObject*>::size_type i = 0; i < n; ++i)
+	std::vector<iSpaceObject*>::iterator it_end = enemy_contacts.end();
+	for (std::vector<iSpaceObject*>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
 	{
 		// Make sure the object is valid
-		obj = enemy_contacts[i]; if (!obj) continue;
+		obj = (*it); if (!obj) continue;
 
 		// Make sure we are only targeting hostile objects
 		if (m_parent->GetDispositionTowardsObject(obj) != Faction::FactionDisposition::Hostile) continue;

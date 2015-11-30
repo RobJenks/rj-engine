@@ -12,10 +12,10 @@ AXMVECTOR_P OrientedBoundingBox::NegAxisExtent[3];
 OrientedBoundingBox::OrientedBoundingBox(void) :
 Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 {
-	Data.Centre = NULL_VECTOR;
-	Data.ExtentF = NULL_FLOAT3;
-	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
-	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
+	_Data.Centre = NULL_VECTOR;
+	_Data.ExtentF = NULL_FLOAT3;
+	_Data.ExtentV = _Data.Extent[0].value = _Data.Extent[1].value = _Data.Extent[2].value = NULL_VECTOR;
+	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
 
 	RecalculateData();
 }
@@ -24,10 +24,10 @@ Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent) : 
 	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 {
-	Data.Centre = NULL_VECTOR;
-	Data.ExtentF = NULL_FLOAT3;
-	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
-	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
+	_Data.Centre = NULL_VECTOR;
+	_Data.ExtentF = NULL_FLOAT3;
+	_Data.ExtentV = _Data.Extent[0].value = _Data.Extent[1].value = _Data.Extent[2].value = NULL_VECTOR;
+	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
 
 	RecalculateData();
 }
@@ -36,8 +36,8 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent) :
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR centre, const FXMVECTOR size) :
 	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 {
-	Data.Centre = centre;
-	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
+	_Data.Centre = centre;
+	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
 	UpdateExtentFromSize(size);
 
 	RecalculateData();
@@ -47,8 +47,8 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR centre
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR size) :
 	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 {
-	Data.Centre = NULL_VECTOR;
-	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
+	_Data.Centre = NULL_VECTOR;
+	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
 	UpdateExtentFromSize(size);
 
 	RecalculateData();
@@ -65,15 +65,15 @@ void OrientedBoundingBox::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
 	NegAxisExtent[2].value = XMVectorNegate(ExtentAlongAxis[2].value);
 
 	// Now use these values to determine the location of each bounding volume vertex in local space
-	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		  // -x, -y, -z	(End face #1)
-	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);	  // +x, -y, -z	(End face #1)
-	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);   // +x, +y, -z	(End face #1)
-	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  	  // -x, +y, -z	(End face #1)
+	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		  // -x, -y, -z	(End face #1)
+	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);	  // +x, -y, -z	(End face #1)
+	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);   // +x, +y, -z	(End face #1)
+	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  	  // -x, +y, -z	(End face #1)
 
-	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);	  // -x, -y, +z	(End face #2)
-	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);   // +x, -y, +z	(End face #2)
-	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value); // +x, +y, +z	(End face #2)
-	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	  // -x, +y, +z	(End face #2)
+	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);	  // -x, -y, +z	(End face #2)
+	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);   // +x, -y, +z	(End face #2)
+	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value); // +x, +y, +z	(End face #2)
+	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	  // -x, +y, +z	(End face #2)
 }
 
 // Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
@@ -109,10 +109,10 @@ void OrientedBoundingBox::UpdateFromObject(iObject & object)
 	if (!HasOffset())
 	{
 		// If we have no offset stored for this OBB then take directly from the world matrix components
-		Data.Axis[0].value = XMVector3NormalizeEst(world.r[0]);
-		Data.Axis[1].value = XMVector3NormalizeEst(world.r[1]);
-		Data.Axis[2].value = XMVector3NormalizeEst(world.r[2]);
-		Data.Centre = object.GetPosition();
+		_Data.Axis[0].value = XMVector3NormalizeEst(world.r[0]);
+		_Data.Axis[1].value = XMVector3NormalizeEst(world.r[1]);
+		_Data.Axis[2].value = XMVector3NormalizeEst(world.r[2]);
+		_Data.Centre = object.GetPosition();
 	}
 	else
 	{
@@ -123,20 +123,20 @@ void OrientedBoundingBox::UpdateFromObject(iObject & object)
 		XMMATRIX offsetworld = XMMatrixMultiply(XMMatrixMultiply(Offset, centretrans), world);
 	
 		// Basis vectors can be extracted directly from the new world matrix
-		Data.Axis[0].value = XMVector3NormalizeEst(offsetworld.r[0]);
-		Data.Axis[1].value = XMVector3NormalizeEst(offsetworld.r[1]);
-		Data.Axis[2].value = XMVector3NormalizeEst(offsetworld.r[2]);
+		_Data.Axis[0].value = XMVector3NormalizeEst(offsetworld.r[0]);
+		_Data.Axis[1].value = XMVector3NormalizeEst(offsetworld.r[1]);
+		_Data.Axis[2].value = XMVector3NormalizeEst(offsetworld.r[2]);
 
 		// Transform the object centre offset by this new matrix, since this will negate the effect of any centre translation for
 		// the object.  Using the world matrix to translate (0, 0, 0), for an object with position (0, 0, 10), would otherwise also 
 		// incorporate the object centre translation and could lead to a position of e.g. (-1.5, -1.0, -7.5) if the object size if (3, 2, 5)
 		// NOT TRUE ANY MORE: Now apply the centre offset earlier in the method, and simply transform the null vector at this point
-		Data.Centre = XMVector3TransformCoord(NULL_VECTOR, offsetworld);
+		_Data.Centre = XMVector3TransformCoord(NULL_VECTOR, offsetworld);
 	}
 	
 	// Perform intermediate/cached calculations based on these new value
 	RecalculateData();
-
+	
 	// The OBB is no longer invalidated
 	RemoveInvalidation();
 
@@ -150,10 +150,10 @@ void OrientedBoundingBox::UpdateFromObject(iObject & object)
 void OrientedBoundingBox::Clear(void)
 {
 	// Clear all primary fields and then recalculate to clear the derived fields
-	Data.Centre = NULL_VECTOR;
-	Data.ExtentF = NULL_FLOAT3;
-	Data.ExtentV = Data.Extent[0].value = Data.Extent[1].value = Data.Extent[2].value = NULL_VECTOR;
-	Data.Axis[0].value = UNIT_BASES[0]; Data.Axis[1].value = UNIT_BASES[1]; Data.Axis[2].value = UNIT_BASES[2];
+	_Data.Centre = NULL_VECTOR;
+	_Data.ExtentF = NULL_FLOAT3;
+	_Data.ExtentV = _Data.Extent[0].value = _Data.Extent[1].value = _Data.Extent[2].value = NULL_VECTOR;
+	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
 	Flags = 0; Offset = ID_MATRIX;
 	RecalculateData();
 
@@ -182,20 +182,20 @@ void OrientedBoundingBox::GenerateWorldMatrix(XMMATRIX & outMatrix) const
 {
 	// Build a rotation matrix from the OBB basis vectors; structure has xyz of each vector running down columns, so create
 	// using the row-vector constructor and transpose.  We then invert since inverse rotation is required
-	//rot = D3DXMATRIX(	Data.Axis[0].x, Data.Axis[1].x, Data.Axis[2].x, 0.0f, 
-	//					Data.Axis[0].y, Data.Axis[1].y, Data.Axis[2].y, 0.0f, 
-	//					Data.Axis[0].z, Data.Axis[1].z, Data.Axis[2].z, 0.0f, 
+	//rot = D3DXMATRIX(	_Data.Axis[0].x, _Data.Axis[1].x, _Data.Axis[2].x, 0.0f, 
+	//					_Data.Axis[0].y, _Data.Axis[1].y, _Data.Axis[2].y, 0.0f, 
+	//					_Data.Axis[0].z, _Data.Axis[1].z, _Data.Axis[2].z, 0.0f, 
 	//					0.0f, 0.0f, 0.0f, 1.0f );
 	//D3DXMatrixInverse(&rot, 0, &rot);
 	static const AXMVECTOR row4 = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	XMMATRIX rot = XMMatrixInverse(NULL, XMMatrixTranspose(XMMATRIX(
-		XMVectorSetW(Data.Axis[0].value, 0.0f), 
-		XMVectorSetW(Data.Axis[1].value, 0.0f), 
-		XMVectorSetW(Data.Axis[2].value, 0.0f), 
+		XMVectorSetW(_Data.Axis[0].value, 0.0f), 
+		XMVectorSetW(_Data.Axis[1].value, 0.0f), 
+		XMVectorSetW(_Data.Axis[2].value, 0.0f), 
 		row4)));
 
 	// Compose the resulting world matrix as (rot * translation)
-	outMatrix = XMMatrixMultiply(rot, XMMatrixTranslationFromVector(Data.Centre));
+	outMatrix = XMMatrixMultiply(rot, XMMatrixTranslationFromVector(_Data.Centre));
 }
 
 // Reallocates child data, including one additional node at the end of the array.  Requires deallocation/reallocation
@@ -284,18 +284,20 @@ void OrientedBoundingBox::SetAutoFitMode(bool autofit)
 
 
 // Performs a deep copy of an OBB hierarchy into the specified destination
-void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest)
+void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest, iObject *new_parent)
 {
 	// Copy the primary fields by value from the source
-	dest.Data.Centre = source.Data.Centre;
-	dest.Data.ExtentV = source.Data.ExtentV;
-	dest.Data.ExtentF = source.Data.ExtentF;
-	dest.Data.Axis[0] = source.Data.Axis[0]; dest.Data.Axis[1] = source.Data.Axis[1]; dest.Data.Axis[2] = source.Data.Axis[2];
-	dest.Data.Extent[0] = source.Data.Extent[0]; dest.Data.Extent[1] = source.Data.Extent[1]; dest.Data.Extent[2] = source.Data.Extent[2];
-	dest.Parent = source.Parent;
+	dest._Data.Centre = source._Data.Centre;
+	dest._Data.ExtentV = source._Data.ExtentV;
+	dest._Data.ExtentF = source._Data.ExtentF;
+	dest._Data.Axis[0] = source._Data.Axis[0]; dest._Data.Axis[1] = source._Data.Axis[1]; dest._Data.Axis[2] = source._Data.Axis[2];
+	dest._Data.Extent[0] = source._Data.Extent[0]; dest._Data.Extent[1] = source._Data.Extent[1]; dest._Data.Extent[2] = source._Data.Extent[2];
 	dest.Offset = source.Offset;
 	dest.Flags = source.Flags;
 	dest.ChildCount = source.ChildCount;
+
+	// Set the new parent object
+	dest.Parent = new_parent;
 
 	// Allocate new memory for child objects and copy them, if any.  We perform this deep copy since the normal copy
 	// constructor will only shallow copy the child data and result in aliasing of source & dest child data
@@ -309,7 +311,7 @@ void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, 
 		// Recursively clone each child in turn
 		for (int i = 0; i < dest.ChildCount; ++i)
 		{
-			OrientedBoundingBox::CloneOBBHierarchy(source.Children[i], dest.Children[i]);
+			OrientedBoundingBox::CloneOBBHierarchy(source.Children[i], dest.Children[i], new_parent);
 		}
 	}
 

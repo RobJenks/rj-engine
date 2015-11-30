@@ -131,6 +131,10 @@ namespace Game {
 	// The current player
 	extern Player *CurrentPlayer;
 
+	// Primary input controllers for the application
+	extern GameInputDevice	Keyboard;
+	extern GameInputDevice	Mouse;
+
 	// Global flag indicating whether the application is paused
 	extern bool Paused;
 

@@ -374,6 +374,9 @@ Result IO::Data::SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb
 	// Parameter check
 	if (!parent || !obb) return ErrorCodes::CannotSaveOBBWithNullReferences;
 
+	// Get a reference to the core OBB data, which will also ensure it is refreshed if the data has become invalidated
+	OrientedBoundingBox::CoreOBBData & obb_data = obb->Data();
+
 	// Create the node; if the OBB is set to auto-fit then simply add a "skip" attribute
 	TiXmlElement *node = new TiXmlElement("CollisionOBB");
 	if (obb->AutoFitObjectBounds())
@@ -417,9 +420,9 @@ Result IO::Data::SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb
 		}
 
 		// Set extents
-		node->SetDoubleAttribute("ex", obb->Data.ExtentF.x);
-		node->SetDoubleAttribute("ey", obb->Data.ExtentF.y);
-		node->SetDoubleAttribute("ez", obb->Data.ExtentF.z);
+		node->SetDoubleAttribute("ex", obb_data.ExtentF.x);
+		node->SetDoubleAttribute("ey", obb_data.ExtentF.y);
+		node->SetDoubleAttribute("ez", obb_data.ExtentF.z);
 	}
 
 	// Specify the number of child OBBs to be allocated below this one

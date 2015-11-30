@@ -75,7 +75,7 @@
 #include "AABB.h"							// DBG
 #include "SpaceProjectileDefinition.h"		// DBG
 #include "SpaceProjectile.h"				// DBG
-#include "ProjectileLauncher.h"		// DBG
+#include "ProjectileLauncher.h"				// DBG
 #include "Attachment.h"						// DBG
 #include "ArticulatedModel.h"				// DBG
 #include "SpaceTurret.h"					// DBG
@@ -85,6 +85,7 @@
 #include "BasicProjectileSet.h"				// DBG
 #include "VolLineShader.h"					// DBG
 #include "VolumetricLine.h"					// DBG
+#include "Ray.h"							// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -255,7 +256,7 @@ bool RJMain::Display(void)
 
 			// Process all user inputs through the various UI components that require them.  Process through the 
 			// UI first so that components with 'focus' can consume the keys before they reach the game controls
-			D::UI->ProcessUserEvents(&m_keyboard, &m_mouse);
+			D::UI->ProcessUserEvents(&Game::Keyboard, &Game::Mouse);
 
 			// Perform immediate processing of mouse & keyboard input
 			ProcessMouseInput();
@@ -426,10 +427,10 @@ void RJMain::PerformFPSCalculations(void)
 void RJMain::ReadUserInput(void)
 {
 	// Read the current keyboard state from the DirectInput device
-	m_keyboard.Read();
+	Game::Keyboard.Read();
 
 	// Read new mouse information from the DirectInput device
-	m_mouse.Read();
+	Game::Mouse.Read();
 }
 
 void RJMain::ProcessKeyboardInput(void)
@@ -438,7 +439,7 @@ void RJMain::ProcessKeyboardInput(void)
 	if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::NormalCamera)
 	{
 		// Pass control to the current player
-		Game::CurrentPlayer->AcceptKeyboardInput(&m_keyboard);
+		Game::CurrentPlayer->AcceptKeyboardInput(&Game::Keyboard);
 	}
 	else if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::DebugCamera)
 	{
@@ -448,18 +449,18 @@ void RJMain::ProcessKeyboardInput(void)
 	
 
 	// Get a reference to the keyboard state 
-	BOOL *b = m_keyboard.GetKeys();
+	BOOL *b = Game::Keyboard.GetKeys();
 
 	// Accept game controls
 	if (b[DIK_P])
 	{
 		TogglePause();
-		m_keyboard.LockKey(DIK_P);
+		Game::Keyboard.LockKey(DIK_P);
 	}
 	if (b[DIK_GRAVE])
 	{
 		D::UI->ToggleConsole();
-		m_keyboard.LockKey(DIK_GRAVE);
+		Game::Keyboard.LockKey(DIK_GRAVE);
 	}
 
 	// Additional debug controls below this point
@@ -502,7 +503,7 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_6])
 	{
 		D::UI->ActivateUIState("UI_MODELBUILDER");
-		m_keyboard.LockKey(DIK_6);
+		Game::Keyboard.LockKey(DIK_6);
 	}
 	if (b[DIK_7])
 	{
@@ -553,7 +554,7 @@ void RJMain::ProcessKeyboardInput(void)
 			}
 			
 		}
-		m_keyboard.LockKey(DIK_7);
+		Game::Keyboard.LockKey(DIK_7);
 	}
 
 	if (b[DIK_8])
@@ -607,7 +608,7 @@ void RJMain::ProcessKeyboardInput(void)
 			ss->Highlight.SetColour(XMLoadFloat4(&options[(int)floor(frand_lh(0, 6))]));
 		}
 
-		m_keyboard.LockKey(DIK_EQUALS);
+		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
 	
 	if (false && b[DIK_Y]) {
@@ -649,15 +650,15 @@ void RJMain::ProcessKeyboardInput(void)
 			if (i > 0) o[i]->Dependency = o[i - 1]->ID;
 			a1->AssignNewOrder(o[i]);
 		}
-		m_keyboard.LockKey(DIK_I);
+		Game::Keyboard.LockKey(DIK_I);
 	}
 
 	if (b[DIK_1]) {
-		m_keyboard.LockKey(DIK_1);
+		Game::Keyboard.LockKey(DIK_1);
 		cs->SetTargetSpeedPercentage(1.0f);
 	}
 	if (b[DIK_2]) {
-		m_keyboard.LockKey(DIK_2);
+		Game::Keyboard.LockKey(DIK_2);
 		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs->GetInstanceCode()).str()));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
@@ -670,7 +671,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_4]) {
 		Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, !b[DIK_LSHIFT]);
-		m_keyboard.LockKey(DIK_4);
+		Game::Keyboard.LockKey(DIK_4);
 	}
 }
 
@@ -683,8 +684,8 @@ void RJMain::ProcessMouseInput(void)
 		if (Game::CurrentPlayer->GetState() == Player::StateType::ShipPilot)
 		{
 			// If piloting a ship then adjust orientation based on % movement from centre in the X and Y axis
-			float x_mv = (float)(m_mouse.GetX() - Game::ScreenCentre.x) / (float)Game::ScreenCentre.x;
-			float y_mv = (float)(m_mouse.GetY() - Game::ScreenCentre.y) / (float)Game::ScreenCentre.y;
+			float x_mv = (float)(Game::Mouse.GetX() - Game::ScreenCentre.x) / (float)Game::ScreenCentre.x;
+			float y_mv = (float)(Game::Mouse.GetY() - Game::ScreenCentre.y) / (float)Game::ScreenCentre.y;
 
 			// Adjust calibration of the mouse range [-1.0 1.0] so that it does not necessarily correspond to the full screen bounds
 			x_mv = min(max(x_mv * Game::C_MOUSE_FLIGHT_MULTIPLIER, -1.0f), 1.0f);
@@ -704,8 +705,8 @@ void RJMain::ProcessMouseInput(void)
 		else
 		{
 			// Else if the player is on foot (or otherwise) we adjust the view vector based on mouse delta % of total
-			float x_delta = ((float)m_mouse.GetXDelta() / (float)Game::ScreenWidth);
-			float y_delta = ((float)m_mouse.GetYDelta() / (float)Game::ScreenHeight);
+			float x_delta = ((float)Game::Mouse.GetXDelta() / (float)Game::ScreenWidth);
+			float y_delta = ((float)Game::Mouse.GetYDelta() / (float)Game::ScreenHeight);
 
 			// Update the player view rotation based on any mouse delta this frame
 			Game::Logic::Move::UpdatePlayerViewViaMouseData(x_delta, y_delta);
@@ -721,7 +722,7 @@ void RJMain::ProcessMouseInput(void)
 void RJMain::AcceptDebugCameraKeyboardInput(void)
 {
 	// Get a reference to the pressed keys array
-	BOOL *b = m_keyboard.GetKeys();
+	BOOL *b = Game::Keyboard.GetKeys();
 
 	// Determine any camera movement required
 	bool move = false;
@@ -763,8 +764,8 @@ void RJMain::AcceptDebugCameraKeyboardInput(void)
 void RJMain::AcceptDebugCameraMouseInput(void)
 {
 	// In debug camera mode we simply want to rotate the camera based upon mouse delta location this frame
-	float x_delta = ((float)m_mouse.GetXDelta() / (float)Game::ScreenWidth);
-	float y_delta = ((float)m_mouse.GetYDelta() / (float)Game::ScreenHeight);
+	float x_delta = ((float)Game::Mouse.GetXDelta() / (float)Game::ScreenWidth);
+	float y_delta = ((float)Game::Mouse.GetYDelta() / (float)Game::ScreenHeight);
 
 	// Scale delta mouse movement by the debug camera rotation speed, and by the time factor to ensure smooth movement
 	x_delta *= (Game::C_DEBUG_CAMERA_TURN_SPEED * Game::PersistentTimeFactor);
@@ -1064,7 +1065,7 @@ Result RJMain::InitialiseWindow()
 Result RJMain::InitialiseDirectInput()
 {
 	// Attempt to initialise DI, and return any error encountered
-	Result result = GameInputSystem::Initialise(m_hinstance, m_hwnd, m_di, &m_keyboard, &m_mouse);
+	Result result = GameInputSystem::Initialise(m_hinstance, m_hwnd, m_di, &Game::Keyboard, &Game::Mouse);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Return success
@@ -1491,7 +1492,7 @@ void RJMain::DebugCCDSphereTest(void)
 	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
-	BOOL *k = m_keyboard.GetKeys();
+	BOOL *k = Game::Keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
@@ -1583,7 +1584,7 @@ void RJMain::DebugCCDOBBTest(void)
 	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
-	BOOL *k = m_keyboard.GetKeys();
+	BOOL *k = Game::Keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
@@ -1680,7 +1681,7 @@ void RJMain::DebugFullCCDTest(void)
 	static AXMVECTOR ssorient = ID_QUATERNION;
 	static const float movespeed = 25.0f;
 	static const float turnspeed = 1.0f;
-	BOOL *k = m_keyboard.GetKeys();
+	BOOL *k = Game::Keyboard.GetKeys();
 
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
@@ -1963,6 +1964,25 @@ void RJMain::__CreateDebugScenario(void)
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
 		}
 
+	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
+	for (int i = 0; i < sst->GetLauncherCount(); ++i)
+	{
+		sst->GetLauncher(i)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
+		sst->GetLauncher(i)->SetLaunchInterval(100U);
+		sst->GetLauncher(i)->SetProjectileSpread(0.01f);
+	}
+	sst->SetRelativePosition(XMVectorSet(0, -20, 10.0f, 0));
+	sst->SetBaseRelativeOrientation(ID_QUATERNION);
+	sst->SetYawLimitFlag(true);
+	sst->SetYawLimits(-0.1f, 0.1f);
+	sst->SetPitchLimits(-0.1f, 0.1f);
+	sst->SetYawRate(PI);
+	sst->SetPitchRate(PI);
+	sst->SetControlMode(SpaceTurret::ControlMode::AutomaticControl);
+	ss->TurretController.AddTurret(sst);
+	s2->TurretController.AddTurret(sst->Copy());
+	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+	s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2037,10 +2057,25 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
-			NullString);
+		cs->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, 100.0f * Game::TimeFactor));
+		XMVECTOR dirvec = XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 10000.0f), ss->GetWorldMatrix());
+		Ray r = Ray(ss->GetPosition(), XMVector3Normalize(dirvec));
+		bool b = Game::PhysicsEngine.TestRayVsOBBIntersection(r, cs->CollisionOBB.Data(), 1e8);
+		float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin;
+		XMVECTOR contact = XMVectorAdd(ss->GetPosition(), XMVectorScale(dirvec, intersect_time));
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f",
+			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
+		if (b) 
+		{
+			Texture *tex = new Texture();
+			tex->Initialise(BuildStrFilename(D::IMAGE_DATA, "Rendering\\grad2.dds"));
+			VolumetricLine v = VolumetricLine(ss->GetPosition(), contact, ONE_VECTOR, 3.0f, tex);
+			Game::Engine->RenderVolumetricLine(v);
+			delete tex;
+		}
 	}
 
 }

@@ -63,6 +63,13 @@ struct VolumetricLine : public ALIGN16<VolumetricLine>
 	{
 	}
 
+	// Constructor
+	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, const FXMVECTOR colour, float radius, Texture *texture)
+		:
+		P1(_P1), P2(_P2), Colour(colour), RenderTexture(texture), Params(XMVectorSetX(NULL_VECTOR, radius))
+	{
+	}
+
 	// Set all additional parameters in one call
 	CMPINLINE void								SetParameters(const FXMVECTOR params)	{ Params = params; }
 

@@ -66,9 +66,6 @@ public:
 		}
 	};
 
-	
-	CoreOBBData					Data;				// Primary object fields are all contained within the core OBB data structure
-
 	iObject *					Parent;				// The parent object that this OBB relates to 
 	
 	AXMMATRIX					Offset;				// The offset of this OBB from its parent object, if applicable.  Offsets are always relative to the object 
@@ -80,6 +77,24 @@ public:
 	short						Flags;				// Bitwise flags to store certain properties of the OBB
 													// 0 = HasOffset, i.e. whether the pos/orient are absolute, or relative to the parent 
 													// 1 = AutoFitObjectBounds, i.e. whether the OBB wil dynamically size itself based on the underlying model size
+
+	// Primary object fields are all contained within the core OBB data structure
+	// Will update the OBB if it has become invalidated before returning the data
+	CMPINLINE CoreOBBData &			Data(void)
+	{
+		if (IsInvalidated() && Parent) UpdateFromObject(*Parent);
+		return _Data;
+	}
+
+	// Primary object fields are all contained within the core OBB data structure
+	// Simply returns the OBB data as-is; will NOT update the OBB based on invalidation
+	CMPINLINE const CoreOBBData &	ConstData(void) const
+	{
+		return _Data;
+	}
+
+	// Updates the OBB data based on its parent object, if the OBB has become invalidated
+	CMPINLINE void				UpdateIfRequired(void)			{ if (IsInvalidated() && Parent) UpdateFromObject(*Parent); }
 
 	// Flag to indicate whether an offset is being applied to this OBB
 	CMPINLINE bool				HasOffset(void) const			{ return CheckBit_Single(Flags, OrientedBoundingBox::OBBFlags::OBBHasOffset); }
@@ -109,7 +124,6 @@ public:
 	OrientedBoundingBox(iObject *parent, const FXMVECTOR centre, const FXMVECTOR size);
 
 	// Inline flags to return properties of the OBB
-	CMPINLINE bool				IsRoot(void) const						{ return (Parent != NULL); }
 	CMPINLINE bool				HasChildren(void) const					{ return (ChildCount != 0); }
 
 	// Allocates space for new child OBBs below this one
@@ -121,12 +135,12 @@ public:
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from the given extent values
 	CMPINLINE void				UpdateExtent(const FXMVECTOR extent)
 	{
-		Data.ExtentV = extent;
-		XMStoreFloat3(&Data.ExtentF, extent);
+		_Data.ExtentV = extent;
+		XMStoreFloat3(&_Data.ExtentF, extent);
 
-		Data.Extent[0].value = XMVectorReplicate(Data.ExtentF.x);
-		Data.Extent[1].value = XMVectorReplicate(Data.ExtentF.y);
-		Data.Extent[2].value = XMVectorReplicate(Data.ExtentF.z);
+		_Data.Extent[0].value = XMVectorReplicate(_Data.ExtentF.x);
+		_Data.Extent[1].value = XMVectorReplicate(_Data.ExtentF.y);
+		_Data.Extent[2].value = XMVectorReplicate(_Data.ExtentF.z);
 		RecalculateData();
 	}
 
@@ -155,9 +169,9 @@ public:
 	CMPINLINE void				RecalculateData(void)
 	{
 		// Store intermediate calculations of basis axes * extent along those axes
-		ExtentAlongAxis[0].value = XMVectorMultiply(Data.Extent[0].value, Data.Axis[0].value);
-		ExtentAlongAxis[1].value = XMVectorMultiply(Data.Extent[1].value, Data.Axis[1].value);
-		ExtentAlongAxis[2].value = XMVectorMultiply(Data.Extent[2].value, Data.Axis[2].value);
+		ExtentAlongAxis[0].value = XMVectorMultiply(_Data.Extent[0].value, _Data.Axis[0].value);
+		ExtentAlongAxis[1].value = XMVectorMultiply(_Data.Extent[1].value, _Data.Axis[1].value);
+		ExtentAlongAxis[2].value = XMVectorMultiply(_Data.Extent[2].value, _Data.Axis[2].value);
 	}
 
 	// Method to determine the vertices of this bounding box in world space
@@ -177,7 +191,7 @@ public:
 	void						RemoveChildNode(int index);
 
 	// Performs a deep copy of an OBB hierarchy into the specified destination
-	static void					CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest);
+	static void					CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest, iObject *new_parent);
 
 	// Default destructor; deallocates memory assigned to any child OBBs below this one
 	~OrientedBoundingBox(void);
@@ -185,6 +199,10 @@ public:
 	// Static array of vectors used to store negative axis extents, to reduce allocations required at runtime
 	static AXMVECTOR_P			NegAxisExtent[3];
 
+protected:
+
+	// Primary object fields are all contained within the core OBB data structure
+	CoreOBBData					_Data;
 };
 
 

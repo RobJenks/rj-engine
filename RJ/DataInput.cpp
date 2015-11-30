@@ -2303,6 +2303,10 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 	XMFLOAT4 orientf = NULL_FLOAT4;
 	int numchildren = 0; bool skip = false;
 
+	// Get a reference to the core OBB data.  This will also perform an invalidation
+	// check which should do nothing since there is nothing to invalidate yet
+	OrientedBoundingBox::CoreOBBData & obb_data = obb.Data();
+
 	// Get required data from the node attributes
 	for (TiXmlAttribute *attr = node->FirstAttribute(); attr; attr = attr->Next())
 	{
@@ -2348,10 +2352,10 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 		{
 			// Set the obb centre, extent and axes based upon this loaded data
 			// obb.Data.Axis[0] = D3DXVECTOR3(mworld._11, mworld._12, mworld._13); D3DXVec3Normalize(&obb.Data.Axis[0], &obb.Data.Axis[0]);
-			obb.Data.Centre = object->GetPosition();
-			obb.Data.Axis[0].value = XMVector3Normalize(mworld.r[0]);
-			obb.Data.Axis[1].value = XMVector3Normalize(mworld.r[1]);
-			obb.Data.Axis[2].value = XMVector3Normalize(mworld.r[2]);
+			obb_data.Centre = object->GetPosition();
+			obb_data.Axis[0].value = XMVector3Normalize(mworld.r[0]);
+			obb_data.Axis[1].value = XMVector3Normalize(mworld.r[1]);
+			obb_data.Axis[2].value = XMVector3Normalize(mworld.r[2]);
 			obb.SetOffsetFlag(false);
 
 			// Update the OBB extents, which will also trigger a full recalculation of the OBB data based on all the above parameters
@@ -2360,7 +2364,7 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 		else
 		{
 			// This is not the root, so instead of setting axes we will set the offset matrix
-			obb.Data.Centre = object->GetPosition();
+			obb_data.Centre = object->GetPosition();
 			obb.SetOffsetFlag(true);
 			obb.Offset = mworld;
 

@@ -195,6 +195,23 @@ void GameInputDevice::Read()
                 m_pressedButtons[i] = m_firstdown[i] = m_isdown[i] = FALSE;
             }
         }
+
+		// Calculate some derived data that will be used elsewhere in the application
+		m_mousepos_norm.x = (float)(m_x - Game::ScreenCentre.x) / (float)Game::ScreenCentre.x;
+		m_mousepos_norm.y = (float)(m_y - Game::ScreenCentre.y) / (float)Game::ScreenCentre.y;
+		m_mousedelta_norm.x = ((float)m_mouseState.lX / (float)Game::ScreenWidth);
+		m_mousedelta_norm.y = ((float)m_mouseState.lY / (float)Game::ScreenHeight);
+
+		// Determine a world position in the middle-distance that corresponds to the current mouse position
+		// This will be used as an approximation for e.g. mouse targeting or picking at runtime
+		//m_mouseworld_pos = XMVector3TransformCoord(	XMVectorSet(m_mousepos_norm.x, m_mousepos_norm.y, 1000.0f, 1.0f),
+		//											Game::Engine->GetRenderInverseViewProjectionMatrix());
+		m_mouseworld_pos = XMVector3TransformCoord(XMVector3TransformCoord(
+			XMVectorSet((float)(m_x - Game::ScreenCentre.x), (float)(m_y - Game::ScreenCentre.y), 1000.0f, 1.0f),
+			XMMatrixInverse(NULL, Game::Engine->GetRenderProjectionMatrix())), XMMatrixInverse(NULL, Game::Engine->GetRenderViewMatrix()));
+
+		m_mouseworld_vector = XMVectorSubtract(m_mouseworld_pos, Game::Engine->GetCamera()->GetPosition());
+
     }
     else if ( m_type == DIT_KEYBOARD )
     {

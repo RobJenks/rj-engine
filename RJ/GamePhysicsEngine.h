@@ -275,6 +275,16 @@ public:
 		return TestRayVsAABBIntersection(ray, aabb, 1.0f);		// By default, limit to the exact extent of the ray
 	}
 
+	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
+	// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
+	// points if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
+	// intersection took place.  If min<0 then the ray began inside the OBB
+	bool									TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
+	CMPINLINE bool							TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
+	{
+		return TestRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
+	}
+
 	// Perform a continuous collision test between two moving objects.  Populates the collision result data with details on the collision
 	// point and time t = [0 1] at which the collision occured, if at all.  Returns a flag indicating whether a collision took place.
 	bool									TestContinuousSphereCollision(const iActiveObject *object1, const iActiveObject *object2);

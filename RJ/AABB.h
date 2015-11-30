@@ -36,7 +36,7 @@ public:
 	// OBJECT SPACE.  This does NOT create an AABB oriented in world space.
 	AABB(const OrientedBoundingBox & obb)
 	{
-		P1 = obb.Data.ExtentV;
+		P1 = obb.ConstData().ExtentV;
 		P0 = XMVectorNegate(P1);
 	}
 

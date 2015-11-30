@@ -128,7 +128,7 @@ void iObject::InitialiseCopiedObject(iObject *source)
 	m_nocollision_count = 0;
 
 	// Deep-copy the object collision data
-	OrientedBoundingBox::CloneOBBHierarchy(source->CollisionOBB, CollisionOBB);
+	OrientedBoundingBox::CloneOBBHierarchy(source->CollisionOBB, CollisionOBB, this);
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 

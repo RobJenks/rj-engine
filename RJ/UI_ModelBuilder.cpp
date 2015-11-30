@@ -184,8 +184,9 @@ void UI_ModelBuilder::RenderCurrentSelection(void)
 	{
 		XMMATRIX world;
 		m_selected_obb->GenerateWorldMatrix(world);
-		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_Green, m_selected_obb->Data.ExtentF.x * 2.0f,
-			m_selected_obb->Data.ExtentF.y * 2.0f, m_selected_obb->Data.ExtentF.z * 2.0f, 0.5f, m_object->GetPosition());
+		OrientedBoundingBox::CoreOBBData & obb_data = m_selected_obb->Data();
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_Green, obb_data.ExtentF.x * 2.0f,
+			obb_data.ExtentF.y * 2.0f, obb_data.ExtentF.z * 2.0f, 0.5f, m_object->GetPosition());
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain && m_nullenv)
 	{
@@ -860,7 +861,7 @@ void UI_ModelBuilder::ResizeSelection(FXMVECTOR rsz)
 	if (m_selection_type == UI_ModelBuilder::MVSelectionType::OBBSelected && m_selected_obb)
 	{
 		// Update the extent of this OBB, including bounds checking
-		XMVECTOR extent = XMVectorMax(XMVectorAdd(XMLoadFloat3(&m_selected_obb->Data.ExtentF), resize), Game::C_EPSILON_V);
+		XMVECTOR extent = XMVectorMax(XMVectorAdd(XMLoadFloat3(&m_selected_obb->Data().ExtentF), resize), Game::C_EPSILON_V);
 		m_selected_obb->UpdateExtent(extent);
 	}
 	else if (m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain)
@@ -908,7 +909,7 @@ void UI_ModelBuilder::RevertSelectionOrientation()
 
 		// Transform both the object & OBB positions back into the same local space, then determine the translation between them
 		XMVECTOR transformedpos = XMVector3TransformCoord(m_object->GetPosition(), m_object->GetInverseWorldMatrix());
-		XMVECTOR transformedcentre = XMVector3TransformCoord(m_selected_obb->Data.Centre, m_object->GetInverseWorldMatrix());
+		XMVECTOR transformedcentre = XMVector3TransformCoord(m_selected_obb->Data().Centre, m_object->GetInverseWorldMatrix());
 		XMVECTOR trans = XMVectorSubtract(transformedcentre, transformedpos);
 
 		// Replace the OBB offset matrix with this direct transform, effectively removing any rotation components

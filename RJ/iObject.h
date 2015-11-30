@@ -272,6 +272,10 @@ public:
 	// Narrowphase-specific collision data.  We make this public to allow direct & fast manipulation of the data
 	OrientedBoundingBox						CollisionOBB;				// The hierarchy of oriented bounding boxes that make up our collision mesh
 
+	// Forces an immediate update of the object OBB.  Not normally required; OBB will be updated when it is required and when it has
+	// been invalidated by some other action
+	CMPINLINE void							ForceOBBUpdate(void)							{ CollisionOBB.UpdateFromObject(*this); }
+
 	// Returns the disposition of this object towards the target object, based on our respective factions and 
 	// any other modifiers (e.g. if the objects have individually attacked each other)
 	Faction::FactionDisposition				GetDispositionTowardsObject(const iObject *obj) const;

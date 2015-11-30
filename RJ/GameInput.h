@@ -24,8 +24,10 @@ enum MouseInputControlMode
 };
 
 
-// This class has no special alignment requirements
-class GameInputDevice
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class GameInputDevice : public ALIGN16<GameInputDevice>
 {
 public:
 	struct InputKey 
@@ -46,33 +48,48 @@ public:
 	void ConsumeKey(DWORD key);
 	void ConsumeAllKeys(void);
 
-    long GetX() { return m_x; }
-    long GetY() { return m_y; }
-	INTVECTOR2 GetCursor() { return m_cursor; }
-	long GetXDelta()    { return m_mouseState.lX; }
-    long GetYDelta()    { return m_mouseState.lY; }
-    long GetZDelta()    { return m_mouseState.lZ; }
-    BOOL* GetKeys() { return m_pressedKeys; }
+	CMPINLINE long GetX() { return m_x; }
+	CMPINLINE long GetY() { return m_y; }
+	CMPINLINE INTVECTOR2 GetCursor() { return m_cursor; }
+	CMPINLINE long GetXDelta()    { return m_mouseState.lX; }
+	CMPINLINE long GetYDelta()    { return m_mouseState.lY; }
+	CMPINLINE long GetZDelta()    { return m_mouseState.lZ; }
+    
+	CMPINLINE XMFLOAT2 GetNormalisedMousePos(void) const { return m_mousepos_norm; }
+	CMPINLINE const XMFLOAT2 & GetNormalisedMousePositionRef(void) const { return m_mousepos_norm; }
 	
-	BOOL* GetButtons() { return m_pressedButtons; }
-	bool LMB() { return (m_pressedButtons[0] == TRUE); }
-	bool RMB() { return (m_pressedButtons[1] == TRUE); }
+	CMPINLINE XMFLOAT2 GetNormalisedMouseDelta(void) const { return m_mousedelta_norm; }
+	CMPINLINE const XMFLOAT2 & GetNormalisedMouseDeltaRef(void) const { return m_mousedelta_norm; }
 
-	BOOL* GetButtonsHeld() { return m_isdown; }
-	bool LMBIsHeld() { return (m_isdown[0] == TRUE); }
-	bool RMBIsHeld() { return (m_isdown[1] == TRUE); }
+	// Returns a world position in the middle-distance (1000 units from the camera) corresponding to the 
+	// current mouse cursor position.  Used for mouse targeting, picking etc.
+	CMPINLINE XMVECTOR GetMouseWorldPosition(void) const	{ return m_mouseworld_pos; }
 
-	BOOL* GetButtonsFirstDown() { return m_firstdown; }
-	bool LMBFirstDown() { return (m_firstdown[0] == TRUE); }
-	bool RMBFirstDown() { return (m_firstdown[1] == TRUE); }
+	// Returns the vector from camera position through the current mouse position in world space (at 
+	// a distance of 1000 units)
+	CMPINLINE XMVECTOR GetMouseWorldVector(void) const		{ return m_mouseworld_vector; }
 
-	BOOL* GetButtonsFirstUp() { return m_firstup; }
-	bool LMBFirstUp() { return (m_firstup[0] == TRUE); }
-	bool RMBFirstUp() { return (m_firstup[1] == TRUE); }
+	CMPINLINE BOOL* GetKeys() { return m_pressedKeys; }
+	
+	CMPINLINE BOOL* GetButtons() { return m_pressedButtons; }
+	CMPINLINE bool LMB() { return (m_pressedButtons[0] == TRUE); }
+	CMPINLINE bool RMB() { return (m_pressedButtons[1] == TRUE); }
 
-	INTVECTOR2 *GetMouseStartPosition() { return m_startpos; }
-	INTVECTOR2 GetLMBStartPosition() { return m_startpos[0]; }
-	INTVECTOR2 GetRMBStartPosition() { return m_startpos[1]; }
+	CMPINLINE BOOL* GetButtonsHeld() { return m_isdown; }
+	CMPINLINE bool LMBIsHeld() { return (m_isdown[0] == TRUE); }
+	CMPINLINE bool RMBIsHeld() { return (m_isdown[1] == TRUE); }
+
+	CMPINLINE BOOL* GetButtonsFirstDown() { return m_firstdown; }
+	CMPINLINE bool LMBFirstDown() { return (m_firstdown[0] == TRUE); }
+	CMPINLINE bool RMBFirstDown() { return (m_firstdown[1] == TRUE); }
+
+	CMPINLINE BOOL* GetButtonsFirstUp() { return m_firstup; }
+	CMPINLINE bool LMBFirstUp() { return (m_firstup[0] == TRUE); }
+	CMPINLINE bool RMBFirstUp() { return (m_firstup[1] == TRUE); }
+
+	CMPINLINE INTVECTOR2 *GetMouseStartPosition() { return m_startpos; }
+	CMPINLINE INTVECTOR2 GetLMBStartPosition() { return m_startpos[0]; }
+	CMPINLINE INTVECTOR2 GetRMBStartPosition() { return m_startpos[1]; }
 
 	InputKey ReadTextInputKey(void);
 
@@ -93,6 +110,10 @@ private:
 	BOOL				  m_firstdown[4];			// Identifies whether this is the first press of each mouse button
 	BOOL				  m_firstup[4];				// Identifies whether this is the first release of each mouse button
 	INTVECTOR2			  m_startpos[4];			// Stores the starting position of each mouse down event
+	XMFLOAT2			  m_mousepos_norm;			// Normalised position of the mouse, in the range [-1.0 +1.0] with (0,0) in the screen centre
+	XMFLOAT2			  m_mousedelta_norm;		// Normalised delta movement of the mouse this cycle, as a percentage of total screen bounds (range [0.0 1.0])
+	AXMVECTOR			  m_mouseworld_pos;			// Middle-distance position of the mouse in world space, for mouse targeting and picking
+	AXMVECTOR			  m_mouseworld_vector;		// Vector from the view position through the mouse position in world space, for raytracing
 
 public:
 	struct ALPHANUM_KEY_DATA

@@ -1087,12 +1087,16 @@ void CoreEngine::Render(void)
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
 	m_D3D->GetOrthoMatrix(r_orthographic);
+	r_viewproj = XMMatrixMultiply(r_view, r_projection);
+	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
 
 	// Store local float representations of each key matrix for runtime efficiency
 	XMStoreFloat4x4(&r_view_f, r_view);
 	XMStoreFloat4x4(&r_invview_f, r_invview);
 	XMStoreFloat4x4(&r_projection_f, r_projection);
 	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
+	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
+	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
 
 	// Validate render cycle parameters before continuing with the render process
 	if (!r_devicecontext) return;

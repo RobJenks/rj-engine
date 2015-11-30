@@ -125,9 +125,7 @@ protected:
 
 	// Input controllers
 	LPDIRECTINPUT8 m_di;
-	GameInputDevice m_keyboard;
-	GameInputDevice m_mouse;
-
+	
 	// Allocate space for memory tracking, if in debug mode and have this enabled
 	#if defined(_DEBUG) && defined(DEBUG_LOGALLOCATEDMEMORY)
 		_CrtMemState m_memstate;

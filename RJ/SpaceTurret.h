@@ -32,13 +32,23 @@ public:
 	// mode currently set for the turret
 	CMPINLINE void					Update(std::vector<iSpaceObject*> & enemy_contacts)
 	{
-		if (m_mode == ControlMode::AutomaticControl)		AutoUpdate(enemy_contacts);
-		else												ManualUpdate();
+		switch (m_mode)
+		{
+			case ControlMode::AutomaticControl:			AutoUpdate(enemy_contacts); return;
+				//if (m_isfixed)							AutoUpdateFixed(enemy_contacts);
+				//else									AutoUpdate(enemy_contacts);
+																					return;
+			default:									ManualUpdate();				return;
+		}
 	}
 
 	// Simulation method for the turret when it is in manual targeting mode.  Will update the 
 	// turret state but will not perform any target identification/evaluation/tracking/engagement
 	void							ManualUpdate(void);
+
+	// Full-simulation mode for a fixed turret (i.e. no rotation/target selection capability) under
+	// ship computer control.  Will fire if targets are within the firing region
+	void							AutoUpdateFixed(std::vector<iSpaceObject*> & enemy_contacts);
 
 	// Simulation method for the turret when it is under ship computer control.  Tracks towards targets 
 	// and fires when possible.  Accepts a reference to an array of ENEMY contacts in the immediate area; 
@@ -134,9 +144,13 @@ public:
 	// Reset the orientation of the turret back to its base (instantly)
 	void							ResetOrientation(void);
 
+	// Indicates whether this is a fixed or rotating turret
+	CMPINLINE bool					IsFixed(void) const											{ return m_isfixed; }
+	CMPINLINE void					SetFixState(bool is_fixed)									{ m_isfixed = is_fixed; }
+
 	// Indicates whether the turret is under manual or automatic (ship computer) control
 	CMPINLINE ControlMode			GetControlMode(void) const									{ return m_mode; }
-	CMPINLINE void					SetControlMode(SpaceTurret::ControlMode mode)				{ m_mode = mode; }
+	CMPINLINE void					SetControlMode(ControlMode mode)							{ m_mode = mode; }
 
 	// Sets the current target for the turret
 	void							SetTarget(iSpaceObject *target);
@@ -216,6 +230,9 @@ protected:
 
 	// Parent object that this turret is attached to
 	iSpaceObject *					m_parent;
+
+	// Indicates whether this is a fixed weapon or rotating turret
+	bool							m_isfixed;
 
 	// Articulated model for this turret
 	ArticulatedModel *				m_articulatedmodel;

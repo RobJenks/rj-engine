@@ -114,14 +114,18 @@ public:
 	CMPINLINE	VolLineShader *				GetVolLineShader(void)					{ return m_vollineshader; }
 
 	// Methods to retrieve the key render matrices from the engine
-	CMPINLINE XMMATRIX GetRenderViewMatrix(void)					{ return r_view; }
-	CMPINLINE XMMATRIX GetRenderInverseViewMatrix(void)				{ return r_invview; }
-	CMPINLINE XMMATRIX GetRenderProjectionMatrix(void)				{ return r_projection; }
-	CMPINLINE XMMATRIX GetRenderOrthographicMatrix(void)			{ return r_orthographic; }
-	CMPINLINE const XMFLOAT4X4 & GetRenderViewMatrixF(void)			{ return r_view_f; }
-	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewMatrixF(void)	{ return r_invview_f; }
-	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void)	{ return r_projection_f; }
-	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void)	{ return r_orthographic_f; }
+	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const						{ return r_view; }
+	CMPINLINE const XMMATRIX & GetRenderInverseViewMatrix(void) const				{ return r_invview; }
+	CMPINLINE const XMMATRIX & GetRenderProjectionMatrix(void) const				{ return r_projection; }
+	CMPINLINE const XMMATRIX & GetRenderOrthographicMatrix(void) const				{ return r_orthographic; }
+	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrix(void) const			{ return r_viewproj; }
+	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionMatrix(void) const		{ return r_invviewproj; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderViewMatrixF(void) const					{ return r_view_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewMatrixF(void) const			{ return r_invview_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void) const				{ return r_projection_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void) const			{ return r_orthographic_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const			{ return r_viewproj_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const	{ return r_invviewproj_f; }
 
 	// Pass-through accessor methods for key engine components
 	CMPINLINE ID3D11Device *		GetDevice(void)			{ return m_D3D->GetDevice(); }
@@ -383,10 +387,14 @@ private:
 	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
 	AXMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
+	AXMMATRIX				r_viewproj;				// Store the combined (view * proj) matrix
+	AXMMATRIX				r_invviewproj;			// Also store the inverse viewproj matrix, i.e. (view * proj)^-1
 	XMFLOAT4X4				r_view_f;				// Local float representation of the current frame view matrix
 	XMFLOAT4X4				r_projection_f;			// Local float representation of the current frame projection matrix
 	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
 	XMFLOAT4X4				r_invview_f;			// Local float representation of the current frame inverse view matrix
+	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
+	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 
 
 	ID3D11Buffer *				m_instancebuffer;

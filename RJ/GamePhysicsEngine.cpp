@@ -289,7 +289,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 					if (result)
 					{
 						// These two objects are colliding.  Determine the collision response and apply it
-						HandleCollision(object, candidate, (collider0 ? &(collider0->Data) : NULL), (collider1 ? &(collider1->Data) : NULL));
+						HandleCollision(object, candidate, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
 						++CollisionDetectionResults.SpaceCollisions.Collisions;
 					}
 				}
@@ -319,6 +319,9 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 	float restore_timefactor = PhysicsClock.TimeFactor;
 	iSpaceObject *candidate, *collider, *exclude = NULL, *lastcollider = NULL;
 
+	// We will refresh the OBB data once here, so that we can use the Const method in all other comparisons and save cycles
+	object->CollisionOBB.UpdateIfRequired();
+
 	// Get basic information on the object that will be needed for each comparison
 	bool hasexclusions = object->HasCollisionExclusions();
 
@@ -335,7 +338,8 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 			if (candidate == exclude || (hasexclusions && object->CollisionExcludedWithObject(candidate->GetID()))) continue;
 
 			// We are testing against the candidate's OBB, so update it if it has been invalidated
-			if (candidate->CollisionOBB.IsInvalidated()) candidate->CollisionOBB.UpdateFromObject(*candidate);
+			//if (candidate->CollisionOBB.IsInvalidated()) candidate->CollisionOBB.UpdateFromObject(*candidate);
+			candidate->CollisionOBB.UpdateIfRequired();
 
 			// Test for collisions with this object; if nothing, we can move to the next candidate immediately
 			++CollisionDetectionResults.SpaceCollisions.CCDCollisionChecks;
@@ -359,7 +363,7 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 
 		// Handle this collision between the two objects.  Physics clock has been adjusted to the correct intra-frame
 		// time, so the collision response will be correct and proportionate
-		HandleCollision(object, collider, NULL, &(collider->CollisionOBB.Data));
+		HandleCollision(object, collider, NULL, &(collider->CollisionOBB.ConstData()));
 		++CollisionDetectionResults.SpaceCollisions.CCDCollisions;
 		lastcollider = collider;
 
@@ -520,7 +524,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 						// in their OBB, and so this is always up-to-date with the latest environment pos/orient.  The collision detection method
 						// will handle transformation of object OBB data into that local coordinate frame, and performs a comparison in local
 						// environment coordinates.  There is therefore no need to update the terrain OBB data here.
-						if (obj->CollisionOBB.IsInvalidated()) obj->CollisionOBB.UpdateFromObject(*obj);
+						//if (obj->CollisionOBB.IsInvalidated()) obj->CollisionOBB.UpdateFromObject(*obj);
 
 						// Now test the object collision against this world-space terrain data, and apply collision response if applicable
 						TestAndHandleTerrainCollision(env, obj, terrain);
@@ -556,7 +560,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 						if (CheckFullCollision(obj, candidate, &collider0, &collider1))
 						{
 							++CollisionDetectionResults.EnvironmentCollisions.Collisions;
-							HandleCollision(obj, candidate, (collider0 ? &(collider0->Data) : NULL), (collider1 ? &(collider1->Data) : NULL));
+							HandleCollision(obj, candidate, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
 						}
 					}
 				}
@@ -582,11 +586,12 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 	// The actor OBB is in world space while the terrain OBB is in local environment space.  Convert the former to local environment
 	// space for this comparison, since we will need to apply the response in local space in case of a collision
-	_obbdata.Centre = XMVector3TransformCoord(object->CollisionOBB.Data.Centre, env->GetInverseZeroPointWorldMatrix());
-	_obbdata.Axis[0].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[0].value, env->GetInverseOrientationMatrix());
-	_obbdata.Axis[1].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[1].value, env->GetInverseOrientationMatrix());
-	_obbdata.Axis[2].value = XMVector3TransformCoord(object->CollisionOBB.Data.Axis[2].value, env->GetInverseOrientationMatrix());
-	_obbdata.UpdateExtent(object->CollisionOBB.Data);
+	OrientedBoundingBox::CoreOBBData & object_obb = object->CollisionOBB.Data();
+	_obbdata.Centre = XMVector3TransformCoord(object_obb.Centre, env->GetInverseZeroPointWorldMatrix());
+	_obbdata.Axis[0].value = XMVector3TransformCoord(object_obb.Axis[0].value, env->GetInverseOrientationMatrix());
+	_obbdata.Axis[1].value = XMVector3TransformCoord(object_obb.Axis[1].value, env->GetInverseOrientationMatrix());
+	_obbdata.Axis[2].value = XMVector3TransformCoord(object_obb.Axis[2].value, env->GetInverseOrientationMatrix());
+	_obbdata.UpdateExtent(object_obb);
 
 	// Perform an SAT test between the object OBBs to see if there is a collision
 	if (TestOBBvsOBBCollision(_obbdata, terrain->GetOBBData()))
@@ -676,7 +681,7 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		// object has a compound OBB then we will need to recalculate the world matrix & traverse it recursively.  
 		// However if it is a single OBB we can directly set the position and wait until the next frame to recalc everything
 		if (!object->CollisionOBB.HasChildren())
-			object->CollisionOBB.Data.Centre = object->GetPosition();
+			object_obb.Centre = object->GetPosition();
 		else
 			object->RefreshPositionImmediate();
 
@@ -742,10 +747,7 @@ bool GamePhysicsEngine::CheckFullCollision(iObject *obj0, iObject *obj1, Oriente
 
 			// We are now interested in the detailed hierarchy for object1; update the OBB hierarchy for the object if 
 			// it has been invalidated since it was last used			
-			if (obj1->CollisionOBB.IsInvalidated())
-			{
-				obj1->CollisionOBB.UpdateFromObject(*obj1);
-			}
+			//obj1->CollisionOBB.UpdateIfRequired();
 
 			// Perform the collision test
 			return TestSpherevsOBBHierarchyCollision(obj0->GetPosition(), obj0->GetCollisionSphereRadiusSq(), obj1->CollisionOBB, ppOutCollider1);
@@ -760,10 +762,7 @@ bool GamePhysicsEngine::CheckFullCollision(iObject *obj0, iObject *obj1, Oriente
 
 			// We are now interested in the detailed hierarchy for object1; update the OBB hierarchy for the object if 
 			// it has been invalidated since it was last used			
-			if (obj0->CollisionOBB.IsInvalidated())
-			{
-				obj0->CollisionOBB.UpdateFromObject(*obj0);
-			}
+			//obj0->CollisionOBB.UpdateIfRequired();
 
 			// Perform the collision test
 			return TestSpherevsOBBHierarchyCollision(obj1->GetPosition(), obj1->GetCollisionSphereRadiusSq(), obj0->CollisionOBB, ppOutCollider0);
@@ -774,8 +773,8 @@ bool GamePhysicsEngine::CheckFullCollision(iObject *obj0, iObject *obj1, Oriente
 
 			// We are now interested in the detailed hierarchy for both object0 and object1, so recalculate the data for all nodes 
 			// in their collision hierarchies before testing collision
-			if (obj0->CollisionOBB.IsInvalidated()) obj0->CollisionOBB.UpdateFromObject(*obj0);
-			if (obj1->CollisionOBB.IsInvalidated()) obj1->CollisionOBB.UpdateFromObject(*obj1);
+			//obj0->CollisionOBB.UpdateIfRequired();
+			//obj1->CollisionOBB.UpdateIfRequired();
 
 			// Perform the collision test
 			return TestOBBvsOBBHierarchy(obj0->CollisionOBB, obj1->CollisionOBB, ppOutCollider0, ppOutCollider1);
@@ -1150,7 +1149,7 @@ bool GamePhysicsEngine::TestOBBvsOBBHierarchy(OrientedBoundingBox & obj0, Orient
 											  OrientedBoundingBox ** ppOutCollider0, OrientedBoundingBox ** ppOutCollider1)
 {
 	// Test the two objects for overlap; if they are not colliding then early-exit immediately
-	if (TestOBBvsOBBCollision(obj0.Data, obj1.Data) == false) return false;
+	if (TestOBBvsOBBCollision(obj0.Data(), obj1.Data()) == false) return false;
 
 	// Otherwise, we have a collision
 	if (!obj0.HasChildren())
@@ -1443,7 +1442,7 @@ bool GamePhysicsEngine::TestSpherevsOBBHierarchyCollision(	const FXMVECTOR spher
 															OrientedBoundingBox & obb, OrientedBoundingBox ** ppOutOBBCollider)
 {
 	// Test the intersection at this level of the OBB hierarchy; if it fails then return false immediately
-	if (TestSpherevsOBBCollision(sphereCentre, sphereRadiusSq, obb.Data) == false) return false;
+	if (TestSpherevsOBBCollision(sphereCentre, sphereRadiusSq, obb.Data()) == false) return false;
 
 	// Now test for any children in the hierarchy
 	if (!obb.HasChildren())
@@ -1524,6 +1523,27 @@ bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & 
 
 	// If min<max then we have an intersection
 	return (RayIntersectionResult.tmax >= max(0.0, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
+}
+
+bool GamePhysicsEngine::TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t)
+{
+	// We will use a ray/AABB intersection test.  Transform the ray into the OBB's coordinate frame.  
+	// We are now in the OBB's frame so can treat it as an AABB
+	AABB box = AABB(obb);
+	Ray localray = ray;
+	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
+
+	// We can potentially adjust the AABB bounds by a given radius to test the intersection of a ray with that radius, 
+	// however in this case we will treat the ray as having point width
+	//box.P0 = XMVectorSubtract(box.P0, radius);
+	//box.P1 = XMVectorAdd(box.P1, radius);
+
+	// Now test as a ray/AABB intersection
+	return (TestRayVsAABBIntersection(localray, box, t));
+
+	// Note: The following can be derived if needed.  This method only tests whether an intersection occurs (not where or when)
+	//m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
+	//m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(pos0, XMVectorScale(dir_vector, RayIntersectionResult.tmin)); // (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
 }
 
 // Tests for the intersection of a line segment (p1 to p2) with a sphere.  Returns no details; only whether an intersection took place
@@ -1774,7 +1794,8 @@ bool GamePhysicsEngine::TestContinuousSphereCollision(const iActiveObject *objec
 }
 
 // Perform a continuous collision test between a moving sphere and a static OBB.  Populates the collision result data.  Returns
-// a flag indicating whether a collision took place
+// a flag indicating whether a collision took place.  Takes constant object references because this method will not 
+// test and update the OBB data if it is invalidated.  This is the responsibility of the calling method
 bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *sphere, const iActiveObject *obb)
 {
 	// Parameter check
@@ -1790,9 +1811,10 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	
 	// We will use a ray/box intersection test.  Generate a ray to simulate the sphere path and transform
 	// it into the OBB's coordinate frame.  We are now in the OBB's frame so can treat it as an AABB
-	AABB box = AABB(obb->CollisionOBB.Data); 
+	const OrientedBoundingBox::CoreOBBData & obb_data = obb->CollisionOBB.ConstData();
+	AABB box = AABB(obb_data); 
 	Ray ray = Ray(D.pos0, D.wm0);
-	ray.TransformIntoCoordinateSystem(obb->CollisionOBB.Data.Centre, obb->CollisionOBB.Data.Axis);
+	ray.TransformIntoCoordinateSystem(obb_data.Centre, obb_data.Axis);
 	
 	// Extend the AABB extent to account for the radius of the moving sphere, so we can then treat the
 	// ray as having point-width for simplicity
@@ -1807,7 +1829,7 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	// the sphere begain inside the AABB at t=0.  Otherwise, first intersection is at time tmin, therefore
 	// at point (x0 + n*tmin) along the (original) ray.  x0==pos0 and n==wm0
 	m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
-	m_collisiontest.ContinuousTestResult.ContactPoint = (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
+	m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(D.pos0, XMVectorScale(D.wm0, RayIntersectionResult.tmin)); // (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
 	return true;
 }
 

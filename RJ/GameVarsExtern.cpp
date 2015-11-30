@@ -118,6 +118,10 @@ namespace Game {
 	// Player data
 	Player *						CurrentPlayer = NULL;		// Pointer to the current player
 
+	// Primary input controllers for the application
+	GameInputDevice					Keyboard;
+	GameInputDevice					Mouse;
+
 	// Global flag indicating whether the application is paused
 	bool							Paused = false;
 
