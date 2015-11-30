@@ -1824,7 +1824,6 @@ void RJMain::__CreateDebugScenario(void)
 		cs->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
 		cs->SetOrientation(ID_QUATERNION);
-		cs->Fade.SetFadeAlpha(0.5f);
 
 		Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
 		cs->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
@@ -1970,48 +1969,6 @@ void RJMain::__CreateDebugScenario(void)
 		}
 
 
-	// Test targeting logic
-	XMVECTOR pos = XMVectorSet(100, 200, 300, 0);
-	XMVECTOR target = XMVectorAdd(pos, XMVectorSet(0, 0, 50, 0));
-	float yaw = 0.0f, pitch = 0.0f; 
-	
-	XMVECTOR idq = XMQuaternionIdentity();
-
-	XMVECTOR orient = XMQuaternionRotationAxis(UP_VECTOR, 0.0f);
-	XMVECTOR invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, PI/2.0f);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, -PI / 2.0f);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, PI);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	target = XMVectorAdd(pos, XMVectorSet(0, 25, 50, 0));
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, 0.0f);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, PI/2.0f);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, -PI/2.0f);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-	orient = XMQuaternionRotationAxis(UP_VECTOR, PI);
-	invOrient = XMQuaternionInverse(orient);
-	DetermineYawAndPitchToTarget(pos, target, invOrient, yaw, pitch);
-
-
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
@@ -2085,22 +2042,12 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		float yaw = 0.0f, pitch = 0.0f; bool fire = false;
-		SpaceTurret *t = cs->TurretController.Turrets[0];
-		if (t->HasTarget())
-		{
-			XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(t->GetTurretRelativeOrientation(), cs->GetOrientation()));
-			DetermineYawAndPitchToTarget(t->CannonPosition(), invorient, t->GetTarget()->GetPosition(), yaw, pitch);
-			float ayaw = fabs(yaw), apitch = fabs(pitch);
-			if (ayaw < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD && apitch < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD)
-				fire = true;
-		}
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Active: %d",
-			ss->GetSpaceEnvironment()->Projectiles.GetActiveProjectileCount());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
+			NullString);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		
+
 	}
+
 }
 
 

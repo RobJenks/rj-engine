@@ -46,7 +46,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_visible = true;
 	m_position = NULL_VECTOR;
 	m_positionf = NULL_FLOAT3;
-	m_orientation = NULL_VECTOR;
+	m_orientation = ID_QUATERNION;
 	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
 	m_worldmatrix = m_inverseworld = m_worldorientadjustment = ID_MATRIX;
 	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_Normal;

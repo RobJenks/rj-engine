@@ -495,14 +495,11 @@ float fast_approx_invsqrt(float number)
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const iObject *object, const FXMVECTOR target, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const iObject & object, const FXMVECTOR target, XMFLOAT2 & outPitchYaw)
 {
-	// Parameter check
-	if (!object) { outYaw = 0.0f; outPitch = 0.0f; return; }
-
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
-	XMVECTOR tgt = XMVector3TransformCoord(XMVectorSubtract(target, object->GetPosition()), object->GetInverseOrientationMatrix());
+	XMVECTOR tgt = XMVector3TransformCoord(XMVectorSubtract(target, object.GetPosition()), object.GetInverseOrientationMatrix());
 	tgt = XMVector3NormalizeEst(tgt);
 
 	// Calculate the cross and dot products for ship yaw
@@ -523,23 +520,24 @@ void DetermineYawAndPitchToTarget(const iObject *object, const FXMVECTOR target,
 	XMStoreFloat3(&tgt_f, tgt);
 
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	// outPitchYaw.x == pitch, outPitchYaw = yaw
+	if (fast_abs(tgt_f.x) > 0.01f)	outPitchYaw.y = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
-		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+		if (tgt_f.z < 0.0f)			outPitchYaw.y = -1.0f;			// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.y = 0.0f;			// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitchYaw.x = -tgt_f.y;		// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
-		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+		if (tgt_f.z < 0.0f)			outPitchYaw.x = -1.0f;			// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.x = 0.0f;			// We are on the correct heading so maintain pitch
 	}
 }
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const FXMVECTOR invOrientation, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const FXMVECTOR invOrientation, XMFLOAT2 & outPitchYaw)
 {
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
@@ -564,24 +562,25 @@ void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR targ
 	XMStoreFloat3(&tgt_f, tgt);
 
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	// outPitchYaw.x == pitch, outPitchYaw = yaw
+	if (fast_abs(tgt_f.x) > 0.01f)	outPitchYaw.y = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
-		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+		if (tgt_f.z < 0.0f)			outPitchYaw.y = -1.0f;			// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.y = 0.0f;			// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitchYaw.x = -tgt_f.y;		// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
-		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+		if (tgt_f.z < 0.0f)			outPitchYaw.x = -1.0f;			// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.x = 0.0f;			// We are on the correct heading so maintain pitch
 	}
 }
 
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
-void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const CXMMATRIX invOrientMatrix, float & outYaw, float & outPitch)
+void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const CXMMATRIX invOrientMatrix, XMFLOAT2 & outPitchYaw)
 {
 	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
 	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
@@ -606,17 +605,18 @@ void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR targ
 	XMStoreFloat3(&tgt_f, tgt);
 
 	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgt_f.x) > 0.01f)	outYaw = tgt_f.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
+	// outPitchYaw.x == pitch, outPitchYaw = yaw
+	if (fast_abs(tgt_f.x) > 0.01f)	outPitchYaw.y = tgt_f.x;			// Plot a yaw component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outYaw = -1.0f;		// We are over 180deg from the target, so perform a full turn
-		else						outYaw = 0.0f;		// We are on the correct heading so maintain yaw
+		if (tgt_f.z < 0.0f)			outPitchYaw.y = -1.0f;				// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.y = 0.0f;				// We are on the correct heading so maintain yaw
 	}
 
 	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgt_f.y) > 0.01f)	outPitch = -tgt_f.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
+	if (fast_abs(tgt_f.y) > 0.01f)	outPitchYaw.x = -tgt_f.y;			// Plot a pitch component proportionate to the angle the ship needs to cover
 	else {
-		if (tgt_f.z < 0.0f)			outPitch = -1.0f;	// We are over 180deg from the target, so perform a full turn
-		else						outPitch = 0.0f;	// We are on the correct heading so maintain pitch
+		if (tgt_f.z < 0.0f)			outPitchYaw.x = -1.0f;				// We are over 180deg from the target, so perform a full turn
+		else						outPitchYaw.x = 0.0f;				// We are on the correct heading so maintain pitch
 	}
 }
 

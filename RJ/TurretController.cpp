@@ -11,7 +11,7 @@ TurretController::TurretController(void)
 // Perform a full update of the turret collection
 void TurretController::Update(std::vector<iSpaceObject*> & enemy_contacts)
 {
-	// Check to make sure there is something to update
+	// Check to make sure there is something to update; we will do nothing if there are no turrets
 	if (!m_parent || !m_active) return;
 
 	// Take different actions based on simulation state
@@ -26,13 +26,19 @@ void TurretController::Update(std::vector<iSpaceObject*> & enemy_contacts)
 		{
 			if ((*it)) (*it)->Update(enemy_contacts);
 		}
-
-
 	}
-
-
 }
 
+// Sets the control mode of all turrets
+void TurretController::SetControlModeOfAllTurrets(SpaceTurret::ControlMode mode)
+{
+	// Iterate over every turret and set the desired control mode
+	TurretCollection::iterator it_end = Turrets.end();
+	for (TurretCollection::iterator it = Turrets.begin(); it != it_end; ++it)
+	{
+		if ((*it)) (*it)->SetControlMode(mode);
+	}
+}
 
 // Set a refernce to the parent object that owns this turret controller
 void TurretController::SetParent(iSpaceObject *parent)

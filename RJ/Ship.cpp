@@ -565,79 +565,36 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 	// this->ChangeOrientation(m_targetturn);
 }
 
-// Determines the yaw and pitch required to turn the ship to face a point in space.  Both values are [0.0-1.0] turn percentages
-void Ship::DetermineYawAndPitchToTarget(FXMVECTOR target, float *pOutYaw, float *pOutPitch)
-{
-	// Determine the difference vector to this target, transform into local coordinate space (where our heading is the basis
-	// vector [0, 0, 1], for mathematical simplicity) and normalise the difference vector
-	/*D3DXVECTOR3 tgt = (target - m_position);
-	D3DXVec3TransformCoord(&tgt, &tgt, &m_inverseorientationmatrix);
-	D3DXVec3Normalize(&tgt, &tgt);		// TODO: can optimise this method?*/
-	XMVECTOR tgt = XMVector3NormalizeEst(XMVector3TransformCoord(XMVectorSubtract(target, m_position), m_inverseorientationmatrix));
-
-	// Calculate the cross and dot products for ship yaw
-	/* 
-		heading = BASIS_VECTOR;		
-		tgt = (s2->Location - ss->Location);	// (tgt is then transformed by the inverse ship orientation matrix)
-
-		Optimisation: we know heading = the basis vector, so can substitute components for 0,0,1 and simplify accordingly  
-		ycross = (heading.z*tgt.x) - (heading.x*tgt.z);		= (1*tgt.x) - (0*tgt.z)		= tgt.x
-		ydot = (heading.z*tgt.z) + (heading.x*tgt.x);		= (1*tgt.z) + (0*tgt.x)		= tgt.z
-		pcross = (heading.y*tgt.z) - (heading.z*tgt.y);		= (0*tgt.z) - (1*tgt.y)		= -tgt.y 
-		pdot = (heading.x*tgt.x) + (heading.z*tgt.z);		= (0*tgt.x) + (1*tgt.z)		= tgt.z
-
-		We therefore don't need to even maintain heading as a variable.  We can also just use tgt components in place of cross/dot
-	*/
-
-	// The final logic uses per-component tests, so store locally for efficieny
-	XMFLOAT3 tgtf; 
-	XMStoreFloat3(&tgtf, tgt);
-
-	// Determine yaw value depending on the current angle to target
-	if (fast_abs(tgtf.x) > 0.01f)	(*pOutYaw) = tgtf.x;		// Plot a yaw component proportionate to the angle the ship needs to cover
-	else {
-		if	(tgtf.z < 0.0f)			(*pOutYaw) = -1.0f;		// We are over 180deg from the target, so perform a full turn
-		else						(*pOutYaw) = 0.0f;		// We are on the correct heading so maintain yaw
-	}
-
-	// Now determine pitch value, also based on the current angle to target
-	if (fast_abs(tgtf.y) > 0.01f)	(*pOutPitch) = -tgtf.y;	// Plot a pitch component proportionate to the angle the ship needs to cover
-	else {
-		if	(tgtf.z < 0.0f)			(*pOutPitch) = -1.0f;	// We are over 180deg from the target, so perform a full turn
-		else						(*pOutPitch) = 0.0f;	// We are on the correct heading so maintain pitch
-	}
-}
-
 // Turns the ship to a specified target object, banking if required
 void Ship::TurnToTarget(iObject *target, bool bank)
 {
 	// Parameter check
-	float yaw, pitch;
+	XMFLOAT2 pitch_yaw;
 	if (!target) return;
 
 	// Determine the yaw and pitch required to align ourselves with this target
-	DetermineYawAndPitchToTarget(target, &yaw, &pitch);
+	DetermineYawAndPitchToTarget((*this), target->GetPosition(), pitch_yaw);
 
 	// Multiply the turn percentages by the turn modifier for our current state (peaceful, in combat, etc)
-	yaw *= m_turnmodifier; pitch *= m_turnmodifier;
+	pitch_yaw.x *= m_turnmodifier; pitch_yaw.y *= m_turnmodifier;
 
 	// Initiate a turn in this direction
-	TurnShip(yaw, pitch, true);
+	TurnShip(pitch_yaw.y, pitch_yaw.x, true);
 }
 
 // Turns the ship to a specified target position, banking if required
 void Ship::TurnToTarget(FXMVECTOR target, bool bank)
 {
-	float yaw, pitch;
+	XMFLOAT2 pitch_yaw;
 
 	// Determine the yaw and pitch required to align ourselves with this target position
-	DetermineYawAndPitchToTarget(target, &yaw, &pitch);
+	DetermineYawAndPitchToTarget((*this), target, pitch_yaw);
 
 	// Multiply the turn percentages by the turn modifier for our current state (peaceful, in combat, etc)
-	yaw *= m_turnmodifier; pitch *= m_turnmodifier;
+	pitch_yaw.x *= m_turnmodifier; pitch_yaw.y *= m_turnmodifier;
 
 	// Initiate a turn in this direction
-	TurnShip(yaw, pitch, true);
+	TurnShip(pitch_yaw.y, pitch_yaw.x, true);
 }
 
 // Returns a bool indicating whether a ship can accept a specified class of order.  Overridden with additional orders by simple/complex subclasses

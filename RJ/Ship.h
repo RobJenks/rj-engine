@@ -75,11 +75,6 @@ public:
 	void				TurnToTarget(iObject *target, bool bank);
 	void				TurnToTarget(FXMVECTOR target, bool bank);
 
-	// Determines the yaw and pitch required to turn the ship to face a point in space.  Both values are [0.0-1.0] turn percentages
-	void				DetermineYawAndPitchToTarget(FXMVECTOR target, float *pOutYaw, float *pOutPitch);
-	CMPINLINE void		DetermineYawAndPitchToTarget(iObject *target, float *pOutYaw, float *pOutPitch)
-						{ DetermineYawAndPitchToTarget(target->GetPosition(), pOutYaw, pOutPitch); }
-
 	// Returns a bool indicating whether a ship can accept a specified class of order.  Overridden with additional orders by simple/complex subclasses
 	bool				CanAcceptOrderType(Order::OrderType type);
 

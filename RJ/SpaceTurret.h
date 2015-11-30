@@ -15,6 +15,9 @@ class SpaceTurret : public ALIGN16<SpaceTurret>
 {
 public:
 
+	// Define the possible turret control modes
+	enum ControlMode				{ ManualControl = 0, AutomaticControl };
+
 	// Default constructor
 	SpaceTurret(void);
 	
@@ -24,12 +27,25 @@ public:
 	CMPINLINE const std::string &	GetName(void) const										{ return m_name; }
 	CMPINLINE void					SetName(const std::string & name)						{ m_name = name; }
 
-	// Primary simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
-	// a reference to an array of ENEMY contacts in the immediate area; this cached array is used for greater
-	// efficiency when processing multiple turrets per object.  Array should be filtered by the parent
-	// before passing it, and also sorted to prioritise targets if required.  Turret will select the first 
-	// target in the vector that it can engage
-	void							Update(std::vector<iSpaceObject*> & enemy_contacts);
+
+	// Primary update method for the turret.  Will take appropriate action depending on the control
+	// mode currently set for the turret
+	CMPINLINE void					Update(std::vector<iSpaceObject*> & enemy_contacts)
+	{
+		if (m_mode == ControlMode::AutomaticControl)		AutoUpdate(enemy_contacts);
+		else												ManualUpdate();
+	}
+
+	// Simulation method for the turret when it is in manual targeting mode.  Will update the 
+	// turret state but will not perform any target identification/evaluation/tracking/engagement
+	void							ManualUpdate(void);
+
+	// Simulation method for the turret when it is under ship computer control.  Tracks towards targets 
+	// and fires when possible.  Accepts a reference to an array of ENEMY contacts in the immediate area; 
+	// this cached array is used for greater efficiency when processing multiple turrets per object.  Array 
+	// should be filtered by the parent before passing it, and also sorted to prioritise targets if required.  
+	// Turret will select the first target in the vector that it can engage
+	void							AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts);
 
 	// Analyse all potential targets in the area and change target if necessary/preferred
 	void							EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts);
@@ -114,6 +130,10 @@ public:
 	// Reset the orientation of the turret back to its base (instantly)
 	void							ResetOrientation(void);
 
+	// Indicates whether the turret is under manual or automatic (ship computer) control
+	CMPINLINE ControlMode			GetControlMode(void) const									{ return m_mode; }
+	CMPINLINE void					SetControlMode(SpaceTurret::ControlMode mode)				{ m_mode = mode; }
+
 	// Sets the current target for the turret
 	void							SetTarget(iSpaceObject *target);
 
@@ -197,11 +217,14 @@ protected:
 	ArticulatedModel *				m_articulatedmodel;
 
 	// Array of projectile launchers attached to this turret
-	ProjectileLauncher *		m_launchers;				// Array of launcher objects arrached to the turret
+	ProjectileLauncher *			m_launchers;				// Array of launcher objects arrached to the turret
 	int								m_launchercount;			// The total count of launcher objects
 	int								m_launcherubound;			// Efficiency measure; the upper bound of the launcher array.  (LauncherCount - 1)
 	int								m_nextlauncher;				// The next launcher that will fire a projectile
 	unsigned int					m_firedelay;				// The minimum period between shots, regardless of launcher readiness
+
+	// Turret control mode indicates whether this turret is under manual or automatic (ship computer) control
+	ControlMode						m_mode;
 
 	// Current target that the turret is tracking
 	iSpaceObject *					m_target;

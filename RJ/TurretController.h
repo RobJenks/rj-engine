@@ -33,6 +33,9 @@ public:
 	CMPINLINE iSpaceObject *						GetParent(void)							{ return m_parent; }
 	void											SetParent(iSpaceObject *parent);
 
+	// Sets the control mode of all turrets
+	void											SetControlModeOfAllTurrets(SpaceTurret::ControlMode mode);
+
 	// Add, remove or retrieve turret objects in the collection
 	bool											AddTurret(SpaceTurret *turret);
 	bool											RemoveTurret(SpaceTurret *turret);

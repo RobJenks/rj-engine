@@ -16,6 +16,7 @@ SpaceTurret::SpaceTurret(void)
 	m_parent = NULL;
 	m_launchers = NULL; m_launchercount = 0; m_launcherubound = 0;
 	m_nextlauncher = 0;
+	m_mode = SpaceTurret::ControlMode::AutomaticControl;
 	m_target = m_designatedtarget = NULL;
 	m_relativepos = NULL_VECTOR;
 	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
@@ -35,10 +36,18 @@ SpaceTurret::SpaceTurret(void)
 	m_firedelay = 0U;
 }
 
+// Full-simulation method for the turret when it is in manual targeting mode.  Will update the 
+// turret state but will not perform any target identification/evaluation/tracking/engagement
+void SpaceTurret::ManualUpdate(void)
+{
+	// Update the turret position and orientation based on its parent
+	UpdatePositioning();
+}
+
 // Primary full-simulation method for the turret.  Tracks towards targets and fires when possible.  Accepts
 // a reference to an array of contacts in the immediate area; this cached array is used for greater
 // efficiency when processing multiple turrets per object
-void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
+void SpaceTurret::AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts)
 {
 	// Update the turret position and orientation based on its parent
 	UpdatePositioning();
@@ -58,12 +67,12 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 	{
 		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
 		// D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
-		float yaw, pitch; 
+		XMFLOAT2 pitch_yaw;
 		XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
-		DetermineYawAndPitchToTarget(CannonPosition(), invorient, m_target->GetPosition(), yaw, pitch);
+		DetermineYawAndPitchToTarget(CannonPosition(), m_target->GetPosition(), invorient, pitch_yaw);
 
 		// If pitch and yaw are very close to target, we can begin firing
-		float ayaw = fabs(yaw), apitch = fabs(pitch);
+		float ayaw = fabs(pitch_yaw.y), apitch = fabs(pitch_yaw.x);
 		if (ayaw < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD && apitch < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD)
 		{
 			// We are within the firing threshold.  This will only fire if the turret is ready to do so
@@ -71,8 +80,8 @@ void SpaceTurret::Update(std::vector<iSpaceObject*> & enemy_contacts)
 		}
 		
 		// Attempt to yaw and pitch to keep the target in view
-		if (ayaw > Game::C_EPSILON)		Yaw(yaw * m_yawrate * Game::TimeFactor);
-		if (apitch > Game::C_EPSILON)	Pitch(pitch * m_pitchrate * Game::TimeFactor);
+		if (ayaw > Game::C_EPSILON)		Yaw(pitch_yaw.y * m_yawrate * Game::TimeFactor);
+		if (apitch > Game::C_EPSILON)	Pitch(pitch_yaw.x * m_pitchrate * Game::TimeFactor);
 	}
 }
 
