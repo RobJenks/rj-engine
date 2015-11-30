@@ -32,6 +32,7 @@ SpaceTurret::SpaceTurret(void)
 	m_minrange = 10.0f; m_minrangesq = (10.0f * 10.0f);
 	m_maxrange = 10000.0f; m_maxrangesq = (10000.0f * 10000.0f);
 	m_nexttargetanalysis = 0U;
+	m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
 	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
 	m_firedelay = 0U;
 }
@@ -73,7 +74,7 @@ void SpaceTurret::AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts)
 
 		// If pitch and yaw are very close to target, we can begin firing
 		float ayaw = fabs(pitch_yaw.y), apitch = fabs(pitch_yaw.x);
-		if (ayaw < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD && apitch < Game::C_DEFAULT_FIRING_CIRCLE_THRESHOLD)
+		if (ayaw < m_firing_region_threshold && apitch < m_firing_region_threshold)
 		{
 			// We are within the firing threshold.  This will only fire if the turret is ready to do so
 			Fire();
@@ -315,6 +316,29 @@ void SpaceTurret::DetermineApproxRange(void)
 	SetRange(1.0f, maxr);
 }
 
+// Determines an appropriate firing region for the turret based on the accuracy of its component launchers, 
+// plus (TODO:) any contribution from pilot skill, ship computer effectiveness etc.
+void SpaceTurret::DetermineFiringRegion(void)
+{
+	// Use a default value if we are missing any required parameters
+	if (m_launchercount == 0)
+	{
+		m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
+	}
+
+	// Iterate through the launcher collection and determine the max spread from any launcher
+	float maxspread = 0.0f;
+	for (int i = 0; i < m_launchercount; ++i)
+	{
+		if (m_launchers[i].GetProjectileSpread() > maxspread) maxspread = m_launchers[i].GetProjectileSpread();
+	}
+
+	// Apply any other modifiers to the spread as required
+
+	// Store the adjusted figure as the radius of the acceptable firing region 
+	m_firing_region_threshold = maxspread;
+}
+
 // Specify the yaw limits for this turret, in radians.  These only have an effect if the yaw limit flag is set
 void SpaceTurret::SetYawLimits(float y_min, float y_max)
 {
@@ -439,6 +463,9 @@ void SpaceTurret::RecalculateTurretStatistics(void)
 {
 	// Determine approximate range of the turret based on all launcher data
 	DetermineApproxRange();
+
+	// Determine an appropriate firing region for the turret, based on accuracy of all launchers
+	DetermineFiringRegion(); 
 
 	// Initialise the firing readiness for each launcher
 	for (int i = 0; i < m_launchercount; ++i)

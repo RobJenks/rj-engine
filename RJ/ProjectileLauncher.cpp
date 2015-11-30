@@ -14,7 +14,7 @@ ProjectileLauncher::ProjectileLauncher(void) :
 	m_launchmethod(ProjectileLaunchMethod::ApplyForce), m_launchimpulse(250.0f), m_degradelinearvelocity(true), 
 	m_linveldegradation(0.1f), m_launchwithangvel(false), m_launchangularvelocity(NULL_VECTOR), 
 	m_degradeangularvelocity(false), m_angveldegradation(0.0f), m_launchwithorientchange(false), 
-	m_projectileorientchange(ID_QUATERNION), m_spread(0.0f), m_spread_delta(ID_QUATERNION), m_spread_divisor(0.0f),
+	m_projectileorientchange(ID_QUATERNION), m_spread(0.0f), m_spread_delta(ID_QUATERNION), m_spread_divisor(1.0f),
 	m_launchinterval(1000U), m_nextlaunch(0U)
 {
 	

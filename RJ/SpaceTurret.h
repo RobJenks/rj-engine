@@ -119,6 +119,10 @@ public:
 	// changes that we cannot simulate accurately here (without actually firing a projectile)
 	void							DetermineApproxRange(void);
 
+	// Determines an appropriate firing region for the turret based on the accuracy of its component launchers, 
+	// plus (TODO:) any contribution from pilot skill, ship computer effectiveness etc.
+	void							DetermineFiringRegion(void);
+
 	// Yaws or pitches the turret by the specified angle
 	void							Yaw(float angle);
 	void							Pitch(float angle);
@@ -163,7 +167,7 @@ public:
 	void							InitialiseLaunchers(int launcher_count);
 
 	// Retrieve a reference to one of the launchers within the turrent
-	ProjectileLauncher *		GetLauncher(int index);
+	ProjectileLauncher *			GetLauncher(int index);
 
 	// Returns the number of launchers maintained within this turrent
 	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
@@ -231,6 +235,10 @@ protected:
 
 	// Target that the turret has been manually assigned, and which it will try to reacquire if it is lost
 	iSpaceObject *					m_designatedtarget;
+
+	// The threshold yaw/pitch within which this turret will begin firing.  Adjusted based on accuracy of weapons
+	// and effectiveness of pilot/turret control computer
+	float							m_firing_region_threshold;
 
 	// The times & intervals for when the turret was last updated
 	static const unsigned int		TARGET_ANALYSIS_INTERVAL = 2000U;

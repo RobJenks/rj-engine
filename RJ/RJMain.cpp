@@ -1840,7 +1840,7 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 
-	if (true) {
+	if (false) {
 		s3[0] = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[0]);
 		s3[0]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
@@ -1848,7 +1848,7 @@ void RJMain::__CreateDebugScenario(void)
 		s3[0]->SetOrientation(ID_QUATERNION);
 	}
 
-	if (true) {
+	if (false) {
 		s3[1] = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
 		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
@@ -1861,12 +1861,6 @@ void RJMain::__CreateDebugScenario(void)
 		s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s3[1]->GetPosition(), XMVectorSet(0.0f, 25.0f, 0.0f, 0.0f)));
 		s3[2]->SetOrientation(ID_QUATERNION);
 	}
-
-
-	s3[1]->AddChildAttachment(s3[2]);
-	Attachment<iObject*> *attach = &(s3[1]->GetChildObjects().at(0));
-	XMVECTOR initial_orient = XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2);
-	attach->CreateConstraint(RIGHT_VECTOR, XMVectorSet(0.0f, 5.0f, 0.0f, 0.0f), XMVectorSet(0.0f, -5.0f, 5.0f, 0.0f), initial_orient);
 
 
 	// Temp: Create a new actor
@@ -1962,6 +1956,7 @@ void RJMain::__CreateDebugScenario(void)
 			{
 				nt->GetLauncher(l)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
 				nt->GetLauncher(l)->SetLaunchInterval(100U);
+				nt->GetLauncher(l)->SetProjectileSpread(0.01f);
 			}
 
 			cs->TurretController.AddTurret(nt);
