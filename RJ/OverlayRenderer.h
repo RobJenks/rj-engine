@@ -69,9 +69,9 @@ public:
 	}
 
 	// Methods to render a box around a specified element / element position / arbitrary position within a complex ship
-	void				RenderElementBox(iSpaceObject *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness);
-	void				RenderElementBoxAtRelativeElementLocation(iSpaceObject *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness);
-	void				RenderBoxAtRelativeElementLocation(iSpaceObject *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
+	void				RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness);
+	void				RenderElementBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness);
+	void				RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
 
 	// Methods to add a cuboid for rendering.  Uses line model scaled to the size of the cuboid.
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize);

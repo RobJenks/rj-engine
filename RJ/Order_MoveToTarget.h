@@ -22,7 +22,7 @@ public:
 		:
 		Target(target),
 		CloseDistance(closedistance),
-		CloseDistanceSq(closedistance * closedistance)
+		CloseDistanceSq(closedistance * closedistance) 
 	{
 	}
 

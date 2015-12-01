@@ -21,7 +21,10 @@ public:
 
 
 	// Constructor including main order parameters
-	Order_ActorTravelToPosition(iSpaceObjectEnvironment *environment, CXMVECTOR startpos, CXMVECTOR targetpos, float getwithin, bool run);
+	// CloseDistance is the distance to the target that we will attempt to reach.  FollowDistance
+	// is the distance we will get to each waypoint on the route
+	Order_ActorTravelToPosition(iSpaceObjectEnvironment *environment, CXMVECTOR startpos, CXMVECTOR targetpos, 
+								float closedistance, float followdistance, bool run);
 
 	// Calculates the path that should be followed in order to reach the target position
 	void CalculateTravelPath(void);
@@ -35,7 +38,8 @@ public:
 	// Order parameters
 	AXMVECTOR						StartPosition;
 	AXMVECTOR						TargetPosition;
-	float							CloseDistance, CloseDistanceSq;
+	float							CloseDistance, CloseDistanceSq;		// Distance to the target that we will attempt to reach
+	float							FollowDistance, FollowDistanceSq;	// Distance we will get within each waypoint on the route
 	bool							Run;
 	iSpaceObjectEnvironment *		Environment;
 

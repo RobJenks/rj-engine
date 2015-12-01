@@ -20,11 +20,12 @@ public:
 	Order::OrderType GetType(void)				{ return Order::OrderType::ActorMoveToTarget; }
 
 	// Constructor including main order parameters
-	Order_ActorMoveToTarget(iEnvironmentObject *target, float getwithin)
+	Order_ActorMoveToTarget(iEnvironmentObject *target, float getwithin, bool run)
 		:
 		Target(target),
 		CloseDistance(getwithin),
-		CloseDistanceSq(getwithin * getwithin)
+		CloseDistanceSq(getwithin * getwithin),
+		Run(run)
 	{
 	}
 
@@ -37,6 +38,7 @@ public:
 	// Order parameters
 	iEnvironmentObject *					Target;
 	float									CloseDistance, CloseDistanceSq;
+	bool									Run;
 
 };
 

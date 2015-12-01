@@ -8,9 +8,11 @@
 #include "iConsumesOrders.h"
 #include "SkinnedModel.h"
 #include "ActorAttributes.h"
-#include "Order.h"
 class iObject;
 class ActorBase;
+class Order;
+class Order_ActorMoveToPosition;
+class Order_ActorMoveToTarget;
 class Order_ActorTravelToPosition;
 class iSpaceObjectEnvironment;
 
@@ -37,7 +39,7 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(Actor *source);
+	void						InitialiseCopiedObject(Actor *source);
 
 	// Causes the actor to recalculate all its properties & final attribute values.  Called when changes are made to the actor attributes
 	void						RecalculateAttributes(void);
@@ -75,13 +77,13 @@ public:
 	Order::OrderResult						ProcessOrder(Order *order);
 
 	// Order: Moves the actor to a target position in the environment, within a certain tolerance
-	Order::OrderResult						MoveToPosition(FXMVECTOR position, float getwithin, bool run);
+	Order::OrderResult						MoveToPosition(Order_ActorMoveToPosition & order);
 
 	// Order: Moves the actor to a target object, within a certain tolerance, providing the target is within the same environment
-	Order::OrderResult						MoveToTarget(iEnvironmentObject *target, float getwithin, bool run);
+	Order::OrderResult						MoveToTarget(Order_ActorMoveToTarget & order);
 	
 	// Order: Travels to a destination using the environment nav network.  Spawns multiple child orders to get there.
-	Order::OrderResult						TravelToPosition(Order_ActorTravelToPosition *order);
+	Order::OrderResult						TravelToPosition(Order_ActorTravelToPosition & order);
 
 	// Turns the actor towards the specified position.  Y (vertical) coordinate is ignored.
 	void									TurnTowardsPosition(const FXMVECTOR position);
@@ -112,7 +114,7 @@ public:
 
 
 
-private:
+protected:
 
 	ActorBase *							m_base;
 	SkinnedModelInstance 				m_model;
@@ -121,8 +123,11 @@ private:
 	// Movement and physics parameters for this actor
 	float								m_turnrate;						// Radians/sec turn rate
 
-};
+	// Moves the actor to a target position in the same environment, within a certain tolerance sq.  Returns a
+	// flag indicating whether we have reached the target (true) or are still in progress (false)
+	bool _MoveToPosition(const FXMVECTOR position, float tolerance_sq, bool run);
 
+};
 
 // Turn (about the Y axis) by the specified number of radians
 CMPINLINE void Actor::Turn(float angle)

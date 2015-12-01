@@ -4,6 +4,7 @@
 #include "iSpaceObjectEnvironment.h"
 #include "Order.h"
 #include "Order_ActorMoveToPosition.h"
+#include "Order_ActorMoveToTarget.h"
 #include "Order_ActorTravelToPosition.h"
 #include "Actor.h"
 #include "ActorBase.h"
@@ -194,30 +195,24 @@ void Actor::SimulateObject(void)
 // Method to process the specified order.  Called when processing the full queue.  Returns true if order is now completed & can be removed
 Order::OrderResult Actor::ProcessOrder(Order *order)
 {
-	Order::OrderType type;
-
 	// Determine the type of order being processed
 	if (!order) return Order::OrderResult::InvalidOrder;
-	type = order->GetType();
+	Order::OrderType type = order->GetType();
 
 	// Take different action depending on the order type
 	switch (type)
 	{
 		// Move to position.  Specifies position and the distance to which we must move within
 		case Order::OrderType::ActorMoveToPosition:
-			return MoveToPosition(	order->Parameters.Vector_1,		// Target position
-									order->Parameters.Float3_1.x,	// Distance to move within
-									order->Parameters.Flag_1);		// Indicates whether the actor should run
+			return MoveToPosition((Order_ActorMoveToPosition&)*order);
 
 		// Move to target.  Specifies the target and the distance to which we must move within
 		case Order::OrderType::ActorMoveToTarget:
-			return MoveToTarget(	(iEnvironmentObject*)order->Parameters.Target_1,		// The target we should move towards
-									order->Parameters.Float3_1.x,							// Distance to move within
-									order->Parameters.Flag_1);								// Indicates whether the actor should run
+			return MoveToTarget((Order_ActorMoveToTarget&)*order);
 
 		// Travel to position.  Navigates to a destination using the environment nav network
 		case Order::OrderType::ActorTravelToPosition:
-			return TravelToPosition((Order_ActorTravelToPosition*)order);
+			return TravelToPosition((Order_ActorTravelToPosition&)*order);
 
 
 			// If this is not an order we can execute, return an invalid order result to have it removed from the queue
@@ -228,8 +223,9 @@ Order::OrderResult Actor::ProcessOrder(Order *order)
 }
 
 
-// Order: Moves the actor to a target position in the same environment, within a certain tolerance
-Order::OrderResult Actor::MoveToPosition(FXMVECTOR position, float getwithin, bool run)
+// Moves the actor to a target position in the same environment, within a certain tolerance sq.  Returns a
+// flag indicating whether we have reached the target (true) or are still in progress (false)
+bool Actor::_MoveToPosition(const FXMVECTOR position, float tolerance_sq, bool run)
 {
 	// Completion check:  See whether we have reached the target position.  Calculated (squared) distance to target and threshold.
 	// Only consider distance in x/z dimensions - y (vertical) dimension is ignored.
@@ -239,10 +235,10 @@ Order::OrderResult Actor::MoveToPosition(FXMVECTOR position, float getwithin, bo
 						 XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(position))));
 
 	// If we are within the close distance then we can stop moving and complete the order
-	if (distsq < (getwithin * getwithin))
+	if (distsq < tolerance_sq)
 	{
 		/* Transition to a stopping/idle animation of some kind */
-		return Order::OrderResult::ExecutedAndCompleted;
+		return true;
 	}	
 
 	// We need to turn towards to the target position
@@ -253,49 +249,58 @@ Order::OrderResult Actor::MoveToPosition(FXMVECTOR position, float getwithin, bo
 	Move(Direction::Up, run);
 
 	// We have executed the order this cycle and it is still in progress
-	return Order::OrderResult::Executed;
+	return false;
+}
+
+// Order: Moves the actor to a target position in the same environment, within a certain tolerance
+Order::OrderResult Actor::MoveToPosition(Order_ActorMoveToPosition & order)
+{
+	if (_MoveToPosition(order.Target, order.CloseDistanceSq, order.Run) == true)
+		return Order::OrderResult::ExecutedAndCompleted;
+	else
+		return Order::OrderResult::Executed;
 }
 
 // Order: Moves the actor to a target object, within a certain tolerance, providing that target is in the same environment
-Order::OrderResult Actor::MoveToTarget(iEnvironmentObject *target, float getwithin, bool run)
+Order::OrderResult Actor::MoveToTarget(Order_ActorMoveToTarget & order)
 {
-	// Call the overloaded function, assuming we are in the same environment as the target
-	if (target && (target->GetParentEnvironment() == m_parent))
-		return MoveToPosition(target->GetEnvironmentPosition(), getwithin, run);
+	// Parameter check; make sure the target exists, and that we are both in the same environment
+	if (order.Target == NULL || order.Target->GetParentEnvironment() != m_parent) return Order::OrderResult::InvalidOrder;
+
+	// This is effectively just a move-to-position command with the current position of the target
+	if (_MoveToPosition(order.Target->GetPosition(), order.CloseDistanceSq, order.Run) == true)
+		return Order::OrderResult::ExecutedAndCompleted;
 	else
-		return Order::OrderResult::InvalidOrder;
+		return Order::OrderResult::Executed;
 }
 
 
 // Order: Travels to a destination using the environment nav network.  Spawns multiple child orders to get there.
-Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition *order)
+Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition & order)
 {
-	// Parameter check
-	if (!order) return Order::OrderResult::InvalidOrder;
-
 	// Test whether we have traversed all the nodes in the travel path.  If so, return a complete status
-	if (order->PathIndex == order->PathLength)
+	if (order.PathIndex == order.PathLength)
 	{
 		return Order::OrderResult::ExecutedAndCompleted;
 	}
 
 	// Otherwise we want to generate a new direct move order to the next node in the path
-	INTVECTOR3 tgt = order->PathNodes[order->PathIndex];
+	INTVECTOR3 tgt = order.PathNodes[order.PathIndex];
 	Order_ActorMoveToPosition *move = new Order_ActorMoveToPosition(
-												XMVectorSet((float)tgt.x, (float)tgt.z, (float)tgt.y, 0.0f), // Swap y/z since path nodes are in element space 
-												order->Parameters.Float3_1.x, order->Parameters.Flag_1 
-											);
-
+		VectorFromIntVector3SwizzleYZ(tgt),															// Swap y/z since path nodes are in element space 
+		((order.PathIndex == (order.PathLength - 1)) ? order.CloseDistance : order.FollowDistance),	// Get within the follow distance, unless this is the last node
+		order.Run);
+											
 	// Assign the new order, which will generate a new unique ID for the child order
 	this->AssignNewOrder(move);
 
 	// Give the new order a parent pointer to the overall 'travel' order, and a dependency for this overall order
 	// on completion of the child (at which point it will generate the next child order)
-	move->Parent = order->ID;
-	order->Dependency = move->ID;
+	move->Parent = order.ID;
+	order.Dependency = move->ID;
 
 	// Increment the path index to indicate which node will be next in the path
-	++order->PathIndex;
+	++(order.PathIndex);
 
 	// Return a success status, to allow this order to continue executing.  Also signal that we generated new 
 	// child orders, so that they will also be picked up in the current order evaluation cycle

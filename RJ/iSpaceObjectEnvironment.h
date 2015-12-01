@@ -9,6 +9,7 @@
 #include "ComplexShipElement.h"
 class iEnvironmentObject;
 class StaticTerrain;
+class NavNetwork;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))

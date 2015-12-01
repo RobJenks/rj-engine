@@ -622,11 +622,9 @@ bool Ship::CanAcceptOrderType(Order::OrderType type)
 // Method to process the specified order.  Called when processing the full queue.  Return value indicates whether order is now completed & can be removed
 Order::OrderResult Ship::ProcessOrder(Order *order)
 {
-	Order::OrderType type;
-
 	// Determine the type of order being processed
 	if (!order) return Order::OrderResult::InvalidOrder;
-	type = order->GetType();
+	Order::OrderType type = order->GetType();
 
 	// Take different action depending on the order type
 	switch (type)
@@ -706,6 +704,7 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 
 	// TODO: IMPLEMENT THIS NEXT
 
+	return Order::OrderResult::InvalidOrder;
 }
 
 

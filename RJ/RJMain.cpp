@@ -1878,7 +1878,7 @@ void RJMain::__CreateDebugScenario(void)
 		else
 			a1->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
-		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, false);
+		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
 		a1->AssignNewOrder(o);
 	}
 

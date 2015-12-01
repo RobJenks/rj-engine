@@ -243,7 +243,7 @@ void ComplexShip::ShipTileRemoved(ComplexShipTile *tile)
 
 
 // Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
-void iSpaceObjectEnvironment::ElementLayoutChanged(void)
+void ComplexShip::ElementLayoutChanged(void)
 {
 	// Pass control down to base classes
 	iSpaceObjectEnvironment::ElementLayoutChanged();

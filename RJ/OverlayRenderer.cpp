@@ -11,6 +11,7 @@
 #include "CoreEngine.h"
 #include "Model.h"
 #include "iSpaceObject.h"
+#include "iSpaceObjectEnvironment.h"
 #include "Actor.h"
 #include "Order.h"
 #include "Order_ActorTravelToPosition.h"
@@ -261,7 +262,7 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRender
 }
 
 // Method to render a box around the specified element of a complex ship
-void OverlayRenderer::RenderElementBox(iSpaceObject *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness)
+void OverlayRenderer::RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness)
 {
 	// Parameter check
 	if (ship)
@@ -276,7 +277,7 @@ void OverlayRenderer::RenderElementBox(iSpaceObject *ship, const INTVECTOR3 & el
 }
 
 // Method to render a box at the specified element *position* (i.e. not element index, but actual coord in element space)
-void OverlayRenderer::RenderElementBoxAtRelativeElementLocation(iSpaceObject* ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness)
+void OverlayRenderer::RenderElementBoxAtRelativeElementLocation(iSpaceObjectEnvironment* ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness)
 {
 	// Parameter check
 	if (ship)
@@ -291,7 +292,7 @@ void OverlayRenderer::RenderElementBoxAtRelativeElementLocation(iSpaceObject* sh
 }
 
 // Method to render a box at the specified element *position* (i.e. not element index, but actual coord in element space).  Allows any size
-void OverlayRenderer::RenderBoxAtRelativeElementLocation(iSpaceObject* ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, 
+void OverlayRenderer::RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment* ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour,
 														 float xSize, float ySize, float zSize, float thickness)
 {
 	// Parameter check
@@ -509,7 +510,7 @@ void OverlayRenderer::RenderActorPath(Actor *actor, float thickness)
 		Order_ActorTravelToPosition *ao;
 
 		// Get a reference to the actor environment, and make sure it is valid
-		iSpaceObject *env = actor->GetParentEnvironment(); if (!env) return;
+		iSpaceObjectEnvironment *env = actor->GetParentEnvironment(); if (!env) return;
 
 		// Iterate through the actor order queue
 		Actor::OrderQueue::const_iterator it_end = actor->Orders.end();

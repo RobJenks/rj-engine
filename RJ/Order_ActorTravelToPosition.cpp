@@ -5,13 +5,16 @@
 #include "Order_ActorTravelToPosition.h"
 
 // Constructor including main order parameters
-Order_ActorTravelToPosition::Order_ActorTravelToPosition(iSpaceObjectEnvironment *environment, CXMVECTOR startpos, CXMVECTOR targetpos, float getwithin, bool run)
+Order_ActorTravelToPosition::Order_ActorTravelToPosition(	iSpaceObjectEnvironment *environment, CXMVECTOR startpos, CXMVECTOR targetpos,
+															float getwithin, float followdistance, bool run)
 	:
 	Environment(environment),
 	StartPosition(startpos),
 	TargetPosition(targetpos),
 	CloseDistance(getwithin),
 	CloseDistanceSq(getwithin * getwithin),
+	FollowDistance(followdistance), 
+	FollowDistanceSq(followdistance * followdistance),
 	Run(run),
 	PathNodes(NULL),
 	PathLength(0),
