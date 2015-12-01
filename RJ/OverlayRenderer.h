@@ -9,6 +9,7 @@
 #include "Utility.h"
 class iShader;
 class iSpaceObject;
+class iSpaceObjectEnvironment;
 class Model;
 class Actor;
 class OrientedBoundingBox;
