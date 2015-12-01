@@ -19,15 +19,25 @@ public:
 
 	// Constructor including main order parameters
 	Order_ActorMoveToPosition(FXMVECTOR position, float getwithin, bool run)
+		:
+		Target(position),
+		CloseDistance(getwithin),
+		CloseDistanceSq(getwithin * getwithin),
+		Run(run)
 	{
-		this->Parameters.Vector_1 = position;
-		this->Parameters.Float3_1.x = getwithin;
-		this->Parameters.Flag_1 = run;
 	}
 
 	// Default constructor / destructor
 	Order_ActorMoveToPosition(void) { }
 	~Order_ActorMoveToPosition(void) { }
+
+public:
+
+	// Order parameters
+	AXMVECTOR					Target;
+	float						CloseDistance, CloseDistanceSq;
+	bool						Run;
+
 };
 
 

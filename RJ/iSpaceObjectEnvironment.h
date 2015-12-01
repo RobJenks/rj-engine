@@ -141,6 +141,24 @@ public:
 	void							ObjectMoved(iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el, 
 																			const INTVECTOR3 & new_min_el, const INTVECTOR3 & new_max_el);
 
+	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
+	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObjectEnvironment::SimulationStateChanged() to maintain the chain
+	void							SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
+
+	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
+	virtual void					ElementLayoutChanged(void);
+
+	// Get a reference to the navigation network assigned to this ship
+	CMPINLINE NavNetwork *			GetNavNetwork(void)				{ return m_navnetwork; }
+
+	// Delete or simply remove the nav network. Removing the link will leave the network itself intact, just unliked - for when we 
+	// copy objects and want to retain original ship's network
+	void							ShutdownNavNetwork(void);
+	CMPINLINE void					RemoveNavNetworkLink(void)		{ m_navnetwork = NULL; }
+
+	// Updates the ship navigation network based on the set of elements and their properties
+	void							UpdateNavigationNetwork(void);
+
 	// Initialise the element storage based on this object's element size
 	Result							InitialiseAllElements(void);
 
@@ -179,6 +197,9 @@ protected:
 	// Adjusted world matrix, which transforms to/from the element (0,0,0) point rather than the environment centre point
 	AXMMATRIX						m_zeropointworldmatrix;
 	AXMMATRIX						m_inversezeropointworldmatrix;
+
+	// The navigation network that actors will use to move around this environment
+	NavNetwork *					m_navnetwork;
 
 };
 

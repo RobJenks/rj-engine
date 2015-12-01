@@ -15,7 +15,9 @@
 #include "Equip.h"
 #include <vector>
 class Hardpoint;
-using namespace std;
+class Order_MoveToPosition;
+class Order_MoveToTarget;
+class Order_AttackBasic;
 
 // Template class used to store ship attributes
 template <typename T> class ShipAttribute
@@ -150,12 +152,18 @@ public:
 	CMPINLINE std::vector<iSpaceObject*>::size_type		GetContactCount(void) const			{ return m_cached_contact_count; }
 	CMPINLINE std::vector<iSpaceObject*>::size_type		GetEnemyContactCount(void) const	{ return m_cached_enemy_contact_count; }
 
+	// Moves the ship to a target position, within a certain tolerance.  Returns a flag indicating whether we have reached the target
+	CMPINLINE bool MoveToPosition(const FXMVECTOR position, float tolerance) { return _MoveToPosition(position, (tolerance * tolerance)); }
 
 	// Order: Moves the ship to a target position, within a certain tolerance
-	Order::OrderResult			MoveToPosition(FXMVECTOR position, float closedistance);
+	Order::OrderResult			MoveToPosition(Order_MoveToPosition & order);
 
 	// Order: Moves the ship to a target object, within a certain tolerance
-	Order::OrderResult			MoveToTarget(iSpaceObject *target, float closedistance);
+	Order::OrderResult			MoveToTarget(Order_MoveToTarget & order);
+
+	// Order: Perform a basic attack on the target.  Will close on the target while firing, then
+	// peel off and circle for another run
+	Order::OrderResult			AttackBasic(Order_AttackBasic & order);
 
 	// Flag to determine whether any engine thrust vectors have changed
 	CMPINLINE bool				ThrustVectorsChanged(void)				{ return m_thrustchange_flag; }
@@ -216,6 +224,9 @@ protected:
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
 	CMPINLINE float		DetermineExactYawToTarget(XMFLOAT3 tgt);
 	CMPINLINE float		DetermineExactPitchToTarget(XMFLOAT3 tgt);
+
+	// Moves the ship to a target position, within a certain squared tolerance.  Returns a flag indicating whether we have reached the target
+	bool				_MoveToPosition(const FXMVECTOR position, float tolerance_sq);
 
 };
 

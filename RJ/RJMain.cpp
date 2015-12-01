@@ -2065,7 +2065,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		XMVECTOR contact = XMVectorAdd(ss->GetPosition(), XMVectorScale(dirvec, intersect_time));
 
 		const FiringArc & arc = ss->TurretController.Turrets[0]->GetYawFiringArc();
-		*** TEST WHETHER VECTOR TO +/- COLLISION SPHERE BOUNDS IS IN RANGE -> TELLS US IF ANY PART OF THE OBJECT IS IN RANGE?
+		
 
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f",
 			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time);

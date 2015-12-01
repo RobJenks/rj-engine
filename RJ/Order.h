@@ -5,9 +5,6 @@
 
 #include "DX11_Core.h"
 
-#include "Utility.h"
-class iSpaceObject;
-
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
 class Order : public ALIGN16<Order>
@@ -23,6 +20,7 @@ public:
 
 		MoveToPosition,						// Orders a ship to move DIRECTLY to the specified position
 		MoveToTarget,						// Orders a ship to move DIRECTLY to the designated target
+		AttackBasic,
 
 		ActorMoveToPosition,				// Orders an actor to move DIRECTLY to the specified position
 		ActorMoveToTarget,					// Orders an actor to move DIRECTLY to the designated target
@@ -59,7 +57,7 @@ public:
 	float										TimeSinceLastEvaluation;
 
 	// Paramters stored by default in the base order class.  Orders can extend with new params if required.  This allows us to avoid casting in simple cases
-	struct 
+	/*struct 
 	{
 		AXMVECTOR								Vector_1, Vector_2;
 		XMFLOAT3								Float3_1,	Float3_2;
@@ -67,7 +65,7 @@ public:
 		bool									Flag_1, Flag_2, Flag_3;
 		iSpaceObject *							Target_1;
 		iSpaceObject * 							Target_2;
-	} Parameters;
+	} Parameters;*/
 
 	// Constructor / destructor
 	Order(void);

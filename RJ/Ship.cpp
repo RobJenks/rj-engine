@@ -5,6 +5,10 @@
 #include "Octree.h"
 #include "iSpaceObject.h"
 #include "SimulationObjectManager.h"
+#include "Order.h"
+#include "Order_MoveToPosition.h"
+#include "Order_MoveToTarget.h"
+#include "Order_AttackBasic.h"
 
 #include "Ship.h"
 
@@ -629,34 +633,36 @@ Order::OrderResult Ship::ProcessOrder(Order *order)
 	{
 		// Move to position.  Specifies position and the distance to which we must move within
 		case Order::OrderType::MoveToPosition:
-			return MoveToPosition(	order->Parameters.Vector_1,		// Target position
-									order->Parameters.Float3_1.x);	// Distance to move within
+			return MoveToPosition((Order_MoveToPosition&)*order);
 
 		// Move to target.  Specifies the target and the distance to which we must move within
 		case Order::OrderType::MoveToTarget:
-			return MoveToTarget(	order->Parameters.Target_1,		// The target we should move towards
-									order->Parameters.Float3_1.x);	// Distance to move within
+			return MoveToTarget((Order_MoveToTarget&)*order);
+
+		// Perform a basic attack on the target.  Will close on the target while firing, then
+		// peel off and circle for another run
+		case Order::OrderType::AttackBasic:
+			return AttackBasic((Order_AttackBasic&)*order);
 
 
-
-			// If this is not an order we can execute, return an invalid order result to have it removed from the queue
+		// If this is not an order we can execute, return an invalid order result to have it removed from the queue
 		default:
 			return Order::OrderResult::InvalidOrder;
 	}
 }
 
-// Order: Moves the ship to a target position, within a certain tolerance
-Order::OrderResult Ship::MoveToPosition(FXMVECTOR position, float closedistance)
+// Moves the ship to a target position, within a certain tolerance.  Returns a flag indicating whether we have reached the target
+bool Ship::_MoveToPosition(const FXMVECTOR position, float tolerance_sq)
 {
 	// Completion check:  See whether we have reached the target position.  Calculated (squared) distance to target
 	float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(m_position, position)));
 
 	// If we are within the close distance then set target speed to zero and mark the order as completed
-	if (distsq < (closedistance * closedistance))
+	if (distsq < tolerance_sq)
 	{
 		this->SetTargetSpeed(0.0f);
-		return Order::OrderResult::ExecutedAndCompleted;
-	}	
+		return true;
+	}
 
 	// Otherwise we need to coninue on a course to the target.  Turn the ship towards the target position
 	this->TurnToTarget(position, true);
@@ -664,18 +670,42 @@ Order::OrderResult Ship::MoveToPosition(FXMVECTOR position, float closedistance)
 	// For now, accelerate to max thrust.  TODO: later, potentially apply a gradual decrease in thrust as ship approaches the target
 	this->SetTargetSpeedPercentage(1.0f);
 
-	// Return a value indicating that we have executed the order
-	return Order::OrderResult::Executed;
+	// We have not yet reached the target
+	return false;
+}
+
+
+// Order: Moves the ship to a target position, within a certain tolerance
+Order::OrderResult Ship::MoveToPosition(Order_MoveToPosition & order)
+{
+	if (_MoveToPosition(order.Target, order.CloseDistanceSq) == true)
+		return Order::OrderResult::ExecutedAndCompleted;
+	else
+		return Order::OrderResult::Executed;
 }
 
 // Order: Moves the ship to a target object, within a certain tolerance
-Order::OrderResult Ship::MoveToTarget(iSpaceObject *target, float closedistance)
+Order::OrderResult Ship::MoveToTarget(Order_MoveToTarget & order)
 {
-	// Call the overloaded function; this is essentially a move-to-position order for the target's current position
-	if (target)
-		return MoveToPosition(target->GetPosition(), closedistance);
+	// Parameter check
+	if (!order.Target) return Order::OrderResult::InvalidOrder;
+
+	// Call the primary movement function; this is essentially a move-to-position order for the target's current position
+	if (_MoveToPosition(order.Target->GetPosition(), order.CloseDistanceSq) == true)
+		return Order::OrderResult::ExecutedAndCompleted;
 	else
-		return Order::OrderResult::InvalidOrder;
+		return Order::OrderResult::Executed;
+}
+
+// Order: Perform a basic attack on the target.  Will close on the target while firing, then
+// peel off and circle for another run
+Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
+{
+	// Parameter check
+	if (!order.Target) return Order::OrderResult::InvalidOrder;
+
+	// TODO: IMPLEMENT THIS NEXT
+
 }
 
 
@@ -684,6 +714,7 @@ Ship::~Ship(void)
 {
 
 }
+
 
 
 

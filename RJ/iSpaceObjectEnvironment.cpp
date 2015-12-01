@@ -9,6 +9,7 @@
 #include "StaticTerrain.h"
 #include "Ship.h"
 #include "iContainsComplexShipTiles.h"
+#include "NavNetwork.h"
 
 #include "iSpaceObjectEnvironment.h"
 
@@ -26,6 +27,7 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_elements = NULL;
 	m_elementsize = NULL_INTVECTOR3;
 	m_containssimulationhubs = false;
+	m_navnetwork = NULL;
 	m_zeropointtranslation = NULL_VECTOR;
 	m_zeropointtranslationf = NULL_FLOAT3;
 	m_zeropointworldmatrix = m_inversezeropointworldmatrix = ID_MATRIX;
@@ -48,6 +50,9 @@ void iSpaceObjectEnvironment::InitialiseCopiedObject(iSpaceObjectEnvironment *so
 	this->SetElements(NULL);
 	ComplexShipElement::CopyElementSpace(source, this);
 
+	// Remove the nav network pointer in this environment, since we want to generate a new one for the environment when first required
+	this->RemoveNavNetworkLink();
+
 	// Perform an initial derivation of the world/zero point matrices, as a starting point
 	RefreshPositionImmediate();
 }
@@ -69,6 +74,37 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 		}
 	}
 }
+
+// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
+void iSpaceObjectEnvironment::SimulationStateChanged(iObject::ObjectSimulationState prevstate, iObject::ObjectSimulationState newstate)
+{
+	// Call the superclass event before proceeding
+	Ship::SimulationStateChanged(prevstate, newstate);
+
+	// If we were not being simulated, and we now are, then we may need to take some iSpaceObjectEnvironment-specific actions here
+	// TODO: this will not always be true in future when we have more granular simulation states 
+	if (prevstate == iObject::ObjectSimulationState::NoSimulation)
+	{
+		// Update the nav network for actors to use in traversing the environment
+		UpdateNavigationNetwork();
+	}
+
+	// Conversely, if we are no longer going to be simulated, we can remove the nav network etc. 
+	if (newstate == iObject::ObjectSimulationState::NoSimulation)
+	{
+		ShutdownNavNetwork();
+	}
+
+}
+
+
+// Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
+void iSpaceObjectEnvironment::ElementLayoutChanged(void)
+{
+	// We want to update the ship navigation network if the element layout has changed.  
+	UpdateNavigationNetwork();
+}
+
 
 // Perform the post-simulation update.  Pure virtual inherited from iObject base class
 void iSpaceObjectEnvironment::PerformPostSimulationUpdate(void)
@@ -356,6 +392,27 @@ void iSpaceObjectEnvironment::ShipTileRemoved(ComplexShipTile *tile)
 
 }
 
+// Updates the ship navigation network based on the set of elements and their properties
+void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
+{
+	// Make sure the network exists.  If it doesn't, create the network object first
+	if (!m_navnetwork) m_navnetwork = new NavNetwork();
+
+	// Initialise the nav network with data from this complex ship
+	m_navnetwork->InitialiseNavNetwork(this);
+
+	// TODO: Find any actors currently following a path provided by the previous network, and have them recalculate their paths
+}
+
+void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
+{
+	if (m_navnetwork)
+	{
+		m_navnetwork->Shutdown();
+		SafeDelete(m_navnetwork);
+	}
+}
+
 // Event to handle the movement of objects within this element-containing object.  Derives the new element range based on object position.
 void iSpaceObjectEnvironment::ObjectMoved(iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el)
 {
@@ -500,6 +557,9 @@ void iSpaceObjectEnvironment::Shutdown(bool unlink_tiles)
 {
 	// Deallocate all tile data
 	ShutdownAllTileData(true, unlink_tiles);
+
+	// Detach and deallocate the navigation network assigned to this ship
+	ShutdownNavNetwork();
 
 	// Deallocate all element storage assigned to the ship itself
 	if (m_elements) ComplexShipElement::DeallocateElementStorage(&m_elements, m_elementsize);

@@ -3,7 +3,7 @@
 #ifndef __Order_ActorMoveToTargetH__
 #define __Order_ActorMoveToTargetH__
 
-#include "iEnvironmentObject.h"
+class iEnvironmentObject;
 #include "Order.h"
 
 
@@ -21,14 +21,23 @@ public:
 
 	// Constructor including main order parameters
 	Order_ActorMoveToTarget(iEnvironmentObject *target, float getwithin)
+		:
+		Target(target),
+		CloseDistance(getwithin),
+		CloseDistanceSq(getwithin * getwithin)
 	{
-		this->Parameters.Target_1 = (iSpaceObject*)target;
-		this->Parameters.Float3_1.x = getwithin;
 	}
 
 	// Default constructor / destructor
 	Order_ActorMoveToTarget(void) { }
 	~Order_ActorMoveToTarget(void) { }
+
+public:
+
+	// Order parameters
+	iEnvironmentObject *					Target;
+	float									CloseDistance, CloseDistanceSq;
+
 };
 
 

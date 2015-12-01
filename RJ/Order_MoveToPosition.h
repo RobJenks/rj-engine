@@ -17,16 +17,25 @@ public:
 	// Specifies the class of order this object represents
 	Order::OrderType GetType(void)				{ return Order::OrderType::MoveToPosition; }
 
-	// Constructor including main order parameters#ifndef __
+	// Constructor including main order parameters
 	Order_MoveToPosition(CXMVECTOR position, float closedistance)
+		:
+		Target(position),
+		CloseDistance(closedistance),
+		CloseDistanceSq(closedistance * closedistance)
 	{
-		this->Parameters.Vector_1 = position;
-		this->Parameters.Float3_1.x = closedistance;
 	}
 
 	// Default constructor / destructor
 	Order_MoveToPosition(void) { }
 	~Order_MoveToPosition(void) { }
+
+public:
+
+	// Order parameters
+	AXMVECTOR					Target;
+	float						CloseDistance, CloseDistanceSq;
+
 };
 
 

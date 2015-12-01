@@ -230,6 +230,8 @@ namespace Game {
 	float C_DEFAULT_ORDER_EVAL_FREQUENCY = 0.5f;				// The default interval for subsequent evaluations of an order by the AI
 	float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY = 5.0f;	// Default interval for entity maintenance of its order queue
 	float C_ENGINE_THRUST_DECREASE_THRESHOLD = 0.9f;			// % threshold of target speed at which we start to reduce engine thrust
+	float C_DEFAULT_ATTACK_CLOSE_MULTIPLIER = 1.5f;				// Multiple of target collision sphere radius that we will close to when attacking, by default
+	float C_DEFAULT_ATTACK_RETREAT_DISTANCE = 1500.0f;			// Default retreat distance between attack runs, added to the close distance
 
 	// Actor-related constants
 	float C_ACTOR_DEFAULT_RUN_SPEED = 18.0f;									// Default run speed for all actors unless specified

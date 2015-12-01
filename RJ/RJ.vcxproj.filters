@@ -514,6 +514,12 @@
     <ClCompile Include="BasicProjectileSet.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
+    <ClCompile Include="Order_AttackBasic.cpp">
+      <Filter>Orders</Filter>
+    </ClCompile>
+    <ClCompile Include="Order_ActorTravelToPosition.cpp">
+      <Filter>Orders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1163,6 +1169,9 @@
     </ClInclude>
     <ClInclude Include="DataRegister.h">
       <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="Order_AttackBasic.h">
+      <Filter>Orders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

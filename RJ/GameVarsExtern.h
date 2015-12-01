@@ -247,6 +247,8 @@ namespace Game {
 	extern float C_DEFAULT_ORDER_EVAL_FREQUENCY;
 	extern float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY;
 	extern float C_ENGINE_THRUST_DECREASE_THRESHOLD;
+	extern float C_DEFAULT_ATTACK_CLOSE_MULTIPLIER;				// Multiple of target collision sphere radius that we will close to when attacking, by default
+	extern float C_DEFAULT_ATTACK_RETREAT_DISTANCE;				// Default retreat distance between attack runs, added to the close distance
 
 	// Actor-related constants
 	extern float C_ACTOR_DEFAULT_RUN_SPEED;						// Default run speed for all actors unless specified

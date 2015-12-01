@@ -15,7 +15,6 @@
 #include "HpEngine.h"
 #include "Engine.h"
 #include "SpaceSystem.h"
-#include "NavNetwork.h"
 #include "GameSpatialPartitioningTrees.h"
 #include "CSLifeSupportTile.h"
 #include "CopyObject.h"
@@ -34,7 +33,6 @@ ComplexShip::ComplexShip(void)
 	m_shipclass = Ships::Class::Complex;
 
 	// Set ship properties to default values on object creation
-	m_navnetwork = NULL;
 	m_perimeterbeacons.clear();
 	m_activeperimeternodes.clear();
 	m_activebeacons = 0;
@@ -95,9 +93,6 @@ void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 	//cs->TerrainObjects.clear();
 	//cs->CopyTerrainDataFromObject(template_ship);
 
-	// Remove the nav network pointer in this ship, since we want to generate a new one for the ship when first required
-	this->RemoveNavNetworkLink();
-
 	// Avoid replicating any behaviour from the source ship in the target
 	this->CancelAllOrders();
 	this->SetTargetThrustOfAllEngines(0.0f);
@@ -124,21 +119,22 @@ ComplexShipSection *ComplexShip::GetSection(ComplexShip::ComplexShipSectionColle
 void ComplexShip::SimulationStateChanged(iObject::ObjectSimulationState prevstate, iObject::ObjectSimulationState newstate)
 {
 	// Call the superclass event before proceeding
-	Ship::SimulationStateChanged(prevstate, newstate);
+	iSpaceObjectEnvironment::SimulationStateChanged(prevstate, newstate);
 
 	// If we were not being simulated, and we now are, then we may need to take some ComplexShip-specific actions here
 	// TODO: this will not always be true in future when we have more granular simulation states 
 	if (prevstate == iObject::ObjectSimulationState::NoSimulation)
 	{
 		// Perform a full recalculation, which will generate new perimeter beacons, a nav network etc. for use during active simulation
+		// TODO: This will call the nav network generation function twice, since the iSpaceObjectEnvironment class (which owns the nav
+		// network) will call this during its SimulationStateChanged() event.  Fix this in future
 		RecalculateAllShipData();
 	}
 
-	// Conversely, if we are no longer going to be simulated, we can remove the perimeter beacons / nav network etc. 
+	// Conversely, if we are no longer going to be simulated, we can remove the perimeter beacons etc. 
 	if (newstate == iObject::ObjectSimulationState::NoSimulation)
 	{
 		ShutdownPerimeterBeacons();
-		ShutdownNavNetwork();
 	}
 
 	// We also want to pass this state down to each complex ship section, since the sections are branching off the iObject>this inheritance hierarchy
@@ -228,20 +224,34 @@ void ComplexShip::RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionC
 // Method to handle the addition of a ship tile to this object
 void ComplexShip::ShipTileAdded(ComplexShipTile *tile)
 {
-	// (Implement any complex ship-specific logic here)
-
 	// Pass control down to base classes
 	iSpaceObjectEnvironment::ShipTileAdded(tile);
+	
+	// (Implement any complex ship-specific logic here)
+
 }
 
 // Method to handle the removal of a ship tile from this object
 void ComplexShip::ShipTileRemoved(ComplexShipTile *tile)
 {
-	// (Implement any complex ship-specific logic here)
-
 	// Pass control down to base classes
 	iSpaceObjectEnvironment::ShipTileRemoved(tile);
+
+	// (Implement any complex ship-specific logic here)
+
 }
+
+
+// Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
+void iSpaceObjectEnvironment::ElementLayoutChanged(void)
+{
+	// Pass control down to base classes
+	iSpaceObjectEnvironment::ElementLayoutChanged();
+
+	// (Implement any complex ship-specific logic here)
+
+}
+
 
 // Builds the complex ship hardpoint collection based on its constituent ship sections
 void ComplexShip::BuildHardpointCollection(void)
@@ -264,13 +274,6 @@ void ComplexShip::BuildHardpointCollection(void)
 
 	// Resume hardpoint updates, which will trigger the event that updates the ship based on all hardpoints
 	m_hardpoints.ResumeUpdates();
-}
-
-// Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
-void ComplexShip::ElementLayoutChanged(void)
-{
-	// We want to update the ship navigation network if the element layout has changed.  
-	UpdateNavigationNetwork();
 }
 
 // Overrides the virtual iSpaceObject method to ensure that all ship sections are also moved into 
@@ -339,9 +342,6 @@ void ComplexShip::Shutdown(bool IncludeStandardObjects, bool ShutdownSections, b
 {
 	// Shutdown the interior environment of the ship (including tiles, elements) by calling the superclass shutdown method
 	iSpaceObjectEnvironment::Shutdown(UnlinkTiles);
-
-	// Detach and deallocate the navigation network assigned to this ship
-	ShutdownNavNetwork();
 
 	// Clear the hardpoints collection, but don't deallocate the hardpoints.  These are the responsibility of the ship 
 	// section that owns them
@@ -512,28 +512,6 @@ void ComplexShip::PerformShipOxygenUpdate(void)
 	m_oxygenupdaterequired = false;
 
 	// TODO: Do this
-}
-
-
-// Updates the ship navigation network based on the set of elements and their properties
-void ComplexShip::UpdateNavigationNetwork(void)
-{
-	// Make sure the network exists.  If it doesn't, create the network object first
-	if (!m_navnetwork) m_navnetwork = new NavNetwork();
-
-	// Initialise the nav network with data from this complex ship
-	m_navnetwork->InitialiseNavNetwork(this);
-
-	// TODO: Find any actors currently following a path provided by the previous network, and have them recalculate their paths
-}
-
-void ComplexShip::ShutdownNavNetwork(void)
-{
-	if (m_navnetwork)
-	{
-		m_navnetwork->Shutdown();
-		SafeDelete(m_navnetwork);
-	}
 }
 
 // Recalculates any perimeter beacons required to maintain spatial position in the world

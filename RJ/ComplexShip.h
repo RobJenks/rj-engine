@@ -14,7 +14,6 @@
 class iSpaceObject;
 class ComplexShipSection;
 class CapitalShipPerimeterBeacon;
-class NavNetwork;
 class StaticTerrain;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -37,7 +36,7 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(ComplexShip *source);
+	void												InitialiseCopiedObject(ComplexShip *source);
 
 	// Methods to add/remove/retrieve the sections that make up this complex ship
 	ComplexShipSection *								GetSection(ComplexShip::ComplexShipSectionCollection::size_type index);
@@ -50,7 +49,9 @@ public:
 	// Methods triggered based on major events impacting this object
 	void										ShipTileAdded(ComplexShipTile *tile);		// When a tile is added.  Virtual inherited from interface.
 	void										ShipTileRemoved(ComplexShipTile *tile);		// When a tile is removed.  Virtual inherited from interface.
-	void										ElementLayoutChanged(void);					// When the layout (e.g. active/walkable state, connectivity) of elements is changed
+
+	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
+	virtual void								ElementLayoutChanged(void);					
 
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
 	void										MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
@@ -70,17 +71,6 @@ public:
 	// Return the minimum & maximum bounds actually occupied by this ship (can be =/= elementsize when sections are being changed)
 	INTVECTOR3									GetShipMinimumBounds(void);
 	INTVECTOR3									GetShipMaximumBounds(void);
-
-	// Get a reference to the navigation network assigned to this ship
-	CMPINLINE NavNetwork *						GetNavNetwork(void)				{ return m_navnetwork; }
-
-	// Delete or simply remove the nav network. Removing the link will leave the network itself intact, just unliked - for when we 
-	// copy objects and want to retain original ship's network
-	void										ShutdownNavNetwork(void);
-	CMPINLINE void								RemoveNavNetworkLink(void)		{ m_navnetwork = NULL; }
-
-	// Updates the ship navigation network based on the set of elements and their properties
-	void										UpdateNavigationNetwork(void);
 
 	// Methods to update life support-related properties of the ship; we set flags that force an update next cycle
 	CMPINLINE void								UpdateGravity(void)			{ m_gravityupdaterequired = true; }
@@ -173,9 +163,6 @@ protected:
 	bool										m_forcerenderinterior;	// Flag that determines whether the ship interior should always be rendered, regardless of the criteria
 
 	bool										m_suspendupdates;		// Flag that suspends all updates in response to changes, until updates are resumed again
-
-	// The navigation network that actors will use to move around this ship
-	NavNetwork *								m_navnetwork;
 
 	// Flags used to indicate whether certain ship properties need to be recalculated
 	bool										m_gravityupdaterequired;
