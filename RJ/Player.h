@@ -7,6 +7,7 @@
 #include "Utility.h"
 class GameInputDevice;
 class Ship;
+class iSpaceObjectEnvironment;
 class ComplexShip;
 class ComplexShipSection;
 class ComplexShipElement;

@@ -1,3 +1,4 @@
+#include "GameVarsExtern.h"
 #include "GameDataExtern.h"
 #include "SimulationStateManager.h"
 #include "Octree.h"
@@ -290,13 +291,19 @@ void iObject::SetSize(const FXMVECTOR size)
 	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
 	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 
-	// We also need to perform some per-component actions
-	XMFLOAT3 sizef;
-	XMStoreFloat3(&sizef, m_size);
+	// Store the local float representation to allow us to perform per-component tests at runtime
+	XMStoreFloat3(&m_sizef, m_size);
 
 	// Recalculate the object fast mover threshold
-	m_fastmoverthresholdsq = (min(sizef.x, min(sizef.y, sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
+	m_fastmoverthresholdsq = (min(m_sizef.x, min(m_sizef.y, m_sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
 	m_fastmoverthresholdsq *= m_fastmoverthresholdsq;
+
+	// Recalculate the object size ratio; the ratio of the object's largest dimension to its smallest.  Can be used
+	// to e.g. select between different intersection tests.  For example, OBB is more appropriate for ratios closer to 1
+	float mindimension = min(min(m_sizef.x, m_sizef.y), m_sizef.z);
+	float maxdimension = max(max(m_sizef.x, m_sizef.y), m_sizef.z);
+	m_size_ratio = (maxdimension / mindimension);
+	m_best_bounding_volume = GamePhysicsEngine::DetermineBestBoundingVolumeTypeForObject(this);
 
 	// Invalidate the OBB based on this change in size
 	CollisionOBB.Invalidate();

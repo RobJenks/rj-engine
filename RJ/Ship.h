@@ -152,6 +152,19 @@ public:
 	CMPINLINE std::vector<iSpaceObject*>::size_type		GetContactCount(void) const			{ return m_cached_contact_count; }
 	CMPINLINE std::vector<iSpaceObject*>::size_type		GetEnemyContactCount(void) const	{ return m_cached_enemy_contact_count; }
 
+	// Determines the "collision avoidance range" of the ship, i.e. the distance at which it starts to avoid an obstacle
+	// This range is dependent on the current velocity of the ship
+	CMPINLINE XMVECTOR DetermineCollisionAvoidanceVector(void) const
+	{
+		// For now, simply return the ship world momentum scaled by (a) the timefactor, (b) a constant time multiplier
+		// (a) * (b) * WorldMomentum = the distance the ship will travel in (b) seconds
+		return XMVectorScale(PhysicsState.WorldMomentum, Game::TimeFactor * Game::C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER);
+	}
+
+	// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
+	// during periodic contact analysis by the ship computer
+	CMPINLINE void PerformCollisionAvoidance(void) { if (m_avoid_target) _PerformCollisionAvoidance(); }
+
 	// Moves the ship to a target position, within a certain tolerance.  Returns a flag indicating whether we have reached the target
 	CMPINLINE bool MoveToPosition(const FXMVECTOR position, float tolerance) { return _MoveToPosition(position, (tolerance * tolerance)); }
 
@@ -213,6 +226,8 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
+	iSpaceObject *		m_avoid_target;				// Reference to any space abject that we are currently maneuvering to avoid, or NULL if none
+
 	AXMVECTOR			m_turnrate_v, m_turnrate_nv;// Vectorised turn rate and negation for faster per-frame calculations
 	AXMVECTOR			m_vlimit_v, m_avlimit_v;	// Vectorised linear/angular velocity limits for faster per-frame calculations
 
@@ -228,6 +243,9 @@ protected:
 	// Moves the ship to a target position, within a certain squared tolerance.  Returns a flag indicating whether we have reached the target
 	bool				_MoveToPosition(const FXMVECTOR position, float tolerance_sq);
 
+	// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
+	// during periodic contact analysis by the ship computer
+	void				_PerformCollisionAvoidance(void);
 };
 
 // Determines exact yaw to target; used for precise corrections near the target heading

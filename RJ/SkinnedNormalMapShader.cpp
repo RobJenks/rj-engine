@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "FastMath.h"
 #include "iShader.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"

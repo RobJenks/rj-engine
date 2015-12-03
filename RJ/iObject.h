@@ -14,6 +14,7 @@
 #include "Attachment.h"
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
+#include "GamePhysicsEngine.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
 #include "Faction.h"
@@ -236,8 +237,11 @@ public:
 	virtual void							Shutdown(void);
 
 	// The size of this object in world coordinates
-	CMPINLINE XMVECTOR						GetSize(void) const					{ return m_size; }
 	void									SetSize(const FXMVECTOR size);
+	CMPINLINE XMVECTOR						GetSize(void) const					{ return m_size; }
+	CMPINLINE const XMFLOAT3 &				GetSizeF(void) const				{ return m_sizef; }
+	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }
+	CMPINLINE Game::BoundingVolumeType		MostAppropriateBoundingVolumeType(void) const { return m_best_bounding_volume; }
 
 	// The model used for rendering this object (or NULL if object is non-renderable)
 	CMPINLINE Model *						GetModel(void)						{ return m_model; }
@@ -453,6 +457,9 @@ protected:
 	bool								m_canperformpostsimulationupdate;
 
 	AXMVECTOR							m_size;							// Size of the object in world coordinates
+	XMFLOAT3							m_sizef;						// Local float representation of the object size
+	float								m_size_ratio;					// Ratio of the object's largest dimension to its smallest
+	Game::BoundingVolumeType			m_best_bounding_volume;			// The most appropriate bounding volume type, based on this object's size & properties
 	AXMVECTOR							m_centreoffset;					// Any required offset to centre the object model about its local origin
 	
 	AXMMATRIX							m_worldmatrix;					// World matrix used for rendering this object

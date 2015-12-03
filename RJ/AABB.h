@@ -47,6 +47,14 @@ public:
 		P1 = obb.ExtentV;
 		P0 = XMVectorNegate(P1);
 	}
+
+	// Constructor to build an AABB from OBB core data.  Accepts a parameter used to expand/contract the AABB 
+	// bounds (centre-to-edge, i.e. half of overall size) by a specified amount on construction
+	AABB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR bounds_adjustment)
+	{
+		P1 = XMVectorAdd(obb.ExtentV, bounds_adjustment);
+		P0 = XMVectorNegate(P1);
+	}
 };
 
 

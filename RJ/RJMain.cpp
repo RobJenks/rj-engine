@@ -2064,9 +2064,6 @@ void RJMain::DEBUGDisplayInfo(void)
 		float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin;
 		XMVECTOR contact = XMVectorAdd(ss->GetPosition(), XMVectorScale(dirvec, intersect_time));
 
-		const FiringArc & arc = ss->TurretController.Turrets[0]->GetYawFiringArc();
-		
-
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f",
 			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);

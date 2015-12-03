@@ -18,10 +18,12 @@ using namespace std::tr1;
 
 class iStaticObject;
 class iActiveObject;
+class iSpaceObject;
 class iEnvironmentObject;
 class Model;
 class ArticulatedModel;
 class Hardpoint;
+class OrientedBoundingBox;
 class SimpleShip;
 class ComplexShip;
 class ComplexShipSection;

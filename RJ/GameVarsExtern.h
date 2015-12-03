@@ -36,12 +36,12 @@ namespace Game {
 #include "Utility.h"
 #include "GameInput.h"
 #include "CentralScheduler.h"
-#include "GamePhysicsEngine.h"
 class RJMain;
 class CoreEngine;
 class Ship;
 class Actor;
 class Player;
+class GamePhysicsEngine;
 class SimulationStateManager;
 class SimulationObjectManager;
 class FactionManagerObject;
@@ -143,6 +143,9 @@ namespace Game {
 	extern CollisionMode TranslateCollisionModeFromString(const std::string & mode);
 	extern std::string TranslateCollisionModeToString(CollisionMode mode);
 
+	// Enumeration of possible bounding volume types for game objects
+	enum BoundingVolumeType { BoundingSphere = 0, OrientedBoundingBox };
+
 	// Enumeration of possible collider types; passive colliders will not test for collisions themselves; 
 	// they can only be the candidate object in a collision test.  They will also not perform CCD, so 
 	// potentially-fast moving objects should be classified as active colliders
@@ -196,6 +199,9 @@ namespace Game {
 	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V;	// Threshold momentum value, above which we apply an additional collision response (vectorised form)
 	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V;	// Squared threshold momentum value, above which we apply an additional collision response (vectorised form)
 	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS;					// The maximum number of collision exclusions that can be applied to an object
+	extern const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER;	// Constant multiplier applied to collision range when performing collision avoidance
+	extern const float C_OBB_SIZE_THRESHOLD;							// The size at which we begin considering OBB as a better alternative to bounding sphere for the object
+	extern const float C_OBB_SIZE_RATIO_THRESHOLD;						// The size ratio at which we begin using OBB rather than bounding sphere, due to better accuracy
 
 	// Object management constants
 	extern const int C_OCTREE_MAX_NODE_ITEMS;							// The target object limit per octree node; can be overriden if required

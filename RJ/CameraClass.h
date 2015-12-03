@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "Ships.h"
 #include "ErrorCodes.h"
+class iSpaceObject;
 class CameraPath;
 
 

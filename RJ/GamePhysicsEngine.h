@@ -285,6 +285,17 @@ public:
 		return TestRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
 	}
 
+	// Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
+	// OBB with temporarily expanded bounds.  Not a completely precise test but sufficient for most purposes.  ray_point_volume
+	// indicates the expansion of OBB bounds; use a replicated "radius" vector if we just want to simulate a ray with certain radius 
+	bool									TestVolumetricRayVsOBBIntersection(	const Ray & ray, const FXMVECTOR ray_point_volume,
+																				const OrientedBoundingBox::CoreOBBData & obb, float t);
+	CMPINLINE bool							TestVolumetricRayVsOBBIntersection(	const Ray & ray, const FXMVECTOR ray_point_volume,
+																				const OrientedBoundingBox::CoreOBBData & obb)
+	{
+		return TestVolumetricRayVsOBBIntersection(ray, ray_point_volume, obb, 1.0f);
+	}
+
 	// Perform a continuous collision test between two moving objects.  Populates the collision result data with details on the collision
 	// point and time t = [0 1] at which the collision occured, if at all.  Returns a flag indicating whether a collision took place.
 	bool									TestContinuousSphereCollision(const iActiveObject *object1, const iActiveObject *object2);
@@ -325,6 +336,10 @@ public:
 	
 	// Default destructor
 	~GamePhysicsEngine(void);
+
+	// Static method that returns the most appropriate bounding volume type for the given object, based on e.g. size & dimension ratios
+	 static Game::BoundingVolumeType		DetermineBestBoundingVolumeTypeForObject(const iObject *object);
+
 
 protected:
 

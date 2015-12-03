@@ -3,7 +3,9 @@
 #include "HpEngine.h"
 #include "FastMath.h"
 #include "Octree.h"
+#include "Ray.h"
 #include "iSpaceObject.h"
+#include "GamePhysicsEngine.h"
 #include "SimulationObjectManager.h"
 #include "Order.h"
 #include "Order_MoveToPosition.h"
@@ -42,6 +44,7 @@ Ship::Ship(void)
 	this->m_targetangularvelocity = NULL_VECTOR;
 	this->m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
 	this->m_cached_contact_count = this->m_cached_enemy_contact_count = 0;
+	this->m_avoid_target = NULL;
 
 	// Link the hardpoints collection to this parent object
 	m_hardpoints.SetParent<Ship>(this);
@@ -200,6 +203,10 @@ void Ship::RunShipFlightComputer(void)
 {
 	// Evaluate any orders in the queue
 	ProcessOrderQueue(m_timesincelastflightcomputereval);
+
+	// Perform any collision avoidance; do this after the order evaluation so that collision avoidance has 
+	// priority to override previously-derived values
+	PerformCollisionAvoidance();
 
 	// Determine thrust levels for each engine on the ship based on current target parameters
 	DetermineEngineThrustLevels();
@@ -417,15 +424,9 @@ void Ship::SimulateObject(void)
 	// Test whether enough time has passed for the flight computer to be evaluated again
 	if (m_timesincelastflightcomputereval > m_flightcomputerinterval)
 	{
-		// Also test whether we are within the interval for re-analysing nearby contacts.  Run within the flight computer
-		// block so we only have to make this test a few times per second, rather than every frame
-		if (m_timesincelasttargetanalysis > Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ)
-		{
-			// Update the vector of nearby contacts and then reset the counter
-			AnalyseNearbyContacts();
-			m_timesincelasttargetanalysis = 0U;
-		}
-		
+		// Analyse all nearby enemy contacts.  This will use a cached collection that does not need to be updated every frame
+		AnalyseNearbyContacts();
+
 		// Reset any persistence flags that maintain an action between one execution of the flight computer and the next
 		m_isturning = false;
 
@@ -467,21 +468,92 @@ void Ship::SimulateObject(void)
 // Update the collections of nearby contacts
 void Ship::AnalyseNearbyContacts(void)
 {
-	// Locate all objects in the vicinity of this object, and maintain as the cache of nearby objects
-	Game::ObjectManager.GetAllObjectsWithinDistance(this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, m_cached_contacts,
-		SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
-	m_cached_contact_count = m_cached_contacts.size();
+	iSpaceObject *obj;
 
-	// Also parse out specifically enemy contacts
-	m_cached_enemy_contacts.clear();
-	for (std::vector<iSpaceObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
+	// Test whether we are within the interval for re-analysing nearby contacts.  If so, perform a new search
+	// for nearby enemy contacts and store them in the cached data collection
+	if (m_timesincelasttargetanalysis > Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ)
 	{
-		if (GetDispositionTowardsObject(m_cached_contacts[i]) == Faction::FactionDisposition::Hostile)
+		// Locate all objects in the vicinity of this object, and maintain as the cache of nearby objects
+		Game::ObjectManager.GetAllObjectsWithinDistance(this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, m_cached_contacts,
+			SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
+		m_cached_contact_count = m_cached_contacts.size();
+	
+		// Parse out any enemy contacts into the cached enemy contact vector.  Also ensure we have no NULLs in 
+		// the collection so that we can parse it without NULL checks each frame/ship computer cycle
+		// TODO: in future, need something more robust in case e.g. one of the ships is destroyed or leaves
+		m_cached_enemy_contacts.clear();
+		for (std::vector<iSpaceObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
 		{
-			m_cached_enemy_contacts.push_back(m_cached_contacts[i]);
+			obj = m_cached_contacts[i]; 
+			if (!obj) { RemoveFromVectorAtIndex<iSpaceObject*>(m_cached_contacts, i); --i; continue; }
+
+			if (GetDispositionTowardsObject(obj) == Faction::FactionDisposition::Hostile)
+			{
+				m_cached_enemy_contacts.push_back(obj);
+			}
 		}
+		m_cached_enemy_contact_count = m_cached_enemy_contacts.size();
+
+		// Reset the counter that indicates when we next search for contacts
+		m_timesincelasttargetanalysis = 0U;
 	}
-	m_cached_enemy_contact_count = m_cached_enemy_contacts.size();
+
+	/* Now perform any per-ship-computer analysis of the cached contacts */
+
+	// We will perform collision avoidance on nearby contacts; determine the relevant avoidance range here
+	XMVECTOR avoidvector = DetermineCollisionAvoidanceVector();
+	XMVECTOR avoid_rangesq = XMVector3LengthSq(avoidvector);
+	iSpaceObject *avoid = NULL; 
+	XMVECTOR objpos, diff, obj_distsq;
+	XMVECTOR nearest_collision = LARGE_VECTOR_P;
+	bool intersects;
+	
+	// Iterate through the contact collection
+	std::vector<iSpaceObject*>::iterator it_end = m_cached_contacts.end();
+	for (std::vector<iSpaceObject*>::iterator it = m_cached_contacts.begin(); it != it_end; ++it)
+	{
+		obj = (*it);
+		objpos = obj->GetPosition();
+		diff = XMVectorSubtract(objpos, m_position);
+		obj_distsq = XMVector3LengthSq(diff);
+
+		// Perform collision avoidance; first, check whether the object is in range 
+		if (XMVector2Less(obj_distsq, avoid_rangesq))
+		{
+			// The object is in range, so test whether our momentum vector would intersect it.  We test the
+			// vector against (obj.radius + this.radius) so both object sizes are accounted for.  Use bounding
+			// sphere where possible, or OBB for larger objects where the sphere is a poorer approximation
+			intersects = (obj->MostAppropriateBoundingVolumeType() == Game::BoundingVolumeType::OrientedBoundingBox ?
+				Game::PhysicsEngine.TestVolumetricRayVsOBBIntersection(	Ray(m_position, avoidvector),
+																		XMVectorReplicate(m_collisionsphereradius), obj->CollisionOBB.Data()) :
+				Game::PhysicsEngine.TestRaySphereIntersection(	m_position, avoidvector, objpos,
+																XMVectorReplicate(m_collisionsphereradius + obj->GetCollisionSphereRadius()))
+			);
+			
+			// Record this intersection if it would be the nearest one
+			if (XMVector2Less(obj_distsq, nearest_collision))
+			{
+				avoid = obj;
+				nearest_collision = obj_distsq;
+			}
+		}
+
+	}
+
+	// Record the nearest potentially-colliding object (or NULL if none) so that it can be used by the ship computer
+	// when plotting an avoidance maneuver
+	m_avoid_target = avoid;
+
+}
+
+// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
+// during periodic contact analysis by the ship computer.  Protected method that can assume the nearest 
+// collision risk is a non-NULL, valid object
+void Ship::_PerformCollisionAvoidance(void)
+{
+	GET VECTOR PERPENDICULAR TO(AVOID_TARGET - POSITION) (USE CROSS PROD?) AND TURN IN THAT DIRECTION
+	SCALE AVOID VECTOR BY(COLL RADIUS0 + COLL RADIUS1)?  OR JUST TURN UNTIL AVOIDANCE TEST IS NO LONGER FIRING?
 }
 
 void Ship::DetermineNewPosition(void)
@@ -702,9 +774,8 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 	// Parameter check
 	if (!order.Target) return Order::OrderResult::InvalidOrder;
 
-	// TODO: IMPLEMENT THIS NEXT
+	// If we are outside the retreat range, issue a command to fly in towards the target
 
-	return Order::OrderResult::InvalidOrder;
 }
 
 

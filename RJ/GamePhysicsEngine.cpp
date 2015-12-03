@@ -6,6 +6,7 @@
 #include "GameVarsExtern.h"
 #include "Octree.h"
 #include "SimulationObjectManager.h"
+#include "iObject.h"
 #include "iActiveObject.h"
 #include "iSpaceObject.h"
 #include "Ray.h"
@@ -1522,7 +1523,7 @@ bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & 
 	RayIntersectionResult.tmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
 
 	// If min<max then we have an intersection
-	return (RayIntersectionResult.tmax >= max(0.0, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
+	return (RayIntersectionResult.tmax >= max(0.0f, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
 }
 
 bool GamePhysicsEngine::TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t)
@@ -1530,6 +1531,29 @@ bool GamePhysicsEngine::TestRayVsOBBIntersection(const Ray & ray, const Oriented
 	// We will use a ray/AABB intersection test.  Transform the ray into the OBB's coordinate frame.  
 	// We are now in the OBB's frame so can treat it as an AABB
 	AABB box = AABB(obb);
+	Ray localray = ray;
+	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
+
+	// We can potentially adjust the AABB bounds by a given radius to test the intersection of a ray with that radius, 
+	// however in this case we will treat the ray as having point width
+	//box.P0 = XMVectorSubtract(box.P0, radius);
+	//box.P1 = XMVectorAdd(box.P1, radius);
+
+	// Now test as a ray/AABB intersection
+	return (TestRayVsAABBIntersection(localray, box, t));
+
+	// Note: The following can be derived if needed.  This method only tests whether an intersection occurs (not where or when)
+	//m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
+	//m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(pos0, XMVectorScale(dir_vector, RayIntersectionResult.tmin)); // (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
+}
+
+// Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
+// OBB with temporarily expanded bounds.  Not a completely precise test but sufficient for most purposes
+bool GamePhysicsEngine::TestVolumetricRayVsOBBIntersection(const Ray & ray, const FXMVECTOR ray_point_volume, const OrientedBoundingBox::CoreOBBData & obb, float t)
+{
+	// We will use a ray/AABB intersection test.  Expand the AABB bounds to simulate the volumetric nature of the ray  
+	// Transform the ray into the OBB's coordinate frame, so can then treat the OBB as an AABB
+	AABB box = AABB(obb, ray_point_volume);
 	Ray localray = ray;
 	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
 
@@ -1922,6 +1946,15 @@ XMVECTOR GamePhysicsEngine::ClosestPointOnOBB(const OrientedBoundingBox::CoreOBB
 		XMVectorMultiply(obb.Axis[0].value, XMVectorClamp(dot0, XMVectorNegate(obb.Extent[0].value), obb.Extent[0].value))),
 		XMVectorMultiply(obb.Axis[1].value, XMVectorClamp(dot1, XMVectorNegate(obb.Extent[1].value), obb.Extent[1].value))),
 		XMVectorMultiply(obb.Axis[2].value, XMVectorClamp(dot2, XMVectorNegate(obb.Extent[2].value), obb.Extent[2].value)));
+}
+
+// Static method that returns the most appropriate bounding volume type for the given object, based on e.g. size & dimension ratios
+Game::BoundingVolumeType GamePhysicsEngine::DetermineBestBoundingVolumeTypeForObject(const iObject *object)
+{
+	return (object &&
+		object->GetCollisionSphereRadius() > Game::C_OBB_SIZE_THRESHOLD &&
+		object->GetSizeRatio() > Game::C_OBB_SIZE_RATIO_THRESHOLD ?
+			Game::BoundingVolumeType::OrientedBoundingBox : Game::BoundingVolumeType::BoundingSphere);
 }
 
 #ifdef RJ_OLD_COLLISION_HANDLING

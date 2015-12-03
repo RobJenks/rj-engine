@@ -37,6 +37,7 @@ class SimpleShip;
 class ComplexShip;
 class ComplexShipSection;
 class ComplexShipSectionDetails;
+class iSpaceObjectEnvironment;
 class ComplexShipTile;
 class ParticleEngine;
 class Render2DManager;

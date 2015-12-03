@@ -179,6 +179,9 @@ namespace Game {
 	const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V = XMVectorReplicate(C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ);
 	const int C_MAX_OBJECT_COLLISION_EXCLUSIONS = 256;					// The maximum number of collision exclusions that can be applied to an object
 	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
+	const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER = 2.5f;	// Constant multiplier applied to collision range when performing collision avoidance
+	const float C_OBB_SIZE_THRESHOLD = 250.0f;							// The size at which we begin considering OBB as a better alternative to bounding sphere for the object
+	const float C_OBB_SIZE_RATIO_THRESHOLD = 2.0f;						// The size ratio at which we begin using OBB rather than bounding sphere (for large objects), due to better accuracy
 	
 	// Object management constants
 	const int C_OCTREE_MAX_NODE_ITEMS = 12;					// The target object limit per octree node; can be overriden if required
@@ -206,7 +209,7 @@ namespace Game {
 	float C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL = 0.7f;			// Default turn modifier for ships when not in combat.  Can be overidden per ship/pilot
 	float C_AI_DEFAULT_TURN_MODIFIER_COMBAT = 1.0f;				// Default turn modifier for ships when in combat.  Can be overidden per ship/pilot
 	float C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE = 5000.0f;		// The default range within which ships will analyse nearby contacts
-	unsigned int C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ = 1000U;	// Default interval between analysis of nearby contacts (ms)
+	unsigned int C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ = 3000U;	// Default interval between analysis of nearby contacts (ms)
 
 	// Immediate Region-related data
 	float C_IREGION_BOUNDS = 150.0f;				// The maximum bounds in each direction that we will extend the immediate region
