@@ -19,32 +19,33 @@ Ship::Ship(void)
 	// Set the object type
 	SetObjectType(iObject::ObjectType::ShipObject);
 
-	this->m_shipclass = Ships::Class::Unknown;
+	m_shipclass = Ships::Class::Unknown;
 
-	this->m_standardobject = false;
-	this->m_defaultloadout = "";
+	m_standardobject = false;
+	m_defaultloadout = "";
 
-	this->BaseMass = 1.0f;
-	this->VelocityLimit.SetAllValues(1.0f);
-	this->AngularVelocityLimit.SetAllValues(1.0f);
-	this->TurnRate.SetAllValues(0.01f);
-	this->TurnAngle.SetAllValues(0.01f);
-	this->Bank = NULL_VECTOR3;
-	this->BankRate.SetAllValues(0.0f);
-	this->BankExtent = NULL_VECTOR3;
-	this->EngineAngularAcceleration.SetAllValues(1000.0f);
-	this->m_isbraking = false;
-	this->BrakeFactor.SetAllValues(1.0f);
-	this->m_flightcomputerinterval = Game::C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;
-	this->m_timesincelastflightcomputereval = 0.0f;
-	this->m_timesincelasttargetanalysis = 0U;
-	this->m_shipenginecontrol = true;
-	this->m_targetspeed = m_targetspeedsq = m_targetspeedsqthreshold = 0.0f;
-	this->m_isturning = false;
-	this->m_targetangularvelocity = NULL_VECTOR;
-	this->m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
-	this->m_cached_contact_count = this->m_cached_enemy_contact_count = 0;
-	this->m_avoid_target = NULL;
+	BaseMass = 1.0f;
+	VelocityLimit.SetAllValues(1.0f);
+	AngularVelocityLimit.SetAllValues(1.0f);
+	TurnRate.SetAllValues(0.01f);
+	TurnAngle.SetAllValues(0.01f);
+	Bank = NULL_VECTOR3;
+	BankRate.SetAllValues(0.0f);
+	BankExtent = NULL_VECTOR3;
+	EngineAngularAcceleration.SetAllValues(1000.0f);
+	m_isbraking = false;
+	BrakeFactor.SetAllValues(1.0f);
+	m_flightcomputerinterval = Game::C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;
+	m_timesincelastflightcomputereval = 0.0f;
+	m_timesincelasttargetanalysis = 0U;
+	m_shipenginecontrol = true;
+	m_targetspeed = m_targetspeedsq = m_targetspeedsqthreshold = 0.0f;
+	m_isturning = false;
+	m_targetpitch = m_targetyaw = 0.0f;
+	m_targetangularvelocity = NULL_VECTOR;
+	m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
+	m_cached_contact_count = m_cached_enemy_contact_count = 0;
+	m_avoid_target = NULL;
 
 	// Link the hardpoints collection to this parent object
 	m_hardpoints.SetParent<Ship>(this);
@@ -52,18 +53,18 @@ Ship::Ship(void)
 	// Notify the turret controller of its parent object
 	TurretController.SetParent(this);
 
-	this->m_thrustchange_flag = true;		// Force an initial refresh
-	this->m_masschange_flag = true;			// Force an initial refresh
+	m_thrustchange_flag = true;		// Force an initial refresh
+	m_masschange_flag = true;			// Force an initial refresh
 
-	this->m_turnmodifier_peaceful = Game::C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL;
-	this->m_turnmodifier_combat = Game::C_AI_DEFAULT_TURN_MODIFIER_COMBAT;
-	this->m_turnmodifier = m_turnmodifier_peaceful;
+	m_turnmodifier_peaceful = Game::C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL;
+	m_turnmodifier_combat = Game::C_AI_DEFAULT_TURN_MODIFIER_COMBAT;
+	m_turnmodifier = m_turnmodifier_peaceful;
 
-	this->MinBounds = XMVectorReplicate(-0.5f);
-	this->MaxBounds = XMVectorReplicate(0.5f);
+	MinBounds = XMVectorReplicate(-0.5f);
+	MaxBounds = XMVectorReplicate(0.5f);
 
 	// All ship objects incorporate a pre-adjustment to their world matrix
-	this->m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment;
+	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment;
 }
 
 
@@ -96,8 +97,7 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	m_timesincelastflightcomputereval = 0.0f;
 	m_timesincelasttargetanalysis = 0U;
 	CancelAllOrders();
-	SetTargetThrustOfAllEngines(0.0f);
-
+	FullStop();
 }
 
 
@@ -178,6 +178,16 @@ void Ship::DecrementTargetThrustOfAllEngines(void)
 		((HpEngine*)(*it))->DecrementTargetThrust();
 }
 
+// Attempts to bring the ship to a full stop
+void Ship::FullStop(void)
+{
+	// Set target linear thrust of all engines to zero
+	SetTargetThrustOfAllEngines(0.0f);
+
+	// Cease all current maneuvers
+	m_targetpitch = m_targetyaw = 0.0f;
+	m_targetangularvelocity = NULL_VECTOR;
+}
 
 // Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
 // configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
@@ -201,12 +211,14 @@ void Ship::HardpointChanged(Hardpoint *hp)
 // Runs the ship flight computer, evaluating current state and any active orders
 void Ship::RunShipFlightComputer(void)
 {
+	// Reset any ship attributes that should be re-initialised on each ship computer cycle
+	m_targetpitch = m_targetyaw = 0.0f;
+	
 	// Evaluate any orders in the queue
 	ProcessOrderQueue(m_timesincelastflightcomputereval);
 
-	// Perform any collision avoidance; do this after the order evaluation so that collision avoidance has 
-	// priority to override previously-derived values
-	PerformCollisionAvoidance();
+	// Identify any nearby collision threats
+	IdentifyCollisionThreats();
 
 	// Determine thrust levels for each engine on the ship based on current target parameters
 	DetermineEngineThrustLevels();
@@ -276,6 +288,8 @@ void Ship::RunAllEnginesToTargetThrust(void)
 	for (Hardpoints::HardpointCollection::iterator it = engines.begin(); it != it_end; ++it)
 		((HpEngine*)(*it))->RunToTargetThrust();
 	
+	// Determine the target angular velocity for our engines based on desired pitch & yaw
+	m_targetangularvelocity = XMVectorSet(m_targetpitch * TurnAngle.Value, m_targetyaw * TurnAngle.Value, 0.0f, 0.0f);
 }
 
 void Ship::SimulateAllShipEngines(void)
@@ -436,9 +450,13 @@ void Ship::SimulateObject(void)
 	}
 
 	// Handle all ship movement, if permitted by the central simulator (if not, it means we will be moved
-	// some other way, e.g. we attached to some other object which will calculate our position)
+	// some other way, e.g. if we are attached to some other object which will calculate our position)
 	if (CanSimulateMovement())
 	{
+		// Performs collision avoidance if we have any nearby collision threat.  This will override any previous 
+		// maneuvering orders if required to avoid the collision
+		if (IsAvoidingCollision()) PerformCollisionAvoidance();
+
 		// Adjust engine outputs towards target thrust levels
 		RunAllEnginesToTargetThrust();
 
@@ -485,9 +503,11 @@ void Ship::AnalyseNearbyContacts(void)
 		m_cached_enemy_contacts.clear();
 		for (std::vector<iSpaceObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
 		{
+			// Remove this contact if it is invalid, or if it is us
 			obj = m_cached_contacts[i]; 
-			if (!obj) { RemoveFromVectorAtIndex<iSpaceObject*>(m_cached_contacts, i); --i; continue; }
+			if (!obj || obj == this) { RemoveFromVectorAtIndex<iSpaceObject*>(m_cached_contacts, i); --i; --m_cached_contact_count; continue; }
 
+			// Add to the list of enemy contacts if we are hostile towards the object
 			if (GetDispositionTowardsObject(obj) == Faction::FactionDisposition::Hostile)
 			{
 				m_cached_enemy_contacts.push_back(obj);
@@ -498,17 +518,25 @@ void Ship::AnalyseNearbyContacts(void)
 		// Reset the counter that indicates when we next search for contacts
 		m_timesincelasttargetanalysis = 0U;
 	}
+}
 
-	/* Now perform any per-ship-computer analysis of the cached contacts */
-
-	// We will perform collision avoidance on nearby contacts; determine the relevant avoidance range here
-	XMVECTOR avoidvector = DetermineCollisionAvoidanceVector();
-	XMVECTOR avoid_rangesq = XMVector3LengthSq(avoidvector);
-	iSpaceObject *avoid = NULL; 
+// Analyses all nearby contacts to identify whether the ship is at risk of collision.  Stores the nearest collision threat 
+// as the current avoidance target if applicable
+void Ship::IdentifyCollisionThreats(void)
+{
+	// We will perform collision avoidance on all nearby contacts
+	iSpaceObject *obj;
 	XMVECTOR objpos, diff, obj_distsq;
 	XMVECTOR nearest_collision = LARGE_VECTOR_P;
 	bool intersects;
-	
+
+	// We do not have any collision threat by default, unless we find one here
+	m_avoid_target = NULL;
+
+	// Determine the collision test vector based on our current momentum
+	XMVECTOR avoidvector = DetermineCollisionAvoidanceCheckVector();
+	XMVECTOR avoid_rangesq = XMVector3LengthSq(avoidvector);
+
 	// Iterate through the contact collection
 	std::vector<iSpaceObject*>::iterator it_end = m_cached_contacts.end();
 	for (std::vector<iSpaceObject*>::iterator it = m_cached_contacts.begin(); it != it_end; ++it)
@@ -518,11 +546,11 @@ void Ship::AnalyseNearbyContacts(void)
 		diff = XMVectorSubtract(objpos, m_position);
 		obj_distsq = XMVector3LengthSq(diff);
 
-		// Perform collision avoidance; first, check whether the object is in range 
+		// Perform collision avoidance; first, check whether the object is in range
 		if (XMVector2Less(obj_distsq, avoid_rangesq))
 		{
 			// The object is in range, so test whether our momentum vector would intersect it.  We test the
-			// vector against (obj.radius + this.radius) so both object sizes are accounted for.  Use bounding
+			// vector against (obj.radius + this.radius) so both object sizes are accounted for.  Uses bounding
 			// sphere where possible, or OBB for larger objects where the sphere is a poorer approximation
 			intersects = (obj->MostAppropriateBoundingVolumeType() == Game::BoundingVolumeType::OrientedBoundingBox ?
 				Game::PhysicsEngine.TestVolumetricRayVsOBBIntersection(	Ray(m_position, avoidvector),
@@ -530,30 +558,69 @@ void Ship::AnalyseNearbyContacts(void)
 				Game::PhysicsEngine.TestRaySphereIntersection(	m_position, avoidvector, objpos,
 																XMVectorReplicate(m_collisionsphereradius + obj->GetCollisionSphereRadius()))
 			);
-			
-			// Record this intersection if it would be the nearest one
+
+			// Take no further action on this object if there will not be an intersection
+			if (!intersects) continue;
+
+			// This is a potential intersection; record it if this would be the nearest one
 			if (XMVector2Less(obj_distsq, nearest_collision))
 			{
-				avoid = obj;
+				// The ship computer will attempt to maneuver to avoid collision with the object in "m_avoid_target"
+				m_avoid_target = obj;
 				nearest_collision = obj_distsq;
 			}
 		}
-
 	}
-
-	// Record the nearest potentially-colliding object (or NULL if none) so that it can be used by the ship computer
-	// when plotting an avoidance maneuver
-	m_avoid_target = avoid;
-
 }
 
-// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
-// during periodic contact analysis by the ship computer.  Protected method that can assume the nearest 
-// collision risk is a non-NULL, valid object
-void Ship::_PerformCollisionAvoidance(void)
+void Ship::PerformCollisionAvoidance(void)
 {
-	GET VECTOR PERPENDICULAR TO(AVOID_TARGET - POSITION) (USE CROSS PROD?) AND TURN IN THAT DIRECTION
-	SCALE AVOID VECTOR BY(COLL RADIUS0 + COLL RADIUS1)?  OR JUST TURN UNTIL AVOIDANCE TEST IS NO LONGER FIRING?
+	// Execute target avoidance if appropriate; this will override existing turn commands where required to avoid a collision (since 
+	// this call to TurnShip() is being made last
+	XMFLOAT2 pitch_yaw;
+	DetermineCollisionAvoidanceResponse(pitch_yaw);
+	TurnShipIfRequired(pitch_yaw.x, pitch_yaw.y, true);
+}
+
+// Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
+// avoidance target for efficiency; this is a protected method that can assume the avoidance target is non-null and valid
+void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
+{
+	static const AXMVECTOR parallel_adj = XMVectorSetX(NULL_VECTOR, 0.1f);
+
+	// Useful info: http://mathinsight.org/dot_product
+	// Get the vector from our current position to the avoidance target
+	XMVECTOR tgt = XMVectorSubtract(m_avoid_target->GetPosition(), m_position);
+
+	// Normalise our world momentum vector to save additional calculations later
+	XMVECTOR wm_n = XMVector3NormalizeEst(PhysicsState.WorldMomentum);
+
+	// Take the projection of this target vector (a) onto our world momentum vector (b) , via
+	// projection = ((a . b) / |b|).  Since we have normalised b, |b| == 1 and we can just use 
+	// projection = (a . b).  This gives a point perpendicular to the momentum vector 
+	// that is in line with the avoidance target
+	XMVECTOR proj = XMVector3Dot(tgt, wm_n);
+
+	// If the dot product projection is negative, the angle between WM and TGT vectors is obtuse.  This means the 
+	// target is behind us and we can safely ignore it
+	if (XMVector2Less(proj, NULL_VECTOR)) { outPitchYaw = NULL_FLOAT2; return; }
+
+	// If the cross product of WM and TGT is ~zero, the two vectors are ~parallel.  We need to add a small offset
+	// to the target vector in this case.  We will use a minor offset along the ship local right basis vector
+	if (IsZeroVector3(XMVector3Cross(wm_n, tgt)))
+		tgt = XMVectorAdd(tgt, XMVector3TransformCoord(parallel_adj, m_orientationmatrix));
+
+	// The point on the momentum vector is now (normalise(wm) * proj), however we have already
+	// normalised so can just take (wm_n * proj)
+	proj = XMVectorMultiply(wm_n, proj);
+
+	// Our collision response vector is therefore ((norm(proj - tgt) * distance), where we will use 
+	// ((radius0 + radius1) * safety_multiplier) as the distance
+	XMVECTOR response = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(proj, tgt)),
+		((m_collisionsphereradius + m_avoid_target->GetCollisionSphereRadius()) * Game::C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER));
+
+	// Finally, determine the pitch and yaw required to turn the ship towards this target 
+	DetermineYawAndPitchToTarget(*this, XMVectorAdd(m_avoid_target->GetPosition(), response), outPitchYaw);
 }
 
 void Ship::DetermineNewPosition(void)
@@ -592,8 +659,9 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 	// Vectorise the pitch and yaw values for more efficient application
 	XMVECTOR yawpitch = XMVectorSet(pitch_pc, yaw_pc, yaw_pc, 0.0f);
 
-	// Determine the target angular velocity for the ship engines to work towards
-	m_targetangularvelocity = XMVectorSet(pitch_pc * TurnAngle.Value, yaw_pc * TurnAngle.Value, 0.0f, 0.0f);
+	// Store the desired pitch and yaw.  This will overwrite any previous target values
+	m_targetyaw = yaw_pc;
+	m_targetpitch = pitch_pc;
 
 	// Calculate an additional banking factor if required
 	if (bank)

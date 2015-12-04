@@ -500,6 +500,11 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 
 	}
+	if (b[DIK_5])
+	{
+		s2->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
+		Game::Keyboard.LockKey(DIK_5);
+	}
 	if (b[DIK_6])
 	{
 		D::UI->ActivateUIState("UI_MODELBUILDER");
@@ -1841,11 +1846,11 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 
-	if (false) {
+	if (true) {
 		s3[0] = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[0]);
 		s3[0]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600.0f, 50.0f, 50.0f, 0.0f));
+		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
 		s3[0]->SetOrientation(ID_QUATERNION);
 	}
 
@@ -1982,7 +1987,7 @@ void RJMain::__CreateDebugScenario(void)
 	ss->TurretController.AddTurret(sst);
 	s2->TurretController.AddTurret(sst->Copy());
 	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
+	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2064,8 +2069,8 @@ void RJMain::DEBUGDisplayInfo(void)
 		float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin;
 		XMVECTOR contact = XMVectorAdd(ss->GetPosition(), XMVectorScale(dirvec, intersect_time));
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f",
-			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f | %s",
+			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time, (s2->IsAvoidingCollision() ? "AVOIDING" : "No"));
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
 		if (b) 

@@ -72,10 +72,31 @@ public:
 	void				IncrementTargetThrustOfAllEngines(void);
 	void				DecrementTargetThrustOfAllEngines(void);
 
+	// Attempts to bring the ship to a full stop
+	void				FullStop(void);
+
 	// Methods to turn the ship by specified amounts, or to a specified heading
 	void				TurnShip(float yaw_pc, float pitch_pc, bool bank);
 	void				TurnToTarget(iObject *target, bool bank);
 	void				TurnToTarget(FXMVECTOR target, bool bank);
+
+	// Applies a ship turn only if required; i.e. if a more extensive turn in the same direction is already planned,
+	// it will not overwrite that planned maneuver with its own shallower turn
+	void				TurnShipIfRequired(float yaw_pc, float pitch_pc, bool bank)
+	{
+		// Determine the target angular velocity for the ship engines to work towards; replace or accentuate existing targets
+		pitch_pc = (pitch_pc < 0.0f ? min(pitch_pc, m_targetpitch) : max(pitch_pc, m_targetpitch));
+		yaw_pc = (yaw_pc < 0.0f ? min(yaw_pc, m_targetpitch) : max(yaw_pc, m_targetpitch));
+
+		// Initiate a normal turn with these (potentially) adjusted values
+		TurnShip(yaw_pc, pitch_pc, bank);
+	}
+
+	// Returns a flag indicating whether the ship is currently performing collision avoidance
+	CMPINLINE bool		IsAvoidingCollision(void) const			{ return m_avoid_target != NULL; }
+
+	// Returns the object that the ship is currently maneuvering to avoid, if relevant, or NULL otherwise
+	CMPINLINE iObject * GetCollisionAvoidanceTarget(void)		{ return m_avoid_target; }
 
 	// Returns a bool indicating whether a ship can accept a specified class of order.  Overridden with additional orders by simple/complex subclasses
 	bool				CanAcceptOrderType(Order::OrderType type);
@@ -110,6 +131,10 @@ public:
 	// Methods relating to nearby contacts and AI analysis of the surrounding area
 	CMPINLINE bool		HasNearbyEnemyContacts(void) const		{ return m_cached_enemy_contact_count != 0; }
 
+	// Analyses all nearby contacts to identify whether the ship is at risk of collision.  Stores the nearest collision threat 
+	// as the current avoidance target if applicable
+	void				IdentifyCollisionThreats(void);
+
 	// Implementation of the virtual iContainsHardpoints event method.  Invoked when the hardpoint 
 	// configuration of the object is changed.  Provides a reference to the hardpoint that was changed, or NULL
 	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
@@ -127,6 +152,8 @@ public:
 	CMPINLINE bool				IsTurning(void)					{ return m_isturning; }
 	
 	// Methods to retrieve the target flight parameters, used by the flight computer to plan engine/turn activity
+	CMPINLINE float				GetTargetPitch(void) const						{ return m_targetpitch; }
+	CMPINLINE float				GetTargetYaw(void) const						{ return m_targetyaw; }
 	CMPINLINE XMVECTOR			GetTargetAngularVelocity(void) const			{ return m_targetangularvelocity; }
 	CMPINLINE void				OverrideTargetAngularVelocity(FXMVECTOR av)		{ m_targetangularvelocity = av; }
 	CMPINLINE XMVECTOR			GetEngineAngularVelocity(void) const			{ return m_engineangularvelocity; }
@@ -154,16 +181,12 @@ public:
 
 	// Determines the "collision avoidance range" of the ship, i.e. the distance at which it starts to avoid an obstacle
 	// This range is dependent on the current velocity of the ship
-	CMPINLINE XMVECTOR DetermineCollisionAvoidanceVector(void) const
+	CMPINLINE XMVECTOR DetermineCollisionAvoidanceCheckVector(void) const
 	{
-		// For now, simply return the ship world momentum scaled by (a) the timefactor, (b) a constant time multiplier
-		// (a) * (b) * WorldMomentum = the distance the ship will travel in (b) seconds
-		return XMVectorScale(PhysicsState.WorldMomentum, Game::TimeFactor * Game::C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER);
+		// For now, simply return the ship world momentum scaled by a constant time multiplier
+		// We are therefore testing for collisions within the distance the ship will travel in <mutliplier> seconds
+		return XMVectorScale(PhysicsState.WorldMomentum, Game::C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER);
 	}
-
-	// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
-	// during periodic contact analysis by the ship computer
-	CMPINLINE void PerformCollisionAvoidance(void) { if (m_avoid_target) _PerformCollisionAvoidance(); }
 
 	// Moves the ship to a target position, within a certain tolerance.  Returns a flag indicating whether we have reached the target
 	CMPINLINE bool MoveToPosition(const FXMVECTOR position, float tolerance) { return _MoveToPosition(position, (tolerance * tolerance)); }
@@ -215,6 +238,7 @@ protected:
 
 	bool				m_isbraking;				// Indicates whether the ship is currently applying brakes to reduce momentum
 	bool				m_isturning;				// Determines whether the ship is currently turning, and therefore whether the orientation needs to be updated each cycle
+	float				m_targetpitch, m_targetyaw;	// Current target pitch/yaw
 	AXMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
 	AXMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
 	AXMVECTOR			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
@@ -243,9 +267,13 @@ protected:
 	// Moves the ship to a target position, within a certain squared tolerance.  Returns a flag indicating whether we have reached the target
 	bool				_MoveToPosition(const FXMVECTOR position, float tolerance_sq);
 
-	// Maneuvers the ship to avoid a potential collision with the nearest collision risk; nearest risk is determined
-	// during periodic contact analysis by the ship computer
-	void				_PerformCollisionAvoidance(void);
+	// Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
+	// avoidance target for efficiency; this is a protected method that can assume the avoidance target is non-null and valid
+	void				DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw);
+
+	// Executes per-frame collision avoidance.  Does not peform a null test on the collision avoidance target for 
+	// efficiency; this is a protected method that can assume the avoidance target is non-null and valid
+	void				PerformCollisionAvoidance(void);
 };
 
 // Determines exact yaw to target; used for precise corrections near the target heading

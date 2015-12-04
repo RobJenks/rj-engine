@@ -10,6 +10,7 @@
 #include "Actor.h"
 #include "ActorBase.h"
 #include "ActorAttributes.h"
+#include "MovementLogic.h"
 #include "iSpaceObjectEnvironment.h"
 class ComplexShipElement;
 class ComplexShipSection;
@@ -163,8 +164,20 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 // Toggles the player mouse control mode when piloting a ship
 void Player::ToggleShipMouseControlMode(void)
 {
-	if (Game::MouseControlMode == MouseInputControlMode::MC_MOUSE_FLIGHT)	SetShipMouseControlMode(MouseInputControlMode::MC_COCKPIT_CONTROL);
-	else																	SetShipMouseControlMode(MouseInputControlMode::MC_MOUSE_FLIGHT);
+	if (Game::MouseControlMode == MouseInputControlMode::MC_MOUSE_FLIGHT)
+	{
+		// We are switching from mouse flight to cockpit control
+		SetShipMouseControlMode(MouseInputControlMode::MC_COCKPIT_CONTROL);
+
+		// Send a one-time update of the ship mouse view with mouse position set to the origin.  This will 
+		// prevent the ship continuing in the last active trajectory when it stops receiving new mouse input
+		Game::Logic::Move::UpdateShipMovementViaMouseFlightData(m_playership, 0.0f, 0.0f);
+	}
+	else
+	{
+		// We are switching from cockpit control to mouse flight
+		SetShipMouseControlMode(MouseInputControlMode::MC_MOUSE_FLIGHT);
+	}
 }
 
 // Sets the player mouse control mode to the specified value

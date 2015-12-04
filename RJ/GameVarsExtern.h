@@ -200,6 +200,7 @@ namespace Game {
 	extern const AXMVECTOR C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_SQ_V;	// Squared threshold momentum value, above which we apply an additional collision response (vectorised form)
 	extern const int C_MAX_OBJECT_COLLISION_EXCLUSIONS;					// The maximum number of collision exclusions that can be applied to an object
 	extern const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER;	// Constant multiplier applied to collision range when performing collision avoidance
+	extern const float C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER;	// Safety multiplier on the minimum required response to avoid a collision
 	extern const float C_OBB_SIZE_THRESHOLD;							// The size at which we begin considering OBB as a better alternative to bounding sphere for the object
 	extern const float C_OBB_SIZE_RATIO_THRESHOLD;						// The size ratio at which we begin using OBB rather than bounding sphere, due to better accuracy
 
