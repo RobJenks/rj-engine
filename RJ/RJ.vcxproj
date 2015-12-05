@@ -448,6 +448,7 @@
     <ClInclude Include="DataOutput.h" />
     <ClInclude Include="DataRegister.h" />
     <ClInclude Include="DebugCommandHandler.h" />
+    <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
     <ClInclude Include="DX11_Compatibility.h" />
     <ClInclude Include="DX11_Core.h" />

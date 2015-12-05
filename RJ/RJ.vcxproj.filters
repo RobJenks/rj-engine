@@ -1173,6 +1173,9 @@
     <ClInclude Include="Order_AttackBasic.h">
       <Filter>Orders</Filter>
     </ClInclude>
+    <ClInclude Include="RJDebug.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1405,6 +1408,9 @@
     </Filter>
     <Filter Include="Engine\Capabilities">
       <UniqueIdentifier>{ab1c5f64-ca63-4ac9-a0e7-c98a9fe1363e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debug">
+      <UniqueIdentifier>{f9eed144-dbe2-4e8d-b9a6-5486fd540207}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

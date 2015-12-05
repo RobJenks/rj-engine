@@ -31,6 +31,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
+#include "RJDebug.h"
 #include "Player.h"
 #include "GameInput.h"
 #include "MovementLogic.h"

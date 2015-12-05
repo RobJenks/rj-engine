@@ -3,6 +3,7 @@
 #include "HpEngine.h"
 #include "FastMath.h"
 #include "Octree.h"
+#include "RJDebug.h"
 #include "Ray.h"
 #include "iSpaceObject.h"
 #include "GamePhysicsEngine.h"
@@ -182,7 +183,7 @@ void Ship::DecrementTargetThrustOfAllEngines(void)
 void Ship::FullStop(void)
 {
 	// Set target linear thrust of all engines to zero
-	SetTargetThrustOfAllEngines(0.0f);
+	SetTargetSpeed(0.0f);
 
 	// Cease all current maneuvers
 	m_targetpitch = m_targetyaw = 0.0f;
@@ -579,7 +580,7 @@ void Ship::PerformCollisionAvoidance(void)
 	// this call to TurnShip() is being made last
 	XMFLOAT2 pitch_yaw;
 	DetermineCollisionAvoidanceResponse(pitch_yaw);
-	TurnShipIfRequired(pitch_yaw.x, pitch_yaw.y, true);
+	TurnShipIfRequired(pitch_yaw.y, pitch_yaw.x, true);
 }
 
 // Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
@@ -690,7 +691,8 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 			// this->Bank.x = Clamp(this->Bank.x + (bf_x  *  this->BankExtent.x), -abe_x, abe_x);	[-this->BankExtent.z for z]
 			Bank = XMVectorClamp(XMVectorAdd(Bank, XMVectorMultiply(b_factor, BankExtentAdj)),
 				XMVectorNegate(b_extent_abs), b_extent_abs);
-
+			if (m_name == "Test ship s2") RJDebug::Print(	RJDebug::LogPrefix::ClockTime, ", Bank, %.3f, %.3f, %.3f\n",
+															XMVectorGetX(Bank), XMVectorGetY(Bank), XMVectorGetZ(Bank));
 			// Now generate the orientation adjustment matrix from these banking values
 			m_worldorientadjustment = XMMatrixRotationRollPitchYawFromVector(Bank);
 		}
@@ -798,11 +800,11 @@ bool Ship::_MoveToPosition(const FXMVECTOR position, float tolerance_sq)
 	// If we are within the close distance then set target speed to zero and mark the order as completed
 	if (distsq < tolerance_sq)
 	{
-		this->SetTargetSpeed(0.0f);
+		FullStop();
 		return true;
 	}
 
-	// Otherwise we need to coninue on a course to the target.  Turn the ship towards the target position
+	// Otherwise we need to continue on a course to the target.  Turn the ship towards the target position
 	this->TurnToTarget(position, true);
 
 	// For now, accelerate to max thrust.  TODO: later, potentially apply a gradual decrease in thrust as ship approaches the target
