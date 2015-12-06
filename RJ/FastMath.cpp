@@ -620,6 +620,15 @@ void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR targ
 	}
 }
 
+XMVECTOR OrientationFromPitchYawRollVector(const FXMVECTOR vec)
+{
+	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
+	return (XMQuaternionMultiply(XMQuaternionMultiply(
+		XMQuaternionRotationNormal(UP_VECTOR, vecf.y),
+		XMQuaternionRotationNormal(RIGHT_VECTOR, vecf.x)),
+		XMQuaternionRotationNormal(FORWARD_VECTOR, vecf.z)
+	));
+}
 
 
 #endif

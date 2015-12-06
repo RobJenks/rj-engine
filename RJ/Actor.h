@@ -137,7 +137,7 @@ CMPINLINE void Actor::Turn(float angle)
 	else				angle = min(angle, m_turnrate * Game::TimeFactor);
 
 	// Generate a delta quaternion for this angle and apply it to our orientation
-	AddDeltaOrientation(XMQuaternionRotationAxis(UP_VECTOR, angle));
+	AddDeltaOrientation(XMQuaternionRotationNormal(UP_VECTOR, angle));
 	RecalculateEnvironmentOrientationData();
 }
 
@@ -147,7 +147,7 @@ CMPINLINE void Actor::Turn(float angle)
 CMPINLINE void Actor::Turn_NoLimit(float angle)
 {
 	// Generate a delta quaternion for this angle and apply it to our orientation
-	AddDeltaOrientation(XMQuaternionRotationAxis(UP_VECTOR, angle)); 
+	AddDeltaOrientation(XMQuaternionRotationNormal(UP_VECTOR, angle)); 
 	RecalculateEnvironmentOrientationData();
 }
 

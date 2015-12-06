@@ -314,6 +314,7 @@
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
+    <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SimulationObjectManager.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
@@ -448,6 +449,7 @@
     <ClInclude Include="DataOutput.h" />
     <ClInclude Include="DataRegister.h" />
     <ClInclude Include="DebugCommandHandler.h" />
+    <ClInclude Include="DebugGlobalField.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
     <ClInclude Include="DX11_Compatibility.h" />

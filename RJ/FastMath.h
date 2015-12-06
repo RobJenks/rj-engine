@@ -197,6 +197,15 @@ CMPINLINE void IntVector3Max(const INTVECTOR3 & v1, const INTVECTOR3 & v2, INTVE
 	outvec.x = max(v1.x, v2.x); outvec.y = max(v1.y, v2.y); outvec.z = max(v1.z, v2.z);
 }
 
+XMVECTOR OrientationFromPitchYawRollVector(const FXMVECTOR vec);
+
+CMPINLINE XMVECTOR tmpq(const FXMVECTOR orient, const FXMVECTOR av)
+{
+	return XMVectorScale(
+		XMQuaternionMultiply(
+		XMVectorSetW(av, 0.0f), orient),
+		0.5f * Game::TimeFactor);
+}
 
 CMPINLINE XMVECTOR CalculateRotationBetweenQuaternions(const FXMVECTOR qStart, const FXMVECTOR qEnd)
 {

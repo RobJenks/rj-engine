@@ -291,7 +291,7 @@ XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 	// Generate a translation matrix to account for the camera elasticity
 	// We only need to test if the bank x/y amount is nonzero; the other coords are undefined
 	// if (BankExtent.x < Game::C_EPSILON || BankExtent.y < Game::C_EPSILON)
-	if (XMVector3AnyTrue(XMVectorNearEqual(
+	if (true || XMVector3AnyTrue(XMVectorNearEqual(
 		XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(BankExtent), 
 		NULL_VECTOR3, Game::C_EPSILON_V)))
 	{

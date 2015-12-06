@@ -74,9 +74,6 @@ public:
 	// sections are moved by their parent ship objects and cannot change their own state
 	CMPINLINE void								RefreshPositionImmediate(void) { }
 
-	CMPINLINE XMMATRIX							GetSectionOffsetMatrix(void) { return m_sectionoffsetmatrix; }
-	CMPINLINE void	XM_CALLCONV 				SetSectionOffsetMatrix(FXMMATRIX m) { m_sectionoffsetmatrix = m; }
-
 	CMPINLINE INTVECTOR3 						GetElementLocation(void)			{ return m_elementlocation; }
 	CMPINLINE void								SetElementLocation(INTVECTOR3 loc)	{ m_elementlocation = loc; } 
 
@@ -128,9 +125,6 @@ public:
 	CMPINLINE void								SetBankRate(float b)			{ m_bankrate = b; }
 	CMPINLINE void								SetBankExtents(FXMVECTOR e)		{ m_bankextent = e; }
 
-	// Derives a new offset matrix for the section, based on its ship-related position and rotation
-	void										DeriveNewSectionOffsetMatrix(void);
-
 	// Methods to force rendering of a section interior even when it does not otherwise meet any criteria for doing so
 	bool										InteriorShouldAlwaysBeRendered(void) const	{ return m_forcerenderinterior; }
 	void										ForceRenderingOfInterior(bool render)		{ m_forcerenderinterior = render; }
@@ -168,11 +162,10 @@ private:
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
 	AXMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
+	AXMVECTOR						m_relativeorient;			// Orientation relative to the parent ship object, in world space
 
 	std::vector<Hardpoint*>			m_hardpoints;				// The hardpoint collection for this ship section; simple vector HPs, which are 
 																// copied to the parent ship when the section is added
-
-	AXMMATRIX						m_sectionoffsetmatrix;		// Translation offset for the ship section, in local space
 
 	bool							m_sectionupdated;			// Indicates to the parent ship object that it should refresh based on its component sections next cycle
 	bool							m_suspendupdates;			// Flag that indicates all updates (via section update flag) should be suspended until updates resume

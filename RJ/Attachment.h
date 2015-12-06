@@ -15,7 +15,7 @@
 __declspec(align(16))
 struct AttachmentConstraint : public ALIGN16<AttachmentConstraint>
 {
-	AXMVECTOR										Axis;					// Axis of rotation, in parent object space
+	AXMVECTOR										Axis;					// NORMALISED axis of rotation, in parent object space
 	float											Rotation;				// Angle of rotation about the axis, in radians, from base orientation
 
 	AXMVECTOR										ParentPoint;			// Point on the parent object which the axis passes through
@@ -122,7 +122,7 @@ protected:
 	AXMMATRIX						m_mat_offset;
 
 	// Load constraint parameters from XML, for use within an attachment
-	Result							LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outAxis, XMVECTOR & outParentPoint, 
+	Result							LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outNormalisedAxis, XMVECTOR & outParentPoint, 
 																	   XMVECTOR &outChildPoint, XMVECTOR & outBaseOrientation);
 };
 
@@ -196,7 +196,7 @@ void Attachment<T>::CreateConstraint(const FXMVECTOR axis, const FXMVECTOR paren
 	Constraint = new AttachmentConstraint();
 
 	// Store initial state of the constraint
-	Constraint->Axis = axis;					// Axis which the constraint lies in
+	Constraint->Axis = XMVector3Normalize(axis);	// NORMALSIED axis which the constraint lies in
 	Constraint->ParentPoint = parentpoint;		// Point on the parent object which the axis passes through
 	Constraint->ChildPoint = childpoint;		// Point on the child object which the axis passes through
 	Constraint->BaseChildOrient = baseorient;	// Initial relative orientation from the parent to the child
@@ -252,8 +252,9 @@ void Attachment<T>::SetChildRotationAboutConstraint(float rad)
 	Constraint->Rotation = rad;
 	
 	// Determine the new overall relative orientation, by adding the delta quaternion to the base orientation
+	// Relies on the constraint axis being NORMALISED
 	XMVECTOR neworient = XMQuaternionMultiply(	Constraint->BaseChildOrient, 
-												XMQuaternionRotationAxis(Constraint->Axis, rad));			// Neworient = (baseQ * deltaQ) q2
+												XMQuaternionRotationNormal(Constraint->Axis, rad));			// Neworient = (baseQ * deltaQ) q2
 
 	// Derive the matrix representing this new relative orientation, then build a transform matrix for the overall relative transform
 	XMMATRIX transform = XMMatrixMultiply(Constraint->InvChildPointOffset, XMMatrixRotationQuaternion(neworient)); // m2
@@ -314,7 +315,7 @@ Result Attachment<T>::LoadAttachmentData(TiXmlElement *node)
 
 // Load constraint parameters for use within an attachment
 template <class T>
-Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outAxis, XMVECTOR & outParentPoint,
+Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, XMVECTOR & outNormalisedAxis, XMVECTOR & outParentPoint,
 														 XMVECTOR & outChildPoint, XMVECTOR & outBaseOrientation)
 {
 	// Parameter check
@@ -331,7 +332,7 @@ Result Attachment<T>::LoadAttachmentConstraintParameters(TiXmlElement *node, XMV
 		// Test the hash against each expected field
 		if (key == "axis")
 		{
-			outAxis = IO::GetVector3FromAttr(child);
+			outNormalisedAxis = XMVector3Normalize(IO::GetVector3FromAttr(child));
 		}
 		else if (key == "parentpoint")
 		{

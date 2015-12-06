@@ -503,7 +503,8 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_5])
 	{
-		s2->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
+		//s2->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
+		RJDebug::Globals.Bool.Set("bank", !RJDebug::Globals.Bool.Get("bank"));
 		Game::Keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])
@@ -1511,7 +1512,7 @@ void RJMain::DebugCCDSphereTest(void)
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
 		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
 	ss->SetPosition(sspos);
@@ -1539,11 +1540,11 @@ void RJMain::DebugCCDSphereTest(void)
 	else
 	{
 		if (k[DIK_LEFTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
@@ -1603,7 +1604,7 @@ void RJMain::DebugCCDOBBTest(void)
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
 		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
 	XMVECTOR restore_size = ss->GetSize();
@@ -1633,11 +1634,11 @@ void RJMain::DebugCCDOBBTest(void)
 	else
 	{
 		if (k[DIK_LEFTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
@@ -1700,7 +1701,7 @@ void RJMain::DebugFullCCDTest(void)
 	{
 		Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
 		Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(0.0f, 200.0f, 0.0f, 0.0f));
-		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, PIOVER2));
+		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
 	XMVECTOR restore_size = ss->GetSize();
@@ -1734,11 +1735,11 @@ void RJMain::DebugFullCCDTest(void)
 	else
 	{
 		if (k[DIK_LEFTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, -turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
-			XMVECTOR delta = XMQuaternionRotationAxis(UP_VECTOR, turnspeed * restore_timefactor);
+			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
 			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
@@ -1945,8 +1946,8 @@ void RJMain::__CreateDebugScenario(void)
 	bdef->GenerateProjectileRenderingData();*/
 
 
-	XMVECTOR rotleft = XMQuaternionRotationAxis(UP_VECTOR, -PI / 4.0f);
-	XMVECTOR rotright = XMQuaternionRotationAxis(UP_VECTOR, PI / 4.0f);
+	XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
+	XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
 	SpaceTurret *t = D::Turrets.Get("turret_basic01");
 	XMFLOAT3 sz; XMStoreFloat3(&sz, cs->GetSize());
 	for (int i = 0; i < 4; ++i)

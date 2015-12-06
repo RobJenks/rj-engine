@@ -173,6 +173,10 @@ public:
 	void						SetTargetSpeed(float target);
 	void						SetTargetSpeedPercentage(float percentage);
 
+	// Returns the unadjusted ship orientation, which exludes any orientation adjustments for e.g. banking
+	CMPINLINE XMVECTOR			GetUnadjustedOrientation(void) const		{ return m_unadjusted_orient; }
+	CMPINLINE XMVECTOR			GetInverseUnadjustedOrientation(void) const { return m_inv_unadjusted_orient; }
+
 	// Retrieve the contacts currently registered by this ship
 	CMPINLINE const std::vector<iSpaceObject*> &		GetContacts(void) const				{ return m_cached_contacts; }
 	CMPINLINE const std::vector<iSpaceObject*> &		GetEnemyContacts(void) const		{ return m_cached_enemy_contacts; }
@@ -242,6 +246,10 @@ protected:
 	AXMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
 	AXMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting
 	AXMVECTOR			m_engineangularmomentum;	// The angular momentum that the ship's engines are currently outputting
+
+	XMVECTOR			m_unadjusted_orient;		// The ship orientation, minus the orienatation adjustment to represent ship banking
+	XMVECTOR			m_inv_unadjusted_orient;	// Inverse of the unadjusted ship orientation
+	XMVECTOR			m_new_bank;					// Newly-calculated bank adjustment for the ship, to be applied when determining final ship orientation
 
 	bool				m_thrustchange_flag;		// Flag indicating whether the ship thrust has changed, and requires physics recalc
 	bool				m_masschange_flag;			// Flag indicating whether the ship mass has changed, and requires physics recalc

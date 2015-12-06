@@ -25,7 +25,7 @@ ComplexShipSection::ComplexShipSection(void)
 	m_elementsize = NULL_INTVECTOR3;
 	m_rotation = Rotation90Degree::Rotate0;
 	m_relativepos = NULL_VECTOR;
-	m_sectionoffsetmatrix = ID_MATRIX;
+	m_relativeorient = ID_QUATERNION;
 	m_velocitylimit = 1.0f;
 	m_angularvelocitylimit = 1.0f;
 	m_turnrate = 0.01f;
@@ -38,9 +38,6 @@ ComplexShipSection::ComplexShipSection(void)
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
-
-	// Ship sections objects will calculate their own world transforms based on parent ship data data, not via the normal iObject methods
-	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_None;
 }
 
 ComplexShipSection *ComplexShipSection::Create(const string & code)
@@ -94,9 +91,6 @@ void ComplexShipSection::SetRelativePosition(const FXMVECTOR relativepos)
 {
 	// Store the new relative position
 	m_relativepos = relativepos;
-
-	// Recalculate the section offset matrix based upon this change
-	DeriveNewSectionOffsetMatrix();
 }
 
 // Sets the section rotation, relative to its parent ship
@@ -105,8 +99,8 @@ void ComplexShipSection::SetRotation(Rotation90Degree rot)
 	// Store the new rotation value
 	m_rotation = rot;
 
-	// Recalculate the section offset matrix based upon this change
-	DeriveNewSectionOffsetMatrix();
+	// Recalculate the orientation offset for this section
+	m_relativeorient = GetRotationQuaternion(rot);
 }
 
 // Update the section based on a change to the parent ship's position or orientation
@@ -115,14 +109,13 @@ void ComplexShipSection::UpdatePositionFromParent(void)
 	// Make sure we have a parent object
 	if (!m_parent) return;
 
-	// Transform our relative position into parent world space, and thereby determine our actual section position
+	// Transform our relative position and orientation into parent world space, and thereby determine our actual section position and orient
 	// D3DXVec3TransformCoord(&pos, &m_relativepos, m_parent->GetOrientationMatrix()) // SetPosition(m_parent->GetPosition() + pos);
-	SetPosition(XMVectorAdd(m_parent->GetPosition(), XMVector3TransformCoord(m_relativepos, m_parent->GetOrientationMatrix())));
-
-	// Derive a new world matrix for this section by adding the translation in local space (WM = Child * Parent)
-	//D3DXMatrixMultiply(&m_worldmatrix, &m_sectionoffsetmatrix, m_parent->GetWorldMatrix());
-	m_worldmatrix = XMMatrixMultiply(m_sectionoffsetmatrix, m_parent->GetWorldMatrix());
-	
+	SetPositionAndOrientation(
+		XMVectorAdd(m_parent->GetPosition(), XMVector3TransformCoord(m_relativepos, m_parent->GetOrientationMatrix())),
+		XMQuaternionMultiply(m_parent->GetOrientation(), m_relativeorient)
+	);
+			
 	// Update position of the ship in the spatial partitioning tree
 	if (m_treenode) m_treenode->ItemMoved(this, m_position);
 }
@@ -137,13 +130,6 @@ void ComplexShipSection::RecalculateShipDataFromCurrentState(void)
 	CalculateTurnRate();
 	CalculateBankRate();
 	CalculateBankExtents();
-}
-
-// Derives a new offset matrix for the section, based on its ship-related position and rotation
-void ComplexShipSection::DeriveNewSectionOffsetMatrix(void)
-{
-	// Construct the section offset matrix based on (WM_offset = rot * trans)
-	m_sectionoffsetmatrix = XMMatrixMultiply(GetRotationMatrix(m_rotation), XMMatrixTranslationFromVector(m_relativepos));
 }
 
 // Add a hardpoint to the section.  Updates will be triggered if they are not suspended
@@ -206,9 +192,6 @@ void ComplexShipSection::CalculateShipSizeData(void)
 		// Otherwise determine the ship section size from its underlying model
 		this->SetSize(Game::ElementLocationToPhysicalPosition(m_elementsize));
 	}
-
-	// Recalculate the section offset matrix based upon this change
-	DeriveNewSectionOffsetMatrix();
 }
 
 void ComplexShipSection::CalculateShipMass()

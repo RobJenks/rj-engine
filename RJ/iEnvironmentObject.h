@@ -25,8 +25,6 @@ public:
 		// Deliberately initialise element_max to -1s and element_min to +1s so that the first method to 'remove' the object
 		// from its current element will skip the loop through existing elements (loop condition will fail on the first check)
 
-		// Environment objects will calculate their own world transforms based on local data, not via the normal iObject methods
-		m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_None;
 	}
 
 	// Returns the environment that this object is currently located in

@@ -520,6 +520,9 @@
     <ClCompile Include="Order_ActorTravelToPosition.cpp">
       <Filter>Orders</Filter>
     </ClCompile>
+    <ClCompile Include="RJDebug.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1174,6 +1177,9 @@
       <Filter>Orders</Filter>
     </ClInclude>
     <ClInclude Include="RJDebug.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugGlobalField.h">
       <Filter>Debug</Filter>
     </ClInclude>
   </ItemGroup>

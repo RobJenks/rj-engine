@@ -45,9 +45,6 @@ public:
 	// Enumeration of possible object simulation states
 	enum ObjectSimulationState					{ NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
 
-	// Enumeration of different world transform calculations that can be applied
-	enum WorldTransformCalculation				{ WTC_Normal = 0, WTC_None, WTC_IncludeOrientAdjustment };
-
 	// Define a standard type for the collection of all attachments from this object to others
 	typedef std::vector<Attachment<iObject*>, AlignedAllocator<Attachment<iObject*>, 16>>	AttachmentSet;
 
@@ -174,10 +171,6 @@ public:
 
 	// Derives a new object world matrix
 	CMPINLINE void							DeriveNewWorldMatrix(void);
-
-	// World adjustment matrix is pre-multiplied into the object world matrix
-	CMPINLINE const XMMATRIX				GetWorldAdjustmentMatrix(void) const			{ return m_worldorientadjustment; }
-	CMPINLINE void XM_CALLCONV				SetWorldAdjustmentMatrix(const FXMMATRIX m)		{ m_worldorientadjustment = m; }
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
@@ -464,10 +457,7 @@ protected:
 	
 	AXMMATRIX							m_worldmatrix;					// World matrix used for rendering this object
 	AXMMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
-	AXMMATRIX							m_worldorientadjustment;		// Pre-multiplying orientation adjustment
-																		// Used to incorporate e.g. pre-scaling, rotation adjustments or other corrections
-	int									m_worldcalcmethod;				// Set by the subclass; indicates the type of world transform calculation to be performed
-
+	
 	Game::CollisionMode					m_collisionmode;				// Value indicating how/whether this object collides with others
 	float								m_collisionsphereradius;		// Radius of the object collision sphere
 	float								m_collisionsphereradiussq;		// Squared radius of the collision sphere for runtime efficiency
@@ -492,37 +482,9 @@ protected:
 // Derives a new object world matrix
 CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 {
-	switch (m_worldcalcmethod)
-	{
-		case iObject::WorldTransformCalculation::WTC_Normal:
-			
-			// Calculate new values
-			m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
-			m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-			SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
-			
-			/*D3DXMatrixRotationQuaternion(&m_orientationmatrix, &m_orientation);
-			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
-			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
-			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);*/
-
-			break;
-
-		case iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment:
-
-			// Calculate new values
-			m_orientationmatrix = XMMatrixMultiply(m_worldorientadjustment, XMMatrixRotationQuaternion(m_orientation));
-			m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-			SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
-
-			/*D3DXMatrixRotationQuaternion(&_calc_data.m1, &m_orientation);
-			m_orientationmatrix = (m_worldorientadjustment * _calc_data.m1);
-			D3DXMatrixInverse(&m_inverseorientationmatrix, NULL, &m_orientationmatrix);
-			D3DXMatrixTranslation(&_calc_data.m1, m_position.x, m_position.y, m_position.z);
-			SetWorldMatrix(m_orientationmatrix * _calc_data.m1);*/
-
-			break;
-	}
+	m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
+	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
+	SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
 }
 
 CMPINLINE void iObject::RegisterObject(iObject *obj)

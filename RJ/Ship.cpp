@@ -30,7 +30,7 @@ Ship::Ship(void)
 	AngularVelocityLimit.SetAllValues(1.0f);
 	TurnRate.SetAllValues(0.01f);
 	TurnAngle.SetAllValues(0.01f);
-	Bank = NULL_VECTOR3;
+	Bank = m_new_bank = NULL_VECTOR;
 	BankRate.SetAllValues(0.0f);
 	BankExtent = NULL_VECTOR3;
 	EngineAngularAcceleration.SetAllValues(1000.0f);
@@ -45,6 +45,8 @@ Ship::Ship(void)
 	m_targetpitch = m_targetyaw = 0.0f;
 	m_targetangularvelocity = NULL_VECTOR;
 	m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
+	m_unadjusted_orient = ID_QUATERNION; 
+	m_inv_unadjusted_orient = XMQuaternionInverse(m_unadjusted_orient);
 	m_cached_contact_count = m_cached_enemy_contact_count = 0;
 	m_avoid_target = NULL;
 
@@ -63,9 +65,6 @@ Ship::Ship(void)
 
 	MinBounds = XMVectorReplicate(-0.5f);
 	MaxBounds = XMVectorReplicate(0.5f);
-
-	// All ship objects incorporate a pre-adjustment to their world matrix
-	m_worldcalcmethod = iObject::WorldTransformCalculation::WTC_IncludeOrientAdjustment;
 }
 
 
@@ -213,7 +212,7 @@ void Ship::HardpointChanged(Hardpoint *hp)
 void Ship::RunShipFlightComputer(void)
 {
 	// Reset any ship attributes that should be re-initialised on each ship computer cycle
-	m_targetpitch = m_targetyaw = 0.0f;
+	//m_targetpitch = m_targetyaw = 0.0f;
 	
 	// Evaluate any orders in the queue
 	ProcessOrderQueue(m_timesincelastflightcomputereval);
@@ -629,17 +628,35 @@ void Ship::DetermineNewPosition(void)
 	// If we have angular velocity then apply it to the ship orientation now
 	if (!IsZeroVector3(this->PhysicsState.AngularVelocity))
 	{
-		// this->AddDeltaOrientation(0.5f * D3DXQUATERNION(	this->PhysicsState.AngularVelocity.x, this->PhysicsState.AngularVelocity.y, 
-		//													this->PhysicsState.AngularVelocity.z, 0.0f) * this->m_orientation * Game::TimeFactor);
-		AddDeltaOrientation(
-			XMVectorScale(
-				XMQuaternionMultiply(
-					XMVectorSetW(PhysicsState.AngularVelocity, 0.0f), m_orientation),
-			0.5f * Game::TimeFactor));	
+		if (!IsZeroVector3(Bank) || !IsZeroVector3(m_new_bank))
+		{
+			// Calculate a new orientation including banking adjustments
+			XMVECTOR invbank = XMQuaternionInverse(XMQuaternionRotationRollPitchYawFromVector(Bank));
+			XMVECTOR angvel = XMQuaternionRotationRollPitchYawFromVector(XMVectorScale(PhysicsState.AngularVelocity, Game::TimeFactor));
+			XMVECTOR newbank = XMQuaternionRotationRollPitchYawFromVector(m_new_bank);
+
+			m_unadjusted_orient = XMQuaternionMultiply(XMQuaternionMultiply(invbank, angvel), m_orientation);
+			m_inv_unadjusted_orient = XMQuaternionInverse(m_unadjusted_orient);
+
+			SetOrientation(XMQuaternionMultiply(newbank, m_unadjusted_orient));
+
+			// Update the current bank value to the new banking value
+			Bank = m_new_bank;
+		}
+		else
+		{
+			// Simply use an unadjusted orientation
+			XMVECTOR angvel = XMQuaternionRotationRollPitchYawFromVector(XMVectorScale(PhysicsState.AngularVelocity, Game::TimeFactor));
+			m_unadjusted_orient = XMQuaternionMultiply(angvel, m_orientation);
+			m_inv_unadjusted_orient = XMQuaternionInverse(m_unadjusted_orient);
+			SetOrientation(m_unadjusted_orient);
+
+			// No need to update the new/old bank values since both are zero
+		}
 	}
 
 	// Derive a new heading for the ship based on its orientation quaternion
-	PhysicsState.Heading = XMVector3TransformCoord(BASIS_VECTOR, m_orientationmatrix);
+	PhysicsState.Heading = XMVector3Rotate(BASIS_VECTOR, m_orientation);
 
 	// For now, simply apply the world momentum vector to our current position to get a new position
 	// Weight momentum by the time factor to get a consistent momentum change per second
@@ -657,58 +674,41 @@ void Ship::DetermineNewPosition(void)
 // Turns the ship by a specified percentage of its total turn capability in each axis, banking if required
 void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 {
-	// Vectorise the pitch and yaw values for more efficient application
-	XMVECTOR yawpitch = XMVectorSet(pitch_pc, yaw_pc, yaw_pc, 0.0f);
-
 	// Store the desired pitch and yaw.  This will overwrite any previous target values
 	m_targetyaw = yaw_pc;
 	m_targetpitch = pitch_pc;
 
-	// Calculate an additional banking factor if required
-	if (bank)
-	{
-		// We only need to change banking values if the game is running.  This is a bit of a hack, since everything else in the game naturally
-		// accomodates pausing since it incorporates the Game::TimeFactor or Game::ClockMs.  However this banking logic (specifically the 
-		// derivation of be_* and abe_*) is not weighted by time and therefore needs to be limited by a direct check of the pause flag
-		if (!Game::Paused)
+	// We will now calculate an additional banking factor if required.  If not, we normalise the banking back to zero
+	if (!bank) 
+	{ 
+		// If we are already at zero bank, and we don't want to bank, there is nothing more to do and we can quit here
+		if (IsZeroVector3(Bank))
 		{
-			// Apply a banking factor to the turn as well, depending on the extent to which we are turning
-			// float bf_yz = this->BankRate.Value * Game::TimeFactor * yaw_pc
-			XMVECTOR b_factor = XMVectorMultiply(XMVectorMultiply(
-				XMVectorReplicate(BankRate.Value),
-				Game::TimeFactorV),
-				yawpitch);
-
-			// Create a copy of the BankExtent vector with the z component negated
-			static const XMVECTOR neg_z = XMVectorSet(1.0f, 1.0f, -1.0f, 0.0f);
-			XMVECTOR BankExtentAdj = XMVectorMultiply(BankExtent, neg_z);
-
-			// Determine bank limits based on the current degree of turning in each axis
-			// float be_x = pitch_pc * this->BankExtent.x; float abe_x = fabs(be_x);
-			XMVECTOR b_extent_abs = XMVectorAbs(XMVectorMultiply(yawpitch, BankExtent));
-
-			// Add the bank factor and clamp to lie within the allowable range for this degree of turn
-			// this->Bank.x = Clamp(this->Bank.x + (bf_x  *  this->BankExtent.x), -abe_x, abe_x);	[-this->BankExtent.z for z]
-			Bank = XMVectorClamp(XMVectorAdd(Bank, XMVectorMultiply(b_factor, BankExtentAdj)),
-				XMVectorNegate(b_extent_abs), b_extent_abs);
-			if (m_name == "Test ship s2") RJDebug::Print(	RJDebug::LogPrefix::ClockTime, ", Bank, %.3f, %.3f, %.3f\n",
-															XMVectorGetX(Bank), XMVectorGetY(Bank), XMVectorGetZ(Bank));
-			// Now generate the orientation adjustment matrix from these banking values
-			m_worldorientadjustment = XMMatrixRotationRollPitchYawFromVector(Bank);
+			m_new_bank = NULL_VECTOR;
+			m_isturning = true;
+			return;
 		}
+
+		// We don't want to bank, but are at non-zero bank, so revert bank to zero over time
+		pitch_pc = yaw_pc = 0.0f; 
 	}
-	else
-	{
-		// If no banking is required we can simply use the identity matrix rather than an adjustment
-		this->m_worldorientadjustment = ID_MATRIX;
-	}
+	
+	// Target bank is our current pitch/yaw values multiplied by the maximum possible bank
+	XMVECTOR yawpitch = XMVectorSet(pitch_pc, yaw_pc, -yaw_pc, 0.0f);
+	XMVECTOR target_bank_amt = XMVectorMultiply(yawpitch, BankExtent);
+
+	// Target bank increment is the difference between this and our current bank state
+	XMVECTOR target_bank_inc = XMVectorSubtract(target_bank_amt, Bank);
+
+	// We can only bank by a certain amount per cycle, determined by our bank rate and the frame time
+	XMVECTOR max_bank = XMVectorMultiply(XMVectorReplicate(BankRate.Value), Game::TimeFactorV);
+	XMVECTOR bank_inc = XMVectorClamp(target_bank_inc, XMVectorNegate(max_bank), max_bank);
+
+	// The new bank value will be the current value plus this increment, constrained within the valid bank extents
+	m_new_bank = XMVectorClamp(XMVectorAdd(Bank, bank_inc), XMVectorNegate(BankExtent), BankExtent);
 
 	// Signal that the ship is currently turning (until next execution of the flight computer)
 	m_isturning = true;
-
-	// Apply the delta "rot" D3DXQUATERNION to the ship world orientation quaternion.  This will automatically recalculate
-	// the model orientation matrix based on orientation & any adjustments
-	// this->ChangeOrientation(m_targetturn);
 }
 
 // Turns the ship to a specified target object, banking if required

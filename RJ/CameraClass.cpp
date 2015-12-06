@@ -50,8 +50,8 @@ void CameraClass::CalculateViewMatrix(void)
 
 			// Calculate the view matrix based on positional data & the additional offset matrix.  We can use the chase camera
 			// orientation which was calculated above based on the current ship movement
-			CalculateViewMatrixFromPositionData(Game::CurrentPlayer->GetPosition(), 
-												Game::CurrentPlayer->GetOrientation(), camoffset);
+			CalculateViewMatrixFromPositionData(ship->GetPosition(), 
+												ship->GetUnadjustedOrientation(), camoffset);
 		}
 		else
 		{
