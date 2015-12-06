@@ -30,7 +30,9 @@ public:
 	// Order parameters
 	iSpaceObject *						Target;								// Target of the attack
 	float								CloseDist, CloseDistSq;				// Close distance when making a run (based on target size)
+	AXMVECTOR							CloseDistV, CloseDistSqV;			// Close distance when making a run (based on target size) - vectorised form
 	float								RetreatDist, RetreatDistSq;			// Distance to retreat between runs (based on target size)
+	AXMVECTOR							RetreatDistV, RetreatDistSqV;		// Distance to retreat between runs (based on target size) - vectorised form
 	
 
 };

@@ -1182,6 +1182,9 @@
     <ClInclude Include="DebugGlobalField.h">
       <Filter>Debug</Filter>
     </ClInclude>
+    <ClInclude Include="Order_MoveAwayFromTarget.h">
+      <Filter>Orders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

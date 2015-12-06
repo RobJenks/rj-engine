@@ -17,6 +17,7 @@
 class Hardpoint;
 class Order_MoveToPosition;
 class Order_MoveToTarget;
+class Order_MoveAwayFromTarget;
 class Order_AttackBasic;
 
 // Template class used to store ship attributes
@@ -202,6 +203,9 @@ public:
 	// Order: Moves the ship to a target object, within a certain tolerance
 	Order::OrderResult			MoveToTarget(Order_MoveToTarget & order);
 
+	// Order: Moves the ship a specified distance away from some target
+	Order::OrderResult			MoveAwayFromTarget(Order_MoveAwayFromTarget & order);
+
 	// Order: Perform a basic attack on the target.  Will close on the target while firing, then
 	// peel off and circle for another run
 	Order::OrderResult			AttackBasic(Order_AttackBasic & order);
@@ -275,6 +279,10 @@ protected:
 
 	// Moves the ship to a target position, within a certain squared tolerance.  Returns a flag indicating whether we have reached the target
 	bool				_MoveToPosition(const FXMVECTOR position, float tolerance_sq);
+
+	// Moves the ship to a target position.  There is no completion check for this order; used when we have just determined
+	// a target position that is far away, and we do not need to check when we get there (since e.g. the order will be checking)
+	void				_MoveToPosition_NoCompletionCheck(const FXMVECTOR position);
 
 	// Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
 	// avoidance target for efficiency; this is a protected method that can assume the avoidance target is non-null and valid

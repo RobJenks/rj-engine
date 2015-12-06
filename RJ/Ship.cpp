@@ -11,6 +11,7 @@
 #include "Order.h"
 #include "Order_MoveToPosition.h"
 #include "Order_MoveToTarget.h"
+#include "Order_MoveAwayFromTarget.h"
 #include "Order_AttackBasic.h"
 
 #include "Ship.h"
@@ -761,6 +762,8 @@ bool Ship::CanAcceptOrderType(Order::OrderType type)
 		// Order types below are all valid options for a ship
 		case Order::OrderType::MoveToPosition:
 		case Order::OrderType::MoveToTarget:
+		case Order::OrderType::MoveAwayFromTarget:
+		case Order::OrderType::AttackBasic:
 			
 			return true; 
 
@@ -787,6 +790,10 @@ Order::OrderResult Ship::ProcessOrder(Order *order)
 		// Move to target.  Specifies the target and the distance to which we must move within
 		case Order::OrderType::MoveToTarget:
 			return MoveToTarget((Order_MoveToTarget&)*order);
+
+		// Move away from the specified target
+		case Order::OrderType::MoveAwayFromTarget:
+			return MoveAwayFromTarget((Order_MoveAwayFromTarget&)*order);
 
 		// Perform a basic attack on the target.  Will close on the target while firing, then
 		// peel off and circle for another run
@@ -823,6 +830,17 @@ bool Ship::_MoveToPosition(const FXMVECTOR position, float tolerance_sq)
 	return false;
 }
 
+// Moves the ship to a target position.  There is no completion check for this order; used when we have just determined
+// a target position that is far away, and we do not need to check when we get there (since e.g. the order will be checking)
+void Ship::_MoveToPosition_NoCompletionCheck(const FXMVECTOR position)
+{
+	// Set a course to the target.  Turn the ship towards the target position
+	this->TurnToTarget(position, true);
+
+	// For now, accelerate to max thrust.  TODO: later, potentially apply a gradual decrease in thrust as ship approaches the target
+	this->SetTargetSpeedPercentage(1.0f);
+}
+
 
 // Order: Moves the ship to a target position, within a certain tolerance
 Order::OrderResult Ship::MoveToPosition(Order_MoveToPosition & order)
@@ -846,6 +864,31 @@ Order::OrderResult Ship::MoveToTarget(Order_MoveToTarget & order)
 		return Order::OrderResult::Executed;
 }
 
+// Order: Moves the ship a specified distance away from some target
+Order::OrderResult Ship::MoveAwayFromTarget(Order_MoveAwayFromTarget & order)
+{
+	// Parameter check
+	if (!order.Target) return Order::OrderResult::InvalidOrder;
+
+	// Test whether we have retreated far enough from the target ship
+	XMVECTOR tgt_to_ship = XMVectorSubtract(m_position, order.Target->GetPosition());
+	XMVECTOR distsq = XMVector3LengthSq(tgt_to_ship);
+	if (XMVector2Greater(distsq, order.RetreatDistanceSqV))
+	{
+		FullStop();
+		return Order::OrderResult::ExecutedAndCompleted;
+	}
+
+	// Our retreat vector will be a linear interpolation between (A) the vector away from the target, through us, and (B) the 
+	// current world momentum of our ship.  The momentum weighting defines the contribution of each.  ((1-Weight)*A + Weight*B)
+	XMVECTOR vec = XMVectorLerp(XMVector3NormalizeEst(tgt_to_ship), XMVector3NormalizeEst(PhysicsState.WorldMomentum), order.MomentumWeighting);
+
+	// Retreat along this vector; we set a distance well outside our retreat distance, and do not need to check for completion
+	// since the completion event will be when we trigger the distance check above
+	_MoveToPosition_NoCompletionCheck(XMVectorScale(vec, order._VectorTravelTarget));
+	return Order::OrderResult::Executed;
+}
+
 // Order: Perform a basic attack on the target.  Will close on the target while firing, then
 // peel off and circle for another run
 Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
@@ -853,7 +896,32 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 	// Parameter check
 	if (!order.Target) return Order::OrderResult::InvalidOrder;
 
-	// If we are outside the retreat range, issue a command to fly in towards the target
+	// TODO: If the target is destroyed, or no longer exists, return executed & completed
+
+	// We need a new sub-order; if we are outside the retreat range, close on the target
+	XMVECTOR distsq = XMVector3LengthSq(XMVectorSubtract(order.Target->GetPosition(), m_position));
+	if (XMVector2Greater(distsq, order.RetreatDistSqV))
+	{
+		// We want to close on the target; give an order to move into the object within the desired close distance
+		Order_MoveToTarget *move = new Order_MoveToTarget(order.Target, order.CloseDist);
+		AssignNewOrder(move);
+
+		// Set this sub-order as a dependency and assign it; control will return to this order when "move" completes
+		move->Parent = order.ID; 
+		order.Dependency = move->ID;
+		return Order::OrderResult::Executed;
+	}
+	else
+	{
+		// We want to put some distance between ourself and the target
+		Order_MoveAwayFromTarget *move = new Order_MoveAwayFromTarget(order.Target, order.RetreatDist, 0.5f);
+		AssignNewOrder(move);
+
+		// Set this sub-order as a dependency and assign it; control will return to this order when "move" completes
+		move->Parent = order.ID;
+		order.Dependency = move->ID;
+		return Order::OrderResult::Executed;
+	}
 
 }
 

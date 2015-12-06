@@ -20,7 +20,8 @@ public:
 
 		MoveToPosition,						// Orders a ship to move DIRECTLY to the specified position
 		MoveToTarget,						// Orders a ship to move DIRECTLY to the designated target
-		AttackBasic,
+		MoveAwayFromTarget,					// Orders a ship to put distance between itself and the designated target
+		AttackBasic,						// Performs basic attack maneuvers against the target object
 
 		ActorMoveToPosition,				// Orders an actor to move DIRECTLY to the specified position
 		ActorMoveToTarget,					// Orders an actor to move DIRECTLY to the designated target

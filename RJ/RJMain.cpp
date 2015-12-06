@@ -68,6 +68,7 @@
 #include "ActorAttributes.h"				// DBG
 #include "Order_MoveToPosition.h"			// DBG
 #include "Order_MoveToTarget.h"				// DBG
+#include "Order_AttackBasic.h"				// DBG
 #include "Order_ActorMoveToPosition.h"		// DBG
 #include "Order_ActorMoveToTarget.h"		// DBG
 #include "Order_ActorTravelToPosition.h"	// DBG
@@ -504,7 +505,7 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_5])
 	{
 		//s2->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
-		RJDebug::Globals.Bool.Set("no_elasticity", !RJDebug::Globals.Bool.Get("no_elasticity"));
+		s2->AssignNewOrder(new Order_AttackBasic(s3[0]));
 		Game::Keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])

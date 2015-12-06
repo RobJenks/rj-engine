@@ -236,6 +236,7 @@ namespace Game {
 	float C_ENGINE_THRUST_DECREASE_THRESHOLD = 0.9f;			// % threshold of target speed at which we start to reduce engine thrust
 	float C_DEFAULT_ATTACK_CLOSE_MULTIPLIER = 1.5f;				// Multiple of target collision sphere radius that we will close to when attacking, by default
 	float C_DEFAULT_ATTACK_RETREAT_DISTANCE = 1500.0f;			// Default retreat distance between attack runs, added to the close distance
+	float C_ATTACK_TAIL_FOLLOW_THRESHOLD = 0.75f;				// We will attempt to get 'on the tail' of ships travelling more than (this) % of our velocity limit
 
 	// Actor-related constants
 	float C_ACTOR_DEFAULT_RUN_SPEED = 18.0f;									// Default run speed for all actors unless specified

@@ -12,9 +12,13 @@ Order_AttackBasic::Order_AttackBasic(iSpaceObject *target)
 	Target = target;
 	CloseDist = (Target->GetCollisionSphereRadius() * Game::C_DEFAULT_ATTACK_CLOSE_MULTIPLIER);
 	CloseDistSq = (CloseDist * CloseDist);
+	CloseDistV = XMVectorReplicate(CloseDist);
+	CloseDistSqV = XMVectorReplicate(CloseDistSq);
 
 	// Determine an appropriate retreat distance based on this
 	RetreatDist = (CloseDist + Game::C_DEFAULT_ATTACK_RETREAT_DISTANCE);
 	RetreatDistSq = (RetreatDist * RetreatDist);
+	RetreatDistV = XMVectorReplicate(RetreatDist);
+	RetreatDistSqV = XMVectorReplicate(RetreatDistSq);
 
 }
