@@ -7,13 +7,38 @@
 #include "CompilerSettings.h"
 #include "Utility.h"
 #include "GameVarsExtern.h"
-
+#include "DebugGlobalField.h"
+class iObject;
 
 class RJDebug
 {
 public:
 
 	enum LogPrefix { NoPrefix = 0, ClockTime, ClockMs };
+
+	// Collection of global debug values
+	struct S_GlobalFieldCollection
+	{
+		DebugGlobalField<int>			Int = DebugGlobalField<int>(0);
+		DebugGlobalField<float>			Float = DebugGlobalField<float>(0.0f);
+		DebugGlobalField<std::string>	String = DebugGlobalField<std::string>("");
+		DebugGlobalField<unsigned int>	UInt = DebugGlobalField<unsigned int>(0U);
+		DebugGlobalField<char*>			CharPtr = DebugGlobalField<char*>("");
+		DebugGlobalField<bool>			Bool = DebugGlobalField<bool>(false);
+		DebugGlobalField<iObject*>		IObject = DebugGlobalField<iObject*>(NULL);
+		DebugGlobalField<XMFLOAT2>		Float2 = DebugGlobalField<XMFLOAT2>(XMFLOAT2(0.0f, 0.0f));
+		DebugGlobalField<XMFLOAT3>		Float3 = DebugGlobalField<XMFLOAT3>(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		DebugGlobalField<XMFLOAT4>		Float4 = DebugGlobalField<XMFLOAT4>(XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f));
+
+		XMVECTOR						VectorGet(const std::string & key) { return XMLoadFloat4(&(Float4.Get(key))); }
+		void							VectorRemove(const std::string & key) { Float4.Remove(key); }
+		void							VectorAdd(const std::string & key, const FXMVECTOR vector)
+		{
+			XMFLOAT4 vec; XMStoreFloat4(&vec, vector);
+			Float4.Set(key, vec);
+		}
+	};
+	static S_GlobalFieldCollection Globals;
 
 	CMPINLINE static void Print(RJDebug::LogPrefix prefix, const std::string & str)
 	{
