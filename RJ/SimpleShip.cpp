@@ -1,4 +1,5 @@
 #include "GameDataExtern.h"
+#include "RJDebug.h"
 #include "Model.h"
 #include "iContainsHardpoints.h"
 #include "FadeEffect.h"
@@ -290,10 +291,7 @@ XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 
 	// Generate a translation matrix to account for the camera elasticity
 	// We only need to test if the bank x/y amount is nonzero; the other coords are undefined
-	// if (BankExtent.x < Game::C_EPSILON || BankExtent.y < Game::C_EPSILON)
-	if (true || XMVector3AnyTrue(XMVectorNearEqual(
-		XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Y, XM_SWIZZLE_Y, XM_SWIZZLE_Y>(BankExtent), 
-		NULL_VECTOR3, Game::C_EPSILON_V)))
+	if (IsZeroVector2(Bank))
 	{
 		// No offset due to camera elasticity is required, so simply return the normal camera offset matrix
 		return CameraPositionMatrix;
@@ -304,7 +302,7 @@ XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 		XMVECTOR trans = XMVectorDivide(Bank, BankExtent);										// [B.x/BE.x, B.y/BE/y, B.z/BE.z, B.w/BE.w]
 		trans = XMVectorSetW(trans, 0.0f);														// [B.x/BE.x, B.y/BE.y, B.z/BE.z, 0.0f]
 		trans = XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_X, XM_SWIZZLE_W, XM_SWIZZLE_W>(trans);	// [B.y/BE.y, B.x/BE.x, 0, 0]
-		trans = XMVectorScale(trans, -CameraElasticity);										// [B.y/BE.y * -CE, B.x/BE.x * -CE, 0, 0]
+		trans = XMVectorScale(trans, CameraElasticity);											// [B.y/BE.y * -CE, B.x/BE.x * -CE, 0, 0]
 		
 		// Use this translation vector to build the adjusted camera matrix
 		return XMMatrixMultiply(XMMatrixTranslationFromVector(trans), CameraPositionMatrix);

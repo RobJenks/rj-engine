@@ -32,7 +32,7 @@ Ship::Ship(void)
 	TurnAngle.SetAllValues(0.01f);
 	Bank = m_new_bank = NULL_VECTOR;
 	BankRate.SetAllValues(0.0f);
-	BankExtent = NULL_VECTOR3;
+	SetBankExtent(NULL_VECTOR3);
 	EngineAngularAcceleration.SetAllValues(1000.0f);
 	m_isbraking = false;
 	BrakeFactor.SetAllValues(1.0f);
@@ -628,6 +628,7 @@ void Ship::DetermineNewPosition(void)
 	// If we have angular velocity then apply it to the ship orientation now
 	if (!IsZeroVector3(this->PhysicsState.AngularVelocity))
 	{
+		// We can use a shorter implementation if no banking is involved
 		if (!IsZeroVector3(Bank) || !IsZeroVector3(m_new_bank))
 		{
 			// Calculate a new orientation including banking adjustments
@@ -741,6 +742,14 @@ void Ship::TurnToTarget(FXMVECTOR target, bool bank)
 
 	// Initiate a turn in this direction
 	TurnShip(pitch_yaw.y, pitch_yaw.x, true);
+}
+
+// Validates and sets the ship bank extents (in radians)
+void Ship::SetBankExtent(const FXMVECTOR extent_radians)
+{
+	// Ensure the extents are positive and non-zero, to allow unchecked division by the bank extents
+	// (e.g. Bank/BankExtents for % banking) without division by zero errors
+	BankExtent = XMVectorSetW(XMVectorMax(extent_radians, Game::C_EPSILON_V), 0.0f);
 }
 
 // Returns a bool indicating whether a ship can accept a specified class of order.  Overridden with additional orders by simple/complex subclasses

@@ -119,8 +119,9 @@ public:
 	AXMVECTOR			MinBounds, MaxBounds;				// Minimum and maximum extents of the ship in world coordinates
 
 	// Details on the ship banking range/position
-	AXMVECTOR			BankExtent;							// Maximum extent of the banking in each dimension
-	AXMVECTOR			Bank;								// The current banking position in all three dimensions
+	AXMVECTOR			BankExtent;										// Maximum extent of the banking in each dimension
+	AXMVECTOR			Bank;											// The current banking position in all three dimensions
+	void				SetBankExtent(const FXMVECTOR extent_radians);	// Validates and sets the ship bank extents (in radians)
 
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);

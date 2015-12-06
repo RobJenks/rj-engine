@@ -32,7 +32,7 @@
     <BrakeFactor>0.25</BrakeFactor>
     <TurnRate>8.000000</TurnRate>
     <TurnAngle>2.000000</TurnAngle>
-    <BankExtent x="10.000000" y="10.000000" z="25.000000" />
+    <BankExtent x="0.174500" y="0.174500" z="0.436300" />
     <BankRate>1.0</BankRate>
 
     <Hardpoint code="hpengine01" type="Engine">

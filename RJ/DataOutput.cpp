@@ -144,7 +144,7 @@ bool IO::Data::SaveShipData(TiXmlElement *node, Ship *object)
 	IO::Data::LinkFloatXMLElement("TurnAngle", object->TurnAngle.BaseValue, node);
 	IO::Data::LinkFloatXMLElement("TurnRate", object->TurnRate.BaseValue, node);
 	IO::Data::LinkFloatXMLElement("BankRate", object->BankRate.BaseValue, node);
-	IO::Data::LinkVector3AttrXMLElement("BankExtent", (object->BankExtent * _180BYPI), node);	// Convert radians>degrees
+	IO::Data::LinkVector3AttrXMLElement("BankExtent", object->BankExtent, node);
 	IO::Data::LinkStringXMLElement("DefaultLoadout", object->GetDefaultLoadout(), node);
 	IO::Data::LinkStringXMLElement("VisibilityTestingMode", TranslateVisibilityModeToString(object->GetVisibilityTestingMode()), node);
 

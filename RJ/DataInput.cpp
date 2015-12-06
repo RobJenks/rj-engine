@@ -558,7 +558,7 @@ bool IO::Data::LoadShipData(TiXmlElement *node, HashVal hash, Ship *object)
 	else if (hash == HashedStrings::H_TurnAngle)					object->TurnAngle.BaseValue = GetFloatValue(node);
 	else if (hash == HashedStrings::H_TurnRate)						object->TurnRate.BaseValue = GetFloatValue(node);
 	else if (hash == HashedStrings::H_BankRate)						object->BankRate.BaseValue = GetFloatValue(node);
-	else if (hash == HashedStrings::H_BankExtent)					object->BankExtent = (IO::GetVector3FromAttr(node) * PIBY180);	// Convert degrees > radians
+	else if (hash == HashedStrings::H_BankExtent)					object->SetBankExtent(IO::GetVector3FromAttr(node));
 	else if (hash == HashedStrings::H_DefaultLoadout)				object->SetDefaultLoadout(GetLCString(node));
 	else if (hash == HashedStrings::H_Mass)							object->SetBaseMass(GetFloatValue(node));	// Overrides the iActiveObject behaviour, since ships have base & overall mass
 

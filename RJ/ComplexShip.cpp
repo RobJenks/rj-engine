@@ -1014,7 +1014,7 @@ void ComplexShip::CalculateBankRate()
 void ComplexShip::CalculateBankExtents()
 {
 	// We need at least one ship section in order to derive meaningful data
-	if (m_sections.size() == 0) { this->BankExtent = NULL_VECTOR; return; }
+	if (m_sections.size() == 0) { SetBankExtent(NULL_VECTOR3); return; }
 	
 	// As a base value, the ship turn rate will be the minimum of all component ship turn rate limits
 	XMVECTOR bankextent = XMVectorReplicate(TWOPI); bool haverate = false;
@@ -1037,7 +1037,7 @@ void ComplexShip::CalculateBankExtents()
 	// Apply other factors, equipment modifiers etc.
 
 	// Apply the turn rate limit to this ship
-	this->BankExtent = bankextent;
+	SetBankExtent(bankextent);
 }
 
 
