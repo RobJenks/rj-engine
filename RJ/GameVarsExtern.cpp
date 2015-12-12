@@ -234,8 +234,9 @@ namespace Game {
 	float C_DEFAULT_ORDER_EVAL_FREQUENCY = 0.5f;				// The default interval for subsequent evaluations of an order by the AI
 	float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY = 5.0f;	// Default interval for entity maintenance of its order queue
 	float C_ENGINE_THRUST_DECREASE_THRESHOLD = 0.9f;			// % threshold of target speed at which we start to reduce engine thrust
-	float C_DEFAULT_ATTACK_CLOSE_MULTIPLIER = 1.5f;				// Multiple of target collision sphere radius that we will close to when attacking, by default
-	float C_DEFAULT_ATTACK_RETREAT_DISTANCE = 1500.0f;			// Default retreat distance between attack runs, added to the close distance
+	float C_DEFAULT_ATTACK_CLOSE_TIME = 2.5f;					// Close distance will be this many seconds at full velocity from target
+	float C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER = 1.5f;		// Multiple of target collision sphere radius that we will account for when attacking, by default
+	float C_DEFAULT_ATTACK_RETREAT_TIME = 2.5f;					// Retreat distance between attack runs will be this many seconds at full velocity, added to close dist
 	float C_ATTACK_TAIL_FOLLOW_THRESHOLD = 0.75f;				// We will attempt to get 'on the tail' of ships travelling more than (this) % of our velocity limit
 
 	// Actor-related constants

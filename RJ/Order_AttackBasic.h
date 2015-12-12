@@ -19,7 +19,7 @@ public:
 	Order::OrderType GetType(void)				{ return Order::OrderType::AttackBasic; }
 
 	// Constructor including main order parameters
-	Order_AttackBasic(iSpaceObject *target);
+	Order_AttackBasic(Ship *attacker, iSpaceObject *target);
 
 	// Default constructor / destructor
 	Order_AttackBasic(void) { }

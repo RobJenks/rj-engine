@@ -254,8 +254,9 @@ namespace Game {
 	extern float C_DEFAULT_ORDER_EVAL_FREQUENCY;
 	extern float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY;
 	extern float C_ENGINE_THRUST_DECREASE_THRESHOLD;
-	extern float C_DEFAULT_ATTACK_CLOSE_MULTIPLIER;				// Multiple of target collision sphere radius that we will close to when attacking, by default
-	extern float C_DEFAULT_ATTACK_RETREAT_DISTANCE;				// Default retreat distance between attack runs, added to the close distance
+	extern float C_DEFAULT_ATTACK_CLOSE_TIME;					// Close distance will be this many seconds at full velocity from target
+	extern float C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER;		// Multiple of target collision sphere radius that we will account for when attacking, by default
+	extern float C_DEFAULT_ATTACK_RETREAT_TIME;					// Retreat distance between attack runs will be this many seconds at full velocity, added to close dist
 	extern float C_ATTACK_TAIL_FOLLOW_THRESHOLD;				// We will attempt to get 'on the tail' of ships travelling more than (this) % of our velocity limit
 
 	// Actor-related constants
