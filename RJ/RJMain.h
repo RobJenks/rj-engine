@@ -7,7 +7,7 @@
 //#define DEBUG_LOGALLOCATEDMEMORY
 //#include "vld.h"
 
-#pragma comment(lib, "pathcch.lib")
+//#pragma comment(lib, "pathcch.lib")
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
 class SimpleShip;

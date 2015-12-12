@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 #include <cmath>
+#include <shlwapi.h>
 #include "FastMath.h"
 
 #include "Utility.h"
@@ -108,6 +109,21 @@ bool DirectoryExists(const char *szPath)
 	return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
 		   (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
+
+// Removes the filename from a path string, leaving only the directory string.  Win7-compatible replacement for "CchRemoveFileSpec"
+// Returns non-zero if something was removed, or zero otherwise
+BOOL RemoveFileNameFromPathStringPathA(LPTSTR path_string)
+{
+	return PathRemoveFileSpecA(path_string);
+}
+
+// Removes the filename from a path string, leaving only the directory string.  Win7-compatible replacement for "CchRemoveFileSpec"
+// Returns non-zero if something was removed, or zero otherwise
+BOOL RemoveFileNameFromPathStringPathW(LPWSTR path_string)
+{
+	return PathRemoveFileSpecW(path_string);
+}
+
 
 void MatrixToCharStream(const XMFLOAT4X4 *m, char *out)
 {

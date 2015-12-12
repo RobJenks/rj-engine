@@ -57,20 +57,12 @@ public:
 	float										EvaluationFrequency;
 	float										TimeSinceLastEvaluation;
 
-	// Paramters stored by default in the base order class.  Orders can extend with new params if required.  This allows us to avoid casting in simple cases
-	/*struct 
-	{
-		AXMVECTOR								Vector_1, Vector_2;
-		XMFLOAT3								Float3_1,	Float3_2;
-		INTVECTOR3								Int3_1,		Int3_2;
-		bool									Flag_1, Flag_2, Flag_3;
-		iSpaceObject *							Target_1;
-		iSpaceObject * 							Target_2;
-	} Parameters;*/
-
 	// Constructor / destructor
 	Order(void);
 	virtual ~Order(void);
+
+	// Translates an order type to its string representation
+	static std::string							TranslateOrderTypeToString(Order::OrderType order_type);
 };
 
 

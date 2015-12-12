@@ -40,6 +40,9 @@ public:
 	bool									HasOrders(void)					{ return (Orders.size() > 0); }
 	OrderQueue::size_type					GetOrderCount(void)				{ return  Orders.size(); }
 
+	// Finds and returns all orders that are currently being executed, i.e. are active and have no dependencies before they can execute
+	void									GetAllExecutingOrders(std::vector<Order*> & outOrders);
+
 	// Virtual method to process the specified order.  Called when processing the full queue.  Returns result of processing the order
 	virtual Order::OrderResult				ProcessOrder(Order *order) = 0;
 

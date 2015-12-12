@@ -6,7 +6,6 @@
 #include <string.h>
 #include <iostream>
 #include <tchar.h>
-#include <pathcch.h>
 #include "time.h"
 
 #include "FastMath.h"
@@ -151,7 +150,8 @@ Result RJMain::RetrieveExecutableData(void)
 	wcsncpy(cpath, wpath, 4096);
 
 	// Parse the executable path to remove the filename, and store the resulting executable directory
-	if (FAILED(PathCchRemoveFileSpec((PWSTR)cpath, 4096))) return ErrorCodes::CouldNotParseExecutablePath;
+	//if (FAILED(CchRemoveFileSpec((PWSTR)cpath, 4096))) return ErrorCodes::CouldNotParseExecutablePath;
+	if (RemoveFileNameFromPathStringPathW(cpath) == FALSE) return ErrorCodes::CouldNotParseExecutablePath;
 	std::wstring wsnewpath = std::wstring(cpath);
 	Game::ExePath = ConvertWStringToString(wsnewpath);
 
@@ -468,38 +468,6 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		static unsigned int dbg_u_counter = 0U;
-		static bool lhs = true;
-		if (Game::ClockMs > dbg_u_counter)
-		{
-			dbg_u_counter = (Game::ClockMs + 100);
-
-			/*static BasicProjectileDefinition *def = NULL;
-			if (!def)
-			{
-				def = new BasicProjectileDefinition();
-				def->SetProjectileSpeed(1000.0f);
-				def->SetProjectileBeamLength(200.0f);
-				def->SetProjectileBeamRadius(5.0f);
-				def->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.25f));
-				def->SetProjectileLifetime(3000U);
-				
-				Texture *t = new Texture();
-				if (ErrorCodes::NoError == t->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
-				{
-					def->SetTexture(t);
-				}
-
-				def->GenerateProjectileRenderingData();
-			}*/
-
-			const float foffset = 10.0f;
-			XMVECTOR pos = (lhs ? XMVectorSetX(NULL_VECTOR, -foffset) : XMVectorSetX(NULL_VECTOR, foffset));
-			pos = XMVector3TransformCoord(pos, ss->GetWorldMatrix());
-			lhs = !lhs;
-			Game::CurrentPlayer->GetSystem()->Projectiles.AddProjectile(D::BasicProjectiles.Get("basiclaser01"), ss->GetID(), 
-																		pos, ss->GetOrientation(), ss->PhysicsState.WorldMomentum);
-		}
 
 	}
 	if (b[DIK_5])
@@ -1988,7 +1956,8 @@ void RJMain::__CreateDebugScenario(void)
 	sst->SetPitchRate(PI);
 	sst->SetControlMode(SpaceTurret::ControlMode::AutomaticControl);
 	ss->TurretController.AddTurret(sst);
-	s2->TurretController.AddTurret(sst->Copy());
+	SpaceTurret *sst2 = sst->Copy();
+	s2->TurretController.AddTurret(sst2);
 	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
 
@@ -2065,25 +2034,17 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		cs->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, 100.0f * Game::TimeFactor));
-		XMVECTOR dirvec = XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 10000.0f), ss->GetWorldMatrix());
-		Ray r = Ray(ss->GetPosition(), XMVector3Normalize(dirvec));
-		bool b = Game::PhysicsEngine.TestRayVsOBBIntersection(r, cs->CollisionOBB.Data(), 1e8);
-		float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin;
-		XMVECTOR contact = XMVectorAdd(ss->GetPosition(), XMVectorScale(dirvec, intersect_time));
+		std::string ordertype = "None";
+		std::vector<Order*> orders;
+		s2->GetAllExecutingOrders(orders);
+		if (orders.size() == 1)
+			ordertype = Order::TranslateOrderTypeToString(orders[0]->GetType());
+		else if (orders.size() > 1)
+			ordertype = "(MULTIPLE)";
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  |  Intersection time: %.4f | %s",
-			(b ? "*** INTERSECTION ***" : "No intersection"), intersect_time, (s2->IsAvoidingCollision() ? "AVOIDING" : "No"));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s | %s",
+			ordertype.c_str(), (s2->IsAvoidingCollision() ? "AVOIDING" : "No"));
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-
-		if (b) 
-		{
-			Texture *tex = new Texture();
-			tex->Initialise(BuildStrFilename(D::IMAGE_DATA, "Rendering\\grad2.dds"));
-			VolumetricLine v = VolumetricLine(ss->GetPosition(), contact, ONE_VECTOR, 3.0f, tex);
-			Game::Engine->RenderVolumetricLine(v);
-			delete tex;
-		}
 	}
 
 }

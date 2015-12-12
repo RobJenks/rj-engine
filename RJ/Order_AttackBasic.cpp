@@ -6,7 +6,7 @@ Order_AttackBasic::Order_AttackBasic(iSpaceObject *target)
 {
 	// Parameter check; if target is invalid, generate an order that will be rejected immediately
 	if (!target) { Target = NULL; return; }
-
+*** BASE ON DISTANCE TRAVELLED IN X SECONDS INSTEAD, E.G. VELOCITYLIMIT * 4 SECS ? ***
 	// Store the target, the close distance sq (based on target size) and the distance sq to back off between
 	// attack runs (based on close distance)
 	Target = target;

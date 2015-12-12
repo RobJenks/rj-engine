@@ -3,6 +3,7 @@
 #ifndef __UtilityH__
 #define __UtilityH__
 
+#pragma comment(lib, "shlwapi.lib")
 #include "DX11_Core.h"
 
 #include <time.h>
@@ -493,6 +494,11 @@ CMPINLINE std::string GetLocalDateTimeString(void)
 	const struct tm *t = GetLocalDateTime();
 	return concat(t->tm_year + 1900)("-")(t->tm_mon + 1)("-")(t->tm_mday)(" ")(t->tm_hour)(":")(t->tm_min)(":")(t->tm_sec).str();
 }
+
+// Removes the filename from a path string, leaving only the directory string.  Replacement for "CchRemoveFileSpec"
+// Returns non-zero if something was removed, or zero otherwise
+BOOL RemoveFileNameFromPathStringPathA(LPTSTR path_string);
+BOOL RemoveFileNameFromPathStringPathW(LPWSTR path_string);
 
 // Splits a string based upon the supplied delimeter, optionally skipping empty items
 void SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements);

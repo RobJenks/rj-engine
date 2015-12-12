@@ -2,6 +2,8 @@
 #include "Utility.h"
 #include "iConsumesOrders.h"
 
+// TODO: Can use more efficiency vector search in future, if we can guarantee that orders are added in sorted order
+
 // Default constructor
 iConsumesOrders::iConsumesOrders(void)
 {
@@ -118,8 +120,11 @@ void iConsumesOrders::ProcessOrderQueue(float interval)
 	bool maintenance_required = false;
 
 	// Iterate through the order queue and consider each item in turn
-	OrderQueue::size_type OrderCount = Orders.size();
-	for (OrderQueue::size_type i = 0; i < OrderCount; ++i)
+	// We have to do this via a loop rather than iterator since the "ProcessOrder" function can introduce new order
+	// into the queue that would otherwise invalidate the iterator.  This way, any new orders will be added to the
+	// end, ignored in this cycle (since ordercount is already calculated), and then executed next cycle
+	OrderQueue::size_type ordercount = Orders.size();
+	for (OrderQueue::size_type i = 0; i < ordercount; ++i)
 	{
 		// We will process this order if it is valid and active
 		order = Orders[i];
@@ -213,6 +218,18 @@ void iConsumesOrders::MaintainOrderQueue(void)
 	{
 		// If any items exist with found == false, remove their dependency so they can now be executed
 		if ((*it4).found == false) (*it4).order->Dependency = 0;
+	}
+}
+
+// Finds and returns all orders that are currently being executed, i.e. are active and have no dependencies before they can execute
+void iConsumesOrders::GetAllExecutingOrders(std::vector<Order*> & outOrders)
+{
+	Order *order;
+	iConsumesOrders::OrderQueue::iterator it_end = Orders.end();
+	for (iConsumesOrders::OrderQueue::iterator it = Orders.begin(); it != it_end; ++it)
+	{
+		order = (*it);
+		if (order && order->Active && order->Dependency == 0) outOrders.push_back(order);
 	}
 }
 

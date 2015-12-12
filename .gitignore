@@ -49,7 +49,7 @@
 /RJ/DirectXTK/Bin/*
 
 # Exclude machine-specific configuration files
-/RJ/Config_MachineOverride.xml
+*/Config_MachineOverride.xml
 
 # Exclude all performance profiling data
 /Profiling Reports/*

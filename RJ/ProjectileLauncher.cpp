@@ -202,10 +202,15 @@ void ProjectileLauncher::CopyFrom(const ProjectileLauncher *source)
 	// Parameter check
 	if (!source) return;
 
-	// Copy all required data from the source object (no instance-specific data like 'parent' or relative pos/orient)
+	// Copy projectile definition from the source, which will also determine the turret projectile type
+	if (source->GetProjectileType() == Projectile::ProjectileType::BasicProjectile)
+		SetProjectileDefinition(source->GetBasicProjectileDefinition());
+	else
+		SetProjectileDefinition(source->GetProjectileDefinition());
+
+	// Copy all other required data from the source object (no instance-specific data like 'parent' or relative pos/orient)
 	SetCode(source->GetCode());
 	SetName(source->GetName());
-	SetProjectileDefinition(source->GetProjectileDefinition());
 	SetLaunchMethod(source->GetLaunchMethod());
 	SetProjectileSpread(source->GetProjectileSpread());
 	SetLaunchInterval(source->GetLaunchInterval());
