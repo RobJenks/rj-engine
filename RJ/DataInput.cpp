@@ -259,7 +259,7 @@ Result IO::Data::LoadConfigFile(const string &filename)
 
 	// Attempt to load the XML config file
 	Result res = ErrorCodes::NoError;
-	TiXmlDocument *doc = IO::Data::LoadXMLDocument(filename);
+	TiXmlDocument *doc = IO::Data::LoadXMLDocument(Game::ExePath + "\\" + filename);
 	if (doc == NULL) return ErrorCodes::CannotLoadXMLDocument;
 
 	// The first (and only) root node should be a "Config" node; if not then stop

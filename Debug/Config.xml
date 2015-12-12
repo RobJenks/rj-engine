@@ -1,7 +1,7 @@
 <Config>
 
   <!-- Primary configuration -->
-  <Data path="../RJ/RJ/Data" />
+  <Data path="../RJ/Data" />
   
   <!-- Graphics options (defaults) -->
   <ScreenResolution x="1024" y="768" />
