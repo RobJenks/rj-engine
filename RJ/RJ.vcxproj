@@ -454,6 +454,10 @@
     <ClInclude Include="DataRegister.h" />
     <ClInclude Include="DebugCommandHandler.h" />
     <ClInclude Include="DebugGlobalField.h" />
+    <ClInclude Include="DefaultValues.h" />
+    <ClInclude Include="iTakesDamage.h" />
+    <ClInclude Include="Modifier.h" />
+    <ClInclude Include="MValue.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />

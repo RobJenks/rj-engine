@@ -1185,6 +1185,18 @@
     <ClInclude Include="Order_MoveAwayFromTarget.h">
       <Filter>Orders</Filter>
     </ClInclude>
+    <ClInclude Include="iTakesDamage.h">
+      <Filter>Concepts\Damage</Filter>
+    </ClInclude>
+    <ClInclude Include="Modifier.h">
+      <Filter>Concepts</Filter>
+    </ClInclude>
+    <ClInclude Include="MValue.h">
+      <Filter>Concepts</Filter>
+    </ClInclude>
+    <ClInclude Include="DefaultValues.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

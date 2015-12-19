@@ -87,6 +87,8 @@
 #include "VolLineShader.h"					// DBG
 #include "VolumetricLine.h"					// DBG
 #include "Ray.h"							// DBG
+#include "Modifier.h"						// DBG
+#include "MValue.h"							// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -1960,6 +1962,28 @@ void RJMain::__CreateDebugScenario(void)
 	s2->TurretController.AddTurret(sst2);
 	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
+
+	std::ostringstream sstrm;
+	MValue<float> x = MValue<float>(10.0f);
+	x.AddModifier(Modifier<float>::ModifierType::Additive, 1.0f); 
+	x.AddModifier(Modifier<float>::ModifierType::Multiplicative, 0.75f);
+	x.AddModifier(Modifier<float>(Modifier<float>::ModifierType::Additive, 1.0f));
+	x.AddModifier(Modifier<float>(Modifier<float>::ModifierType::Multiplicative, 0.75f));
+	x.AddModifier(AdditiveModifier<float>(1.0f));
+	x.AddModifier(MultiplicativeModifier<float>(0.75f));
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f + 1.0f) * 0.75f * 0.75f * 0.75f) << "\n";
+	x.RemoveModifierApprox(Modifier<float>(Modifier<float>::ModifierType::Additive, 1.0f));
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f) * 0.75f * 0.75f * 0.75f) << "\n";
+	x.RemoveAnyModifierApprox(Modifier<float>(Modifier<float>::ModifierType::Multiplicative, 0.75f));
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f)) << "\n";
+	x.AddModifier(MultiplicativeModifier<float>(0.5f));
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f) * 0.5f) << "\n";
+	x.RemoveModifiersOfType(Modifier<float>::ModifierType::Additive);
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f) * 0.5f) << "\n";
+	x.RemoveAllModifiers();
+	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f)) << "\n";
+	OutputDebugString(sstrm.str().c_str());
+
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

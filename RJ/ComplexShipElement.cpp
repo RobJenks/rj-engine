@@ -480,6 +480,8 @@ void ComplexShipElement::SetSimulationState(iObject::ObjectSimulationState state
 		// Store the new simulation state for this element
 		m_simulationstate = state;
 
+		// TODO: the logic below may be redundant / duplicative if applied by multiple elements to one object/tile that is linked to >1 element
+
 		// Iterate through all the objects in this element
 		std::vector<iEnvironmentObject*>::iterator it_end = Objects.end();
 		for (std::vector<iEnvironmentObject*>::iterator it = Objects.begin(); it != it_end; ++it)

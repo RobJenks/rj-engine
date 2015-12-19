@@ -148,6 +148,7 @@ namespace Game {
 	const float C_EPSILON_NEG = (-C_EPSILON);
 	const XMVECTOR C_EPSILON_V = XMVectorReplicate(C_EPSILON);
 	const XMVECTOR C_EPSILON_NEG_V = XMVectorReplicate(C_EPSILON_NEG);
+	const double C_EPSILON_DP = (double)C_EPSILON;
 	const float C_MIN_PHYSICS_CYCLES_PER_SEC = 30.0f;								// The minimum number of physics cycles that should be run per 
 																					// second (i.e. the physics FPS)
 	const float C_MAX_PHYSICS_TIME_DELTA = (1.0f / C_MIN_PHYSICS_CYCLES_PER_SEC);	// The maximum permitted physics time delta, beyond which multiple 
