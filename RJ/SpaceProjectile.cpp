@@ -19,21 +19,21 @@ SpaceProjectile::SpaceProjectile(void)
 }
 
 // Constructor accepting the projectile definition as an initialisation parameter
-#ifdef RJ_CPP11_SUPPORT
+//#ifdef RJ_CPP11_SUPPORT
 	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : SpaceProjectile()
-#else
-	// Perform full construction if C++11 constructor delegation not supported
-	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition)		
-		: m_owner(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f),
-		m_degrade_av_pc(0.0f), m_orient_change(false), m_orient_change_amount(ID_QUATERNION), 
-		m_detach_time(0U), m_detached_from_owner(false)
-#endif
+//#else
+//	Perform full construction if C++11 constructor delegation not supported
+//	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : 		
+//		m_owner(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f),
+//		m_degrade_av_pc(0.0f), m_orient_change(false), m_orient_change_amount(ID_QUATERNION), 
+//		m_detach_time(0U), m_detached_from_owner(false)
+//#endif
 {
 	// Set the object type
-	this->SetObjectType(iObject::ObjectType::ProjectileObject);
+//	this->SetObjectType(iObject::ObjectType::ProjectileObject);
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
-	this->SetCollisionMode(Game::CollisionMode::FullCollision);
+//	this->SetCollisionMode(Game::CollisionMode::FullCollision);
 
 	// Store and pull data from the definition, if a valid pointer was provided
 	m_definition = definition;
@@ -143,6 +143,14 @@ void SpaceProjectile::CollisionWithObject(iObject *object, const GamePhysicsEngi
 
 // Method called when the projectile exceeds its defined lifetime
 void SpaceProjectile::EndProjectileLifetime(void)
+{
+	// For now, simply destroy the projectile at the end of its lifetime
+	// TODO: may wish to e.g. silently delete projectiles at the end of their lifetime instead, in future
+	DestroyObject();
+}
+
+// Event triggered upon destruction of the object
+void SpaceProjectile::DestroyObject(void)
 {
 	// Take different action depending on the type of projectile
 	if (m_definition)

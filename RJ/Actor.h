@@ -103,7 +103,10 @@ public:
 
 	// Method called when this object collides with another.  Virtual inheritance from iObject
 	void									CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
-	
+
+	// Event triggered upon destruction of the entity
+	void									DestroyObject(void);
+
 	// Shutdown method to deallocate resources and remove the actor
 	void									Shutdown(void);
 

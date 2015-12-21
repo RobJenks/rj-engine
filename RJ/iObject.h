@@ -11,6 +11,7 @@
 #include "Utility.h"
 #include "AlignedAllocator.h"
 #include "HashFunctions.h"
+#include "iTakesDamage.h"
 #include "Attachment.h"
 #include "Octree.h"
 #include "OrientedBoundingBox.h"
@@ -19,11 +20,12 @@
 #include "HighlightEffect.h"
 #include "Faction.h"
 class Model;
+struct BasicProjectile;
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iObject : public ALIGN16<iObject>
+class iObject : public ALIGN16<iObject>, public iTakesDamage
 {
 public:
 
@@ -174,6 +176,7 @@ public:
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
+	// TODO: No longer needs to be virtual, since iObject can handle all logic itself?
 	virtual void							RefreshPositionImmediate(void)
 	{
 		DeriveNewWorldMatrix();
@@ -265,6 +268,10 @@ public:
 
 	// Virtual method, called when this object collides with another
 	virtual void							CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) = 0;
+
+	// Method called when a projectile (not an object, but a basic projectile) collides with this object
+	// Handles any damage or effects of the collision, and also triggers rendering of appropriate effects if required
+	void									HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::OBBIntersectionData & impact);
 
 	// Narrowphase-specific collision data.  We make this public to allow direct & fast manipulation of the data
 	OrientedBoundingBox						CollisionOBB;				// The hierarchy of oriented bounding boxes that make up our collision mesh
@@ -373,13 +380,6 @@ public:
 		m_simulated = m_posupdated /*= m_spatialdatachanged */= false; 
 	}
 
-	// Static methods which register and deregister an object from the global space object collection, using the unique ID as a lookup key
-	CMPINLINE static void						RegisterObject(iObject *obj);
-	CMPINLINE static void						UnregisterObject(iObject *obj);
-
-	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
-	static void									UpdateGlobalObjectCollection(void);
-
 	// Static methods to translate between object simulation states and their string representations
 	static std::string							TranslateSimulationStateToString(ObjectSimulationState state);
 	static ObjectSimulationState				TranslateSimulationStateFromString(const std::string & state);
@@ -487,26 +487,9 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 	SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
 }
 
-CMPINLINE void iObject::RegisterObject(iObject *obj)
-{
-	// Add to the registration list for addition to the global collection in the next cycle
-	Game::RegisterList.push_back(obj);
-}
 
-CMPINLINE void iObject::UnregisterObject(iObject *obj)
-{
-	// Check whether this object is in fact registered with the global collection
-	if (obj && Game::Objects.count(obj->GetID()) != 0)
-	{
-		// If it is, add it's ID to the shutdown list for removal in the next cycle.  Add the ID rather than
-		// the object since this unregistering could be requested as part of object shutdown, and when the
-		// unregister list is next processed the object may no longer be valid.
-		Game::UnregisterList.push_back(obj->GetID());
 
-		// Flag the object as inactive in the global collection to avoid processing it in the upcoming frame
-		Game::Objects[obj->GetID()].Active = false;
-	}
-}
+
 
 
 #endif

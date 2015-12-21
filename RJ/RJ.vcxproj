@@ -259,6 +259,7 @@
     <ClCompile Include="CSQuartersTile.cpp" />
     <ClCompile Include="CubeMapTexture.cpp" />
     <ClCompile Include="D3DMain.cpp" />
+    <ClCompile Include="Damage.cpp" />
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataOutput.cpp" />
     <ClCompile Include="DebugCommandHandler.cpp" />
@@ -282,6 +283,7 @@
     <ClCompile Include="GameDataExtern.cpp" />
     <ClCompile Include="GameInput.cpp" />
     <ClCompile Include="GameInputSystem.cpp" />
+    <ClCompile Include="GameObjects.cpp" />
     <ClCompile Include="GamePhysicsEngine.cpp" />
     <ClCompile Include="GameSpatialPartitioningTrees.cpp" />
     <ClCompile Include="GameUniverse.cpp" />
@@ -310,6 +312,7 @@
     <ClCompile Include="iObject.cpp" />
     <ClCompile Include="iSpaceObject.cpp" />
     <ClCompile Include="iStaticObject.cpp" />
+    <ClCompile Include="iTakesDamage.cpp" />
     <ClCompile Include="iUIController.cpp" />
     <ClCompile Include="LightHighlightFadeShader.cpp" />
     <ClCompile Include="LogManager.cpp" />
@@ -454,9 +457,12 @@
     <ClInclude Include="DataRegister.h" />
     <ClInclude Include="DebugCommandHandler.h" />
     <ClInclude Include="DebugGlobalField.h" />
+    <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
+    <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="Modifier.h" />
+    <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="MValue.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="RJDebug.h" />

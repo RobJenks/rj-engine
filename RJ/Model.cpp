@@ -31,6 +31,7 @@ Model::Model()
 	m_minbounds = m_maxbounds = m_modelsize = m_modelcentre = m_effectivesize = NULL_FLOAT3;
 	m_actualsize = m_actualeffectivesize = m_scalingfactor = NULL_FLOAT3;
 	m_elementsize = NULL_INTVECTOR3;
+	m_origin_centred = true;
 
 	m_iscompound = false; 
 	m_compoundmodelcount = 0;
@@ -457,11 +458,16 @@ Result Model::LoadModel(const char *filename)
 	// Recalculate other model dimensions based on these min and max bounds
 	RecalculateDimensions();
 
-	// If the model is not centred about (0,0,0) then adjust the vertex data now. This also recalculates
-	// the dependent fields by calling RecalculateDimensions() internally
-	if (!IsZeroFloat3(m_modelcentre))
+	// If the model is not centred about (0,0,0), and if we have not overriden the default centering behaviour
+	// for this model, then adjust the vertex data now. This also recalculates he dependent fields by 
+	// calling RecalculateDimensions() internally
+	if (IsZeroFloat3(m_modelcentre))
 	{
-		CentreModelAboutOrigin();
+		m_origin_centred = true;
+	}
+	else
+	{
+		if (m_origin_centred) CentreModelAboutOrigin();
 	}
 
 	// Close the model file.

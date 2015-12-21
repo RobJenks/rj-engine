@@ -291,6 +291,10 @@ protected:
 	// Executes per-frame collision avoidance.  Does not peform a null test on the collision avoidance target for 
 	// efficiency; this is a protected method that can assume the avoidance target is non-null and valid
 	void				PerformCollisionAvoidance(void);
+
+	// Event triggered upon destruction of the object
+	void				DestroyObject(void);
+
 };
 
 // Determines exact yaw to target; used for precise corrections near the target heading

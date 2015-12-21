@@ -187,6 +187,9 @@ protected:
 	// Deallocates and clears the set of capital ship perimeter beacons attached to this ship
 	void										ShutdownPerimeterBeacons(void);
 
+	// Event triggered upon destruction of the object
+	void										DestroyObject(void);
+
 
 	// Methods to recalculate properties of this ship based on its configuration and current state
 	void										CalculateShipSizeData(void);		// Recalculates ship size data by combining component section data

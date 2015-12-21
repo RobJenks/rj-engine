@@ -143,6 +143,9 @@ public:
 	CMPINLINE Texture *							GetPreviewImage(void) { return m_previewimage; }
 	void										SetPreviewImage(const std::string & filename);
 
+	// Event triggered upon destruction of the object
+	void										DestroyObject(void);
+
 	// Shutdown method to terminate the ship section and any resources
 	void										Shutdown(void);
 

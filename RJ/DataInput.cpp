@@ -335,9 +335,9 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 {
 	Model *model;
 	Model::ModelClass mclass;
-	string key, code, type, fname, tex;
+	string key, code, type, fname, tex, val;
 	XMFLOAT3 acteffsize, effsize;
-	INTVECTOR3 elsize;
+	INTVECTOR3 elsize; bool no_centre = false;
 	HashVal hash;
 
 	// Set defaults before loading the model
@@ -369,6 +369,10 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 		else if (hash == HashedStrings::H_Texture) {						/* Filename of the associated model texture */
 			tex = child->GetText();
 			StrLowerC(tex);
+		}
+		else if (hash == HashedStrings::H_NoModelCentering) {				/* Flag that overrides the default behaviour of centring all models about the origin */
+			val = child->GetText(); StrLowerC(val);
+			no_centre = (val == "true");
 		}
 		else if (hash == HashedStrings::H_EffectiveSize) {					/* Effective size (i.e. not just vertex max-min) for the model */
 			effsize = IO::GetFloat3FromAttr(child);
@@ -403,6 +407,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	model->SetTextureFilename(texture);
 	model->SetEffectiveModelSize(effsize);
 	model->SetElementSize(elsize);
+	model->SetCentredAboutOrigin(!no_centre);
 
 	// Mark as a 'standard' model, i.e. one that will be shared as a template
 	// between multiple entities for performance reasons.  The entity only acquires an individual model

@@ -17,11 +17,11 @@ Actor::Actor(void)
 }
 
 // Constructor
-#ifdef RJ_CPP11_SUPPORT
+//#ifdef RJ_CPP11_SUPPORT
 Actor::Actor(ActorBase *actorbase) : Actor()
-#else
-Actor::Actor(ActorBase *actorbase)			// Perform full construction if C++11 constructor delegation not supported
-#endif
+//#else
+//Actor::Actor(ActorBase *actorbase)			// Perform full construction if C++11 constructor delegation not supported
+//#endif
 {
 	// Store a reference back to the actor base class from which we were created
 	m_base = actorbase;
@@ -400,6 +400,11 @@ void Actor::CollisionWithObject(iObject *object, const GamePhysicsEngine::Impact
 
 }
 
+// Event triggered upon destruction of the entity
+void Actor::DestroyObject(void)
+{
+	OutputDebugString("Destruction of Actor\n");
+}
 
 // Shutdown method to deallocate resources and remove the actor
 void Actor::Shutdown(void)

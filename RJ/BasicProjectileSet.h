@@ -55,6 +55,8 @@ public:
 	// Accepts a pointer to the spatial partitioning tree for the current area as input
 	void													SimulateProjectiles(Octree<iSpaceObject*> *sp_tree);
 
+	// 
+
 	// Returns the number of projectiles currently active in the set
 	CMPINLINE std::vector<BasicProjectile>::size_type		GetActiveProjectileCount(void) const
 	{

@@ -45,6 +45,16 @@ public:
 		LineSegmentIntersectionData(void) : k1(0.0f), k2(0.0f) { }
 	} LineSegmentIntersectionResult;
 
+	// Struct holding results of a collision test against an OBB or OBB hierarchy
+	// Class is 16-bit aligned to allow use of SIMD member variables
+	__declspec(align(16))
+	struct OBBIntersectionData : public ALIGN16<OBBIntersectionData>
+	{
+		OrientedBoundingBox *						OBB;
+		float										IntersectionTime;
+		AXMVECTOR									CollisionPoint;
+	} OBBIntersectionResult;
+
 	// Struct holding data on a SAT test
 	// Class has no special alignment requirments
 	struct SATIntersectionResult 
@@ -266,24 +276,47 @@ public:
 	template <typename T>
 	T *										PerformRaycast(const BasicRay & ray, const std::vector<T*> & objects) const;
 
-	// Tests for the intersection of a ray with an AABB.  Results will be populated with min/max intersection points if an intersection
-	// took place.  If min<max then we have an intersection.  Returns a flag indicating whether the intersection took place.  If 
-	// min<0 then the ray began inside the AABB.  
-	bool									TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
+	// Tests for the intersection of a ray with an AABB.  Results will not be returned/stored, only a flag indicating whether 
+	// the intersection took place.
+	/*bool									TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
 	CMPINLINE bool							TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
 	{
-		return TestRayVsAABBIntersection(ray, aabb, 1.0f);		// By default, limit to the exact extent of the ray
+		return TestRayVsAABBIntersection(ray, aabb, 1.0f);
+	}*/
+
+	// Tests for the intersection of a ray with an AABB.  Results will be populated with min/max intersection points if an intersection
+	// took place.  If min<max then we have an intersection.  Returns a flag indicating whether the intersection took place.  If 
+	// min<0 then the ray began inside the AABB
+	bool									DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
+	CMPINLINE bool							DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
+	{
+		return DetermineRayVsAABBIntersection(ray, aabb, 1.0f);		// By default, limit to the exact extent of the ray
 	}
+
+	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
+	// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Does not return or store any results; 
+	// simply returns a flag indicating whether the intersection took place
+	/*bool									TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
+	CMPINLINE bool							TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
+	{
+		return TestRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
+	}*/
 
 	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
 	// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
 	// points if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
 	// intersection took place.  If min<0 then the ray began inside the OBB
-	bool									TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
-	CMPINLINE bool							TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
+	bool									DetermineRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
+	CMPINLINE bool							DetermineRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
 	{
-		return TestRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
+		return DetermineRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
 	}
+
+	// Tests for the intersection of a line vector with an OBB hierarchy, by treating as a ray and transforming into OBB-space so that each 
+	// OBB can be treated as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
+	// points if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
+	// intersection took place.  If min<0 then the ray began inside the OBB
+	bool									DetermineLineVectorVsOBBHierarchyIntersection(const FXMVECTOR line_pos, const FXMVECTOR line_delta, OrientedBoundingBox & obb);
 
 	// Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
 	// OBB with temporarily expanded bounds.  Not a completely precise test but sufficient for most purposes.  ray_point_volume
@@ -295,6 +328,8 @@ public:
 	{
 		return TestVolumetricRayVsOBBIntersection(ray, ray_point_volume, obb, 1.0f);
 	}
+
+	// Determine the point of collision between a ray and an OBB hierarchy
 
 	// Perform a continuous collision test between two moving objects.  Populates the collision result data with details on the collision
 	// point and time t = [0 1] at which the collision occured, if at all.  Returns a flag indicating whether a collision took place.
@@ -394,6 +429,7 @@ protected:
 	AXMVECTOR								_diffpos;
 	float									_distsq, _r1r2;
 	OrientedBoundingBox::CoreOBBData		_obbdata;
+	std::vector<OrientedBoundingBox*>		_obb_vector;
 };
 
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial

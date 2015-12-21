@@ -14,16 +14,7 @@ class iObject;
 // This file contains no objects with special alignment requirements
 namespace Game {
 
-	struct ObjectRegisterEntry
-	{
-		iObject *	Object;
-		bool		Active;
-		ObjectRegisterEntry(void) : Object(NULL), Active(true) { }
-		ObjectRegisterEntry(iObject *object) : Object(object), Active(true) { }
-	};
-
 	typedef long												ID_TYPE;
-	typedef unordered_map<Game::ID_TYPE, ObjectRegisterEntry>	ObjectRegister;
 	typedef float												HitPoints;
 };
 
@@ -95,13 +86,6 @@ namespace Game {
 	extern INTVECTOR2 WindowPosition;
 	extern bool FullScreen;
 	extern bool ForceWARPRenderDevice;
-
-	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
-	extern Game::ObjectRegister				Objects;
-
-	// Short-term lists of objects waiting to be registered or unregistered with the global collection; actioned each frame
-	extern std::vector<Game::ID_TYPE>		UnregisterList;		// Stored as ID in case object is being unregistered while it is being shut down
-	extern std::vector<iObject*>			RegisterList;		// Store the object so it can be inserted into the global game objects list
 
 	// Central scheduler for all scheduled jobs
 	extern CentralScheduler Scheduler;
@@ -292,7 +276,6 @@ namespace Game {
 	// Default tile simulation values
 	extern unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL;
 
-
 	// Convert from grid location to physical position in 3D space
 	CMPINLINE float						ElementLocationToPhysicalPosition(int location) 
 										{ return ((float)location * Game::C_CS_ELEMENT_SCALE); }
@@ -377,23 +360,6 @@ namespace Game {
 							elementposition.y * Game::C_CS_ELEMENT_SCALE_RECIP,
 							elementposition.z * Game::C_CS_ELEMENT_SCALE_RECIP);
 	}
-
-	// Test whether an object exists with the specified ID
-	CMPINLINE bool						ObjectExists(Game::ID_TYPE id)		
-	{ 
-		return (Objects.count(id) != 0 && Objects[id].Active); 
-	}
-	
-	// Return the object with the specified ID, or NULL if no object exists with that ID
-	CMPINLINE iObject *					GetObjectByID(Game::ID_TYPE id)		
-	{ 
-		return (Objects.count(id) != 0 && Objects[id].Active ? Objects[id].Object : NULL); 
-	}
-
-	// Find an object based on its string code or instance hash
-	iObject *							FindObjectInGlobalRegister(const std::string & instance_code);
-	iObject *							FindObjectInGlobalRegister(const HashVal & instance_hash);
-
 
 };
 

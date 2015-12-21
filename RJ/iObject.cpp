@@ -1,10 +1,13 @@
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
+#include "GameObjects.h"
 #include "SimulationStateManager.h"
 #include "Octree.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "FactionManagerObject.h"
 #include "Faction.h"
+#include "BasicProjectile.h"
+#include "BasicProjectileDefinition.h"
 
 #include "iObject.h"
 
@@ -142,7 +145,7 @@ void iObject::SetSimulationState(ObjectSimulationState state)
 	// Special case: if the current state is "No Simulation", the object will not be checked next cycle for any pending state
 	// change (since objects not being simulated are not even registered as objects).  We should therefore directly register
 	// the object here, which means it will be added next cycle, and the state will also then be checked & actioned next cycle
-	if (m_simulationstate == iObject::ObjectSimulationState::NoSimulation) iObject::RegisterObject(this);
+	if (m_simulationstate == iObject::ObjectSimulationState::NoSimulation) Game::RegisterObject(this);
 }
 
 // Handles a change to the simulation state.  The simulation state determines what level of simulation (if any) should be run for this object.  Any changes
@@ -165,14 +168,14 @@ void iObject::SimulationStateChanged(void)
 	if (prevstate == iObject::ObjectSimulationState::NoSimulation)	// and we know state != m_state, therefore we will now be simulated in some way
 	{
 		// Register with the central object collection
-		iObject::RegisterObject(this);
+		Game::RegisterObject(this);
 	}
 
 	// Conversely, if we are moving to a state where we are no longer simulated then remove from the central object collection
 	if (m_simulationstate == iObject::ObjectSimulationState::NoSimulation)
 	{
 		// Remove from the central object simulation
-		iObject::UnregisterObject(this);
+		Game::UnregisterObject(this);
 	}
 
 	// We also need to pass the change in simulation state to any attached objects
@@ -264,7 +267,7 @@ void iObject::Shutdown(void)
 
 	// De-register from the global collection before the object is finally deallocated.  The per-frame cleanup
 	// code will then process the unregister list and deallocate/delete this object
-	iObject::UnregisterObject(this);
+	Game::UnregisterObject(this);
 }
 
 
@@ -372,54 +375,6 @@ void iObject::UpdatePositionOfChildObjects(void)
 		}
 	}
 }
-
-// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
-void iObject::UpdateGlobalObjectCollection(void)
-{
-	// First process any unregister requests
-	std::vector<Game::ID_TYPE>::size_type nU = Game::UnregisterList.size();
-	if (nU != 0)
-	{
-		// Process each request in turn
-		iObject *obj; Game::ID_TYPE id;
-		for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nU; ++i)
-		{
-			// Get a reference to the object being removed
-			id = Game::UnregisterList[i];
-			obj = Game::Objects[id].Object;
-
-			// Remove each object from the global collection
-			Game::Objects[id].Object = NULL;	// Remove the pointer first; ensures we are deregistered, and also prevents ".erase()" from calling its destructor
-			Game::Objects.erase(id);			// Erasing from the map will remove the key and element, reducing search space for the future
-
-			// Finally call the destructor for this object to deallocate all resources
-			delete obj;
-		}
-
-		// Clear the pending unregister list
-		Game::UnregisterList.clear();
-	}
-
-	// Now process any register requests
-	std::vector<iObject*>::size_type nR = Game::RegisterList.size();
-	if (nR != 0)
-	{
-		// Process each request in turn
-		iObject *obj;
-		for (std::vector<iObject*>::size_type i = 0; i < nR; ++i)
-		{
-			// Check the object exists
-			obj = Game::RegisterList[i]; if (!obj) continue;
-
-			// Register with the global collection
-			Game::Objects[obj->GetID()] = Game::ObjectRegisterEntry(obj);
-		}
-
-		// Clear the pending registration list
-		Game::RegisterList.clear();
-	}	
-}
-
 
 // Add a new attachment from this object to a child.  Sets default (zero) offset parameters.
 void iObject::AddChildAttachment(iObject *child)
@@ -548,6 +503,20 @@ void iObject::RemoveCollisionExclusion(Game::ID_TYPE object)
 	RemoveFromVector<Game::ID_TYPE>(m_nocollision, object);
 	m_nocollision_count = (int)m_nocollision.size();
 }
+
+// Method called when a projectile (not an object, but a basic projectile) collides with this object
+// Handles any damage or effects of the collision, and also triggers rendering of appropriate effects if required
+void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::OBBIntersectionData & impact)
+{
+	// The projectile must have a definition to provide the required data
+	if (!proj.Definition) return;
+
+	// Render an appropriate impact effect
+
+	// Apply damage from the impact
+	ApplyDamage(proj.Definition->GetProjectileDamage());
+}
+
 
 // Static method to translate from an object simulation state to its string representation
 std::string iObject::TranslateSimulationStateToString(iObject::ObjectSimulationState state)

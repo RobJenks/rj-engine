@@ -1489,25 +1489,36 @@ bool GamePhysicsEngine::TestSpherevsOBBCollision(	const FXMVECTOR sphereCentre, 
 	return (m_collisiontest.Penetration > 0.0f);
 }
 
+
+/*/ Tests for the intersection of a ray with an AABB.  Results will not be returned/stored, only a flag indicating whether 
+// the intersection took place.
+// Input from http://tavianator.com/cgit/dimension.git/tree/libdimension/bvh.c#n191
+bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t)
+{
+	// Perform intersection test
+	XMVECTOR t1 = XMVectorMultiply(XMVectorSubtract(aabb.P0, ray.Origin), ray.InvDirection);
+	XMVECTOR t2 = XMVectorMultiply(XMVectorSubtract(aabb.P1, ray.Origin), ray.InvDirection);
+
+	// Get the minimum value for each component
+	XMVECTOR tmin = XMVectorMin(t1, t2);
+	XMVECTOR tmax = XMVectorMax(t1, t2);
+
+	// We want to choose the largest of all min components, and the smallest of all max components, as the intersection times
+	XMFLOAT3 tminf, tmaxf;
+	XMStoreFloat3(&tminf, tmin); XMStoreFloat3(&tmaxf, tmax);
+	float fmin = max(max(tminf.x, tminf.y), tminf.z);
+	float fmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
+
+	// If min<max then we have an intersection
+	return (fmax >= max(0.0f, fmin) && fmin < t);
+}*/
+
 // Tests for the intersection of a ray with an AABB.  Results will be populated with min/max intersection points if an intersection
 // took place.  If min<max then we have an intersection.  Returns a flag indicating whether the intersection took place.  If 
 // min<0 then the ray began inside the AABB.  
 // Input from http://tavianator.com/cgit/dimension.git/tree/libdimension/bvh.c#n191
-bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t)
+bool GamePhysicsEngine::DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t)
 {
-	//tx1 = (aabb.P0.x - ray.Origin.x)*ray.InvDirection.x;
-	//tx2 = (aabb.P1.x - ray.Origin.x)*ray.InvDirection.x;
-	//RayIntersectionResult.tmin = min(tx1, tx2);
-	//RayIntersectionResult.tmax = max(tx1, tx2);
-	//ty1 = (aabb.P0.y - ray.Origin.y)*ray.InvDirection.y;
-	//ty2 = (aabb.P1.y - ray.Origin.y)*ray.InvDirection.y;
-	//RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(ty1, ty2));
-	//RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(ty1, ty2));
-	//tz1 = (aabb.P0.z - ray.Origin.z)*ray.InvDirection.z;
-	//tz2 = (aabb.P1.z - ray.Origin.z)*ray.InvDirection.z;
-	//RayIntersectionResult.tmin = max(RayIntersectionResult.tmin, min(tz1, tz2));
-	//RayIntersectionResult.tmax = min(RayIntersectionResult.tmax, max(tz1, tz2));
-
 	// Perform intersection test
 	XMVECTOR t1 = XMVectorMultiply(XMVectorSubtract(aabb.P0, ray.Origin), ray.InvDirection);
 	XMVECTOR t2 = XMVectorMultiply(XMVectorSubtract(aabb.P1, ray.Origin), ray.InvDirection);
@@ -1526,6 +1537,9 @@ bool GamePhysicsEngine::TestRayVsAABBIntersection(const Ray & ray, const AABB & 
 	return (RayIntersectionResult.tmax >= max(0.0f, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
 }
 
+/*/ Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
+// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Does not return or store any results; 
+// simply returns a flag indicating whether the intersection took place
 bool GamePhysicsEngine::TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t)
 {
 	// We will use a ray/AABB intersection test.  Transform the ray into the OBB's coordinate frame.  
@@ -1545,6 +1559,97 @@ bool GamePhysicsEngine::TestRayVsOBBIntersection(const Ray & ray, const Oriented
 	// Note: The following can be derived if needed.  This method only tests whether an intersection occurs (not where or when)
 	//m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
 	//m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(pos0, XMVectorScale(dir_vector, RayIntersectionResult.tmin)); // (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
+}*/
+
+// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
+// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
+// points if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
+// intersection took place.  If min<0 then the ray began inside the OBB
+bool GamePhysicsEngine::DetermineRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t)
+{
+	// We will use a ray/AABB intersection test.  Transform the ray into the OBB's coordinate frame.  
+	// We are now in the OBB's frame so can treat it as an AABB
+	AABB box = AABB(obb);
+	Ray localray = ray;
+	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
+
+	// We can potentially adjust the AABB bounds by a given radius to test the intersection of a ray with that radius, 
+	// however in this case we will treat the ray as having point width
+	//box.P0 = XMVectorSubtract(box.P0, radius);
+	//box.P1 = XMVectorAdd(box.P1, radius);
+
+	// Now test as a ray/AABB intersection
+	return (DetermineRayVsAABBIntersection(localray, box, t));
+
+	// Note: The following can be derived if needed.  This method only tests whether an intersection occurs (not where or when)
+	//m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
+	//m_collisiontest.ContinuousTestResult.ContactPoint = XMVectorAdd(pos0, XMVectorScale(dir_vector, RayIntersectionResult.tmin)); // (D.pos0 + (D.wm0 * RayIntersectionResult.tmin));
+}
+
+
+// Tests for the intersection of a ray with an OBB hierarchy, by transforming the ray into OBB-space so that each OBB can be treated
+// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated in the OBBIntersectionResult
+// struct if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
+// intersection took place.  If min<0 then the ray began inside the OBB
+bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection(const FXMVECTOR line_pos, const FXMVECTOR line_delta, OrientedBoundingBox & obb)
+{
+	AABB box; Ray localray; 
+	bool intersection = false; 
+	float closest_intersection = 1.1f;		// Intersection should always be within t = [0 1], so 1.1 is a fine as an unachievable maximum
+
+	// Construct a ray in world space from the line vector data provided
+	Ray worldray = Ray(line_pos, line_delta);
+
+	// Update the OBB with a recursive refresh if invalidated & required
+	obb.UpdateIfRequired();
+
+	// Push this OBB onto the search vector as the top-level node to be tested
+	_obb_vector.clear();
+	_obb_vector.push_back(&obb);
+
+	// Process each OBB in the search vector in turn.  This allows us to perform a linear equivalent to recursive search
+	while (!_obb_vector.empty())
+	{
+		// Get a reference to the OBB
+		OrientedBoundingBox & node = *(_obb_vector.back());
+		_obb_vector.pop_back();
+
+		// We will use a ray/AABB intersection test.  Treat the line vector as a ray and transform into 
+		// the OBB's coordinate frame.  Once in the OBB's frame we can treat it as an AABB
+		box = AABB(node);
+		localray = worldray;
+		localray.TransformIntoCoordinateSystem(node.ConstData().Centre, node.ConstData().Axis);
+
+		// Now test as a ray/AABB intersection, and quit if this element of the hierachy is not colliding (since then 
+		// none of its children will be colliding either).  This will populate the RayIntersectionResult if a collision occured
+		if (DetermineRayVsAABBIntersection(localray, box, 1.0f) == false) continue;
+
+		// This OBB is colliding.  If it is a branch, we want to test its children.  If it is
+		// a leaf, we want to consider it as the final colliding OBB
+		if (node.HasChildren())
+		{
+			// Add all child nodes to the search vector
+			for (int i = 0; i < node.ChildCount; ++i)
+			{
+				_obb_vector.push_back(&node.Children[i]);
+			}
+		}
+		else
+		{
+			// This is a leaf node which has collided; test whether it is closer than any current collision
+			intersection = true;
+			if (RayIntersectionResult.tmin < closest_intersection)
+			{
+				// This is closer than the current intersection, so store it
+				OBBIntersectionResult.OBB = &node;
+				OBBIntersectionResult.IntersectionTime = RayIntersectionResult.tmin;
+				OBBIntersectionResult.CollisionPoint = XMVectorAdd(line_pos, XMVectorScale(line_delta, OBBIntersectionResult.IntersectionTime));
+			}
+		}
+	}
+
+	// We have processed all nodes in the OBB hierarchy, so return the intersection flag (results are returned in OBBIntersectionResult)
+	return intersection;
 }
 
 // Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
@@ -1563,7 +1668,7 @@ bool GamePhysicsEngine::TestVolumetricRayVsOBBIntersection(const Ray & ray, cons
 	//box.P1 = XMVectorAdd(box.P1, radius);
 
 	// Now test as a ray/AABB intersection
-	return (TestRayVsAABBIntersection(localray, box, t));
+	return (DetermineRayVsAABBIntersection(localray, box, t));
 
 	// Note: The following can be derived if needed.  This method only tests whether an intersection occurs (not where or when)
 	//m_collisiontest.ContinuousTestResult.IntersectionTime = RayIntersectionResult.tmin;
@@ -1847,7 +1952,7 @@ bool GamePhysicsEngine::TestContinuousSphereVsOBBCollision(const iActiveObject *
 	box.P1 = XMVectorAdd(box.P1, radius);
 	
 	// Now test the ray/AABB intersection
-	if (TestRayVsAABBIntersection(ray, box) == false) return false;
+	if (DetermineRayVsAABBIntersection(ray, box) == false) return false;
 
 	// We have a collision.  Populate the intersection point in the results struct.  If tmin < 0 then
 	// the sphere begain inside the AABB at t=0.  Otherwise, first intersection is at time tmin, therefore

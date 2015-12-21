@@ -65,15 +65,15 @@ void OrientedBoundingBox::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
 	NegAxisExtent[2].value = XMVectorNegate(ExtentAlongAxis[2].value);
 
 	// Now use these values to determine the location of each bounding volume vertex in local space
-	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		  // -x, -y, -z	(End face #1)
-	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);	  // +x, -y, -z	(End face #1)
-	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);   // +x, +y, -z	(End face #1)
-	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  	  // -x, +y, -z	(End face #1)
+	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		// -x, -y, -z	(End face #1)
+	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		// +x, -y, -z	(End face #1)
+	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);	// +x, +y, -z	(End face #1)
+	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  	// -x, +y, -z	(End face #1)
 
-	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);	  // -x, -y, +z	(End face #2)
-	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);   // +x, -y, +z	(End face #2)
-	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value); // +x, +y, +z	(End face #2)
-	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	  // -x, +y, +z	(End face #2)
+	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);		// -x, -y, +z	(End face #2)
+	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);	// +x, -y, +z	(End face #2)
+	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// +x, +y, +z	(End face #2)
+	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// -x, +y, +z	(End face #2)
 }
 
 // Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)

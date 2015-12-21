@@ -52,6 +52,9 @@ public:
 	// Method called when the projectile exceeds its defined lifetime
 	void							EndProjectileLifetime(void);
 
+	// Event triggered upon destruction of the object
+	void							DestroyObject(void);
+
 	// Shut down the projectile object, deallocating all resources.  Inherited from iObject
 	void							Shutdown(void);
 

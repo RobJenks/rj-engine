@@ -5,7 +5,6 @@
 #include "iSpaceObject.h"
 #include "Ship.h"
 #include "SimpleShipLoadout.h"
-#include "iContainsHardpoints.h"
 class iObject;
 class Hardpoint;
 class Hardpoints;
@@ -61,6 +60,9 @@ public:
 
 	// Method called when this object collides with another.  Virtual inheritance from iObject
 	void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
+
+	// Event triggered upon destruction of the object
+	void										DestroyObject(void);
 
 	// Shut down the ship, deallocating all resources
 	void Shutdown(void);

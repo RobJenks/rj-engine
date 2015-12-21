@@ -38,6 +38,9 @@ public:
 	// are effectively just a wrapper around a position
 	CMPINLINE void				RefreshPositionImmediate(void) { }
 	
+	// Event triggered upon destruction of the object; inherited from iObject/iTakesDamage and not required here
+	CMPINLINE void				DestroyObject(void) { }
+
 	// Shutdown method for a beacon, to break any link to a parent ship and deallocate all resources 
 	void						Shutdown(void);
 

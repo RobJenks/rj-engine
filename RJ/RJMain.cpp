@@ -30,6 +30,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
+#include "GameObjects.h"
 #include "RJDebug.h"
 #include "Player.h"
 #include "GameInput.h"
@@ -88,7 +89,8 @@
 #include "VolumetricLine.h"					// DBG
 #include "Ray.h"							// DBG
 #include "Modifier.h"						// DBG
-#include "MValue.h"							// DBG
+#include "ModifiedValue.h"					// DBG
+#include "DebugTest.h"						// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -642,9 +644,10 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		for (int t = 0; t < cs->TurretController.TurretCount(); ++t)
+		Ship *parent = ss;
+		for (int t = 0; t < parent->TurretController.TurretCount(); ++t)
 		{
-			cs->TurretController.Turrets[t]->Fire();
+			parent->TurretController.Turrets[t]->Fire();
 		}
 	}
 	if (b[DIK_4]) {
@@ -1790,6 +1793,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create a new ship for the player to use
 	ss = SimpleShip::Create("testship1");
 	ss->SetName("Player ship ss");
+	ss->OverrideInstanceCode("ss");
 	ss->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	ss->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
 	ss->SetOrientation(ID_QUATERNION);
@@ -1813,7 +1817,8 @@ void RJMain::__CreateDebugScenario(void)
 		s2 = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
 		s2->SetName("Test ship s2");
-		s2->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		s2->OverrideInstanceCode("Test ship s2");
+		s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
 		s2->SetOrientation(ID_QUATERNION);
 	}
@@ -1916,6 +1921,9 @@ void RJMain::__CreateDebugScenario(void)
 	}
 	bdef->GenerateProjectileRenderingData();*/
 
+	D::BasicProjectiles.Get("basiclaser01")->AddDamageType(Damage(DamageType::Laser, 5.0f));
+	s2->SetMaxHealth(20.0f);
+	s2->SetHealth(20.0f);
 
 	XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
@@ -1960,31 +1968,10 @@ void RJMain::__CreateDebugScenario(void)
 	ss->TurretController.AddTurret(sst);
 	SpaceTurret *sst2 = sst->Copy();
 	s2->TurretController.AddTurret(sst2);
+
 	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
-
-	std::ostringstream sstrm;
-	MValue<float> x = MValue<float>(10.0f);
-	x.AddModifier(Modifier<float>::ModifierType::Additive, 1.0f); 
-	x.AddModifier(Modifier<float>::ModifierType::Multiplicative, 0.75f);
-	x.AddModifier(Modifier<float>(Modifier<float>::ModifierType::Additive, 1.0f));
-	x.AddModifier(Modifier<float>(Modifier<float>::ModifierType::Multiplicative, 0.75f));
-	x.AddModifier(AdditiveModifier<float>(1.0f));
-	x.AddModifier(MultiplicativeModifier<float>(0.75f));
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f + 1.0f) * 0.75f * 0.75f * 0.75f) << "\n";
-	x.RemoveModifierApprox(Modifier<float>(Modifier<float>::ModifierType::Additive, 1.0f));
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f) * 0.75f * 0.75f * 0.75f) << "\n";
-	x.RemoveAnyModifierApprox(Modifier<float>(Modifier<float>::ModifierType::Multiplicative, 0.75f));
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f)) << "\n";
-	x.AddModifier(MultiplicativeModifier<float>(0.5f));
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f + 1.0f + 1.0f) * 0.5f) << "\n";
-	x.RemoveModifiersOfType(Modifier<float>::ModifierType::Additive);
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f) * 0.5f) << "\n";
-	x.RemoveAllModifiers();
-	sstrm << "Result = " << x.Value << ", Actual = " << ((10.0f)) << "\n";
-	OutputDebugString(sstrm.str().c_str());
-
-
+	
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
@@ -2058,17 +2045,20 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		std::string ordertype = "None";
-		std::vector<Order*> orders;
-		s2->GetAllExecutingOrders(orders);
-		if (orders.size() == 1)
-			ordertype = Order::TranslateOrderTypeToString(orders[0]->GetType());
-		else if (orders.size() > 1)
-			ordertype = "(MULTIPLE)";
+		SimpleShip *ship2 = (SimpleShip*)Game::GetObjectByInstanceCode("Test ship s2");
+		if (ship2)
+		{
+			std::string ordertype = "None";
+			std::vector<Order*> orders;
+			s2->GetAllExecutingOrders(orders);
+			if (orders.size() == 1)
+				ordertype = Order::TranslateOrderTypeToString(orders[0]->GetType());
+			else if (orders.size() > 1)
+				ordertype = "(MULTIPLE)";
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s | %s",
-			ordertype.c_str(), (s2->IsAvoidingCollision() ? "AVOIDING" : "No"));
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Health: %.2f / %.2f", s2->GetHealth(), s2->GetMaxHealth());
+			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		}
 	}
 
 }

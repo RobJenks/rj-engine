@@ -3,8 +3,9 @@
 #ifndef __BasicProjectileDefinitionH__
 #define __BasicProjectileDefinitionH__
 
-#include "VolumetricLine.h"
 #include "ErrorCodes.h"
+#include "VolumetricLine.h"
+#include "Damage.h"
 class Texture;
 class ModelBuffer;
 
@@ -45,6 +46,15 @@ public:
 	CMPINLINE float							GetProjectileBeamRadius(void) const				{ return VolumetricLineData.GetLineRadius(); }
 	CMPINLINE void							SetProjectileBeamRadius(float radius)			{ VolumetricLineData.SetLineRadius(radius); }
 
+	// Add a new form of damage applied by this projectile
+	CMPINLINE void							AddDamageType(const Damage & damage)			{ m_damage.push_back(damage); }
+
+	// Remove all types of damage currently performed by this projectile type
+	CMPINLINE void							RemoveAllDamageTypes(void)						{ m_damage.clear(); }
+
+	// Returns a reference to the damage imparted by this projectile type
+	CMPINLINE const DamageSet &				GetProjectileDamage(void) const					{ return m_damage; }
+
 	// Generates the volumetric rendering data for this projectile type; will recalculate all derived rendering data
 	// Must be called after all definition properties are set
 	void									GenerateProjectileRenderingData(void);
@@ -72,7 +82,7 @@ protected:
 	std::string								m_code;
 	std::string								m_name;
 
-
+	DamageSet								m_damage;
 
 };
 

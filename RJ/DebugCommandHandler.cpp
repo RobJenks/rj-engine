@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
+#include "GameObjects.h"
 #include "Player.h"
 #include "Ship.h"
 #include "SimpleShip.h"
@@ -38,7 +39,7 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		if (command.Parameter(0) == "") { command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
 								concat("Environment not specified").str()); return true; }
 	
-		object = Game::FindObjectInGlobalRegister(command.Parameter(0));
+		object = Game::GetObjectByInstanceCode(command.Parameter(0));
 		if (!object) { command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
 				concat("Object \"")(command.Parameter(0))("\" does not exist").str()); return true; }
 
@@ -154,7 +155,7 @@ void DebugCommandHandler::ClearAllSpawnedShips(void)
 		if (it->second.Active && it->second.Object && it->second.Object->GetName() == "DebugSpawnedShip")
 		{
 			it->second.Object->Shutdown();			// Call virtual shutdown method on the object
-			delete (it++)->second.Object;			// Delete the object, using post-increment to avoid invalidating the pointer
+			++it;
 		}
 		else
 		{

@@ -925,6 +925,12 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 
 }
 
+// Event triggered upon destruction of the object
+void Ship::DestroyObject(void)
+{
+	OutputDebugString("Destruction of Ship\n");
+}
+
 
 // Default destructor
 Ship::~Ship(void)

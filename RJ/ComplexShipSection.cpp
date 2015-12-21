@@ -263,6 +263,12 @@ void ComplexShipSection::ShipTileRemoved(ComplexShipTile *tile)
 	// TODO: To be implemented
 }
 
+// Event triggered upon destruction of the object
+void ComplexShipSection::DestroyObject(void)
+{
+	OutputDebugString("Destruction of ComplexShipSection\n");
+}
+
 // Sets the preview image texture associated with this ship
 void ComplexShipSection::SetPreviewImage(const std::string & filename)
 {

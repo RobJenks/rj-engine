@@ -16,5 +16,28 @@
     <ActualEffectiveSize y="10.000000"/>
   </Model>
 
+   <Model>
+    <Code>unit_line_model_green</Code>
+    <Type>Other</Type>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Texture>Models\Misc\overlay_green.dds</Texture>
+    <NoModelCentering>true</NoModelCentering>
+  </Model>
+
+   <Model>
+    <Code>unit_line_model_red</Code>
+    <Type>Other</Type>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Texture>Models\Misc\overlay_red.dds</Texture>
+    <NoModelCentering>true</NoModelCentering>
+  </Model>
+
+   <Model>
+    <Code>unit_line_model_lblue</Code>
+    <Type>Other</Type>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Texture>Models\Misc\overlay_lblue.dds</Texture>
+    <NoModelCentering>true</NoModelCentering>
+  </Model>
 
 </GameData>

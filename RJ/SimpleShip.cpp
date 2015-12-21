@@ -314,3 +314,19 @@ void SimpleShip::CollisionWithObject(iObject *object, const GamePhysicsEngine::I
 {
 
 }
+
+// Event triggered upon destruction of the object
+void SimpleShip::DestroyObject(void)
+{
+	// Generate destruction effects and debris
+
+	// Perform any other SimpleShip-specific destruction logic here
+
+	// Call the base class method
+	Ship::DestroyObject();
+
+	// Now call the shutdown method to remove this entity from the simulation
+	Shutdown();
+	OutputDebugString("Destruction of SimpleShip\n");
+}
+

@@ -112,8 +112,7 @@ private:
 	// Array of vectors, each holding the render data for a type of line being rendered
 	//std::vector<D3DXMATRIX>							m_lines[RC_COUNT];
 
-	// Array of model filenames, and the models themselves, corresponding to each type of line that can be rendered
-	const char *									m_modelfilenames[(int)RC_COUNT];
+	// Array of models corresponding to each type of line that can be rendered
 	Model *											m_models[(int)RC_COUNT];
 
 	// Other, more complex overlay models

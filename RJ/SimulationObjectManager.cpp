@@ -1,3 +1,4 @@
+#include "GameObjects.h"
 #include "Octree.h"
 #include "iSpaceObject.h"
 #include "ComplexShipSection.h"

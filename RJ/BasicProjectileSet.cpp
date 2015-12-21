@@ -131,6 +131,7 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 	// Define variables required later in the method
 	Octree<iSpaceObject*> *leaf = NULL;
 	std::vector<iSpaceObject*> contacts;
+	XMVECTOR delta_pos;
 	bool collision;
 
 	// Loop through the projectile collection until we reach the LiveIndex (the last active projectile)
@@ -163,6 +164,9 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 			leaf = sp_tree->GetNodeContainingPoint(proj.Position);
 		}
 
+		// Determine the position delta vector for this frame; this is the velocity/sec * the timefactor
+		delta_pos = XMVectorMultiply(proj.Velocity, Game::TimeFactorV);
+
 		// Get all contacts potentially within the path of this object
 		int count = Game::ObjectManager.GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
 			contacts, SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
@@ -178,15 +182,20 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 				iSpaceObject *obj = (*it);
 				if (obj->GetID() == proj.Owner) continue;
 
-				// Test for precise intersection along the projectile path
-				if (Game::PhysicsEngine.TestLineVectorvsSphereIntersection(proj.Position, proj.Velocity,
+				// Test for bounding sphere intersection along the projectile path
+				if (Game::PhysicsEngine.TestLineVectorvsSphereIntersection(proj.Position, delta_pos,
 					obj->GetPosition(), obj->GetCollisionSphereRadius()))
 				{
-					// The projectile is impacting this object, so handle the impact here
-					/* Impact handling code */
+					// This is a potential (broadphase) collision; perform a precise collision test 
+					// against the object OBB hierarchy to confirm
+					if (Game::PhysicsEngine.DetermineLineVectorVsOBBHierarchyIntersection(proj.Position, delta_pos, obj->CollisionOBB))
+					{
+						// The projectile is impacting this object; handle and render the impact accordingly
+						obj->HandleProjectileImpact(proj, Game::PhysicsEngine.OBBIntersectionResult);
 
-					// Record the collision and quit here; we cannot combine with more than one object
-					collision = true; break;
+						// Record the collision and quit here; we cannot collide with more than one object
+						collision = true; break;
+					}
 				}
 			}
 
@@ -197,7 +206,7 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 		/* 3. Since the projectile hasn't collided we can move it along its velocity vector to its new position */
 		// TODO: If velocity vector is only re-tranformed from basis vector by orientation once at start, changes in orientation mid-flight
 		// will have no effect on the projectile trajectory.  This may be fine for basic projectiles
-		proj.Position = XMVectorAdd(proj.Position, XMVectorMultiply(proj.Velocity, Game::TimeFactorV));
+		proj.Position = XMVectorAdd(proj.Position, delta_pos);
 
 		// Finally, increment the collection index to move onto the next projectile
 		++i;

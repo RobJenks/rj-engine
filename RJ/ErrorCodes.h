@@ -277,6 +277,7 @@ namespace ErrorCodes {
 	const Result		ErrorCreatingVolLineTexPixelShader				= 1334;
 	const Result		ErrorCreatingVolLineTexPSSamplerState			= 1335;
 	const Result		ErrorCreatingVolLineTexPSConstantBuffer			= 1336;
+	const Result		CannotLoadOverlayRendererModelComponents		= 1337;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

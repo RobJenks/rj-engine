@@ -94,6 +94,10 @@ class Model
 		CMPINLINE INTVECTOR3		GetElementSize(void)				{ return m_elementsize; }
 		CMPINLINE void				SetElementSize(INTVECTOR3 elsize)	{ m_elementsize = elsize; }
 
+		// Determines whether the model will be centred about the origin upon loading (default), or not adjusted on load
+		CMPINLINE bool				CentredAboutOrigin(void) const		{ return m_origin_centred; }
+		CMPINLINE void				SetCentredAboutOrigin(bool centred)	{ m_origin_centred = centred; }
+
 		// Methods which accept either a target effective size, or a scaling factor, and resize the model data accordingly
 		CMPINLINE XMFLOAT3			GetActualModelSize(void)	{ return m_actualeffectivesize; }
 		CMPINLINE XMFLOAT3			GetModelScalingFactor(void)	{ return m_scalingfactor; }
@@ -160,6 +164,7 @@ class Model
 		string					m_texturefilename;
 		bool					m_geometryloaded;
 		bool					m_standardmodel;
+		bool					m_origin_centred;
 		XMFLOAT3				m_minbounds, m_maxbounds, m_modelsize, m_modelcentre, m_effectivesize;
 		XMFLOAT3				m_actualsize, m_actualeffectivesize, m_scalingfactor;
 

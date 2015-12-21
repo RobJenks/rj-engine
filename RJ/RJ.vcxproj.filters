@@ -523,6 +523,15 @@
     <ClCompile Include="RJDebug.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="iTakesDamage.cpp">
+      <Filter>Concepts\Damage</Filter>
+    </ClCompile>
+    <ClCompile Include="Damage.cpp">
+      <Filter>Concepts\Damage</Filter>
+    </ClCompile>
+    <ClCompile Include="GameObjects.cpp">
+      <Filter>Game data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1188,14 +1197,23 @@
     <ClInclude Include="iTakesDamage.h">
       <Filter>Concepts\Damage</Filter>
     </ClInclude>
-    <ClInclude Include="Modifier.h">
-      <Filter>Concepts</Filter>
-    </ClInclude>
-    <ClInclude Include="MValue.h">
-      <Filter>Concepts</Filter>
-    </ClInclude>
     <ClInclude Include="DefaultValues.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="DebugTest.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="ModifiedValue.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="Modifier.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="MValue.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="GameObjects.h">
+      <Filter>Game data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1432,6 +1450,9 @@
     </Filter>
     <Filter Include="Debug">
       <UniqueIdentifier>{f9eed144-dbe2-4e8d-b9a6-5486fd540207}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Concepts\Modifiers">
+      <UniqueIdentifier>{3dd8899d-e2f8-41a3-87d2-10fdaa34f425}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

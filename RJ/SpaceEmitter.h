@@ -38,6 +38,9 @@ public:
 	// emitters are only updated by some parent object and cannot change themselves outside of that
 	CMPINLINE void				RefreshPositionImmediate(void) { }
 	
+	// Event triggered upon destruction of the object; inherited from iObject/iTakesDamage and not required here
+	CMPINLINE void				DestroyObject(void) { }
+
 	// Shutdown method to deallocate & delete all object resources
 	void						Shutdown(void);
 

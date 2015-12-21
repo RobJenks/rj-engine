@@ -39,6 +39,7 @@
 #include "FastMath.h"
 #include "Utility.h"
 #include "GameDataExtern.h"
+#include "GameObjects.h"
 #include "SimulationObjectManager.h"
 #include "SpaceSystem.h"
 #include "ImmediateRegion.h"
@@ -2190,11 +2191,11 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 {
 	// Parameter check
-	if (m_debug_renderenvboxes == 0 || Game::Objects.count(m_debug_renderenvboxes) == 0) return;
+	if (m_debug_renderenvboxes == 0 || Game::ObjectExists(m_debug_renderenvboxes) == 0) return;
 	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
 
 	// Get a reference to the environment object
-	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::Objects[m_debug_renderenvboxes].Object;
+	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::GetObjectByID(m_debug_renderenvboxes);
 	if (!parent) return;
 
 	// Iterate through all active objects within this parent environment
@@ -2273,7 +2274,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	{
 		if (command.Parameter(1) == "1")
 		{
-			iObject *env = Game::FindObjectInGlobalRegister(command.Parameter(0));
+			iObject *env = Game::GetObjectByInstanceCode(command.Parameter(0));
 			if (!env || !env->IsEnvironment())
 				{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
 						concat("Invalid object \"")(command.Parameter(0))("\" specified").str()); return true; }

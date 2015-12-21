@@ -4,12 +4,12 @@
 #include "DX11_Core.h"
 
 #include "ErrorCodes.h"
+#include "Model.h"
 #include "GameDataExtern.h"
 #include "GameVarsExtern.h"
 #include "FastMath.h"
 #include "Utility.h"
 #include "CoreEngine.h"
-#include "Model.h"
 #include "iSpaceObject.h"
 #include "iSpaceObjectEnvironment.h"
 #include "Actor.h"
@@ -36,55 +36,43 @@ OverlayRenderer::OverlayRenderer(void)
 	// Set initial standard model storage to null
 	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; i++)
 	{
-		m_modelfilenames[i] = NULL;
 		m_models[i] = NULL;
 	}
 
 	// Also set other models to NULL before initialisation
 	m_blueprintoverlay = NULL;
+	m_matrix_boxtransforms = NULL;
 }
 
 // Initialises the overlay rendering component; includes loading of all required models
 Result OverlayRenderer::Initialise(void)
 {
-	Result result, overallresult;
-	std::string s_filename;
-	const char *filename;
+	Result result;
 
-	// All standard component instances will use the same underlying model
-	std::string s_modelname = concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str();
-	const char *modelname = s_modelname.c_str();
+	// Line models will all use the same underlying geometry, but with the following different textures
+	std::string line_models[] = { "overlay_green.dds", "overlay_red.dds", "overlay_lblue.dds" };
 
-	// Specify the filename for each line type in turn
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Green] = "overlay_green.dds";
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_Red] = "overlay_red.dds";
-	m_modelfilenames[(int)OverlayRenderer::RenderColour::RC_LightBlue] = "overlay_lblue.dds";
-
-	// Now load each overlay texture in turn
-	overallresult = ErrorCodes::NoError;
-	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; i++)
+	// Create all models required for overlay rendering
+	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
 	{
-		// Load the model and texture from file
-		s_filename = concat(D::IMAGE_DATA)("\\Models\\Misc\\")(m_modelfilenames[i]).str();
-		filename = s_filename.c_str();
 		m_models[i] = new Model();
-		result = m_models[i]->Initialise(modelname, filename);
-
-		// Record any failures that we encounter
-		if (result != ErrorCodes::NoError) overallresult = result;
+		m_models[i]->SetCentredAboutOrigin(false);
+		result = m_models[i]->Initialise(	concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str(),
+											concat(D::IMAGE_DATA)("\\Models\\Misc\\")(line_models[i]).str());
+		if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
 	}
 
 	// Initialise blueprint overlay model
 	m_blueprintoverlay = new Model();
 	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
 											concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
-	if (result != ErrorCodes::NoError) overallresult = result;
+	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
 
 	// Initialise all pre-cached transform matrices for render efficiency
 	InitialiseCachedMatrices();
 
 	// Return the overall initialisation result
-	return overallresult;
+	return ErrorCodes::NoError;
 }
 
 // Initialise all pre-cached transform matrices for render efficiency

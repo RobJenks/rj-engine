@@ -98,6 +98,7 @@ namespace HashedStrings
 	DefineHash(H_Option, "option");
 	DefineHash(H_Filename, "filename");
 	DefineHash(H_Texture, "texture");
+	DefineHash(H_NoModelCentering, "nomodelcentering");
 	DefineHash(H_EffectiveSize, "effectivesize");
 	DefineHash(H_ActualEffectiveSize, "actualeffectivesize");
 	DefineHash(H_ElementLocation, "elementlocation");

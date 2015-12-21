@@ -28,7 +28,6 @@ using namespace std::tr1;
 namespace Game {
 
 	typedef unsigned int									ID_TYPE;
-	typedef unordered_map<Game::ID_TYPE, iSpaceObject*>		SpaceObjectRegister;
 	typedef float											HitPoints;
 };
 
@@ -79,13 +78,6 @@ namespace Game {
 	bool FullScreen = false;
 	bool ForceWARPRenderDevice = false;
 
-	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
-	Game::ObjectRegister					Objects(0);
-
-	// Short-term lists of objects waiting to be registered or unregistered with the global collection; actioned each frame
-	std::vector<Game::ID_TYPE>				UnregisterList(0);		// Stored as ID in case object is being unregistered while it is being shut down
-	std::vector<iObject*>					RegisterList(0);		// Store the object so it can be inserted into the global game objects list
-	
 
 	// Central scheduler for all scheduled jobs
 	CentralScheduler 				Scheduler = CentralScheduler();
@@ -321,31 +313,6 @@ namespace Game {
 		}
 	}
 
-	// Find an object based on its string code
-	iObject *FindObjectInGlobalRegister(const std::string & instance_code)
-	{
-		// Hash the desired code (assuming it is valid) for more efficient comparisons
-		if (instance_code == NullString) return NULL;
-		HashVal hash = HashString(instance_code);
-
-		// Compare hash values for more efficient comparison
-		ObjectRegister::const_iterator it_end = Game::Objects.end();
-		for (ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
-			if ((it->second.Active) && (it->second.Object) && (it->second.Object)->GetInstanceCodeHash() == hash) return (it->second.Object);
-
-		return NULL;
-	}
-
-	// Find an object based on its instance hash
-	iObject *FindObjectInGlobalRegister(const HashVal & instance_hash)
-	{
-		// Compare hash values for more efficient comparison
-		ObjectRegister::const_iterator it_end = Game::Objects.end();
-		for (ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
-			if ((it->second.Active) && (it->second.Object) && (it->second.Object)->GetInstanceCodeHash() == instance_hash) return (it->second.Object);
-
-		return NULL;
-	}
 };
 
 

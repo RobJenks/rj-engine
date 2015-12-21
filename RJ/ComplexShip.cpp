@@ -1262,6 +1262,21 @@ void ComplexShip::RemoveStandardComponentFlags(void)
 	}
 }
 
+// Event triggered upon destruction of the object
+void ComplexShip::DestroyObject(void)
+{
+	// Generate destruction effects and debris
+
+	// Perform any other ComplexShip-specific destruction logic here
+
+	// Call the base class method
+	Ship::DestroyObject();
+
+	// Now call the shutdown method to remove this entity from the simulation
+	Shutdown();
+	OutputDebugString("Destruction of ComplexShip\n");
+}
+
 
 // Performs a text output of perimeter beacon data for debug purposes
 std::string ComplexShip::DebugOutputPerimeterBeacons(void)

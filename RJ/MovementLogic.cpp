@@ -1,6 +1,7 @@
 #include <vector>
 #include "DX11_Core.h"
 #include "GameVarsExtern.h"
+#include "GameObjects.h"
 #include "Player.h"
 #include "Ship.h"
 #include "Engine.h"
@@ -74,7 +75,7 @@ void Game::Logic::SimulateAllObjects(void)
 	}
 
 	// Process any pending object register/deregister requests
-	iObject::UpdateGlobalObjectCollection();
+	Game::UpdateGlobalObjectCollection();
 }
 
 // Updates the current ship vector based upon mouse input data
