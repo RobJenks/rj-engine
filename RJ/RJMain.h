@@ -83,7 +83,6 @@ public:
 
 	// Termination methods
 	void				TerminateApplication(void);
-	void				TerminateObjectRegisters(void);
 	void				TerminateCoreDataStructures(void);
 	void				TerminateStateManager(void);
 	void				TerminateLogging(void);

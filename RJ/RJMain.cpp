@@ -346,7 +346,7 @@ void RJMain::TerminateApplication()
 	Game::Log.FlushAllStreams();
 
 	// Terminate all objects in the game
-	TerminateObjectRegisters();
+	Game::ShutdownObjectRegisters();
 
 	// Release all standard model/geometry data
 	Model::TerminateAllModelData();
@@ -910,6 +910,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseMathFunctions();
 	Game::Log << LOG_INIT_START << "Math functions initialised\n";
 
+	// Initialise the central object registers
+	Game::InitialiseObjectRegisters();
+
 	// Initialise the object manager; disable caching functions during initialisation while objects are being created in large numbers
 	Game::ObjectManager.DisableSearchCache();
 
@@ -1217,29 +1220,6 @@ void RJMain::UpdateRegions(void)
 {
 	// Re-centre the immediate region on the player
 	D::Regions::Immediate->RegionCentreMoved(Game::CurrentPlayer->GetPosition());
-}
-
-void RJMain::TerminateObjectRegisters(void)
-{
-	// Traverse the object register one at a time
-	Game::ObjectRegister::iterator it = Game::Objects.begin();
-	Game::ObjectRegister::iterator it_end = Game::Objects.end();
-	while (it != it_end)
-	{
-		// Make sure this object still exists
-		if (it->second.Active && it->second.Object)
-		{
-			it->second.Object->Shutdown();			// Call virtual shutdown method on the object
-			delete (it++)->second.Object;			// Delete the object, using post-increment to avoid invalidating the pointer
-		}
-		else
-		{
-			++it;							// If this object does not exist then simply increment immediately and move on
-		}
-	}
-
-	// Call the unordered_map::clear method, which will call the destructor for every element in turn (now unnecessary) before clearing the collection
-	Game::Objects.clear();
 }
 
 // Terminate all key game data structures (e.g. the space object Octree)
@@ -2062,6 +2042,26 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 }
+
+
+DO THE FOLLOWING TO CREATE 'MANAGED' OBJECTREFERENCES TO THE OBJECT REGISTER:
+
+ObjectReference(ID)
+	get pointer to registerentry(unordered_map element pointers will always remain valid)
+	increment ref count in entry
+
+~ObjectReference()
+	decrement ref count in entry
+	if (!Active && entry ref count == 0)
+		delete registerentry
+
+ObjectReference.Get()
+	return (ref.Active ? ref.Object : NULL)
+
+
+ObjectReference::Null()
+	returns objectreference with ptr to special-purpose null entry, which has active=true && object == NULL
+	(i.e. then Get() will always pass validation and return ref.object, which is NULL)
 
 
 

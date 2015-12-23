@@ -14,10 +14,20 @@ namespace Game
 	// Structure of one entry in the global object collection
 	struct ObjectRegisterEntry
 	{
-		iObject *	Object;
-		bool		Active;
-		ObjectRegisterEntry(void) : Object(NULL), Active(true) { }
-		ObjectRegisterEntry(iObject *object) : Object(object), Active(true) { }
+		Game::ID_TYPE			ID;				// ID of the object wrapped by this register entry
+		iObject *				Object;			// Pointer to the object itself
+		bool					Active;			// Flag indicating whether the object still exists
+		int						RefCount;		// Number of external references to this entry.  Entry will only be deleted once
+												// it is inactive, and once there are no further external references to the object
+		// Constructors
+		ObjectRegisterEntry(void) : ID(0), Object(NULL), Active(true), RefCount(0) { }
+		ObjectRegisterEntry(iObject *object) : ID(object ? object->GetID() : 0), Object(object), Active(true), RefCount(0) { }
+
+		// Record a new reference to this entry
+		CMPINLINE void			ReferenceAdded(void)		{ ++RefCount; }
+
+		// Record the removal of a reference to this entry
+		CMPINLINE void			ReferenceRemoved(void)		{ if (--RefCount <= 0) Game::RemoveObjectRegisterEntry(ID); }
 	};
 
 	// Type definitions for game object collections
@@ -29,8 +39,9 @@ namespace Game
 	extern Game::ObjectRegisterByInstanceCode	ObjectsByCode;
 
 	// Short-term lists of objects waiting to be registered or unregistered with the global collection; actioned each frame
-	extern std::vector<iObject*>				RegisterList;		// Store the object so it can be inserted into the global game objects list
-	extern std::vector<Game::ID_TYPE>			UnregisterList;		// Stored as ID in case object is being unregistered while it is being shut down
+	extern std::vector<iObject*>				RegisterList;			// Store the object so it can be inserted into the global game objects list
+	extern std::vector<Game::ID_TYPE>			UnregisterList;			// Stored as ID in case object is being unregistered while it is being shut down
+	extern std::vector<Game::ID_TYPE>			RegisterRemovalList;	// Objects where the entire entry can now be removed from the register (i.e. inactive & refcount == 0)
 
 	// Register an object with the global collection
 	CMPINLINE void								RegisterObject(iObject *obj)
@@ -41,10 +52,25 @@ namespace Game
 
 	// Unregister an object from the global collection
 	void										UnregisterObject(iObject *obj);
+
+	// Remove the entire entry from the object register; performed when active == false and refcount == 0
+	CMPINLINE void								RemoveObjectRegisterEntry(Game::ID_TYPE id)
+	{
+		// Add to the removal vector which is processed at the end of each frame
+		Game::RegisterRemovalList.push_back(id);
+	}
 	
 	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
 	void										UpdateGlobalObjectCollection(void);
 
+	// Initialises all object register data on application startup
+	void										InitialiseObjectRegisters(void);
+
+	// Deallocates all object register data on application shutdown
+	void										ShutdownObjectRegisters(void);
+	
+	// Returns the null object register entry
+	static										ObjectRegisterEntry *NullObjectReference;
 
 	// Test whether an object exists with the specified ID
 	CMPINLINE bool								ObjectExists(Game::ID_TYPE id)
@@ -83,6 +109,10 @@ namespace Game
 		Game::ObjectRegisterEntry & entry = it->second;
 		return (entry.Active ? entry.Object : NULL);
 	}
+
+	// Notifies the central object collection that the code of the specified object has changed.  Ensures that
+	// correct references are maintained in the central object collection
+	void										NotifyChangeOfObjectInstanceCode(iObject *object, const std::string & old_code);
 };
 
 

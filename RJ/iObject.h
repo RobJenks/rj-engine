@@ -408,6 +408,10 @@ protected:
 	// Protected method to set the object type, which also derives and stores the object class
 	void								SetObjectType(iObject::ObjectType type);
 
+	// Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
+	// updates to the central data collections
+	void								SetInstanceCode(const std::string & instance_code);
+
 	// Threshold (number of changes) for internally renormalising object quaternions, depending on state
 	static const int					ORIENT_NORMALISE_THRESHOLD_FULLSIM = 100;
 	//static const int					ORIENT_NORMALISE_THRESHOLD_DISTANT = 250;

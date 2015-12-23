@@ -1215,6 +1215,9 @@
     <ClInclude Include="GameObjects.h">
       <Filter>Game data</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectReference.h">
+      <Filter>Game data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

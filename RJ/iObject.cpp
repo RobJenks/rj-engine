@@ -317,14 +317,33 @@ void iObject::SetSize(const FXMVECTOR size)
 	}
 }
 
+// Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
+// updates to the central data collections
+void iObject::SetInstanceCode(const std::string & instance_code)
+{
+	// Parameter check
+	if (instance_code == NullString) return;
+
+	// We will only update the central collection if the current instance code is not null.  If it is a null string, 
+	// the object is being created and so does not yet exist in the central collection.  Store so we can test later
+	std::string old_code = m_instancecode;
+
+	// Store the new instance code
+	m_instancecode = instance_code;
+
+	// Hash the instance code for more efficient lookups
+	m_instancecodehash = HashString(m_instancecode);
+
+	// Notify the central collection of this update if required
+	if (old_code != NullString) Game::NotifyChangeOfObjectInstanceCode(this, old_code);
+}
+
 // Determines the instance code that should be assigned to this object
 void iObject::DetermineInstanceCode(void)
 {
 	// Instance code should be a concatenation of the object code and unique ID; wil ensure unique assignment of instance codes
-	m_instancecode = concat(m_code)("_")(m_id).str();
-
-	// Hash the instance code for more efficient lookups
-	m_instancecodehash = HashString(m_instancecode);
+	std::string code = concat(m_code)("_")(m_id).str();
+	SetInstanceCode(code);
 }
 
 // Overrides the object instance code with a custom string value
@@ -333,11 +352,8 @@ void iObject::OverrideInstanceCode(const std::string & icode)
 	// Ensure the code is valid
 	if (icode == "") return;
 
-	// Store the new instance code
-	m_instancecode = icode;
-
-	// Hash the instance code for more efficient lookups
-	m_instancecodehash = HashString(m_instancecode);
+	// Update the instance code, which will take care of updating the central collection etc
+	SetInstanceCode(icode);
 }
 
 bool iObject::TestForOverrideOfInstanceCode(void) const
