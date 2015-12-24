@@ -84,14 +84,11 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 // Assigns a new unique ID to this object
 void iObject::AssignNewUniqueID(void)
 {
-	// First, test whether the instance code has been overriden manually (since it will otherwise be affected by this ID change)
-	bool overriden = TestForOverrideOfInstanceCode();
-
 	// Generate a new unique ID
 	m_id = GenerateNewObjectID();
 
-	// If the ship instance code has not been set manually, recalculate it now
-	if (!overriden) DetermineInstanceCode();
+	// Generate a new instance code based on this ID
+	DetermineInstanceCode();
 }
 
 // Sets the object code
@@ -112,7 +109,10 @@ void iObject::SetCode(const std::string & code)
 // their level of the implementation
 void iObject::InitialiseCopiedObject(iObject *source)
 {
-	// Assign a new unique ID for this object, so that it doesn't retain the ID of its copy source
+	// Assign a new unique ID for this object, so that it doesn't retain the ID of its copy source.  Set the 
+	// instance code to a null string beforehand, otherwise if the source object had overridden its instance
+	// code the new object would also inherit it, and would not generate a new one since the code is overridden
+	m_instancecode = NullString;
 	AssignNewUniqueID();
 
 	// Simulation state will always begin as "no simulation"

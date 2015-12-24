@@ -91,6 +91,7 @@
 #include "Modifier.h"						// DBG
 #include "ModifiedValue.h"					// DBG
 #include "DebugTest.h"						// DBG
+#include "ObjectReference.h"				// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -1952,6 +1953,7 @@ void RJMain::__CreateDebugScenario(void)
 	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
 	
+
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
@@ -2042,26 +2044,6 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 }
-
-
-DO THE FOLLOWING TO CREATE 'MANAGED' OBJECTREFERENCES TO THE OBJECT REGISTER:
-
-ObjectReference(ID)
-	get pointer to registerentry(unordered_map element pointers will always remain valid)
-	increment ref count in entry
-
-~ObjectReference()
-	decrement ref count in entry
-	if (!Active && entry ref count == 0)
-		delete registerentry
-
-ObjectReference.Get()
-	return (ref.Active ? ref.Object : NULL)
-
-
-ObjectReference::Null()
-	returns objectreference with ptr to special-purpose null entry, which has active=true && object == NULL
-	(i.e. then Get() will always pass validation and return ref.object, which is NULL)
 
 
 

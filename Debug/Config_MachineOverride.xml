@@ -1,7 +1,6 @@
 <Config>
 
   <!-- Override of graphics options for this machine -->
-  <ScreenResolution x="960" y="720" />
-  <SoftwareRasterizerOverride enable="true" />
+  <ScreenResolution x="1280" y="720" />
   
 </Config>

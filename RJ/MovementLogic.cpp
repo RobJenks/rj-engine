@@ -27,6 +27,10 @@ void Game::Logic::SimulateAllObjects(void)
 {
 	iObject *obj; Game::ID_TYPE id;
 	
+	// Lock the central object registers while iterating through the full collection; any collection
+	// changes will then be held and applied at the end of the frame
+	Game::LockObjectRegisters();
+
 	// Process the set of objects in scope for simulation (TODO: in future, this should be the locally-relevant subset) 
 	Game::ObjectRegister::iterator it_end = Game::Objects.end();
 	for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
@@ -73,6 +77,9 @@ void Game::Logic::SimulateAllObjects(void)
 		// Revert the 'currently visible' flag, which will be updated by the core engine ready for next frame
 		obj->RemoveCurrentVisibilityFlag();
 	}
+
+	// Unlock the central object registers following processing of the full object collection
+	Game::UnlockObjectRegisters();
 
 	// Process any pending object register/deregister requests
 	Game::UpdateGlobalObjectCollection();

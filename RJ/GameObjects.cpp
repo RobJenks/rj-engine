@@ -4,9 +4,6 @@
 
 namespace Game
 {
-	// Static object register entry for null objects; created within InitialiseObjectRegisters()
-	ObjectRegisterEntry *NullObjectReference = NULL;
-
 	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
 	Game::ObjectRegister					Objects(0);
 
@@ -18,6 +15,14 @@ namespace Game
 	std::vector<iObject*>					RegisterList(0);		// Store the object so it can be inserted into the global game objects list
 	std::vector<Game::ID_TYPE>				RegisterRemovalList(0);	// Objects where the entire entry can now be removed from the register (i.e. inactive & refcount == 0)
 
+	// Returns the null object register entry
+	ObjectRegisterEntry *					NullObjectReference = NULL;
+
+	// Determines whether object registers are locked, e.g. when the main logic cycle is iterating through the collection
+	// If registers are unlocked we can add/remove objects as normal; if locked, objects are instead added to the relevant 
+	// lists to be actioned at the end of the frame
+	bool									m_registers_locked = false;
+
 	// Initialises all object register data on application startup
 	void InitialiseObjectRegisters(void)
 	{
@@ -25,7 +30,7 @@ namespace Game
 		Game::NullObjectReference = new ObjectRegisterEntry();
 		Game::NullObjectReference->Object = NULL;
 		Game::NullObjectReference->Active = true;
-		Game::NullObjectReference->RefCount = 1000U;			// Ref count should never hit zero so this is always active; use 1000 in case of unexpected error
+		Game::NullObjectReference->RefCount = 1000U;				// Ref count should never hit zero so this is always active; use 1000 in case of unexpected error
 
 	}
 
@@ -70,20 +75,83 @@ namespace Game
 		Game::ObjectRegister::iterator entry = Game::Objects.find(obj->GetID());
 		if (entry != Game::Objects.end())
 		{
-			// If it is, add it's ID to the shutdown list for removal in the next cycle.  Add the ID rather than
-			// the object since this unregistering could be requested as part of object shutdown, and when the
-			// unregister list is next processed the object may no longer be valid.
-			Game::UnregisterList.push_back(obj->GetID());
-
-			// Flag the object as inactive in all global collections to avoid processing it in the upcoming frame
+			// Flag the object as inactive in the global collection to avoid processing it in the upcoming frame
 			entry->second.Active = false;
 
-			// Also remove from secondary registers.  Should always exist here as well since the collections should always
-			// remain in sync, but still perform a check to ensure the object exists in each register
-			Game::ObjectRegisterByInstanceCode::iterator code_entry = Game::ObjectsByCode.find(obj->GetInstanceCode());
-			if (code_entry != Game::ObjectsByCode.end()) code_entry->second.Active = false;
+			// Remove based on object ID.  Use the ID rather than the object itself since this unregistering 
+			// could be requested as part of object shutdown, and when the unregister list is next processed 
+			// the object may no longer be valid.  Either remove immediately or add to the list, depending on lock state
+			if (m_registers_locked)
+			{
+				// If registers are locked, add to the list for removal at the end of the frame
+				Game::UnregisterList.push_back(obj->GetID());
+			}
+			else
+			{
+				// If registers are unlocked we can unregister the object immediately
+				PerformObjectUnregistration(obj->GetID());
+			}
+
 		}
 	}
+
+	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
+	void PerformObjectRegistration(iObject *object)
+	{
+		// Make sure the object is valid and meets all criteria for e.g. uniqueness
+		if (!object ||																// Ignore this object if it is NULL
+			object->GetInstanceCode() == NullString ||								// Ignore this object if it has no instance code
+			ObjectExists(object->GetInstanceCode())) return;						// Ignore this object if it does not have a unique instance code
+
+		// Register with the global collection
+		Game::Objects[object->GetID()] = Game::ObjectRegisterEntry(object);
+
+		// Register with secondary collections
+		Game::ObjectRegisterEntry *primary_entry = &(Game::Objects[object->GetID()]);
+		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;				// We know the code is unique after the test above
+	}
+
+	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
+	void PerformObjectUnregistration(Game::ID_TYPE id)
+	{
+		// Check the object exists.  It definitely should , but check to be safe
+		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
+		if (entry != Game::Objects.end())
+		{
+			// Get a reference to the object
+			iObject *obj = entry->second.Object;
+
+			// Set the object to inactive and remove the pointer, so no further processes can access it
+			entry->second.Active = false;
+			entry->second.Object = NULL;
+
+			// If there are no current references to this object we can also remove the entire entry from the register at the same time
+			if (entry->second.RefCount <= 0) Game::RemoveObjectRegisterEntry(id);
+
+			// Also remove from all secondary registers; these do not need to maintain a persistent register entry to
+			// avoid null-references, since they are not maintaining any data directly.  They instead just reference entries
+			// in the primary collection.  If we erase from a secondary collection the relevant retrieval methods will simply return null, correctly
+			Game::ObjectRegisterByInstanceCode::iterator code_entry = Game::ObjectsByCode.find(obj->GetInstanceCode());
+			if (code_entry != Game::ObjectsByCode.end()) Game::ObjectsByCode.erase(obj->GetInstanceCode());
+
+			// Finally call the destructor for this object to deallocate all resources
+			delete obj;
+		}
+	}
+
+	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
+	void PerformRegisterEntryRemoval(Game::ID_TYPE id)
+	{
+		// The object should definitely exist, but make sure
+		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
+		if (entry != Game::Objects.end())
+		{
+			// Assuming we found the entry, erase it now to remove all record from the register
+			entry->second.Object = NULL;
+			Game::Objects.erase(entry);
+		}
+	}
+
 
 	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
 	void UpdateGlobalObjectCollection(void)
@@ -93,38 +161,29 @@ namespace Game
 		if (nU != 0)
 		{
 			// Process each request in turn
-			iObject *obj; Game::ID_TYPE id;
 			for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nU; ++i)
 			{
-				// Get a reference to the object being removed
-				id = Game::UnregisterList[i];
-				obj = Game::Objects[id].Object;
-
-				// Remove this object from the global collection.  It should definitely exist, but check to be safe
-				Game::ObjectRegister::iterator entry = Game::Objects.find(id);
-				if (entry != Game::Objects.end())
-				{
-					entry->second.Object = NULL;		// Remove the pointer first; ensures we are deregistered, and also prevents ".erase()" from calling its destructor
-					Game::Objects.erase(id);			// Erasing from the map will remove the key and element, reducing search space for the future
-				}
-// *** ADD AND INCLUDE
-// If there are no references to this object we can remove it immediately
-//if (entry->second.RefCount <= 0) Game::RemoveObjectRegisterEntry(entry->second.ID);
-
-				// Also remove from all secondary registers
-				Game::ObjectRegisterByInstanceCode::iterator code_entry = Game::ObjectsByCode.find(obj->GetInstanceCode());
-				if (code_entry != Game::ObjectsByCode.end())
-				{
-					code_entry->second.Object = NULL;
-					Game::ObjectsByCode.erase(obj->GetInstanceCode());
-				}
-
-				// Finally call the destructor for this object to deallocate all resources
-				delete obj;
+				// Unregister the object
+				PerformObjectUnregistration(Game::UnregisterList[i]);
 			}
 
 			// Clear the pending unregister list
 			Game::UnregisterList.clear();
+		}
+
+		// Process any entry-removal requests
+		std::vector<ID_TYPE>::size_type nE = Game::RegisterRemovalList.size();
+		if (nE != 0)
+		{
+			// Process each request in turn
+			for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nE; ++i)
+			{
+				// Remove the entry from the central register
+				PerformRegisterEntryRemoval(Game::RegisterRemovalList[i]);
+			}
+
+			// Clear the pending removal list
+			Game::RegisterRemovalList.clear();
 		}
 
 		// Now process any register requests
@@ -132,20 +191,10 @@ namespace Game
 		if (nR != 0)
 		{
 			// Process each request in turn
-			iObject *obj;
 			for (std::vector<iObject*>::size_type i = 0; i < nR; ++i)
 			{
-				// Check the object exists
-				obj = Game::RegisterList[i]; if (!obj) continue;
-
-				// Make sure the object meets all criteria for e.g. uniqueness
-				if (Game::ObjectsByCode.count(obj->GetInstanceCode()) != 0) continue;		// Ignore this object if it does not have a unique instance code
-
-				// Register with the global collection
-				Game::Objects[obj->GetID()] = Game::ObjectRegisterEntry(obj);
-
-				// Register with secondary collections
-				Game::ObjectsByCode[obj->GetInstanceCode()] = Game::ObjectRegisterEntry(obj);	// We know the code is unique after the test above
+				// Register this object with the central register
+				Game::PerformObjectRegistration(Game::RegisterList[i]); 
 			}
 
 			// Clear the pending registration list
@@ -159,22 +208,21 @@ namespace Game
 	{
 		// Parameter check 
 		if (!object || old_code == NullString || object->GetInstanceCode() == NullString ||
-			Game::ObjectsByCode.count(object->GetInstanceCode()) != 0) return;
+			ObjectExists(object->GetInstanceCode())) return;
 
 		// Attempt to locate the object by its previous code
 		Game::ObjectRegisterByInstanceCode::iterator entry = Game::ObjectsByCode.find(old_code);
-		if (entry == Game::ObjectsByCode.end()) return;		// Error: object does not exist with this code
-		if (entry->second.Object != object) return;			// Error: the object with this code is not the one we are attempting to change
+		if (entry == Game::ObjectsByCode.end()) return;			// Error: object does not exist with this code (or it may be a standard, non-register object)
+		if (!(entry->second)) return;							// Error: no link to primary entry (major error)
+		if (entry->second->Object != object) return;			// Error: the object with this code is not the one we are attempting to change
 		
-		// Remove the object from its previous position in the collection
-		bool is_active = entry->second.Active;
-		entry->second.Object = NULL;
-		Game::ObjectsByCode.erase(old_code);
+		// Remove the secondary register entry for the old code
+		ObjectRegisterEntry *primary_entry = (entry->second);
+		entry->second = NULL;
+		Game::ObjectsByCode.erase(entry);
 
-		// Insert a new entry for the new object code
-		ObjectRegisterEntry new_entry = ObjectRegisterEntry(object);
-		new_entry.Active = is_active;
-		Game::ObjectsByCode[object->GetInstanceCode()] = new_entry;
+		// Add a new secondary register entry for the new code
+		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;
 	}
 
 
