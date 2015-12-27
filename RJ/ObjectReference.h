@@ -7,6 +7,7 @@
 #include "GameVarsExtern.h"
 #include "GameObjects.h"
 
+template <class T>
 struct ObjectReference
 {
 public:
@@ -81,7 +82,7 @@ public:
 
 	// Operator (); returns the object being wrapped by this reference
 	// No longer need to test (entry.Active ? entry.object : NULL) since object is set to NULL on unregistering anyway
-	CMPINLINE iObject * operator()(void)				{ return (m_entry->Object); }
+	CMPINLINE T * operator()(void)				{ return static_cast<T*>(m_entry->Object); }
 
 protected:
 

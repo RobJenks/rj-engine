@@ -16,7 +16,7 @@ namespace Game
 	std::vector<Game::ID_TYPE>				RegisterRemovalList(0);	// Objects where the entire entry can now be removed from the register (i.e. inactive & refcount == 0)
 
 	// Returns the null object register entry
-	ObjectRegisterEntry *					NullObjectReference = NULL;
+	ObjectRegisterEntry *					NullObjectReference = new ObjectRegisterEntry(0, NULL, true, 1000);
 
 	// Determines whether object registers are locked, e.g. when the main logic cycle is iterating through the collection
 	// If registers are unlocked we can add/remove objects as normal; if locked, objects are instead added to the relevant 

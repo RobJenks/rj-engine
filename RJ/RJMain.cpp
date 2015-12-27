@@ -137,7 +137,6 @@ RJMain::RJMain(void)
 
 	// Debug fields and settings
 	m_debug_ccdspheretest = m_debug_ccdobbtest = false;
-	sproj = NULL;
 }
 
 // Retrieve data on the executable and working directory
@@ -477,8 +476,8 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_5])
 	{
-		//s2->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
-		s2->AssignNewOrder(new Order_AttackBasic(s2, s3[0]));
+		//s2()->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
+		s2()->AssignNewOrder(new Order_AttackBasic(s2(), s3[0]()));
 		Game::Keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])
@@ -495,8 +494,8 @@ void RJMain::ProcessKeyboardInput(void)
 				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
 				Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(298.0f, 75.0f, 1463.0f, 0.0f));
 				XMVECTOR orient = XMQuaternionNormalize(XMVectorSet(0.0546f, -0.99057f, 0.0973f, 0.4090f));
-				XMFLOAT3 pos; XMStoreFloat3(&pos, cs->GetPosition());
-				XMFLOAT3 size; XMStoreFloat3(&size, cs->GetSize());
+				XMFLOAT3 pos; XMStoreFloat3(&pos, cs()->GetPosition());
+				XMFLOAT3 size; XMStoreFloat3(&size, cs()->GetSize());
 				Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
 
 				for (int x = 0; x < 10; ++x)
@@ -540,7 +539,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_8])
 	{
-		if (s2->HasOrders()) s2->CancelAllOrders();
+		if (s2()->HasOrders()) s2()->CancelAllOrders();
 		XMFLOAT3 tpos[10]; Order_MoveToPosition *orders[10];
 		for (int i = 0; i<10; i++)
 		{
@@ -549,7 +548,7 @@ void RJMain::ProcessKeyboardInput(void)
 									((float)((float)rand() / (float)RAND_MAX) * 3400.0f) - 400.0f);
 			orders[i] = new Order_MoveToPosition(XMLoadFloat3(&tpos[i]), 100.0f);
 			if (i > 0) orders[i]->Dependency = orders[i - 1]->ID;
-			s2->AssignNewOrder(orders[i]);
+			s2()->AssignNewOrder(orders[i]);
 		}
 	}
 
@@ -568,25 +567,25 @@ void RJMain::ProcessKeyboardInput(void)
 	{
 		if (b[DIK_LSHIFT])
 		{
-			cs->ForceRenderingOfInterior(false);
-			cs->GetSection(0)->Fade.FadeIn(1.0f);
+			cs()->ForceRenderingOfInterior(false);
+			cs()->GetSection(0)->Fade.FadeIn(1.0f);
 		}
 		else
 		{
-			cs->ForceRenderingOfInterior(true);
-			cs->GetSection(0)->Fade.FadeToAlpha(1.0f, 0.25f);
+			cs()->ForceRenderingOfInterior(true);
+			cs()->GetSection(0)->Fade.FadeToAlpha(1.0f, 0.25f);
 		}
 	}
 	if (b[DIK_EQUALS])
 	{
-		if (ss->Highlight.IsActive())
-			ss->Highlight.Deactivate();
+		if (ss()->Highlight.IsActive())
+			ss()->Highlight.Deactivate();
 		else
 		{
 			XMFLOAT4 options[6] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
 				XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) };
-			ss->Highlight.Activate();
-			ss->Highlight.SetColour(XMLoadFloat4(&options[(int)floor(frand_lh(0, 6))]));
+			ss()->Highlight.Activate();
+			ss()->Highlight.SetColour(XMLoadFloat4(&options[(int)floor(frand_lh(0, 6))]));
 		}
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
@@ -595,57 +594,57 @@ void RJMain::ProcessKeyboardInput(void)
 	if (false && b[DIK_Y]) {
 		if (b[DIK_LSHIFT])
 		{
-			cs->ForceRenderingOfInterior(false);
-			cs->GetSection(0)->Fade.FadeIn(2.5f);
+			cs()->ForceRenderingOfInterior(false);
+			cs()->GetSection(0)->Fade.FadeIn(2.5f);
 			Game::Engine->GetCamera()->ReleaseCamera();
 		}
 		else
 		{
-			cs->ForceRenderingOfInterior(true);
-			cs->GetSection(0)->Fade.FadeToAlpha(2.5f, 0.25f);
-			Game::Engine->GetCamera()->ZoomToOverheadShipView(cs);
+			cs()->ForceRenderingOfInterior(true);
+			cs()->GetSection(0)->Fade.FadeToAlpha(2.5f, 0.25f);
+			Game::Engine->GetCamera()->ZoomToOverheadShipView(cs());
 		}
 	}
 	if (b[DIK_G])
 	{
-		CSLifeSupportTile *tile = (CSLifeSupportTile*)cs->GetFirstTileOfType(D::TileClass::LifeSupport);
-		for (int x = 0; x < cs->GetElementSizeX(); ++x)
-			for (int y = 0; y < cs->GetElementSizeY(); ++y)
-				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs, INTVECTOR3(x, y, 0),
-				XMVectorSet(1.0f - (cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value),
-				cs->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
+		CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetFirstTileOfType(D::TileClass::LifeSupport);
+		for (int x = 0; x < cs()->GetElementSizeX(); ++x)
+			for (int y = 0; y < cs()->GetElementSizeY(); ++y)
+				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), INTVECTOR3(x, y, 0),
+				XMVectorSet(1.0f - (cs()->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value),
+				cs()->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
 	}
 
 	if (false && b[DIK_U]) {
-		if (b[DIK_LSHIFT])		{ a1->Attributes[ActorAttr::A_RunSpeed].BaseValue -= 1.0f; a1->RecalculateAttributes(); }
-		else					{ a1->Attributes[ActorAttr::A_RunSpeed].BaseValue += 1.0f; a1->RecalculateAttributes(); }
+		if (b[DIK_LSHIFT])		{ a1()->Attributes[ActorAttr::A_RunSpeed].BaseValue -= 1.0f; a1()->RecalculateAttributes(); }
+		else					{ a1()->Attributes[ActorAttr::A_RunSpeed].BaseValue += 1.0f; a1()->RecalculateAttributes(); }
 	}
 	if (false && b[DIK_I]) {
 		Order_ActorMoveToPosition *o[3];
-		a1->CancelAllOrders();
+		a1()->CancelAllOrders();
 		for (int i = 0; i<3; i++)
 		{
 			o[i] = new Order_ActorMoveToPosition(XMVectorSetY(XMVectorSetW(
 				XMVectorAdd(Game::CurrentPlayer->GetPosition(), Vector3Random(-15.0f, 15.0f)), 0.0f), 0.0f),
 				2.0f, false);
 			if (i > 0) o[i]->Dependency = o[i - 1]->ID;
-			a1->AssignNewOrder(o[i]);
+			a1()->AssignNewOrder(o[i]);
 		}
 		Game::Keyboard.LockKey(DIK_I);
 	}
 
 	if (b[DIK_1]) {
 		Game::Keyboard.LockKey(DIK_1);
-		cs->SetTargetSpeedPercentage(1.0f);
+		cs()->SetTargetSpeedPercentage(1.0f);
 	}
 	if (b[DIK_2]) {
 		Game::Keyboard.LockKey(DIK_2);
 		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs->GetInstanceCode()).str()));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs->GetInstanceCode())(" 1").str()));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		Ship *parent = ss;
+		Ship *parent = ss();
 		for (int t = 0; t < parent->TurretController.TurretCount(); ++t)
 		{
 			parent->TurretController.Turrets[t]->Fire();
@@ -861,6 +860,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseLogging();
 	Game::Log.EnableFlushAfterEveryOperation();
 
+	// Initialise the central object registers
+	Game::InitialiseObjectRegisters();
+
 	// Load player config before initialising the application
 	res = LoadPlayerConfig();
 	if (res != ErrorCodes::NoError) {
@@ -910,9 +912,6 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Math functions
 	InitialiseMathFunctions();
 	Game::Log << LOG_INIT_START << "Math functions initialised\n";
-
-	// Initialise the central object registers
-	Game::InitialiseObjectRegisters();
 
 	// Initialise the object manager; disable caching functions during initialisation while objects are being created in large numbers
 	Game::ObjectManager.DisableSearchCache();
@@ -1137,10 +1136,10 @@ Result RJMain::InitialisePlayer(void)
 
 	Game::CurrentPlayer->SetActor(actorbase->CreateInstance());
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
-	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs);
+	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 
 	// Place the player in a default (already created) ship and the current system
-	Game::CurrentPlayer->SetPlayerShip(ss);
+	Game::CurrentPlayer->SetPlayerShip(ss());
 	Game::CurrentPlayer->EnterEnvironment(Game::Universe->GetSystem("AB01"));
 
 	// Return success
@@ -1459,7 +1458,7 @@ void RJMain::DebugCCDSphereTest(void)
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
 		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
-		ss->SetOrientation(ID_QUATERNION);
+		ss()->SetOrientation(ID_QUATERNION);
 	}
 
 	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera || 
@@ -1470,17 +1469,17 @@ void RJMain::DebugCCDSphereTest(void)
 		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
-	ss->SetPosition(sspos);
-	ss->SetOrientation(ssorient);
-	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
-	ss->RefreshPositionImmediate();
-	ss->CollisionOBB.UpdateFromObject(*ss);
-	s2->SetPosition(NULL_VECTOR);
-	s2->SetOrientation(ID_QUATERNION);
-	s2->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
-	s2->RefreshPositionImmediate();
-	s2->RefreshPositionImmediate();
-	s2->CollisionOBB.UpdateFromObject(*s2);
+	ss()->SetPosition(sspos);
+	ss()->SetOrientation(ssorient);
+	ss()->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
+	ss()->RefreshPositionImmediate();
+	ss()->CollisionOBB.UpdateFromObject(*ss());
+	s2()->SetPosition(NULL_VECTOR);
+	s2()->SetOrientation(ID_QUATERNION);
+	s2()->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
+	s2()->RefreshPositionImmediate();
+	s2()->RefreshPositionImmediate();
+	s2()->CollisionOBB.UpdateFromObject(*s2());
 
 	float restore_timefactor = Game::TimeFactor;
 	Game::TimeFactor = 1.0f;
@@ -1496,36 +1495,36 @@ void RJMain::DebugCCDSphereTest(void)
 	{
 		if (k[DIK_LEFTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
-	bool b = Game::PhysicsEngine.TestContinuousSphereCollision(ss, s2);
+	bool b = Game::PhysicsEngine.TestContinuousSphereCollision(ss(), s2());
 	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
 	OverlayRenderer::RenderColour col = (b ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
 	XMMATRIX world; XMVECTOR move;
-	ss->CollisionOBB.GenerateWorldMatrix(world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
-	s2->CollisionOBB.GenerateWorldMatrix(world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize());
+	ss()->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss()->GetSize());
+	s2()->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2()->GetSize());
 
 	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm0);
-	world = XMMatrixMultiply(ss->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
+	world = XMMatrixMultiply(ss()->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss()->GetSize());
 
 	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm1);
-	world = XMMatrixMultiply(s2->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2->GetSize());
+	world = XMMatrixMultiply(s2()->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2()->GetSize());
 
 	Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.InterimCalculations.pos0,
-		ss->GetPosition(), col, 5.0f, -1.0f);
+		ss()->GetPosition(), col, 5.0f, -1.0f);
 	Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.InterimCalculations.pos1,
-		s2->GetPosition(), col, 5.0f, -1.0f);
+		s2()->GetPosition(), col, 5.0f, -1.0f);
 
 	if (b)
 	{
@@ -1533,8 +1532,8 @@ void RJMain::DebugCCDSphereTest(void)
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 	}
 
-	ss->SetWorldMomentum(NULL_VECTOR);
-	s2->SetWorldMomentum(NULL_VECTOR);
+	ss()->SetWorldMomentum(NULL_VECTOR);
+	s2()->SetWorldMomentum(NULL_VECTOR);
 
 	Game::TimeFactor = restore_timefactor;
 }
@@ -1551,7 +1550,7 @@ void RJMain::DebugCCDOBBTest(void)
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
 		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
-		ss->SetOrientation(ID_QUATERNION);
+		ss()->SetOrientation(ID_QUATERNION);
 	}
 
 	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera ||
@@ -1562,19 +1561,19 @@ void RJMain::DebugCCDOBBTest(void)
 		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
-	XMVECTOR restore_size = ss->GetSize();
-	ss->SetPosition(sspos);
-	ss->SetOrientation(ssorient);
-	ss->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
-	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
-	ss->RefreshPositionImmediate();
+	XMVECTOR restore_size = ss()->GetSize();
+	ss()->SetPosition(sspos);
+	ss()->SetOrientation(ssorient);
+	ss()->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
+	ss()->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
+	ss()->RefreshPositionImmediate();
 
-	s2->SetPosition(NULL_VECTOR);
-	s2->SetOrientation(ID_QUATERNION);
-	s2->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
-	s2->RefreshPositionImmediate();
-	s2->RefreshPositionImmediate();
-	s2->CollisionOBB.UpdateFromObject(*s2);
+	s2()->SetPosition(NULL_VECTOR);
+	s2()->SetOrientation(ID_QUATERNION);
+	s2()->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
+	s2()->RefreshPositionImmediate();
+	s2()->RefreshPositionImmediate();
+	s2()->CollisionOBB.UpdateFromObject(*s2());
 
 	float restore_timefactor = Game::TimeFactor;
 	Game::TimeFactor = 1.0f;
@@ -1590,37 +1589,37 @@ void RJMain::DebugCCDOBBTest(void)
 	{
 		if (k[DIK_LEFTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
-	bool b = Game::PhysicsEngine.TestContinuousSphereVsOBBCollision(ss, s2);
+	bool b = Game::PhysicsEngine.TestContinuousSphereVsOBBCollision(ss(), s2());
 	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
 	OverlayRenderer::RenderColour col = (b ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
 	XMMATRIX world; XMVECTOR move;
-	ss->CollisionOBB.GenerateWorldMatrix(world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
-	s2->CollisionOBB.GenerateWorldMatrix(world);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2->GetSize());
+	ss()->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss()->GetSize());
+	s2()->CollisionOBB.GenerateWorldMatrix(world);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, s2()->GetSize());
 
 	move = XMVectorNegate(collision.ContinuousTestResult.InterimCalculations.wm0);
-	world = XMMatrixMultiply(ss->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
+	world = XMMatrixMultiply(ss()->GetWorldMatrix(), XMMatrixTranslationFromVector(move));
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss()->GetSize());
 
 	/*move = -collision.ContinuousTestResult.InterimCalculations.wm1;
 	D3DXMatrixTranslation(&trans, move.x, move.y, move.z);
-	world = (*(s2->GetWorldMatrix()) * trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2->GetSize().x, s2->GetSize().y, s2->GetSize().z);*/
+	world = (*(s2()->GetWorldMatrix()) * trans);
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, s2()->GetSize().x, s2()->GetSize().y, s2()->GetSize().z);*/
 
 	Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.InterimCalculations.pos0,
-		ss->GetPosition(), col, ss->GetCollisionSphereRadius() * 2.0f, -1.0f);
+		ss()->GetPosition(), col, ss()->GetCollisionSphereRadius() * 2.0f, -1.0f);
 	//Game::Engine->GetOverlayRenderer()->RenderLine(collision.ContinuousTestResult.InterimCalculations.pos1,
-	//	s2->GetPosition(), col, 5.0f, -1.0f);
+	//	s2()->GetPosition(), col, 5.0f, -1.0f);
 
 	if (b)
 	{
@@ -1628,10 +1627,10 @@ void RJMain::DebugCCDOBBTest(void)
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 	}
 
-	ss->SetWorldMomentum(NULL_VECTOR);
-	s2->SetWorldMomentum(NULL_VECTOR);
+	ss()->SetWorldMomentum(NULL_VECTOR);
+	s2()->SetWorldMomentum(NULL_VECTOR);
 
-	ss->SetSize(restore_size);
+	ss()->SetSize(restore_size);
 	Game::TimeFactor = restore_timefactor;
 }
 
@@ -1648,7 +1647,7 @@ void RJMain::DebugFullCCDTest(void)
 	if (k[DIK_LCONTROL] && k[DIK_0])
 	{
 		sspos = XMVectorSet(50.0f, 0.0f, 50.0f, 0.0f);
-		ss->SetOrientation(ID_QUATERNION);
+		ss()->SetOrientation(ID_QUATERNION);
 	}
 
 	if (Game::Engine->GetCamera()->GetCameraState() != CameraClass::CameraState::DebugCamera ||
@@ -1659,17 +1658,17 @@ void RJMain::DebugFullCCDTest(void)
 		Game::Engine->GetCamera()->SetDebugCameraOrientation(XMQuaternionRotationNormal(RIGHT_VECTOR, PIOVER2));
 	}
 
-	XMVECTOR restore_size = ss->GetSize();
-	ss->SetPosition(sspos);
-	ss->SetOrientation(ssorient);
-	ss->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
-	ss->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
-	ss->RefreshPositionImmediate();
+	XMVECTOR restore_size = ss()->GetSize();
+	ss()->SetPosition(sspos);
+	ss()->SetOrientation(ssorient);
+	ss()->SetSize(XMVectorSet(5.0f, 5.0f, 5.0f, 0.0f));
+	ss()->SetLocalMomentum(XMVectorSet(0.0f, 0.0f, 200.0f, 0.0f));
+	ss()->RefreshPositionImmediate();
 
-	s2->SetPosition(NULL_VECTOR);
-	s2->SetOrientation(ID_QUATERNION);
-	s2->RefreshPositionImmediate();
-	s2->CollisionOBB.UpdateFromObject(*s2);
+	s2()->SetPosition(NULL_VECTOR);
+	s2()->SetOrientation(ID_QUATERNION);
+	s2()->RefreshPositionImmediate();
+	s2()->CollisionOBB.UpdateFromObject(*s2());
 
 	float restore_timefactor = Game::TimeFactor;
 	float restore_physicstime = Game::PhysicsEngine.PhysicsClock.TimeFactor;
@@ -1691,21 +1690,21 @@ void RJMain::DebugFullCCDTest(void)
 	{
 		if (k[DIK_LEFTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, -turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 		if (k[DIK_RIGHTARROW])  {
 			XMVECTOR delta = XMQuaternionRotationNormal(UP_VECTOR, turnspeed * restore_timefactor);
-			ss->SetOrientation(XMQuaternionMultiply(ssorient, delta));
+			ss()->SetOrientation(XMQuaternionMultiply(ssorient, delta));
 		}
 	}
 
-	XMVECTOR wm0 = XMVectorMultiply(ss->PhysicsState.WorldMomentum, Game::TimeFactorV);
-	XMVECTOR pos0 = XMVectorSubtract(ss->GetPosition(), wm0);
-	XMVECTOR posn = ss->GetPosition();
-	XMVECTOR rotn = ss->GetOrientation();
+	XMVECTOR wm0 = XMVectorMultiply(ss()->PhysicsState.WorldMomentum, Game::TimeFactorV);
+	XMVECTOR pos0 = XMVectorSubtract(ss()->GetPosition(), wm0);
+	XMVECTOR posn = ss()->GetPosition();
+	XMVECTOR rotn = ss()->GetOrientation();
 
 	// Do collision detection & handling
-	iSpaceObject *collider = Game::PhysicsEngine.PerformContinuousSpaceCollisionDetection(ss);
+	iSpaceObject *collider = Game::PhysicsEngine.PerformContinuousSpaceCollisionDetection(ss());
 	GamePhysicsEngine::CollisionDetectionResult collision = Game::PhysicsEngine.LastCollisionTest();
 	OverlayRenderer::RenderColour col = (collider ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green);
 
@@ -1714,15 +1713,15 @@ void RJMain::DebugFullCCDTest(void)
 	rot = XMMatrixRotationQuaternion(rotn);
 	trans = XMMatrixTranslationFromVector(pos0);
 	world = XMMatrixMultiply(rot, trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss->GetSize());
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, OverlayRenderer::RenderColour::RC_LightBlue, ss()->GetSize());
 
-	// Render box at end (ss->pos, before any collision handling)
+	// Render box at end (ss()->pos, before any collision handling)
 	trans = XMMatrixTranslationFromVector(posn);
 	world = XMMatrixMultiply(rot, trans);
-	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss->GetSize());
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, col, ss()->GetSize());
 
 	// Render line from pos0 to end pos (before any collision handling)
-	Game::Engine->GetOverlayRenderer()->RenderLine(pos0, posn, col, ss->GetCollisionSphereRadius() * 2.0f, -1.0f);
+	Game::Engine->GetOverlayRenderer()->RenderLine(pos0, posn, col, ss()->GetCollisionSphereRadius() * 2.0f, -1.0f);
 
 	if (collider)
 	{
@@ -1737,13 +1736,13 @@ void RJMain::DebugFullCCDTest(void)
 		Game::Engine->GetOverlayRenderer()->RenderBox(world, OverlayRenderer::RenderColour::RC_LightBlue, 3.0f, 10.0f);
 
 		// If we deflected off the collider, render a line to our resulting position
-		XMVECTOR endwm = ss->PhysicsState.WorldMomentum;
+		XMVECTOR endwm = ss()->PhysicsState.WorldMomentum;
 		if (true || !XMVector3NearEqual(wm0, endwm, Game::C_EPSILON_V))
 		{
 			Game::Engine->GetOverlayRenderer()->RenderLine(
 				collision.ContinuousTestResult.ContactPoint, 
 				XMVectorAdd(collision.ContinuousTestResult.ContactPoint, endwm), 
-				OverlayRenderer::RenderColour::RC_LightBlue, ss->GetCollisionSphereRadius(), -1.0f);
+				OverlayRenderer::RenderColour::RC_LightBlue, ss()->GetCollisionSphereRadius(), -1.0f);
 		}
 
 		// Remove any momentum added as part of the collision
@@ -1755,9 +1754,9 @@ void RJMain::DebugFullCCDTest(void)
 		}
 	}
 
-	ss->SetWorldMomentum(NULL_VECTOR);
-	ss->PhysicsState.AngularVelocity = NULL_VECTOR;
-	ss->SetSize(restore_size);
+	ss()->SetWorldMomentum(NULL_VECTOR);
+	ss()->PhysicsState.AngularVelocity = NULL_VECTOR;
+	ss()->SetSize(restore_size);
 
 	Game::TimeFactor = restore_timefactor;
 	Game::PhysicsEngine.PhysicsClock.TimeFactor = restore_physicstime;
@@ -1772,78 +1771,68 @@ void RJMain::__CreateDebugScenario(void)
 		Game::FactionManager.GetFaction("faction_us"), Faction::FactionDisposition::Hostile);
 
 	// Temp: Create a new ship for the player to use
-	ss = SimpleShip::Create("testship1");
-	ss->SetName("Player ship ss");
-	ss->OverrideInstanceCode("ss");
-	ss->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	ss->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
-	ss->SetOrientation(ID_QUATERNION);
-	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss);
+	SimpleShip *ss_ship = SimpleShip::Create("testship1");
+	ss_ship->SetName("Player ship ss");
+	ss_ship->OverrideInstanceCode("ss");
+	ss_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
+	ss_ship->SetOrientation(ID_QUATERNION);
+	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
+	ss = ss_ship;
 
 	// Temp: Create a complex ship in this scenario
 	if (true) {
-		cs = ComplexShip::Create("testfrigate12");		// Previously 12
-		cs->SetName("Test frigate cs");
-		cs->GetSection(0)->SetName("cs section 0");
-		cs->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		cs->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
-		cs->SetOrientation(ID_QUATERNION);
+		ComplexShip *cs_ship = ComplexShip::Create("testfrigate12");		// Previously 12
+		cs_ship->SetName("Test frigate cs");
+		cs_ship->GetSection(0)->SetName("cs section 0");
+		cs_ship->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		cs_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
+		cs_ship->SetOrientation(ID_QUATERNION);
+		cs = cs_ship;
 
 		Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
-		cs->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
+		cs_ship->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
 	}
 
 	// Temp: Create a second ship in this scenario
 	if (true) {
-		s2 = SimpleShip::Create("testship1");
-		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2);
-		s2->SetName("Test ship s2");
-		s2->OverrideInstanceCode("Test ship s2");
-		s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
-		s2->SetOrientation(ID_QUATERNION);
+		SimpleShip *s2_ship = SimpleShip::Create("testship1");
+		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
+		s2_ship->SetName("Test ship s2");
+		s2_ship->OverrideInstanceCode("Test ship s2");
+		s2_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
+		s2_ship->SetOrientation(ID_QUATERNION);
+		s2 = s2_ship;
 	}
 
 
 	if (true) {
-		s3[0] = SimpleShip::Create("testship1");
-		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[0]);
-		s3[0]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[0]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
-		s3[0]->SetOrientation(ID_QUATERNION);
+		SimpleShip *s3_0_ship = SimpleShip::Create("testship1");
+		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_0_ship);
+		s3_0_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+		s3_0_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2()->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
+		s3_0_ship->SetOrientation(ID_QUATERNION);
+		s3[0] = s3_0_ship;
 	}
-
-	if (false) {
-		s3[1] = SimpleShip::Create("test_placeholder_ship");
-		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[1]);
-		s3[1]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[1]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
-		s3[1]->SetOrientation(ID_QUATERNION);
-
-		s3[2] = SimpleShip::Create("test_placeholder_ship");
-		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3[2]);
-		s3[2]->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3[2]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s3[1]->GetPosition(), XMVectorSet(0.0f, 25.0f, 0.0f, 0.0f)));
-		s3[2]->SetOrientation(ID_QUATERNION);
-	}
-
 
 	// Temp: Create a new actor
 	if (true)
 	{
-		a1 = D::Actors.Get("human_soldier_basic")->CreateInstance();
-		a1->SetName("A1");
-		a1->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-		a1->MoveIntoEnvironment(cs);
-		ComplexShipTile *t = cs->GetFirstTileOfType(D::TileClass::Corridor);
+		Actor *a1_actor = D::Actors.Get("human_soldier_basic")->CreateInstance();
+		a1_actor->SetName("A1");
+		a1_actor->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		a1_actor->MoveIntoEnvironment(cs());
+		ComplexShipTile *t = cs()->GetFirstTileOfType(D::TileClass::Corridor);
 		if (t)
-			a1->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
+			a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
 			XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
 		else
-			a1->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
+			a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
-		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs, a1->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
-		a1->AssignNewOrder(o);
+		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs(), a1_actor->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
+		a1_actor->AssignNewOrder(o);
+		a1 = a1_actor;
 	}
 
 	SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
@@ -1856,7 +1845,7 @@ void RJMain::__CreateDebugScenario(void)
 	turret->SetParent(ss);
 	turret->InitialiseLaunchers(1);
 	turret->SetMaxRange(1000.0f);
-	turret->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));	// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
+	turret->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss()->GetCollisionSphereRadius()));	// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
 	turret->SetBaseRelativeOrientation(ID_QUATERNION);
 	turret->SetPitchLimits(-PI / 4.0f, +PI / 4.0f);
 	turret->SetPitchRate(0.1f);
@@ -1871,7 +1860,7 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetProjectileSpread(0.01f);
 	l->SetLaunchImpulse(1000.0f);
 	l->SetLaunchMethod(ProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
-	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss->GetCollisionSphereRadius()));		// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
+	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss()->GetCollisionSphereRadius()));		// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
 	l->SetRelativeOrientation(ID_QUATERNION);
 	l->SetProjectileSpin(1.0f);
 	l->SetLinearVelocityDegradeState(false);
@@ -1903,18 +1892,18 @@ void RJMain::__CreateDebugScenario(void)
 	bdef->GenerateProjectileRenderingData();*/
 
 	D::BasicProjectiles.Get("basiclaser01")->AddDamageType(Damage(DamageType::Laser, 5.0f));
-	s2->SetMaxHealth(20.0f);
-	s2->SetHealth(20.0f);
+	s2()->SetMaxHealth(20.0f);
+	s2()->SetHealth(20.0f);
 
 	XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
 	SpaceTurret *t = D::Turrets.Get("turret_basic01");
-	XMFLOAT3 sz; XMStoreFloat3(&sz, cs->GetSize());
+	XMFLOAT3 sz; XMStoreFloat3(&sz, cs()->GetSize());
 	for (int i = 0; i < 4; ++i)
 		for (int j = 0; j < 2; ++j)
 		{
 			XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
-			pos = XMVectorSubtract(pos, XMVectorMultiply(cs->GetSize(), HALF_VECTOR));
+			pos = XMVectorSubtract(pos, XMVectorMultiply(cs()->GetSize(), HALF_VECTOR));
 			SpaceTurret *nt = t->Copy();
 			nt->SetRelativePosition(pos);
 			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
@@ -1927,7 +1916,7 @@ void RJMain::__CreateDebugScenario(void)
 				nt->GetLauncher(l)->SetProjectileSpread(0.01f);
 			}
 
-			cs->TurretController.AddTurret(nt);
+			cs()->TurretController.AddTurret(nt);
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
 		}
 
@@ -1946,12 +1935,12 @@ void RJMain::__CreateDebugScenario(void)
 	sst->SetYawRate(PI);
 	sst->SetPitchRate(PI);
 	sst->SetControlMode(SpaceTurret::ControlMode::AutomaticControl);
-	ss->TurretController.AddTurret(sst);
+	ss()->TurretController.AddTurret(sst);
 	SpaceTurret *sst2 = sst->Copy();
-	s2->TurretController.AddTurret(sst2);
+	s2()->TurretController.AddTurret(sst2);
 
-	s2->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	//s2->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
+	s2()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+	//s2()->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
 	
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
@@ -2027,18 +2016,17 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		SimpleShip *ship2 = (SimpleShip*)Game::GetObjectByInstanceCode("Test ship s2");
-		if (ship2)
+		if (s2())
 		{
 			std::string ordertype = "None";
 			std::vector<Order*> orders;
-			s2->GetAllExecutingOrders(orders);
+			s2()->GetAllExecutingOrders(orders);
 			if (orders.size() == 1)
 				ordertype = Order::TranslateOrderTypeToString(orders[0]->GetType());
 			else if (orders.size() > 1)
 				ordertype = "(MULTIPLE)";
 
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Health: %.2f / %.2f", s2->GetHealth(), s2->GetMaxHealth());
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Health: %.2f / %.2f", s2()->GetHealth(), s2()->GetMaxHealth());
 			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		}
 	}

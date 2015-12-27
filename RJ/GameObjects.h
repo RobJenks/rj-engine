@@ -25,6 +25,9 @@ namespace Game
 		// Constructors
 		ObjectRegisterEntry(void) : ID(0), Object(NULL), Active(true), RefCount(0) { }
 		ObjectRegisterEntry(iObject *object) : ID(object ? object->GetID() : 0), Object(object), Active(true), RefCount(0) { }
+		
+		// Constructor accepting all parameters; used only for internal operations
+		ObjectRegisterEntry(Game::ID_TYPE id, iObject *object, bool active, int refcount) : ID(id), Object(object), Active(active), RefCount(refcount) { }
 
 		// Record a new reference to this entry
 		CMPINLINE void			ReferenceAdded(void)		{ ++RefCount; }
