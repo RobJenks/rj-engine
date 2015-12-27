@@ -1,6 +1,7 @@
 #include "iSpaceObjectEnvironment.h"
 #include "SimulationStateManager.h"
 #include "iActiveObject.h"
+#include "ObjectReference.h"
 
 #include "iEnvironmentObject.h"
 
@@ -18,20 +19,20 @@ void iEnvironmentObject::InitialiseCopiedObject(iEnvironmentObject *source)
 void iEnvironmentObject::MoveIntoEnvironment(iSpaceObjectEnvironment *env)
 {
 	// If we have a current environment, we need to inform it and the state manager that we are leaving the environment
-	if (m_parent)
+	if (m_parent())
 	{
-		m_parent->ObjectLeavingEnvironment(this);
-		Game::StateManager.ObjectLeavingInteriorEnvironment(this, m_parent);
+		m_parent()->ObjectLeavingEnvironment(this);
+		Game::StateManager.ObjectLeavingInteriorEnvironment(this, m_parent());
 	}
 
 	// Store the new environment
 	m_parent = env;
 
 	// Inform the new environment and state manager that we are entering the environment, assuming it is not null
-	if (m_parent)
+	if (env)
 	{
-		m_parent->ObjectEnteringEnvironment(this);
-		Game::StateManager.ObjectEnteringInteriorEnvironment(this, m_parent);
+		m_parent()->ObjectEnteringEnvironment(this);
+		Game::StateManager.ObjectEnteringInteriorEnvironment(this, m_parent());
 	}
 
 	// Move the object to be within the environment (although this may not be accessible space) as an initial state
@@ -71,10 +72,10 @@ void iEnvironmentObject::SetEnvironmentPositionAndOrientation(const FXMVECTOR po
 
 void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 {
-	if (m_parent)
+	if (m_parent())
 	{
 		// Transform the relative position by the parent world matrix to get this object's absolute position
-		SetPosition(XMVector3TransformCoord(m_envposition, m_parent->GetZeroPointWorldMatrix()));
+		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
 
 		// We need to use components of the environment position vector
 		XMFLOAT3 envposf;
@@ -93,7 +94,7 @@ void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
 		{
 			// Trigger an update of the environment record, that tracks the location of objects within it
-			m_parent->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
+			m_parent()->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
 
 			// Store the new element range
 			m_parent_element_min = min_element;
@@ -115,10 +116,10 @@ void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 
 void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 {
-	if (m_parent)
+	if (m_parent())
 	{
 		// Multiply in the relative orientation to the parent's to get this object's absolute orientation
-		SetOrientation(m_envorientation * m_parent->GetOrientation());
+		SetOrientation(m_envorientation * m_parent()->GetOrientation());
 	}
 	else
 	{
@@ -134,11 +135,11 @@ void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 
 void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 {
-	if (m_parent)
+	if (m_parent())
 	{
 		// Derive absolute position & orientation based on the parent object's state
-		SetPosition(XMVector3TransformCoord(m_envposition, m_parent->GetZeroPointWorldMatrix()));
-		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent->GetOrientation()));
+		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
+		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent()->GetOrientation()));
 
 		// We need to use components of the environment position vector
 		XMFLOAT3 envposf;
@@ -157,7 +158,7 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
 		{
 			// Trigger an update of the envionrment record, that tracks the location of objects within it
-			m_parent->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
+			m_parent()->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
 		
 			// Store the new element range
 			m_parent_element_min = min_element;
@@ -187,7 +188,8 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 void iEnvironmentObject::UpdateSimulationStateFromParentElements(void)
 {
 	// Parameter check; make sure we have a valid parent environment before proceeding
-	if (!m_parent) return;
+	iSpaceObjectEnvironment *env = m_parent();
+	if (!env) return;
 
 	// We will not simulate the object by default
 	iObject::ObjectSimulationState state = iObject::ObjectSimulationState::NoSimulation;
@@ -201,7 +203,7 @@ void iEnvironmentObject::UpdateSimulationStateFromParentElements(void)
 			for (int z = m_parent_element_min.z; z <= m_parent_element_max.z; ++z)
 			{
 				// Attempt to retrieve the element at this location
-				el = m_parent->GetElement(x, y, z);
+				el = env->GetElement(x, y, z);
 				if (!el) continue;
 
 				// Get the simulation state of this element, and upgrade our own state if the element state is "greater"
@@ -233,7 +235,7 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	XMStoreFloat3(&lm, PhysicsState.LocalMomentum);
 
 	// Apply gravity to the object, if it is in a non-zero gravity environment
-	ComplexShipElement *el = m_parent->GetElement(Game::PhysicalPositionToElementLocation(m_envposition));
+	ComplexShipElement *el = m_parent()->GetElement(Game::PhysicalPositionToElementLocation(m_envposition));
 	if (el && el->GetGravityStrength() > Game::C_EPSILON)
 	{
 		// Apply this downward (relative to the environment) gravity force to the object

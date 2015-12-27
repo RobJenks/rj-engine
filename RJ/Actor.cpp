@@ -137,7 +137,7 @@ void Actor::SetAnimationImmediate(const AnimationClip *anim)
 void Actor::Jump(void)
 {
 	// Make sure we have all required data
-	if (!m_parent) return;
+	if (!m_parent()) return;
 
 	// Determine the jump force for this actor.  Force is mass-independent, i.e. post-division through by inverse mass.  
 	// TODO: Change this to pull from actor attributes
@@ -265,10 +265,10 @@ Order::OrderResult Actor::MoveToPosition(Order_ActorMoveToPosition & order)
 Order::OrderResult Actor::MoveToTarget(Order_ActorMoveToTarget & order)
 {
 	// Parameter check; make sure the target exists, and that we are both in the same environment
-	if (order.Target == NULL || order.Target->GetParentEnvironment() != m_parent) return Order::OrderResult::InvalidOrder;
+	if (order.Target() == NULL || order.Target()->GetParentEnvironment() != m_parent()) return Order::OrderResult::InvalidOrder;
 
 	// This is effectively just a move-to-position command with the current position of the target
-	if (_MoveToPosition(order.Target->GetPosition(), order.CloseDistanceSq, order.Run) == true)
+	if (_MoveToPosition(order.Target()->GetPosition(), order.CloseDistanceSq, order.Run) == true)
 		return Order::OrderResult::ExecutedAndCompleted;
 	else
 		return Order::OrderResult::Executed;

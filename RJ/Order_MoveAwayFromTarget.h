@@ -4,6 +4,7 @@
 #define __Order_MoveAwayFromTargetH__
 
 #include "Order.h"
+#include "ObjectReference.h"
 #include "Utility.h"
 class iSpaceObject;
 
@@ -39,7 +40,7 @@ public:
 
 public:
 
-	iSpaceObject *					Target;
+	ObjectReference<iSpaceObject>	Target;
 	float							RetreatDistance, RetreatDistanceSq;
 	XMVECTOR						RetreatDistanceSqV;
 	float							MomentumWeighting;

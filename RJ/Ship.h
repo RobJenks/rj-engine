@@ -9,6 +9,7 @@
 #include "FastMath.h"
 #include "CompilerSettings.h"
 #include "iSpaceObject.h"
+#include "ObjectReference.h"
 #include "iConsumesOrders.h"
 #include "iContainsHardpoints.h"
 #include "iContainsTurrets.h"
@@ -94,10 +95,10 @@ public:
 	}
 
 	// Returns a flag indicating whether the ship is currently performing collision avoidance
-	CMPINLINE bool		IsAvoidingCollision(void) const			{ return m_avoid_target != NULL; }
+	CMPINLINE bool		IsAvoidingCollision(void) const			{ return m_avoid_target() != NULL; }
 
 	// Returns the object that the ship is currently maneuvering to avoid, if relevant, or NULL otherwise
-	CMPINLINE iObject * GetCollisionAvoidanceTarget(void)		{ return m_avoid_target; }
+	CMPINLINE iObject * GetCollisionAvoidanceTarget(void)		{ return m_avoid_target(); }
 
 	// Returns a bool indicating whether a ship can accept a specified class of order.  Overridden with additional orders by simple/complex subclasses
 	bool				CanAcceptOrderType(Order::OrderType type);
@@ -263,10 +264,10 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
-	iSpaceObject *		m_avoid_target;				// Reference to any space abject that we are currently maneuvering to avoid, or NULL if none
+	ObjectReference<iSpaceObject>			m_avoid_target;					// Reference to any space abject that we are currently maneuvering to avoid, or NULL if none
 
-	AXMVECTOR			m_turnrate_v, m_turnrate_nv;// Vectorised turn rate and negation for faster per-frame calculations
-	AXMVECTOR			m_vlimit_v, m_avlimit_v;	// Vectorised linear/angular velocity limits for faster per-frame calculations
+	AXMVECTOR								m_turnrate_v, m_turnrate_nv;	// Vectorised turn rate and negation for faster per-frame calculations
+	AXMVECTOR								m_vlimit_v, m_avlimit_v;		// Vectorised linear/angular velocity limits for faster per-frame calculations
 
 	std::vector<iSpaceObject*>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
 	std::vector<iSpaceObject*>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run

@@ -5,6 +5,7 @@
 
 #include <vector>
 #include "Order.h"
+#include "ObjectReference.h"
 class iSpaceObjectEnvironment;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -36,18 +37,18 @@ public:
 public:
 
 	// Order parameters
-	AXMVECTOR						StartPosition;
-	AXMVECTOR						TargetPosition;
-	float							CloseDistance, CloseDistanceSq;		// Distance to the target that we will attempt to reach
-	float							FollowDistance, FollowDistanceSq;	// Distance we will get within each waypoint on the route
-	bool							Run;
-	iSpaceObjectEnvironment *		Environment;
+	AXMVECTOR									StartPosition;
+	AXMVECTOR									TargetPosition;
+	float										CloseDistance, CloseDistanceSq;		// Distance to the target that we will attempt to reach
+	float										FollowDistance, FollowDistanceSq;	// Distance we will get within each waypoint on the route
+	bool										Run;
+	ObjectReference<iSpaceObjectEnvironment>	Environment;
 
 
 	// Maintain an array of positions that will be followed on the path, and an index specifying 
 	// which position is the current move target
-	INTVECTOR3 *					PathNodes;
-	int								PathLength, PathIndex;
+	INTVECTOR3 *								PathNodes;
+	int											PathLength, PathIndex;
 
 };
 

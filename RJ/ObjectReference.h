@@ -32,6 +32,9 @@ public:
 		}
 	}
 
+	// Constructor; establishes a reference to the specified object
+	CMPINLINE ObjectReference(iObject *object) : ObjectReference(object ? object->GetID() : 0) { }
+
 	// Custom assignment operator; assigns one reference to another, incrementing reference counts accordingly
 	CMPINLINE void operator=(const ObjectReference & rhs)
 	{
@@ -82,7 +85,8 @@ public:
 
 	// Operator (); returns the object being wrapped by this reference
 	// No longer need to test (entry.Active ? entry.object : NULL) since object is set to NULL on unregistering anyway
-	CMPINLINE T * operator()(void)				{ return static_cast<T*>(m_entry->Object); }
+	CMPINLINE T * operator()(void)				{ return (T*)(m_entry->Object); }
+	CMPINLINE T * operator()(void) const		{ return (T*)(m_entry->Object); }
 
 protected:
 

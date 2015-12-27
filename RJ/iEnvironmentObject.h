@@ -5,6 +5,7 @@
 
 #include "FastMath.h"
 #include "iActiveObject.h"
+#include "ObjectReference.h"
 class iSpaceObjectEnvironment;
 
 // Extends the iSpaceObject interface for objects that exist within and relative to some environment
@@ -18,7 +19,7 @@ public:
 	USE_ALIGN16_ALLOCATORS(iEnvironmentObject)
 
 	// Default constructor; initialise fields to default values
-	iEnvironmentObject(void) : m_parent(NULL), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_orientchanges(0),
+	iEnvironmentObject(void) : m_parent(nullptr), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_orientchanges(0),
 								m_parent_element_min(INTVECTOR3(1, 1, 1)), m_parent_element_max(INTVECTOR3(-1, -1, -1)),
 								m_multielement(false), m_onground(false)
 	{ 
@@ -28,7 +29,7 @@ public:
 	}
 
 	// Returns the environment that this object is currently located in
-	CMPINLINE iSpaceObjectEnvironment *			GetParentEnvironment(void) const			{ return m_parent; }
+	CMPINLINE iSpaceObjectEnvironment *			GetParentEnvironment(void) const			{ return m_parent(); }
 
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
@@ -88,7 +89,7 @@ public:
 protected:
 
 	// Parent environment that the object is located in, and the element bounds within which it exists
-	iSpaceObjectEnvironment *					m_parent;
+	ObjectReference<iSpaceObjectEnvironment>	m_parent;
 	INTVECTOR3									m_parent_element_min, m_parent_element_max;
 	bool										m_multielement;
 

@@ -13,7 +13,7 @@ Order_AttackBasic::Order_AttackBasic(Ship *attacker, iSpaceObject *target)
 	Target = target;
 	CloseDist = 
 		(attacker->VelocityLimit.Value * Game::C_DEFAULT_ATTACK_CLOSE_TIME) + 
-		(Target->GetCollisionSphereRadius() * Game::C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER);
+		(target->GetCollisionSphereRadius() * Game::C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER);
 	CloseDistSq = (CloseDist * CloseDist);
 	CloseDistV = XMVectorReplicate(CloseDist);
 	CloseDistSqV = XMVectorReplicate(CloseDistSq);

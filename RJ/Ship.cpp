@@ -532,7 +532,7 @@ void Ship::IdentifyCollisionThreats(void)
 	bool intersects;
 
 	// We do not have any collision threat by default, unless we find one here
-	m_avoid_target = NULL;
+	iSpaceObject *new_avoid_target = NULL;
 
 	// Determine the collision test vector based on our current momentum
 	XMVECTOR avoidvector = DetermineCollisionAvoidanceCheckVector();
@@ -567,11 +567,14 @@ void Ship::IdentifyCollisionThreats(void)
 			if (XMVector2Less(obj_distsq, nearest_collision))
 			{
 				// The ship computer will attempt to maneuver to avoid collision with the object in "m_avoid_target"
-				m_avoid_target = obj;
+				new_avoid_target = obj;
 				nearest_collision = obj_distsq;
 			}
 		}
 	}
+
+	// Assign the new avoid target (which will be NULL if no objects are in our path)
+	new_avoid_target = new_avoid_target;
 }
 
 void Ship::PerformCollisionAvoidance(void)
@@ -591,7 +594,7 @@ void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
 
 	// Useful info: http://mathinsight.org/dot_product
 	// Get the vector from our current position to the avoidance target
-	XMVECTOR tgt = XMVectorSubtract(m_avoid_target->GetPosition(), m_position);
+	XMVECTOR tgt = XMVectorSubtract(m_avoid_target()->GetPosition(), m_position);
 
 	// Normalise our world momentum vector to save additional calculations later
 	XMVECTOR wm_n = XMVector3NormalizeEst(PhysicsState.WorldMomentum);
@@ -618,10 +621,10 @@ void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
 	// Our collision response vector is therefore ((norm(proj - tgt) * distance), where we will use 
 	// ((radius0 + radius1) * safety_multiplier) as the distance
 	XMVECTOR response = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(proj, tgt)),
-		((m_collisionsphereradius + m_avoid_target->GetCollisionSphereRadius()) * Game::C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER));
+		((m_collisionsphereradius + m_avoid_target()->GetCollisionSphereRadius()) * Game::C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER));
 
 	// Finally, determine the pitch and yaw required to turn the ship towards this target 
-	DetermineYawAndPitchToTarget(*this, XMVectorAdd(m_avoid_target->GetPosition(), response), outPitchYaw);
+	DetermineYawAndPitchToTarget(*this, XMVectorAdd(m_avoid_target()->GetPosition(), response), outPitchYaw);
 }
 
 void Ship::DetermineNewPosition(void)
@@ -855,10 +858,10 @@ Order::OrderResult Ship::MoveToPosition(Order_MoveToPosition & order)
 Order::OrderResult Ship::MoveToTarget(Order_MoveToTarget & order)
 {
 	// Parameter check
-	if (!order.Target) return Order::OrderResult::InvalidOrder;
+	if (!order.Target()) return Order::OrderResult::InvalidOrder;
 
 	// Call the primary movement function; this is essentially a move-to-position order for the target's current position
-	if (_MoveToPosition(order.Target->GetPosition(), order.CloseDistanceSq) == true)
+	if (_MoveToPosition(order.Target()->GetPosition(), order.CloseDistanceSq) == true)
 		return Order::OrderResult::ExecutedAndCompleted;
 	else
 		return Order::OrderResult::Executed;
@@ -868,10 +871,10 @@ Order::OrderResult Ship::MoveToTarget(Order_MoveToTarget & order)
 Order::OrderResult Ship::MoveAwayFromTarget(Order_MoveAwayFromTarget & order)
 {
 	// Parameter check
-	if (!order.Target) return Order::OrderResult::InvalidOrder;
+	if (!order.Target()) return Order::OrderResult::InvalidOrder;
 
 	// Test whether we have retreated far enough from the target ship
-	XMVECTOR tgt_to_ship = XMVectorSubtract(m_position, order.Target->GetPosition());
+	XMVECTOR tgt_to_ship = XMVectorSubtract(m_position, order.Target()->GetPosition());
 	XMVECTOR distsq = XMVector3LengthSq(tgt_to_ship);
 	if (XMVector2Greater(distsq, order.RetreatDistanceSqV))
 	{
@@ -894,16 +897,16 @@ Order::OrderResult Ship::MoveAwayFromTarget(Order_MoveAwayFromTarget & order)
 Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 {
 	// Parameter check
-	if (!order.Target) return Order::OrderResult::InvalidOrder;
+	if (!order.Target()) return Order::OrderResult::InvalidOrder;
 
 	// TODO: If the target is destroyed, or no longer exists, return executed & completed
 
 	// We need a new sub-order; if we are outside the retreat range, close on the target
-	XMVECTOR distsq = XMVector3LengthSq(XMVectorSubtract(order.Target->GetPosition(), m_position));
+	XMVECTOR distsq = XMVector3LengthSq(XMVectorSubtract(order.Target()->GetPosition(), m_position));
 	if (XMVector2Greater(distsq, order.RetreatDistSqV))
 	{
 		// We want to close on the target; give an order to move into the object within the desired close distance
-		Order_MoveToTarget *move = new Order_MoveToTarget(order.Target, order.CloseDist);
+		Order_MoveToTarget *move = new Order_MoveToTarget(order.Target(), order.CloseDist);
 		AssignNewOrder(move);
 
 		// Set this sub-order as a dependency and assign it; control will return to this order when "move" completes
@@ -914,7 +917,7 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 	else
 	{
 		// We want to put some distance between ourself and the target
-		Order_MoveAwayFromTarget *move = new Order_MoveAwayFromTarget(order.Target, order.RetreatDist, 0.5f);
+		Order_MoveAwayFromTarget *move = new Order_MoveAwayFromTarget(order.Target(), order.RetreatDist, 0.5f);
 		AssignNewOrder(move);
 
 		// Set this sub-order as a dependency and assign it; control will return to this order when "move" completes

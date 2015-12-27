@@ -4,6 +4,7 @@
 #define __Order_MoveToTargetH__
 
 #include "Order.h"
+#include "ObjectReference.h"
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -32,7 +33,7 @@ public:
 
 public:
 
-	iSpaceObject *					Target;
+	ObjectReference<iSpaceObject>	Target;
 	float							CloseDistance, CloseDistanceSq;
 
 };

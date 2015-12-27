@@ -4,6 +4,7 @@
 #define __Order_AttackBasicH__
 
 #include "Order.h"
+#include "ObjectReference.h"
 class iSpaceObject;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -28,7 +29,7 @@ public:
 public:
 
 	// Order parameters
-	iSpaceObject *						Target;								// Target of the attack
+	ObjectReference<iSpaceObject>		Target;								// Target of the attack
 	float								CloseDist, CloseDistSq;				// Close distance when making a run (based on target size)
 	AXMVECTOR							CloseDistV, CloseDistSqV;			// Close distance when making a run (based on target size) - vectorised form
 	float								RetreatDist, RetreatDistSq;			// Distance to retreat between runs (based on target size)

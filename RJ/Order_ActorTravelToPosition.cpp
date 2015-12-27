@@ -28,11 +28,12 @@ Order_ActorTravelToPosition::Order_ActorTravelToPosition(	iSpaceObjectEnvironmen
 void Order_ActorTravelToPosition::CalculateTravelPath(void)
 {
 	// Parameter check
-	if (!Environment || !Environment->GetNavNetwork()) return;
+	iSpaceObjectEnvironment *env = Environment();
+	if (!env || !env->GetNavNetwork()) return;
 
 	// Find the nav nodes closest to our current (start) location, and the target (end) location
-	NavNode *start = Environment->GetNavNetwork()->GetClosestNode(StartPosition);
-	NavNode *end = Environment->GetNavNetwork()->GetClosestNode(TargetPosition);
+	NavNode *start = env->GetNavNetwork()->GetClosestNode(StartPosition);
+	NavNode *end = env->GetNavNetwork()->GetClosestNode(TargetPosition);
 
 	// If no node can be found for either the start or end of the path, quit now and generate no path.  Order will
 	// then terminate on its first execution
@@ -40,7 +41,7 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 
 	// Create a vector to hold the output nodes and request a path from the nav network
 	std::vector<NavNode*> revpath;
-	Result result = Environment->GetNavNetwork()->FindPath(start, end, &revpath);
+	Result result = env->GetNavNetwork()->FindPath(start, end, &revpath);
 
 	// If no path is possible then return now; order will terminate on first execution since it can generate no child nodes
 	if (result != ErrorCodes::NoError) return;

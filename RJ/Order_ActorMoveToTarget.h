@@ -4,6 +4,7 @@
 #define __Order_ActorMoveToTargetH__
 
 class iEnvironmentObject;
+#include "ObjectReference.h"
 #include "Order.h"
 
 
@@ -36,7 +37,7 @@ public:
 public:
 
 	// Order parameters
-	iEnvironmentObject *					Target;
+	ObjectReference<iEnvironmentObject>		Target;
 	float									CloseDistance, CloseDistanceSq;
 	bool									Run;
 
