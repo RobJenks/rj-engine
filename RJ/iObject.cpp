@@ -145,11 +145,6 @@ void iObject::InitialiseCopiedObject(iObject *source)
 // unintended consequences if called within the game object update loop (which uses iterators)
 void iObject::SetSimulationState(ObjectSimulationState state)
 {
-	if (m_objecttype == iObject::ObjectType::SpaceEmitterObject)
-	{
-		int a = 1 + Game::ClockMs;
-	}
-
 	// Record the requested change in state
 	m_nextsimulationstate = state; 
 

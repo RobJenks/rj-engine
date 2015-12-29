@@ -6,9 +6,6 @@
 #include <string>
 #include "CompilerSettings.h"
 #include "MemoryPool.h"
-#include "OverlayRenderer.h"
-#include "ScheduledObject.h"
-#include "CoreEngine.h"
 template <class Octree> class MemoryPool;
 
 // The index into child node pointers for each of the eight possible subdivision directions
@@ -141,9 +138,6 @@ public:
 
 	// Debug method to generate a string output of an Octree and its recursively-defined children
 	string							DebugOutput(void);
-
-	// Debug method to render node bounds in 3D space
-	void							DebugRender(bool include_children);
 
 	// Default destructor
 	~Octree(void);
@@ -544,25 +538,6 @@ string Octree<T>::DebugOutput(void)
 
 	// Return the output from this section of the tree
 	return s.str();
-}
-
-// Debug method to render node bounds in 3D space
-template <typename T> 
-void Octree<T>::DebugRender(bool include_children)
-{
-	// Create a world matrix that will translate the rendered box into position
-	XMMATRIX world = XMMatrixTranslationFromVector(m_min);
-
-	// Send a request to the overlay renderer to render this node of the tree
-	Game::Engine->GetOverlayRenderer()->RenderBox(world, 
-												 (m_itemcount == 0 ? OverlayRenderer::RenderColour::RC_Red : OverlayRenderer::RenderColour::RC_Green),
-												 (m_itemcount == 0 ? 1.0f : 3.0f), (m_xmax-m_xmin), (m_ymax-m_ymin), (m_zmax-m_zmin) );
-
-	// Now also render children if required
-	if (include_children) 
-		for (int i = 0; i < 8; ++i)
-			if (m_children[i]) m_children[i]->DebugRender(true);
-
 }
 
 // Returns a reference to this node's ultimate parent, i.e. the root node at the top of its tree

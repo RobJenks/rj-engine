@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "GameDataExtern.h"
+#include "CoreEngine.h"
 #include "GameObjects.h"
 #include "Player.h"
 #include "Ship.h"

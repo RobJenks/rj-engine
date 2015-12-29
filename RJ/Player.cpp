@@ -12,6 +12,7 @@
 #include "ActorAttributes.h"
 #include "MovementLogic.h"
 #include "iSpaceObjectEnvironment.h"
+#include "ObjectReference.h"
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -63,12 +64,12 @@ void Player::UpdatePlayerState(void)
 	if (m_envoverride == Player::PlayerEnvironmentOverrideType::NoOverride)
 	{
 		// Take different action depending on the current player environment
-		if (m_state == Player::StateType::ShipPilot && m_playership)
+		if (m_state == Player::StateType::ShipPilot)
 		{
 			// If the player is currently piloting a ship
 			UpdatePlayerShipState();
 		}
-		else if (m_state == Player::StateType::OnFoot && m_actor)
+		else if (m_state == Player::StateType::OnFoot)
 		{
 			// If the player is currently on foot
 			UpdatePlayerActorState();
@@ -83,34 +84,43 @@ void Player::UpdatePlayerState(void)
 
 void Player::UpdatePlayerShipState(void)
 {
+	// Make sure we have a valid player ship object
+	Ship *ship = m_playership();
+	if (!ship) return;
+
 	// If the player is piloting a ship then inherit position/orientation from the player ship.  
 	// Master source = ship in this case.  Easier since ship will calculate all trajectories etc for us
-	m_position		= m_envposition			= m_playership->GetPosition();
-	m_orientation	= m_envorientation		= m_playership->GetOrientation();
+	m_position = m_envposition = ship->GetPosition();
+	m_orientation = m_envorientation = ship->GetOrientation();
 
 	// Store a reference to the current player system
-	m_systemenv = m_playership->GetSpaceEnvironment();
+	m_systemenv = ship->GetSpaceEnvironment();
 }
 
 void Player::UpdatePlayerActorState(void)
 {
+	// Make sure we have a valid player actor object
+	Actor *actor = m_actor();
+	if (!actor) return;
+
 	// Retrieve position & orientation data from the player actor
-	m_envposition = m_actor->GetEnvironmentPosition();
-	m_envorientation = m_actor->GetEnvironmentOrientation();
+	m_envposition = actor->GetEnvironmentPosition();
+	m_envorientation = actor->GetEnvironmentOrientation();
 
 	// We also want to keep a local copy of the player absolute pos & orient, so retrieve them now
-	m_position = m_actor->GetPosition();
-	m_orientation = m_actor->GetOrientation();
+	m_position = actor->GetPosition();
+	m_orientation = actor->GetOrientation();
 
 	// Retrieve data relating to the immediate player environment
-	if (m_parentenv)
+	iSpaceObjectEnvironment *env = m_parentenv();
+	if (env)
 	{
 		// Get a reference to the ship element this player is located in
 		m_complexshipenvelementlocation = Game::PhysicalPositionToElementLocation(m_envposition);
-		m_complexshipenvelement = m_parentenv->GetElement(m_complexshipenvelementlocation);
+		m_complexshipenvelement = env->GetElement(m_complexshipenvelementlocation);
 
 		// Also store a reference to the ultimate player system, i.e. the system this player's environment sits within
-		m_systemenv = m_parentenv->GetSpaceEnvironment();
+		m_systemenv = env->GetSpaceEnvironment();
 	}
 
 
@@ -120,7 +130,7 @@ void Player::UpdatePlayerActorState(void)
 		m_headbobposition -= (m_headbobspeed * Game::TimeFactor);
 		if (m_headbobposition < 0.0f) m_headbobposition = 0.0f;
 	}
-		
+
 	// Recalculate the view offset matrix each frame
 	RecalculatePlayerOffsetMatrix();
 }
@@ -148,16 +158,18 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 		if (keys[DIK_D])			{ MovePlayerActor(Direction::Right, true); }
 		if (keys[DIK_SPACE])		{ ActorJump(); }
 	}
-	else if (m_state == StateType::ShipPilot && m_playership)
+	else if (m_state == StateType::ShipPilot)
 	{
 		/* Otherwise if we are piloting a ship, use the keyboard input to adjust ship engines, heading etc. */
-		
-		// Ship thrust control
-		if (keys[DIK_W])			{ m_playership->IncrementTargetThrustOfAllEngines(); }
-		if (keys[DIK_S])			{ m_playership->DecrementTargetThrustOfAllEngines(); }
-		if (keys[DIK_T])			{ m_playership->SetTargetSpeedPercentage(1.0f);			keyboard->LockKey(DIK_T); }
-		if (keys[DIK_BACKSPACE])	{ m_playership->SetTargetSpeed(0.0f);					keyboard->LockKey(DIK_BACKSPACE); }
-		if (keys[DIK_SPACE])		{ ToggleShipMouseControlMode();							keyboard->LockKey(DIK_SPACE); }
+		if (m_playership())
+		{
+			// Ship thrust control
+			if (keys[DIK_W])			{ m_playership()->IncrementTargetThrustOfAllEngines(); }
+			if (keys[DIK_S])			{ m_playership()->DecrementTargetThrustOfAllEngines(); }
+			if (keys[DIK_T])			{ m_playership()->SetTargetSpeedPercentage(1.0f);			keyboard->LockKey(DIK_T); }
+			if (keys[DIK_BACKSPACE])	{ m_playership()->SetTargetSpeed(0.0f);						keyboard->LockKey(DIK_BACKSPACE); }
+			if (keys[DIK_SPACE])		{ ToggleShipMouseControlMode();								keyboard->LockKey(DIK_SPACE); }
+		}
 	}
 }
 
@@ -171,7 +183,7 @@ void Player::ToggleShipMouseControlMode(void)
 
 		// Send a one-time update of the ship mouse view with mouse position set to the origin.  This will 
 		// prevent the ship continuing in the last active trajectory when it stops receiving new mouse input
-		Game::Logic::Move::UpdateShipMovementViaMouseFlightData(m_playership, 0.0f, 0.0f);
+		Game::Logic::Move::UpdateShipMovementViaMouseFlightData(m_playership(), 0.0f, 0.0f);
 	}
 	else
 	{
@@ -188,7 +200,7 @@ void Player::SetShipMouseControlMode(MouseInputControlMode mode)
 
 	// If we are currently in mouse-flight mode then zero out any current turn.  If autopilot is on it should overwrite this within a flight computer cycle
 	if (Game::MouseControlMode == MouseInputControlMode::MC_MOUSE_FLIGHT)
-		m_playership->OverrideTargetAngularVelocity(NULL_VECTOR);
+		if (m_playership()) m_playership()->OverrideTargetAngularVelocity(NULL_VECTOR);
 
 	// Store the new mouse control mode
 	Game::MouseControlMode = mode;
@@ -198,11 +210,11 @@ void Player::SetShipMouseControlMode(MouseInputControlMode mode)
 void Player::MovePlayerActor(Direction direction, bool run)
 {
 	// Record the fact that we are moving
-	if (!m_actor) return;
+	if (!m_actor()) return;
 	m_ismoving = true;
 
 	// Move the actor being controlled by this player
-	m_actor->Move(direction, run);
+	m_actor()->Move(direction, run);
 
 	// Calculate the 'head-bob' effect for this movement
 	if (m_headbobascending) m_headbobposition += (m_headbobspeed * Game::TimeFactor);
@@ -219,10 +231,10 @@ void Player::MovePlayerActor(Direction direction, bool run)
 // Rotates the on-foot player view by the specified amounts in the Y and X axes
 void Player::RotatePlayerView(float y, float x)
 {
-	if (!m_actor) return;
+	if (!m_actor()) return;
 
 	// Turn the actor by the specified angle about the y axis
-	m_actor->Turn(y);
+	m_actor()->Turn(y);
 
 	// Update the X rotation (pitch); clamp values to ensure that we are not pitching outside the valid player look range.
 	// This will also take care of the 0-2PI range so long as the clamp range is set sensibly (i.e. within 0-2PI)
@@ -239,24 +251,24 @@ void Player::RotatePlayerView(float y, float x)
 void Player::ActorJump(void)
 {
 	// Parameter check
-	if (!m_actor) return;
+	if (!m_actor()) return;
 
 	// Pass control to the player actor
-	m_actor->Jump();
+	m_actor()->Jump();
 }
 
 // Moves the player back into their ship, whether simple or complex
 void Player::ReturnToShip(void)
 {
 	// If the player doesn't have a ship then we can't do anything
-	if (!this->m_playership) return;
+	if (!m_playership()) return;
 
 	// Take different action depending on the player ship type
-	if (this->m_playership->GetShipClass() == Ships::Class::Simple)
+	if (m_playership()->GetShipClass() == Ships::Class::Simple)
 	{
 		// Simply set the player to be piloting their simple ship
 		m_state = StateType::ShipPilot;
-		
+
 		// Inactivate the player actor, and activate the player ship
 		//m_actor->SetSimulationState(iObject::ObjectSimulationState::NoSimulation);
 		//m_playership->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -264,10 +276,10 @@ void Player::ReturnToShip(void)
 		// Update the player state to take account of its new environment
 		UpdatePlayerState();
 	}
-	else if (this->m_playership->GetShipClass() == Ships::Class::Complex)
+	else if (m_playership()->GetShipClass() == Ships::Class::Complex)
 	{
 		// Move the player into this complex ship
-		EnterEnvironment((ComplexShip*)m_playership);
+		EnterEnvironment((ComplexShip*)m_playership());
 	}
 }
 
@@ -275,7 +287,7 @@ void Player::ReturnToShip(void)
 void Player::EnterEnvironment(SpaceSystem *system)
 {
 	// Make sure a system is specified, and that the player has a ship; if not, they cannot be placed into the space environment
-	if (!m_playership || !system) return;
+	if (!m_playership() || !system) return;
 
 	// Store the system environment that the player is being placed into
 	m_systemenv = system;
@@ -284,13 +296,13 @@ void Player::EnterEnvironment(SpaceSystem *system)
 	m_state = StateType::ShipPilot;
 
 	// Remove the designation of the player actor as a simulation hub, and instead set the player ship to be a hub
-	m_actor->RemoveSimulationHub();
-	m_playership->SetAsSimulationHub();
+	if (m_actor()) m_actor()->RemoveSimulationHub();
+	m_playership()->SetAsSimulationHub();
 
 	// If the player ship is not currently located in this system then move it now
-	if (m_playership->GetSpaceEnvironment() != m_systemenv)
+	if (m_playership()->GetSpaceEnvironment() != m_systemenv)
 	{
-		m_playership->MoveIntoSpaceEnvironment(m_systemenv, NULL_VECTOR);
+		m_playership()->MoveIntoSpaceEnvironment(m_systemenv, NULL_VECTOR);
 	}
 }
 
@@ -298,7 +310,7 @@ void Player::EnterEnvironment(SpaceSystem *system)
 void Player::EnterEnvironment(ComplexShip *complexship)
 {
 	// Get a reference to the ship and make sure we have required details
-	if (!complexship || !m_actor) return;
+	if (!complexship || !m_actor()) return;
 
 	// Get a reference to the first corridor tile within this ship (NOTE: TODO: we can later locate the bridge/entry doors and move the player there)
 	ComplexShipTile *tile = complexship->GetFirstTileOfType(D::TileClass::Corridor);
@@ -309,21 +321,21 @@ void Player::EnterEnvironment(ComplexShip *complexship)
 	m_parentenv = complexship;
 
 	// Remove the designation of the player actor as a simulation hub, and instead set the player ship to be a hub
-	m_playership->RemoveSimulationHub();
-	m_actor->SetAsSimulationHub();
+	if (m_playership()) m_playership()->RemoveSimulationHub();
+	m_actor()->SetAsSimulationHub();
 
 	// Determine an offset to apply that will place the player in the centre of a specific element
 	float centreoffset = Game::ElementLocationToPhysicalPosition(1) * 0.5f;
 	XMVECTOR offset = XMVectorSet(centreoffset, 0.0f, centreoffset, 0.0f);			// TODO: Set at just above floor height in future
 
 	// Set the actor's parent environment to this ship
-	if (m_actor) m_actor->MoveIntoEnvironment(complexship);
+	m_actor()->MoveIntoEnvironment(complexship);
 
 	// Move the player to be within this identified tile within the ship
 	// Pos = (ELocation + (ESize * 0.5))
-	m_actor->SetEnvironmentPositionAndOrientation(Game::ElementPartialLocationToPhysicalPosition(
-		XMVectorAdd(VectorFromIntVector3(tile->GetElementLocation()), 
-			XMVectorMultiply(VectorFromIntVector3(tile->GetElementSize()), HALF_VECTOR))), ID_QUATERNION);		
+	m_actor()->SetEnvironmentPositionAndOrientation(Game::ElementPartialLocationToPhysicalPosition(
+		XMVectorAdd(VectorFromIntVector3(tile->GetElementLocation()),
+		XMVectorMultiply(VectorFromIntVector3(tile->GetElementSize()), HALF_VECTOR))), ID_QUATERNION);
 
 	// Update the player state to take account of its new environment
 	UpdatePlayerState();
@@ -334,13 +346,16 @@ void Player::EnterEnvironment(ComplexShip *complexship)
 void Player::SetPlayerShip(Ship *ship)
 {
 	// If we previously controlled a ship, remove its designation as a simulation hub
-	if (m_playership) m_playership->RemoveSimulationHub();
+	if (m_playership()) m_playership()->RemoveSimulationHub();
 
 	// Store the new player ship
 	m_playership = ship;
 
+	// We may have been setting the ship to NULL to remove it entirely; if so, quit now
+	if (!m_playership()) return;
+
 	// Set the new ship as a simulation hub, if we are currently in player ship mode (vs actor mode)
-	if (m_state == Player::StateType::ShipPilot) m_playership->SetAsSimulationHub();
+	if (m_state == Player::StateType::ShipPilot) m_playership()->SetAsSimulationHub();
 
 	// Update the player state based on this new ship assignment
 	UpdatePlayerState();
@@ -354,13 +369,14 @@ void Player::SetActor(Actor *actor)
 	if (!actor || !actor->GetBase()) return;
 
 	// If we previously controlled an actor, remove its designation as a simulation hub
-	if (m_actor) m_actor->RemoveSimulationHub();
+	if (m_actor()) m_actor()->RemoveSimulationHub();
 
-	// Store the new player actor
+	// Store the new player actor.  Actor cannot be null
 	m_actor = actor;
+	if (!m_actor()) return;
 
 	// Set the new actor as a simulation hub, if we are currently in player actor mode (vs as a ship pilot)
-	if (m_state == Player::StateType::OnFoot) m_actor->SetAsSimulationHub();
+	if (m_state == Player::StateType::OnFoot) m_actor()->SetAsSimulationHub();
 
 	// Retrieve data from the actor that will influence how the player operates
 	m_runspeed = actor->Attributes[ActorAttr::A_RunSpeed].Value;
@@ -398,7 +414,7 @@ void Player::SetViewOrientationOffset(const FXMVECTOR orient)
 void Player::SetViewPositionAndOrientationOffset(const FXMVECTOR pos, const FXMVECTOR orient)
 {
 	// Store the new position offset
-	m_viewpositionoffset = pos; 
+	m_viewpositionoffset = pos;
 
 	// Store the new orientation offset
 	m_vieworientationoffset = orient;
@@ -414,7 +430,7 @@ void Player::RecalculatePlayerOffsetMatrix(void)
 	m_viewoffsetmatrix = XMMatrixRotationQuaternion(m_vieworientationoffset);
 
 	// Directly set the translation row of this matrix for efficiency
-	m_viewoffsetmatrix.r[3] = 
+	m_viewoffsetmatrix.r[3] =
 		XMVectorSetW(											// 3. Ensure matrix diagonal is always 1.0
 		XMVectorAdd(m_viewpositionoffset,						// 2. The translation row should incorporate the regular view offset translation...
 		XMVectorSetY(NULL_VECTOR, m_headbobposition)), 1.0f);	// 1. ...and an additional Y component to account for 'head bob'
@@ -424,15 +440,15 @@ void Player::RecalculatePlayerOffsetMatrix(void)
 void Player::SetPosition(const FXMVECTOR pos)
 {
 	// Take different action depending on the current player environment
-	if (m_state == Player::StateType::ShipPilot && m_playership) 
+	if (m_state == Player::StateType::ShipPilot)
 	{
 		// If the player is currently piloting a ship
-		m_playership->SetPosition(pos);
+		if (m_playership()) m_playership()->SetPosition(pos);
 	}
-	else if (m_state == Player::StateType::OnFoot && m_actor)
+	else if (m_state == Player::StateType::OnFoot)
 	{
 		// If the player is currently on foot
-		m_actor->SetEnvironmentPosition(pos);
+		if (m_actor()) m_actor()->SetEnvironmentPosition(pos);
 	}
 
 	// Update the player state following this change
@@ -443,15 +459,15 @@ void Player::SetPosition(const FXMVECTOR pos)
 void Player::SetOrientation(const FXMVECTOR orient)
 {
 	// Take different action depending on the current player environment
-	if (m_state == Player::StateType::ShipPilot && m_playership) 
+	if (m_state == Player::StateType::ShipPilot)
 	{
 		// If the player is currently piloting a ship
-		m_playership->SetOrientation(orient);
+		if (m_playership()) m_playership()->SetOrientation(orient);
 	}
-	else if (m_state == Player::StateType::OnFoot && m_actor)
+	else if (m_state == Player::StateType::OnFoot)
 	{
 		// If the player is currently on foot
-		m_actor->SetEnvironmentOrientation(orient);
+		if (m_actor()) m_actor()->SetEnvironmentOrientation(orient);
 	}
 
 	// Update the player state following this change
@@ -470,7 +486,7 @@ void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, co
 
 		// Set the override flag
 		m_envoverride = PlayerEnvironmentOverrideType::SpaceEnvironmentOverride;
-	
+
 		// Store the relevant fields
 		m_overridesystem = system;
 		m_overrideposition = position;
@@ -480,12 +496,13 @@ void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, co
 		// even if the system is changed to be inconsistent with that ship
 		if (playership)
 		{
-			m_overridepriorship = m_playership;
+			m_overridepriorship = m_playership();
 			m_overrideship = playership;
 		}
 		else
 		{
-			m_overrideship = m_overridepriorship = NULL;
+			m_overrideship = NULL;
+			m_overridepriorship = NULL;
 		}
 	}
 }
@@ -505,10 +522,10 @@ void Player::ReleasePlayerEnvironmentOverride(void)
 		m_overrideposition = NULL_VECTOR;
 		m_overrideorientation = ID_QUATERNION;
 		m_overridepriorstate = Player::StateType::UnknownState;
-		
-		if (m_overridepriorship)
+
+		if (m_overridepriorship())
 		{
-			m_playership = m_overridepriorship;
+			m_playership = m_overridepriorship();
 			m_overridepriorship = NULL;
 			m_overrideship = NULL;
 		}
@@ -525,7 +542,7 @@ void Player::ExecuteOverrideOfPlayerEnvironment(void)
 	m_orientation = m_overrideorientation;
 
 	// Optional override of player ship
-	if (m_overrideship) m_playership = m_overrideship;
+	if (m_overrideship()) m_playership = m_overrideship();
 }
 
 // Default destructor

@@ -97,6 +97,22 @@ public:
 	// Methods to render the path being taken by an actor through a complex ship environment
 	void				RenderActorPath(Actor *actor, float thickness);
 
+	// Performs debug rendering of an octree node, and optionally all the way down the subtree as well
+	template <typename T>
+	void				DebugRenderSpatialPartitioningTree(const Octree<T> *tree, bool include_children)
+	{
+		// Create a world matrix that will translate the rendered box into position, then render it
+		if (!tree) return;
+		XMMATRIX world = XMMatrixTranslationFromVector(tree->m_min);
+		RenderBox(world, (tree->m_itemcount == 0 ? RenderColour::RC_Red : RenderColour::RC_Green),
+						 (tree->m_itemcount == 0 ? 1.0f : 3.0f), (tree->m_xmax - tree->m_xmin), (tree->m_ymax - tree->m_ymin), (tree->m_zmax - tree->m_zmin));
+
+		// Now also render children if required
+		if (include_children)
+			for (int i = 0; i < 8; ++i)
+				if (tree->m_children[i]) DebugRenderSpatialPartitioningTree(tree->m_children[i], true);
+	}
+
 	// Shutdown method to deallocate all resources maintained by the renderer
 	void Shutdown(void);
 

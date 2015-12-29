@@ -14,13 +14,13 @@
 #include "Octree.h"
 #include "iTakesDamage.h"
 #include "Attachment.h"
-#include "Octree.h"
 #include "OrientedBoundingBox.h"
 #include "GamePhysicsEngine.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
 #include "Faction.h"
 class Model;
+class ArticulatedModel;
 struct BasicProjectile;
 
 

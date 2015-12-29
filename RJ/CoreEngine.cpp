@@ -2135,7 +2135,7 @@ void CoreEngine::RenderDebugData(void)
 void CoreEngine::DebugRenderSpatialPartitioningTree(void)
 {
 	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem() && Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree)
-		Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree->DebugRender(true);
+		m_overlayrenderer->DebugRenderSpatialPartitioningTree<iObject*>(Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree, true);
 }
 
 void CoreEngine::DebugRenderSpaceCollisionBoxes(void)

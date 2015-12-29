@@ -1137,8 +1137,14 @@ Result RJMain::InitialisePlayer(void)
 	// Create a new human actor and assign it as the player character
 	ActorBase *actorbase = D::Actors.Get("human_soldier_basic");
 	if (!actorbase) return ErrorCodes::CouldNotCreatePlayerFromUndefinedActorBase;
+	Actor *actor = actorbase->CreateInstance();
+	if (!actor) return ErrorCodes::CouldNotCreatePlayerActor;
 
-	Game::CurrentPlayer->SetActor(actorbase->CreateInstance());
+	// Set the player actor to full simulation now so that we can correctly make a reference to it during initialisation
+	actor->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	Game::CurrentPlayer->SetActor(actor);
+	if (Game::CurrentPlayer->GetActor() == NULL) return ErrorCodes::CouldNotCreatePlayerActor;
+
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 

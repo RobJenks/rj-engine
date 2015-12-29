@@ -552,6 +552,7 @@ namespace ErrorCodes {
 	const Result		CouldNotSetSkinnedModelIndexBuffer				= 5001;
 	const Result		CannotInitialiseActorWithInvalidModelCode		= 5002;
 	const Result		CouldNotCreatePlayerFromUndefinedActorBase		= 5003;
+	const Result		CouldNotCreatePlayerActor						= 5004;
 
 	// Pathfinding errors												(5300-5599)
 	const Result		CannotGenerateNavNetworkForNullParentEntity		= 5300;
