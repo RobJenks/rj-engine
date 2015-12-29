@@ -7,7 +7,7 @@
 #include "Ray.h"
 #include "iSpaceObject.h"
 #include "GamePhysicsEngine.h"
-#include "SimulationObjectManager.h"
+#include "ObjectSearch.h"
 #include "Order.h"
 #include "Order_MoveToPosition.h"
 #include "Order_MoveToTarget.h"
@@ -478,10 +478,7 @@ void Ship::SimulateObject(void)
 	}
 	
 	// Simulate all ship turrets if applicable (TODO: need to pass contacts array)
-	if (HasNearbyEnemyContacts() && TurretController.IsActive()) TurretController.Update(m_cached_enemy_contacts);
-
-	// Update position of the ship in the spatial partitioning tree
-	if (m_treenode) m_treenode->ItemMoved(this, m_position);
+	if (TurretController.IsActive()) TurretController.Update(m_cached_enemy_contacts);
 }
 
 // Update the collections of nearby contacts
@@ -494,19 +491,23 @@ void Ship::AnalyseNearbyContacts(void)
 	if (m_timesincelasttargetanalysis > Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ)
 	{
 		// Locate all objects in the vicinity of this object, and maintain as the cache of nearby objects
-		Game::ObjectManager.GetAllObjectsWithinDistance(this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, m_cached_contacts,
-			SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
-		m_cached_contact_count = m_cached_contacts.size();
+		std::vector<iObject*> objects;
+		Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, objects,
+																	Game::ObjectSearchOptions::NoSearchOptions);
 	
 		// Parse out any enemy contacts into the cached enemy contact vector.  Also ensure we have no NULLs in 
 		// the collection so that we can parse it without NULL checks each frame/ship computer cycle
 		// TODO: in future, need something more robust in case e.g. one of the ships is destroyed or leaves
+		m_cached_contacts.clear();
 		m_cached_enemy_contacts.clear();
-		for (std::vector<iSpaceObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
+		for (std::vector<iObject*>::size_type i = 0; i < m_cached_contact_count; ++i)
 		{
-			// Remove this contact if it is invalid, or if it is us
-			obj = m_cached_contacts[i]; 
-			if (!obj || obj == this) { RemoveFromVectorAtIndex<iSpaceObject*>(m_cached_contacts, i); --i; --m_cached_contact_count; continue; }
+			// Ignore this contact if it is invalid, or if it is us
+			obj = (iSpaceObject*)objects[i]; 
+			if (!obj || obj == this) continue;
+
+			// Add to the list of nearby contacts
+			m_cached_contacts.push_back(obj);
 
 			// Add to the list of enemy contacts if we are hostile towards the object
 			if (GetDispositionTowardsObject(obj) == Faction::FactionDisposition::Hostile)
@@ -514,6 +515,9 @@ void Ship::AnalyseNearbyContacts(void)
 				m_cached_enemy_contacts.push_back(obj);
 			}
 		}
+
+		// Store the size of each collection for runtime efficiency
+		m_cached_contact_count = m_cached_contacts.size();
 		m_cached_enemy_contact_count = m_cached_enemy_contacts.size();
 
 		// Reset the counter that indicates when we next search for contacts

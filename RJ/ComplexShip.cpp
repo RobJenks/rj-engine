@@ -519,7 +519,7 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 {
 	XMVECTOR pos;
 	CapitalShipPerimeterBeacon *beacon;
-	Octree<iSpaceObject*> *node;
+	Octree<iObject*> *node;
 
 	// We will recalculate any additional nodes during this method, so clear the collection now
 	m_activeperimeternodes.clear();
@@ -552,8 +552,8 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 
 		// Otherwise, also discount it if it is in another node that we already have a beacon for
 		bool found = false;
-		vector<Octree<iSpaceObject*>*>::const_iterator it_end = m_activeperimeternodes.end();
-		for (vector<Octree<iSpaceObject*>*>::const_iterator it = m_activeperimeternodes.begin(); it != it_end; ++it)
+		vector<Octree<iObject*>*>::const_iterator it_end = m_activeperimeternodes.end();
+		for (vector<Octree<iObject*>*>::const_iterator it = m_activeperimeternodes.begin(); it != it_end; ++it)
 		{
 			// Get a reference to the node
 			node = (*it); if (!node) continue;
@@ -1282,7 +1282,7 @@ void ComplexShip::DestroyObject(void)
 std::string ComplexShip::DebugOutputPerimeterBeacons(void)
 {
 	CapitalShipPerimeterBeacon *beacon;
-	Octree<iSpaceObject*> *node;
+	Octree<iObject*> *node;
 	string s = "";
 
 	// Iterate over each beacon attached to the ship

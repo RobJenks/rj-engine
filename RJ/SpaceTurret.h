@@ -35,9 +35,6 @@ public:
 		switch (m_mode)
 		{
 			case ControlMode::AutomaticControl:			AutoUpdate(enemy_contacts); return;
-				//if (m_isfixed)							AutoUpdateFixed(enemy_contacts);
-				//else									AutoUpdate(enemy_contacts);
-																					return;
 			default:									ManualUpdate();				return;
 		}
 	}
@@ -281,6 +278,9 @@ protected:
 
 	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;
+
+	// Flag that indicates whether the turret is 'at rest', i.e. at the ID orientation
+	bool							m_atrest;
 
 	// Object world matrix, relative to its parent object.  Based on m_position and m_orientation
 	AXMMATRIX						m_worldmatrix;

@@ -31,13 +31,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 							m_objectclass(iObject::ObjectClass::UnknownObjectClass),
 							m_isenvironment(false)
 {
-	// Initialise this object with a unique ID
-	AssignNewUniqueID();
-
-	// All objects begin outside of the simulation, and will only be added once the simulation state is updated for the first time
-	m_simulationstate = m_nextsimulationstate = ObjectSimulationState::NoSimulation;
-
-	// Initialise key fields to their default values
+	// Initialise basic key fields to their default values
 	m_code = "";
 	m_name = "";
 	m_instancecode = "";
@@ -53,10 +47,18 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_orientation = ID_QUATERNION;
 	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
 	m_worldmatrix = m_inverseworld = ID_MATRIX;
+	m_treenode = NULL;
 	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
 	m_nocollision_count = 0;
 
+	// Initialise this object with a unique ID
+	AssignNewUniqueID();
+
+	// All objects begin outside of the simulation, and will only be added once the simulation state is updated for the first time
+	m_simulationstate = m_nextsimulationstate = ObjectSimulationState::NoSimulation;
+
+	// No attachments to start with
 	m_childcount = 0;
 	m_parentobject = NULL;
 
@@ -117,6 +119,10 @@ void iObject::InitialiseCopiedObject(iObject *source)
 
 	// Simulation state will always begin as "no simulation"
 	m_simulationstate = iObject::ObjectSimulationState::NoSimulation;
+	m_nextsimulationstate = iObject::ObjectSimulationState::NoSimulation;
+
+	// We do not begin within any spatial partitioning tree node
+	m_treenode = NULL;
 
 	// Remove the 'standard' flag from items following a copy
 	m_standardobject = false;
@@ -139,6 +145,11 @@ void iObject::InitialiseCopiedObject(iObject *source)
 // unintended consequences if called within the game object update loop (which uses iterators)
 void iObject::SetSimulationState(ObjectSimulationState state)
 {
+	if (m_objecttype == iObject::ObjectType::SpaceEmitterObject)
+	{
+		int a = 1 + Game::ClockMs;
+	}
+
 	// Record the requested change in state
 	m_nextsimulationstate = state; 
 
@@ -198,6 +209,46 @@ void iObject::SetObjectType(iObject::ObjectType type)
 
 	// Derive and store the object class
 	m_objectclass = iObject::DetermineObjectClass(*this);
+}
+
+// Core iObject method to simulate any object.  Passes control down the hierarchy to virtual SimulateObject() method during execution
+void iObject::Simulate(void)
+{
+	// Only simulate the object if it has not already been simulated
+	if (m_simulated == false)
+	{
+		// Call the virtual subclass function to fully simulate the object
+		Game::ID_TYPE id = m_id;
+		SimulateObject();
+
+		// Objects can be destroyed within their simulation cycle; perform a check here to ensure the object is still active
+		if (Game::ObjectExists(id) == false) return;
+
+		// Set the "simulated" flag for this frame
+		m_simulated = true;
+
+		// Update the position of any child objects, if we have any (checking count!=0 here, instead of in function, avoids unnecessary function calls)
+		if (m_childcount != 0) UpdatePositionOfChildObjects();
+	}
+
+	// If the object position changed during this frame (regardless of whether it was simulated) then 
+	// recalculate any derived data (e.g. world matrices)
+	if (m_spatialdatachanged)
+	{
+		// Perform base object updates required when the object moves, e.g. ensuring quaternions are normalised,
+		// and deriving a new world transform for the object
+		RenormaliseSpatialData();
+		DeriveNewWorldMatrix();
+
+		// Update our position in the spatial partitioning tree
+		if (m_treenode) m_treenode->ItemMoved(this, m_position);
+
+		// Perform a post-simulation update if required, and if available in the class in question
+		if (IsPostSimulationUpdateRequired()) PerformPostSimulationUpdate();
+
+		// Clear the flag that indicates spatial data was changed, since we have now responded to it
+		m_spatialdatachanged = false;
+	}
 }
 
 // Updates the object before it is rendered.  Called only when the object enters the render queue (i.e. not when it is out of view)

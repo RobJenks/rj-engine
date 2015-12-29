@@ -11,6 +11,7 @@
 #include "Utility.h"
 #include "AlignedAllocator.h"
 #include "HashFunctions.h"
+#include "Octree.h"
 #include "iTakesDamage.h"
 #include "Attachment.h"
 #include "Octree.h"
@@ -182,8 +183,17 @@ public:
 		DeriveNewWorldMatrix();
 	}
 
+	// Core iObject method to simulate any object.  Passes control down the hierarchy to virtual SimulateObject() method during execution
+	void									Simulate(void);
+
 	// All objects must expose a method to simulate themselves.  Flag indicates whether they are allowed to simulate movement (vs if the object is attached)
 	virtual void							SimulateObject(void) = 0;
+
+	// Notifies our spatial partitioning tree node that the object has possibly moved, so that it can be re-assessed if required
+	CMPINLINE void							UpdateSpatialPartitioningTreePosition(void)
+	{
+		if (m_treenode) m_treenode->ItemMoved(this, m_position);
+	}
 
 	// Method that indicates whether the object requires a post-simulation update or not.  Usually means the object position/orientation has changed.
 	// Use this flag to minimise the number of virtual function calls required where there is nothing to be done
@@ -280,6 +290,10 @@ public:
 	// been invalidated by some other action
 	CMPINLINE void							ForceOBBUpdate(void)							{ CollisionOBB.UpdateFromObject(*this); }
 
+	// Retrieve and set the spatial partitioning tree node this object belongs to
+	CMPINLINE Octree<iObject*> *			GetSpatialTreeNode(void) const						{ return m_treenode; }
+	CMPINLINE void							SetSpatialTreeNode(Octree<iObject*> * node)			{ m_treenode = node; }
+
 	// Returns the disposition of this object towards the target object, based on our respective factions and 
 	// any other modifiers (e.g. if the objects have individually attacked each other)
 	Faction::FactionDisposition				GetDispositionTowardsObject(const iObject *obj) const;
@@ -347,7 +361,7 @@ public:
 	CMPINLINE void								RenormaliseSpatialData(void)
 	{
 		// Normalise every frame if the object is visible, or every *_FULLSIM changes when the object is being fully-simulated
-		// but is not currently visible.  Aside from, we do not bother renormalising to save cycles
+		// but is not currently visible.  Aside from that, we do not bother renormalising to save cycles
 		if (m_currentlyvisible)
 		{
 			m_orientation = XMQuaternionNormalizeEst(m_orientation);
@@ -439,6 +453,8 @@ protected:
 	AXMMATRIX							m_orientationmatrix;			// Precise orientation matrix for the object, incorporating base orientation and any adjustments
 	AXMMATRIX							m_inverseorientationmatrix;		// Inverse oriented matrix, precalculated for efficiency
 	int									m_orientchanges;				// The number of orientation changes we have performed since normalising the quaternion
+
+	Octree<iObject*> *					m_treenode;						// Stores a pointer to the spatial partitioning node we belong to
 
 	ObjectSimulationState				m_simulationstate;				// Value indicating the extent of simulation (if any) that should be applied to this object
 	ObjectSimulationState				m_nextsimulationstate;			// Any change to simulation state is stored here and takes effect on the next simulation cycle

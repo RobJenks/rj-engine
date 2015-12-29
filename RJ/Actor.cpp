@@ -26,6 +26,9 @@ Actor::Actor(ActorBase *actorbase) : Actor()
 	// Store a reference back to the actor base class from which we were created
 	m_base = actorbase;
 
+	// Store the string code of the base actor definition and use it to derive a new unique instance code
+	SetCode(actorbase->GetCode());
+
 	// Set the object type
 	SetObjectType(iObject::ObjectType::ActorObject);
 

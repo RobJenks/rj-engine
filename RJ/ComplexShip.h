@@ -158,7 +158,7 @@ protected:
 
 	PerimeterBeaconCollection					m_perimeterbeacons;		// Collection of capital ship perimeter beacons for this ship
 	int											m_activebeacons;		// The number of active beacons for this ship
-	vector<Octree<iSpaceObject*>*>				m_activeperimeternodes;	// The nodes currently holding our ship (excluding the main m_treenode)
+	vector<Octree<iObject*>*>					m_activeperimeternodes;	// The nodes currently holding our ship (excluding the main m_treenode)
 
 	bool										m_forcerenderinterior;	// Flag that determines whether the ship interior should always be rendered, regardless of the criteria
 

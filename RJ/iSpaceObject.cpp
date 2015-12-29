@@ -12,7 +12,6 @@
 iSpaceObject::iSpaceObject(void)
 {
 	// Initialise key fields to their default values
-	m_treenode = NULL;
 	m_spaceenvironment = NULL;
 }
 
@@ -21,9 +20,6 @@ iSpaceObject::iSpaceObject(void)
 // their level of the implementation
 void iSpaceObject::InitialiseCopiedObject(iSpaceObject *source)
 {
-	// Initialise the spatial tree node to null, since our position is likely different from the copy source
-	m_treenode = NULL;
-
 	// Pass control to all base classes
 	iActiveObject::InitialiseCopiedObject((iActiveObject*)source);
 }

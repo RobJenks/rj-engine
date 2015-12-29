@@ -9,7 +9,6 @@
 #include "CentralScheduler.h"
 #include "GamePhysicsEngine.h"
 #include "SimulationStateManager.h"
-#include "SimulationObjectManager.h"
 #include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "GameConsole.h"
@@ -84,9 +83,6 @@ namespace Game {
 
 	// State manager, which maintains the simulation state and level for all objects/systems/processes in the game
 	SimulationStateManager			StateManager = SimulationStateManager();
-
-	// Object manager, which handles operations across the set of active objects
-	SimulationObjectManager			ObjectManager = SimulationObjectManager();
 
 	// Faction manager, which maintains the central record of all faction and the relationships between them
 	FactionManagerObject			FactionManager = FactionManagerObject();

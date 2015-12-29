@@ -53,7 +53,7 @@ public:
 
 	// Simulate all projectiles.  Remove any expired projectiles, handle collisions and mark any in-view projectiles for rendering
 	// Accepts a pointer to the spatial partitioning tree for the current area as input
-	void													SimulateProjectiles(Octree<iSpaceObject*> *sp_tree);
+	void													SimulateProjectiles(Octree<iObject*> *sp_tree);
 
 	// 
 

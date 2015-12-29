@@ -40,7 +40,7 @@
 #include "Utility.h"
 #include "GameDataExtern.h"
 #include "GameObjects.h"
-#include "SimulationObjectManager.h"
+#include "ObjectSearch.h"
 #include "SpaceSystem.h"
 #include "ImmediateRegion.h"
 #include "SystemRegion.h"
@@ -2141,7 +2141,7 @@ void CoreEngine::DebugRenderSpatialPartitioningTree(void)
 void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 {
 	iSpaceObject *object;
-	std::vector<iSpaceObject*> objects; int count = 0;
+	std::vector<iObject*> objects; int count = 0;
 	float radius; bool invalidated;
 
 	// Find all active space objects around the player; take a different approach depending on whether the player is in a ship or on foot
@@ -2149,28 +2149,28 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects,
-																   (SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
+		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects,
+																			(Game::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Also include the parent ship environmment (hence why we +1 to the count above)
-		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetParentEnvironment());
+		objects.push_back((iObject*)Game::CurrentPlayer->GetParentEnvironment());
 	}
 	else
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects, 
-																   (SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects));
+		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects, 
+																			(Game::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Also include the player ship (hence why we +1 to the count above)
-		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetPlayerShip());
+		objects.push_back((iObject*)Game::CurrentPlayer->GetPlayerShip());
 	}
 
 	// Iterate through the active objects
-	std::vector<iSpaceObject*>::iterator it_end = objects.end();
-	for (std::vector<iSpaceObject*>::iterator it = objects.begin(); it != it_end; ++it)
+	std::vector<iObject*>::iterator it_end = objects.end();
+	for (std::vector<iObject*>::iterator it = objects.begin(); it != it_end; ++it)
 	{
-		object = (*it);
+		object = (iSpaceObject*)(*it);
 		radius = object->GetCollisionSphereRadius();
 
 		// Render the oriented bounding box(es) used for narrowphase collision detection, if applicable for this object

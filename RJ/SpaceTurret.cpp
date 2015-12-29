@@ -1,13 +1,11 @@
 #include "DX11_Core.h"
 #include "Utility.h"
 #include "FastMath.h"
-#include "SimulationObjectManager.h"
 #include "ArticulatedModel.h"
 #include "SpaceProjectile.h"
 #include "ProjectileLauncher.h"
 
 #include "SpaceTurret.h"
-
 
 // Default constructor
 SpaceTurret::SpaceTurret(void)
@@ -22,6 +20,7 @@ SpaceTurret::SpaceTurret(void)
 	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
+	m_atrest = true;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;
@@ -99,6 +98,26 @@ void SpaceTurret::AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts)
 		// Attempt to yaw and pitch to keep the target in view
 		if (ayaw > Game::C_EPSILON)		Yaw(pitch_yaw.y * m_yawrate * Game::TimeFactor);
 		if (apitch > Game::C_EPSILON)	Pitch(pitch_yaw.x * m_pitchrate * Game::TimeFactor);
+	}
+	else
+	{
+		// We have no target; return the turret to resting position
+		// If we are already at rest then there is nothing further to do
+		if (fabs(m_yaw) < Game::C_EPSILON && fabs(m_pitch) < Game::C_EPSILON)
+		{
+			if (!m_atrest)
+			{
+				// If we have oriented back to ID and are not current flagged as 'at rest', set the flag now and quit
+				ResetOrientation();
+			}
+		}
+		else
+		{
+			// We are trying to rotate back to the resting position
+			Yaw((m_yaw < 0.0f ? min(-m_yaw, m_yawrate) : -min(m_yaw, m_yawrate)) * Game::TimeFactor);
+			Pitch((m_pitch < 0.0f ? min(-m_pitch, m_pitchrate) : -min(m_pitch, m_pitchrate)) * Game::TimeFactor);
+		}
+
 	}
 }
 
@@ -241,11 +260,17 @@ void SpaceTurret::SetBaseRelativeOrientation(const FXMVECTOR orient)
 {
 	// Store the new base orientation
 	m_baserelativeorient = orient;
+
+	// Reset orientation of the turret cannon given that we have just changed the base turret state
+	ResetOrientation();
 }
 
 // Yaws the turret by the specified angle
 void SpaceTurret::Yaw(float angle)
 {
+	// This will move us from our resting position
+	m_atrest = false;
+
 	// Determine the new yaw value that would result
 	//float yaw = fmod((m_yaw + angle), TWOPI);
 	float yaw = (m_yaw + angle);
@@ -278,6 +303,9 @@ void SpaceTurret::Yaw(float angle)
 // Pitches the turret by the specified angle
 void SpaceTurret::Pitch(float angle)
 {
+	// This will move us from our resting position
+	m_atrest = false;
+
 	// Determine the new pitch value that would result
 	float pitch = fmod((m_pitch + angle), TWOPI);
 
@@ -308,6 +336,9 @@ void SpaceTurret::ResetOrientation(void)
 
 	// Reset the turret to its base orientation (which is equivalent to yaw/pitch of zero)
 	m_turretrelativeorient = m_baserelativeorient;
+
+	// Mark the turret as 'at rest' since it is at its base orientation
+	m_atrest = true;
 }
 
 // Determines the max range of the turret based on its component launchers & projectiles.  Is only

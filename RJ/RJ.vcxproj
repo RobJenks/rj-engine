@@ -323,7 +323,6 @@
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
-    <ClCompile Include="SimulationObjectManager.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
     <ClCompile Include="ProjectileLauncher.cpp" />
@@ -535,7 +534,7 @@
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="ShaderManager.h" />
-    <ClInclude Include="SimulationObjectManager.h" />
+    <ClInclude Include="ObjectSearch.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />

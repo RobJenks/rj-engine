@@ -6,7 +6,6 @@
 #include "CompilerSettings.h"
 #include "FastMath.h"
 #include "iActiveObject.h"
-#include "Octree.h"
 class SpaceSystem;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -30,10 +29,6 @@ public:
 	// Removes the object from its current space environment
 	void									RemoveFromEnvironment(void);
 
-	// Retrieve and set the spatial partitioning tree node this object belongs to
-	CMPINLINE Octree<iSpaceObject*> *		GetSpatialTreeNode(void) const						{ return m_treenode; }
-	CMPINLINE void							SetSpatialTreeNode(Octree<iSpaceObject*> * node)	{ m_treenode = node; }
-
 	// Retrieve a pointer to the space system that this object exists in
 	CMPINLINE SpaceSystem *					GetSpaceEnvironment(void) const						{ return m_spaceenvironment; }
 	CMPINLINE void							SetSpaceEnvironmentDirect(SpaceSystem *env)			{ m_spaceenvironment = env; }
@@ -51,8 +46,6 @@ public:
 
 
 protected:
-
-	Octree<iSpaceObject*> *				m_treenode;						// Stores a pointer to the spatial partitioning node we belong to
 
 	SpaceSystem *						m_spaceenvironment;				// Stores a pointer to the system that this object exists in
 

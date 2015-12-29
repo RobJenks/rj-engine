@@ -5,7 +5,7 @@
 #include "FastMath.h"
 #include "GameVarsExtern.h"
 #include "Octree.h"
-#include "SimulationObjectManager.h"
+#include "ObjectSearch.h"
 #include "iObject.h"
 #include "iActiveObject.h"
 #include "iSpaceObject.h"
@@ -163,8 +163,8 @@ void GamePhysicsEngine::PerformCollisionDetection(iObject *focalobject)
 // pointers to the relevant octree nodes during simulation.  Using a position value we would have to calculate the relevant node each frame.
 void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject, float radius)
 {
-	std::vector<iSpaceObject*> objects;			// The list of objects being considered for collision detection
-	std::vector<iSpaceObject*> candidates;		// The list of potential collisions around the object being tested
+	std::vector<iObject*> objects;			// The list of objects being considered for collision detection
+	std::vector<iObject*> candidates;		// The list of potential collisions around the object being tested
 	iSpaceObject *object, *candidate;
 	int numobjects, numcandidates;
 	bool hasexclusions;							// Flag indicating whether the current object has any collision exclusions.  For efficiency
@@ -186,7 +186,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	if (!focalobject) return;
 
 	// Make sure this object is held within an octree, otherwise we cannot consider it for collision detection
-	Octree<iSpaceObject*> *node = focalobject->GetSpatialTreeNode();
+	Octree<iObject*> *node = focalobject->GetSpatialTreeNode();
 	if (!node) return;
 
 	// 1. We want to retrieve the set of objects in scope for testing.  If radius < 0.0f, we select all objects from the root
@@ -200,8 +200,8 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 		// Perform a search outwards from the focal object to locate all objects within range.  Don't incorporate any object
 		// boundaries at this point since we are just doing a coarse search of nearby objects.  We only want to return
 		// active collider objects and can ignore anything else
-		numobjects = Game::ObjectManager.GetAllObjectsWithinDistance(focalobject, radius, objects, 
-			(SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects | SimulationObjectManager::ObjectSearchOptions::OnlyActiveColliders));
+		numobjects = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(focalobject, radius, objects, 
+			(Game::ObjectSearchOptions::OnlyCollidingObjects | Game::ObjectSearchOptions::OnlyActiveColliders));
 
 		// Add the focal object (as long as it collides), since it will not be returned by the ObjectsWithinDistance method
 		if (focalobject->GetCollisionMode() != Game::CollisionMode::NoCollision)
@@ -215,7 +215,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 	for (int i = 0; i < numobjects; ++i)
 	{
 		// Get a reference to this object
-		object = objects[i]; if (!object) continue;
+		object = (iSpaceObject*)objects[i]; if (!object) continue;
 
 		// Test whether this object is moving at very high speed
 		if (object->IsFastMover())
@@ -229,8 +229,8 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			
 			// Get any colliding objects within the current object's collision sphere radius; quit here if there are no objects nearby
 			candidates.clear();
-			numcandidates = Game::ObjectManager.GetAllObjectsWithinDistance(object, object->GetCollisionSphereRadius(), candidates, 
-				SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+			numcandidates = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	object, object->GetCollisionSphereRadius(), candidates, 
+																						Game::ObjectSearchOptions::OnlyCollidingObjects);
 			if (numcandidates == 0) continue;
 
 			// Get basic information on the object that we will need for each comparison
@@ -242,7 +242,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			for (int c = 0; c < numcandidates; ++c)
 			{
 				// Get a reference to the candidate object
-				candidate = candidates[c]; if (!candidate) continue;
+				candidate = (iSpaceObject*)candidates[c]; if (!candidate) continue;
 
 				// We only want to test a collision between two objects once, i.e. we don't want to test (object vs candidate) and 
 				// then (candidate vs object).  To do this efficiently we only test collisions where object.ID < candidate.ID.  The 
@@ -309,9 +309,9 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 
 	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
 	// Quit immediately if there are no other objects in range
-	std::vector<iSpaceObject*> candidates;
-	int numcandidates = Game::ObjectManager.GetAllObjectsWithinDistance(object, GetCCDTestDistance(object), candidates,
-		SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+	std::vector<iObject*> candidates;
+	int numcandidates = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	object, GetCCDTestDistance(object), candidates,
+																					Game::ObjectSearchOptions::OnlyCollidingObjects);
 	if (numcandidates == 0) return NULL;
 
 	// The method will test for potentially multiple collisions within the same frame.  It therefore 'dials-back' the physics
@@ -335,7 +335,7 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 		for (int c = 0; c < numcandidates; ++c)
 		{
 			// Make sure the object is valid, and we aren't excluded from colliding with it
-			candidate = candidates[c]; if (!candidate) continue;
+			candidate = (iSpaceObject*)candidates[c]; if (!candidate) continue;
 			if (candidate == exclude || (hasexclusions && object->CollisionExcludedWithObject(candidate->GetID()))) continue;
 
 			// We are testing against the candidate's OBB, so update it if it has been invalidated

@@ -442,9 +442,6 @@
     <ClCompile Include="OrientedBoundingBox.cpp">
       <Filter>Math\Geometry</Filter>
     </ClCompile>
-    <ClCompile Include="SimulationObjectManager.cpp">
-      <Filter>Object Manager</Filter>
-    </ClCompile>
     <ClCompile Include="SpaceProjectile.cpp">
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
@@ -1074,9 +1071,6 @@
     <ClInclude Include="AABB.h">
       <Filter>Math\Geometry</Filter>
     </ClInclude>
-    <ClInclude Include="SimulationObjectManager.h">
-      <Filter>Object Manager</Filter>
-    </ClInclude>
     <ClInclude Include="SpaceProjectile.h">
       <Filter>Objects\Projectiles</Filter>
     </ClInclude>
@@ -1217,6 +1211,9 @@
     </ClInclude>
     <ClInclude Include="ObjectReference.h">
       <Filter>Game data</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectSearch.h">
+      <Filter>Object Manager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

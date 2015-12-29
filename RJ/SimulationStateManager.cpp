@@ -1,5 +1,5 @@
 #include "Utility.h"
-#include "SimulationObjectManager.h"
+#include "ObjectSearch.h"
 #include "iSpaceObject.h"
 #include "iEnvironmentObject.h"
 #include "iSpaceObjectEnvironment.h"
@@ -174,9 +174,8 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 														iObject::ObjectSimulationState::TacticalSimulation);
 
 	// Default all objects to either strategic or tactical simulation as a default, depending on whether hubs are present
-	std::vector<iSpaceObject*>::iterator it, it_end;
-	it_end = system->Objects.end();
-	for (it = system->Objects.begin(); it != it_end; ++it)
+	std::vector<iSpaceObject*>::iterator it_end = system->Objects.end();
+	for (std::vector<iSpaceObject*>::iterator it = system->Objects.begin(); it != it_end; ++it)
 	{
 		spaceobject = (*it); if (!spaceobject) continue;
 		spaceobject->SetSimulationState(defaultstate);
@@ -190,7 +189,8 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	}
 
 	// Advance-declare some variables that will be used multiple times below
-	std::vector<iSpaceObject*> spacehubs, objects;
+	std::vector<iSpaceObject*> spacehubs;
+	std::vector<iObject*> objects;
 
 	// Otherwise, first get a reference to all space-based simulation hubs in the system
 	GetAllSpaceSimulationHubsInSystem(system, spacehubs);
@@ -200,8 +200,8 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	if (havespacehubs)
 	{
 		// Iterate over each simulation hub in turn
-		it_end = spacehubs.end();
-		for (it = spacehubs.begin(); it != it_end; ++it)
+		std::vector<iSpaceObject*>::iterator it_end = spacehubs.end();
+		for (std::vector<iSpaceObject*>::iterator it = spacehubs.begin(); it != it_end; ++it)
 		{
 			// The simulation hub itself should always be fully-simulated; if it is an environment, so should its contents
 			(*it)->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -209,13 +209,13 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 																					iObject::ObjectSimulationState::FullSimulation);
 
 			// Get all objects within the simulation hub radius from this object and iterate through them
-			Game::ObjectManager.GetAllObjectsWithinDistance((*it), Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
-				SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
-			std::vector<iSpaceObject*>::iterator it2_end = objects.end();
-			for (std::vector<iSpaceObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
+			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance((*it), Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
+																		  Game::ObjectSearchOptions::NoSearchOptions);
+			std::vector<iObject*>::iterator it2_end = objects.end();
+			for (std::vector<iObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
 			{
 				// Make sure the object is valid
-				spaceobject = (*it2); if (!spaceobject) continue;
+				spaceobject = (iSpaceObject*)(*it2); if (!spaceobject) continue;
 
 				// We want to fully simulate this object since it is close to a space simulation hub
 				spaceobject->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -240,14 +240,14 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	if (haveenvhubs)
 	{
 		// Iterate through all interior hubs in turn
-		std::vector<iEnvironmentObject*>::iterator it2_end = envhubs.end();
-		for (std::vector<iEnvironmentObject*>::iterator it2 = envhubs.begin(); it2 != it2_end; ++it2)
+		std::vector<iEnvironmentObject*>::iterator it_end = envhubs.end();
+		for (std::vector<iEnvironmentObject*>::iterator it = envhubs.begin(); it != it_end; ++it)
 		{
 			// The simulation hub itself should always be fully-simulated 
-			(*it2)->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+			(*it)->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 
 			// Make sure this interior hub has an environment; if not (and this shouldn't happen) there is nothing more to do
-			env = (*it2)->GetParentEnvironment();
+			env = (*it)->GetParentEnvironment();
 			if (!env) continue;
 
 			// All objects sharing the environment with this interior hub, and the environment itself, should also be fully simulated
@@ -255,13 +255,13 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			SetSimulationStateOfAllEnvironmentObjects(env, iObject::ObjectSimulationState::FullSimulation);
 
 			// We also want to update any space objects within range of this hub's environment
-			Game::ObjectManager.GetAllObjectsWithinDistance(env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
-				SimulationObjectManager::ObjectSearchOptions::NoSearchOptions);
-			it_end = objects.end();
-			for (it = objects.begin(); it != it_end; ++it)
+			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
+																		Game::ObjectSearchOptions::NoSearchOptions);
+			std::vector<iObject*>::iterator it2_end = objects.end();
+			for (std::vector<iObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
 			{
 				// Make sure the object is valid
-				spaceobject = (*it); if (!spaceobject) continue;
+				spaceobject = (iSpaceObject*)(*it2); if (!spaceobject) continue;
 
 				// The object itself should be fully simulated since it is near this hub's environment
 				spaceobject->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);

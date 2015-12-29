@@ -58,10 +58,10 @@ public:
 	BasicProjectileSet			Projectiles;
 
 	// Each system maintains an Octree for tracking the position of its objects
-	Octree<iSpaceObject*> *		SpatialPartitioningTree;
+	Octree<iObject*> *			SpatialPartitioningTree;
 
 	// Methods to retrieve objects in the system
-	CMPINLINE std::vector<iSpaceObject*> *				GetObjects(void)					{ return &Objects; }
+	CMPINLINE std::vector<iSpaceObject*> *	GetObjects(void)					{ return &Objects; }
 
 	// Methods to get or change the system backdrop texture
 	CMPINLINE string						GetBackdropLocation(void) { return m_backdroplocation; }

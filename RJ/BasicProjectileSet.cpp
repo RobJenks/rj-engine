@@ -1,6 +1,6 @@
 #include "GameVarsExtern.h"
-#include "SimulationObjectManager.h"
 #include "ViewFrustrum.h"
+#include "ObjectSearch.h"
 
 #include "BasicProjectileSet.h"
 
@@ -123,14 +123,14 @@ void BasicProjectileSet::ShrinkCollection(void)
 
 // Simulate all projectiles.  (1) Remove any expired projectiles, (2) handle collisions and (3) move the projectiles
 // along their velocity vector.  Accepts a pointer to the spatial partitioning tree for the current area as input
-void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
+void BasicProjectileSet::SimulateProjectiles(Octree<iObject*> *sp_tree)
 {
 	// Make sure this collection is active
 	if (!Active) return;
 
 	// Define variables required later in the method
-	Octree<iSpaceObject*> *leaf = NULL;
-	std::vector<iSpaceObject*> contacts;
+	Octree<iObject*> *leaf = NULL;
+	std::vector<iObject*> contacts;
 	XMVECTOR delta_pos;
 	bool collision;
 
@@ -168,18 +168,18 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iSpaceObject*> *sp_tree)
 		delta_pos = XMVectorMultiply(proj.Velocity, Game::TimeFactorV);
 
 		// Get all contacts potentially within the path of this object
-		int count = Game::ObjectManager.GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
-			contacts, SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+		int count = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
+						contacts, Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Test each contact to see if it is actually intersected by the projectile path
 		if (count != 0)
 		{
 			collision = false;
-			std::vector<iSpaceObject*>::iterator it_end = contacts.end();
-			for (std::vector<iSpaceObject*>::iterator it = contacts.begin(); it != it_end; ++it)
+			std::vector<iObject*>::iterator it_end = contacts.end();
+			for (std::vector<iObject*>::iterator it = contacts.begin(); it != it_end; ++it)
 			{
 				// Prevent the projectile from colliding with its owner
-				iSpaceObject *obj = (*it);
+				iObject *obj = (*it);
 				if (obj->GetID() == proj.Owner) continue;
 
 				// Test for bounding sphere intersection along the projectile path

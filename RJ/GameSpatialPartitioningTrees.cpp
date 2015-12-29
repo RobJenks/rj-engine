@@ -1,4 +1,4 @@
-#include "iSpaceObject.h"
+#include "iObject.h"
 #include "Octree.h"
 #include "OctreePruner.h"
 
@@ -12,6 +12,6 @@ namespace Game
 	//float							C_DEFAULT_SPATIAL_PARTITIONING_TREE_EXTENT = 200000.0f;
 
 	// Central components used to periodically prune all spatial partitioning trees to remove redundant nodes
-	OctreePruner<iSpaceObject*>		TreePruner = OctreePruner<iSpaceObject*>();
+	OctreePruner<iObject*>			TreePruner = OctreePruner<iObject*>();
 
 }

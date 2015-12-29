@@ -32,7 +32,7 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 	// Create a new spatial partitioning tree to track objects within the system.  Determine the largest dimension and generate to that extent
 	// in each dimension to ensure coverage.  We should only generally have cubic systems (x==y==z) but this allows flexibility for the future
 	float largestdimension = max(m_sizef.x, max(m_sizef.y, m_sizef.z));
-	SpatialPartitioningTree = new Octree<iSpaceObject*>(
+	SpatialPartitioningTree = new Octree<iObject*>(
 		XMVectorMultiply(XMVectorReplicate(largestdimension), HALF_VECTOR_N),						// Centre point is at -0.5f * size (e.g. -50k to +50k for a size of 100k)
 		largestdimension);																			
 	if (!SpatialPartitioningTree) return ErrorCodes::CouldNotInitialiseSpatialPartitioningTree;

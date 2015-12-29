@@ -43,7 +43,7 @@
 #include "CentralScheduler.h"
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
-#include "SimulationObjectManager.h"
+#include "ObjectSearch.h"
 #include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "SpaceSystem.h"
@@ -250,7 +250,7 @@ bool RJMain::Display(void)
 		{
 			Game::Logic::BeginSimulationCycle();
 			Game::CurrentPlayer->BeginSimulationCycle();
-			Game::ObjectManager.InitialiseFrame();
+			Game::ObjectSearchManager::InitialiseFrame();
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_BeginCycle)
 
@@ -651,8 +651,11 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 	if (b[DIK_4]) {
-		Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, !b[DIK_LSHIFT]);
-		Game::Keyboard.LockKey(DIK_4);
+		Ship *parent = cs();
+		for (int t = 0; t < parent->TurretController.TurretCount(); ++t)
+		{
+			parent->TurretController.Turrets[t]->SetTarget(ss());
+		}
 	}
 }
 
@@ -913,8 +916,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseMathFunctions();
 	Game::Log << LOG_INIT_START << "Math functions initialised\n";
 
-	// Initialise the object manager; disable caching functions during initialisation while objects are being created in large numbers
-	Game::ObjectManager.DisableSearchCache();
+	// Initialise object search capabilities, and also disable search caching during initialisation while objects are being created in large numbers
+	Game::ObjectSearchManager::Initialise();
+	Game::ObjectSearchManager::DisableSearchCache();
 
 	// Initialise the universe
 	res = InitialiseUniverse();
@@ -973,7 +977,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	}
 
 	// Enable the object manager cache now that objects have been created during initialisation
-	Game::ObjectManager.EnableSearchCache();
+	Game::ObjectSearchManager::EnableSearchCache();
 
 	// Return success if we have completed all initialisation functions
 	Game::Log << LOG_INIT_START << "Initialisation complete\n\n";
@@ -1291,7 +1295,7 @@ void RJMain::TerminateMemoryPools(void)
 {
 	// Run the shutdown function for each central static memory pool in turn.  Method should be called
 	// for each templated class in use by the application
-	Octree<iSpaceObject*>::ShutdownMemoryPool();
+	Octree<iObject*>::ShutdownMemoryPool();
 }
 
 // Load player config before initialising the application
@@ -1381,36 +1385,36 @@ Result RJMain::InitialiseLoadedGameData(void)
 void RJMain::DebugRenderSpaceCollisionBoxes(void)
 {
 	iSpaceObject *object;
-	std::vector<iSpaceObject*> objects; int count = 0;
+	std::vector<iObject*> objects; int count = 0;
 
 	// Find all active space objects around the player; take a different approach depending on whether the player is in a ship or on foot
 	if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects, 
-			SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects, 
+																				Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the parent ship environmment(hence why we +1 to the count above)
-		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetParentEnvironment());
+		objects.push_back(Game::CurrentPlayer->GetParentEnvironment());
 	}
 	else
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::ObjectManager.GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects,
-			SimulationObjectManager::ObjectSearchOptions::OnlyCollidingObjects);
+		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects,
+																				Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the player ship (hence why we +1 to the count above)
-		objects.push_back((iSpaceObject*)Game::CurrentPlayer->GetPlayerShip());
+		objects.push_back(Game::CurrentPlayer->GetPlayerShip());
 	}
 
 	// Iterate through the active objects
 	XMFLOAT3 pos; float radius;
-	std::vector<iSpaceObject*>::iterator it_end = objects.end();
-	for (std::vector<iSpaceObject*>::iterator it = objects.begin(); it != it_end; ++it)
+	std::vector<iObject*>::iterator it_end = objects.end();
+	for (std::vector<iObject*>::iterator it = objects.begin(); it != it_end; ++it)
 	{
-		object = (*it);
+		object = (iSpaceObject*)(*it);
 
 		/* If we want to render collision sphere extents */
 		if (false)
@@ -2000,10 +2004,11 @@ void RJMain::DEBUGDisplayInfo(void)
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_3, 
 #			ifdef OBJMGR_DEBUG_MODE
 				"Obj cache: Size = %d (Hit: %d / Miss: %d) | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
-				Game::ObjectManager.GetCurrentCacheSize(), Game::ObjectManager.CACHE_HITS, Game::ObjectManager.CACHE_MISSES,
+				Game::ObjectSearchManager::DetermineTotalCurrentCacheSize(), Game::ObjectSearchManager::DetermineTotalCurrentCacheHits(),
+				Game::ObjectSearchManager::DetermineTotalCurrentCacheMisses(),
 #			else
 				"Obj cache: Size = %d | Collisions: Spc = (O/O:%d > B:%d > C:%d), Sp-CCD = (O/O:%d > C:%d), Env = (E:%d > O:%d > E[O]:%d > O/T:%d, O/O:%d > B:%d > C:%d)",
-				Game::ObjectManager.GetCurrentCacheSize(), 
+				Game::ObjectSearchManager::DetermineTotalCurrentCacheSize(),
 #			endif
 			coll.SpaceCollisions.CollisionChecks, coll.SpaceCollisions.BroadphaseCollisions, coll.SpaceCollisions.Collisions,
 			coll.SpaceCollisions.CCDCollisionChecks, coll.SpaceCollisions.CCDCollisions, 
