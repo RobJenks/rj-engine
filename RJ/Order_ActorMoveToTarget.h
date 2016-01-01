@@ -17,9 +17,6 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Order_ActorMoveToTarget)
 
-	// Specifies the class of order this object represents
-	Order::OrderType GetType(void)				{ return Order::OrderType::ActorMoveToTarget; }
-
 	// Constructor including main order parameters
 	Order_ActorMoveToTarget(iEnvironmentObject *target, float getwithin, bool run)
 		:
@@ -28,10 +25,11 @@ public:
 		CloseDistanceSq(getwithin * getwithin),
 		Run(run)
 	{
+		// All order subclasses must set their order type on construction
+		m_ordertype = Order::OrderType::ActorMoveToTarget;
 	}
 
-	// Default constructor / destructor
-	Order_ActorMoveToTarget(void) { }
+	// Default destructor
 	~Order_ActorMoveToTarget(void) { }
 
 public:

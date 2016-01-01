@@ -14,9 +14,6 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Order_MoveToPosition)
 
-	// Specifies the class of order this object represents
-	Order::OrderType GetType(void)				{ return Order::OrderType::MoveToPosition; }
-
 	// Constructor including main order parameters
 	Order_MoveToPosition(CXMVECTOR position, float closedistance)
 		:
@@ -24,10 +21,11 @@ public:
 		CloseDistance(closedistance),
 		CloseDistanceSq(closedistance * closedistance)
 	{
+		// All order subclasses must set their order type on construction
+		m_ordertype = Order::OrderType::MoveToPosition;
 	}
 
-	// Default constructor / destructor
-	Order_MoveToPosition(void) { }
+	// Default destructor
 	~Order_MoveToPosition(void) { }
 
 public:

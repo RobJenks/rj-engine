@@ -4,6 +4,8 @@
 #include "ArticulatedModel.h"
 #include "SpaceProjectile.h"
 #include "ProjectileLauncher.h"
+#include "ObjectReference.h"
+#include "Ship.h"
 
 #include "SpaceTurret.h"
 
@@ -36,93 +38,81 @@ SpaceTurret::SpaceTurret(void)
 	m_firedelay = 0U;
 }
 
-// Full-simulation method for the turret when it is in manual targeting mode.  Will update the 
-// turret state but will not perform any target identification/evaluation/tracking/engagement
-void SpaceTurret::ManualUpdate(void)
-{
-	// Update the turret position and orientation based on its parent
-	UpdatePositioning();
-}
-
-// Full-simulation mode for a fixed turret (i.e. no rotation/target selection capability) under
-// ship computer control.  Will fire if targets are within the possible firing arcs
-void SpaceTurret::AutoUpdateFixed(std::vector<iSpaceObject*> & enemy_contacts)
-{
-	// Iterate through each target in turn to see if any can be hit
-	iSpaceObject *obj;
-	std::vector<iSpaceObject*>::iterator it_end = enemy_contacts.end();
-	for (std::vector<iSpaceObject*>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
-	{
-		// Make sure the object is valid
-		obj = (*it); if (!obj) continue;
-	}
-}
-
 // Full-simulation method for the turret when it is under ship computer control.  Tracks towards targets 
 // and fires when possible.  Accepts a reference to an array of ENEMY contacts in the immediate area; 
 // this cached array is used for greater efficiency when processing multiple turrets per object.  Array 
 // should be filtered by the parent before passing it, and also sorted to prioritise targets if required.  
 // Turret will select the first target in the vector that it can engage
-void SpaceTurret::AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts)
+void SpaceTurret::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts)
 {
 	// Update the turret position and orientation based on its parent
 	UpdatePositioning();
 
-	// We will re-evaluate targets on a less frequent basis; check if we are ready to do so now
-	if (Game::ClockMs >= m_nexttargetanalysis)
+	// Take different action depending on whether we are in manual or automatic mode
+	if (m_mode == SpaceTurret::ControlMode::ManualControl)
 	{
-		// Update the counter to prepare for the next analysis cycle
-		m_nexttargetanalysis = (Game::ClockMs + TARGET_ANALYSIS_INTERVAL);
-
-		// Evaluate all available targets and select one if possible and desirable
-		EvaluateTargets(enemy_contacts);			
-	}
-
-	// Track towards the target if we have one, and if needed
-	if (m_target)
-	{
-		// Determine any pitch/yaw required to keep the target in view (TODO: target leading)
-		// D3DXQuaternionInverse(&invorient, &(m_turretrelativeorient * m_parent->GetOrientation()));
-		XMFLOAT2 pitch_yaw;
-		XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
-		DetermineYawAndPitchToTarget(CannonPosition(), m_target->GetPosition(), invorient, pitch_yaw);
-
-		// If pitch and yaw are very close to target, we can begin firing
-		float ayaw = fabs(pitch_yaw.y), apitch = fabs(pitch_yaw.x);
-		if (ayaw < m_firing_region_threshold && apitch < m_firing_region_threshold)
-		{
-			// We are within the firing threshold.  This will only fire if the turret is ready to do so
-			Fire();
-		}
-		
-		// Attempt to yaw and pitch to keep the target in view
-		if (ayaw > Game::C_EPSILON)		Yaw(pitch_yaw.y * m_yawrate * Game::TimeFactor);
-		if (apitch > Game::C_EPSILON)	Pitch(pitch_yaw.x * m_pitchrate * Game::TimeFactor);
+		// (Move turret to point at user target)
 	}
 	else
 	{
-		// We have no target; return the turret to resting position
-		// If we are already at rest then there is nothing further to do
-		if (fabs(m_yaw) < Game::C_EPSILON && fabs(m_pitch) < Game::C_EPSILON)
+		// We are in automatic mode
+		// We will re-evaluate targets on a less frequent basis; check if we are ready to do so now
+		if (Game::ClockMs >= m_nexttargetanalysis)
 		{
-			if (!m_atrest)
+			// Update the counter to prepare for the next analysis cycle
+			m_nexttargetanalysis = (Game::ClockMs + TARGET_ANALYSIS_INTERVAL);
+
+			// Evaluate all available targets and select one if possible and desirable
+			EvaluateTargets(enemy_contacts);			
+		}
+
+		// Track towards the target if we have one, and if needed
+		if (m_target)
+		{
+			// Determine any pitch/yaw required to keep the target in view.  Implements
+			// target leading ahead of the target object
+			XMFLOAT2 pitch_yaw;
+			XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
+			DetermineYawAndPitchToTarget(CannonPosition(), 
+				XMVectorAdd(m_target->GetPosition(), XMVectorScale(m_target->PhysicsState.WorldMomentum, m_parent->GetTargetLeadingMultiplier(m_target->GetID()))),
+				invorient, pitch_yaw);
+
+			// If pitch and yaw are very close to target, we can begin firing
+			float ayaw = fabs(pitch_yaw.y), apitch = fabs(pitch_yaw.x);
+			if (ayaw < m_firing_region_threshold && apitch < m_firing_region_threshold)
 			{
-				// If we have oriented back to ID and are not current flagged as 'at rest', set the flag now and quit
-				ResetOrientation();
+				// We are within the firing threshold.  This will only fire if the turret is ready to do so
+				Fire();
 			}
+		
+			// Attempt to yaw and pitch to keep the target in view
+			if (ayaw > Game::C_EPSILON)		Yaw(pitch_yaw.y * m_yawrate * Game::TimeFactor);
+			if (apitch > Game::C_EPSILON)	Pitch(pitch_yaw.x * m_pitchrate * Game::TimeFactor);
 		}
 		else
 		{
-			// We are trying to rotate back to the resting position
-			Yaw((m_yaw < 0.0f ? min(-m_yaw, m_yawrate) : -min(m_yaw, m_yawrate)) * Game::TimeFactor);
-			Pitch((m_pitch < 0.0f ? min(-m_pitch, m_pitchrate) : -min(m_pitch, m_pitchrate)) * Game::TimeFactor);
+			// We have no target; return the turret to resting position
+			// If we are already at rest then there is nothing further to do
+			if (fabs(m_yaw) < Game::C_EPSILON && fabs(m_pitch) < Game::C_EPSILON)
+			{
+				if (!m_atrest)
+				{
+					// If we have oriented back to ID and are not current flagged as 'at rest', set the flag now and quit
+					ResetOrientation();
+				}
+			}
+			else
+			{
+				// We are trying to rotate back to the resting position
+				Yaw((m_yaw < 0.0f ? min(-m_yaw, m_yawrate) : -min(m_yaw, m_yawrate)) * Game::TimeFactor);
+				Pitch((m_pitch < 0.0f ? min(-m_pitch, m_pitchrate) : -min(m_pitch, m_pitchrate)) * Game::TimeFactor);
+			}
 		}
-
 	}
 }
 
 // Analyse all potential targets in the area and change target if necessary/preferred
-void SpaceTurret::EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts)
+void SpaceTurret::EvaluateTargets(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts)
 {
 	// If there are no enemy contacts nearby then we know that no target can be possible
 	if (enemy_contacts.size() == 0)
@@ -244,7 +234,7 @@ void SpaceTurret::Fire(void)
 }
 
 // Sets the parent object to this turret
-void SpaceTurret::SetParent(iSpaceObject *parent)
+void SpaceTurret::SetParent(Ship *parent)
 {
 	// Store the parent reference
 	m_parent = parent;
@@ -451,18 +441,18 @@ bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one
-iSpaceObject * SpaceTurret::FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts)
+iSpaceObject * SpaceTurret::FindNewTarget(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts)
 {
 	// Make sure we have required data
 	if (!m_parent) return NULL;
 
 	// Consider each candidate in turn
 	iSpaceObject *obj;
-	std::vector<iSpaceObject*>::iterator it_end = enemy_contacts.end();
-	for (std::vector<iSpaceObject*>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = enemy_contacts.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
 	{
 		// Make sure the object is valid
-		obj = (*it); if (!obj) continue;
+		obj = (*it)(); if (!obj) continue;
 
 		// Make sure we are only targeting hostile objects
 		if (m_parent->GetDispositionTowardsObject(obj) != Faction::FactionDisposition::Hostile) continue;

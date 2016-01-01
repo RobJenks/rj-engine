@@ -5,7 +5,7 @@
 
 #include "CompilerSettings.h"
 #include "iEnvironmentObject.h"
-#include "iConsumesOrders.h"
+#include "EntityAI.h"
 #include "SkinnedModel.h"
 #include "ActorAttributes.h"
 class iObject;
@@ -19,7 +19,7 @@ class iSpaceObjectEnvironment;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Actor : public ALIGN16<Actor>, public iEnvironmentObject, public iConsumesOrders
+class Actor : public ALIGN16<Actor>, public iEnvironmentObject, public EntityAI
 {
 public:
 

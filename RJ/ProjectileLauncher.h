@@ -6,7 +6,7 @@
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
 #include "Projectile.h"
-class iSpaceObject;
+class Ship;
 class SpaceTurret;
 class SpaceProjectile;
 class BasicProjectileDefinition;
@@ -56,8 +56,8 @@ public:
 	CMPINLINE const SpaceProjectileDefinition * GetProjectileDefinition(void) const								{ return m_projectiledef; }
 
 	// Methods to get or set basic object properties
-	CMPINLINE const iSpaceObject *		GetParent(void) const										{ return m_parent; }
-	CMPINLINE void						SetParent(iSpaceObject *parent)								{ m_parent = parent; }	
+	CMPINLINE const Ship *				GetParent(void) const										{ return m_parent; }
+	CMPINLINE void						SetParent(Ship *parent)										{ m_parent = parent; }	
 	CMPINLINE const SpaceTurret *		GetParentTurret(void) const									{ return m_parentturret; }
 	CMPINLINE void						SetParentTurret(SpaceTurret *turret)						{ m_parentturret = turret; }
 
@@ -82,6 +82,9 @@ public:
 	// Launch impulse is either a force or a velocity, depending on the launch method
 	CMPINLINE float						GetLaunchImpulse(void) const								{ return m_launchimpulse; }
 	CMPINLINE void						SetLaunchImpulse(float i)									{ m_launchimpulse = max(0.01f, i); }
+
+	// Returns the actual projectile at launch, calculated based on projectile definition, type and launch method
+	CMPINLINE float						GetLaunchVelocity(void) const								{ return m_launch_velocity; }
 
 	CMPINLINE bool						ImpartsOrientationShiftInFlight(void) const					{ return m_launchwithorientchange; }
 	CMPINLINE XMVECTOR					GetProjectileOrientationChange(void) const					{ return m_projectileorientchange; }
@@ -138,6 +141,9 @@ public:
 	// changes that we cannot simulate accurately here (without actually firing a projectile)
 	float								DetermineApproxRange(void) const;
 
+	// Precalculates data based on the projectile launcher, projectile definitions and other factors
+	void								RecalculateLauncherStatistics(void);
+
 	// Copy all launcher data from the specified source object
 	void								CopyFrom(const ProjectileLauncher *source);
 
@@ -157,7 +163,7 @@ protected:
 	const BasicProjectileDefinition *	m_basicprojdef;					// The type of projectile that will be launched (if we are launching basic projectiles)
 	const SpaceProjectileDefinition *	m_projectiledef;				// The type of projectile that will be launched (if we are launching full projectiles)
 
-	iSpaceObject *						m_parent;						// The parent object that this launcher belongs to
+	Ship *								m_parent;						// The parent object that this launcher belongs to
 	SpaceTurret *						m_parentturret;					// The parent object turret that this launcher belongs to (or NULL if N/A)
 
 	AXMVECTOR							m_relativepos;					// Relative position in the parent object's coordinate space
@@ -183,6 +189,7 @@ protected:
 	bool								m_launchwithorientchange;		// Indicates whether projectiles are launched with a 'spin', changing their orientation in flight
 	AXMVECTOR							m_projectileorientchange;		// Allow us to impart a gradual orientation change on the projectile during flight
 
+	float								m_launch_velocity;				// Projectile velocity at launch; precalculated to aid in runtime efficiency.  Distance /sec
 };
 
 

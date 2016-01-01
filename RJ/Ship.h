@@ -10,7 +10,7 @@
 #include "CompilerSettings.h"
 #include "iSpaceObject.h"
 #include "ObjectReference.h"
-#include "iConsumesOrders.h"
+#include "EntityAI.h"
 #include "iContainsHardpoints.h"
 #include "iContainsTurrets.h"
 #include "Equip.h"
@@ -18,6 +18,7 @@
 class Hardpoint;
 class Order_MoveToPosition;
 class Order_MoveToTarget;
+class Order_AttackRunOnTargetWithLeading; 
 class Order_MoveAwayFromTarget;
 class Order_AttackBasic;
 
@@ -35,7 +36,7 @@ public:
 // Main ship class
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Ship : public ALIGN16<Ship>, public iSpaceObject, public iConsumesOrders, public iContainsHardpoints, public iContainsTurrets
+class Ship : public ALIGN16<Ship>, public iSpaceObject, public EntityAI, public iContainsHardpoints, public iContainsTurrets
 {
 public:
 
@@ -125,6 +126,10 @@ public:
 	AXMVECTOR			Bank;											// The current banking position in all three dimensions
 	void				SetBankExtent(const FXMVECTOR extent_radians);	// Validates and sets the ship bank extents (in radians)
 
+	// Runs the entity-level AI, which will determine actions/orders for the ship (if not being controlled 
+	// by a higher-level AI)
+	void				RunEntityAI(void);
+
 	// Runs the ship flight computer, evaluating current state and any active orders
 	void				RunShipFlightComputer(void);
 
@@ -133,6 +138,43 @@ public:
 
 	// Methods relating to nearby contacts and AI analysis of the surrounding area
 	CMPINLINE bool		HasNearbyEnemyContacts(void) const		{ return m_cached_enemy_contact_count != 0; }
+
+	// Assesses nearby enemy contacts, and decides whether/which to engage
+	void				AssessNearbyEnemyContacts(void);
+
+	// Performs an assessment of the current situation, based on nearby friendly vs enemy contacts, current
+	// ship state etc.
+	float				AssessCurrentSituation(void);
+
+	// Have the entity decide on a new course of action
+	void				DetermineNewCourseOfAction(void);
+
+	// Returns the target of our first currently-active combat order, if any, or NULL if we have no target
+	iSpaceObject *		GetCurrentAttackTarget(void);
+
+	// Returns a value indicating how appropriate the specified object is a combat target for us, 
+	// given our relative strength, AI states, disposition towards the target etc.  Higher
+	// values are better, with anything < 0 meaning the target is actually invalid and should not be considered
+	float				AssessEnemyTarget(iSpaceObject *target);
+
+	// Assess the relative strength of this ship vs the specified target.  Positive return values indicate we
+	// are stronger, negative indicate we are weaker, with 0.0 meaning equally-matched
+	float				AssessRelativeStrength(iSpaceObject *target);
+
+	// Assesses all nearby enemy contacts and determines the most appropriate (or NULL if no appropriate targets exist)
+	iSpaceObject *		FindBestTarget(void);
+
+	// Orders the ship to begin attacking the specified object (which can be NULL for no action)
+	// Will also clear any existing combat orders before issuing this one
+	void				Attack(iSpaceObject *target);
+
+	// Cancels all combat orders, turret designations etc.  Calls the base EntityAI class method of
+	// the same name to modify the order queue itself
+	CMPINLINE void		CancelAllCombatOrders(void)							{ CancelAllCombatOrders(true); }
+	void				CancelAllCombatOrders(bool perform_maintenance);
+
+	// Flees from nearby enemies
+	void				FleeFromEnemies(void);
 
 	// Analyses all nearby contacts to identify whether the ship is at risk of collision.  Stores the nearest collision threat 
 	// as the current avoidance target if applicable
@@ -144,7 +186,7 @@ public:
 	void				HardpointChanged(Hardpoint *hp);
 
 	// Recalculates the ship statistics based on its current state & loadout.  Called when the ship state changes during operation
-	virtual void		RecalculateShipDataFromCurrentState(void) = 0;
+	virtual void		RecalculateShipDataFromCurrentState(void);
 
 
 	// Method to set the base ship mass, which will automatically recalculate the overall ship mass at the same time
@@ -181,10 +223,10 @@ public:
 	CMPINLINE XMVECTOR			GetInverseUnadjustedOrientation(void) const { return m_inv_unadjusted_orient; }
 
 	// Retrieve the contacts currently registered by this ship
-	CMPINLINE const std::vector<iSpaceObject*> &		GetContacts(void) const				{ return m_cached_contacts; }
-	CMPINLINE const std::vector<iSpaceObject*> &		GetEnemyContacts(void) const		{ return m_cached_enemy_contacts; }
-	CMPINLINE std::vector<iSpaceObject*>::size_type		GetContactCount(void) const			{ return m_cached_contact_count; }
-	CMPINLINE std::vector<iSpaceObject*>::size_type		GetEnemyContactCount(void) const	{ return m_cached_enemy_contact_count; }
+	CMPINLINE const std::vector<ObjectReference<iSpaceObject>> &		GetContacts(void) const				{ return m_cached_contacts; }
+	CMPINLINE const std::vector<ObjectReference<iSpaceObject>> &		GetEnemyContacts(void) const		{ return m_cached_enemy_contacts; }
+	CMPINLINE std::vector<ObjectReference<iSpaceObject>>::size_type		GetContactCount(void) const			{ return m_cached_contact_count; }
+	CMPINLINE std::vector<ObjectReference<iSpaceObject>>::size_type		GetEnemyContactCount(void) const	{ return m_cached_enemy_contact_count; }
 
 	// Determines the "collision avoidance range" of the ship, i.e. the distance at which it starts to avoid an obstacle
 	// This range is dependent on the current velocity of the ship
@@ -204,6 +246,9 @@ public:
 	// Order: Moves the ship to a target object, within a certain tolerance
 	Order::OrderResult			MoveToTarget(Order_MoveToTarget & order);
 
+	// Order: Moves the ship at a target object, within a certain tolerance, using target leading
+	Order::OrderResult			AttackRunOnTargetWithLeading(Order_AttackRunOnTargetWithLeading & order);
+	
 	// Order: Moves the ship a specified distance away from some target
 	Order::OrderResult			MoveAwayFromTarget(Order_MoveAwayFromTarget & order);
 
@@ -225,6 +270,37 @@ public:
 	// Further derived classes (e.g. ships) can implement this method and then call Ship::SimulationStateChanged() to maintain the chain
 	void						SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
 
+
+	// Structure holding this entity's immediate-term information on other entities
+	struct				ImmediateEntityInfo
+	{
+		Game::ID_TYPE				ID;							// ID of the object that this information relates to
+
+		float						TargetLeadMultiplier;		// Precalculated target leading multiplier for this entity
+		unsigned int				TargetLeadingValidUntil;	// Time (ms) at which the target leading should be recalculated
+
+		// Constructor
+		ImmediateEntityInfo(void) : ID(0), TargetLeadMultiplier(0.0f), TargetLeadingValidUntil(0U) { }
+		ImmediateEntityInfo(Game::ID_TYPE id) : ID(id), TargetLeadMultiplier(0.0f), TargetLeadingValidUntil(0U) { }
+		ImmediateEntityInfo(Game::ID_TYPE id, float lead_multiplier) :
+			ID(id),
+			TargetLeadMultiplier(lead_multiplier),
+			TargetLeadingValidUntil(Game::ClockMs + Game::C_TARGET_LEADING_RECALC_INTERVAL) { }
+	};
+
+	// Clears any immediate-term data stored on nearby entities
+	CMPINLINE void				ClearAllImmediateEntityData(void)			{ ImmediateEntityData.clear(); }
+
+	// Retrieve any immediate-term information on the specified object, if we have any
+	const ImmediateEntityInfo *	GetImmediateEntityData(Game::ID_TYPE id) const;
+
+	// Get an appropriate target leading multiplier for the specified object.  Uses average projectile velocity
+	// to determine the leading multiplier
+	float						GetTargetLeadingMultiplier(Game::ID_TYPE id);
+
+	// Calculates a new target lead multiplier for the specified target object
+	float						CalculateTargetLeadMultiplier(iSpaceObject *target);
+
 	// Terminates the ship object and deallocates storage
 	void						Shutdown(void);
 
@@ -237,11 +313,12 @@ protected:
 	Ships::Class		m_shipclass;				// This is either a simple or a complex ship
 	std::string			m_defaultloadout;			// String ID of the default loadout to be applied to this ship
 
-	float				m_flightcomputerinterval;			// Interval (secs) between executions of the flight computer
-	float				m_timesincelastflightcomputereval;	// Time (secs) since flight computer was last executed
+	unsigned int		m_flightcomputer_interval;			// Interval (secs) between executions of the flight computer
+	unsigned int		m_ai_interval;						// Interval (secs) between executions of the flight computer
+	unsigned int		m_last_ai_evaluation;				// Time (ms) since the last AI cycle and analysis of nearby targets
+	unsigned int		m_last_flight_comp_evaluation;		// Time (ms) since flight computer was last executed to process current orders
+	
 	bool				m_shipenginecontrol;				// Determines whether the ship will operate engines/brakes to attain target speed
-	unsigned int		m_timesincelasttargetanalysis;		// Time (ms) since the last analysis of nearby targets
-
 	float				m_targetspeed;				// The speed we want the ship flight computer to attain
 	float				m_targetspeedsq;			// Precalculated squared-target speed, for inflight efficiency
 	float				m_targetspeedsqthreshold;	// Precalculated 90% threshold at which we start to reduce engine thrust
@@ -264,15 +341,15 @@ protected:
 	float				m_turnmodifier_peaceful;	// Turn modifier for peaceful situations
 	float				m_turnmodifier_combat;		// Turn modifier for combat situations
 
-	ObjectReference<iSpaceObject>			m_avoid_target;					// Reference to any space abject that we are currently maneuvering to avoid, or NULL if none
+	ObjectReference<iSpaceObject>							m_avoid_target;					// Reference to any space abject that we are currently maneuvering to avoid, or NULL if none
 
-	AXMVECTOR								m_turnrate_v, m_turnrate_nv;	// Vectorised turn rate and negation for faster per-frame calculations
-	AXMVECTOR								m_vlimit_v, m_avlimit_v;		// Vectorised linear/angular velocity limits for faster per-frame calculations
+	AXMVECTOR												m_turnrate_v, m_turnrate_nv;	// Vectorised turn rate and negation for faster per-frame calculations
+	AXMVECTOR												m_vlimit_v, m_avlimit_v;		// Vectorised linear/angular velocity limits for faster per-frame calculations
 
-	std::vector<iSpaceObject*>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
-	std::vector<iSpaceObject*>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
-	std::vector<iSpaceObject*>::size_type	m_cached_contact_count;			// Count of cached contacts
-	std::vector<iSpaceObject*>::size_type	m_cached_enemy_contact_count;	// Count of cached enemy contacts
+	std::vector<ObjectReference<iSpaceObject>>				m_cached_contacts;				// Cached collection of contacts, obtained last time the flight computer was run
+	std::vector<ObjectReference<iSpaceObject>>				m_cached_enemy_contacts;		// Cached collection of enemy contacts, obtained last time the flight computer was run
+	std::vector<ObjectReference<iSpaceObject>>::size_type	m_cached_contact_count;			// Count of cached contacts
+	std::vector<ObjectReference<iSpaceObject>>::size_type	m_cached_enemy_contact_count;	// Count of cached enemy contacts
 
 	// Determine exact yaw and pitch to target; used for precise corrections near the target heading
 	CMPINLINE float		DetermineExactYawToTarget(XMFLOAT3 tgt);
@@ -295,6 +372,9 @@ protected:
 
 	// Event triggered upon destruction of the object
 	void				DestroyObject(void);
+
+	// Vector of immediate-term information on nearby entities
+	std::vector<ImmediateEntityInfo>	ImmediateEntityData;
 
 };
 

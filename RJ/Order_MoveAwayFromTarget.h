@@ -18,9 +18,6 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Order_MoveAwayFromTarget)
 
-	// Specifies the class of order this object represents
-	Order::OrderType GetType(void)				{ return Order::OrderType::MoveAwayFromTarget; }
-
 	// Constructor including main order parameters.  The existing momentum weighting [0.0 - 1.0] specifies how
 	// much weight the ship's existing momentum vector should play in plotting a retreat path
 	Order_MoveAwayFromTarget(iSpaceObject *target, float retreat_distance, float existing_momentum_weighting)
@@ -32,10 +29,11 @@ public:
 		MomentumWeighting(clamp(existing_momentum_weighting, 0.0f, 1.0f)),
 		_VectorTravelTarget(RetreatDistance * 10.0f)
 	{
+		// All order subclasses must set their order type on construction
+		m_ordertype = Order::OrderType::MoveAwayFromTarget;
 	}
 
-	// Default constructor / destructor
-	Order_MoveAwayFromTarget(void) { }
+	// Default destructor
 	~Order_MoveAwayFromTarget(void) { }
 
 public:

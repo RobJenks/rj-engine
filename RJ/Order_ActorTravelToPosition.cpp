@@ -20,6 +20,9 @@ Order_ActorTravelToPosition::Order_ActorTravelToPosition(	iSpaceObjectEnvironmen
 	PathLength(0),
 	PathIndex(0)
 {
+	// All order subclasses must set their order type on construction
+	m_ordertype = Order::OrderType::ActorTravelToPosition;
+
 	// Determine the path to be followed to reach the target position
 	CalculateTravelPath();
 }

@@ -231,14 +231,18 @@ namespace Game {
 	extern XMVECTOR C_CS_PERIMETER_BEACON_FREQUENCY_V;	// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)
 
 	// AI, order management and ship computer constants
-	extern float C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;
-	extern float C_DEFAULT_ORDER_EVAL_FREQUENCY;
-	extern float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY;
+	extern unsigned int C_DEFAULT_ENTITY_AI_EVAL_INTERVAL;				// The default interval for evaluation of current situation by an entity AI
+	extern unsigned int C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL;		// The default interval for evaluation by the ship flight computer
+	extern unsigned int C_DEFAULT_ORDER_EVAL_FREQUENCY;					// The default interval for subsequent evaluations of an order by the AI
+	extern unsigned int C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY;	// Default interval for entity maintenance of its order queue
+
 	extern float C_ENGINE_THRUST_DECREASE_THRESHOLD;
 	extern float C_DEFAULT_ATTACK_CLOSE_TIME;					// Close distance will be this many seconds at full velocity from target
 	extern float C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER;		// Multiple of target collision sphere radius that we will account for when attacking, by default
 	extern float C_DEFAULT_ATTACK_RETREAT_TIME;					// Retreat distance between attack runs will be this many seconds at full velocity, added to close dist
 	extern float C_ATTACK_TAIL_FOLLOW_THRESHOLD;				// We will attempt to get 'on the tail' of ships travelling more than (this) % of our velocity limit
+	extern float C_DEFAULT_FLEE_DISTANCE;						// Default distance we will attempt to flee from enemies, if in 'flee' mode
+	extern unsigned int C_TARGET_LEADING_RECALC_INTERVAL;		// Ships will recalculate their target leading distance every interval (ms)
 
 	// Actor-related constants
 	extern float C_ACTOR_DEFAULT_RUN_SPEED;						// Default run speed for all actors unless specified

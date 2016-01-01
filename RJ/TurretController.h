@@ -6,6 +6,7 @@
 #include <vector>
 #include "CompilerSettings.h"
 #include "iObject.h"
+#include "ObjectReference.h"
 #include "SpaceTurret.h"
 
 // Represents a collection of turrets, with methods for managing, simulating and rendering them
@@ -24,14 +25,14 @@ public:
 	TurretController(void);
 
 	// Perform a full update of the turret collection
-	void											Update(std::vector<iSpaceObject*> & enemy_contacts);
+	void											Update(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts);
 
 	// Indicates whether the turret controller is active, based on whether it is managing any turrets
 	CMPINLINE bool									IsActive(void) const					{ return m_active; }
 
 	// Return or set a refernce to the parent object that owns this turret controller
-	CMPINLINE iSpaceObject *						GetParent(void)							{ return m_parent; }
-	void											SetParent(iSpaceObject *parent);
+	CMPINLINE Ship *								GetParent(void)							{ return m_parent; }
+	void											SetParent(Ship *parent);
 
 	// Sets the control mode of all turrets
 	void											SetControlModeOfAllTurrets(SpaceTurret::ControlMode mode);
@@ -51,6 +52,21 @@ public:
 	// parent object) changes
 	void											RefreshTurretCollection(void);
 
+	// Sets the current target for all ship turrets 
+	void											SetTarget(iSpaceObject *target);
+
+	// Changes the current target for all ship turrets targeting current_target to new_target
+	void											ChangeTarget(iSpaceObject *current_target, iSpaceObject *new_target);
+
+	// Sets the designated target for all ship turrets 
+	void											SetDesignatedTarget(iSpaceObject *designated_target);
+
+	// Changes the designated target for all ship turrets targeting current_designation to new_designation
+	void											ChangeDesignatedTarget(iSpaceObject *current_designation, iSpaceObject *new_designation);
+
+	// Returns the average projectile velocity for all turrets managed by this controller
+	CMPINLINE float									GetAverageProjectileVelocity(void) const	{ return m_avg_projectile_velocity; }
+
 	// Default destructor
 	~TurretController(void);
 
@@ -58,13 +74,17 @@ public:
 protected:
 
 	// Reference to the parent object
-	iSpaceObject *									m_parent;
+	Ship *											m_parent;
 
 	// Maintain a record of the number of turret objects, to avoid recalculating via size() each time
 	int												m_turretcount;
 
 	// Indicates whether the turret controller is active, based on whether it is managing any turrets
 	bool											m_active;
+
+	// Turret controller keeps track of the average projectile velocity in its turret collection, 
+	// to enable more accurate target leading (velocity /sec)
+	float											m_avg_projectile_velocity;
 
 };
 

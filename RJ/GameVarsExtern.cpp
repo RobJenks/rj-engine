@@ -198,7 +198,7 @@ namespace Game {
 	// Ship simulation, movement and manuevering constants
 	float C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL = 0.7f;			// Default turn modifier for ships when not in combat.  Can be overidden per ship/pilot
 	float C_AI_DEFAULT_TURN_MODIFIER_COMBAT = 1.0f;				// Default turn modifier for ships when in combat.  Can be overidden per ship/pilot
-	float C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE = 5000.0f;		// The default range within which ships will analyse nearby contacts
+	float C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE = 20000.0f;		// The default range within which ships will analyse nearby contacts
 	unsigned int C_DEFAULT_SHIP_CONTACT_ANALYSIS_FREQ = 3000U;	// Default interval between analysis of nearby contacts (ms)
 
 	// Immediate Region-related data
@@ -219,14 +219,18 @@ namespace Game {
 		XMVectorReplicate(C_CS_PERIMETER_BEACON_FREQUENCY);								// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)
 
 	// AI, order management and ship computer constants
-	float C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL = 0.1f;		// The default interval for evaluation by the ship flight computer
-	float C_DEFAULT_ORDER_EVAL_FREQUENCY = 0.5f;				// The default interval for subsequent evaluations of an order by the AI
-	float C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY = 5.0f;	// Default interval for entity maintenance of its order queue
+	unsigned int C_DEFAULT_ENTITY_AI_EVAL_INTERVAL = 3000U;				// The default interval for evaluation of current situation by an entity AI
+	unsigned int C_DEFAULT_FLIGHT_COMPUTER_EVAL_INTERVAL = 100U;		// The default interval for evaluation by the ship flight computer
+	unsigned int C_DEFAULT_ORDER_EVAL_FREQUENCY = 500U;					// The default interval for subsequent evaluations of an order by the AI
+	unsigned int C_DEFAULT_ORDER_QUEUE_MAINTENANCE_FREQUENCY = 5000U;	// Default interval for entity maintenance of its order queue
+
 	float C_ENGINE_THRUST_DECREASE_THRESHOLD = 0.9f;			// % threshold of target speed at which we start to reduce engine thrust
 	float C_DEFAULT_ATTACK_CLOSE_TIME = 2.5f;					// Close distance will be this many seconds at full velocity from target
 	float C_DEFAULT_ATTACK_CLOSE_RADIUS_MULTIPLIER = 1.5f;		// Multiple of target collision sphere radius that we will account for when attacking, by default
 	float C_DEFAULT_ATTACK_RETREAT_TIME = 2.5f;					// Retreat distance between attack runs will be this many seconds at full velocity, added to close dist
 	float C_ATTACK_TAIL_FOLLOW_THRESHOLD = 0.75f;				// We will attempt to get 'on the tail' of ships travelling more than (this) % of our velocity limit
+	float C_DEFAULT_FLEE_DISTANCE = 5000.0f;					// Default distance we will attempt to flee from enemies, if in 'flee' mode
+	unsigned int C_TARGET_LEADING_RECALC_INTERVAL = 500U;		// Ships will recalculate their target leading distance every interval (ms)
 
 	// Actor-related constants
 	float C_ACTOR_DEFAULT_RUN_SPEED = 18.0f;									// Default run speed for all actors unless specified

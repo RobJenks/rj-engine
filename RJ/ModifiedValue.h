@@ -99,8 +99,12 @@ template <typename T>
 void ModifiedValue<T>::RemoveModifiersOfType(typename Modifier<T>::ModifierType type)
 {
 	// Erase all matching elements and then recalculate the value
-	m_modifiers.erase(std::remove_if(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsOfType(type)), m_modifiers.end());
-	if (!m_update_suspended) RecalculateValue();
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsOfType(type));
+	if (it != m_modifiers.end())
+	{
+		m_modifiers.erase(it, m_modifiers.end());
+		if (!m_update_suspended) RecalculateValue();
+	}
 }
 
 // Removes the specified modifier.  Only one removed if multiple matching modifiers.  Exact matching
@@ -140,8 +144,12 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifier(const Modifier<T> & modifier)
 {
 	// Erase all matching elements and then recalculate the value
-	m_modifiers.erase(std::remove_if(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(modifier)), m_modifiers.end());
-	if (!m_update_suspended) RecalculateValue();
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(modifier));
+	if (it != m_modifiers.end())
+	{
+		m_modifiers.erase(it, m_modifiers.end());
+		if (!m_update_suspended) RecalculateValue();
+	}
 }
 
 // Removes all instances of the specified modifier.  Exact matching
@@ -149,8 +157,12 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifier(typename Modifier<T>::ModifierType type, T value)
 {
 	// Erase all matching elements and then recalculate the value
-	m_modifiers.erase(std::remove_if(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(type, value)), m_modifiers.end());
-	if (!m_update_suspended) RecalculateValue();
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(type, value));
+	if (it != m_modifiers.end())
+	{
+		m_modifiers.erase(it, m_modifiers.end());
+		if (!m_update_suspended) RecalculateValue();
+	}
 }
 
 // Removes the specified modifier.  Only one removed if multiple matching modifiers.  Allows slight matching threshold for e.g. FP rounding differences
@@ -190,8 +202,12 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifierApprox(const Modifier<T> & modifier)
 {
 	// Erase all matching elements and then recalculate the value
-	m_modifiers.erase(std::remove_if(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(modifier)), m_modifiers.end());
-	if (!m_update_suspended) RecalculateValue();
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(modifier));
+	if (it != m_modifiers.end())
+	{
+		m_modifiers.erase(it, m_modifiers.end());
+		if (!m_update_suspended) RecalculateValue();
+	}
 }
 
 // Removes all instances of the specified modifier.  Allows slight matching threshold for e.g. FP rounding differences
@@ -199,8 +215,12 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifierApprox(typename Modifier<T>::ModifierType type, T value)
 {
 	// Erase all matching elements and then recalculate the value
-	m_modifiers.erase(std::remove_if(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(type, value)), m_modifiers.end());
-	if (!m_update_suspended) RecalculateValue();
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(type, value));
+	if (it != m_modifiers.end())
+	{
+		m_modifiers.erase(it, m_modifiers.end());
+		if (!m_update_suspended) RecalculateValue();
+	}
 }
 
 

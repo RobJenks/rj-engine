@@ -6,7 +6,8 @@
 #include "DX11_Core.h"
 #include "FiringArc.h"
 #include "ArticulatedModel.h"
-class iSpaceObject;
+#include "ObjectReference.h"
+#include "iSpaceObject.h"
 class ProjectileLauncher;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -30,32 +31,10 @@ public:
 
 	// Primary update method for the turret.  Will take appropriate action depending on the control
 	// mode currently set for the turret
-	CMPINLINE void					Update(std::vector<iSpaceObject*> & enemy_contacts)
-	{
-		switch (m_mode)
-		{
-			case ControlMode::AutomaticControl:			AutoUpdate(enemy_contacts); return;
-			default:									ManualUpdate();				return;
-		}
-	}
-
-	// Simulation method for the turret when it is in manual targeting mode.  Will update the 
-	// turret state but will not perform any target identification/evaluation/tracking/engagement
-	void							ManualUpdate(void);
-
-	// Full-simulation mode for a fixed turret (i.e. no rotation/target selection capability) under
-	// ship computer control.  Will fire if targets are within the firing region
-	void							AutoUpdateFixed(std::vector<iSpaceObject*> & enemy_contacts);
-
-	// Simulation method for the turret when it is under ship computer control.  Tracks towards targets 
-	// and fires when possible.  Accepts a reference to an array of ENEMY contacts in the immediate area; 
-	// this cached array is used for greater efficiency when processing multiple turrets per object.  Array 
-	// should be filtered by the parent before passing it, and also sorted to prioritise targets if required.  
-	// Turret will select the first target in the vector that it can engage
-	void							AutoUpdate(std::vector<iSpaceObject*> & enemy_contacts);
+	void							Update(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts);
 
 	// Analyse all potential targets in the area and change target if necessary/preferred
-	void							EvaluateTargets(std::vector<iSpaceObject*> & enemy_contacts);
+	void							EvaluateTargets(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts);
 
 	// Force new target analysis next frame
 	void							ForceNewTargetAnalysis(void);
@@ -64,8 +43,8 @@ public:
 	void							Fire(void);
 
 	// Gets/sets the parent object to this turret
-	CMPINLINE iSpaceObject *		GetParent(void) const									{ return m_parent; }
-	void							SetParent(iSpaceObject *parent);
+	CMPINLINE Ship *				GetParent(void) const									{ return m_parent; }
+	void							SetParent(Ship *parent);
 
 	// Retrieve a pointer to the articulated model for this turret
 	CMPINLINE ArticulatedModel *	GetArticulatedModel(void)								{ return m_articulatedmodel; }
@@ -164,7 +143,7 @@ public:
 	bool							CanHitTarget(iSpaceObject *target);
 
 	// Searches for a new target in the given vector of enemy contacts and returns the first valid one
-	iSpaceObject *					FindNewTarget(std::vector<iSpaceObject*> & enemy_contacts);
+	iSpaceObject *					FindNewTarget(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts);
 
 	// Returns a value indicating whether the turret currently has a target
 	CMPINLINE bool					HasTarget(void) const										{ return (m_target != NULL); }
@@ -184,7 +163,7 @@ public:
 	// Retrieve a reference to one of the launchers within the turrent
 	ProjectileLauncher *			GetLauncher(int index);
 
-	// Returns the number of launchers maintained within this turrent
+	// Returns the number of launchers maintained within this turret
 	CMPINLINE int					GetLauncherCount(void) const		{ return m_launchercount; }
 
 	// Sets a launcher to the specified object
@@ -230,7 +209,7 @@ protected:
 	std::string						m_name;
 
 	// Parent object that this turret is attached to
-	iSpaceObject *					m_parent;
+	Ship *							m_parent;
 
 	// Indicates whether this is a fixed weapon or rotating turret
 	bool							m_isfixed;

@@ -302,7 +302,7 @@
     <ClCompile Include="HpTorpedoLauncher.cpp" />
     <ClCompile Include="HpWeapon.cpp" />
     <ClCompile Include="iActiveObject.cpp" />
-    <ClCompile Include="iConsumesOrders.cpp" />
+    <ClCompile Include="EntityAI.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
     <ClCompile Include="iContainsTurrets.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
@@ -462,6 +462,7 @@
     <ClInclude Include="DebugGlobalField.h" />
     <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
+    <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="Modifier.h" />
@@ -513,7 +514,7 @@
     <ClInclude Include="HpWeapon.h" />
     <ClInclude Include="iAcceptsConsoleCommands.h" />
     <ClInclude Include="iActiveObject.h" />
-    <ClInclude Include="iConsumesOrders.h" />
+    <ClInclude Include="EntityAI.h" />
     <ClInclude Include="iContainsTurrets.h" />
     <ClInclude Include="InputLayoutDesc.h" />
     <ClInclude Include="iSpaceObjectEnvironment.h" />

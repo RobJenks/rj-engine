@@ -2,7 +2,9 @@
 #include "SpaceSystem.h"
 #include "SpaceProjectile.h"
 #include "BasicProjectileSet.h"
+#include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
+#include "Ship.h"
 
 #include "ProjectileLauncher.h"
 
@@ -15,7 +17,7 @@ ProjectileLauncher::ProjectileLauncher(void) :
 	m_linveldegradation(0.1f), m_launchwithangvel(false), m_launchangularvelocity(NULL_VECTOR), 
 	m_degradeangularvelocity(false), m_angveldegradation(0.0f), m_launchwithorientchange(false), 
 	m_projectileorientchange(ID_QUATERNION), m_spread(0.0f), m_spread_delta(ID_QUATERNION), m_spread_divisor(1.0f),
-	m_launchinterval(1000U), m_nextlaunch(0U)
+	m_launchinterval(1000U), m_nextlaunch(0U), m_launch_velocity(1.0f)
 {
 	
 }
@@ -26,6 +28,9 @@ void ProjectileLauncher::SetProjectileDefinition(const BasicProjectileDefinition
 	// Store the new definition and update our projectile type
 	ChangeProjectileType(Projectile::ProjectileType::BasicProjectile);
 	m_basicprojdef = def;
+
+	// Recalculate data that may rely on this definition
+	RecalculateLauncherStatistics();
 }
 
 // Set the projectile definition to be used by this launcher.  Also sets the projectiletype to match
@@ -33,6 +38,29 @@ void ProjectileLauncher::SetProjectileDefinition(const SpaceProjectileDefinition
 {
 	ChangeProjectileType(Projectile::ProjectileType::SpaceProjectile);
 	m_projectiledef = def;
+
+	// Recalculate data that may rely on this definition
+	RecalculateLauncherStatistics();
+}
+
+// Precalculates data based on the projectile launcher, projectile definitions and other factors
+void ProjectileLauncher::RecalculateLauncherStatistics(void)
+{
+	// Certain statistics are dependent on projectile type
+	if (m_projectiletype == Projectile::ProjectileType::BasicProjectile && m_basicprojdef)
+	{
+		m_launch_velocity = m_basicprojdef->Speed;
+	}
+	else if (m_projectiletype == Projectile::ProjectileType::SpaceProjectile && m_projectiledef)
+	{
+		// Create a temporary projectile object to help calculate launcher statistics
+		SpaceProjectile *proj = m_projectiledef->CreateProjectile();
+		if (proj)
+		{
+			m_launch_velocity = (m_launchmethod == ProjectileLaunchMethod::ApplyForce ? (m_launchimpulse * proj->GetInverseMass()) : m_launchimpulse);
+			m_launch_velocity = clamp(m_launch_velocity, 0.01f, Game::C_PROJECTILE_VELOCITY_LIMIT);
+		}
+	}
 }
 
 // Launches a projectile.  Returns a pointer to the projectile object that was launched, if applicable.  Will 
@@ -89,9 +117,7 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		proj->RefreshPositionImmediate();
 
 		// Apply launch impulse to the projectile
-		float impulse = (m_launchmethod == ProjectileLaunchMethod::ApplyForce ? (m_launchimpulse * proj->GetInverseMass()) : m_launchimpulse);
-		impulse = clamp(impulse, 0.01f, Game::C_PROJECTILE_VELOCITY_LIMIT);
-		proj->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, impulse));
+		proj->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, m_launch_velocity));
 
 		// Store linear trajectory properties in the projectile
 		proj->SetLinearVelocityDegradation(m_degradelinearvelocity);

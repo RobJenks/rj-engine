@@ -206,6 +206,37 @@ CMPINLINE std::string ConvertWStringToString(const std::wstring & utf16_string)
 	return utf_converter.to_bytes(utf16_string);
 }
 
+// Unary function which deletes the subject element.  Used for pointer implementations of remove/erase
+template <typename T>
+struct unary_delete : public std::unary_function<T, void>
+{
+	void operator()(T toDelete) { if (toDelete) delete toDelete; };
+};
+
+// Performs a delete-erase on a single iterator element within the specified container
+// This is the equivalent of erase(it) for containers of pointer types
+template <typename T>
+CMPINLINE void delete_erase(std::vector<T> & vec, typename std::vector<T>::iterator it)
+{
+	if (it != vec.end())
+	{
+		if ((*it)) delete (*it);
+		vec.erase(it);
+	}
+}
+
+// Performs a delete-erase on a range of elements within the specified container
+// This is the equivalent of erase(it) for containers of pointer types
+template <typename T>
+CMPINLINE void delete_erase(std::vector<T> & vec, typename std::vector<T>::iterator begin, typename std::vector<T>::iterator end)
+{
+	if (begin != vec.end())
+	{
+		std::for_each(begin, end, unary_delete<T>());
+		vec.erase(begin, end);
+	}
+}
+
 // String concatenation class
 class concat
 {

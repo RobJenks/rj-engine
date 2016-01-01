@@ -495,7 +495,6 @@ void OverlayRenderer::RenderActorPath(Actor *actor, float thickness)
 	if (actor)
 	{
 		INTVECTOR3 pos, el;
-		Order_ActorTravelToPosition *ao;
 
 		// Get a reference to the actor environment, and make sure it is valid
 		iSpaceObjectEnvironment *env = actor->GetParentEnvironment(); if (!env) return;
@@ -507,8 +506,8 @@ void OverlayRenderer::RenderActorPath(Actor *actor, float thickness)
 			// If this is a 'travel to position' order then we want to render it
 			if ((*it)->GetType() == Order::OrderType::ActorTravelToPosition)
 			{
-				ao = (Order_ActorTravelToPosition*)(*it);
-				for (int i = 0; i < ao->PathLength; i++)
+				const Order_ActorTravelToPosition *ao = (const Order_ActorTravelToPosition*)(*it);
+				for (int i = 0; i < ao->PathLength; ++i)
 				{
 					// Render each node in turn; render nodes in green if they have already been traversed, otherwise render in red
 					RenderNodeAtRelativeElementLocation(env, ao->PathNodes[i], 

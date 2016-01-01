@@ -22,7 +22,7 @@ public:
 		MoveToTarget,						// Orders a ship to move DIRECTLY to the designated target
 		MoveAwayFromTarget,					// Orders a ship to put distance between itself and the designated target
 		AttackBasic,						// Performs basic attack maneuvers against the target object
-
+		
 		ActorMoveToPosition,				// Orders an actor to move DIRECTLY to the specified position
 		ActorMoveToTarget,					// Orders an actor to move DIRECTLY to the designated target
 		ActorTravelToPosition,				// Orders an actor to move to the specified position using the local nav network
@@ -38,6 +38,13 @@ public:
 		ExecutedAndCompleted		// If the entity evaluated the order, and determined it can be removed from the queue
 	};
 
+	// Enumeration of possible order sources
+	enum OrderSource
+	{
+		Entity = 0,
+		StrategicAI
+	};
+
 	// Unique (to the owner) ID of this order
 	ID_TYPE										ID;
 
@@ -45,7 +52,7 @@ public:
 	bool										Active;
 
 	// Method to retrieve the type of order this represents
-	virtual OrderType							GetType(void) = 0;
+	CMPINLINE OrderType							GetType(void) const		{ return m_ordertype; }
 
 	// Dependency on another order before this is executed (0 == no dependency)
 	ID_TYPE										Dependency;
@@ -53,16 +60,37 @@ public:
 	// Pointer to the parent order of this one, if relevant.  Used when one order spawns multiple child requests
 	ID_TYPE										Parent;
 
+	// Source of the order, i.e. who assigned it to the entity
+	OrderSource									Source;
+
 	// The frequency of order evaluation, and time since the order was last evaluated
-	float										EvaluationFrequency;
-	float										TimeSinceLastEvaluation;
+	unsigned int								EvaluationFrequency;
+	unsigned int								TimeSinceLastEvaluation;
 
 	// Constructor / destructor
 	Order(void);
 	virtual ~Order(void);
 
+	// Returns a flag indicating whether the specified order type is a combat order
+	CMPINLINE static bool						IsCombatOrderType(Order::OrderType order_type)
+	{
+		switch (order_type)
+		{
+			case OrderType::AttackBasic:
+				return true;
+			default:
+				return false;
+			}
+	}
+
 	// Translates an order type to its string representation
 	static std::string							TranslateOrderTypeToString(Order::OrderType order_type);
+
+protected:
+
+	// Order type is a protected field set only upon construction
+	Order::OrderType							m_ordertype;
+
 };
 
 

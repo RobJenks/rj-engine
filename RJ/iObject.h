@@ -87,6 +87,10 @@ public:
 	CMPINLINE iObject::ObjectType			GetObjectType(void) const				{ return m_objecttype; }
 	CMPINLINE iObject::ObjectClass			GetObjectClass(void) const				{ return m_objectclass; }
 	CMPINLINE bool							IsEnvironment(void) const				{ return m_isenvironment; }
+	CMPINLINE bool							IsShip(void) const
+	{
+		return (m_objecttype == iObject::ObjectType::SimpleShipObject || m_objecttype == iObject::ObjectType::ComplexShipObject);
+	}
 
 	// Methods to get/set the instance code, and to determine whether it has been overridden manually
 	CMPINLINE const std::string &			GetInstanceCode(void) const				{ return m_instancecode; }

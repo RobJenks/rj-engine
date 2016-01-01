@@ -1,4 +1,8 @@
-#include "iSpaceObject.h"
+#include <algorithm>
+#include "Ship.h"
+#include "ProjectileLauncher.h"
+#include "BasicProjectileDefinition.h"
+#include "SpaceProjectileDefinition.h"
 #include "TurretController.h"
 
 // Default constructor
@@ -9,7 +13,7 @@ TurretController::TurretController(void)
 
 
 // Perform a full update of the turret collection
-void TurretController::Update(std::vector<iSpaceObject*> & enemy_contacts)
+void TurretController::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_contacts)
 {
 	// Check to make sure there is something to update; we will do nothing if there are no turrets
 	if (!m_parent || !m_active) return;
@@ -41,7 +45,7 @@ void TurretController::SetControlModeOfAllTurrets(SpaceTurret::ControlMode mode)
 }
 
 // Set a refernce to the parent object that owns this turret controller
-void TurretController::SetParent(iSpaceObject *parent)
+void TurretController::SetParent(Ship *parent)
 {
 	// Store a reference to the new parent object
 	m_parent = parent;
@@ -139,9 +143,74 @@ void TurretController::RefreshTurretCollection(void)
 	// Cache the turret collection size for runtime efficiency
 	m_turretcount = (int)Turrets.size();
 
-	// Controller will be considered if it is managing at least one turret
+	// Controller will be considered active if it is managing at least one turret
 	m_active = (m_turretcount != 0);
+
+	// Reset any statistics that are based on the contents of the turret collection
+	m_avg_projectile_velocity = 0.0f;
+
+	// Now recalculate those statistics, assuming there are any turrets in the collection
+	SpaceTurret *t; ProjectileLauncher *l; int count = 0;
+	TurretCollection::const_iterator it_end = Turrets.end();
+	for (TurretCollection::const_iterator it = Turrets.begin(); it != it_end; ++it)
+	{
+		// We need to consider each launcher in turn; maintain a count of the total launchers processed
+		t = (*it); if (!t) continue;
+		int ln = t->GetLauncherCount();
+		count += ln;
+
+		for (int li = 0; li < ln; ++li)
+		{
+			// Process for each launcher in each turret in the collection
+			l = t->GetLauncher(li); if (!l) continue;
+			m_avg_projectile_velocity += l->GetLaunchVelocity();
+		}
+	}
+
+	// Calculate average statistics as long as there was at least one valid launcher to process
+	if (count != 0)
+	{
+		m_avg_projectile_velocity /= count;
+	}
+	else
+	{
+		m_avg_projectile_velocity = 1.0f;
+	}
 }
+
+// Sets the current target for all ship turrets 
+void TurretController::SetTarget(iSpaceObject *target)
+{
+	if (!m_active) return;
+	std::for_each(Turrets.begin(), Turrets.end(),
+		[&target](SpaceTurret *t) { if (t) t->SetTarget(target); });
+}
+
+// Changes the current target for all ship turrets targeting current_target to new_target
+void TurretController::ChangeTarget(iSpaceObject *current_target, iSpaceObject *new_target)
+{
+	if (!m_active) return;
+	std::for_each(Turrets.begin(), Turrets.end(),
+		[&current_target, &new_target](SpaceTurret *t) { if (t && t->GetTarget() == current_target) t->SetTarget(new_target); });
+}
+
+// Sets the designated target for all ship turrets 
+void TurretController::SetDesignatedTarget(iSpaceObject *designated_target)
+{
+	if (!m_active) return;
+	std::for_each(Turrets.begin(), Turrets.end(),
+		[&designated_target](SpaceTurret *t) { if (t) t->DesignateTarget(designated_target); });
+}
+
+// Changes the designated target for all ship turrets targeting current_designation to new_designation
+void TurretController::ChangeDesignatedTarget(iSpaceObject *current_designation, iSpaceObject *new_designation)
+{
+	if (!m_active) return;
+	std::for_each(Turrets.begin(), Turrets.end(),
+		[&current_designation, &new_designation](SpaceTurret *t) 
+			{ if (t && t->GetDesignatedTarget() == current_designation) t->DesignateTarget(new_designation); });
+}
+
 
 // Clears all controller contents without affecting any of the turrets themselves.  Generally used post-clone
 // to reset the controller without resetting the parent pointer of the (old) turrets being removed

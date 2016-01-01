@@ -139,9 +139,8 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 		s->SetOrientation(ID_QUATERNION);
 		
 		// Assign a default order for now
-		Order_MoveToPosition *o = new Order_MoveToPosition(
-			XMVectorSet(frand_lh(-1000.0f, 1000.0f), frand_lh(-400.0f, 400.0f), frand_lh(-1000.0f, 1000.0f), 0.0f), 25.0f);
-		s->AssignNewOrder(o);
+		s->AssignNewOrder(new Order_MoveToPosition(
+			XMVectorSet(frand_lh(-1000.0f, 1000.0f), frand_lh(-400.0f, 400.0f), frand_lh(-1000.0f, 1000.0f), 0.0f), 25.0f));
 	}
 }
 

@@ -34,9 +34,11 @@ public:
 		}
 	}
 
-	// Adjust the current health of this entity
+	// Adjust the current health of this entity.  Returns a flag indicating whether the change in health resulting
+	// in destruction of the object
 	CMPINLINE bool						IncreaseHealth(Game::HitPoints increase)		{ return SetHealth(m_health + increase); }
 	CMPINLINE bool						DecreaseHealth(Game::HitPoints decrease)		{ return SetHealth(m_health - decrease); }
+	CMPINLINE bool						SetHealthPercentage(float pc)					{ return SetHealth(m_maxhealth * pc); }
 
 	// Maximum HP of the entity
 	CMPINLINE Game::HitPoints			GetMaxHealth(void) const						{ return m_maxhealth; }

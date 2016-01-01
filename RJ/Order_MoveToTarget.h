@@ -15,26 +15,26 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Order_MoveToTarget)
 
-	// Specifies the class of order this object represents
-	Order::OrderType GetType(void)				{ return Order::OrderType::MoveToTarget; }
-
 	// Constructor including main order parameters
-	Order_MoveToTarget(iSpaceObject *target, float closedistance)
+	Order_MoveToTarget(iSpaceObject *target, float closedistance, bool lead_target)
 		:
 		Target(target),
 		CloseDistance(closedistance),
-		CloseDistanceSq(closedistance * closedistance) 
+		CloseDistanceSq(closedistance * closedistance),
+		LeadTarget(lead_target)
 	{
+		// All order subclasses must set their order type on construction
+		m_ordertype = Order::OrderType::MoveToTarget;
 	}
 
-	// Default constructor / destructor
-	Order_MoveToTarget(void) { }
+	// Default destructor
 	~Order_MoveToTarget(void) { }
 
 public:
 
 	ObjectReference<iSpaceObject>	Target;
 	float							CloseDistance, CloseDistanceSq;
+	bool							LeadTarget;
 
 };
 

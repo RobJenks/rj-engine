@@ -205,9 +205,6 @@
     <ClCompile Include="iStaticObject.cpp">
       <Filter>Objects\Object Hierarchy</Filter>
     </ClCompile>
-    <ClCompile Include="iConsumesOrders.cpp">
-      <Filter>Orders</Filter>
-    </ClCompile>
     <ClCompile Include="ImmediateRegion.cpp">
       <Filter>Regions</Filter>
     </ClCompile>
@@ -260,10 +257,10 @@
       <Filter>UI\Controls</Filter>
     </ClCompile>
     <ClCompile Include="NavNetwork.cpp">
-      <Filter>Pathfinding</Filter>
+      <Filter>AI\Pathfinding</Filter>
     </ClCompile>
     <ClCompile Include="Order.cpp">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClCompile>
     <ClCompile Include="ParticleBase.cpp">
       <Filter>Engine\Particles</Filter>
@@ -512,10 +509,10 @@
       <Filter>Objects\Projectiles</Filter>
     </ClCompile>
     <ClCompile Include="Order_AttackBasic.cpp">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClCompile>
     <ClCompile Include="Order_ActorTravelToPosition.cpp">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClCompile>
     <ClCompile Include="RJDebug.cpp">
       <Filter>Debug</Filter>
@@ -528,6 +525,9 @@
     </ClCompile>
     <ClCompile Include="GameObjects.cpp">
       <Filter>Game data</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityAI.cpp">
+      <Filter>AI\EntityAI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -774,9 +774,6 @@
     <ClInclude Include="iStaticObject.h">
       <Filter>Objects\Object Hierarchy</Filter>
     </ClInclude>
-    <ClInclude Include="iConsumesOrders.h">
-      <Filter>Orders</Filter>
-    </ClInclude>
     <ClInclude Include="iLoadoutMap.h">
       <Filter>Equipment\Loadouts</Filter>
     </ClInclude>
@@ -841,10 +838,10 @@
       <Filter>UI\Controls</Filter>
     </ClInclude>
     <ClInclude Include="NavNetwork.h">
-      <Filter>Pathfinding</Filter>
+      <Filter>AI\Pathfinding</Filter>
     </ClInclude>
     <ClInclude Include="NavNode.h">
-      <Filter>Pathfinding</Filter>
+      <Filter>AI\Pathfinding</Filter>
     </ClInclude>
     <ClInclude Include="Octree.h">
       <Filter>Data structures</Filter>
@@ -853,22 +850,22 @@
       <Filter>Data structures</Filter>
     </ClInclude>
     <ClInclude Include="Order.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="Order_ActorMoveToPosition.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="Order_ActorMoveToTarget.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="Order_ActorTravelToPosition.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="Order_MoveToPosition.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="Order_MoveToTarget.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="ParticleBase.h">
       <Filter>Engine\Particles</Filter>
@@ -1177,7 +1174,7 @@
       <Filter>Game data</Filter>
     </ClInclude>
     <ClInclude Include="Order_AttackBasic.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="RJDebug.h">
       <Filter>Debug</Filter>
@@ -1186,7 +1183,7 @@
       <Filter>Debug</Filter>
     </ClInclude>
     <ClInclude Include="Order_MoveAwayFromTarget.h">
-      <Filter>Orders</Filter>
+      <Filter>AI\Orders</Filter>
     </ClInclude>
     <ClInclude Include="iTakesDamage.h">
       <Filter>Concepts\Damage</Filter>
@@ -1214,6 +1211,12 @@
     </ClInclude>
     <ClInclude Include="ObjectSearch.h">
       <Filter>Object Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityAIStates.h">
+      <Filter>AI\EntityAI</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityAI.h">
+      <Filter>AI\EntityAI</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1337,9 +1340,6 @@
     <Filter Include="Equipment\Equipment classes\Shield">
       <UniqueIdentifier>{dd62d165-7608-48a1-854e-db13968b6265}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Orders">
-      <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
-    </Filter>
     <Filter Include="UI">
       <UniqueIdentifier>{0b54db43-8bd7-425b-9a6b-a0c8e5ecc593}</UniqueIdentifier>
     </Filter>
@@ -1363,9 +1363,6 @@
     </Filter>
     <Filter Include="UI\Controls">
       <UniqueIdentifier>{631d6c08-cd88-4035-ad35-dcdb9fb5a0c2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Pathfinding">
-      <UniqueIdentifier>{c37c2159-b6ef-42b5-9000-7b94acdcdd4c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Objects\Attachments">
       <UniqueIdentifier>{bffe734d-8349-49bc-a93c-5a67617d88a5}</UniqueIdentifier>
@@ -1453,6 +1450,18 @@
     </Filter>
     <Filter Include="Concepts\Modifiers">
       <UniqueIdentifier>{3dd8899d-e2f8-41a3-87d2-10fdaa34f425}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI">
+      <UniqueIdentifier>{158841f3-2fe6-4dc5-ab1b-c6f544241ea1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\Orders">
+      <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\Pathfinding">
+      <UniqueIdentifier>{c37c2159-b6ef-42b5-9000-7b94acdcdd4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="AI\EntityAI">
+      <UniqueIdentifier>{954c16a8-f1be-4852-8988-c5e5e33313b3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -52,6 +52,7 @@ void Actor::InitialiseCopiedObject(Actor *source)
 {
 	// Pass control to all base classes
 	iEnvironmentObject::InitialiseCopiedObject((iEnvironmentObject*)source);
+	EntityAI::InitialiseCopiedObject((EntityAI*)source);
 }
 
 // Causes the actor to recalculate all its properties & final attribute values.  Called when changes are made to the actor attributes
@@ -181,7 +182,7 @@ void Actor::SimulateObject(void)
 		/* Full simulation of the actor */
 		case iObject::ObjectSimulationState::FullSimulation:
 
-			ProcessOrderQueue(Game::TimeFactor);							// Process any orders in the actor's queue
+			ProcessOrderQueue(Game::ClockDelta);							// Process any orders in the actor's queue
 
 			SimulateObjectPhysics();										// Simulate all object physics, generally just gravity 
 																			// plus any impact force that has been applied.  This must happen LAST.
@@ -190,7 +191,7 @@ void Actor::SimulateObject(void)
 		/* Else (e.g. no simulation) */
 		default:
 
-			ProcessOrderQueue(Game::TimeFactor);							// Process any orders in the actor's queue
+			ProcessOrderQueue(Game::ClockDelta);							// Process any orders in the actor's queue
 			break;
 	}
 }
@@ -198,12 +199,9 @@ void Actor::SimulateObject(void)
 // Method to process the specified order.  Called when processing the full queue.  Returns true if order is now completed & can be removed
 Order::OrderResult Actor::ProcessOrder(Order *order)
 {
-	// Determine the type of order being processed
-	if (!order) return Order::OrderResult::InvalidOrder;
-	Order::OrderType type = order->GetType();
-
 	// Take different action depending on the order type
-	switch (type)
+	if (!order) return Order::OrderResult::InvalidOrder;
+	switch (order->GetType())
 	{
 		// Move to position.  Specifies position and the distance to which we must move within
 		case Order::OrderType::ActorMoveToPosition:
@@ -289,13 +287,16 @@ Order::OrderResult Actor::TravelToPosition(Order_ActorTravelToPosition & order)
 
 	// Otherwise we want to generate a new direct move order to the next node in the path
 	INTVECTOR3 tgt = order.PathNodes[order.PathIndex];
-	Order_ActorMoveToPosition *move = new Order_ActorMoveToPosition(
+
+	// Assign the new order, which will generate a new unique ID for the child order
+	Order::ID_TYPE id = AssignNewOrder(new Order_ActorMoveToPosition(
 		VectorFromIntVector3SwizzleYZ(tgt),															// Swap y/z since path nodes are in element space 
 		((order.PathIndex == (order.PathLength - 1)) ? order.CloseDistance : order.FollowDistance),	// Get within the follow distance, unless this is the last node
-		order.Run);
-											
-	// Assign the new order, which will generate a new unique ID for the child order
-	this->AssignNewOrder(move);
+		order.Run));
+
+	// Make sure the order was correctly assigned
+	Order *move = GetOrder(id);
+	if (!move) return Order::OrderResult::InvalidOrder;
 
 	// Give the new order a parent pointer to the overall 'travel' order, and a dependency for this overall order
 	// on completion of the child (at which point it will generate the next child order)

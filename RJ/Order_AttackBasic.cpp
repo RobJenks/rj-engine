@@ -5,11 +5,15 @@
 // Constructor including main order parameters
 Order_AttackBasic::Order_AttackBasic(Ship *attacker, iSpaceObject *target)
 {
+	// All order subclasses must set their order type on construction
+	m_ordertype = Order::OrderType::AttackBasic;
+
 	// Parameter check; if target is invalid, generate an order that will be rejected immediately
-	if (!attacker || !target) { Target = NULL; return; }
+	if (!attacker || !target) { Attacker = NULL; Target = NULL; return; }
 
 	// Store the target, the close distance sq (based on target size) and the distance sq to back off between
 	// attack runs (based on close distance)
+	Attacker = attacker;
 	Target = target;
 	CloseDist = 
 		(attacker->VelocityLimit.Value * Game::C_DEFAULT_ATTACK_CLOSE_TIME) + 

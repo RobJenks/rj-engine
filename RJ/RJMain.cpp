@@ -472,11 +472,22 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-
+		if (b[DIK_LSHIFT])
+		{
+			ss()->CancelAllCombatOrders();
+			Game::Keyboard.LockKey(DIK_U);
+		}
+		else
+		{
+			if (cs()->GetFaction() == Game::FactionManager.GetFaction("faction_prc"))
+				cs()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+			else
+				cs()->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+			Game::Keyboard.LockKey(DIK_U);
+		}
 	}
 	if (b[DIK_5])
 	{
-		//s2()->AssignNewOrder(new Order_MoveToPosition(XMVectorAdd(s3[0]->GetPosition(), XMVectorSetZ(NULL_VECTOR, 400.0f)), 150.0f));
 		s2()->AssignNewOrder(new Order_AttackBasic(s2(), s3[0]()));
 		Game::Keyboard.LockKey(DIK_5);
 	}
@@ -540,15 +551,18 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_8])
 	{
 		if (s2()->HasOrders()) s2()->CancelAllOrders();
-		XMFLOAT3 tpos[10]; Order_MoveToPosition *orders[10];
-		for (int i = 0; i<10; i++)
+		XMFLOAT3 tpos; Order::ID_TYPE id, last_id = 0;
+		for (int i = 0; i < 10; ++i)
 		{
-			tpos[i] = XMFLOAT3(		((float)((float)rand() / (float)RAND_MAX) * 300.0f) + 200.0f,
+			tpos = XMFLOAT3(		((float)((float)rand() / (float)RAND_MAX) * 300.0f) + 200.0f,
 									((float)((float)rand() / (float)RAND_MAX) * 300.0f),
 									((float)((float)rand() / (float)RAND_MAX) * 3400.0f) - 400.0f);
-			orders[i] = new Order_MoveToPosition(XMLoadFloat3(&tpos[i]), 100.0f);
-			if (i > 0) orders[i]->Dependency = orders[i - 1]->ID;
-			s2()->AssignNewOrder(orders[i]);
+			
+			id = s2()->AssignNewOrder(new Order_MoveToPosition(XMLoadFloat3(&tpos), 100.0f));
+			Order_MoveToPosition *order = (Order_MoveToPosition*)s2()->GetOrder(id); if (!order) break;
+			if (i > 0) order->Dependency = last_id;
+			
+			last_id = id;
 		}
 	}
 
@@ -615,20 +629,18 @@ void RJMain::ProcessKeyboardInput(void)
 				cs()->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
 	}
 
-	if (false && b[DIK_U]) {
-		if (b[DIK_LSHIFT])		{ a1()->Attributes[ActorAttr::A_RunSpeed].BaseValue -= 1.0f; a1()->RecalculateAttributes(); }
-		else					{ a1()->Attributes[ActorAttr::A_RunSpeed].BaseValue += 1.0f; a1()->RecalculateAttributes(); }
-	}
 	if (false && b[DIK_I]) {
-		Order_ActorMoveToPosition *o[3];
+		Order::ID_TYPE last_id = 0;
 		a1()->CancelAllOrders();
 		for (int i = 0; i<3; i++)
 		{
-			o[i] = new Order_ActorMoveToPosition(XMVectorSetY(XMVectorSetW(
+			Order::ID_TYPE id = a1()->AssignNewOrder(new Order_ActorMoveToPosition(XMVectorSetY(XMVectorSetW(
 				XMVectorAdd(Game::CurrentPlayer->GetPosition(), Vector3Random(-15.0f, 15.0f)), 0.0f), 0.0f),
-				2.0f, false);
-			if (i > 0) o[i]->Dependency = o[i - 1]->ID;
-			a1()->AssignNewOrder(o[i]);
+				2.0f, false));
+			Order_ActorMoveToPosition *order = (Order_ActorMoveToPosition*)a1()->GetOrder(id); if (!order) break;
+			if (i > 0) order->Dependency = last_id;
+
+			last_id = id;
 		}
 		Game::Keyboard.LockKey(DIK_I);
 	}
@@ -1795,7 +1807,7 @@ void RJMain::__CreateDebugScenario(void)
 		ComplexShip *cs_ship = ComplexShip::Create("testfrigate12");		// Previously 12
 		cs_ship->SetName("Test frigate cs");
 		cs_ship->GetSection(0)->SetName("cs section 0");
-		cs_ship->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		cs_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		cs_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
 		cs_ship->SetOrientation(ID_QUATERNION);
 		cs = cs_ship;
@@ -1826,6 +1838,15 @@ void RJMain::__CreateDebugScenario(void)
 		s3[0] = s3_0_ship;
 	}
 
+	if (true) {
+		SimpleShip *s3_1_ship = SimpleShip::Create("test_placeholder_ship");
+		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_1_ship);
+		s3_1_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+		s3_1_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2()->GetPosition(), XMVectorSet(-10000.0f, 0.0f, 100.0f, 0.0f)));
+		s3_1_ship->SetOrientation(ID_QUATERNION);
+		s3[1] = s3_1_ship;
+	}
+
 	// Temp: Create a new actor
 	if (true)
 	{
@@ -1851,59 +1872,13 @@ void RJMain::__CreateDebugScenario(void)
 	def->SetMass(25000.0f);
 	def->SetDefaultLifetime(3.0f);
 
-	/*turret = new SpaceTurret();
-	turret->SetParent(ss);
-	turret->InitialiseLaunchers(1);
-	turret->SetMaxRange(1000.0f);
-	turret->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss()->GetCollisionSphereRadius()));	// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
-	turret->SetBaseRelativeOrientation(ID_QUATERNION);
-	turret->SetPitchLimits(-PI / 4.0f, +PI / 4.0f);
-	turret->SetPitchRate(0.1f);
-	turret->SetYawLimitFlag(true);
-	turret->SetYawLimits(-PI / 4.0f, +PI / 4.0f);;
-	turret->SetYawRate(0.1f);
-
-
-	ProjectileLauncher *l = turret->GetLauncher(0);
-	l->SetProjectileDefinition(def);
-	l->SetLaunchInterval(1000U);
-	l->SetProjectileSpread(0.01f);
-	l->SetLaunchImpulse(1000.0f);
-	l->SetLaunchMethod(ProjectileLauncher::ProjectileLaunchMethod::SetVelocityDirect);
-	l->SetRelativePosition(D3DXVECTOR3(0.0f, 0.0f, ss()->GetCollisionSphereRadius()));		// TODO: *** FIX THIS.  Should not be in both turret & launcher ***
-	l->SetRelativeOrientation(ID_QUATERNION);
-	l->SetProjectileSpin(1.0f);
-	l->SetLinearVelocityDegradeState(false);
-	l->SetAngularVelocityDegradeState(false);*/
-
-
-	// Turret testing	
-	/*dbg_turret = new SpaceTurret();
-	dbg_turret->SetArticulatedModel(ArticulatedModel::GetModel("turret_basic01_model")->Copy());
-	dbg_turret->SetRelativePosition(D3DXVECTOR3(0.0f, 10.0f, -5.0f));
-	dbg_turret->SetBaseRelativeOrientation(ID_QUATERNION);
-	dbg_turret->SetRange(1.0f, 10000.0f);									// NOT REQ
-	dbg_turret->SetPitchLimits(-999.0f, 999.0f);
-	dbg_turret->SetYawLimitFlag(false);
-	dbg_turret->SetPitchRate(0.25f);
-	dbg_turret->SetYawRate(0.5f);*/
-
-	/*BasicProjectileDefinition *bdef = new BasicProjectileDefinition();
-	bdef->SetProjectileSpeed(1000.0f);
-	bdef->SetProjectileBeamLength(200.0f);
-	bdef->SetProjectileBeamRadius(3.0f);
-	bdef->SetProjectileColour(XMVectorSet(1.0f, 1.0f, 1.0f, 0.65f));
-	bdef->SetProjectileLifetime(3000U);
-	Texture *bt = new Texture();
-	if (ErrorCodes::NoError == bt->Initialise(concat(D::IMAGE_DATA)("\\Rendering\\grad2.dds").str().c_str()))
-	{
-		bdef->SetTexture(bt);
-	}
-	bdef->GenerateProjectileRenderingData();*/
-
 	D::BasicProjectiles.Get("basiclaser01")->AddDamageType(Damage(DamageType::Laser, 5.0f));
-	s2()->SetMaxHealth(20.0f);
-	s2()->SetHealth(20.0f);
+	s2()->SetMaxHealth(100.0f);
+	s2()->SetHealthPercentage(1.0f);
+	s3[0]()->SetMaxHealth(100.0f);
+	s3[0]()->SetHealthPercentage(1.0f);
+	cs()->SetMaxHealth(1000.0f);
+	cs()->SetHealthPercentage(1.0f);
 
 	XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
 	XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
@@ -1949,9 +1924,8 @@ void RJMain::__CreateDebugScenario(void)
 	SpaceTurret *sst2 = sst->Copy();
 	s2()->TurretController.AddTurret(sst2);
 
-	s2()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	//s2()->AssignNewOrder(new Order_MoveToTarget(cs, 100.0f));
-	
+	//s2()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+	ss()->AssignNewOrder(new Order_AttackBasic(ss(), cs()));
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2027,20 +2001,18 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		if (s2())
-		{
-			std::string ordertype = "None";
-			std::vector<Order*> orders;
-			s2()->GetAllExecutingOrders(orders);
-			if (orders.size() == 1)
-				ordertype = Order::TranslateOrderTypeToString(orders[0]->GetType());
-			else if (orders.size() > 1)
-				ordertype = "(MULTIPLE)";
+		std::string s = NullString;
+		if (ss()) s = concat("ss[ ")(Game::FactionManager.GetFaction(ss()->GetFaction())->GetName())(" ]: { ")(ss()->GetDebugOrderQueueString())(" }").str();
+		if (s2()) s = concat(s)(" | s3[ ")(Game::FactionManager.GetFaction(s2()->GetFaction())->GetName())(" ]: { ")(s2()->GetDebugOrderQueueString())(" }").str();
+		OutputDebugString((s + "\n").c_str());
 
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Health: %.2f / %.2f", s2()->GetHealth(), s2()->GetMaxHealth());
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		}
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "[%.3f / %.1f]  |  %s", 
+			(ss() ? ss()->GetTargetLeadingMultiplier(cs()->GetID()) : -1.0f), 
+			(cs() ? cs()->GetHealth() : -1.0f), s.c_str());
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
+
+	//*** TARGET LEADING NEEDS TO BE MADE MORE GENERALLY-ACCESSIBLE, AND TURRETS NEED TO AIM AT TARGET-LED POINT RATHER THAN TARGET ITSELF ***
 
 }
 

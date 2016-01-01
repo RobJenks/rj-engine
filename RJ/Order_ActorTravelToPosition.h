@@ -17,10 +17,6 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Order_ActorTravelToPosition)
 
-	// Specifies the class of order this object represents
-	Order::OrderType GetType(void)				{ return Order::OrderType::ActorTravelToPosition; }
-
-
 	// Constructor including main order parameters
 	// CloseDistance is the distance to the target that we will attempt to reach.  FollowDistance
 	// is the distance we will get to each waypoint on the route
@@ -30,7 +26,7 @@ public:
 	// Calculates the path that should be followed in order to reach the target position
 	void CalculateTravelPath(void);
 
-	// Default constructor / destructor
+	// Default destructor
 	~Order_ActorTravelToPosition(void) { }
 
 
