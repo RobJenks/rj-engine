@@ -522,6 +522,7 @@ void RJMain::ProcessKeyboardInput(void)
 							pos.y + ((y - 5)*tmpsize.y*1.2f),
 							pos.z + (size.z*0.5f) + 1000.0f, 0.0f));
 						tmp->SetOrientation(ID_QUATERNION);
+						tmp->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 
 					}
 			}
@@ -1873,6 +1874,8 @@ void RJMain::__CreateDebugScenario(void)
 	def->SetDefaultLifetime(3.0f);
 
 	D::BasicProjectiles.Get("basiclaser01")->AddDamageType(Damage(DamageType::Laser, 5.0f));
+	ss()->SetMaxHealth(1000.0f);
+	ss()->SetHealthPercentage(1.0f);	
 	s2()->SetMaxHealth(100.0f);
 	s2()->SetHealthPercentage(1.0f);
 	s3[0]()->SetMaxHealth(100.0f);
@@ -1900,6 +1903,7 @@ void RJMain::__CreateDebugScenario(void)
 				nt->GetLauncher(l)->SetLaunchInterval(100U);
 				nt->GetLauncher(l)->SetProjectileSpread(0.01f);
 			}
+			nt->RecalculateTurretStatistics();
 
 			cs()->TurretController.AddTurret(nt);
 			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
@@ -1915,17 +1919,18 @@ void RJMain::__CreateDebugScenario(void)
 	sst->SetRelativePosition(XMVectorSet(0, -20, 10.0f, 0));
 	sst->SetBaseRelativeOrientation(ID_QUATERNION);
 	sst->SetYawLimitFlag(true);
-	sst->SetYawLimits(-0.1f, 0.1f);
-	sst->SetPitchLimits(-0.1f, 0.1f);
+	sst->SetYawLimits(-0.15f, 0.15f);
+	sst->SetPitchLimits(-0.15f, 0.15f);
 	sst->SetYawRate(PI);
 	sst->SetPitchRate(PI);
 	sst->SetControlMode(SpaceTurret::ControlMode::AutomaticControl);
+	sst->RecalculateTurretStatistics();
 	ss()->TurretController.AddTurret(sst);
 	SpaceTurret *sst2 = sst->Copy();
 	s2()->TurretController.AddTurret(sst2);
+	SpaceTurret *sst3 = sst->Copy();
+	s3[0]()->TurretController.AddTurret(sst3);
 
-	//s2()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	ss()->AssignNewOrder(new Order_AttackBasic(ss(), cs()));
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2011,8 +2016,6 @@ void RJMain::DEBUGDisplayInfo(void)
 			(cs() ? cs()->GetHealth() : -1.0f), s.c_str());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
-
-	//*** TARGET LEADING NEEDS TO BE MADE MORE GENERALLY-ACCESSIBLE, AND TURRETS NEED TO AIM AT TARGET-LED POINT RATHER THAN TARGET ITSELF ***
 
 }
 

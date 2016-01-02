@@ -287,9 +287,14 @@ public:
 			TargetLeadMultiplier(lead_multiplier),
 			TargetLeadingValidUntil(Game::ClockMs + Game::C_TARGET_LEADING_RECALC_INTERVAL) { }
 	};
-
+	
 	// Clears any immediate-term data stored on nearby entities
-	CMPINLINE void				ClearAllImmediateEntityData(void)			{ ImmediateEntityData.clear(); }
+	CMPINLINE void				ClearAllImmediateEntityData(void)			
+	{ 
+		m_immediate_entity_data.clear(); 
+		m_last_immediate_entity = 0;
+		m_last_immediate_data = 0U;
+	}
 
 	// Retrieve any immediate-term information on the specified object, if we have any
 	const ImmediateEntityInfo *	GetImmediateEntityData(Game::ID_TYPE id) const;
@@ -374,7 +379,11 @@ protected:
 	void				DestroyObject(void);
 
 	// Vector of immediate-term information on nearby entities
-	std::vector<ImmediateEntityInfo>	ImmediateEntityData;
+	std::vector<ImmediateEntityInfo>	m_immediate_entity_data;
+
+	// Index into the last accessed entity info, for runtime efficiency
+	Game::ID_TYPE									m_last_immediate_entity;
+	std::vector<ImmediateEntityInfo>::size_type		m_last_immediate_data;
 
 };
 

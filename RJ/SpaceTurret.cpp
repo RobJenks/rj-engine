@@ -22,7 +22,9 @@ SpaceTurret::SpaceTurret(void)
 	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
+	m_worldmatrix = ID_MATRIX;
 	m_atrest = true;
+	m_isfixed = false;
 	m_yaw = m_pitch = 0.0f;
 	m_yawrate = 0.5f;
 	m_pitchrate = 0.25f;

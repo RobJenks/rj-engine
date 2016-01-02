@@ -61,9 +61,9 @@ void HpEngine::DestroyEngineThrustEmitter(void)
 		// Attempt to break any attachment that already exists, but we don't care if it doesn't
 		m_emitter->DetachFromParent();
 
-		// Dispose of the emitter space object
+		// Dispose of the emitter space object; shutdown method will remove and deallocate 
+		// the underlying particle emitter
 		m_emitter->Shutdown();
-		delete m_emitter; m_emitter = NULL;
 	}
 }
 

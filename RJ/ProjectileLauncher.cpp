@@ -192,30 +192,33 @@ void ProjectileLauncher::DetermineNextProjectileSpreadDelta(void)
 // changes that we cannot simulate accurately here (without actually firing a projectile)
 float ProjectileLauncher::DetermineApproxRange(void) const
 {
-	float range;
+	float range = 0.0f;
 
-	// We can't do much without information on the projectiles we will be firing
-	if (!m_projectiledef) return 0.0f;
-
-	// Initial estimate is based upon the launch impulse, and represents the range PER SECOND
-	if (m_launchmethod == ProjectileLauncher::ProjectileLaunchMethod::ApplyForce)
+	// Take different action depending on the projectile type
+	if (m_projectiletype == Projectile::ProjectileType::BasicProjectile && m_basicprojdef)
 	{
-		range = (m_launchimpulse / m_projectiledef->GetMass());		// a = F/m
+		// Basic projectiles have a constant defined velocity per second; multiply
+		// by the maximum lifetime to get the maximum possible range (note: lifetime is in ms so /1000)
+		range = m_basicprojdef->Speed * ((float)m_basicprojdef->Lifetime * 0.001f);
 	}
-	else
+	else if (m_projectiletype == Projectile::ProjectileType::SpaceProjectile && m_projectiledef)
 	{
-		range = m_launchimpulse;
-	}
+		// Initial estimate is based upon the launch impulse, and represents the range PER SECOND
+		if (m_launchmethod == ProjectileLauncher::ProjectileLaunchMethod::ApplyForce)
+			range = m_launchimpulse / max(m_projectiledef->GetMass(), 1.0f);
+		else
+			range = m_launchimpulse;
 
-	// Scale the range/sec by the maximum projectile lifetime, assuming no collisions/deviations
-	float lifetime = m_projectiledef->GetDefaultLifetime();
-	range *= lifetime;
+		// Scale the range/sec by the maximum projectile lifetime, assuming no collisions/deviations
+		float lifetime = m_projectiledef->GetDefaultLifetime();
+		range *= lifetime;
 
-	// Account for linear velocity degradation in the estimate 
-	if (m_degradelinearvelocity)
-	{
-		// Velocity degrades at 'm_linveldegradation' percent per second, so we will multiply by (1-m_linveldegradation)^lifetime
-		range *= pow((1.0f - m_linveldegradation), lifetime);
+		// Account for linear velocity degradation in the estimate 
+		if (m_degradelinearvelocity)
+		{
+			// Velocity degrades at 'm_linveldegradation' percent per second, so we will multiply by (1-m_linveldegradation)^lifetime
+			range *= pow((1.0f - m_linveldegradation), lifetime);
+		}
 	}
 
 	// Return our best estimate of the launcher range

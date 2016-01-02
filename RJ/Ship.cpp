@@ -16,6 +16,7 @@
 
 #include "Ship.h"
 
+// Default constructor
 Ship::Ship(void)
 {
 	// Set the object type
@@ -51,6 +52,8 @@ Ship::Ship(void)
 	m_inv_unadjusted_orient = XMQuaternionInverse(m_unadjusted_orient);
 	m_cached_contact_count = m_cached_enemy_contact_count = 0;
 	m_avoid_target = NULL;
+	m_last_immediate_entity = 0;
+	m_last_immediate_data = 0U;
 
 	// Link the hardpoints collection to this parent object
 	m_hardpoints.SetParent<Ship>(this);
@@ -90,6 +93,11 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	TurretController.ForceClearContents();		// To avoid turret parent pointers being reset by a RemoveAll...() call
 	TurretController.SetParent(this);
 
+	// Clear all entity-specific data relating to nearby contacts 
+	m_immediate_entity_data.clear();
+	m_last_immediate_entity = 0;
+	m_last_immediate_data = 0U;
+
 	// Clear any instance-specific fields
 	m_cached_contacts.clear();
 	m_cached_enemy_contacts.clear();
@@ -99,6 +107,7 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	m_last_ai_evaluation = 0U;
 	m_last_flight_comp_evaluation = 0U;
 	FullStop();
+	
 }
 
 
@@ -1243,34 +1252,51 @@ Order::OrderResult Ship::AttackBasic(Order_AttackBasic & order)
 // Retrieve any immediate-term information on the specified object, if we have any
 const Ship::ImmediateEntityInfo *Ship::GetImmediateEntityData(Game::ID_TYPE id) const
 {
-	std::vector<Ship::ImmediateEntityInfo>::const_iterator it = std::find_if(ImmediateEntityData.begin(), ImmediateEntityData.end(),
+	std::vector<Ship::ImmediateEntityInfo>::const_iterator it = std::find_if(m_immediate_entity_data.begin(), m_immediate_entity_data.end(),
 		[&id](const Ship::ImmediateEntityInfo &data) { return (data.ID == id); });
-	return (it == ImmediateEntityData.end() ? NULL : &(*it));
+	return (it == m_immediate_entity_data.end() ? NULL : &(*it));
 }
 
 // Get an appropriate target leading multiplier for the specified object.  Uses average projectile velocity
 // to determine the leading multiplier
 float Ship::GetTargetLeadingMultiplier(Game::ID_TYPE id)
 {
-	// Test whether we already have a figure we can use
-	std::vector<Ship::ImmediateEntityInfo>::iterator it_end = ImmediateEntityData.end();
-	for (std::vector<Ship::ImmediateEntityInfo>::iterator it = ImmediateEntityData.begin(); it != it_end; ++it)
+	// Test whether we can simply use the last cached entity data
+	if (m_last_immediate_entity == id &&
+		Game::ClockMs <= m_immediate_entity_data[m_last_immediate_data].TargetLeadingValidUntil)
+			return m_immediate_entity_data[m_last_immediate_data].TargetLeadMultiplier;
+
+	// Record the entity being retrieved; this will identify which object the m_last_immediate_data index
+	// refers to in future iterations
+	m_last_immediate_entity = id;
+
+	// Perform a full test to see whether we already have a figure we can use
+	std::vector<Ship::ImmediateEntityInfo>::size_type n = m_immediate_entity_data.size();
+	for (std::vector<Ship::ImmediateEntityInfo>::size_type i = 0; i < n; ++i)
 	{
-		Ship::ImmediateEntityInfo & info = (*it);
+		Ship::ImmediateEntityInfo & info = m_immediate_entity_data[i];
 		if (info.ID == id)
 		{
+			// We have a figure but it is outdated, so recalculate it before returning a result
 			if (Game::ClockMs > info.TargetLeadingValidUntil)
 			{
 				info.TargetLeadMultiplier = CalculateTargetLeadMultiplier((iSpaceObject*)Game::GetObjectByID(id));
 				info.TargetLeadingValidUntil = (Game::ClockMs + Game::C_TARGET_LEADING_RECALC_INTERVAL);
 			}
+
+			// Record the last immediate data record that was accessed
+			m_last_immediate_data = i;
+
+			// Return the target leading multiplier for this entity
 			return info.TargetLeadMultiplier;
 		}
 	}
 
-	// We don't have any data on this entity yet, so add a new record and return the estimate
+	// We don't have any data on this entity yet, so add a new record and return the estimate.  Also set
+	// the last accessed entity record to "n", since we are adding at the end of the collection
 	float lead = CalculateTargetLeadMultiplier((iSpaceObject*)Game::GetObjectByID(id));
-	ImmediateEntityData.push_back(Ship::ImmediateEntityInfo(id, lead));
+	m_immediate_entity_data.push_back(Ship::ImmediateEntityInfo(id, lead));
+	m_last_immediate_data = n;
 	return lead;
 }
 
@@ -1284,8 +1310,7 @@ float Ship::CalculateTargetLeadMultiplier(iSpaceObject *target)
 	// radius of time t.   Solve quadratic equation for t, and use t (secs) as the
 	// leading multiplier for shots in the immediate future
 	// Algorithm info here: http://stackoverflow.com/questions/4749951/shoot-projectile-straight-trajectory-at-moving-target-in-3-dimensions
-	XMVECTOR cv = XMVectorSubtract(target->GetPosition(), m_position);
-	XMFLOAT3 cf; XMStoreFloat3(&cf, cv);
+	XMFLOAT3 cf; XMStoreFloat3(&cf, XMVectorSubtract(target->GetPosition(), m_position));
 	XMFLOAT3 relv; XMStoreFloat3(&relv, XMVectorSubtract(target->PhysicsState.WorldMomentum, PhysicsState.WorldMomentum));
 	float projv = TurretController.GetAverageProjectileVelocity();
 
