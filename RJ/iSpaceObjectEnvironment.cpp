@@ -129,11 +129,11 @@ void iSpaceObjectEnvironment::PerformPostSimulationUpdate(void)
 		// We also only perform this update if our own position or orientation has changed.  Environment objects will update their own
 		// world position if their environment pos/orient changes.  The update here is only required if our environment pos/orient changes,
 		// since in this case we need to update their world position based on OUR change in pos/orient
-		std::vector<iEnvironmentObject*>::iterator o_it_end = Objects.end();
-		for (std::vector<iEnvironmentObject*>::iterator o_it = Objects.begin(); o_it != o_it_end; ++o_it)
+		std::vector<ObjectReference<iEnvironmentObject>>::iterator o_it_end = Objects.end();
+		for (std::vector<ObjectReference<iEnvironmentObject>>::iterator o_it = Objects.begin(); o_it != o_it_end; ++o_it)
 		{
 			// Have the object update its own world position & orientation
-			(*o_it)->RecalculateEnvironmentPositionAndOrientationData();
+			if ((*o_it)()) (*o_it)()->RecalculateEnvironmentPositionAndOrientationData();
 		}
 	}
 }
@@ -146,7 +146,7 @@ void iSpaceObjectEnvironment::ObjectEnteringEnvironment(iEnvironmentObject *obj)
 
 	// Add to the main collection of objects in this environment; the per-element collections will be updated
 	// once the object moves or otherwise has its position set
-	Objects.push_back(obj);
+	Objects.push_back(ObjectReference<iEnvironmentObject>(obj));
 }
 
 // Removes an object from this environment
@@ -175,7 +175,14 @@ void iSpaceObjectEnvironment::ObjectLeavingEnvironment(iEnvironmentObject *obj)
 	}
 
 	// Now remove from the overall environment collection
-	RemoveFromVector<iEnvironmentObject*>(Objects, obj);
+	while (true)
+	{
+		std::vector<ObjectReference<iEnvironmentObject>>::iterator it = std::find_if(Objects.begin(), Objects.end(),
+			[&obj](const ObjectReference<iEnvironmentObject> & element) { return (element() == obj); });
+		if (it == Objects.end()) break;
+
+		Objects.erase(it);
+	}
 }
 
 // Adds a terrain object to the environment

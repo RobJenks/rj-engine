@@ -1,6 +1,8 @@
+#include <algorithm>
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
+#include "ObjectReference.h"
 #include "GameSpatialPartitioningTrees.h"
 #include "SimulationStateManager.h"
 
@@ -67,7 +69,7 @@ Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, const FXMVECTOR loc
 	if (object->GetSpatialTreeNode())				return ErrorCodes::ObjectAlreadyExistsInOtherSpatialTree;
 
 	// Add to the list of system objects
-	Objects.push_back(object);
+	Objects.push_back(ObjectReference<iSpaceObject>(object));
 
 	// Clamp the entry position to the bounds of the system
 	XMVECTOR pos = XMVectorClamp(location, m_minbounds, m_maxbounds);
@@ -103,8 +105,14 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 		object->SetSpatialTreeNode(NULL);
 	}
 
-	// Remove from the system collection itself
-	RemoveFromVector<iSpaceObject*>(Objects, object);
+	// Remove from the system collection itself; ensure that there are not multiple copies of the same object to be safe
+	while (true)
+	{
+		std::vector<ObjectReference<iSpaceObject>>::iterator it = std::find_if(Objects.begin(), Objects.end(),
+			[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); });
+		if (it == Objects.end()) break;
+		Objects.erase(it);
+	}
 
 	// Remove the reference to this system from the object
 	object->SetSpaceEnvironmentDirect(NULL);

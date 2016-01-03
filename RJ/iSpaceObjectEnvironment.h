@@ -57,10 +57,10 @@ public:
 	CMPINLINE void					SetElementSizeZ(int z) { m_elementsize.z = z; }
 
 	// Vector of active objects within the ship; each CS-Element also holds a pointer to its local objects for runtime efficiency
-	std::vector<iEnvironmentObject*>			Objects;
+	std::vector<ObjectReference<iEnvironmentObject>>	Objects;
 
 	// Vector of terrain objects held within this ship; each CS-Element also holds a pointer to the terrain for runtime efficiency
-	std::vector<StaticTerrain*>					TerrainObjects;
+	std::vector<StaticTerrain*>							TerrainObjects;
 
 	// Standard object simulation method, used to simulate the contents of this object environment
 	void							SimulateObject(void);

@@ -32,6 +32,9 @@ class ComplexShipTile : public ALIGN16<ComplexShipTile>
 {
 public:
 
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(ComplexShipTile)
+
 	// Static record of the highest ID value in existence, for assigning to new tiles upon registration
 	static Game::ID_TYPE					InstanceCreationCount;
 
@@ -196,7 +199,16 @@ public:
 	__declspec(align(16))
 	struct TileCompoundModelSet : public ALIGN16<TileCompoundModelSet>
 	{
-		typedef					vector<TileModel>		TileModelCollection;
+		// Struct to allow 16-byte alignment of TileModel instances in STL vector
+		typedef __declspec(align(16))TileModel ATileModel;	
+		typedef __declspec(align(16)) struct ATileModel_P_T : public ALIGN16<ATileModel_P_T> 
+		{ 
+			ATileModel value;
+			ATileModel_P_T(ATileModel & model) { value = model; }
+		} ATileModel_P;
+		
+		// Type definition for aligned collection of tile model instances 
+		typedef __declspec(align(16)) vector<ATileModel_P> TileModelCollection;
 
 		TileModelCollection		Models;					// Linear collection of all models, for rendering efficiency
 		ModelLinkedList	****	ModelLayout;			// Spatial layout of models, for efficient indexing into the collection.  ModelLinkedList*[x][y][z]	
@@ -311,7 +323,7 @@ public:
 			int modelcount = (int)src->Models.size();
 			for (int i=0; i<modelcount; ++i)
 			{
-				m = &(src->Models[i]);
+				m = &(src->Models[i].value);
 				AddModel(m->elementpos.x, m->elementpos.y, m->elementpos.z, m->model, m->rotation, m->type, false);
 			}
 
@@ -325,7 +337,7 @@ public:
 			int n = (int)Models.size();
 			for (int i = 0; i < n; ++i)
 			{
-				if (Models[i].elementpos.x == x && Models[i].elementpos.y == y && Models[i].elementpos.z == z)
+				if (Models[i].value.elementpos.x == x && Models[i].value.elementpos.y == y && Models[i].value.elementpos.z == z)
 				{
 					RemoveFromVectorAtIndex<TileModel>(Models, i);	// Remove from the vector at this index
 					--i;											// Decrement the loop counter so we resume at the same location, which now contains the next element
@@ -393,14 +405,14 @@ public:
 			for (int i = 0; i < n; ++i)
 			{
 				// Check this model is valid
-				model = Models[i].model;
+				model = Models[i].value.model;
 				if (!model) continue;
 
 				// Check whether the min or max bounds for this model would push out the overall bounds
 				// Swap y and z coordinates since we are moving from element to world space
 				// D3DXVECTOR3 pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.x), _z_, _y_);
 				const INTVECTOR3 & elsize = model->GetElementSize();
-				const INTVECTOR3 & location = Models[i].elementpos;
+				const INTVECTOR3 & location = Models[i].value.elementpos;
 				XMVECTOR pos = XMVectorAdd(	Game::ElementLocationToPhysicalPosition(location),
 											XMVectorMultiply(VectorFromIntVector3SwizzleYZ(elsize), Game::C_CS_ELEMENT_MIDPOINT_V));
 

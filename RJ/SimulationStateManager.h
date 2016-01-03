@@ -6,7 +6,9 @@
 #include <vector>
 #include "Utility.h"
 #include "ScheduledObject.h"
+#include "ObjectReference.h"
 #include "iObject.h"
+#include "iSpaceObject.h"
 
 // This class has no special alignment requirements
 class SimulationStateManager : public ScheduledObject
@@ -87,11 +89,14 @@ public:
 	void							EvaluateEnvironmentAsHubContainer(iSpaceObjectEnvironment * environment);
 
 	// Methods to add or remove items from the primary collections
-	CMPINLINE void					AddSpaceSimulationHub(iSpaceObject *hub)			{ m_space_simhubs.push_back(hub); }
-	CMPINLINE void					RemoveSpaceSimulationHub(iSpaceObject *hub)			{ RemoveFromVector<iSpaceObject*>(m_space_simhubs, hub); }
-	CMPINLINE void					AddInteriorSimulationHub(iEnvironmentObject *hub)	{ m_env_simhubs.push_back(hub); }
-	CMPINLINE void					RemoveInteriorSimulationHub(iEnvironmentObject*hub)	{ RemoveFromVector<iEnvironmentObject*>(m_env_simhubs, hub); }
+	void							AddSpaceSimulationHub(iSpaceObject *hub);
+	void							RemoveSpaceSimulationHub(iSpaceObject *hub);			
+	void							AddInteriorSimulationHub(iEnvironmentObject *hub);
+	void							RemoveInteriorSimulationHub(iEnvironmentObject*hub);
 	
+	// Checks the integrity of the simulation hub collections and makes corrections / removes invalid entries if required
+	void							ValidateSimulationHubCollections(void);
+
 	// Default destructor
 	~SimulationStateManager(void);
 
@@ -104,19 +109,23 @@ protected:
 	void							AddHubSystem(SpaceSystem *system);
 	void							RemoveHubSystem(SpaceSystem *system);
 
+	// Methods to remove simulation hubs using a direct iterator reference.  Protected since these should only
+	// be called by internal methods that can correctly define the iterator
+	void							RemoveSpaceSimulationHub(std::vector<ObjectReference<iSpaceObject>>::iterator hub);
+	void							RemoveInteriorSimulationHub(std::vector<ObjectReference<iEnvironmentObject>>::iterator hub);
 
 protected:
 
 	// The state manager maintains a collection of all simulation hubs, for use in determining the simulation state of other objects
-	std::vector<iSpaceObject*>				m_space_simhubs;
-	std::vector<iEnvironmentObject*>		m_env_simhubs;
+	std::vector<ObjectReference<iSpaceObject>>				m_space_simhubs;
+	std::vector<ObjectReference<iEnvironmentObject>>		m_env_simhubs;
 
 	// We maintain a list of systems that contain at least one hub object, for efficiency at runtime
-	std::vector<SpaceSystem*>				m_hubsystems;
-	std::vector<SpaceSystem*>::size_type	m_hubsystemcount;
+	std::vector<SpaceSystem*>								m_hubsystems;
+	std::vector<SpaceSystem*>::size_type					m_hubsystemcount;
 
 	// Maintain an index of the hub system to be evaluated in the next scheduled update
-	std::vector<SpaceSystem*>::size_type	m_nexthubsystem;
+	std::vector<SpaceSystem*>::size_type					m_nexthubsystem;
 };
 
 

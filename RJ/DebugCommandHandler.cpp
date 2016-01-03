@@ -3,6 +3,7 @@
 #include "GameDataExtern.h"
 #include "CoreEngine.h"
 #include "GameObjects.h"
+#include "ObjectReference.h"
 #include "Player.h"
 #include "Ship.h"
 #include "SimpleShip.h"
@@ -105,6 +106,14 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		return true;
 	}
 
+	/* Print a log of all registered game objects to the debug output */
+	else if (command.InputCommand == "print_objects")
+	{
+		DebugPrintAllGameObjects();
+		command.SetSuccessOutput("Printed all registered game objects to debug output");
+		return true;
+	}
+
 	// We did not recognise the command
 	return false;
 }
@@ -162,7 +171,56 @@ void DebugCommandHandler::ClearAllSpawnedShips(void)
 			++it;									// If this object was not debug-spawned
 		}
 	}
-	
+}
+
+
+// Prints a log of all registered game objects to the debug output stream
+void DebugCommandHandler::DebugPrintAllGameObjects(void)
+{
+	// Generate and output a header row
+	std::string header1 = "ID    Act.  Type   Name   InstanceCode   Code   RC";
+	std::string header2 = "--------------------------------------------------";
+	OutputDebugString(std::string("\n\n" + header1 + "\n" + header2 + "\n").c_str());
+
+	// Store a temporary vector of pointers to register entries, so we can sort them locally before printing
+	std::vector<Game::ObjectRegisterEntry*> objects;
+	Game::ObjectRegister::iterator it_end = Game::Objects.end();
+	for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
+	{
+		Game::ObjectRegisterEntry * entry = &(it->second);
+		std::vector<Game::ObjectRegisterEntry*>::iterator insert_pt = std::upper_bound(objects.begin(), objects.end(), entry->ID,
+			[](Game::ID_TYPE const& id, Game::ObjectRegisterEntry const* obj) { return (id < obj->ID); });
+		objects.insert(insert_pt, entry);
+	}
+
+	// Iterate through each sorted object register entry in turn
+	iObject *obj;
+	std::vector<Game::ObjectRegisterEntry*>::iterator it2_end = objects.end();
+	for (std::vector<Game::ObjectRegisterEntry*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
+	{
+		// The first part of the line can be constructed based on the entry only, whether or not the object exists
+		Game::ID_TYPE id = (*it2)->ID;
+		std::string s = concat(id)((id >= 0 && id < 10 ? "     " : (id >= 10 && id < 100 ? "    " : (id >= 100 && id < 1000 ? "   " : "  ")))).str();	// ID & padding
+		s += ((*it2)->Active ? " Yes  " : " No   ");
+
+		// Now print the object-related information
+		obj = (*it2)->Object;
+		if (obj)
+		{
+			s += (iObject::TranslateObjectTypeToString(obj->GetObjectType()) + "  \"" + obj->GetName() + "\"  \"" + obj->GetInstanceCode()
+				+ "\"  \"" + obj->GetCode() + "\"  ");
+		}
+		else
+		{
+			s += ("(Null)  (Null)  (Null)  (Null)  ");
+		}
+
+		// Final entry-related data
+		s = concat(s)((*it2)->RefCount).str();
+
+		// Print this line to the debug output
+		OutputDebugString((s + "\n").c_str());
+	}
 }
 
 // Default destructor

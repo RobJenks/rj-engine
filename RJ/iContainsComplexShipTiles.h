@@ -16,7 +16,7 @@ class iContainsComplexShipTiles
 public:
 
 	// Define the standard collection of ship tiles, and an iterator over the collection
-	typedef vector<ComplexShipTile*> ComplexShipTileCollection;
+	typedef __declspec(align(16)) vector<__declspec(align(16)) ComplexShipTile*> ComplexShipTileCollection;
 	typedef ComplexShipTileCollection::const_iterator ConstTileIterator;
 
 	// Default constructor

@@ -398,6 +398,9 @@ public:
 		m_simulated = m_posupdated /*= m_spatialdatachanged */= false; 
 	}
 
+	// Static method to return the string representation of an object type
+	static std::string							TranslateObjectTypeToString(iObject::ObjectType type);
+
 	// Static methods to translate between object simulation states and their string representations
 	static std::string							TranslateSimulationStateToString(ObjectSimulationState state);
 	static ObjectSimulationState				TranslateSimulationStateFromString(const std::string & state);

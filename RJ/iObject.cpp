@@ -138,6 +138,10 @@ void iObject::InitialiseCopiedObject(iObject *source)
 
 	// Deep-copy the object collision data
 	OrientedBoundingBox::CloneOBBHierarchy(source->CollisionOBB, CollisionOBB, this);
+
+	// Set the simulation state of the new object to strategic as a starting point.  This will likely be overridden
+	// in the next update cycle, but setting an active simulation state here means it will be registered on construction
+	SetSimulationState(iObject::ObjectSimulationState::StrategicSimulation);
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 
@@ -603,7 +607,7 @@ iObject::ObjectSimulationState iObject::TranslateSimulationStateFromString(const
 	else											return iObject::ObjectSimulationState::NoSimulation;
 }
 
-// Static method to detemine the object classs of an object; i.e. whether it is space- or environment-based
+// Static method to detemine the object class of an object; i.e. whether it is space- or environment-based
 iObject::ObjectClass iObject::DetermineObjectClass(const iObject & object)
 {
 	// Object class is based upon the more granular object type
@@ -627,5 +631,22 @@ iObject::ObjectClass iObject::DetermineObjectClass(const iObject & object)
 }
 
 
+// Static method to return the string representation of an object type
+std::string iObject::TranslateObjectTypeToString(iObject::ObjectType type)
+{
+	switch (type)
+	{
+		case iObject::ObjectType::ShipObject:						return "Ship";
+		case iObject::ObjectType::SimpleShipObject:					return "SimpleShip";
+		case iObject::ObjectType::ComplexShipObject:				return "ComplexShip";
+		case iObject::ObjectType::ComplexShipSectionObject:			return "ComplexShipSection";
+		case iObject::ObjectType::SpaceEmitterObject:				return "SpaceEmitter";
+		case iObject::ObjectType::CapitalShipPerimeterBeaconObject:	return "CS Perimeter Beacon";
+		case iObject::ObjectType::ProjectileObject:					return "Projectile";
+		case iObject::ObjectType::ActorObject:						return "Actor";
+	
+		default:													return "(Unknown)";
+	}
+}
 
 

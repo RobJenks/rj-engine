@@ -647,8 +647,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_1]) {
-		Game::Keyboard.LockKey(DIK_1);
-		cs()->SetTargetSpeedPercentage(1.0f);
+		
 	}
 	if (b[DIK_2]) {
 		Game::Keyboard.LockKey(DIK_2);
@@ -2006,14 +2005,11 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		std::string s = NullString;
-		if (ss()) s = concat("ss[ ")(Game::FactionManager.GetFaction(ss()->GetFaction())->GetName())(" ]: { ")(ss()->GetDebugOrderQueueString())(" }").str();
-		if (s2()) s = concat(s)(" | s3[ ")(Game::FactionManager.GetFaction(s2()->GetFaction())->GetName())(" ]: { ")(s2()->GetDebugOrderQueueString())(" }").str();
-		OutputDebugString((s + "\n").c_str());
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "[%.3f / %.1f]  |  %s", 
-			(ss() ? ss()->GetTargetLeadingMultiplier(cs()->GetID()) : -1.0f), 
-			(cs() ? cs()->GetHealth() : -1.0f), s.c_str());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "[%.3f / %.1f]  |  %s",
+			(ss() ? ss()->GetTargetLeadingMultiplier(cs()->GetID()) : -1.0f),
+			(cs() ? cs()->GetHealth() : -1.0f),
+			(a1() ? "Exists" : "NULL")
+		);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 

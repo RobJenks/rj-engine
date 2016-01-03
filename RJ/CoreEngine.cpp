@@ -1431,11 +1431,11 @@ void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
 	if (!system) return;
 
 	// Iterate through all objects in the system object collection
-	std::vector<iSpaceObject*>::iterator it_end = system->Objects.end();
-	for (std::vector<iSpaceObject*>::iterator it = system->Objects.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = system->Objects.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = system->Objects.begin(); it != it_end; ++it)
 	{
 		// Get a reference to the object and make sure it is valid
-		object = (*it); if (!object) continue;
+		object = (*it)(); if (!object) continue;
 
 		// Take different action based on object simulation state
 		if (object->SimulationState() == iObject::ObjectSimulationState::FullSimulation)
@@ -1779,21 +1779,21 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
 		for (ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it = tile->GetCompoundModelSet()->Models.begin(); it != it_end; ++it)
 		{
-			// Make sure this is a valid model
-			if (!it->model) continue;
+			// Get a reference to the model
+			const ComplexShipTile::TileModel & item = (*it).value;
 			
 			// Apply a transformation of (ModelRotation * CurrentWorldMatrix * ModelTranslation)
-			modelwm = XMMatrixMultiply(XMMatrixMultiply(it->rotmatrix, world), XMMatrixTranslationFromVector(it->offset));
+			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.rotmatrix, world), XMMatrixTranslationFromVector(item.offset));
 
 			// Submit the tile model for rendering using this adjusted world matrix
 			if (fade)
 			{
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, it->model, modelwm, m_instanceparams,
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, item.model, modelwm, m_instanceparams,
 											modelwm.r[3]);	// Take pos from the trans components of the world matrix (_41 to _43)
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, it->model, modelwm);
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, modelwm);
 			}
 
 		}
@@ -2199,29 +2199,25 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 	if (!parent) return;
 
 	// Iterate through all active objects within this parent environment
-	std::vector<iEnvironmentObject*>::iterator a_it_end = parent->Objects.end();
-	for (std::vector<iEnvironmentObject*>::iterator a_it = parent->Objects.begin(); a_it != a_it_end; ++a_it)
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator a_it_end = parent->Objects.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator a_it = parent->Objects.begin(); a_it != a_it_end; ++a_it)
 	{
-		a_obj = (*a_it);
-		if (a_obj)
-		{
-			// Determine the location of all vertices for each bounding volume and render using the overlay renderer
-			a_obj->CollisionOBB.DetermineVertices(v);
-			Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_LightBlue, 0.1f);
-		}
+		a_obj = (*a_it)(); if (!a_obj) continue;
+
+		// Determine the location of all vertices for each bounding volume and render using the overlay renderer
+		a_obj->CollisionOBB.DetermineVertices(v);
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_LightBlue, 0.1f);
 	}
 
 	// Iterate through all terrain objects within this parent environment
 	std::vector<StaticTerrain*>::iterator t_it_end = parent->TerrainObjects.end();
 	for (std::vector<StaticTerrain*>::iterator t_it = parent->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
 	{
-		t_obj = (*t_it);
-		if (t_obj)
-		{
-			// Determine the location of all vertices for each bounding volume and render using the overlay renderer
-			t_obj->DetermineCollisionBoxVertices(parent, v);
-			Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
-		}
+		t_obj = (*t_it); if (!t_obj) continue;
+
+		// Determine the location of all vertices for each bounding volume and render using the overlay renderer
+		t_obj->DetermineCollisionBoxVertices(parent, v);
+		Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
 	}
 }
 

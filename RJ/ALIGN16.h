@@ -64,6 +64,23 @@ public:
 		return p;
 	}
 
+
+	// Overridden "new[]" operator with "nothrow" to ensure 16-bit alignment for all allocations of this class
+	// Will return NULL rather than throwing an exception if the memory allocation fails
+	void* operator new[](size_t size, const std::nothrow_t &t) throw()
+	{
+		void *p = _aligned_malloc(size, 16U);
+
+		// Return p without testing it; if the allocation failed, p will be NULL.  Replaces "if (!p) throw std::bad_alloc();"
+		return p;
+	}
+
+	// Overridden "delete[]" operator to deallocate 16-bit-aligned heap-allocated instances of this class
+	// Required counterpart to new[](nothrow) so that memory can be automatically freed if initialisation throws an exception
+	void operator delete[](void *p, const std::nothrow_t &t) throw()
+	{
+		_aligned_free(static_cast<T*>(p));
+	}
 };
 
 

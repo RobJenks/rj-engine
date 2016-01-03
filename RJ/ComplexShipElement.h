@@ -24,10 +24,16 @@ using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
-// This class deliberately DOES NOT use any data with alignment requirements
-class ComplexShipElement : public iContainsComplexShipTiles
+
+// Class is 16-bit aligned to allow use of SIMD member variables
+__declspec(align(16))
+class ComplexShipElement : public iContainsComplexShipTiles, public ALIGN16<ComplexShipElement>
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(ComplexShipElement)
+
 	ComplexShipElement(void);
 	~ComplexShipElement(void);
 

@@ -43,6 +43,10 @@ Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
 	result = InitialisePixelShader(device, iShader::ShaderFilename("skinned_nmap.ps.cso"));
 	if (result != ErrorCodes::NoError) return result;
 
+	// Initialise all constant buffers required for rendering
+	result = InitialiseCommonConstantBuffers(device);
+	if (result != ErrorCodes::NoError) return result;
+
 	// Return success
 	return ErrorCodes::NoError;
 }

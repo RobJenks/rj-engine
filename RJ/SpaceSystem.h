@@ -10,6 +10,7 @@
 #include "ErrorCodes.h"
 #include "Texture.h"
 #include "Octree.h"
+#include "ObjectReference.h"
 #include "iSpaceObject.h"
 #include "BasicProjectileSet.h"
 
@@ -52,7 +53,7 @@ public:
 	void						SetSize(const XMFLOAT3 & size);
 
 	// Each system maintains a collection of objects that it currently holds
-	std::vector<iSpaceObject*>	Objects;
+	std::vector<ObjectReference<iSpaceObject>>	Objects;
 
 	// Each system maintains a collection of active projectiles that are present in the environment
 	BasicProjectileSet			Projectiles;
@@ -61,7 +62,7 @@ public:
 	Octree<iObject*> *			SpatialPartitioningTree;
 
 	// Methods to retrieve objects in the system
-	CMPINLINE std::vector<iSpaceObject*> *	GetObjects(void)					{ return &Objects; }
+	CMPINLINE std::vector<ObjectReference<iSpaceObject>> * 	GetObjects(void)					{ return &Objects; }
 
 	// Methods to get or change the system backdrop texture
 	CMPINLINE string						GetBackdropLocation(void) { return m_backdroplocation; }

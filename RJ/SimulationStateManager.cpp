@@ -65,20 +65,23 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 	if (object->GetSpaceEnvironment() == NULL) return iObject::ObjectSimulationState::NoSimulation;
 
 	// If there are no simulation hubs in this system then we should immediately default to strategic simulation
-	if (FindInVector<SpaceSystem*>(m_hubsystems, object->GetSpaceEnvironment()) == -1)
+	if (std::find(m_hubsystems.begin(), m_hubsystems.end(), object->GetSpaceEnvironment()) == m_hubsystems.end())
 		return iObject::ObjectSimulationState::StrategicSimulation;
 
 	// Otherwise, test our proximity to all registered simulation hubs
-	bool insystem = false; XMVECTOR distsq;
-	std::vector<iSpaceObject*>::const_iterator it_end = m_space_simhubs.end();
-	for (std::vector<iSpaceObject*>::const_iterator it = m_space_simhubs.begin(); it != it_end; ++it)
+	XMVECTOR distsq;
+	const iSpaceObject *shub; const iEnvironmentObject *ehub; const iSpaceObjectEnvironment *env;
+	std::vector<ObjectReference<iSpaceObject>>::const_iterator it_end = m_space_simhubs.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::const_iterator it = m_space_simhubs.begin(); it != it_end; ++it)
 	{
+		shub = (*it)(); if (!shub) continue;
+
 		// The hub is only relevant to us if it is in the same system.  We know neither is null since 
 		// we already tested the object environment above
-		if ((*it)->GetSpaceEnvironment() == object->GetSpaceEnvironment())
+		if (shub->GetSpaceEnvironment() == object->GetSpaceEnvironment())
 		{
 			// Now test the distance to this hub object; if we are close, we want full simulation
-			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), (*it)->GetPosition()));
+			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), shub->GetPosition()));
 			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::FullSimulation;
 		}
@@ -86,14 +89,18 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 
 	// Also check if there is a simulation hub in an environment that shares this system, in which 
 	// case we may also go with full simulation
-	std::vector<iEnvironmentObject*>::const_iterator it2_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::const_iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
+	std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it2_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
 	{
-		// Test whether the hub has an environment, and that environment is in the same system as us
-		if ((*it2)->GetParentEnvironment() != NULL && (*it2)->GetParentEnvironment()->GetSpaceEnvironment() == object->GetSpaceEnvironment())
+		// Get a reference to the environment hub, and the environment it is in since we will test proximity to that for space-based objects
+		ehub = (*it2)(); if (!ehub) continue;
+		env = ehub->GetParentEnvironment(); if (!env) continue;
+
+		// Test whether the hub's environment is in the same system as this object (we know object->env != NULL from above)
+		if (env->GetSpaceEnvironment() == object->GetSpaceEnvironment())
 		{
 			// Test whether the hub's environment is close enough
-			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), (*it2)->GetPosition()));
+			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), env->GetPosition()));
 			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::FullSimulation;
 		}
@@ -118,22 +125,26 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 	if (environment == NULL) return iObject::ObjectSimulationState::NoSimulation;
 
 	// If there are no simulation hubs in this system then we should immediately default to strategic simulation
-	if (FindInVector<SpaceSystem*>(m_hubsystems, environment->GetSpaceEnvironment()) == -1)
+	if (std::find(m_hubsystems.begin(), m_hubsystems.end(), environment->GetSpaceEnvironment()) == m_hubsystems.end())
 		return iObject::ObjectSimulationState::StrategicSimulation;
 
 	// Otherwise, test our proximity to all registered simulation hubs
 	bool proximity = false; XMVECTOR distsq;
-	std::vector<iEnvironmentObject*>::const_iterator it_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::const_iterator it = m_env_simhubs.begin(); it != it_end; ++it)
+	const iSpaceObject *shub; const iEnvironmentObject *ehub; const iSpaceObjectEnvironment *env;
+	std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it = m_env_simhubs.begin(); it != it_end; ++it)
 	{
+		ehub = (*it)(); if (!ehub) continue;
+		env = ehub->GetParentEnvironment();
+
 		// If we are in the same environment as a simulation hub then we should be fully simulated
-		if ((*it)->GetParentEnvironment() == environment)
+		if (env == environment)
 			return iObject::ObjectSimulationState::FullSimulation;
 
 		// Otherwise, test if our environment is at least close to the hub's environment
-		if ((*it)->GetParentEnvironment() != NULL)
+		if (env != NULL)
 		{
-			distsq = XMVector3LengthSq(XMVectorSubtract(environment->GetPosition(), (*it)->GetParentEnvironment()->GetPosition()));
+			distsq = XMVector3LengthSq(XMVectorSubtract(environment->GetPosition(), env->GetPosition()));
 			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				proximity = true;
 		}
@@ -142,14 +153,21 @@ iObject::ObjectSimulationState SimulationStateManager::DetermineSimulationStateF
 	// If our environment is close to another containing a hub, we can use tactical simulation for the object
 	if (proximity) return iObject::ObjectSimulationState::TacticalSimulation;
 
+	// We check here that the object environment's space system is != NULL; we could permit a null environment
+	// when testing within the isolated environment, but it makes no sense when considering space objects next
+	const SpaceSystem *system = environment->GetSpaceEnvironment();
+	if (!system) return (proximity ? iObject::ObjectSimulationState::TacticalSimulation : iObject::ObjectSimulationState::StrategicSimulation);
+
 	// Last chance: if there are any space-based hubs close to our environment, we should also use tactical simulation
-	std::vector<iSpaceObject*>::const_iterator it2_end = m_space_simhubs.end();
-	for (std::vector<iSpaceObject*>::const_iterator it2 = m_space_simhubs.begin(); it2 != it2_end; ++it2)
+	std::vector<ObjectReference<iSpaceObject>>::const_iterator it2_end = m_space_simhubs.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::const_iterator it2 = m_space_simhubs.begin(); it2 != it2_end; ++it2)
 	{
+		shub = (*it2)(); if (!shub) continue;
+
 		// Test whether the hub is in the same system as our environment
-		if ((*it2)->GetSpaceEnvironment() && (*it2)->GetSpaceEnvironment() == object->GetParentEnvironment()->GetSpaceEnvironment())
+		if (shub->GetSpaceEnvironment() == system)
 		{
-			distsq = XMVector3LengthSq(XMVectorSubtract(object->GetParentEnvironment()->GetPosition(), (*it2)->GetPosition()));
+			distsq = XMVector3LengthSq(XMVectorSubtract(environment->GetPosition(), shub->GetPosition()));
 			if (XMVector3LessOrEqual(distsq, Game::C_SPACE_SIMULATION_HUB_RADIUS_SQ_V))
 				return iObject::ObjectSimulationState::TacticalSimulation;
 		}
@@ -168,16 +186,20 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	// Parameter check
 	if (!system) return;
 
+	// Take the opportunity to ensure the integrity of each simulation hub collection
+	ValidateSimulationHubCollections();
+
 	// Check whether any simulation hubs exist in this system; this will determine the default simulation state
-	iObject::ObjectSimulationState defaultstate = (FindInVector<SpaceSystem*>(m_hubsystems, system) == -1 ?
-														iObject::ObjectSimulationState::StrategicSimulation :
-														iObject::ObjectSimulationState::TacticalSimulation);
+	iObject::ObjectSimulationState defaultstate = (
+		std::find(m_hubsystems.begin(), m_hubsystems.end(), system) != m_hubsystems.end() ? 
+														iObject::ObjectSimulationState::TacticalSimulation:		// >= 1 hub in system
+														iObject::ObjectSimulationState::StrategicSimulation);	// No hubs in system
 
 	// Default all objects to either strategic or tactical simulation as a default, depending on whether hubs are present
-	std::vector<iSpaceObject*>::iterator it_end = system->Objects.end();
-	for (std::vector<iSpaceObject*>::iterator it = system->Objects.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = system->Objects.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = system->Objects.begin(); it != it_end; ++it)
 	{
-		spaceobject = (*it); if (!spaceobject) continue;
+		spaceobject = (*it)(); if (!spaceobject) continue;
 		spaceobject->SetSimulationState(defaultstate);
 
 		// If the object is itself an environment, also update the state of all its occupants to strategic
@@ -194,23 +216,26 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 
 	// Otherwise, first get a reference to all space-based simulation hubs in the system
 	GetAllSpaceSimulationHubsInSystem(system, spacehubs);
-	bool havespacehubs = !spacehubs.empty();
-
+	
 	// If we have any space hubs, check each one now
-	if (havespacehubs)
+	if (!spacehubs.empty())
 	{
 		// Iterate over each simulation hub in turn
+		iSpaceObject *spacehub;
 		std::vector<iSpaceObject*>::iterator it_end = spacehubs.end();
 		for (std::vector<iSpaceObject*>::iterator it = spacehubs.begin(); it != it_end; ++it)
 		{
+			// Make sure the simulation hub is valid
+			spacehub = (*it); if (!spacehub) continue;
+
 			// The simulation hub itself should always be fully-simulated; if it is an environment, so should its contents
-			(*it)->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			if ((*it)->IsEnvironment()) SetSimulationStateOfAllEnvironmentObjects(	(iSpaceObjectEnvironment*)(*it), 
-																					iObject::ObjectSimulationState::FullSimulation);
+			spacehub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+			if (spacehub->IsEnvironment()) SetSimulationStateOfAllEnvironmentObjects(	(iSpaceObjectEnvironment*)spacehub, 
+																						 iObject::ObjectSimulationState::FullSimulation);
 
 			// Get all objects within the simulation hub radius from this object and iterate through them
-			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance((*it), Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
-																		  Game::ObjectSearchOptions::NoSearchOptions);
+			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(spacehub, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
+																			   Game::ObjectSearchOptions::NoSearchOptions);
 			std::vector<iObject*>::iterator it2_end = objects.end();
 			for (std::vector<iObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
 			{
@@ -234,20 +259,21 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	// Now get a reference to all interior simulation hubs in the system
 	std::vector<iEnvironmentObject*> envhubs, envobjects;
 	GetAllInteriorSimulationHubsInSystem(system, envhubs);
-	bool haveenvhubs = !envhubs.empty();
-
+	
 	// If we have any interior hubs, check each one now
-	if (haveenvhubs)
+	if (!envhubs.empty())
 	{
 		// Iterate through all interior hubs in turn
+		iEnvironmentObject *envhub;
 		std::vector<iEnvironmentObject*>::iterator it_end = envhubs.end();
 		for (std::vector<iEnvironmentObject*>::iterator it = envhubs.begin(); it != it_end; ++it)
 		{
 			// The simulation hub itself should always be fully-simulated 
-			(*it)->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+			envhub = (*it); if (!envhub) continue;
+			envhub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 
 			// Make sure this interior hub has an environment; if not (and this shouldn't happen) there is nothing more to do
-			env = (*it)->GetParentEnvironment();
+			env = envhub->GetParentEnvironment();
 			if (!env) continue;
 
 			// All objects sharing the environment with this interior hub, and the environment itself, should also be fully simulated
@@ -285,36 +311,31 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 // environment will be considered when determining simulation state.  
 void SimulationStateManager::EvaluateSimulationStateInIsolatedInteriorEnvironment(iSpaceObjectEnvironment * environment)
 {
-	iSpaceObjectEnvironment *hubenv;
-
 	// Parameter check
 	if (!environment) return;
+	Game::ID_TYPE env_id = environment->GetID();
 
 	// Check each space hub in turn; if this environment is a space hub then we set it & all its contents to full simulation
-	std::vector<iSpaceObject*>::iterator it_end = m_space_simhubs.end();
-	for (std::vector<iSpaceObject*>::iterator it = m_space_simhubs.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = m_space_simhubs.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = m_space_simhubs.begin(); it != it_end; ++it)
 	{
-		// We only need to consider this object if it is an environment
-		if ((*it)->IsEnvironment())
+		// Check whether the environment IS this space simulation hub
+		if ((*it)() && (*it)()->GetID() == env_id)
 		{
-			hubenv = (iSpaceObjectEnvironment*)(*it);
-			if (hubenv == environment)
-			{
-				// The environment is a space simulation hub; we therefore want to set it & all its contents to full simulation
-				environment->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-				SetSimulationStateOfAllEnvironmentObjects(environment, iObject::ObjectSimulationState::FullSimulation);
+			// The environment is a space simulation hub; we therefore want to set it & all its contents to full simulation
+			environment->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+			SetSimulationStateOfAllEnvironmentObjects(environment, iObject::ObjectSimulationState::FullSimulation);
 
-				// We can return immediately now that everything is at full simulation
-				return;
-			}
+			// We can return immediately now that everything is at full simulation
+			return;
 		}
 	}
 
 	// Also check all interior simulation hubs to see if any are within the environment
-	std::vector<iEnvironmentObject*>::iterator it2_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it2_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
 	{
-		if ((*it2)->GetParentEnvironment() == environment)
+		if ((*it2)() && (*it2)()->GetParentEnvironment() == environment)
 		{
 			// An interior simulation hub is within the environment, so again we want to set everything to full simulation
 			environment->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -339,11 +360,13 @@ void SimulationStateManager::GetAllSpaceSimulationHubsInSystem(SpaceSystem *syst
 	if (!system) return;
 
 	// Check each registered space simulation hub in turn
-	std::vector<iSpaceObject*>::iterator it_end = m_space_simhubs.end();
-	for (std::vector<iSpaceObject*>::iterator it = m_space_simhubs.begin(); it != it_end; ++it)
+	iSpaceObject *obj;
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = m_space_simhubs.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = m_space_simhubs.begin(); it != it_end; ++it)
 	{
 		// If the hub is in this system then add it to the output vector
-		if ((*it)->GetSpaceEnvironment() == system) outResult.push_back((*it));
+		obj = (*it)();
+		if (obj && obj->GetSpaceEnvironment() == system) outResult.push_back(obj);
 	}	
 }
 
@@ -354,12 +377,14 @@ void SimulationStateManager::GetAllInteriorSimulationHubsInSystem(SpaceSystem *s
 	if (!system) return;
 
 	// Check each registered interior simulation hub in turn
-	std::vector<iEnvironmentObject*>::iterator it_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::iterator it = m_env_simhubs.begin(); it != it_end; ++it)
+	iEnvironmentObject *obj;
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = m_env_simhubs.begin(); it != it_end; ++it)
 	{
 		// If the hub is in this system then add it to the output vector
-		if ((*it)->GetParentEnvironment() && (*it)->GetParentEnvironment()->GetSpaceEnvironment() == system)
-			outResult.push_back((*it));
+		obj = (*it)();
+		if (obj && obj->GetParentEnvironment() && obj->GetParentEnvironment()->GetSpaceEnvironment() == system)
+			outResult.push_back(obj);
 	}
 }
 
@@ -474,9 +499,10 @@ void SimulationStateManager::SimulationHubEnteringSpaceEnvironment(iSpaceObject 
 	// Parameter check
 	if (!object || !environment) return;
 
-	// Add to the list of space simulation hubs
-	if (FindInVector<iSpaceObject*>(m_space_simhubs, object) == -1)
-		AddSpaceSimulationHub(object);
+	// Add to the list of space simulation hubs, if we are not already registered
+	if (std::find_if(m_space_simhubs.begin(), m_space_simhubs.end(), 
+		[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); }) == m_space_simhubs.end())
+			AddSpaceSimulationHub(object);
 
 	// Add this environment to the hub system list if it isn't already listed
 	AddHubSystem(environment);
@@ -492,8 +518,9 @@ void SimulationStateManager::SimulationHubEnteringInteriorEnvironment(iEnvironme
 	if (!object || !environment) return;
 
 	// Add to the list of interior simulation hubs
-	if (FindInVector<iEnvironmentObject*>(m_env_simhubs, object) == -1)
-		AddInteriorSimulationHub(object);
+	if (std::find_if(m_env_simhubs.begin(), m_env_simhubs.end(),
+		[&object](const ObjectReference<iEnvironmentObject> & obj) { return (obj() == object); }) == m_env_simhubs.end())
+			AddInteriorSimulationHub(object);
 
 	// Notify the environment that it definitely contains at least one interior simulation hub
 	environment->NotifyIsContainerOfSimulationHubs(true);
@@ -547,8 +574,15 @@ void SimulationStateManager::SimulationHubLeavingSpaceEnvironment(iSpaceObject *
 	if (!object || !environment) return;
 
 	// Remove from the collection of space simulation hubs
-	int i = 0; while (FindInVector<iSpaceObject*>(m_space_simhubs, object) != -1 && (++i < 10))
+	while (true)
+	{
+		std::vector<ObjectReference<iSpaceObject>>::iterator it = std::find_if(m_space_simhubs.begin(), m_space_simhubs.end(),
+			[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); });
+		if (it == m_space_simhubs.end()) break;
+	
 		RemoveSpaceSimulationHub(object);
+	}
+	
 
 	// Check how many simulation hubs exist in this system.  If this was the only one, remove the system from the hub systems list
 	if (DetermineSimulationHubCountInSystem(environment) == 0)
@@ -565,8 +599,14 @@ void SimulationStateManager::SimulationHubLeavingInteriorEnvironment(iEnvironmen
 	if (!object || !environment) return;
 
 	// Remove from the collection of interior simulation hubs
-	int i = 0; while (FindInVector<iEnvironmentObject*>(m_env_simhubs, object) != -1 && (++i < 10))
+	while (true)
+	{
+		std::vector<ObjectReference<iEnvironmentObject>>::iterator it = std::find_if(m_env_simhubs.begin(), m_env_simhubs.end(),
+			[&object](const ObjectReference<iEnvironmentObject> & obj) { return (obj() == object); });
+		if (it == m_env_simhubs.end()) break;
+
 		RemoveInteriorSimulationHub(object);
+	}
 
 	// Check whether the removal of this hub means the environment no longer contains any simulation hubs
 	EvaluateEnvironmentAsHubContainer(environment);
@@ -594,20 +634,23 @@ void SimulationStateManager::SimulationHubLeavingInteriorEnvironment(iEnvironmen
 int SimulationStateManager::DetermineSimulationHubCountInSystem(SpaceSystem *system)
 {
 	int count = 0;
+	const iSpaceObject *s_obj; const iEnvironmentObject *e_obj;
 
 	// Test the system that each space simulation hub exists in
-	std::vector<iSpaceObject*>::const_iterator it_end = m_space_simhubs.end();
-	for (std::vector<iSpaceObject*>::const_iterator it = m_space_simhubs.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::const_iterator it_end = m_space_simhubs.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::const_iterator it = m_space_simhubs.begin(); it != it_end; ++it)
 	{
-		if ((*it)->GetSpaceEnvironment() == system) 
+		s_obj = (*it)();
+		if (s_obj && s_obj->GetSpaceEnvironment() == system) 
 			++count;
 	}
 
 	// Also test whether any interior simulation hubs are ultimately within this system
-	std::vector<iEnvironmentObject*>::const_iterator it2_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::const_iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
+	std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it2_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::const_iterator it2 = m_env_simhubs.begin(); it2 != it2_end; ++it2)
 	{
-		if ((*it2)->GetParentEnvironment() && (*it2)->GetParentEnvironment()->GetSpaceEnvironment() == system)
+		e_obj = (*it2)();
+		if (e_obj && e_obj->GetParentEnvironment() && e_obj->GetParentEnvironment()->GetSpaceEnvironment() == system)
 			++count;
 	}
 
@@ -632,11 +675,11 @@ void SimulationStateManager::SetSimulationStateOfAllEnvironmentObjects(iSpaceObj
 	// Iterate through all objects in the environment and change their state.  We have to do this separately
 	// since they will only inherit state from their parent element upon moving to a different element.  We
 	// therefore force it here to make sure the state is updated immediately
-	std::vector<iEnvironmentObject*>::iterator it2_end = environment->Objects.end();
-	for (std::vector<iEnvironmentObject*>::iterator it2 = environment->Objects.begin(); it2 != it2_end; ++it2)
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = environment->Objects.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = environment->Objects.begin(); it != it_end; ++it)
 	{
 		// Set the simulation state of this object
-		(*it2)->SetSimulationState(state);
+		if ((*it)()) (*it)()->SetSimulationState(state);
 	}
 }
 
@@ -648,14 +691,16 @@ void SimulationStateManager::UpgradeSimulationStateOfAllEnvironmentObjects(iSpac
 	if (!environment) return;
 
 	// Iterate through all objects in the environment
-	std::vector<iEnvironmentObject*>::iterator it_end = environment->Objects.end();
-	for (std::vector<iEnvironmentObject*>::iterator it = environment->Objects.begin(); it != it_end; ++it)
+	iEnvironmentObject *obj;
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = environment->Objects.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = environment->Objects.begin(); it != it_end; ++it)
 	{
 		// Make sure this would actually be an upgrade to the object's current state
-		if (iObject::CompareSimulationStates(state, (*it)->SimulationState()) == ComparisonResult::GreaterThan)
+		obj = (*it)();
+		if (obj && iObject::CompareSimulationStates(state, obj->SimulationState()) == ComparisonResult::GreaterThan)
 		{
 			// Set the simulation state of this object
-			(*it)->SetSimulationState(state);
+			obj->SetSimulationState(state);
 		}
 	}
 }
@@ -667,11 +712,11 @@ void SimulationStateManager::EvaluateEnvironmentAsHubContainer(iSpaceObjectEnvir
 	if (!environment) return;
 
 	// Iterate through each interior simulation hub in turm
-	std::vector<iEnvironmentObject*>::iterator it_end = m_env_simhubs.end();
-	for (std::vector<iEnvironmentObject*>::iterator it = m_env_simhubs.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = m_env_simhubs.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = m_env_simhubs.begin(); it != it_end; ++it)
 	{
 		// If this hub is located within the environment then set the flag and quit immediately
-		if ((*it) && (*it)->GetParentEnvironment() == environment)
+		if ((*it)() && (*it)()->GetParentEnvironment() == environment)
 		{
 			environment->NotifyIsContainerOfSimulationHubs(true);
 			return;
@@ -710,6 +755,94 @@ void SimulationStateManager::RemoveHubSystem(SpaceSystem *system)
 	// Store the new size of the hub systems vector
 	m_hubsystemcount = m_hubsystems.size();
 }
+
+// Add a space simulation hub
+void SimulationStateManager::AddSpaceSimulationHub(iSpaceObject *hub)
+{
+	if (hub && std::find_if(m_space_simhubs.begin(), m_space_simhubs.end(), 
+		[&hub](const ObjectReference<iSpaceObject> & obj) { return (obj() == hub); }) == m_space_simhubs.end())
+	{
+		m_space_simhubs.push_back(hub);
+	}
+}
+
+// Remove a space simulation hub
+void SimulationStateManager::RemoveSpaceSimulationHub(iSpaceObject *hub)
+{
+	while (true)
+	{
+		std::vector<ObjectReference<iSpaceObject>>::iterator it = std::find_if(m_space_simhubs.begin(), m_space_simhubs.end(),
+			[&hub](const ObjectReference<iSpaceObject> & obj) { return (obj() == hub); });
+		if (it == m_space_simhubs.end()) break;
+			
+		m_space_simhubs.erase(it);
+	}
+}
+
+// Add an interior simulation hub
+void SimulationStateManager::AddInteriorSimulationHub(iEnvironmentObject *hub)
+{
+	if (hub && std::find_if(m_env_simhubs.begin(), m_env_simhubs.end(), 
+		[&hub](const ObjectReference<iEnvironmentObject> & obj) { return (obj() == hub); }) == m_env_simhubs.end())
+	{
+		m_env_simhubs.push_back(hub);
+	}
+}
+
+// Remove an interior simulation hub
+void SimulationStateManager::RemoveInteriorSimulationHub(iEnvironmentObject*hub)
+{
+	while (true)
+	{
+		std::vector<ObjectReference<iEnvironmentObject>>::iterator it = std::find_if(m_env_simhubs.begin(), m_env_simhubs.end(),
+			[&hub](const ObjectReference<iEnvironmentObject> & obj) { return (obj() == hub); });
+		if (it == m_env_simhubs.end()) break;
+
+		m_env_simhubs.erase(it);
+	}
+}
+
+// Remove simulation hubs using a direct iterator reference.  Protected since this should only
+// be called by internal methods that can correctly define the iterator
+void SimulationStateManager::RemoveSpaceSimulationHub(std::vector<ObjectReference<iSpaceObject>>::iterator hub)
+{
+	if (hub != m_space_simhubs.end()) m_space_simhubs.erase(hub);
+}
+
+// Remove simulation hubs using a direct iterator reference.  Protected since this should only
+// be called by internal methods that can correctly define the iterator
+void SimulationStateManager::RemoveInteriorSimulationHub(std::vector<ObjectReference<iEnvironmentObject>>::iterator hub)
+{
+	if (hub != m_env_simhubs.end()) m_env_simhubs.erase(hub);
+}
+
+// Checks the integrity of the simulation hub collections and makes corrections / removes invalid entries if required
+void SimulationStateManager::ValidateSimulationHubCollections(void)
+{
+	/* Space simulation hubs */
+
+	// Check for any null entries, and remove if any exist
+	std::vector<ObjectReference<iSpaceObject>>::iterator s_it = std::partition(m_space_simhubs.begin(), m_space_simhubs.end(),
+		[](const ObjectReference<iSpaceObject> & obj) { return (obj() != NULL); });
+	if (s_it != m_space_simhubs.end())
+	{
+		// There is at least one null simulation hub entry (e.g. it may have been destroyed) so erase these items
+		m_space_simhubs.erase(s_it, m_space_simhubs.end());
+	}
+
+
+	/* Environment simulation hubs */
+
+	// Check for any null entries, and remove if any exist
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator e_it = std::partition(m_env_simhubs.begin(), m_env_simhubs.end(),
+		[](const ObjectReference<iEnvironmentObject> & obj) { return (obj() != NULL); });
+	if (e_it != m_env_simhubs.end())
+	{
+		// There is at least one null simulation hub entry (e.g. it may have been destroyed) so erase these items
+		m_env_simhubs.erase(e_it, m_env_simhubs.end());
+	}
+}
+
 
 // Default destructor
 SimulationStateManager::~SimulationStateManager(void)
