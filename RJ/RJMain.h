@@ -108,9 +108,6 @@ public:
 	void DebugCCDOBBTest(void);
 	void DebugFullCCDTest(void);
 
-
-
-
 	// Default destructor
 	~RJMain(void);
 

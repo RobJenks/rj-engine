@@ -99,7 +99,7 @@ template <typename T>
 void ModifiedValue<T>::RemoveModifiersOfType(typename Modifier<T>::ModifierType type)
 {
 	// Erase all matching elements and then recalculate the value
-	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsOfType(type));
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsNotOfType(type));
 	if (it != m_modifiers.end())
 	{
 		m_modifiers.erase(it, m_modifiers.end());
@@ -144,7 +144,7 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifier(const Modifier<T> & modifier)
 {
 	// Erase all matching elements and then recalculate the value
-	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(modifier));
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsNotEqual(modifier));
 	if (it != m_modifiers.end())
 	{
 		m_modifiers.erase(it, m_modifiers.end());
@@ -157,7 +157,7 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifier(typename Modifier<T>::ModifierType type, T value)
 {
 	// Erase all matching elements and then recalculate the value
-	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsEqual(type, value));
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsNotEqual(type, value));
 	if (it != m_modifiers.end())
 	{
 		m_modifiers.erase(it, m_modifiers.end());
@@ -202,7 +202,7 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifierApprox(const Modifier<T> & modifier)
 {
 	// Erase all matching elements and then recalculate the value
-	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(modifier));
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsNotApproxEqual(modifier));
 	if (it != m_modifiers.end())
 	{
 		m_modifiers.erase(it, m_modifiers.end());
@@ -215,7 +215,7 @@ template <typename T>
 void ModifiedValue<T>::RemoveAnyModifierApprox(typename Modifier<T>::ModifierType type, T value)
 {
 	// Erase all matching elements and then recalculate the value
-	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsApproxEqual(type, value));
+	Modifier<T>::ModifierSet::iterator it = std::partition(m_modifiers.begin(), m_modifiers.end(), Modifier<T>::IsNotApproxEqual(type, value));
 	if (it != m_modifiers.end())
 	{
 		m_modifiers.erase(it, m_modifiers.end());

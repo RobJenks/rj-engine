@@ -144,9 +144,12 @@ void iSpaceObjectEnvironment::ObjectEnteringEnvironment(iEnvironmentObject *obj)
 	// Make sure the object is valid
 	if (!obj) return;
 
-	// Add to the main collection of objects in this environment; the per-element collections will be updated
-	// once the object moves or otherwise has its position set
-	Objects.push_back(ObjectReference<iEnvironmentObject>(obj));
+	// Add to the main collection of objects in this environment, assuming it does not already exist
+	if (Objects.end() == std::find_if(Objects.begin(), Objects.end(),
+		[&obj](const ObjectReference<iEnvironmentObject> & element) { return (element() == obj); }))
+	{
+		Objects.push_back(ObjectReference<iEnvironmentObject>(obj));
+	}
 }
 
 // Removes an object from this environment
@@ -155,26 +158,7 @@ void iSpaceObjectEnvironment::ObjectLeavingEnvironment(iEnvironmentObject *obj)
 	// Make sure the object is valid
 	if (!obj) return;
 
-	// Get a reference to the range of elements that this object exists in
-	const INTVECTOR3 & emin = obj->GetElementRangeMin();
-	const INTVECTOR3 & emax = obj->GetElementRangeMax();
-
-	// Iterate through all the elements that this object exists in (likely just 1) and remove it from their collections
-	ComplexShipElement *el;
-	for (int x = emin.x; x <= emax.x; ++x)
-	{
-		for (int y = emin.y; y <= emax.y; ++y)
-		{
-			for (int z = emin.z; z <= emax.z; ++z)
-			{
-				// If this is a valid element, remove from its collection now
-				el = GetElement(x, y, z);
-				if (el) el->RemoveObject(obj);
-			}
-		}
-	}
-
-	// Now remove from the overall environment collection
+	// Remove from the environment object collection
 	while (true)
 	{
 		std::vector<ObjectReference<iEnvironmentObject>>::iterator it = std::find_if(Objects.begin(), Objects.end(),
@@ -191,35 +175,18 @@ void iSpaceObjectEnvironment::AddTerrainObject(StaticTerrain *obj)
 	// Make sure the terrain object is valid
 	if (!obj) return;
 
+	// Make sure the terrain object does not already exist in this environment
+	if (std::find(TerrainObjects.begin(), TerrainObjects.end(), obj) != TerrainObjects.end()) return;
+
 	// Add to the terrain collection, and set the reverse terrain pointer to this environment
 	TerrainObjects.push_back(obj);
 	obj->SetParentEnvironment(this);
-
-	// Also locate the relevant element(s) that this terrain will exist in
-	const INTVECTOR3 & emin = obj->GetElementRangeMin(); 
-	const INTVECTOR3 & emax = obj->GetElementRangeMax();
-
-	// Add to the collection in each element of the range
-	ComplexShipElement *el;
-	for (int x = emin.x; x <= emax.x; ++x)
-	{
-		for (int y = emin.y; y <= emax.y; ++y)
-		{
-			for (int z = emin.z; z <= emax.z; ++z)
-			{
-				// If this is a valid element, remove from its collection now
-				el = GetElement(x, y, z);
-				if (el) el->AddTerrainObject(obj);
-			}
-		}
-	}
-
 }
 
 // Removes a terrain object from the environment.  Optionally takes a second parameter indicating the index of this 
 // object in the terrain collection; if set, and if the index is correct, it will be used rather than performing
 // a search of the collection for the object.  Deallocates the terrain object.
-void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj, std::vector<StaticTerrain*>::size_type terrainindex)
+void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
 {
 	// Make sure the terrain object is valid
 	if (!obj) return;
@@ -227,74 +194,24 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj, std::vecto
 	// Remove the reverse terrain pointer back to its environment
 	obj->SetParentEnvironment(NULL);
 
-	// Locate the relevant element(s) that this terrain exists in
-	const INTVECTOR3 & emin = obj->GetElementRangeMin();
-	const INTVECTOR3 & emax = obj->GetElementRangeMax();
-
-	// Remove from the terrain collection of each element in turn
-	ComplexShipElement *el;
-	for (int x = emin.x; x <= emax.x; ++x)
-	{
-		for (int y = emin.y; y <= emax.y; ++y)
-		{
-			for (int z = emin.z; z <= emax.z; ++z)
-			{
-				// If this is a valid element, remove from its collection now
-				el = GetElement(x, y, z);
-				if (el) el->RemoveTerrainObject(obj);
-			}
-		}
-	}
-
-	// Remove from the overall environment terrain collection.  If we have an index supplied, validate
-	// that it is accurate and use to remove the object.  If we don't have one, or if it is not valid, then search for 
-	// the object and remove it.
-	if (terrainindex >= 0 && terrainindex < TerrainObjects.size() && TerrainObjects[terrainindex] &&
-		TerrainObjects[terrainindex]->GetID() == obj->GetID())
-	{
-		RemoveFromVectorAtIndex(TerrainObjects, terrainindex);
-	}
-	else
-	{
-		RemoveFromVector<StaticTerrain*>(TerrainObjects, obj);
-	}
+	// Remove from the terrain object collection
+	std::vector<StaticTerrain*>::iterator it = std::find(TerrainObjects.begin(), TerrainObjects.end(), obj);
+	if (it != TerrainObjects.end()) TerrainObjects.erase(it);
 
 	// Finally, deallocate the terrain object
 	SafeDelete(obj);
 }
 
-// Removes all terrain objects from an environment.  Performs controlled unlinking from all environment elements at the 
-// same time.
+// Removes all terrain objects from an environment
 void iSpaceObjectEnvironment::ClearAllTerrainObjects(void)
 {
-	ClearAllTerrainObjects(true);
-}
-
-// Removes all terrain objects from an environment.  The "unlink" parameter determines whether objects will be correctly
-// unlinked from element containers etc. during the process (default behaviour).  Setting unlink=true will simply remove
-// all terrain object references and is not recommended except during shutdown when it is not necessary to maintain
-// referential integrity for these objects
-void iSpaceObjectEnvironment::ClearAllTerrainObjects(bool unlink)
-{
-	if (unlink)
+	// Deallocate all terrain objects and then clear the collection
+	std::vector<StaticTerrain*>::iterator it_end = TerrainObjects.end();
+	for (std::vector<StaticTerrain*>::iterator it = TerrainObjects.begin(); it != it_end; ++it)
 	{
-		// Loop until the terrain vector is empty (or until we break out of an infinite loop due to error)
-		StaticTerrain *terrain;
-		int infinite_loop_guard = ((int)TerrainObjects.size() * 10 + 100);
-		while (TerrainObjects.size() > 0 && --infinite_loop_guard > 0)
-		{
-			terrain = TerrainObjects.at(TerrainObjects.size() - 1);
-			if (terrain == NULL)
-				TerrainObjects.pop_back();
-			else
-				RemoveTerrainObject(terrain);
-		}
+		if (*it) (delete (*it));
 	}
-	else
-	{
-		// If we don't care about unlinking the objects (unwise, unless during shutdown) then simply clear out the vector
-		TerrainObjects.clear();
-	}
+	TerrainObjects.clear();
 }
 
 // Specialised method to add a new terrain object that is part of a tile.  Object will be transformed from tile-relative to
@@ -380,23 +297,11 @@ void iSpaceObjectEnvironment::ShipTileRemoved(ComplexShipTile *tile)
 	// Parameter check
 	if (!tile) return;
 	
-	// Iterate through all terrain objects in the environment, and remove any which are owned by this tile
+	// Remove any terrain objects in the environment that were owned by this tile
 	Game::ID_TYPE id = tile->GetID();
-	std::vector<StaticTerrain*>::size_type i = 0, n = TerrainObjects.size();
-	while (i < n)
-	{
-		if (TerrainObjects[i] && TerrainObjects[i]->GetParentTileID() == id)
-		{
-			// This object belongs to the tile, so remove it and DO NOT increment i (since the next element is now at position i)
-			RemoveTerrainObject(TerrainObjects[i], i);
-		}
-		else
-		{
-			// Move to the next element
-			++i;
-		}
-	}
-
+	std::vector<StaticTerrain*>::iterator it = std::partition(TerrainObjects.begin(), TerrainObjects.end(),
+		[&id](const StaticTerrain *element) { return (element->GetParentTileID() != id); });
+	delete_erase<StaticTerrain*>(TerrainObjects, it, TerrainObjects.end());
 }
 
 // Updates the ship navigation network based on the set of elements and their properties
@@ -418,62 +323,6 @@ void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 		m_navnetwork->Shutdown();
 		SafeDelete(m_navnetwork);
 	}
-}
-
-// Event to handle the movement of objects within this element-containing object.  Derives the new element range based on object position.
-void iSpaceObjectEnvironment::ObjectMoved(iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el)
-{
-	if (object)
-	{
-		// Get references to the key values needed in calculating the new element range
-		XMVECTOR pos = XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Y, XM_SWIZZLE_W>(object->GetEnvironmentPosition());
-		XMVECTOR radius = XMVectorReplicate(object->GetCollisionSphereRadius());
-		
-		// Determine new min/max bounds based on
-		//		[Min/Max] = (int)floorf((pos [-/+] radius) * ElementScaleRecip)
-		//		[Min/Max] = Floor( Multiply( [Subtract/Add](Pos, Radius), ElementScaleRecip) )
-		XMVECTOR vmin = XMVectorFloor(XMVectorMultiply(XMVectorSubtract(pos, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V));
-		XMVECTOR vmax = XMVectorFloor(XMVectorMultiply(XMVectorAdd(pos, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V));
-		
-		// Retrieve required components 
-		XMFLOAT3 fmin, fmax;
-		XMStoreFloat3(&fmin, vmin);
-		XMStoreFloat3(&fmax, vmax);
-
-		// Raise the object movement event using these calculated bounds
-		ObjectMoved(object, old_min_el, old_max_el, INTVECTOR3(fmin.x, fmin.y, fmin.z), INTVECTOR3(fmax.x, fmax.y, fmax.z));
-	}
-}
-
-// Event to handle the movement of objects within this element-containing object.  Accepts both old and new element locations
-// as parameters, so more efficient than other overloaded function.
-void iSpaceObjectEnvironment::ObjectMoved(	iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el,
-												const INTVECTOR3 & new_min_el, const INTVECTOR3 & new_max_el)
-{
-	if (object)
-	{
-		int x, y, z;
-		ComplexShipElement *el;
-
-		// Look for this item in the origin elements, and remove if it exists
-		for (x = old_min_el.x; x <= old_max_el.x; ++x)
-			for (y = old_min_el.y; y <= old_max_el.y; ++y)
-				for (z = old_min_el.z; z <= old_max_el.z; ++z)
-				{
-					el = GetElement(x, y, z);
-					if (el) el->RemoveObject(object);
-				}
-
-		// Add the reference to all new elements 
-		for (x = new_min_el.x; x <= new_max_el.x; ++x)
-			for (y = new_min_el.y; y <= new_max_el.y; ++y)
-				for (z = new_min_el.z; z <= new_max_el.z; ++z)
-				{
-					el = GetElement(x, y, z);
-					if (el) el->AddObject(object);
-				}
-	}
-
 }
 
 // Allocates and initialises storage for elements based on the element size properties.  

@@ -20,7 +20,6 @@
 class ComplexShipTile;
 class iSpaceObjectEnvironment;
 class ComplexShipSection;
-using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
@@ -34,38 +33,23 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(ComplexShipElement)
 
+	// Default constructor
 	ComplexShipElement(void);
+	
+	// Default destructor
 	~ComplexShipElement(void);
 
 	// Enumeration of all classes of attachment between elements
-	enum AttachType { NoneAllowed = 0, Standard, TurretModule };
-
-	// Represents a possible attachment from one edge of this element
-	struct ElementAttachPoint { 
-		Direction		Edge;
-		AttachType		Type;
-
-		ElementAttachPoint() : Edge(Direction::None), Type(AttachType::NoneAllowed) { }
-		ElementAttachPoint(Direction edge, AttachType type) : Edge(edge), Type(type) { }
-	};
-	typedef vector<ElementAttachPoint> AttachPointCollection;
-
+	enum AttachType { Standard = 0, TurretModule, _AttachTypeCount };
+	
 	// Properties of the element, indexed into the m_properties bitstring
 	enum PROPERTY {
-		PROP_UNKNOWN = 0,
-		PROP_ACTIVE,				// Is the element active, i.e. can be used in the SD
-		PROP_BUILDABLE,				// Can the element have tiles built on it?
-		PROP_WALKABLE,				// Is the element an (easy, walking) route for player & AI?
-		PROP_POWER_CABLES,			// Are there power cables running through this element?
-		PROPERTY_COUNT				// (The total number of properties per element)
-	};
-
-	// Struct holding the value of one property
-	struct PropertyValue 
-	{ 
-		ComplexShipElement::PROPERTY prop; bool value;
-		PropertyValue(void) { prop = ComplexShipElement::PROPERTY::PROP_UNKNOWN; value = false; }
-		PropertyValue(ComplexShipElement::PROPERTY _prop, bool _value) { prop = _prop; value = _value; }
+		PROP_UNKNOWN		= (1 << 0),
+		PROP_ACTIVE			= (1 << 1),				// Is the element active, i.e. can be used in the SD
+		PROP_BUILDABLE		= (1 << 2),				// Can the element have tiles built on it?
+		PROP_WALKABLE		= (1 << 3),				// Is the element an (easy, walking) route for player & AI?
+		PROP_POWER_CABLES	= (1 << 4),				// Are there power cables running through this element?
+		PROPERTY_COUNT		= (1 << 5)				// (The total number of properties per element)
 	};
 
 	// Struct holding data on a connection from one nav node to another
@@ -82,38 +66,32 @@ public:
 		NavNodePos(void) { Position = NULL_INTVECTOR3; NumConnections = 0; CostModifier = 1.0f; }
 	};
 	
-	// Static method which determines whether the parameter is a valid element property value
-	CMPINLINE static bool			IsValidProperty(PROPERTY prop) { return ( ((int)prop >= 0) && ((int)prop < PROPERTY::PROPERTY_COUNT) ); }
+	// Test the value of a property.  Multiple properties can be provided at once (e.g. GetProperty(Property::Active | Property::Buildable)), 
+	// in which case the method will return a value indicating whether all properties are true for the element
+	CMPINLINE bool					GetProperty(PROPERTY prop)				{ return CheckBit_All(m_properties, prop); }
 
-	// Get or set a property of this element (note no bounds checking for efficiency)
-	CMPINLINE bool					GetProperty(PROPERTY prop) { return m_properties[(int)prop]; }
-	CMPINLINE bool					GetProperty(int prop) { return m_properties[prop]; }
-	CMPINLINE void					SetProperty(PROPERTY prop, bool value) { m_properties[(int)prop] = value; }
-	CMPINLINE void					SetProperty(int prop, bool value) { m_properties[prop] = value; }
+	// Set the value of a property.  Multiple properties can be provided, in which case the method will set all at once
+	CMPINLINE void					SetProperty(PROPERTY prop, bool value)	{ SetBitState(m_properties, prop, value); }
 
 	// Get or set the full property set in one operation
-	CMPINLINE vector<bool>*			GetProperties(void) { return &m_properties; }
-	CMPINLINE void					SetProperties(vector<bool>* props) { m_properties = *props; }
+	CMPINLINE bitstring				GetProperties(void) const { return m_properties; }
+	CMPINLINE void					SetProperties(bitstring props) { m_properties = props; }
 
 	// Is the element active?  If not, it cannot be used for anything and is empty space
-	CMPINLINE bool					IsActive(void) { return m_properties[PROPERTY::PROP_ACTIVE]; }
-	CMPINLINE void					SetActive(bool b) { m_properties[PROPERTY::PROP_ACTIVE] = b; }
+	CMPINLINE bool					IsActive(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_ACTIVE); }
+	CMPINLINE void					SetActive(bool b)		{ SetBitState(m_properties, ComplexShipElement::PROPERTY::PROP_ACTIVE, b); }
 
 	// Can the element be used by the user for construction?  If not, it may still contain other components but is locked and cannot be changed
-	CMPINLINE bool					IsBuildable(void) { return m_properties[PROPERTY::PROP_BUILDABLE]; }
-	CMPINLINE void					SetBuildable(bool b) { m_properties[PROPERTY::PROP_BUILDABLE] = b; }
+	CMPINLINE bool					IsBuildable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_BUILDABLE); }
+	CMPINLINE void					SetBuildable(bool b)	{ SetBitState(m_properties, ComplexShipElement::PROPERTY::PROP_BUILDABLE, b); }
 
 	// Is the element walkable?  Used for pathfinding and routing calculations
-	CMPINLINE bool					IsWalkable(void) { return m_properties[PROPERTY::PROP_WALKABLE]; }
-
-	// Set or retrieve the simulation state associated with this element
-	CMPINLINE iObject::ObjectSimulationState		GetSimulationState(void) const		{ return m_simulationstate; }
-	void											SetSimulationState(iObject::ObjectSimulationState state);
+	CMPINLINE bool					IsWalkable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_WALKABLE); }
 
 	// Location in element space
-	CMPINLINE INTVECTOR3			GetLocation(void) { return m_location; }
-	CMPINLINE void					SetLocation(INTVECTOR3 loc) { m_location = loc; }
-	CMPINLINE void					SetLocation(int x, int y, int z) { m_location.x = x; m_location.y = y; m_location.z = z; }
+	CMPINLINE INTVECTOR3			GetLocation(void)					{ return m_location; }
+	CMPINLINE void					SetLocation(const INTVECTOR3 & loc) { m_location = loc; }
+	CMPINLINE void					SetLocation(int x, int y, int z)	{ m_location.x = x; m_location.y = y; m_location.z = z; }
 
 	// Other key fields relating to this element
 	CMPINLINE float					GetHealth(void)					{ return m_health; }
@@ -123,8 +101,41 @@ public:
 	CMPINLINE float					GetGravityStrength(void) const	{ return m_gravity; }
 	CMPINLINE void					ChangeGravityStrength(float G)	{ m_gravity = G; }
 
-	// Returns the type of attachment allowed on the specified edge of this element.  Returns "NotAllowed" by default if none is specified
-	AttachType										GetAttachPoint(Direction edge);
+	// Indicates whether the element has attachment points of the given type in the specified direction.  Multiple directions 
+	// can be specified, in which case this will test whether the element has attachpoints in ALL of those directions
+	CMPINLINE bool					HasAttachPoints(ComplexShipElement::AttachType type, DirectionBS direction)
+	{
+		return CheckBit_All(m_attachpoints[type], direction);
+	}
+
+	// Indicates whether the element has attachment points of the given type in the specified direction.  Multiple directions 
+	// can be specified, in which case this will test whether the element has attachpoints in ANY of those directions
+	CMPINLINE bool					HasAnyAttachPoints(ComplexShipElement::AttachType type, DirectionBS direction)
+	{
+		return CheckBit_Any(m_attachpoints[type], direction);
+	}
+
+	// Indicates whether the element has an attach point of the specified type in ANY direction
+	CMPINLINE bool					HasAnyAttachPoints(ComplexShipElement::AttachType type)
+	{
+		return CheckBit_Any(m_attachpoints[type], DirectionBS_All); 
+	}
+
+	// Indicates whether the element has attachment points of ANY type in the specified direction.  Multiple directions 
+	// can be specified, in which case this will test whether the element has attachpoints in ALL of those directions
+	CMPINLINE bool					HasAttachPointsOfAnyType(DirectionBS direction)
+	{
+		return CheckBit_All(m_attachpoints[type], direction);
+	}
+
+	// Indicates whether the element has attachment points of ANY type in the specified direction.  Multiple directions 
+	// can be specified, in which case this will test whether the element has attachpoints in ANY of those directions
+	CMPINLINE bool					HasAnyAttachPointsOfAnyType(DirectionBS direction)
+	{
+		return CheckBit_Any(m_attachpoints[type], direction);
+	}
+
+	AttachType										GetAttachPoint(DirectionBS edge);
 	AttachPointCollection *							GetAttachPoints(void) { return &m_attachpoints; }
 	CMPINLINE AttachPointCollection::size_type		GetAttachPointCount(void) { return m_attachpoints.size(); }
 	CMPINLINE void									AddAttachPoint(ElementAttachPoint attach) { m_attachpoints.push_back(attach); }
@@ -166,31 +177,6 @@ public:
 	// Updates this element based on all attached tiles
 	void							UpdateElementBasedOnTiles(void);
 	
-	// Vector of active objects within the element; each CS-Element keeps track of items as they enter/leave for runtime efficiency
-	std::vector<iEnvironmentObject*>			Objects;
-
-	// Vector of terrain objects held within this ship; each CS-Element also holds a pointer to the terrain in its area for runtime efficiency
-	std::vector<StaticTerrain*>					TerrainObjects;
-
-	// Methods to add, remove and search for objects within the element
-	CMPINLINE void					AddObject(iEnvironmentObject *obj)		{ Objects.push_back(obj); m_hasobjects = true; }
-	CMPINLINE void					RemoveObject(iEnvironmentObject *obj)	{ RemoveFromVector<iEnvironmentObject*>(Objects, obj); m_hasobjects = !Objects.empty(); }
-	CMPINLINE int					FindObject(iEnvironmentObject *obj)		{ return FindInVector<iEnvironmentObject*>(Objects, obj); }
-	CMPINLINE void					ClearAllObjects(void)					{ Objects.clear(); m_hasobjects = false; }
-	CMPINLINE bool					HasObjects(void) const					{ return m_hasobjects; }
-
-	// Methods to add, remove and search for terrain objects within the element
-	CMPINLINE void					AddTerrainObject(StaticTerrain *obj)	{ TerrainObjects.push_back(obj); m_hasterrain = true; }
-	CMPINLINE void					RemoveTerrainObject(StaticTerrain *obj)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, obj); m_hasterrain = !TerrainObjects.empty(); }
-	CMPINLINE int					FindTerrainObject(StaticTerrain *obj)	{ return FindInVector<StaticTerrain*>(TerrainObjects, obj); }
-	CMPINLINE void					ClearAllTerrain(void)					{ TerrainObjects.clear(); m_hasterrain = false; }
-	CMPINLINE bool					HasTerrain(void) const					{ return m_hasterrain; }
-
-	// Methods to update or remove damage modifiers for this element
-	void							AddDamageModifier(Damage modifier);
-	float							GetDamageModifier(DamageType type);
-	CMPINLINE void					ClearDamageModifiers(void)			{ m_damagemodifiers.clear(); }
-
 	// Methods to query the walkable connections to neighbouring walkable elements
 	CMPINLINE bool				ConnectsLeft(void)		{ return m_cleft; }
 	CMPINLINE bool				ConnectsUp(void)		{ return m_cup; }
@@ -275,28 +261,22 @@ public:
 
 private:
 	INTVECTOR3						m_location;					// x,y,z location of this element, in element space
-
-	float							m_health;					// Health of the element from 0.0-1.0
-
-	// Properties of the element, stored as a bitstring for efficiency.  All set to false on initialisation
-	vector<bool>					m_properties;
+	iSpaceObjectEnvironment *		m_parent;					// The parent environment that this element belongs to
+	int								m_id;						// Index of the element in its parent element collection
 	
-	// Each element maintains a simulation state that will be applied to objects within it
-	iObject::ObjectSimulationState	m_simulationstate;
+	// Properties of the element, stored as a bitstring for efficiency.  All set to false on initialisation
+	bitstring 						m_properties;
+	
+	// Store an attachment state per attach type.  Each type has a bitstring; 1 for allowed, 0 for not allowed, based on DirectionBS enumeration
+	bitstring						m_attachpoints[ComplexShipElement::AttachType::_AttachTypeCount];
 
-	// Damage modifiers for this element
-	DamageSet						m_damagemodifiers;			// vector<Damage> of each modifier to be applied
-
+	// Health of the element from 0.0-1.0
+	float							m_health;
+	
 	// Other properties of the element
 	float							m_gravity;
 
-	// Flags that indicate whether the element contains certain classes of entity
-	bool							m_hasobjects;
-	bool							m_hasterrain;
-
 	// Criteria around how this element can attach to neighbouring cells
-	AttachPointCollection			m_attachpoints;				// Set of possible attachments on each edge of this element
-
 	ComplexShipElement *			m_left;						// Pointer to adjacent elements
 	ComplexShipElement *			m_right;					// Pointer to adjacent elements
 	ComplexShipElement *			m_up;						// Pointer to adjacent elements
@@ -307,8 +287,6 @@ private:
 	ComplexShipElement *			m_upright;					// Pointer to adjacent elements
 	ComplexShipElement *			m_downright;				// Pointer to adjacent elements
 	ComplexShipElement *			m_downleft;					// Pointer to adjacent elements
-
-	iSpaceObjectEnvironment *		m_parent;					// The ship/section of ship this element belongs to
 
 	// Flags determining which directions this element will connect in
 	bool m_cleft, m_cup, m_cright, m_cdown, m_cupleft, m_cupright, m_cdownright, m_cdownleft, m_czup, m_czdown;

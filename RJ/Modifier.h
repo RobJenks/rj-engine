@@ -49,6 +49,14 @@ public:
 		IsEqual(ModifierType type, T value) : _type(type), _value(value) { }
 		bool operator()(const Modifier<T> & value) const { return (value.Type == _type && value.Value == _value); }
 	};
+	// Define custom functor to allow std::* operations over sets of modifiers where we want to test equality
+	struct IsNotEqual
+	{
+		ModifierType _type; T _value;
+		IsNotEqual(const Modifier<T> & value) : _type(value.Type), _value(value.Value) { }
+		IsNotEqual(ModifierType type, T value) : _type(type), _value(value) { }
+		bool operator()(const Modifier<T> & value) const { return (value.Type != _type || value.Value != _value); }
+	};
 
 	// Define custom functor to allow std::* operations over sets of modifiers where we want to test approximate equality
 	struct IsApproxEqual
@@ -61,6 +69,17 @@ public:
 			return (value.Type == _type && (std::abs(value.Value - _value) < DefaultValues<T>::EpsilonValue())); 
 		}
 	};
+	// Define custom functor to allow std::* operations over sets of modifiers where we want to test approximate equality
+	struct IsNotApproxEqual
+	{
+		ModifierType _type; T _value;
+		IsNotApproxEqual(const Modifier<T> & value) : _type(value.Type), _value(value.Value) { }
+		IsNotApproxEqual(ModifierType type, T value) : _type(type), _value(value) { }
+		bool operator()(const Modifier<T> & value) const
+		{
+			return !(value.Type == _type && (std::abs(value.Value - _value) < DefaultValues<T>::EpsilonValue()));
+		}
+	};
 
 	// Define custom functor to allow std::* operations over sets of modifiers where we want to test modifier type only
 	struct IsOfType
@@ -68,6 +87,13 @@ public:
 		ModifierType _type;
 		IsOfType(ModifierType type) : _type(type) { }
 		bool operator()(const Modifier<T> & value) const { return (value.Type == _type); }
+	};
+	// Define custom functor to allow std::* operations over sets of modifiers where we want to test modifier type only
+	struct IsNotOfType
+	{
+		ModifierType _type;
+		IsNotOfType(ModifierType type) : _type(type) { }
+		bool operator()(const Modifier<T> & value) const { return (value.Type != _type); }
 	};
 
 };

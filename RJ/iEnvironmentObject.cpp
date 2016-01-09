@@ -76,36 +76,6 @@ void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 	{
 		// Transform the relative position by the parent world matrix to get this object's absolute position
 		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
-
-		// We need to use components of the environment position vector
-		XMFLOAT3 envposf;
-		XMStoreFloat3(&envposf, m_envposition);
-
-		// Also determine the element range (usually just 1 element) that this object now exists in.  Swap Y and Z coords since we are
-		// moving from space to environment coordinates
-		INTVECTOR3 min_element = INTVECTOR3((int)floorf((envposf.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-		INTVECTOR3 max_element = INTVECTOR3((int)floorf((envposf.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-
-		// If the element range has changed, update our record and trigger an update in the parent environment mappings
-		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
-		{
-			// Trigger an update of the environment record, that tracks the location of objects within it
-			m_parent()->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
-
-			// Store the new element range
-			m_parent_element_min = min_element;
-			m_parent_element_max = max_element;
-
-			// Store a flag indicating whether we now span multiple elements, for render-time efficiency
-			m_multielement = (m_parent_element_min != m_parent_element_max);
-
-			// Adopt the simulation state of these new elements.  We take the highest level of simulation if it differs across the element range
-			UpdateSimulationStateFromParentElements();
-		}
 	}
 	else
 	{
@@ -140,36 +110,6 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 		// Derive absolute position & orientation based on the parent object's state
 		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
 		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent()->GetOrientation()));
-
-		// We need to use components of the environment position vector
-		XMFLOAT3 envposf;
-		XMStoreFloat3(&envposf, m_envposition);
-
-		// Also determine the element range (usually just 1 element) that this object now exists in.  Swap Y and Z coords since
-		// we are moving from space to environment coordinates
-		INTVECTOR3 min_element = INTVECTOR3((int)floorf((envposf.x - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.z - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.y - m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-		INTVECTOR3 max_element = INTVECTOR3((int)floorf((envposf.x + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.z + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP),
-											(int)floorf((envposf.y + m_collisionsphereradius) * Game::C_CS_ELEMENT_SCALE_RECIP));
-
-		// If the element range has changed, update our record and trigger an update in the parent environment mappings
-		if (min_element != m_parent_element_min || max_element != m_parent_element_max)
-		{
-			// Trigger an update of the envionrment record, that tracks the location of objects within it
-			m_parent()->ObjectMoved(this, m_parent_element_min, m_parent_element_max, min_element, max_element);
-		
-			// Store the new element range
-			m_parent_element_min = min_element;
-			m_parent_element_max = max_element;
-
-			// Store a flag indicating whether we now span multiple elements, for render-time efficiency
-			m_multielement = (m_parent_element_min != m_parent_element_max);
-
-			// Adopt the simulation state of these new elements.  We take the highest level of simulation if it differs across the element range
-			UpdateSimulationStateFromParentElements();
-		}
 	}
 	else
 	{
@@ -183,42 +123,6 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);	// Cache the inverse orientation matrix, (also relative to the current environment)
 }
 
-
-// Adopts the simulation state of our parent elements.  Takes the "most" simulated state if this differs across the element range
-void iEnvironmentObject::UpdateSimulationStateFromParentElements(void)
-{
-	// Parameter check; make sure we have a valid parent environment before proceeding
-	iSpaceObjectEnvironment *env = m_parent();
-	if (!env) return;
-
-	// We will not simulate the object by default
-	iObject::ObjectSimulationState state = iObject::ObjectSimulationState::NoSimulation;
-
-	// Loop across the range of elements that this object exists in
-	ComplexShipElement *el; iObject::ObjectSimulationState elstate;
-	for (int x = m_parent_element_min.x; x <= m_parent_element_max.x; ++x)
-	{
-		for (int y = m_parent_element_min.y; y <= m_parent_element_max.y; ++y)
-		{
-			for (int z = m_parent_element_min.z; z <= m_parent_element_max.z; ++z)
-			{
-				// Attempt to retrieve the element at this location
-				el = env->GetElement(x, y, z);
-				if (!el) continue;
-
-				// Get the simulation state of this element, and upgrade our own state if the element state is "greater"
-				elstate = el->GetSimulationState();
-				if (iObject::CompareSimulationStates(elstate, state) == ComparisonResult::GreaterThan)
-				{
-					state = elstate;
-				}
-			}
-		}
-	}
-
-	// We can now set the simulation state of this object.  No action will be taken if the state has not changed
-	SetSimulationState(state);
-}
 
 // Event raised whenever the object has a significant collision with the terrain.  "Significant" denotes impacts greater than 
 // a defined threshold, so excluding e.g. normal floor collisions

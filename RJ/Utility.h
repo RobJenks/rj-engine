@@ -45,6 +45,10 @@ CMPINLINE T * ptr(T & obj) { return &obj; }	// If object is a reference type the
 template<typename T>
 CMPINLINE T * ptr(T * obj) { return obj; }	// Otherwise if object is already a pointer type then simply return it
 
+// Type definition for bitstring data
+typedef int bitstring;
+typedef long bitstring_l;
+
 // Convenience macros to manipulate bitstrings
 #define SetBit(bitstring, bit) bitstring |= bit
 #define ClearBit(bitstring, bit) bitstring &= ~bit
@@ -148,7 +152,7 @@ Rotation90Degree TranslateRotation90Degree(string rotvalue);
 Rotation90Degree RotateBy90Degrees(Rotation90Degree current);
 
 // Enumeration of possible 90-degree directions
-enum Direction { None = 0, Left, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown };
+enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, None };
 const int DirectionCount = 10;
 
 // Structure holding the basic directions, for iteration over the possible movement directions
@@ -187,6 +191,26 @@ CMPINLINE bool IsDiagonalDirection(Direction direction) {
 string DirectionToString(Direction direction);
 Direction DirectionFromString(string direction);
 Direction GetOppositeDirection(Direction dir);
+
+//Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft,
+//Direction::UpRight, Direction::DownRight, Direction::DownLeft, Direction::ZUp, Direction::ZDown };
+// Bitstring direction values
+enum DirectionBS
+{
+	Left		= (1 << Direction::Left),
+	Up			= (1 << Direction::Up), 
+	Right		= (1 << Direction::Right),
+	Down		= (1 << Direction::Down),
+	UpLeft		= (1 << Direction::UpLeft),
+	UpRight		= (1 << Direction::UpRight),
+	DownRight	= (1 << Direction::DownRight),
+	DownLeft	= (1 << Direction::DownLeft),
+	ZUp			= (1 << Direction::ZUp),
+	ZDown		= (1 << Direction::ZDown), 
+	None		= (1 << Direction::None)
+};
+const DirectionBS DirectionBS_All =	(DirectionBS)(DirectionBS::Left | DirectionBS::Up | DirectionBS::Right | DirectionBS::Down | DirectionBS::UpLeft |
+												  DirectionBS::UpRight | DirectionBS::DownRight | DirectionBS::DownLeft | DirectionBS::ZUp | DirectionBS::ZDown);
 
 // Null string, to avoid repeated instantiation at runtime
 const std::string NullString = "";

@@ -20,8 +20,7 @@ public:
 
 	// Default constructor; initialise fields to default values
 	iEnvironmentObject(void) : m_parent(nullptr), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_orientchanges(0),
-								m_parent_element_min(INTVECTOR3(1, 1, 1)), m_parent_element_max(INTVECTOR3(-1, -1, -1)),
-								m_multielement(false), m_onground(false)
+								m_onground(false)
 	{ 
 		// Deliberately initialise element_max to -1s and element_min to +1s so that the first method to 'remove' the object
 		// from its current element will skip the loop through existing elements (loop condition will fail on the first check)
@@ -62,13 +61,6 @@ public:
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate.  Nothing to do at this point.
 	void										SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate) { }
 
-	// Returns a reference to the range of elements that this object currently exists in
-	CMPINLINE const INTVECTOR3					GetElementRangeMin(void) const			{ return m_parent_element_min; }
-	CMPINLINE const INTVECTOR3					GetElementRangeMax(void) const			{ return m_parent_element_max; }
-
-	// Returns a value indicating whether this object spans multiple elements
-	CMPINLINE bool								SpansMultipleElements(void) const		{ return m_multielement; }
-
 	// Performs all physics simulation for this environment object
 	void										SimulateObjectPhysics(void);
 
@@ -88,10 +80,8 @@ public:
 
 protected:
 
-	// Parent environment that the object is located in, and the element bounds within which it exists
+	// Parent environment that the object is located in
 	ObjectReference<iSpaceObjectEnvironment>	m_parent;
-	INTVECTOR3									m_parent_element_min, m_parent_element_max;
-	bool										m_multielement;
 
 	// Stores the object position/orientation relative to the current environment, as opposed to the absolute pos/orient stored in m_position & m_orientation
 	AXMVECTOR									m_envposition;

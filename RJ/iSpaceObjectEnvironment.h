@@ -46,15 +46,9 @@ public:
 
 	// Methods to retrieve and manipulate the size of the environment
 	CMPINLINE INTVECTOR3 			GetElementSize(void) { return m_elementsize; }
-	CMPINLINE int					GetElementSizeX(void) { return m_elementsize.x; }
-	CMPINLINE int					GetElementSizeY(void) { return m_elementsize.y; }
-	CMPINLINE int					GetElementSizeZ(void) { return m_elementsize.z; }
 	CMPINLINE INTVECTOR3 *			GetElementSizePointer(void) { return &m_elementsize; }
 	CMPINLINE void					SetElementSize(const INTVECTOR3 & size) { m_elementsize = size; }
 	CMPINLINE void					SetElementSize(int x, int y, int z) { m_elementsize = INTVECTOR3(x, y, z); }
-	CMPINLINE void					SetElementSizeX(int x) { m_elementsize.x = x; }
-	CMPINLINE void					SetElementSizeY(int y) { m_elementsize.y = y; }
-	CMPINLINE void					SetElementSizeZ(int z) { m_elementsize.z = z; }
 
 	// Vector of active objects within the ship; each CS-Element also holds a pointer to its local objects for runtime efficiency
 	std::vector<ObjectReference<iEnvironmentObject>>	Objects;
@@ -123,24 +117,13 @@ public:
 
 	// Methods to add, find or remove terrain objects in the environment
 	void							AddTerrainObject(StaticTerrain *obj);
-	CMPINLINE void					RemoveTerrainObject(StaticTerrain *obj)	{ RemoveTerrainObject(obj, -1); }
-	void							RemoveTerrainObject(StaticTerrain *obj, std::vector<StaticTerrain*>::size_type terrainindex);
+	void							RemoveTerrainObject(StaticTerrain *obj);
 	CMPINLINE int					FindTerrainObject(StaticTerrain *obj)	{ return FindInVector<StaticTerrain*>(TerrainObjects, obj); }
 	void							ClearAllTerrainObjects(void);
-	void							ClearAllTerrainObjects(bool unlink);
 
 	// Specialised method to add a new terrain object that is part of a tile.  Object will be transformed from tile-relative to
 	// environment-relative position & orientation and then added to the environment as normal
 	void							AddTerrainObjectFromTile(StaticTerrain *obj, ComplexShipTile *sourcetile);
-
-	// Event to handle the movement of objects within this element-containing object.  Calculates the new element location based
-	// upon the current object position.  
-	void							ObjectMoved(iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el);
-
-	// Event to handle the movement of objects within this element-containing object.  Accepts both old and new element locations
-	// as parameters, so more efficient than other overloaded function.
-	void							ObjectMoved(iEnvironmentObject *object, const INTVECTOR3 & old_min_el, const INTVECTOR3 & old_max_el, 
-																			const INTVECTOR3 & new_min_el, const INTVECTOR3 & new_max_el);
 
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObjectEnvironment::SimulationStateChanged() to maintain the chain
