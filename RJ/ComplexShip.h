@@ -47,20 +47,17 @@ public:
 	void												RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionCollection>::size_type index);
 
 	// Methods triggered based on major events impacting this object
-	void										ShipTileAdded(ComplexShipTile *tile);		// When a tile is added.  Virtual inherited from interface.
-	void										ShipTileRemoved(ComplexShipTile *tile);		// When a tile is removed.  Virtual inherited from interface.
+	virtual void										TileAdded(ComplexShipTile *tile);		// When a tile is added.  Virtual inherited from interface.
+	virtual void										TileRemoved(ComplexShipTile *tile);		// When a tile is removed.  Virtual inherited from interface.
 
 	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
 	virtual void								ElementLayoutChanged(void);					
 
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
-	void										MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
+	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
 
 	// Builds the complex ship hardpoint collection based on its constituent ship sections
 	void										BuildHardpointCollection(void);
-
-	// Copies all tiles from another object and adds the copies to this object
-	Result										CopyTileDataFromObject(iContainsComplexShipTiles *src);
 
 	// Fits the element space around this ship, eliminating any extra space allocated outside of the (cuboid) bounds it requires
 	Result										FitElementSpaceToShip(void);
@@ -71,10 +68,6 @@ public:
 	// Return the minimum & maximum bounds actually occupied by this ship (can be =/= elementsize when sections are being changed)
 	INTVECTOR3									GetShipMinimumBounds(void);
 	INTVECTOR3									GetShipMaximumBounds(void);
-
-	// Methods to update life support-related properties of the ship; we set flags that force an update next cycle
-	CMPINLINE void								UpdateGravity(void)			{ m_gravityupdaterequired = true; }
-	CMPINLINE void								UpdateOxygenLevels(void)	{ m_oxygenupdaterequired = true; }
 
 	// Methods to get and set the ship designer offset, determining where the ship will appear within the SD
 	INTVECTOR3									GetSDOffset(void) { return m_sdoffset; }
@@ -164,19 +157,9 @@ protected:
 
 	bool										m_suspendupdates;		// Flag that suspends all updates in response to changes, until updates are resumed again
 
-	// Flags used to indicate whether certain ship properties need to be recalculated
-	bool										m_gravityupdaterequired;
-	bool										m_oxygenupdaterequired;
-
 	// Ship designer-related fields 
 	INTVECTOR3									m_sdoffset;					// Offset determines where the ship will appear when loaded into the SD
 	bool										m_directlygeneratedfromSD;	// Flag that indicates the ship was directly generated from the SD
-
-
-
-	// Private methods used to update key ship properties
-	void										PerformShipGravityUpdate(void);
-	void										PerformShipOxygenUpdate(void);
 
 	// Recalculates any perimeter beacons required to maintain spatial position in the world
 	void										UpdatePerimeterBeacons(void);

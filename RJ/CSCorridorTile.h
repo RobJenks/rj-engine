@@ -20,16 +20,8 @@ public:
 	// Corridor tiles require no simulation method
 	CMPINLINE void					PerformTileSimulation(unsigned int delta_ms) { }
 
-	// The pre- and post-parent-link events exposed by the base class
-	void						BeforeLinkToParent(ComplexShip *ship);
-	void						AfterLinkToParent(ComplexShip *ship);
-
-	// The pre- and post-parent-unlink events exposed by the base class
-	void						BeforeUnlinkFromParent(void);
-	void						AfterUnlinkFromParent(ComplexShip *oldship);
-
 	// Apply the contents of the tile to its parent objects.  Called upon linking, plus on repair of the ship.  Inherited virtual.
-	void						ApplyTileSpecific(ComplexShipElement *el);
+	void						ApplyTileSpecific(void);
 
 	// Virtual inherited method to make a copy of this tile and return it
 	ComplexShipTile *			Copy(void) const;

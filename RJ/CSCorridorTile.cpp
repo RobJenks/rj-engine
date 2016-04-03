@@ -16,33 +16,8 @@ CSCorridorTile::CSCorridorTile(void)
 	// Initialise default values
 }
 
-// The pre-parent-link event exposed by the base tile class
-void CSCorridorTile::BeforeLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The post-parent-link event exposed by the base tile class
-void CSCorridorTile::AfterLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The pre-parent-unlink event exposed by the base tile class
-void CSCorridorTile::BeforeUnlinkFromParent(void)
-{
-
-}
-
-// The post-parent-ulink event exposed by the base tile class
-void CSCorridorTile::AfterUnlinkFromParent(ComplexShip *oldship)
-{
-
-}
-
-
 // Apply the contents of the tile to its parent objects.  Called upon linking, plus on repair of the ship.  Inherited virtual.
-void CSCorridorTile::ApplyTileSpecific(ComplexShipElement *el)
+void CSCorridorTile::ApplyTileSpecific(void)
 {
 
 }

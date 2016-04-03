@@ -271,6 +271,7 @@
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Faction.cpp" />
     <ClCompile Include="FactionManagerObject.cpp" />
@@ -412,6 +413,7 @@
     <ClInclude Include="AdjustableParameter.h" />
     <ClInclude Include="ALIGN16.h" />
     <ClInclude Include="AlignedAllocator.h" />
+    <ClInclude Include="AlignedAllocator_Alternative.h" />
     <ClInclude Include="Arc2D.h" />
     <ClInclude Include="ArticulatedModel.h" />
     <ClInclude Include="ArticulatedModelComponent.h" />
@@ -463,6 +465,7 @@
     <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="EntityAIStates.h" />
+    <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="Modifier.h" />

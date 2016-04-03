@@ -311,7 +311,7 @@ public:
 
 	// Standard constructor / destructor
 	Ship(void);
-	~Ship(void);
+	virtual ~Ship(void) = 0;
 
 
 protected:

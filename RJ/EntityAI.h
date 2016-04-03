@@ -104,7 +104,7 @@ public:
 
 	// Constructor / destructor
 	EntityAI(void);
-	~EntityAI(void);
+	virtual ~EntityAI(void) = 0;
 
 protected:
 

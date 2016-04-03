@@ -54,6 +54,7 @@
 #include "Actor.h"
 #include "GameConsoleCommand.h"
 #include "VolumetricLine.h"
+#include "EnvironmentTree.h"
 #include <tchar.h>
 #include <unordered_map>
 
@@ -89,7 +90,7 @@ CoreEngine::CoreEngine(void)
 	m_render2d = NULL;
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
-	m_debug_renderenvboxes = 0;
+	m_debug_renderenvboxes = m_debug_renderenvtree = 0;
 	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 	
 	// Set default values for game engine parameters
@@ -1551,179 +1552,93 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 	m_cache_el_inc[1].value = XMVector3TransformCoord(m_cache_el_inc_base[1].value, environment->GetOrientationMatrix());
 	m_cache_el_inc[2].value = XMVector3TransformCoord(m_cache_el_inc_base[2].value, environment->GetOrientationMatrix());
 	
-	// Clear the temporary vectors used to prevent potential multiple rendering of objects that span >1 element
-	m_tmp_renderedtiles.clear();
-	m_tmp_renderedobjects.clear();
-	m_tmp_renderedterrain.clear();
+	// Render all visible tiles
+	ComplexShipTile *tile;
+	iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_end = environment->GetTiles().end();
+	for (iContainsComplexShipTiles::ComplexShipTileCollection::iterator it = environment->GetTiles().begin(); it != it_end; ++it)
+	{
+		// Get a reference to this tile
+		tile = (*it).value; if (!tile) continue;
 
-	// Begin the recursive environment traversal with one full, environment-sized element area
-	RenderObjectEnvironmentSector(environment, NULL_INTVECTOR3, environment->GetElementSize());
+		// Make sure the tile is visible
+		if (!m_frustrum->CheckSphere(XMVector3TransformCoord(NULL_VECTOR,
+			XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix())),
+			tile->GetBoundingSphereRadius())) continue;
+
+		// Render the tile
+		RenderComplexShipTile(tile, environment);
+	}
+
+	// We perform a non-recursive vector traversal of the environment tree, and render the contents of any leaf nodes 
+	// that are visible to the user
+	EnvironmentTree *node;
+	m_tmp_envnodes.clear();
+	m_tmp_envnodes.push_back(environment->SpatialPartitioningTree);
+	while (!m_tmp_envnodes.empty())
+	{
+		// Get the next node to be processed
+		node = m_tmp_envnodes.back(); 
+		m_tmp_envnodes.pop_back();
+		if (!node) continue;
+
+		// Determine the centre point of this node in world space
+		XMFLOAT3 fcentre = Game::ElementLocationToPhysicalPositionF(node->GetElementCentre());
+		XMVECTOR centre = XMVectorAdd(XMVectorAdd(XMVectorAdd(
+			m_cache_zeropoint, XMVectorScale(m_cache_el_inc[0].value, fcentre.x)),
+			XMVectorScale(m_cache_el_inc[1].value, fcentre.y)), XMVectorScale(m_cache_el_inc[2].value, fcentre.z));
+
+		// We only continue with this node (and any possible children) if it is visible
+		if (!m_frustrum->CheckSphere(centre, node->GetBoundingSphereRadius())) continue;
+
+		// Test whether this is a branch or a leaf
+		if (node->GetChildCount() != 0)
+		{
+			// This is a visible branch node, so add all its children to the search vector
+			m_tmp_envnodes.insert(m_tmp_envnodes.end(), node->GetActiveChildNodes().begin(), node->GetActiveChildNodes().end());
+		}
+		else
+		{
+			// This is a leaf node; render all objects within the node
+			RenderObjectEnvironmentNodeContents(environment, node);
+		}
+	}
 }
 
-// Recursively analsyses and renders a sector of the environment.  Performs binary splitting to efficiently test visibility.
-// Only called internally so no parameter checks are performed, for efficiency.
-void CoreEngine::RenderObjectEnvironmentSector(iSpaceObjectEnvironment *environment, const INTVECTOR3 & start, const INTVECTOR3 & size)
+// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
+void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node)
 {
-	// Make sure the size parameter is valid.  If any dimensions is zero, we know that this is an unneccessary zero-size area 
-	// generated when we subdivided by a dimension that had a size of 1.  We can therefore abandon it here since the elements will
-	// be covered in one of the other subdivisions (that will be exactly equal)
-	if (size.x <= 0 || size.y <= 0 || size.z <= 0) return;
-
-	// Determine the centre point of this element range.  Swap Y and Z coordinates since we are moving from environment to world space
-	//D3DXVECTOR3 centre = m_cache_zeropoint + (((float)start.x + ((float)size.x * 0.5f)) * m_cache_el_inc[0]) +
-	//										   (((float)start.z + ((float)size.z * 0.5f)) * m_cache_el_inc[1]) +
-	//										   (((float)start.y + ((float)size.y * 0.5f)) * m_cache_el_inc[2]);
-	XMVECTOR multiplier = XMVectorMultiplyAdd(VectorFromIntVector3SwizzleYZ(size), HALF_VECTOR, VectorFromIntVector3SwizzleYZ(start));	// Start+(Size*0.5)
-	XMFLOAT3 multiplier_f; XMStoreFloat3(&multiplier_f, multiplier);
-	XMVECTOR centre = XMVectorAdd(XMVectorAdd(XMVectorAdd(
-		m_cache_zeropoint,
-		XMVectorScale(m_cache_el_inc[0].value, multiplier_f.x)),
-		XMVectorScale(m_cache_el_inc[1].value, multiplier_f.y)),
-		XMVectorScale(m_cache_el_inc[2].value, multiplier_f.z));
-
-	// Determine the maximum dimension, and then perform a lookup of the bounding sphere radius that completely encloses it
-	float radius = GetElementBoundingSphereRadius(max(max(size.x, size.y), size.z));
-
-	// Test visibility of this element range via a simple bounding sphere test.  
-	// TOOD: Later, may be worth switching to bounding box test to more strictly exclude content (at the slight expense of test complexity)
-	if (m_frustrum->CheckSphere(centre, radius) == false) return;
-
-	// This area is within the viewing frustum.  If the range is currently greater than 1x1x1 element then we want
-	// to subdivide and move recursively downwards
-	if (size.x != 1 || size.y != 1 || size.z != 1)
+	// Render all objects within this node
+	iEnvironmentObject *object;
+	std::vector<iEnvironmentObject*>::const_iterator o_it_end = node->GetNodeObjects().end();
+	for (std::vector<iEnvironmentObject*>::const_iterator o_it = node->GetNodeObjects().begin(); o_it != o_it_end; ++o_it)
 	{
-		// Determine the midpoint, around which we will split the recursive subdivision.  Use integer division where 
-		// the size in a dimension is even to avoid the potential for floating-point errors; we DO NOT want to cover 
-		// the same element twice due to a fp precision issue or we may render its contents twice.
-		INTVECTOR3 midpoint = INTVECTOR3(	((size.x & 1) ? (int)ceilf((float)size.x * 0.5f) : size.x / 2),
-											((size.y & 1) ? (int)ceilf((float)size.y * 0.5f) : size.y / 2),
-											((size.z & 1) ? (int)ceilf((float)size.z * 0.5f) : size.z / 2)  );
+		// Get a reference to the object and make sure it is valid
+		object = (*o_it); if (!object) continue;
 
-		// Precalculate some element offsets that are used multiple times in the following function calls
-		INTVECTOR3 start_plus_midpoint = (start + midpoint);
-		INTVECTOR3 size_less_midpoint = (size - midpoint); 
-
-		// Recursively move into each sub-sector.  Attempt all eight; once any dimension reaches 1 we will start 
-		// generating subdivisions with at least one dimension of size zero.  This is fine; we abandon them at the 
-		// start of the method.
-		RenderObjectEnvironmentSector(environment, start, midpoint);																								// 0,0,0
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start_plus_midpoint.x, start.y, start.z), INTVECTOR3(size_less_midpoint.x, midpoint.y, midpoint.z));	// x,0,0
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start.x, start_plus_midpoint.y, start.z), INTVECTOR3(midpoint.x, size_less_midpoint.y, midpoint.z));	// 0,y,0
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start_plus_midpoint.x, start_plus_midpoint.y, start.z),												// x,y,0
-												   INTVECTOR3(size_less_midpoint.x, size_less_midpoint.y, midpoint.z));
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start.x, start.y, start_plus_midpoint.z), INTVECTOR3(midpoint.x, midpoint.y, size_less_midpoint.z));	// 0,0,z
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start_plus_midpoint.x, start.y, start_plus_midpoint.z),												// x,0,z
-												   INTVECTOR3(size_less_midpoint.x, midpoint.y, size_less_midpoint.z));
-		RenderObjectEnvironmentSector(environment, INTVECTOR3(start.x, start_plus_midpoint.y, start_plus_midpoint.z),												// 0,y,z
-												   INTVECTOR3(midpoint.x, size_less_midpoint.y, size_less_midpoint.z));
-		RenderObjectEnvironmentSector(environment, start_plus_midpoint, size_less_midpoint);																		// x,y,z
-	}
-	else
-	{
-		// Otherwise, this is a single element that we have determined is visible.  We therefore want to render everything in it now
-		RenderObjectEnvironmentSectorContents(environment, start);
-	}
-
-}
-
-
-// Renders the contents of an element, including all linked tiles, objects & terrain.  Updates the temporary
-// render lists to ensure an item that spans multiple elements is not rendered more than once
-// Only called internally so no parameter checks are performed, for efficiency.
-void CoreEngine::RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *environment, const INTVECTOR3 & element)
-{
-	// Get a reference to this element, and make sure it is valid
-	ComplexShipElement *el = environment->GetElement(element);
-	if (!el) return;
-
-	// We will only render this element if it is being fully-simulated
-	if (el->GetSimulationState() != iObject::ObjectSimulationState::FullSimulation) return;
-
-	// Iterate through the collection of tiles linked to this element
-	if (el->HasTiles())
-	{
-		ComplexShipTile *tile;
-		iContainsComplexShipTiles::ConstTileIterator it_end = el->GetTileIteratorEnd();
-		for (iContainsComplexShipTiles::ConstTileIterator it = el->GetTileIteratorStart(); it != it_end; ++it)
+		// Pass to different methods depending on the type of object
+		switch (object->GetObjectType())
 		{
-			// Make sure the item is valid
-			tile = (*it); if (!tile) continue;
-
-			// The InsertIntoSortedVectorIfNotPresent method will return 'true' if the item did not exist and was added, 
-			// which in this case means we want to render it.  It it returns false the item has already been rendered 
-			// (from its link to another element) so can therefore skip it.  We only need to check this if the item
-			// spans multiple elements; if it doesn't, there is no way it could be rendered twice
-			if (tile->SpansMultipleElements() && 
-				InsertIntoSortedVectorIfNotPresent<Game::ID_TYPE>(m_tmp_renderedtiles, tile->GetID()) == false)
-					continue;
-
-			// Either the tile exists only in this element, or it spans multiple but hasn't been rendered yet.
-			// We can therefore go ahead and render the tile relative to its parent ship section
-			RenderComplexShipTile(tile, environment);
+			case iObject::ActorObject:
+				QueueActorRendering((Actor*)object);				break;
 		}
 	}
 
-	// Iterate through the collection of active objects in (or partially in) this element
-	if (el->HasObjects()) 
+	// Render all terrain within the node
+	StaticTerrain *terrain;
+	std::vector<StaticTerrain*>::const_iterator t_it_end = node->GetNodeTerrain().end();
+	for (std::vector<StaticTerrain*>::const_iterator t_it = node->GetNodeTerrain().begin(); t_it != t_it_end; ++t_it)
 	{
-		iEnvironmentObject *object;
-		std::vector<iEnvironmentObject*>::iterator it2_end = el->Objects.end();
-		for (std::vector<iEnvironmentObject*>::iterator it2 = el->Objects.begin(); it2 != it2_end; ++it2)
-		{
-			// Get a reference to the object and make sure it is valid
-			object = (*it2); if (!object) continue;
+		// Get a reference to the object and make sure it is valid, has a model etc.
+		terrain = (*t_it);
+		if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
 
-			// (We no longer need to test the object simulation state, since we know this element is being
-			// fully-simulated, and everything within it will inherit that simulation state)
-
-			// The InsertIntoSortedVectorIfNotPresent method will return 'true' if the item did not exist and was added, 
-			// which in this case means we want to render it.  It it returns false the item has already been rendered 
-			// (from its link to another element) so can therefore skip it.  We only need to check this if the item
-			// spans multiple elements; if it doesn't, there is no way it could be rendered twice
-			if (object->SpansMultipleElements() &&
-				InsertIntoSortedVectorIfNotPresent<Game::ID_TYPE>(m_tmp_renderedobjects, object->GetID()) == false)
-					continue;
-
-			// Pass to different methods depending on the type of object
-			switch (object->GetObjectType())
-			{
-				case iObject::ActorObject:
-					QueueActorRendering((Actor*)object);				break;
-			}
-		}
-	}
-
-	// Iterate through the collection of terrain objects in (or partially in) this element
-	if (el->HasTerrain()) 
-	{
-		StaticTerrain *terrain;
-		std::vector<StaticTerrain*>::iterator it3_end = el->TerrainObjects.end();
-		for (std::vector<StaticTerrain*>::iterator it3 = el->TerrainObjects.begin(); it3 != it3_end; ++it3)
-		{
-			// Get a reference to the object and make sure it is valid, has a model etc.
-			terrain = (*it3);
-			if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
-
-			// (We no longer need to test the object simulation state, since we know this element is being
-			// fully-simulated, and everything within it will inherit that simulation state)
-
-			// The InsertIntoSortedVectorIfNotPresent method will return 'true' if the item did not exist and was added, 
-			// which in this case means we want to render it.  It it returns false the item has already been rendered 
-			// (from its link to another element) so can therefore skip it.  We only need to check this if the item
-			// spans multiple elements; if it doesn't, there is no way it could be rendered twice
-			if (terrain->SpansMultipleElements() &&
-				InsertIntoSortedVectorIfNotPresent<Game::ID_TYPE>(m_tmp_renderedterrain, terrain->GetID()) == false)
-					continue;
-
-			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
-								XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
-			++m_renderinfo.TerrainRenderCount;
-		}
+		// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+		// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+		SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
+			XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
+		++m_renderinfo.TerrainRenderCount;
 	}
 }
-
 
 // Render a complex ship tile to the space environment, relative to its parent ship object
 void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnvironment *environment)
@@ -2128,14 +2043,27 @@ void CoreEngine::ClearRenderingQueue(void)
 void CoreEngine::RenderDebugData(void)
 {
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTree]) DebugRenderSpatialPartitioningTree();
+	if (m_renderflags[CoreEngine::RenderFlag::RenderEnvTree]) DebugRenderEnvironmentTree();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderOBBs]) DebugRenderSpaceCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTerrainBoxes]) DebugRenderEnvironmentCollisionBoxes();
 }
 
+// Performs debug rendering of the active spatial partitioning tree
 void CoreEngine::DebugRenderSpatialPartitioningTree(void)
 {
 	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem() && Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree)
 		m_overlayrenderer->DebugRenderSpatialPartitioningTree<iObject*>(Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree, true);
+}
+
+// Performs debug rendering of a specified environment spatial partitioning tree
+void CoreEngine::DebugRenderEnvironmentTree(void)
+{
+	iObject *obj = Game::GetObjectByID(m_debug_renderenvtree);
+	if (m_debug_renderenvtree == 0 || !obj || !obj->IsEnvironment()) { SetRenderFlag(CoreEngine::RenderFlag::RenderEnvTree, false); return; }
+	iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)obj;
+	if (!env->SpatialPartitioningTree) { SetRenderFlag(CoreEngine::RenderFlag::RenderEnvTree, false); return; }
+
+	m_overlayrenderer->DebugRenderEnvironmentTree(env->SpatialPartitioningTree, true);
 }
 
 void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
@@ -2253,6 +2181,48 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		SetRenderFlag(CoreEngine::RenderFlag::RenderTree, b);
 		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" render of spatial partitioning tree").str());
 		return true;
+	}
+	else if (command.InputCommand == "render_envtree")
+	{
+		int pcount = command.InputParameters.size();
+		bool render = false; iSpaceObjectEnvironment *env = NULL;
+		if (pcount == 1)
+		{
+			render = (command.Parameter(0) == "1");
+			if (!Game::CurrentPlayer || !Game::CurrentPlayer->GetActor() || !Game::CurrentPlayer->GetActor()->GetParentEnvironment())
+			{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::NoValidEnvironmentSpecified,
+					"Cannot determine valid environment tree to render"); return true; }
+			env = Game::CurrentPlayer->GetActor()->GetParentEnvironment();
+		}
+		else if (pcount == 2)
+		{
+			render = (command.Parameter(1) == "1");
+
+			iObject *obj = Game::GetObjectByInstanceCode(command.Parameter(0));
+			if (!obj || !obj->IsEnvironment())
+			{
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+					concat("Invalid object \"")(command.Parameter(0))("\" specified").str()); return true;
+			}
+			env = (iSpaceObjectEnvironment*)obj;
+		}
+
+		if (!render)
+		{
+			SetRenderFlag(CoreEngine::RenderFlag::RenderEnvTree, false);
+			SetDebugTreeRenderEnvironment(0);
+			command.SetSuccessOutput("Disabling render of environment spatial partitioning tree");
+			return true;
+		}
+		else
+		{
+			if (!env) { command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+					concat("Invalid or missing environment specified").str()); return true; }
+			SetRenderFlag(CoreEngine::RenderFlag::RenderEnvTree, true);
+			SetDebugTreeRenderEnvironment(env->GetID());
+			command.SetSuccessOutput("Enabling render of environment spatial partitioning tree");
+			return true;
+		}
 	}
 	else if (command.InputCommand == "hull_render")
 	{

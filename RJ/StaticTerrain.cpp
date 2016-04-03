@@ -5,6 +5,7 @@
 #include "iSpaceObjectEnvironment.h"
 #include "StaticTerrainDefinition.h"
 #include "OrientedBoundingBox.h"
+#include "EnvironmentTree.h"
 #include "StaticTerrain.h"
 
 
@@ -15,7 +16,8 @@ Game::ID_TYPE StaticTerrain::InstanceCreationCount = 0;
 // Default constructor; initialise fields to default values
 StaticTerrain::StaticTerrain()
 	:	m_definition(NULL), m_parent(NULL), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), m_collisionradius(0.0f), m_collisionradiussq(0.0f),
-		m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), m_multielement(false), m_postponeupdates(false), m_parenttile(0)
+		m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), m_multielement(false), m_postponeupdates(false), 
+		m_env_treenode(NULL), m_parenttile(0)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;
@@ -134,8 +136,9 @@ void StaticTerrain::RecalculatePositionalData(void)
 	XMVECTOR elmax = XMVectorFloor(XMVectorMultiply(XMVectorAdd(m_data.Centre, cradius), Game::C_CS_ELEMENT_SCALE_RECIP_V));
 
 	// Convert vectors into integer elements
-	Vector3ToIntVector(elmin, m_element_min);
-	Vector3ToIntVector(elmax, m_element_max);
+	m_element_location = Game::PhysicalPositionToElementLocation(m_data.Centre);
+	Vector3ToIntVectorSwizzleYZ(elmin, m_element_min);
+	Vector3ToIntVectorSwizzleYZ(elmax, m_element_max);
 
 	// Set the flag that indicates whether we span multiple elements, for render-time efficiency
 	m_multielement = (m_element_min != m_element_max);

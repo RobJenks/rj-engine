@@ -13,6 +13,7 @@ class iSpaceObjectEnvironment;
 class Model;
 class Actor;
 class OrientedBoundingBox;
+class EnvironmentTree;
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -90,8 +91,13 @@ public:
 	// will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects
 	void				RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness);
 
-	// Methods to add a node for rendering.  Uses line model.  Spins in place.
+	// Method to add a node for rendering.  Uses line model.  Spins in place.
 	void XM_CALLCONV	RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
+	
+	// Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
+	void XM_CALLCONV	RenderNode(const FXMVECTOR pos, OverlayRenderer::RenderColour colour);
+
+	// Render a node at the specified element within the given environment
 	void				RenderNodeAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour);
 
 	// Methods to render the path being taken by an actor through a complex ship environment
@@ -112,6 +118,9 @@ public:
 			for (int i = 0; i < 8; ++i)
 				if (tree->m_children[i]) DebugRenderSpatialPartitioningTree(tree->m_children[i], true);
 	}
+
+	// Performs debug rendering of an environment tree node, and optionally all the way down the subtree as well
+	void				DebugRenderEnvironmentTree(const EnvironmentTree *tree, bool include_children);
 
 	// Shutdown method to deallocate all resources maintained by the renderer
 	void Shutdown(void);

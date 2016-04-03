@@ -206,7 +206,7 @@ template <typename T>
 Octree<T>::Octree(FXMVECTOR position, float areasize) :	m_areasize(areasize), m_size(areasize), m_parent(0)															
 {
 	// Make sure we have been given a valid size parameter; if not, this is an unrecoverable error
-	if (areasize <= 0) throw 1;
+	if (areasize <= 0) return;
 
 	// Store the position data locally, and vectorise the area size, for the following calculations
 	XMFLOAT3 pos; XMStoreFloat3(&pos, position);
@@ -491,13 +491,13 @@ void Octree<T>::Shutdown(void)
 {
 	// If we have child nodes then recursively deallocate each in turn
 	if (m_children[0]) m_children[0]->Shutdown();
-	if (m_children[1]) m_children[0]->Shutdown();
-	if (m_children[2]) m_children[0]->Shutdown();
-	if (m_children[3]) m_children[0]->Shutdown();
-	if (m_children[4]) m_children[0]->Shutdown();
-	if (m_children[5]) m_children[0]->Shutdown();
-	if (m_children[6]) m_children[0]->Shutdown();
-	if (m_children[7]) m_children[0]->Shutdown();
+	if (m_children[1]) m_children[1]->Shutdown();
+	if (m_children[2]) m_children[2]->Shutdown();
+	if (m_children[3]) m_children[3]->Shutdown();
+	if (m_children[4]) m_children[4]->Shutdown();
+	if (m_children[5]) m_children[5]->Shutdown();
+	if (m_children[6]) m_children[6]->Shutdown();
+	if (m_children[7]) m_children[7]->Shutdown();
 
 	// Zero out the child collection
 	memset(m_children, 0, sizeof(Octree<T>*) * 8);

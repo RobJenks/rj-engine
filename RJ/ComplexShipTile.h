@@ -7,6 +7,7 @@
 #include "DX11_Core.h"
 
 #include "CompilerSettings.h"
+#include "AlignedAllocator.h"
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
@@ -32,9 +33,6 @@ class ComplexShipTile : public ALIGN16<ComplexShipTile>
 {
 public:
 
-	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
-	USE_ALIGN16_ALLOCATORS(ComplexShipTile)
-
 	// Static record of the highest ID value in existence, for assigning to new tiles upon registration
 	static Game::ID_TYPE					InstanceCreationCount;
 
@@ -54,7 +52,7 @@ public:
 			WallConnection
 		};
 
-		Model * model; AXMVECTOR offset; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type; AXMMATRIX rotmatrix;
+		AXMMATRIX rotmatrix; AXMVECTOR offset; Model * model; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type;
 		TileModel(void) { model = NULL; offset = NULL_VECTOR; elementpos = NULL_INTVECTOR3; rotation = Rotation90Degree::Rotate0; type = TileModelType::Unknown; rotmatrix = ID_MATRIX; }
 		TileModel(Model *_model, INTVECTOR3 _elementpos, Rotation90Degree _rotation, TileModelType _type) 
 		{ 
@@ -208,7 +206,7 @@ public:
 		} ATileModel_P;
 		
 		// Type definition for aligned collection of tile model instances 
-		typedef __declspec(align(16)) vector<ATileModel_P> TileModelCollection;
+		typedef __declspec(align(16)) std::vector<ATileModel_P, AlignedAllocator<ATileModel_P, 16U>> TileModelCollection;
 
 		TileModelCollection		Models;					// Linear collection of all models, for rendering efficiency
 		ModelLinkedList	****	ModelLayout;			// Spatial layout of models, for efficient indexing into the collection.  ModelLinkedList*[x][y][z]	
@@ -446,8 +444,7 @@ public:
 	// Retrieves or sets the simulation state for this tile
 	CMPINLINE iObject::ObjectSimulationState		GetSimulationState(void) const								{ return m_simulationstate; }
 	CMPINLINE void									SetSimulationState(iObject::ObjectSimulationState state)	{ m_simulationstate = state; }
-	void											UpdateSimulationStateFromParentElements(void);
-
+	
 	// Flag indicating whether this tile requires simulation time; while it does, the SimulateTile() method will be called every <interval>	
 	CMPINLINE void						DeactivateSimulation(void)				{ m_requiressimulation = false; }
 	CMPINLINE void						ActivateSimulation(void) 				
@@ -487,26 +484,14 @@ public:
 	// Virtual method for tile subclasses to perform simulation.  Differs depending on the current simulation state of the tile
 	virtual void						PerformTileSimulation(unsigned int delta_ms)			= 0;
 
-	// Method to link this tile to a parent ship/sections/elements.  Used primarily on ship creation
-	void								LinkToParent(ComplexShip *ship);
+	// Applies the effects of this tile on the underlying elements
+	void								ApplyTile(void);
 
-	// Events that are generated pre- and post-link to parent objects.  Exposed for use by subclasses as required
-	virtual void						BeforeLinkToParent(ComplexShip *ship) = 0;
-	virtual void						AfterLinkToParent(ComplexShip *ship) = 0;
+	// Applies the effects of this tile to a specific underlying element
+	void								ApplyTileToElement(ComplexShipElement *el);
 
-	// Unlink this tile from its parent objects, applying any removal logic as part of the same process
-	void								UnlinkFromParent(void);
-
-	// Events that are generated pre- and post-unlink from parent objects.  Exposed for use by subclasses as required
-	virtual void						BeforeUnlinkFromParent(void) = 0;
-	virtual void						AfterUnlinkFromParent(ComplexShip *oldship) = 0;
-
-	// Abstract method to apply the contents of the tile to its parent objects.  Called upon linking, plus on repair of the ship
-	void								ApplyTile(void);					// Base class method; calls the element-specific method one element at a time
-	void								ApplyTile(ComplexShipElement *el);	// Base class method
-	
 	// Subclass-implemented virtual method, called by base class method
-	virtual void						ApplyTileSpecific(ComplexShipElement *el) = 0;		
+	virtual void						ApplyTileSpecific(void) = 0;		
 
 	// Abstract method to remove the contents of the tile to its parent objects.  Called upon removal.
 //	void								UnapplyTile(void);					// Base class method
@@ -621,15 +606,16 @@ public:
 	void								RecalculateBoundingVolume(void);
 	CMPINLINE BoundingObject *			GetBoundingObject(void) const				{ return m_boundingbox; }
 
+	// Get the approximate radius of a bounding sphere that encompasses this tile
+	CMPINLINE float						GetBoundingSphereRadius(void) const			{ return m_bounding_radius; }
+
 	// Retrieve or recalculate the position and transform matrix for this tile relative to its parent ship object
 	CMPINLINE XMVECTOR					GetRelativePosition(void)					{ return m_relativeposition; }
 	CMPINLINE const XMMATRIX 			GetWorldMatrix(void)						{ return m_worldmatrix; }
 	void								RecalculateWorldMatrix(void);
 
 	// Return pointers to the parent objects associated with this tile
-	CMPINLINE ComplexShip *					GetParentShip(void) const						{ return m_parentship; }
-	CMPINLINE ComplexShipSection *			GetParentShipSection(void) const				{ return m_parentsection; }
-	CMPINLINE ComplexShipElement *			GetParentShipElement(void) const				{ return m_parentelement; }
+	CMPINLINE iSpaceObjectEnvironment *			GetParent(void) const				{ return m_parent; }
 
 	// Methods to query and set connection points for elements within the tile
 	CMPINLINE ElementConnectionSet *			GetConnections(void)										{ return &m_connections; }					
@@ -644,6 +630,12 @@ public:
 	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorStart(void)			{ return m_connections.begin(); }
 	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorEnd(void)				{ return m_connections.end(); }
 	void										SetConnections(const ElementConnectionSet &source);
+
+	// Events generated when the tile is added/removed from an environment
+	void										BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment);
+	void										AfterAddedToEnvironment(iSpaceObjectEnvironment *environment);
+	void										BeforeRemovedToEnvironment(iSpaceObjectEnvironment *environment);
+	void										AfterRemovedFromEnvironment(iSpaceObjectEnvironment *environment);
 
 	// Compiles the tile based on its definition
 	Result								CompileTile(void);	
@@ -687,7 +679,7 @@ public:
 	static bool							IsInfrastructureTile(D::TileClass tileclass);
 
 	// Default property set applied to all elements of the tile; element-specific changes are then made afterwards
-	vector<ComplexShipElement::PropertyValue>		DefaultProperties;
+	bitstring							DefaultProperties;
 
 	// Effects that can be activated on this object
 	FadeEffect							Fade;					// Allows the object to be faded in and out
@@ -729,9 +721,7 @@ protected:
 	AXMMATRIX					m_worldmatrix;
 
 	// Pointers to the various parents of this tile
-	ComplexShip *				m_parentship;			// The ship that contains this tile
-	ComplexShipSection *		m_parentsection;		// The section of the ship that contains this tile
-	ComplexShipElement *		m_parentelement;		// The ship element at the top-top-left of this tile
+	iSpaceObjectEnvironment *	m_parent;				// The environment that contains this tile
 
 	// The geometry associated with this ship tile
 	bool						m_multiplemodels;
@@ -740,6 +730,12 @@ protected:
 
 	// Bounding box encompassing this tile; used for more efficient visibility & collision testing
 	BoundingObject *			m_boundingbox;
+
+	// Approximate radius of a bounding sphere that encompasses this tile
+	float						m_bounding_radius;
+
+	// Centre point of the tile
+	AXMVECTOR					m_centre_point;
 
 	// Flag determining whether this is a standard tile, or just an instance within some parent entity
 	bool						m_standardtile;

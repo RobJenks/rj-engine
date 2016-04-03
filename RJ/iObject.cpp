@@ -368,11 +368,11 @@ void iObject::SetSize(const FXMVECTOR size)
 }
 
 // Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
-// updates to the central data collections
-void iObject::SetInstanceCode(const std::string & instance_code)
+// updates to the central data collections.  Returns a value indicating whether the code could be successfully set
+bool iObject::SetInstanceCode(const std::string & instance_code)
 {
 	// Parameter check
-	if (instance_code == NullString) return;
+	if (instance_code == NullString) return false;
 
 	// We will only update the central collection if the current instance code is not null.  If it is a null string, 
 	// the object is being created and so does not yet exist in the central collection.  Store so we can test later
@@ -386,6 +386,9 @@ void iObject::SetInstanceCode(const std::string & instance_code)
 
 	// Notify the central collection of this update if required
 	if (old_code != NullString) Game::NotifyChangeOfObjectInstanceCode(this, old_code);
+
+	// Return success
+	return true;
 }
 
 // Determines the instance code that should be assigned to this object
@@ -396,14 +399,18 @@ void iObject::DetermineInstanceCode(void)
 	SetInstanceCode(code);
 }
 
-// Overrides the object instance code with a custom string value
-void iObject::OverrideInstanceCode(const std::string & icode)
+// Overrides the object instance code with a custom string value.  Returns a value indicating whether
+// the code could be successfully overridden
+bool iObject::OverrideInstanceCode(const std::string & icode)
 {
 	// Ensure the code is valid
-	if (icode == "") return;
+	if (icode == "") return false;
+
+	// Ensure the code is not already in use
+	if (Game::GetObjectByInstanceCode(icode) != NULL) return false;
 
 	// Update the instance code, which will take care of updating the central collection etc
-	SetInstanceCode(icode);
+	return SetInstanceCode(icode);
 }
 
 bool iObject::TestForOverrideOfInstanceCode(void) const

@@ -54,7 +54,7 @@ ComplexShip::ComplexShip(void)
 void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 {
 	// Pass control to all base classes
-	iSpaceObjectEnvironment::InitialiseCopiedObject((iSpaceObjectEnvironment*)source);
+	iSpaceObjectEnvironment::InitialiseCopiedObject(source);
 
 	/* Now perform ComplexShip-specific initialisation logic for new objects */
 
@@ -222,20 +222,20 @@ void ComplexShip::RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionC
 }
 
 // Method to handle the addition of a ship tile to this object
-void ComplexShip::ShipTileAdded(ComplexShipTile *tile)
+void ComplexShip::TileAdded(ComplexShipTile *tile)
 {
 	// Pass control down to base classes
-	iSpaceObjectEnvironment::ShipTileAdded(tile);
+	iSpaceObjectEnvironment::TileAdded(tile);
 	
 	// (Implement any complex ship-specific logic here)
 
 }
 
 // Method to handle the removal of a ship tile from this object
-void ComplexShip::ShipTileRemoved(ComplexShipTile *tile)
+void ComplexShip::TileRemoved(ComplexShipTile *tile)
 {
 	// Pass control down to base classes
-	iSpaceObjectEnvironment::ShipTileRemoved(tile);
+	iSpaceObjectEnvironment::TileRemoved(tile);
 
 	// (Implement any complex ship-specific logic here)
 
@@ -294,6 +294,11 @@ void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR 
 		if (m_sections[i])
 		{
 			// Move into the environment
+			ComplexShipSection *sec = m_sections[i];
+			iSpaceObject *sobj = (iSpaceObject*)sec;
+			OutputDebugString(sec->GetName().c_str());
+			OutputDebugString(sec->GetSpaceEnvironment() ? sec->GetSpaceEnvironment()->GetName().c_str() : "");
+
 			m_sections[i]->MoveIntoSpaceEnvironment(system, location);
 
 			// Have the section recalculate its own position based on the parent ship location
@@ -424,10 +429,6 @@ void ComplexShip::SimulateObject(void)
 		}
 	}
 
-	// Update properties of the ship if required
-	if (m_gravityupdaterequired)		PerformShipGravityUpdate();
-	if (m_oxygenupdaterequired)			PerformShipOxygenUpdate();
-
 	// Make sure that the spatial tree node for this ship contains the WHOLE ship
 	if (m_treenode)
 	{
@@ -444,74 +445,6 @@ void ComplexShip::SimulateObject(void)
 			UpdatePerimeterBeacons();
 		}
 	}
-}
-
-// Performs an update of ship gravity levels, based on each life support system in the ship
-void ComplexShip::PerformShipGravityUpdate(void)
-{
-	CSLifeSupportTile *tile;
-	INTVECTOR3 elmin, elmax;
-	int maxrange;
-	float gravity;
-
-	// Reset the update flag now we are performing an update
-	m_gravityupdaterequired = false;
-
-	// First, reset the gravity strength at every element to zero
-	for (int x = 0; x < m_elementsize.x; ++x) {
-		for (int y = 0; y < m_elementsize.y; ++y) {
-			for (int z = 0; z < m_elementsize.z; ++z) {
-				m_elements[x][y][z].ChangeGravityStrength(0.0f);
-			}
-		}
-	}
-
-	// Now process each life support system in turn
-	std::vector<ComplexShipTile*>::iterator it_end = GetTilesOfType(D::TileClass::LifeSupport).end();
-	for (std::vector<ComplexShipTile*>::iterator it = GetTilesOfType(D::TileClass::LifeSupport).begin(); it != it_end; ++it)
-	{
-		// Make sure this is a valid life support system
-		tile = (CSLifeSupportTile*)(*it);
-		if (!tile) continue;
-
-		// Determine the maximum effective tile range of this system.  E.g. Range=3 --> MaxRange=ceil(3*1.41...) = ceil(4.24) = 5
-		maxrange = (int)ceilf(tile->GetGravityRange() * ROOT2);
-
-		// Now determine the range of elements that need to be considered for the system
-		elmin = INTVECTOR3(	max(0, tile->GetElementLocationX() - maxrange), max(0, tile->GetElementLocationY() - maxrange),
-							max(0, tile->GetElementLocationZ() - maxrange));
-		elmax = INTVECTOR3(	min(m_elementsize.x, tile->GetElementLocationX() + maxrange),
-							min(m_elementsize.y, tile->GetElementLocationY() + maxrange),
-							min(m_elementsize.z, tile->GetElementLocationZ() + maxrange));
-
-		// Consider each relevant element in turn
-		for (int x = elmin.x; x < elmax.x; ++x)
-		{
-			for (int y = elmin.y; y < elmax.y; ++y)
-			{
-				for (int z = elmin.z; z < elmax.z; ++z)
-				{					
-					// Get the effective gravity strength at this location
-					gravity = tile->GetGravityStrength(x, y, z);
-
-					// Apply this to the target element, if it is higher than the current gravity value
-					if (gravity > m_elements[x][y][z].GetGravityStrength())
-					{
-						m_elements[x][y][z].ChangeGravityStrength(gravity);
-					}
-				}
-			}
-		}	// x/y/z
-	}		// For each life support system
-}
-
-// Performs an update of ship oxygen levels, based on each life support system in the ship
-void ComplexShip::PerformShipOxygenUpdate(void)
-{
-	// Reset the update flag now we are performing an update
-	m_oxygenupdaterequired = false;
-
-	// TODO: Do this
 }
 
 // Recalculates any perimeter beacons required to maintain spatial position in the world
@@ -1116,42 +1049,6 @@ void ComplexShip::CollisionWithObject(iObject *object, ComplexShipSection *colli
 	
 }
 
-// Copies all tiles from another object and adds the copies to this object
-Result ComplexShip::CopyTileDataFromObject(iContainsComplexShipTiles *src)
-{
-	// Parameter check
-	if (!src) return ErrorCodes::CannotCopyTileDataFromNullSource;
-
-	// Remove any tile data that currently exists for the environment; do not use the RemoveTile() methods since the
-	// existing tiles belong to the source environment, which we just copied from
-	RemoveAllShipTiles();
-
-	// Remove all terrain objects which were introduced as part of a tile; create a new vector, populate with any 
-	// terrain objects that are still valid, and then swap the vectors at the end.  More efficient than removing
-	// items from the main vector since the majority will likely be removed here.
-	std::vector<StaticTerrain*> terrain;
-	std::vector<StaticTerrain*>::size_type n = TerrainObjects.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
-	{
-		if (TerrainObjects[i]->GetParentTileID() == 0) terrain.push_back(TerrainObjects[i]);
-	}
-	TerrainObjects = terrain;
-
-	//  Iterate through each tile in the source in turn
-	iContainsComplexShipTiles::ConstTileIterator it_end = src->GetTileIteratorEnd();
-	for (iContainsComplexShipTiles::ConstTileIterator it = src->GetTileIteratorStart(); it != it_end; ++it)
-	{
-		// Get a reference to this tile and make a copy via virtual subclass copy method
-		ComplexShipTile *tile = (*it)->Copy();
-
-		// Link this cloned tile to the new ship
-		if (tile) tile->LinkToParent(this);
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 // Fits the element space around this ship, eliminating any extra space allocated outside of the (cuboid) bounds it requires
 Result ComplexShip::FitElementSpaceToShip(void)
 {
@@ -1159,7 +1056,7 @@ Result ComplexShip::FitElementSpaceToShip(void)
 	INTVECTOR3 bounds = GetShipMaximumBounds();
 
 	// Now request a reallocation to this maximum extent; if there is no change to be made it will simply return
-	return ReallocateElementSpace(bounds);
+	return InitialiseElements(bounds, true);
 }
 
 // Returns the maximum bounds occupied by this ship.  May not necessarily == elementsize when sections are being moved around

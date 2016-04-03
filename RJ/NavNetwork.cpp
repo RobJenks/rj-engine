@@ -26,7 +26,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 	ComplexShipElement::NavNodePos *navpos;
 	ComplexShipElement::NavNodeConnection *navconn;
 	NavNode *nsrc, *ntgt;
-	int elementnavcount, elementconncount;
+	int elementnavcount, elementconncount, index;
 	int csrc, ctgt, layoutindex;
 	int targetindex, targetnodecount; INTVECTOR3 targetpos;
 	bool *validconn = 0; int vc_capacity = 0;		// Indicates whether a connection is valid, and the memory that has been allocated so far for this
@@ -63,7 +63,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 			{
 				// Get this element.  If it doesn't exist, or it does but is not 
 				// walkable, then skip it since there will be no nodes here
-				el = parent->GetElementDirect(x, y, z);
+				el = parent->GetElement(x, y, z);
 				if (!el || !el->IsWalkable()) continue;
 
 				/* 1. Nav node positions.  If we don't already have any specified, generate defaults now */
@@ -90,7 +90,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 						int conn = 0;
 						for (int i = 1; i <= DirectionCount; i++)
 						{
-							if (el->ConnectsInDirection((Direction)i))
+							if (el->ConnectsInDirection(DirectionToBS((Direction)i)))
 							{
 								// We are connecting in this direction so add a new nav node connection
 								el->GetNavPointConnectionData()[conn].Source = 0;
@@ -136,7 +136,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 			{
 				// Get this element.  If it doesn't exist, or it does but is not 
 				// walkable, then skip it since there will be no nodes here
-				el = parent->GetElementDirect(x, y, z);
+				el = parent->GetElement(x, y, z);
 				if (!el || !el->IsWalkable()) continue;
 
 				// Derive the layout array index for this node
@@ -189,7 +189,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 			for (int z = 0; z < m_elementsize.z; z++)
 			{
 				// Get this element.  If it doesn't exist, or isn't walkable, then skip it now
-				el = parent->GetElementDirect(x, y, z);
+				el = parent->GetElement(x, y, z);
 				if (!el || !el->IsWalkable()) continue;
 
 				// Get the number of nodes in this element
@@ -233,12 +233,13 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 							// Attempt to get the relevant neighbouring element
 							nsrc = node_layout[layoutindex][csrc];			if (!nsrc) continue;
 							elsrc = nsrc->Element;							if (!elsrc) continue;
-							eltgt = elsrc->GetNeighbour((Direction)ctgt);	if (!eltgt) continue;
+							index = elsrc->GetNeighbour((Direction)ctgt);	if (index == ComplexShipElement::NO_ELEMENT) continue;
+							eltgt = &parent->GetElements()[index];
 
 							// Make sure the neighbour is a valid walkable target element that connects in our direction
 							Direction oppositedirection = GetOppositeDirection((Direction)ctgt);
-							if (oppositedirection == Direction::None) continue;
-							if (!eltgt->IsWalkable() || !eltgt->ConnectsInDirection(oppositedirection)) continue;
+							if (oppositedirection == Direction::_Count) continue;
+							if (!eltgt->IsWalkable() || !eltgt->ConnectsInDirection((DirectionBS)oppositedirection)) continue;
 
 							// Determine the index of this element in the node array based on the target element location
 							targetpos = eltgt->GetLocation();

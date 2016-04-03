@@ -44,7 +44,12 @@ void GameUniverse::AddSystem(SpaceSystem *system)
 
 SpaceSystem	*GameUniverse::GetSystem(string code)
 {
-	return Systems[code];
+	// Attempt to locate this system in the collection
+	if (code == NullString) return NULL;
+	GameUniverse::SystemRegister::const_iterator it = Systems.find(code);
+	
+	// Return the system, if we could find it
+	return (it == Systems.end() ? NULL : it->second);
 }
 
 

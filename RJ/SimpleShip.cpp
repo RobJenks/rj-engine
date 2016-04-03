@@ -34,7 +34,7 @@ SimpleShip::SimpleShip(void)
 void SimpleShip::InitialiseCopiedObject(SimpleShip *source)
 {
 	// Pass control to all base classes
-	Ship::InitialiseCopiedObject((Ship*)source);
+	Ship::InitialiseCopiedObject(source);
 
 	/* Begin SimpleShip-specific initialisation logic here */
 

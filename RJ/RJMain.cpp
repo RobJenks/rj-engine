@@ -92,6 +92,8 @@
 #include "ModifiedValue.h"					// DBG
 #include "DebugTest.h"						// DBG
 #include "ObjectReference.h"				// DBG
+#include "EnvironmentTree.h"				// DBG
+#include "CopyObject.h"						// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -606,7 +608,7 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
 	
-	if (false && b[DIK_Y]) {
+	if (b[DIK_SEMICOLON]) {
 		if (b[DIK_LSHIFT])
 		{
 			cs()->ForceRenderingOfInterior(false);
@@ -622,12 +624,12 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
-		CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetFirstTileOfType(D::TileClass::LifeSupport);
-		for (int x = 0; x < cs()->GetElementSizeX(); ++x)
-			for (int y = 0; y < cs()->GetElementSizeY(); ++y)
+		CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetTilesOfType(D::TileClass::LifeSupport)[0].value;
+		for (int x = 0; x < cs()->GetElementSize().x; ++x)
+			for (int y = 0; y < cs()->GetElementSize().y; ++y)
 				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), INTVECTOR3(x, y, 0),
-				XMVectorSet(1.0f - (cs()->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value),
-				cs()->GetElementDirect(x, y, 0)->GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
+				XMVectorSet(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
+				cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
 	}
 
 	if (false && b[DIK_I]) {
@@ -1220,8 +1222,7 @@ Result RJMain::InitialiseLogging(void)
 
 Result RJMain::InitialiseShipData(void)
 {
-	// Initialise complex ship element data
-	ComplexShipElement::InitialiseStaticData();
+	// Nothing to do at this point
 
 	// Return success
 	Game::Log << LOG_INIT_START << "Supporting ship data initialised\n";
@@ -1786,6 +1787,47 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
+	ComplexShip *c = new ComplexShip();
+	c->SetSize(XMVectorReplicate(500.0f));
+	c->InitialiseElements(INTVECTOR3(10, 4, 2));
+	EnvironmentTree *tr = new EnvironmentTree(c);
+	tr->Subdivide();
+	tr->GetChildNode(5)->Subdivide();
+
+	EnvironmentTree *tr5 = tr->GetChildNode(5);
+	OutputDebugString(concat("TR5: ")(Vector3ToString(tr5->GetMin()))(" to ")(Vector3ToString(tr5->GetMax()))("\n").str().c_str());
+	for (int i = 0; i < 8; ++i)
+	{
+		EnvironmentTree *ch = tr5->GetChildNode(i);
+		if (ch)
+			OutputDebugString(concat("TR5 Child ")(i)(": ")(Vector3ToString(ch->GetMin()))(" to ")(Vector3ToString(ch->GetMax()))("\n").str().c_str());
+		else
+			OutputDebugString(concat("TR5 Child ")(i)(": Does not exist\n").str().c_str());
+	}
+
+
+	for (int i = 0; i < 8; ++i)
+	{
+		if (!tr->GetChildNode(i))
+			OutputDebugString(concat("Child ")(i)(": Does not exist\n").str().c_str());
+		else
+		{
+			INTVECTOR3 elmin = tr->GetChildNode(i)->GetElementMin();
+			INTVECTOR3 elmax = tr->GetChildNode(i)->GetElementMax();
+
+			//INTVECTOR3 elc = (elmin + elmax) / 2;
+			INTVECTOR3 elc = elmax;
+			XMFLOAT3 fc = Game::ElementLocationToPhysicalPositionF(elc);
+		
+			int iE = tr->GetRelevantChildNode(elc);
+			int iF = tr->GetRelevantChildNode(fc);
+			int iV = tr->GetRelevantChildNode(XMLoadFloat3(&fc));
+
+			OutputDebugString(concat("Child ")(i)(": ")(elmin.ToString())(" to ")(elmax.ToString())(", Centre ")(tr->GetChildNode(i)->GetElementCentre().ToString())
+				(" // Rel = {")(iE)(",")(iF)(",")(iV)("} // ")(tr->GetChildNode(i)->ContainsPoint(XMLoadFloat3(&fc)))("\n").str().c_str());
+		}
+	}
+
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"),
 		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
@@ -1810,6 +1852,7 @@ void RJMain::__CreateDebugScenario(void)
 		cs_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 		cs_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
 		cs_ship->SetOrientation(ID_QUATERNION);
+		cs_ship->OverrideInstanceCode("cs");
 		cs = cs_ship;
 
 		Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
@@ -1854,15 +1897,18 @@ void RJMain::__CreateDebugScenario(void)
 		a1_actor->SetName("A1");
 		a1_actor->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
 		a1_actor->MoveIntoEnvironment(cs());
-		ComplexShipTile *t = cs()->GetFirstTileOfType(D::TileClass::Corridor);
-		if (t)
-			a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
-			XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
-		else
-			a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
+		if (cs()->GetTileCountOfType(D::TileClass::Corridor) > 0)
+		{
+			ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor)[0].value;
+			if (t)
+				a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
+				XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
+			else
+				a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
-		Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs(), a1_actor->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
-		a1_actor->AssignNewOrder(o);
+			Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs(), a1_actor->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
+			a1_actor->AssignNewOrder(o);
+		}
 		a1 = a1_actor;
 	}
 
@@ -1905,7 +1951,7 @@ void RJMain::__CreateDebugScenario(void)
 			nt->RecalculateTurretStatistics();
 
 			cs()->TurretController.AddTurret(nt);
-			OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
+			//OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
 		}
 
 	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
@@ -1930,6 +1976,20 @@ void RJMain::__CreateDebugScenario(void)
 	SpaceTurret *sst3 = sst->Copy();
 	s3[0]()->TurretController.AddTurret(sst3);
 
+	EnvironmentTree *tree = new EnvironmentTree(cs());
+	//OutputDebugString(concat("Size = ")(tree->GetElementSize().ToString())(", Centre = ")(tree->GetElementCentre().ToString())("\n").str().c_str());
+	for (int x = -20; x <= 20; x += 40)
+		for (int y = -20; y <= 20; y += 40)
+			for (int z = -20; z <= 20; z += 40)
+			{
+				XMVECTOR offset = XMVectorSet((float)x, (float)y, (float)z, 0.0f);
+				//OutputDebugString(concat("Offset = [")(x)(",")(y)(",")(z)("], Child node = ")(tree->GetRelevantChildNode(
+					//XMVectorAdd(tree->GetCentrePoint(), offset)))("\n").str().c_str());
+			}
+
+
+
+	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2013,6 +2073,14 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
+	// Debug rendering
+	iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it_end = cs()->GetTiles().end();
+	for (iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it = cs()->GetTiles().begin(); it != it_end; ++it)
+	{
+		XMMATRIX world = XMMatrixMultiply((*it).value->GetWorldMatrix(), cs()->GetZeroPointWorldMatrix());
+		Game::Engine->GetOverlayRenderer()->RenderNode(world, OverlayRenderer::RenderColour::RC_Green);
+	}
+	
 }
 
 

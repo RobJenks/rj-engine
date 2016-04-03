@@ -51,8 +51,8 @@ Actor::Actor(ActorBase *actorbase) : Actor()
 void Actor::InitialiseCopiedObject(Actor *source)
 {
 	// Pass control to all base classes
-	iEnvironmentObject::InitialiseCopiedObject((iEnvironmentObject*)source);
-	EntityAI::InitialiseCopiedObject((EntityAI*)source);
+	iEnvironmentObject::InitialiseCopiedObject(source);
+	EntityAI::InitialiseCopiedObject(source);
 }
 
 // Causes the actor to recalculate all its properties & final attribute values.  Called when changes are made to the actor attributes

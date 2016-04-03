@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "iContainsComplexShipTiles.h"
 #include "ComplexShipTile.h"
 
@@ -23,7 +24,7 @@ void iContainsComplexShipTiles::InitialiseCopiedObject(iContainsComplexShipTiles
 int iContainsComplexShipTiles::FindShipTileIndex(ComplexShipTile *tile) const
 {
 	for (int i = 0; i < m_tilecount[0]; ++i)
-		if (m_tiles[0][i] == tile)
+		if (m_tiles[0][i].value == tile)
 			return i;
 
 	return -1;
@@ -33,19 +34,16 @@ int iContainsComplexShipTiles::FindShipTileIndex(ComplexShipTile *tile) const
 void iContainsComplexShipTiles::AddShipTile(ComplexShipTile *tile)
 {
 	// Attempt to locate this tile in the collection; if it already exists then stop now
-	if (std::find(m_tiles[0].begin(), m_tiles[0].end(), tile) != TileNotFound()) return; 
+	if (FindShipTile(tile) != TileNotFound()) return;
 
 	// Add the item to the overall collection now that we know it isn't currently linked
-	m_tiles[0].push_back(tile);
+	m_tiles[0].push_back(AComplexShipTile_P(tile));
 
 	// Update based on this new tile, unless we have suspended updates.  This will populate the relevant class-specific tile collection
 	if (!m_tilecalcsuspended) 
 	{
 		// Recalculate the statistics and cached values storing tile state
 		RecalculateShipTileData();
-
-		// Update ourself based on the addition of this new tile (subclass method, depending on the implementing object: ship/section/element/...)
-		ShipTileAdded(tile);
 	}
 }
 
@@ -75,7 +73,7 @@ void iContainsComplexShipTiles::RecalculateShipTileData(void)
 	ComplexShipTileCollection::const_iterator it_end = m_tiles[0].end();
 	for (ComplexShipTileCollection::const_iterator it = m_tiles[0].begin(); it != it_end; ++it)
 	{
-		t = (*it); if (!t) continue;
+		t = (*it).value; if (!t) continue;
 		type = (int)t->GetTileClass();
 
 		// Add to the relevant collection, assuming this is a valid tile class
@@ -100,7 +98,7 @@ void iContainsComplexShipTiles::ShutdownAllTileData(bool deallocate)
 	if (deallocate)
 	{
 		// If we want to deallocate tiles, call the delete/erase iteration method across the whole primary collection
-		delete_erase<ComplexShipTile*>(m_tiles[0], m_tiles[0].begin(), m_tiles[0].end());
+		delete_erase_value<AComplexShipTile_P>(m_tiles[0], m_tiles[0].begin(), m_tiles[0].end());
 	}
 
 	// Now clear every tile pointer collection (incl the primary collection) and reset tile counts

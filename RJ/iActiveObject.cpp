@@ -24,7 +24,7 @@ iActiveObject::iActiveObject(void)
 void iActiveObject::InitialiseCopiedObject(iActiveObject *source)
 {
 	// Pass control to all base classes
-	iObject::InitialiseCopiedObject((iObject*)source);
+	iObject::InitialiseCopiedObject(source);
 }
 
 // Default destructor

@@ -22,7 +22,7 @@ void SpaceEmitter::SimulateObject(void)
 void SpaceEmitter::InitialiseCopiedObject(SpaceEmitter *source)
 {
 	// Pass control to all base classes
-	iSpaceObject::InitialiseCopiedObject((iSpaceObject*)source);
+	iSpaceObject::InitialiseCopiedObject(source);
 }
 
 // Shuts down the emitter and releases all resources

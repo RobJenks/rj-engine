@@ -607,12 +607,12 @@
       <complexshiptile code="lifesupport_huge_01">
           <basetiledata>
               <Location x="5" y="12" z="0" />
-              <Size x="1" y="1" z="1" />
+              <Size x="2" y="2" z="2" />
               <Rotation>0</Rotation>
-              <ConnectionPoint x="0" y="0" z="0" Direction="down" />
+              <!--ConnectionPoint x="0" y="0" z="0" Direction="down" /-->
               <ConnectionPoint x="0" y="0" z="0" Direction="up" />
               <ConnectionPoint x="0" y="0" z="0" Direction="left" />
-              <ConnectionPoint x="0" y="0" z="0" Direction="right" />
+              <!--ConnectionPoint x="0" y="0" z="0" Direction="right" /-->
           </basetiledata>
       </complexshiptile>
       

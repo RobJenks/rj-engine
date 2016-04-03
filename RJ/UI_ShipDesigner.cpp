@@ -635,8 +635,7 @@ Result UI_ShipDesigner::CreateNewShip(void)
 
 	// Create a new ship details object
 	m_ship = new ComplexShip();
-	m_ship->SetElementSize(initialsize);
-	m_ship->InitialiseAllElements();
+	m_ship->InitialiseElements(initialsize);
 	
 	// Update the view to show this new (blank) ship
 	ShipBlueprintModified();
@@ -663,22 +662,22 @@ Result UI_ShipDesigner::PrepareShipForOperation(ComplexShip *s, string code)
 	s->SetCode(code);
 
 	// Also generate a unique code for each of the ship sections
-	int ns = (int)s->GetSections()->size();
-	for (int i=0; i<ns; i++)
+	int ns = s->GetSectionCount();
+	for (int i=0; i<ns; ++i)
 	{
 		s->GetSection(i)->SetCode(concat(code)("_section_")(i).str());
 	}
 
 	// Re-evaluate the ship tile data to ensure that everything has been precalculated correctly before saving
-	int nt = (int)s->GetTileCollection()->size();
-	for (int i=0; i<nt; i++)
+	int nt = s->GetTileCount();
+	for (int i=0; i<nt; ++i)
 	{
 		// Get a reference to the tile
 		ComplexShipTile *tile = s->GetTile(i);
 		if (!tile) continue;
 
 		// Update the element containing this tile (in future, generalise to update of *any* tile type on the element, or just process all elements)
-		UpdateCorridorTileAtElement(tile->GetParentShipElement());
+		UpdateTile(tile);
 	}
 
 	// Return success
@@ -843,11 +842,11 @@ void UI_ShipDesigner::ApplySDOffsetExplicit(ComplexShip *ship, INTVECTOR3 offset
 	}	
 
 	// Next loop over the set of ship tiles and apply the same offset to their position
-	iContainsComplexShipTiles::ConstTileIterator it2_end = ship->GetTileIteratorEnd();
-	for (iContainsComplexShipTiles::ConstTileIterator it2 = ship->GetTileIteratorStart(); it2 != it2_end; ++it2)
+	iContainsComplexShipTiles::ConstTileIterator it2_end = ship->GetTiles().end();
+	for (iContainsComplexShipTiles::ConstTileIterator it2 = ship->GetTiles().begin(); it2 != it2_end; ++it2)
 	{
 		// Get a reference to this tile
-		ComplexShipTile *tile = (*it2);
+		ComplexShipTile *tile = (*it2).value;
 		if (!tile) continue;
 
 		// Offset the tile location by the specified amount
@@ -855,21 +854,11 @@ void UI_ShipDesigner::ApplySDOffsetExplicit(ComplexShip *ship, INTVECTOR3 offset
 	}
 
 	// Now loop over the entire ship element space and update the location of each by the offset value
-	INTVECTOR3 size = ship->GetElementSize();
-	for (int x=0; x<size.x; x++)
+	ComplexShipElement *elements = ship->GetElements();
+	int n = ship->GetElementCount();
+	for (int i = 0; i < n; ++i)
 	{
-		for (int y=0; y<size.y; y++)
-		{
-			for (int z=0; z<size.z; z++)
-			{
-				// Get a reference to the element at this location
-				ComplexShipElement *el = ship->GetElementDirect(x, y, z);
-				if (!el) continue;
-
-				// Apply the offset to this element's location
-				el->SetLocation(el->GetLocation() + offset);
-			}
-		}
+		elements[i].SetLocation(elements[i].GetLocation() + offset);
 	} 
 }
 
@@ -1355,7 +1344,6 @@ void UI_ShipDesigner::UpdateSDGridElementRendering(void)
 void UI_ShipDesigner::UpdateSDGridRendering(void)
 {
 	ComplexShipElement *el;
-	std::vector<ComplexShipElement::ElementAttachPoint>::size_type numattachpoints;
 	INTVECTOR2 startpos, endpos, gridpos, index;
 
 	// Clear any previous rendering data before we begin recreating it
@@ -1426,9 +1414,7 @@ void UI_ShipDesigner::UpdateSDGridRendering(void)
 				INTVECTOR2 screenpos = GetGridElementLocation(gridpos);	
 
 				// Now render anything relating to this element; first, render any attachment points
-				numattachpoints = el->GetAttachPointCount();
-				if (numattachpoints != 0)
-					RenderElementAttachPoints(el, numattachpoints, x, y, screenpos);
+				RenderElementAttachPoints(el, x, y, screenpos);
 			}
 		}
 	}
@@ -1445,11 +1431,11 @@ void UI_ShipDesigner::RenderShipTilesToSDGrid(void)
 	INTVECTOR3 gridend = INTVECTOR3(gridstart.x + m_numgx, gridstart.y + m_numgy, gridstart.z);
 
 	// Iterate over the ship tile collection and process each in turn
-	iContainsComplexShipTiles::ConstTileIterator it_end = m_ship->GetTileIteratorEnd();
-	for (iContainsComplexShipTiles::ConstTileIterator it = m_ship->GetTileIteratorStart(); it != it_end; ++it)
+	iContainsComplexShipTiles::ConstTileIterator it_end = m_ship->GetTiles().end();
+	for (iContainsComplexShipTiles::ConstTileIterator it = m_ship->GetTiles().begin(); it != it_end; ++it)
 	{
 		// Make sure the tile is valid
-		ComplexShipTile *tile = (*it);
+		ComplexShipTile *tile = (*it).value;
 		if (!tile) continue;
 
 		// Retrieve position & size of this tile
@@ -1581,7 +1567,8 @@ void UI_ShipDesigner::RenderCorridorTile(CSCorridorTile *tile, INTVECTOR3 tilepo
 							   m_rg_corridor->GetZOrder(), INTVECTOR2(centresize), true, Rotation90Degree::Rotate0);
 
 	// Attempt to link back to the parent element
-	ComplexShipElement *el = tile->GetParentShipElement();
+	INTVECTOR3 loc = tile->GetElementLocation();
+	ComplexShipElement *el = m_ship->GetElement(loc);
 	if (!el) return;
 	
 	// Get the surrounding environment of the tile to see where we need to render connectors
@@ -1657,62 +1644,48 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 }
 
 // Renders the section attach points for a complex ship element on the SD grid
-void UI_ShipDesigner::RenderElementAttachPoints(ComplexShipElement *el, std::vector<ComplexShipElement::ElementAttachPoint>::size_type rendercount, 
-												int shipxpos, int shipypos, INTVECTOR2 gridpos)
+void UI_ShipDesigner::RenderElementAttachPoints(ComplexShipElement *el, int shipxpos, int shipypos, INTVECTOR2 gridpos)
 {
-	INTVECTOR2 pos, size;
+	// Static constant data used during rendering of attach points
+	static Image2DRenderGroup *rendergroups[2] = { m_rg_apoint_standard, m_rg_apoint_turret };
+	static const Direction directions[4] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down };
+	static const DirectionBS bsdir[4] = { DirectionBS::Left_BS, DirectionBS::Up_BS, DirectionBS::Right_BS, DirectionBS::Down_BS }; 
+	static const INTVECTOR2 pos_offset[4] =
+		{ INTVECTOR2(m_apoint_pos_offset.x, m_apoint_pos_offset.y), INTVECTOR2(m_apoint_pos_offset.y, m_apoint_pos_offset.x), 
+		  INTVECTOR2(m_apoint_pos_faroffset, m_apoint_pos_offset.y), INTVECTOR2(m_apoint_pos_offset.y, m_apoint_pos_faroffset) };
+	static const INTVECTOR2 rendersize[4] = { m_apoint_size, INTVECTOR2(m_apoint_size.y, m_apoint_size.x),
+											  m_apoint_size, INTVECTOR2(m_apoint_size.y, m_apoint_size.x) };
 
-	// Also get a reference to the corresponding element in the SHIP element space
-	ComplexShipElement *eship = m_ship->GetElement(shipxpos, shipypos, m_gridzpos);
+	// Make sure we have an element to be rendered
+	if (!el) return;
 
-	// Get a reference to the attach point collection
-	ComplexShipElement::AttachPointCollection *points = el->GetAttachPoints();
-
-	// Loop over the points to be rendered
-	for (std::vector<ComplexShipElement::ElementAttachPoint>::size_type i = 0; i < rendercount; ++i)
+	// Process each attach type in turn
+	for (int i = 0; i < (int)ComplexShipElement::AttachType::_AttachTypeCount; ++i)
 	{
-		// Get a reference to the attach point
-		ComplexShipElement::ElementAttachPoint point = points->at(i);
+		// If the element has no attach points of this type then skip all other checks immediately
+		if (!el->HasAnyAttachPoints((ComplexShipElement::AttachType)i)) continue;
 
-		// Calculate the position and size of this render image
-		switch (point.Edge) 
+		// Check each relevant direction and render an attach point wherever necessary
+		for (int d = 0; d < 4; ++d)
 		{
-			case Direction::Left:
-				if (eship && eship->GetLeft() && eship->GetLeft()->IsActive()) continue;		// Don't render if the attach point is in use
-				pos = INTVECTOR2(gridpos.x + m_apoint_pos_offset.x, gridpos.y + m_apoint_pos_offset.y);
-				size = m_apoint_size;
-				break;
-			case Direction::Right:
-				if (eship && eship->GetRight() && eship->GetRight()->IsActive()) continue;		// Don't render if the attach point is in use
-				pos = INTVECTOR2(gridpos.x + m_apoint_pos_faroffset, gridpos.y + m_apoint_pos_offset.y);
-				size = m_apoint_size;
-				break;
-			case Direction::Up:
-				if (eship && eship->GetUp() && eship->GetUp()->IsActive()) continue;			// Don't render if the attach point is in use
-				pos = INTVECTOR2(gridpos.x + m_apoint_pos_offset.y, gridpos.y + m_apoint_pos_offset.x);
-				size = INTVECTOR2(m_apoint_size.y, m_apoint_size.x);
-				break;
-			case Direction::Down:
-				if (eship && eship->GetDown() && eship->GetDown()->IsActive()) continue;		// Don't render if the attach point is in use
-				pos = INTVECTOR2(gridpos.x + m_apoint_pos_offset.y, gridpos.y + m_apoint_pos_faroffset);
-				size = INTVECTOR2(m_apoint_size.y, m_apoint_size.x);
-				break;
-			default:
-				continue;
+			// Check whether an attach point exists in this direction
+			if (el->HasAttachPoints((ComplexShipElement::AttachType)i, bsdir[d]))
+			{
+				// Attach points are not relevant at the outer edge of the environment
+				int neighbour = el->GetNeighbour(directions[d]);
+				if (neighbour != ComplexShipElement::NO_ELEMENT)
+				{
+					// Only render an attach point if there is not already an element attached to it
+					if (!m_ship->GetElements()[neighbour].IsActive())
+					{
+						// Add an instance for rendering
+						rendergroups[i]->AddInstance(INTVECTOR2(shipxpos + pos_offset[d].x, shipypos + pos_offset[d].y), 0.0f,
+													 rendersize[d], true, Rotation90Degree::Rotate0);
+					}
+				}
+			}
 		}
-
-		// Now create a render image based on the attach point type
-		switch (point.Type)
-		{
-			case ComplexShipElement::AttachType::Standard:
-				m_rg_apoint_standard->AddInstance(pos, 0.0f, size, true, Rotation90Degree::Rotate0);		break;
-			case ComplexShipElement::AttachType::TurretModule:
-				m_rg_apoint_turret->AddInstance(pos, 0.0f, size, true, Rotation90Degree::Rotate0);			break;
-			default:
-				continue;
-		}				
 	}
-
 }
 
 // Evaluates the placement of a ship section for conflicts, and in general whether it can be attached to the ship in this place
@@ -1791,7 +1764,7 @@ void UI_ShipDesigner::EvaluateSectionEdgePlacement(ComplexShipElement *sectionel
 	if (!neighbourelement) return;
 
 	// Test whether the attachment criteria on each element are compatible
-	if (!ComplexShipElement::AttachmentIsCompatible(sectionelement, sectionedge, neighbourelement))
+	if (!ComplexShipElement::AttachmentIsCompatible(sectionelement, DirectionToBS(sectionedge), neighbourelement))
 	{
 		// Raise a new placement issue if this attachment is not permitted
 		pPlacementResult->Issues.push_back(SectionPlacementIssue(SectionPlacementIssueType::IncompatibleEdgeAttachment,
@@ -2318,16 +2291,10 @@ void UI_ShipDesigner::PlaceTile(ComplexShipTileDefinition *tile, INTVECTOR2 star
 	}
 	
 	// Otherwise, add this new tile to the ship under construction
-	t->LinkToParent(m_ship);
+	m_ship->AddTile(t);
 
 	// Refresh the surrounding environment to determine e.g. connection points to neighbours
-	for (int x = elstart.x; x <= elend.x; x++)
-		for (int y = elstart.y; y <= elend.y; y++)
-			for (int z = elstart.z; z <= elend.z; z++)
-			{
-				// Update corridor data for this and the immediately-surrounding tiles (TODO: remove, replace with more generic functionality?)
-				UpdateAllCorridorTilesAtElement(m_ship->GetElement(x, y, z));
-			}
+	UpdateTileAndNeighbours(t);
 			
 	// Update the SD grid.  This could be wasteful to peform for every tile, but not a time-critical operation
 	PerformSDGridUpdate();
@@ -2355,7 +2322,7 @@ void UI_ShipDesigner::ShowConnectionChangeTool(INTVECTOR2 location)
 	if (!el || !el->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE)) return;
 
 	// Get the primary tile linked to this element; we must have a primary tile for this element to be connectable
-	ComplexShipTile *elptile = el->GetPrimaryTile();
+	ComplexShipTile *elptile = el->GetTile();
 	if (!elptile) return;
 
 	// Attempt to get the neighbouring element closest to the edge of the element that we are mousing over, as a first priority
@@ -2374,18 +2341,18 @@ void UI_ShipDesigner::ShowConnectionChangeTool(INTVECTOR2 location)
 	
 	// See if a neighbour is available in our preferred direction, as a priority
 	if		(xdiff < -edgethreshold && nbrs[0] && nbrs[0]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE) 
-			 && nbrs[0]->GetPrimaryTile() != elptile)																	nbr = nbrs[0];
+				&& nbrs[0]->GetTile() != elptile)																	nbr = nbrs[0];
 	else if (ydiff < -edgethreshold && nbrs[1] && nbrs[1]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE)
-			 && nbrs[1]->GetPrimaryTile() != elptile)																	nbr = nbrs[1];
+				&& nbrs[1]->GetTile() != elptile)																	nbr = nbrs[1];
 	else if (xdiff >  edgethreshold && nbrs[2] && nbrs[2]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE)
-			 && nbrs[2]->GetPrimaryTile() != elptile)																	nbr = nbrs[2];
+				&& nbrs[2]->GetTile() != elptile)																	nbr = nbrs[2];
 	else if (ydiff >  edgethreshold && nbrs[3] && nbrs[3]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE)
-			 && nbrs[3]->GetPrimaryTile() != elptile)																	nbr = nbrs[3];
+				&& nbrs[3]->GetTile() != elptile)																	nbr = nbrs[3];
 	
 	// If we don't have a neighbour in the preferred direction, look for any other that is eligible
 	if (!nbr)
 		for (int i=0; i<4; i++)
-			if (nbrs[i] && nbrs[i]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE) && nbrs[i]->GetPrimaryTile() != elptile)
+			if (nbrs[i] && nbrs[i]->GetProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE) && nbrs[i]->GetTile() != elptile)
 				{ nbr = nbrs[i]; break; }
 
 	// If we still don't have any eligible neighbour then quit now
@@ -2441,12 +2408,12 @@ void UI_ShipDesigner::ApplyConnectionChangeTool(INTVECTOR2 mouselocation)
 	if (!e1 || !e2 || e1 == e2) return;
 
 	// Get a reference to the primary tile linked to each element; if this is the same tile, we do not want to connect them
-	ComplexShipTile *t1 = e1->GetPrimaryTile();
-	ComplexShipTile *t2 = e2->GetPrimaryTile();
+	ComplexShipTile *t1 = e1->GetTile();
+	ComplexShipTile *t2 = e2->GetTile();
 	if (!t1 || !t2 || t1 == t2) return;
 
 	// Determine the direction of this connection from e1 > e2
-	Direction dir = Direction::None;
+	Direction dir = Direction::_Count;
 	if		(m_connectionchangetool_element2.x < m_connectionchangetool_element1.x)		dir = Direction::Left;
 	else if (m_connectionchangetool_element2.y < m_connectionchangetool_element1.y)		dir = Direction::Up;
 	else if (m_connectionchangetool_element2.x > m_connectionchangetool_element1.x)		dir = Direction::Right;
@@ -2523,31 +2490,48 @@ void UI_ShipDesigner::DeployCorridorTile(INTVECTOR2 location)
 	tile->SetElementLocation(elpos);
 
 	// Link this tile to the relevant parent objects
-	tile->LinkToParent(m_ship);
+	m_ship->AddTile(tile);
 
 	// Now we want to perform an update of this tile, plus its neighbours, to see if the connections will change
-	UpdateAllCorridorTilesAtElement(el);
+	UpdateTileAndNeighbours(tile);
+}
+
+// Updates a single tile and all underlying elements
+void UI_ShipDesigner::UpdateTile(ComplexShipTile *tile)
+{
+	// TODO: To be implemented using relevant logic from UpdateCorridorTilesAtElement()
 }
 
 // Updates a corridor tile and all its neighbours at the specified location, to make sure all connections are made correctly
-void UI_ShipDesigner::UpdateAllCorridorTilesAtElement(ComplexShipElement *el)
+void UI_ShipDesigner::UpdateTileAndNeighbours(ComplexShipTile *tile)
 {
 	// Parameter checks
-	if (!el) return;
+	if (!tile) return;
 	
-	// Check the element at this location first
-	UpdateCorridorTileAtElement(el);
+	// Check this tile first
+	UpdateTile(tile);
 
-	// Now also update any neighbouring tiles
-	if (el->GetLeft()) UpdateCorridorTileAtElement(el->GetLeft());
-	if (el->GetUp()) UpdateCorridorTileAtElement(el->GetUp());
-	if (el->GetRight()) UpdateCorridorTileAtElement(el->GetRight());
-	if (el->GetDown()) UpdateCorridorTileAtElement(el->GetDown());
+	// Now also update any neighbouring tiles, if this is a corridor; DEBUG: TEMP: NOTE: this assumes corridor tiles are 1x1x1
+	if (tile->GetTileClass() == D::TileClass::Corridor)
+	{
+		ComplexShipElement *elements = m_ship->GetElements();
+		ComplexShipElement *el = m_ship->GetElement(tile->GetElementLocation());
+		if (elements && el)
+		{
+			int index;
+			index = el->GetNeighbour(Direction::Left); if (index != ComplexShipElement::NO_ELEMENT) UpdateCorridorTileAtElement(&elements[index]);
+			index = el->GetNeighbour(Direction::Up); if (index != ComplexShipElement::NO_ELEMENT) UpdateCorridorTileAtElement(&elements[index]);
+			index = el->GetNeighbour(Direction::Right); if (index != ComplexShipElement::NO_ELEMENT) UpdateCorridorTileAtElement(&elements[index]);
+			index = el->GetNeighbour(Direction::Down); if (index != ComplexShipElement::NO_ELEMENT) UpdateCorridorTileAtElement(&elements[index]);
+		}
+	}
 }
 
 // Updates a single tile at the specified location.  Does not consider neighbouring tiles
 void UI_ShipDesigner::UpdateCorridorTileAtElement(ComplexShipElement *el)
 {
+	return;
+	/*
 	bool left = false, up = false, right = false, down = false;
 
 	// Parameter check
@@ -2586,61 +2570,72 @@ void UI_ShipDesigner::UpdateCorridorTileAtElement(ComplexShipElement *el)
 	newtile->SetElementLocation(el->GetLocation());
 	newtile->LinkToParent(m_ship);
 
-	// Set the walkable connections from this element based on the surrounding corridor environment
-	/*el->SetConnectionLeft(left);
-	el->SetConnectionUp(up);				(Removed since we will set element connectivity based upon the actual tile connections) 
-	el->SetConnectionRight(right);
-	el->SetConnectionDown(down);*/
-
 	// Compile and validate the corridor tile
-	newtile->CompileAndValidateTile();
+	newtile->CompileAndValidateTile();*/
 }
 
 // Returns a set of flags determining the corridor environment surrounding this element
 void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *pOutLeft, bool *pOutUp, bool *pOutRight, bool *pOutDown)
 {
+	int index;
 	ComplexShipElement *en = NULL;
 	ComplexShipTile *nbr = NULL;
 	if (!el) return;
 
 	// Get the tile at this element 
-	ComplexShipTile *tile = el->GetPrimaryTile();
+	ComplexShipTile *tile = el->GetTile();
 	if (!tile || tile->GetClass() != D::TileClass::Corridor) return;
 
 	// Check left neighbour
-	en = el->GetLeft();
-	if (en) {	
-		nbr = en->GetPrimaryTile();
-		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Left) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Right))
-				(*pOutLeft) = true;
+	index = el->GetNeighbour(Direction::Left);
+	if (index != ComplexShipElement::NO_ELEMENT)
+	{
+		en = m_ship->GetElement(index);
+		if (en) {
+			nbr = en->GetTile();
+			if (nbr && nbr->GetClass() == D::TileClass::Corridor)
+				if (tile->HasConnection(NULL_INTVECTOR3, Direction::Left) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Right))
+					(*pOutLeft) = true;
+		}
 	}
 
 	// Check up neighbour
-	en = el->GetUp();
-	if (en) {	
-		nbr = en->GetPrimaryTile();
-		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Up) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Down))
-				(*pOutUp) = true;
+	index = el->GetNeighbour(Direction::Up);
+	if (index != ComplexShipElement::NO_ELEMENT)
+	{
+		en = m_ship->GetElement(index);
+		if (en) {
+			nbr = en->GetTile();
+			if (nbr && nbr->GetClass() == D::TileClass::Corridor)
+				if (tile->HasConnection(NULL_INTVECTOR3, Direction::Up) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Down))
+					(*pOutUp) = true;
+		}
 	}
 
 	// Check right neighbour
-	en = el->GetRight();
-	if (en) {	
-		nbr = en->GetPrimaryTile();
-		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Right) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Left))
-				(*pOutRight) = true;
+	index = el->GetNeighbour(Direction::Right);
+	if (index != ComplexShipElement::NO_ELEMENT)
+	{
+		en = m_ship->GetElement(index);
+		if (en) {
+			nbr = en->GetTile();
+			if (nbr && nbr->GetClass() == D::TileClass::Corridor)
+				if (tile->HasConnection(NULL_INTVECTOR3, Direction::Right) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Left))
+					(*pOutRight) = true;
+		}
 	}
 
 	// Check down neighbour
-	en = el->GetDown();
-	if (en) {
-		nbr = en->GetPrimaryTile();
-		if (nbr && nbr->GetClass() == D::TileClass::Corridor)
-			if (tile->HasConnection(NULL_INTVECTOR3, Direction::Down) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Up))
-				(*pOutDown) = true;
+	index = el->GetNeighbour(Direction::Down);
+	if (index != ComplexShipElement::NO_ELEMENT)
+	{
+		en = m_ship->GetElement(index);
+		if (en) {
+			nbr = en->GetTile();
+			if (nbr && nbr->GetClass() == D::TileClass::Corridor)
+				if (tile->HasConnection(NULL_INTVECTOR3, Direction::Down) || nbr->HasConnection(NULL_INTVECTOR3, Direction::Up))
+					(*pOutDown) = true;
+		}
 	}
 }
 
@@ -2843,26 +2838,23 @@ bool UI_ShipDesigner::TestTilePlacement(INTVECTOR3 location, D::TileClass tilecl
 	if (!el->IsBuildable()) return false;
 
 	// If the element is buildable, and there are no tiles currently linked to it, then we can return true immediately
-	if (!el->HasTiles()) return true;
+	ComplexShipTile *tile = el->GetTile();
+	if (!tile) return true;
 
 	// Test the tile class provided
 	if (tileclass == D::TileClass::Unknown) return false;
 	bool infrastructure = ComplexShipTile::IsInfrastructureTile(tileclass);
 
-	// Iterate over the tiles linked to this element
-	iContainsComplexShipTiles::ConstTileIterator it_end = el->GetTileIteratorEnd();
-	for (iContainsComplexShipTiles::ConstTileIterator it = el->GetTileIteratorStart(); it != it_end; ++it)
-	{
-		// Get the class of the tile currently in this place
-		D::TileClass existingclass = (*it)->GetClass();
-		bool existinginfra = ComplexShipTile::IsInfrastructureTile(existingclass);
+	// Get the class of the tile currently in this place
+	D::TileClass existingclass = tile->GetClass();
+	bool existinginfra = ComplexShipTile::IsInfrastructureTile(existingclass);
 
-		// If we are trying to deploy a 'normal' tile, then we cannot allow any other in this place aside from an infrastructure tile
-		if (!infrastructure && !existinginfra) return false;
+	// If we are trying to deploy a 'normal' tile, then we cannot allow any other in this place aside from an infrastructure tile
+	// TODO: This will no longer work since we link max one tile per element
+	if (!infrastructure && !existinginfra) return false;
 
-		// If we are trying to deploy an infrastructure tile, then we can always deploy unless a tile of the same class is already here
-		if (infrastructure && (tileclass == existingclass)) return false;
-	}
+	// If we are trying to deploy an infrastructure tile, then we can always deploy unless a tile of the same class is already here
+	if (infrastructure && (tileclass == existingclass)) return false;
 
 	// We have passed all checks so return true to signal that the tile can be placed here
 	return true;

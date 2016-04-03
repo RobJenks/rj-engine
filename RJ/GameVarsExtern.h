@@ -189,6 +189,13 @@ namespace Game {
 	extern const int C_OCTREE_MAX_NODE_ITEMS;							// The target object limit per octree node; can be overriden if required
 																		// based on current node size
 	extern const float C_OCTREE_MIN_NODE_SIZE;							// Minimum acceptable octree node size.  Overrides node count limit if required
+	extern const int C_ENVTREE_MAX_NODE_ITEMS;							// Target total object limit per envtree node; can be overriden if required 
+																		// based on current node size
+	extern const int C_ENVTREE_MIN_NODE_SIZE;							// Minimum acceptanble envtree node size, in elements.  Overrides node count
+																		// limit if required 
+	extern const INTVECTOR3 C_ENVTREE_MIN_NODE_SIZE_V;					// Vectorised form; minimum acceptable node size, in elements
+	extern const int C_ENVTREE_MAX_NODE_ITEMS_PER_TYPE;					// Max node items per category (e.g. objects, terrain) 
+	extern const float C_ENVIRONMENT_OBJECT_SEARCH_DISTANCE_MARGIN;		// Additional threshold used when finding objects to be tested in proximity calculations
 
 	// Camera-related constants
 	extern float C_DEFAULT_ZOOM_TO_SHIP_SPEED;				// Default number of seconds to zoom the camera from its current location to a ship
@@ -227,6 +234,7 @@ namespace Game {
 	extern XMVECTOR C_CS_ELEMENT_MIDPOINT_V;		// Midpoint of an element in each dimension  (replicated vector form)
 	extern XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V;		// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
 
+	extern int C_CS_ELEMENT_SIZE_LIMIT;					// Maximum element count for any complex ship element environment
 	extern float C_CS_PERIMETER_BEACON_FREQUENCY;		// The (approx, max) spacing between perimeter beacons on a capital ship
 	extern XMVECTOR C_CS_PERIMETER_BEACON_FREQUENCY_V;	// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)
 

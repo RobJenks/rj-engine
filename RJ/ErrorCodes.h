@@ -526,6 +526,10 @@ namespace ErrorCodes {
 	const Result		CannotCopyTileDataFromNullSource				= 4026;
 	const Result		InvalidComplexShipTileDefinitionClass			= 4027;
 	const Result		CouldNotCreateNewCSTileDefinition				= 4028;
+	const Result		CouldNotAllocateEnvironmentElementSpace			= 4029;
+	const Result		CannotAllocateElementSpaceForRotation			= 4030;
+	const Result		InvalidParametersToRotateElementSpace			= 4031;
+	const Result		CannotLoadComplexShipElementWithInvalidID		= 4032;
 
 	// Ship designer errors												(4400-4599)
 	const Result		ShipDesignerCannotLoadInvalidShipCode			= 4400;
@@ -571,6 +575,7 @@ namespace ErrorCodes {
 	const Result		SystemDoesNotExist								= 5603;
 	const Result		ObjectIsNotEnvironment							= 5604;
 	const Result		NoSpatialPartitioningTreeToRender				= 5605;
+	const Result		NoValidEnvironmentSpecified						= 5606;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

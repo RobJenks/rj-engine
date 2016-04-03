@@ -43,9 +43,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_id = GenerateNewUniqueID();
 
 	// Set properties to default values on object creation
-	m_parentship = NULL;
-	m_parentsection = NULL;
-	m_parentelement = NULL;
+	m_parent = NULL;
 	m_standardtile = false;
 	m_model = NULL;
 	m_multiplemodels = false;
@@ -54,7 +52,9 @@ ComplexShipTile::ComplexShipTile(void)
 	m_elementsize = NULL_INTVECTOR3;		
 	m_elementposition = NULL_VECTOR;
 	m_worldsize = NULL_VECTOR;
+	m_centre_point = NULL_VECTOR;
 	m_multielement = false;
+	m_bounding_radius = 1.0f;
 	m_boundingbox = new BoundingObject();
 	m_relativeposition = NULL_VECTOR;
 	m_worldmatrix = ID_MATRIX;
@@ -90,23 +90,31 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_classtype = C.GetTileClass();
 	m_elementlocation = C.GetElementLocation();
 	m_elementposition = C.GetElementPosition();
-	m_elementsize = C.GetElementSize();
 	m_worldsize = C.GetWorldSize();
 	m_model = C.GetModel();
-	m_rotation = C.GetRotation();
+	m_rotation = C.GetRotation(); 
 	m_boundingbox = BoundingObject::Copy(C.GetBoundingObject());
 	m_multiplemodels = C.HasCompoundModel();
 	m_models.CopyFrom(C.GetCompoundModelSet());
 	DefaultProperties = C.DefaultProperties;
 
+	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
+	// Per-element construction state can therefore always be initialised to NULL
+	if (C.GetConstructedStateConst())
+		m_constructedstate = C.GetConstructedStateConst()->CreateClone();
+	else
+		m_constructedstate = new ProductionCost();
+	m_elementconstructedstate = NULL;
+
+	// Set the element size of this tile, which recalculates relevant derived fields
+	SetElementSize(C.GetElementSize());
+
 	// We always reset the 'standard' flag to false on copy, since only a small subset of tiles in the global collection
 	// should ever be flagged as standard
 	m_standardtile = false;
 
-	// Set all parent pointers to NULL since the copied element will likely not share the same parent
-	m_parentship = NULL;
-	m_parentsection = NULL;
-	m_parentelement = NULL;
+	// Set parent pointer to NULL since the copied element will likely not share the same parent
+	m_parent = NULL;
 
 	// Copy the simulation parameters of our copy source, and treat the new object as having just been simulated
 	m_requiressimulation = C.SimulationIsActive();
@@ -117,11 +125,6 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	//for (int i = C.GetConnectionCount() - 1; i >= 0; i--)
 	for (ElementConnectionSet::size_type i = 0; i < C.GetConnectionCount(); ++i)
 		m_connections.push_back(C.GetConnection(i));
-
-	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
-	// Per-element construction state can therefore always be initialised to NULL
-	if (C.GetConstructedStateConst()) m_constructedstate = C.GetConstructedStateConst()->CreateClone();
-	m_elementconstructedstate = NULL;
 
 	// Recalculate tile data, relative position and world matrix based on this new data
 	RecalculateTileData();
@@ -157,8 +160,8 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	// Telement = translation from model centre to top-left corner (0.5*numelements*elementsize in world coords) + translation to element position
 	// Will switch y and z coordinates since we are moving from element to world space
 	// m_relativeposition = D3DXVECTOR3((float)(m_elementsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.x), ...
-	m_relativeposition = XMVectorAdd(XMVectorMultiply(m_worldsize, Game::C_CS_ELEMENT_MIDPOINT_V), m_elementposition);
-	
+	m_relativeposition = XMVectorAdd(XMVectorMultiply(m_worldsize, HALF_VECTOR), m_elementposition);
+
 	// Multiply the matrices together to determine the final tile world matrix
 	// World = (CentreTrans * Rotation * ElementPosTranslation)
 	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(
@@ -193,140 +196,85 @@ void ComplexShipTile::PerformRenderUpdate(void)
 	Fade.Update();
 }
 
-// Link this tile to a parent ship/sections/elements.  Used primarily on ship creation
-void ComplexShipTile::LinkToParent(ComplexShip *ship)
+// Event generated before the tile is added to an environment
+void ComplexShipTile::BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {
-	bool parentelementassigned = false, parentsectionassigned = false;
-	ComplexShipSection *prevsection = NULL;
-
-	// Make sure the parent pointer is valid
-	if (!ship) return;
-
-	// Raise the pre-link event for subclasses to implement as required
-	BeforeLinkToParent(ship);
-
-	// Clear the vector of terrain ID references; these will be repopulated when the tile is added to its new environment
+	// Clear all terrain object links; terrain associated with this tile will be recreated
+	// and added to the environment when the tile is added
 	ClearTerrainObjectLinks();
 
-	// Store a pointer to the parent object
-	m_parentship = ship;
-
-	// Iterate over the extent of elements covered by this tile and create parent links
-	for (int x=0; x<m_elementsize.x; x++) {
-		for (int y=0; y<m_elementsize.y; y++) {
-			for (int z=0; z<m_elementsize.z; z++) 
-			{
-				// Attempt to get the element at this location
-				INTVECTOR3 elpos = INTVECTOR3(m_elementlocation.x + x, m_elementlocation.y + y, m_elementlocation.z + z);
-				ComplexShipElement *el = ship->GetElement(elpos);
-
-				// Make sure the element is valid (it should be if the ship remains internally consistent)
-				if (!el) continue;
-
-				// Assign the first valid underlying element as the 'parent' element.  Most useful for 1x1 tiles
-				if (!parentelementassigned) { m_parentelement = el; parentelementassigned = true; }
-
-				// Also determine the section in which this element sits
-				ComplexShipSection *sec = ship->GetShipSectionContainingElement(elpos);		if (!sec) continue;
-
-				// Assign the first valid underlying section as the 'parent' section
-				if (!parentsectionassigned) { m_parentsection = sec; parentsectionassigned = true; }
-
-				// Link the element to this tile, which will also recalculate the element details
-				el->AddShipTile(this, true);
-
-				// IF this element sits within a different ship section, also perform linking to that section
-				/*if (sec != prevsection) {
-					prevsection = sec;
-					sec->AddShipTile(this, false);
-				}*/
-			}
-		}
-	}
-
-	// We have applied the tile to all elements and sections; now apply to the ship itself
-	m_parentship->AddShipTile(this, false);
-
-	// Raise the post-link event, again for subclasses to implement their own custom linking logic
-	AfterLinkToParent(ship);
+	// Store a pointer to the new environment (this may be NULL, if not being assigned anywhere)
+	m_parent = environment;
 }
 
-// Unlink this tile from its parent objects, applying any removal logic as part of the same process
-void ComplexShipTile::UnlinkFromParent(void)
+// Event generated after the tile is added to an environment
+void ComplexShipTile::AfterAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {
-	ComplexShipSection *prevsection = NULL;
 
-	// Make sure we do have a valid parent object
-	if (!m_parentship) return;
-
-	// Raise the pre-unlink event for subclasses to implement as required
-	BeforeUnlinkFromParent();
-
-	// Iterate over the extent of elements covered by this tile and remove parent links
-	for (int x=0; x<m_elementsize.x; x++) {
-		for (int y=0; y<m_elementsize.y; y++) {
-			for (int z=0; z<m_elementsize.z; z++) 
-			{
-				// Attempt to get the element at this location
-				INTVECTOR3 elpos = INTVECTOR3(m_elementlocation.x + x, m_elementlocation.y + y, m_elementlocation.z + z);
-				ComplexShipElement *el = m_parentship->GetElement(elpos);
-
-				// Make sure the element is valid (it should be if the ship remains internally consistent)
-				if (!el) continue;
-
-				// Also determine the section in which this element sits
-				ComplexShipSection *sec = m_parentship->GetShipSectionContainingElement(elpos);		if (!sec) continue;
-				
-				// Unlink the element from this tile, which will also recalculate the element details
-				el->RemoveShipTile(this);
-
-				// IF this element sits within a different ship section, also remove the link from that section
-				/*if (sec != prevsection) {
-					prevsection = sec;
-					sec->RemoveShipTile(this);
-				}*/
-			}
-		}
-	}
-
-	// Remove from the parent ship, keeping a temp pointer for the post-unlink event
-	ComplexShip *_ship = m_parentship;
-	m_parentship->RemoveShipTile(this);         
-
-	// Remove parent pointers from this tile
-	m_parentship = NULL;
-	m_parentsection = NULL;
-	m_parentelement = NULL;
-
-	// Raise the post-unlink event, again for subclasses to implement their own custom linking logic
-	// Use the temporary pointers to still provide a reference to the parents that were just removed
-	AfterUnlinkFromParent(_ship);
 }
 
-void ComplexShipTile::ApplyTile(ComplexShipElement *el)
+// Event generated before the tile is removed from an environment
+void ComplexShipTile::BeforeRemovedToEnvironment(iSpaceObjectEnvironment *environment)
 {
-	// Apply this tile to the element; first, the element should inherit all default tile properties
-	vector<ComplexShipElement::PropertyValue>::const_iterator prop_end = DefaultProperties.end();
-	for (vector<ComplexShipElement::PropertyValue>::const_iterator prop = DefaultProperties.begin(); prop != prop_end; ++prop)
-		if (ComplexShipElement::IsValidProperty(prop->prop))
-			el->SetProperty(prop->prop, prop->value);
 
-	// Apply any damage modifiers to the element
-	DamageSet::const_iterator dam_end = m_damagemodifiers.end();
-	for (DamageSet::const_iterator dam = m_damagemodifiers.begin(); dam != dam_end; ++dam)
-		el->AddDamageModifier((*dam));
+}
 
-	// See if there are any connection values specified for this element, and apply them if there are
-	INTVECTOR3 tgt = (el->GetLocation() - m_elementlocation);
-	ElementConnectionSet::const_iterator it_end = m_connections.end();
-	for (ElementConnectionSet::const_iterator it = m_connections.begin(); it != it_end; ++it)
-	{	
-		if (it->Location == tgt) el->SetConnectionInDirection(it->Connection, true);
+// Event generated after the tile is removed from an environment
+void ComplexShipTile::AfterRemovedFromEnvironment(iSpaceObjectEnvironment *environment)
+{
+	// Remove our pointer to the environment
+	m_parent = NULL;
+}
+
+// Applies the effects of this tile on the underlying elements
+void ComplexShipTile::ApplyTile(void)
+{
+	// Parameter check
+	if (!m_parent) return;
+
+	// Determine the extent of this tile, and ensure it is valid
+	INTVECTOR3 bounds = (m_elementlocation + m_elementsize);
+	if (!(bounds > m_elementlocation)) return;
+
+	// This tile will apply to all elements it covers
+	for (int x = m_elementlocation.x; x < bounds.x; ++x)
+	{
+		for (int y = m_elementlocation.y; y < bounds.y; ++y)
+		{
+			for (int z = m_elementlocation.z; z < bounds.z; ++z)
+			{
+				// Update the element
+				ApplyTileToElement(m_parent->GetElement(x, y, z));
+			}
+		}
 	}
 
 	// Now call the subclass method to apply class-specific properties to the elements
-	ApplyTileSpecific(el);
+	ApplyTileSpecific();
 }
+
+// Applies the effects of this tile to a specific underlying element
+void ComplexShipTile::ApplyTileToElement(ComplexShipElement *el)
+{
+	// Parameter check
+	if (!el) return;
+
+	// Set the element pointer to this tile
+	el->SetTile(this);
+
+	// Set element properties
+	el->SetProperties(DefaultProperties);
+
+	// See if there are any connection values specified for this element, and apply them if there are
+	INTVECTOR3 tgt = (el->GetLocation() - m_elementlocation);
+	el->SetConnectionState(0);
+	ElementConnectionSet::const_iterator it_end = m_connections.end();
+	for (ElementConnectionSet::const_iterator it = m_connections.begin(); it != it_end; ++it)
+	{
+		if ((*it).Location == tgt) el->SetConnectionStateInDirection(DirectionToBS((*it).Connection), true);
+	}
+}
+
 
 // Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
 int ComplexShipTile::GetConnection(INTVECTOR3 loc, Direction dir) const
@@ -337,39 +285,6 @@ int ComplexShipTile::GetConnection(INTVECTOR3 loc, Direction dir) const
 		if (m_connections[i].Location == loc && m_connections[i].Connection == dir) return i;
 	}
 	return -1;
-}
-
-// Updates the simulation state of this tile from its underlying element
-void ComplexShipTile::UpdateSimulationStateFromParentElements(void)
-{
-	// We will not simulate the tile by default
-	iObject::ObjectSimulationState state = iObject::ObjectSimulationState::NoSimulation;
-
-	// Loop across the range of elements that this tile covers
-	ComplexShipElement *el; iObject::ObjectSimulationState elstate;
-	INTVECTOR3 el_end = (m_elementlocation + m_elementsize);
-	for (int x = m_elementlocation.x; x < el_end.x; ++x)
-	{
-		for (int y = m_elementlocation.y; y < el_end.y; ++y)
-		{
-			for (int z = m_elementlocation.z; z < el_end.z; ++z)
-			{
-				// Attempt to retrieve the element at this location
-				el = m_parentship->GetElement(x, y, z);
-				if (!el) continue;
-
-				// Get the simulation state of this element, and upgrade our own state if it is "greater"
-				elstate = el->GetSimulationState();
-				if (iObject::CompareSimulationStates(state, elstate) == ComparisonResult::GreaterThan)
-				{
-					state = elstate;
-				}
-			}
-		}
-	}
-
-	// We can now set the simulation state of this tile.  No action will be taken if the state has not changed
-	SetSimulationState(state);
 }
 
 // Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
@@ -440,6 +355,12 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 
 	// Determine the world size of this tile based on the element size
 	m_worldsize = Game::ElementLocationToPhysicalPosition(m_elementsize);
+
+	// Determine the approximate radius of a bounding sphere that encompasses this tile
+	m_bounding_radius = GetElementBoundingSphereRadius(max(max(m_elementsize.x, m_elementsize.y), m_elementsize.z));
+
+	// Determine the centre point of this tile in world space
+	m_centre_point = XMVectorScale(Game::ElementLocationToPhysicalPosition(m_elementsize), 0.5f);
 
 	// Recalculate properties derived from the element size
 	RecalculateTileData(); 
@@ -663,7 +584,7 @@ void ComplexShipTile::RecalculateAggregateHealth(void)
 	ComplexShipElement *el;
 
 	// Before we start, make sure the ship & element size are valid to avoid any errors later
-	if (!m_parentship || m_elementsize.x == 0 || m_elementsize.y == 0 || m_elementsize.z == 0) return;
+	if (!m_parent || m_elementsize.x == 0 || m_elementsize.y == 0 || m_elementsize.z == 0) return;
 
 	// We will build up aggregate construction state by first summing the state of every element
 	m_aggregatehealth = 0.0f;
@@ -673,13 +594,13 @@ void ComplexShipTile::RecalculateAggregateHealth(void)
 		for (int y = 0; y < m_elementsize.y; y++) {
 			for (int z = 0; z < m_elementsize.z; z++)
 			{
-				el = m_parentship->GetElement(x, y, z);
+				el = m_parent->GetElement(x, y, z);
 				if (el) m_aggregatehealth += el->GetHealth();
 			}
 		}
 	}
 
-	// Divide through by the number of elements to get a average aggregate value
+	// Divide through by the number of elements to get an average aggregate value
 	m_aggregatehealth /= (m_elementsize.x * m_elementsize.y * m_elementsize.z);
 }
 

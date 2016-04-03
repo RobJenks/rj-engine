@@ -30,18 +30,18 @@ CSLifeSupportTile::CSLifeSupportTile(void)
 void CSLifeSupportTile::PerformTileSimulation(unsigned int delta_ms)
 {
 	// Parameter check
-	if (!m_parentship) return;
+	if (!m_parent) return;
 
 	// Update the ship gravity level; ship should take the maximum level of any life support systems on board
 	Gravity.Update(delta_ms);
-	m_parentship->UpdateGravity();
+	m_parent->UpdateGravity();
 	
 	// Update the oxygen levels
 	OxygenLevel.Update(delta_ms);
 	OxygenRange.Update(delta_ms);
 
 	// Refresh the oxygen content of all elements in range of this system
-	m_parentship->UpdateOxygenLevels();
+	m_parent->UpdateOxygenLevels();
 
 	// If all life-support parameters are now at their target value, stop simulating.  Otherwise we
 	// keep the flag set for continued simulation next frame
@@ -72,33 +72,8 @@ void CSLifeSupportTile::ReadClassSpecificXMLData(TiXmlElement *node)
 	// TODO: Do this
 }
 
-// The pre-parent-link event exposed by the base tile class
-void CSLifeSupportTile::BeforeLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The post-parent-link event exposed by the base tile class
-void CSLifeSupportTile::AfterLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The pre-parent-unlink event exposed by the base tile class
-void CSLifeSupportTile::BeforeUnlinkFromParent(void)
-{
-
-}
-
-// The post-parent-ulink event exposed by the base tile class
-void CSLifeSupportTile::AfterUnlinkFromParent(ComplexShip *oldship)
-{
-
-}
-
-
 // Apply the contents of the tile to its parent objects.  Called upon linking, plus on repair of the ship.  Inherited virtual.
-void CSLifeSupportTile::ApplyTileSpecific(ComplexShipElement *el)
+void CSLifeSupportTile::ApplyTileSpecific(void)
 {
 
 }

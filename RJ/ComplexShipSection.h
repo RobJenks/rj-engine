@@ -89,6 +89,9 @@ public:
 	// Recalculates all section statistics based upon the loadout and base statistics
 	void										RecalculateShipDataFromCurrentState(void);
 
+	// Overrides the iSpaceObject virtual method
+	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
+
 	// Implemented to satisfy iSpaceObject interface.  In reality all section positions are determined by the parent ship
 	CMPINLINE void								SimulateObject(void) { }
 

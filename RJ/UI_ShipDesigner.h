@@ -236,8 +236,7 @@ public:
 	void								RenderCorridorTile(CSCorridorTile *tile, INTVECTOR3 tilepos);
 
 	// Renders the section attach points for a complex ship element on the SD grid
-	void								RenderElementAttachPoints(	ComplexShipElement *el, std::vector<ComplexShipElement::ElementAttachPoint>::size_type rendercount,
-																	int shipxpos, int shipypos, INTVECTOR2 gridpos);
+	void								RenderElementAttachPoints(ComplexShipElement *el, int shipxpos, int shipypos, INTVECTOR2 gridpos);
 
 	// Rotates the ship section currently being dragged
 	void								RotateShipSection(void);
@@ -301,8 +300,11 @@ public:
 	void								AnalyseCorridorEnvironment(ComplexShipElement *el, bool *pOutLeft, bool *pOutUp, bool *pOutRight, bool *pOutDown);
 
 	// Updates a corridor tile and (optionally) its neighbours at the specified location, to make sure all connections are made correctly
+	void								UpdateTile(ComplexShipTile *tile);
+	void								UpdateTileAndNeighbours(ComplexShipTile *tile);
+
+	// Updates a single tile at the specified location.  Does not consider neighbouring tiles
 	void								UpdateCorridorTileAtElement(ComplexShipElement *el);
-	void								UpdateAllCorridorTilesAtElement(ComplexShipElement *el);
 
 	// Determines the actual range of elements that would be covered by a tile placement, taking into account things
 	// like fixed tile sizes.  Accepts a proposed start & end grid square as input, and returns a new value for the 

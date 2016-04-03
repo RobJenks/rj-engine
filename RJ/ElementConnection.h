@@ -13,7 +13,7 @@ struct ElementConnection
 	INTVECTOR3		Location;
 	Direction		Connection;
 
-	ElementConnection(void) { Location = INTVECTOR3(); Connection = Direction::None; }
+	ElementConnection(void) { Location = INTVECTOR3(); Connection = Direction::_Count; }
 	ElementConnection(INTVECTOR3 loc, Direction dir) { Location = loc; Connection = dir; }
 };
 

@@ -2,6 +2,7 @@
 #include "SimulationStateManager.h"
 #include "iActiveObject.h"
 #include "ObjectReference.h"
+#include "EnvironmentTree.h"
 
 #include "iEnvironmentObject.h"
 
@@ -12,7 +13,7 @@
 void iEnvironmentObject::InitialiseCopiedObject(iEnvironmentObject *source)
 {
 	// Pass control to all base classes
-	iActiveObject::InitialiseCopiedObject((iActiveObject*)source);
+	iActiveObject::InitialiseCopiedObject(source);
 }
 
 // Moves this object into a new environment
@@ -59,6 +60,16 @@ void iEnvironmentObject::SetEnvironmentOrientation(const FXMVECTOR orient)
 	RecalculateEnvironmentOrientationData();
 }
 
+// Changes the orientation of this object relative to its parent environment, recalculating all derived fields in the process
+void iEnvironmentObject::ChangeEnvironmentOrientation(const FXMVECTOR orient_delta)
+{
+	// Store the new relative orientation
+	m_envorientation = XMQuaternionMultiply(m_envorientation, orient_delta);
+
+	// Recalculate all dependent data
+	RecalculateEnvironmentOrientationData();
+}
+
 // Sets the position & orientation of this object relative to its parent environment, recalculating all derived fields in the process
 void iEnvironmentObject::SetEnvironmentPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
 {
@@ -76,11 +87,28 @@ void iEnvironmentObject::RecalculateEnvironmentPositionData(void)
 	{
 		// Transform the relative position by the parent world matrix to get this object's absolute position
 		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
+
+		// Determine the object element location, and update relevant data if we have just moved between elements
+		const INTVECTOR3 element_location = Game::PhysicalPositionToElementLocation(m_envposition);
+		if (element_location != m_element_location && m_env_treenode)
+		{
+			m_element_location = element_location;
+			if (element_location >= NULL_INTVECTOR3 && element_location < m_parent()->GetElementSize())
+			{
+				m_within_env = true;
+				m_env_treenode->ItemMoved(this);
+			}
+			else
+			{
+				m_within_env = false;
+			}
+		}
 	}
 	else
 	{
 		// If we have no parent object, absolute position == relative position
 		SetPosition(m_envposition);
+		m_within_env = false;
 	}
 }
 
@@ -89,7 +117,7 @@ void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 	if (m_parent())
 	{
 		// Multiply in the relative orientation to the parent's to get this object's absolute orientation
-		SetOrientation(m_envorientation * m_parent()->GetOrientation());
+		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent()->GetOrientation()));
 	}
 	else
 	{
@@ -110,12 +138,29 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 		// Derive absolute position & orientation based on the parent object's state
 		SetPosition(XMVector3TransformCoord(m_envposition, m_parent()->GetZeroPointWorldMatrix()));
 		SetOrientation(XMQuaternionMultiply(m_envorientation, m_parent()->GetOrientation()));
+
+		// Determine the object element location, and update relevant data if we have just moved between elements
+		const INTVECTOR3 element_location = Game::PhysicalPositionToElementLocation(m_envposition);
+		if (element_location != m_element_location && m_env_treenode)
+		{
+			m_element_location = element_location;
+			if (element_location >= NULL_INTVECTOR3 && element_location < m_parent()->GetElementSize())
+			{
+				m_within_env = true;
+				m_env_treenode->ItemMoved(this);
+			}
+			else
+			{
+				m_within_env = false;
+			}
+		}
 	}
 	else
 	{
 		// If we have no parent object, absolute values == relative values
 		SetPosition(m_envposition);
 		SetOrientation(m_envorientation);
+		m_within_env = false;
 	}
 
 	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance

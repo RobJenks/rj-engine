@@ -655,20 +655,15 @@ void UI_ModelBuilder::RefreshAllCollisionGeometry(void)
 {
 	// Collision OBB hierarchy - no refresh actions needed at this point
 
-	// Terrain objects - force all terrain objects into element (0,0,0) of the null environment, to ensure that they are
-	// always rendered regardless of their position/orientation
+	// Terrain objects - Add all terrain objects to the null environment
 	if (m_nullenv)
 	{
-		ComplexShipElement *el = m_nullenv->GetElement(0, 0, 0); 
-		if (el)
-		{
-			// First, remove all current references from the element
-			el->ClearAllTerrain();
+		// First, remove all current references from the element
+		m_nullenv->ClearAllTerrainObjects();
 
-			// Now add all terrain objects to this element
-			std::vector<StaticTerrain*>::size_type n = m_terrain.size();
-			for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) el->AddTerrainObject(m_terrain[i]);
-		}
+		// Now add all terrain objects to the environment
+		std::vector<StaticTerrain*>::size_type n = m_terrain.size();
+		for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) m_nullenv->AddTerrainObject(m_terrain[i]);
 	}
 }
 
@@ -1142,8 +1137,8 @@ void UI_ModelBuilder::ClearCollisionData(void)
 	if (m_object) m_object->CollisionOBB.Clear();
 
 	// Clear any terrain objects stored in the null placeholder environment, before we later remove from the
-	// central UI comtroller collection and deallocate them
-	m_nullenv->ClearAllTerrainObjects(false);
+	// central UI controller collection and deallocate them
+	m_nullenv->ClearAllTerrainObjects();
 
 	// Delete any terrain objects that have been created, then clear the vector
 	std::vector<StaticTerrain*>::size_type n = m_terrain.size();

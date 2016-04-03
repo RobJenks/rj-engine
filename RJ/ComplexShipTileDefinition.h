@@ -150,7 +150,7 @@ public:
 	~ComplexShipTileDefinition(void);
 
 	// Default property set applied to all elements of the tile; element-specific changes are then made when compiling the tile
-	vector<ComplexShipElement::PropertyValue>		DefaultProperties;
+	bitstring						DefaultProperties;
 
 	// Adds a new model to the tile model set
 	CMPINLINE bool AddItemToCompoundModelCollection(string type, string code, float prob)

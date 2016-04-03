@@ -15,33 +15,8 @@ CSQuartersTile::CSQuartersTile(void)
 	// Initialise default values
 }
 
-// The pre-parent-link event exposed by the base tile class
-void CSQuartersTile::BeforeLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The post-parent-link event exposed by the base tile class
-void CSQuartersTile::AfterLinkToParent(ComplexShip *ship)
-{
-
-}
-
-// The pre-parent-unlink event exposed by the base tile class
-void CSQuartersTile::BeforeUnlinkFromParent(void)
-{
-
-}
-
-// The post-parent-ulink event exposed by the base tile class
-void CSQuartersTile::AfterUnlinkFromParent(ComplexShip *oldship)
-{
-
-}
-
-
 // Apply the contents of the tile to its parent objects.  Called upon linking, plus on repair of the ship.  Inherited virtual.
-void CSQuartersTile::ApplyTileSpecific(ComplexShipElement *el)
+void CSQuartersTile::ApplyTileSpecific(void)
 {
 
 }

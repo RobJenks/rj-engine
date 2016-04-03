@@ -78,9 +78,6 @@ public:
 	// Populates the output vector with all interior simulation hubs in the specified system.  Appends to any existing contents.
 	void							GetAllInteriorSimulationHubsInSystem(SpaceSystem *system, std::vector<iEnvironmentObject*> & outResult);
 
-	// Updates the simulation state of every relevant object in the specified environment to a specific level of simulation
-	void							SetSimulationStateOfAllEnvironmentObjects(iSpaceObjectEnvironment *environment, iObject::ObjectSimulationState state);
-
 	// Updates the simulation state of every relevant object in the specified environment to a specific level of simulation.  The object 
 	// state will only be set if this would be an upgrade (ComparisonResult::GreaterThan) on its current simulation state
 	void							UpgradeSimulationStateOfAllEnvironmentObjects(iSpaceObjectEnvironment *environment, iObject::ObjectSimulationState state);

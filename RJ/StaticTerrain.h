@@ -9,6 +9,7 @@
 #include "OrientedBoundingBox.h"
 class Model;
 class StaticTerrainDefinition;
+class EnvironmentTree;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -44,6 +45,7 @@ public:
 	void											SetParentEnvironment(const iSpaceObjectEnvironment *env);
 	
 	CMPINLINE XMVECTOR								GetPosition(void) const							{ return m_data.Centre; }
+	CMPINLINE XMVECTOR								GetEnvironmentPosition(void) const				{ return m_data.Centre; }
 	void											SetPosition(const FXMVECTOR pos);
 
 	CMPINLINE XMVECTOR								GetOrientation(void) const						{ return m_orientation; }
@@ -66,12 +68,17 @@ public:
 	CMPINLINE float									GetCollisionRadius(void) const					{ return m_collisionradius; }
 	CMPINLINE float									GetCollisionRadiusSq(void) const				{ return m_collisionradiussq; }		// Read-only; derived from extent
 
+	CMPINLINE INTVECTOR3							GetElementLocation(void) const					{ return m_element_location; }
 	CMPINLINE INTVECTOR3							GetElementRangeMin(void) const					{ return m_element_min; }
 	CMPINLINE INTVECTOR3							GetElementRangeMax(void) const					{ return m_element_max; }
 	
 	// Returns a value indicating whether this terrain object spans multiple elements
 	CMPINLINE bool									SpansMultipleElements(void) const				{ return m_multielement; }
 	
+	// Pointer to the environment tree node this terrain object resides in
+	CMPINLINE EnvironmentTree *						GetEnvironmentTreeNode(void)					{ return m_env_treenode; }
+	CMPINLINE void									SetEnvironmentTreeNode(EnvironmentTree *node)	{ m_env_treenode = node; }
+
 	// Return or set the link to a parent tile, if one exists.  An ID of zero indicates there is no link
 	CMPINLINE Game::ID_TYPE							GetParentTileID(void) const						{ return m_parenttile; }
 	CMPINLINE void									SetParentTileID(Game::ID_TYPE ID)				{ m_parenttile = ID; }
@@ -119,8 +126,11 @@ protected:
 	float									m_collisionradius;					// Collision radius is derived based upon the object size
 	float									m_collisionradiussq;				// Precalculated squared collision radius for broadphase testing
 
+	INTVECTOR3								m_element_location;					// Location of the terrain centre in element space
 	INTVECTOR3								m_element_min, m_element_max;		// Store the range of elements that this terrain object spans
 	bool									m_multielement;						// Flag indicating whether we span >1 element, for render-time efficiency
+
+	EnvironmentTree *						m_env_treenode;						// Pointer to the environment tree node holding this object
 
 	Game::ID_TYPE							m_parenttile;						// Store the ID of the tile that 'owns' this object, if relevant
 

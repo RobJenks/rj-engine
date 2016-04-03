@@ -396,59 +396,17 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnviron
 	// Parameter check
 	if (!env) return;
 
-	// Store the element size upper bound to ensure we can restrict to a valid area
-	INTVECTOR3 envbound = env->GetElementSize(); --envbound.x; --envbound.y; --envbound.z;
-
-	// Determine the range of elements which will need to be checked for collision around this focal location.  Swap Y and Z coords as we 
-	// transition from space coordinates to environment coordinates
-	// INTVECTOR3 min_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP))), ..., ...
-	// INTVECTOR3 max_element = INTVECTOR3(max(0, min(envbound.x, (int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP))), ..., ...
-	XMVECTOR radiusv = XMVectorReplicate(radius);
-	XMVECTOR minv = XMVectorMax(NULL_VECTOR, XMVectorFloor(XMVectorMultiply(XMVectorSubtract(location, radiusv), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
-	XMVECTOR maxv = XMVectorMax(NULL_VECTOR, XMVectorFloor(XMVectorMultiply(XMVectorAdd(location, radiusv), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
-	
-	INTVECTOR3 min_element = IntVector3Min(Vector3ToIntVectorSwizzleYZ(minv), envbound);
-	INTVECTOR3 max_element = IntVector3Max(Vector3ToIntVectorSwizzleYZ(minv), envbound);
-
-	// Peform environment collision handling on the objects in each element in turn.  All elements should be valid since we
-	// clamped to the environment size
-	for (int x = min_element.x; x <= max_element.x; ++x)
+	// Iterate through all environment object and test any that are within the specified radius
+	XMVECTOR radius_sq = XMVectorReplicate(radius * radius);
+	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = env->Objects.end();
+	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = env->Objects.begin(); it != it_end; ++it)
 	{
-		for (int y = min_element.y; y <= max_element.y; ++y)
+		// If the object is within this radius then collision-test it now
+		const ObjectReference<iEnvironmentObject> & obj = (*it);
+		if (obj() && XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(location, obj()->GetEnvironmentPosition())), radius_sq))
 		{
-			for (int z = min_element.z; z <= max_element.z; ++z)
-			{
-				// Call the per-element collision handling method				
-				PerformEnvironmentCollisionDetection(env, x, y, z);
-			}
+			PerformEnvironmentCollisionDetection(obj());
 		}
-	}
-}
-
-// Performs collision detection for all objects in the specified element
-void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, int x, int y, int z)
-{
-	// Make sure the environment and the specified element are valid
-	if (!env) return;
-	ComplexShipElement *el = env->GetElement(x, y, z);
-	if (!el) return;
-
-	// Record the fact that we are checking this element around the focal object
-	++CollisionDetectionResults.EnvironmentCollisions.ElementsChecked;
-
-	// Loop through each active object in turn and test it for collisions
-	iEnvironmentObject *obj;
-	int n = (int)el->Objects.size();
-	for (int i = 0; i < n; ++i)
-	{
-		// Only check this object if the current element is its minimum element bound.  This avoids objects being
-		// checked multiple times where they exist across multiple elements
-		obj = el->Objects[i];
-		const INTVECTOR3 & el_min = obj->GetElementRangeMin();
-		if (!obj || el_min.x != x || el_min.y != y || el_min.z != z) continue;
-
-		// Perform collision detection for this object with its surroundings
-		PerformEnvironmentCollisionDetection(obj);
 	}
 }
 
@@ -463,108 +421,80 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 	// Record the fact that we are checking this object for collisions
 	++CollisionDetectionResults.EnvironmentCollisions.ObjectsChecked;
 
-	ComplexShipElement *el;
-	iEnvironmentObject *candidate; StaticTerrain *terrain;
-	std::vector<iEnvironmentObject*>::iterator a_it, a_it_end;
-	std::vector<StaticTerrain*>::iterator t_it, t_it_end;
-	OrientedBoundingBox *collider0, *collider1;
-
-	// Store references to the key fields we will require
-	const XMVECTOR & location = obj->GetEnvironmentPosition();
-	XMVECTOR radius = XMVectorReplicate(obj->GetCollisionSphereRadius());	
-
 	// Store the object local vertical momentum before handling any collisions.  We can then test this later to determine if the 
 	// object is on the 'ground'
 	float pre_lmY = XMVectorGetY(obj->PhysicsState.LocalMomentum);
 
-	// Determine the range of elements which will need to be checked for collision around this object (typically just 1, or a couple of adjacent elements)
-	// Swap Y and Z coords since we are moving from space to environment coordinates
-	// INTVECTOR3 min_element = INTVECTOR3((int)floorf((location.x - radius) * Game::C_CS_ELEMENT_SCALE_RECIP), ..., ...
-	// INTVECTOR3 max_element = INTVECTOR3((int)floorf((location.x + radius) * Game::C_CS_ELEMENT_SCALE_RECIP), ..., ...
-	INTVECTOR3 min_element = Vector3ToIntVectorSwizzleYZ(XMVectorFloor(XMVectorMultiply(XMVectorSubtract(location, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
-	INTVECTOR3 max_element = Vector3ToIntVectorSwizzleYZ(XMVectorFloor(XMVectorMultiply(XMVectorAdd(location, radius), Game::C_CS_ELEMENT_SCALE_RECIP_V)));
-	
-	// Check each of these elements in turn
-	for (int x = min_element.x; x <= max_element.x; ++x)
+	// Search for all terrain and active objects around the focal object
+	_envobj.clear(); _terrain.clear();
+	env->GetAllObjectsWithinDistance(obj, /*obj->GetCollisionSphereRadius()*/ Game::C_CS_ELEMENT_SCALE * 5.0f, &_envobj, &_terrain);
+
+	// First check for collisions against terrain objects
+	StaticTerrain *terrain;
+	std::vector<StaticTerrain*>::iterator t_it_end = _terrain.end();
+	for (std::vector<StaticTerrain*>::iterator t_it = _terrain.begin(); t_it != t_it_end; ++t_it)
 	{
-		for (int y = min_element.y; y <= max_element.y; ++y)
+		// Make sure this is a valid terrain object
+		terrain = (*t_it); if (!terrain) continue;
+
+		// Record the fact that we are testing this object/terrain collision pair
+		++CollisionDetectionResults.EnvironmentCollisions.ObjectVsTerrainChecks;
+
+		/* Broadphase collision check; determine whether object collision spheres intersect */
+		if (CheckBroadphaseCollision(obj->GetEnvironmentPosition(), obj->GetCollisionSphereRadius(), 
+										terrain->GetPosition(), terrain->GetCollisionRadius()) == false)
 		{
-			for (int z = min_element.z; z <= max_element.z; ++z)
+			continue;
+		}
+		else
+		{
+			// Broadphase collision detected, so perform full collision between these two objects.  Both are represented as OBBs
+			// Replace with OBBHierarchy method if required later, but for now all colliding environment objects are represented by single OBBs
+			++CollisionDetectionResults.EnvironmentCollisions.BroadphaseCollisions;
+
+			// Update the object collision hierarchy before executing narrowphase collision detection, if it has been invalidated
+			// since the last update.  Terrain OBB does not need to be updated; terrain objects store their environment-relative data
+			// in their OBB, and so this is always up-to-date with the latest environment pos/orient.  The collision detection method
+			// will handle transformation of object OBB data into that local coordinate frame, and performs a comparison in local
+			// environment coordinates.  There is therefore no need to update the terrain OBB data here.
+			//if (obj->CollisionOBB.IsInvalidated()) obj->CollisionOBB.UpdateFromObject(*obj);
+
+			// Now test the object collision against this world-space terrain data, and apply collision response if applicable
+			TestAndHandleTerrainCollision(env, obj, terrain);
+		}
+	}
+
+	// Now check for collisions against other active objects
+	iEnvironmentObject *candidate; OrientedBoundingBox *collider0, *collider1;
+	std::vector<iEnvironmentObject*>::iterator a_it_end = _envobj.end();
+	for (std::vector<iEnvironmentObject*>::iterator a_it = _envobj.begin(); a_it != a_it_end; ++a_it)
+	{
+		// Make sure this is a valid object
+		candidate = (*a_it); if (!candidate) continue;
+
+		// We only want to test a collision between two active objects once, i.e. we don't want to test (object vs candidate) and 
+		// then (candidate vs object).  To do this efficiently we only test collisions where object.ID < candidate.ID.  The 
+		// uniqueness and sequential nature of object IDs means this will always work
+		if (obj->GetID() >= candidate->GetID()) continue;
+
+		// Record the fact that we are testing this object/object collision pair
+		++CollisionDetectionResults.EnvironmentCollisions.ObjectVsObjectChecks;
+
+		/* Broadphase collision check; determine whether object collision spheres intersect */
+		if (CheckBroadphaseCollision(obj, candidate) == false)
+		{
+			continue;
+		}
+		else
+		{
+			// We have a broadphase collision
+			++CollisionDetectionResults.EnvironmentCollisions.BroadphaseCollisions;
+
+			// Perform full collision between these two objects
+			if (CheckFullCollision(obj, candidate, &collider0, &collider1))
 			{
-				// Get a reference to this element and make sure it exists (e.g. we haven't left the edge of the environment)
-				el = env->GetElement(x, y, z); 
-				if (!el) continue;
-
-				// Record the fact that we are checking for object collisions within this surrounding element
-				++CollisionDetectionResults.EnvironmentCollisions.ElementsCheckedAroundObjects;
-
-				// First check for collisions against terrain objects in the element
-				t_it_end = el->TerrainObjects.end();
-				for (t_it = el->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
-				{
-					// Make sure this is a valid terrain object
-					terrain = (*t_it); if (!terrain) continue;
-
-					// Record the fact that we are testing this object/terrain collision pair
-					++CollisionDetectionResults.EnvironmentCollisions.ObjectVsTerrainChecks;
-
-					/* Broadphase collision check; determine whether object collision spheres intersect */
-					if (CheckBroadphaseCollision(obj->GetEnvironmentPosition(), obj->GetCollisionSphereRadius(), 
-												 terrain->GetPosition(), terrain->GetCollisionRadius()) == false)
-					{
-						continue;
-					}
-					else
-					{
-						// Broadphase collision detected, so perform full collision between these two objects.  Both are represented as OBBs
-						// Replace with OBBHierarchy method if required later, but for now all colliding environment objects are represented by single OBBs
-						++CollisionDetectionResults.EnvironmentCollisions.BroadphaseCollisions;
-
-						// Update the object collision hierarchy before executing narrowphase collision detection, if it has been invalidated
-						// since the last update.  Terrain OBB does not need to be updated; terrain objects store their environment-relative data
-						// in their OBB, and so this is always up-to-date with the latest environment pos/orient.  The collision detection method
-						// will handle transformation of object OBB data into that local coordinate frame, and performs a comparison in local
-						// environment coordinates.  There is therefore no need to update the terrain OBB data here.
-						//if (obj->CollisionOBB.IsInvalidated()) obj->CollisionOBB.UpdateFromObject(*obj);
-
-						// Now test the object collision against this world-space terrain data, and apply collision response if applicable
-						TestAndHandleTerrainCollision(env, obj, terrain);
-					}
-				}
-
-				// Now check for collisions against other active objects in the element
-				a_it_end = el->Objects.end();
-				for (a_it = el->Objects.begin(); a_it != a_it_end; ++a_it)
-				{
-					// Make sure this is a valid object
-					candidate = (*a_it); if (!candidate) continue;
-
-					// We only want to test a collision between two active objects once, i.e. we don't want to test (object vs candidate) and 
-					// then (candidate vs object).  To do this efficiently we only test collisions where object.ID < candidate.ID.  The 
-					// uniqueness and sequential nature of object IDs means this will always work
-					if (obj->GetID() >= candidate->GetID()) continue;
-
-					// Record the fact that we are testing this object/object collision pair
-					++CollisionDetectionResults.EnvironmentCollisions.ObjectVsObjectChecks;
-
-					/* Broadphase collision check; determine whether object collision spheres intersect */
-					if (CheckBroadphaseCollision(obj, candidate) == false)
-					{
-						continue;
-					}
-					else
-					{
-						// We have a broadphase collision
-						++CollisionDetectionResults.EnvironmentCollisions.BroadphaseCollisions;
-
-						// Perform full collision between these two objects
-						if (CheckFullCollision(obj, candidate, &collider0, &collider1))
-						{
-							++CollisionDetectionResults.EnvironmentCollisions.Collisions;
-							HandleCollision(obj, candidate, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
-						}
-					}
-				}
+				++CollisionDetectionResults.EnvironmentCollisions.Collisions;
+				HandleCollision(obj, candidate, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
 			}
 		}
 	}

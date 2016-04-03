@@ -6,17 +6,23 @@
 #include <vector>
 #include "CompilerSettings.h"
 #include "GameDataExtern.h"
+#include "ALIGN16.h"
 class ComplexShipTile;
-using namespace std;
 
-// Class has no special alignment requirements
-class iContainsComplexShipTiles
+// 16-bit aligned to allow use of SIMD instruction set
+class iContainsComplexShipTiles : public ALIGN16 < iContainsComplexShipTiles >
 {
 
 public:
 
 	// Define the standard collection of ship tiles, and an iterator over the collection
-	typedef __declspec(align(16)) vector<__declspec(align(16)) ComplexShipTile*> ComplexShipTileCollection;
+	typedef __declspec(align(16)) ComplexShipTile AComplexShipTile;
+	typedef __declspec(align(16)) struct AComplexShipTile_P_T {
+		__declspec(align(16)) AComplexShipTile *value;
+		AComplexShipTile_P_T(ComplexShipTile *tile) : value(tile) { }
+	} AComplexShipTile_P;
+
+	typedef __declspec(align(16)) std::vector<AComplexShipTile_P> ComplexShipTileCollection;
 	typedef ComplexShipTileCollection::const_iterator ConstTileIterator;
 
 	// Default constructor
@@ -30,7 +36,7 @@ public:
 
 	// Standard methods to add/remove/retrieve the tiles that are contained within this parent object
 	CMPINLINE ComplexShipTileCollection &	GetTiles(void)				{ return m_tiles[0]; }
-	CMPINLINE ComplexShipTile *				GetTile(int index)			{ return (m_tiles[0])[index]; }
+	CMPINLINE ComplexShipTile *				GetTile(int index)			{ return (m_tiles[0])[index].value; }
 	CMPINLINE int							GetTileCount(void) const	{ return m_tilecount[0]; }
 	CMPINLINE bool							HasTiles(void) const		{ return m_tilecount[0] != 0; }
 	
@@ -46,15 +52,11 @@ public:
 	
 
 	// Collection of ship tile pointers, by tile type, for easy access to specific types of tile.  tiles[Unknown/0] is the full collection
-	CMPINLINE std::vector<ComplexShipTile*> & GetTilesOfType(D::TileClass type)			{ return m_tiles[(int)type]; }
+	CMPINLINE ComplexShipTileCollection &	  GetTilesOfType(D::TileClass type)			{ return m_tiles[(int)type]; }
 	CMPINLINE int							  GetTileCountOfType(D::TileClass type) const		
 	{ 
 		return (((int)type > 0 && (int)type < D::TileClass::_COUNT) ? m_tilecount[(int)type] : 0);
 	}
-
-	// Subclass methods that are triggered when a ship tile is added or removed
-	virtual void							ShipTileAdded(ComplexShipTile *tile) = 0;
-	virtual void							ShipTileRemoved(ComplexShipTile *tile) = 0;
 
 	// Methods to get/set the flag determining whether we suspend tile-based refreshes.  Used to allow all tiles to
 	// be added on ship creation without refreshing at every step
@@ -83,7 +85,8 @@ protected:
 	// Protected method to find and return an iterator to the supplied tile, or m_tiles[0].end() if it does not exist in the collection
 	CMPINLINE ComplexShipTileCollection::iterator FindShipTile(ComplexShipTile *tile)
 	{
-		return std::find(m_tiles[0].begin(), m_tiles[0].end(), tile);
+		return (std::find_if(m_tiles[0].begin(), m_tiles[0].end(),
+			[&tile](const AComplexShipTile_P & element) { return (element.value == tile); }));
 	}
 
 

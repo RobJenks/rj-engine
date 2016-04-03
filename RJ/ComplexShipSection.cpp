@@ -71,7 +71,7 @@ ComplexShipSection *ComplexShipSection::Create(ComplexShipSection *template_sec)
 void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 {
 	// Pass control to all base classes
-	iSpaceObject::InitialiseCopiedObject((iSpaceObject*)source);
+	iSpaceObject::InitialiseCopiedObject(source);
 
 
 	/* Now perform ComplexShipSection-specific initialisation logic for new objects */
@@ -83,7 +83,18 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 	m_hardpoints.clear();
 	std::vector<Hardpoint*>::size_type n = source->GetHardpoints().size();
 	m_hardpoints.reserve(n);
-	for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i) m_hardpoints.push_back(source->GetHardpoints()[i]->Clone());
+
+	// Copy each hardpoint in turn
+	Hardpoint *hp;
+	const std::vector<Hardpoint*> & hps = source->GetHardpoints();
+	for (std::vector<Hardpoint*>::size_type i = 0; i < n; ++i)
+	{
+		// All hardpoints should be non-null, but perform this check for safety
+		hp = hps[i]; if (!hp) continue;
+
+		// Clone and store the hardpoint
+		m_hardpoints.push_back(hp->Clone());
+	}
 }
 
 // Sets the section position relative to its parent ship, recalculating required data at the same time
@@ -297,4 +308,12 @@ std::string ComplexShipSection::DetermineXMLDataFilename(void)
 std::string ComplexShipSection::DetermineXMLDataFullFilename(void)
 {
 	return concat(DetermineXMLDataPath())("\\")(DetermineXMLDataFilename()).str();
+}
+
+
+// Overrides the iSpaceObject virtual method
+void ComplexShipSection::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
+{
+	// No section-specific logic; simply pass back to the base class
+	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
 }

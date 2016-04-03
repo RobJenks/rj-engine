@@ -205,8 +205,8 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 		// If the object is itself an environment, also update the state of all its occupants to strategic
 		if (spaceobject->IsEnvironment())
 		{
-			SetSimulationStateOfAllEnvironmentObjects(	(iSpaceObjectEnvironment*)spaceobject, 
-														iObject::ObjectSimulationState::StrategicSimulation);
+			env = (iSpaceObjectEnvironment*)spaceobject;
+			env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::StrategicSimulation);
 		}
 	}
 
@@ -230,8 +230,11 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 
 			// The simulation hub itself should always be fully-simulated; if it is an environment, so should its contents
 			spacehub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			if (spacehub->IsEnvironment()) SetSimulationStateOfAllEnvironmentObjects(	(iSpaceObjectEnvironment*)spacehub, 
-																						 iObject::ObjectSimulationState::FullSimulation);
+			if (spacehub->IsEnvironment())
+			{
+				env = (iSpaceObjectEnvironment*)spaceobject;
+				env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
+			}
 
 			// Get all objects within the simulation hub radius from this object and iterate through them
 			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(spacehub, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
@@ -250,7 +253,7 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 				if (spaceobject->IsEnvironment())
 				{
 					env = (iSpaceObjectEnvironment*)spaceobject;
-					SetSimulationStateOfAllEnvironmentObjects(env, iObject::ObjectSimulationState::TacticalSimulation);
+					env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::TacticalSimulation);
 				}
 			}
 		}
@@ -278,7 +281,7 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 
 			// All objects sharing the environment with this interior hub, and the environment itself, should also be fully simulated
 			env->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			SetSimulationStateOfAllEnvironmentObjects(env, iObject::ObjectSimulationState::FullSimulation);
+			env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
 
 			// We also want to update any space objects within range of this hub's environment
 			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
@@ -324,7 +327,7 @@ void SimulationStateManager::EvaluateSimulationStateInIsolatedInteriorEnvironmen
 		{
 			// The environment is a space simulation hub; we therefore want to set it & all its contents to full simulation
 			environment->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			SetSimulationStateOfAllEnvironmentObjects(environment, iObject::ObjectSimulationState::FullSimulation);
+			environment->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
 
 			// We can return immediately now that everything is at full simulation
 			return;
@@ -339,7 +342,7 @@ void SimulationStateManager::EvaluateSimulationStateInIsolatedInteriorEnvironmen
 		{
 			// An interior simulation hub is within the environment, so again we want to set everything to full simulation
 			environment->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			SetSimulationStateOfAllEnvironmentObjects(environment, iObject::ObjectSimulationState::FullSimulation);
+			environment->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
 
 			// We can return immediately now that everything is at full simulation
 			return;
@@ -350,7 +353,7 @@ void SimulationStateManager::EvaluateSimulationStateInIsolatedInteriorEnvironmen
 	// of determining whether tactical or strategic simulation is more appropriate.  Assign tactical simulation
 	// in this case for prudence
 	environment->SetSimulationState(iObject::ObjectSimulationState::TacticalSimulation);
-	SetSimulationStateOfAllEnvironmentObjects(environment, iObject::ObjectSimulationState::TacticalSimulation);
+	environment->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::TacticalSimulation);
 }
 
 // Populates the output vector with all space-based simulation hubs in the specified system.  Appends to any existing contents.
@@ -656,31 +659,6 @@ int SimulationStateManager::DetermineSimulationHubCountInSystem(SpaceSystem *sys
 
 	// Return the total count
 	return count;
-}
-
-// Updates the simulation state of every relevant object in the specified environment to a specific level of simulation
-void SimulationStateManager::SetSimulationStateOfAllEnvironmentObjects(iSpaceObjectEnvironment *environment, iObject::ObjectSimulationState state)
-{
-	// Parameter check
-	if (!environment) return;
-
-	// Iterate through all elements in the environment and set their simulation state.  This will also automatically
-	// update the simulation state of any linked elements
-	INTVECTOR3 elsize = environment->GetElementSize();
-	for (int x = 0; x < elsize.x; ++x)
-		for (int y = 0; y < elsize.y; ++y)
-			for (int z = 0; z < elsize.z; ++z)
-				environment->GetElementDirect(x, y, z)->SetSimulationState(state);
-
-	// Iterate through all objects in the environment and change their state.  We have to do this separately
-	// since they will only inherit state from their parent element upon moving to a different element.  We
-	// therefore force it here to make sure the state is updated immediately
-	std::vector<ObjectReference<iEnvironmentObject>>::iterator it_end = environment->Objects.end();
-	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it = environment->Objects.begin(); it != it_end; ++it)
-	{
-		// Set the simulation state of this object
-		if ((*it)()) (*it)()->SetSimulationState(state);
-	}
 }
 
 // Updates the simulation state of every relevant object in the specified environment to a specific level of simulation.  The object 

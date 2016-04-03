@@ -355,7 +355,7 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, f
 	path->AddNode(m_position, m_orientation, 0.0f);
 
 	// Get the vector from camera > centre of target in world space
-	XMVECTOR localcentre = XMVectorMultiply(target->GetSize(), HALF_VECTOR);
+	XMVECTOR localcentre = NULL_VECTOR; 
 	XMVECTOR targetpos = XMVector3TransformCoord(localcentre, target->GetWorldMatrix());
 	XMVECTOR targetvec = XMVectorSubtract(targetpos, m_position);
 	XMVECTOR targetvec_norm = XMVector3NormalizeEst(targetvec);

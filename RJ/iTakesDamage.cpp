@@ -57,3 +57,9 @@ bool iTakesDamage::ApplyDamage(const DamageSet & damage)
 	// The object was damaged but not destroyed, so return false
 	return false;
 }
+
+// Destructor
+iTakesDamage::~iTakesDamage(void)
+{
+
+}

@@ -21,7 +21,7 @@ iSpaceObject::iSpaceObject(void)
 void iSpaceObject::InitialiseCopiedObject(iSpaceObject *source)
 {
 	// Pass control to all base classes
-	iActiveObject::InitialiseCopiedObject((iActiveObject*)source);
+	iActiveObject::InitialiseCopiedObject(source);
 }
 
 // Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate

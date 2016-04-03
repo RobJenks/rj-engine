@@ -232,7 +232,7 @@ void Player::MovePlayerActor(Direction direction, bool run)
 void Player::RotatePlayerView(float y, float x)
 {
 	if (!m_actor()) return;
-
+	
 	// Turn the actor by the specified angle about the y axis
 	m_actor()->Turn(y);
 
@@ -313,7 +313,8 @@ void Player::EnterEnvironment(ComplexShip *complexship)
 	if (!complexship || !m_actor()) return;
 
 	// Get a reference to the first corridor tile within this ship (NOTE: TODO: we can later locate the bridge/entry doors and move the player there)
-	ComplexShipTile *tile = complexship->GetFirstTileOfType(D::TileClass::Corridor);
+	if (complexship->GetTileCountOfType(D::TileClass::Corridor) == 0) return;
+	ComplexShipTile *tile = complexship->GetTilesOfType(D::TileClass::Corridor)[0].value;
 	if (!tile) return;
 
 	// Set the player to be on-foot within the complex ship
@@ -324,18 +325,17 @@ void Player::EnterEnvironment(ComplexShip *complexship)
 	if (m_playership()) m_playership()->RemoveSimulationHub();
 	m_actor()->SetAsSimulationHub();
 
-	// Determine an offset to apply that will place the player in the centre of a specific element
-	float centreoffset = Game::ElementLocationToPhysicalPosition(1) * 0.5f;
-	XMVECTOR offset = XMVectorSet(centreoffset, 0.0f, centreoffset, 0.0f);			// TODO: Set at just above floor height in future
+	// Determine a multiplier on tile size to apply that will position the player within the tile
+	XMVECTOR position_within_tile = XMVectorSet(0.5f, 0.5f, 0.5f, 0.0f);			// TODO: Set at just above floor height in future
 
 	// Set the actor's parent environment to this ship
 	m_actor()->MoveIntoEnvironment(complexship);
 
 	// Move the player to be within this identified tile within the ship
 	// Pos = (ELocation + (ESize * 0.5))
-	m_actor()->SetEnvironmentPositionAndOrientation(Game::ElementPartialLocationToPhysicalPosition(
-		XMVectorAdd(VectorFromIntVector3(tile->GetElementLocation()),
-		XMVectorMultiply(VectorFromIntVector3(tile->GetElementSize()), HALF_VECTOR))), ID_QUATERNION);
+	m_actor()->SetEnvironmentPositionAndOrientation(XMVectorAdd(
+		Game::ElementLocationToPhysicalPosition(tile->GetElementLocation()),
+		XMVectorMultiply(tile->GetWorldSize(), position_within_tile)), ID_QUATERNION);
 
 	// Update the player state to take account of its new environment
 	UpdatePlayerState();

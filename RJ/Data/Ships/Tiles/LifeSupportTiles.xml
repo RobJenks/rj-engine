@@ -51,7 +51,7 @@
     <Code>LIFESUPPORT_HUGE_01</Code>
     <Name>Huge Life Support Systems</Name>
     <PrimaryTile>True</PrimaryTile>
-    <Size x="1" y="1" z="1" />
+    <Size x="3" y="3" z="1" />
     <Level>1</Level>
     <DefaultProperty name="active" value="true" />
     <DefaultProperty name="walkable" value="true" />

@@ -123,10 +123,12 @@ bool IO::Data::SaveSpaceObjectEnvironmentData(TiXmlElement *node, iSpaceObjectEn
 	IO::Data::LinkIntVector3AttrXMLElement("ElementSize", elsize, node);
 
 	// Add an entry for each complex ship element
-	for (int x = 0; x < elsize.x; ++x)
-		for (int y = 0; y < elsize.y; ++y)
-			for (int z = 0; z < elsize.z; ++z)
-				IO::Data::SaveComplexShipElement(node, object->GetElement(x, y, z));
+	ComplexShipElement *elements = object->GetElements(); if (!elements) return false;
+	int n = object->GetElementCount();
+	for (int i = 0; i < n; ++i)
+	{
+		IO::Data::SaveComplexShipElement(node, elements[i]);
+	}
 
 	// Return success
 	return true;
@@ -225,10 +227,10 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 
 	// Save all tile data for the ship
 	TiXmlElement *tile;
-	iContainsComplexShipTiles::ConstTileIterator t_it_end = object->GetTileIteratorEnd();
-	for (iContainsComplexShipTiles::ConstTileIterator t_it = object->GetTileIteratorStart(); t_it != t_it_end; ++t_it)
+	iContainsComplexShipTiles::ConstTileIterator t_it_end = object->GetTiles().end();
+	for (iContainsComplexShipTiles::ConstTileIterator t_it = object->GetTiles().begin(); t_it != t_it_end; ++t_it)
 	{
-		tile = (*t_it)->GenerateXML();
+		tile = (*t_it).value->GenerateXML();
 		if (tile) node->LinkEndChild(tile);
 	}
 
@@ -303,44 +305,31 @@ Result IO::Data::SaveComplexShipSectionInstance(TiXmlElement *parent, ComplexShi
 	return ErrorCodes::NoError;
 }
 
-Result IO::Data::SaveComplexShipElement(TiXmlElement *parent, ComplexShipElement *e)
+Result IO::Data::SaveComplexShipElement(TiXmlElement *parent, const ComplexShipElement &e)
 {
 	// Parameter check
-	if (!parent || !e) return ErrorCodes::CannotSaveComplexShipElementWithNullReferences;
+	if (!parent) return ErrorCodes::CannotSaveComplexShipElementWithNullReferences;
 
 	// If this is an inactive element then we don't need to save anything, since this is the default
-	if (!e->IsActive()) return ErrorCodes::NoError;
+	if (!e.IsActive()) return ErrorCodes::NoError;
 
-	// Create a node for this element, with location specified in the attributes
-	TiXmlElement *node = IO::Data::NewIntVector3AttrXMLElement(D::NODE_ComplexShipElement, e->GetLocation());
+	// Create a node for this element, with ID specified in the attributes
+	TiXmlElement *node = new TiXmlElement(D::NODE_ComplexShipElement);
+	node->SetAttribute("id", e.GetID());
 
-	// Create a node for any element properties that aren't set to their default values
-	TiXmlElement *nprop = NULL;
-	for (int i = 0; i < ComplexShipElement::PROPERTY::PROPERTY_COUNT; i++)
+	// Store all other element data
+	IO::Data::LinkIntVector3AttrXMLElement("elementlocation", e.GetLocation(), node);
+	IO::Data::LinkIntegerXMLElement("properties", e.GetProperties(), node);
+	IO::Data::LinkDoubleXMLElement("health", e.GetHealth(), node);
+	IO::Data::LinkDoubleXMLElement("connections", e.GetConnectionState(), node);
+
+	// Add all attach point data
+	TiXmlElement *attach;
+	for (int i = 0; i < ComplexShipElement::AttachType::_AttachTypeCount; ++i)
 	{
-		if (e->GetProperty(i) != ComplexShipElement::DefaultPropertyValues[i])
-		{
-			// Create the property node if we have at least one different property
-			if (!nprop) nprop = new TiXmlElement("Properties");
-
-			// Add an attribute for this property
-			nprop->SetAttribute(ComplexShipElement::TranslatePropertyToName((ComplexShipElement::PROPERTY)i).c_str(), 
-							   (e->GetProperty(i) ? "true" : "false"));
-		}
-	}
-
-	// If we have any non-default properties then add the node now
-	if (nprop) node->LinkEndChild(nprop);
-
-	// Add entries for any attach points linked to this element
-	ComplexShipElement::AttachPointCollection::size_type n = e->GetAttachPointCount();
-	ComplexShipElement::AttachPointCollection *points = e->GetAttachPoints();
-	for (ComplexShipElement::AttachPointCollection::size_type i = 0; i < n; ++i)
-	{
-		TiXmlElement *apoint = new TiXmlElement( "AttachPoint" );
-		apoint->SetAttribute("edge", DirectionToString(points->at(i).Edge).c_str());
-		apoint->SetAttribute("type", ComplexShipElement::AttachTypeToString(points->at(i).Type).c_str() );
-		node->LinkEndChild(apoint);
+		attach = IO::Data::NewIntegerXMLElement("attachpoint", e.GetAttachmentState((ComplexShipElement::AttachType)i));
+		attach->SetAttribute("type", i);
+		node->LinkEndChild(attach);
 	}
 
 	// Finally link the new node to the parent and return success

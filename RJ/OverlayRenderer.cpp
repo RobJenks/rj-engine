@@ -16,6 +16,7 @@
 #include "Order.h"
 #include "Order_ActorTravelToPosition.h"
 #include "OrientedBoundingBox.h"
+#include "EnvironmentTree.h"
 class iShader;
 
 #include "OverlayRenderer.h"
@@ -206,16 +207,16 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRender
 	trans.r[3] = XMVectorSetX(trans.r[3], 0.0f);						// now has only y-translation
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 4: fwd, above origin
 	RenderLine(mfinal, colour);
-
+	
 	// Now handle edges in the right (X) direction
 	//D3DXMatrixScaling(&scale, thickness, thickness, xSize); | scale._33 = xSize;					
-	scale.r[2] = XMVectorSetX(scale.r[2], xSize);							// update z-scaling factor to the length of an X side
+	scale.r[2] = XMVectorSetZ(scale.r[2], xSize);							// update z-scaling factor to the length of an X side
 	scale_x_rot = XMMatrixMultiply(scale, m_matrix_yrot);
 
 	trans.r[3] = XMVectorSetZ(trans.r[3], thickness);						// translate forwards so in line
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 5: right, above origin
 	RenderLine(mfinal, colour);
-
+	
 	trans.r[3] = XMVectorSetZ(trans.r[3], zSize);							// x-translation (in fwd direction)
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 6: right, above & in front of origin
 	RenderLine(mfinal, colour);
@@ -449,6 +450,13 @@ void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive,
 	}
 }
 
+// Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
+void XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, OverlayRenderer::RenderColour colour)
+{
+	RenderNode(XMMatrixTranslationFromVector(pos), colour);
+}
+
+
 // Method to add a node for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Spins in place.
 void XM_CALLCONV OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
 {
@@ -522,6 +530,27 @@ void OverlayRenderer::RenderActorPath(Actor *actor, float thickness)
 	}
 }
 
+void OverlayRenderer::DebugRenderEnvironmentTree(const EnvironmentTree *tree, bool include_children)
+{
+	// Parameter check
+	if (!tree) return;
+	const iSpaceObjectEnvironment *env = tree->GetEnvironment();
+	if (!env) return;
+
+	// Create a world matrix that will translate the rendered box into position, then render it
+	XMFLOAT3 sizef = tree->GetSizeF();
+	XMMATRIX world = XMMatrixMultiply(XMMatrixTranslationFromVector(tree->GetMin()), env->GetZeroPointWorldMatrix());
+	RenderBox(world, (tree->GetTotalItemCount() == 0 ? RenderColour::RC_Red : RenderColour::RC_Green),
+		(tree->GetTotalItemCount() == 0 ? 0.25f : 0.5f), sizef.x, sizef.y, sizef.z);
+
+	// Now also render children if required
+	if (include_children)
+	{
+		int children = tree->GetChildCount();
+		for (int i = 0; i < children; ++i)
+			DebugRenderEnvironmentTree(tree->GetActiveChildNode(i), true);
+	}
+}
 
 // Shutdown method to deallocate all resources maintained by the renderer
 void OverlayRenderer::Shutdown(void)

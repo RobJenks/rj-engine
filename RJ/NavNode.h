@@ -15,7 +15,8 @@ struct NavNodeConnection
 	int						ConnectionCost;		// The cost of traversing this connection.  Generally equivalent to the
 												// straight-line distance from this node to the target.  Int for efficiency.
 	
-	NavNodeConnection(NavNode *target, int cost) { Target = target; ConnectionCost = cost; }
+	CMPINLINE NavNodeConnection(NavNode *target, int cost) { Target = target; ConnectionCost = cost; }
+	CMPINLINE void operator=(const NavNodeConnection & rhs) { Target = rhs.Target; ConnectionCost = rhs.ConnectionCost; }
 };
 
 // Struct holding data on a navigation node, used by actors to route around the interior of ships/stations
@@ -44,7 +45,7 @@ public:
 	int						NumConnections;		// The number of connections from this node to others
 
 	// Constructors
-	NavNode(int _index, ComplexShipElement *_el, INTVECTOR3 _position, float _cost)
+	CMPINLINE NavNode(int _index, ComplexShipElement *_el, INTVECTOR3 _position, float _cost)
 	{
 		Index = _index; Element = _el; Position = _position; NodeCost = _cost;
 	}

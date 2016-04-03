@@ -177,6 +177,15 @@ namespace Game {
 	const int C_OCTREE_MAX_NODE_ITEMS = 12;					// The target object limit per octree node; can be overriden if required
 															// based on current node size
 	const float C_OCTREE_MIN_NODE_SIZE = 250.0f;			// Minimum acceptable octree node size.  Overrides node count limit if required
+	const int C_ENVTREE_MAX_NODE_ITEMS = 12;				// Target total object limit per envtree node; can be overriden if required 
+															// based on current node size
+	const int C_ENVTREE_MIN_NODE_SIZE = 2;					// Minimum acceptanble envtree node size, in elements.  Overrides node count
+															// limit if required 
+	const INTVECTOR3 C_ENVTREE_MIN_NODE_SIZE_V				// Vectorised form; minimum acceptable node size, in elements
+		= INTVECTOR3(C_ENVTREE_MIN_NODE_SIZE);					
+	const int C_ENVTREE_MAX_NODE_ITEMS_PER_TYPE				// Max node items per category (e.g. objects, terrain) 
+		= C_ENVTREE_MAX_NODE_ITEMS / 2;		
+	const float C_ENVIRONMENT_OBJECT_SEARCH_DISTANCE_MARGIN = 25.0f;	// Additional threshold used when finding objects to be tested in proximity calculations
 
 	// Camera-related constants
 	float C_DEFAULT_ZOOM_TO_SHIP_SPEED = 1.75f;				// Default number of seconds to zoom the camera from its current location to a ship
@@ -188,7 +197,7 @@ namespace Game {
 	float C_DEBUG_CAMERA_ROLL_SPEED = 2.0f;					// The speed at which the debug camera will revert its roll component
 
 	// Player-related contants
-	float C_PLAYER_MOUSE_TURN_MODIFIER_YAW = 6.0f;			// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
+	float C_PLAYER_MOUSE_TURN_MODIFIER_YAW = 500.0f;		// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
 	float C_PLAYER_MOUSE_TURN_MODIFIER_PITCH = 500.0f;		// Modifier to pitch speed (about X) when using the mouse, i.e. the mouse sensitivity
 	float C_PLAYER_PITCH_MIN = PI * -0.4f;					// Minimum possible pitch of the player view (i.e. furthest extent we can look down)
 	float C_PLAYER_PITCH_MAX = PI * 0.4f;					// Maximum possible pitch of the player view (i.e. furthest extent we can look up)
@@ -214,6 +223,8 @@ namespace Game {
 	XMVECTOR C_CS_ELEMENT_SCALE_V = XMVectorReplicate(C_CS_ELEMENT_SCALE);				// The physical size of each CS element in space (replicated vector form)
 	XMVECTOR C_CS_ELEMENT_MIDPOINT_V = XMVectorReplicate(C_CS_ELEMENT_MIDPOINT);		// Midpoint of an element in each dimension  (replicated vector form)
 	XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V = XMVectorReplicate(C_CS_ELEMENT_SCALE_RECIP);	// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
+
+	int C_CS_ELEMENT_SIZE_LIMIT = (500 * 500 * 100);									// Maximum element count for any complex ship element environment
 	float C_CS_PERIMETER_BEACON_FREQUENCY = 400.0f;										// The (approx, max) spacing between perimeter beacons on a capital ship
 	XMVECTOR C_CS_PERIMETER_BEACON_FREQUENCY_V = 
 		XMVectorReplicate(C_CS_PERIMETER_BEACON_FREQUENCY);								// The (approx, max) spacing between perimeter beacons on a capital ship (vectorised)

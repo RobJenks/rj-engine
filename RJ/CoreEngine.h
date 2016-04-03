@@ -47,6 +47,7 @@ class TurretController;
 class OverlayRenderer;
 class BasicProjectileSet;
 class VolLineShader;
+class EnvironmentTree;
 struct GameConsoleCommand;
 struct VolumetricLine;
 
@@ -241,11 +242,15 @@ public:
 	void DebugRenderSpaceCollisionBoxes(void);
 	void DebugRenderEnvironmentCollisionBoxes(void);
 	void DebugRenderSpatialPartitioningTree(void);
+	void DebugRenderEnvironmentTree(void);
 
-	// Gets or sets the environment that is the subject of debug terrain rendering
+	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
 	CMPINLINE void SetDebugTerrainRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvboxes = environment_id; }
+	CMPINLINE Game::ID_TYPE GetDebugTreeRenderEnvironment(void) const { return m_debug_renderenvtree; }
+	CMPINLINE void SetDebugTreeRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvtree = environment_id; }
 
+	
 	// Structure keeping track of render info per frame
 	struct EngineRenderInfoData
 	{
@@ -285,6 +290,7 @@ public:
 	{
 		None = 0,
 		RenderTree,
+		RenderEnvTree,
 		DisableHullRendering,
 		RenderOBBs,
 		RenderTerrainBoxes,
@@ -520,13 +526,8 @@ public:
 	// Render an object with an articulated model.  Protected; called only from RenderObject()
 	void                    RenderObjectWithArticulatedModel(iObject *object);
 
-	// Recursively analsyses and renders a sector of the environment.  Performs binary splitting to efficiently test visibility.
-	// Only called internally so no parameter checks are performed, for efficiency.
-	void					RenderObjectEnvironmentSector(iSpaceObjectEnvironment *environment, const INTVECTOR3 & start, const INTVECTOR3 & size);
-
-	// Renders the contents of an element, including all linked tiles, objects & terrain.  Updates the temporary
-	// render lists to ensure an item that spans multiple elements is not rendered more than once
-	void					RenderObjectEnvironmentSectorContents(iSpaceObjectEnvironment *environment, const INTVECTOR3 & element);
+	// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
+	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node);
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
 	AXMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
@@ -551,12 +552,14 @@ public:
 	AXMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
 	AXMVECTOR_P					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
 	AXMVECTOR_P					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
+	std::vector<EnvironmentTree*> m_tmp_envnodes;								// Temporary vector of environment tree nodes being processed for rendering
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedobjects;							// Temporary vector of object IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle
 	
 	// Persistent storage for objects being debug-rendered
 	Game::ID_TYPE 			m_debug_renderenvboxes;
+	Game::ID_TYPE			m_debug_renderenvtree;
 };
 
 

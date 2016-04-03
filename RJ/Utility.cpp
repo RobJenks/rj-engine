@@ -172,13 +172,51 @@ Rotation90Degree RotateBy90Degrees(Rotation90Degree current)
 		case Rotation90Degree::Rotate180:
 			return Rotation90Degree::Rotate270;
 		default:
-			return Rotation90Degree::Rotate0;
+			return current;
 	}
+}
+
+
+// Returns a unit integer offset in the indicated direction
+INTVECTOR3 DirectionUnitOffset(Direction direction)
+{
+	switch (direction)
+	{
+		case Direction::Left:			return INTVECTOR3(-1, 0, 0);
+		case Direction::Right:			return INTVECTOR3(+1, 0, 0);
+		case Direction::Up:				return INTVECTOR3(0, -1, 0);
+		case Direction::Down:			return INTVECTOR3(0, +1, 0);
+		case Direction::ZUp:			return INTVECTOR3(0, 0, +1);
+		case Direction::ZDown:			return INTVECTOR3(0, 0, -1);
+
+		case Direction::UpLeft:			return INTVECTOR3(-1, -1, 0);
+		case Direction::UpRight:		return INTVECTOR3(+1, -1, 0);
+		case Direction::DownLeft:		return INTVECTOR3(-1, +1, 0);
+		case Direction::DownRight:		return INTVECTOR3(+1, +1, 0);
+
+		default:						return NULL_INTVECTOR3;
+	}
+}
+
+// Rotates a bitstring representing directional data
+bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation)
+{
+	bitstring newb;
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Left_BS, rotation), CheckBit_All(b, DirectionBS::Left_BS)); 
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Up_BS, rotation), CheckBit_All(b, DirectionBS::Up_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Down_BS, rotation), CheckBit_All(b, DirectionBS::Down_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Right_BS, rotation), CheckBit_All(b, DirectionBS::Right_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::UpLeft_BS, rotation), CheckBit_All(b, DirectionBS::UpLeft_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::UpRight_BS, rotation), CheckBit_All(b, DirectionBS::UpRight_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::DownLeft_BS, rotation), CheckBit_All(b, DirectionBS::DownLeft_BS));
+	SetBitState(newb, GetRotatedBSDirection(DirectionBS::DownRight_BS, rotation), CheckBit_All(b, DirectionBS::DownRight_BS));
+	return newb;
 }
 
 string DirectionToString(Direction edge)
 {
-	switch (edge) {
+	switch (edge) 
+	{
 		case Direction::Left:		return "left";
 		case Direction::Up:			return "up";
 		case Direction::Right:		return "right";
@@ -206,7 +244,7 @@ Direction DirectionFromString(string edge)
 	else if (s == "downleft")		return Direction::DownLeft;
 	else if (s == "zup")			return Direction::ZUp;
 	else if (s == "zdown")			return Direction::ZDown;
-	else							return Direction::None;
+	else							return Direction::_Count;
 }
 
 Direction GetOppositeDirection(Direction dir)
@@ -223,7 +261,7 @@ Direction GetOppositeDirection(Direction dir)
 		case Direction::DownLeft:	return Direction::UpRight;
 		case Direction::ZUp:		return Direction::ZDown;
 		case Direction::ZDown:		return Direction::ZUp;
-		default:					return Direction::None;
+		default:					return Direction::_Count;
 	}
 }
 

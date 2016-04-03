@@ -15,6 +15,9 @@ public:
 	// Constructor
 	iTakesDamage(void)					: m_maxhealth(1.0f), m_health(1.0f), m_is_invulnerable(false)		{ } 
 
+	// Destructor
+	virtual ~iTakesDamage(void) = 0;
+
 	// Current HP of the entity
 	CMPINLINE Game::HitPoints			GetHealth(void) const							{ return m_health; }
 

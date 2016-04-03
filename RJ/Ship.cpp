@@ -80,8 +80,8 @@ Ship::Ship(void)
 void Ship::InitialiseCopiedObject(Ship *source)
 {
 	// Pass control to all base classes
-	iSpaceObject::InitialiseCopiedObject((iSpaceObject*)source);
-	EntityAI::InitialiseCopiedObject((EntityAI*)source);
+	iSpaceObject::InitialiseCopiedObject(source);
+	EntityAI::InitialiseCopiedObject(source);
 
 	/* Begin Ship-specific initialisation logic here */
 

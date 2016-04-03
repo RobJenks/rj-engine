@@ -39,7 +39,7 @@ namespace IO { namespace Data {
 	Result SaveComplexShip(TiXmlElement *parent, ComplexShip *object);
 	Result SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection *object);
 	Result SaveComplexShipSectionInstance(TiXmlElement *parent, ComplexShipSection *object);	// Instance of an already-defined section
-	Result SaveComplexShipElement(TiXmlElement *parent, ComplexShipElement *object);
+	Result SaveComplexShipElement(TiXmlElement *parent, const ComplexShipElement &object);
 	Result SaveHardpoint(TiXmlElement *parent, Hardpoint *object);
 	
 	Result SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb);

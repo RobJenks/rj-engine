@@ -119,6 +119,7 @@ namespace HashedStrings
 	DefineHash(H_AttachPoint, "attachpoint");
 	DefineHash(H_Properties, "properties");
 	DefineHash(H_DefaultProperty, "defaultproperty");
+	DefineHash(H_DefaultProperties, "defaultproperties");
 	DefineHash(H_ClassSpecificDefinition, "classspecificdefinition");
 	DefineHash(H_CompoundTileModelData, "compoundtilemodeldata");
 	DefineHash(H_ProductionCost, "productioncost");
@@ -137,6 +138,7 @@ namespace HashedStrings
 	DefineHash(H_NoiseDistortion3, "noisedistortion3");
 	DefineHash(H_NoiseDistortionScale, "noisedistortionscale");
 	DefineHash(H_NoiseDistortionBias, "noisedistortionbias");
+	DefineHash(H_Health, "health"); 
 	DefineHash(H_MaxHealth, "maxhealth");
 	DefineHash(H_MaxThrust, "maxthrust");
 	DefineHash(H_MinThrust, "minthrust");
@@ -238,6 +240,7 @@ namespace HashedStrings
 	DefineHash(H_ProjectileBeamRadius, "projectilebeamradius");
 	DefineHash(H_Lifetime, "lifetime");
 	DefineHash(H_Colour, "colour");
+	DefineHash(H_Connections, "connections");
 }
 
 

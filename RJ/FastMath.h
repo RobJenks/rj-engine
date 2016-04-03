@@ -27,6 +27,8 @@ extern const float ONE_BY_ROOT2;
 
 extern const INTVECTOR2 NULL_INTVECTOR2;
 extern const INTVECTOR3 NULL_INTVECTOR3;
+extern const INTVECTOR2 ONE_INTVECTOR2;
+extern const INTVECTOR3 ONE_INTVECTOR3;
 extern const XMVECTOR NULL_VECTOR;
 extern const XMVECTOR NULL_VECTOR2;
 extern const XMVECTOR NULL_VECTOR3;
@@ -196,6 +198,17 @@ CMPINLINE void IntVector3Max(const INTVECTOR3 & v1, const INTVECTOR3 & v2, INTVE
 {
 	outvec.x = max(v1.x, v2.x); outvec.y = max(v1.y, v2.y); outvec.z = max(v1.z, v2.z);
 }
+CMPINLINE INTVECTOR3 IntVector3Clamp(const INTVECTOR3 & v, const INTVECTOR3 & vmin, INTVECTOR3 & vmax)
+{
+	return INTVECTOR3(clamp(v.x, vmin.x, vmax.x), clamp(v.y, vmin.y, vmax.y), clamp(v.z, vmin.z, vmax.z));
+}
+CMPINLINE bool IntVector3Between(const INTVECTOR3 & v, const INTVECTOR3 & v_min, const INTVECTOR3 & v_max)
+{
+	return (v.x >= v_min.x && v.y >= v_min.y && v.z >= v_min.z &&
+			v.x <= v_max.x && v.y <= v_max.y && v.z <= v_max.z);
+}
+
+
 
 XMVECTOR OrientationFromPitchYawRollVector(const FXMVECTOR vec);
 

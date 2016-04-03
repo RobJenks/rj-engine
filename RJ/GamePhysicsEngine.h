@@ -227,9 +227,6 @@ public:
 	// environment-based collision handling
 	void									PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, const FXMVECTOR location, float radius);
 
-	// Performs collision detection for all objects in the specified element of an environment
-	void									PerformEnvironmentCollisionDetection(iSpaceObjectEnvironment *env, int x, int y, int z);
-
 	// Performs collision detection for the specified environment object with its surroundings
 	void									PerformEnvironmentCollisionDetection(iEnvironmentObject *obj);
 
@@ -430,6 +427,8 @@ protected:
 	float									_distsq, _r1r2;
 	OrientedBoundingBox::CoreOBBData		_obbdata;
 	std::vector<OrientedBoundingBox*>		_obb_vector;
+	std::vector<iEnvironmentObject*>			_envobj;
+	std::vector<StaticTerrain*>				_terrain;
 };
 
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial

@@ -533,8 +533,7 @@ bool IO::Data::LoadSpaceObjectEnvironmentData(TiXmlElement *node, HashVal hash, 
 	if (hash == HashedStrings::H_ElementSize)
 	{
 		// Initialise all elements when the element size is set.  This means element size MUST be set before elements are defined
-		object->SetElementSize(IO::GetInt3CoordinatesFromAttr(node));
-		object->InitialiseAllElements();
+		object->InitialiseElements(IO::GetInt3CoordinatesFromAttr(node), false);
 	}
 	else if (hash == HashedStrings::H_ComplexShipElement)			LoadComplexShipElement(node, object);
 	else if (hash == HashedStrings::H_StaticTerrain)
@@ -660,13 +659,13 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 		// Test for fields directly within this class
 		else
 		{
-			// Compare the hash against all SimpleShip-related fields
+			// Compare the hash against all SimpleShip-related fieldsB
 			if		(hash == HashedStrings::H_SDOffset)						object->SetSDOffset(IO::GetInt3CoordinatesFromAttr(node));
 			else if (hash == HashedStrings::H_ComplexShipSectionInstance)	result = LoadComplexShipSectionInstance(node, object);
 			else if (hash == HashedStrings::H_ComplexShipTile)
 			{
 				result = LoadComplexShipTile(node, &tile);
-				if (tile) tile->LinkToParent(object);
+				if (tile && result == ErrorCodes::NoError) object->AddTile(tile);
 			}
 		}
 	}
@@ -887,11 +886,16 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 	// Make sure we have a valid section of document to work on
 	if (!node || !parent) return ErrorCodes::NullComplexShipElementNodeProvided;
 	
-	// Attempt to get the element at the specified location.  This also performs validation of the 
-	// indices provided (if they were provided) as well by returning NULL if they are invalid
-	INTVECTOR3 location = IO::GetInt3CoordinatesFromAttr(node);
-	ComplexShipElement *el = parent->GetElement(location.x, location.y, location.z);
-	if (el == NULL) return ErrorCodes::CannotLoadComplexShipElementForInvalidCoords;
+	// Get the element ID from this top-level node and validate it
+	const char *c_id = node->Attribute("id"); 
+	if (!c_id) return ErrorCodes::CannotLoadComplexShipElementWithInvalidID;
+	
+	// Make sure this element fits within the environment bounds
+	int id = atoi(c_id); 
+	if (!parent->IsValidElementID(id)) return ErrorCodes::CannotLoadComplexShipElementWithInvalidID;
+
+	// Get a reference to this element within the parent
+	ComplexShipElement & el = parent->GetElements()[id];
 
 	// Parse the contents of this node to populate the element details
 	TiXmlElement *child = node->FirstChildElement();
@@ -901,52 +905,53 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 		key = child->Value(); StrLowerC(key); 
 		hash = HashString(key);
 
-		if (hash == HashedStrings::H_Properties) {
-			// Properties are saved one-per-attribute
-			const TiXmlAttribute *attr; ComplexShipElement::PROPERTY prop;
-			for (attr = child->FirstAttribute(); attr; attr = attr->Next() )
-			{
-				prop = ComplexShipElement::TranslatePropertyFromName(attr->Name());
-				if (ComplexShipElement::IsValidProperty(prop)) 
-					el->SetProperty(prop, (strcmp(attr->Value(), "true") == 0));
-			}
+		if (hash == HashedStrings::H_ElementLocation) {
+			el.SetLocation(IO::GetInt3CoordinatesFromAttr(child));
 		}
-		else if (hash == HashedStrings::H_AttachPoint) {
-			// Retrieve the attachment point data from file
-			const char *sedge = child->Attribute("edge");
-			const char *stype = child->Attribute("type");
-			if (!sedge || !stype) continue;
-
-			// Create a new attachment point by translating this data into attach point values
-			el->AddAttachPoint(ComplexShipElement::ElementAttachPoint(DirectionFromString(sedge),
-																	  ComplexShipElement::AttachTypeFromString(stype)));
+		else if (hash == HashedStrings::H_Properties) {
+			el.SetProperties(IO::GetIntValue(child));
+		}
+		else if (hash == HashedStrings::H_Health) {
+			el.SetHealth(IO::GetFloatValue(child));
+		}
+		else if (hash == HashedStrings::H_Connections) {
+			el.SetConnectionState(IO::GetIntValue(child));
+		}
+		else if (hash == HashedStrings::H_AttachPoint) 
+		{
+			// Make sure the attach point type is valid
+			int type = IO::GetIntegerAttribute(child, "type");
+			if (type < ComplexShipElement::AttachType::_AttachTypeCount && type >= 0)
+			{
+				el.SetAttachmentState((ComplexShipElement::AttachType)type, IO::GetIntValue(child));
+			}
 		}
 		else if (hash == HashedStrings::H_NavNodePositionCount) { 
 			// Allocate space for nav point data (deal with deallocation if necessary)
 			cval = child->GetText();
 			int n = atoi(cval);
-			el->AllocateNavPointPositionData(n);
+			el.AllocateNavPointPositionData(n);
 		}
 		else if (hash == HashedStrings::H_NavNodeConnectionCount) { 
 			// Allocate space for nav point connection data (deal with deallocation if necessary)
 			cval = child->GetText();
 			int n = atoi(cval);
-			el->AllocateNavPointConnectionData(n);
+			el.AllocateNavPointConnectionData(n);
 		}
 		else if (hash == HashedStrings::H_NavNodePosition) {			
 			// Get the node index and make sure it is valid
 			const char *cindex = child->Attribute("Index"); if (!cindex) continue;
-			int index = atoi(cindex); if (index < 0 || index >= el->GetNavPointPositionCount()) continue;
+			int index = atoi(cindex); if (index < 0 || index >= el.GetNavPointPositionCount()) continue;
 
 			// Pull other required parameters
-			el->GetNavPointPositionData()[index].Position = IO::GetInt3CoordinatesFromAttr(child);
+			el.GetNavPointPositionData()[index].Position = IO::GetInt3CoordinatesFromAttr(child);
 			const char *ccostmod = child->Attribute("CostModifier"); if (!ccostmod) continue;
-			float costmod = (float)atof(ccostmod); if (costmod > 0.0f) el->GetNavPointPositionData()[index].CostModifier = costmod;
+			float costmod = (float)atof(ccostmod); if (costmod > 0.0f) el.GetNavPointPositionData()[index].CostModifier = costmod;
 
 			// Record the number of connections to other nav nodes, or outside of the current element
 			const char *cnumconns = child->Attribute("NumConnections"); if (!cnumconns) continue;
 			int numconns = atoi(cnumconns); 
-			if (numconns > 0) el->GetNavPointPositionData()[index].NumConnections = numconns;
+			if (numconns > 0) el.GetNavPointPositionData()[index].NumConnections = numconns;
 		}
 		else if (hash == HashedStrings::H_NavNodeConnection) { 
 			// Retrieve the basic properties of this connection
@@ -956,14 +961,14 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 			const char *ccost = child->Attribute("Cost");  // Not mandatory
 
 			// Make sure the source node is valid
-			int navcount = el->GetNavPointPositionCount();
+			int navcount = el.GetNavPointPositionCount();
 			int src = atoi(csrc); 
 			if (src < 0 || src >= navcount) continue;
 
 			// Get the target node; first, see if this is a direction out of the element (rather than a specific node)
 			bool isdir = false; int tgt;
 			Direction dir = DirectionFromString(ctgt);
-			if (dir != Direction::None)
+			if (dir != Direction::_Count)
 				isdir = true;
 			else
 			{
@@ -974,7 +979,7 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 
 			// Make sure the connection ID is valid
 			int id = atoi(cid); 
-			if (id < 0 || id >= el->GetNavPointConnectionCount()) continue;
+			if (id < 0 || id >= el.GetNavPointConnectionCount()) continue;
 
 			// Attempt to retrieve the connection cost, if it has been specified
 			int cost = 0;
@@ -984,9 +989,9 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 			if (cost <= 0) 
 			{
 				INTVECTOR3 psrc, ptgt;
-				psrc = el->GetNavPointPositionData()[src].Position;
+				psrc = el.GetNavPointPositionData()[src].Position;
 				if (isdir)	ptgt = ComplexShipElement::GetAdjacentElementCentrePosition(dir);
-				else		ptgt = el->GetNavPointPositionData()[tgt].Position;
+				else		ptgt = el.GetNavPointPositionData()[tgt].Position;
 				INTVECTOR3 diff = psrc - ptgt;
 				cost = (int)floorf(sqrtf((float)(diff.x * diff.x) + (float)(diff.y * diff.y) + (float)(diff.z * diff.z)));
 			}
@@ -995,13 +1000,13 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 			if (cost <= 0) continue;
 
 			// We have all the data we need so store the connection
-			el->GetNavPointConnectionData()[id].Source = src;
-			el->GetNavPointConnectionData()[id].IsDirection = isdir;
-			el->GetNavPointConnectionData()[id].Cost = cost;
+			el.GetNavPointConnectionData()[id].Source = src;
+			el.GetNavPointConnectionData()[id].IsDirection = isdir;
+			el.GetNavPointConnectionData()[id].Cost = cost;
 			if (isdir)
-				el->GetNavPointConnectionData()[id].Target = (int)dir;
+				el.GetNavPointConnectionData()[id].Target = (int)dir;
 			else
-				el->GetNavPointConnectionData()[id].Target = tgt;
+				el.GetNavPointConnectionData()[id].Target = tgt;
 		}
 	}
 	
@@ -1197,19 +1202,8 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			// Add to the vector of terrain objects in the tile definition
 			tiledef->AddTerrainObject(t);
 		}
-		else if (hash == HashedStrings::H_DefaultProperty) {
-			// Pull the relevant properties
-			const char *pname = child->Attribute("name");
-			const char *pval = child->Attribute("value");
-			if (!pname || !pval) continue;
-
-			// Attempt to locate this property name
-			ComplexShipElement::PROPERTY prop = ComplexShipElement::TranslatePropertyFromName(pname);
-			if (prop == ComplexShipElement::PROPERTY::PROP_UNKNOWN) continue;
-
-			// Set this property in the tile definition
-			string sval = pval; StrLowerC(sval);
-			tiledef->DefaultProperties.push_back(ComplexShipElement::PropertyValue(prop, (sval == "true")));
+		else if (hash == HashedStrings::H_DefaultProperties) {
+			tiledef->DefaultProperties = IO::GetIntValue(child);
 		}
 		else if (hash == HashedStrings::H_ProductionCost) {
 			// We supply one special attribute for tile production; whether these are per-element or overall requirements.  Store it now

@@ -96,7 +96,7 @@ public:
 	CMPINLINE const std::string &			GetInstanceCode(void) const				{ return m_instancecode; }
 	CMPINLINE HashVal						GetInstanceCodeHash(void) const			{ return m_instancecodehash; }
 	void									DetermineInstanceCode(void);
-	void									OverrideInstanceCode(const std::string & icode);
+	bool									OverrideInstanceCode(const std::string & icode);
 	bool									TestForOverrideOfInstanceCode(void) const;
 
 	// Flag indicating whether this is a 'standard', centrally-maintained template object
@@ -165,8 +165,8 @@ public:
 	CMPINLINE const XMMATRIX				GetInverseOrientationMatrix(void) const	{ return m_inverseorientationmatrix; }
 
 	// The world matrix of this object
-	CMPINLINE XMMATRIX						GetWorldMatrix(void)				{ return m_worldmatrix; }
-	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)			{ return m_inverseworld; }
+	CMPINLINE XMMATRIX						GetWorldMatrix(void) const			{ return m_worldmatrix; }
+	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const	{ return m_inverseworld; }
 	CMPINLINE void XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
@@ -418,7 +418,7 @@ public:
 	}
 
 	// Destructor
-	virtual ~iObject(void);
+	virtual ~iObject(void) = 0;
 
 
 protected:
@@ -430,8 +430,8 @@ protected:
 	void								SetObjectType(iObject::ObjectType type);
 
 	// Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
-	// updates to the central data collections
-	void								SetInstanceCode(const std::string & instance_code);
+	// updates to the central data collections.  Returns a value indicating whether the code could be successfully set
+	bool								SetInstanceCode(const std::string & instance_code);
 
 	// Threshold (number of changes) for internally renormalising object quaternions, depending on state
 	static const int					ORIENT_NORMALISE_THRESHOLD_FULLSIM = 100;

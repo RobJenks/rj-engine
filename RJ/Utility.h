@@ -12,6 +12,7 @@
 #include <locale>
 #include <codecvt>
 #include <vector>
+#include <algorithm>
 #include <unordered_map>
 #include "CompilerSettings.h"
 using namespace std;
@@ -46,8 +47,8 @@ template<typename T>
 CMPINLINE T * ptr(T * obj) { return obj; }	// Otherwise if object is already a pointer type then simply return it
 
 // Type definition for bitstring data
-typedef int bitstring;
-typedef long bitstring_l;
+typedef unsigned int bitstring;
+typedef unsigned long bitstring_l;
 
 // Convenience macros to manipulate bitstrings
 #define SetBit(bitstring, bit) bitstring |= bit
@@ -82,7 +83,7 @@ struct INTVECTOR2
 	INTVECTOR2(const XMFLOAT2 & v) { x = (int)v.x; y = (int)v.y; }
 	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
 
-	bool IsZeroVector3(void) { return (x == 0 && y == 0); }
+	bool IsZeroVector(void) { return (x == 0 && y == 0); }
 
 	INTVECTOR2& operator +=(const INTVECTOR2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
 	INTVECTOR2& operator -=(const INTVECTOR2& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }
@@ -105,8 +106,9 @@ struct INTVECTOR3
 	INTVECTOR3(int _x, int _y, int _z) { x = _x; y = _y; z = _z; }
 	INTVECTOR3(float _x, float _y, float _z) { x = (int)_x; y = (int)_y; z = (int)_z; }
 	INTVECTOR3(const XMFLOAT3 & v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
+	INTVECTOR3(int val) { x = y = z = val; }
 
-	bool IsZeroVector3(void) { return (x == 0 && y == 0 && z == 0); }
+	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
 
 	INTVECTOR3& operator +=(const INTVECTOR3& rhs) { this->x += rhs.x; this->y += rhs.y; this->z += rhs.z; return *this; }
 	INTVECTOR3& operator -=(const INTVECTOR3& rhs) { this->x -= rhs.x; this->y -= rhs.y; this->z -= rhs.z; return *this; }	
@@ -122,6 +124,13 @@ struct INTVECTOR3
 	bool operator !=(const INTVECTOR3& rhs) { return (this->x != rhs.x || this->y != rhs.y || this->z != rhs.z); }
 	bool operator ==(const INTVECTOR3& rhs) const { return (this->x == rhs.x && this->y == rhs.y && this->z == rhs.z); }
 	bool operator !=(const INTVECTOR3& rhs) const { return (this->x != rhs.x || this->y != rhs.y || this->z != rhs.z); }
+
+	bool operator<(const INTVECTOR3 &rhs) const { return (x < rhs.x && y < rhs.y && z < rhs.z); }
+	bool operator<=(const INTVECTOR3 &rhs) const { return (x <= rhs.x && y <= rhs.y && z <= rhs.z); }
+	bool operator>(const INTVECTOR3 &rhs) const { return (x > rhs.x && y > rhs.y && z > rhs.z); }
+	bool operator>=(const INTVECTOR3 &rhs) const { return (x >= rhs.x && y >= rhs.y && z >= rhs.z); }
+
+	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << z << "]"; return s.str(); }
 };
 inline INTVECTOR3 operator +(INTVECTOR3 lhs, const INTVECTOR3& rhs) { lhs += rhs; return lhs; }
 inline INTVECTOR3 operator -(INTVECTOR3 lhs, const INTVECTOR3& rhs) { lhs -= rhs; return lhs; }
@@ -152,33 +161,106 @@ Rotation90Degree TranslateRotation90Degree(string rotvalue);
 Rotation90Degree RotateBy90Degrees(Rotation90Degree current);
 
 // Enumeration of possible 90-degree directions
-enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, None };
+enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };
 const int DirectionCount = 10;
 
 // Structure holding the basic directions, for iteration over the possible movement directions
 const int Directions[DirectionCount] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft, 
 										 Direction::UpRight, Direction::DownRight, Direction::DownLeft,  Direction::ZUp, Direction::ZDown };
 
+// Bitstring direction values
+enum DirectionBS 
+{
+	Left_BS =		(1 << Direction::Left),
+	Up_BS =			(1 << Direction::Up),
+	Right_BS =		(1 << Direction::Right),
+	Down_BS =		(1 << Direction::Down),
+	UpLeft_BS =		(1 << Direction::UpLeft),
+	UpRight_BS =	(1 << Direction::UpRight),
+	DownRight_BS =	(1 << Direction::DownRight),
+	DownLeft_BS =	(1 << Direction::DownLeft),
+	ZUp_BS =		(1 << Direction::ZUp),
+	ZDown_BS =		(1 << Direction::ZDown),
+	None_BS =		(1 << Direction::_Count)
+};
+
+const DirectionBS DirectionBS_All = (DirectionBS)(DirectionBS::Left_BS | DirectionBS::Up_BS | DirectionBS::Right_BS | DirectionBS::Down_BS | DirectionBS::UpLeft_BS |
+	DirectionBS::UpRight_BS | DirectionBS::DownRight_BS | DirectionBS::DownLeft_BS | DirectionBS::ZUp_BS | DirectionBS::ZDown_BS);
+
+// Convert a direction into a bitstring direction
+CMPINLINE DirectionBS		DirectionToBS(Direction direction) { return (DirectionBS)(1 << direction); }
+
+// Convert a bitstring direction into a direction
+CMPINLINE Direction			BSToDirection(DirectionBS direction)
+{
+	switch (direction)
+	{
+		case DirectionBS::Left_BS:		return Direction::Left;
+		case DirectionBS::Up_BS:		return Direction::Up;
+		case DirectionBS::Right_BS:		return Direction::Right;
+		case DirectionBS::Down_BS:		return Direction::Down;
+		case DirectionBS::UpLeft_BS:	return Direction::UpLeft;
+		case DirectionBS::UpRight_BS:	return Direction::UpRight;
+		case DirectionBS::DownRight_BS:	return Direction::DownRight;
+		case DirectionBS::DownLeft_BS:	return Direction::DownLeft;
+		case DirectionBS::ZUp_BS:		return Direction::ZUp;
+		case DirectionBS::ZDown_BS:		return Direction::ZDown;
+		default:						return Direction::_Count;
+	}
+}
+
 // Structure that holds the effect of applying a rotation to each direction value (in 2D only)
-const int RotatedDirections[9][4] = { 
-	{ Direction::None,	Direction::None,	Direction::None,	Direction::None },
-	{ Direction::Left,	Direction::Up,		Direction::Right,	Direction::Down },
-	{ Direction::Up,	Direction::Right,	Direction::Down,	Direction::Left },
-	{ Direction::Right, Direction::Down,	Direction::Left,	Direction::Up },
-	{ Direction::Down,	Direction::Left,	Direction::Up,		Direction::Right }, 
-	{ Direction::UpLeft, Direction::UpRight, Direction::DownRight, Direction::DownLeft }, 
-	{ Direction::UpRight, Direction::DownRight, Direction::DownLeft, Direction::UpLeft }, 
-	{ Direction::DownRight, Direction::DownLeft, Direction::UpLeft, Direction::UpRight }, 
-	{ Direction::DownLeft, Direction::UpLeft, Direction::UpRight, Direction::DownRight }
+const int RotatedDirections[Direction::_Count+1][4] = { 
+	{ Direction::Left,		Direction::Up,			Direction::Right,		Direction::Down },
+	{ Direction::Up,		Direction::Right,		Direction::Down,		Direction::Left },
+	{ Direction::Right,		Direction::Down,		Direction::Left,		Direction::Up },
+	{ Direction::Down,		Direction::Left,		Direction::Up,			Direction::Right }, 
+	{ Direction::UpLeft,	Direction::UpRight,		Direction::DownRight,	Direction::DownLeft }, 
+	{ Direction::UpRight,	Direction::DownRight,	Direction::DownLeft,	Direction::UpLeft }, 
+	{ Direction::DownRight, Direction::DownLeft,	Direction::UpLeft,		Direction::UpRight }, 
+	{ Direction::DownLeft,	Direction::UpLeft,		Direction::UpRight,		Direction::DownRight }, 
+	{ Direction::ZUp,		Direction::ZUp,			Direction::ZUp,			Direction::ZUp },
+	{ Direction::ZDown,		Direction::ZDown,		Direction::ZDown,		Direction::ZDown },
+	{ Direction::_Count,	Direction::_Count,		Direction::_Count,		Direction::_Count },
+};
+
+// Structure that holds the effect of applying a rotation to each direction value (in 2D only)
+const int RotatedBSDirections[Direction::_Count+1][4] = {
+	{ DirectionBS::Left_BS, DirectionBS::Up_BS, DirectionBS::Right_BS, DirectionBS::Down_BS },
+	{ DirectionBS::Up_BS, DirectionBS::Right_BS, DirectionBS::Down_BS, DirectionBS::Left_BS },
+	{ DirectionBS::Right_BS, DirectionBS::Down_BS, DirectionBS::Left_BS, DirectionBS::Up_BS },
+	{ DirectionBS::Down_BS, DirectionBS::Left_BS, DirectionBS::Up_BS, DirectionBS::Right_BS },
+	{ DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS, DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS },
+	{ DirectionBS::UpRight_BS, DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS },
+	{ DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS },
+	{ DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS, DirectionBS::DownRight_BS },
+	{ DirectionBS::ZUp_BS, DirectionBS::ZUp_BS, DirectionBS::ZUp_BS, DirectionBS::ZUp_BS },
+	{ DirectionBS::ZDown_BS, DirectionBS::ZDown_BS, DirectionBS::ZDown_BS, DirectionBS::ZDown_BS },
+	{ DirectionBS::None_BS, DirectionBS::None_BS, DirectionBS::None_BS, DirectionBS::None_BS },
 };
 
 
+// Returns a unit integer offset in the indicated direction
+INTVECTOR3 DirectionUnitOffset(Direction direction);
+
 // Method to return the effect of a rotation on a 2D direction, using the above predefined structure
-CMPINLINE Direction GetRotatedDirection(Direction direction, Rotation90Degree rotation) {
-	if ((int)direction >= 0 && (int)direction < 9 && (int)rotation >= 0 && (int)rotation < 4) 
+CMPINLINE Direction GetRotatedDirection(Direction direction, Rotation90Degree rotation) 
+{
+	if ((int)direction >= 0 && (int)direction < Direction::_Count && (int)rotation >= 0 && (int)rotation < 4) 
 		return (Direction)RotatedDirections[direction][rotation];
 	else
-		return Direction::None;
+		return direction;
+}
+
+// Method to return the effect of a rotation on a 2D direction, using the above predefined structure
+CMPINLINE DirectionBS GetRotatedBSDirection(DirectionBS direction, Rotation90Degree rotation) 
+{
+	if (rotation < 0 || rotation >= 4) return direction;
+	for (int i = 0; i < Direction::_Count; ++i)
+	{
+		if (direction == RotatedBSDirections[i][0])	return (DirectionBS)RotatedBSDirections[0][(int)rotation];
+	}
+	return direction;
 }
 
 // Returns a value indicating whether this is a diagonal direction or not
@@ -192,25 +274,8 @@ string DirectionToString(Direction direction);
 Direction DirectionFromString(string direction);
 Direction GetOppositeDirection(Direction dir);
 
-//Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft,
-//Direction::UpRight, Direction::DownRight, Direction::DownLeft, Direction::ZUp, Direction::ZDown };
-// Bitstring direction values
-enum DirectionBS
-{
-	Left		= (1 << Direction::Left),
-	Up			= (1 << Direction::Up), 
-	Right		= (1 << Direction::Right),
-	Down		= (1 << Direction::Down),
-	UpLeft		= (1 << Direction::UpLeft),
-	UpRight		= (1 << Direction::UpRight),
-	DownRight	= (1 << Direction::DownRight),
-	DownLeft	= (1 << Direction::DownLeft),
-	ZUp			= (1 << Direction::ZUp),
-	ZDown		= (1 << Direction::ZDown), 
-	None		= (1 << Direction::None)
-};
-const DirectionBS DirectionBS_All =	(DirectionBS)(DirectionBS::Left | DirectionBS::Up | DirectionBS::Right | DirectionBS::Down | DirectionBS::UpLeft |
-												  DirectionBS::UpRight | DirectionBS::DownRight | DirectionBS::DownLeft | DirectionBS::ZUp | DirectionBS::ZDown);
+// Rotates a bitstring representing directional data
+bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation);
 
 // Null string, to avoid repeated instantiation at runtime
 const std::string NullString = "";
@@ -237,6 +302,14 @@ struct unary_delete : public std::unary_function<T, void>
 	void operator()(T toDelete) { if (toDelete) delete toDelete; };
 };
 
+// Unary function which deletes the ".value" property of the subject element.  
+// Used for pointer implementations of remove/erasein alignment-padded structures
+template <typename T>
+struct unary_delete_value : public std::unary_function<T, void>
+{
+	void operator()(const T & toDelete) { if (toDelete.value) delete toDelete.value; };
+};
+
 // Performs a delete-erase on a single iterator element within the specified container
 // This is the equivalent of erase(it) for containers of pointer types
 template <typename T>
@@ -257,6 +330,19 @@ CMPINLINE void delete_erase(std::vector<T> & vec, typename std::vector<T>::itera
 	if (begin != vec.end())
 	{
 		std::for_each(begin, end, unary_delete<T>());
+		vec.erase(begin, end);
+	}
+}
+
+// Performs a delete-erase on a range of elements within the specified container
+// Operates on the ".value" property of each element, for alignment-padded structures
+// This is the equivalent of erase(it) for containers of pointer types
+template <typename T>
+CMPINLINE void delete_erase_value(std::vector<T> & vec, typename std::vector<T>::iterator begin, typename std::vector<T>::iterator end)
+{
+	if (begin != vec.end())
+	{
+		std::for_each(begin, end, unary_delete_value<T>());
 		vec.erase(begin, end);
 	}
 }
