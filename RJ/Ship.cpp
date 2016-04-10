@@ -483,11 +483,16 @@ void Ship::RunEntityAI(void)
 	// Analyse all nearby enemy contacts.  This will use a cached collection that does not need to be updated every frame
 	AnalyseNearbyContacts();
 
-	// Check whether there are any enemies nearby.  If so, we may (or may not) want to engage
-	AssessNearbyEnemyContacts();
+	// The following actions are only relevant if the ship is under some degree of AI control.  If it is
+	// being controlled directly by the player or is idle then we take no action
+	if (GetEntityAIState() != EntityAIStates::EntityAIState::NoAI)
+	{
+		// Check whether there are any enemies nearby.  If so, we may (or may not) want to engage
+		AssessNearbyEnemyContacts();
 
-	// If we have no orders, decide on a new course of action
-	if (GetOrderCount() == 0) DetermineNewCourseOfAction();
+		// If we have no orders, decide on a new course of action
+		if (GetOrderCount() == 0) DetermineNewCourseOfAction();
+	}
 
 	// Reset the AI evaluation timer ready for another cycle
 	m_last_ai_evaluation = 0U;
@@ -555,11 +560,6 @@ void Ship::AnalyseNearbyContacts(void)
 // Assesses nearby enemy contacts, and decides whether/which to engage
 void Ship::AssessNearbyEnemyContacts(void)
 {
-	if (m_id == 53)
-	{
-		int a = 1 + m_id;
-	}
-
 	// If there are no nearby enemy contacts then there is nothing to do here
 	if (m_cached_enemy_contact_count == 0) return;
 

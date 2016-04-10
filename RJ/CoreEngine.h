@@ -558,8 +558,15 @@ public:
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle
 	
 	// Persistent storage for objects being debug-rendered
-	Game::ID_TYPE 			m_debug_renderenvboxes;
-	Game::ID_TYPE			m_debug_renderenvtree;
+	Game::ID_TYPE 				m_debug_renderenvboxes;
+	Game::ID_TYPE				m_debug_renderenvtree;
+
+	// Enumeration of possible debug terain render modes
+	enum DebugTerrainRenderMode { Normal = 0, Solid };
+
+	// Debug terrain rendering mode
+	DebugTerrainRenderMode		m_debug_terrain_render_mode;
+
 };
 
 

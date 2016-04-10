@@ -91,6 +91,7 @@ CoreEngine::CoreEngine(void)
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = m_debug_renderenvtree = 0;
+	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
 	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
 	
 	// Set default values for game engine parameters
@@ -2143,9 +2144,18 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 	{
 		t_obj = (*t_it); if (!t_obj) continue;
 
-		// Determine the location of all vertices for each bounding volume and render using the overlay renderer
-		t_obj->DetermineCollisionBoxVertices(parent, v);
-		Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
+		if (m_debug_terrain_render_mode == DebugTerrainRenderMode::Solid)
+		{
+			// Perform solid rendering
+			Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixMultiply(t_obj->GetWorldMatrix(), parent->GetZeroPointWorldMatrix()),
+				OverlayRenderer::RenderColour::RC_Red, XMVectorScale(XMLoadFloat3(&(t_obj->GetExtentF())), 2.0f));
+		}
+		else
+		{
+			// Determine the location of all vertices for each bounding volume and render wireframe using the overlay renderer
+			t_obj->DetermineCollisionBoxVertices(parent, v);
+			Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
+		}
 	}
 }
 
@@ -2254,6 +2264,22 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			SetRenderFlag(CoreEngine::RenderFlag::RenderTerrainBoxes, false);
 			m_debug_renderenvboxes = 0;
 			command.SetSuccessOutput("Disabling render of environment collision volumes");
+		}
+		return true;
+	}
+	else if (command.InputCommand == "terrain_debug_render_mode")
+	{
+		if (command.InputParameters.size() < 1) {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::RequiredCommandParametersNotProvided,
+				"Terrain render mode not specified"); 
+		}
+		if (command.Parameter(0) == "solid") {
+			m_debug_terrain_render_mode = DebugTerrainRenderMode::Solid;
+			command.SetSuccessOutput("Setting debug terrain render mode to solid-render");
+		}
+		else {
+			m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
+			command.SetSuccessOutput("Enabling render of environment object collision volumes");
 		}
 		return true;
 	}

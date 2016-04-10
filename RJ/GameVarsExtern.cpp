@@ -137,6 +137,7 @@ namespace Game {
 	const XMVECTOR C_EPSILON_V = XMVectorReplicate(C_EPSILON);
 	const XMVECTOR C_EPSILON_NEG_V = XMVectorReplicate(C_EPSILON_NEG);
 	const double C_EPSILON_DP = (double)C_EPSILON;
+	const float	C_LARGE_FLOAT = 1e15;
 	const float C_MIN_PHYSICS_CYCLES_PER_SEC = 30.0f;								// The minimum number of physics cycles that should be run per 
 																					// second (i.e. the physics FPS)
 	const float C_MAX_PHYSICS_TIME_DELTA = (1.0f / C_MIN_PHYSICS_CYCLES_PER_SEC);	// The maximum permitted physics time delta, beyond which multiple 
@@ -275,7 +276,8 @@ namespace Game {
 	unsigned int C_PROJECTILE_OWNER_DETACH_PERIOD = 1000U;							// Period within which a projectile is protected from colliding with its owner (ms)
 	int C_MAX_TURRET_LAUNCHERS = 128;												// The maximum number of launchers that a single turret can hold
 	float C_DEFAULT_FIRING_REGION_THRESHOLD = 0.05f;								// Deviation in pitch/yaw within which a turret will start firing at the target
-
+	float C_DEFAULT_FIRING_SPREAD_THRESHOLD = 5.0f;									// Default multiple on weapon spread within which a turret will begin firing
+	
 	// Default tile simulation values
 	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 100U;						// Life support tiles will be simulated every 100ms, when active
 

@@ -19,6 +19,9 @@ public:
 	// Define the possible turret control modes
 	enum ControlMode				{ ManualControl = 0, AutomaticControl };
 
+	// Define the possible turret status codes
+	enum TurretStatus				{ Idle = 0, UnderManualControl, TrackingTarget, EngagingTarget, ReturningToIdle };
+
 	// Default constructor
 	SpaceTurret(void);
 	
@@ -64,6 +67,9 @@ public:
 	// Return the actual relative orientation of the turret.  This accounts for pitch & yaw
 	CMPINLINE XMVECTOR				GetTurretRelativeOrientation(void) const				{ return m_turretrelativeorient; }
 
+	// Returns the current status of this turret
+	CMPINLINE TurretStatus			GetTurretStatus(void) const								{ return m_turretstatus; }
+
 	// Specifies whether the turret is yaw-limited, or can rotate freely about its local up axis
 	CMPINLINE bool					IsYawLimited(void) const								{ return m_yaw_limited; }
 	CMPINLINE void					SetYawLimitFlag(bool limit)								{ m_yaw_limited = limit; }
@@ -108,6 +114,17 @@ public:
 	// an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
 	// changes that we cannot simulate accurately here (without actually firing a projectile)
 	void							DetermineApproxRange(void);
+
+	// Multiplier on turret launcher spread, so that turret will fire when the target is within x launchers-spreads of 
+	// centre.  Can be tuned per turret based on types of weapon mounted (e.g. we allow a greater multiple for smaller, 
+	// faster-firing weapons than large projectile-firing cannons which should be more careful not to miss and not as
+	// suitable for engaging fast-moving targets anyway)
+	CMPINLINE float					GetFiringSpreadMultiplier(void) const						{ return m_firing_spread_multiplier; }
+	CMPINLINE void					SetFiringSpreadMultiplier(float m)							
+	{ 
+		m_firing_spread_multiplier = m; 
+		RecalculateTurretStatistics(); 
+	}
 
 	// Determines an appropriate firing region for the turret based on the accuracy of its component launchers, 
 	// plus (TODO:) any contribution from pilot skill, ship computer effectiveness etc.
@@ -202,6 +219,9 @@ public:
 	// Make and return a copy of this turret
 	SpaceTurret *					Copy(void);
 
+	// Static method to translate a turret status code to its string representation
+	static std::string				TranslateTurretStatusToString(TurretStatus status);
+
 protected:
 
 	// Unique string code, and descriptive string name
@@ -233,9 +253,18 @@ protected:
 	// Target that the turret has been manually assigned, and which it will try to reacquire if it is lost
 	iSpaceObject *					m_designatedtarget;
 
+	// Current status of the turret
+	SpaceTurret::TurretStatus		m_turretstatus;
+
 	// The threshold yaw/pitch within which this turret will begin firing.  Adjusted based on accuracy of weapons
 	// and effectiveness of pilot/turret control computer
 	float							m_firing_region_threshold;
+
+	// Multiplier on turret launcher spread, so that turret will fire when the target is within x launchers-spreads of 
+	// centre.  Can be tuned per turret based on types of weapon mounted (e.g. we allow a greater multiple for smaller, 
+	// faster-firing weapons than large projectile-firing cannons which should be more careful not to miss and not as
+	// suitable for engaging fast-moving targets anyway)
+	float							m_firing_spread_multiplier;
 
 	// The times & intervals for when the turret was last updated
 	static const unsigned int		TARGET_ANALYSIS_INTERVAL = 2000U;
@@ -282,6 +311,18 @@ protected:
 	int								m_constraint_yaw;
 	int								m_constraint_pitch;
 	int								m_component_cannon;
+
+	// Returns the range to a specified target
+	float							RangeSqToTarget(const iSpaceObject *target);
+
+	// Indicates whether a target at the specified range is valid
+	bool							TargetRangeSqIsValid(float range_sq);
+
+	// Indicates whether the specified target is in range
+	bool							TargetIsInRange(const iSpaceObject *target);
+
+	// Indicates whether the specified target is within this turret's possible firing arc
+	bool							TargetIsWithinFiringArc(const iSpaceObject *target);
 
 };
 

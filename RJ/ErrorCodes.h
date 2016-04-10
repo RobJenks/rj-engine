@@ -576,6 +576,7 @@ namespace ErrorCodes {
 	const Result		ObjectIsNotEnvironment							= 5604;
 	const Result		NoSpatialPartitioningTreeToRender				= 5605;
 	const Result		NoValidEnvironmentSpecified						= 5606;
+	const Result		RequiredCommandParametersNotProvided			= 5607;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

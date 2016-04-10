@@ -24,7 +24,7 @@
 // Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds
 #ifdef _DEBUG
 //#	define RJ_LOG_COLLISION_DETAILS
-//#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
+#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 #endif
 
 // Compiler setting to define the collision detection method in use
@@ -588,8 +588,6 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 		// We now want to scale the response vector by the penetration distance (since we want to move the object by the exact inverse 
 		// of that distance, out of the collision) to determine the collision response
-		response = XMVectorScale(response, m_collisiontest.Penetration);
-
 #		ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 			if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
 				OutputDebugString(concat("Adjusting position by penentration of ")(m_collisiontest.Penetration)(" along response vector (")
@@ -597,6 +595,9 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 					("(")(XMVectorGetX(object->GetEnvironmentPosition()))(",")(XMVectorGetY(object->GetEnvironmentPosition()))
 					(",")(XMVectorGetZ(object->GetEnvironmentPosition()))(")").str().c_str());
 #		endif
+
+		// Scale the response vector
+		response = XMVectorScale(response, m_collisiontest.Penetration);
 
 		// Apply the change in location to the object
 		object->SetEnvironmentPosition(XMVectorAdd(object->GetEnvironmentPosition(), response));
@@ -1127,7 +1128,7 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
 	// Determine the distance between box centre points
 	XMVECTOR vdist = XMVectorSubtract(box1.Centre, box0.Centre);
-
+OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(Vector3ToString(box1.Centre))(", Dist = ")(Vector3ToString(vdist))("\n").str().c_str());
 	// Obtain local float copies of key vectors; calculations are performed at component level and we do not 
 	// gain efficiency by vectorising
 	XMFLOAT3 dist, box0Axis[3], box1Axis[3];

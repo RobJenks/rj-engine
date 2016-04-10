@@ -658,18 +658,55 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
-		Ship *parent = ss();
-		for (int t = 0; t < parent->TurretController.TurretCount(); ++t)
+		if (!ss() || !cs()) return;
+		cs()->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		cs()->CancelAllOrders();
+		cs()->AssignNewOrder(new Order_MoveToTarget(ss(), 100.0f, true));
+
+		for (int i = 0; i < 6; ++i)
 		{
-			parent->TurretController.Turrets[t]->Fire();
+			SimpleShip *s = SimpleShip::Create("testship1");
+			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s);
+
+			s->SetName("DIK_3_SPAWNED_SHIP");
+			s->MoveIntoSpaceEnvironment(ss()->GetSpaceEnvironment(),
+				XMVectorSetZ(ss()->GetPosition(), i * 1.2f * ss()->GetSizeF().z));
+			s->SetOrientation(ID_QUATERNION);
+			s->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+			
+			s->AssignNewOrder(new Order_AttackBasic(s, cs()));
 		}
+
+		Game::Keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
-		Ship *parent = cs();
-		for (int t = 0; t < parent->TurretController.TurretCount(); ++t)
+
+		StaticTerrain *t = cs()->TerrainObjects.at(0);
+		t->SetDefinition(D::StaticTerrainDefinitions.Get("tmp_terrain_box"));
+		t->SetExtent(XMVectorSet(50.0f, 2.5f, 50.0f, 0.0f));
+		t->SetPosition(XMVectorSet(10.0f, 6.0f, 10.0f, 0.0f));
+		t->RecalculatePositionalData();
+
+		Game::CurrentPlayer->GetActor()->SetEnvironmentPosition(XMVectorSet(35.0f, 16.0f, 35.0f, 0.0f));
+
+		int n = cs()->TerrainObjects.size();
+		for (int i = 1; i < n; ++i)
 		{
-			parent->TurretController.Turrets[t]->SetTarget(ss());
+			cs()->TerrainObjects.at(i)->SetPosition(XMVectorReplicate(1000.0f));
+			cs()->TerrainObjects.at(i)->SetExtent(XMVectorReplicate(0.1f));
+			cs()->TerrainObjects.at(i)->RecalculatePositionalData();
 		}
+		n = cs()->GetTileCount();
+		for (int i = 0; i < n; ++i)
+		{
+			cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)n), 0.1f);
+		}
+
+		Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+
+		Game::Keyboard.LockKey(DIK_4);
 	}
 }
 
@@ -1787,6 +1824,19 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
+	OrientedBoundingBox::CoreOBBData o1, o2;
+	for (int i = 0; i < 3; ++i)
+	{
+		o1.Axis[i].value = o2.Axis[i].value = UNIT_BASES[i];
+	}
+	o1.UpdateExtent(XMVectorReplicate(5.0f));
+	o2.UpdateExtent(XMVectorReplicate(5.0f));
+	o1.Centre = NULL_VECTOR;
+	o2.Centre = XMVectorSetY(NULL_VECTOR, 5.0f);
+	bool collision = Game::PhysicsEngine.TestOBBvsOBBCollision(o1, o2);
+	const GamePhysicsEngine::CollisionDetectionResult & result = Game::PhysicsEngine.LastCollisionTest();
+
+
 	ComplexShip *c = new ComplexShip();
 	c->SetSize(XMVectorReplicate(500.0f));
 	c->InitialiseElements(INTVECTOR3(10, 4, 2));
@@ -1838,6 +1888,7 @@ void RJMain::__CreateDebugScenario(void)
 	SimpleShip *ss_ship = SimpleShip::Create("testship1");
 	ss_ship->SetName("Player ship ss");
 	ss_ship->OverrideInstanceCode("ss");
+	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
 	ss_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
 	ss_ship->SetOrientation(ID_QUATERNION);
@@ -1948,6 +1999,10 @@ void RJMain::__CreateDebugScenario(void)
 				nt->GetLauncher(l)->SetLaunchInterval(100U);
 				nt->GetLauncher(l)->SetProjectileSpread(0.01f);
 			}
+			nt->SetYawRate(PI);
+			nt->SetPitchRate(PI);
+			nt->SetYawLimitFlag(false);
+			nt->SetPitchLimits(-PIOVER2, PIOVER2);
 			nt->RecalculateTurretStatistics();
 
 			cs()->TurretController.AddTurret(nt);
@@ -2065,11 +2120,14 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "[%.3f / %.1f]  |  %s",
-			(ss() ? ss()->GetTargetLeadingMultiplier(cs()->GetID()) : -1.0f),
-			(cs() ? cs()->GetHealth() : -1.0f),
-			(a1() ? "Exists" : "NULL")
-		);
+		std::ostringstream ss;
+		TurretController::TurretCollection::const_iterator it_end = cs()->TurretController.Turrets.end();
+		for (TurretController::TurretCollection::const_iterator it = cs()->TurretController.Turrets.begin(); it != it_end; ++it)
+		{
+			if (*it) ss << SpaceTurret::TranslateTurretStatusToString((*it)->GetTurretStatus()) << " | ";
+		}
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", ss.str().c_str());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
@@ -2080,6 +2138,9 @@ void RJMain::DEBUGDisplayInfo(void)
 		XMMATRIX world = XMMatrixMultiply((*it).value->GetWorldMatrix(), cs()->GetZeroPointWorldMatrix());
 		Game::Engine->GetOverlayRenderer()->RenderNode(world, OverlayRenderer::RenderColour::RC_Green);
 	}
+	//iEnvironmentObject *obj = Game::CurrentPlayer->GetActor();
+	//OutputDebugString(concat("A1 envpos = ")(Vector3ToString(obj->GetEnvironmentPosition()))(", pos = ")(Vector3ToString(obj->GetPosition()))
+	//	(", obb = ")(Vector3ToString(obj->CollisionOBB.Data().Centre))(", wmom = ")(Vector3ToString(obj->PhysicsState.WorldMomentum))("\n").str().c_str());
 	
 }
 

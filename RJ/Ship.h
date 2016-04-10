@@ -18,7 +18,6 @@
 class Hardpoint;
 class Order_MoveToPosition;
 class Order_MoveToTarget;
-class Order_AttackRunOnTargetWithLeading; 
 class Order_MoveAwayFromTarget;
 class Order_AttackBasic;
 
@@ -245,9 +244,6 @@ public:
 
 	// Order: Moves the ship to a target object, within a certain tolerance
 	Order::OrderResult			MoveToTarget(Order_MoveToTarget & order);
-
-	// Order: Moves the ship at a target object, within a certain tolerance, using target leading
-	Order::OrderResult			AttackRunOnTargetWithLeading(Order_AttackRunOnTargetWithLeading & order);
 	
 	// Order: Moves the ship a specified distance away from some target
 	Order::OrderResult			MoveAwayFromTarget(Order_MoveAwayFromTarget & order);

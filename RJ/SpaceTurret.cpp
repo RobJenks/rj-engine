@@ -23,6 +23,7 @@ SpaceTurret::SpaceTurret(void)
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
 	m_worldmatrix = ID_MATRIX;
+	m_turretstatus = TurretStatus::Idle;
 	m_atrest = true;
 	m_isfixed = false;
 	m_yaw = m_pitch = 0.0f;
@@ -35,6 +36,7 @@ SpaceTurret::SpaceTurret(void)
 	m_minrange = 10.0f; m_minrangesq = (10.0f * 10.0f);
 	m_maxrange = 10000.0f; m_maxrangesq = (10000.0f * 10000.0f);
 	m_nexttargetanalysis = 0U;
+	m_firing_spread_multiplier = Game::C_DEFAULT_FIRING_SPREAD_THRESHOLD;
 	m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
 	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
 	m_firedelay = 0U;
@@ -53,6 +55,9 @@ void SpaceTurret::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_cont
 	// Take different action depending on whether we are in manual or automatic mode
 	if (m_mode == SpaceTurret::ControlMode::ManualControl)
 	{
+		// Update status
+		m_turretstatus = TurretStatus::UnderManualControl;
+
 		// (Move turret to point at user target)
 	}
 	else
@@ -85,6 +90,14 @@ void SpaceTurret::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_cont
 			{
 				// We are within the firing threshold.  This will only fire if the turret is ready to do so
 				Fire();
+
+				// Update status to indicate that the turret is engaging
+				m_turretstatus = TurretStatus::EngagingTarget;
+			}
+			else
+			{
+				// We are tracking the target but do not yet have a shot
+				m_turretstatus = TurretStatus::TrackingTarget;
 			}
 		
 			// Attempt to yaw and pitch to keep the target in view
@@ -102,12 +115,18 @@ void SpaceTurret::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_cont
 					// If we have oriented back to ID and are not current flagged as 'at rest', set the flag now and quit
 					ResetOrientation();
 				}
+
+				//  The turret is at rest
+				m_turretstatus = TurretStatus::Idle;
 			}
 			else
 			{
 				// We are trying to rotate back to the resting position
 				Yaw((m_yaw < 0.0f ? min(-m_yaw, m_yawrate) : -min(m_yaw, m_yawrate)) * Game::TimeFactor);
 				Pitch((m_pitch < 0.0f ? min(-m_pitch, m_pitchrate) : -min(m_pitch, m_pitchrate)) * Game::TimeFactor);
+
+				// Update status accordingly
+				m_turretstatus = TurretStatus::ReturningToIdle;
 			}
 		}
 	}
@@ -363,6 +382,7 @@ void SpaceTurret::DetermineFiringRegion(void)
 	if (m_launchercount == 0)
 	{
 		m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
+		return;
 	}
 
 	// Iterate through the launcher collection and determine the max spread from any launcher
@@ -372,9 +392,14 @@ void SpaceTurret::DetermineFiringRegion(void)
 		if (m_launchers[i].GetProjectileSpread() > maxspread) maxspread = m_launchers[i].GetProjectileSpread();
 	}
 
-	// Apply any other modifiers to the spread as required
+	/* Apply any other modifiers to the spread as required */
 
-	// Store the adjusted figure as the radius of the acceptable firing region 
+	// Apply the turret multiplier on launcher spread
+	maxspread *= m_firing_spread_multiplier;
+
+	// Operator/computer targeting skill etc...
+
+	/* Store the adjusted figure as the radius of the acceptable firing region */
 	m_firing_region_threshold = maxspread;
 }
 
@@ -428,18 +453,46 @@ void SpaceTurret::UpdatePositioning(void)
 // test range since turrets should only be passed potential targets that are within their range
 bool SpaceTurret::CanHitTarget(iSpaceObject *target)
 { 
+	// First make sure the target exists
+	if (!target) return false;
+
+	// Check whether the target is in range
+	if (!TargetIsInRange(target)) return false;
+
+	// Check that this turret can maneuver to bring the target in its sights
+	return (TargetIsWithinFiringArc(target));
+}
+
+// Returns the range to a specified target
+float SpaceTurret::RangeSqToTarget(const iSpaceObject *target)
+{
+	return XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(target->GetPosition(), m_position)));
+}
+
+// Indicates whether a target at the specified range is valid
+bool SpaceTurret::TargetRangeSqIsValid(float range_sq)
+{
+	return (range_sq <= m_maxrangesq && range_sq >= m_minrangesq);
+}
+
+// Indicates whether the specified target is in range
+bool SpaceTurret::TargetIsInRange(const iSpaceObject *target)
+{
+	return TargetRangeSqIsValid(RangeSqToTarget(target));
+}
+
+// Indicates whether the specified target is within this turret's possible firing arc
+bool SpaceTurret::TargetIsWithinFiringArc(const iSpaceObject *target)
+{
 	// Transform the target vector by turret inverse orientation to get a target vector in local space
 	XMVECTOR tgt_local = XMVector3Rotate(
 		XMVectorSubtract(target->GetPosition(), m_position),	// Get difference vector from turret to target
 		m_invorient);											// Transform this target vector into local space
 
-	// Before testing the firing arcs, make sure this target is actually in range
-	if (XMVectorGetX(XMVector3LengthSq(tgt_local)) > m_maxrangesq) return false;
-
-	// Now test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
+	// Test whether the vector lies within both our yaw & pitch firing arcs; it must lie in both to be valid
 	return (
 		(m_yaw_limited == false || m_yaw_arc.VectorWithinArc(XMVectorSwizzle<XM_SWIZZLE_X, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(tgt_local))) &&	// (x, z)
-		(						   m_pitch_arc.VectorWithinArc(XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(tgt_local))));	// (y, z)
+		(m_pitch_arc.VectorWithinArc(XMVectorSwizzle<XM_SWIZZLE_Y, XM_SWIZZLE_Z, XM_SWIZZLE_Z, XM_SWIZZLE_Z>(tgt_local))));	// (y, z)
 }
 
 // Searches for a new target in the given vector of enemy contacts and returns the first valid one
@@ -449,7 +502,7 @@ iSpaceObject * SpaceTurret::FindNewTarget(std::vector<ObjectReference<iSpaceObje
 	if (!m_parent) return NULL;
 
 	// Consider each candidate in turn
-	iSpaceObject *obj;
+	iSpaceObject *obj; iSpaceObject *target = NULL; float target_dist_sq = 1e9;
 	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = enemy_contacts.end();
 	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = enemy_contacts.begin(); it != it_end; ++it)
 	{
@@ -459,15 +512,22 @@ iSpaceObject * SpaceTurret::FindNewTarget(std::vector<ObjectReference<iSpaceObje
 		// Make sure we are only targeting hostile objects
 		if (m_parent->GetDispositionTowardsObject(obj) != Faction::FactionDisposition::Hostile) continue;
 
-		// Make sure the object is in range and within our firing arc
-		if (!CanHitTarget(obj)) continue;
+		/* Note: components of CanHitTarget() are called separately here for efficiency, and because we want to use the range information ourselves */
 
-		// The object has passed all tests, so we can consider it a valid target
-		return obj;
+		// Make sure the target is in range.  Even if it is, reject the target if it is further away than a previous valid target
+		float range_sq = RangeSqToTarget(obj);
+		if (!TargetRangeSqIsValid(range_sq) || range_sq > target_dist_sq) continue;
+
+		// Make sure the turret can bring this target to bear within its firing arc
+		if (!TargetIsWithinFiringArc(obj)) continue;
+
+		// The object has passed all tests so it is now our best potential target; record that fact and move to the next object
+		target = obj;
+		target_dist_sq = range_sq;
 	}
 
-	// We could not locate any valid targets
-	return NULL;
+	// Return the best target we could find, or NULL if none were suitable
+	return target;
 }
 
 // Allocates space for the required number of launcher objects
@@ -580,5 +640,19 @@ SpaceTurret * SpaceTurret::Copy(void)
 
 	// Return the new turret object
 	return t;
+}
+
+// Static method to translate a turret status code to its string representation
+std::string SpaceTurret::TranslateTurretStatusToString(SpaceTurret::TurretStatus status)
+{
+	switch (status)
+	{
+		case TurretStatus::Idle:					return "Idle";
+		case TurretStatus::UnderManualControl:		return "Under Manual Control";
+		case TurretStatus::TrackingTarget:			return "Tracking Target";
+		case TurretStatus::EngagingTarget:			return "Engaging Target";
+		case TurretStatus::ReturningToIdle:			return "Returning to Idle";
+		default:									return "(Unknown)";
+	}
 }
 

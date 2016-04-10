@@ -1,10 +1,18 @@
 <GameData>
 
   <StaticTerrainDefinition>
+    <code>tmp_terrain_box</code>
+    <model>unit_line_model_lblue</model>
+    <defaultextent x="10.0" y="10.0" z="10.0" />
+    <destructible>false</destructible>
+    <maxhealth>100.0</maxhealth>
+  </StaticTerrainDefinition>
+
+  <StaticTerrainDefinition>
     <code>tmp_terrain_cone</code>
     <model>unit_cone_model</model>
     <defaultextent x="10.0" y="10.0" z="10.0" />
-    <destructible>true</destructible>
+    <destructible>false</destructible>
     <maxhealth>100.0</maxhealth>
   </StaticTerrainDefinition>
 
