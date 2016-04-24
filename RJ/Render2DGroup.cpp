@@ -250,7 +250,7 @@ bool Render2DGroup::RegisterRenderableComponent(iUIComponentRenderable *componen
 bool Render2DGroup::UnregisterRenderableComponent(iUIComponentRenderable *component) 
 { 
 	// Attempt to locate the item in the render queue; return false if it does not exist
-	int index = FindInVector(m_renderqueue, component);
+	int index = FindIndexInVector(m_renderqueue, component);
 	if (index == -1) return false;
 
 	// If it does exist, remove the item at this location

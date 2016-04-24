@@ -649,7 +649,9 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_1]) {
-		
+		//cs()->DestroyObject();
+		cs()->ClearAllTerrainObjects();
+		Game::Keyboard.LockKey(DIK_1);
 	}
 	if (b[DIK_2]) {
 		Game::Keyboard.LockKey(DIK_2);
@@ -680,33 +682,59 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
+		Actor *ac = Game::CurrentPlayer->GetActor();
 
-		StaticTerrain *t = cs()->TerrainObjects.at(0);
-		t->SetDefinition(D::StaticTerrainDefinitions.Get("tmp_terrain_box"));
-		t->SetExtent(XMVectorSet(50.0f, 2.5f, 50.0f, 0.0f));
-		t->SetPosition(XMVectorSet(10.0f, 6.0f, 10.0f, 0.0f));
-		t->RecalculatePositionalData();
-
-		Game::CurrentPlayer->GetActor()->SetEnvironmentPosition(XMVectorSet(35.0f, 16.0f, 35.0f, 0.0f));
-
-		int n = cs()->TerrainObjects.size();
-		for (int i = 1; i < n; ++i)
+		if (b[DIK_LCONTROL])
 		{
-			cs()->TerrainObjects.at(i)->SetPosition(XMVectorReplicate(1000.0f));
-			cs()->TerrainObjects.at(i)->SetExtent(XMVectorReplicate(0.1f));
-			cs()->TerrainObjects.at(i)->RecalculatePositionalData();
+			if (b[DIK_LSHIFT])
+				ac->Turn(-PIOVER2 * Game::TimeFactor);
+			else
+				ac->Turn(PIOVER2 * Game::TimeFactor);
+
+			ac->CollisionOBB.UpdateFromObject(*ac);
+			ac->CollisionOBB.RecalculateData();
+
+			AXMVECTOR_P v[8];
+			ac->CollisionOBB.DetermineVertices(v);
+			return;
 		}
-		n = cs()->GetTileCount();
-		for (int i = 0; i < n; ++i)
+		else
 		{
-			cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)n), 0.1f);
-		}
+			Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 
-		Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+			if (b[DIK_LSHIFT])
+			{
+				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
+				Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorAdd(ac->GetPosition(), XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f)));
+				Game::Engine->GetCamera()->SetDebugCameraOrientation(ID_QUATERNION);
+			}
 
-		Game::Keyboard.LockKey(DIK_4);
+			StaticTerrain *t = cs()->TerrainObjects.at(0);
+			t->SetDefinition(D::StaticTerrainDefinitions.Get("tmp_terrain_box"));
+			t->SetExtent(XMVectorSet(50.0f, 2.5f, 50.0f, 0.0f));
+			t->SetPosition(XMVectorSet(10.0f, 6.0f, 10.0f, 0.0f));
+			t->RecalculatePositionalData();
+
+			ac->SetEnvironmentPosition(XMVectorSet(35.0f, 16.0f, 35.0f, 0.0f));
+
+			int n = cs()->TerrainObjects.size();
+			for (int i = 1; i < n; ++i)
+			{
+				cs()->TerrainObjects.at(i)->SetPosition(XMVectorReplicate(1000.0f));
+				cs()->TerrainObjects.at(i)->SetExtent(XMVectorReplicate(0.1f));
+				cs()->TerrainObjects.at(i)->RecalculatePositionalData();
+			}
+			n = cs()->GetTileCount();
+			for (int i = 0; i < n; ++i)
+			{
+				cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)n), 0.1f);
+			}
+
+			Game::Keyboard.LockKey(DIK_4);
+		}		
 	}
 }
 
@@ -1395,44 +1423,48 @@ Result RJMain::LoadAllGameData()
 
 Result RJMain::InitialiseLoadedGameData(void)
 {
-	Result res;
+	Result res; bool failures = false;
 
 	// Ships: Load all ship geometry, AFTER the ship data itself has been retrieved
 	Game::Log << LOG_INIT_START << "Beginning load of all model geometry\n";
 	res = IO::Data::LoadAllModelGeometry();
-	if (res != ErrorCodes::NoError) return res;
-	Game::Log << LOG_INIT_START << "Completed load of all model geometry\n";
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Completed load of all model geometry\n" : "ERRORS encountered during load of model geometry\n");
 
 	// Run post-processing of all model geometry as necessary
 	res = IO::Data::PostProcessAllModelGeometry();
-	if (res != ErrorCodes::NoError) return res;
-	Game::Log << LOG_INIT_START << "Post-processing of all model geometry completed\n";
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
 
 	// Resources: Run all post-load creation of the interdependencies between resources & their ingredients
 	res = IO::Data::PostProcessResources();
-	if (res != ErrorCodes::NoError) return res;
-	Game::Log << LOG_INIT_START << "Post-processing of all resource data completed\n";
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all resource data completed\n" : "ERRORS encountered during post-processing of resource data\n");
 
 	// Ship tiles: Perform post-load initialisation of tiles and their construction requirements
 	res = IO::Data::PostProcessComplexShipTileData();
-	if (res != ErrorCodes::NoError) return res;
-	Game::Log << LOG_INIT_START << "Post-processing of all tile data completed\n";
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all tile data completed\n" : "ERRORS encountered during post-processing of tile data\n");
 
 	// Universe: Process all systems in the universe, with data already loaded as part of LoadAllGameData
-	Game::Universe->ProcessLoadedSystems(Game::Engine->GetDevice());
-	Game::Log << LOG_INIT_START << "Post-processing of all system data completed\n";
+	res = Game::Universe->ProcessLoadedSystems(Game::Engine->GetDevice());
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all system data completed\n" : "ERRORS encountered during post-processing of system data\n");
 
 	// Equipment: Process all equipment to run post-load initialisation
 	Equipment::InitialiseLoadedEquipmentData();
-	Game::Log << LOG_INIT_START << "Post-processing of all equipment data completed\n";
+	res = ErrorCodes::NoError;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all equipment data completed\n" : "ERRORS encountered during post-processing of equipment data\n");
 
 	// User interface: Build all UI layouts using the data loaded from game data files
-	D::UI->BuildUILayouts();
-	Game::Log << LOG_INIT_START << "Post-processing of all UI layouts completed\n";
+	res = D::UI->BuildUILayouts();
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all UI layouts completed\n" : "ERRORS encountered during post-processing UI layout data\n");
 
 	// Factions: initialise all faction data once game files have been processed
-	Game::FactionManager.Initialise();
-	Game::Log << LOG_INIT_START << "Post-processing of all faction data completed\n";
+	res = Game::FactionManager.Initialise();
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INIT_START << (res == ErrorCodes::NoError ? "Post-processing of all faction data completed\n" : "ERRORS encountered during post-processing of faction data\n");
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -2031,19 +2063,6 @@ void RJMain::__CreateDebugScenario(void)
 	SpaceTurret *sst3 = sst->Copy();
 	s3[0]()->TurretController.AddTurret(sst3);
 
-	EnvironmentTree *tree = new EnvironmentTree(cs());
-	//OutputDebugString(concat("Size = ")(tree->GetElementSize().ToString())(", Centre = ")(tree->GetElementCentre().ToString())("\n").str().c_str());
-	for (int x = -20; x <= 20; x += 40)
-		for (int y = -20; y <= 20; y += 40)
-			for (int z = -20; z <= 20; z += 40)
-			{
-				XMVECTOR offset = XMVectorSet((float)x, (float)y, (float)z, 0.0f);
-				//OutputDebugString(concat("Offset = [")(x)(",")(y)(",")(z)("], Child node = ")(tree->GetRelevantChildNode(
-					//XMVectorAdd(tree->GetCentrePoint(), offset)))("\n").str().c_str());
-			}
-
-
-
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
@@ -2120,28 +2139,42 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		std::ostringstream ss;
-		TurretController::TurretCollection::const_iterator it_end = cs()->TurretController.Turrets.end();
-		for (TurretController::TurretCollection::const_iterator it = cs()->TurretController.Turrets.begin(); it != it_end; ++it)
-		{
-			if (*it) ss << SpaceTurret::TranslateTurretStatusToString((*it)->GetTurretStatus()) << " | ";
-		}
+		Actor *ac = Game::CurrentPlayer->GetActor();
+		if (ac) {
+			XMFLOAT3 a[3];
+			XMStoreFloat3(&a[0], ac->CollisionOBB.ExtentAlongAxis[0].value);
+			XMStoreFloat3(&a[1], ac->CollisionOBB.ExtentAlongAxis[1].value);
+			XMStoreFloat3(&a[2], ac->CollisionOBB.ExtentAlongAxis[2].value);
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", ss.str().c_str());
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+
+			AXMVECTOR_P v[8];
+			ac->CollisionOBB.DetermineVertices(v);
+
+			XMVECTOR mn = XMVectorReplicate(99999.0f), mx = XMVectorReplicate(-99999.0f);
+			for (int i = 0; i < 8; ++i)
+			{
+				mn = XMVectorMin(mn, v[i].value);
+				mx = XMVectorMax(mx, v[i].value);
+			}
+			
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "BBL: %s, TFR: %s,  %s, %s",
+				Vector3ToString(v[0].value).c_str(), Vector3ToString(v[6].value).c_str(), 
+				Vector4ToString(ac->GetEnvironmentOrientation()).c_str(), Vector4ToString(ac->GetOrientation()).c_str());
+				//Vector3ToString(a[0]).c_str(), Vector3ToString(a[1]).c_str(), Vector3ToString(a[2]).c_str());
+			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		}
 	}
 
 	// Debug rendering
-	iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it_end = cs()->GetTiles().end();
-	for (iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it = cs()->GetTiles().begin(); it != it_end; ++it)
+	if (cs())
 	{
-		XMMATRIX world = XMMatrixMultiply((*it).value->GetWorldMatrix(), cs()->GetZeroPointWorldMatrix());
-		Game::Engine->GetOverlayRenderer()->RenderNode(world, OverlayRenderer::RenderColour::RC_Green);
+		iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it_end = cs()->GetTiles().end();
+		for (iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it = cs()->GetTiles().begin(); it != it_end; ++it)
+		{
+			XMMATRIX world = XMMatrixMultiply((*it).value->GetWorldMatrix(), cs()->GetZeroPointWorldMatrix());
+			Game::Engine->GetOverlayRenderer()->RenderNode(world, OverlayRenderer::RenderColour::RC_Green);
+		}
 	}
-	//iEnvironmentObject *obj = Game::CurrentPlayer->GetActor();
-	//OutputDebugString(concat("A1 envpos = ")(Vector3ToString(obj->GetEnvironmentPosition()))(", pos = ")(Vector3ToString(obj->GetPosition()))
-	//	(", obb = ")(Vector3ToString(obj->CollisionOBB.Data().Centre))(", wmom = ")(Vector3ToString(obj->PhysicsState.WorldMomentum))("\n").str().c_str());
-	
 }
 
 

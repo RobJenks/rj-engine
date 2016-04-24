@@ -1,7 +1,7 @@
 #include <string>
 #include <unordered_map>
 #include "DX11_Core.h"
-
+#include "LogManager.h"
 #include "SpaceSystem.h"
 
 #include "GameUniverse.h"
@@ -16,6 +16,8 @@ Result GameUniverse::InitialiseUniverse(void)
 
 Result GameUniverse::ProcessLoadedSystems(ID3D11Device *device)
 {
+	Result overallresult = ErrorCodes::NoError;
+
 	// Initialise each loaded system in turn
 	SystemRegister::const_iterator it_end = Systems.end();
 	for (SystemRegister::const_iterator it = Systems.begin(); it != it_end; ++it) 
@@ -24,13 +26,17 @@ Result GameUniverse::ProcessLoadedSystems(ID3D11Device *device)
 		{
 			// Initialise the system
 			Result res = it->second->InitialiseSystem(device);
-			if (res != ErrorCodes::NoError) return res;
+			if (res != ErrorCodes::NoError)
+			{
+				overallresult = res;
+				Game::Log << LOG_INIT_START << "ERROR during post-processing of system \"" << it->second->GetName() << "\"\n";
+			}
 		}
 	}
 	
 	// Return success if no errors were encounterd loading systems.  TODO: could make this more fault tolerant
 	// by not returning error on the first failure, and proceeding with the remaining systems regardless
-	return ErrorCodes::NoError;
+	return overallresult;
 }
 
 void GameUniverse::AddSystem(SpaceSystem *system)

@@ -63,22 +63,34 @@ Result UserInterface::Initialise(void)
 
 Result UserInterface::BuildUILayouts(void)
 {
-	Result result;
+	Result result, overallresult = ErrorCodes::NoError;
 
 	// Perform post-load initialisation of the ship designer UI
 	result = InitialiseShipDesignerUI();
-	if (result != ErrorCodes::NoError) return result;
+	if (result != ErrorCodes::NoError)
+	{
+		overallresult = result; 
+		Game::Log << LOG_INIT_START << "ERROR building ship designer UI layout\n";
+	}
 
 	// Initialise the model builder UI
 	result = InitialiseModelBuilderUI();
-	if (result != ErrorCodes::NoError) return result;
+	if (result != ErrorCodes::NoError)
+	{
+		overallresult = result;
+		Game::Log << LOG_INIT_START << "ERROR building model builder UI layout\n";
+	}
 
 	// Initialise the game console UI
 	result = InitialiseConsoleUI();
-	if (result != ErrorCodes::NoError) return result;
+	if (result != ErrorCodes::NoError)
+	{
+		overallresult = result;
+		Game::Log << LOG_INIT_START << "ERROR building console UI layout\n";
+	}
 
-	// Return success
-	return ErrorCodes::NoError;
+	// Return the overall result
+	return overallresult;
 }
 
 

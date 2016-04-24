@@ -66,7 +66,7 @@ public:
 		}
 	};
 
-	iObject *					Parent;				// The parent object that this OBB relates to 
+	const iObject *				Parent;				// The parent object that this OBB relates to 
 	
 	AXMMATRIX					Offset;				// The offset of this OBB from its parent object, if applicable.  Offsets are always relative to the object 
 													// position, rather than that of any OBB above it in the hierarchy
@@ -163,7 +163,7 @@ public:
 	}
 
 	// Update the OBB position and basis vectors based upon a world matrix
-	void						UpdateFromObject(iObject & object);
+	void						UpdateFromObject(const iObject & object);
 
 	// Method to update this bounding volume based upon its underlying data
 	CMPINLINE void				RecalculateData(void)

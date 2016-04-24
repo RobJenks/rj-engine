@@ -302,6 +302,9 @@ public:
 	// Calculates a new target lead multiplier for the specified target object
 	float						CalculateTargetLeadMultiplier(iSpaceObject *target);
 
+	// Event triggered upon destruction of the object
+	void						DestroyObject(void);
+
 	// Terminates the ship object and deallocates storage
 	void						Shutdown(void);
 
@@ -370,9 +373,6 @@ protected:
 	// Executes per-frame collision avoidance.  Does not peform a null test on the collision avoidance target for 
 	// efficiency; this is a protected method that can assume the avoidance target is non-null and valid
 	void				PerformCollisionAvoidance(void);
-
-	// Event triggered upon destruction of the object
-	void				DestroyObject(void);
 
 	// Vector of immediate-term information on nearby entities
 	std::vector<ImmediateEntityInfo>	m_immediate_entity_data;

@@ -334,6 +334,32 @@ CMPINLINE void delete_erase(std::vector<T> & vec, typename std::vector<T>::itera
 	}
 }
 
+// Performs a delete-erase on a single iterator element within the specified container
+// This is the equivalent of erase(it) for containers of pointer types
+// Accepts the type of container as an additional template parameter
+template <typename Tvec, typename Tobj>
+CMPINLINE void delete_erase(Tvec & vec, typename Tvec::iterator it)
+{
+	if (it != vec.end())
+	{
+		if ((*it)) delete (*it);
+		vec.erase(it);
+	}
+}
+
+// Performs a delete-erase on a range of elements within the specified container
+// This is the equivalent of erase(it) for containers of pointer types
+// Accepts the type of container as an additional template parameter
+template <typename Tvec, typename Tobj>
+CMPINLINE void delete_erase(Tvec & vec, typename Tvec::iterator begin, typename Tvec::iterator end)
+{
+	if (begin != vec.end())
+	{
+		std::for_each(begin, end, unary_delete<Tobj>());
+		vec.erase(begin, end);
+	}
+}
+
 // Performs a delete-erase on a range of elements within the specified container
 // Operates on the ".value" property of each element, for alignment-padded structures
 // This is the equivalent of erase(it) for containers of pointer types
@@ -539,19 +565,38 @@ bool InsertIntoSortedVectorIfNotPresent(std::vector<T> & vec, T const& item)
 	}
 }
 
-// Locates a specific item in a vector, using the defined equality operator for type T.  Simple linear search.
+// Locates a specific item in a vector, using the defined equality operator for type T.  Returns iterator to the 
+// item, or vector.end() if not found
 template <typename T>
-int FindInVector(vector<T> &vec, T obj)
+typename std::vector<T>::const_iterator FindInVector(std::vector<T> &vec, T obj)
 {
-	// Loop through the vector and look for this element
-	int i = 0; vector<T>::const_iterator it, it_end = vec.end();
-	for (it = vec.begin(); it != it_end; ++it, ++i)
-	{
-		if ((*it) == obj) return i;
-	}
+	return (std::find(vec.begin(), vec.end(), obj));
+}
 
-	// We did not find a match
-	return -1;
+// Locates a specific item in a vector, using the defined equality operator for type T.  Returns iterator to the 
+// item, or vector.end() if not found
+template <typename Tvec, typename Tobj>
+typename Tvec::const_iterator FindInVector(Tvec &vec, Tobj obj)
+{
+	return (std::find(vec.begin(), vec.end(), obj));
+}
+
+// Locates a specific item in a vector, using the defined equality operator for type T.  Returns iterator to the 
+// item, or vector.end() if not found
+template <typename T>
+int FindIndexInVector(std::vector<T> &vec, T obj)
+{
+	typename std::vector<T>::const_iterator it = FindInVector<T>(vec, obj);
+	return (it == vec.end() ? -1 : (int)(it - vec.begin()));
+}
+
+// Locates a specific item in a vector, using the defined equality operator for type T.  Returns iterator to the 
+// item, or vector.end() if not found
+template <typename Tvec, typename Tobj>
+int FindIndexInVector(Tvec &vec, Tobj obj)
+{
+	typename Tvec::const_iterator it = FindInVector<Tvec, Tobj>(vec, obj);
+	return (it == vec.end() ? -1 : (int)(it - vec.begin()));
 }
 
 // TODO: FindInVector method returns an integer (with -1 for no result) however must be case to vector::size_type for methods
@@ -560,12 +605,8 @@ int FindInVector(vector<T> &vec, T obj)
 template <typename T>
 CMPINLINE void RemoveFromVector(vector<T> &vec, T obj)
 {
-	// First make sure the item exists within this vector
-	int index = FindInVector(vec, obj);
-	if (index == -1) return;
-
-	// Now remove the element at this index
-	_RemoveFromVectorAtIndex_Unchecked(vec, index);
+	typename std::vector<T>::const_iterator it = FindInVector(vec, obj);
+	if (it != vec.end()) vec.erase(it);
 }
 
 // Removes the specified element from a vector, based on its index within the vector

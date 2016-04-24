@@ -44,7 +44,7 @@ void SimulationStateManager::Update(void)
 void SimulationStateManager::SetNextHubSystemForEvaluation(SpaceSystem *system)
 {
 	// Attmept to locate this system in the hub systems collection
-	int index = FindInVector<SpaceSystem*>(m_hubsystems, system);
+	int index = FindIndexInVector<SpaceSystem*>(m_hubsystems, system);
 	if (index != -1)
 	{
 		// Force the next system index to cause this system to be simulated next
@@ -712,7 +712,7 @@ void SimulationStateManager::AddHubSystem(SpaceSystem *system)
 	if (!system) return;
 
 	// We don't want to add anything if the system is already in the collection
-	if (FindInVector<SpaceSystem*>(m_hubsystems, system) != -1) return;
+	if (FindInVector<SpaceSystem*>(m_hubsystems, system) != m_hubsystems.end()) return;
 
 	// Add to the hub systems collection
 	m_hubsystems.push_back(system);

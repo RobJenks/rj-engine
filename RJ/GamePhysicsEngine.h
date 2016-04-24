@@ -27,6 +27,13 @@ class GamePhysicsEngine : public ALIGN16<GamePhysicsEngine>
 {
 public:
 
+	struct tmpbox {
+		XMFLOAT3 Centre;
+		XMFLOAT3 Axis[3];
+		XMFLOAT3 Extent;
+	};
+	bool OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmpbox & box1);
+
 	// Enumeration of the types of collision detection that may be performed
 	enum CollisionDetectionType { Unknown = 0, SphereVsSphere, SphereVsOBB, OBBvsOBB, ContinuousSphereVsSphere, ContinuousSphereVsOBB };
 

@@ -168,6 +168,11 @@ CMPINLINE XMFLOAT3	Float3MultiplyScalar(const XMFLOAT3 & v, const float s)
 	return XMFLOAT3(v.x * s, v.y * s, v.z * s);
 }
 
+CMPINLINE XMFLOAT3	Float3Multiply(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
+}
+
 CMPINLINE void Vector3ToIntVector(const FXMVECTOR vec, INTVECTOR3 & outVec)
 {
 	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
@@ -313,6 +318,7 @@ extern XMVECTOR ROT_QUATERNIONS[4];
 
 // Orthornormal unit basis vectors;
 extern const XMVECTOR UNIT_BASES[3];
+extern const XMFLOAT3 UNIT_BASES_F[3];
 
 // Uses the Padé approximation to avoid sqrt, where the approximation holds, within a certain tolerance 
 // of the actual result.  If outside that tolerance then perform the sqrt to retain acceptable precision

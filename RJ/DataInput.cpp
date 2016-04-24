@@ -108,7 +108,7 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 {
 	// Record the time taken to process this file; store the start time before beginning
 	unsigned int processtime = (unsigned int)timeGetTime();
-
+	
 	// Build full filename
 	if (file == NullString) return ErrorCodes::NullFilenamePointer;
 	string &filename = BuildStrFilename(D::DATA, file);
@@ -2408,6 +2408,7 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 
 Result IO::Data::LoadAllModelGeometry(void)
 {
+	unsigned int processtime;
 	Result res			= ErrorCodes::NoError; 
 	Result overallres	= ErrorCodes::NoError;
 
@@ -2415,6 +2416,9 @@ Result IO::Data::LoadAllModelGeometry(void)
 	Model::ModelCollection::iterator it_end = Model::Models.end();
 	for (Model::ModelCollection::iterator it = Model::Models.begin(); it != it_end; ++it) 
 	{
+		// Record the time taken to process this model; store the start time before beginning
+		processtime = (unsigned int)timeGetTime();
+
 		if (it->second) 
 		{
 			// Load the model geometry
@@ -2427,9 +2431,15 @@ Result IO::Data::LoadAllModelGeometry(void)
 		}
 	
 		// After each iteration we need to report any error that arises and then move onto the next object
-		if (res != ErrorCodes::NoError) {
+		if (res != ErrorCodes::NoError) 
+		{
 			overallres = ErrorCodes::ErrorsOccuredWhileLoadingMeshes;
 			Game::Log << LOG_INIT_START << "ERROR loading model geometry for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\"\n";
+		}
+		else
+		{
+			processtime = ((unsigned int)timeGetTime() - processtime);
+			Game::Log << LOG_INIT_START << "Geometry loaded for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\" [" << processtime << "ms]\n";
 		}
 	}
 

@@ -132,6 +132,7 @@ XMVECTOR ROT_QUATERNIONS[4];
 
 // Orthornormal unit basis vectors
 const XMVECTOR UNIT_BASES[3] = { XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f), XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f) };
+const XMFLOAT3 UNIT_BASES_F[3] = { XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) };
 
 bool Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {

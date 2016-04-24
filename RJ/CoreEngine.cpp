@@ -2267,6 +2267,37 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		}
 		return true;
 	}
+	else if (command.InputCommand == "fade_interior")
+	{
+		iObject *obj = Game::GetObjectByInstanceCode(command.Parameter(0));
+		if (!obj || !obj->IsEnvironment())
+		{
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+				concat("Invalid object \"")(command.Parameter(0))("\" specified").str()); return true;
+		}
+		iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)obj;
+
+		if (command.Parameter(1) == "1")
+		{
+			int n = env->GetTileCount();
+			for (int i = 0; i < n; ++i)
+			{
+				ComplexShipTile *t = env->GetTile(i); if (!t) continue;
+				t->Fade.FadeToAlpha(1.0f + ((float)i / (float)n), 0.1f);
+			}
+			command.SetSuccessOutput(concat("Fading out environment interior for ")(env->GetInstanceCode()).str()); return true;
+		}
+		else
+		{
+			int n = env->GetTileCount();
+			for (int i = 0; i < n; ++i)
+			{
+				ComplexShipTile *t = env->GetTile(i); if (!t) continue;
+				t->Fade.FadeIn(1.0f + ((float)i / (float)n));
+			}
+			command.SetSuccessOutput(concat("Fading environment interior of ")(env->GetInstanceCode())(" back in").str()); return true;
+		}
+	}
 	else if (command.InputCommand == "terrain_debug_render_mode")
 	{
 		if (command.InputParameters.size() < 1) {

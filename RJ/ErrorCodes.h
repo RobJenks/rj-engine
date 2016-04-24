@@ -392,6 +392,7 @@ namespace ErrorCodes {
 	const Result		CouldNotInitialiseBasicProjectileTexture		= 2671;
 	const Result		CannotLoadBasicProjectileDefWithoutRequiredData = 2672;
 	const Result		CannotLoadBasicProjectileDefWithInvalidParams	= 2673;
+	const Result		CannotLoadGeometryForNullModel					= 2674;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -581,6 +582,9 @@ namespace ErrorCodes {
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;
 	const Result		CannotSetTurretLauncherDefinition				= 6001;
+
+	// Faction errors													(6100-6199)
+	const Result		NoFactionsToBuildFactionDispositionMatrix		= 6100;
 
 }
 

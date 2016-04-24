@@ -143,6 +143,9 @@ public:
 	std::string									DetermineXMLDataFilename(void);
 	std::string									DetermineXMLDataFullFilename(void);
 
+	// Event triggered upon destruction of the object
+	void										DestroyObject(void);
+
 
 protected:
 
@@ -169,9 +172,6 @@ protected:
 
 	// Deallocates and clears the set of capital ship perimeter beacons attached to this ship
 	void										ShutdownPerimeterBeacons(void);
-
-	// Event triggered upon destruction of the object
-	void										DestroyObject(void);
 
 
 	// Methods to recalculate properties of this ship based on its configuration and current state

@@ -1,3 +1,4 @@
+#include "AlignedAllocator.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
@@ -141,8 +142,8 @@ void UI_ModelBuilder::RefreshInterface(void)
 	std::vector<std::string>::size_type obbcount = items.size();
 
 	// Now add each terrain object to the vector in turn
-	std::vector<StaticTerrain*>::size_type terraincount = m_terrain.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < terraincount; ++i)
+	TerrainCollection::size_type terraincount = m_terrain.size();
+	for (TerrainCollection::size_type i = 0; i < terraincount; ++i)
 	{
 		items.push_back(concat("Terrain")(i).str());
 	}
@@ -627,17 +628,12 @@ void UI_ModelBuilder::RemoveTerrain(StaticTerrain *terrain)
 	// Make sure the terrain object and container environment are valid
 	if (!terrain || !m_nullenv) return;
 
-	// Attempt to locate the terrain object in the null environnment.  Removing from the environment
-	// will also deallocate and dispose of the terrain object
-	int index = m_nullenv->FindTerrainObject(terrain);
-	if (index != -1)
-	{
-		m_nullenv->RemoveTerrainObject(terrain);
-	}
-
+	// Remove from the environment terrain collection; this will also deallocate the terrain object
+	m_nullenv->RemoveTerrainObject(terrain);
+	
 	// Remove the terrain object it from the central modelbuilder collection; it has already been 
 	// deallocated upon removal from the environment
-	index = FindTerrainIndex(terrain);
+	int index = FindTerrainIndex(terrain);
 	if (index >= 0 && index < (int)m_terrain.size() && m_terrain[index] != NULL)
 	{
 		//SafeDelete(m_terrain[index]);
@@ -653,18 +649,26 @@ void UI_ModelBuilder::RemoveTerrain(StaticTerrain *terrain)
 // added, removed, moved, resized or rotated
 void UI_ModelBuilder::RefreshAllCollisionGeometry(void)
 {
+	// Record whether we currently have an OBB/terrain object selected
+	int selected = m_colldata_selected;
+
 	// Collision OBB hierarchy - no refresh actions needed at this point
 
 	// Terrain objects - Add all terrain objects to the null environment
 	if (m_nullenv)
 	{
-		// First, remove all current references from the element
-		m_nullenv->ClearAllTerrainObjects();
+		// First, remove all current references from the element.  Remove references only; we don't want
+		// to actually delete the terrain objects like normal since they are mastered in the modelbuilder
+		//m_nullenv->ClearAllTerrainObjects();
+		m_nullenv->TerrainObjects.clear();
 
 		// Now add all terrain objects to the environment
-		std::vector<StaticTerrain*>::size_type n = m_terrain.size();
-		for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) m_nullenv->AddTerrainObject(m_terrain[i]);
+		TerrainCollection::size_type n = m_terrain.size();
+		for (TerrainCollection::size_type i = 0; i < n; ++i) m_nullenv->AddTerrainObject(m_terrain[i]);
 	}
+
+	// Restore the previously-selected item (will handle cases where that item no longer exists)
+	CollisionData_Clicked(selected);
 }
 
 // Add a new terrain object to the end of the terrain vector, using the unique code specified in the relevant text box
@@ -738,13 +742,23 @@ void UI_ModelBuilder::RemoveSelectedObject(void)
 	SelectOBB(NULL);
 }
 
-// Handles the event where the user is clicking on the collision data listing
+// Handles the event where the user is clicking on the collision data listing.  Accepts the point which was clicked as input
 void UI_ModelBuilder::CollisionData_Clicked(INTVECTOR2 location)
 {
 	// Get the line (if any) within this control that was clicked.  Returns -1 if no line was clicked
 	INTVECTOR2 local = (location - m_collisiondata->GetPosition());
 	int line = m_collisiondata->GetLineAtLocation(local);
-	
+
+	// Pass to the overloaded method with this line index
+	CollisionData_Clicked(line);
+}
+
+// Handles the event where the user is clicking on the collision data listing.  Accepts the line that has been clicked as input
+void UI_ModelBuilder::CollisionData_Clicked(int line)
+{
+	// Parameter check
+	if (line < 0 || line >= m_collisiondata->GetLineCount()) line = -1;
+
 	// Store the currently-selected line
 	m_colldata_selected = line;
 
@@ -845,7 +859,7 @@ void UI_ModelBuilder::MoveSelection(FXMVECTOR mv)
 	}
 
 	// Perform a full update of the collision geometry based on this change
-	RefreshAllCollisionGeometry();
+	//RefreshAllCollisionGeometry();
 }
 
 // Resize the selected object
@@ -960,18 +974,8 @@ int UI_ModelBuilder::FindOBBChildIndex(OrientedBoundingBox *obb, OrientedBoundin
 // Finds a terrain object in the terrain vector and returns its index.  Returns -1 if the terrain does not exist
 int UI_ModelBuilder::FindTerrainIndex(StaticTerrain *terrain)
 {
-	// Parameter check
-	if (!terrain) return -1; 
-	
-	// Simply check each terrain object in turn and return the first that matches
-	int n = (int)m_terrain.size();
-	for (int i = 0; i < n; ++i)
-	{
-		if (m_terrain[i] == terrain) return i;
-	}
-
-	// The terrain object was not found
-	return -1;
+	if (!terrain) return -1;
+	return FindIndexInVector<TerrainCollection, StaticTerrain*>(m_terrain, terrain);
 }
 
 // Private recursive method to traverse the OBB hierarchy
@@ -1116,8 +1120,8 @@ Result UI_ModelBuilder::SaveCollData_ButtonClicked(void)
 	}
 
 	// Now generate XML entries for each terrain object in turn
-	std::vector<StaticTerrain*>::size_type n = m_terrain.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
+	TerrainCollection::size_type n = m_terrain.size();
+	for (TerrainCollection::size_type i = 0; i < n; ++i)
 	{
 		if (m_terrain[i])
 		{
@@ -1137,12 +1141,14 @@ void UI_ModelBuilder::ClearCollisionData(void)
 	if (m_object) m_object->CollisionOBB.Clear();
 
 	// Clear any terrain objects stored in the null placeholder environment, before we later remove from the
-	// central UI controller collection and deallocate them
-	m_nullenv->ClearAllTerrainObjects();
+	// central UI controller collection and deallocate them.  Remove references only; we don't want to 
+	// delete the objects here since they are mastered by the modelbuilder
+	//m_nullenv->ClearAllTerrainObjects();
+	m_nullenv->TerrainObjects.clear();
 
 	// Delete any terrain objects that have been created, then clear the vector
-	std::vector<StaticTerrain*>::size_type n = m_terrain.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i) if (m_terrain[i]) SafeDelete(m_terrain[i]);
+	TerrainCollection::size_type n = m_terrain.size();
+	for (TerrainCollection::size_type i = 0; i < n; ++i) if (m_terrain[i]) SafeDelete(m_terrain[i]);
 	m_terrain.clear();
 
 	// Clear any reference to currently selected objects, since these are no longer valid

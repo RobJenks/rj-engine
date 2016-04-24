@@ -50,6 +50,9 @@ Result Model::Initialise(const char *modelFilename, const char *textureFilename)
 {
 	Result result;
 
+	// Parameter check; we need a model filename at minimum in order to load anything
+	if (!modelFilename || strcmp(modelFilename, "") == 0) return ErrorCodes::CannotLoadGeometryForNullModel;
+
 	// Load in the model data,
 	result = LoadModel(modelFilename);
 	if(result != ErrorCodes::NoError) return result;

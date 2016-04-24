@@ -1,4 +1,6 @@
 #include "Utility.h"
+#include "ErrorCodes.h"
+#include "LogManager.h"
 #include "Faction.h"
 
 #include "FactionManagerObject.h"
@@ -67,18 +69,28 @@ void FactionManagerObject::FactionDispositionChanged(Faction::F_ID FactionA, Fac
 }
 
 // Initialises the faction manager once all faction data has been loaded
-void FactionManagerObject::Initialise(void)
+Result FactionManagerObject::Initialise(void)
 {
+	Result result, overallresult = ErrorCodes::NoError;
+
 	// Initialise the faction disposition matrix
-	InitialiseDispositionMatrix();
+	result = InitialiseDispositionMatrix();
+	if (result != ErrorCodes::NoError)
+	{
+		overallresult = result;
+		Game::Log << LOG_INIT_START << "ERROR initialising faction disposition matrix\n";
+	}
+
+	// Return the overall result
+	return overallresult;
 }
 
 // Initialises the faction disposition matrix, holding the disposition of every faction to every other.  Should be called
 // once all factions have been loaded at the start of the game. 
-void FactionManagerObject::InitialiseDispositionMatrix(void)
+Result FactionManagerObject::InitialiseDispositionMatrix(void)
 {
 	// Make sure we have a valid number of factions
-	if (m_factioncount < 1) { m_dispmatrix = NULL; return; }
+	if (m_factioncount < 1) { m_dispmatrix = NULL; return ErrorCodes::NoFactionsToBuildFactionDispositionMatrix; }
 
 	// We want to allocate an nxn matrix for n factions
 	m_dispmatrix = (Faction::FactionDisposition**)malloc(sizeof(Faction::FactionDisposition*) * m_factioncount);
@@ -93,6 +105,9 @@ void FactionManagerObject::InitialiseDispositionMatrix(void)
 
 	// Overwrite the diagonal (i == j) relations to friendly, since this is the faction's disposition to itself
 	for (int i = 0; i < m_factioncount; ++i) m_dispmatrix[i][i] = Faction::FactionDisposition::Friendly;
+
+	// Return success
+	return ErrorCodes::NoError;
 }
 
 // Expands the disposition matrix to account for a new faction being added.  Unlikely to be required

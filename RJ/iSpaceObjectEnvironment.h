@@ -31,6 +31,9 @@ public:
 	// other than our own, e.g. when allocating a new space with different dimensions
 #	define ELEMENT_INDEX_EX(_x, _y, _z, _size, _size_xy) (_x + (_y * _size.x) + (_z * _size_xy))
 
+	// Environment terrain collection
+	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
+
 	// Default constructor
 	iSpaceObjectEnvironment(void);
 
@@ -82,13 +85,13 @@ public:
 	Result							InitialiseElements(INTVECTOR3 size, const ComplexShipElement * const source, INTVECTOR3 source_size);
 
 	// Vector of active objects within the ship; each CS-Element also holds a pointer to its local objects for runtime efficiency
-	std::vector<ObjectReference<iEnvironmentObject>>	Objects;
+	std::vector<ObjectReference<iEnvironmentObject>>						Objects;
 
 	// Vector of terrain objects held within this ship; each CS-Element also holds a pointer to the terrain for runtime efficiency
-	std::vector<StaticTerrain*>							TerrainObjects;
+	TerrainCollection														TerrainObjects;
 
 	// Spatial partitioning tree for all objects in the environment
-	EnvironmentTree * 									SpatialPartitioningTree;
+	EnvironmentTree * 														SpatialPartitioningTree;
 
 	// Rebuilds the spatial partitioning tree, populating with all existing objects if relevant
 	void							BuildSpatialPartitioningTree(void);
@@ -171,8 +174,13 @@ public:
 	// Methods to add, find or remove terrain objects in the environment
 	void							AddTerrainObject(StaticTerrain *obj);
 	void							RemoveTerrainObject(StaticTerrain *obj);
-	CMPINLINE int					FindTerrainObject(StaticTerrain *obj)	{ return FindInVector<StaticTerrain*>(TerrainObjects, obj); }
 	void							ClearAllTerrainObjects(void);
+	
+	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found
+	TerrainCollection::const_iterator FindTerrainObject(StaticTerrain *obj)
+	{ 
+		return FindInVector<TerrainCollection, StaticTerrain*>(TerrainObjects, obj);
+	}
 
 	// Add a tile to the environment
 	void							AddTile(ComplexShipTile *tile);

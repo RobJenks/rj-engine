@@ -31,7 +31,7 @@ public:
 	void									FactionDispositionChanged(Faction::F_ID FactionA, Faction::F_ID FactionB, Faction::FactionDisposition disposition);
 
 	// Initialises the faction manager once all faction data has been loaded
-	void									Initialise(void);
+	Result									Initialise(void);
 
 	// Returns the disposition of Faction A towards Faction B, i.e. whether Faction A likes Faction B
 	CMPINLINE Faction::FactionDisposition	GetDisposition(Faction::F_ID FactionA, Faction::F_ID FactionB)	{ return m_dispmatrix[FactionA][FactionB]; }
@@ -56,7 +56,7 @@ protected:
 
 	// Initialises the faction disposition matrix, holding the disposition of every faction to every other.  Should be called
 	// once all factions have been loaded at the start of the game. 
-	void									InitialiseDispositionMatrix(void);
+	Result									InitialiseDispositionMatrix(void);
 
 	// Expands the disposition matrix to account for a new faction being added.  Unlikely to be required
 	// but can be used in case e.g. a new faction forms from an existing one during a game

@@ -92,15 +92,14 @@ void OrientedBoundingBox::AllocateChildren(int children)
 	if (children <= 0) return;
 
 	// Allocate new space and initialise it to NULL
-	Children = (OrientedBoundingBox*)malloc(sizeof(OrientedBoundingBox) * children);
-	memset(Children, 0, sizeof(OrientedBoundingBox) * children);
-
+	Children = new OrientedBoundingBox[children];
+	
 	// Store the new child count
 	ChildCount = children;
 }
 
 // Update the OBB position and basis vectors based upon a world matrix
-void OrientedBoundingBox::UpdateFromObject(iObject & object)
+void OrientedBoundingBox::UpdateFromObject(const iObject & object)
 {
 	// Get a reference to the object world matrix
 	const XMMATRIX & world = object.GetWorldMatrix();
@@ -171,8 +170,7 @@ void OrientedBoundingBox::DeallocateChildren(void)
 		{
 			Children[i].DeallocateChildren();
 		}
-		free(Children);
-		Children = NULL;
+		SafeDeleteArray(Children);
 	}
 	ChildCount = 0;
 }
@@ -204,9 +202,8 @@ void OrientedBoundingBox::AppendNewChildNode(void)
 {
 	// Allocate new storage for (n+1) child nodes
 	int newchildcount = ChildCount + 1;
-	OrientedBoundingBox *obb = (OrientedBoundingBox*)malloc(sizeof(OrientedBoundingBox) * newchildcount);
-	memset(obb, 0, sizeof(OrientedBoundingBox) * newchildcount);
-
+	OrientedBoundingBox *obb = new OrientedBoundingBox[newchildcount];
+	
 	// Copy the existing OBB data element-by-element
 	for (int i = 0; i < ChildCount; ++i)
 	{
@@ -223,7 +220,7 @@ void OrientedBoundingBox::AppendNewChildNode(void)
 	ChildCount = newchildcount;
 
 	// Deallocate the previous child data, assuming any existed
-	if (oldchildren) SafeFree(oldchildren);
+	if (oldchildren) SafeDeleteArray(oldchildren);
 }
 
 // Removes a child node below this OBB.  Takes care of maintaining references to existing nodes and reducing the child storage
@@ -237,11 +234,10 @@ void OrientedBoundingBox::RemoveChildNode(int index)
 
 	// Allocate new storage for (n-1) child nodes
 	int newchildcount = ChildCount - 1;
-	OrientedBoundingBox *obb = (OrientedBoundingBox*)malloc(sizeof(OrientedBoundingBox) * newchildcount);
-	memset(obb, 0, sizeof(OrientedBoundingBox) * newchildcount);
+	OrientedBoundingBox *obb = new OrientedBoundingBox[newchildcount];
 
 	// We want to dispose of the item being removed, as well as all data below it in the hierarchy.  We can't 
-	// deallocate at this top level since the entire child data block was malloc-ed at once, and we only want to
+	// deallocate at this top level since the entire child data block was created at once, and we only want to
 	// deallocate one element from it.  Instead, deallocate individual data within that child object and allow it 
 	// to propogate recursively at that point.  Add any other heap-allocated properties here as required.
 	Children[index].DeallocateChildren();
@@ -259,7 +255,7 @@ void OrientedBoundingBox::RemoveChildNode(int index)
 	}
 
 	// Now deallocate the existing child data and replace it with this new pointer
-	SafeFree(Children);
+	SafeDeleteArray(Children);
 	Children = obb;
 
 	// Update the child node count

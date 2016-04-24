@@ -4,6 +4,7 @@
 #define __UI_ModelBuilderH__
 
 #include <vector>
+#include "AlignedAllocator.h"
 #include "SimpleShip.h"
 #include "iUIController.h"
 
@@ -12,6 +13,13 @@ __declspec(align(16))
 class UI_ModelBuilder : public ALIGN16<UI_ModelBuilder>, public iUIController
 {
 public:
+
+	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
+	USE_ALIGN16_ALLOCATORS(UI_ModelBuilder)
+
+	// Collection of terrain objects being added within the modelbuilder
+	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
+
 	// Enumeration of possible selection types
 	enum MVSelectionType { NothingSelected = 0, OBBSelected, TerrainSelected };
 
@@ -64,8 +72,11 @@ public:
 	Result LoadCollData_ButtonClicked(void);
 	Result SaveCollData_ButtonClicked(void);
 
-	// Handles the event where the user is clicking on the collision data listing
+	// Handles the event where the user is clicking on the collision data listing.  Accepts the point which was clicked as input
 	void CollisionData_Clicked(INTVECTOR2 location);
+
+	// Handles the event where the user is clicking on the collision data listing.  Accepts the line that has been clicked as input
+	void CollisionData_Clicked(int line);
 
 	// Retrieves a pointer to the OBB at the specified index, based on a flattening of the model OBB hierarchy and traversing sequentially
 	OrientedBoundingBox *GetOBBByIndex(int index);
@@ -192,7 +203,7 @@ protected:
 	SimpleShip *							m_object;
 
 	// Vector of terrain objects added to the model
-	std::vector<StaticTerrain*>				m_terrain;
+	TerrainCollection						m_terrain;
 
 	// References to key UI controls
 	MultiLineTextBlock *					m_collisiondata;

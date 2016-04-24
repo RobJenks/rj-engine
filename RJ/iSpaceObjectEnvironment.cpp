@@ -391,9 +391,9 @@ Result iSpaceObjectEnvironment::CopyTileDataFromObject(iContainsComplexShipTiles
 	// Remove all terrain objects which were introduced as part of a tile; create a new vector, populate with any 
 	// terrain objects that are still valid, and then swap the vectors at the end.  More efficient than removing
 	// items from the main vector since the majority will likely be removed here.
-	std::vector<StaticTerrain*> terrain;
-	std::vector<StaticTerrain*>::size_type n = TerrainObjects.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
+	TerrainCollection terrain;
+	TerrainCollection::size_type n = TerrainObjects.size();
+	for (TerrainCollection::size_type i = 0; i < n; ++i)
 	{
 		if (TerrainObjects[i]->GetParentTileID() == 0) terrain.push_back(TerrainObjects[i]);
 	}
@@ -506,9 +506,9 @@ void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile
 
 	// Remove any terrain objects in the environment that were owned by this tile
 	Game::ID_TYPE id = tile->GetID();
-	std::vector<StaticTerrain*>::iterator it = std::partition(TerrainObjects.begin(), TerrainObjects.end(),
+	TerrainCollection::iterator it = std::partition(TerrainObjects.begin(), TerrainObjects.end(),
 		[&id](const StaticTerrain *element) { return (element->GetParentTileID() != id); });
-	delete_erase<StaticTerrain*>(TerrainObjects, it, TerrainObjects.end());
+	delete_erase<TerrainCollection, StaticTerrain*>(TerrainObjects, it, TerrainObjects.end());
 
 	// Rebuild the spatial partitioning tree following this bulk change
 	BuildSpatialPartitioningTree();
