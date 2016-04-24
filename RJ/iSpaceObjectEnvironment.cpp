@@ -345,28 +345,21 @@ void iSpaceObjectEnvironment::AddTerrainObjectFromTile(StaticTerrain *obj, Compl
 	// If the tile has a non-ID orientation, apply that orientation change to the object
 	if (sourcetile->GetRotation() != Rotation90Degree::Rotate0)
 	{
-		// First adjust the terrain relative position, by rotating it about the local tile centre by the tile orientation
-		XMVECTOR ctrans, localpos;XMMATRIX ct, invct, transform;
-		
-		// We need to translate to/from the tile centre before rotating, since (0,0,0) represents the top-left corner
-		ctrans = XMVectorScale(Game::ElementLocationToPhysicalPosition(sourcetile->GetElementSize()), 0.5f);
-		ct = XMMatrixTranslationFromVector(XMVectorScale(ctrans, -0.5f));
-		invct = XMMatrixTranslationFromVector(XMVectorScale(ctrans, 0.5f));
-		transform = XMMatrixMultiply(XMMatrixMultiply(
-			ct,	
-			GetRotationMatrix(sourcetile->GetRotation())),
-			invct);
+		// Determine the transformation matrix for this rotation
+		XMMATRIX transform = GetRotationMatrix(sourcetile->GetRotation());
 
-		// Transform the object position by this matrix
-		localpos = XMVector3TransformCoord(obj->GetPosition(), transform);
-		obj->SetPosition(localpos);
+		// Transform the tile-local object position by this matrix
+		XMVECTOR localpos = XMVector3TransformCoord(obj->GetPosition(), transform);
 
-		// Now adjust the terrain orientation itself to account for the tile orientation
+		// Now adjust the terrain orientation and position, transforming it into environment space
 		obj->SetOrientation(XMQuaternionMultiply(obj->GetOrientation(), GetRotationQuaternion(sourcetile->GetRotation())));
+		obj->SetPosition(XMVectorAdd(localpos, sourcetile->GetRelativePosition()));
 	}
-
-	// Transform the object position from tile- to environment-space
-	obj->SetPosition(XMVectorAdd(Game::ElementLocationToPhysicalPosition(sourcetile->GetElementLocation()), obj->GetPosition()));
+	else
+	{
+		// The tile is not rotated at all, so we just need to determine the correct terrain position
+		obj->SetPosition(XMVectorAdd(obj->GetPosition(), sourcetile->GetRelativePosition()));
+	}
 
 	// Resume updates following these changes
 	obj->ResumeUpdates();

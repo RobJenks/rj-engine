@@ -649,9 +649,54 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_1]) {
-		//cs()->DestroyObject();
-		cs()->ClearAllTerrainObjects();
-		Game::Keyboard.LockKey(DIK_1);
+
+		if (b[DIK_LCONTROL])
+		{
+			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("terrain_debug_render_mode solid"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("fade_interior cs 1"));
+
+			/*while (cs()->GetTiles().size() > 1) cs()->RemoveTile(cs()->GetTile(cs()->GetTiles().size() - 1));
+			iSpaceObjectEnvironment::TerrainCollection::const_iterator it = cs()->FindTerrainObject(cs()->GetTile(0)->GetTerrainObjectLinks().at(0));
+			StaticTerrain *t = *it;
+			t->SetPosition(XMVectorAdd(cs()->GetTile(0)->GetElementPosition(), XMVectorSet(0, 0, 10, 0));*/
+
+			Game::Keyboard.LockKey(DIK_1);
+			return;
+		}
+
+		static int index = 1;
+		if (b[DIK_LSHIFT])	index = (index == 1 ? 0 : 1);
+		else
+		{
+			index = 0;
+			while (cs()->GetTiles().size() > 1) cs()->RemoveTile(cs()->GetTile(cs()->GetTiles().size() - 1));
+
+			if (index >= cs()->GetTileCount()) { index = 0; return; }
+			ComplexShipTile *t = cs()->GetTile(index);
+
+			//Rotation90Degree rot = RotateBy90Degrees(t->GetRotation());
+			//t->SetRotation(rot);
+			float rot = PIOVER2 * Game::TimeFactor;
+			XMMATRIX transform = XMMatrixRotationY(rot);// GetRotationMatrix(Rotation90Degree::Rotate90);
+			XMVECTOR qtrans = XMQuaternionRotationAxis(UP_VECTOR, rot);
+
+			for (int i = 0; i < (int)t->GetTerrainObjectLinks().size(); ++i)
+			{
+				iSpaceObjectEnvironment::TerrainCollection::const_iterator it = cs()->FindTerrainObject(t->GetTerrainObjectLinks().at(i));
+				if (it == cs()->TerrainObjects.end()) continue;
+				StaticTerrain *tn = (*it); if (!tn) continue;
+
+				XMVECTOR localpos = XMVectorSubtract(tn->GetEnvironmentPosition(), t->GetRelativePosition());
+				localpos = XMVector3TransformCoord(localpos, transform);
+
+				tn->SetOrientation(XMQuaternionMultiply(tn->GetOrientation(), qtrans));
+				tn->SetPosition(XMVectorAdd(t->GetRelativePosition(), localpos));
+			}
+		}
+
+		//Game::Keyboard.LockKey(DIK_1);
 	}
 	if (b[DIK_2]) {
 		Game::Keyboard.LockKey(DIK_2);
@@ -675,7 +720,10 @@ void RJMain::ProcessKeyboardInput(void)
 				XMVectorSetZ(ss()->GetPosition(), i * 1.2f * ss()->GetSizeF().z));
 			s->SetOrientation(ID_QUATERNION);
 			s->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-			
+
+			SpaceTurret *turret = ss()->TurretController.Turrets.at(0)->Copy();
+			s->TurretController.AddTurret(turret);
+
 			s->AssignNewOrder(new Order_AttackBasic(s, cs()));
 		}
 
@@ -2138,42 +2186,9 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
-	{
-		Actor *ac = Game::CurrentPlayer->GetActor();
-		if (ac) {
-			XMFLOAT3 a[3];
-			XMStoreFloat3(&a[0], ac->CollisionOBB.ExtentAlongAxis[0].value);
-			XMStoreFloat3(&a[1], ac->CollisionOBB.ExtentAlongAxis[1].value);
-			XMStoreFloat3(&a[2], ac->CollisionOBB.ExtentAlongAxis[2].value);
-
-
-			AXMVECTOR_P v[8];
-			ac->CollisionOBB.DetermineVertices(v);
-
-			XMVECTOR mn = XMVectorReplicate(99999.0f), mx = XMVectorReplicate(-99999.0f);
-			for (int i = 0; i < 8; ++i)
-			{
-				mn = XMVectorMin(mn, v[i].value);
-				mx = XMVectorMax(mx, v[i].value);
-			}
-			
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "BBL: %s, TFR: %s,  %s, %s",
-				Vector3ToString(v[0].value).c_str(), Vector3ToString(v[6].value).c_str(), 
-				Vector4ToString(ac->GetEnvironmentOrientation()).c_str(), Vector4ToString(ac->GetOrientation()).c_str());
-				//Vector3ToString(a[0]).c_str(), Vector3ToString(a[1]).c_str(), Vector3ToString(a[2]).c_str());
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		}
-	}
-
-	// Debug rendering
-	if (cs())
-	{
-		iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it_end = cs()->GetTiles().end();
-		for (iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it = cs()->GetTiles().begin(); it != it_end; ++it)
-		{
-			XMMATRIX world = XMMatrixMultiply((*it).value->GetWorldMatrix(), cs()->GetZeroPointWorldMatrix());
-			Game::Engine->GetOverlayRenderer()->RenderNode(world, OverlayRenderer::RenderColour::RC_Green);
-		}
+	{			
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }
 

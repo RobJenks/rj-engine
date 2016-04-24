@@ -182,6 +182,13 @@ public:
 		return FindInVector<TerrainCollection, StaticTerrain*>(TerrainObjects, obj);
 	}
 
+	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found
+	TerrainCollection::const_iterator FindTerrainObject(Game::ID_TYPE id)
+	{
+		return (std::find_if(TerrainObjects.begin(), TerrainObjects.end(),
+			[&id](const StaticTerrain *element) { return (element && element->GetID() == id); }));
+	}
+
 	// Add a tile to the environment
 	void							AddTile(ComplexShipTile *tile);
 

@@ -1,4 +1,0 @@
-<gamedata>
-    <CollisionOBB skip="true" numchildren="0" />
-    <staticterrain code="tmp_terrain_cone" px="0.000000" py="0.000000" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="10.000000" ey="10.000000" ez="10.000000" />
-</gamedata>

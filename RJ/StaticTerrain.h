@@ -57,6 +57,7 @@ public:
 	CMPINLINE void XM_CALLCONV						SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
 	CMPINLINE XMFLOAT3								GetExtentF(void) const							{ return m_data.ExtentF; }
+	CMPINLINE XMVECTOR								GetExtentV(void) const							{ return m_data.ExtentV; }
 	CMPINLINE void									GetExtent(AXMVECTOR_P(&outExtent)[3]) const		
 	{ 
 		outExtent[0] = m_data.Extent[0]; 

@@ -468,6 +468,19 @@ void UI_ModelBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	}
 	else if (keyboard->GetKey(DIK_E))					ZoomIn();
 	else if (keyboard->GetKey(DIK_C))					ZoomOut();
+	else if (keyboard->GetKey(DIK_R) && m_key_ctrl && m_key_shift)
+	{
+		if (!m_object || !m_object->GetModel()) return;
+		XMVECTOR adjust = XMLoadFloat3(&Float3MultiplyScalar(m_object->GetModel()->GetActualModelSize(), 0.5f));
+		for (int i = 0; i < (int)m_terrain.size(); ++i)
+			if (m_terrain[i])
+				m_terrain[i]->SetPosition(XMVectorSubtract(m_terrain[i]->GetPosition(), adjust));
+
+		RefreshAllCollisionGeometry();
+		RefreshInterface();
+
+		keyboard->LockKey(DIK_R);
+	}
 	else
 	{
 		// All movement or resize operations can be performed in parallel, as long as other keys are not being pressed

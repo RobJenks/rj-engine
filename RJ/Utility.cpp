@@ -172,7 +172,7 @@ Rotation90Degree RotateBy90Degrees(Rotation90Degree current)
 		case Rotation90Degree::Rotate180:
 			return Rotation90Degree::Rotate270;
 		default:
-			return current;
+			return Rotation90Degree::Rotate0;
 	}
 }
 
