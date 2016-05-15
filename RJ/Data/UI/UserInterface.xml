@@ -8,5 +8,6 @@
   <include file="UI/Console/UI_Console.xml" />
   <include file="UI/ShipDesigner/UI_ShipDesigner.xml" />
   <include file="UI/ModelBuilder/UI_ModelBuilder.xml" />
+  <include file="UI/ShipBuilder/UI_ShipBuilder.xml" />
 
 </gamedata>

@@ -15,6 +15,7 @@
 #include "UI_Console.h"
 #include "UI_ShipDesigner.h"
 #include "UI_ModelBuilder.h"
+#include "UI_ShipBuilder.h"
 class GameInputDevice;
 using namespace std;
 
@@ -26,7 +27,7 @@ const string		UserInterface::UI_MAINMENU					= "UI_MAINMENU";
 const string		UserInterface::UI_CONSOLE					= "UI_CONSOLE";
 const string		UserInterface::UI_SHIPDESIGNER				= "UI_SHIPDESIGNER";
 const string		UserInterface::UI_MODELBUILDER				= "UI_MODELBUILDER";
-
+const string		UserInterface::UI_SHIPBUILDER				= "UI_SHIPBUILDER";
 
 // Default constructor
 UserInterface::UserInterface(void)
@@ -79,6 +80,14 @@ Result UserInterface::BuildUILayouts(void)
 	{
 		overallresult = result;
 		Game::Log << LOG_INIT_START << "ERROR building model builder UI layout\n";
+	}
+
+	// Initialise the model builder UI
+	result = InitialiseShipBuilderUI();
+	if (result != ErrorCodes::NoError)
+	{
+		overallresult = result;
+		Game::Log << LOG_INIT_START << "ERROR building ship builder UI layout\n";
 	}
 
 	// Initialise the game console UI
@@ -191,12 +200,32 @@ Result UserInterface::InitialiseModelBuilderUI(void)
 	Render2DGroup *ui = Game::Engine->Get2DRenderManager()->GetRenderGroup(UserInterface::UI_MODELBUILDER);
 	if (ui == NULL) return ErrorCodes::CannotInitialiseUIRenderGroupAsNotLoaded;
 
-	// If it was, create the ship designer UI object
+	// If it was, create the model builder UI object
 	m_modelbuilder = new UI_ModelBuilder();
 	if (!m_modelbuilder) return ErrorCodes::CouldNotCreateModelBuilderUIController;
 
-	// Attempt initialisation of the ship designer
+	// Attempt initialisation of the model builder
 	result = m_modelbuilder->Initialise(ui, this);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Return succeess
+	return ErrorCodes::NoError;
+}
+
+Result UserInterface::InitialiseShipBuilderUI(void)
+{
+	Result result;
+
+	// Make sure this UI was loaded with the game data
+	Render2DGroup *ui = Game::Engine->Get2DRenderManager()->GetRenderGroup(UserInterface::UI_SHIPBUILDER);
+	if (ui == NULL) return ErrorCodes::CannotInitialiseUIRenderGroupAsNotLoaded;
+
+	// If it was, create the ship builder UI object
+	m_shipbuilder = new UI_ShipBuilder();
+	if (!m_shipbuilder) return ErrorCodes::CouldNotCreateShipBuilderUIController;
+
+	// Attempt initialisation of the ship designer
+	result = m_shipbuilder->Initialise(ui, this);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Return succeess
@@ -328,6 +357,8 @@ iUIController *UserInterface::GetUIController(string state)
 		return m_shipdesigner;
 	else if (state == UserInterface::UI_MODELBUILDER)				// Model builder (development) interface
 		return m_modelbuilder;
+	else if (state == UserInterface::UI_SHIPBUILDER)				// Ship builder
+		return m_shipbuilder;
 	else															// Otherwise, there is no specific UI controller so return null
 		return NULL;
 	

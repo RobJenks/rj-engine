@@ -69,7 +69,7 @@ void CameraClass::CalculateViewMatrix(void)
 	else if (m_camerastate == CameraClass::CameraState::PathCamera)
 	{
 		// Advance the camera along its path.  Method will return true if the path is now complete
-		if (m_camerapath->Advance(Game::TimeFactor) == true) 
+		if (m_camerapath->Advance() == true) 
 		{
 			// If the path has ended then handle the completion event, and release or fix the camera for next frame
 			HandleEndOfCameraPath();

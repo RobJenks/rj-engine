@@ -492,7 +492,7 @@ void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, co
 		m_overrideposition = position;
 		m_overrideorientation = orientation;
 
-		// Also switch to the (optional) payer ship, if specified.  If not, the player remains in their current ship, 
+		// Also switch to the (optional) player ship, if specified.  If not, the player remains in their current ship, 
 		// even if the system is changed to be inconsistent with that ship
 		if (playership)
 		{

@@ -24,7 +24,7 @@
 // Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds
 #ifdef _DEBUG
 //#	define RJ_LOG_COLLISION_DETAILS
-#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
+//#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 #endif
 
 // Compiler setting to define the collision detection method in use
@@ -514,24 +514,18 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *env, iEnvironmentObject *object, StaticTerrain *terrain)
 {
 	// No parameter checks; this will only ever be called by the physics engine at the point it has already confirmed all are valid objects
-	if (XMVectorGetY(object->GetEnvironmentPosition()) < 9.3f)
-	{
-		int n = 1;
-	}
+	
 	// The actor OBB is in world space while the terrain OBB is in local environment space.  Convert the former to local environment
 	// space for this comparison, since we will need to apply the response in local space in case of a collision
 	OrientedBoundingBox::CoreOBBData & object_obb = object->CollisionOBB.Data();
 	_obbdata.Centre = XMVector3TransformCoord(object_obb.Centre, env->GetInverseZeroPointWorldMatrix());
-	
+
 	//XMMATRIX orient = XMMATRIX(XMVectorSetW(object_obb.Axis[0].value, 0.0f), XMVectorSetW(object_obb.Axis[1].value, 0.0f), XMVectorSetW(object_obb.Axis[2].value, 0.0f), XMVectorSet(0, 0, 0, 1));
 	XMMATRIX orient = XMMATRIX(object_obb.Axis[0].value, object_obb.Axis[1].value, object_obb.Axis[2].value, XMVectorSet(0, 0, 0, 1));
-	orient = XMMatrixMultiply(orient, env->GetOrientationMatrix());
+	orient = XMMatrixMultiply(orient, env->GetInverseOrientationMatrix());
 	_obbdata.Axis[0].value = orient.r[0];
 	_obbdata.Axis[1].value = orient.r[1];
 	_obbdata.Axis[2].value = orient.r[2];
-
-	XMVECTOR rot = XMVector3TransformCoord(BASIS_VECTOR, orient);
-	OutputDebugString(concat("Rotated: ")(XMVectorGetX(rot))(", ")(XMVectorGetY(rot))(", ")(XMVectorGetZ(rot))("\n").str().c_str());
 
 	/*_obbdata.Axis[0].value = XMVector3TransformCoord(object_obb.Axis[0].value, env->GetOrientationMatrix());
 	_obbdata.Axis[1].value = XMVector3TransformCoord(object_obb.Axis[1].value, env->GetOrientationMatrix());
@@ -541,45 +535,24 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 	// Perform an SAT test between the object OBBs to see if there is a collision
 	if (TestOBBvsOBBCollision(_obbdata, terrain->GetOBBData()))
 	{
-		CollisionDetectionResult new_result = m_collisiontest;
-		tmpbox b0, b1;
-		XMStoreFloat3(&b0.Centre, _obbdata.Centre);
-		XMStoreFloat3(&b1.Centre, terrain->GetOBBData().Centre);
-		b0.Extent = _obbdata.ExtentF;
-		b1.Extent = terrain->GetOBBData().ExtentF;
-		for (int i = 0; i < 3; ++i)
-		{
-			XMStoreFloat3(&b0.Axis[i], _obbdata.Axis[i].value);
-			XMStoreFloat3(&b1.Axis[i], terrain->GetOBBData().Axis[i].value);
-		}
-		OLD_TestOBBvsOBBCollision(b0, b1);
-		CollisionDetectionResult old_result = m_collisiontest;
-		OutputDebugString(concat("Diff: ")(fabs(new_result.Penetration - old_result.Penetration))("\n").str().c_str());
-		if (fabs(new_result.Penetration - old_result.Penetration) > 0.5f)
-		{
-			int n = 1;
-		}
-
-		m_collisiontest = new_result;
-
 		// We have a collision
 		++CollisionDetectionResults.EnvironmentCollisions.Collisions;
 		
 		// Use the last SAT result to determine the minimum separating axis that should be used to separate the objects
-		// Also use the returned axis distance to determine whether the response should be +ve or -ve along the axis.  We test 
-		// Object1 first since it is more frequently the reference frame returned by SAT
+		// [Also use the returned axis distance to determine whether the response should be +ve or -ve along the axis.  We test 
+		// Object1 first since it is more frequently the reference frame returned by SAT]
 		XMVECTOR response = BASIS_VECTOR;
-		if (m_collisiontest.SATResult.Object1Axis != -1)
+		if (m_collisiontest.SATResult.Object0Axis != -1)
 		{
-			response = (m_collisiontest.SATResult.AxisDist1[m_collisiontest.SATResult.Object1Axis] < 0.0f ? 
-								terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value :
-				XMVectorNegate(	terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value));
+			response = (m_collisiontest.SATResult.AxisDist0[m_collisiontest.SATResult.Object0Axis] < 0.0f ?
+				_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value :
+				XMVectorNegate(_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value));
 		}
-		else if (m_collisiontest.SATResult.Object0Axis != -1)
+		else if (m_collisiontest.SATResult.Object1Axis != -1)
 		{
-			response = (m_collisiontest.SATResult.AxisDist0[m_collisiontest.SATResult.Object0Axis] < 0.0f ? 
-								_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value :
-				XMVectorNegate(	_obbdata.Axis[m_collisiontest.SATResult.Object0Axis].value));
+			response = (m_collisiontest.SATResult.AxisDist1[m_collisiontest.SATResult.Object1Axis] < 0.0f ?
+				terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value :
+				XMVectorNegate(terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value));
 		}
 
 		// Normalise the vector (although it should be normalised already since we are working with basis vectors)
@@ -594,9 +567,8 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		{
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat("Applying momentum of ")(XMVectorGetX(mom_n))(" along response vector (")(XMVectorGetX(response))(",")
-						(XMVectorGetY(response))(",")(XMVectorGetZ(response))("); world momentum change from (")(XMVectorGetX(object->PhysicsState.WorldMomentum))
-						(",")(XMVectorGetY(object->PhysicsState.WorldMomentum))(",")(XMVectorGetX(object->PhysicsState.WorldMomentum))(")").str().c_str());
+					OutputDebugString(concat("Applying momentum of ")(XMVectorGetX(mom_n))(" along response vector ")(Vector3ToString(response))
+					("; world momentum change from ")(Vector3ToString(object->PhysicsState.WorldMomentum)).str().c_str());
 #			endif
 
 			// Apply a direct force (i.e. no division through by mass) in the object local frame, to nullify current momentum along the response vector
@@ -616,8 +588,8 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat(" to (")(XMVectorGetX(object->PhysicsState.WorldMomentum))(",")(XMVectorGetY(object->PhysicsState.WorldMomentum))(",")
-						(XMVectorGetZ(object->PhysicsState.WorldMomentum))(")\n").str().c_str());
+					OutputDebugString(concat(" to ")(Vector3ToString(object->PhysicsState.WorldMomentum))("{ ")
+					(m_collisiontest.SATResult.Object0Axis)("|")(m_collisiontest.SATResult.Object1Axis)("}\n").str().c_str());
 #			endif
 		}
 
@@ -647,7 +619,7 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		// Efficiency measure: the terrain collision is only adjusting the object position (not its axes).  If the 
 		// object has a compound OBB then we will need to recalculate the world matrix & traverse it recursively.  
 		// However if it is a single OBB we can directly set the position and wait until the next frame to recalc everything
-		if (false || !object->CollisionOBB.HasChildren())
+		if (false || !object->CollisionOBB.HasChildren()) // TODO: DEBUG: 
 			object_obb.Centre = object->GetPosition();
 		else
 			object->RefreshPositionImmediate();
@@ -1163,7 +1135,7 @@ bool GamePhysicsEngine::TestOBBvsOBBCollision(const OrientedBoundingBox::CoreOBB
 
 	// Determine the distance between box centre points
 	XMVECTOR vdist = XMVectorSubtract(box1.Centre, box0.Centre);
-OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(Vector3ToString(box1.Centre))(", Dist = ")(Vector3ToString(vdist))("\n").str().c_str());
+
 	// Obtain local float copies of key vectors; calculations are performed at component level and we do not 
 	// gain efficiency by vectorising
 	XMFLOAT3 dist, box0Axis[3], box1Axis[3];
@@ -1200,7 +1172,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r = fabs(m_collisiontest.SATResult.AxisDist0[0]);
     r1 = box1.ExtentF.x * absDot01[0][0] + box1.ExtentF.y * absDot01[0][1] + box1.ExtentF.z * absDot01[0][2];
     r01 = box0.ExtentF.x + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = -1; }
     if (r01_r < 0.0f)
     {
@@ -1221,7 +1193,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r = fabs(m_collisiontest.SATResult.AxisDist0[1]);
     r1 = box1.ExtentF.x * absDot01[1][0] + box1.ExtentF.y * absDot01[1][1] + box1.ExtentF.z * absDot01[1][2];
     r01 = box0.ExtentF.y + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
     {
@@ -1242,7 +1214,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r = fabs(m_collisiontest.SATResult.AxisDist0[2]);
     r1 = box1.ExtentF.x * absDot01[2][0] + box1.ExtentF.y * absDot01[2][1] + box1.ExtentF.z * absDot01[2][2];
     r01 = box0.ExtentF.z + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
     {
@@ -1254,7 +1226,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
 	r = fabs(m_collisiontest.SATResult.AxisDist1[0]);
     r0 = box0.ExtentF.x * absDot01[0][0] + box0.ExtentF.y * absDot01[1][0] + box0.ExtentF.z * absDot01[2][0];
     r01 = r0 + box1.ExtentF.x;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
     {
@@ -1266,7 +1238,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
 	r = fabs(m_collisiontest.SATResult.AxisDist1[1]);
     r0 = box0.ExtentF.x * absDot01[0][1] + box0.ExtentF.y * absDot01[1][1] + box0.ExtentF.z * absDot01[2][1];
     r01 = r0 + box1.ExtentF.y;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
     {
@@ -1278,7 +1250,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
 	r = fabs(m_collisiontest.SATResult.AxisDist1[2]);
     r0 = box0.ExtentF.x * absDot01[0][2] + box0.ExtentF.y * absDot01[1][2] + box0.ExtentF.z * absDot01[2][2];
     r01 = r0 + box1.ExtentF.z;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
     {
@@ -1289,16 +1261,15 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     // effectively in 2D.  The edge-edge axes do not need to be tested.
     if (parallelPairExists)
     {
-		OutputDebugString("New: PARALLEL\n"); 
 		return true;
     }
-	OutputDebugString("New: NOT PARALLEL\n");
+	
     // Test for separation on the axis box0.Centre + t*box0.Axis[0]xA1[0].
     r = fabs(m_collisiontest.SATResult.AxisDist0[2] * dot01[1][0] - m_collisiontest.SATResult.AxisDist0[1] * dot01[2][0]);
     r0 = box0.ExtentF.y * absDot01[2][0] + box0.ExtentF.z * absDot01[1][0];
     r1 = box1.ExtentF.y * absDot01[0][2] + box1.ExtentF.z * absDot01[0][1];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
     {
@@ -1310,7 +1281,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.y * absDot01[2][1] + box0.ExtentF.z * absDot01[1][1];
     r1 = box1.ExtentF.x * absDot01[0][2] + box1.ExtentF.z * absDot01[0][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
     {
@@ -1322,7 +1293,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.y * absDot01[2][2] + box0.ExtentF.z * absDot01[1][2];
     r1 = box1.ExtentF.x * absDot01[0][1] + box1.ExtentF.y * absDot01[0][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
     {
@@ -1334,7 +1305,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[2][0] + box0.ExtentF.z * absDot01[0][0];
     r1 = box1.ExtentF.y * absDot01[1][2] + box1.ExtentF.z * absDot01[1][1];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
     {
@@ -1346,7 +1317,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[2][1] + box0.ExtentF.z * absDot01[0][1];
     r1 = box1.ExtentF.x * absDot01[1][2] + box1.ExtentF.z * absDot01[1][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
     {
@@ -1358,7 +1329,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[2][2] + box0.ExtentF.z * absDot01[0][2];
     r1 = box1.ExtentF.x * absDot01[1][1] + box1.ExtentF.y * absDot01[1][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
     {
@@ -1370,7 +1341,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[1][0] + box0.ExtentF.y * absDot01[0][0];
     r1 = box1.ExtentF.y * absDot01[2][2] + box1.ExtentF.z * absDot01[2][1];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
     {
@@ -1382,7 +1353,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[1][1] + box0.ExtentF.y * absDot01[0][1];
     r1 = box1.ExtentF.x * absDot01[2][2] + box1.ExtentF.z * absDot01[2][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
     {
@@ -1394,7 +1365,7 @@ OutputDebugString(concat("Box0 = ")(Vector3ToString(box0.Centre))(", Box1 = ")(V
     r0 = box0.ExtentF.x * absDot01[1][2] + box0.ExtentF.y * absDot01[0][2];
     r1 = box1.ExtentF.x * absDot01[2][1] + box1.ExtentF.y * absDot01[2][0];
     r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("New: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r); 
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
     {
@@ -1441,7 +1412,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist0[0]);
 	r1 = box1.Extent.x * absDot01[0][0] + box1.Extent.y * absDot01[0][1] + box1.Extent.z * absDot01[0][2];
 	r01 = box0.Extent.x + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
 	{
@@ -1462,7 +1433,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist0[1]);
 	r1 = box1.Extent.x * absDot01[1][0] + box1.Extent.y * absDot01[1][1] + box1.Extent.z * absDot01[1][2];
 	r01 = box0.Extent.y + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
 	{
@@ -1483,7 +1454,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist0[2]);
 	r1 = box1.Extent.x * absDot01[2][0] + box1.Extent.y * absDot01[2][1] + box1.Extent.z * absDot01[2][2];
 	r01 = box0.Extent.z + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = -1; }
 	if (r01_r < 0.0f)
 	{
@@ -1495,7 +1466,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist1[0]);
 	r0 = box0.Extent.x * absDot01[0][0] + box0.Extent.y * absDot01[1][0] + box0.Extent.z * absDot01[2][0];
 	r01 = r0 + box1.Extent.x;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
 	{
@@ -1507,7 +1478,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist1[1]);
 	r0 = box0.Extent.x * absDot01[0][1] + box0.Extent.y * absDot01[1][1] + box0.Extent.z * absDot01[2][1];
 	r01 = r0 + box1.Extent.y;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
 	{
@@ -1519,7 +1490,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r = fabs(m_collisiontest.SATResult.AxisDist1[2]);
 	r0 = box0.Extent.x * absDot01[0][2] + box0.Extent.y * absDot01[1][2] + box0.Extent.z * absDot01[2][2];
 	r01 = r0 + box1.Extent.z;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = -1; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
 	{
@@ -1530,16 +1501,15 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	// effectively in 2D.  The edge-edge axes do not need to be tested.
 	if (parallelPairExists)
 	{
-		OutputDebugString("Old: PARALLEL\n");
 		return true;
 	}
-	OutputDebugString("Old: NOT PARALLEL\n");
+	
 	// Test for separation on the axis box0.Centre + t*box0.Axis[0]xA1[0].
 	r = fabs(m_collisiontest.SATResult.AxisDist0[2] * dot01[1][0] - m_collisiontest.SATResult.AxisDist0[1] * dot01[2][0]);
 	r0 = box0.Extent.y * absDot01[2][0] + box0.Extent.z * absDot01[1][0];
 	r1 = box1.Extent.y * absDot01[0][2] + box1.Extent.z * absDot01[0][1];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
 	{
@@ -1551,7 +1521,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.y * absDot01[2][1] + box0.Extent.z * absDot01[1][1];
 	r1 = box1.Extent.x * absDot01[0][2] + box1.Extent.z * absDot01[0][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
 	{
@@ -1563,7 +1533,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.y * absDot01[2][2] + box0.Extent.z * absDot01[1][2];
 	r1 = box1.Extent.x * absDot01[0][1] + box1.Extent.y * absDot01[0][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 0; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
 	{
@@ -1575,7 +1545,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[2][0] + box0.Extent.z * absDot01[0][0];
 	r1 = box1.Extent.y * absDot01[1][2] + box1.Extent.z * absDot01[1][1];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
 	{
@@ -1587,7 +1557,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[2][1] + box0.Extent.z * absDot01[0][1];
 	r1 = box1.Extent.x * absDot01[1][2] + box1.Extent.z * absDot01[1][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
 	{
@@ -1599,7 +1569,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[2][2] + box0.Extent.z * absDot01[0][2];
 	r1 = box1.Extent.x * absDot01[1][1] + box1.Extent.y * absDot01[1][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 1; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
 	{
@@ -1611,7 +1581,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[1][0] + box0.Extent.y * absDot01[0][0];
 	r1 = box1.Extent.y * absDot01[2][2] + box1.Extent.z * absDot01[2][1];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 0; }
 	if (r01_r < 0.0f)
 	{
@@ -1623,7 +1593,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[1][1] + box0.Extent.y * absDot01[0][1];
 	r1 = box1.Extent.x * absDot01[2][2] + box1.Extent.z * absDot01[2][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 1; }
 	if (r01_r < 0.0f)
 	{
@@ -1635,7 +1605,7 @@ bool GamePhysicsEngine::OLD_TestOBBvsOBBCollision(const tmpbox & box0, const tmp
 	r0 = box0.Extent.x * absDot01[1][2] + box0.Extent.y * absDot01[0][2];
 	r1 = box1.Extent.x * absDot01[2][1] + box1.Extent.y * absDot01[2][0];
 	r01 = r0 + r1;
-	r01_r = (r01 - r); OutputDebugString(concat("Old: ")(r01_r)("\n").str().c_str());
+	r01_r = (r01 - r);
 	if (r01_r < m_collisiontest.Penetration && r01_r > Game::C_EPSILON) { m_collisiontest.Penetration = r01_r; m_collisiontest.SATResult.Object0Axis = 2; m_collisiontest.SATResult.Object1Axis = 2; }
 	if (r01_r < 0.0f)
 	{

@@ -16,6 +16,7 @@ CameraPath::CameraPath(void)
 	m_index = 0;
 	m_nodecount = 0;
 	m_reversepath = false;
+	m_pausable = false;
 	m_camerapos = NULL_VECTOR;
 	m_cameraorient = ID_QUATERNION;
 	m_completionaction = CameraPath::CameraPathCompletionAction::ReleaseOnCompletion;
@@ -52,6 +53,14 @@ void CameraPath::StartPath(bool reverse)
 }
 
 // Advances the path along its route.  Returns a flag indicating whether the path has now completed
+bool CameraPath::Advance(void)
+{
+	// Advance the path using a timefactor based on the current path parameters
+	return Advance((m_pausable ? Game::TimeFactor : Game::PersistentTimeFactor));
+}
+
+// Advances the path along its route.  Returns a flag indicating whether the path has now completed.  Allows
+// time factor to be explicitly provided, for example to progress the path faster/slower than normal
 bool CameraPath::Advance(float timefactor)
 {
 	// Test whether the path is still valid

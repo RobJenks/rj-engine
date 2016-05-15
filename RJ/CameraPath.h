@@ -43,6 +43,7 @@ public:
 	void							StartPath(bool reverse);
 
 	// Advances the path along its route.  Returns a flag indicating whether the path has now completed
+	bool							Advance(void); 
 	bool							Advance(float timefactor);
 
 	// Flag determining whether the path will run once, repeatedly, or repeatedly in reverse
@@ -64,6 +65,10 @@ public:
 
 	// Retrieve the current path time 
 	CMPINLINE float					GetPathTime(void)								{ return m_time; }
+
+	// Flag indicating whether the camera path respects game pause or not.  Default is false
+	CMPINLINE bool					IsPausable(void) const							{ return m_pausable; }
+	CMPINLINE void					SetIsPausable(bool pausable)					{ m_pausable = pausable; }
 
 	// Methods to query, add or update nodes
 	void							AddNode(const FXMVECTOR position, const FXMVECTOR orientation, float time);
@@ -91,6 +96,8 @@ private:
 	bool							m_reversepath;			// Flag indicating whether we are travelling forwards (false, default) or in reverse (true)
 
 	float							m_time;					// Current time value along the path
+
+	bool							m_pausable;				// Flag indicating whether the camera path respects game pause or not.  Default is false
 
 	AXMVECTOR						m_camerapos;			// Current position of the camera
 	AXMVECTOR						m_cameraorient;			// Current orientation of the camera

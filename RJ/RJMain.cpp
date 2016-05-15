@@ -40,6 +40,7 @@
 #include "FileInput.h"
 #include "Model.h"
 #include "UserInterface.h"
+#include "UI_ShipBuilder.h"
 #include "CentralScheduler.h"
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
@@ -649,60 +650,20 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_1]) {
-
-		if (b[DIK_LCONTROL])
+		D::UI->DeactivateAllUIComponents();
+		if (!b[DIK_LSHIFT])
 		{
-			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand("terrain_debug_render_mode solid"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand("fade_interior cs 1"));
-
-			/*while (cs()->GetTiles().size() > 1) cs()->RemoveTile(cs()->GetTile(cs()->GetTiles().size() - 1));
-			iSpaceObjectEnvironment::TerrainCollection::const_iterator it = cs()->FindTerrainObject(cs()->GetTile(0)->GetTerrainObjectLinks().at(0));
-			StaticTerrain *t = *it;
-			t->SetPosition(XMVectorAdd(cs()->GetTile(0)->GetElementPosition(), XMVectorSet(0, 0, 10, 0));*/
-
-			Game::Keyboard.LockKey(DIK_1);
-			return;
+			D::UI->ActivateUIState("UI_SHIPBUILDER");
+			D::UI->ShipBuilderUI()->SetShip(cs());
 		}
 
-		static int index = 1;
-		if (b[DIK_LSHIFT])	index = (index == 1 ? 0 : 1);
-		else
-		{
-			index = 0;
-			while (cs()->GetTiles().size() > 1) cs()->RemoveTile(cs()->GetTile(cs()->GetTiles().size() - 1));
-
-			if (index >= cs()->GetTileCount()) { index = 0; return; }
-			ComplexShipTile *t = cs()->GetTile(index);
-
-			//Rotation90Degree rot = RotateBy90Degrees(t->GetRotation());
-			//t->SetRotation(rot);
-			float rot = PIOVER2 * Game::TimeFactor;
-			XMMATRIX transform = XMMatrixRotationY(rot);// GetRotationMatrix(Rotation90Degree::Rotate90);
-			XMVECTOR qtrans = XMQuaternionRotationAxis(UP_VECTOR, rot);
-
-			for (int i = 0; i < (int)t->GetTerrainObjectLinks().size(); ++i)
-			{
-				iSpaceObjectEnvironment::TerrainCollection::const_iterator it = cs()->FindTerrainObject(t->GetTerrainObjectLinks().at(i));
-				if (it == cs()->TerrainObjects.end()) continue;
-				StaticTerrain *tn = (*it); if (!tn) continue;
-
-				XMVECTOR localpos = XMVectorSubtract(tn->GetEnvironmentPosition(), t->GetRelativePosition());
-				localpos = XMVector3TransformCoord(localpos, transform);
-
-				tn->SetOrientation(XMQuaternionMultiply(tn->GetOrientation(), qtrans));
-				tn->SetPosition(XMVectorAdd(t->GetRelativePosition(), localpos));
-			}
-		}
-
-		//Game::Keyboard.LockKey(DIK_1);
+		Game::Keyboard.LockKey(DIK_1);
 	}
 	if (b[DIK_2]) {
 		Game::Keyboard.LockKey(DIK_2);
 		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 	}
 	if (b[DIK_3]) {
 		if (!ss() || !cs()) return;
@@ -2187,7 +2148,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		BOOL *b = Game::Mouse.GetButtons();
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d, %d, %d, %d", b[0], b[1], b[2], b[3]);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }

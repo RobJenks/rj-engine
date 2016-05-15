@@ -278,8 +278,8 @@ void UI_ModelBuilder::UpdateModelOrientation(const INTVECTOR2 & startlocation, c
 
 	// The distance moved in the X axis will correspond to yaw, and distance in the X axis to pitch
 	float yaw = (currentlocation.x - startlocation.x) / ((float)Game::ScreenWidth * UI_ModelBuilder::MOUSE_DRAG_DISTANCE_MODIFIER);
-	float pitch = (currentlocation.y - startlocation.y) / ((float)Game::ScreenWidth * UI_ModelBuilder::MOUSE_DRAG_DISTANCE_MODIFIER);
-
+	float pitch = (currentlocation.y - startlocation.y) / ((float)Game::ScreenHeight * UI_ModelBuilder::MOUSE_DRAG_DISTANCE_MODIFIER);
+	
 	// Constrain the yaw and pitch to be within (-1.0 to +1.0)
 	yaw = max(min(yaw, 1.0f), -1.0f);
 	pitch = max(min(pitch, 1.0f), -1.0f);

@@ -179,16 +179,22 @@ void iEnvironmentObject::CollisionWithTerrain(const GamePhysicsEngine::TerrainIm
 // Performs all physics simulation for this environment object
 void iEnvironmentObject::SimulateObjectPhysics(void)
 {
+	// Get a pointer to the parent object
+	iSpaceObjectEnvironment *parent = m_parent();
+
 	// Compose a local momentum change vector during these operations, and then apply one transform at the end
 	XMFLOAT3 lm, lm_delta = NULL_FLOAT3;
 	XMStoreFloat3(&lm, PhysicsState.LocalMomentum);
 
 	// Apply gravity to the object, if it is in a non-zero gravity environment
-	ComplexShipElement *el = m_parent()->GetElement(Game::PhysicalPositionToElementLocation(m_envposition));
-	if (el && el->GetGravityStrength() > Game::C_EPSILON)
+	if (parent)
 	{
-		// Apply this downward (relative to the environment) gravity force to the object
-		lm_delta.y = -(el->GetGravityStrength() * Game::TimeFactor);
+		ComplexShipElement *el = parent->GetElement(Game::PhysicalPositionToElementLocation(m_envposition));
+		if (el && el->GetGravityStrength() > Game::C_EPSILON)
+		{
+			// Apply this downward (relative to the environment) gravity force to the object
+			lm_delta.y = -(el->GetGravityStrength() * Game::TimeFactor);
+		}
 	}
 
 	// Apply drag in the local x & z dimensions, to quickly slow the entity if it is not trying to move
@@ -209,7 +215,10 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	{
 		// Move the object based on its external momentum, relative to the environment
 		SetEnvironmentPosition(XMVectorAdd(	m_envposition,
-											XMVectorScale(PhysicsState.WorldMomentum, Game::TimeFactor)));
+											XMVectorScale(
+												(parent ? XMVector3TransformCoord(PhysicsState.WorldMomentum, m_parent()->GetOrientationMatrix())
+														: PhysicsState.WorldMomentum),
+													Game::TimeFactor)));
 	}
 }
 

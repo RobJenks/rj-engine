@@ -489,6 +489,7 @@ namespace ErrorCodes {
 	const Result		CollisionDataFileDoesNotExist					= 3849;
 	const Result		CouldNotLoadCollisionDataFromFile				= 3850;
 	const Result		CannotSaveNullCollisionDataFile					= 3851;
+	const Result		CouldNotCreateShipBuilderUIController			= 3852;
 
 	// Space object errors												(3900-3999)
 	const Result		ChildIsAlreadyAttachedToAnObject				= 3900;

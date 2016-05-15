@@ -392,6 +392,7 @@
     <ClCompile Include="UIComponentGroup.cpp" />
     <ClCompile Include="UIManagedControlDefinition.cpp" />
     <ClCompile Include="UITextBox.cpp" />
+    <ClCompile Include="UI_ShipBuilder.cpp" />
     <ClCompile Include="UI_ShipDesigner.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="Utility.cpp" />
@@ -627,6 +628,7 @@
     <ClInclude Include="UIComponentGroup.h" />
     <ClInclude Include="UIManagedControlDefinition.h" />
     <ClInclude Include="UITextBox.h" />
+    <ClInclude Include="UI_ShipBuilder.h" />
     <ClInclude Include="UI_ShipDesigner.h" />
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="Utility.h" />

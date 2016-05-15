@@ -91,6 +91,10 @@ public:
 	CMPINLINE INTVECTOR2 GetLMBStartPosition() { return m_startpos[0]; }
 	CMPINLINE INTVECTOR2 GetRMBStartPosition() { return m_startpos[1]; }
 
+	CMPINLINE bool ShiftDown(void) const		{ return (m_pressedKeys[DIK_LSHIFT] == TRUE || m_pressedKeys[DIK_RSHIFT] == TRUE); }
+	CMPINLINE bool CtrlDown(void) const			{ return (m_pressedKeys[DIK_LCONTROL] == TRUE || m_pressedKeys[DIK_RCONTROL] == TRUE); }
+	CMPINLINE bool AltDown(void) const			{ return (m_pressedKeys[DIK_LALT] == TRUE || m_pressedKeys[DIK_RALT] == TRUE); }
+
 	InputKey ReadTextInputKey(void);
 
 private:

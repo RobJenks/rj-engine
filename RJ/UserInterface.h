@@ -20,6 +20,7 @@ class iUIController;
 class UI_Console;
 class UI_ShipDesigner;
 class UI_ModelBuilder;
+class UI_ShipBuilder;
 using namespace std;
 
 // This class has no special alignment requirements
@@ -76,7 +77,14 @@ public:
 	// Initialisation method for UI controllers
 	Result					InitialiseShipDesignerUI(void);
 	Result					InitialiseModelBuilderUI(void);
+	Result					InitialiseShipBuilderUI(void);
 	Result					InitialiseConsoleUI(void);
+
+	// Accessor method for UI controllers
+	CMPINLINE UI_ShipDesigner *		ShipDesignerUI(void)		{ return m_shipdesigner; }
+	CMPINLINE UI_ModelBuilder *		ModelBuilderUI(void)		{ return m_modelbuilder; }
+	CMPINLINE UI_ShipBuilder *		ShipBuilderUI(void)			{ return m_shipbuilder; }
+	CMPINLINE UI_Console *			ConsoleUI(void)				{ return m_console; }
 
 	// Activates or deactivates particular UI states
 	void					ActivateUIState(string state);
@@ -135,6 +143,7 @@ private:
 	UI_Console *			m_console;
 	UI_ShipDesigner *		m_shipdesigner;
 	UI_ModelBuilder *		m_modelbuilder;
+	UI_ShipBuilder *		m_shipbuilder;
 
 	// Pointer to the currently-active UI controller, or NULL if none are active
 	iUIController *			m_controller;
@@ -165,6 +174,7 @@ public:
 	static const string		UI_CONSOLE;
 	static const string		UI_SHIPDESIGNER;				
 	static const string		UI_MODELBUILDER;
+	static const string		UI_SHIPBUILDER;
 
 
 private:
