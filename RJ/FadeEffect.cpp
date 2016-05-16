@@ -14,16 +14,24 @@ FadeEffect::FadeEffect(void)
 	m_effectstart = m_effectend = 0;
 	m_effecttime = 0.0f;
 	m_alphastart = m_alphaend = m_alphachange = 0.0f;
+	m_ignore_pause = false;
 }
 
 // Method to begin a fade effect from current alpha value over the specified period of time
 void FadeEffect::InitialiseFade(float timeperiod, float startalpha, float targetalpha)
 {
+	InitialiseFade(timeperiod, startalpha, targetalpha, false);
+}
+
+// Method to begin a fade effect from current alpha value over the specified period of time
+void FadeEffect::InitialiseFade(float timeperiod, float startalpha, float targetalpha, bool ignore_pause)
+{
 	// Set the effect to active and initialise the timing parameters
 	m_active = true;
-	m_effectstart = Game::ClockMs;
+	m_effectstart = (ignore_pause ? Game::PersistentClockMs : Game::ClockMs);
 	m_effecttime = (timeperiod * 1000.0f);
 	m_effectend = (m_effectstart + (unsigned int)m_effecttime);
+	m_ignore_pause = ignore_pause;
 
 	// Set the alpha start/end values and calculate the change in alpha to be applied over the lifetime of the effect
 	m_alphastart = startalpha;

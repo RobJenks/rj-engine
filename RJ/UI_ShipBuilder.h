@@ -35,6 +35,8 @@ public:
 	static const float								MOUSE_DRAG_ROTATION_SPEED;		// Rotation speed for the camera about the current origin point
 	static const float								MOUSE_DRAG_PAN_SPEED;			// Pan speed for the camera based on user input
 	static const float								CAMERA_REVERT_TIME;				// Time for the camera to revert to origin and ID orientation
+	static const float								COMPONENT_FADE_TIME;			// Time (secs) for components to fade in or out 
+	static const float								COMPONENT_FADE_OUT_ALPHA;		// Alpha value for components that have been faded out
 
 	// Default constructor
 	UI_ShipBuilder(void);
@@ -63,11 +65,6 @@ public:
 	// Returns the current editor mode
 	CMPINLINE EditorMode								GetEditorMode(void) const			{ return m_mode; }
 
-	// Activate the specified editor mode
-	void												ActivateSectionMode(EditorMode previous_mode);
-	void												ActivateTileMode(EditorMode previous_mode);
-	void												ActivateObjectMode(EditorMode previous_mode);
-	
 	// Zoom the view in or out
 	CMPINLINE void										ZoomIn(void)						{ PerformZoom(-GetZoomSpeedPerSecond() * Game::PersistentTimeFactor); }
 	CMPINLINE void										ZoomOut(void)						{ PerformZoom(+GetZoomSpeedPerSecond() * Game::PersistentTimeFactor); }
@@ -131,6 +128,11 @@ protected:
 
 	// Event triggered when an editor mode is activated.  "mode" is the mode being activated
 	void										EditorModeActivated(EditorMode mode, EditorMode previous_mode);
+
+	// Activate the specified editor mode
+	void										ActivateSectionMode(EditorMode previous_mode);
+	void										ActivateTileMode(EditorMode previous_mode);
+	void										ActivateObjectMode(EditorMode previous_mode);
 
 	// Locks the camera for the specified period of time, after which it will be released again to the user
 	void										LockCamera(unsigned int time_ms);

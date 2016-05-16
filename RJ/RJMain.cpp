@@ -2148,9 +2148,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		BOOL *b = Game::Mouse.GetButtons();
+		long z = Game::Mouse.GetZDelta();
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d, %d, %d, %d", b[0], b[1], b[2], b[3]);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d", z);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }

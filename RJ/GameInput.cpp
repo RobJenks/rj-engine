@@ -315,6 +315,18 @@ void GameInputDevice::ConsumeKey(DWORD key)
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+Summary: Locks a key so that it is not read again until the key has been released and 
+re-pressed.  Also consumes the key so it is not read by any other consumer than the current one.
+Parameters:
+[in] key - Key to lock and consume.
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+void GameInputDevice::LockAndConsumeKey(DWORD key)
+{
+	m_keyLock[key] = TRUE;
+	m_pressedKeys[key] = FALSE;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 Summary: Consumes all non-system keys so they are not read by any other consumer than the current one.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 void GameInputDevice::ConsumeAllKeys(void)

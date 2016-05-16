@@ -76,6 +76,10 @@ public:
 	// Methods to set and check the flag that determines whether a ship has been directly generated from the SD
 	bool							HasBeenDirectlyGeneratedFromSD(void)				{ return m_directlygeneratedfromSD; }
 	void							FlagShipAsDirectlyGeneratedFromShipDesigner(bool b)	{ m_directlygeneratedfromSD = b; }
+	
+	// Fade the ship to the specified alpha level
+	void										FadeToAlpha(float time, float alpha, bool ignore_pause);
+	CMPINLINE void								FadeToAlpha(float time, float alpha)						{ FadeToAlpha(time, alpha, false); }
 
 	// Suspend or resume updates based on changes to the ship.  This relates to structural changes, e.g. the addition
 	// or removal of ship sections.  Likely only required during first-time initialisation of the object

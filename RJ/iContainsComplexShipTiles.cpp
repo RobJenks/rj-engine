@@ -92,6 +92,19 @@ void iContainsComplexShipTiles::RemoveAllShipTiles(void)
 	RecalculateShipTileData();
 }
 
+// Apply a fade effect to all ship tiles in this environment
+void iContainsComplexShipTiles::FadeAllTiles(float time, float alpha, bool ignore_pause)
+{
+	// Iterate through all tiles in the collection and apply this fade value
+	ComplexShipTile *t;
+	ComplexShipTileCollection::const_iterator it_end = m_tiles[0].end();
+	for (ComplexShipTileCollection::const_iterator it = m_tiles[0].begin(); it != it_end; ++it)
+	{
+		t = (*it).value; if (!t) continue;
+		t->Fade.FadeToAlpha(time, alpha, ignore_pause);
+	}
+}
+
 // Shuts down and (optionally) deallocates all tile data in this object
 void iContainsComplexShipTiles::ShutdownAllTileData(bool deallocate)
 {

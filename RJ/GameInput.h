@@ -44,8 +44,9 @@ public:
     void Release();
     void Read();
 	CMPINLINE BOOL GetKey(DWORD key) { return m_pressedKeys[key]; }
-    void LockKey( DWORD key );
+    void LockKey(DWORD key);
 	void ConsumeKey(DWORD key);
+	void LockAndConsumeKey(DWORD key);
 	void ConsumeAllKeys(void);
 
 	CMPINLINE long GetX() { return m_x; }

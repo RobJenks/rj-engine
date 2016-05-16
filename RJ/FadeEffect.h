@@ -37,7 +37,9 @@ public:
 	CMPINLINE void			FadeIn(float timeperiod)	{ InitialiseFade(timeperiod, m_fade, 1.0f); }
 
 	// Method to begin a fade in or out from current alpha value, to another alpha value, over the specified period of time
-	CMPINLINE void			FadeToAlpha(float timeperiod, float targetalpha)	{ InitialiseFade(timeperiod, m_fade, targetalpha); }
+	CMPINLINE void			FadeToAlpha(float timeperiod, float targetalpha)					{ InitialiseFade(timeperiod, m_fade, targetalpha); }
+	CMPINLINE void			FadeToAlpha(float timeperiod, float targetalpha, bool ignore_pause)	{ InitialiseFade(timeperiod, m_fade, targetalpha, ignore_pause); }
+
 
 	// Update method, called each frame (or less frequently if object is not visible; will still work).  Updates the fade effect if it is active
 	CMPINLINE void Update(void)
@@ -45,8 +47,11 @@ public:
         // This method should only be called where m_active == true; safety check here
 		if (!m_active) return;
 
+		// We either use the game or persistent clock depending on whether the fade is set to run while paused
+		unsigned int clock_time = (m_ignore_pause ? Game::PersistentClockMs : Game::ClockMs);
+
 		// Update progress through the fade effect.  If we are done then end the effect
-		if (Game::ClockMs >= m_effectend)
+		if (clock_time >= m_effectend)
 		{
 			// Set alpha to the target end value and deactivate the effect
 			SetFadeAlpha(m_alphaend);
@@ -55,14 +60,14 @@ public:
 		}
 
 		// If the effect is still active then set the alpha value proportionate to our progress through the effect time
-		SetFadeAlpha(m_alphastart + (((float)(Game::ClockMs - m_effectstart) / m_effecttime) * m_alphachange));
+		SetFadeAlpha(m_alphastart + (((float)(clock_time - m_effectstart) / m_effecttime) * m_alphachange));
 	}
-
 
 private:
 
 	// Method to begin a fade effect from one alpha value to another over the specified period of time
 	void					InitialiseFade(float timeperiod, float startalpha, float targetalpha);
+	void					InitialiseFade(float timeperiod, float startalpha, float targetalpha, bool ignore_pause);
 
 	// Private member variables
 	bool					m_active;					// Flag indicating whether the fade effect is active
@@ -75,6 +80,8 @@ private:
 	float					m_alphastart;				// The alpha value that the effect began from
 	float					m_alphaend;					// The alpha value that the effect should end at
 	float					m_alphachange;				// The change in alpha that will be applied over the lifetime of the effect
+
+	bool					m_ignore_pause;				// Flag indicating whether the fade will still progress when the game is paused
 
 	// Static constant value; (1.0f-epsilon) will be the threshold above which we consider no alpha effect to be active
 	static const float		ALPHA_THRESHOLD;

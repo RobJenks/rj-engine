@@ -1143,6 +1143,18 @@ ComplexShipSection *ComplexShip::GetShipSectionContainingElement(INTVECTOR3 loca
 	return NULL;
 }
 
+// Apply a fade effect to all ship tiles in this environment
+void ComplexShip::FadeToAlpha(float time, float alpha, bool ignore_pause)
+{
+	// Iterate through all sections in the collection and apply this fade value
+	ComplexShipSection *s;
+	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
+	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
+	{
+		s = (*it); if (!s) continue;
+		s->Fade.FadeToAlpha(time, alpha, ignore_pause);
+	}
+}
 
 // Removes the 'standard' flag from this ship's definition and it's sections.  Used following a copy from a standard template ship
 void ComplexShip::RemoveStandardComponentFlags(void)

@@ -21,7 +21,8 @@ const AXMVECTOR UI_ShipBuilder::DEFAULT_CAMERA_ROTATION = XMQuaternionRotationAx
 const float UI_ShipBuilder::DEFAULT_ZOOM_LEVEL = 4.0f;
 const float UI_ShipBuilder::MIN_ZOOM_LEVEL = 3.0f;
 const float	UI_ShipBuilder::CAMERA_REVERT_TIME = 0.5f;
-
+const float UI_ShipBuilder::COMPONENT_FADE_TIME = 0.5f;
+const float UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA = 0.35f;
 
 // Default constructor
 UI_ShipBuilder::UI_ShipBuilder(void)
@@ -84,6 +85,9 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_centre_from = NULL_VECTOR;
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
+
+	// Set default starting editor mode
+	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
 }
 
 // Method to perform per-frame logic and perform rendering of the UI controller (excluding 2D render objects, which will be handled by the 2D render manager)
@@ -97,9 +101,6 @@ void UI_ShipBuilder::Render(void)
 // Method that is called when the UI controller is deactivated
 void UI_ShipBuilder::Deactivate(void)
 {
-	// Release any override on player state (e.g. if the player was not in the same system as the target ship)
-	//Game::CurrentPlayer->ReleasePlayerEnvironmentOverride();
-
 	// Remove any reference to the target ship
 	m_ship = NULL;
 
@@ -126,9 +127,6 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 	m_ship = ship;
 	if (!m_ship || !ship->GetSpaceEnvironment()) { m_ship = NULL; return; }
 
-	// Override the player state and force them into the same system as the target ship, if they are not already in it
-	//Game::CurrentPlayer->OverridePlayerEnvironment(m_ship->GetSpaceEnvironment(), NULL, NULL_VECTOR, ID_QUATERNION);
-
 	// Initialise a camera transition to overhead view of the ship
 	Game::Engine->GetCamera()->ZoomToOverheadShipView(m_ship, GetDefaultZoomLevel(), Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
 	LockCamera(Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
@@ -137,7 +135,7 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 	SetZoom(GetDefaultZoomLevel());
 
 	// Initialise the UI to ship tile mode
-	SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);
+	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
 }
 
 
@@ -145,7 +143,7 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 void UI_ShipBuilder::SetEditorMode(EditorMode mode)
 {
 	// If the mode is not changing then we don't need to do anything 
-	if (mode == m_mode) return;
+	//if (mode == m_mode) return;
 
 	// Raise the deactivation event for the current editor mode
 	EditorModeDeactivated(m_mode, mode);
@@ -177,19 +175,37 @@ void UI_ShipBuilder::EditorModeActivated(EditorMode mode, EditorMode previous_mo
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateSectionMode(EditorMode previous_mode)
 {
-
+	// Remove any fade effect from the ship or its contents when building entire ship sections
+	if (m_ship)
+	{ 
+		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+		m_ship->ForceRenderingOfInterior(false);
+	}
 }
 
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateTileMode(EditorMode previous_mode)
 {
-
+	// Fade out the ship exterior, leaving all tiles at full alpha
+	if (m_ship)
+	{
+		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+		m_ship->ForceRenderingOfInterior(true);
+	}
 }
 
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateObjectMode(EditorMode previous_mode)
 {
-
+	// Fade out the ship exterior and tile exteriors
+	if (m_ship)
+	{
+		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+		m_ship->ForceRenderingOfInterior(true);
+	}
 }
 
 // Locks the camera for the specified period of time, after which it will be released again to the user
@@ -269,6 +285,7 @@ void UI_ShipBuilder::PerformZoomIncrement(float increment)
 	else
 		m_zoom_increment_amount = increment;
 	
+	m_zoom_increment_amount = min(m_zoom_increment_amount, GetZoomIncrement() * 5.0f);
 	m_zoom_increment_end = Game::PersistentClockTime + UI_ShipBuilder::ZOOM_INCREMENT_TIME;
 }
 
@@ -353,7 +370,7 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	BOOL *keys = keyboard->GetKeys();
 
 	// Revert the camera to base position/orientation/zoom if the home key is pressed
-	if (keys[DIK_HOME])		
+	if (keys[DIK_HOME])
 	{
 		RevertCamera();
 		keyboard->LockKey(DIK_HOME);
@@ -362,8 +379,14 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	// Zoom controls
 	if (keys[DIK_PGUP])			ZoomIn();
 	else if (keys[DIK_PGDN])	ZoomOut();
+	
+	// Controls to change editor mode
+	if (keys[DIK_1])			{ SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);	keyboard->LockKey(DIK_1); }
+	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);			keyboard->LockKey(DIK_2); }
+	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);		keyboard->LockKey(DIK_3); }
 
-
+	// Consume all keys within this UI so they are not passed down to the main application
+	keyboard->ConsumeAllKeys();
 }
 
 

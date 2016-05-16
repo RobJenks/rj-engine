@@ -10,7 +10,7 @@
 class ComplexShipTile;
 
 // 16-bit aligned to allow use of SIMD instruction set
-class iContainsComplexShipTiles : public ALIGN16 < iContainsComplexShipTiles >
+class iContainsComplexShipTiles : public ALIGN16 <iContainsComplexShipTiles>
 {
 
 public:
@@ -57,6 +57,10 @@ public:
 	{ 
 		return (((int)type > 0 && (int)type < D::TileClass::_COUNT) ? m_tilecount[(int)type] : 0);
 	}
+
+	// Apply a fade effect to all ship tiles in this environment
+	void									FadeAllTiles(float time, float alpha, bool ignore_pause);
+	CMPINLINE void							FadeAllTiles(float time, float alpha)						{ FadeAllTiles(time, alpha, false); }
 
 	// Methods to get/set the flag determining whether we suspend tile-based refreshes.  Used to allow all tiles to
 	// be added on ship creation without refreshing at every step
