@@ -399,8 +399,8 @@ void RJMain::PerformFPSCalculations(void)
 {
 	// Calculate the FPS rate
 	static float m_framecount = 0.0f; static float m_elapsedtime = 0.0f;
-	m_framecount++;
-	m_elapsedtime += Game::TimeFactor;
+	++m_framecount;
+	m_elapsedtime += Game::PersistentTimeFactor;
 
 	// Recalculate once per second
 	if (m_elapsedtime >= 1.0f)
