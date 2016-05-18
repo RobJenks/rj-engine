@@ -160,6 +160,9 @@ protected:
 	// Pans the camera based on user mouse input
 	void										PanCameraBasedOnUserInput(const INTVECTOR2 & startlocation, const INTVECTOR2 & currentlocation);
 
+	// Render the editor grid, depending on editor mode
+	void										RenderEditorGrid(void);
+
 	// Internal methods to get the current position/orientation of the game camera
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
@@ -168,6 +171,8 @@ protected:
 	ComplexShip *								m_ship;						// The ship currently being worked on
 	EditorMode									m_mode;						// Current editor mode
 	AXMVECTOR									m_centre;					// The centre point (relative to ship centre) that the camera is focused on
+
+	int											m_deck;						// The deck that we are currently editing.  0-based
 
 	SBCameraState								m_camerastate;				// Indicates the current state of the editor camera
 	AXMVECTOR									m_camera_rotate;			// Current camera rotation about centre

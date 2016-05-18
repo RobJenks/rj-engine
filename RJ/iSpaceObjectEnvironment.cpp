@@ -38,6 +38,7 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_zeropointtranslation = NULL_VECTOR;
 	m_zeropointtranslationf = NULL_FLOAT3;
 	m_zeropointworldmatrix = m_inversezeropointworldmatrix = ID_MATRIX;
+	m_deckcount = 0;
 }
 
 
@@ -545,14 +546,37 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	{
 		m_elements[i].SetTile(NULL);
 	}
+	
+	// Keep a temporary record of all decks that contain tiles
+	unsigned int nZ = max((unsigned int)m_elementsize.z, 1);
+	std::vector<bool> decks(nZ, false);
 
 	// Process each tile in turn
+	ComplexShipTile *tile;
 	iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_end = m_tiles[0].end();
 	for (iContainsComplexShipTiles::ComplexShipTileCollection::iterator it = m_tiles[0].begin(); it != it_end; ++it)
 	{
 		// Apply the effects of the tile to its underlying elements
-		(*it).value->ApplyTile();
+		tile = (*it).value;
+		tile->ApplyTile();
+
+		// Mark all decks covered by this tile as active
+		int min_deck = tile->GetElementLocationZ();
+		int max_deck = min_deck + tile->GetElementSizeZ() - 1;
+		for (int i = min_deck; i <= max_deck; ++i) decks[i] = true;
 	}
+
+	// Store the number of decks and indices into the relevant z-values
+	m_deckcount = 0; m_deck_indices.clear();
+	for (int i = 0; i < (int)nZ; ++i)
+	{
+		if (decks[i])
+		{
+			++m_deckcount;
+			m_deck_indices.push_back(i);
+		}
+	}
+	assert(m_deckcount == (int)m_deck_indices.size());
 
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
@@ -577,6 +601,13 @@ void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 		m_navnetwork->Shutdown();
 		SafeDelete(m_navnetwork);
 	}
+}
+
+// Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
+int iSpaceObjectEnvironment::GetDeckIndex(int deck) const
+{
+	if (deck < 0 || deck >= m_deckcount)		return 0;
+	else										return m_deck_indices[deck];
 }
 
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 

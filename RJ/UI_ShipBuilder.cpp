@@ -2,6 +2,7 @@
 #include "RJMain.h"
 #include "CoreEngine.h"
 #include "CameraClass.h"
+#include "VolumetricLine.h"
 #include "Player.h"
 #include "ComplexShip.h"
 
@@ -27,22 +28,7 @@ const float UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA = 0.35f;
 // Default constructor
 UI_ShipBuilder::UI_ShipBuilder(void)
 {
-	// Set default values
-	m_ship = NULL;
-	m_mode = EditorMode::ShipSectionMode;
-	m_centre = NULL_VECTOR;
-	m_camerastate = SBCameraState::Normal;
-	m_camera_release = 0U;
-	m_camera_rotate = ID_QUATERNION;
-	m_zoomlevel = MIN_ZOOM_LEVEL;
-	m_zoom_increment_amount = 0.0f; 
-	m_zoom_increment_end = 0.0f;
-	m_reverting_camera = false;
-	m_reverttimeremaining = 0.0f;
-	m_reverting_from = ID_QUATERNION;
-	m_revert_centre_from = NULL_VECTOR;
-	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
-	m_rmb_down_start_centre = m_centre;
+	// Most initialisation takes place per-activation in the Activate() method
 }
 
 // Initialisation method, called once the UI component has been created
@@ -85,6 +71,7 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_centre_from = NULL_VECTOR;
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
+	m_deck = 0;
 
 	// Set default starting editor mode
 	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
@@ -95,6 +82,10 @@ void UI_ShipBuilder::Render(void)
 {
 	// Perform any updates of the camera required since the previous frame
 	PerformCameraUpdate();
+
+	// Render the editor grid, depending on editor mode
+	RenderEditorGrid();
+
 }
 
 
@@ -476,9 +467,53 @@ void UI_ShipBuilder::PanCameraBasedOnUserInput(const INTVECTOR2 & startlocation,
 
 // Internal methods to get the current position/orientation of the game camera
 XMVECTOR UI_ShipBuilder::GetCameraPosition(void) const			{ return Game::Engine->GetCamera()->GetFixedCameraPosition(); }
-XMVECTOR UI_ShipBuilder::GetCameraOrientation(void) const		{ return Game::Engine->GetCamera()->GetFixedCameraOrientation();
+XMVECTOR UI_ShipBuilder::GetCameraOrientation(void) const		{ return Game::Engine->GetCamera()->GetFixedCameraOrientation(); }
 
 
+// Render the editor grid, depending on editor mode
+void UI_ShipBuilder::RenderEditorGrid(void)
+{
+	static const int EXTEND_GRID = 3;
+	const INTVECTOR3 &elsize = m_ship->GetElementSize();
+	VolumetricLine vol_line = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMVectorSet(0.75f, 0.75f, 0.75f, 0.35f), 0.5f, NULL);
+	
+	// Determine the local/world start and end positions
+	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_deck)));
+	XMVECTOR start_pos = XMVector3TransformCoord(local_start_pos, m_ship->GetZeroPointWorldMatrix());
+	XMVECTOR end_pos = XMVectorAdd(start_pos, XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 
+		Game::ElementLocationToPhysicalPosition(elsize.z + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
 
+	// Also determine the world space adjustment required to transition between elements
+	XMVECTOR incr = XMVector3TransformCoord(Game::ElementLocationToPhysicalPosition(INTVECTOR3(1, 0, 0)), m_ship->GetOrientationMatrix());
 
+	// Generate 'vertical' lines at each x coordinate first
+	XMVECTOR add_vec = NULL_VECTOR;
+	for (int x = -EXTEND_GRID; x < (elsize.x + EXTEND_GRID); ++x)
+	{
+		vol_line.P1 = XMVectorAdd(start_pos, add_vec);
+		vol_line.P2 = XMVectorAdd(end_pos, add_vec);
+		Game::Engine->RenderVolumetricLine(vol_line);
+		OutputDebugString(concat("Adding V line: ")(Vector3ToString(vol_line.P1))(" to ")(Vector3ToString(vol_line.P2))("\n").str().c_str());
+		add_vec = XMVectorAdd(add_vec, incr);
+	}
+	
+	// Recalculate some fields for the other dimension
+	end_pos = XMVectorAdd(start_pos, XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR,
+		Game::ElementLocationToPhysicalPosition(elsize.x + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
+	incr = XMVector3TransformCoord(Game::ElementLocationToPhysicalPosition(INTVECTOR3(0, 1, 0)), m_ship->GetOrientationMatrix());
+	add_vec = NULL_VECTOR;
+
+	// Now generate 'horizontal' lines at each y coordinate
+	for (int y = -EXTEND_GRID; y < (elsize.y + EXTEND_GRID); ++y)
+	{
+		vol_line.P1 = XMVectorAdd(start_pos, add_vec);
+		vol_line.P2 = XMVectorAdd(end_pos, add_vec);
+		Game::Engine->RenderVolumetricLine(vol_line);
+		OutputDebugString(concat("Adding H line: ")(Vector3ToString(vol_line.P1))(" to ")(Vector3ToString(vol_line.P2))("\n").str().c_str());
+		add_vec = XMVectorAdd(add_vec, incr);
+	}
 }
+
+
+
+

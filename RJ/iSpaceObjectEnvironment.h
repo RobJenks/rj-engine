@@ -251,6 +251,9 @@ public:
 	// if necessary.  Returns a bool indicating whether reallocation was necessary
 	Result							EnsureShipElementSpaceIncorporatesLocation(INTVECTOR3 location);
 
+	// Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
+	int								GetDeckIndex(int deck) const;
+
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }
 	void							Shutdown(bool unlink_tiles);
@@ -325,6 +328,10 @@ protected:
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
+
+	// We store the number of decks in this environment, and a pointer to the element Z value for each
+	int								m_deckcount;
+	std::vector<int>				m_deck_indices;
 
 	// Internal method; get all objects within a given distaance of the specified position, within the 
 	// specified EnvironmentTree node
