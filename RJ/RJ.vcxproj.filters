@@ -535,6 +535,9 @@
     <ClCompile Include="UI_ShipBuilder.cpp">
       <Filter>UI\UI Controllers</Filter>
     </ClCompile>
+    <ClCompile Include="RenderConfig.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1232,6 +1235,12 @@
     </ClInclude>
     <ClInclude Include="UI_ShipBuilder.h">
       <Filter>UI\UI Controllers</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderConfig.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderConfigEntry.h">
+      <Filter>Engine\Render Queue</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

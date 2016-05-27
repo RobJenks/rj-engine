@@ -325,6 +325,7 @@
     <ClCompile Include="MultiLineTextBlock.cpp" />
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
+    <ClCompile Include="RenderConfig.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -474,6 +475,8 @@
     <ClInclude Include="MValue.h" />
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
+    <ClInclude Include="RenderConfig.h" />
+    <ClInclude Include="RenderConfigEntry.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
     <ClInclude Include="DX11_Compatibility.h" />

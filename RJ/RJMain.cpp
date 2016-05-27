@@ -2148,10 +2148,11 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		long z = Game::Mouse.GetZDelta();
+		unsigned long long mx = 0 - 1;
+		double lg = std::log2((double)mx);
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d", z);
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.3f", lg);
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);		
 	}
 }
 
