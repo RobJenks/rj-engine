@@ -475,7 +475,7 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 {
 	static const int EXTEND_GRID = 3;
 	const INTVECTOR3 &elsize = m_ship->GetElementSize();
-	VolumetricLine vol_line = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMVectorSet(0.75f, 0.75f, 0.75f, 0.35f), 0.5f, NULL);
+	VolumetricLine vol_line = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(0.75f, 0.75f, 0.75f, 0.35f), 0.5f, NULL);
 	
 	// Determine the local/world start and end positions
 	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_deck)));

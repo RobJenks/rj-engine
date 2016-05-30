@@ -142,11 +142,13 @@ namespace Game {
 	extern const int C_CONFIG_LOAD_RECURSION_LIMIT;		// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
+	typedef UINT32 LIGHT_CONFIG;				// Bitstring representing a particular lighting configuration
 	extern const int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine
 	extern const float C_MODEL_SIZE_LIMIT;			// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values
 	extern const int C_MAX_ARTICULATED_MODEL_SIZE;	// The maximum number of components within any articulated model
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL;		// Time (ms) between pre-optimisation checks of the render queue
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_OPTIMISE_INTERVAL;	// Time (ms) between optimisation passes on the render queue
+	extern const float C_LIGHT_RENDER_DISTANCE;		// The maximum distance at which lights are considered during rendering
 
 	// Physics constants
 	extern const float C_EPSILON;

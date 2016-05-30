@@ -7,6 +7,8 @@
 #include "RJMain.h"
 #include "Profiler.h"
 #include "CameraClass.h"
+#include "InputLayoutDesc.h"
+#include "LightingManagerObject.h"
 #include "LightShader.h"
 #include "LightFadeShader.h"
 #include "LightHighlightShader.h"
@@ -105,7 +107,8 @@ CoreEngine::CoreEngine(void)
 	m_renderflags = std::vector<bool>(CoreEngine::RenderFlag::_RFLAG_COUNT, false);
 
 	// Set pre-populated parameter values for render-time efficiency
-	m_instanceparams = NULL_VECTOR4;										// x component holds fade alpha
+	m_current_modelbuffer = NULL;
+	m_instanceparams = NULL_FLOAT4;
 
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -143,6 +146,16 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseCamera();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Camera initialised\n";
+
+	// Initialise the lighting manager
+	res = InitialiseLightingManager();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INIT_START << "Lighting manager initialised\n";
+
+	// Initialise shader support data
+	res = InitialiseShaderSupport();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INIT_START << "Shader support data initialised\n";
 
 	// Initialise the light objects
 	res = InitialiseLights();
@@ -266,6 +279,8 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownTextureShader();
 	ShutdownLights();
 	ShutdownCamera();
+	ShutdownLightingManager();
+	ShutdownShaderSupport();
 	ShutdownFrustrum();
 	ShutdownTextRendering();
 	ShutdownFontShader();
@@ -380,6 +395,11 @@ Result CoreEngine::InitialiseRenderQueue(void)
 		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
+	// TODO30
+	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader].Shader = (iShader*)m_lightshader;
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader].Shader = (iShader*)m_lightshader;
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader].Shader = (iShader*)m_lightshader;
+
 	// Return success
 	return ErrorCodes::NoError;
 }
@@ -406,6 +426,21 @@ Result CoreEngine::InitialiseCamera(void)
 
 }
 
+Result CoreEngine::InitialiseLightingManager(void)
+{
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+Result CoreEngine::InitialiseShaderSupport(void)
+{
+	// Initialise all standard vertex input layouts
+	InputLayoutDesc::InitialiseStaticData();
+
+	// Returns success
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseLightShader(void)
 {
 	// Create the light shader object.
@@ -421,9 +456,6 @@ Result CoreEngine::InitialiseLightShader(void)
 	{
 		return result;
 	}
-
-	// For now, set the light parameters as per the defined light objects
-	m_lightshader->SetLightParameters(m_light->GetDirection(), m_light->GetAmbientColor(), m_light->GetDiffuseColor());
 
 	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
@@ -444,9 +476,6 @@ Result CoreEngine::InitialiseLightFadeShader(void)
 	{
 		return result;
 	}
-
-	// For now, set the light parameters as per the defined light objects
-	m_lightfadeshader->SetLightParameters(m_light->GetDirection(), m_light->GetAmbientColor(), m_light->GetDiffuseColor());
 
 	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
@@ -469,9 +498,6 @@ Result CoreEngine::InitialiseLightHighlightShader(void)
 		return result;
 	}
 
-	// For now, set the light parameters as per the defined light objects
-	m_lighthighlightshader->SetLightParameters(m_light->GetDirection(), m_light->GetAmbientColor(), m_light->GetDiffuseColor());
-
 	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
 }
@@ -492,9 +518,6 @@ Result CoreEngine::InitialiseLightHighlightFadeShader(void)
 	{
 		return result;
 	}
-
-	// For now, set the light parameters as per the defined light objects
-	m_lighthighlightfadeshader->SetLightParameters(m_light->GetDirection(), m_light->GetAmbientColor(), m_light->GetDiffuseColor());
 
 	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
@@ -550,10 +573,9 @@ Result CoreEngine::InitialiseLights()
 		return ErrorCodes::CannotCreateLightObject;
 	}
 
-	// Initialise the light object.
-	m_light->SetAmbientColor(0.25f, 0.25f, 0.25f, 1.0f);
-	m_light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f); 
-	m_light->SetDirection(0.0f, 0.0f, 1.0f);
+	// Initialise the global directional light object (will be overriden once rendering starts, these are just initial values)
+	Game::Engine->LightingManager.SetDirectionalLightData(DirLightData(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f),
+		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)));
 
 	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
@@ -876,6 +898,16 @@ void CoreEngine::ShutdownCamera(void)
 	}
 }
 
+void CoreEngine::ShutdownLightingManager(void)
+{
+	// Nothing required
+}
+
+void CoreEngine::ShutdownShaderSupport(void)
+{
+	// Nothing required
+}
+
 void CoreEngine::ShutdownLightShader(void)
 {
 	// Release the light shader object.
@@ -1107,6 +1139,9 @@ void CoreEngine::Render(void)
 	// Construct the view frustrum for this frame so we can perform culling calculations
 	m_frustrum->ConstructFrustrum(r_view, r_invview);
 
+	// Initialise the lighting manager for this frame
+	LightingManager.AnalyseNewFrame();
+
 	/*** Perform rendering that is common to all player environment & states ***/
 
 	// Render the system region
@@ -1181,6 +1216,9 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		mi_end = m_renderqueue[i].end();
 		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
 		{
+			// Store a reference to the model buffer currently being rendered
+			m_current_modelbuffer = mi->first;
+
 			// Get the number of instances to be rendered
 			instancecount = (int)mi->second.InstanceData.size();
 			if (instancecount == 0) continue;
@@ -1198,21 +1236,21 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = mi->first->VertexBuffer;
-				m_instancedstride[0] = mi->first->GetVertexSize();
+				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer;
+				m_instancedstride[0] = m_current_modelbuffer->GetVertexSize();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(mi->first->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (rq_shader.PrimitiveTopology != m_current_topology) 
 					r_devicecontext->IASetPrimitiveTopology(rq_shader.PrimitiveTopology);
 
 				// Now process all instanced / indexed vertex data through this shader
-				rq_shader.Shader->Render(	r_devicecontext, mi->first->GetIndexCount(),
-											mi->first->GetIndexCount(), n, 
-											r_view, r_projection, mi->first->GetTextureResource());
+				rq_shader.Shader->Render(	r_devicecontext, m_current_modelbuffer->GetIndexCount(),
+											m_current_modelbuffer->GetIndexCount(), n,
+											r_view, r_projection, m_current_modelbuffer->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1231,7 +1269,6 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
-	ModelBuffer *model = NULL; 
 	int n;
 	vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
@@ -1247,18 +1284,18 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 	// Deliberately go to -1, so we can render the final element(s).  Loop will run from (n-1) to -1
 
 	// The starting model will be that of the first element (which we know exists since size>0)
-	model = shader.SortedInstances[size-1].ModelPtr;
+	m_current_modelbuffer = shader.SortedInstances[size - 1].ModelPtr;
 	for (int i = size - 1; i >= -1; --i)
 	{
 		// If this is an instance of the same model as the previous item, and this is not the final (-1) dummy item,
 		// add another element to the render buffer
-		if (i != -1 && shader.SortedInstances[i].ModelPtr == model)
+		if (i != -1 && shader.SortedInstances[i].ModelPtr == m_current_modelbuffer)
 		{
 			renderbuffer.push_back(shader.SortedInstances[i].Item);
 		}
 
 		// If this is an instance of a different model, or is the dummy end-element, we want to render the buffer that has been accumulated so far
-		if (i == -1 || shader.SortedInstances[i].ModelPtr != model)
+		if (i == -1 || shader.SortedInstances[i].ModelPtr != m_current_modelbuffer)
 		{
 			// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
 			// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
@@ -1275,20 +1312,20 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = model->VertexBuffer;
-				m_instancedstride[0] = model->GetVertexSize();
+				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer;
+				m_instancedstride[0] = m_current_modelbuffer->GetVertexSize();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(model->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (shader.PrimitiveTopology != m_current_topology)
 					r_devicecontext->IASetPrimitiveTopology(shader.PrimitiveTopology);
 
 				// Now process all instanced / indexed vertex data through this shader
-				shader.Shader->Render(	r_devicecontext, model->GetIndexCount(), model->GetIndexCount(), n, 
-										r_view, r_projection, model->GetTextureResource());
+				shader.Shader->Render(	r_devicecontext, m_current_modelbuffer->GetIndexCount(), m_current_modelbuffer->GetIndexCount(), n,
+										r_view, r_projection, m_current_modelbuffer->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
@@ -1301,7 +1338,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 			// we now want to update the current model pointer, and add the current element to the render buffer as the first item
 			if (i != -1)
 			{
-				model = shader.SortedInstances[i].ModelPtr;
+				m_current_modelbuffer = shader.SortedInstances[i].ModelPtr;
 				renderbuffer.push_back(shader.SortedInstances[i].Item);
 			}
 		}
@@ -1352,7 +1389,7 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 		float alpha = object->Fade.GetFadeAlpha();
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams = XMVectorReplicate(alpha);
+		m_instanceparams.x = alpha;
 
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel(), object->GetWorldMatrix(), m_instanceparams, object->GetPosition());
 	}
@@ -1389,7 +1426,7 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 		float alpha = object->Fade.GetFadeAlpha();
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams = XMVectorReplicate(alpha);
+		m_instanceparams.x = alpha;
 
         // Submit each component for rendering in turn
 		ArticulatedModelComponent **component = model->GetComponents();
@@ -1664,7 +1701,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 				float alpha = tile->Fade.GetFadeAlpha();
 				if (alpha < Game::C_EPSILON) return;
-				m_instanceparams = XMVectorReplicate(alpha);
+				m_instanceparams.x = alpha;
 
 				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), world, m_instanceparams, 
 											world.r[3]);	// Position can be taken from trans. components of world matrix (_41 to _43)
@@ -1689,7 +1726,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 
 		// Determine whether any effects are active on the tile; these will need to be propogated across to constituent parts here
 		bool fade = false;
-		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams = XMVectorReplicate(tile->Fade.GetFadeAlpha()); }
+		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams.x = tile->Fade.GetFadeAlpha(); }
 
 		// Iterate through all models to be rendered
 		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
@@ -1747,7 +1784,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 		float alpha = parent->Fade.GetFadeAlpha();
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams = XMVectorReplicate(alpha);
+		m_instanceparams.x = alpha;
 
 		// Iterate through each turret in turn
 		TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
@@ -1863,12 +1900,12 @@ void CoreEngine::RenderSkinnedModelInstance(SkinnedModelInstance &model)
 void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 {
 	// Embed line endpoints within the first two rows of the instance transform
-	RM_Instance m;
-	m.World.r[0] = line.P1;
-	m.World.r[1] = line.P2;
+	RM_Instance m; XMFLOAT4 p1, p2;
+	XMStoreFloat4(&p1, line.P1); 
+	XMStoreFloat4(&p2, line.P2);
 
-	// Embed line colour & alpha within the third matrix row
-	m.World.r[2] = line.Colour;
+	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
+	m.World = XMFLOAT4X4(p1.x, p1.y, p1.z, 1.0f, p2.x, p2.y, p2.z, 1.0f, line.Colour.x, line.Colour.y, line.Colour.z, line.Colour.w, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Provide additional parameters as required.  x = line radius
 	m.Params = line.Params;

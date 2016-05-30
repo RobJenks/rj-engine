@@ -1,22 +1,9 @@
-//=============================================================================
-// NormalMap.fx by Frank Luna (C) 2011 All Rights Reserved.
-//=============================================================================
+#include "light_definition.h"
+#include "material_definition.h"
 
-struct DirectionalLight
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
-	float3 Direction;
-	float pad;
-};
-struct Material
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular; // w = SpecPower
-	float4 Reflect;
-};
+// Import a standard constant buffer holding data on materials, lighting etc
+#include "standard_ps_const_buffer.h"
+
 
 //---------------------------------------------------------------------------------------
 // Performs shadowmap test to determine if a pixel is in shadow.
@@ -60,9 +47,9 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 //---------------------------------------------------------------------------------------
 // Computes the ambient, diffuse, and specular terms in the lighting equation
 // from a directional light.  We need to output the terms separately because
-// later we will modify the individual terms.
+// later we will modify the individual terms.  
 //---------------------------------------------------------------------------------------
-void ComputeDirectionalLight(Material mat, DirectionalLight L, 
+void ComputeDirectionalLight(MaterialData mat, DirLightData L, 
                              float3 normal, float3 toEye,
 					         out float4 ambient,
 						     out float4 diffuse,
@@ -118,21 +105,9 @@ float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 unitNormalW, floa
 	return bumpedNormalW;
 }
 
- 
-cbuffer cbPerFrame
-{
-	DirectionalLight gDirLights[3];
-	float3 gEyePosW;
-
-	float  gFogStart;
-	float  gFogRange;
-	float4 gFogColor; 
-	float3 padding;
-};
-
 cbuffer cbPerSubset
 {
-	Material gMaterial;
+	MaterialData Material;
 }; 
 
 // Nonnumeric values cannot be added to a cbuffer.
@@ -188,7 +163,7 @@ bool gReflectionEnabled = false;
 	pin.NormalW = normalize(pin.NormalW);
 
 	// The toEye vector is used in lighting.
-	float3 toEye = gEyePosW - pin.PosW;
+	float3 toEye = EyeWorldPos - pin.PosW;
 
 	// Cache the distance to the eye from this surface point.
 	float distToEye = length(toEye);
@@ -224,60 +199,61 @@ bool gReflectionEnabled = false;
 	//
 
 	float4 litColor = texColor;
-	if( gLightCount > 0  )
-	{   
-		// Start with a sum of zero. 
-		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-		float4 spec    = float4(0.0f, 0.0f, 0.0f, 0.0f);
-		  
-		// Only the first light casts a shadow.
-		float3 shadow = float3(1.0f, 1.0f, 1.0f);
-		shadow[0] = 0.5f; //CalcShadowFactor(samShadow, gShadowMap, pin.ShadowPosH);
+	
+	// Only the first light casts a shadow.
+	float3 shadow = float3(1.0f, 1.0f, 1.0f);
+	shadow[0] = 0.5f; //CalcShadowFactor(samShadow, gShadowMap, pin.ShadowPosH);
 
-		// Finish texture projection and sample SSAO map.
-		pin.SsaoPosH /= pin.SsaoPosH.w;
-		float ambientAccess = 1.0f; //gSsaoMap.Sample(samLinear, pin.SsaoPosH.xy, 0.0f).r;
+	// Finish texture projection and sample SSAO map.
+	pin.SsaoPosH /= pin.SsaoPosH.w;
+	float ambientAccess = 1.0f; //gSsaoMap.Sample(samLinear, pin.SsaoPosH.xy, 0.0f).r;
 		
-		// Sum the light contribution from each light source.  
-		[unroll] 
-		for(int i = 0; i < gLightCount; ++i)
-		{
-			float4 A, D, S;
-			ComputeDirectionalLight(gMaterial, gDirLights[i], bumpedNormalW, toEye, 
-				A, D, S);
+	// First calculate light contribution from the global directional light (which sets initial values for each light property)
+	float4 ambient, diffuse, spec;
+	ComputeDirectionalLight(Material, DirLight, bumpedNormalW, toEye, ambient, diffuse, spec);
+	ambient *= ambientAccess;
+	diffuse *= shadow[0];
+	spec *= shadow[0];
 
-			ambient += ambientAccess*A;    
-			diffuse += shadow[i]*D;
-			spec    += shadow[i]*S;
-		}
-		   
-		litColor = texColor*(ambient + diffuse) + spec;
+	// Now calculate and add the light contribution from each point light source.  
+	//[unroll] 
+	for(unsigned int i = 0; i < LightCount; ++i)
+	{
+		float4 A, D, S;
+		/*ComputeDirectionalLight(gMaterial, gDirLights[i], bumpedNormalW, toEye,			// TODO: EXTEND TO THE POINT LIGHTS
+			A, D, S);
 
-		//if( gReflectionEnabled )
-		//{
-		//	float3 incident = -toEye;
-		//	float3 reflectionVector = reflect(incident, bumpedNormalW);
-		//	float4 reflectionColor  = gCubeMap.Sample(samLinear, reflectionVector);
-		//
-		//	litColor += gMaterial.Reflect*reflectionColor;
-		//}
+		ambient += ambientAccess*A;    
+		diffuse += shadow[i]*D;
+		spec    += shadow[i]*S;*/
 	}
+		   
+	litColor = texColor*(ambient + diffuse) + spec;
+
+	//if( gReflectionEnabled )
+	//{
+	//	float3 incident = -toEye;
+	//	float3 reflectionVector = reflect(incident, bumpedNormalW);
+	//	float4 reflectionColor  = gCubeMap.Sample(samLinear, reflectionVector);
+	//
+	//	litColor += gMaterial.Reflect*reflectionColor;
+	//}
+
  
 	//
 	// Fogging
 	//
 
-	if( gFogEnabled )
+	if( FogEnabled )
 	{
-		float fogLerp = saturate( (distToEye - gFogStart) / gFogRange ); 
+		float fogLerp = saturate( (distToEye - FogStart) / FogRange ); 
 
 		// Blend the fog color and the lit color.
-		litColor = lerp(litColor, gFogColor, fogLerp);
+		litColor = lerp(litColor, FogColour, fogLerp);
 	}
 
 	// Common to take alpha from diffuse material and texture.
-	litColor.a = gMaterial.Diffuse.a * texColor.a;
+	litColor.a = Material.Diffuse.a * texColor.a;
 
     return litColor;
 }

@@ -20,7 +20,7 @@ public:
 	HighlightEffect(void)
 	{
 		m_active = false;
-		m_colour = XMVectorReplicate(1.0f);
+		m_colour = ONE_FLOAT4;
 	}
 
 	// Change the activation state of this effect
@@ -30,8 +30,8 @@ public:
 	CMPINLINE void			SetActiveState(bool active)					{ m_active = active; }
 
 	// Retrieve or set the colour to be used in this highlight effect
-	CMPINLINE XMVECTOR		GetColour(void)								{ return m_colour; }
-	CMPINLINE void			SetColour(const FXMVECTOR colour)			{ m_colour = colour; }
+	CMPINLINE XMFLOAT4		GetColour(void)								{ return m_colour; }
+	CMPINLINE void			SetColour(const XMFLOAT4 & colour)			{ m_colour = colour; }
 
 	// Default destructor
 	~HighlightEffect(void) { }
@@ -40,7 +40,7 @@ public:
 protected:
 
 	bool					m_active;		// Flag indicating whether highlight effect is active
-	AXMVECTOR				m_colour;		// Colour to be applied when highlighting
+	XMFLOAT4				m_colour;		// Colour to be applied when highlighting
 
 };
 

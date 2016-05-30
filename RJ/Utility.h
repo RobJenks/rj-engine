@@ -695,6 +695,10 @@ enum VisibilityTestingModeType { UseBoundingSphere = 0, UseOrientedBoundingBox }
 VisibilityTestingModeType		TranslateVisibilityModeFromString(const std::string & mode);
 std::string 					TranslateVisibilityModeToString(const VisibilityTestingModeType mode);
 
+// Debug macro to output the size of a given type
+#ifdef _DEBUG
+#	define DBG_OUTPUT_SIZE(x) { OutputDebugString(concat("Sizeof("#x") == ")(sizeof(x))("\n").str().c_str()); }
+#endif
 
 
 #endif

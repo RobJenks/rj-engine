@@ -337,11 +337,7 @@ void iObject::SetSize(const FXMVECTOR size)
 		m_size = XMVectorReplicate(1.0f);
 
 	// Recalculate the collision sphere radii for broadphase collision detection
-	m_collisionsphereradiussq = DetermineCuboidBoundingSphereRadiusSq(m_size); 
-	m_collisionsphereradius = sqrtf(m_collisionsphereradiussq);
-
-	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
-	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
+	SetCollisionSphereRadius(DetermineCuboidBoundingSphereRadiusSq(m_size));
 
 	// Store the local float representation to allow us to perform per-component tests at runtime
 	XMStoreFloat3(&m_sizef, m_size);
@@ -365,6 +361,26 @@ void iObject::SetSize(const FXMVECTOR size)
 	{
 		CollisionOBB.UpdateExtentFromSize(m_size);
 	}
+}
+
+// Set a new collision sphere radius, recalcuating all derived fieds
+void iObject::SetCollisionSphereRadius(float radius)
+{
+	m_collisionsphereradius = radius;
+	m_collisionsphereradiussq = radius * radius;
+
+	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
+	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
+}
+
+// Set a new squared collision sphere radius, recalcuating all derived fieds
+void iObject::SetCollisionSphereRadiusSq(float radius_sq)
+{
+	m_collisionsphereradiussq = radius_sq;
+	m_collisionsphereradius = sqrtf(m_collisionsphereradiussq);
+
+	// Also calculate a collision sphere including margin, to catch edge cases that could potentially otherwise be missed
+	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 }
 
 // Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
@@ -651,6 +667,7 @@ std::string iObject::TranslateObjectTypeToString(iObject::ObjectType type)
 		case iObject::ObjectType::CapitalShipPerimeterBeaconObject:	return "CS Perimeter Beacon";
 		case iObject::ObjectType::ProjectileObject:					return "Projectile";
 		case iObject::ObjectType::ActorObject:						return "Actor";
+		case iObject::ObjectType::LightSourceObject:				return "LightSource";
 	
 		default:													return "(Unknown)";
 	}

@@ -49,12 +49,16 @@ void BasicProjectile::GenerateRenderInstance(RM_Instance & outInstance)
 	// P1 will be scaled so that the beam grows from zero to its full length during the 
 	// first 'Speed' seconds after launch
 	float beam_mult = (float)(Game::ClockMs - LaunchTime) * 0.001f;
-	outInstance.World.r[0] = Position;
-	outInstance.World.r[1] = XMVectorSubtract(Position, XMVectorScale(Velocity,
-		min(beam_mult, ProjectileBeamLengthMultiplier)));
 
-	// Line colour and alpha are stored within the third matrix row
-	outInstance.World.r[2] = Definition->VolumetricLineData.Colour;
+	// Get relevant data on the volumetric line
+	XMFLOAT4 start, end;
+	XMStoreFloat4(&start, Position);
+	XMStoreFloat4(&end, XMVectorSubtract(Position, XMVectorScale(Velocity,
+						min(beam_mult, ProjectileBeamLengthMultiplier))));
+	const XMFLOAT4 &col = Definition->VolumetricLineData.Colour;
+
+ 	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
+	outInstance.World = XMFLOAT4X4(start.x, start.y, start.z, 1.0f, end.x, end.y, end.z, 1.0f, col.x, col.y, col.z, col.w, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Additional parameters (e.g. beam radius) are stored within the instance parameter vector
 	outInstance.Params = Definition->VolumetricLineData.Params;

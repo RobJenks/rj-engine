@@ -4,7 +4,13 @@
 #include "Utility.h"
 #include "DX11_Core.h"
 #include "D3DCompiler.h"
+#include "GameVarsExtern.h"
+#include "CoreEngine.h"
+#include "CameraClass.h"
+#include "Material.h"
 #include "InputLayoutDesc.h"
+#include "Data\\Shaders\\light_definition.h"
+#include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "ShaderManager.h"
 
@@ -237,3 +243,31 @@ Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bind
 }
 
 
+// Populate one of the standard constant buffer objects with appropriate data
+Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
+{
+	// Parameter check
+	if (!buffer) return ErrorCodes::CannotPopulateNullConstantBuffer;
+
+	// Populate each field in turn
+	buffer->EyeWorldPos = Game::Engine->GetCamera()->GetPositionF();
+	buffer->DirLight = Game::Engine->LightingManager.GetDirectionalLightData();
+
+	unsigned int light_count = Game::Engine->LightingManager.GetLightSourceCount();
+	buffer->LightCount = light_count;
+	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
+	
+	unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
+	buffer->MaterialCount = material_count;
+	memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
+	//TODO30
+	/*buffer->ID = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.ID;
+	buffer->Ambient = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Ambient;
+	buffer->Diffuse = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Diffuse;
+	buffer->Specular = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Specular;
+	buffer->Reflect = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Reflect;*/
+
+
+	// Return success
+	return ErrorCodes::NoError;
+}

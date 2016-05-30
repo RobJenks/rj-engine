@@ -85,7 +85,7 @@ public:
 															  float xSize, float ySize, float zSize);
 
 	// Methods to render semi-transparent overlay components
-	void				RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const FXMVECTOR colour, float alpha);
+	void				RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
 
 	// Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 	// will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects

@@ -1,33 +1,24 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: light.ps
-////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////
-// GLOBALS //
-/////////////
+// Globals
 Texture2D shaderTexture;
 SamplerState SampleType;
 
-cbuffer LightBuffer
-{
-    float4 ambientColor;
-    float4 diffuseColor;
-    float3 lightDirection;
-	float padding;
-};
+// Import all light structures and definitions from the external definition file
+#include "render_constants.h"
+#include "light_definition.h"
+#include "vertex_definitions.h.hlsl"
 
+// Import a standard constant buffer holding data on materials, lighting etc
+#include "standard_ps_const_buffer.h"
 
-//////////////
-// TYPEDEFS //
-//////////////
+// Pixel input format
 struct PixelInputType
 {
-    float4 position : SV_POSITION;
-    float2 tex : TEXCOORD0;
+	float4 position : SV_POSITION;
+	float2 tex : TEXCOORD0;
 	float3 normal : NORMAL;
+	unsigned int material : MATERIAL;
+	unsigned int LightConfig : LightConfig;
 };
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
@@ -38,16 +29,20 @@ float4 main(PixelInputType input) : SV_TARGET
     float3 lightDir;
     float lightIntensity;
     float4 color;
-
+//TODO30
+	float4 amb = float4(0.25f, 0.25f, 0.25f, 1.0f);
+	float4 dif = float4(1.0f, 1.0f, 1.0f, 1.0f);
+	float4 spc = float4(0.5f, 0.5f, 0.5f, 0.5f);
+	float3 dr = float3(0.0f, 0.0f, 1.0f);
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
     textureColor = shaderTexture.Sample(SampleType, input.tex);
 
     // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
-    color = ambientColor;
+	color = DirLight.Ambient; //color = amb;
 
     // Invert the light direction for calculations.
-    lightDir = -lightDirection;
+	lightDir = -dr;// DirLight.Direction;
 
     // Calculate the amount of light on this pixel.
     lightIntensity = saturate(dot(input.normal, lightDir));
@@ -56,7 +51,7 @@ float4 main(PixelInputType input) : SV_TARGET
     if (lightIntensity > 0.0f)
     {
         // Determine the final diffuse colour based on the diffuse colour and level of light intensity
-        color += (diffuseColor * lightIntensity);
+		color += (dif/*DirLight.Diffuse*/ * lightIntensity);
     }
 
 

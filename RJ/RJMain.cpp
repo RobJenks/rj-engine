@@ -603,7 +603,7 @@ void RJMain::ProcessKeyboardInput(void)
 			XMFLOAT4 options[6] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
 				XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) };
 			ss()->Highlight.Activate();
-			ss()->Highlight.SetColour(XMLoadFloat4(&options[(int)floor(frand_lh(0, 6))]));
+			ss()->Highlight.SetColour(options[(int)floor(frand_lh(0, 6))]);
 		}
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
@@ -629,8 +629,8 @@ void RJMain::ProcessKeyboardInput(void)
 		for (int x = 0; x < cs()->GetElementSize().x; ++x)
 			for (int y = 0; y < cs()->GetElementSize().y; ++y)
 				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), INTVECTOR3(x, y, 0),
-				XMVectorSet(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
-				cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.0f), 0.2f);
+					XMFLOAT3(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
+					cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f), 0.2f);
 	}
 
 	if (false && b[DIK_I]) {
@@ -931,10 +931,26 @@ HWND RJMain::CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc)
 	return hwnd;
 }
 
+#include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
+
+	StandardPSConstBuffer buf;
+	DBG_OUTPUT_SIZE(StandardPSConstBuffer);
+	DBG_OUTPUT_SIZE(buf);
+	DBG_OUTPUT_SIZE(buf.EyeWorldPos);
+	DBG_OUTPUT_SIZE(buf.FogEnabled);
+	DBG_OUTPUT_SIZE(buf.FogStart);
+	DBG_OUTPUT_SIZE(buf.FogRange);
+	DBG_OUTPUT_SIZE(buf.DirLight);
+	DBG_OUTPUT_SIZE(buf.MaterialCount); 
+	DBG_OUTPUT_SIZE(buf.LightCount);
+	//DBG_OUTPUT_SIZE(buf.Materials);
+	//DBG_OUTPUT_SIZE(buf.Materials[4]);
+//	DBG_OUTPUT_SIZE(buf.Lights);
+	//DBG_OUTPUT_SIZE(buf.Lights[4]);
 
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;

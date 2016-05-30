@@ -59,6 +59,7 @@ public:
 
 	// Return the basic position/orientation components specified the last time the view matrix was calculated
 	CMPINLINE XMVECTOR					GetPosition(void) const			{ return m_position; }
+	CMPINLINE XMFLOAT3					GetPositionF(void) const		{ return m_positionf; }
 	CMPINLINE XMVECTOR					GetOrientation(void) const		{ return m_orientation; }
 
 	// Methods to change (and retrieve) the current camera state
@@ -144,6 +145,8 @@ private:
 	float								m_yaw, m_pitch;					// Current camera yaw & pitch
 
 	AXMMATRIX							m_rot, m_trans, m_inter;		// Interim calculation matrices
+
+	XMFLOAT3							m_positionf;					// Key data replicated in other structures for runtime efficiency
 
 };
 

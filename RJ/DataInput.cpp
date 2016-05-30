@@ -1798,7 +1798,7 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_Colour)
 		{
-			XMVECTOR vec = IO::GetColourVectorFromAttr(child);
+			XMFLOAT4 vec = IO::GetColourFloatFromAttr(child);
 			proj->SetProjectileColour(vec);
 		}
 		else if (hash == HashedStrings::H_Texture)

@@ -10,7 +10,7 @@ BasicProjectileDefinition::BasicProjectileDefinition(void)
 	SetProjectileSpeed(100.0f);
 	SetProjectileBeamLength(5.0f);
 	SetProjectileBeamRadius(2.0f);
-	SetProjectileColour(ONE_VECTOR);
+	SetProjectileColour(ONE_FLOAT4);
 	SetProjectileLifetime(3000U);
 	SetTexture(NULL);
 }

@@ -22,13 +22,6 @@ private:
 		XMFLOAT4X4 projection;
 	};
 
-	struct PSBufferType
-	{
-		XMFLOAT4 ambientColor;
-		XMFLOAT4 diffuseColor;
-		XMFLOAT3 lightDirection;
-		float padding;
-	};
 
 public:
 
@@ -46,9 +39,6 @@ public:
 	Result XM_CALLCONV				Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 		const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
-	// Sets the parameters specific to the light shader, i.e. light type / direction / colour
-	Result							SetLightParameters(XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor);
-
 	// Shut down the shader and deallocate all associated resources
 	void							Shutdown();
 
@@ -64,10 +54,6 @@ protected:
 	ID3D11SamplerState		* m_sampleState;
 	ID3D11Buffer			* m_cbuffer_vs;
 	ID3D11Buffer			* m_cbuffer_ps;
-
-	XMFLOAT3				m_lightdirection;
-	XMFLOAT4				m_ambientcolour;
-	XMFLOAT4				m_diffusecolour;
 };
 
 #endif

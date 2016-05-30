@@ -12,16 +12,6 @@
 class SkinnedNormalMapShader
 {
 private:
-	struct PerFrameBuffer
-	{
-		DirectionalLight			gDirLights[3];
-		XMFLOAT3					gEyePosW;
-
-		float						gFogStart;
-		float						gFogRange;
-		XMFLOAT4					gFogColor; 
-		XMFLOAT3					padding;
-	};
 
 	struct PerObjectBuffer
 	{
@@ -61,7 +51,7 @@ public:
 
 private:
 
-	Result SetPerFrameShaderParameters(		ID3D11DeviceContext *deviceContext, DirectionalLight *lights3, XMFLOAT3 eyepos);
+	Result SetPerFrameShaderParameters(ID3D11DeviceContext *deviceContext);
 
 	Result SetPerObjectShaderParameters(	ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model, 
 											XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
@@ -74,8 +64,6 @@ private:
 	ID3D11Buffer			* m_perFrameBuffer;
 	ID3D11Buffer			* m_perObjectBuffer;
 	ID3D11Buffer			* m_perSubsetBuffer;
-
-	DirectionalLight		* m_lights;					// Hardcoded to be an array of 3 directional lights
 };
 
 

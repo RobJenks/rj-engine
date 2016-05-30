@@ -7,7 +7,9 @@
 #include <vector>
 #include "ErrorCodes.h"
 #include "DX11_Core.h"
+#include "Data\\Shaders\\light_definition.h"
 class InputLayoutDesc;
+struct StandardPSConstBuffer;
 
 // This class has no special alignment requirements
 class ShaderManager
@@ -43,6 +45,9 @@ public:
 	// Create a buffer based on the specified parameters
 	static Result		CreateBuffer(D3D11_USAGE usage, UINT bytewidth, UINT bindflags, UINT cpuaccessflags, UINT miscflags, UINT structurebytestride,
 									 ID3D11Device *device, ID3D11Buffer **ppOutBuffer);
+
+	// Populate one of the standard constant buffer objects with appropriate data
+	static Result		PopulateConstantBuffer(StandardPSConstBuffer *buffer);
 
 
 protected:

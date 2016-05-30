@@ -53,6 +53,10 @@ const XMVECTOR UP_VECTOR = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 const XMVECTOR RIGHT_VECTOR = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 const XMVECTOR FORWARD_VECTOR = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
 
+const XMFLOAT3 UP_VECTOR_F = XMFLOAT3(0.0f, 1.0f, 0.0f);
+const XMFLOAT3 RIGHT_VECTOR_F = XMFLOAT3(1.0f, 0.0f, 0.0f);
+const XMFLOAT3 FORWARD_VECTOR_F = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 const XMVECTOR ID_QUATERNION = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 const XMFLOAT4 ID_QUATERNIONF = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 const XMMATRIX NULL_MATRIX = XMMatrixSet(0.0f, 0.0f, 0.0f, 0.0f,

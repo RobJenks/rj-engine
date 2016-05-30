@@ -28,9 +28,10 @@ class Model
 	private:
 		struct VertexType
 		{
-			XMFLOAT3 position;
-			XMFLOAT2 texture;
-			XMFLOAT3 normal;
+			XMFLOAT4			position;
+			XMFLOAT2			texture;
+			XMFLOAT3			normal;
+			unsigned int		material;
 		};
 
 		struct ModelType
@@ -38,6 +39,7 @@ class Model
 			float x, y, z;
 			float tu, tv;
 			float nx, ny, nz;
+			unsigned int material;
 		};
 
 	public:
@@ -151,6 +153,7 @@ class Model
 		void		CentreModelAboutOrigin(void);
 
 	private:
+
 		// Private variables for buffer / model storage
 		ModelBuffer				m_buffer;
 		unsigned int			m_vertexCount, m_indexCount;

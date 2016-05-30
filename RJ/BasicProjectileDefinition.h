@@ -39,8 +39,8 @@ public:
 	void									SetProjectileBeamLength(float beam);
 
 	// Set or retrieve the projectile colour
-	CMPINLINE XMVECTOR						GetProjectileColour(void) const					{ return VolumetricLineData.Colour; }
-	CMPINLINE void							SetProjectileColour(const FXMVECTOR colour)		{ VolumetricLineData.Colour = colour; }
+	CMPINLINE XMFLOAT4						GetProjectileColour(void) const					{ return VolumetricLineData.Colour; }
+	CMPINLINE void							SetProjectileColour(const XMFLOAT4 & colour)	{ VolumetricLineData.Colour = colour; }
 
 	// Set or retrieve the projectile beam radius
 	CMPINLINE float							GetProjectileBeamRadius(void) const				{ return VolumetricLineData.GetLineRadius(); }

@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "Texture.h"
+#include "Material.h"
 #include "ModelBuffer.h"
 
 
@@ -12,6 +13,8 @@ ModelBuffer::ModelBuffer(void)
 	m_texture = NULL;
 	m_vertexcount = m_indexcount = 0U;
 	m_vertexsize = m_indexsize = 0U;
+	m_materials = NULL;
+	m_material_count = 0U;
 }
 
 // Initialise the buffers based on the supplied model data
@@ -116,6 +119,38 @@ Result ModelBuffer::SetTexture(Texture *texture)
 	return ErrorCodes::NoError;
 }
 
+
+// Set the number of materials in this model and allocate space accordingly
+void ModelBuffer::SetMaterialCount(unsigned int count)
+{
+	// Deallocate any existing material storage, if applicable
+	if (m_materials != NULL)
+	{
+		SafeDeleteArray(m_materials);
+		m_material_count = 0U;
+	}
+
+	// Store the new material count
+	m_material_count = count;
+
+	// Allocate space for the materials
+	m_materials = new Material[m_material_count];
+}
+
+// Set details for the specified material
+void ModelBuffer::SetMaterial(unsigned int index, const Material & material)
+{
+	// Parameter check
+	if (index < 0 || index >= m_material_count) return;
+
+	// Copy the material data
+	m_materials[index] = material;
+
+	// Also ensure that the material ID is set accordingly
+	m_materials[index].Data.ID = index;
+}
+
+
 // Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
 // handled automatically when the object is deallocated
 void ModelBuffer::ReleaseModelBufferResources(void)
@@ -136,11 +171,17 @@ void ModelBuffer::ReleaseAllResources(void)
 	// Release all the resources allocated to model (VB / IB) buffers
 	ReleaseModelBufferResources();
 	
-	// Also deallocate the texture object if relevant
+	// Deallocate the texture object if relevant
 	if (m_texture)
 	{
 		m_texture->Shutdown();
 		SafeDelete(m_texture);
+	}
+
+	// Deallocate material data if relevant
+	if (m_materials)
+	{
+		SafeDelete(m_materials);
 	}
 }
 

@@ -407,7 +407,7 @@ void OverlayRenderer::RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::
 }
 
 // Renders a semi-transparent ovelay above the specified element
-void OverlayRenderer::RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const FXMVECTOR colour, float alpha)
+void OverlayRenderer::RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
 {
 	// Parameter check
 	if (ship)

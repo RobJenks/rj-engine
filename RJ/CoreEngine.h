@@ -15,10 +15,12 @@
 #include "iAcceptsConsoleCommands.h"
 #include "RenderQueue.h"
 #include "RenderQueueOptimiser.h"
+#include "LightingManagerObject.h"
 #include "ShaderManager.h"
 #include "Model.h"
 #include "ModelBuffer.h"
 class iShader;
+class ModelBuffer;
 class LightShader;
 class LightFadeShader;
 class LightHighlightShader;
@@ -30,6 +32,7 @@ class FireShader;
 class SkinnedNormalMapShader;
 class Light;
 class ViewFrustrum;
+class LightingManager;
 class FontShader;
 class TextManager;
 class EffectManager;
@@ -92,6 +95,8 @@ public:
 	// Release all components of the game engine as part of a controlled shutdown
 	void					ShutdownGameEngine();
 
+	// Key game engine components
+	LightingManagerObject	LightingManager;
 	
 	// Accessor/modifier methods for key game engine components
 	CMPINLINE D3DMain		*GetDirect3D()				{ return m_D3D; }
@@ -208,34 +213,37 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void XM_CALLCONV			RenderModel(Model *model, FXMMATRIX world)
+	CMPINLINE void XM_CALLCONV			RenderModel(Model *model, const FXMMATRIX world)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world);
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
-	CMPINLINE void			RenderModel(Model *model, FXMVECTOR highlight, CXMMATRIX world)
+	CMPINLINE void			RenderModel(Model *model, const XMFLOAT4 & highlight, const CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
 		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, highlight);
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, float alpha, CXMMATRIX world)
+	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, float alpha, const CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMVectorReplicate(alpha);
+		m_instanceparams.x = alpha;
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
-	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, const FXMVECTOR highlight, float alpha, CXMMATRIX world)
+	CMPINLINE void			RenderModel(Model *model, const FXMVECTOR position, const XMFLOAT3 highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMVectorSetW(highlight, alpha);
+		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
 	}
+
+	// Returns a reference to the model buffer currently being rendered
+	CMPINLINE ModelBuffer *	GetCurrentModelBuffer(void) const			{ return m_current_modelbuffer; }
 
 	// Performs rendering of debug/special data
 	void RenderDebugData(void);
@@ -310,6 +318,8 @@ private:
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
+	Result					InitialiseLightingManager(void);
+	Result					InitialiseShaderSupport(void);
 	Result					InitialiseLightShader(void);
 	Result					InitialiseLightFadeShader(void);
 	Result					InitialiseLightHighlightShader(void);
@@ -337,6 +347,8 @@ private:
 	void					ShutdownRenderQueue(void);
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
+	void					ShutdownLightingManager(void);
+	void					ShutdownShaderSupport(void);
 	void					ShutdownLightShader(void);
 	void					ShutdownLightFadeShader(void);
 	void					ShutdownLightHighlightShader(void);
@@ -431,7 +443,7 @@ public:
 	CMPINLINE void XM_CALLCONV	SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform));
+		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration()));
 	}
 
 	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
@@ -439,23 +451,23 @@ public:
 	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform)
 	{
 		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform));
+		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration()));
 	}
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const CXMVECTOR params)
+	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const XMFLOAT4 & params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, params));
+		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params));
 	}
 
 	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
 	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const CXMVECTOR params)
+	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const XMFLOAT4 & params)
 	{
 		// Push this matrix onto the vector of transform matrices, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, params));
+		((m_renderqueue[shader])[model]).InstanceData.push_back(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params));
 	}
 
 	// Method to submit for rendering where the instance is directly specified.  Will submit directly to
@@ -477,25 +489,27 @@ public:
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
 	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform,
-															const CXMVECTOR params, const CXMVECTOR position)
+															const XMFLOAT4 & params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
 		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
-		// Add to the z-sorted vector with this z-value as the sorting key
-		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model->GetModelBuffer(), transform, params));
+		// Add to the z-sorted vector with this z-value as the sorting key2
+		m_renderqueueshaders[(int)shader].SortedInstances.push_back(
+			RM_ZSortedInstance(z, model->GetModelBuffer(), transform, LightingManager.GetActiveLightingConfiguration(), params));
 	}
 	
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
 	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
-															const CXMVECTOR params, const CXMVECTOR position)
+															const XMFLOAT4 & params, const CXMVECTOR position)
 	{
 		// Compute the z-value as the distance squared from this object to the camera
 		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
 		// Add to the z-sorted vector with this z-value as the sorting key
-		m_renderqueueshaders[(int)shader].SortedInstances.push_back(RM_ZSortedInstance(z, model, transform, params));
+		m_renderqueueshaders[(int)shader].SortedInstances.push_back(
+			RM_ZSortedInstance(z, model, transform, LightingManager.GetActiveLightingConfiguration(), params));
 	}
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
@@ -529,6 +543,8 @@ public:
 	// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
 	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node);
 
+	// Lighting configuration is stored within the core engine and set for each object being rendered
+
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
 	AXMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering
 
@@ -537,7 +553,10 @@ public:
 	void                    ResetRenderInfo(void);
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
-	AXMVECTOR				m_instanceparams;
+	XMFLOAT4				m_instanceparams;
+
+	// Reference to the model buffer currently being rendered by the render queue
+	ModelBuffer *			m_current_modelbuffer;
 
 	// Vector used to queue up actors for rendering.  This allows us to render them all at once, avoiding multiple state changes
 	std::vector<Actor*>		m_queuedactors;

@@ -1,21 +1,14 @@
-////////////////////////////////////////////////////////////////////////////////
-// Filename: light_highlight_fade_sm_all.ps
-////////////////////////////////////////////////////////////////////////////////
-
-
-/////////////
-// GLOBALS //
-/////////////
+// Globals
 Texture2D shaderTexture;
 SamplerState SampleType;
 
-cbuffer LightBuffer
-{
-    float4 ambientColor;
-    float4 diffuseColor;
-    float3 lightDirection;
-	float padding;
-};
+// Import all light structures and definitions from the external definition file
+#include "render_constants.h"
+#include "light_definition.h"
+#include "vertex_definitions.h.hlsl"
+
+// Import a standard constant buffer holding data on materials, lighting etc
+#include "standard_ps_const_buffer.h"
 
 
 //////////////
@@ -27,6 +20,8 @@ struct PixelInputType
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
     float4 highlight_alpha : TEXCOORD1;		// Highlight colour and alpha for the object
+	unsigned int material : MATERIAL;
+	unsigned int LightConfig : LightConfig;
 };
 
 
@@ -45,10 +40,10 @@ float4 main(PixelInputType input) : SV_TARGET
     textureColor = shaderTexture.Sample(SampleType, input.tex);
 
     // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
-    color = ambientColor;
+	color = DirLight.Ambient;
 
     // Invert the light direction for calculations.
-    lightDir = -lightDirection;
+	lightDir = -DirLight.Direction;
 
     // Calculate the amount of light on this pixel.
     lightIntensity = saturate(dot(input.normal, lightDir));
@@ -57,7 +52,7 @@ float4 main(PixelInputType input) : SV_TARGET
     if (lightIntensity > 0.0f)
     {
         // Determine the final diffuse colour based on the diffuse colour and level of light intensity
-        color += (diffuseColor * lightIntensity);
+		color += (DirLight.Diffuse * lightIntensity);
     }
 
     // Determine the average color intensity across all components, then use the highlight colour weighted by this value

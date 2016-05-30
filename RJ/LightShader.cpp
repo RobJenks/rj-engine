@@ -3,8 +3,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "CoreEngine.h"
+#include "CameraClass.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
+#include "Data\\Shaders\\light_definition.h"
+#include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "LightShader.h"
 
@@ -45,15 +49,9 @@ Result LightShader::InitialiseVertexShader(ID3D11Device *device, std::string fil
 	if (!device || filename == NullString) return ErrorCodes::NullInputToCreateLightShaderVS;
 
 	// Define the input layout for this vertex shader
-	InputLayoutDesc layout_desc = InputLayoutDesc()
-		.Add("POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0)
-		.Add("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0)
-		.Add("NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0)
-		.Add("mTransform", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("mTransform", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("mTransform", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("mTransform", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("iParams", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_INSTANCE_DATA, 1);
+	InputLayoutDesc layout_desc; 
+	bool layout_loaded = InputLayoutDesc::GetStandardLayout("Vertex_Inst_TexNormMatLit", layout_desc);
+	if (!layout_loaded) return ErrorCodes::CouldNotRetrieveShaderInputLayout;
 
 	// Attempt to load and create the compiled shader 
 	result = ShaderManager::CreateVertexShader(device, filename, &layout_desc, &m_vertexShader, &m_inputlayout);
@@ -85,7 +83,8 @@ Result LightShader::InitialisePixelShader(ID3D11Device *device, std::string file
 	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingLightShaderSamplerPS;
 
 	// Create the shader constant buffer
-	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PSBufferType), device, &m_cbuffer_ps);
+
+	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(StandardPSConstBuffer), device, &m_cbuffer_ps);
 	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingLightShaderConstBuffersPS;
 
 	// Return success
@@ -97,7 +96,7 @@ Result XM_CALLCONV LightShader::Render(ID3D11DeviceContext *deviceContext, UINT 
 {
 	HRESULT hr;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	VSBufferType *vsbuffer; PSBufferType *psbuffer;
+	VSBufferType *vsbuffer; StandardPSConstBuffer *psbuffer;
 
 	// Parameter check
 	if (!deviceContext || vertexCount <= 0 || indexCount <= 0 || instanceCount <= 0 || !texture) return ErrorCodes::InvalidShaderParameters;
@@ -116,11 +115,9 @@ Result XM_CALLCONV LightShader::Render(ID3D11DeviceContext *deviceContext, UINT 
 	// Initialise pixel shader constant buffer
 	hr = deviceContext->Map(m_cbuffer_ps, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(hr)) return ErrorCodes::CouldNotObtainShaderBufferLock;
-	psbuffer = (PSBufferType*)mappedResource.pData;
+	psbuffer = (StandardPSConstBuffer*)mappedResource.pData;
 	{
-		psbuffer->lightDirection = m_lightdirection;
-		psbuffer->ambientColor = m_ambientcolour;
-		psbuffer->diffuseColor = m_diffusecolour;
+		Game::Engine->ShaderManager.PopulateConstantBuffer(psbuffer);
 	}
 	deviceContext->Unmap(m_cbuffer_ps, 0);
 	deviceContext->PSSetConstantBuffers((unsigned int)0U, 1, &m_cbuffer_ps);
@@ -144,19 +141,6 @@ Result XM_CALLCONV LightShader::Render(ID3D11DeviceContext *deviceContext, UINT 
 	// Return success
 	return ErrorCodes::NoError;
 }
-
-// Sets the parameters specific to the light shader, i.e. light type / direction / colour
-Result LightShader::SetLightParameters(XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
-{
-	// Store the new light parameters; these will take effect in the next call to SetShaderParameters (each frame)
-	m_lightdirection = lightDirection;
-	m_ambientcolour = ambientColor;
-	m_diffusecolour = diffuseColor;
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 
 void LightShader::Shutdown()
 {

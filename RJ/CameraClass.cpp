@@ -21,6 +21,7 @@ CameraClass::CameraClass(void)
 	m_vright = m_vup = m_vforward = NULL_VECTOR;
 	m_vrightf = m_vupf = m_vforwardf = NULL_FLOAT3;
 	m_camerapath = NULL;
+	m_positionf = NULL_FLOAT3;
 }
 
 CameraClass::~CameraClass(void)
@@ -115,6 +116,9 @@ void CameraClass::CalculateViewMatrixFromPositionData(const FXMVECTOR position, 
 
 	// Decompose into components that other methods can use for rendering; more efficient to do once here
 	DecomposeViewMatrix();
+
+	// Also store key data in other structures for runtime efficiency
+	XMStoreFloat3(&m_positionf, m_position);
 }
 
 void CameraClass::DecomposeViewMatrix(void)

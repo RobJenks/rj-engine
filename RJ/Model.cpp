@@ -350,9 +350,10 @@ Result Model::InitialiseBuffers(void)
 	// Load the vertex array and index array with data.
 	for (unsigned int i = 0; i < m_vertexCount; ++i)
 	{
-		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].position = XMFLOAT4(m_model[i].x, m_model[i].y, m_model[i].z, 1.0f);
 		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
 		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
+		vertices[i].material = m_model[i].material;
 
 		indices[i] = i;
 	}
@@ -448,6 +449,7 @@ Result Model::LoadModel(const char *filename)
 		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
 		fin >> m_model[i].tu >> m_model[i].tv;
 		fin >> m_model[i].nx >> m_model[i].ny >> m_model[i].nz;
+		m_model[i].material = 0U;
 
 		// Also keep track of the min & max model bounds as we load it
 		if (m_model[i].x < m_minbounds.x) m_minbounds.x = m_model[i].x;
@@ -457,6 +459,16 @@ Result Model::LoadModel(const char *filename)
 		if (m_model[i].z < m_minbounds.z) m_minbounds.z = m_model[i].z;
 		if (m_model[i].z > m_maxbounds.z) m_maxbounds.z = m_model[i].z;
 	}
+
+	// TODO: also load materials as part of this process
+	int nummat = 1;
+	Material m; 
+	m.Data.ID = 0U; 
+	m.Data.Ambient = m.Data.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);  
+	m.Data.Specular = XMFLOAT4(1.0f, 0.8f, 0.8f, 0.75f);
+
+	m_buffer.SetMaterialCount(nummat);
+	m_buffer.SetMaterial(0U, m);
 
 	// Recalculate other model dimensions based on these min and max bounds
 	RecalculateDimensions();

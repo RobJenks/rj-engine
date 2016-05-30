@@ -112,6 +112,22 @@ namespace Game
 			else return 0;
 		}
 
+		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
+		template <typename UnaryPredicate>
+		CMPINLINE static int	CustomSearch(const T *focalobject, float distance, std::vector<T*> outResult, UnaryPredicate Predicate)
+		{
+			if (focalobject)	return _CustomSearch<UnaryPredicate>(focalobject->GetSpatialTreeNode(), focalobject->GetPosition(), distance, outResult, Predicate);
+			else				return 0;
+		}
+
+		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
+		template <typename UnaryPredicate>
+		CMPINLINE static int	CustomSearch(const FXMVECTOR position, Octree<T*> *sp_tree, float distance, std::vector<T*> outResult, UnaryPredicate Predicate)
+		{
+			if (sp_tree)		return _CustomSearch<UnaryPredicate>(sp_tree->GetNodeContainingPoint(position), position, distance, outResult, Predicate);
+			else				return 0;
+		}
+
 		// Flag determining whether the object manager will maintain and return cached object search results where possible
 		CMPINLINE static bool						SearchCacheEnabled(void) 		{ return m_cache_enabled; }
 		CMPINLINE static void						DisableSearchCache(void)		{ m_cache_enabled = false; }
@@ -125,6 +141,16 @@ namespace Game
 		// Returns the current size of the search cache
 		CMPINLINE static typename std::vector<CachedSearchResults>::size_type GetCurrentCacheSize(void) { return m_cachesize; }
 
+		// Unary predicate for searching based on object type
+		class ObjectIsOfType : public std::unary_function<T*, bool>
+		{
+		public:
+			ObjectIsOfType(iObject::ObjectType _type) : type(_type){ }
+			bool operator()(T* obj) const { return (obj->GetObjectType() == type); }
+
+		protected:
+			iObject::ObjectType type;
+		};
 
 		// Debug output of number cache hits/missed
 #	ifdef OBJMGR_DEBUG_MODE
@@ -136,7 +162,224 @@ namespace Game
 		// Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
 		// appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
 		static int _GetAllObjectsWithinDistance(Octree<T*> *node, const FXMVECTOR position, float distance,
-			std::vector<T*> & outResult, SearchOptions options);
+												std::vector<T*> & outResult, SearchOptions options);
+
+		// Primary custom search method.  Searches for all items within the specified distance of a position, using a custom
+		// predicate to select results.  Accepts the appropriate Octree node as an input; this is derived or supplied 
+		// by the various publicly-invoked methods
+		template <typename UnaryPredicate>
+		static int _CustomSearch(	Octree<T*> *node, const FXMVECTOR position, float distance,
+									std::vector<T*> & outResult, UnaryPredicate Predicate)
+		{
+			// We a pointer to the relevant spatial partitioning Octree to search for objects.  If we don't have one, return nothing immediately
+			if (!node) return 0;
+
+			// All comparisons will be based on squared distance to avoid costly sqrt operations
+			float distsq = (distance * distance);
+			XMVECTOR vdistsq = XMVectorReplicate(distsq);
+
+			// Determine the octree bounds that we need to consider
+			XMVECTOR sdist = XMVectorReplicate(distance);
+			XMVECTOR vmin = XMVectorSubtract(position, sdist);
+			XMVECTOR vmax = XMVectorAdd(position, sdist);
+			XMFLOAT3 fmin; XMStoreFloat3(&fmin, vmin);
+			XMFLOAT3 fmax; XMStoreFloat3(&fmax, vmax);
+
+			// Determine whether we can take approach 1, i.e. considering only the contents of our current node
+			if (XMVector3GreaterOrEqual(vmin, node->m_min) && XMVector3Less(vmax, node->m_max))
+			{
+				// The search area does fit within this node, so we can take approach 1.  Make sure we have any items besides ourself; 
+				// if not, we can stop here
+				if (node->m_itemcount <= 1) return 0;
+
+				// We will simply consider the items in this node; no need to assign "node" since it already points to our tree node
+				// node = m_treenode;
+			}
+			else
+			{
+				// We cannot take the more efficient approach since the search area is not fully contained within this node.  We therefore need
+				// to take approach 2 and traverse up the tree until we find a node that fully contains the search area, or we reach the root
+				while (node->m_parent)
+				{
+					// Move up to the parent node
+					node = node->m_parent;
+
+					// Test whether this now fully contains the search area
+					if (XMVector3GreaterOrEqual(vmin, node->m_min) && XMVector3Less(vmax, node->m_max))
+					{
+						// It does, so break out of the loop and use this node for locating objects
+						break;
+					}
+				}
+			}
+
+			// We know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
+			// of all items in its bounds.  Use a non-recursive vector substitute instead of normal recursive search for efficiency
+			search_candidate_nodes.clear();
+			search_candidate_nodes.push_back(node);
+			T *obj;	XMFLOAT3 centre; int C; float obj_dist_sq;
+
+			// Search nodes from the left ("index"), and add new search candidates to the right.  Only node in place at the start
+			// will be the selected "node" that encompasses the entire search area
+			int index = -1, count = 1;
+			while (++index < count)
+			{
+				// Process the node.  Different action for branch vs leaf nodes
+				node = search_candidate_nodes[index]; if (!node) continue;
+				if (node->IsBranchNode())
+				{
+					// If this is a branch node, work out which of its children are actually relevant to us
+					XMStoreFloat3(&centre, node->m_centre);
+					C = (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH);
+					if (fmin.x >= centre.x)	ClearBit(C, NodeSubdiv::X_NEG_SEG);
+					else if (fmax.x < centre.x)		ClearBit(C, NodeSubdiv::X_POS_SEG);
+					if (fmin.y >= centre.y)	ClearBit(C, NodeSubdiv::Y_NEG_SEG);
+					else if (fmax.y < centre.y)		ClearBit(C, NodeSubdiv::Y_POS_SEG);
+					if (fmin.z >= centre.z)	ClearBit(C, NodeSubdiv::Z_NEG_SEG);
+					else if (fmax.z < centre.z)		ClearBit(C, NodeSubdiv::Z_POS_SEG);
+
+					// Now add only those child nodes which are still considered relevant.  Unrolled as switch/lookup table for efficiency
+					switch (C)
+					{
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]); ++count; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]); ++count; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 4; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]); ++count; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						count += 2; break;
+					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]); ++count; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 4; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 4; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						count += 8; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						count += 4; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						count += 2; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						count += 4; break;
+					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						count += 2; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]); ++count; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]); ++count; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						count += 4; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						count += 2; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]); ++count; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						count += 2; break;
+					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
+						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]); ++count; break;
+					}
+				}
+				else
+				{
+					// Otherwise, this is a leaf node.  Process each item within it
+					search_obj_end = node->m_items.end();
+					for (search_obj_it = node->m_items.begin(); search_obj_it != search_obj_end; ++search_obj_it)
+					{
+						// We can ignore this entry if it does not represent an item, or if it is us
+						obj = (*search_obj_it);
+						if (!obj) continue;
+
+						// Test whether the object is within our search distance
+						obj_dist_sq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition())));
+						if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
+
+						// Also test whether it meets the custom predicate condition
+						if (!Predicate(obj)) continue;
+
+						// The object is valid; add it to the output vector
+						outResult.push_back(obj);
+					}
+				}
+			}
+
+			// Return the total number of items that were located
+			return ((int)outResult.size());
+		}
+
 
 		// Data used in the process of searching for objects
 		static std::vector<Octree<T*>*>									search_candidate_nodes;
@@ -155,7 +398,6 @@ namespace Game
 		// Index of the next cached search result to be added
 		typename static std::vector<CachedSearchResults>::size_type		m_nextcacheindex;
 		typename static std::vector<CachedSearchResults>::size_type		m_cachesize;
-
 	};
 
 
@@ -634,6 +876,8 @@ namespace Game
 		// Return the total number of items that were located
 		return ((int)outResult.size());
 	}
+
+
 
 
 	// Object search manager; coordinates the action of multiple ObjectSearch instances so that only one

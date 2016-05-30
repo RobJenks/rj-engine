@@ -5,8 +5,12 @@
 #include "CompilerSettings.h"
 #include "FastMath.h"
 #include "iShader.h"
+#include "CoreEngine.h"
+#include "CameraClass.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
+#include "Data\\Shaders\\light_definition.h"
+#include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "SkinnedNormalMapShader.h"
 
@@ -20,15 +24,6 @@ SkinnedNormalMapShader::SkinnedNormalMapShader(void)
 	m_perFrameBuffer = 0;
 	m_perObjectBuffer = 0;
 	m_perSubsetBuffer = 0;
-
-	// TODO: TEMP: Create temporary directional lights for now.  Set by light update method in future
-	m_lights = new DirectionalLight[3];
-	m_lights[0] = DirectionalLight(	XMFLOAT3(-0.57735f, -0.57735f, 0.57735f),	XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f), 
-									XMFLOAT4(1.0f, 0.9f, 0.9f, 1.0f),			XMFLOAT4(0.8f, 0.8f, 0.7f, 1.0f));
-	m_lights[1] = DirectionalLight(	XMFLOAT3(0.707f, -0.707f, 0.0f),			XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), 
-									XMFLOAT4(0.40f, 0.40f, 0.40f, 1.0f),		XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f));
-	m_lights[2] = DirectionalLight(	XMFLOAT3(0.0f, 0.0, -1.0f),					XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f), 
-									XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f),			XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f));
 }
 
 
@@ -102,11 +97,11 @@ Result SkinnedNormalMapShader::InitialiseCommonConstantBuffers(ID3D11Device *dev
 	// Parameter check
 	if (!device) return ErrorCodes::NullInputToCreateSkinnedNMConstBuffers;
 
-	// Create the per-frame shader constant buffer
-	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PerFrameBuffer), device, &m_perFrameBuffer);
+	// Create the per-frame (PS) shader constant buffer
+	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(StandardPSConstBuffer), device, &m_perFrameBuffer);
 	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderConstBuffers;
 
-	// Create the per-object shader constant buffer
+	// Create the per-object (VS) shader constant buffer
 	result = ShaderManager::CreateStandardDynamicConstantBuffer(sizeof(PerObjectBuffer), device, &m_perObjectBuffer);
 	if (result != ErrorCodes::NoError) return ErrorCodes::ErrorCreatingSkinnedNMShaderConstBuffers;
 
@@ -139,7 +134,7 @@ Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceCon
 	ID3D11ShaderResourceView *SRVs[2];
 
 	// TODO: TEMP: Set the per-frame shader parameters here for now, for simplicity
-	result = SetPerFrameShaderParameters(deviceContext, m_lights, eyepos);
+	result = SetPerFrameShaderParameters(deviceContext);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Set the per-object shader parameters that we will use for rendering
@@ -183,21 +178,22 @@ Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceCon
 }
 
 // Set the per-frame shader parameters in this method.  This includes only PS parameters
-Result SkinnedNormalMapShader::SetPerFrameShaderParameters(ID3D11DeviceContext *deviceContext, DirectionalLight *lights3, XMFLOAT3 eyepos)
+Result SkinnedNormalMapShader::SetPerFrameShaderParameters(ID3D11DeviceContext *deviceContext)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	PerFrameBuffer *cbFrameBuffer;
+	StandardPSConstBuffer *cbFrameBuffer;
 
 	/* *** Per-frame PS constant buffer *** */
 	result = deviceContext->Map(m_perFrameBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result)) return ErrorCodes::CouldNotObtainShaderBufferLock;
 
 	// Get a pointer to the data in the constant buffer and copy data into it
-	cbFrameBuffer = (PerFrameBuffer*)mappedResource.pData;
-	memcpy(cbFrameBuffer->gDirLights, lights3, sizeof(DirectionalLight) * 3);	// Hardcoded to always support three lights (even if set to zero)
-	cbFrameBuffer->gEyePosW = eyepos;
-
+	cbFrameBuffer = (StandardPSConstBuffer*)mappedResource.pData;
+	{
+		Game::Engine->ShaderManager.PopulateConstantBuffer(cbFrameBuffer);
+	}
+	
 	// Unlock the constant buffer.
 	deviceContext->Unmap(m_perFrameBuffer, 0);
 
@@ -269,5 +265,4 @@ Result SkinnedNormalMapShader::SetPerObjectShaderParameters(ID3D11DeviceContext 
 
 SkinnedNormalMapShader::~SkinnedNormalMapShader()
 {
-	SafeDeleteArray(m_lights);
 }

@@ -57,7 +57,7 @@ public:
 
 	// Enumeration of all object types
 	enum ObjectType {	Unknown = 0, ShipObject, SimpleShipObject, ComplexShipObject, ComplexShipSectionObject, 
-						SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject, ProjectileObject };
+						SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject, ProjectileObject, LightSourceObject };
 
 	// Enumeration of object classes
 	enum ObjectClass { UnknownObjectClass = 0, SpaceObjectClass, EnvironmentObjectClass };
@@ -279,6 +279,10 @@ public:
 	float									GetCollisionSphereRadius(void) const			{ return m_collisionsphereradius; }
 	float									GetCollisionSphereRadiusSq(void) const			{ return m_collisionsphereradiussq; }
 	float									GetCollisionSphereMarginRadius(void) const		{ return m_collisionspheremarginradius; }	
+
+	// Set a new collision sphere radius, recalcuating all derived fieds
+	void									SetCollisionSphereRadius(float radius);
+	void									SetCollisionSphereRadiusSq(float radius_sq);
 
 	// Virtual method, called when this object collides with another
 	virtual void							CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) = 0;

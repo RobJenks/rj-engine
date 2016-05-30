@@ -535,8 +535,17 @@
     <ClCompile Include="UI_ShipBuilder.cpp">
       <Filter>UI\UI Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="RenderConfig.cpp">
-      <Filter>Engine\Render Queue</Filter>
+    <ClCompile Include="LightSource.cpp">
+      <Filter>Engine\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="LightingManagerObject.cpp">
+      <Filter>Engine\Lighting</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Engine\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="InputLayoutDesc.cpp">
+      <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1236,11 +1245,14 @@
     <ClInclude Include="UI_ShipBuilder.h">
       <Filter>UI\UI Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="RenderConfig.h">
-      <Filter>Engine\Render Queue</Filter>
+    <ClInclude Include="LightSource.h">
+      <Filter>Engine\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="RenderConfigEntry.h">
-      <Filter>Engine\Render Queue</Filter>
+    <ClInclude Include="LightingManagerObject.h">
+      <Filter>Engine\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Engine\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1486,6 +1498,9 @@
     </Filter>
     <Filter Include="AI\Pathfinding\Orders">
       <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Materials">
+      <UniqueIdentifier>{89a23be2-347b-41a8-aac8-90ea8fef0e88}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
