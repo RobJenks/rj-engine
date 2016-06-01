@@ -14,41 +14,35 @@
 	#define cbuffer struct
 #endif
 
+// Define constants used in these definitions
+#define			FOG_STATE_DISABLED		0
+#define			FOG_STATE_ENABLED		1
+
 
 // Constant buffer holding all material, lighting and other data for the render pass
 cbuffer StandardPSConstBuffer
 {
-	/* GENERAL DATA */
-	float3					EyeWorldPos;
-	int					FogEnabled;
-	float4					FogColour;
-	float					FogStart;
-	float					FogRange;
-	
-	unsigned int			MaterialCount;
-	unsigned int			LightCount;
+	// Float4
+	float3							EyeWorldPos;
+	int								FogState;
 
+	// Float4
+	float4							FogColour;
 
-	MaterialData			Materials[C_MATERIAL_LIMIT];		// Guaranteed to have SIZE % 16 == 0
-	
-	/*MATERIAL_ID						ID;
-	float4							Ambient;
-	float4							Diffuse;
-	float4							Specular; // w = SpecPower
-	float4							Reflect;
-	// Size = 68, Size+pad = 80, 80 % 16 = 0
-	float3							_padding;*/
+	// Float4
+	float							FogStart;
+	float							FogRange;
+	unsigned int					MaterialCount;
+	unsigned int					LightCount;
 
-	/* LIGHTING DATA*/
+	// Float4
+	DirLightData					DirLight;							// Guaranteed to have SIZE % 16 == 0
 
-	// Single unsituated directional light
-	//TODO30
-	DirLightData			DirLight;							// Guaranteed to have SIZE % 16 == 0
+	// Float4
+	MaterialData					Materials[C_MATERIAL_LIMIT];		// Guaranteed to have SIZE % 16 == 0
 
-	// Array of lights in the scene, and the number (<= LC_LIGHT_LIMIT) which are active
-	
-	//LightData				Lights[C_LIGHT_LIMIT];				// Guaranteed to have SIZE % 16 == 0
-
+	// Float4
+	LightData						Lights[C_LIGHT_LIMIT];				// Guaranteed to have SIZE % 16 == 0
 
 	// Padding only needs to account for the primitive types; all structs have been padded to % 16 == 0 already
 	// Primitive size = 12*4 = 48, 48 % 16 == 0, no additional padding required

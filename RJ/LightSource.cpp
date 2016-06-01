@@ -21,3 +21,11 @@ void LightSource::SetLight(const Light & data)
 	// The object collision radius will be set to equal the light range, for more efficient light 'collision' testing with illuminated objects
 	SetCollisionSphereRadius(m_light.Data.Range);
 }
+
+
+
+
+
+
+
+

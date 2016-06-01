@@ -395,11 +395,6 @@ Result CoreEngine::InitialiseRenderQueue(void)
 		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
-	// TODO30
-	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader].Shader = (iShader*)m_lightshader;
-	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader].Shader = (iShader*)m_lightshader;
-	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader].Shader = (iShader*)m_lightshader;
-
 	// Return success
 	return ErrorCodes::NoError;
 }

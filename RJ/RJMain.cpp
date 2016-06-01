@@ -95,6 +95,7 @@
 #include "ObjectReference.h"				// DBG
 #include "EnvironmentTree.h"				// DBG
 #include "CopyObject.h"						// DBG
+#include "LightSource.h"					// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -941,7 +942,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	DBG_OUTPUT_SIZE(StandardPSConstBuffer);
 	DBG_OUTPUT_SIZE(buf);
 	DBG_OUTPUT_SIZE(buf.EyeWorldPos);
-	DBG_OUTPUT_SIZE(buf.FogEnabled);
+	DBG_OUTPUT_SIZE(buf.FogState);
 	DBG_OUTPUT_SIZE(buf.FogStart);
 	DBG_OUTPUT_SIZE(buf.FogRange);
 	DBG_OUTPUT_SIZE(buf.DirLight);
@@ -2089,6 +2090,9 @@ void RJMain::__CreateDebugScenario(void)
 	s3[0]()->TurretController.AddTurret(sst3);
 
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
+
+	LightSource *ls = new LightSource();
+	ls->setpos
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

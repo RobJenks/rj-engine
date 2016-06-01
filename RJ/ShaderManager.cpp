@@ -260,13 +260,6 @@ Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
 	unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
 	buffer->MaterialCount = material_count;
 	memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
-	//TODO30
-	/*buffer->ID = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.ID;
-	buffer->Ambient = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Ambient;
-	buffer->Diffuse = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Diffuse;
-	buffer->Specular = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Specular;
-	buffer->Reflect = Game::Engine->GetCurrentModelBuffer()->GetMaterialData()[0].Data.Reflect;*/
-
 
 	// Return success
 	return ErrorCodes::NoError;

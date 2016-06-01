@@ -27,7 +27,6 @@ struct MaterialData
 	float4							Reflect;
 
 	// Size = 68, Size+pad = 80, 80 % 16 = 0
-	// Size = 80 now
 };
 
 

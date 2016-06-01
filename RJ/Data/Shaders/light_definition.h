@@ -47,13 +47,24 @@ struct AttenuationData
 // Structure holding data on a point light which is situated in space
 struct LightData
 {
+	// Float4
 	unsigned int					ID;
 	float3							Position;
+
+	// Float4
 	int								Type;				// Accepts a value from LightingManager::LightType
 	float3							Direction;
+
+	// Float4
 	float4							Ambient;
+
+	// Float4
 	float4							Diffuse;
+	
+	// Float4
 	float4							Specular;
+
+	// Float4
 	float							Range;
 	AttenuationData					Attenuation;
 

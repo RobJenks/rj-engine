@@ -244,7 +244,7 @@ bool gReflectionEnabled = false;
 	// Fogging
 	//
 
-	if( FogEnabled )
+	if( FogState == FOG_STATE_ENABLED )
 	{
 		float fogLerp = saturate( (distToEye - FogStart) / FogRange ); 
 

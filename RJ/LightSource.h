@@ -26,6 +26,20 @@ public:
 	CMPINLINE void										SetPriority(int priority)			{ m_priority = priority; }
 
 
+	// Object simulation method.  Light sources do not need to take any action (TODO: dynamic lights, e.g. flickering, could use this)
+	CMPINLINE void										SimulateObject(void) { }
+
+	// Inherited virtual method.  Destruction method triggered when object HP hits zero
+	CMPINLINE void										DestroyObject(void) { }
+
+	// iObject subclasses must implement a method to handle any change in simulation state
+	CMPINLINE void										SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate) { }
+
+	// Inherited from iObject, called when this object collides with another.  Not relevant since light sources cannot collide with the world
+	CMPINLINE void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
+
+
+
 protected:
 
 	// Light data
