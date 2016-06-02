@@ -29,11 +29,6 @@ float4 main(PixelInputType input) : SV_TARGET
     float3 lightDir;
     float lightIntensity;
     float4 color;
-//TODO30
-	/*float4 amb = float4(0.25f, 0.25f, 0.25f, 1.0f);
-	float4 dif = float4(1.0f, 1.0f, 1.0f, 1.0f);
-	float4 spc = float4(0.5f, 0.5f, 0.5f, 0.5f);
-	float3 dr = float3(0.0f, 0.0f, 1.0f);*/
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
     textureColor = shaderTexture.Sample(SampleType, input.tex);

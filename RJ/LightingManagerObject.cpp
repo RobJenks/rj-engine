@@ -18,7 +18,7 @@ LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject
 // Default constructor
 LightingManagerObject::LightingManagerObject(void)
 	:
-	m_source_count(0U)
+	m_source_count(0U), m_active_config(0U)
 {
 	// Initialise space in the light source vector to hold the maximum possible number of lights
 	m_sources.clear();
@@ -34,6 +34,7 @@ LightingManagerObject::LightingManagerObject(void)
 	// Initialise the global & unsituated directional light
 	m_dir_light.Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
 	m_dir_light.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_dir_light.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_dir_light.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 }

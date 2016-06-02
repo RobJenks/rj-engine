@@ -24,23 +24,23 @@ struct					RM_InstanceStructure
 	XMFLOAT3						padding;							// (Padding - brings total size to 96, 96 % 16 == 0)
 
 	// Constructor where only the world transform and lighting data are required; other params will be unitialised (for efficiency) and should not be used
-	RM_InstanceStructure(const XMFLOAT4X4 & world, Game::LIGHT_CONFIG lighting) : World(world), LightConfig(17+0*lighting) { }
+	RM_InstanceStructure(const XMFLOAT4X4 & world, Game::LIGHT_CONFIG lighting) : World(world), LightConfig(lighting) { }
 
 	// Constructor where only the world transform and lighting data are required; other params will be unitialised (for efficiency) and should not be used
 	RM_InstanceStructure(const CXMMATRIX world, Game::LIGHT_CONFIG lighting) 
 		: 
-		LightConfig(17+0*lighting)	//TODO30
+		LightConfig(lighting)
 	{
 		XMStoreFloat4x4(&World, world);
 	}
 
 	// Constructor including additional per-instance parameters
-	RM_InstanceStructure(const XMFLOAT4X4 world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) : World(world), LightConfig(17+0*lighting), Params(params) { }
+	RM_InstanceStructure(const XMFLOAT4X4 world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) : World(world), LightConfig(lighting), Params(params) { }
 
 	// Constructor including additional per-instance parameters
 	RM_InstanceStructure(const CXMMATRIX world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) 
 		: 
-		LightConfig(17+0*lighting), Params(params) 
+		LightConfig(lighting), Params(params) 
 	{
 		XMStoreFloat4x4(&World, world);
 	}

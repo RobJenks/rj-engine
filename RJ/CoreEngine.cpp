@@ -1357,6 +1357,9 @@ void CoreEngine::RenderObject(iObject *object)
 	// We are rendering this object, so call its pre-render update method
 	object->PerformRenderUpdate();
 
+	// Set the lighting configuration to be used for rendering this object
+	LightingManager.SetActiveLightingConfigurationForObject(object);
+
     // Render either articulated or static model depending on object properties
 	if (object->GetArticulatedModel())
 	{
@@ -1483,11 +1486,9 @@ void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
 				case iObject::ComplexShipObject:
 					RenderComplexShip((ComplexShip*)object, false);		break;
 
-				// Basic object types are directly pushed to the render queue using default shader parameters
+				// Basic object types are directly pushed to the render queue using the default model rendering method
 				case iObject::ProjectileObject:
-					if (object && object->GetModel())
-						SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel(), object->GetWorldMatrix());
-					break;
+					RenderObject(object);								break;
 			}
 		}
 	}
@@ -1537,6 +1538,9 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 	// We only need to render the ship & its contents if at least one ship section was rendered
 	if (shiprendered)
 	{
+		// Set one active lighting configuration for the entire ship (rather than by turret) for efficiency
+		LightingManager.SetActiveLightingConfigurationForObject(ship);
+
 		// Render any turret objects on the exterior of the ship, if applicable
 		if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);
 
@@ -2034,11 +2038,16 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	XMFLOAT3 campos; XMStoreFloat3(&campos, m_camera->GetPosition());
 	
 	// Iterate through the vector of queued actors
+	Actor *actor;
 	std::vector<Actor*>::iterator it_end = m_queuedactors.end();
 	for (std::vector<Actor*>::iterator it = m_queuedactors.begin(); it != it_end; ++it)
 	{
 		// Calculate new transforms for the bones & mesh of this actor
-		(*it)->UpdateForRendering(Game::TimeFactor);
+		actor = (*it);
+		actor->UpdateForRendering(Game::TimeFactor);
+
+		// Determine a lighting configuration for this actor
+		LightingManager.SetActiveLightingConfigurationForObject(actor);
 
 		// Render using the skinned model shader
 		m_skinnedshader->Render(r_devicecontext, (*it)->GetModel(), campos, r_view_f, r_projection_f);

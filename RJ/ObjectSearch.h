@@ -114,7 +114,7 @@ namespace Game
 
 		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
 		template <typename UnaryPredicate>
-		CMPINLINE static int	CustomSearch(const T *focalobject, float distance, std::vector<T*> outResult, UnaryPredicate Predicate)
+		CMPINLINE static int	CustomSearch(const T *focalobject, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
 		{
 			if (focalobject)	return _CustomSearch<UnaryPredicate>(focalobject->GetSpatialTreeNode(), focalobject->GetPosition(), distance, outResult, Predicate);
 			else				return 0;
@@ -122,7 +122,7 @@ namespace Game
 
 		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
 		template <typename UnaryPredicate>
-		CMPINLINE static int	CustomSearch(const FXMVECTOR position, Octree<T*> *sp_tree, float distance, std::vector<T*> outResult, UnaryPredicate Predicate)
+		CMPINLINE static int	CustomSearch(const FXMVECTOR position, Octree<T*> *sp_tree, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
 		{
 			if (sp_tree)		return _CustomSearch<UnaryPredicate>(sp_tree->GetNodeContainingPoint(position), position, distance, outResult, Predicate);
 			else				return 0;

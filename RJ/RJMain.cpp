@@ -2091,11 +2091,20 @@ void RJMain::__CreateDebugScenario(void)
 
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
+	Light l;
+	l.InitialisePointLight(NULL_FLOAT3, FORWARD_VECTOR_F, 200.0f, XMFLOAT4(0.75f, 0.75f, 0.75f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
+		XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f), AttenuationData(1.0f, 1.0f, 1.5f));
 	LightSource *ls = new LightSource();
-	ls->setpos
+	ls->SetLight(l);
+	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
+	Game::RegisterObject(ls);
+	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	ss()->AddChildAttachment(ls, XMVectorSetZ(NULL_VECTOR, 20.0f), ID_QUATERNION);
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
+
+*** UPDATE SHADER TO ACCOUNT FOR ALL LIGHTS ***
 
 void RJMain::DEBUGDisplayInfo(void)
 {

@@ -37,6 +37,12 @@ public:
 	// Handles the exit of an object from the system, removing it from the system collections and updating the simulation state accordingly
 	Result						RemoveObjectFromSystem(iSpaceObject * object);
 
+	// Adds a basic object to the system; no logic besides adding to the relevant collections and SP tree
+	Result						AddBaseObject(iObject *object, const FXMVECTOR location);
+
+	// Removes a basic object from the system; no logic besides removing from the relevant collections and SP tree
+	Result						RemoveBaseObject(iObject *object);
+
 	// Shuts down the system and deallocates resources.  Expect this to only ever be executed upon application shutdown
 	void						TerminateSystem(void);
 

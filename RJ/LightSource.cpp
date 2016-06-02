@@ -9,6 +9,10 @@ LightSource::LightSource(void)
 
 	// Light sources will not collide with anything (although their collision radii are used for illumination tests)
 	SetCollisionMode(Game::CollisionMode::NoCollision);
+	SetCollisionSphereRadius(1.0f);
+
+	// Light sources do perform a post-simulation update to reposition their internal light component
+	SetPostSimulationUpdateFlag(true);
 }
 
 
@@ -23,6 +27,16 @@ void LightSource::SetLight(const Light & data)
 }
 
 
+// Light sources do implement a post-simulation update method to reposition their internal light component
+void LightSource::PerformPostSimulationUpdate(void)
+{
+	// Update the position of our internal light component
+	m_light.Data.Position = m_positionf;
+
+	// Update light direction based on orientation of the light source object
+	XMVECTOR DirAdj = XMVector3Rotate(XMLoadFloat3(&m_light.Data.Direction), m_orientation);
+	XMStoreFloat3(&m_light.Data.Direction, DirAdj);
+}
 
 
 

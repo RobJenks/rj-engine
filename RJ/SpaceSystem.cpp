@@ -124,6 +124,56 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 	return ErrorCodes::NoError;
 }
 
+
+// Adds a basic object to the system; no logic besides adding to the relevant collection and SP tree
+Result SpaceSystem::AddBaseObject(iObject *object, const FXMVECTOR location)
+{
+	// Parameter check; ensure this is a valid object, and that it doesn't already belong to another system
+	if (object == NULL)								return ErrorCodes::CannotAddNullObjectToSystem;
+	if (object->GetSpatialTreeNode())				return ErrorCodes::ObjectAlreadyExistsInOtherSpatialTree;
+
+	// Add to the list of system objects (TODO: Cannot currently add, unless the collection becomes iObject rather than space object)
+	//Objects.push_back(ObjectReference<iSpaceObject>(object));
+
+	// Clamp the entry position to the bounds of the system
+	XMVECTOR pos = XMVectorClamp(location, m_minbounds, m_maxbounds);
+
+	// Store a reference to the new system this object exists in
+	//object->SetSpaceEnvironmentDirect(this);
+
+	// Set the position of the object in the system, and add it to the system spatial positioning tree
+	object->SetPosition(pos);
+	object->RefreshPositionImmediate();
+	if (SpatialPartitioningTree)
+	{
+		SpatialPartitioningTree->AddItem(object, pos);
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
+// Removes a basic object from the system; no logic besides removing from the relevant collections and SP tree
+Result SpaceSystem::RemoveBaseObject(iObject *object)
+{
+	// Parameter check; ensure that this is a valid object
+	if (!object) return ErrorCodes::CannotRemoveNullObjectFromSystem;
+
+	// Remove from the spatial partitioning tree for this system
+	if (SpatialPartitioningTree && object->GetSpatialTreeNode() != NULL)
+	{
+		object->GetSpatialTreeNode()->RemoveItem(object);
+		object->SetSpatialTreeNode(NULL);
+	}
+
+	// TODO: Also remove from the Objects collection if we do add to it in future
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+
 // Set the size of the system.  Cannot be changed post-initialisation.
 void SpaceSystem::SetSize(const FXMVECTOR size)
 {

@@ -29,6 +29,9 @@ public:
 	// Object simulation method.  Light sources do not need to take any action (TODO: dynamic lights, e.g. flickering, could use this)
 	CMPINLINE void										SimulateObject(void) { }
 
+	// Light sources do implement a post-simulation update method to reposition their internal light component
+	virtual void										PerformPostSimulationUpdate(void);
+
 	// Inherited virtual method.  Destruction method triggered when object HP hits zero
 	CMPINLINE void										DestroyObject(void) { }
 
@@ -43,10 +46,10 @@ public:
 protected:
 
 	// Light data
-	Light									m_light;
+	Light												m_light;
 
 	// Importance of the light for use when rendering needs to be prioritised
-	int										m_priority;
+	int													m_priority;
 
 };
 

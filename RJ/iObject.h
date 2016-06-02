@@ -204,8 +204,11 @@ public:
 	CMPINLINE bool							IsPostSimulationUpdateRequired(void) const			
 	{ 
 		// Only perform an update if the class implements post-simulation updates
-		return m_canperformpostsimulationupdate && m_spatialdatachanged /* && ... && ... */; 
+		return m_canperformpostsimulationupdate;
 	}
+
+	// Set the flag that indicates whether this object requires a post-simulation update
+	CMPINLINE void							SetPostSimulationUpdateFlag(bool perform_update) { m_canperformpostsimulationupdate = perform_update; }
 
 	// Objects can also expose a method to update object state following a simulation.  Some objects will not require this method; others
 	// will need to e.g. update the position of any contained objects following a change in position

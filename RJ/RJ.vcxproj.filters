@@ -535,9 +535,6 @@
     <ClCompile Include="UI_ShipBuilder.cpp">
       <Filter>UI\UI Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="LightSource.cpp">
-      <Filter>Engine\Lighting</Filter>
-    </ClCompile>
     <ClCompile Include="LightingManagerObject.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
@@ -546,6 +543,9 @@
     </ClCompile>
     <ClCompile Include="InputLayoutDesc.cpp">
       <Filter>Engine\ShaderManager</Filter>
+    </ClCompile>
+    <ClCompile Include="LightSource.cpp">
+      <Filter>Engine\Lighting</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1245,14 +1245,14 @@
     <ClInclude Include="UI_ShipBuilder.h">
       <Filter>UI\UI Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="LightSource.h">
-      <Filter>Engine\Lighting</Filter>
-    </ClInclude>
     <ClInclude Include="LightingManagerObject.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Engine\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="LightSource.h">
+      <Filter>Engine\Lighting</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
