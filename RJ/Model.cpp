@@ -8,6 +8,7 @@ using namespace std;
 #include "HashFunctions.h"
 #include "CoreEngine.h"
 #include "Texture.h"
+#include "Data\Shaders\vertex_definitions.h.hlsl"
 
 #include "Model.h"
 
@@ -340,7 +341,7 @@ void Model::Render(void)
 Result Model::InitialiseBuffers(void)
 {
 	// Create the vertex array.
-	VertexType *vertices = new VertexType[m_vertexCount];
+	Vertex_Inst_TexNormMatLit *vertices = new Vertex_Inst_TexNormMatLit[m_vertexCount];
 	if(!vertices) return ErrorCodes::CouldNotAllocateModelVertexArray;
 
 	// Create the index array.
@@ -350,8 +351,8 @@ Result Model::InitialiseBuffers(void)
 	// Load the vertex array and index array with data.
 	for (unsigned int i = 0; i < m_vertexCount; ++i)
 	{
-		vertices[i].position = XMFLOAT4(m_model[i].x, m_model[i].y, m_model[i].z, 1.0f);
-		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
+		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].tex = XMFLOAT2(m_model[i].tu, m_model[i].tv);
 		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 		vertices[i].material = m_model[i].material;
 
@@ -359,7 +360,7 @@ Result Model::InitialiseBuffers(void)
 	}
 
 	// Initialise the model buffers based on this raw data
-	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), (const void**)&vertices, sizeof(VertexType), m_vertexCount,
+	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), (const void**)&vertices, sizeof(Vertex_Inst_TexNormMatLit), m_vertexCount,
 																   (const void**)&indices, sizeof(INDEXFORMAT), m_indexCount);
 	if (result != ErrorCodes::NoError) return result;
 
@@ -464,8 +465,10 @@ Result Model::LoadModel(const char *filename)
 	int nummat = 1;
 	Material m; 
 	m.Data.ID = 0U; 
-	m.Data.Ambient = m.Data.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);  
+	m.Data.Ambient = XMFLOAT4(100.0f, 100.0f, 100.0f, 100.0f);
+	m.Data.Diffuse = XMFLOAT4(50.0f, 50.0f, 50.0f, 50.0f);
 	m.Data.Specular = XMFLOAT4(1.0f, 0.8f, 0.8f, 0.75f);
+	m.Data.Reflect = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
 
 	m_buffer.SetMaterialCount(nummat);
 	m_buffer.SetMaterial(0U, m);

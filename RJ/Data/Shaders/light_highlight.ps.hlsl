@@ -39,7 +39,7 @@ float4 main(PixelInputType input) : SV_TARGET
 
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+    /*textureColor = shaderTexture.Sample(SampleType, input.tex);
 
     // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
 	color = DirLight.Ambient;
@@ -70,5 +70,6 @@ float4 main(PixelInputType input) : SV_TARGET
 
 
 
-    return color;
+    return color;*/
+	return float4(0, 0, 0, 0);
 }

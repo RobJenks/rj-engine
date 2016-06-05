@@ -22,6 +22,16 @@ void LightSource::SetLight(const Light & data)
 	// Store the lighting data
 	m_light = data;
 
+	// Set light range directly, which will perform validation and update object properties accordingly
+	SetRange(data.Data.Range);
+}
+
+// Set the range of this light source
+void LightSource::SetRange(float range)
+{
+	// Store the new range value; validate to ensure valid positive values
+	m_light.Data.Range = max(range, Game::C_EPSILON);
+
 	// The object collision radius will be set to equal the light range, for more efficient light 'collision' testing with illuminated objects
 	SetCollisionSphereRadius(m_light.Data.Range);
 }

@@ -30,7 +30,7 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
 {
-    float4 textureColor;
+    /*float4 textureColor;
     float3 lightDir;
     float lightIntensity;
     float4 color;
@@ -70,5 +70,6 @@ float4 main(PixelInputType input) : SV_TARGET
     color.a = input.highlight_alpha.w;
 
 
-    return color;
+    return color;*/
+	return float4(0, 0, 0, 0);
 }

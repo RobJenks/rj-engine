@@ -26,13 +26,6 @@ class Model
 		enum ModelClass { Unknown = 0, Ship, ComplexShipSection, Tile, Terrain };
 
 	private:
-		struct VertexType
-		{
-			XMFLOAT4			position;
-			XMFLOAT2			texture;
-			XMFLOAT3			normal;
-			unsigned int		material;
-		};
 
 		struct ModelType
 		{

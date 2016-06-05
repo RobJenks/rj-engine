@@ -36,7 +36,7 @@ cbuffer StandardPSConstBuffer
 	unsigned int					LightCount;
 
 	// Float4
-	DirLightData					DirLight;							// Guaranteed to have SIZE % 16 == 0
+	BaseLightData					DirLight;							// Guaranteed to have SIZE % 16 == 0
 
 	// Float4
 	MaterialData					Materials[C_MATERIAL_LIMIT];		// Guaranteed to have SIZE % 16 == 0

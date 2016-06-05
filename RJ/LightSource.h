@@ -25,6 +25,9 @@ public:
 	CMPINLINE int										GetPriority(void) const				{ return m_priority; }
 	CMPINLINE void										SetPriority(int priority)			{ m_priority = priority; }
 
+	// Get or set the range of this light source
+	CMPINLINE float										GetRange(void) const				{ return m_light.Data.Range; }
+	void												SetRange(float range);
 
 	// Object simulation method.  Light sources do not need to take any action (TODO: dynamic lights, e.g. flickering, could use this)
 	CMPINLINE void										SimulateObject(void) { }

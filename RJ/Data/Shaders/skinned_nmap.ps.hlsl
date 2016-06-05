@@ -49,7 +49,7 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 // from a directional light.  We need to output the terms separately because
 // later we will modify the individual terms.  
 //---------------------------------------------------------------------------------------
-void ComputeDirectionalLight(MaterialData mat, DirLightData L, 
+void ComputeDirectionalLight(MaterialData mat, BaseLightData L, 
                              float3 normal, float3 toEye,
 					         out float4 ambient,
 						     out float4 diffuse,
@@ -64,7 +64,7 @@ void ComputeDirectionalLight(MaterialData mat, DirLightData L,
 	float3 lightVec = -L.Direction;
 
 	// Add ambient term.
-	ambient = mat.Ambient * L.Ambient;	
+	ambient = mat.Ambient * L.AmbientIntensity;	
 
 	// Add diffuse and specular term, provided the surface is in 
 	// the line of site of the light.
@@ -78,8 +78,8 @@ void ComputeDirectionalLight(MaterialData mat, DirLightData L,
 		float3 v         = reflect(-lightVec, normal);
 		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
 					
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec    = specFactor * mat.Specular * L.Specular;
+		diffuse = diffuseFactor * mat.Diffuse * L.DiffuseIntensity;
+		spec    = specFactor * mat.Specular * L.SpecularPower;
 	}
 }
 

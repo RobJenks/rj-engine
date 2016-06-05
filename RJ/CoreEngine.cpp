@@ -77,7 +77,6 @@ CoreEngine::CoreEngine(void)
 	m_lightfadeshader = NULL;
 	m_lighthighlightshader = NULL;
 	m_lighthighlightfadeshader = NULL;
-	m_light = NULL;
 	m_particleshader = NULL;
 	m_textureshader = NULL;
 	m_texcubeshader = NULL;
@@ -156,11 +155,6 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseShaderSupport();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Shader support data initialised\n";
-
-	// Initialise the light objects
-	res = InitialiseLights();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_START << "Lighting initialisation complete\n";
 
 	// Initialise the light shader
 	res = InitialiseLightShader();
@@ -277,7 +271,6 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownLightHighlightFadeShader();
 	ShutdownParticleShader();
 	ShutdownTextureShader();
-	ShutdownLights();
 	ShutdownCamera();
 	ShutdownLightingManager();
 	ShutdownShaderSupport();
@@ -394,6 +387,12 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
 		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+
+	// TODO: DEBUG: Remove variants on the light shader
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
+	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
+
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -556,23 +555,6 @@ Result CoreEngine::InitialiseTextureShader(void)
 	}
 
 	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseLights()
-{
-	// Create the light object.
-	m_light = new Light();
-	if(!m_light)
-	{
-		return ErrorCodes::CannotCreateLightObject;
-	}
-
-	// Initialise the global directional light object (will be overriden once rendering starts, these are just initial values)
-	Game::Engine->LightingManager.SetDirectionalLightData(DirLightData(XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f),
-		XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f)));
-
-	// Return success code if we have reached this point
 	return ErrorCodes::NoError;
 }
 
@@ -964,17 +946,6 @@ void CoreEngine::ShutdownTextureShader(void)
 		m_textureshader->Shutdown();
 		delete m_textureshader;
 		m_textureshader = NULL;
-	}
-}
-
-
-void CoreEngine::ShutdownLights(void)
-{
-	// Release the light object.
-	if(m_light)
-	{
-		delete m_light;
-		m_light = 0;
 	}
 }
 

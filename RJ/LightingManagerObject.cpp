@@ -32,9 +32,10 @@ LightingManagerObject::LightingManagerObject(void)
 	}
 
 	// Initialise the global & unsituated directional light
-	m_dir_light.Ambient = XMFLOAT4(0.25f, 0.25f, 0.25f, 1.0f);
-	m_dir_light.Diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	m_dir_light.Specular = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_dir_light.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
+	m_dir_light.AmbientIntensity = 0.1f;
+	m_dir_light.DiffuseIntensity = 0.1f;
+	m_dir_light.SpecularPower = 0.05f;
 	m_dir_light.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 
 }
@@ -153,7 +154,7 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 }
 
 // Update the global unsituated directional light
-void LightingManagerObject::SetDirectionalLightData(const DirLightData & data)
+void LightingManagerObject::SetDirectionalLightData(const BaseLightData & data)
 {
 	m_dir_light = data;
 }

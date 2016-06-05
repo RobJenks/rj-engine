@@ -555,20 +555,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_8])
 	{
-		if (s2()->HasOrders()) s2()->CancelAllOrders();
-		XMFLOAT3 tpos; Order::ID_TYPE id, last_id = 0;
-		for (int i = 0; i < 10; ++i)
-		{
-			tpos = XMFLOAT3(		((float)((float)rand() / (float)RAND_MAX) * 300.0f) + 200.0f,
-									((float)((float)rand() / (float)RAND_MAX) * 300.0f),
-									((float)((float)rand() / (float)RAND_MAX) * 3400.0f) - 400.0f);
-			
-			id = s2()->AssignNewOrder(new Order_MoveToPosition(XMLoadFloat3(&tpos), 100.0f));
-			Order_MoveToPosition *order = (Order_MoveToPosition*)s2()->GetOrder(id); if (!order) break;
-			if (i > 0) order->Dependency = last_id;
-			
-			last_id = id;
-		}
+		
 	}
 
 	if (b[DIK_9])
@@ -2092,19 +2079,17 @@ void RJMain::__CreateDebugScenario(void)
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
 	Light l;
-	l.InitialisePointLight(NULL_FLOAT3, FORWARD_VECTOR_F, 200.0f, XMFLOAT4(0.75f, 0.75f, 0.75f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-		XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f), AttenuationData(1.0f, 1.0f, 1.5f));
+	l.InitialisePointLight(NULL_FLOAT3, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1,1,1), 500.0f, 
+		1.0f, 1.0f, 0.5f, AttenuationData(1.0f, 0.007f, 0.0002f));
 	LightSource *ls = new LightSource();
 	ls->SetLight(l);
 	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
 	Game::RegisterObject(ls);
 	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	ss()->AddChildAttachment(ls, XMVectorSetZ(NULL_VECTOR, 20.0f), ID_QUATERNION);
+	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 100.0f), ID_QUATERNION);
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
-
-*** UPDATE SHADER TO ACCOUNT FOR ALL LIGHTS ***
 
 void RJMain::DEBUGDisplayInfo(void)
 {
@@ -2177,11 +2162,66 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		unsigned long long mx = 0 - 1;
-		double lg = std::log2((double)mx);
+		// Find the light source attached to ss
+		iObject *child = NULL; LightSource *ls = NULL;
+		unsigned int n = ss()->GetChildObjects().size();
+		for (unsigned int i = 0; i < n; ++i)
+		{
+			child = ss()->GetChildObjects().at(i).Child;
+			if (child && child->GetObjectType() == iObject::ObjectType::LightSourceObject) 
+			{
+				ls = (LightSource*)child; break;
+			}
+		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.3f", lg);
-		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);		
+		// Make sure we found the light source.  Then adjust if necessary and display info
+		if (ls)
+		{
+			float md = (Game::Keyboard.AltDown() ? -1.0f : 1.0f);
+			const float adj = 20.0f;
+			float delta = (md * adj * Game::TimeFactor);
+
+			Light l = ls->GetLight();
+			if (Game::Keyboard.GetKey(DIK_F1))
+			{
+				l.Data.AmbientIntensity += delta;
+			}
+			if (Game::Keyboard.GetKey(DIK_F2))
+			{
+				l.Data.DiffuseIntensity += delta;
+			}
+			if (Game::Keyboard.GetKey(DIK_F3))
+			{
+				l.Data.SpecularPower += delta;
+			}
+			if (Game::Keyboard.GetKey(DIK_F5))
+			{
+				if (!Game::Keyboard.ShiftDown() && !Game::Keyboard.CtrlDown())		l.Data.Attenuation.Constant += (md * 0.005f);
+				else if (Game::Keyboard.ShiftDown() && !Game::Keyboard.CtrlDown())	l.Data.Attenuation.Linear += (md * 0.005f);
+				else if (Game::Keyboard.ShiftDown() && Game::Keyboard.CtrlDown())	l.Data.Attenuation.Exp += (md * 0.005f);
+				Game::Keyboard.LockKey(DIK_F5);
+			}
+
+			l.Data.AmbientIntensity = max(l.Data.AmbientIntensity, 0.0f);
+			l.Data.DiffuseIntensity = max(l.Data.DiffuseIntensity, 0.0f);
+			l.Data.SpecularPower = max(l.Data.SpecularPower, 0.0f);
+			l.Data.Attenuation.Constant = max(l.Data.Attenuation.Constant, 0.0f);
+			l.Data.Attenuation.Linear = max(l.Data.Attenuation.Linear, 0.0f);
+			l.Data.Attenuation.Exp = max(l.Data.Attenuation.Exp, 0.0f);
+
+			ls->SetLight(l);
+			if (Game::Keyboard.GetKey(DIK_F6))
+			{
+				ls->SetRange(frand_lh(0.0f, 1000.0f));
+				Game::Keyboard.LockKey(DIK_F6);
+			}
+
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Ambient: %.1f, Diffuse: %.1f, Specular: %.1f, Atten { Constant: %.4f, Linear: %.4f, Exp: %.4f }, Range: %.0f, Pos: %s",
+				l.Data.AmbientIntensity, l.Data.DiffuseIntensity, l.Data.SpecularPower, l.Data.Attenuation.Constant,
+				l.Data.Attenuation.Linear, l.Data.Attenuation.Exp, ls->GetRange(), Vector3ToString(ls->GetPosition()).c_str());
+
+			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		}
 	}
 }
 

@@ -27,9 +27,9 @@ public:
 	static unsigned int				NewUniqueID(void);
 
 	// Initialise a light to the specified type
-	void							InitialiseDirectionalLight(const XMFLOAT3 & direction, const XMFLOAT4 & ambient, const XMFLOAT4 & diffuse, const XMFLOAT4 & specular);
-	void							InitialisePointLight(	const XMFLOAT3 & position, const XMFLOAT3 & direction, float range, const XMFLOAT4 & ambient, 
-															const XMFLOAT4 & diffuse, const XMFLOAT4 & specular, const AttenuationData & attenuation);
+	void							InitialiseDirectionalLight(const XMFLOAT3 & direction, const XMFLOAT3 & colour, float ambient, float diffuse, float specular);
+	void							InitialisePointLight(	const XMFLOAT3 & position, const XMFLOAT3 & direction, const XMFLOAT3 & colour, float range, float ambient, 
+															float diffuse, float specular, const AttenuationData & attenuation);
 
 	// Default destructor
 	~Light(void);

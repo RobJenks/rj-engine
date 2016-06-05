@@ -10,12 +10,16 @@ SamplerState SampleType;
 // Import a standard constant buffer holding data on materials, lighting etc
 #include "standard_ps_const_buffer.h"
 
+// Import key lighting calcuations
+#include "light_calculation.h.hlsl"
+
 // Pixel input format
 struct PixelInputType
 {
-	float4 position : SV_POSITION;
+	float4 position : SV_POSITION;				// Position projected into screen space
 	float2 tex : TEXCOORD0;
-	float3 normal : NORMAL;
+	float3 worldpos : TEXCOORD1;				// Position in world space (interpolated)
+	float3 normal : NORMAL;						// Un-normalised; will be interpolated so is normalised in the PS
 	unsigned int material : MATERIAL;
 	unsigned int LightConfig : LightConfig;
 };
@@ -25,38 +29,24 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
 {
-    float4 textureColor;
-    float3 lightDir;
-    float lightIntensity;
-    float4 color;
+	// Normalise the input normal.  This is passed un-normalised since interpolation at the 
+	// PS means it needs to be normalised here
+	float3 normal = normalize(input.normal);
 
-    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex);
+    // Apply global directional light first
+	float4 TotalLight = CalculateDirectionalLight(DirLight, input.material, input.worldpos, normal);
 
-    // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
-	color = DirLight.Ambient;
+	// Now apply the effect of any active point lights
+	unsigned int bit;
+	for (unsigned int i = 0; i < LightCount; ++i)
+	{
+		bit = CONFIG_VAL[i];
+		if ((input.LightConfig & bit) == bit)
+		{
+			TotalLight += CalculatePointLight(i, input.material, input.worldpos, normal);
+		}
+	}
 
-    // Invert the light direction for calculations.
-	lightDir = DirLight.Direction;
-
-    // Calculate the amount of light on this pixel.
-    lightIntensity = saturate(dot(input.normal, lightDir));
-
-    // Ensure N dot L is greater than zero, otherwise -ve diffuse light would subtract from the ambient light
-    if (lightIntensity > 0.0f)
-    {
-        // Determine the final diffuse colour based on the diffuse colour and level of light intensity
-		color += (DirLight.Diffuse * lightIntensity);
-    }
-
-
-    // Saturate the final light colour
-    color = saturate(color);
-
-    // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
-    color = color * textureColor;
-
-
-
-    return color;
+	// Final pixel colour will be the sampled texture colour illuminated by this total volume of light
+	return (shaderTexture.Sample(SampleType, input.tex) * TotalLight);
 }

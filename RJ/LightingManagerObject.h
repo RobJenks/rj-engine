@@ -65,10 +65,10 @@ public:
 	}
 
 	// Returns data on the standard (unsituated) directional light source
-	CMPINLINE DirLightData				GetDirectionalLightData(void)											{ return m_dir_light; }
+	CMPINLINE BaseLightData				GetDirectionalLightData(void)											{ return m_dir_light; }
 
 	// Update the global unsituated directional light
-	void								SetDirectionalLightData(const DirLightData & data);
+	void								SetDirectionalLightData(const BaseLightData & data);
 
 	// Default destructor
 	~LightingManagerObject(void);
@@ -91,7 +91,7 @@ protected:
 	Game::LIGHT_CONFIG										m_config_lookup[LightingManagerObject::LIGHT_LIMIT];
 
 	// Global and unsituated directional light 
-	DirLightData											m_dir_light;
+	BaseLightData											m_dir_light;
 
 	// Functor for sorting/searching light sources based on priority
 	static struct _LightSourceEntryPriorityComparator

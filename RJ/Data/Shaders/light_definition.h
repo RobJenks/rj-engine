@@ -10,24 +10,41 @@
 
 #endif
 
+// Constant array of bitstring values corresponding to each possile light config value
+static const unsigned int CONFIG_VAL[64] = { 1U, 2U, 4U, 8U, 16U, 32U, 64U, 128U, 256U, 512U, 1024U, 2048U, 4096U, 8192U, 16384U, 32768U, 65536U, 131072U, 262144U, 524288U, 1048576U, 2097152U, 4194304U, 8388608U, 16777216U, 33554432U, 67108864U, 134217728U, 268435456U, 536870912U, 1073741824U, 2147483648U, 1U, 2U, 4U, 8U, 16U, 32U, 64U, 128U, 256U, 512U, 1024U, 2048U, 4096U, 8192U, 16384U, 32768U, 65536U, 131072U, 262144U, 524288U, 1048576U, 2097152U, 4194304U, 8388608U, 16777216U, 33554432U, 67108864U, 134217728U, 268435456U, 536870912U, 1073741824U, 2147483648U };
 
 // Structure holding data on a directional (unsituated) light
-struct DirLightData
+struct BaseLightData
 {
-	float4							Ambient;
-	float4							Diffuse;
-	float4							Specular;		// w = power
-	float3							Direction;
+	// Float4
+	unsigned int					ID;						
+	float3							Colour;
 
-	// Size = 60, Size+pad = 64, 64 % 16 = 0
-	float							_padding;		
+	// Float4
+	int								Type;					// Accepts a value from LightingManager::LightType
+	float							AmbientIntensity;
+	float							DiffuseIntensity;
+	float							SpecularPower;
+
+	// Float4
+	float3							Direction;				// Only relevant for directional lights; calculated otherwise
+	float							_padding;
+
+	// Size % 16 == 0
 
 #	ifdef __cplusplus
-		DirLightData(void) { }
-		DirLightData(const float4 & ambient, const float4 & diffuse, const float4 & specular, const float3 & direction)
-			: Ambient(ambient), Diffuse(diffuse), Specular(specular), Direction(direction) { }
-		DirLightData(const DirLightData & source) 
-			: Ambient(source.Ambient), Diffuse(source.Diffuse), Specular(source.Specular), Direction(source.Direction) { }
+		// Constructor; note that ID *CANNOT* be set since it needs to be unique
+		BaseLightData(void)
+			: ID(0U), Type(0), Colour(0.0f, 0.0f, 0.0f), AmbientIntensity(0.0f), DiffuseIntensity(0.0f), SpecularPower(0.0f), Direction(0.0f, 0.0f, 1.0f) { }
+		
+		// Constructor; note that ID *CANNOT* be set since it needs to be unique
+		BaseLightData(int type, const float3 & colour, float ambient, float diffuse, float specular, const float3 & direction)
+			: ID(0U), Type(type), Colour(colour), AmbientIntensity(ambient), DiffuseIntensity(diffuse), SpecularPower(specular), Direction(direction) { }
+
+		// Copy constructor; note that ID *CANNOT* be set since it needs to be unique
+		BaseLightData(const BaseLightData & source) 
+			: ID(0U), Type(source.Type), Colour(source.Colour), AmbientIntensity(source.AmbientIntensity), 
+			  DiffuseIntensity(source.DiffuseIntensity), SpecularPower(source.SpecularPower), Direction(source.Direction) { }
 #	endif
 };
 
@@ -45,42 +62,30 @@ struct AttenuationData
 };
 
 // Structure holding data on a point light which is situated in space
-struct LightData
+struct LightData : BaseLightData
 {
 	// Float4
-	unsigned int					ID;
 	float3							Position;
-
-	// Float4
-	int								Type;				// Accepts a value from LightingManager::LightType
-	float3							Direction;
-
-	// Float4
-	float4							Ambient;
-
-	// Float4
-	float4							Diffuse;
-	
-	// Float4
-	float4							Specular;
-
-	// Float4
 	float							Range;
+
+	// Float4	
 	AttenuationData					Attenuation;
+	float							_padding;
 
 
-	// Size = 96, Size+pad = 96, 96 % 16 = 0
-	///*Not req*/					_padding;
+	// Size % 16 == 0
 
 #	ifdef __cplusplus
-		// Default constructor; note that ID *CANNOT* be set since it needs to be unique
-		LightData(void) :	ID(0), Type(0 /* = Directional */), Position(float3(0.0f, 0.0f, 0.0f)), Direction(float3(0.0f, 0.0f, 1.0f)), Range(0.0f),
-							Ambient(float4(0.0f, 0.0f, 0.0f, 0.0f)), Diffuse(float4(0.0f, 0.0f, 0.0f, 0.0f)), Specular(float4(0.0f, 0.0f, 0.0f, 0.0f)),
-							Attenuation(0.0f, 0.0f, 0.0f) { }
+		// Constructor; note that ID *CANNOT* be set since it needs to be unique
+		LightData(void) 
+			: BaseLightData(), Position(0.0f, 0.0f, 0.0f), Range(0.0f), Attenuation(0.0f, 0.0f, 0.0f) { }
+
+		// Constructor; note that ID *CANNOT* be set since it needs to be unique
+		LightData(const BaseLightData & base, float3 position, float range, const AttenuationData & atten) 
+			: BaseLightData(base), Position(position), Range(range), Attenuation(atten) { }
 
 		// Copy constructor; note that ID is *NOT* copied from the source object since it needs to be unique
-		LightData(const LightData & source) :	ID(0), Type(source.Type), Position(source.Position), Direction(source.Direction),
-												Ambient(source.Ambient), Diffuse(source.Diffuse), Specular(source.Specular),
+		LightData(const LightData & source) :	BaseLightData((BaseLightData)source), Position(source.Position), 
 												Range(source.Range), Attenuation(source.Attenuation) { }
 #	endif
 

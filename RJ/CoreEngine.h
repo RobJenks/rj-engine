@@ -326,7 +326,6 @@ private:
 	Result					InitialiseLightHighlightFadeShader(void);
 	Result					InitialiseParticleShader(void);
 	Result					InitialiseTextureShader(void);
-	Result					InitialiseLights(void);
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseFontShader(void);
 	Result					InitialiseTextRendering(void);
@@ -355,7 +354,6 @@ private:
 	void					ShutdownLightHighlightFadeShader(void);
 	void					ShutdownParticleShader(void);
 	void					ShutdownTextureShader(void);
-	void					ShutdownLights(void);
 	void					ShutdownFrustrum(void);
 	void					ShutdownFontShader(void);
 	void					ShutdownTextRendering(void);
@@ -380,7 +378,6 @@ private:
 	LightFadeShader			*m_lightfadeshader;
 	LightHighlightShader	*m_lighthighlightshader;
 	LightHighlightFadeShader*m_lighthighlightfadeshader;
-	Light					*m_light;
 	ParticleShader			*m_particleshader;
 	TextureShader			*m_textureshader;
 	ViewFrustrum			*m_frustrum;

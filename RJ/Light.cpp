@@ -28,24 +28,26 @@ Light::Light(const Light & source)
 }
 
 // Initialise a light to the specified type
-void Light::InitialiseDirectionalLight(const XMFLOAT3 & direction, const XMFLOAT4 & ambient, const XMFLOAT4 & diffuse, const XMFLOAT4 & specular)
+void Light::InitialiseDirectionalLight(const XMFLOAT3 & direction, const XMFLOAT3 & colour, float ambient, float diffuse, float specular)
 {
 	Data.Direction = direction;
-	Data.Ambient = ambient;
-	Data.Diffuse = diffuse;
-	Data.Specular = specular;
+	Data.Colour = colour;
+	Data.AmbientIntensity = ambient;
+	Data.DiffuseIntensity = diffuse;
+	Data.SpecularPower = specular;
 }
 
 // Initialise a light to the specified type
-void Light::InitialisePointLight(	const XMFLOAT3 & position, const XMFLOAT3 & direction, float range, const XMFLOAT4 & ambient, const XMFLOAT4 & diffuse,
-									const XMFLOAT4 & specular, const AttenuationData & attenuation)
+void Light::InitialisePointLight(	const XMFLOAT3 & position, const XMFLOAT3 & direction, const XMFLOAT3 & colour, float range, 
+									float ambient, float diffuse, float specular, const AttenuationData & attenuation)
 {
 	Data.Position = position;
 	Data.Direction = direction;
+	Data.Colour = colour;
 	Data.Range = range;
-	Data.Ambient = ambient;
-	Data.Diffuse = diffuse;
-	Data.Specular = specular;
+	Data.AmbientIntensity = ambient;
+	Data.DiffuseIntensity = diffuse;
+	Data.SpecularPower = specular;
 	Data.Attenuation = attenuation;
 }
 
