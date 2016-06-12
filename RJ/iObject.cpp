@@ -337,7 +337,7 @@ void iObject::SetSize(const FXMVECTOR size)
 		m_size = XMVectorReplicate(1.0f);
 
 	// Recalculate the collision sphere radii for broadphase collision detection
-	SetCollisionSphereRadius(DetermineCuboidBoundingSphereRadiusSq(m_size));
+	SetCollisionSphereRadius(DetermineCuboidBoundingSphereRadius(m_size));
 
 	// Store the local float representation to allow us to perform per-component tests at runtime
 	XMStoreFloat3(&m_sizef, m_size);
