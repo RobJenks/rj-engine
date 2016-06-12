@@ -49,7 +49,7 @@ float CalcShadowFactor(SamplerComparisonState samShadow,
 // from a directional light.  We need to output the terms separately because
 // later we will modify the individual terms.  
 //---------------------------------------------------------------------------------------
-void ComputeDirectionalLight(MaterialData mat, BaseLightData L, 
+void ComputeDirectionalLight(MaterialData mat, LightData L, 
                              float3 normal, float3 toEye,
 					         out float4 ambient,
 						     out float4 diffuse,
@@ -210,7 +210,7 @@ bool gReflectionEnabled = false;
 		
 	// First calculate light contribution from the global directional light (which sets initial values for each light property)
 	float4 ambient, diffuse, spec;
-	ComputeDirectionalLight(Material, DirLight, bumpedNormalW, toEye, ambient, diffuse, spec);
+	ComputeDirectionalLight(Material, Lights[0], bumpedNormalW, toEye, ambient, diffuse, spec);	// ***** TODO ****** <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	ambient *= ambientAccess;
 	diffuse *= shadow[0];
 	spec *= shadow[0];

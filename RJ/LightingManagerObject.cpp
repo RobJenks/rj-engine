@@ -18,7 +18,7 @@ LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject
 // Default constructor
 LightingManagerObject::LightingManagerObject(void)
 	:
-	m_source_count(0U), m_active_config(0U)
+	m_dir_light_count(0U), m_source_count(0U), m_active_config(0U)
 {
 	// Initialise space in the light source vector to hold the maximum possible number of lights
 	m_sources.clear();
@@ -31,13 +31,9 @@ LightingManagerObject::LightingManagerObject(void)
 		m_config_lookup[i] = (1 << i);
 	}
 
-	// Initialise the global & unsituated directional light
-	m_dir_light.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
-	m_dir_light.AmbientIntensity = 0.1f;
-	m_dir_light.DiffuseIntensity = 0.1f;
-	m_dir_light.SpecularPower = 0.05f;
-	m_dir_light.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
-
+	// Initialise space in the directional light data vector to hold the maximum possible number of directional lights
+	m_dir_light.clear();
+	m_dir_light.reserve(LightingManagerObject::DIR_LIGHT_LIMIT);
 }
 
 // Initialise the lighting manager for a new frame
@@ -68,10 +64,16 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		}
 	}
 
-	// Parse any registered light sources and transfer core lighting data to the data array
-	for (unsigned int i = 0; i < m_source_count; ++i)
+	// Directional light sources are always located at the start of the light data array
+	if (m_dir_light_count != 0U)
 	{
-		m_light_data[i] = m_sources[i].Source->GetLight().Data;
+		memcpy(&(m_light_data[0]), &(m_dir_light[0]), sizeof(LightData) * m_dir_light_count);
+	}
+
+	// Now parse any registered light sources and transfer core lighting data to the data array
+	for (LightSources::size_type i = 0; i < m_source_count; ++i)
+	{
+		m_light_data[LightingManagerObject::DIR_LIGHT_LIMIT + i] = m_sources[i].Source->GetLight().Data;
 	}
 }
 
@@ -153,11 +155,68 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 	return config;
 }
 
-// Update the global unsituated directional light
-void LightingManagerObject::SetDirectionalLightData(const BaseLightData & data)
+// Update directional light data for the scene
+bool LightingManagerObject::AddDirectionalLight(const LightData & data)
 {
-	m_dir_light = data;
+	// Ensure we remain below the limit
+	if (m_dir_light_count >= LightingManagerObject::DIR_LIGHT_LIMIT) return false;
+
+	// Push into the collection and return success
+	m_dir_light.push_back(data);
+	m_dir_light_count = m_dir_light.size();
+	return true;
 }
+
+// Update directional light data for the scene
+void LightingManagerObject::UpdateDirectionalLight(DirLightData::size_type index, const LightData & data)
+{
+	if (index >= 0 && index < m_dir_light_count) m_dir_light[index] = data;
+}
+
+// Update directional light data for the scene
+void LightingManagerObject::RemoveDirectionalLight(DirLightData::size_type index)
+{
+	if (index >= 0 && index < m_dir_light_count) 
+	{
+		m_dir_light.erase(m_dir_light.begin() + index);
+		m_dir_light_count = m_dir_light.size();
+	}
+}
+
+// Remove all directional lights from the scene
+void LightingManagerObject::ClearDirectionalLightData(void)
+{
+	m_dir_light.clear();
+	m_dir_light_count = m_dir_light.size();
+}
+
+// Returns data for a basic, default unsituated directional light
+void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
+{
+	// Populate with default values
+	outLight.Type = LightingManagerObject::LightType::Directional;
+	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
+	outLight.AmbientIntensity = 0.1f;
+	outLight.DiffuseIntensity = 0.1f;
+	outLight.SpecularPower = 0.05f;
+	outLight.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+}
+
+// Returns data for a basic, default point light
+void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
+{
+	// Populate with default values
+	outLight.Type = LightingManagerObject::LightType::PointLight;
+	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	outLight.AmbientIntensity = 30.0f;
+	outLight.DiffuseIntensity = 26.0f;
+	outLight.SpecularPower = 0.5f;
+	outLight.Range = 500.0f;
+	outLight.Attenuation.Constant = 1.0f;
+	outLight.Attenuation.Linear = 0.012f;
+	outLight.Attenuation.Exp = 0.0052f;
+}
+
 
 bool LightingManagerObject::_LightSourceEntryPriorityComparator::operator() (const LightSourceEntry & lhs, const LightSourceEntry & rhs) const
 {

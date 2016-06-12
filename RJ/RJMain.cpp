@@ -925,21 +925,6 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
 
-	StandardPSConstBuffer buf;
-	DBG_OUTPUT_SIZE(StandardPSConstBuffer);
-	DBG_OUTPUT_SIZE(buf);
-	DBG_OUTPUT_SIZE(buf.EyeWorldPos);
-	DBG_OUTPUT_SIZE(buf.FogState);
-	DBG_OUTPUT_SIZE(buf.FogStart);
-	DBG_OUTPUT_SIZE(buf.FogRange);
-	DBG_OUTPUT_SIZE(buf.DirLight);
-	DBG_OUTPUT_SIZE(buf.MaterialCount); 
-	DBG_OUTPUT_SIZE(buf.LightCount);
-	//DBG_OUTPUT_SIZE(buf.Materials);
-	//DBG_OUTPUT_SIZE(buf.Materials[4]);
-//	DBG_OUTPUT_SIZE(buf.Lights);
-	//DBG_OUTPUT_SIZE(buf.Lights[4]);
-
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
@@ -2078,9 +2063,12 @@ void RJMain::__CreateDebugScenario(void)
 
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
+	LightData dirlight;
+	Game::Engine->LightingManager.GetDefaultDirectionalLightData(dirlight);
+	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
+
 	Light l;
-	l.InitialisePointLight(NULL_FLOAT3, XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT3(1,1,1), 500.0f, 
-		1.0f, 1.0f, 0.5f, AttenuationData(1.0f, 0.007f, 0.0002f));
+	Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
 	LightSource *ls = new LightSource();
 	ls->SetLight(l);
 	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);

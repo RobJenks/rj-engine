@@ -23,10 +23,13 @@ public:
 	};
 
 	// Typedefs
+	typedef std::vector<LightData>					DirLightData;				// Collection of directional light data
 	typedef std::vector<LightSourceEntry>			LightSources;				// Collection of light source entries
 
 	// Limit on the number of lights that can contribute to a scene
+	static const unsigned int						DIR_LIGHT_LIMIT = C_DIR_LIGHT_LIMIT;
 	static const unsigned int						LIGHT_LIMIT = C_LIGHT_LIMIT;
+	static const unsigned int						TOTAL_LIGHT_LIMIT = C_TOTAL_LIGHT_LIMIT;
 
 	// Enumeration of possible light types
 	enum LightType						{ Directional = 0, PointLight };
@@ -42,6 +45,12 @@ public:
 
 	// Clear all registered light sources
 	void								ClearAllLightSources(void);
+
+	// Returns the number of directional light sources present
+	CMPINLINE unsigned int				GetDirectionalLightSourceCount(void) const	{ return m_dir_light_count; }
+
+	// Returns a pointer to data on the global directional light source(s)
+	CMPINLINE const LightData *			GetDirectionalLightData(void)				{ return &(m_dir_light[0]); }
 
 	// Return the number of light sources currently registered
 	LightSources::size_type				GetLightSourceCount(void) const				{ return m_source_count; }
@@ -64,11 +73,17 @@ public:
 		if (object) SetActiveLightingConfiguration(GetLightingConfigurationForObject(object));
 	}
 
-	// Returns data on the standard (unsituated) directional light source
-	CMPINLINE BaseLightData				GetDirectionalLightData(void)											{ return m_dir_light; }
+	// Add, change or remove directional light data from the scene
+	bool								AddDirectionalLight(const LightData & data);
+	void								UpdateDirectionalLight(DirLightData::size_type index, const LightData & data);
+	void								RemoveDirectionalLight(DirLightData::size_type index);
+	void								ClearDirectionalLightData(void);
 
-	// Update the global unsituated directional light
-	void								SetDirectionalLightData(const BaseLightData & data);
+	// Returns data for a basic, default unsituated directional light
+	void								GetDefaultDirectionalLightData(LightData & outLight);
+
+	// Returns data for a basic, default point light
+	void								GetDefaultPointLightData(LightData & outLight);
 
 	// Default destructor
 	~LightingManagerObject(void);
@@ -90,8 +105,9 @@ protected:
 	// Lookup array which translates from a light index to its bit value in a light config bitstring
 	Game::LIGHT_CONFIG										m_config_lookup[LightingManagerObject::LIGHT_LIMIT];
 
-	// Global and unsituated directional light 
-	BaseLightData											m_dir_light;
+	// Global directional light(s)
+	DirLightData											m_dir_light;
+	DirLightData::size_type									m_dir_light_count;
 
 	// Functor for sorting/searching light sources based on priority
 	static struct _LightSourceEntryPriorityComparator

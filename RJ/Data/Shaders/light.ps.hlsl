@@ -29,13 +29,18 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
 {
+	float4 TotalLight = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
 	// Normalise the input normal.  This is passed un-normalised since interpolation at the 
 	// PS means it needs to be normalised here
 	float3 normal = normalize(input.normal);
 
-    // Apply global directional light first
-	float4 TotalLight = CalculateDirectionalLight(DirLight, input.material, input.worldpos, normal);
-
+	// Apply global directional lights first
+	for (unsigned int i; i < DirLightCount; ++i)
+	{
+		TotalLight += CalculateDirectionalLight(i, input.material, input.worldpos, normal);
+	}
+	
 	// Now apply the effect of any active point lights
 	unsigned int bit;
 	for (unsigned int i = 0; i < LightCount; ++i)
@@ -43,10 +48,15 @@ float4 main(PixelInputType input) : SV_TARGET
 		bit = CONFIG_VAL[i];
 		if ((input.LightConfig & bit) == bit)
 		{
-			TotalLight += CalculatePointLight(i, input.material, input.worldpos, normal);
+			// Index into the light array is (DIR_LIGHT_LIMIT + i), since light data is packed as [Dir_1, ..., Dir_n, Pt_1, ..., Pt_n]
+			TotalLight += CalculatePointLight(C_DIR_LIGHT_LIMIT + i, input.material, input.worldpos, normal);
 		}
 	}
 
 	// Final pixel colour will be the sampled texture colour illuminated by this total volume of light
 	return (shaderTexture.Sample(SampleType, input.tex) * TotalLight);
 }
+
+
+
+
