@@ -10,15 +10,19 @@ SamplerState SampleType;
 // Import a standard constant buffer holding data on materials, lighting etc
 #include "standard_ps_const_buffer.h"
 
+// Import key lighting calcuations
+#include "light_calculation.h.hlsl"
+
 
 //////////////
 // TYPEDEFS //
 //////////////
 struct PixelInputType
 {
-    float4 position : SV_POSITION;
-    float3 tex_alpha : TEXCOORD0;		// Share semantic for efficiency.  xy = tex, z = alpha
-    float3 normal : TEXCOORD1;
+	float4 position : SV_POSITION;
+	float3 tex_alpha : TEXCOORD0;		// Share semantic for efficiency.  xy = tex, z = alpha
+	float3 worldpos : TEXCOORD1;		// Position in world space (interpolated)
+	float3 normal : NORMAL;				// Un-normalised; will be interpolated so is normalised in the PS
 	unsigned int material : MATERIAL;
 	unsigned int LightConfig : LightConfig;
 };
@@ -29,40 +33,34 @@ struct PixelInputType
 ////////////////////////////////////////////////////////////////////////////////
 float4 main(PixelInputType input) : SV_TARGET
 {
-   /* float4 textureColor;
-    float3 lightDir;
-    float lightIntensity;
-    float4 color;
+	float4 TotalLight = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
+	// Normalise the input normal.  This is passed un-normalised since interpolation at the 
+	// PS means it needs to be normalised here
+	float3 normal = normalize(input.normal);
 
-    // Sample the pixel color from the texture using the sampler at this texture coordinate location.
-    textureColor = shaderTexture.Sample(SampleType, input.tex_alpha.xy);
+	// Apply global directional lights first
+	for (unsigned int i = 0U; i < DirLightCount; ++i)
+	{
+		TotalLight += CalculateDirectionalLight(i, input.material, input.worldpos, normal);
+	}
 
-    // Set the default ambient colour to the ambient colour, for all pixels.  We apply all other effects on top of the ambient colour
-    color = DirLight.Ambient;
+	// Now apply the effect of any active point lights
+	unsigned int bit;
+	for (unsigned int j = 0U; j < LightCount; ++j)
+	{
+		bit = CONFIG_VAL[j];
+		if ((input.LightConfig & bit) == bit)
+		{
+			// Index into the light array is (DIR_LIGHT_LIMIT + j), since light data is packed as [Dir_1, ..., Dir_n, Pt_1, ..., Pt_n]
+			TotalLight += CalculatePointLight(C_DIR_LIGHT_LIMIT + j, input.material, input.worldpos, normal);
+		}
+	}
 
-    // Invert the light direction for calculations.
-    lightDir = -DirLight.Direction;
+	// Final pixel colour will be the sampled texture colour illuminated by this total volume of light
+	float4 colour = shaderTexture.Sample(SampleType, input.tex_alpha.xy) * TotalLight;
 
-    // Calculate the amount of light on this pixel.
-    lightIntensity = saturate(dot(input.normal, lightDir));
-
-    // Ensure N dot L is greater than zero, otherwise -ve diffuse light would subtract from the ambient light
-    if (lightIntensity > 0.0f)
-    {
-        // Determine the final diffuse colour based on the diffuse colour and level of light intensity
-        color += (DirLight.Diffuse * lightIntensity);
-    }
-
-    // Saturate the final light colour
-    color = saturate(color);
-
-    // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
-    color = color * textureColor;
-
-    // Apply the desired alpha value to this colour
-    color.a = input.tex_alpha.z;
-
-    return color;*/
-	return float4(0, 0, 0, 0);
+	// Set the desired alpha value and return the result
+	colour.a = input.tex_alpha.z;
+	return colour;
 }

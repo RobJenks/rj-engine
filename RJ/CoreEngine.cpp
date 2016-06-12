@@ -389,10 +389,9 @@ Result CoreEngine::InitialiseRenderQueue(void)
 		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	// TODO: DEBUG: Remove variants on the light shader
-	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
+	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
-	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
-
+	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];*/
 
 	// Return success
 	return ErrorCodes::NoError;

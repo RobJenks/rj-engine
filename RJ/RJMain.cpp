@@ -2065,6 +2065,7 @@ void RJMain::__CreateDebugScenario(void)
 
 	LightData dirlight;
 	Game::Engine->LightingManager.GetDefaultDirectionalLightData(dirlight);
+	dirlight.Direction = XMFLOAT3(0, -1, 0);
 	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
 
 	Light l;
@@ -2204,9 +2205,10 @@ void RJMain::DEBUGDisplayInfo(void)
 				Game::Keyboard.LockKey(DIK_F6);
 			}
 
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Ambient: %.1f, Diffuse: %.1f, Specular: %.1f, Atten { Constant: %.4f, Linear: %.4f, Exp: %.4f }, Range: %.0f, Pos: %s",
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Ambient: %.1f, Diffuse: %.1f, Specular: %.1f, Atten { Constant: %.4f, Linear: %.4f, Exp: %.4f }, Range: %.0f, Pos: %s // %s",
 				l.Data.AmbientIntensity, l.Data.DiffuseIntensity, l.Data.SpecularPower, l.Data.Attenuation.Constant,
-				l.Data.Attenuation.Linear, l.Data.Attenuation.Exp, ls->GetRange(), Vector3ToString(ls->GetPosition()).c_str());
+				l.Data.Attenuation.Linear, l.Data.Attenuation.Exp, ls->GetRange(), Vector3ToString(ls->GetPosition()).c_str(), 
+				Vector3ToString(Game::Engine->GetCamera()->GetPosition()).c_str());
 
 			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		}
