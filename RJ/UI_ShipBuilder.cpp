@@ -72,10 +72,72 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
 	m_deck = 0;
+	m_revert_dir_light_index = 0;
+	m_revert_dir_light_is_overriding = false;
+	m_revert_dir_light = LightData();
+
+	// Initialise any editor-specific render data
+	InitialiseRenderData();
+
 
 	// Set default starting editor mode
 	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
 }
+
+
+// Initialise any editor-specific render states and data
+void UI_ShipBuilder::InitialiseRenderData(void)
+{
+	// We want to add a	new directional light that will shine 'out' of the camera
+	LightData dirlight = LightData(LightingManagerObject::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
+
+	// Check whether we can create a new directional light one, or whether we are at the limit and so 
+	// have to create a new one (which will be reverted on exit)
+	if (Game::Engine->LightingManager.CanAddNewDirectionalLight())
+	{
+		// We cam simply add a new light
+		Game::Engine->LightingManager.AddDirectionalLight(dirlight);
+		m_revert_dir_light_index = Game::Engine->LightingManager.GetDirectionalLightSourceCount() - 1;
+		m_revert_dir_light_is_overriding = false;
+	}
+	else
+	{
+		// We need to override an existing light; pick the last, rather arbitrarily.  TODO: Potential risk if directional lights
+		// are removed part-way through use of the editor
+		m_revert_dir_light_index = Game::Engine->LightingManager.GetDirectionalLightSourceCount() - 1;
+		m_revert_dir_light = Game::Engine->LightingManager.GetDirectionalLightDataEntry(m_revert_dir_light_index); 
+		m_revert_dir_light_is_overriding = true; 
+		Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);	
+	}
+
+	// Initialise the volumetric line used for rendering the editor grid
+	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
+	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
+		(tex->GetTexture() != NULL ? tex : NULL));
+
+}
+
+// Revert any editor-specific render states and data
+void UI_ShipBuilder::RevertRenderData(void)
+{
+	// We either need to remove the editor directional light, or revert back to the original light, depending on 
+	// whether we added a new light or overrode an existing one on initialisation
+	if (m_revert_dir_light_is_overriding)
+	{
+		Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, m_revert_dir_light);
+	}
+	else
+	{
+		Game::Engine->LightingManager.RemoveDirectionalLight(m_revert_dir_light_index);
+	}
+
+	// Deallocate the editor gridline objects
+	if (m_gridline.RenderTexture)
+	{
+		SafeDelete(m_gridline.RenderTexture);
+	}
+}
+
 
 // Method to perform per-frame logic and perform rendering of the UI controller (excluding 2D render objects, which will be handled by the 2D render manager)
 void UI_ShipBuilder::Render(void)
@@ -83,17 +145,36 @@ void UI_ShipBuilder::Render(void)
 	// Perform any updates of the camera required since the previous frame
 	PerformCameraUpdate();
 
+	// Perform any rendering updates required for the editor
+	PerformRenderUpdate();
+
 	// Render the editor grid, depending on editor mode
 	RenderEditorGrid();
 
 }
 
 
+// Updates any editor-specific render data for the current frame
+void UI_ShipBuilder::PerformRenderUpdate(void)
+{
+	// Update the editor directional light to ensure it is always pointing 'out' of the camera
+	LightData dirlight = Game::Engine->LightingManager.GetDirectionalLightDataEntry(m_revert_dir_light_index);
+	dirlight.Direction = Game::Engine->GetCamera()->GetViewForwardBasisVectorF();
+	Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);
+
+	// TODO: TMP
+	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, Game::Engine->GetCamera()->GetOrientation());
+	OutputDebugString(concat("DIR: ")(Vector3ToString(dir))("  |  ")(Vector3ToString(dirlight.Direction))("\n").str().c_str());
+}
+
 // Method that is called when the UI controller is deactivated
 void UI_ShipBuilder::Deactivate(void)
 {
 	// Remove any reference to the target ship
 	m_ship = NULL;
+
+	// Revert any editor-specific render data
+	RevertRenderData();
 
 	// Unpause the game once the model builder is deactivated
 	Game::Application.Unpause();
@@ -475,7 +556,6 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 {
 	static const int EXTEND_GRID = 3;
 	const INTVECTOR3 &elsize = m_ship->GetElementSize();
-	VolumetricLine vol_line = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(0.75f, 0.75f, 0.75f, 0.35f), 0.5f, NULL);
 	
 	// Determine the local/world start and end positions
 	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_deck)));
@@ -490,10 +570,9 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	XMVECTOR add_vec = NULL_VECTOR;
 	for (int x = -EXTEND_GRID; x < (elsize.x + EXTEND_GRID); ++x)
 	{
-		vol_line.P1 = XMVectorAdd(start_pos, add_vec);
-		vol_line.P2 = XMVectorAdd(end_pos, add_vec);
-		Game::Engine->RenderVolumetricLine(vol_line);
-		OutputDebugString(concat("Adding V line: ")(Vector3ToString(vol_line.P1))(" to ")(Vector3ToString(vol_line.P2))("\n").str().c_str());
+		m_gridline.P1 = XMVectorAdd(start_pos, add_vec);
+		m_gridline.P2 = XMVectorAdd(end_pos, add_vec);
+		Game::Engine->RenderVolumetricLine(m_gridline);
 		add_vec = XMVectorAdd(add_vec, incr);
 	}
 	
@@ -506,10 +585,9 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	// Now generate 'horizontal' lines at each y coordinate
 	for (int y = -EXTEND_GRID; y < (elsize.y + EXTEND_GRID); ++y)
 	{
-		vol_line.P1 = XMVectorAdd(start_pos, add_vec);
-		vol_line.P2 = XMVectorAdd(end_pos, add_vec);
-		Game::Engine->RenderVolumetricLine(vol_line);
-		OutputDebugString(concat("Adding H line: ")(Vector3ToString(vol_line.P1))(" to ")(Vector3ToString(vol_line.P2))("\n").str().c_str());
+		m_gridline.P1 = XMVectorAdd(start_pos, add_vec);
+		m_gridline.P2 = XMVectorAdd(end_pos, add_vec);
+		Game::Engine->RenderVolumetricLine(m_gridline);
 		add_vec = XMVectorAdd(add_vec, incr);
 	}
 }

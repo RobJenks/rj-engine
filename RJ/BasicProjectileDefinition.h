@@ -77,6 +77,9 @@ public:
 	// Shutdown method - not required for this class
 	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
+	// Destructor
+	~BasicProjectileDefinition(void);
+
 protected:
 
 	std::string								m_code;

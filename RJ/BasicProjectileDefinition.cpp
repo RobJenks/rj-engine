@@ -52,7 +52,7 @@ Result BasicProjectileDefinition::SetTexture(const std::string & filename)
 	// Attempt to initialise a new texture object from the specified file
 	Texture *tex = new Texture();
 	Result result = tex->Initialise(filename);
-
+	
 	// We won't store the resulting texture if an error occured during initialisation
 	if (result != ErrorCodes::NoError)
 	{
@@ -76,4 +76,16 @@ Result BasicProjectileDefinition::SetTexture(Texture *texture)
 	VolumetricLineData.RenderTexture = texture; 
 	return ErrorCodes::NoError;
 }
+
+
+// Destructor
+BasicProjectileDefinition::~BasicProjectileDefinition(void)
+{
+	// Deallocate texture resource for the definition if applicable
+	if (VolumetricLineData.RenderTexture != NULL)
+	{
+		SafeDelete(VolumetricLineData.RenderTexture);
+	}
+}
+
 

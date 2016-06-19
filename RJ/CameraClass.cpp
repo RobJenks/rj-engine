@@ -100,7 +100,7 @@ void CameraClass::CalculateViewMatrixFromPositionData(const FXMVECTOR position, 
 	m_position = position;
 	m_orientation = orientation;
 	m_offsetmatrix = offsetmatrix;
-		
+
 	// First convert the orientation D3DXQUATERNION into a rotation matrix
 	m_rot = XMMatrixRotationQuaternion(orientation);
 			

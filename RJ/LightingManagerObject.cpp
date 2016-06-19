@@ -167,6 +167,12 @@ bool LightingManagerObject::AddDirectionalLight(const LightData & data)
 	return true;
 }
 
+// Returns a flag indicating whether we can add any new directional lights to the scene (or whether we are at the limit)
+bool LightingManagerObject::CanAddNewDirectionalLight(void) const
+{
+	return ((m_dir_light_count + 1) < LightingManagerObject::DIR_LIGHT_LIMIT);
+}
+
 // Update directional light data for the scene
 void LightingManagerObject::UpdateDirectionalLight(DirLightData::size_type index, const LightData & data)
 {

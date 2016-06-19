@@ -6,6 +6,7 @@
 #include <vector>
 #include "AlignedAllocator.h"
 #include "iUIController.h"
+#include "VolumetricLine.h"
 class ComplexShip;
 class UIButton;
 
@@ -50,6 +51,9 @@ public:
 	// Method to perform per-frame logic and perform rendering of the UI controller (excluding 2D render objects, which will be handled by the 2D render manager)
 	void												Render(void);
 
+	// Updates any editor-specific render data for the current frame
+	void												PerformRenderUpdate(void);
+
 	// Sets the ship under construction and focuses the view on it
 	void												SetShip(ComplexShip *ship);
 
@@ -64,6 +68,12 @@ public:
 
 	// Returns the current editor mode
 	CMPINLINE EditorMode								GetEditorMode(void) const			{ return m_mode; }
+
+	// Initialise any editor-specific render states and data
+	void												InitialiseRenderData(void);
+
+	// Revert any editor-specific render states and data
+	void												RevertRenderData(void);
 
 	// Zoom the view in or out
 	CMPINLINE void										ZoomIn(void)						{ PerformZoom(-GetZoomSpeedPerSecond() * Game::PersistentTimeFactor); }
@@ -171,6 +181,7 @@ protected:
 	ComplexShip *								m_ship;						// The ship currently being worked on
 	EditorMode									m_mode;						// Current editor mode
 	AXMVECTOR									m_centre;					// The centre point (relative to ship centre) that the camera is focused on
+	VolumetricLine								m_gridline;					// Volumetric line used to render the editor grid
 
 	int											m_deck;						// The deck that we are currently editing.  0-based
 
@@ -186,6 +197,11 @@ protected:
 	AXMVECTOR									m_rmb_down_start_centre;	// Centre point of the camera when the RMB was first depressed; used for panning
 	float										m_zoom_increment_amount;	// Zoom increment that is currently being applied
 	float										m_zoom_increment_end;		// Time at which the current zoom increment will end
+
+	// Data relating to editor-specific lighting
+	unsigned int								m_revert_dir_light_index;			// Index of the directional light that is being used for the editor
+	bool										m_revert_dir_light_is_overriding;	// Flag indicating whether the directional light is overriding another (that needs to be reverted afterwards)
+	LightData									m_revert_dir_light;					// Data on the directional light that was temporarily overridden
 
 };
 

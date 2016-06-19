@@ -47,10 +47,11 @@ public:
 	void								ClearAllLightSources(void);
 
 	// Returns the number of directional light sources present
-	CMPINLINE unsigned int				GetDirectionalLightSourceCount(void) const	{ return m_dir_light_count; }
+	CMPINLINE DirLightData::size_type	GetDirectionalLightSourceCount(void) const	{ return m_dir_light_count; }
 
 	// Returns a pointer to data on the global directional light source(s)
-	CMPINLINE const LightData *			GetDirectionalLightData(void)				{ return &(m_dir_light[0]); }
+	CMPINLINE const LightData *			GetDirectionalLightData(void)								{ return &(m_dir_light[0]); }
+	CMPINLINE LightData 				GetDirectionalLightDataEntry(DirLightData::size_type index)	{ return m_dir_light[index]; }
 
 	// Return the number of light sources currently registered
 	LightSources::size_type				GetLightSourceCount(void) const				{ return m_source_count; }
@@ -75,6 +76,7 @@ public:
 
 	// Add, change or remove directional light data from the scene
 	bool								AddDirectionalLight(const LightData & data);
+	bool								CanAddNewDirectionalLight(void) const;
 	void								UpdateDirectionalLight(DirLightData::size_type index, const LightData & data);
 	void								RemoveDirectionalLight(DirLightData::size_type index);
 	void								ClearDirectionalLightData(void);
