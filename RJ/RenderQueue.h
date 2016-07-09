@@ -14,8 +14,7 @@ class ModelBuffer;
 
 /* This header contains all structure and type definitions for the render queue maintained within the core engine */
 
-// Structure of a single instance in the instancing model.  16-bit aligned to allow use of SIMD member variables
-__declspec(align(16))
+// Structure of a single instance in the instancing model.  No special alignement requirements
 struct					RM_InstanceStructure
 {
 	XMFLOAT4X4						World;								// World matrix to transform into the world

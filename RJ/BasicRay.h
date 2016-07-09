@@ -14,6 +14,9 @@ public:
 	AXMVECTOR				Origin;					// Origin point of the ray 
 	AXMVECTOR				Direction;				// Ray direction in world space
 
+	// Default constructor; accepts no data
+	BasicRay(void) { }
+
 	// Constructor; accepts value to initialise the ray
 	BasicRay(const FXMVECTOR origin, const FXMVECTOR direction)
 		: Origin(origin), Direction(direction)

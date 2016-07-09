@@ -547,6 +547,12 @@
     <ClCompile Include="LightSource.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
+    <ClCompile Include="ObjectPicking.cpp">
+      <Filter>Engine\Picking</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Math\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1254,6 +1260,9 @@
     <ClInclude Include="LightSource.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
+    <ClInclude Include="ObjectPicking.h">
+      <Filter>Engine\Picking</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1501,6 +1510,9 @@
     </Filter>
     <Filter Include="Engine\Materials">
       <UniqueIdentifier>{89a23be2-347b-41a8-aac8-90ea8fef0e88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Picking">
+      <UniqueIdentifier>{0112f23b-bb53-447c-990b-ccff107fb515}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

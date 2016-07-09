@@ -5,7 +5,6 @@
 
 #include "DX11_Core.h"
 
-
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
 class Ray : public ALIGN16<Ray>
@@ -21,11 +20,13 @@ public:
 	// Constructors
 	Ray(void) { }
 	Ray(const FXMVECTOR origin, const FXMVECTOR direction)
-		: Origin(origin), Direction(direction)
 	{
-		InvDirection = XMVectorReciprocal(Direction);
-		Sign = XMVectorSelect(ONE_VECTOR_P, ONE_VECTOR_N, XMVectorLess(InvDirection, ZERO_VECTOR));
+		SetOrigin(origin);
+		SetDirection(direction);
 	}
+
+	// Construct a Ray from a BasicRay object
+	Ray(const BasicRay & basic_ray) : Ray(basic_ray.Origin, basic_ray.Direction) { }
 
 	// Copy constructor
 	Ray(const Ray &r)
@@ -37,24 +38,16 @@ public:
 	}
 
 	// Transforms the ray into a different coordinate system
-	void TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_P(&bases)[3])
-	{
-		XMVECTOR diff = XMVectorSubtract(Origin, origin);
-		
-		// Transform the ray origin
-		Origin = XMVectorSet(	XMVectorGetX(XMVector3Dot(diff, bases[0].value)),
-								XMVectorGetX(XMVector3Dot(diff, bases[1].value)),
-								XMVectorGetX(XMVector3Dot(diff, bases[2].value)), 0.0f);
+	void TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_P(&bases)[3]);
 
-		// Transform the ray direction
-		Direction = XMVectorSet(XMVectorGetX(XMVector3Dot(Direction, bases[0].value)),
-								XMVectorGetX(XMVector3Dot(Direction, bases[1].value)),
-								XMVectorGetX(XMVector3Dot(Direction, bases[2].value)), 0.0f);
-			
-		// Recalculate derived fields
-		InvDirection = XMVectorReciprocal(Direction);
-		Sign = XMVectorSelect(ONE_VECTOR_P, ONE_VECTOR_N, XMVectorLess(InvDirection, ZERO_VECTOR));
+	// Update the ray origin
+	CMPINLINE void				SetOrigin(const FXMVECTOR origin)
+	{
+		Origin = origin;
 	}
+
+	// Update the ray direction
+	void						SetDirection(const FXMVECTOR direction);
 
 };
 

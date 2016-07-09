@@ -276,16 +276,23 @@ public:
 																						const FXMVECTOR sphere_centre, float sphere_radius);
 
 	// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
-	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
+	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.  Performs only broadphase
+	// (bounding sphere) collision testing
 	template <typename T>
-	T *										PerformRaycast(const BasicRay & ray, const std::vector<T*> & objects) const;
+	T *										PerformRaycastBroadphase(const BasicRay & ray, std::vector<T*> & objects);
+
+	// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
+	// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.  Performs broadphase
+	// and narrowphase (e.g. OBB) collision testing.  Results of the closest collision are populated in RayIntersectionResult
+	template <typename T>
+	T *										PerformRaycastFull(const BasicRay & ray, std::vector<T*> & objects);
 
 	// Tests for the intersection of a ray with an AABB.  Results will not be returned/stored, only a flag indicating whether 
 	// the intersection took place.
 	/*bool									TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
 	CMPINLINE bool							TestRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
 	{
-		return TestRayVsAABBIntersection(ray, aabb, 1.0f);
+		return TestRayVsAABBIntersection(ray, aabb, FLT_MAX);		// By default, do not limit the extent of the ray
 	}*/
 
 	// Tests for the intersection of a ray with an AABB.  Results will be populated with min/max intersection points if an intersection
@@ -294,7 +301,7 @@ public:
 	bool									DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
 	CMPINLINE bool							DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
 	{
-		return DetermineRayVsAABBIntersection(ray, aabb, 1.0f);		// By default, limit to the exact extent of the ray
+		return DetermineRayVsAABBIntersection(ray, aabb, FLT_MAX);		// By default, do not limit the extent of the ray
 	}
 
 	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
@@ -303,7 +310,7 @@ public:
 	/*bool									TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
 	CMPINLINE bool							TestRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
 	{
-		return TestRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
+		return TestRayVsOBBIntersection(ray, obb, FLT_MAX);		// By default, do not limit the extent of the ray
 	}*/
 
 	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
@@ -313,8 +320,8 @@ public:
 	bool									DetermineRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb, float t);
 	CMPINLINE bool							DetermineRayVsOBBIntersection(const Ray & ray, const OrientedBoundingBox::CoreOBBData & obb)
 	{
-		return DetermineRayVsOBBIntersection(ray, obb, 1.0f);		// By default, limit to the exact extent of the ray
-	}
+		return DetermineRayVsOBBIntersection(ray, obb, FLT_MAX);		// By default, do not limit the extent of the ray
+	} 
 
 	// Tests for the intersection of a line vector with an OBB hierarchy, by treating as a ray and transforming into OBB-space so that each 
 	// OBB can be treated as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
@@ -330,7 +337,7 @@ public:
 	CMPINLINE bool							TestVolumetricRayVsOBBIntersection(	const Ray & ray, const FXMVECTOR ray_point_volume,
 																				const OrientedBoundingBox::CoreOBBData & obb)
 	{
-		return TestVolumetricRayVsOBBIntersection(ray, ray_point_volume, obb, 1.0f);
+		return TestVolumetricRayVsOBBIntersection(ray, ray_point_volume, obb, FLT_MAX);		// By default, do not limit the extent of the ray
 	}
 
 	// Determine the point of collision between a ray and an OBB hierarchy
@@ -439,9 +446,10 @@ protected:
 };
 
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
-// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.
+// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.  Performs only broadphase
+// (bounding sphere) collision testing
 template <typename T>
-T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*> & objects) const
+T * GamePhysicsEngine::PerformRaycastBroadphase(const BasicRay & ray, std::vector<T*> & objects)
 {
 	// We will keep track of the closest object that was intersected
 	T *closest = NULL;
@@ -462,10 +470,13 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 
 		// Get the difference vector from ray origin to sphere centre.  We can early-exit here if it is further away 
 		// than our current closest intersection
-		diff = XMVectorSubtract(ray.Origin, sphere_centre);
+		diff = XMVectorSubtract(ray.Origin, obj->GetPosition());
 		dsq = XMVector3LengthSq(diff);
-		if (XMVector2GreaterOrEqual(dsq, closest_dsq)) continue;							// Early-exit if the object is further away than our current best
 		a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));	// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+
+		// Early-exit if the distance to collision sphere surface is greater than our current best; if we don't exit here,
+		// we know this object is closer than our current best (although we don't know yet if it intersects)
+		if (XMVector2GreaterOrEqual(a0, closest_dsq)) continue;							
 
 		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
 		if (XMVector2LessOrEqual(a0, nullvec)) return obj;
@@ -479,10 +490,71 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 		// if (((a1 * a1) - a0) >= 0.0f)
 		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), nullvec))
 		{
-			// Test whether this intersection is closer than our current best, and record it if so
-			//if (dsq < closest_dsq)
+			// The object intersects.  We already know it is closer than the current best so record it here
+			closest = obj;
+			closest_dsq = a0;			// This is the distance to object collision sphere *surface*
+		}
+	}
+
+	// Return the closest intersected object, or NULL if no intersections were detected
+	return closest;
+}
+
+
+// Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial
+// partitioning performed; assumed that the object collection will be constructed reasonably intelligently.  Performs broadphase
+// and narrowphase (e.g. OBB) collision testing.  Results of the closest collision are populated in RayIntersectionResult
+template <typename T>
+T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> & objects)
+{
+	// We will keep track of the closest object that was intersected
+	T *closest = NULL;
+	XMVECTOR diff, dsq, a0, a1;
+	XMVECTOR closest_dsq = XMVectorReplicate(FLT_MAX);
+	static const AXMVECTOR nullvec = XMVectorZero();
+
+	// We will also need a full ray object to perform narrowphase testing, so construct it once here
+	Ray full_ray = Ray(ray);
+
+	// Loop through each object in turn
+	int n = (int)objects.size();
+	for (int i = 0; i < n; ++i)
+	{
+		// Here we will expand out the ray/sphere intersection test to avoid function calls, and to avoid duplicating
+		// calculations (e.g. difference vector from ray origin to sphere) which are required here & the ray/sphere test
+
+		// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
+		// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
+		T *obj = objects[i];
+
+		// Get the difference vector from ray origin to sphere centre.  We can early-exit here if it is further away 
+		// than our current closest intersection
+		diff = XMVectorSubtract(ray.Origin, obj->GetPosition());
+		dsq = XMVector3LengthSq(diff);
+		if (XMVector2GreaterOrEqual(dsq, closest_dsq)) continue;							// Early-exit if the object is further away than our current best
+		a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));	// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+
+		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
+		if (XMVector2LessOrEqual(a0, nullvec)) return obj;
+
+		// Project object difference vector onto the ray
+		a1 = XMVector3Dot(ray.Direction, diff);												// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
+		if (XMVector2GreaterOrEqual(a1, nullvec)) continue;
+
+		// Intersection occurs when Q(t) has real roots.  We can avoid testing the root by instead
+		// testing whether the discriminant [i.e. sqrtf(discrimininant)] is positive
+		// if (((a1 * a1) - a0) >= 0.0f)
+		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), nullvec))
+		{
+			// Test whether this intersection is closer than our current best
 			if (XMVector2Less(dsq, closest_dsq))
 			{
+				// We have a new best intersection bassed on broadphase testing.  Now also perform narrowphase
+				// on the candidate (if appropriate) before recording the result
+				if (obj->GetCollisionMode() == Game::CollisionMode::FullCollision &&
+					DetermineRayVsOBBIntersection(full_ray, obj->CollisionOBB.Data()) == false) continue;
+
+				// The object has passed narrowphase collision detection and is closest, so record it
 				closest = obj;
 				closest_dsq = dsq;
 			}
@@ -492,6 +564,7 @@ T * GamePhysicsEngine::PerformRaycast(const BasicRay & ray, const std::vector<T*
 	// Return the closest intersected object, or NULL if no intersections were detected
 	return closest;
 }
+
 
 
 #endif

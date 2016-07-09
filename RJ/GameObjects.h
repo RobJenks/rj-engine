@@ -46,6 +46,9 @@ namespace Game
 	extern Game::ObjectRegister					Objects;
 	extern Game::ObjectRegisterByInstanceCode	ObjectsByCode;
 
+	// Collection of all visible objects, recreated each frame
+	extern std::vector<iObject*>				VisibleObjects;
+
 	// Short-term lists of objects waiting to be registered or unregistered with the global collection; actioned each frame
 	extern std::vector<iObject*>				RegisterList;			// Store the object so it can be inserted into the global game objects list
 	extern std::vector<Game::ID_TYPE>			UnregisterList;			// Stored as ID in case object is being unregistered while it is being shut down
@@ -108,6 +111,18 @@ namespace Game
 	
 	// Returns the null object register entry
 	extern ObjectRegisterEntry *				NullObjectReference;
+
+	// Marks an object as visible.  No parameter checking; calling function must ensure the object is non-null
+	// or an exception will be thrown
+	CMPINLINE void								MarkObjectAsVisible(iObject *obj)
+	{
+		obj->MarkAsVisible();
+		Game::VisibleObjects.push_back(obj);
+	}
+
+	// Clears the visible object collection ready for the next frame
+	CMPINLINE void								ClearVisibleObjectCollection(void)	{ Game::VisibleObjects.clear(); }
+
 
 	// Test whether an object exists with the specified ID
 	CMPINLINE bool								ObjectExists(Game::ID_TYPE id)

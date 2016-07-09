@@ -80,7 +80,7 @@ public:
 
 	// Primary object fields are all contained within the core OBB data structure
 	// Will update the OBB if it has become invalidated before returning the data
-	CMPINLINE CoreOBBData &			Data(void)
+	CMPINLINE CoreOBBData &	Data(void)
 	{
 		if (IsInvalidated() && Parent) UpdateFromObject(*Parent);
 		return _Data;

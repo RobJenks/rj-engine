@@ -96,6 +96,7 @@
 #include "EnvironmentTree.h"				// DBG
 #include "CopyObject.h"						// DBG
 #include "LightSource.h"					// DBG
+#include "ObjectPicking.h"					// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -330,6 +331,9 @@ bool RJMain::Display(void)
 
 		// DEBUG DISPLAY FUNCTIONS
 		DEBUGDisplayInfo();
+
+		// Clear the register of all visible objects now that the cycle has completed
+		Game::ClearVisibleObjectCollection();
 
 		// End the current frame
 		Game::Engine->EndFrame();
@@ -2151,67 +2155,24 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		// Find the light source attached to ss
-		iObject *child = NULL; LightSource *ls = NULL;
-		unsigned int n = ss()->GetChildObjects().size();
-		for (unsigned int i = 0; i < n; ++i)
-		{
-			child = ss()->GetChildObjects().at(i).Child;
-			if (child && child->GetObjectType() == iObject::ObjectType::LightSourceObject) 
-			{
-				ls = (LightSource*)child; break;
-			}
-		}
+		iObject * obj = ObjectPicking::GetObjectAtMouseLocation();
+		float tmin = (obj ? Game::PhysicsEngine.RayIntersectionResult.tmin : 200.0f);
 
-		// Make sure we found the light source.  Then adjust if necessary and display info
-		if (ls)
-		{
-			float md = (Game::Keyboard.AltDown() ? -1.0f : 1.0f);
-			const float adj = 20.0f;
-			float delta = (md * adj * Game::TimeFactor);
+		BasicRay ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
+		Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
+		VolumetricLine line = VolumetricLine(
+			XMVectorAdd(ray.Origin, XMVectorScale(ray.Direction, 10.0f)),
+			XMVectorAdd(ray.Origin, XMVectorScale(ray.Direction, tmin)),
+			XMFLOAT4(1.0f, (obj ? 1.0f : 0.0f), (obj ? 1.0f : 0.0f), 0.75f), 1.0f,
+			(tex->GetTexture() != NULL ? tex : NULL));
+		Game::Engine->RenderVolumetricLine(line);
 
-			Light l = ls->GetLight();
-			if (Game::Keyboard.GetKey(DIK_F1))
-			{
-				l.Data.AmbientIntensity += delta;
-			}
-			if (Game::Keyboard.GetKey(DIK_F2))
-			{
-				l.Data.DiffuseIntensity += delta;
-			}
-			if (Game::Keyboard.GetKey(DIK_F3))
-			{
-				l.Data.SpecularPower += delta;
-			}
-			if (Game::Keyboard.GetKey(DIK_F5))
-			{
-				if (!Game::Keyboard.ShiftDown() && !Game::Keyboard.CtrlDown())		l.Data.Attenuation.Constant += (md * 0.005f);
-				else if (Game::Keyboard.ShiftDown() && !Game::Keyboard.CtrlDown())	l.Data.Attenuation.Linear += (md * 0.005f);
-				else if (Game::Keyboard.ShiftDown() && Game::Keyboard.CtrlDown())	l.Data.Attenuation.Exp += (md * 0.005f);
-				Game::Keyboard.LockKey(DIK_F5);
-			}
-
-			l.Data.AmbientIntensity = max(l.Data.AmbientIntensity, 0.0f);
-			l.Data.DiffuseIntensity = max(l.Data.DiffuseIntensity, 0.0f);
-			l.Data.SpecularPower = max(l.Data.SpecularPower, 0.0f);
-			l.Data.Attenuation.Constant = max(l.Data.Attenuation.Constant, 0.0f);
-			l.Data.Attenuation.Linear = max(l.Data.Attenuation.Linear, 0.0f);
-			l.Data.Attenuation.Exp = max(l.Data.Attenuation.Exp, 0.0f);
-
-			ls->SetLight(l);
-			if (Game::Keyboard.GetKey(DIK_F6))
-			{
-				ls->SetRange(frand_lh(0.0f, 1000.0f));
-				Game::Keyboard.LockKey(DIK_F6);
-			}
-
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Ambient: %.1f, Diffuse: %.1f, Specular: %.1f, Atten { Constant: %.4f, Linear: %.4f, Exp: %.4f }, Range: %.0f, Pos: %s // %s",
-				l.Data.AmbientIntensity, l.Data.DiffuseIntensity, l.Data.SpecularPower, l.Data.Attenuation.Constant,
-				l.Data.Attenuation.Linear, l.Data.Attenuation.Exp, ls->GetRange(), Vector3ToString(ls->GetPosition()).c_str(), 
-				Vector3ToString(Game::Engine->GetCamera()->GetPosition()).c_str());
-
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		}
+		 
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.2f, %.2f --> %s",
+			Game::Mouse.GetNormalisedMousePos().x, Game::Mouse.GetNormalisedMousePos().y,
+			(obj ? obj->GetInstanceCode().c_str() : "[NULL]"));
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+		
 	}
 }
 

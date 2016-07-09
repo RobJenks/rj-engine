@@ -327,8 +327,10 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
+    <ClCompile Include="ObjectPicking.cpp" />
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
+    <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
@@ -479,6 +481,7 @@
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="MValue.h" />
+    <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="RJDebug.h" />

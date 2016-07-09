@@ -7,6 +7,9 @@ namespace Game
 	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
 	Game::ObjectRegister					Objects(0);
 
+	// Collection of all visible objects, recreated each frame
+	std::vector<iObject*>					VisibleObjects(0);
+
 	// Secondary object collections
 	Game::ObjectRegisterByInstanceCode		ObjectsByCode(0);
 
@@ -32,6 +35,9 @@ namespace Game
 		Game::NullObjectReference->Active = true;
 		Game::NullObjectReference->RefCount = 1000U;				// Ref count should never hit zero so this is always active; use 1000 in case of unexpected error
 
+		// Reserve space in the primary object vectors for efficiency
+		Game::Objects.reserve(2048U);
+		Game::VisibleObjects.reserve(2048U);
 	}
 
 	// Deallocates all object register data on application shutdown

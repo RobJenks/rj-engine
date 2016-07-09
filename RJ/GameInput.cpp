@@ -1,4 +1,6 @@
 #include "GameInput.h"
+#include "ObjectPicking.h"
+#include "Ray.h"
 #include "GameDataExtern.h" //tmp
 #include "UserInterface.h" // tmp
 #include "CoreEngine.h"//tmp
@@ -59,16 +61,20 @@ Summary: Default constructor
 GameInputDevice::GameInputDevice()
 {
     m_pDevice = NULL;
+	m_hWnd = 0;
+	m_type = DIRECTINPUTTYPE::DIT_KEYBOARD;
     m_x = m_y = 0;
 	m_cursor = m_screencursor = INTVECTOR2(0, 0);
-    ZeroMemory( m_keyLock, sizeof( BOOL ) * 256 );
-    ZeroMemory( &m_mouseState, sizeof( DIMOUSESTATE ) );
-    ZeroMemory( m_keyboardState, 256 );
-    ZeroMemory( m_pressedKeys, 256 );
-    ZeroMemory( m_pressedButtons, 4 );
-	ZeroMemory( m_isdown, 4);
-	ZeroMemory( m_firstdown, 4);
-	ZeroMemory( m_firstup, 4);
+	m_mousepos_norm = m_mousedelta_norm = XMFLOAT2(0.0f, 0.0f);
+    memset(m_keyLock, 0, sizeof( BOOL ) * 256 );
+	memset(&m_mouseState, 0, sizeof(DIMOUSESTATE));
+	memset(m_keyboardState, 0 , sizeof(char) * 256);
+    memset(m_pressedKeys, 0, sizeof(BOOL) * 256 );
+	memset(m_pressedButtons, 0, sizeof(BOOL) * 4);
+	memset(m_isdown, 0, sizeof(BOOL) * 4);
+	memset(m_firstdown, 0, sizeof(BOOL) * 4);
+	memset(m_firstup, 0, sizeof(BOOL) * 4);
+	memset(m_startpos, 0, sizeof(INTVECTOR2) * 4);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -202,15 +208,9 @@ void GameInputDevice::Read()
 		m_mousedelta_norm.x = ((float)m_mouseState.lX / (float)Game::ScreenWidth);
 		m_mousedelta_norm.y = ((float)m_mouseState.lY / (float)Game::ScreenHeight);
 
-		// Determine a world position in the middle-distance that corresponds to the current mouse position
-		// This will be used as an approximation for e.g. mouse targeting or picking at runtime
-		//m_mouseworld_pos = XMVector3TransformCoord(	XMVectorSet(m_mousepos_norm.x, m_mousepos_norm.y, 1000.0f, 1.0f),
-		//											Game::Engine->GetRenderInverseViewProjectionMatrix());
-		m_mouseworld_pos = XMVector3TransformCoord(XMVector3TransformCoord(
-			XMVectorSet((float)(m_x - Game::ScreenCentre.x), (float)(m_y - Game::ScreenCentre.y), 1000.0f, 1.0f),
-			XMMatrixInverse(NULL, Game::Engine->GetRenderProjectionMatrix())), XMMatrixInverse(NULL, Game::Engine->GetRenderViewMatrix()));
-
-		m_mouseworld_vector = XMVectorSubtract(m_mouseworld_pos, Game::Engine->GetCamera()->GetPosition());
+		// Determine a world-space ray based on the camera and mouse position.  Will be used for e.g. mouse picking
+		ObjectPicking::ScreenSpaceToWorldBasicRay(m_mousepos_norm, m_mouse_world_basicray);
+		m_mouse_world_ray = Ray(m_mouse_world_basicray);
 
     }
     else if ( m_type == DIT_KEYBOARD )

@@ -1322,7 +1322,7 @@ void CoreEngine::RenderObject(iObject *object)
 	if (!m_frustrum->TestObjectVisibility(object)) return;
 
 	// Mark the object as visible
-	object->MarkAsVisible();
+	Game::MarkObjectAsVisible(object);
 
 	// We are rendering this object, so call its pre-render update method
 	object->PerformRenderUpdate();
@@ -1523,7 +1523,7 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 		}
 
 		// Mark the ship to indicate that it was visible this frame
-		ship->MarkAsVisible();
+		Game::MarkObjectAsVisible(ship);
 
 		// Increment the complex ship render count if any of its sections were rendered this frame
 		++m_renderinfo.ComplexShipRenderCount;
@@ -1989,7 +1989,7 @@ void CoreEngine::QueueActorRendering(Actor *actor)
 {
 	if (actor)
 	{
-		actor->MarkAsVisible();
+		Game::MarkObjectAsVisible(actor);
 		m_queuedactors.push_back(actor);
 	}
 }

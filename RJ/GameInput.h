@@ -8,6 +8,8 @@
 #include "DX11_Core.h"
 #include <dinput.h>
 #include "Utility.h"
+#include "BasicRay.h"
+#include "Ray.h"
 
 // Device types
 enum DIRECTINPUTTYPE
@@ -62,14 +64,9 @@ public:
 	CMPINLINE XMFLOAT2 GetNormalisedMouseDelta(void) const { return m_mousedelta_norm; }
 	CMPINLINE const XMFLOAT2 & GetNormalisedMouseDeltaRef(void) const { return m_mousedelta_norm; }
 
-	// Returns a world position in the middle-distance (1000 units from the camera) corresponding to the 
-	// current mouse cursor position.  Used for mouse targeting, picking etc.
-	CMPINLINE XMVECTOR GetMouseWorldPosition(void) const	{ return m_mouseworld_pos; }
-
-	// Returns the vector from camera position through the current mouse position in world space (at 
-	// a distance of 1000 units)
-	CMPINLINE XMVECTOR GetMouseWorldVector(void) const		{ return m_mouseworld_vector; }
-
+	CMPINLINE const BasicRay &		GetWorldSpaceMouseBasicRay(void) const		{ return m_mouse_world_basicray; }
+	CMPINLINE const Ray &			GetWorldSpaceMouseRay(void) const			{ return m_mouse_world_ray; }
+	
 	CMPINLINE BOOL* GetKeys() { return m_pressedKeys; }
 	
 	CMPINLINE BOOL* GetButtons() { return m_pressedButtons; }
@@ -117,8 +114,8 @@ private:
 	INTVECTOR2			  m_startpos[4];			// Stores the starting position of each mouse down event
 	XMFLOAT2			  m_mousepos_norm;			// Normalised position of the mouse, in the range [-1.0 +1.0] with (0,0) in the screen centre
 	XMFLOAT2			  m_mousedelta_norm;		// Normalised delta movement of the mouse this cycle, as a percentage of total screen bounds (range [0.0 1.0])
-	AXMVECTOR			  m_mouseworld_pos;			// Middle-distance position of the mouse in world space, for mouse targeting and picking
-	AXMVECTOR			  m_mouseworld_vector;		// Vector from the view position through the mouse position in world space, for raytracing
+	BasicRay			  m_mouse_world_basicray;	// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
+	Ray					  m_mouse_world_ray;		// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
 
 public:
 	struct ALPHANUM_KEY_DATA
