@@ -2158,7 +2158,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (true)
 	{			
 		iObject * obj = Game::CurrentPlayer->GetMouseSelectedNonPlayerObject();
-		float tmin = (obj ? Game::PhysicsEngine.RayIntersectionResult.tmin : 200.0f);
+		/*float tmin = (obj ? Game::PhysicsEngine.RayIntersectionResult.tmin : 200.0f);
 
 		BasicRay ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
 		Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
@@ -2168,7 +2168,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			XMFLOAT4(1.0f, (obj ? 1.0f : 0.0f), (obj ? 1.0f : 0.0f), 0.75f), 1.0f,
 			(tex->GetTexture() != NULL ? tex : NULL));
 		Game::Engine->RenderVolumetricLine(line);
-
+		*/
 		 
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.2f, %.2f --> %s",
 			Game::Mouse.GetNormalisedMousePos().x, Game::Mouse.GetNormalisedMousePos().y,

@@ -49,6 +49,10 @@ public:
 	// Update the ray direction
 	void						SetDirection(const FXMVECTOR direction);
 
+	// Generates a string representation of the ray
+	std::string					ToString(void) const;
+
+
 };
 
 

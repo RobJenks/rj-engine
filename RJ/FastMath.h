@@ -17,6 +17,7 @@ extern const float TWOPI;
 extern const float PIOVER2;
 extern const float ROOT2;
 extern const float ONE_BY_ROOT2;
+extern const float FLT_MAX_NEG;
 
 #define DegToRad(x) ((x)*PIBY180)
 #define RadToDeg(x) ((x)*_180BYPI)

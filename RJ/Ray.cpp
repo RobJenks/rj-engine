@@ -1,5 +1,6 @@
 #include "DX11_Core.h"
 #include "FastMath.h"
+#include "Utility.h"
 #include "Ray.h"
 
 // Set the ray direction, updating derived fields in the process
@@ -28,4 +29,10 @@ void Ray::TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_
 	// Recalculate derived fields
 	InvDirection = XMVectorReciprocal(Direction);
 	Sign = XMVectorSelect(ONE_VECTOR_P, ONE_VECTOR_N, XMVectorLess(InvDirection, ZERO_VECTOR));
+}
+
+// Generates a string representation of the ray
+std::string Ray::ToString(void) const
+{
+	return concat("Ray { ")(Vector3ToString(Origin))(" + k")(Vector3ToString(Direction))(" }").str();
 }

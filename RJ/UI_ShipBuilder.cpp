@@ -5,6 +5,7 @@
 #include "VolumetricLine.h"
 #include "Player.h"
 #include "ComplexShip.h"
+#include "OverlayRenderer.h"
 
 #include "RJMain.h"		// DBG
 #include "SimpleShip.h"	// DBG
@@ -75,6 +76,8 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_dir_light_index = 0;
 	m_revert_dir_light_is_overriding = false;
 	m_revert_dir_light = LightData();
+	m_mouse_is_over_element = false;
+	m_mouse_over_element = NULL_INTVECTOR3;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -162,9 +165,18 @@ void UI_ShipBuilder::PerformRenderUpdate(void)
 	dirlight.Direction = Game::Engine->GetCamera()->GetViewForwardBasisVectorF();
 	Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);
 
-	// TODO: TMP
-	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, Game::Engine->GetCamera()->GetOrientation());
-	OutputDebugString(concat("DIR: ")(Vector3ToString(dir))("  |  ")(Vector3ToString(dirlight.Direction))("\n").str().c_str());
+	// Render a highlighting effect on the element currently being highlighted, if applicable
+	if (m_mouse_is_over_element && m_mode == UI_ShipBuilder::EditorMode::TileMode)
+	{
+		Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(0.5f, 1.0f, 1.0f), 1.0f);
+		OutputDebugString(concat("Over ")(IntVectorToString(&m_mouse_over_element))("\n").str().c_str());
+	}
+	else
+	{
+		OutputDebugString(concat("NO: ")(m_mouse_is_over_element)(", ")(IntVectorToString(&m_mouse_over_element))("\n").str().c_str());
+		m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseRay(), /*m_deck, */m_mouse_over_element);
+	}
+	OutputDebugString(concat(Game::Mouse.GetWorldSpaceMouseBasicRay().ToString())("\n").str().c_str());
 }
 
 // Method that is called when the UI controller is deactivated
@@ -216,6 +228,9 @@ void UI_ShipBuilder::SetEditorMode(EditorMode mode)
 {
 	// If the mode is not changing then we don't need to do anything 
 	//if (mode == m_mode) return;
+
+	// Update the editor mode
+	m_mode = mode;
 
 	// Raise the deactivation event for the current editor mode
 	EditorModeDeactivated(m_mode, mode);
@@ -489,6 +504,9 @@ void UI_ShipBuilder::ProcessMouseInput(GameInputDevice *mouse, GameInputDevice *
 	long z = mouse->GetZDelta();
 	if (z > 0) ZoomInIncrement();
 	else if (z < 0) ZoomOutIncrement();
+
+	// Determine the ship element (if applicable) currently being selected by the mouse
+	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), /*m_deck, */m_mouse_over_element);
 }
 
 // Event raised when the RMB is first depressed

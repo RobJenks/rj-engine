@@ -81,11 +81,11 @@ public:
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness, const CXMVECTOR size);
-	void				RenderCuboidAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
+	void				RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
 															  float xSize, float ySize, float zSize);
 
 	// Methods to render semi-transparent overlay components
-	void				RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
+	void				RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
 
 	// Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 	// will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects
@@ -98,7 +98,7 @@ public:
 	void XM_CALLCONV	RenderNode(const FXMVECTOR pos, OverlayRenderer::RenderColour colour);
 
 	// Render a node at the specified element within the given environment
-	void				RenderNodeAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour);
+	void				RenderNodeAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour);
 
 	// Methods to render the path being taken by an actor through a complex ship environment
 	void				RenderActorPath(Actor *actor, float thickness);

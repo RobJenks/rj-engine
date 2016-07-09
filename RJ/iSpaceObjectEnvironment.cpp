@@ -639,14 +639,20 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray &
 	XMVECTOR pos = XMVectorMultiplyAdd(XMVectorReplicate(t), XMVector3NormalizeEst(ray.Direction), ray.Origin);
 
 	// Transform this position into local ship space, and make sure it is within the ship bounds
+	// We artificially extend the ship bounds slightly (by [1,1,1], and here only) to allow for imprecision in the intersection tests
 	XMVECTOR localpos = XMVector3TransformCoord(pos, m_inversezeropointworldmatrix);
-	if ((XMVector3GreaterOrEqual(localpos, NULL_VECTOR) && XMVector3LessOrEqual(localpos, m_size)) == false)
+	if ((XMVector3GreaterOrEqual(localpos, ONE_VECTOR_N) && XMVector3LessOrEqual(localpos, XMVectorAdd(m_size, ONE_VECTOR_P))) == false)
 		return false;
 
 	// We know this is a valid element within the ship, so determine and return the element location
-	outElement = Game::PhysicalPositionToElementLocation(localpos);	// TODO: MAY NEED A SLIGHTLY DIFF METHOD THAT ACCOUNTS FOR BOTH <= AND >=
+	// Clamp the position value within bounds that will translate directly to an element index ([0,0,0] to (size-[eps,eps,eps]))
+	// since we already know the collision is approximately within the ship bounds
+	static const AXMVECTOR clamp_neg = XMVectorSetW(NULL_VECTOR, FLT_MAX_NEG);			// Since XMVectorClamp() will assert Min<=Max, and the W component may not be
+	outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(localpos, clamp_neg, XMVectorAdd(m_size, Game::C_EPSILON_NEG_V)));
 	return true;
 }
+
+*** REPLICATE LOGIC CHANGES IN LEVEL-BASED INTERSECTION TEST METHOD.  THEN START USING LEVEL METHOD IN S.BUILDER & DEBUG IF NECESSARY ***
 
 // Determines the element intersected by a world-space ray on the specified level.  Returns a flag indicating whether any
 // intersection does take place
@@ -694,7 +700,7 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray &
 
 	// We know this is a valid element within the ship; now determine the exact element and make sure it is on this level
 	INTVECTOR3 el = Game::PhysicalPositionToElementLocation(localpos);	// TODO: MAY NEED A SLIGHTLY DIFF METHOD THAT ACCOUNTS FOR BOTH <= AND >=
-	if (el.y == level)
+	if (el.z == level)
 	{
 		outElement = el;
 		return true;

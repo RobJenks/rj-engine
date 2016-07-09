@@ -553,6 +553,9 @@
     <ClCompile Include="Ray.cpp">
       <Filter>Math\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="BasicRay.cpp">
+      <Filter>Math\Geometry</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

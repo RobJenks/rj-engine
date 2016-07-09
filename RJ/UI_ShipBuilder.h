@@ -203,6 +203,10 @@ protected:
 	bool										m_revert_dir_light_is_overriding;	// Flag indicating whether the directional light is overriding another (that needs to be reverted afterwards)
 	LightData									m_revert_dir_light;					// Data on the directional light that was temporarily overridden
 
+	// Fields related to selection of ship elements
+	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element
+	INTVECTOR3									m_mouse_over_element;				// Ship element that the mouse is currently over, if m_mouse_is_over_element == true
+
 };
 
 

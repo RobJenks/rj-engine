@@ -260,8 +260,8 @@ void OverlayRenderer::RenderElementBox(iSpaceObjectEnvironment *ship, const INTV
 		XMMATRIX trans = XMMatrixTranslationFromVector(
 			XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V));
 
-		// Render a box at the desired location by multiplying the ship world matrix by this transform
-		RenderBox( XMMatrixMultiply(trans, ship->GetWorldMatrix()), colour, thickness, Game::C_CS_ELEMENT_SCALE );
+		// Render a box at the desired location by multiplying the ship zero-point world matrix by this transform
+		RenderBox( XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), colour, thickness, Game::C_CS_ELEMENT_SCALE );
 	}
 }
 
@@ -276,7 +276,7 @@ void OverlayRenderer::RenderElementBoxAtRelativeElementLocation(iSpaceObjectEnvi
 		XMMATRIX trans = XMMatrixTranslationFromVector(VectorFromIntVector3(elementpos));
 
 		// Render a box at the desired location by multiplying the ship world matrix by this transform
-		RenderBox( XMMatrixMultiply(trans, ship->GetWorldMatrix()), colour, thickness, Game::C_CS_ELEMENT_SCALE );
+		RenderBox( XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), colour, thickness, Game::C_CS_ELEMENT_SCALE );
 	}
 }
 
@@ -292,7 +292,7 @@ void OverlayRenderer::RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment
 		XMMATRIX trans = XMMatrixTranslationFromVector(VectorFromIntVector3(elementpos));
 
 		// Render a box at the desired location by multiplying the ship world matrix by this transform
-		RenderBox( XMMatrixMultiply(trans, ship->GetWorldMatrix()), colour, thickness, xSize, ySize, zSize);
+		RenderBox( XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), colour, thickness, xSize, ySize, zSize);
 	}
 }
 
@@ -344,7 +344,7 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 
 
 // Method to add a cuboid for rendering in a ship-relative element space location.
-void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
+void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
 														    float xSize, float ySize, float zSize)
 {
 	// Parameter check
@@ -360,7 +360,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObject *ship, 
 			XMVectorMultiply(size, HALF_VECTOR)));
 
 		// Scale & translate the current world matrix before passing it to the engine rendering method
-		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetWorldMatrix());
+		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
 		Game::Engine->RenderModel(m_models[(int)colour], mworld);
 	}
 }
@@ -407,7 +407,7 @@ void OverlayRenderer::RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::
 }
 
 // Renders a semi-transparent ovelay above the specified element
-void OverlayRenderer::RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
+void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
 {
 	// Parameter check
 	if (ship)
@@ -419,11 +419,11 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObject *ship, const INTVECTOR3 
 		// 									(element.y * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT);
 		XMVECTOR add = XMVectorSetY(XMVectorReplicate(Game::C_CS_ELEMENT_MIDPOINT), Game::C_CS_ELEMENT_SCALE);		// { MidP, Scale, MidP }
 		XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorAdd(													// (El*Scale) + { MidP, Scale, MidP }
-			XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V), add));			
+			XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V), add));
 
 		// Scale to element size, then translate to the relevant place for rendering
 		Game::Engine->RenderModel(m_blueprintoverlay, ship->GetPosition(), colour, alpha,
-			XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship->GetWorldMatrix()));
+			XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship->GetZeroPointWorldMatrix()));
 	}
 }
 
@@ -473,7 +473,7 @@ void XM_CALLCONV OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRende
 }
 
 // Method to add a node for rendering in a ship-relative element space location.  Spins in place.
-void OverlayRenderer::RenderNodeAtRelativeElementLocation(iSpaceObject *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour)
+void OverlayRenderer::RenderNodeAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour)
 {
 	// Parameter check
 	if (ship)
@@ -490,7 +490,7 @@ void OverlayRenderer::RenderNodeAtRelativeElementLocation(iSpaceObject *ship, IN
 			m_matrix_nodescale_and_origin,
 			mrot),
 			mtrans),
-			ship->GetWorldMatrix());
+			ship->GetZeroPointWorldMatrix());
 		Game::Engine->RenderModel(m_models[(int)colour], mworld);
 	}
 }

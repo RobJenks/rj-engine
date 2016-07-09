@@ -237,6 +237,7 @@
     <ClCompile Include="BasicProjectile.cpp" />
     <ClCompile Include="BasicProjectileDefinition.cpp" />
     <ClCompile Include="BasicProjectileSet.cpp" />
+    <ClCompile Include="BasicRay.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CameraPath.cpp" />
