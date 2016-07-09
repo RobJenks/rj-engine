@@ -319,9 +319,14 @@ bool RJMain::Display(void)
 		// Begin generating this frame
 		Game::Engine->BeginFrame();
 
+		// Clear the register of all visible objects.  This is generated during rendering so should immediately 
+		// precede the call to CoreEngine::Render()
+		Game::ClearVisibleObjectCollection();
+
 		// Pass to the main rendering function in the core engine, to render everything required in turn
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render)
 		{
+			// Perform all rendering
 			Game::Engine->Render();
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render);
@@ -331,9 +336,6 @@ bool RJMain::Display(void)
 
 		// DEBUG DISPLAY FUNCTIONS
 		DEBUGDisplayInfo();
-
-		// Clear the register of all visible objects now that the cycle has completed
-		Game::ClearVisibleObjectCollection();
 
 		// End the current frame
 		Game::Engine->EndFrame();
@@ -2155,7 +2157,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		iObject * obj = ObjectPicking::GetObjectAtMouseLocation();
+		iObject * obj = Game::CurrentPlayer->GetMouseSelectedNonPlayerObject();
 		float tmin = (obj ? Game::PhysicsEngine.RayIntersectionResult.tmin : 200.0f);
 
 		BasicRay ray = Game::Mouse.GetWorldSpaceMouseBasicRay();

@@ -13,6 +13,7 @@
 #include "MovementLogic.h"
 #include "iSpaceObjectEnvironment.h"
 #include "ObjectReference.h"
+#include "ObjectPicking.h"
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -79,6 +80,33 @@ void Player::UpdatePlayerState(void)
 	{
 		// If the override is active, directly override the relevant fields with stored parameters now
 		ExecuteOverrideOfPlayerEnvironment();
+	}
+
+	// Perform a raycast to determine whether the player currently has their mouse over an 
+	// object, and record it for use this frame
+	iObject *mouse_obj = ObjectPicking::GetObjectAtMouseLocation();
+	m_mouse_over_object = mouse_obj;
+
+	// We also want to record the non-player entity object being selected, if relevant, since this
+	// will allow selection of objects 'past' the player
+	iObject *exclude = (m_state == Player::StateType::ShipPilot ? (iObject*)m_playership() : (iObject*)m_actor());
+	if (mouse_obj != NULL && mouse_obj == exclude)
+	{
+		// Our player entity has been selected by the raycast, so derive a different result for the non-player result
+		std::vector<iObject*> objects;
+		std::vector<iObject*>::size_type n = Game::VisibleObjects.size();
+		objects.reserve(n);
+		for (std::vector<iObject*>::size_type i = 0; i < n; ++i)
+		{
+			if (Game::VisibleObjects[i] != exclude) objects.push_back(Game::VisibleObjects[i]);
+		}
+
+		m_mouse_over_obj_nonplayer = Game::PhysicsEngine.PerformRaycastFull(Game::Mouse.GetWorldSpaceMouseBasicRay(), objects);
+	}
+	else
+	{
+		// If the selected object is not the player entity, or is NULL, simply replicate for the non-player object
+		m_mouse_over_obj_nonplayer = mouse_obj;
 	}
 }
 

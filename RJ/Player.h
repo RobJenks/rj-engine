@@ -109,6 +109,10 @@ public:
 	void							ToggleShipMouseControlMode(void);
 	void							SetShipMouseControlMode(MouseInputControlMode mode);
 
+	// Returns the object currently selected by the player using the mouse
+	iObject *						GetMouseSelectedObject(void)				{ return m_mouse_over_object(); }
+	iObject *						GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }
+
 	// Constructor / destructor
 	Player(void);
 	~Player(void);
@@ -174,6 +178,11 @@ public:
 	AXMVECTOR									m_overrideorientation;
 	ObjectReference<Ship>						m_overrideship;
 	ObjectReference<Ship>						m_overridepriorship;
+
+	// Record the object current selected by the player, for use throughout the frame
+	ObjectReference<iObject>					m_mouse_over_object;			// Current mouse-selected object
+	ObjectReference<iObject>					m_mouse_over_obj_nonplayer;		// Current mouse-selected object, excluding the player entity
+
 };
 
 
