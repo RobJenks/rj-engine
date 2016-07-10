@@ -614,8 +614,12 @@ public:
 	CMPINLINE const XMMATRIX 			GetWorldMatrix(void)						{ return m_worldmatrix; }
 	void								RecalculateWorldMatrix(void);
 
-	// Return pointers to the parent objects associated with this tile
+	// Return pointer to the parent object that owns this tile
 	CMPINLINE iSpaceObjectEnvironment *			GetParent(void) const				{ return m_parent; }
+
+	// Override method; sets the parent pointer manually.  Performs no other recalculation.  Only to be used by internal
+	// methods that can perform the calculation directly.  Use iSpaceObjectEnvironment::AddTile() to correctly add to a parent environment
+	CMPINLINE void								OverrideParentEnvironmentReference(iSpaceObjectEnvironment *env) { m_parent = env; }
 
 	// Methods to query and set connection points for elements within the tile
 	CMPINLINE ElementConnectionSet *			GetConnections(void)										{ return &m_connections; }					

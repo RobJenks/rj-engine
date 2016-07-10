@@ -6,6 +6,8 @@
 #include "Player.h"
 #include "ComplexShip.h"
 #include "OverlayRenderer.h"
+#include "ComplexShipTile.h"
+#include "CSCorridorTile.h"
 
 #include "RJMain.h"		// DBG
 #include "SimpleShip.h"	// DBG
@@ -78,6 +80,8 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_dir_light = LightData();
 	m_mouse_is_over_element = false;
 	m_mouse_over_element = NULL_INTVECTOR3;
+	m_tile_being_placed = NULL;
+	m_placing_generic_corridors = false;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -151,6 +155,9 @@ void UI_ShipBuilder::Render(void)
 	// Perform any rendering updates required for the editor
 	PerformRenderUpdate();
 
+	// Render the current selection and any objects part-way through being placed
+	RenderCurrentActions();
+
 	// Render the editor grid, depending on editor mode
 	RenderEditorGrid();
 
@@ -164,13 +171,124 @@ void UI_ShipBuilder::PerformRenderUpdate(void)
 	LightData dirlight = Game::Engine->LightingManager.GetDirectionalLightDataEntry(m_revert_dir_light_index);
 	dirlight.Direction = Game::Engine->GetCamera()->GetViewForwardBasisVectorF();
 	Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);
+}
 
-	// Render a highlighting effect on the element currently being highlighted, if applicable
+// Render the current selection and any objects part-way through being placed
+void UI_ShipBuilder::RenderCurrentActions()
+{
+	// Actions to be performed when the user is in tile mode and has the mouse over a valid ship tile
 	if (m_mouse_is_over_element && m_mode == UI_ShipBuilder::EditorMode::TileMode)
 	{
+		// Render a highlighting effect on the element currently being highlighted, if applicable
 		Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(128.0f, 255.0f, 255.0f), 255.0f);
+
+		// If the user is trying to place a ship tile we may also need to render it here
+		RenderTilePlacement();
 	}
 }
+
+// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
+void UI_ShipBuilder::MovePlacementTile(const INTVECTOR3 & location)
+{
+	// Parameter check
+	if (!m_tile_being_placed) return;
+
+	// Parameter check
+	const INTVECTOR3 & envsize = m_ship->GetElementSize();
+	INTVECTOR3 tile_far_el = (location + (m_tile_being_placed->GetElementSize()) - ONE_INTVECTOR3);
+	if (location < NULL_INTVECTOR3 || !(location < envsize) || tile_far_el < NULL_INTVECTOR3 || !(tile_far_el < envsize)) return;
+
+	// Set the tile parent to the environment being constructed (though not the reverse, so the environment never
+	// knows that it owns this tile)
+	m_tile_being_placed->OverrideParentEnvironmentReference(m_ship);
+
+	// Set the tile location.  This will recalculate the tile world matrix etc. as well
+	m_tile_being_placed->SetElementLocation(location);
+}
+
+// If a tile is currently being placed, renders the tile and performs any other associated rendering
+void UI_ShipBuilder::RenderTilePlacement(void)
+{
+	// If we are not placing a tile then there is nothing to do here
+	if (!m_tile_being_placed) return;
+
+	// We can only place a tile if the mouse is currently over an environment element
+	if (!m_mouse_is_over_element) return;
+
+	// Test whether we are attempting to place the tile in a valid location.  
+	m_tile_placement_issues.clear();
+	bool is_valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
+
+	// Now perform rendering based on the result
+	if (is_valid)
+	{
+		// If the proposed location is valid then render the tile itself.  We need to set the tile location 
+		// accordingly since it is not actually part of the parent ship
+		MovePlacementTile(m_mouse_over_element);
+		Game::Engine->RenderComplexShipTile(m_tile_being_placed, m_ship);
+
+		// Render the selection highlight to reflect the fact this is a valid placement
+		*** DO THIS, AND BELOW FOR !VALID ***
+	}
+	else
+	{
+		// Render the selection highlight to reflect the fact this is not a valid placement
+
+		// Render each placement error in turn, to show why the tile cannot be placed here
+
+	}
+	
+}
+
+// Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
+// a list of errors to the supplied output vector, if any exist
+bool UI_ShipBuilder::TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location,
+										std::vector<TilePlacementIssue> & outPlacementIssues)
+{
+	// Parameter check
+	if (!tile) return false;
+
+	// Start by assuming the placement is valid and then test all conditions that could invalidate it
+	bool is_valid = true;
+
+	// Derive some required data
+	INTVECTOR3 el;
+	const INTVECTOR3 & envsize = m_ship->GetElementSize();
+	INTVECTOR3 tile_far_el = (location + (tile->GetElementSize()) - ONE_INTVECTOR3);
+	
+	// Tile is placed with its (0,0,0) element at the mouse position.  Iterate over the full space
+	// of elements to be covered by this tile and validate them
+	ComplexShipElement *element;
+	for (int x = location.x; x <= tile_far_el.x; ++x)
+	{
+		for (int y = location.y; y <= tile_far_el.y; ++y)
+		{
+			for (int z = location.z; z <= tile_far_el.z; ++z)
+			{
+				// Test whether the element lies within the ship bounds
+				el = INTVECTOR3(x, y, z);
+				if (el < NULL_INTVECTOR3 || !(el < envsize))
+				{
+					outPlacementIssues.push_back(TilePlacementIssue(TilePlacementIssueType::OutOfEnvironmentBounds, el));
+					is_valid = false;
+				}
+
+				// Test whether the element is already occupied (if it exists; 'el' may be out of bounds)
+				element = m_ship->GetElement(el);
+				if (element && element->GetTile() != NULL)
+				{
+					outPlacementIssues.push_back(TilePlacementIssue(TilePlacementIssueType::ElementAlreadyOccupied, el));
+					is_valid = false;
+				}
+			}
+		}
+	}
+
+	// Return the final result 
+	return is_valid;
+}
+
+
 
 // Method that is called when the UI controller is deactivated
 void UI_ShipBuilder::Deactivate(void)
@@ -468,6 +586,11 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	// Adjust which deck of the ship is being modified
 	if (keys[DIK_O])			{ MoveUpLevel();												keyboard->LockKey(DIK_O); }
 	else if (keys[DIK_L])		{ MoveDownLevel();												keyboard->LockKey(DIK_L); }
+
+	// TODO: DEBUG
+	if (keys[DIK_T])			{ 
+		m_tile_being_placed = ComplexShipTile::Create("lifesupport_huge_01"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_T);
+	}
 
 	// Consume all keys within this UI so they are not passed down to the main application
 	keyboard->ConsumeAllKeys();

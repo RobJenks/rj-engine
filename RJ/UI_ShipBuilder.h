@@ -19,7 +19,7 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(UI_ShipBuilder)
 
-	// Enumeration of possible editor modes
+		// Enumeration of possible editor modes
 	enum EditorMode { ShipSectionMode = 0, TileMode, ObjectMode };
 
 	// Enumeration of possible camera states
@@ -85,7 +85,7 @@ public:
 	float												GetDefaultZoomLevel(void) const;
 	float												GetMinZoomLevel(void) const;
 	float												GetZoomIncrement(void) const;
-	
+
 	// Revert the camera back to base position/orientation/zoom
 	void												RevertCamera(void);
 
@@ -133,6 +133,20 @@ public:
 
 protected:
 
+	// Enumeration of possible tile placement issue types
+	enum TilePlacementIssueType { OutOfEnvironmentBounds = 0, ElementAlreadyOccupied };
+
+	// Struct holding data on a tile placement issue
+	struct TilePlacementIssue
+	{
+		TilePlacementIssueType					Type;						// The type of issue.  Mandatory
+		INTVECTOR3								Element;					// Specific element with the error (if applicable based on type)
+
+		TilePlacementIssue(void) { }
+		TilePlacementIssue(TilePlacementIssueType type) : Type(type) { }
+		TilePlacementIssue(TilePlacementIssueType type, const INTVECTOR3 & element) : Type(type), Element(element) { }
+	};
+
 	// Initialise the UI and focus on the target ship
 	void										InitialiseForShip(ComplexShip *ship);
 
@@ -176,9 +190,24 @@ protected:
 	// Render the editor grid, depending on editor mode
 	void										RenderEditorGrid(void);
 
+	// Render the current selection and any objects part-way through being placed
+	void										RenderCurrentActions(void);
+
+	// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
+	void										MovePlacementTile(const INTVECTOR3 & location);
+
+	// If a tile is currently being placed, renders the tile and performs any other associated rendering
+	void										RenderTilePlacement(void);
+
+	// Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
+	// a list of errors to the supplied output vector, if any exist
+	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location, 
+																	std::vector<TilePlacementIssue> & outPlacementIssues);
+
 	// Internal methods to get the current position/orientation of the game camera
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
+
 
 
 
@@ -211,6 +240,13 @@ protected:
 	// Fields related to selection of ship elements
 	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element
 	INTVECTOR3									m_mouse_over_element;				// Ship element that the mouse is currently over, if m_mouse_is_over_element == true
+
+	// Fields relating to the selection and placing of ship tiles
+	ComplexShipTile *							m_tile_being_placed;				// The ship tile that follows the mouse and can be placed in the environment
+	bool										m_placing_generic_corridors;		// Flag indicating whether the corridor tile we are placing is to be adapted to meet 
+																					// the connections of tiles around it
+	std::vector<TilePlacementIssue>				m_tile_placement_issues;			// Vector populated with each tile placement error that is encountered
+
 
 };
 
