@@ -174,7 +174,6 @@ void UI_ShipBuilder::PerformRenderUpdate(void)
 	else
 	{
 		OutputDebugString(concat("NO: ")(m_mouse_is_over_element)(", ")(IntVectorToString(&m_mouse_over_element))("\n").str().c_str());
-		m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseRay(), /*m_deck, */m_mouse_over_element);
 	}
 	OutputDebugString(concat(Game::Mouse.GetWorldSpaceMouseBasicRay().ToString())("\n").str().c_str());
 }
@@ -506,7 +505,7 @@ void UI_ShipBuilder::ProcessMouseInput(GameInputDevice *mouse, GameInputDevice *
 	else if (z < 0) ZoomOutIncrement();
 
 	// Determine the ship element (if applicable) currently being selected by the mouse
-	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), /*m_deck, */m_mouse_over_element);
+	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_deck, m_mouse_over_element);
 }
 
 // Event raised when the RMB is first depressed

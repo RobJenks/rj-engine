@@ -652,16 +652,14 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray &
 	return true;
 }
 
-*** REPLICATE LOGIC CHANGES IN LEVEL-BASED INTERSECTION TEST METHOD.  THEN START USING LEVEL METHOD IN S.BUILDER & DEBUG IF NECESSARY ***
-
 // Determines the element intersected by a world-space ray on the specified level.  Returns a flag indicating whether any
 // intersection does take place
 bool iSpaceObjectEnvironment::DetermineElementIntersectedByRay(const Ray & ray, int level, INTVECTOR3 & outElement)
 {
 	// Generate an AABB that represents one level of the ship
 	static const float level_height = Game::ElementLocationToPhysicalPosition(1);
-	XMVECTOR bounds = XMVectorSetY(CollisionOBB.Data().ExtentV, level_height);
-	AABB slice = AABB(XMVectorNegate(bounds), bounds);
+	XMVECTOR size = XMVectorSetY(m_size, level_height);
+	AABB slice = AABB(NULL_VECTOR, size);
 
 	// Transform the ray into the local space of this AABB
 	Ray local_ray = Ray(
@@ -675,38 +673,21 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRay(const Ray & ray, 
 	// Perform a ray/AABB intersection test to see if this floor is hit by the ray
 	if (Game::PhysicsEngine.DetermineRayVsAABBIntersection(local_ray, slice))
 	{
-		// We do have an intersection.  The intersection time has been calculated by the physics engine
-		// so simply pass it to the oveloaded function
-		return DetermineElementIntersectedByRayAtTime(ray, level, Game::PhysicsEngine.RayIntersectionResult.tmin, outElement);
-	}
-	else
-	{
-		// There is no intersection at all, so return false immediately
-		return false;
-	}
-}
+		// Get the AABB-local position of this intersection
+		XMVECTOR local_pos = XMVectorMultiplyAdd(XMVector3NormalizeEst(local_ray.Direction), 
+			XMVectorReplicate(Game::PhysicsEngine.RayIntersectionResult.tmin), local_ray.Origin);
 
-// Determines the element intersected by a world-space ray, on the specified level, at the specified 
-// time t along the ray.  Returns a flag indicating whether any intersection does take place
-bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray & ray, int level, float t, INTVECTOR3 & outElement)
-{
-	// Determine the world-space position corresponding to this time t along the ray (at Pos = Origin + (t * Direction))
-	XMVECTOR pos = XMVectorMultiplyAdd(XMVectorReplicate(t), XMVector3NormalizeEst(ray.Direction), ray.Origin);
-
-	// Transform this position into local ship space, and make sure it is within the ship bounds
-	XMVECTOR localpos = XMVector3TransformCoord(pos, m_inversezeropointworldmatrix);
-	if ((XMVector3GreaterOrEqual(localpos, NULL_VECTOR) && XMVector3LessOrEqual(localpos, m_size)) == false)
-		return false;
-
-	// We know this is a valid element within the ship; now determine the exact element and make sure it is on this level
-	INTVECTOR3 el = Game::PhysicalPositionToElementLocation(localpos);	// TODO: MAY NEED A SLIGHTLY DIFF METHOD THAT ACCOUNTS FOR BOTH <= AND >=
-	if (el.z == level)
-	{
-		outElement = el;
+		// We know this is a valid element within the slice, so determine and return the element location
+		// Clamp the position value within bounds that will translate directly to an element index ([0,0,0] to (size-[eps,eps,eps]))
+		// since we already know the collision is approximately within the ship bounds
+		static const AXMVECTOR clamp_neg = XMVectorSetW(NULL_VECTOR, FLT_MAX_NEG);			// Since XMVectorClamp() will assert Min<=Max, and the W component may not be
+		outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(local_pos, clamp_neg, XMVectorAdd(size, Game::C_EPSILON_NEG_V)));
+		outElement.z = level;
 		return true;
 	}
 	else
 	{
+		// There is no intersection at all, so return false immediately
 		return false;
 	}
 }
