@@ -72,7 +72,7 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_centre_from = NULL_VECTOR;
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
-	m_deck = 0;
+	m_level = 0;
 	m_revert_dir_light_index = 0;
 	m_revert_dir_light_is_overriding = false;
 	m_revert_dir_light = LightData();
@@ -168,14 +168,8 @@ void UI_ShipBuilder::PerformRenderUpdate(void)
 	// Render a highlighting effect on the element currently being highlighted, if applicable
 	if (m_mouse_is_over_element && m_mode == UI_ShipBuilder::EditorMode::TileMode)
 	{
-		Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(0.5f, 1.0f, 1.0f), 1.0f);
-		OutputDebugString(concat("Over ")(IntVectorToString(&m_mouse_over_element))("\n").str().c_str());
+		Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(128.0f, 255.0f, 255.0f), 255.0f);
 	}
-	else
-	{
-		OutputDebugString(concat("NO: ")(m_mouse_is_over_element)(", ")(IntVectorToString(&m_mouse_over_element))("\n").str().c_str());
-	}
-	OutputDebugString(concat(Game::Mouse.GetWorldSpaceMouseBasicRay().ToString())("\n").str().c_str());
 }
 
 // Method that is called when the UI controller is deactivated
@@ -471,6 +465,10 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);			keyboard->LockKey(DIK_2); }
 	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);		keyboard->LockKey(DIK_3); }
 
+	// Adjust which deck of the ship is being modified
+	if (keys[DIK_O])			{ MoveUpLevel();												keyboard->LockKey(DIK_O); }
+	else if (keys[DIK_L])		{ MoveDownLevel();												keyboard->LockKey(DIK_L); }
+
 	// Consume all keys within this UI so they are not passed down to the main application
 	keyboard->ConsumeAllKeys();
 }
@@ -505,7 +503,7 @@ void UI_ShipBuilder::ProcessMouseInput(GameInputDevice *mouse, GameInputDevice *
 	else if (z < 0) ZoomOutIncrement();
 
 	// Determine the ship element (if applicable) currently being selected by the mouse
-	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_deck, m_mouse_over_element);
+	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_level, m_mouse_over_element);
 }
 
 // Event raised when the RMB is first depressed
@@ -575,7 +573,7 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	const INTVECTOR3 &elsize = m_ship->GetElementSize();
 	
 	// Determine the local/world start and end positions
-	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_deck)));
+	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_level)));
 	XMVECTOR start_pos = XMVector3TransformCoord(local_start_pos, m_ship->GetZeroPointWorldMatrix());
 	XMVECTOR end_pos = XMVectorAdd(start_pos, XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 
 		Game::ElementLocationToPhysicalPosition(elsize.z + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
@@ -609,6 +607,20 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	}
 }
 
+// Adjust the level of the environment currently being modified
+void UI_ShipBuilder::MoveToLevel(int level)
+{
+	// Validate the parameter; constrain to be within the valid range
+	const INTVECTOR3 elsize = m_ship->GetElementSize();
+	level = clamp(level, 0, elsize.z - 1);
 
+	// Take no action if we are already on the desired level
+	if (level == m_level) return;
+
+	// (Adjust visual cues, begin animation to move editor/ship up or down appropriately */
+
+	// Store the new level being edited
+	m_level = level;
+}
 
 

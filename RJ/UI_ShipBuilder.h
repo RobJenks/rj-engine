@@ -89,7 +89,10 @@ public:
 	// Revert the camera back to base position/orientation/zoom
 	void												RevertCamera(void);
 
-
+	// Adjust the level of the environment currently being modified
+	CMPINLINE void										MoveUpLevel(void)					{ MoveToLevel(m_level + 1); }
+	CMPINLINE void										MoveDownLevel(void)					{ MoveToLevel(m_level - 1); }
+	void												MoveToLevel(int level);
 
 	// Method to process user input into the active UI controller
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
@@ -177,13 +180,15 @@ protected:
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
 
+
+
 	// Member variables
 	ComplexShip *								m_ship;						// The ship currently being worked on
 	EditorMode									m_mode;						// Current editor mode
 	AXMVECTOR									m_centre;					// The centre point (relative to ship centre) that the camera is focused on
 	VolumetricLine								m_gridline;					// Volumetric line used to render the editor grid
 
-	int											m_deck;						// The deck that we are currently editing.  0-based
+	int											m_level;					// The level of the environment that we are currently editing.  0-based
 
 	SBCameraState								m_camerastate;				// Indicates the current state of the editor camera
 	AXMVECTOR									m_camera_rotate;			// Current camera rotation about centre
