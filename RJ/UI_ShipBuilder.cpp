@@ -180,7 +180,9 @@ void UI_ShipBuilder::RenderCurrentActions()
 	if (m_mouse_is_over_element && m_mode == UI_ShipBuilder::EditorMode::TileMode)
 	{
 		// Render a highlighting effect on the element currently being highlighted, if applicable
-		Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(128.0f, 255.0f, 255.0f), 255.0f);
+		//Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(128.0f, 255.0f, 255.0f), 255.0f);
+		Game::Engine->GetOverlayRenderer()->RenderCuboidAtRelativeElementLocation(m_ship, m_mouse_over_element, ONE_INTVECTOR3, 
+			XMFLOAT3(0.785f, 1.0f, 1.0f), 0.3f);
 
 		// If the user is trying to place a ship tile we may also need to render it here
 		RenderTilePlacement();
@@ -699,14 +701,14 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_level)));
 	XMVECTOR start_pos = XMVector3TransformCoord(local_start_pos, m_ship->GetZeroPointWorldMatrix());
 	XMVECTOR end_pos = XMVectorAdd(start_pos, XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 
-		Game::ElementLocationToPhysicalPosition(elsize.z + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
+		Game::ElementLocationToPhysicalPosition(elsize.y + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
 
 	// Also determine the world space adjustment required to transition between elements
 	XMVECTOR incr = XMVector3TransformCoord(Game::ElementLocationToPhysicalPosition(INTVECTOR3(1, 0, 0)), m_ship->GetOrientationMatrix());
 
 	// Generate 'vertical' lines at each x coordinate first
 	XMVECTOR add_vec = NULL_VECTOR;
-	for (int x = -EXTEND_GRID; x < (elsize.x + EXTEND_GRID); ++x)
+	for (int x = -EXTEND_GRID; x <= (elsize.x + EXTEND_GRID); ++x)
 	{
 		m_gridline.P1 = XMVectorAdd(start_pos, add_vec);
 		m_gridline.P2 = XMVectorAdd(end_pos, add_vec);
@@ -721,7 +723,7 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	add_vec = NULL_VECTOR;
 
 	// Now generate 'horizontal' lines at each y coordinate
-	for (int y = -EXTEND_GRID; y < (elsize.y + EXTEND_GRID); ++y)
+	for (int y = -EXTEND_GRID; y <= (elsize.y + EXTEND_GRID); ++y)
 	{
 		m_gridline.P1 = XMVectorAdd(start_pos, add_vec);
 		m_gridline.P2 = XMVectorAdd(end_pos, add_vec);

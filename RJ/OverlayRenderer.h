@@ -28,7 +28,7 @@ public:
 	static const XMVECTOR PATH_NODE_RENDER_ORIGIN;
 
 	// Enumeration of the possible colours/textures for overlay rendering
-	enum RenderColour { RC_Green = 0, RC_Red, RC_LightBlue, RC_COUNT };
+	enum RenderColour { RC_None = 0, RC_Green, RC_Red, RC_LightBlue, RC_COUNT };
 
 	// Initialises the overlay rendering component; includes loading of all required models
 	Result				Initialise(void);
@@ -81,9 +81,11 @@ public:
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness, const CXMVECTOR size);
-	void				RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
-															  float xSize, float ySize, float zSize);
-
+	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, 
+																float xSize, float ySize, float zSize);
+	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_pos, const INTVECTOR3 & element_size,
+																const XMFLOAT3 & colour, float alpha);
+	
 	// Methods to render semi-transparent overlay components
 	void				RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
 

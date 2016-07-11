@@ -51,7 +51,7 @@ Result OverlayRenderer::Initialise(void)
 	Result result;
 
 	// Line models will all use the same underlying geometry, but with the following different textures
-	std::string line_models[] = { "overlay_green.dds", "overlay_red.dds", "overlay_lblue.dds" };
+	std::string line_models[] = { "overlay_none.dds", "overlay_green.dds", "overlay_red.dds", "overlay_lblue.dds" };
 
 	// Create all models required for overlay rendering
 	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
@@ -344,7 +344,7 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 
 
 // Method to add a cuboid for rendering in a ship-relative element space location.
-void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour, 
+void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, 
 														    float xSize, float ySize, float zSize)
 {
 	// Parameter check
@@ -362,6 +362,30 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 		// Scale & translate the current world matrix before passing it to the engine rendering method
 		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
 		Game::Engine->RenderModel(m_models[(int)colour], mworld);
+	}
+}
+
+// Method to add a cuboid for rendering in a ship-relative element space location.
+void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_pos, const INTVECTOR3 & element_size, 
+															const XMFLOAT3 & colour, float alpha)
+{
+	// Parameter check
+	if (ship)
+	{
+		// Generate a scaling matrix to account for the length & thickness, plus a translation to both centre the item & move to the right element
+		// Swap y & z coords since we are moving from element to world space
+		// D3DXMatrixTranslation(&mtrans, elementpos.x - (xSize * 0.5f), elementpos.z - (ySize * 0.5f), elementpos.y - (zSize * 0.5f));
+		XMVECTOR size = Game::ElementLocationToPhysicalPosition(element_size);
+		XMMATRIX scale = XMMatrixScalingFromVector(size);
+		XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorMultiplyAdd(
+			size, NULL_VECTOR, Game::ElementLocationToPhysicalPosition(element_pos)));
+
+		// Scale & translate the current world matrix before passing it to the engine rendering method
+		// Use the light highlight/fade shader to add the custom colour and alpha values
+		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
+		Game::Engine->RenderModel(m_models[RenderColour::RC_None], ship->GetPosition(), colour, alpha, mworld);
+
+		//OutputDebugString(concat("El: ")(element_pos.ToString())(" = ")(Vector3ToString(XMVector3TransformCoord(NULL_VECTOR, mworld)))("\n").str().c_str());
 	}
 }
 
