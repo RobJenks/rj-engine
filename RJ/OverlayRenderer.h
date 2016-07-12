@@ -45,6 +45,7 @@ public:
 
 	// Method to add a line for rendering.  Accepts a world matrix for the line
 	void XM_CALLCONV	RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
+	void XM_CALLCONV	RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT3 & colour, float alpha);
 
 	// Determines the world matrix required to transform a line model into the correct position, given only
 	// the coordinates of each line end point.  Also optionally accepts a line length parameter to avoid 
@@ -70,8 +71,13 @@ public:
 		RenderBox(world, colour, thickness, size, size, size);
 	}
 
+	// Method to render a box at the specified location
+	void XM_CALLCONV	RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT3 & colour, float alpha, float thickness);
+
 	// Methods to render a box around a specified element / element position / arbitrary position within a complex ship
 	void				RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness);
+	void				RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_location, const INTVECTOR3 & element_size,
+										 const XMFLOAT3 & colour, float alpha, float thickness);
 	void				RenderElementBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
 

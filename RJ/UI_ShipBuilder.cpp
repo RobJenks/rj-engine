@@ -27,6 +27,9 @@ const float UI_ShipBuilder::MIN_ZOOM_LEVEL = 3.0f;
 const float	UI_ShipBuilder::CAMERA_REVERT_TIME = 0.5f;
 const float UI_ShipBuilder::COMPONENT_FADE_TIME = 0.5f;
 const float UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA = 0.35f;
+const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_VALID = XMFLOAT3(0.5f, 1.0f, 0.5f);
+const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_INVALID = XMFLOAT3(1.0, 0.0f, 0.0f);
+const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_PLACEMENTERROR = XMFLOAT3(1.0f, 0.4f, 0.4f);
 
 // Default constructor
 UI_ShipBuilder::UI_ShipBuilder(void)
@@ -230,14 +233,23 @@ void UI_ShipBuilder::RenderTilePlacement(void)
 		Game::Engine->RenderComplexShipTile(m_tile_being_placed, m_ship);
 
 		// Render the selection highlight to reflect the fact this is a valid placement
-		*** DO THIS, AND BELOW FOR !VALID ***
+		Game::Engine->GetOverlayRenderer()->RenderElementBox(m_ship, m_mouse_over_element, m_tile_being_placed->GetElementSize(),
+			UI_ShipBuilder::TILE_PLACEMENT_COLOUR_VALID, 0.75f, 0.4f);
 	}
 	else
 	{
 		// Render the selection highlight to reflect the fact this is not a valid placement
+		Game::Engine->GetOverlayRenderer()->RenderElementBox(m_ship, m_mouse_over_element, m_tile_being_placed->GetElementSize(),
+			UI_ShipBuilder::TILE_PLACEMENT_COLOUR_INVALID, 0.75f, 0.4f);
 
 		// Render each placement error in turn, to show why the tile cannot be placed here
-
+		std::vector<TilePlacementIssue>::const_iterator it_end = m_tile_placement_issues.end();
+		for (std::vector<TilePlacementIssue>::const_iterator it = m_tile_placement_issues.begin(); it != it_end; ++it)
+		{
+			// For now, we don't take any different action based on the issue type
+			Game::Engine->GetOverlayRenderer()->RenderCuboidAtRelativeElementLocation(m_ship, (*it).Element, ONE_INTVECTOR3,
+				UI_ShipBuilder::TILE_PLACEMENT_COLOUR_PLACEMENTERROR, 0.75f);
+		}
 	}
 	
 }

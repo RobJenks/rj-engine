@@ -139,6 +139,13 @@ void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRende
 	Game::Engine->RenderModel(m_models[(int)colour], world);
 }
 
+// Method to add a line for rendering.  Accepts a world matrix for the line
+void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT3 & colour, float alpha)
+{
+	// Add a request to the core engine to render this line
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None], position, colour, alpha, world);
+}
+
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
 void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float length, float thickness)
 {
@@ -250,6 +257,77 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRender
 	RenderLine(mfinal, colour);
 }
 
+
+// Method to render a box at the specified location
+void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT3 & colour, float alpha, float thickness)
+{
+	XMMATRIX mfinal, scale, trans, scale_x_rot;
+
+
+	// First handle edges in the forward (Z) direction
+	trans = ID_MATRIX;
+	scale = XMMatrixScaling(thickness, thickness, size.z);
+	mfinal = XMMatrixMultiply(scale, world);							// > Edge 1: fwd from origin
+
+	// Note: determine an approximate position for the box to aid in alpha testing
+	XMVECTOR pos = XMVector3TransformCoord(NULL_VECTOR, mfinal);
+
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetX(trans.r[3], size.x - thickness);			// x-translation
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 2: fwd, to right of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetY(trans.r[3], size.y - thickness);			// now has x- & y-translation
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 3: fwd, above and to the right of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetX(trans.r[3], 0.0f);						// now has only y-translation
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 4: fwd, above origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	// Now handle edges in the right (X) direction
+	//D3DXMatrixScaling(&scale, thickness, thickness, size.x); | scale._33 = size.x;					
+	scale.r[2] = XMVectorSetZ(scale.r[2], size.x);							// update z-scaling factor to the length of an X side
+	scale_x_rot = XMMatrixMultiply(scale, m_matrix_yrot);
+
+	trans.r[3] = XMVectorSetZ(trans.r[3], thickness);						// translate forwards so in line
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 5: right, above origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetZ(trans.r[3], size.z);							// x-translation (in fwd direction)
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 6: right, above & in front of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetY(trans.r[3], 0.0f);							// remove y translation, now at fwd-Z
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 7: right, ahead of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetZ(trans.r[3], thickness);						// translate z-back to origin, minus thickness again
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 8: right, from origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	// Finally handle edges in the up (Y) direction
+	//D3DXMatrixScaling(&scale, thickness, thickness, size.y);
+	scale.r[2] = XMVectorSetZ(scale.r[2], size.y);							// update z-scaling factor to the length of a Y side
+	scale_x_rot = XMMatrixMultiply(scale, m_matrix_xrotneg);
+
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 9: up, from origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetX(trans.r[3], size.x - thickness);				// translate to the right, minus thickness
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 10: up, to right of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetZ(trans.r[3], size.z);							// translate fwd, so at fwd+right
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 11: up, ahead & right of origin
+	RenderLine(mfinal, pos, colour, alpha);
+
+	trans.r[3] = XMVectorSetX(trans.r[3], 0.0f);
+	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 12: up, ahead of origin
+	RenderLine(mfinal, pos, colour, alpha);
+}
+
 // Method to render a box around the specified element of a complex ship
 void OverlayRenderer::RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness)
 {
@@ -262,6 +340,25 @@ void OverlayRenderer::RenderElementBox(iSpaceObjectEnvironment *ship, const INTV
 
 		// Render a box at the desired location by multiplying the ship zero-point world matrix by this transform
 		RenderBox( XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), colour, thickness, Game::C_CS_ELEMENT_SCALE );
+	}
+}
+
+// Method to render a box around the specified element(s) of a complex ship
+void OverlayRenderer::RenderElementBox(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_location, const INTVECTOR3 & element_size, 
+										const XMFLOAT3 & colour, float alpha, float thickness)
+{
+	// Parameter check
+	if (ship)
+	{
+		// Create a transform matrix to translate to the desired element.  Switches y & z since going from element > world space
+		XMMATRIX trans = XMMatrixTranslationFromVector(Game::ElementLocationToPhysicalPosition(element_location));
+
+		// Determine the size of the box in world coordinates.  Switch y & z since going from element > world space
+		XMFLOAT3 size = XMFLOAT3(	(float)element_size.x * Game::C_CS_ELEMENT_SCALE, (float)element_size.z * Game::C_CS_ELEMENT_SCALE,
+									(float)element_size.y * Game::C_CS_ELEMENT_SCALE);
+
+		// Render a box at the desired location by multiplying the ship zero-point world matrix by this transform
+		RenderBox(XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), size, colour, alpha, thickness);
 	}
 }
 
