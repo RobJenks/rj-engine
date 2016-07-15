@@ -64,6 +64,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_constructedstate = new ProductionCost();
 	m_elementconstructedstate = NULL;
 	m_constructedstate_previousallocatedsize = NULL_INTVECTOR3;
+	m_connections_fixed = false;
 	
 	// By default, tiles will not be simulated
 	m_requiressimulation = false;
@@ -97,6 +98,7 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_multiplemodels = C.HasCompoundModel();
 	m_models.CopyFrom(C.GetCompoundModelSet());
 	DefaultProperties = C.DefaultProperties;
+	m_connections_fixed = C.ConnectionsAreFixed();
 
 	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
 	// Per-element construction state can therefore always be initialised to NULL
@@ -313,7 +315,8 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 void ComplexShipTile::InitialiseConnectionState()
 {
 	// Deallocate any connection data that has already been stored
-
+	PossibleConnections.Initialise(m_elementsize);
+	Connections.Initialise(m_elementsize);
 }
 
 // Clears all terrain object links.  If a tile definition exists for this tile, the method also reserves
@@ -604,11 +607,24 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 			{
 				for (int z = 0; z < connsize.z; ++z)
 				{
+					// Save data for potential connections, only for those elements that have some ( != 0) connection data
+					data = tile->PossibleConnections.GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
+					if (data != 0U)
+					{
+						TiXmlElement *conn = new TiXmlElement("CanConnect");
+						conn->SetAttribute("type", i);
+						conn->SetAttribute("x", x);
+						conn->SetAttribute("y", y);
+						conn->SetAttribute("z", z);
+						conn->SetAttribute("State", data);
+						node->LinkEndChild(conn);
+					}
+
+					// Save data for actual connections, only for those elements that have some ( != 0) connection data
 					data = tile->Connections.GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
 					if (data != 0U)
 					{
-						// We only want to save an entry for elements that have some ( != 0) connection data
-						TiXmlElement *conn = new TiXmlElement("ConnectionPoint");
+						TiXmlElement *conn = new TiXmlElement("Connection");
 						conn->SetAttribute("type", i);
 						conn->SetAttribute("x", x);
 						conn->SetAttribute("y", y);
@@ -661,7 +677,17 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 					int rot = atoi(val.c_str());
 					tile->SetRotation((Rotation90Degree)rot);
 				}
-				else if (key == "connectionpoint") {
+				else if (key == "canconnect") {
+					INTVECTOR3 loc = INTVECTOR3(); int type, iState;
+					child->Attribute("type", &type);
+					child->Attribute("x", &loc.x);
+					child->Attribute("y", &loc.y);
+					child->Attribute("z", &loc.z);
+					child->Attribute("state", &iState);
+
+					tile->PossibleConnections.SetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState);
+				}
+				else if (key == "connection") {
 					INTVECTOR3 loc = INTVECTOR3(); int type, iState;
 					child->Attribute("type", &type); 
 					child->Attribute("x", &loc.x);

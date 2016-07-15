@@ -265,6 +265,24 @@ Direction GetOppositeDirection(Direction dir)
 	}
 }
 
+DirectionBS GetOppositeDirectionBS(DirectionBS dir)
+{
+	switch (dir)
+	{
+		case DirectionBS::Left_BS:		return DirectionBS::Right_BS;
+		case DirectionBS::Up_BS:		return DirectionBS::Down_BS;
+		case DirectionBS::Right_BS:		return DirectionBS::Left_BS;
+		case DirectionBS::Down_BS:		return DirectionBS::Up_BS;
+		case DirectionBS::UpLeft_BS:	return DirectionBS::DownRight_BS;
+		case DirectionBS::UpRight_BS:	return DirectionBS::DownLeft_BS;
+		case DirectionBS::DownRight_BS:	return DirectionBS::UpLeft_BS;
+		case DirectionBS::DownLeft_BS:	return DirectionBS::UpRight_BS;
+		case DirectionBS::ZUp_BS:		return DirectionBS::ZDown_BS;
+		case DirectionBS::ZDown_BS:		return DirectionBS::ZUp_BS;
+		default:						return DirectionBS::None_BS;
+	}
+}
+
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize)
 {
 	return (point.x >= arealocation.x && point.y >= arealocation.y && 

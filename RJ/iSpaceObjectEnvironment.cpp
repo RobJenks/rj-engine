@@ -923,7 +923,86 @@ void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&
 			}
 		}
 	}
+}
 
+// Updates the connection state of the specified tile based on its neighbours.  Ensures a bi-directional
+// connection is setup and that the adjacent tile is also updated
+void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
+{
+	// Parameter check
+	if (!tile) return;
+
+	// We will not be able to make any updates if the connections from this tile are
+	// fixed; in this case, simply quit immediately
+	if (tile->ConnectionsAreFixed()) return;
+
+	// We will reset all connections before re-calculating them below.  Save a copy of the current
+	// connection state so we can test whether it changed at the end
+	TileConnections old_state = TileConnections(tile->Connections);
+	tile->Connections.ResetConnectionState();
+
+	// Find all neighbours of this tile
+	bool neighbours[4]; 
+	std::vector<TileAdjacency> adjacent;
+	GetNeighbouringTiles(tile, neighbours, adjacent);
+
+	// Check each adjacent tile in turn
+	std::vector<TileAdjacency>::iterator it_end = adjacent.end();
+	for (std::vector<TileAdjacency>::iterator it = adjacent.begin(); it != it_end; ++it)
+	{
+		// We can do nothing if the tile is NULL (erroneously) or if its connections have been fixed
+		const TileAdjacency & adj = (*it);
+		if (adj.Tile == NULL || adj.Tile->ConnectionsAreFixed() == true) continue;
+
+		// Get the ship-relative element under the tile which is being considered here
+		INTVECTOR3 actual_el_loc = (tile->GetElementLocation() + adj.Location);
+		ComplexShipElement *actual_el = GetElement(actual_el_loc);
+		if (!actual_el) continue;
+
+		// Determine the element within the target tile which would be making this connection
+		int adj_el_index = actual_el->GetNeighbour(adj.AdjDirection);
+		ComplexShipElement *adj_el = GetElement(adj_el_index);
+		if (!adj_el) continue;
+
+		// The element within the target tile will be the absolute element location minus the target tile location
+		INTVECTOR3 adj_loc = (adj_el->GetLocation() - adj.Tile->GetElementLocation());
+
+		// Test all possible connection types
+		DirectionBS dirBS = DirectionToBS(adj.AdjDirection);
+		DirectionBS invDirBS = GetOppositeDirectionBS(dirBS);
+		bool target_updated = false;
+		for (int i = 0; i < (int)TileConnections::TileConnectionType::_COUNT; ++i)
+		{
+			TileConnections::TileConnectionType type = (TileConnections::TileConnectionType)i;
+
+			// Test whether it is possible to make a connection between the two tiles at this point
+			if (tile->PossibleConnections.ConnectionExists(type, adj.Location, dirBS) &&			// Tile > Adj
+				adj.Tile->PossibleConnections.ConnectionExists(type, adj_loc, invDirBS))			// Adj > Tile
+			{
+				// It is; make the connection from this tile, since we previously reset all connections
+				tile->Connections.AddConnection(type, adj.Location, dirBS);
+
+				// Make the reciprocal connection IF it does not already exist
+				if (adj.Tile->Connections.ConnectionExists(type, adj_loc, invDirBS) == false)
+				{
+					adj.Tile->Connections.AddConnection(type, adj_loc, invDirBS);
+					target_updated = true;
+				}
+			}
+		}
+
+		// Trigger an update of the adjacent tile if any connections were updated
+		if (target_updated) adj.Tile->UpdateTileBasedOnConnectionData();
+	}
+
+	// We have processed all adjacent tiles; test whether any connections were changed
+	// in this tile as part of the update
+	if (!tile->Connections.Equals(old_state))
+	{
+		tile->UpdateTileBasedOnConnectionData();
+		*** BREAK OUT THE RELEVANT SECTION OF COMPILETILE() INTO ITS OWN METHOD SO THAT THE ABOVE NEW METHOD CAN CALL IT TO REGENERATE MULTI-GEOMETRY TILES ***
+		*** SHOULD THEN CALL THIS FOR MULTI - TILES.FOR SINGLE - GEOMETRY, WILL TEST 'DYNAMIC' FLAG FOR EG CORRIDORS TO KNOW IF THEY SHOULD ADJUST TO ANOTHER IN THE SAME DYNAMIC SET ***
+	}
 
 }
 

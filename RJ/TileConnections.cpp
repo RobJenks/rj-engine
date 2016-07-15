@@ -194,6 +194,26 @@ void TileConnections::DeallocateData(void)
 	m_xy_size = 0;
 }
 
+// Tests whether the data in this object is equivalent to the specified object
+bool TileConnections::Equals(const TileConnections & other) const
+{
+	// The objects are clearly not equal if they are of different size
+	if (m_elementsize != other.GetElementSize()) return false;
+
+	// Iterate through all the data and return false if any differs
+	bitstring ** const other_data = other.GetData();
+	for (int i = 0; i < (int)TileConnectionType::_COUNT; ++i)
+	{
+		for (int e = 0; e < m_elementcount; ++e)
+		{
+			if (m_data[i][e] != other_data[i][e]) return false;
+		}
+	}
+
+	// All data was identical
+	return true;
+}
+
 // Default destructor
 TileConnections::~TileConnections(void)
 {

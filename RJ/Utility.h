@@ -273,6 +273,7 @@ CMPINLINE bool IsDiagonalDirection(Direction direction) {
 string DirectionToString(Direction direction);
 Direction DirectionFromString(string direction);
 Direction GetOppositeDirection(Direction dir);
+DirectionBS GetOppositeDirectionBS(DirectionBS dir);
 
 // Rotates a bitstring representing directional data
 bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation);

@@ -271,6 +271,10 @@ public:
 	// Determines the set of connections from other tiles that surround this element
 	void							GetNeighbouringTiles(ComplexShipTile *tile, bool(&outConnects)[4], std::vector<TileAdjacency> & outNeighbours);
 
+	// Updates the connection state of the specified tile based on its neighbours.  Ensures a bi-directional
+	// connection is setup and that the adjacent tile is also updated
+	void							UpdateTileConnectionState(ComplexShipTile *tile);
+
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }
 	void							Shutdown(bool unlink_tiles);

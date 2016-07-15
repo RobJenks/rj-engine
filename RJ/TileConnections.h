@@ -70,6 +70,9 @@ public:
 	// Returns the number of elements covered by this object
 	CMPINLINE int					GetElementCount(void) const				{ return m_elementcount; }
 
+	// Tests whether the data in this object is equivalent to the specified object
+	bool							Equals(const TileConnections & other) const;
+
 	// Default destructor
 	~TileConnections(void);
 

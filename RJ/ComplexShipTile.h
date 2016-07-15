@@ -670,7 +670,11 @@ public:
 	void										ClearTerrainObjectLinks(void);
 
 	// Returns a value indicating whether this tile spans multiple elements
-	CMPINLINE bool						SpansMultipleElements(void) const				{ return m_multielement; }
+	CMPINLINE bool						SpansMultipleElements(void) const						{ return m_multielement; }
+
+	// Flag which indicates whether the connections from this tile have been 'fixed' (true) or are allowed to update based on surroundings
+	CMPINLINE bool						ConnectionsAreFixed(void) const							{ return m_connections_fixed; }
+	CMPINLINE void						FixConnections(bool fix_connections)					{ m_connections_fixed = fix_connections; }
 
 	// Static method to determine whether a given tileclass is 'infrastructural'
 	static bool							IsInfrastructureTile(D::TileClass tileclass);
@@ -742,6 +746,9 @@ protected:
 
 	// Rotation of this tile; contents are already rotated, this is mainly for geometry rendering & the SD
 	Rotation90Degree			m_rotation;
+
+	// Flag which indicates whether the connections from this tile have been 'fixed' (true) or are allowed to update based on surroundings
+	bool						m_connections_fixed;
 	
 	// Vector of unique terrain IDs, corresponding to the terrain objects within our parent environment that are 'owned' by this
 	// tile.  We maintain this link so that terrain objects can be efficiently removed with the tile if required
