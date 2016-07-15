@@ -7,6 +7,7 @@
 #include "DX11_Core.h"
 #include "Ship.h"
 #include "ComplexShipElement.h"
+#include "TileAdjacency.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -266,6 +267,9 @@ public:
 
 	// Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
 	int								GetDeckIndex(int deck) const;
+
+	// Determines the set of connections from other tiles that surround this element
+	void							GetNeighbouringTiles(ComplexShipTile *tile, bool(&outConnects)[4], std::vector<TileAdjacency> & outNeighbours);
 
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }

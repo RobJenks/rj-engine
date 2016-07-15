@@ -115,7 +115,7 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 	if (!tile) return ErrorCodes::CannotBuildTileWithInvalidPointer;
 
 	// Retrieve the size of this tile and make sure it is valid
-	INTVECTOR3 size = tile->GetElementSize();
+	const INTVECTOR3 & size = tile->GetElementSize();
 	if (size.x <= 0 || size.y <= 0 || size.z <= 0) return ErrorCodes::CannotCompileTileWithInvalidSize;
 
 	// We can initialise the construction state of this tile based on the production cost maintained in the tile definition
@@ -156,24 +156,36 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 	// First, set any tiles with a connection
 	if (mconn)
 	{
-		INTVECTOR3 pos; Rotation90Degree rot;
-		ElementConnectionSet::const_iterator it_end = tile->GetConnections()->end();
-		for (ElementConnectionSet::const_iterator it = tile->GetConnections()->begin(); it != it_end; ++it)
-		{
-			// Get a reference to this connection and its properties
-			pos = it->Location;
-			
-			// Determine the rotation to be applied
-			switch (it->Connection)
-			{
-				case Direction::Up:			rot = Rotation90Degree::Rotate270;		break;
-				case Direction::Right:		rot = Rotation90Degree::Rotate180;		break;
-				case Direction::Down:		rot = Rotation90Degree::Rotate90;		break;
-				default:					rot = Rotation90Degree::Rotate0;		break;
-			}
+		// TODO: We currently only look at walkable connections
+		TileConnections::TileConnectionType type = TileConnections::TileConnectionType::Walkable;
 
-			// Add the connection-wall model to the collection
-			models->AddModel(pos.x, pos.y, pos.z, GetModelFromSet(mconn), rot, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+		// Iterate over each element in turn
+		INTVECTOR3 location;
+		for (int x = 0; x < size.x; ++x)
+		{
+			for (int y = 0; y < size.y; ++y)
+			{
+				for (int z = 0; z < size.z; ++z)
+				{
+					// Check whether there are any connections from this element; if not, skip it immediately
+					location = INTVECTOR3(x, y, z);
+					if (!tile->Connections.ConnectionExists(type, location)) continue;
+
+					// There is at least one connection; process each possible direction in turn
+					bitstring data = tile->Connections.GetConnectionState(type, location);
+					if (CheckBit_Any(data, DirectionBS::Up_BS))
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate270, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+
+					if (CheckBit_Any(data, DirectionBS::Right_BS))
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate180, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+
+					if (CheckBit_Any(data, DirectionBS::Down_BS))
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate90, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+
+					if (CheckBit_Any(data, DirectionBS::Left_BS))
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate0, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+				}
+			}
 		}
 	}
 

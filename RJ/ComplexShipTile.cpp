@@ -64,7 +64,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_constructedstate = new ProductionCost();
 	m_elementconstructedstate = NULL;
 	m_constructedstate_previousallocatedsize = NULL_INTVECTOR3;
-
+	
 	// By default, tiles will not be simulated
 	m_requiressimulation = false;
 	m_simulationinterval = 1000U;
@@ -122,9 +122,8 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_lastsimulation = Game::ClockMs;
 
 	// Copy the connection data for this tile 
-	//for (int i = C.GetConnectionCount() - 1; i >= 0; i--)
-	for (ElementConnectionSet::size_type i = 0; i < C.GetConnectionCount(); ++i)
-		m_connections.push_back(C.GetConnection(i));
+	Connections.SetConnectionState(C.Connections);
+	PossibleConnections.SetConnectionState(C.PossibleConnections);
 
 	// Recalculate tile data, relative position and world matrix based on this new data
 	RecalculateTileData();
@@ -266,73 +265,10 @@ void ComplexShipTile::ApplyTileToElement(ComplexShipElement *el)
 	el->SetProperties(DefaultProperties);
 
 	// See if there are any connection values specified for this element, and apply them if there are
+	// TODO: Currently only copying the "walkable" connection state.  Element may need to store all types in future
 	INTVECTOR3 tgt = (el->GetLocation() - m_elementlocation);
-	el->SetConnectionState(0);
-	ElementConnectionSet::const_iterator it_end = m_connections.end();
-	for (ElementConnectionSet::const_iterator it = m_connections.begin(); it != it_end; ++it)
-	{
-		if ((*it).Location == tgt) el->SetConnectionStateInDirection(DirectionToBS((*it).Connection), true);
-	}
+	el->SetConnectionState(Connections.GetConnectionState(TileConnections::TileConnectionType::Walkable, tgt));
 }
-
-
-// Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
-int ComplexShipTile::GetConnection(INTVECTOR3 loc, Direction dir) const
-{
-	int n = (int)m_connections.size();
-	for (int i = 0; i < n; ++i)
-	{
-		if (m_connections[i].Location == loc && m_connections[i].Connection == dir) return i;
-	}
-	return -1;
-}
-
-// Returns the index of a connection matching the supplied criteria, or -1 if such a connection does not exist
-int ComplexShipTile::GetConnection(INTVECTOR3 loc) const
-{
-	int n = (int)m_connections.size();
-	for (int i = 0; i < n; ++i)
-	{
-		if (m_connections[i].Location == loc) return i;
-	}
-	return -1;
-}
-
-// Adds a new connection at the specified location & in the specified direction
-void ComplexShipTile::AddConnection(INTVECTOR3 loc, Direction dir)
-{
-	int index = GetConnection(loc, dir);
-	if (index == -1) m_connections.push_back(ElementConnection(loc, dir));
-}
-
-// Removes the connection at the specified index
-void ComplexShipTile::RemoveConnection(ElementConnectionSet::size_type index)
-{
-	// Make sure the supplied index is valid
-	ElementConnectionSet::size_type size = m_connections.size();
-	if (index < 0 || index >= size) return;
-
-	// If it is, perform a swap & pop to remove the item efficiently
-	std::swap(m_connections[index], m_connections[size-1]);
-	m_connections.pop_back();
-}
-
-// Removes the connection matching the supplied criteria, if such a connection exists
-void ComplexShipTile::RemoveConnection(INTVECTOR3 loc, Direction dir)
-{
-	RemoveConnection(GetConnection(loc, dir));
-}
-
-// Copies a set of source connection data into this tile
-void ComplexShipTile::SetConnections(const ElementConnectionSet &source)
-{
-	// Clear our current connection set
-	m_connections.clear();
-
-	// Copy all elements from source
-	m_connections = source;
-}
-
 
 // Returns a value indicating whether or not this is a primary tile.  Based on the underlying tile class
 bool ComplexShipTile::IsPrimaryTile(void)
@@ -362,12 +298,22 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 	// Determine the centre point of this tile in world space
 	m_centre_point = XMVectorScale(Game::ElementLocationToPhysicalPosition(m_elementsize), 0.5f);
 
+	// Reallocate connection data to be appropriate for this new size
+	InitialiseConnectionState();
+
 	// Recalculate properties derived from the element size
 	RecalculateTileData(); 
 
 	// Reset the tile to be 0% constructed and start the construction process
 	m_constructedstate->ResetToZeroPcProgress();
 	StartConstruction();
+}
+
+// Reallocate connection data to be appropriate for this new size
+void ComplexShipTile::InitialiseConnectionState()
+{
+	// Deallocate any connection data that has already been stored
+
 }
 
 // Clears all terrain object links.  If a tile definition exists for this tile, the method also reserves
@@ -647,17 +593,34 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)tile->GetRotation(), node);
 
 	// Add an entry for each connection point on this tile
-	ElementConnectionSet::const_iterator it_end = tile->GetConnectionIteratorEnd();
-	for (ElementConnectionSet::const_iterator it = tile->GetConnectionIteratorStart(); it != it_end; ++it)
+	bitstring data;
+	bitstring ** const conn = tile->Connections.GetData();
+	const INTVECTOR3 & connsize = tile->Connections.GetElementSize();
+	for (unsigned int i = 0; i < TileConnections::TileConnectionType::_COUNT; ++i)
 	{
-		TiXmlElement *conn = new TiXmlElement("ConnectionPoint");
-		conn->SetAttribute("x", (*it).Location.x);
-		conn->SetAttribute("y", (*it).Location.y);
-		conn->SetAttribute("z", (*it).Location.z);
-		conn->SetAttribute("Direction", DirectionToString((*it).Connection).c_str());
-		node->LinkEndChild(conn);
+		for (int x = 0; x < connsize.x; ++x)
+		{
+			for (int y = 0; y < connsize.y; ++y)
+			{
+				for (int z = 0; z < connsize.z; ++z)
+				{
+					data = tile->Connections.GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
+					if (data != 0U)
+					{
+						// We only want to save an entry for elements that have some ( != 0) connection data
+						TiXmlElement *conn = new TiXmlElement("ConnectionPoint");
+						conn->SetAttribute("type", i);
+						conn->SetAttribute("x", x);
+						conn->SetAttribute("y", y);
+						conn->SetAttribute("z", z);
+						conn->SetAttribute("State", data);
+						node->LinkEndChild(conn);
+					}
+				}
+			}
+		}
 	}
-	
+
 	// Return the node containing all data on this base class
 	return node;
 }
@@ -699,15 +662,14 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 					tile->SetRotation((Rotation90Degree)rot);
 				}
 				else if (key == "connectionpoint") {
-					INTVECTOR3 loc = INTVECTOR3();
+					INTVECTOR3 loc = INTVECTOR3(); int type, iState;
+					child->Attribute("type", &type); 
 					child->Attribute("x", &loc.x);
 					child->Attribute("y", &loc.y);
 					child->Attribute("z", &loc.z);
-					const char *dir = child->Attribute("Direction");
-					if (dir) {
-						Direction d = DirectionFromString(dir);
-						tile->AddConnection(loc, d);
-					}
+					child->Attribute("state", &iState);
+
+					tile->Connections.SetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState);
 				}
 			}
 		}

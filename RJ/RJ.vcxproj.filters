@@ -556,6 +556,9 @@
     <ClCompile Include="BasicRay.cpp">
       <Filter>Math\Geometry</Filter>
     </ClCompile>
+    <ClCompile Include="TileConnections.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1265,6 +1268,12 @@
     </ClInclude>
     <ClInclude Include="ObjectPicking.h">
       <Filter>Engine\Picking</Filter>
+    </ClInclude>
+    <ClInclude Include="TileAdjacency.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="TileConnections.h">
+      <Filter>Objects\Ships\Tiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

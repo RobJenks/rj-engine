@@ -13,7 +13,7 @@
 #include "GameDataExtern.h"
 #include "Model.h"
 #include "ComplexShipElement.h"
-#include "ElementConnection.h"
+#include "TileConnections.h"
 #include "Damage.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
@@ -621,19 +621,12 @@ public:
 	// methods that can perform the calculation directly.  Use iSpaceObjectEnvironment::AddTile() to correctly add to a parent environment
 	CMPINLINE void								OverrideParentEnvironmentReference(iSpaceObjectEnvironment *env) { m_parent = env; }
 
-	// Methods to query and set connection points for elements within the tile
-	CMPINLINE ElementConnectionSet *			GetConnections(void)										{ return &m_connections; }					
-	CMPINLINE ElementConnection					GetConnection(ElementConnectionSet::size_type index) const	{ return m_connections[index]; }
-	int											GetConnection(INTVECTOR3 loc) const;
-	int											GetConnection(INTVECTOR3 loc, Direction dir) const;
-	CMPINLINE ElementConnectionSet::size_type	GetConnectionCount(void) const						{ return m_connections.size(); }
-	CMPINLINE bool								HasConnection(INTVECTOR3 loc, Direction dir) const	{ return (GetConnection(loc, dir) > -1); }
-	void										AddConnection(INTVECTOR3 loc, Direction dir);
-	void										RemoveConnection(ElementConnectionSet::size_type index);
-	void										RemoveConnection(INTVECTOR3 loc, Direction dir);
-	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorStart(void)			{ return m_connections.begin(); }
-	CMPINLINE ElementConnectionSet::iterator	GetConnectionIteratorEnd(void)				{ return m_connections.end(); }
-	void										SetConnections(const ElementConnectionSet &source);
+	// The set of connections that are present from this tile
+	TileConnections								Connections;
+
+	// The set of connections that are possible from this tile
+	TileConnections								PossibleConnections;
+
 
 	// Events generated when the tile is added/removed from an environment
 	void										BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment);
@@ -681,6 +674,9 @@ public:
 
 	// Static method to determine whether a given tileclass is 'infrastructural'
 	static bool							IsInfrastructureTile(D::TileClass tileclass);
+
+	// Initialise and clear connection data for the tile
+	void								InitialiseConnectionState();
 
 	// Default property set applied to all elements of the tile; element-specific changes are then made afterwards
 	bitstring							DefaultProperties;
@@ -750,9 +746,6 @@ protected:
 	// Vector of unique terrain IDs, corresponding to the terrain objects within our parent environment that are 'owned' by this
 	// tile.  We maintain this link so that terrain objects can be efficiently removed with the tile if required
 	std::vector<Game::ID_TYPE>	m_terrain_ids;
-
-	// The set of connections that are possible from this tile
-	ElementConnectionSet		m_connections;
 
 	// Simulation state of this tile.  Light implementation for tiles, since the ship & elements handle most of the logic.  This state 
 	// just determines the extent of activity within SimulateTile()

@@ -8,8 +8,7 @@
 #include "OverlayRenderer.h"
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
-
-#include "RJMain.h"		// DBG
+#include "TileAdjacency.h"
 #include "SimpleShip.h"	// DBG
 
 #include "UI_ShipBuilder.h"
@@ -302,6 +301,24 @@ bool UI_ShipBuilder::TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 
 	return is_valid;
 }
 
+
+// Place the selected tile at its current location, assuming the placement is valid
+void UI_ShipBuilder::PlaceTile(void)
+{
+	// We can only place a tile if we have one selected and over the ship
+	if (!m_tile_being_placed || !m_mouse_is_over_element) return;
+
+	// Perform another, final test of the tile placement to make sure it is valid before placement
+	m_tile_placement_issues.clear();
+	bool valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
+	if (!valid || !m_tile_placement_issues.empty()) return;
+
+	// Tile placement is valid, so add it to the ship
+	m_ship->AddTile(m_tile_being_placed);
+
+	// Clear the tile pointer, since this tile is now a member of the ship
+	m_tile_being_placed = NULL;
+}
 
 
 // Method that is called when the UI controller is deactivated
@@ -640,7 +657,7 @@ void UI_ShipBuilder::ProcessMouseInput(GameInputDevice *mouse, GameInputDevice *
 	else if (z < 0) ZoomOutIncrement();
 
 	// Determine the ship element (if applicable) currently being selected by the mouse
-	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_level, m_mouse_over_element);
+	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_level, m_mouse_over_element);	
 }
 
 // Event raised when the RMB is first depressed
@@ -649,6 +666,14 @@ void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2
 	// Store the current camera centre point when the RMB is first depressed, for use when panning the camera
 	if (m_rmb_down_component == NULL) m_rmb_down_start_centre = m_centre;
 
+}
+
+// Methods to accept generic mouse click events at the specified location
+void UI_ShipBuilder::ProcessMouseClickAtLocation(INTVECTOR2 location)
+{
+	// If we have a tile selected, attempt to place it now.  No need to check the location since this
+	// is updated each frame for tile placement.  The PlaceTile() method will validate location before placing
+	if (m_tile_being_placed) PlaceTile();
 }
 
 // Method to handle the mouse move event

@@ -1,0 +1,90 @@
+<GameData>
+  <DynamicTileSet class="corridor">
+    <Code>DYNAMIC_CORRIDOR_BASIC</Code>
+    <Name>Straight corridor</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <StandardTile>True</StandardTile>
+    <Model>corridor_ns_model</Model>
+    <Size x="1" y="1" z="1" />
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+  
+    <CollisionOBB skip="true" numchildren="0" />
+    <staticterrain px="-3.245002" py="-0.104999" pz="-0.149999" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.395001" ey="2.455000" ez="5.069999" />
+    <staticterrain px="3.155014" py="-0.099999" pz="0.010001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.395001" ey="2.455000" ez="5.069999" />
+    <staticterrain px="-0.124999" py="-2.290002" pz="-0.114999" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.345001" ey="0.280001" ez="5.135007" />
+    <staticterrain px="-0.120000" py="2.105004" pz="-0.024997" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.345001" ey="0.280001" ez="5.085007" />
+  </ComplexShipTileDefinition>
+
+  <ComplexShipTileDefinition class="corridor">
+    <Code>CORRIDOR_NE</Code>
+    <Name>Corner corridor</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <StandardTile>True</StandardTile>
+    <Model>corridor_ne_model</Model>
+    <Size x="1" y="1" z="1" />
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+    <CollisionOBB skip="true" numchildren="0" />
+    <staticterrain px="-0.369997" py="-2.364999" pz="-0.055001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.140003" ey="0.295001" ez="4.865002" />
+    <staticterrain px="-0.354996" py="2.079996" pz="-0.045000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.140003" ey="0.295001" ez="5.010003" />
+    <staticterrain px="-3.265001" py="-0.189996" pz="0.025001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="4.985004" />
+    <staticterrain px="2.569991" py="-0.214995" pz="-3.750006" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.204999" />
+    <staticterrain px="-0.119995" py="-0.089998" pz="4.580007" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.495005" ey="2.380000" ez="0.325002" />
+    <staticterrain px="2.794989" py="-2.255001" pz="0.770000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.814999" ey="0.295001" ez="4.035004" />
+    <staticterrain px="2.869990" py="2.009992" pz="0.810000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.814999" ey="0.295001" ez="4.035004" />
+    <staticterrain px="2.729994" py="-0.199998" pz="-2.935000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+
+  </ComplexShipTileDefinition>
+
+  <ComplexShipTileDefinition class="corridor">
+    <Code>CORRIDOR_NSE</Code>
+    <Name>T-junction corridor</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <StandardTile>True</StandardTile>
+    <Model>corridor_nse_model</Model>
+    <Size x="1" y="1" z="1" />
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+    <CollisionOBB skip="true" numchildren="0" />
+    <staticterrain px="-0.459997" py="-2.364999" pz="-0.080001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.635005" ey="0.295001" ez="5.000003" />
+    <staticterrain px="-3.890000" py="-0.189996" pz="0.025001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="4.985004" />
+    <staticterrain px="2.969989" py="-0.214995" pz="-4.020006" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="3.565001" py="-2.335001" pz="0.245000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.814999" ey="0.295001" ez="3.750003" />
+    <staticterrain px="3.679996" py="2.009992" pz="0.110000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.539999" ey="0.295001" ez="3.465002" />
+    <staticterrain px="3.310001" py="-0.199998" pz="-3.345002" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+    <staticterrain px="-0.469995" py="1.949994" pz="-0.090000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.635005" ey="0.295001" ez="5.000003" />
+    <staticterrain px="3.099992" py="-0.159997" pz="4.045005" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="3.484999" py="-0.145000" pz="3.230004" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+
+  </ComplexShipTileDefinition>
+
+  <ComplexShipTileDefinition class="corridor">
+    <Code>CORRIDOR_NSEW</Code>
+    <Name>Four-way corridor</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <StandardTile>True</StandardTile>
+    <Model>corridor_nsew_model</Model>
+    <Size x="1" y="1" z="1" />
+    <DefaultProperty name="active" value="true" />
+    <DefaultProperty name="walkable" value="true" />
+
+    <CollisionOBB skip="true" numchildren="0" />
+    <staticterrain px="-0.359997" py="-2.339999" pz="-0.080001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.835006" ey="0.295001" ez="5.000003" />
+    <staticterrain px="2.969989" py="-0.214995" pz="-4.020006" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="-0.079991" py="-2.325001" pz="0.245000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="4.495005" ey="0.295001" ez="3.750003" />
+    <staticterrain px="-0.045015" py="2.279993" pz="0.110000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="4.360005" ey="0.295001" ez="3.465002" />
+    <staticterrain px="3.465005" py="-0.199998" pz="-3.345002" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+    <staticterrain px="-0.429995" py="2.284993" pz="-0.090000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.635005" ey="0.295001" ez="5.000003" />
+    <staticterrain px="3.099992" py="-0.159997" pz="4.045005" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="3.484999" py="-0.145000" pz="3.230004" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+    <staticterrain px="-3.375001" py="0.014999" pz="-4.015001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="-3.225000" py="0.139999" pz="4.065002" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
+    <staticterrain px="-3.795001" py="0.105001" pz="3.320001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+    <staticterrain px="-3.580001" py="-0.085000" pz="-3.265000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
+    
+  </ComplexShipTileDefinition>
+
+</GameData>

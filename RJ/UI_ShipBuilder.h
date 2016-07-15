@@ -112,7 +112,7 @@ public:
 	void ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) { }
 
 	// Methods to accept generic mouse click events at the specified location
-	void ProcessMouseClickAtLocation(INTVECTOR2 location) { }
+	void ProcessMouseClickAtLocation(INTVECTOR2 location);
 	void ProcessRightMouseClickAtLocation(INTVECTOR2 location) { }
 
 	// Methods to accept the processed mouse click events for particular components
@@ -201,6 +201,9 @@ protected:
 
 	// If a tile is currently being placed, renders the tile and performs any other associated rendering
 	void										RenderTilePlacement(void);
+
+	// Place the selected tile at its current location, assuming the placement is valid
+	void										PlaceTile(void);
 
 	// Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
 	// a list of errors to the supplied output vector, if any exist

@@ -150,7 +150,7 @@ public:
 		for (int i = 0; i < ComplexShipElement::AttachType::_AttachTypeCount; ++i) m_attachpoints[i] = state[i]; 
 	}
 
-	// Retrieve a neighbouring element in three-dimensional element space (or NULL, if no neighbour)
+	// Retrieve a neighbouring element in three-dimensional element space (or -1, if no neighbour)
 	CMPINLINE int					GetNeighbour(Direction direction) const					{ return m_adj[direction]; }
 	
 	// Link this element to a neighbour in the three-dimensional space

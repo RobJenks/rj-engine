@@ -2157,22 +2157,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		iObject * obj = Game::CurrentPlayer->GetMouseSelectedNonPlayerObject();
-		/*float tmin = (obj ? Game::PhysicsEngine.RayIntersectionResult.tmin : 200.0f);
-
-		BasicRay ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
-		Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
-		VolumetricLine line = VolumetricLine(
-			XMVectorAdd(ray.Origin, XMVectorScale(ray.Direction, 10.0f)),
-			XMVectorAdd(ray.Origin, XMVectorScale(ray.Direction, tmin)),
-			XMFLOAT4(1.0f, (obj ? 1.0f : 0.0f), (obj ? 1.0f : 0.0f), 0.75f), 1.0f,
-			(tex->GetTexture() != NULL ? tex : NULL));
-		Game::Engine->RenderVolumetricLine(line);
-		*/
-		 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.2f, %.2f --> %s",
-			Game::Mouse.GetNormalisedMousePos().x, Game::Mouse.GetNormalisedMousePos().y,
-			(obj ? obj->GetInstanceCode().c_str() : "[NULL]"));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
+			"Test");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}

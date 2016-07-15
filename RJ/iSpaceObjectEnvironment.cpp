@@ -870,6 +870,63 @@ void iSpaceObjectEnvironment::BuildSpatialPartitioningTree(void)
 	}
 }
 
+// Determines the set of connections from other tiles that surround this element
+void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&outConnects)[4], std::vector<TileAdjacency> & outNeighbours)
+{
+	// Initialise all connection results to false by default
+	for (int i = 0; i < 4; ++i) outConnects[i] = false;
+
+	// Parameter check
+	if (!tile) return;
+	const INTVECTOR3 & location = tile->GetElementLocation();
+	const INTVECTOR3 & size = tile->GetElementSize();
+
+	// Check each direction in turn
+	for (int i = 0; i < 4; ++i)
+	{
+		Direction dir = (Direction)i;
+
+		// Determine the range of elements on this 'face' of the tile.  This will always
+		// be the element size in two dimensions and 1 in the third
+		bool x_dim = (dir == Direction::Up || dir == Direction::Down);
+		INTVECTOR3 el_incr = INTVECTOR3(
+			(x_dim ? size.x : 1), (x_dim ? 1 : size.y), size.z);
+
+		// Loop across the range of elements in this direction
+		INTVECTOR3 el, incr; ComplexShipElement *element;
+		ComplexShipTile *adj_tile; int adj_index;
+		for (int x = 0; x < el_incr.x; ++x)
+		{
+			for (int y = 0; y < el_incr.y; ++y)
+			{
+				for (int z = 0; z < el_incr.z; ++z)
+				{
+					// Get the element in question
+					incr = INTVECTOR3(x, y, z);
+					el = (location + incr);
+					element = GetElement(el);
+					if (!element) continue;
+
+					// Try to retrieve the neighbouring element; if none, we are at the edge and can skip this case
+					adj_index = element->GetNeighbour(dir);
+					if (adj_index < 0 || adj_index >= m_elementcount) continue;
+					const ComplexShipElement & adj_el = m_elements[adj_index];
+
+					// Test whether this element contains a tile; if so, we want to record that fact
+					adj_tile = adj_el.GetTile();
+					if (adj_tile)
+					{
+						outConnects[i] = true;
+						outNeighbours.push_back(TileAdjacency(incr, dir, adj_tile));
+					}
+				}
+			}
+		}
+	}
+
+
+}
+
 // Converts an element index into its x/y/z location
 INTVECTOR3 iSpaceObjectEnvironment::ElementIndexToLocation(int index) const
 {

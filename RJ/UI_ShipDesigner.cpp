@@ -1515,7 +1515,7 @@ void UI_ShipDesigner::RenderBaseTileData(ComplexShipTile *tile, INTVECTOR3 tilep
 	if (tileclass != D::TileClass::Corridor)
 	{
 		// Render each tile connection point in turn
-		ElementConnectionSet::iterator it_end = tile->GetConnectionIteratorEnd();
+/*		ElementConnectionSet::iterator it_end = tile->GetConnectionIteratorEnd();
 		for (ElementConnectionSet::iterator it = tile->GetConnectionIteratorStart(); it != it_end; ++it)
 		{
 			// Get the absolute position of this connection in the ship element space.  Only render if it is within the bounds
@@ -1549,7 +1549,7 @@ void UI_ShipDesigner::RenderBaseTileData(ComplexShipTile *tile, INTVECTOR3 tilep
 				default:
 					break;		// Add no render instance unless the connection is in one of the four 2D-plane directions
 			}
-		}
+		}*/
 	}
 }
 
@@ -2419,7 +2419,7 @@ void UI_ShipDesigner::ApplyConnectionChangeTool(INTVECTOR2 mouselocation)
 	else if (m_connectionchangetool_element2.x > m_connectionchangetool_element1.x)		dir = Direction::Right;
 	else if (m_connectionchangetool_element2.y > m_connectionchangetool_element1.y)		dir = Direction::Down;
 	else																				return;
-
+	/*
 	// See whether connections already exist between these two tiles, at this location
 	bool c1 = t1->HasConnection(m_connectionchangetool_element1 - t1->GetElementLocation(), dir);
 	bool c2 = t2->HasConnection(m_connectionchangetool_element2 - t2->GetElementLocation(), GetOppositeDirection(dir));
@@ -2437,7 +2437,7 @@ void UI_ShipDesigner::ApplyConnectionChangeTool(INTVECTOR2 mouselocation)
 		t1->AddConnection(m_connectionchangetool_element1 - t1->GetElementLocation(), dir);
 		t2->AddConnection(m_connectionchangetool_element2 - t2->GetElementLocation(), GetOppositeDirection(dir));
 	}
-
+	*/
 	// Refresh the SD grid to show the change in connections
 	ForceRefreshOfConnectionChangeTool();
 	PerformSDGridUpdate();
@@ -2577,7 +2577,7 @@ void UI_ShipDesigner::UpdateCorridorTileAtElement(ComplexShipElement *el)
 // Returns a set of flags determining the corridor environment surrounding this element
 void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *pOutLeft, bool *pOutUp, bool *pOutRight, bool *pOutDown)
 {
-	int index;
+	//int index;
 	ComplexShipElement *en = NULL;
 	ComplexShipTile *nbr = NULL;
 	if (!el) return;
@@ -2585,7 +2585,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 	// Get the tile at this element 
 	ComplexShipTile *tile = el->GetTile();
 	if (!tile || tile->GetClass() != D::TileClass::Corridor) return;
-
+	/*
 	// Check left neighbour
 	index = el->GetNeighbour(Direction::Left);
 	if (index != ComplexShipElement::NO_ELEMENT)
@@ -2637,6 +2637,7 @@ void UI_ShipDesigner::AnalyseCorridorEnvironment(ComplexShipElement *el, bool *p
 					(*pOutDown) = true;
 		}
 	}
+	*/
 }
 
 // Returns a new corridor tile depending on the environment in which it is about to be placed.  Params indicate whether
@@ -2711,7 +2712,7 @@ CSCorridorTile *UI_ShipDesigner::CreateCorridorTile(bool left, bool up, bool rig
 
 	// Final check to make sure we successfully created the tile
 	if (!tile) return NULL;
-
+	/*
 	// Now set tile-to-tile connections depennding on the surrounding environment.  Note that we only need to
 	// set the connection from this tile outwards; the reciprocal connection will be established when updating
 	// the surrounding corridor environment after this
@@ -2719,7 +2720,7 @@ CSCorridorTile *UI_ShipDesigner::CreateCorridorTile(bool left, bool up, bool rig
 	if (up)		tile->AddConnection(NULL_INTVECTOR3, Direction::Up);
 	if (right)	tile->AddConnection(NULL_INTVECTOR3, Direction::Right);
 	if (down)	tile->AddConnection(NULL_INTVECTOR3, Direction::Down);
-
+	*/
 	// Return the new tile
 	return tile;
 }
