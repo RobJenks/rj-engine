@@ -16,7 +16,7 @@ public:
 	CSLifeSupportTileDefinition(void);
 
 	// Virtual method implemented by definition subclasses, if required, to apply subclass-specific properties to a tile
-	void						ApplyClassSpecificDefinition(ComplexShipTile *tile);
+	void						ApplyClassSpecificDefinition(ComplexShipTile *tile) const;
 
 	// Virtual method to read class-specific XML data for the tile
 	void						ReadClassSpecificXMLData(TiXmlElement *node);

@@ -30,6 +30,7 @@ class BasicProjectileDefinition;
 class SpaceProjectileDefinition;
 class SkinnedModel;
 class ActorBase;
+class DynamicTileSet;
 
 // This file contains no objects with special alignment requirements
 namespace D {
@@ -43,6 +44,7 @@ namespace D {
 	extern DataRegister<ComplexShipSection>				ComplexShipSections;		// The details of all complex ship sections in the game
 	extern DataRegister<ComplexShipTileDefinition>		ComplexShipTiles;			// The details of all complex ship tiles in the game
 	extern DataRegister<ComplexShipTileClass>			ComplexShipTileClasses;		// The details of all complex ship tile classes in the game
+	extern DataRegister<DynamicTileSet>					DynamicTileSets;			// Details of all dynamic tile sets in the game
 	extern DataRegister<ComplexShipObjectClass>			ComplexShipObjectClasses;	// The details of all object classes in the game
 
 	extern DataRegister<StaticTerrainDefinition>		StaticTerrainDefinitions;	// The details of all static terrain classes in the game
@@ -111,6 +113,7 @@ namespace D {
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;
 	extern const char *NODE_ProjectileLauncher;
+	extern const char *NODE_DynamicTileSet;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;

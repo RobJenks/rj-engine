@@ -2674,7 +2674,7 @@ CSCorridorTile *UI_ShipDesigner::CreateCorridorTile(bool left, bool up, bool rig
 		else
 		{
 			// Corner tile
-			tile = (CSCorridorTile*)ComplexShipTile::Create("corridor_ne");
+			tile = (CSCorridorTile*)ComplexShipTile::Create("corridor_se");
 			if (!tile) return NULL;
 
 			// Rotate based on which type of corner this is

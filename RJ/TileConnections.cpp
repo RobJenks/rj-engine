@@ -135,10 +135,34 @@ void TileConnections::SetConnectionState(TileConnectionType type, const INTVECTO
 	m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)] = state;
 }
 
+// Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
+// input data before making any changes.  More appropriate for data read from external files.  Returns a flag
+// indicating whether the data was valid and applied
+bool TileConnections::ValidateAndSetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state)
+{
+	// Validate our current state
+	if (!m_data) return false;
+
+	// Validate the input parameters
+	if (type < (TileConnectionType)0 || type >= TileConnectionType::_COUNT ||
+		!(location >= NULL_INTVECTOR3) || !(location < m_elementsize))
+	{
+		return false;
+	}
+
+	// Input parameters are valid, so set the connection state and return success
+	SetConnectionState(type, location, state);
+	return true;
+}
+
 // Sets the complete connection state based on some other connection state object
 void TileConnections::SetConnectionState(const TileConnections & source) 
 { 
+	// Parameter check
 	bitstring ** const src = source.GetData();
+	if (!src) return;
+
+	// Copy each connection state entry in turn
 	for (unsigned int i = 0; i < TileConnections::TileConnectionType::_COUNT; ++i)
 	{
 		for (int e = 0; e < m_elementcount; ++e)
@@ -172,6 +196,19 @@ TileConnections::TileConnections(const TileConnections & source)
 	SetConnectionState(source);
 }
 
+// Assignment operator
+TileConnections & TileConnections::operator=(const TileConnections & rhs)
+{
+	// Reinitialise the data within this object.  If we already have data then
+	// it will be deallocated and reallocated
+	Initialise(rhs.GetElementSize());
+
+	// Copy all data from the source object into this object
+	SetConnectionState(rhs);
+
+	// Return a reference to this object
+	return *this;
+}
 
 // Deallocates any existing data
 void TileConnections::DeallocateData(void)

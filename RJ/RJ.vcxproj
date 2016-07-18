@@ -269,6 +269,7 @@
     <ClCompile Include="DataOutput.cpp" />
     <ClCompile Include="DebugCommandHandler.cpp" />
     <ClCompile Include="DustParticle.cpp" />
+    <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -473,6 +474,7 @@
     <ClInclude Include="DebugGlobalField.h" />
     <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
+    <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="GameObjects.h" />

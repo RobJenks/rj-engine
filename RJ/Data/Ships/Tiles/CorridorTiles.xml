@@ -8,7 +8,9 @@
     <Size x="1" y="1" z="1" />
     <DefaultProperty name="active" value="true" />
     <DefaultProperty name="walkable" value="true" />
-  
+
+    <CanConnect type="0" x="0" y="0" z="0" state="15" />
+    
     <CollisionOBB skip="true" numchildren="0" />
     <staticterrain px="-3.245002" py="-0.104999" pz="-0.149999" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.395001" ey="2.455000" ez="5.069999" />
     <staticterrain px="3.155014" py="-0.099999" pz="0.010001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.395001" ey="2.455000" ez="5.069999" />
@@ -17,15 +19,17 @@
   </ComplexShipTileDefinition>
 
   <ComplexShipTileDefinition class="corridor">
-    <Code>CORRIDOR_NE</Code>
+    <Code>CORRIDOR_SE</Code>
     <Name>Corner corridor</Name>
     <PrimaryTile>True</PrimaryTile>
     <StandardTile>True</StandardTile>
-    <Model>corridor_ne_model</Model>
+    <Model>corridor_se_model</Model>
     <Size x="1" y="1" z="1" />
     <DefaultProperty name="active" value="true" />
     <DefaultProperty name="walkable" value="true" />
 
+    <CanConnect type="0" x="0" y="0" z="0" state="15" />
+    
     <CollisionOBB skip="true" numchildren="0" />
     <staticterrain px="-0.369997" py="-2.364999" pz="-0.055001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.140003" ey="0.295001" ez="4.865002" />
     <staticterrain px="-0.354996" py="2.079996" pz="-0.045000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.140003" ey="0.295001" ez="5.010003" />
@@ -47,6 +51,8 @@
     <Size x="1" y="1" z="1" />
     <DefaultProperty name="active" value="true" />
     <DefaultProperty name="walkable" value="true" />
+
+    <CanConnect type="0" x="0" y="0" z="0" state="15" />
 
     <CollisionOBB skip="true" numchildren="0" />
     <staticterrain px="-0.459997" py="-2.364999" pz="-0.080001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.635005" ey="0.295001" ez="5.000003" />
@@ -70,6 +76,8 @@
     <Size x="1" y="1" z="1" />
     <DefaultProperty name="active" value="true" />
     <DefaultProperty name="walkable" value="true" />
+
+    <CanConnect type="0" x="0" y="0" z="0" state="15" />
 
     <CollisionOBB skip="true" numchildren="0" />
     <staticterrain px="-0.359997" py="-2.339999" pz="-0.080001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="3.835006" ey="0.295001" ez="5.000003" />

@@ -101,6 +101,7 @@ namespace HashedStrings
 	DefineHash(H_NoModelCentering, "nomodelcentering");
 	DefineHash(H_EffectiveSize, "effectivesize");
 	DefineHash(H_ActualEffectiveSize, "actualeffectivesize");
+	DefineHash(H_Location, "location");
 	DefineHash(H_ElementLocation, "elementlocation");
 	DefineHash(H_ElementSize, "elementsize");
 	DefineHash(H_Include, "include");
@@ -241,6 +242,9 @@ namespace HashedStrings
 	DefineHash(H_Lifetime, "lifetime");
 	DefineHash(H_Colour, "colour");
 	DefineHash(H_Connections, "connections");
+	DefineHash(H_CanConnect, "canconnect");
+	DefineHash(H_Connection, "connection");
+	DefineHash(H_DynamicTileSet, "dynamictileset");
 }
 
 

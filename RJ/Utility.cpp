@@ -184,15 +184,15 @@ INTVECTOR3 DirectionUnitOffset(Direction direction)
 	{
 		case Direction::Left:			return INTVECTOR3(-1, 0, 0);
 		case Direction::Right:			return INTVECTOR3(+1, 0, 0);
-		case Direction::Up:				return INTVECTOR3(0, -1, 0);
-		case Direction::Down:			return INTVECTOR3(0, +1, 0);
+		case Direction::Up:				return INTVECTOR3(0, +1, 0);
+		case Direction::Down:			return INTVECTOR3(0, -1, 0);
 		case Direction::ZUp:			return INTVECTOR3(0, 0, +1);
 		case Direction::ZDown:			return INTVECTOR3(0, 0, -1);
 
-		case Direction::UpLeft:			return INTVECTOR3(-1, -1, 0);
-		case Direction::UpRight:		return INTVECTOR3(+1, -1, 0);
-		case Direction::DownLeft:		return INTVECTOR3(-1, +1, 0);
-		case Direction::DownRight:		return INTVECTOR3(+1, +1, 0);
+		case Direction::UpLeft:			return INTVECTOR3(-1, +1, 0);
+		case Direction::UpRight:		return INTVECTOR3(+1, +1, 0);
+		case Direction::DownLeft:		return INTVECTOR3(-1, -1, 0);
+		case Direction::DownRight:		return INTVECTOR3(+1, -1, 0);
 
 		default:						return NULL_INTVECTOR3;
 	}

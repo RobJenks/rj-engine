@@ -559,6 +559,9 @@
     <ClCompile Include="TileConnections.cpp">
       <Filter>Objects\Ships\Tiles</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicTileSet.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1273,6 +1276,9 @@
       <Filter>Objects\Ships\Tiles</Filter>
     </ClInclude>
     <ClInclude Include="TileConnections.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTileSet.h">
       <Filter>Objects\Ships\Tiles</Filter>
     </ClInclude>
   </ItemGroup>

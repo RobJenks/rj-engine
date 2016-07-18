@@ -10,6 +10,7 @@
 #include "Model.h"
 #include "ComplexShipElement.h"
 #include "ProductionCost.h"
+#include "TileConnections.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -61,7 +62,7 @@ public:
 	// Methods to add and retrieve probability-weighted models for contructing tiles
 	typedef unordered_map<string, ProbabilityWeightedModelCollection> TileModelSet;
 	void AddModelToSet(string category, Model *model, float probability);
-	Model *GetModelFromSet(ProbabilityWeightedModelCollection *models);
+	Model *GetModelFromSet(const ProbabilityWeightedModelCollection *models) const;
 	
 	// Static method to create definition objects of the desired subclass type
 	static ComplexShipTileDefinition *	Create(D::TileClass cls);
@@ -69,19 +70,19 @@ public:
 	// Methods to get and set the class of this tile definition
 	bool								SetClass(const std::string & cls);
 	bool								SetClass(ComplexShipTileClass *cls);
-	CMPINLINE D::TileClass				GetClass(void) { return m_classtype; }
-	CMPINLINE ComplexShipTileClass *	GetClassObject(void) { return m_class; }
+	CMPINLINE D::TileClass				GetClass(void) const { return m_classtype; }
+	CMPINLINE ComplexShipTileClass *	GetClassObject(void) const { return m_class; }
 
 	// Methods to get and set key properties
-	CMPINLINE string		GetCode(void)									{ return m_code; }
-	CMPINLINE void			SetCode(string code)							{ m_code = code; }
-	CMPINLINE string		GetName(void)									{ return m_name; }
-	CMPINLINE void			SetName(string name)							{ m_name = name; }
-	CMPINLINE INTVECTOR3	GetElementSize(void)							{ return m_elementsize; }
-	CMPINLINE void			SetElementSize(INTVECTOR3 size)					{ m_elementsize = size; }
+	CMPINLINE string		GetCode(void) const										{ return m_code; }
+	CMPINLINE void			SetCode(const string & code)							{ m_code = code; }
+	CMPINLINE string		GetName(void) const										{ return m_name; }
+	CMPINLINE void			SetName(const string & name)							{ m_name = name; }
+	CMPINLINE INTVECTOR3	GetElementSize(void) const								{ return m_elementsize; }
+	void					SetElementSize(const INTVECTOR3 & size);
 	
 	// Virtual method implemented by subclasses, if required, to apply subclass-specific properties to a tile
-	virtual void			ApplyClassSpecificDefinition(ComplexShipTile *tile) = 0;
+	virtual void			ApplyClassSpecificDefinition(ComplexShipTile *tile) const = 0;
 
 	// Virtual method to read class-specific XML data for the tile definition
 	virtual void			ReadClassSpecificXMLData(TiXmlElement *node) = 0;
@@ -108,13 +109,13 @@ public:
 	}
 	
 	// Determines whether the tile type has a fixed size in all dimensions, or if it can vary for each instance
-	CMPINLINE bool			HasFixedSize(void)								
+	CMPINLINE bool			HasFixedSize(void) const
 	{
 		return (m_elementsize.x > 0 && m_elementsize.y > 0 && m_elementsize.z > 0);
 	}
 
 	// Model properties
-	CMPINLINE bool				HasCompoundModel(void)							{ return m_multiplemodels; }
+	CMPINLINE bool				HasCompoundModel(void) const					{ return m_multiplemodels; }
 	CMPINLINE void				SetHasCompoundModel(bool compound)				{ m_multiplemodels = compound; }
 	CMPINLINE Model *			GetModel(void)									{ return m_model; }
 	CMPINLINE void				SetModel(Model *model)							{ m_model = model; }
@@ -122,26 +123,37 @@ public:
 	CMPINLINE BoundingObject *	GetBoundingVolume(void)							{ return m_boundingbox; }
 	CMPINLINE void				SetBoundingVolume(BoundingObject *obj)			{ m_boundingbox = obj; }
 	
+	// Data on the dynamic tileset (if any) this definition belongs to
+	CMPINLINE bool				BelongsToDynamicTileSet(void) const				{ return m_member_of_dynamic_tileset; }
+	void						AddToDynamicTileSet(const std::string & tileset);
+	void						RemoveLinkToDynamicTileSet(void);
+	std::string					GetDynamicTileSet(void) const;
 
 	// Inline method to return a model from a set based on category name; simply calls overloaded function after looking up that category
-	CMPINLINE Model *ComplexShipTileDefinition::GetModelFromSet(string category)
+	CMPINLINE Model *ComplexShipTileDefinition::GetModelFromSet(string category) const
 	{
 		if (category == NullString || m_models.count(category) == 0)	return NULL; 
-		else													return GetModelFromSet(&(m_models[category]));
+		else															return GetModelFromSet(&(m_models.at(category)));
 	}
 
 	// Creates a new tile based on this definition
-	ComplexShipTile *				CreateTile(void);
+	ComplexShipTile *				CreateTile(void) const;
+
+	// Generates the geometry for this tile.  Typically called during tile compilation
+	Result							GenerateGeometry(ComplexShipTile *tile) const;
 
 	// Builds a tile based on this definition, and the data already loaded into the tile object
-	Result							CompileTile(ComplexShipTile *tile);
+	Result							CompileTile(ComplexShipTile *tile) const;
 
 	// Validates a tile based on its hard stop requirements
-	Result							ValidateTileHardStop(ComplexShipTile *tile);
+	Result							ValidateTileHardStop(ComplexShipTile *tile) const;
 
 	// Attempts to compile *and validate* a tile based on the parameters that have been set
-	Result							CompileAndValidateTile(ComplexShipTile *tile);
-
+	Result							CompileAndValidateTile(ComplexShipTile *tile) const;
+	
+	// Defines the connectivity for tiles created from this definition
+	TileConnections					Connectivity;
+	
 	// Shutdown method to deallocate all resources
 	void							Shutdown(void);
 
@@ -186,6 +198,10 @@ protected:
 	bool						m_multiplemodels;
 	TileModelSet				m_models;
 
+	// Name of the dynamic tile set this definition belongs to, if applicable
+	bool						m_member_of_dynamic_tileset;
+	std::string					m_dynamic_tileset;
+
 	// Size of the model.  If set to -1/-1/-1 then the tile is stretchable to user-defined size; if not, it maintains the size specified
 	INTVECTOR3					m_elementsize;
 
@@ -196,9 +212,9 @@ protected:
 	BoundingObject *			m_boundingbox;
 
 	// Returns the model set for the specified category of element, or NULL if no model set exists
-	CMPINLINE ProbabilityWeightedModelCollection *	GetModelSet(const string &category) 
+	CMPINLINE const ProbabilityWeightedModelCollection *	GetModelSet(const string &category) const
 	{ 
-		if (m_models.count(category) > 0)	return &(m_models[category]); 
+		if (m_models.count(category) > 0)	return &(m_models.at(category)); 
 		else								return NULL; 
 	}
 

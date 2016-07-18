@@ -1,0 +1,78 @@
+<GameData>
+  <DynamicTileSet>
+    <Code>dts_corridor</Code>
+    <DefaultOption>corridor_ns</DefaultOption>
+
+    <!-- Straight corridor sections -->
+    <Option>
+      <Tile code="corridor_ns" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="10" />
+    </Option>
+    <Option>
+      <Tile code="corridor_ns" rotation="1" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="5" />
+    </Option>   
+    
+    <!-- Corner corridor sections -->
+    <Option>
+      <Tile code="corridor_se" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="12" />
+    </Option>
+    <Option>
+      <Tile code="corridor_se" rotation="1" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="9" />
+    </Option>
+    <Option>
+      <Tile code="corridor_se" rotation="2" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="3" />
+    </Option>
+    <Option>
+      <Tile code="corridor_se" rotation="3" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="6" />
+    </Option>
+    
+    <!-- Three-way corridor sections -->
+    <Option>
+      <Tile code="corridor_nse" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="14" />
+    </Option>
+    <Option>
+      <Tile code="corridor_nse" rotation="1" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="13" />
+    </Option>
+    <Option>
+      <Tile code="corridor_nse" rotation="2" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="11" />
+    </Option>
+    <Option>
+      <Tile code="corridor_nse" rotation="3" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="7" />
+    </Option>
+    
+    <!-- Four-way corridor sections -->
+    <Option>
+      <Tile code="corridor_nsew" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="15" />
+    </Option>
+    
+    <!-- Straight corridor sections - for single-connection-only scenarios -->
+    <!-- In future this should be handled by end-piece corridors with only one entrance -->
+    <Option>
+      <Tile code="corridor_ns" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="2" />
+    </Option>
+    <Option>
+      <Tile code="corridor_ns" rotation="0" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="8" />
+    </Option>
+    <Option>
+      <Tile code="corridor_ns" rotation="1" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="1" />
+    </Option>
+    <Option>
+      <Tile code="corridor_ns" rotation="1" />
+      <ConnectionState type="0" x="0" y="0" z="0" state="4" />
+    </Option>
+    
+  </DynamicTileSet>
+</GameData>

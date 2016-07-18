@@ -38,6 +38,7 @@
 #include "ComplexShipInfrastructure.h"
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
+#include "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "StaticTerrainDefinition.h"
 
@@ -188,8 +189,10 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadProjectileLauncher(child);
 		} else if (name == D::NODE_BasicProjectileDefinition) {
 			res = IO::Data::LoadBasicProjectileDefinition(child);
-		} else if (name == D::NODE_SpaceProjectileDefinition) { 
+		} else if (name == D::NODE_SpaceProjectileDefinition) {
 			res = IO::Data::LoadSpaceProjectileDefinition(child);
+		} else if (name == D::NODE_DynamicTileSet) {
+			res = IO::Data::LoadDynamicTileSet(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -1205,6 +1208,13 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 		else if (hash == HashedStrings::H_DefaultProperties) {
 			tiledef->DefaultProperties = IO::GetIntValue(child);
 		}
+		else if (hash == HashedStrings::H_CanConnect) {
+			LoadAndApplyTileConnectionState(child, &(tiledef->Connectivity));
+		}
+		else if (hash == HashedStrings::H_DynamicTileSet) {
+			val = child->GetText();
+			tiledef->AddToDynamicTileSet(val);
+		}
 		else if (hash == HashedStrings::H_ProductionCost) {
 			// We supply one special attribute for tile production; whether these are per-element or overall requirements.  Store it now
 			bool perelement = true;										// We assume production cost is per-element unless specified
@@ -1345,6 +1355,125 @@ Result IO::Data::LoadComplexShipTileCompoundModel(TiXmlElement *node, ComplexShi
 	return ErrorCodes::NoError;
 }
 
+// Loads a dynamic tileset and registers it with the central collection
+Result IO::Data::LoadDynamicTileSet(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadDynamicTileSetWithInvalidReference;
+
+	// Create a new dynamic tile set to hold the data
+	DynamicTileSet *dts = new DynamicTileSet();
+
+	// Parse the contents of this node one element at a time
+	std::string key, val;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+
+		if (key == "code")
+		{
+			val = child->GetText();
+			dts->SetCode(val);
+		}
+		else if (key == "defaultoption")
+		{
+			val = child->GetText(); StrLowerC(val);
+			ComplexShipTileDefinition *def = D::ComplexShipTiles.Get(val);
+			dts->SetDefault(def);
+		}
+		else if (key == "option")
+		{
+			LoadDynamicTileSetOption(child, dts);
+		}
+	}
+
+	// Only store this dynamic tileset if it contains all mandatory data
+	if (dts->GetCode() == NullString)
+	{
+		return ErrorCodes::CouldNotAddDynamicTileSetWithoutMandatoryData;
+	}
+
+	// Add to the central register and return success
+	D::DynamicTileSets.Store(dts);
+	return ErrorCodes::NoError;
+}
+
+// Load one option for a dynamic tileset and apply it to the DTS provided
+Result IO::Data::LoadDynamicTileSetOption(TiXmlElement *node, DynamicTileSet *pOutDTS)
+{
+	// Parameter check
+	if (!node || !pOutDTS) return ErrorCodes::CouldNotLoadDynamicTileSetEntryWithNullData;
+
+	// Create an object to hold the data
+	DynamicTileSet::DynamicTileRequirements option;
+
+	// Parse the contents of this node one element at a time
+	std::string key;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+
+		if (key == "tile")
+		{
+			const char *ccode = child->Attribute("code");
+			const char *crot = child->Attribute("rotation");
+			std::string code = ccode;
+			int rot = atoi(crot);
+
+			option.TileDefinition = D::ComplexShipTiles.Get(code);
+			option.Rotation = (Rotation90Degree)rot;
+
+			// Use the tile definition to allocate space for connection requirements.  This adds
+			// a hard dependency; the "Tile" element MUST be included before any "ConnectionState"
+			// elements, otherwise the connection state data will be ignored 
+			if (option.TileDefinition)
+			{
+				option.Connections.Initialise(option.TileDefinition->GetElementSize());
+			}
+		}
+		else if (key == "connectionstate")
+		{
+			// Load the connection state data.  Note that, as per the above, this data will only
+			// be loaded if it follows the "Tile" element, since that element will also allocate
+			// the space required for this connection state data
+			LoadAndApplyTileConnectionState(child, &(option.Connections));
+		}
+	}
+
+	// Add to the dynamic tileset and return success
+	pOutDTS->AddEntry(option);
+	return ErrorCodes::NoError;
+}
+
+
+// Load the state of a tile connection and set that state in the TileConnections object passed in as a parameter
+Result IO::Data::LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnections *pOutConnections)
+{
+	// Parameter check
+	if (!node || !pOutConnections) return ErrorCodes::CannotLoadTileConnectionStateWithNullData;
+
+	// Read data out of the relevant attributes
+	INTVECTOR3 loc = INTVECTOR3(); int type, iState;
+	node->Attribute("type", &type);
+	node->Attribute("x", &loc.x);
+	node->Attribute("y", &loc.y);
+	node->Attribute("z", &loc.z);
+	node->Attribute("state", &iState);
+
+	// Make sure the connection state is valid and then apply it directly
+	if (pOutConnections->ValidateAndSetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState))
+	{
+		return ErrorCodes::NoError;
+	}
+	else
+	{
+		return ErrorCodes::TileConnectionStateIsInvalid;
+	}
+}
 
 // Loads a static terrain definition and stores it in the global collection
 Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)

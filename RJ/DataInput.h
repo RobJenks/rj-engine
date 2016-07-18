@@ -37,6 +37,7 @@ class ProductionCost;
 class StaticTerrain;
 class EffectBase;
 class FireEffect;
+class TileConnections;
 
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
@@ -115,6 +116,8 @@ namespace IO { namespace Data {
 	Result LoadComplexShipTileDefinition(TiXmlElement *node);
 	Result LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutShipTile);
 	Result LoadComplexShipTileCompoundModel(TiXmlElement *node, ComplexShipTileDefinition *tiledef);
+	Result LoadDynamicTileSet(TiXmlElement *node);
+	Result LoadDynamicTileSetOption(TiXmlElement *node, DynamicTileSet *pOutDTS);
 
 	Result LoadStaticTerrainDefinition(TiXmlElement *node);
 	StaticTerrain *LoadStaticTerrain(TiXmlElement *node);
@@ -125,6 +128,8 @@ namespace IO { namespace Data {
 	Result LoadSkinnedModel(TiXmlElement *node);
 	Result LoadActorAttributeGenerationData(TiXmlElement *node);
 	Result LoadActor(TiXmlElement *node);
+
+	Result LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnections *pOutConnections);
 
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;

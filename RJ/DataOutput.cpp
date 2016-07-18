@@ -431,6 +431,48 @@ Result IO::Data::SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb
 	return overallresult;
 }
 
+// Saves the full set of connection data in the specified collection.  Only saves non-zero connection states.
+// The "element_name" parameter indicates the label applied to each new element generated below the parent
+Result IO::Data::SaveTileConnectionState(TiXmlElement *parent, const std::string & element_name, TileConnections *connection_data)
+{
+	// Parameter check
+	if (!parent || !connection_data) return ErrorCodes::CannotSaveNullTileConnectionData;
+
+	// Element name will be applied to all new elements generated under the parent
+	const char *elname = element_name.c_str();
+	bitstring data;
+
+	// Iterate through the full set of possible connections
+	const INTVECTOR3 & connsize = connection_data->GetElementSize();
+	for (int i = 0; i < (int)TileConnections::TileConnectionType::_COUNT; ++i)
+	{
+		for (int x = 0; x < connsize.x; ++x)
+		{
+			for (int y = 0; y < connsize.y; ++y)
+			{
+				for (int z = 0; z < connsize.z; ++z)
+				{
+					// Only save data for those elements that have some ( != 0) connection data
+					data = connection_data->GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
+					if (data != 0U)
+					{
+						TiXmlElement *conn = new TiXmlElement(elname);
+						conn->SetAttribute("type", i);
+						conn->SetAttribute("x", x);
+						conn->SetAttribute("y", y);
+						conn->SetAttribute("z", z);
+						conn->SetAttribute("State", data);
+						parent->LinkEndChild(conn);
+					}
+				}
+			}
+		}
+	}
+
+	// Return success once all data is saved
+	return ErrorCodes::NoError;
+}
+
 Result IO::Data::SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain)
 {
 	// Parameter check

@@ -395,6 +395,10 @@ namespace ErrorCodes {
 	const Result		CannotLoadBasicProjectileDefWithoutRequiredData = 2672;
 	const Result		CannotLoadBasicProjectileDefWithInvalidParams	= 2673;
 	const Result		CannotLoadGeometryForNullModel					= 2674;
+	const Result		CannotLoadTileConnectionStateWithNullData		= 2675;
+	const Result		CannotLoadDynamicTileSetWithInvalidReference	= 2676;
+	const Result		CouldNotLoadDynamicTileSetEntryWithNullData		= 2677;
+	const Result		CouldNotAddDynamicTileSetWithoutMandatoryData	= 2678;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -408,6 +412,7 @@ namespace ErrorCodes {
 	const Result		CannotSaveHardpointWithNullReferences			= 2809;
 	const Result		CannotSaveOBBWithNullReferences					= 2810;
 	const Result		CannotSaveTerrainWithNullReferences				= 2811;
+	const Result		CannotSaveNullTileConnectionData				= 2812;
 
 	// Generic object errors											(3000-3199)
 	const Result		ObjectHasNoInternalCode							= 3000;
@@ -534,6 +539,8 @@ namespace ErrorCodes {
 	const Result		CannotAllocateElementSpaceForRotation			= 4030;
 	const Result		InvalidParametersToRotateElementSpace			= 4031;
 	const Result		CannotLoadComplexShipElementWithInvalidID		= 4032;
+	const Result		CannotGenerateGeometryForNullTile				= 4033;
+	const Result		TileConnectionStateIsInvalid					= 4034;
 
 	// Ship designer errors												(4400-4599)
 	const Result		ShipDesignerCannotLoadInvalidShipCode			= 4400;

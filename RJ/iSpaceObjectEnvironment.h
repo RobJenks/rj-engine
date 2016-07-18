@@ -71,6 +71,9 @@ public:
 	// Returns the total number of elements in this environment
 	CMPINLINE int					GetElementCount(void) const										{ return m_elementcount; }
 
+	// Returns the element index corresponding to the specified element location
+	CMPINLINE int					GetElementIndex(const INTVECTOR3 & location)					{ return ELEMENT_INDEX(location.x, location.y, location.z); }
+
 	// Allocates a new element space of the specified size.  Contents are copied from the existing 
 	// space (as far as possible, and if relevant).  If any element space does already exist 
 	// it will be deallocated first
@@ -342,6 +345,15 @@ protected:
 	// Private methods used to update key ship properties
 	void							PerformGravityUpdate(void);
 	void							PerformOxygenUpdate(void);
+
+	// Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer
+	// neighbouring tiles.  Accepts the address of a tile pointer and will adjust that tile pointer if
+	// the tile is updated as part of the analysis.  TODO: May wish to replace with more general methods in future
+	Result							UpdateTileBasedOnConnectionData(ComplexShipTile **ppOutTile);
+
+	// Replaces one tile in the environment with another.  The old tile is not 
+	// shut down or deallocated by this operation
+	void							ReplaceTile(ComplexShipTile *old_tile, ComplexShipTile *new_tile);
 
 	// Sets the size of the element space within this environment.  Protected.  Only called by
 	// object methods which are handling the effects of the element space change

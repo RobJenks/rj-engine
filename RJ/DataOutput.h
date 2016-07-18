@@ -15,10 +15,12 @@ class iSpaceObjectEnvironment;
 class ComplexShip;
 class ComplexShipSection;
 class ComplexShipElement;
+class TileConnections;
 class Hardpoint;
 class OrientedBoundingBox;
 class BoundingObject;
 class Engine;
+class TileConnections;
 
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
@@ -44,6 +46,8 @@ namespace IO { namespace Data {
 	
 	Result SaveCollisionOBB(TiXmlElement *parent, OrientedBoundingBox *obb);
 	Result SaveBoundingObject(TiXmlElement *parent, BoundingObject *bound, int id);
+
+	Result SaveTileConnectionState(TiXmlElement *parent, const std::string & element_name, TileConnections *connection_data);
 
 	Result SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain);
 

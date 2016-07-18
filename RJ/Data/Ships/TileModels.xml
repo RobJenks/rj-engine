@@ -10,10 +10,10 @@
   </Model>
 
   <Model>
-    <Code>corridor_ne_model</Code>
+    <Code>corridor_se_model</Code>
     <Type>ComplexShipTile</Type>
-    <Filename>Ships\Tiles\CorridorTiles\corridor_ne.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_ne.dds</Texture>
+    <Filename>Ships\Tiles\CorridorTiles\corridor_se.rjm</Filename>
+    <Texture>Ships\Tiles\CorridorTiles\corridor_se.dds</Texture>
     <EffectiveSize x="100" y="100" z="100" />
     <ElementSize x="1" y="1" z="1" />
   </Model>

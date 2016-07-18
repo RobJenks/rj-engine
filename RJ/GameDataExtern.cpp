@@ -24,6 +24,7 @@
 #include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 #include "StaticTerrainDefinition.h"
+#include "DynamicTileSet.h"
 class ImmediateRegion;
 class SystemRegion;
 class UserInterface;
@@ -40,6 +41,7 @@ namespace D {
 	DataRegister<ComplexShipSection>			ComplexShipSections(true);			// The details of all complex ship sections in the game
 	DataRegister<ComplexShipTileDefinition>		ComplexShipTiles(true);				// The details of all complex ship tiles in the game
 	DataRegister<ComplexShipTileClass>			ComplexShipTileClasses(false);		// The details of all complex ship tile classes in the game
+	DataRegister<DynamicTileSet>				DynamicTileSets(false);				// Details of all dynamic tile sets in the game
 	DataRegister<ComplexShipObjectClass>		ComplexShipObjectClasses(false);	// Details of all object classes in the game
 	DataRegister<StaticTerrainDefinition>		StaticTerrainDefinitions(false);	// Details of all static terrain classes in the game
 	DataRegister<Resource>						Resources(false);					// Details of all resources in the game
@@ -101,6 +103,7 @@ namespace D {
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";
 	const char *NODE_ProjectileLauncher = "projectilelauncher";
+	const char *NODE_DynamicTileSet = "dynamictileset";
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";

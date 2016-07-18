@@ -620,7 +620,7 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 
 	// TODO: DEBUG
 	if (keys[DIK_T])			{ 
-		m_tile_being_placed = ComplexShipTile::Create("lifesupport_huge_01"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_T);
+		m_tile_being_placed = ComplexShipTile::Create("corridor_ns"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_T);
 	}
 
 	// Consume all keys within this UI so they are not passed down to the main application

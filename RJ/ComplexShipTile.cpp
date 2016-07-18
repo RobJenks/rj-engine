@@ -22,6 +22,8 @@
 #include "ProductionProgress.h"
 #include "ProductionCost.h"
 #include "FadeEffect.h"
+#include "DataInput.h"
+#include "DataOutput.h"
 
 #if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
 	long ComplexShipTile::inst_con = 0;
@@ -123,6 +125,9 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_simulationinterval = C.GetSimulationInterval();
 	m_lastsimulation = Game::ClockMs;
 
+	// Take the simulation state of the source tile
+	SetSimulationState(C.GetSimulationState());
+
 	// Copy the connection data for this tile 
 	Connections.SetConnectionState(C.Connections);
 	PossibleConnections.SetConnectionState(C.PossibleConnections);
@@ -211,7 +216,7 @@ void ComplexShipTile::BeforeAddedToEnvironment(iSpaceObjectEnvironment *environm
 // Event generated after the tile is added to an environment
 void ComplexShipTile::AfterAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {
-
+	// Recalculate internal tile data 
 }
 
 // Event generated before the tile is removed from an environment
@@ -595,47 +600,9 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 	//if (tile->GetModel()) IO::Data::LinkStringXMLElement("Model", tile->GetModel()->GetCode(), node);
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)tile->GetRotation(), node);
 
-	// Add an entry for each connection point on this tile
-	bitstring data;
-	bitstring ** const conn = tile->Connections.GetData();
-	const INTVECTOR3 & connsize = tile->Connections.GetElementSize();
-	for (unsigned int i = 0; i < TileConnections::TileConnectionType::_COUNT; ++i)
-	{
-		for (int x = 0; x < connsize.x; ++x)
-		{
-			for (int y = 0; y < connsize.y; ++y)
-			{
-				for (int z = 0; z < connsize.z; ++z)
-				{
-					// Save data for potential connections, only for those elements that have some ( != 0) connection data
-					data = tile->PossibleConnections.GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
-					if (data != 0U)
-					{
-						TiXmlElement *conn = new TiXmlElement("CanConnect");
-						conn->SetAttribute("type", i);
-						conn->SetAttribute("x", x);
-						conn->SetAttribute("y", y);
-						conn->SetAttribute("z", z);
-						conn->SetAttribute("State", data);
-						node->LinkEndChild(conn);
-					}
-
-					// Save data for actual connections, only for those elements that have some ( != 0) connection data
-					data = tile->Connections.GetConnectionState((TileConnections::TileConnectionType)i, INTVECTOR3(x, y, z));
-					if (data != 0U)
-					{
-						TiXmlElement *conn = new TiXmlElement("Connection");
-						conn->SetAttribute("type", i);
-						conn->SetAttribute("x", x);
-						conn->SetAttribute("y", y);
-						conn->SetAttribute("z", z);
-						conn->SetAttribute("State", data);
-						node->LinkEndChild(conn);
-					}
-				}
-			}
-		}
-	}
+	// Add entries for each connection point, and possible connection, from this tile
+	IO::Data::SaveTileConnectionState(node, "CanConnect", &(tile->PossibleConnections));
+	IO::Data::SaveTileConnectionState(node, "Connection", &(tile->Connections));
 
 	// Return the node containing all data on this base class
 	return node;
@@ -645,6 +612,7 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile)
 {
 	string skey, key, val;
+	HashVal hash;
 
 	// Parameter check
 	if (!node || !tile) return;
@@ -665,37 +633,24 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 			{
 				// All key comparisons are case-insensitive
 				key = child->Value(); StrLowerC(key);
+				hash = HashString(key);
 
-				if (key == "location") {										
+				if (hash == HashedStrings::H_Location) {
 					tile->SetElementLocation( IO::GetInt3CoordinatesFromAttr(child) );
 				}
-				else if (key == "size") {
+				else if (hash == HashedStrings::H_Size) {
 					tile->SetElementSize( IO::GetInt3CoordinatesFromAttr(child) );
 				}
-				else if (key == "rotation") {
+				else if (hash == HashedStrings::H_Rotation) {
 					val = child->GetText();
 					int rot = atoi(val.c_str());
 					tile->SetRotation((Rotation90Degree)rot);
 				}
-				else if (key == "canconnect") {
-					INTVECTOR3 loc = INTVECTOR3(); int type, iState;
-					child->Attribute("type", &type);
-					child->Attribute("x", &loc.x);
-					child->Attribute("y", &loc.y);
-					child->Attribute("z", &loc.z);
-					child->Attribute("state", &iState);
-
-					tile->PossibleConnections.SetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState);
+				else if (hash == HashedStrings::H_CanConnect) {
+					IO::Data::LoadAndApplyTileConnectionState(child, &(tile->PossibleConnections));
 				}
-				else if (key == "connection") {
-					INTVECTOR3 loc = INTVECTOR3(); int type, iState;
-					child->Attribute("type", &type); 
-					child->Attribute("x", &loc.x);
-					child->Attribute("y", &loc.y);
-					child->Attribute("z", &loc.z);
-					child->Attribute("state", &iState);
-
-					tile->Connections.SetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState);
+				else if (hash == HashedStrings::H_Connection) {
+					IO::Data::LoadAndApplyTileConnectionState(child, &(tile->Connections));
 				}
 			}
 		}
@@ -704,6 +659,21 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 			tile->ReadClassSpecificXMLData(section);
 		}
 	}
+}
+
+
+// Static base class method to copy data for the base class portion of any tile
+void ComplexShipTile::CopyBaseClassData(ComplexShipTile *source, ComplexShipTile *target)
+{
+	// Parameter check
+	if (!source || !target) return;
+
+	// Copy all base parameters
+	target->SetElementSize(source->GetElementSize());
+	target->SetElementLocation(source->GetElementLocation());
+	target->SetRotation(source->GetRotation());
+	target->Connections = TileConnections(source->Connections);
+	target->PossibleConnections = TileConnections(source->PossibleConnections);
 }
 
 // Static method to look up a tile definition and create a new tile based upon it
@@ -746,9 +716,21 @@ Result ComplexShipTile::CompileAndValidateTile(void)
 	return ErrorCodes::NoError;
 }
 
+// Generates the geometry for this tile.  Subset of the "CompileTile()" functionality which can
+// be called separately if required
+Result ComplexShipTile::GenerateGeometry(void)
+{
+	// Assuming we have an associated tile definition, pass control back to that component for geometry generation
+	if (m_definition) return m_definition->GenerateGeometry(this);
+
+	// If we have no definition to validate against then simply return success
+	return ErrorCodes::NoError;
+}
+
 // Methods to retrieve and set the definition associated with this tile
-ComplexShipTileDefinition *	ComplexShipTile::GetTileDefinition(void) const		{ return m_definition; }
-void ComplexShipTile::SetTileDefinition(ComplexShipTileDefinition *definition)	{ m_definition = definition; }
+const ComplexShipTileDefinition *	ComplexShipTile::GetTileDefinition(void) const				{ return m_definition; }
+void ComplexShipTile::SetTileDefinition(const ComplexShipTileDefinition *definition)			{ m_definition = definition; }
+
 
 // Static method to create a new instance of the specified class of tile.  Creates the object only, no initialisation
 ComplexShipTile * ComplexShipTile::New(D::TileClass cls)

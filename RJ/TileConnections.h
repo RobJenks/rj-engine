@@ -19,6 +19,9 @@ public:
 	// Copy constructor
 	TileConnections(const TileConnections & source);
 
+	// Assignment operator
+	TileConnections & operator=(const TileConnections & rhs);
+
 	// Initialise the connection data for an area of the specified size.  Clears all data
 	void							Initialise(const INTVECTOR3 & element_size);
 
@@ -55,8 +58,14 @@ public:
 	// Sets the complete connection state for a particular element & connection type
 	void							SetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state);
 
+	// Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
+	// input data before making any changes.  More appropriate for data read from external files.  Returns a flag
+	// indicating whether the data was valid and applied
+	bool							ValidateAndSetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state);
+
 	// Sets the complete connection state based on some other connection state object
 	void							SetConnectionState(const TileConnections & source);
+
 
 	// Resets the connection state across all elements
 	void							ResetConnectionState(void);

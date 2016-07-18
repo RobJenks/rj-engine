@@ -39,6 +39,8 @@ ComplexShipTileDefinition::ComplexShipTileDefinition(void)
 	m_elementsize = NULL_INTVECTOR3;
 	m_boundingbox = NULL;
 	m_productioncost = NULL;
+	m_member_of_dynamic_tileset = false;
+	m_dynamic_tileset = NullString;
 }
 
 // Static method to create definition objects of the desired subclass type
@@ -60,7 +62,7 @@ ComplexShipTileDefinition *	ComplexShipTileDefinition::Create(D::TileClass cls)
 	return def;
 }
 
-ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
+ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 {
 	// Create a new tile depending on our class
 	ComplexShipTile *tile = ComplexShipTile::New(m_classtype);
@@ -79,6 +81,9 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
 		tile->SetElementSize(m_elementsize);
 	else
 		tile->SetElementSize(INTVECTOR3(1, 1, 1));
+
+	// Copy all connectivity data into the new tile
+	tile->PossibleConnections = Connectivity;
 	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
 	if (m_haveclassspecificdata) this->ApplyClassSpecificDefinition(tile);
@@ -88,7 +93,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void)
 }
 
 // Attempts to compile and validate a tile based on the parameters that have been set
-Result ComplexShipTileDefinition::CompileAndValidateTile(ComplexShipTile *tile)
+Result ComplexShipTileDefinition::CompileAndValidateTile(ComplexShipTile *tile) const
 {
 	// Parameter check
 	Result res;
@@ -107,10 +112,8 @@ Result ComplexShipTileDefinition::CompileAndValidateTile(ComplexShipTile *tile)
 }
 
 // Builds a tile based on this definition, and the data loaded into the tile object by the GenerateTile method
-Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
+Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile) const
 {
-	ComplexShipTile::ModelLinkedList *mlink = NULL;
-
 	// Make sure the supplied parameter is valid
 	if (!tile) return ErrorCodes::CannotBuildTileWithInvalidPointer;
 
@@ -125,7 +128,22 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 		tile->InitialiseConstructionState(m_productioncost->CreateClone((float)(size.x * size.y * size.z)));
 	}
 
-	/* Model compilation logic begins below - perform all other compilation BEFORE this point */
+	// Generate the model geometry.  This MUST be performed after all other model compilation is complete
+	Result result = GenerateGeometry(tile);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Perform a recalculation of tile data, to ensure that e.g. the world matrix is correctly recalculated
+	tile->RecalculateTileData();
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Generates the geometry for this tile.  Typically called during tile compilation
+Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const 
+{
+	// Parameter check
+	if (!tile) return ErrorCodes::CannotGenerateGeometryForNullTile;
 
 	// Take different action depending on whether this tile has a simple or compound model
 	if (!m_multiplemodels)
@@ -140,19 +158,20 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 	tile->SetHasCompoundModel(true);
 
 	// Get a pointer to each of the key model types for efficiency before looping.
-	ComplexShipTileDefinition::ProbabilityWeightedModelCollection *medge = GetModelSet("wall_straight");
-	ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mcorner = GetModelSet("wall_corner");
-	ComplexShipTileDefinition::ProbabilityWeightedModelCollection *minterior = GetModelSet("interior");
-	ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mconn = GetModelSet("connection");
-	
+	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *medge = GetModelSet("wall_straight");
+	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mcorner = GetModelSet("wall_corner");
+	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *minterior = GetModelSet("interior");
+	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mconn = GetModelSet("connection");
+
 	// Get a reference to the tile model collection, and reset the contents if required
 	ComplexShipTile::TileCompoundModelSet *models = tile->GetCompoundModelSet();
 	models->ResetModelSet();
-	
+
 	// Allocate new space in the model collection based on the tile size
+	const INTVECTOR3 & size = tile->GetElementSize();
 	models->Size = size;
 	if (!models->Allocate()) return ErrorCodes::CouldNotAllocateSpaceForCompoundTileModel;
-		
+
 	// First, set any tiles with a connection
 	if (mconn)
 	{
@@ -190,37 +209,38 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 	}
 
 	// Now consider each corner in turn; may require composition of edge/connection pieces depending on the location of connection tiles
+	ComplexShipTile::ModelLinkedList *mlink = NULL;
 	bool have1 = false, have2 = false;
-	for (int z=0; z<size.z; z++)
+	for (int z = 0; z<size.z; z++)
 	{
 		// Iterate over the set of corner adjacency data for each corner
 		for (int i = 0; i < 4; i++)
 		{
 			// Check whether we have either edge already placed at the corner, as a connection, using the x/y and edge rotation values
 			have1 = have2 = false;
-			mlink = models->ModelLayout[CornerData[i].x * (size.x-1)][CornerData[i].y * (size.y-1)][z];
+			mlink = models->ModelLayout[CornerData[i].x * (size.x - 1)][CornerData[i].y * (size.y - 1)][z];
 			if (mlink)
 			{
 				// Check for connection or wall tiles at this corner
 				have1 = (mlink->HasItem(CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallConnection)) ||
-						(mlink->HasItem(CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
-				have2 = (mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallConnection)) || 
-						(mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
+					(mlink->HasItem(CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
+				have2 = (mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallConnection)) ||
+					(mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
 			}
 
 			// If we have neither edge covered then we can add a normal corner tile at this position
-			if (!have1 && !have2) 
+			if (!have1 && !have2)
 			{
-				models->AddModel(CornerData[i].x * (size.x-1), CornerData[i].y * (size.y-1), z, GetModelFromSet(mcorner), 
-								 CornerData[i].CornerRotation, ComplexShipTile::TileModel::TileModelType::WallCorner, false);
+				models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(mcorner),
+					CornerData[i].CornerRotation, ComplexShipTile::TileModel::TileModelType::WallCorner, false);
 				continue;
 			}
 
 			// Otherwise, we have at least one edge covered.  We therefore fill in in the missing edges 
-			if (!have1) models->AddModel(CornerData[i].x * (size.x-1), CornerData[i].y * (size.y-1), z, GetModelFromSet(medge), 
-										 CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-			if (!have2) models->AddModel(CornerData[i].x * (size.x-1), CornerData[i].y * (size.y-1), z, GetModelFromSet(medge), 
-										 CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+			if (!have1) models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(medge),
+				CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+			if (!have2) models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(medge),
+				CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
 		}
 	}
 
@@ -230,21 +250,21 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 		for (int z = 0; z < size.z; z++)
 		{
 			// Traverse the y dimension and fill in the left (x=0) and right (x=n-1) columns
-			for (int y=1; y<size.y-1; y++)
+			for (int y = 1; y<size.y - 1; y++)
 			{
-				if (!(models->ModelLayout[0][y][z]))		models->AddModel(0, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate0, 
-																			 ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-				if (!(models->ModelLayout[size.x-1][y][z])) models->AddModel(size.x-1, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate180,
-																			 ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+				if (!(models->ModelLayout[0][y][z]))		models->AddModel(0, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate0,
+					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+				if (!(models->ModelLayout[size.x - 1][y][z])) models->AddModel(size.x - 1, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate180,
+					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
 			}
 
 			// Traverse the x dimension and fill in the top (y=0) and bottom (y=n-1) rows
-			for (int x=1; x<size.x-1; x++)
+			for (int x = 1; x<size.x - 1; x++)
 			{
 				if (!(models->ModelLayout[x][0][z]))		models->AddModel(x, 0, z, GetModelFromSet(medge), Rotation90Degree::Rotate270,
-																			 ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-				if (!(models->ModelLayout[x][size.y-1][z])) models->AddModel(x, size.y-1, z, GetModelFromSet(medge), Rotation90Degree::Rotate90,
-																			 ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+				if (!(models->ModelLayout[x][size.y - 1][z])) models->AddModel(x, size.y - 1, z, GetModelFromSet(medge), Rotation90Degree::Rotate90,
+					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
 			}
 		}
 	}
@@ -252,10 +272,10 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 	// Finally loop across the tile and set all other elements as interior elements		
 	if (minterior)
 	{
-		for (int z=0; z<size.z; z++) 
+		for (int z = 0; z<size.z; z++)
 		{
-			for (int x=1; x<size.x-1; x++) {
-				for (int y=1; y<size.y-1; y++) 
+			for (int x = 1; x<size.x - 1; x++) {
+				for (int y = 1; y<size.y - 1; y++)
 				{
 					if (!(models->ModelLayout[x][y][z])) models->AddModel(x, y, z, GetModelFromSet(minterior), Rotation90Degree::Rotate0);
 				}
@@ -268,7 +288,7 @@ Result ComplexShipTileDefinition::CompileTile(ComplexShipTile *tile)
 }
 
 // Validates a tile based on hard stop requirements of the class
-Result ComplexShipTileDefinition::ValidateTileHardStop(ComplexShipTile *tile)
+Result ComplexShipTileDefinition::ValidateTileHardStop(ComplexShipTile *tile) const
 {
 	// Validate the tile against any hard-stop tile class requirements
 	if (m_class && !m_class->ValidateHardStopRequirements(tile))
@@ -279,6 +299,39 @@ Result ComplexShipTileDefinition::ValidateTileHardStop(ComplexShipTile *tile)
 	// We have created and validated the tile, so return success
 	return ErrorCodes::NoError;
 }
+
+// Sets the element size for this definition, allocating other data accordingly
+void ComplexShipTileDefinition::SetElementSize(const INTVECTOR3 & size)					
+{
+	// Store the new element size
+	m_elementsize = size; 
+
+	// Initialise the connection data to an equivalent size
+	Connectivity.Initialise(m_elementsize);
+}
+
+// Adds a link to a dynamic tileset
+void ComplexShipTileDefinition::AddToDynamicTileSet(const std::string & tileset)
+{
+	// Store the tileset code and set the flag
+	m_member_of_dynamic_tileset = true;
+	m_dynamic_tileset = tileset;
+}
+
+// Removes this definition from its current dynamic tileset
+void ComplexShipTileDefinition::RemoveLinkToDynamicTileSet(void)
+{
+	// Clear the tileset code and also reset the flag
+	m_member_of_dynamic_tileset = false;
+	m_dynamic_tileset = NullString;
+}
+
+// Returns the dynamic tileset that this definition belongs to, if applicable
+std::string ComplexShipTileDefinition::GetDynamicTileSet(void) const
+{
+	return m_dynamic_tileset;
+}
+
 
 // Adds a model to the probability-weighted model collection for this tile type
 void ComplexShipTileDefinition::AddModelToSet(string category, Model *model, float probability)
@@ -291,7 +344,7 @@ void ComplexShipTileDefinition::AddModelToSet(string category, Model *model, flo
 }
 
 // Retrieves a model for the specified category, taking into account the probability assigned to each model type
-Model *ComplexShipTileDefinition::GetModelFromSet(ProbabilityWeightedModelCollection *modelset)
+Model *ComplexShipTileDefinition::GetModelFromSet(const ProbabilityWeightedModelCollection *modelset) const
 {
 	// Make sure we have at least one model for this category
 	if (!modelset) return NULL;

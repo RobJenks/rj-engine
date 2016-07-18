@@ -6,6 +6,7 @@
 #include "iEnvironmentObject.h"
 #include "ComplexShipTileDefinition.h"
 #include "ComplexShipTile.h"
+#include  "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "Ship.h"
 #include "iContainsComplexShipTiles.h"
@@ -432,11 +433,18 @@ void iSpaceObjectEnvironment::AddTile(ComplexShipTile *tile)
 	// Add any terrain objects that come with this tile
 	AddTerrainObjectsFromTile(tile);
 
-	// Update the environment
-	UpdateEnvironment();
-
 	// Raise the post-addition event
 	TileAdded(tile);
+
+	// Set the tile simulation state to match that of the parent ship
+	tile->SetSimulationState(m_simulationstate);
+
+	// Test whether this tile, or its neighbours, need to adapt to adjust to 
+	// their surrounding neighbourhood of tiles
+	UpdateTileConnectionState(tile);
+
+	// Update the environment
+	UpdateEnvironment();
 }
 
 // Remove a tile from the environment
@@ -448,17 +456,17 @@ void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile)
 	// Raise the pre-removal event
 	BeforeTileRemoved(tile);
 
-	// Add to the tile collection
+	// Remove from the tile collection
 	RemoveShipTile(tile);
 
-	// Add any terrain objects that come with this tile
+	// Remove any terrain objects that came with this tile
 	RemoveTerrainObjectsFromTile(tile);
+
+	// Raise the post-removal event
+	TileRemoved(tile);
 
 	// Update the environment
 	UpdateEnvironment();
-
-	// Raise the post-addition event
-	TileRemoved(tile);
 }
 
 
@@ -467,7 +475,7 @@ void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)
 {
 	// Parameter check
 	if (!tile) return;
-	ComplexShipTileDefinition *def = tile->GetTileDefinition();
+	const ComplexShipTileDefinition *def = tile->GetTileDefinition();
 
 	// If the tile definition specifies any terrain objects we want to add them to the environment now, and also
 	// store references to the terrain instance IDs within the tile instance to maintain the link 
@@ -604,6 +612,99 @@ void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 		m_navnetwork->Shutdown();
 		SafeDelete(m_navnetwork);
 	}
+}
+
+// Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer
+// neighbouring tiles.  Accepts the address of a tile pointer and will adjust that tile pointer if
+// the tile is updated as part of the analysis.  TODO: May wish to replace with more general methods in future
+Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile **ppOutTile)
+{
+	Result result;
+
+	// Parameter check
+	if (!ppOutTile) return ErrorCodes::NoError;
+	ComplexShipTile *tile = (*ppOutTile);
+	if (!tile) return ErrorCodes::NoError;
+
+	// Test whether this tile is part of a dynamic tile set
+	const ComplexShipTileDefinition *definition = tile->GetTileDefinition();
+	if (definition && definition->BelongsToDynamicTileSet())
+	{
+		// Attempt to get a reference to this dynamic tileset
+		DynamicTileSet *tileset = D::DynamicTileSets.Get(definition->GetDynamicTileSet());
+		if (tileset)
+		{
+			// Verify whether the current definition is still applicable
+			DynamicTileSet::DynamicTileSetResult new_def = tileset->GetMostAppropriateTileDefinition(tile);
+			if (new_def.TileDefinition != definition)
+			{
+				// The current tile definition is no longer valid.  We therefore want to generate a 
+				// replacement tile using this new definition and copy the relevant data across to it
+				ComplexShipTile *new_tile = new_def.TileDefinition->CreateTile();
+				if (new_tile)
+				{
+					ComplexShipTile::CopyBaseClassData(tile, new_tile);
+					result = new_tile->CompileAndValidateTile();
+					if (result != ErrorCodes::NoError)
+					{
+						// Discard the new tile since it could not be validated
+						SafeDelete(new_tile);
+					}
+					else
+					{
+						// We are good to make the change; first, replace the tile with the new one
+						ReplaceTile(tile, new_tile);
+
+						// Now deallocate the old tile
+						SafeDelete(tile);
+
+						// Finally, adjust the pointer in this method to reference the new tile
+						tile = new_tile;
+					}
+				}
+			}
+
+			// We also need to make sure the tile is oriented as per the DTS entry
+			if (tile->GetRotation() != new_def.Rotation)
+			{
+				tile->SetRotation(new_def.Rotation);
+			}
+		}
+	}
+
+	// We now know that this tile has the correct tile definition associated to it, so can
+	// proceed with adjusting any geometry etc. based on that definition
+
+	// Regenerate the tile geometry if required based on the new connections etc. into this tile
+	result = tile->GenerateGeometry();
+	if (result != ErrorCodes::NoError) return result;
+
+	// Return a reference to the tile, either the existing one (if valid) or the new one that was generated
+	(*ppOutTile) = tile;
+	return ErrorCodes::NoError;
+}
+
+// Replaces one tile in the environment with another.  The old tile is not 
+// shut down or deallocated by this operation
+void iSpaceObjectEnvironment::ReplaceTile(ComplexShipTile *old_tile, ComplexShipTile *new_tile)
+{
+	// Parameter check; old tile cannot be null
+	if (!old_tile) return;
+
+	// Suspend updates while we make changes
+	SuspendTileRecalculation();
+
+	// Remove the old tile from the environment
+	RemoveTile(old_tile);
+
+	// We now want to add the new tile, assuming it exists
+	if (new_tile)
+	{
+		AddTile(new_tile);
+	}
+
+	// Resume updates, which will recalculate all tile-dependent data
+	ReactivateTileRecalculation();
 }
 
 // Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
@@ -951,7 +1052,7 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 	for (std::vector<TileAdjacency>::iterator it = adjacent.begin(); it != it_end; ++it)
 	{
 		// We can do nothing if the tile is NULL (erroneously) or if its connections have been fixed
-		const TileAdjacency & adj = (*it);
+		TileAdjacency & adj = (*it);
 		if (adj.Tile == NULL || adj.Tile->ConnectionsAreFixed() == true) continue;
 
 		// Get the ship-relative element under the tile which is being considered here
@@ -992,18 +1093,17 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 		}
 
 		// Trigger an update of the adjacent tile if any connections were updated
-		if (target_updated) adj.Tile->UpdateTileBasedOnConnectionData();
+		if (target_updated) UpdateTileBasedOnConnectionData(&(adj.Tile));
 	}
 
 	// We have processed all adjacent tiles; test whether any connections were changed
 	// in this tile as part of the update
-	if (!tile->Connections.Equals(old_state))
+	bool tile_updated = (!tile->Connections.Equals(old_state));
+	if (tile_updated)
 	{
-		tile->UpdateTileBasedOnConnectionData();
-		*** BREAK OUT THE RELEVANT SECTION OF COMPILETILE() INTO ITS OWN METHOD SO THAT THE ABOVE NEW METHOD CAN CALL IT TO REGENERATE MULTI-GEOMETRY TILES ***
-		*** SHOULD THEN CALL THIS FOR MULTI - TILES.FOR SINGLE - GEOMETRY, WILL TEST 'DYNAMIC' FLAG FOR EG CORRIDORS TO KNOW IF THEY SHOULD ADJUST TO ANOTHER IN THE SAME DYNAMIC SET ***
+		// The subject tile was modified, so finally trigger an update of that tile 
+		UpdateTileBasedOnConnectionData(&(tile));
 	}
-
 }
 
 // Converts an element index into its x/y/z location

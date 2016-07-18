@@ -22,7 +22,7 @@ CSLifeSupportTileDefinition::CSLifeSupportTileDefinition(void)
 }
 
 // Virtual method implemented by definition subclasses, if required, to apply subclass-specific properties to a tile
-void CSLifeSupportTileDefinition::ApplyClassSpecificDefinition(ComplexShipTile *tile)
+void CSLifeSupportTileDefinition::ApplyClassSpecificDefinition(ComplexShipTile *tile) const
 {
 	// We know this is a life support system tile
 	if (!tile) return;

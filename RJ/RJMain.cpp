@@ -97,6 +97,7 @@
 #include "CopyObject.h"						// DBG
 #include "LightSource.h"					// DBG
 #include "ObjectPicking.h"					// DBG
+#include "DynamicTileSet.h"					// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -2083,6 +2084,33 @@ void RJMain::__CreateDebugScenario(void)
 	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 100.0f), ID_QUATERNION);
 
+
+	/*DynamicTileSet::DynamicTileRequirements req;
+	req.TileDefinition = D::ComplexShipTiles.Get("corridor_nse");
+	TileConnections conn;
+	conn.Initialise(ONE_INTVECTOR3);
+	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Up_BS);
+	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Down_BS);
+	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Right_BS);
+	req.Connections = conn;
+
+	DynamicTileSet *dts = new DynamicTileSet();
+	dts->SetCode("dts_corridor");
+	dts->SetDefault(D::ComplexShipTiles.Get("corridor_ns"));
+	dts->AddEntry(req);
+	D::DynamicTileSets.Store(dts);*/
+
+	bitstring up = DirectionBS::Up_BS;				// == 2
+	bitstring left = DirectionBS::Left_BS;			// == 1
+	bitstring down = DirectionBS::Down_BS;			// == 8
+	bitstring right = DirectionBS::Right_BS;		// == 4
+
+	bitstring straight = (up | down);				// == 10
+	bitstring ne_corner = (up | right);				// == 6
+	bitstring nse_t = (up | right | down);			// == 14
+	bitstring nsew = (up | left | down | right);	// == 15
+
+
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
@@ -2157,8 +2185,13 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
-			"Test");
+		INTVECTOR3 el;
+		UI_ShipBuilder *sb = D::UI->ShipBuilderUI();
+		if (sb)		el = sb->m_mouse_over_element;
+		else		el = NULL_INTVECTOR3;
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s = %d",
+			el.ToString().c_str(), cs()->GetElementIndex(el));
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}

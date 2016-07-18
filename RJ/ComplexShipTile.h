@@ -533,8 +533,8 @@ public:
 	void								PerformRenderUpdate(void);
 
 	// Methods to retrieve and set the definition associated with this tile
-	ComplexShipTileDefinition *			GetTileDefinition(void) const;
-	void								SetTileDefinition(ComplexShipTileDefinition *definition);
+	const ComplexShipTileDefinition *	GetTileDefinition(void) const;
+	void								SetTileDefinition(const ComplexShipTileDefinition *definition);
 
 	// Methods to get and set the tile class type
 	CMPINLINE D::TileClass				GetTileClass(void) const		{ return m_classtype; }
@@ -643,7 +643,9 @@ public:
 	// Compiles and validates the tile based on its definition, class & associated hard-stop criteria
 	Result								CompileAndValidateTile(void);
 
-	// Static method to create a new tile.  Looks up the definition specified and generates a new 
+	// Generates the geometry for this tile.  Subset of the "CompileTile()" functionality which can
+	// be called separately if required
+	Result								GenerateGeometry(void);
 
 	// Static method to look up a tile definition and create a new tile based upon it
 	static ComplexShipTile *			Create(string code);
@@ -654,6 +656,9 @@ public:
 	// Static base class methods to generate and read XML data for the base class portion of any tile
 	static TiXmlElement *				GenerateBaseClassXML(ComplexShipTile *tile);
 	static void							ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile);
+
+	// Static base class method to copy data for the base class portion of any tile
+	static void							CopyBaseClassData(ComplexShipTile *source, ComplexShipTile *target);
 
 	// Virtual method to read class-specific XML data for the tile
 	virtual void						ReadClassSpecificXMLData(TiXmlElement *node)		= 0;
@@ -690,7 +695,7 @@ public:
 	HighlightEffect						Highlight;				
 
 	// Shutdown method - not required for this class
-	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
+	CMPINLINE void						Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	// Default constructor/copy constructor/destructor
 	ComplexShipTile(void);
@@ -708,7 +713,7 @@ protected:
 	string						m_name;
 
 	// Pointer back to the tile definition
-	ComplexShipTileDefinition * m_definition;
+	const ComplexShipTileDefinition * m_definition;
 
 	// Tile class (for efficiency; this can also be retrieved from the class object by Tile>TileDefinition>TileClass
 	D::TileClass				m_classtype;

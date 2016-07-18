@@ -28,6 +28,7 @@ ComplexShipElement::ComplexShipElement(void)
 	m_location = NULL_INTVECTOR3;
 	m_parent = NULL;
 	m_properties = ComplexShipElement::DefaultPropertyValues;
+	m_tile = NULL;
 	m_health = 1.0f;
 	m_gravity = 0.0f;
 
