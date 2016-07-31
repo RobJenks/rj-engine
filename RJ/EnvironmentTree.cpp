@@ -18,17 +18,24 @@ template void EnvironmentTree::ItemMoved<StaticTerrain*>(StaticTerrain *item);
 // Constructor for the root node
 EnvironmentTree::EnvironmentTree(iSpaceObjectEnvironment *environment) 
 {
+	// Initialise as the root node; special case
+	Initialise(environment);
+}
+
+// Constructor for non-root notes; take no action, since the node will be set up via Initialise()
+EnvironmentTree::EnvironmentTree(void) 
+{ 
+}
+
+// Initialise a node as the root, attached to the specified environment
+void EnvironmentTree::Initialise(iSpaceObjectEnvironment *environment)
+{
 	// Store a pointer to the environment
 	m_environment = environment;
 
 	// Call the initialisation method with no parent pointer (this is the root) and bounds
 	// which cover the entire environment
 	Initialise(NULL, NULL_INTVECTOR3, environment->GetElementSize());
-}
-
-// Constructor for non-root notes; take no action, since the node will be set up via Initialise()
-EnvironmentTree::EnvironmentTree(void) 
-{ 
 }
 
 // Initialise a node to cover the specified portion of the environment

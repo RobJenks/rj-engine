@@ -405,7 +405,7 @@ Result iSpaceObjectEnvironment::CopyTileDataFromObject(iContainsComplexShipTiles
 		ComplexShipTile *tile = (*it).value->Copy();
 
 		// Add this cloned tile to the new ship
-		if (tile) AddTile(tile);
+		if (tile) AddTile(&tile);
 	}
 
 	// Rebuild the spatial partitioning tree to account for all the changes above
@@ -419,29 +419,31 @@ Result iSpaceObjectEnvironment::CopyTileDataFromObject(iContainsComplexShipTiles
 }
 
 // Add a tile to the environment
-void iSpaceObjectEnvironment::AddTile(ComplexShipTile *tile)
+void iSpaceObjectEnvironment::AddTile(ComplexShipTile **ppTile)
 {
 	// Parameter check
-	if (!tile) return;
+	if (!ppTile || !(*ppTile)) return;
+	ComplexShipTile *tile_obj = (*ppTile);
+	if (!tile_obj) return;
 
 	// Raise the pre-addition event
-	BeforeTileAdded(tile);
+	BeforeTileAdded(tile_obj);
 
 	// Add to the tile collection
-	AddShipTile(tile);
+	AddShipTile(tile_obj);
 	
 	// Add any terrain objects that come with this tile
-	AddTerrainObjectsFromTile(tile);
+	AddTerrainObjectsFromTile(tile_obj);
 
 	// Raise the post-addition event
-	TileAdded(tile);
+	TileAdded(tile_obj);
 
 	// Set the tile simulation state to match that of the parent ship
-	tile->SetSimulationState(m_simulationstate);
+	tile_obj->SetSimulationState(m_simulationstate);
 
 	// Test whether this tile, or its neighbours, need to adapt to adjust to 
 	// their surrounding neighbourhood of tiles
-	UpdateTileConnectionState(tile);
+	UpdateTileConnectionState(ppTile);
 
 	// Update the environment
 	UpdateEnvironment();
@@ -622,20 +624,21 @@ Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile 
 	Result result;
 
 	// Parameter check
-	if (!ppOutTile) return ErrorCodes::NoError;
-	ComplexShipTile *tile = (*ppOutTile);
-	if (!tile) return ErrorCodes::NoError;
-
+	if (!ppOutTile || !(*ppOutTile)) return ErrorCodes::NoError;
+	
 	// Test whether this tile is part of a dynamic tile set
-	const ComplexShipTileDefinition *definition = tile->GetTileDefinition();
+	const ComplexShipTileDefinition *definition = (*ppOutTile)->GetTileDefinition();
 	if (definition && definition->BelongsToDynamicTileSet())
 	{
 		// Attempt to get a reference to this dynamic tileset
 		DynamicTileSet *tileset = D::DynamicTileSets.Get(definition->GetDynamicTileSet());
 		if (tileset)
 		{
+			// Store for later (since "tile" may not exist later if it is replaced)
+			Rotation90Degree rot = (*ppOutTile)->GetRotation();
+
 			// Verify whether the current definition is still applicable
-			DynamicTileSet::DynamicTileSetResult new_def = tileset->GetMostAppropriateTileDefinition(tile);
+			DynamicTileSet::DynamicTileSetResult new_def = tileset->GetMostAppropriateTileDefinition(*ppOutTile);
 			if (new_def.TileDefinition != definition)
 			{
 				// The current tile definition is no longer valid.  We therefore want to generate a 
@@ -643,7 +646,7 @@ Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile 
 				ComplexShipTile *new_tile = new_def.TileDefinition->CreateTile();
 				if (new_tile)
 				{
-					ComplexShipTile::CopyBaseClassData(tile, new_tile);
+					ComplexShipTile::CopyBaseClassData((*ppOutTile), new_tile);
 					result = new_tile->CompileAndValidateTile();
 					if (result != ErrorCodes::NoError)
 					{
@@ -653,21 +656,21 @@ Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile 
 					else
 					{
 						// We are good to make the change; first, replace the tile with the new one
-						ReplaceTile(tile, new_tile);
+						ReplaceTile((*ppOutTile), new_tile);
 
 						// Now deallocate the old tile
-						SafeDelete(tile);
+						SafeDelete(*ppOutTile);
 
 						// Finally, adjust the pointer in this method to reference the new tile
-						tile = new_tile;
+						(*ppOutTile) = new_tile;
 					}
 				}
 			}
 
 			// We also need to make sure the tile is oriented as per the DTS entry
-			if (tile->GetRotation() != new_def.Rotation)
+			if (rot != new_def.Rotation)
 			{
-				tile->SetRotation(new_def.Rotation);
+				(*ppOutTile)->SetRotation(new_def.Rotation);
 			}
 		}
 	}
@@ -676,11 +679,10 @@ Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile 
 	// proceed with adjusting any geometry etc. based on that definition
 
 	// Regenerate the tile geometry if required based on the new connections etc. into this tile
-	result = tile->GenerateGeometry();
+	result = (*ppOutTile)->GenerateGeometry();
 	if (result != ErrorCodes::NoError) return result;
 
-	// Return a reference to the tile, either the existing one (if valid) or the new one that was generated
-	(*ppOutTile) = tile;
+	// Return success; the contents of ppOutTile will be the new or existing tile, depending on whether a change was made
 	return ErrorCodes::NoError;
 }
 
@@ -700,7 +702,8 @@ void iSpaceObjectEnvironment::ReplaceTile(ComplexShipTile *old_tile, ComplexShip
 	// We now want to add the new tile, assuming it exists
 	if (new_tile)
 	{
-		AddTile(new_tile);
+		ComplexShipTile **ppNewTile = &new_tile;		// To prevent the contents of the new_tile pointer being modified
+		AddTile(ppNewTile);
 	}
 
 	// Resume updates, which will recalculate all tile-dependent data
@@ -953,8 +956,9 @@ void iSpaceObjectEnvironment::BuildSpatialPartitioningTree(void)
 		SpatialPartitioningTree = NULL;
 	}
 
-	// Create a new root node
-	SpatialPartitioningTree = new EnvironmentTree(this);
+	// Create a new root node and initialise as the root node for this environment
+	SpatialPartitioningTree = EnvironmentTree::_MemoryPool->RequestItem(); // new EnvironmentTree(this);
+	SpatialPartitioningTree->Initialise(this);
 
 	// Add all terrain objects to the tree
 	std::vector<StaticTerrain*>::iterator it_end = TerrainObjects.end();
@@ -1018,7 +1022,7 @@ void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&
 					if (adj_tile)
 					{
 						outConnects[i] = true;
-						outNeighbours.push_back(TileAdjacency(incr, dir, adj_tile));
+						outNeighbours.push_back(TileAdjacency(incr, dir, adj_el.GetLocation(), adj_tile));
 					}
 				}
 			}
@@ -1028,9 +1032,11 @@ void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&
 
 // Updates the connection state of the specified tile based on its neighbours.  Ensures a bi-directional
 // connection is setup and that the adjacent tile is also updated
-void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
+void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile **ppTile)
 {
 	// Parameter check
+	if (!ppTile) return;
+	ComplexShipTile *tile = (*ppTile);
 	if (!tile) return;
 
 	// We will not be able to make any updates if the connections from this tile are
@@ -1051,10 +1057,9 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 	std::vector<TileAdjacency>::iterator it_end = adjacent.end();
 	for (std::vector<TileAdjacency>::iterator it = adjacent.begin(); it != it_end; ++it)
 	{
-		// We can do nothing if the tile is NULL (erroneously) or if its connections have been fixed
+		// Get a reference to the adjacency data
 		TileAdjacency & adj = (*it);
-		if (adj.Tile == NULL || adj.Tile->ConnectionsAreFixed() == true) continue;
-
+		
 		// Get the ship-relative element under the tile which is being considered here
 		INTVECTOR3 actual_el_loc = (tile->GetElementLocation() + adj.Location);
 		ComplexShipElement *actual_el = GetElement(actual_el_loc);
@@ -1065,8 +1070,13 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 		ComplexShipElement *adj_el = GetElement(adj_el_index);
 		if (!adj_el) continue;
 
+		// Attempt to locate the neighbouring tile that spans this adjacent element
+		// We can proceed no further if the tile does not exist, or if it is fixed and cannot be modified
+		ComplexShipTile *adjtile = FindTileAtLocation(adj_el->GetLocation());
+		if (!adjtile || adjtile->ConnectionsAreFixed()) continue;
+
 		// The element within the target tile will be the absolute element location minus the target tile location
-		INTVECTOR3 adj_loc = (adj_el->GetLocation() - adj.Tile->GetElementLocation());
+		INTVECTOR3 adj_loc = (adj_el->GetLocation() - adjtile->GetElementLocation());
 
 		// Test all possible connection types
 		DirectionBS dirBS = DirectionToBS(adj.AdjDirection);
@@ -1078,22 +1088,22 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 
 			// Test whether it is possible to make a connection between the two tiles at this point
 			if (tile->PossibleConnections.ConnectionExists(type, adj.Location, dirBS) &&			// Tile > Adj
-				adj.Tile->PossibleConnections.ConnectionExists(type, adj_loc, invDirBS))			// Adj > Tile
+				adjtile->PossibleConnections.ConnectionExists(type, adj_loc, invDirBS))			// Adj > Tile
 			{
 				// It is; make the connection from this tile, since we previously reset all connections
 				tile->Connections.AddConnection(type, adj.Location, dirBS);
 
 				// Make the reciprocal connection IF it does not already exist
-				if (adj.Tile->Connections.ConnectionExists(type, adj_loc, invDirBS) == false)
+				if (adjtile->Connections.ConnectionExists(type, adj_loc, invDirBS) == false)
 				{
-					adj.Tile->Connections.AddConnection(type, adj_loc, invDirBS);
+					adjtile->Connections.AddConnection(type, adj_loc, invDirBS);
 					target_updated = true;
 				}
 			}
 		}
 
 		// Trigger an update of the adjacent tile if any connections were updated
-		if (target_updated) UpdateTileBasedOnConnectionData(&(adj.Tile));
+		if (target_updated) UpdateTileBasedOnConnectionData(&(adjtile));
 	}
 
 	// We have processed all adjacent tiles; test whether any connections were changed
@@ -1102,7 +1112,7 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile *tile)
 	if (tile_updated)
 	{
 		// The subject tile was modified, so finally trigger an update of that tile 
-		UpdateTileBasedOnConnectionData(&(tile));
+		UpdateTileBasedOnConnectionData(ppTile);
 	}
 }
 

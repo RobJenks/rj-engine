@@ -58,6 +58,13 @@ public:
 		return (((int)type > 0 && (int)type < D::TileClass::_COUNT) ? m_tilecount[(int)type] : 0);
 	}
 
+	// Attempts to locate a tile at the specified location.  Only searches for tiles with an ElementLocation specifically
+	// at this location; will not return a tile that is at a different location but extends over the target location
+	ComplexShipTile *						FindTileWithSpecificLocation(const INTVECTOR3 & element_location);
+
+	// Attempts to locate a tile that spans the specified location.  Returns the first matching tile found
+	ComplexShipTile *						FindTileAtLocation(const INTVECTOR3 & element_location);
+
 	// Apply a fade effect to all ship tiles in this environment
 	void									FadeAllTiles(float time, float alpha, bool ignore_pause);
 	CMPINLINE void							FadeAllTiles(float time, float alpha)						{ FadeAllTiles(time, alpha, false); }

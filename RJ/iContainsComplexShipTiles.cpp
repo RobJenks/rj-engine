@@ -30,6 +30,35 @@ int iContainsComplexShipTiles::FindShipTileIndex(ComplexShipTile *tile) const
 	return -1;
 }
 
+// Attempts to locate a tile at the specified location.  Only searches for tiles with an ElementLocation specifically
+// at this location; will not return a tile that is at a different location but extends over the target location
+ComplexShipTile * iContainsComplexShipTiles::FindTileWithSpecificLocation(const INTVECTOR3 & element_location)
+{
+	ComplexShipTileCollection::const_iterator it = std::find_if(m_tiles[0].begin(), m_tiles[0].end(),
+		[&element_location](const AComplexShipTile_P & element) { 
+			return (element.value && element.value->GetElementLocation() == element_location); });
+
+	if (it != m_tiles[0].end())		return (*it).value;
+	else							return NULL;
+}
+
+// Attempts to locate a tile that spans the specified location.  Returns the first matching tile found
+ComplexShipTile * iContainsComplexShipTiles::FindTileAtLocation(const INTVECTOR3 & element_location)
+{
+	ComplexShipTileCollection::const_iterator it_end = m_tiles[0].end();
+	for (ComplexShipTileCollection::const_iterator it = m_tiles[0].begin(); it != it_end; ++it)
+	{
+		AComplexShipTile *tile = (*it).value;
+		if (tile && (element_location >= tile->GetElementLocation()) &&
+					(element_location < (tile->GetElementLocation() + tile->GetElementSize())))
+		{
+			return tile;
+		}
+	}
+
+	return NULL;
+}
+
 // Links a new ship tile to this object
 void iContainsComplexShipTiles::AddShipTile(ComplexShipTile *tile)
 {

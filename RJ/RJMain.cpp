@@ -2185,13 +2185,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		INTVECTOR3 el;
-		UI_ShipBuilder *sb = D::UI->ShipBuilderUI();
-		if (sb)		el = sb->m_mouse_over_element;
-		else		el = NULL_INTVECTOR3;
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s = %d",
-			el.ToString().c_str(), cs()->GetElementIndex(el));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 		
 	}

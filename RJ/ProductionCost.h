@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include "CompilerSettings.h"
+#include "ALIGN16.h"
 #include "Resource.h"
 #include "ResourceAmount.h"
 #include "ProductionProgress.h"

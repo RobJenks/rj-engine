@@ -194,7 +194,7 @@ public:
 	}
 
 	// Add a tile to the environment
-	void							AddTile(ComplexShipTile *tile);
+	void							AddTile(ComplexShipTile **ppTile);
 
 	// Events that are generated pre- and post-tile addition.  Exposed for use by subclasses as required
 	virtual void					BeforeTileAdded(ComplexShipTile *tile);
@@ -276,7 +276,7 @@ public:
 
 	// Updates the connection state of the specified tile based on its neighbours.  Ensures a bi-directional
 	// connection is setup and that the adjacent tile is also updated
-	void							UpdateTileConnectionState(ComplexShipTile *tile);
+	void							UpdateTileConnectionState(ComplexShipTile **ppTile);
 
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }

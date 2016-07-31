@@ -83,6 +83,7 @@ void UI_ShipBuilder::Activate(void)
 	m_mouse_is_over_element = false;
 	m_mouse_over_element = NULL_INTVECTOR3;
 	m_tile_being_placed = NULL;
+	m_tile_placement_is_valid = false;
 	m_placing_generic_corridors = false;
 
 	// Initialise any editor-specific render data
@@ -219,16 +220,13 @@ void UI_ShipBuilder::RenderTilePlacement(void)
 	// We can only place a tile if the mouse is currently over an environment element
 	if (!m_mouse_is_over_element) return;
 
-	// Test whether we are attempting to place the tile in a valid location.  
-	m_tile_placement_issues.clear();
-	bool is_valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
-
-	// Now perform rendering based on the result
-	if (is_valid)
+	// Perform rendering based on whether the current tile placement is valid
+	if (m_tile_placement_is_valid)
 	{
-		// If the proposed location is valid then render the tile itself.  We need to set the tile location 
-		// accordingly since it is not actually part of the parent ship
+		// Make sure the tile location is correct since the tile is not actually part of the parent ship
 		MovePlacementTile(m_mouse_over_element);
+
+		// Render the tile 
 		Game::Engine->RenderComplexShipTile(m_tile_being_placed, m_ship);
 
 		// Render the selection highlight to reflect the fact this is a valid placement
@@ -314,7 +312,7 @@ void UI_ShipBuilder::PlaceTile(void)
 	if (!valid || !m_tile_placement_issues.empty()) return;
 
 	// Tile placement is valid, so add it to the ship
-	m_ship->AddTile(m_tile_being_placed);
+	m_ship->AddTile(&m_tile_being_placed);
 
 	// Clear the tile pointer, since this tile is now a member of the ship
 	m_tile_being_placed = NULL;
@@ -657,8 +655,100 @@ void UI_ShipBuilder::ProcessMouseInput(GameInputDevice *mouse, GameInputDevice *
 	else if (z < 0) ZoomOutIncrement();
 
 	// Determine the ship element (if applicable) currently being selected by the mouse
-	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_level, m_mouse_over_element);	
+	INTVECTOR3 old_element = m_mouse_over_element; bool was_over_element = m_mouse_is_over_element;
+	m_mouse_is_over_element = m_ship->DetermineElementIntersectedByRay(Game::Mouse.GetWorldSpaceMouseBasicRay(), m_level, m_mouse_over_element);
+
+	// Raise the exit method for the current element if appropriate
+	if ((m_mouse_is_over_element && was_over_element && m_mouse_over_element != old_element) ||		// If we have moved from one element to another, OR
+		(!m_mouse_is_over_element && was_over_element))												// If we are no longer selecting an element, and were before
+	{
+		MouseExitingElement(old_element);
+	}
+
+	// Raise the enter method for this element where appropriate
+	if ((m_mouse_is_over_element && was_over_element && m_mouse_over_element != old_element) ||		// If we have moved from one element to another, OR
+		(m_mouse_is_over_element && !was_over_element))												// If we are selecting an element now, and weren't before
+	{
+		MouseEnteringElement(m_mouse_over_element, was_over_element, old_element);
+	}
 }
+
+// Event raised when the mouse moves between elements of the ship
+void UI_ShipBuilder::MouseExitingElement(const INTVECTOR3 & old_element)
+{
+	// If we are holding a tile for placement, revert any changes made when the tile was positioned within this element
+	RevertPlacementTileUpdates();
+}
+
+// Event raised when the mouse moves between elements of the ship
+void UI_ShipBuilder::MouseEnteringElement(const INTVECTOR3 & new_element, bool entered_from_another_element, const INTVECTOR3 & entered_from)
+{
+	// If we are holding a tile for placement, adjust it to fit with its surrounding environment
+	UpdatePlacementTile();
+}
+
+// If we are holding a tile for placement, adjusts it to fit with its surrounding environment
+void UI_ShipBuilder::UpdatePlacementTile(void)
+{
+	// Make sure we are holding a tile for placement, and have it held over an element
+	if (!m_tile_being_placed || !m_mouse_is_over_element) return;
+
+	// Test whether we are attempting to place the tile in a valid location.  
+	m_tile_placement_issues.clear();
+	m_tile_placement_is_valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
+
+	// If the placement is valid, update it and its surroundings to show the effect of placing it here
+	if (m_tile_placement_is_valid)
+	{
+		// We need to directly set the tile location since it is not actually part of the parent ship
+		MovePlacementTile(m_mouse_over_element);
+
+		
+		/* *** NOTE: DEACTIVATED FOR NOW.  UNCOMMENT BELOW FOR PARTIALLY-WORKING TILE ADJUSTMENT *** */
+		// The tile & neighbours will be adjusted to reflect their potential configuration if the tile is 
+		// placed here.  This should have been reverted before we reach this point.  However perform a 
+		// check here for safety before proceeding
+		/*
+		if (!m_placement_tile_changes.empty()) RevertPlacementTileUpdates();
+
+		// Now record the new set of adjacent tiles which will be updated, for reverting later
+		// We store the LOCATION of the adjacent element within each tile (rather than the tile 
+		// itself) since if the tile is updated it will be replaced by a new instance
+		bool connects[4]; std::vector<TileAdjacency> adj_tiles;
+		m_ship->GetNeighbouringTiles(m_tile_being_placed, connects, adj_tiles);
+		std::vector<INTVECTOR3> & adj_locations = m_placement_tile_changes;
+		std::for_each(adj_tiles.begin(), adj_tiles.end(),
+			[&adj_locations](const TileAdjacency & entry)
+		{
+			adj_locations.push_back(entry.AdjLocation);
+		});
+
+		// Now adjust the tile and its neighbours based on their local connections, if required
+		m_ship->UpdateTileConnectionState(&m_tile_being_placed);
+		*/
+	}
+}
+
+// If we are holding a tile for placement, revert any changes made when the tile was positioned within this element
+void UI_ShipBuilder::RevertPlacementTileUpdates(void)
+{
+	// Process each tile that was potentially impacted during the placement operation
+	ComplexShipTile *tile;
+	std::vector<INTVECTOR3>::iterator it_end = m_placement_tile_changes.end();
+	for (std::vector<INTVECTOR3>::iterator it = m_placement_tile_changes.begin(); it != it_end; ++it)
+	{
+		// Attempt to get the tile at this location, and perform the update if we find one 
+		tile = m_ship->FindTileAtLocation((*it));
+		if (tile)
+		{
+			m_ship->UpdateTileConnectionState(&tile);
+		}
+	}
+
+	// Clear the vector of changes now that they have all been reverted
+	m_placement_tile_changes.clear();
+}
+
 
 // Event raised when the RMB is first depressed
 void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)

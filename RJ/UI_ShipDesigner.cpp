@@ -2291,7 +2291,7 @@ void UI_ShipDesigner::PlaceTile(ComplexShipTileDefinition *tile, INTVECTOR2 star
 	}
 	
 	// Otherwise, add this new tile to the ship under construction
-	m_ship->AddTile(t);
+	m_ship->AddTile(&t);
 
 	// Refresh the surrounding environment to determine e.g. connection points to neighbours
 	UpdateTileAndNeighbours(t);
@@ -2490,7 +2490,7 @@ void UI_ShipDesigner::DeployCorridorTile(INTVECTOR2 location)
 	tile->SetElementLocation(elpos);
 
 	// Link this tile to the relevant parent objects
-	m_ship->AddTile(tile);
+	m_ship->AddTile((ComplexShipTile**)&tile);
 
 	// Now we want to perform an update of this tile, plus its neighbours, to see if the connections will change
 	UpdateTileAndNeighbours(tile);

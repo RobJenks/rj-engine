@@ -7,6 +7,7 @@
 #include "AlignedAllocator.h"
 #include "iUIController.h"
 #include "VolumetricLine.h"
+#include "TileAdjacency.h"
 class ComplexShip;
 class UIButton;
 
@@ -96,6 +97,17 @@ public:
 	CMPINLINE void										MoveUpLevel(void)					{ MoveToLevel(m_level + 1); }
 	CMPINLINE void										MoveDownLevel(void)					{ MoveToLevel(m_level - 1); }
 	void												MoveToLevel(int level);
+
+	// Events raised when the mouse moves between elements of the ship
+	void												MouseExitingElement(const INTVECTOR3 & old_element);
+	void												MouseEnteringElement(	const INTVECTOR3 & new_element, bool entered_from_another_element, 
+																				const INTVECTOR3 & entered_from);
+
+	// If we are holding a tile for placement, adjusts it to fit with its surrounding environment
+	void												UpdatePlacementTile(void);
+
+	// If we are holding a tile for placement, revert any changes made when the tile was positioned within this element
+	void												RevertPlacementTileUpdates(void);
 
 	// Method to process user input into the active UI controller
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
@@ -242,7 +254,7 @@ protected:
 	unsigned int								m_revert_dir_light_index;			// Index of the directional light that is being used for the editor
 	bool										m_revert_dir_light_is_overriding;	// Flag indicating whether the directional light is overriding another (that needs to be reverted afterwards)
 	LightData									m_revert_dir_light;					// Data on the directional light that was temporarily overridden
-public:
+
 	// Fields related to selection of ship elements
 	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element
 	INTVECTOR3									m_mouse_over_element;				// Ship element that the mouse is currently over, if m_mouse_is_over_element == true
@@ -251,7 +263,10 @@ public:
 	ComplexShipTile *							m_tile_being_placed;				// The ship tile that follows the mouse and can be placed in the environment
 	bool										m_placing_generic_corridors;		// Flag indicating whether the corridor tile we are placing is to be adapted to meet 
 																					// the connections of tiles around it
+	bool										m_tile_placement_is_valid;			// Based on the last tile placement test
 	std::vector<TilePlacementIssue>				m_tile_placement_issues;			// Vector populated with each tile placement error that is encountered
+	std::vector<INTVECTOR3>						m_placement_tile_changes;			// Vector populated with the location of all tiles that were temporarily modified during 
+																					// tile placement, and which need to be reverted once tile placement ends or moves to another element
 
 
 };

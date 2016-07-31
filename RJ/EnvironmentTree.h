@@ -40,6 +40,9 @@ public:
 	// Default constructor for all non-root nodes
 	EnvironmentTree(void);
 
+	// Initialise a node as the root, attached to the specified environment
+	void										Initialise(iSpaceObjectEnvironment *environment);
+
 	// Initialise a node to cover the specified portion of the environment
 	void										Initialise(EnvironmentTree *parent, const INTVECTOR3 & start, const INTVECTOR3 & size);
 

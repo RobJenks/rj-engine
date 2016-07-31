@@ -668,7 +668,7 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 			else if (hash == HashedStrings::H_ComplexShipTile)
 			{
 				result = LoadComplexShipTile(node, &tile);
-				if (tile && result == ErrorCodes::NoError) object->AddTile(tile);
+				if (tile && result == ErrorCodes::NoError) object->AddTile(&tile);
 			}
 		}
 	}

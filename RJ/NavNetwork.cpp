@@ -50,7 +50,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 	// Allocate space for a temporary array of node pointers, arranged by element, for efficient lookup during network build
 	node_layout_size = parent->GetElementSize();
 	node_layout_count = (node_layout_size.x * node_layout_size.y * node_layout_size.z);
-	node_layout = (NavNode***)malloc(sizeof(NavNode**) * node_layout_count);
+	node_layout = new NavNode**[node_layout_count]; // (NavNode***)malloc(sizeof(NavNode**) * node_layout_count);
 	memset(node_layout, 0, sizeof(NavNode**) * node_layout_count);
 
 	// Iterate through the full possible extent of elements in this parent entity
@@ -111,7 +111,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 				nodecount += elementnavcount;
 
 				layoutindex = x + (y * node_layout_size.x) + (z * node_layout_size.x * node_layout_size.y);
-				node_layout[layoutindex] = (NavNode**)malloc(sizeof(NavNode*) * elementnavcount);
+				node_layout[layoutindex] = new NavNode*[elementnavcount]; // (NavNode**)malloc(sizeof(NavNode*) * elementnavcount);
 								
 			} // z
 		} // y
@@ -122,7 +122,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 
 	// Record the total number of nodes in this network and allocate space to hold them
 	m_nodecount = nodecount;
-	m_nodes = (NavNode*)malloc(sizeof(NavNode) * m_nodecount);
+	m_nodes = new NavNode[m_nodecount];
 	if (!m_nodes) return ErrorCodes::CouldNotAllocateSpaceForNavNetworkNodes;
 	memset(m_nodes, 0, sizeof(NavNode) * m_nodecount);
 	int nodeindex = 0;
@@ -265,10 +265,10 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 				/* 3b. Allocate space for connections from each node in this element while we are here, to save iterating again */
 				for (int i = 0; i < elementnavcount; i++)
 				{
-					if (ccounts[i] < 1) 
+					if (ccounts[i] < 1)
 						node_layout[layoutindex][i]->Connections = NULL;
 					else
-						node_layout[layoutindex][i]->Connections = (NavNodeConnection*)malloc(sizeof(NavNodeConnection) * ccounts[i]);
+						node_layout[layoutindex][i]->Connections = new NavNodeConnection[ccounts[i]]; // (NavNodeConnection*)malloc(sizeof(NavNodeConnection) * ccounts[i]);
 				}
 
 			} // z
@@ -285,9 +285,9 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 	}
 
 	/* 5. Free the memory that was allocated temporarily during build of the nav network */
-	for (int i = 0; i < node_layout_count; i++) if (node_layout[i]) free(node_layout[i]);
-	free(node_layout);
-	delete[] ccounts;
+	for (int i = 0; i < node_layout_count; i++) if (node_layout[i]) SafeDeleteArray(node_layout[i]);
+	SafeDeleteArray(node_layout);
+	SafeDeleteArray(ccounts);
 
 	/* 6. Allocate a sufficiently-large binary heap for use as the open list in pathfinding calls */
 	m_openlist.Initialise(m_nodecount);
@@ -443,11 +443,11 @@ void NavNetwork::Shutdown(void)
 	// Deallocate the memory allocated for connections between nodes
 	for (int i = 0; i < m_nodecount; i++)
 	{
-		if (m_nodes[i].Connections) free(m_nodes[i].Connections);
+		if (m_nodes[i].Connections) SafeDeleteArray(m_nodes[i].Connections);
 	}
 
 	// Release all space allocated for nodes in this network
-	free(m_nodes); m_nodes = NULL;
+	SafeDeleteArray(m_nodes)
 }
 
 // Outputs a string representation of the network
