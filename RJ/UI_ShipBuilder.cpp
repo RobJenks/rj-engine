@@ -9,6 +9,7 @@
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
 #include "TileAdjacency.h"
+#include "UserInterface.h"
 #include "SimpleShip.h"	// DBG
 
 #include "UI_ShipBuilder.h"
@@ -328,6 +329,9 @@ void UI_ShipBuilder::Deactivate(void)
 	// Revert any editor-specific render data
 	RevertRenderData();
 
+	// Release the camera to return to normal user control
+	Game::Engine->GetCamera()->ReleaseCamera();
+
 	// Unpause the game once the model builder is deactivated
 	Game::Application.Unpause();
 }
@@ -615,6 +619,9 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	// Adjust which deck of the ship is being modified
 	if (keys[DIK_O])			{ MoveUpLevel();												keyboard->LockKey(DIK_O); }
 	else if (keys[DIK_L])		{ MoveDownLevel();												keyboard->LockKey(DIK_L); }
+
+	// The user can quit the ship designer by pressing tab again
+	if (keys[DIK_TAB])			{ Shutdown();													keyboard->LockKey(DIK_TAB); }
 
 	// TODO: DEBUG
 	if (keys[DIK_T])			{ 

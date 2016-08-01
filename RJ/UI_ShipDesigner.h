@@ -25,6 +25,7 @@ using namespace std;
 class UI_ShipDesigner : public iUIController
 {
 public: 
+
 	// The different views available in the ship designer
 	enum SDViewMode { General = 0, Construction = 1, Corridor = 2, Tile = 3, SDTab4 = 4, SDTab5 = 5, SDTab6 = 6, SDTab7 = 7 };
 

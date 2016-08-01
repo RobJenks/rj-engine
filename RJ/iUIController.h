@@ -19,8 +19,11 @@ public:
 	// Default constructor
 	iUIController(void);
 
+	// Returns the string code which identifies this controller
+	CMPINLINE std::string GetCode(void) const { return m_code; }
+
 	// Method that is called when the UI controller is first created
-	Result Initialise(Render2DGroup *render, UserInterface *ui);
+	Result Initialise(const std::string & state_code, Render2DGroup *render, UserInterface *ui);
 
 	// Virtual initialisation method that subclasses must implement
 	virtual Result InitialiseController(Render2DGroup *render, UserInterface *ui) = 0;
@@ -30,6 +33,15 @@ public:
 
 	// Method that is called when the UI controller is deactivated
 	virtual void Deactivate(void) = 0;
+
+	// Shut down the controller	
+	CMPINLINE void Shutdown(void)						{ m_awaiting_termination = true; }
+
+	// Flag which indicates whether the controller is awaiting shutdown
+	CMPINLINE bool AwaitingTermination(void) const		{ return m_awaiting_termination; }
+
+	// Reset the flag that requests controller shutdown
+	CMPINLINE void ResetTerminationFlag(void)			{ m_awaiting_termination = false; }
 
 	// Method to process user input into the active UI controller
 	virtual void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse) = 0;
@@ -84,11 +96,17 @@ public:
 
 protected:
 
+	// The string state code for this UI controller
+	std::string								m_code;
+
 	// Store a reference to the UI controller render group
 	Render2DGroup *							m_render;
 
 	// Maintain a reference to the control currently in focus
 	iUIControl *							m_focuscontrol;
+
+	// Flag indicating that the controller wishes to shut down in the next UI cycle
+	bool									m_awaiting_termination;
 
 	// Flags determining whether a mouse event is in progress
 	bool									m_lmb_down;

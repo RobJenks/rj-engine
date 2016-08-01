@@ -36,8 +36,8 @@ UserInterface::UserInterface(void)
 	m_console = NULL;
 	m_shipdesigner = NULL;
 	m_modelbuilder = NULL;
+	m_shipbuilder = NULL;
 	m_controller = NULL;
-	m_currentstate = "";
 	m_mouselocation.x = m_mouselocation.y = 0;
 	m_mousepreviouslocation.x = m_mousepreviouslocation.y = 0;
 	m_mousecurrenthovercomponent = Image2DRenderGroup::InstanceReference(NULL, NULL, -1, "");
@@ -185,8 +185,11 @@ Result UserInterface::InitialiseShipDesignerUI(void)
 	if (!m_shipdesigner) return ErrorCodes::CouldNotCreateShipDesignerUIController;
 
 	// Attempt initialisation of the model builder
-	result = m_shipdesigner->Initialise(ui, this);
+	result = m_shipdesigner->Initialise(UserInterface::UI_SHIPDESIGNER, ui, this);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Add to the collection of controllers
+	m_ui_controllers.push_back((iUIController**)&m_shipdesigner);
 
 	// Return succeess
 	return ErrorCodes::NoError;
@@ -205,8 +208,11 @@ Result UserInterface::InitialiseModelBuilderUI(void)
 	if (!m_modelbuilder) return ErrorCodes::CouldNotCreateModelBuilderUIController;
 
 	// Attempt initialisation of the model builder
-	result = m_modelbuilder->Initialise(ui, this);
+	result = m_modelbuilder->Initialise(UserInterface::UI_MODELBUILDER, ui, this);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Add to the collection of controllers
+	m_ui_controllers.push_back((iUIController**)&m_modelbuilder);
 
 	// Return succeess
 	return ErrorCodes::NoError;
@@ -225,8 +231,11 @@ Result UserInterface::InitialiseShipBuilderUI(void)
 	if (!m_shipbuilder) return ErrorCodes::CouldNotCreateShipBuilderUIController;
 
 	// Attempt initialisation of the ship designer
-	result = m_shipbuilder->Initialise(ui, this);
+	result = m_shipbuilder->Initialise(UserInterface::UI_SHIPBUILDER, ui, this);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Add to the collection of controllers
+	m_ui_controllers.push_back((iUIController**)&m_shipbuilder);
 
 	// Return succeess
 	return ErrorCodes::NoError;
@@ -245,8 +254,11 @@ Result UserInterface::InitialiseConsoleUI(void)
 	if (!m_console) return ErrorCodes::CouldNotCreateConsoleUIController;
 
 	// Attempt initialisation of the console
-	result = m_console->Initialise(ui, this);
+	result = m_console->Initialise(UserInterface::UI_CONSOLE, ui, this);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Add to the collection of controllers
+	m_ui_controllers.push_back((iUIController**)&m_console);
 
 	// Return succeess
 	return ErrorCodes::NoError;
@@ -263,6 +275,13 @@ void UserInterface::Render(void)
 		// Pass control to the UI controller render method
 		m_controller->Render();
 	}
+}
+
+// Returns the code of the active UI controller (or an empty string, if no controller is active)
+std::string UserInterface::GetActiveUIControllerCode(void) const
+{
+	if (m_controller)	return m_controller->GetCode();
+	else				return NullString;
 }
 
 Image2D *UserInterface::NewComponent(string code, const char *filename, int x, int y, float z, int width, int height)
@@ -289,7 +308,7 @@ Image2D *UserInterface::NewComponent(string code, const char *filename, int x, i
 }
 
 // Activates a UI state based on its uniquely-identifying code
-void UserInterface::ActivateUIState(string state)
+void UserInterface::ActivateUIState(const std::string & state)
 {
 	// If we currently have a UI controller active then notify it that it is being deactivated
 	if (m_controller) m_controller->Deactivate();
@@ -347,21 +366,32 @@ void UserInterface::DeactivateConsole(void)
 // Returns a pointer to the primary UI layout corresponding to this state, or NULL if not applicable
 iUIController *UserInterface::GetUIController(string state)
 {
-	if (state == UserInterface::UI_INFLIGHT)						// In-flight UI controller
-		return NULL;		// TEMPORARY, UNTIL IMPLEMENTED
-	else if (state == UserInterface::UI_MAINMENU)					// Main menu UI controller
-		return NULL;		// TEMPORARY, UNTIL IMPLEMENTED
-	else if (state == UserInterface::UI_CONSOLE)					// Debug console
-		return m_console;	
-	else if (state == UserInterface::UI_SHIPDESIGNER)				// Ship designer UI controller
-		return m_shipdesigner;
-	else if (state == UserInterface::UI_MODELBUILDER)				// Model builder (development) interface
-		return m_modelbuilder;
-	else if (state == UserInterface::UI_SHIPBUILDER)				// Ship builder
-		return m_shipbuilder;
-	else															// Otherwise, there is no specific UI controller so return null
-		return NULL;
-	
+	// Attempt to locate a controller matching the desired state code
+	std::vector<iUIController**>::iterator it_end = m_ui_controllers.end();
+	for (std::vector<iUIController**>::iterator it = m_ui_controllers.begin(); it != it_end; ++it)
+	{
+		if ((*it) && (**it))
+		{
+			if ((**it)->GetCode() == state) return (**it);
+		}
+	}
+
+	// We did not find a matching controller
+	return NULL;
+}
+
+// Deactivates a single UI state
+void UserInterface::DeactivateUIState(const std::string & state)
+{
+	// Pass this request directly to the 2D render manager
+	Game::Engine->Get2DRenderManager()->DeactivateGroup(state);
+
+	// Deactivate the current UI controller, if one exists and if it matches this state
+	if (m_controller && m_controller->GetCode() == state)
+	{
+		m_controller->Deactivate();
+		m_controller = NULL;
+	}
 }
 
 void UserInterface::DeactivateAllUIComponents(void)
@@ -378,9 +408,6 @@ void UserInterface::DeactivateAllUIComponents(void)
 		m_controller->Deactivate();
 		m_controller = NULL;
 	}
-
-	// Record the fact that no UI state is currently active
-	m_currentstate = "";
 }
 
 void UserInterface::Terminate(void)
@@ -452,6 +479,20 @@ bool UserInterface::ProcessConsoleCommand(GameConsoleCommand & command)
 	return false;
 }
 
+// Termaintes the UI controller which is currently active (if applicable)
+void UserInterface::TerminateActiveUIController(void)
+{
+	// Make sure a controller is actually active
+	if (m_controller)
+	{
+		// Reset the termination flag on the controller since we are now processing that request
+		m_controller->ResetTerminationFlag();
+
+		// Deactivate the UI state.  This will also call iUIController::Deactivate() and clear
+		// the controller pointer since the controller code matches the state being deactivated
+		DeactivateUIState(m_controller->GetCode());
+	}
+}
 
 void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse)
 {
@@ -466,137 +507,145 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 	// Also pass these events to the active UI controller, if applicable
 	if (m_controller) 
 	{
-		// Pass keyboard input to the current focus control, if there is one, it is visible & can accept keyboard input
-		iUIControl *focus = m_controller->GetControlInFocus();
-		if (focus && focus->CanAcceptKeyboardInput() && focus->GetRenderActive()) focus->ProcessKeyboardInput(keyboard);
-
-		// Pass all mouse & keyboard data to the generic method before generating specific events
-		m_controller->ProcessUserEvents(keyboard, mouse);
-
-		// The primary controller user event method has the potential to shut down the controller itself.  Test for this (rare)
-		// condition and just early-exit here if it occurs
-		if (!m_controller) return;
-
-		// First, generate mouse hover event handlers
-		// See whether the mouse has actually moved since last cycle
-		if ((m_mouselocation.x != m_mousepreviouslocation.x)  || (m_mouselocation.y != m_mousepreviouslocation.y))
+		// Test whether the controller is attempting to shut down, and process that request here if necessary
+		if (m_controller->AwaitingTermination())
 		{
-			// If it has, generate a mouse move event and pass to the UI controller
-			m_controller->ProcessMouseMoveEvent(m_mouselocation);
-
-			// Also test whether this is a component at this new location
-			m_mousecurrenthovercomponent = m_controller->GetRenderGroup()->GetComponentInstanceAtLocation(m_mouselocation, true);
-		}
-
-		// If there IS a component at this location (either cached or new) then raise a mouse hover event for the component
-		if (m_mousecurrenthovercomponent.instance)
-		{
-			m_controller->ProcessMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation, m_lmb, m_rmb);
-
-			// Also pass control to any managed component to update its appearance based on a mouse hover event
-			if (m_mousecurrenthovercomponent.instance->control)
-				m_mousecurrenthovercomponent.instance->control->HandleMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation);
-		}
-
-		// Now generate LMB events
-		if (m_lmb) 
-		{
-			// If the mouse button is currently down then generate a mouse down event
-			m_controller->ProcessMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
-
-			// If the mouse is over a managed component then also pass it control to update its own appearance
-			if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
-				m_mousecurrenthovercomponent.instance->control->HandleMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
-
-			// Also report whether this is the first press of the button
-			if (mouse->LMBFirstDown()) 
-				m_controller->ProcessMouseFirstDownEvent_Base(m_mouselocation, m_mousecurrenthovercomponent);
+			TerminateActiveUIController();
 		}
 		else
 		{
-			// If the mouse button is no longer down, we have a mouse-up event
-			if (mouse->LMBFirstUp())
+			// Pass keyboard input to the current focus control, if there is one, it is visible & can accept keyboard input
+			iUIControl *focus = m_controller->GetControlInFocus();
+			if (focus && focus->CanAcceptKeyboardInput() && focus->GetRenderActive()) focus->ProcessKeyboardInput(keyboard);
+
+			// Pass all mouse & keyboard data to the generic method before generating specific events
+			m_controller->ProcessUserEvents(keyboard, mouse);
+
+			// The primary controller user event method has the potential to shut down the controller itself.  Test for this (rare)
+			// condition and just early-exit here if it occurs
+			if (!m_controller) return;
+
+			// First, generate mouse hover event handlers
+			// See whether the mouse has actually moved since last cycle
+			if ((m_mouselocation.x != m_mousepreviouslocation.x) || (m_mouselocation.y != m_mousepreviouslocation.y))
 			{
-				// Raise a new mouse up event
-				INTVECTOR2 startloc = mouse->GetLMBStartPosition();
-				m_controller->ProcessMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
+				// If it has, generate a mouse move event and pass to the UI controller
+				m_controller->ProcessMouseMoveEvent(m_mouselocation);
 
-				// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
-				if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
-					m_controller->ProcessMouseClickAtLocation(m_mouselocation);
-
-				// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
-				// end location are both within a particular control. 
-				// First, test whether the current (mouse up) location is within a component
-				if (m_mousecurrenthovercomponent.instance) {
-					// If the mouse IS within a component then test whether it also began the mouse event within the same component
-					if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
-						// If it did, raise a mouse click event for this component
-						m_controller->ProcessMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
-
-						// Also raise a control-click method (both at the controller and the control itself) if this is a managed control
-						if (m_mousecurrenthovercomponent.instance->control)
-						{
-							m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent.instance->control);
-							m_mousecurrenthovercomponent.instance->control->HandleMouseClickEvent(
-								m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
-						}
-					}
-				}
-
-				// Pass a mouse up notification to any managed control that requires it to revert from a mouse down state
-				BroadcastMouseUpEvent(true, false, m_mousecurrenthovercomponent, m_mouselocation);
+				// Also test whether this is a component at this new location
+				m_mousecurrenthovercomponent = m_controller->GetRenderGroup()->GetComponentInstanceAtLocation(m_mouselocation, true);
 			}
-		}
 
-		// Now generate RMB events
-		if (m_rmb) 
-		{
-			// If the mouse button is currently down then generate a mouse down event
-			m_controller->ProcessRightMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
-
-			// If the mouse is over a managed component then also pass it control to update its own appearance
-			if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
-				m_mousecurrenthovercomponent.instance->control->HandleRightMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
-
-			// Also report whether this is the first press of the button
-			if (mouse->RMBFirstDown()) 
-				m_controller->ProcessRightMouseFirstDownEvent_Base(m_mouselocation, m_mousecurrenthovercomponent);
-		}
-		else
-		{
-			// If the mouse button is no longer down, we have a mouse-up event
-			if (mouse->RMBFirstUp())
+			// If there IS a component at this location (either cached or new) then raise a mouse hover event for the component
+			if (m_mousecurrenthovercomponent.instance)
 			{
-				// Raise a new mouse up event
-				INTVECTOR2 startloc = mouse->GetRMBStartPosition();
-				m_controller->ProcessRightMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
+				m_controller->ProcessMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation, m_lmb, m_rmb);
 
-				// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
-				if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
-					m_controller->ProcessRightMouseClickAtLocation(m_mouselocation);
+				// Also pass control to any managed component to update its appearance based on a mouse hover event
+				if (m_mousecurrenthovercomponent.instance->control)
+					m_mousecurrenthovercomponent.instance->control->HandleMouseHoverEvent(m_mousecurrenthovercomponent, m_mouselocation);
+			}
 
-				// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
-				// end location are both within a particular control. 
-				// First, test whether the current (mouse up) location is within a component
-				if (m_mousecurrenthovercomponent.instance) {
-					// If the mouse IS within a component then test whether it also began the mouse event within the same component
-					if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
-						// If it did, raise a right mouse click event for this component
-						m_controller->ProcessRightMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
+			// Now generate LMB events
+			if (m_lmb)
+			{
+				// If the mouse button is currently down then generate a mouse down event
+				m_controller->ProcessMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
 
-						// Also raise a control-right-click method if this is a managed control
-						if (m_mousecurrenthovercomponent.instance->control)
-						{
-							m_controller->ProcessControlRightClickEvent(m_mousecurrenthovercomponent.instance->control);
-							m_mousecurrenthovercomponent.instance->control->HandleMouseRightClickEvent(
-								m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
+				// If the mouse is over a managed component then also pass it control to update its own appearance
+				if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
+					m_mousecurrenthovercomponent.instance->control->HandleMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
+
+				// Also report whether this is the first press of the button
+				if (mouse->LMBFirstDown())
+					m_controller->ProcessMouseFirstDownEvent_Base(m_mouselocation, m_mousecurrenthovercomponent);
+			}
+			else
+			{
+				// If the mouse button is no longer down, we have a mouse-up event
+				if (mouse->LMBFirstUp())
+				{
+					// Raise a new mouse up event
+					INTVECTOR2 startloc = mouse->GetLMBStartPosition();
+					m_controller->ProcessMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
+
+					// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
+					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
+						m_controller->ProcessMouseClickAtLocation(m_mouselocation);
+
+					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
+					// end location are both within a particular control. 
+					// First, test whether the current (mouse up) location is within a component
+					if (m_mousecurrenthovercomponent.instance) {
+						// If the mouse IS within a component then test whether it also began the mouse event within the same component
+						if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
+							// If it did, raise a mouse click event for this component
+							m_controller->ProcessMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
+
+							// Also raise a control-click method (both at the controller and the control itself) if this is a managed control
+							if (m_mousecurrenthovercomponent.instance->control)
+							{
+								m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent.instance->control);
+								m_mousecurrenthovercomponent.instance->control->HandleMouseClickEvent(
+									m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
+							}
 						}
 					}
-				}
 
-				// Pass a mouse up notification to any managed control that requires it to revert from a mouse down state
-				BroadcastMouseUpEvent(false, true, m_mousecurrenthovercomponent, m_mouselocation);
+					// Pass a mouse up notification to any managed control that requires it to revert from a mouse down state
+					BroadcastMouseUpEvent(true, false, m_mousecurrenthovercomponent, m_mouselocation);
+				}
+			}
+
+			// Now generate RMB events
+			if (m_rmb)
+			{
+				// If the mouse button is currently down then generate a mouse down event
+				m_controller->ProcessRightMouseDownEvent(m_mouselocation, m_mousecurrenthovercomponent);
+
+				// If the mouse is over a managed component then also pass it control to update its own appearance
+				if (m_mousecurrenthovercomponent.instance && m_mousecurrenthovercomponent.instance->control)
+					m_mousecurrenthovercomponent.instance->control->HandleRightMouseDownEvent(m_mousecurrenthovercomponent, m_mouselocation);
+
+				// Also report whether this is the first press of the button
+				if (mouse->RMBFirstDown())
+					m_controller->ProcessRightMouseFirstDownEvent_Base(m_mouselocation, m_mousecurrenthovercomponent);
+			}
+			else
+			{
+				// If the mouse button is no longer down, we have a mouse-up event
+				if (mouse->RMBFirstUp())
+				{
+					// Raise a new mouse up event
+					INTVECTOR2 startloc = mouse->GetRMBStartPosition();
+					m_controller->ProcessRightMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
+
+					// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
+					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
+						m_controller->ProcessRightMouseClickAtLocation(m_mouselocation);
+
+					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
+					// end location are both within a particular control. 
+					// First, test whether the current (mouse up) location is within a component
+					if (m_mousecurrenthovercomponent.instance) {
+						// If the mouse IS within a component then test whether it also began the mouse event within the same component
+						if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
+							// If it did, raise a right mouse click event for this component
+							m_controller->ProcessRightMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
+
+							// Also raise a control-right-click method if this is a managed control
+							if (m_mousecurrenthovercomponent.instance->control)
+							{
+								m_controller->ProcessControlRightClickEvent(m_mousecurrenthovercomponent.instance->control);
+								m_mousecurrenthovercomponent.instance->control->HandleMouseRightClickEvent(
+									m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
+							}
+						}
+					}
+
+					// Pass a mouse up notification to any managed control that requires it to revert from a mouse down state
+					BroadcastMouseUpEvent(false, true, m_mousecurrenthovercomponent, m_mouselocation);
+				}
 			}
 		}
 	}

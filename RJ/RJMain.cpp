@@ -644,21 +644,26 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Keyboard.LockKey(DIK_I);
 	}
 
-	if (b[DIK_1]) {
-		D::UI->DeactivateAllUIComponents();
-		if (!b[DIK_LSHIFT])
+	if (b[DIK_TAB]) {
+
+		if (D::UI->GetActiveUIControllerCode() == UserInterface::UI_SHIPBUILDER)
 		{
-			D::UI->ActivateUIState("UI_SHIPBUILDER");
+			D::UI->DeactivateAllUIComponents();
+		}
+		else
+		{
+			D::UI->DeactivateAllUIComponents();
+			D::UI->ActivateUIState(UserInterface::UI_SHIPBUILDER);
 			D::UI->ShipBuilderUI()->SetShip(cs());
 		}
 
-		Game::Keyboard.LockKey(DIK_1);
+		Game::Keyboard.LockKey(DIK_TAB);
 	}
 	if (b[DIK_2]) {
-		Game::Keyboard.LockKey(DIK_2);
-		Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+		Game::Keyboard.LockKey(DIK_2);
 	}
 	if (b[DIK_3]) {
 		if (!ss() || !cs()) return;

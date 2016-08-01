@@ -6,16 +6,21 @@ class UserInterface;
 iUIController::iUIController(void)
 {
 	// Set all fields to default values
+	m_code = "";
 	m_render = NULL;
 	m_focuscontrol = NULL;
+	m_awaiting_termination = false;
 	m_lmb_down = m_rmb_down = false;
 	m_lmb_down_location = m_rmb_down_location = NULL_INTVECTOR2;
 	m_lmb_down_component = m_rmb_down_component = NULL;
 }
 
 // Method that is called when the UI controller is first created
-Result iUIController::Initialise(Render2DGroup *render, UserInterface *ui)
+Result iUIController::Initialise(const std::string & state_code, Render2DGroup *render, UserInterface *ui)
 {
+	// Store the state code for this controller
+	m_code = state_code;
+
 	// Store a reference to the parent render group
 	m_render = render;
 

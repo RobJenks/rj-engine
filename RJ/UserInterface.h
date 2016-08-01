@@ -87,8 +87,16 @@ public:
 	CMPINLINE UI_Console *			ConsoleUI(void)				{ return m_console; }
 
 	// Activates or deactivates particular UI states
-	void					ActivateUIState(string state);
+	void					ActivateUIState(const std::string & state);
+	void					DeactivateUIState(const std::string & state);
 	void					DeactivateAllUIComponents(void);
+
+	// Returns the active UI controller (if relevant)
+	CMPINLINE iUIController *	GetActiveUIController(void) const		{ return m_controller; }
+	std::string					GetActiveUIControllerCode(void) const;
+
+	// Termaintes the UI controller which is currently active (if applicable)
+	void					TerminateActiveUIController(void);
 
 	// Activate or deactivate the game console
 	void					ActivateConsole(void);
@@ -145,11 +153,11 @@ private:
 	UI_ModelBuilder *		m_modelbuilder;
 	UI_ShipBuilder *		m_shipbuilder;
 
+	// Collection of PPs to UI controllers, for instances where we need to parse all of them
+	std::vector<iUIController**>	m_ui_controllers;
+
 	// Pointer to the currently-active UI controller, or NULL if none are active
 	iUIController *			m_controller;
-
-	// Store the UI state that is currently active
-	std::string				m_currentstate;
 
 	// Store the controller (if any) that was active before the console was activated, for purposes of reverting control afterwards
 	iUIController *			m_pre_console_controller;
