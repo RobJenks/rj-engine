@@ -225,7 +225,17 @@ void TerminateMathFunctions()
 	return pOut;
 }*/
 
-XMMATRIX GetRotationMatrix(Rotation90Degree rot)
+const XMMATRIX & GetRotationMatrix(Rotation90Degree rot)
+{
+	switch (rot)
+	{
+		case Rotation90Degree::Rotate90:		return ROT_MATRIX_90;		break;
+		case Rotation90Degree::Rotate180:		return ROT_MATRIX_180;		break;
+		case Rotation90Degree::Rotate270:		return ROT_MATRIX_270;		break;
+		default:								return ROT_MATRIX_0;		break;
+	}
+}
+XMMATRIX GetRotationMatrixInstance(Rotation90Degree rot)
 {
 	switch (rot)
 	{
@@ -267,7 +277,6 @@ XMVECTOR GetRotationQuaternion(Rotation90Degree rot)
 		default:								return ROT_QUATERNIONS[0];	break;
 	}
 }
-
 
 
 XMVECTOR FloorVector(FXMVECTOR vec, float low)

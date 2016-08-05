@@ -306,9 +306,10 @@ extern std::tr1::normal_distribution<float>			norm_rdist;
 
 // Fast rotation functions: precalculated matrices & function for common 90-degree rotations
 XMVECTOR GetRotationQuaternion(Rotation90Degree rot); 
-XMMATRIX GetRotationMatrix(Rotation90Degree rot);
+const XMMATRIX & GetRotationMatrix(Rotation90Degree rot);
+XMMATRIX GetRotationMatrixInstance(Rotation90Degree rot);
 const XMFLOAT4X4 * GetRotationMatrixF(Rotation90Degree rot);
-XMFLOAT4X4 GetRotationMatrixInstance(Rotation90Degree rot);
+XMFLOAT4X4 GetRotationMatrixInstanceF(Rotation90Degree rot);
 
 extern const XMMATRIX ROT_MATRIX_0;
 extern const XMMATRIX ROT_MATRIX_90;

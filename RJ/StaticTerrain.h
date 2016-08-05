@@ -50,6 +50,7 @@ public:
 
 	CMPINLINE XMVECTOR								GetOrientation(void) const						{ return m_orientation; }
 	void											SetOrientation(const FXMVECTOR orient);
+	void											ChangeOrientation(const FXMVECTOR delta);
 
 	CMPINLINE const OrientedBoundingBox::CoreOBBData &	GetOBBData(void) const						{ return m_data; }
 

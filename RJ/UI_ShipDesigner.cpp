@@ -981,7 +981,7 @@ void UI_ShipDesigner::RotateShipSection(void)
 	//m_consview_selected->RotateShipSection(Rotation90Degree::Rotate90);	// NOT REQUIRED?  IF NO LONGER CONTAINING ELEMENTS
 
 	// Also rotate and resize the preview image in the ship designer
-	m_consview_selected_image.instance->rotation = RotateBy90Degrees(m_consview_selected_image.instance->rotation);
+	m_consview_selected_image.instance->rotation = Compose90DegreeRotations(m_consview_selected_image.instance->rotation, Rotation90Degree::Rotate90);
 	
 	// Calculate the new dimensions of this ship section as a preview image and on the SD grid
 	m_consview_selected_size = INTVECTOR2(m_consview_selected_size.y, m_consview_selected_size.x);
@@ -989,7 +989,7 @@ void UI_ShipDesigner::RotateShipSection(void)
 												m_consview_selected_size.y * m_gridsize );
 
 	// Also store the new rotation, which will apply to the physical instance of the ship section in space
-	m_consview_selected_rotation = RotateBy90Degrees(m_consview_selected_rotation);
+	m_consview_selected_rotation = Compose90DegreeRotations(m_consview_selected_rotation, Rotation90Degree::Rotate90);
 
 	// Alter the currently selected grid square to force a render refresh next cycle
 	m_consview_selected_gridpos = INTVECTOR2(-1, -1);

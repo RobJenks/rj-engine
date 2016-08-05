@@ -548,11 +548,13 @@ public:
 
 	// Gets or sets the rotation of this tile; contents are already rotated, this is mainly for geometry rendering & the SD
 	CMPINLINE Rotation90Degree			GetRotation(void) const { return m_rotation; }
-	CMPINLINE void						SetRotation(Rotation90Degree rot) 
-	{ 
-		m_rotation = rot; 
-		RecalculateTileData();
-	}
+	void								SetRotation(Rotation90Degree rot);
+
+	// Rotates the tile by the specified angle, adjusting all contents and geometry accordingly
+	void								Rotate(Rotation90Degree rot);
+
+	// Rotates all terrain objects associated with this tile by the specified angle
+	void								RotateAllTerrainObjects(Rotation90Degree rotation);
 
 	// Methods to get and recalculate the aggregate health value of this tile
 	CMPINLINE float						GetAggregateHealth(void)							{ return m_aggregatehealth; }

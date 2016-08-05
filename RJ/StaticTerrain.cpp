@@ -82,6 +82,12 @@ void StaticTerrain::SetOrientation(const FXMVECTOR orient)
 	RecalculatePositionalData();
 }
 
+// Adjusts the terrain orientation by the specified rotation value
+void StaticTerrain::ChangeOrientation(const FXMVECTOR delta)
+{
+	SetOrientation(XMQuaternionMultiply(m_orientation, delta));
+}
+
 // Changes the extents of this terrain object, recalculating derived fields in the process
 void StaticTerrain::SetExtent(const FXMVECTOR e)
 {

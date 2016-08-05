@@ -157,8 +157,14 @@ enum ComparisonResult { Equal = 0, LessThan, GreaterThan };
 
 // Enumeration of possible 90-degree rotations
 enum Rotation90Degree { Rotate0 = 0, Rotate90 = 1, Rotate180 = 2, Rotate270 = 3 };
+extern const Rotation90Degree ROT90_VALUES[4];
 Rotation90Degree TranslateRotation90Degree(string rotvalue);
-Rotation90Degree RotateBy90Degrees(Rotation90Degree current);
+
+// Returns the result of rotating one 90-degree value by another
+Rotation90Degree Compose90DegreeRotations(Rotation90Degree current_rotation, Rotation90Degree rotate_by);
+
+// Returns the 90-degree rotation required to transform between two rotation values
+Rotation90Degree Rotation90BetweenValues(Rotation90Degree start_rotation, Rotation90Degree end_rotation);
 
 // Enumeration of possible 90-degree directions
 enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };

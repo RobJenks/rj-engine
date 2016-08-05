@@ -24,6 +24,7 @@
 #include "FadeEffect.h"
 #include "DataInput.h"
 #include "DataOutput.h"
+#include "iSpaceObjectEnvironment.h"
 
 #if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
 	long ComplexShipTile::inst_con = 0;
@@ -136,6 +137,66 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	RecalculateTileData();
 }
 
+
+// Sets the rotation of this tile, adjusting all contents and geometry accordingly
+void ComplexShipTile::SetRotation(Rotation90Degree rot)
+{
+	// Determine the rotation being performed between old and new rotation states
+	Rotation90Degree rot_delta = Rotation90BetweenValues(m_rotation, rot);
+
+	// Store the new rotation value
+	m_rotation = rot;
+
+	// No action is required if this will not involve a rotation (e.g. going from 360d to 0d)
+	if (rot_delta == Rotation90Degree::Rotate0) return;
+
+	// Transform all terrain objects associate with this tile by the relevant rotation
+	RotateAllTerrainObjects(rot_delta);
+
+	// Recalculate all derived data for the tile
+	RecalculateTileData();
+}
+
+// Rotates the tile by the specified angle, adjusting all contents and geometry accordingly
+void ComplexShipTile::Rotate(Rotation90Degree rot)
+{
+	// Determine the new desired tile rotation and call the primary rotation method
+	SetRotation(Compose90DegreeRotations(GetRotation(), rot));
+}
+
+// Rotates all terrain objects associated with this tile by the specified angle
+void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
+{
+	// Parameter check
+	if (!m_parent || rotation == Rotation90Degree::Rotate0) return;
+
+	// Precalculate some per-tile data
+	XMVECTOR tile_centre_pos = XMVectorAdd(m_elementposition, m_centre_point);
+	XMVECTOR tile_inverse_orient = XMQuaternionInverse(GetRotationQuaternion(m_rotation));
+	XMVECTOR rotation_quat = GetRotationQuaternion(rotation);
+	const XMMATRIX & rotation_matrix = GetRotationMatrix(rotation);
+
+	// Iterate through all terrain objects in our parent environment
+	StaticTerrain *t;
+	iSpaceObjectEnvironment::TerrainCollection::iterator it_end = m_parent->TerrainObjects.end();
+	for (iSpaceObjectEnvironment::TerrainCollection::iterator it = m_parent->TerrainObjects.begin(); it != it_end; ++it)
+	{
+		// Get a reference to the terrain object
+		t = (*it); if (!t) continue;
+
+		// We only care about terrain objects associated with this tile
+		if (t->GetParentTileID() != m_id) continue;
+
+		// This is a terrain object which we need to update.  Transform our environment-relative position
+		// into tile-relative space so we can transform relative to the tile, then return to environment space
+		XMVECTOR rel_pos = XMVectorSubtract(t->GetPosition(), tile_centre_pos);
+		rel_pos = XMVector3TransformCoord(rel_pos, rotation_matrix);
+		t->SetPosition(XMVectorAdd(rel_pos, tile_centre_pos));
+
+		// Also adjust the terrain object orientation about its local centre
+		t->ChangeOrientation(rotation_quat);
+	}
+}
 
 // Recalculates the state of the tile following a change to its position/size etc.  Includes recalc of the world matrix and bounding volume
 void ComplexShipTile::RecalculateTileData(void)
