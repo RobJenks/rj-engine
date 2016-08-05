@@ -85,6 +85,8 @@ public:
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize);
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, const CXMVECTOR size);
 	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, OverlayRenderer::RenderColour colour, float xSize, float ySize, float zSize, float alpha, const CXMVECTOR position);
+	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT3 & colour, float alpha, const CXMVECTOR position);
+	void XM_CALLCONV	RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT4 & colour);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::RenderColour colour, float thickness, const CXMVECTOR size);
 	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, 

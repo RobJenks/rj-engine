@@ -69,11 +69,21 @@ public:
 		int Object0Axis, Object1Axis;
 		float AxisDist0[3], AxisDist1[3];
 
+		// Default constructor
 		SATIntersectionResult(void) 
-		{ 
-			Object0Axis = Object1Axis = -1;
+			: Object0Axis(-1), Object1Axis(-1)
+		{
 			AxisDist0[0] = AxisDist0[1] = AxisDist0[2] = AxisDist1[0] = AxisDist1[1] = AxisDist1[2] = 0.0f;
 		}
+
+		// Copy constructor
+		SATIntersectionResult(const SATIntersectionResult & other)
+			: Object0Axis(other.Object0Axis), Object1Axis(other.Object1Axis)
+		{
+			AxisDist0[0] = other.AxisDist0[0]; AxisDist0[1] = other.AxisDist0[1]; AxisDist0[2] = other.AxisDist0[2];
+			AxisDist1[0] = other.AxisDist1[0]; AxisDist1[1] = other.AxisDist1[1]; AxisDist1[2] = other.AxisDist1[2];
+		}
+
 	};
 
 	// Struct holding intermediate data used in performing a continuous collision detection
@@ -122,6 +132,12 @@ public:
 
 		// Default constructor
 		CollisionDetectionResult(void) { Type = CollisionDetectionType::Unknown; BroadphasePenetrationSq = Penetration = 0.0f; }
+
+		// Copy constructor
+		CollisionDetectionResult(const CollisionDetectionResult & other)
+			:	Type(other.Type), BroadphasePenetrationSq(other.BroadphasePenetrationSq), Penetration(other.Penetration), 
+				SATResult(other.SATResult), ContinuousTestResult(other.ContinuousTestResult)
+		{ }
 
 		// Return the penetration for any collision type; for SphereVsSphere this will be the sqrt of the BroadphasePenetrationSq.
 		// For any other method this will simply be the Penetration value that was already calculated

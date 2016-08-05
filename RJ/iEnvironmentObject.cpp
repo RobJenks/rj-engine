@@ -7,6 +7,10 @@
 #include "iEnvironmentObject.h"
 
 
+#include "CoreEngine.h"
+#include "OverlayRenderer.h"
+
+
 // Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 // lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 // their level of the implementation
@@ -123,7 +127,6 @@ void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 	{
 		// If we have no parent object, absolute position == relative position
 		SetOrientation(m_envorientation);
-	
 	}
 
 	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance
@@ -173,7 +176,10 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 // a defined threshold, so excluding e.g. normal floor collisions
 void iEnvironmentObject::CollisionWithTerrain(const GamePhysicsEngine::TerrainImpactData & impact)
 {
-
+	if (impact.Terrain)
+	{
+		impact.Terrain->Highlight(XMFLOAT3(1.0f, 1.0f, 0.0f), 0.75f);
+	}
 }
 
 // Performs all physics simulation for this environment object

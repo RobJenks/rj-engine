@@ -2321,7 +2321,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		}
 		else {
 			m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
-			command.SetSuccessOutput("Enabling render of environment object collision volumes");
+			command.SetSuccessOutput("Setting debug terrain render mode to wireframe");
 		}
 		return true;
 	}

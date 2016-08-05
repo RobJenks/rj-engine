@@ -438,6 +438,33 @@ void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, OverlayRen
 	Game::Engine->RenderModel(m_models[(int)colour], position, alpha, mworld);
 }
 
+// Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes 
+// custom colour.  No alpha blending
+void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT4 & colour)
+{
+	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
+	XMVECTOR size = XMVectorSet(xSize, ySize, zSize, 0.0f);
+	XMMATRIX scale = XMMatrixScalingFromVector(size);
+	XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorMultiply(size, HALF_VECTOR_N));
+
+	// Scale & translate the current world matrix before passing it to the engine rendering method
+	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None], colour, mworld);
+}
+
+// Method to add a cuboid for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Includes 
+// custom colour and alpha blending.  Requires the position to be provided for efficient depth-sorting
+void XM_CALLCONV OverlayRenderer::RenderCuboid(const FXMMATRIX world, float xSize, float ySize, float zSize, const XMFLOAT3 & colour, float alpha, const CXMVECTOR position)
+{
+	// Generate a scaling matrix to account for the length & thickness, plus a translation to offset to the cuboid centre
+	XMVECTOR size = XMVectorSet(xSize, ySize, zSize, 0.0f);
+	XMMATRIX scale = XMMatrixScalingFromVector(size);
+	XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorMultiply(size, HALF_VECTOR_N));
+
+	// Scale & translate the current world matrix before passing it to the engine rendering method
+	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None], position, colour, alpha, mworld);
+}
 
 
 // Method to add a cuboid for rendering in a ship-relative element space location.

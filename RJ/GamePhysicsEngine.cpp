@@ -526,18 +526,17 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 	_obbdata.Axis[0].value = orient.r[0];
 	_obbdata.Axis[1].value = orient.r[1];
 	_obbdata.Axis[2].value = orient.r[2];
-
-	/*_obbdata.Axis[0].value = XMVector3TransformCoord(object_obb.Axis[0].value, env->GetOrientationMatrix());
-	_obbdata.Axis[1].value = XMVector3TransformCoord(object_obb.Axis[1].value, env->GetOrientationMatrix());
-	_obbdata.Axis[2].value = XMVector3TransformCoord(object_obb.Axis[2].value, env->GetOrientationMatrix());*/
 	_obbdata.UpdateExtent(object_obb);
 
+	// Get a reference to the equivalent terrain OBB data
+	const OrientedBoundingBox::CoreOBBData & terrain_obb = terrain->GetOBBData();
+
 	// Perform an SAT test between the object OBBs to see if there is a collision
-	if (TestOBBvsOBBCollision(_obbdata, terrain->GetOBBData()))
+	if (TestOBBvsOBBCollision(_obbdata, terrain_obb))
 	{
 		// We have a collision
 		++CollisionDetectionResults.EnvironmentCollisions.Collisions;
-		
+
 		// Use the last SAT result to determine the minimum separating axis that should be used to separate the objects
 		// [Also use the returned axis distance to determine whether the response should be +ve or -ve along the axis.  We test 
 		// Object1 first since it is more frequently the reference frame returned by SAT]
@@ -553,6 +552,30 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			response = (m_collisiontest.SATResult.AxisDist1[m_collisiontest.SATResult.Object1Axis] < 0.0f ?
 				terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value :
 				XMVectorNegate(terrain->GetOBBData().Axis[m_collisiontest.SATResult.Object1Axis].value));
+		}
+		else
+		{
+			return false;		// One axis must have been selected, else we have an error (and probably no collision)
+		}
+
+		// Special case where the collision is NOT in the vertical direction
+		if (m_collisiontest.SATResult.Object0Axis != 1 && m_collisiontest.SATResult.Object1Axis != 1)
+		{
+			// Get the lower edge of the object OBB, and the upper edge of the terrain OBB
+			float obj_lower = (XMVectorGetY(_obbdata.Centre) - _obbdata.ExtentF.y);
+			float terrain_upper = (XMVectorGetY(terrain_obb.Centre) + terrain_obb.ExtentF.y);
+			float step_delta = (terrain_upper - obj_lower);
+
+			OutputDebugString(concat("Horizontal collision, obj_lower = ")(obj_lower)(", terrain_upper = ")(terrain_upper)(", step delta = ")(step_delta)("\n").str().c_str());
+
+			// If the distance between these Y values is less than the step threshold we allow the object to move up without collision
+			if (step_delta < Game::C_GROUND_COLLISION_STEP_THRESHOLD)
+			{
+				// Move the player upwards and exit here without performing any collision response
+			OutputDebugString(concat("*** Moving object up by step_delta = ")(step_delta)("\n").str().c_str());
+				object->AddDeltaPosition(XMVectorSetY(NULL_VECTOR, step_delta + Game::C_EPSILON));
+				return false;
+			}
 		}
 
 		// Normalise the vector (although it should be normalised already since we are working with basis vectors)
@@ -576,7 +599,7 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 			// Also test whether this momentum change exceeds our 'impact threshold'.  If it does, we consider this a significant impact (vs
 			// e.g. a normal floor collision) and may apply an additional response such as object or terrain damage
-			if (XMVector2Greater(absmom, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
+			if (true || XMVector2Greater(absmom, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
 			{
 				TerrainImpact.Terrain = terrain;
 				TerrainImpact.ResponseVector = response;

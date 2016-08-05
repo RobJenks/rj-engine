@@ -661,7 +661,9 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_2]) {
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+		
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 		Game::Keyboard.LockKey(DIK_2);
 	}

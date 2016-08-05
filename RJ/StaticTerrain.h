@@ -104,6 +104,10 @@ public:
 	// Recalculates the positional data for this terrain following a change to its primary pos/orient data
 	void											RecalculatePositionalData(void);
 
+	// Applies a highlight effect to the terrain object
+	void											Highlight(const XMFLOAT3 & colour, float alpha) const;
+	void											Highlight(const XMFLOAT4 & colour) const;
+
 	// Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 	StaticTerrain *									Copy(void) const;
 

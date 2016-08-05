@@ -15,7 +15,7 @@ __declspec(align(16))
 class iEnvironmentObject : public ALIGN16<iEnvironmentObject>, public iActiveObject
 {
 public:
-
+	
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(iEnvironmentObject)
 

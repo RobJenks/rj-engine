@@ -6,6 +6,9 @@
 #include "StaticTerrainDefinition.h"
 #include "OrientedBoundingBox.h"
 #include "EnvironmentTree.h"
+#include "CoreEngine.h"
+#include "OverlayRenderer.h"
+
 #include "StaticTerrain.h"
 
 
@@ -207,6 +210,37 @@ StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
 
 	// Return the new terrain object
 	return terrain;
+}
+
+// Applies a highlight/alpha effect to the terrain object
+void StaticTerrain::Highlight(const XMFLOAT3 & colour, float alpha) const
+{
+	// Make sure we have all required data
+	if (!m_parent) return;
+
+	// Generate a world matrix for the required transformation
+	XMMATRIX world = XMMatrixMultiply(	XMMatrixMultiply(XMMatrixRotationQuaternion(GetOrientation()), XMMatrixTranslationFromVector(GetPosition())),	// Env-local world
+										m_parent->GetZeroPointWorldMatrix());																			// Global world
+	XMFLOAT3 tsize = Float3MultiplyScalar(GetExtentF(), 2.1f);
+	
+	// Render the highlight effect around this terrain object
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, tsize.x, tsize.y, tsize.z, colour, 0.5f, 
+		XMVector3TransformCoord(NULL_VECTOR, world));
+}
+
+// Applies a highlight effect to the terrain object.  No alpha blending is performed
+void StaticTerrain::Highlight(const XMFLOAT4 & colour) const
+{
+	// Make sure we have all required data
+	if (!m_parent) return;
+
+	// Generate a world matrix for the required transformation
+	XMMATRIX world = XMMatrixMultiply(	XMMatrixMultiply(XMMatrixRotationQuaternion(GetOrientation()), XMMatrixTranslationFromVector(GetPosition())),	// Env-local world
+										m_parent->GetZeroPointWorldMatrix());																			// Global world
+	XMFLOAT3 tsize = Float3MultiplyScalar(GetExtentF(), 2.1f);
+
+	// Render the highlight effect around this terrain object
+	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, tsize.x, tsize.y, tsize.z, colour);
 }
 
 // Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
