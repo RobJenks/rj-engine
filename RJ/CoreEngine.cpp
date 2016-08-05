@@ -57,6 +57,8 @@
 #include "GameConsoleCommand.h"
 #include "VolumetricLine.h"
 #include "EnvironmentTree.h"
+#include "NavNetwork.h"
+#include "NavNode.h"
 #include <tchar.h>
 #include <unordered_map>
 
@@ -2058,6 +2060,7 @@ void CoreEngine::RenderDebugData(void)
 	if (m_renderflags[CoreEngine::RenderFlag::RenderEnvTree]) DebugRenderEnvironmentTree();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderOBBs]) DebugRenderSpaceCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTerrainBoxes]) DebugRenderEnvironmentCollisionBoxes();
+	if (m_renderflags[CoreEngine::RenderFlag::RenderNavNetwork]) DebugRenderEnvironmentNavNetwork();
 }
 
 // Performs debug rendering of the active spatial partitioning tree
@@ -2078,6 +2081,7 @@ void CoreEngine::DebugRenderEnvironmentTree(void)
 	m_overlayrenderer->DebugRenderEnvironmentTree(env->SpatialPartitioningTree, true);
 }
 
+// Performs debug rendering of all space object OBBs
 void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 {
 	iSpaceObject *object;
@@ -2128,10 +2132,11 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	}
 }
 
+// Performs debug rendering of all environment terrain collision boxes
 void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 {
 	// Parameter check
-	if (m_debug_renderenvboxes == 0 || Game::ObjectExists(m_debug_renderenvboxes) == 0) return;
+	if (m_debug_renderenvboxes == 0 || Game::ObjectExists(m_debug_renderenvboxes) == false) return;
 	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
 
 	// Get a reference to the environment object
@@ -2166,6 +2171,53 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 			// Determine the location of all vertices for each bounding volume and render wireframe using the overlay renderer
 			t_obj->DetermineCollisionBoxVertices(parent, v);
 			Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
+		}
+	}
+}
+
+// Performs debug rendering of a specified environment navigation network
+void CoreEngine::DebugRenderEnvironmentNavNetwork(void)
+{
+	// Parameter check
+	if (m_debug_renderenvnetwork == 0) return;
+
+	// Get a reference to the environment object and make sure it exists
+	iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)Game::GetObjectByID(m_debug_renderenvnetwork);
+	if (!env) return;
+
+	// Make sure the environment has an active nav network
+	NavNetwork *network = env->GetNavNetwork();
+	if (!network) return;
+
+	// All environment-relative rendering will be transformed by the environment world matrix
+	XMMATRIX envworld = env->GetZeroPointWorldMatrix();
+	XMVECTOR pos, tgtpos; const NavNode *tgt;
+
+	// Get a reference to the node data and iterate through it
+	int nodecount = network->GetNodeCount();
+	const NavNode *nodes = network->GetNodes();
+	for (int i = 0; i < nodecount; ++i)
+	{
+		// Get a reference to the node and transform its position into world space
+		const NavNode & node = nodes[i];
+		pos = XMVector3TransformCoord(VectorFromIntVector3SwizzleYZ(node.Position), envworld);
+		
+		// Render a marker at this location
+		m_overlayrenderer->RenderNode(pos, OverlayRenderer::RenderColour::RC_Red);
+
+		// Now we want to render connections to all connected nav nodes
+		int linkcount = node.NumConnections;
+		for (int c = 0; c < linkcount; ++c)
+		{
+			// Attempt to get the target node.  Render a connection IF our index < target index
+			// This avoids rendering each connection twice.  NOTE: Assumes BI-DIRECTIONAL connections
+			tgt = node.Connections[c].Target;
+			if (tgt && tgt->Index > node.Index)
+			{
+				// Render a connection to this node
+				tgtpos = XMVector3TransformCoord(VectorFromIntVector3SwizzleYZ(tgt->Position), envworld);
+				m_overlayrenderer->RenderLine(pos, tgtpos, OverlayRenderer::RenderColour::RC_LightBlue, 0.25f, -1.0f);
+			}
 		}
 	}
 }
@@ -2322,6 +2374,29 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		else {
 			m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
 			command.SetSuccessOutput("Setting debug terrain render mode to wireframe");
+		}
+		return true;
+	}
+	else if (command.InputCommand == "render_navnetwork")
+	{
+		if (command.Parameter(1) == "1")
+		{
+			iObject *env = Game::GetObjectByInstanceCode(command.Parameter(0));
+			if (!env || !env->IsEnvironment())
+			{
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+					concat("Invalid object \"")(command.Parameter(0))("\" specified").str()); return true;
+			}
+
+			SetRenderFlag(CoreEngine::RenderFlag::RenderNavNetwork, true);
+			SetDebugNavNetworkRenderEnvironment(env->GetID());
+			command.SetSuccessOutput("Enabling render of environment nav network");
+		}
+		else
+		{
+			SetRenderFlag(CoreEngine::RenderFlag::RenderNavNetwork, false);
+			m_debug_renderenvnetwork = 0;
+			command.SetSuccessOutput("Disabling render of environment nav network");
 		}
 		return true;
 	}

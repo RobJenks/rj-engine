@@ -208,7 +208,7 @@ CMPINLINE void IntVector3Max(const INTVECTOR3 & v1, const INTVECTOR3 & v2, INTVE
 {
 	outvec.x = max(v1.x, v2.x); outvec.y = max(v1.y, v2.y); outvec.z = max(v1.z, v2.z);
 }
-CMPINLINE INTVECTOR3 IntVector3Clamp(const INTVECTOR3 & v, const INTVECTOR3 & vmin, INTVECTOR3 & vmax)
+CMPINLINE INTVECTOR3 IntVector3Clamp(const INTVECTOR3 & v, const INTVECTOR3 & vmin, const INTVECTOR3 & vmax)
 {
 	return INTVECTOR3(clamp(v.x, vmin.x, vmax.x), clamp(v.y, vmin.y, vmax.y), clamp(v.z, vmin.z, vmax.z));
 }

@@ -44,7 +44,7 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 
 	// Create a vector to hold the output nodes and request a path from the nav network
 	std::vector<NavNode*> revpath;
-	Result result = env->GetNavNetwork()->FindPath(start, end, &revpath);
+	Result result = env->GetNavNetwork()->FindPath(start, end, revpath);
 
 	// If no path is possible then return now; order will terminate on first execution since it can generate no child nodes
 	if (result != ErrorCodes::NoError) return;

@@ -286,8 +286,15 @@ public:
 	INTVECTOR3						ElementIndexToLocation(int index) const;
 	void							ElementIndexToLocation(int index, INTVECTOR3 & outVector) const;
 	
+	// Returns the element location containing the specified position.  Unbounded, so can return an element
+	// location outside the bounds of this environment
+	CMPINLINE INTVECTOR3			GetElementContainingPositionUnbounded(const FXMVECTOR position) const
+	{
+		return Game::PhysicalPositionToElementLocation(position);
+	}
+
 	// Returns the element containing the specified position, clamped to the environment bounds
-	INTVECTOR3						GetClampedElementContainingPosition(const FXMVECTOR position)
+	CMPINLINE INTVECTOR3			GetClampedElementContainingPosition(const FXMVECTOR position) const
 	{
 		return IntVector3Clamp(Game::PhysicalPositionToElementLocation(position), NULL_INTVECTOR3, m_elementsize);
 	}

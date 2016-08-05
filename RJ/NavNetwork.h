@@ -25,8 +25,11 @@ public:
 	// Returns a value indicating whether the network has been successfully initialised
 	CMPINLINE bool				IsInitialised(void)		{ return m_initialised; }
 
-	// Finds a path from one node to another, populating the result vector as a set of intvectors
-	Result						FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> *outPathReverse);
+	// Finds a path from one node to another, populating the result vector as a set of nav nodes
+	Result						FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> & outPathReverse);
+
+	// Finds a path from one element position ot another, populating the result vector as a set of nav nodes
+	Result						FindPath(const FXMVECTOR start, const FXMVECTOR end, std::vector<NavNode*> & outPathReverse);
 
 	// Finds the navigation node closest to the specified position
 	CMPINLINE NavNode *			GetClosestNode(const FXMVECTOR pos)
@@ -37,6 +40,12 @@ public:
 
 	// Finds the navigation node closest to the specified position
 	NavNode *					GetClosestNode(const XMFLOAT3 & pos);
+
+	// Returns the number of nodes in this network
+	CMPINLINE int				GetNodeCount(void) const					{ return m_nodecount; }
+
+	// Returns a pointer to the immutable node collection for this network
+	CMPINLINE const NavNode *	GetNodes(void) const						{ return m_nodes; }
 
 	// Outputs a string representation of the network
 	std::string					OutputAsString(void);

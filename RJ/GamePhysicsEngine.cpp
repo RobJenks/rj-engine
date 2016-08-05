@@ -566,13 +566,10 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			float terrain_upper = (XMVectorGetY(terrain_obb.Centre) + terrain_obb.ExtentF.y);
 			float step_delta = (terrain_upper - obj_lower);
 
-			OutputDebugString(concat("Horizontal collision, obj_lower = ")(obj_lower)(", terrain_upper = ")(terrain_upper)(", step delta = ")(step_delta)("\n").str().c_str());
-
 			// If the distance between these Y values is less than the step threshold we allow the object to move up without collision
 			if (step_delta < Game::C_GROUND_COLLISION_STEP_THRESHOLD)
 			{
 				// Move the player upwards and exit here without performing any collision response
-			OutputDebugString(concat("*** Moving object up by step_delta = ")(step_delta)("\n").str().c_str());
 				object->AddDeltaPosition(XMVectorSetY(NULL_VECTOR, step_delta + Game::C_EPSILON));
 				return false;
 			}

@@ -251,12 +251,15 @@ public:
 	void DebugRenderEnvironmentCollisionBoxes(void);
 	void DebugRenderSpatialPartitioningTree(void);
 	void DebugRenderEnvironmentTree(void);
+	void DebugRenderEnvironmentNavNetwork(void);
 
 	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
 	CMPINLINE void SetDebugTerrainRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvboxes = environment_id; }
 	CMPINLINE Game::ID_TYPE GetDebugTreeRenderEnvironment(void) const { return m_debug_renderenvtree; }
 	CMPINLINE void SetDebugTreeRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvtree = environment_id; }
+	CMPINLINE Game::ID_TYPE GetDebugNavNetworkRenderEnvironment(void) const { return m_debug_renderenvnetwork; }
+	CMPINLINE void SetDebugNavNetworkRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvnetwork = environment_id; }
 
 	
 	// Structure keeping track of render info per frame
@@ -302,6 +305,7 @@ public:
 		DisableHullRendering,
 		RenderOBBs,
 		RenderTerrainBoxes,
+		RenderNavNetwork,
 		_RFLAG_COUNT
 	};
 
@@ -576,6 +580,7 @@ public:
 	// Persistent storage for objects being debug-rendered
 	Game::ID_TYPE 				m_debug_renderenvboxes;
 	Game::ID_TYPE				m_debug_renderenvtree;
+	Game::ID_TYPE				m_debug_renderenvnetwork;
 
 	// Enumeration of possible debug terain render modes
 	enum DebugTerrainRenderMode { Normal = 0, Solid };

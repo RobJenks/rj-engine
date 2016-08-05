@@ -661,8 +661,8 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_2]) {
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 		
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 		Game::Keyboard.LockKey(DIK_2);
@@ -1868,60 +1868,6 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
-	OrientedBoundingBox::CoreOBBData o1, o2;
-	for (int i = 0; i < 3; ++i)
-	{
-		o1.Axis[i].value = o2.Axis[i].value = UNIT_BASES[i];
-	}
-	o1.UpdateExtent(XMVectorReplicate(5.0f));
-	o2.UpdateExtent(XMVectorReplicate(5.0f));
-	o1.Centre = NULL_VECTOR;
-	o2.Centre = XMVectorSetY(NULL_VECTOR, 5.0f);
-	bool collision = Game::PhysicsEngine.TestOBBvsOBBCollision(o1, o2);
-	const GamePhysicsEngine::CollisionDetectionResult & result = Game::PhysicsEngine.LastCollisionTest();
-
-
-	ComplexShip *c = new ComplexShip();
-	c->SetSize(XMVectorReplicate(500.0f));
-	c->InitialiseElements(INTVECTOR3(10, 4, 2));
-	EnvironmentTree *tr = new EnvironmentTree(c);
-	tr->Subdivide();
-	tr->GetChildNode(5)->Subdivide();
-
-	EnvironmentTree *tr5 = tr->GetChildNode(5);
-	OutputDebugString(concat("TR5: ")(Vector3ToString(tr5->GetMin()))(" to ")(Vector3ToString(tr5->GetMax()))("\n").str().c_str());
-	for (int i = 0; i < 8; ++i)
-	{
-		EnvironmentTree *ch = tr5->GetChildNode(i);
-		if (ch)
-			OutputDebugString(concat("TR5 Child ")(i)(": ")(Vector3ToString(ch->GetMin()))(" to ")(Vector3ToString(ch->GetMax()))("\n").str().c_str());
-		else
-			OutputDebugString(concat("TR5 Child ")(i)(": Does not exist\n").str().c_str());
-	}
-
-
-	for (int i = 0; i < 8; ++i)
-	{
-		if (!tr->GetChildNode(i))
-			OutputDebugString(concat("Child ")(i)(": Does not exist\n").str().c_str());
-		else
-		{
-			INTVECTOR3 elmin = tr->GetChildNode(i)->GetElementMin();
-			INTVECTOR3 elmax = tr->GetChildNode(i)->GetElementMax();
-
-			//INTVECTOR3 elc = (elmin + elmax) / 2;
-			INTVECTOR3 elc = elmax;
-			XMFLOAT3 fc = Game::ElementLocationToPhysicalPositionF(elc);
-		
-			int iE = tr->GetRelevantChildNode(elc);
-			int iF = tr->GetRelevantChildNode(fc);
-			int iV = tr->GetRelevantChildNode(XMLoadFloat3(&fc));
-
-			OutputDebugString(concat("Child ")(i)(": ")(elmin.ToString())(" to ")(elmax.ToString())(", Centre ")(tr->GetChildNode(i)->GetElementCentre().ToString())
-				(" // Rel = {")(iE)(",")(iF)(",")(iV)("} // ")(tr->GetChildNode(i)->ContainsPoint(XMLoadFloat3(&fc)))("\n").str().c_str());
-		}
-	}
-
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"),
 		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
@@ -2192,9 +2138,11 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		INTVECTOR3 loc = INTVECTOR3(-1);
+		if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot && Game::CurrentPlayer->GetActor() && cs())
+			loc = cs()->GetElementContainingPositionUnbounded(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player element: %s", loc.ToString().c_str());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
-		
 	}
 }
 

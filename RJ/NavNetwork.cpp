@@ -75,7 +75,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 					navpos = el->GetNavPointPositionData();		// Get a pointer to element 0, i.e. &(elements[0])
 					navpos->Position = INTVECTOR3((int)(x * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT_INT, 
 												  (int)(y * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT_INT, 
-												  (int)(z * Game::C_CS_ELEMENT_SCALE) + 0);
+												  (int)(z * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT_INT);
 					navpos->CostModifier = 1.0f;
 					
 					// Determine which connections are possible from this nav point
@@ -228,7 +228,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 						{
 							// This is an external connection.  Connection will only be created if we can locate a suitable neighbouring element/node
 							csrc = navconn->Source; ctgt = navconn->Target;
-							if (csrc < 0 || csrc >= elementnavcount || ctgt <= 0 || ctgt > DirectionCount || csrc == ctgt) continue;	// Note: we want direction 1-10, not 0-9
+							if (csrc < 0 || csrc >= elementnavcount || ctgt <= 0 || ctgt > DirectionCount) continue;	// Note: we want direction 1-10, not 0-9
 
 							// Attempt to get the relevant neighbouring element
 							nsrc = node_layout[layoutindex][csrc];			if (!nsrc) continue;
@@ -239,7 +239,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 							// Make sure the neighbour is a valid walkable target element that connects in our direction
 							Direction oppositedirection = GetOppositeDirection((Direction)ctgt);
 							if (oppositedirection == Direction::_Count) continue;
-							if (!eltgt->IsWalkable() || !eltgt->ConnectsInDirection((DirectionBS)oppositedirection)) continue;
+							if (!eltgt->IsWalkable() || !eltgt->ConnectsInDirection(DirectionToBS(oppositedirection))) continue;
 
 							// Determine the index of this element in the node array based on the target element location
 							targetpos = eltgt->GetLocation();
@@ -496,16 +496,23 @@ std::string NavNetwork::OutputAsString(void)
 	return s;
 }
 
+// Finds a path from one element position ot another, populating the result vector as a set of nav nodes
+Result NavNetwork::FindPath(const FXMVECTOR start, const FXMVECTOR end, std::vector<NavNode*> & outPathReverse)
+{
+	// Attempt to locate the nearest nav node to each position, then find a path between them
+	// The primary method will deal with situations where one or other node cannot be identified
+	return FindPath(GetClosestNode(start), GetClosestNode(end), outPathReverse);
+}
 
 // Finds a path from one node to another, populating the result vector as a (reverse) set of navnodes
-Result NavNetwork::FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> *outPathReverse)
+Result NavNetwork::FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> & outPathReverse)
 {
 	NavNode *node, *next;
 	int newG;
 
 	// 1. Basic efficiency checks where pathfinding is not required
 	if (!start || !end) return ErrorCodes::InvalidPathfindingParameters;
-	if (start == end) { outPathReverse->push_back(end); return ErrorCodes::NoError; }
+	if (start == end) { outPathReverse.push_back(end); return ErrorCodes::NoError; }
 
 	// 2. If we have reached the max values for open/closed list counters, reset all nodes and wrap around
 	if (CLOSED_LIST > 100000)
@@ -591,7 +598,7 @@ Result NavNetwork::FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> 
 		if (end->OnList == OPEN_LIST)
 		{
 			// Push the end element as the first element in the (reverse) output path
-			outPathReverse->push_back(end);
+			outPathReverse.push_back(end);
 			node = end;
 
 			// Traverse the path back to the start, adding each node to the output path vector in turn
@@ -599,7 +606,7 @@ Result NavNetwork::FindPath(NavNode *start, NavNode *end, std::vector<NavNode*> 
 			{
 				// Push this node onto the output vector and move to the next item in the list
 				node = node->PathParent;
-				outPathReverse->push_back(node);
+				outPathReverse.push_back(node);
 			}
 
 			// Return success to indicate that we found a path
