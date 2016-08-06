@@ -34,9 +34,9 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 	NavNode ***node_layout;							// Maintain a temporary array of node pointers, by element.  
 													// node_layout[x + y*(size.x) + z*(size.x*size.y)] = NavNode*[count]
 
-	// We will only consider the network initialised if we reach the end of the method succesfully
-	m_initialised = false;
-	m_nodes = NULL; m_nodecount = 0;
+	// Shutdown the network before we recreate it here.  We will only consider the network 
+	// initialised if we reach the end of the method succesfully
+	Shutdown();
 
 	// Make sure the parent object is valid, and store a reference if it is
 	if (!parent) return ErrorCodes::CannotGenerateNavNetworkForNullParentEntity;
@@ -65,6 +65,18 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 				// walkable, then skip it since there will be no nodes here
 				el = parent->GetElement(x, y, z);
 				if (!el || !el->IsWalkable()) continue;
+
+				if (x == 2 && y == 8 && z == 0)
+				{
+					int sdfse = 34;
+				}
+
+				/* 0. If this element has no manually-specified nav data, we will deallocate any auto-generated data and regenerate */
+				if (el->HasCustomNavData() == false)
+				{
+					el->DeallocateNavPointPositionData();
+					el->DeallocateNavPointConnectionData();
+				}
 
 				/* 1. Nav node positions.  If we don't already have any specified, generate defaults now */
 				elementnavcount = el->GetNavPointPositionCount();
@@ -110,7 +122,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 				elementnavcount = el->GetNavPointPositionCount();
 				nodecount += elementnavcount;
 
-				layoutindex = x + (y * node_layout_size.x) + (z * node_layout_size.x * node_layout_size.y);
+				layoutindex = NAV_LAYOUT_INDEX(x, y, z, node_layout_size); 
 				node_layout[layoutindex] = new NavNode*[elementnavcount]; // (NavNode**)malloc(sizeof(NavNode*) * elementnavcount);
 								
 			} // z
@@ -140,7 +152,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 				if (!el || !el->IsWalkable()) continue;
 
 				// Derive the layout array index for this node
-				layoutindex = x + (y * node_layout_size.x) + (z * node_layout_size.x * node_layout_size.y);
+				layoutindex = NAV_LAYOUT_INDEX(x, y, z, node_layout_size);
 
 				// Clear the current collection of nodes associated to the element.  These will be repopulated below
 				el->NavNodes.clear();
@@ -204,7 +216,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 					ccounts = new int[ccount_capacity];
 				}
 				for (int i = 0; i < elementnavcount; i++) ccounts[i] = 0;
-				layoutindex = x + (y * node_layout_size.x) + (z * node_layout_size.x * node_layout_size.y);
+				layoutindex = NAV_LAYOUT_INDEX(x, y, z, node_layout_size);
 			
 				// Now look at each potential connection in turn
 				{
@@ -249,8 +261,8 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 							targetnodecount = eltgt->GetNavPointPositionCount();
 							if (targetnodecount == 0)	continue;
 							if (targetnodecount == 1)	ntgt = node_layout[targetindex][0];
-							else						ntgt = GetNodeNearestToEdge(node_layout[targetindex], targetnodecount, 
-																					oppositedirection);
+							else						ntgt = GetNodeForConnectionToAdjancentElement(	eltgt, node_layout[targetindex], 
+																										targetnodecount, oppositedirection);
 							
 							// Make sure we were able to retrieve a valid target node;							
 							if (!ntgt) continue;
@@ -388,15 +400,47 @@ NavNode * NavNetwork::GetClosestNode(const XMFLOAT3 & pos)
 	} // (if the node is not valid, so we have to search outwards)
 }
 
+// Identifies the best node to connect in a direction from the specified element.  Will preferentially
+// look for an element that "wants" to connect in that direction.  If none exists, it will identify
+// the node closest to the relevant edge.  Returns NULL if no applicable nodes are available
+NavNode * NavNetwork::GetNodeForConnectionToAdjancentElement(ComplexShipElement *element, NavNode **element_nodes, int element_nodecount, Direction direction)
+{
+	// Parameter check
+	if (!element || !element_nodes || element_nodecount <= 0) return NULL;
+	int iDir = (int)direction;
+
+	// Loop through each possible connection from the element in turn
+	ComplexShipElement::NavNodeConnection *conns = element->GetNavPointConnectionData();
+	if (conns)
+	{
+		int nconn = element->GetNavPointConnectionCount();
+		for (int i = 0; i < nconn; ++i)
+		{
+			if (conns[i].IsDirection && conns[i].Target == iDir && conns[i].Source >= 0 && conns[i].Source < element_nodecount)
+			{
+				// Return this node as a good connection point, as long as it is valid
+				NavNode *node = element_nodes[conns[i].Source];
+				if (node) return node;
+			}
+		}
+	}
+
+	// There are no noes which specifically try to connect in this direction.  Return the closest node
+	// to the relevant edge as an alternative
+	return GetNodeNearestToEdge(element_nodes, element_nodecount, direction);
+}
 
 // Selects one node from an array based on its proximity to the edge of its element
 NavNode * NavNetwork::GetNodeNearestToEdge(NavNode **nodes, int nodecount, Direction edge)
 {
 	int best;
-	NavNode *node = nodes[0];
+	
+	// Parameter check
+	if (!nodes || nodecount <= 0) return NULL;
 
 	// Looks inelegant, but this saves a lot more comparisons than having the loop as the outer construct
 	// For now we will also link diagonal elements to a node satisfying the horizontal condition, for efficiency & to save true distance calculations
+	NavNode *node = nodes[0]; 
 	switch (edge)
 	{
 		case Direction::Up:
@@ -441,13 +485,20 @@ NavNode * NavNetwork::GetNodeNearestToEdge(NavNode **nodes, int nodecount, Direc
 void NavNetwork::Shutdown(void)
 {
 	// Deallocate the memory allocated for connections between nodes
-	for (int i = 0; i < m_nodecount; i++)
+	if (m_nodes)
 	{
-		if (m_nodes[i].Connections) SafeDeleteArray(m_nodes[i].Connections);
+		for (int i = 0; i < m_nodecount; ++i)
+		{
+			if (m_nodes[i].Connections) SafeDeleteArray(m_nodes[i].Connections);
+		}
 	}
 
 	// Release all space allocated for nodes in this network
-	SafeDeleteArray(m_nodes)
+	SafeDeleteArray(m_nodes);
+
+	// Clear related fields
+	m_nodecount = 0;
+	m_initialised = false;
 }
 
 // Outputs a string representation of the network
@@ -628,4 +679,31 @@ NavNetwork::~NavNetwork(void)
 
 
 
+/* ******************************************
+   *** Nav network initialisation process ***
+   ******************************************
 
+   Create temporary node_layout[] array of nav nodes
+
+   1. for each x/y/z
+		if no nav nodes,
+			Generate one navposdata
+			Generate connectiondata for each walkable m_connections directions
+		Add element nodecount-sized array in node_layout for that element index
+
+   2. Allocate space for all nav nodes in the network
+		for each x/y/z
+		for each navpos data,
+			add a nav node in the network collection
+			add a pointer to the node to the element itself
+
+   3. Connections.  for each x/y/z
+		if not a direction-conn, this is INTERNAL, so
+			create temp connection to the tgt node ID
+		else, direction-conn, so this is EXTERNAL, so
+			create temp connection to the best node in the el in this direction, if applicable
+
+   4. Create connections.  for each temp conn data,
+		add conection to the source node that references the tgt node
+
+*/

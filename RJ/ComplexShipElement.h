@@ -201,11 +201,17 @@ public:
 	CMPINLINE NavNodeConnection *	GetNavPointConnectionData(void)			{ return m_navnodeconnections; }
 	void							AllocateNavPointPositionData(int n);
 	void							AllocateNavPointConnectionData(int n);
+	void							DeallocateNavPointPositionData(void);
+	void							DeallocateNavPointConnectionData(void);
 	CMPINLINE const NavNodePos &		GetNavPointPosition(int index) const	{ return m_navnodepositions[index]; }
 	CMPINLINE const NavNodeConnection &	GetNavNodeConnection(int index) const	{ return m_navnodeconnections[index]; }
 
-	// The collection of nav nodes within this elemnet.  Remains public to allow direct access
+	// The collection of nav nodes within this element.  Remains public to allow direct access
 	std::vector<NavNode*>			NavNodes;
+
+	// Flag indicating whether the element has custom-defined nav data, or whether the data is being auto-generated
+	CMPINLINE bool					HasCustomNavData(void) const				{ return m_customnavdata; }
+	CMPINLINE void					SetCustomNavDataFlag(bool is_custom)		{ m_customnavdata = is_custom; }
 
 	// Default destructor
 	~ComplexShipElement(void);
@@ -280,6 +286,7 @@ private:
 	int								m_numnavnodepositions;
 	NavNodeConnection *				m_navnodeconnections;
 	int								m_numnavnodeconnections;
+	bool							m_customnavdata;
 
 public:
 

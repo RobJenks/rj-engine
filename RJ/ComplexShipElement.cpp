@@ -42,6 +42,7 @@ ComplexShipElement::ComplexShipElement(void)
 	// No nav node positions or connections are specified by default
 	m_navnodepositions = NULL; m_navnodeconnections = NULL;
 	m_numnavnodepositions = 0; m_numnavnodeconnections = 0;
+	m_customnavdata = false;
 }
 
 // Default desctructor
@@ -166,8 +167,8 @@ void ComplexShipElement::SetParent(iSpaceObjectEnvironment *parent)
 void ComplexShipElement::AllocateNavPointPositionData(int n)
 {
 	// Deallocate any memory that has already been allocated
-	if (m_navnodepositions) { free(m_navnodepositions); m_navnodepositions = NULL; }
-
+	DeallocateNavPointPositionData();
+	
 	// Validate the parameter; n = number of nav point positions to allocate
 	if (n <= 0) return;
 
@@ -176,10 +177,16 @@ void ComplexShipElement::AllocateNavPointPositionData(int n)
 	m_numnavnodepositions = n;
 }
 
+void ComplexShipElement::DeallocateNavPointPositionData(void)
+{
+	if (m_navnodepositions) SafeFree(m_navnodepositions);
+	m_numnavnodepositions = 0;
+}
+
 void ComplexShipElement::AllocateNavPointConnectionData(int n)
 {
 	// Deallocate any memory that has already been allocated
-	if (m_navnodeconnections) { free(m_navnodeconnections); m_navnodeconnections = NULL; }
+	DeallocateNavPointConnectionData();
 
 	// Validate the parameter; n = number of nav point connections to allocate
 	if (n <= 0) return;
@@ -187,6 +194,12 @@ void ComplexShipElement::AllocateNavPointConnectionData(int n)
 	// Allocate space for the nav point connection data
 	m_navnodeconnections = (ComplexShipElement::NavNodeConnection*)malloc(sizeof(ComplexShipElement::NavNodeConnection) * n);
 	m_numnavnodeconnections = n;
+}
+
+void ComplexShipElement::DeallocateNavPointConnectionData(void)
+{
+	if (m_navnodeconnections) SafeFree(m_navnodeconnections);
+	m_numnavnodeconnections = 0;
 }
 
 string ComplexShipElement::AttachTypeToString(ComplexShipElement::AttachType type)

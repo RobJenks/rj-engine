@@ -9,6 +9,7 @@
 #include "Utility.h"
 #include "BinaryHeap.h"
 class iSpaceObjectEnvironment;
+class ComplexShipElement;
 class NavNode;
 
 
@@ -40,6 +41,15 @@ public:
 
 	// Finds the navigation node closest to the specified position
 	NavNode *					GetClosestNode(const XMFLOAT3 & pos);
+
+	// Identifies the best node to connect in a direction from the specified element.  Will preferentially
+	// look for an element that "wants" to connect in that direction.  If none exists, it will identify
+	// the node closest to the relevant edge.  Returns NULL if no applicable nodes are available
+	NavNode *					GetNodeForConnectionToAdjancentElement(	ComplexShipElement *element, NavNode **element_nodes, 
+																		int element_nodecount, Direction direction);
+
+	// Macro which returns the index for an element at the specified coordinates
+#	define						NAV_LAYOUT_INDEX(x,y,z,size) (x + (y * size.x) + (z * size.x * size.y))
 
 	// Returns the number of nodes in this network
 	CMPINLINE int				GetNodeCount(void) const					{ return m_nodecount; }
