@@ -1591,10 +1591,12 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 		if (!node) continue;
 
 		// Determine the centre point of this node in world space
-		XMFLOAT3 fcentre = Game::ElementLocationToPhysicalPositionF(node->GetElementCentre());
+		//XMFLOAT3 fcentre = Game::ElementLocationToPhysicalPositionF(node->GetElementCentre());
+		/*XMFLOAT3 fcentre = node->GetElementCentre().ToFloat3();
 		XMVECTOR centre = XMVectorAdd(XMVectorAdd(XMVectorAdd(
 			m_cache_zeropoint, XMVectorScale(m_cache_el_inc[0].value, fcentre.x)),
-			XMVectorScale(m_cache_el_inc[1].value, fcentre.y)), XMVectorScale(m_cache_el_inc[2].value, fcentre.z));
+			XMVectorScale(m_cache_el_inc[1].value, fcentre.y)), XMVectorScale(m_cache_el_inc[2].value, fcentre.z));*/
+		XMVECTOR centre = XMVector3TransformCoord(node->GetActualCentrePoint(), environment->GetZeroPointWorldMatrix());
 
 		// We only continue with this node (and any possible children) if it is visible
 		if (!m_frustrum->CheckSphere(centre, node->GetBoundingSphereRadius())) continue;

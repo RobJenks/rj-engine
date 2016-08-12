@@ -79,13 +79,17 @@ public:
 	iSpaceObjectEnvironment *					GetEnvironment(void) const		{ return m_environment; }
 
 	// Return data on the node position
-	XMVECTOR									GetCentrePoint(void) const		{ return m_centre; }
-	XMFLOAT3									GetCentrePointF(void) const		{ return m_fcentre; }
-	INTVECTOR3									GetElementCentre(void) const	{ return m_elcentre; }
-	INTVECTOR3									GetElementMin(void) const		{ return m_elmin; }
-	INTVECTOR3									GetElementMax(void) const		{ return m_elmax; }
-	XMVECTOR									GetMin(void) const				{ return m_min; }
-	XMVECTOR									GetMax(void) const				{ return m_max; }
+	CMPINLINE XMVECTOR							GetCentrePoint(void) const		{ return m_centre; }
+	CMPINLINE XMFLOAT3							GetCentrePointF(void) const		{ return m_fcentre; }
+	CMPINLINE INTVECTOR3						GetElementCentre(void) const	{ return m_elcentre; }
+	CMPINLINE INTVECTOR3						GetElementMin(void) const		{ return m_elmin; }
+	CMPINLINE INTVECTOR3						GetElementMax(void) const		{ return m_elmax; }
+	CMPINLINE XMVECTOR							GetMin(void) const				{ return m_min; }
+	CMPINLINE XMVECTOR							GetMax(void) const				{ return m_max; }
+
+	// Returns the ACTUAL centre point of this node (distinct from the node "centre" which is the 
+	// element-aligned position around which the node may be subdivided)
+	CMPINLINE XMVECTOR							GetActualCentrePoint(void) const { return m_actualcentre; }
 
 	// Determines whether the node contains the specified point
 	CMPINLINE bool								ContainsPoint(const FXMVECTOR point) const
@@ -225,9 +229,13 @@ protected:
 	XMFLOAT3									m_fmin, m_fmax;
 	INTVECTOR3									m_elmin, m_elmax;
 
-	// Centre point of the node, used to determine which child node should be selected
+	// Centre point of the node, used to determine which child node should be selected.  This is not the actual
+	// centre; rather this is the point around which the node may be subdivided.  It falls on an x/y/z boundary
 	AXMVECTOR									m_centre;
 	XMFLOAT3									m_fcentre;
+
+	// Actual centre point of the node, calculated as (min + max) / 2
+	XMVECTOR									m_actualcentre;
 
 	// 'Centre' element is the one in the top-top-left of the '+ve' child nodes, e.g. in a 4x4 node, from 10-13 in each dimension, 
 	// the 'centre' element is (12,12,12).  Has no meaning for a one-element distance in any dimension - in that case the centre point

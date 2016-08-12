@@ -176,10 +176,7 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 // a defined threshold, so excluding e.g. normal floor collisions
 void iEnvironmentObject::CollisionWithTerrain(const GamePhysicsEngine::TerrainImpactData & impact)
 {
-	if (impact.Terrain)
-	{
-		impact.Terrain->Highlight(XMFLOAT3(1.0f, 1.0f, 0.0f), 0.75f);
-	}
+
 }
 
 // Performs all physics simulation for this environment object

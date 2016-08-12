@@ -596,7 +596,7 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 			// Also test whether this momentum change exceeds our 'impact threshold'.  If it does, we consider this a significant impact (vs
 			// e.g. a normal floor collision) and may apply an additional response such as object or terrain damage
-			if (true || XMVector2Greater(absmom, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
+			if (XMVector2Greater(absmom, Game::C_ENVIRONMENT_COLLISION_RESPONSE_THRESHOLD_V))
 			{
 				TerrainImpact.Terrain = terrain;
 				TerrainImpact.ResponseVector = response;

@@ -483,19 +483,31 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		if (b[DIK_LSHIFT])
+		Actor *a = new Actor(D::Actors.Get("human_soldier_basic"));
+		if (a && cs())
 		{
-			ss()->CancelAllCombatOrders();
-			Game::Keyboard.LockKey(DIK_U);
+			a->MoveIntoEnvironment(cs());
+			
+			unsigned int i = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
+			unsigned int j = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
+			if (i && i >= 0 && i < cs()->GetTilesOfType(D::TileClass::Corridor).size())
+			{
+				ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor).at(i).value;
+				ComplexShipTile *t2 = cs()->GetTilesOfType(D::TileClass::Corridor).at(j).value;
+				if (t && t2)
+				{
+					XMVECTOR actorpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t->GetWorldSize(), 0.5f));
+					XMVECTOR targetpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t2->GetWorldSize(), 0.5f));
+
+					a->SetPositionAndOrientation(actorpos, ID_QUATERNION);
+					a->AssignNewOrder(new Order_ActorTravelToPosition(cs(), a->GetEnvironmentPosition(), targetpos, 2.0f, 1.0f, false));
+				}
+			}
+
+			
 		}
-		else
-		{
-			if (cs()->GetFaction() == Game::FactionManager.GetFaction("faction_prc"))
-				cs()->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-			else
-				cs()->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
-			Game::Keyboard.LockKey(DIK_U);
-		}
+
+		Game::Keyboard.LockKey(DIK_U);
 	}
 	if (b[DIK_5])
 	{
@@ -1940,15 +1952,12 @@ void RJMain::__CreateDebugScenario(void)
 		a1_actor->MoveIntoEnvironment(cs());
 		if (cs()->GetTileCountOfType(D::TileClass::Corridor) > 0)
 		{
-			ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor)[0].value;
+			//ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor)[0].value;
+			ComplexShipTile *t = cs()->GetElement(4, 4, 0)->GetTile();
 			if (t)
-				a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetRelativePosition(),
-				XMVectorSet(Game::C_CS_ELEMENT_SCALE*0.5f, Game::C_CS_ELEMENT_SCALE, Game::C_CS_ELEMENT_SCALE*0.5f, 0.0f)), ID_QUATERNION);
+				a1_actor->SetEnvironmentPositionAndOrientation(XMVectorAdd(t->GetElementPosition(), Game::C_CS_ELEMENT_MIDPOINT_V), ID_QUATERNION);
 			else
 				a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
-
-			Order_ActorTravelToPosition *o = new Order_ActorTravelToPosition(cs(), a1_actor->GetEnvironmentPosition(), XMVectorSet(72.0f, 0.0f, 71.0f, 0.0f), 1.0f, 3.0f, false);
-			a1_actor->AssignNewOrder(o);
 		}
 		a1 = a1_actor;
 	}
@@ -2138,10 +2147,32 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{			
-		INTVECTOR3 loc = INTVECTOR3(-1);
+		INTVECTOR3 loc = INTVECTOR3(-1), aloc = INTVECTOR3(-1); XMVECTOR apos = XMVectorReplicate(-1.0f); float adist = -1.0f;
 		if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot && Game::CurrentPlayer->GetActor() && cs())
-			loc = cs()->GetElementContainingPositionUnbounded(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition());
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player element: %s", loc.ToString().c_str());
+		{
+			loc = Game::CurrentPlayer->GetActor()->GetElementLocation();
+			if (a1())
+			{
+				aloc = a1()->GetElementLocation();
+				//apos = a1()->GetPosition();
+				adist = XMVectorGetX(XMVector3LengthEst(XMVectorSubtract(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), a1()->GetEnvironmentPosition())));
+				EnvironmentTree *node = a1()->GetEnvironmentTreeNode();
+				if (node)
+				{
+					apos = Game::ElementPartialLocationToPhysicalPosition(node->GetActualCentrePoint());
+					XMMATRIX world = XMMatrixMultiply(XMMatrixTranslationFromVector(node->GetActualCentrePoint()), cs()->GetZeroPointWorldMatrix());
+					XMVECTOR npos = XMVector3TransformCoord(NULL_VECTOR, world);
+
+					XMFLOAT3 col = (Game::Engine->GetViewFrustrum()->CheckSphere(npos, node->GetBoundingSphereRadius()) ?
+						XMFLOAT3(0.0f, 1.0f, 0.0f) : XMFLOAT3(1.0f, 0.0f, 0.0f));
+					//Game::Engine->GetOverlayRenderer()->RenderCuboid(world, node->GetSizeF().x, node->GetSizeF().y, node->GetSizeF().z, col, 0.75f, 
+					//	XMVector3TransformCoord(NULL_VECTOR, world));			
+				}
+			}
+		}
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player el: %s  |  Actor el: %s  |  Node pos: %s|  Dist = %.2f", 
+			loc.ToString().c_str(), aloc.ToString().c_str(), Vector3ToString(apos).c_str(), adist);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 }

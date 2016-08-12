@@ -71,6 +71,9 @@ void EnvironmentTree::Initialise(EnvironmentTree *parent, const INTVECTOR3 & sta
 	XMStoreFloat3(&m_fsize, m_size);
 	XMStoreFloat3(&m_fcentre, m_centre);
 	
+	// Calculate the ACTUAL centre point within this node
+	m_actualcentre = XMVectorLerp(m_min, m_max, 0.5f);
+
 	// Determine an approximate bounding sphere radius for the node, for more efficient rendering
 	m_bounding_radius = GetElementBoundingSphereRadius(max(max(m_elsize.x, m_elsize.y), m_elsize.z));
 
@@ -84,6 +87,7 @@ void EnvironmentTree::Initialise(EnvironmentTree *parent, const INTVECTOR3 & sta
 	// The node begins with no active children
 	m_active_children.clear();
 	m_active_children.reserve(8U);
+	m_pruningflag = false;
 
 	// Initialise item storage
 	m_objects.clear(); m_terrain.clear();

@@ -183,7 +183,7 @@ namespace Game {
 	const float C_OCTREE_MIN_NODE_SIZE = 250.0f;			// Minimum acceptable octree node size.  Overrides node count limit if required
 	const int C_ENVTREE_MAX_NODE_ITEMS = 12;				// Target total object limit per envtree node; can be overriden if required 
 															// based on current node size
-	const int C_ENVTREE_MIN_NODE_SIZE = 2;					// Minimum acceptanble envtree node size, in elements.  Overrides node count
+	const int C_ENVTREE_MIN_NODE_SIZE = 1;					// Minimum acceptanble envtree node size, in elements.  Overrides node count
 															// limit if required 
 	const INTVECTOR3 C_ENVTREE_MIN_NODE_SIZE_V				// Vectorised form; minimum acceptable node size, in elements
 		= INTVECTOR3(C_ENVTREE_MIN_NODE_SIZE);					

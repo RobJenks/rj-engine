@@ -12,6 +12,9 @@ NavNetwork::NavNetwork(void)
 	// Initialise fields to their default values upon creation
 	m_parent = NULL;
 	OPEN_LIST = 10; CLOSED_LIST = 11;
+	m_nodes = NULL;
+	m_nodecount = 0;
+	m_elementsize = NULL_INTVECTOR3;
 
 	// The network is uninitialised upon creation
 	m_initialised = false;
