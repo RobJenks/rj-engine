@@ -42,6 +42,12 @@ Actor *ActorBase::CreateInstance(void)
 	// Have the actor recalculate its final trait values once all base values and effects have been applied
 	a->RecalculateAttributes();
 
+	// Set the simulation state of the new actor to strategic as a starting point.  This will likely be overridden
+	// in the next update cycle, but setting an active simulation state here means it will be registered on construction
+	// This is taken care of in InitialiseCopiedObject() for other object types, but actors are created from
+	// an ActorBase rather than copied from a template so we have to perform this directly here
+	a->SetSimulationState(iObject::ObjectSimulationState::StrategicSimulation);
+
 	// Return a reference to the new actor
 	return a;
 }
