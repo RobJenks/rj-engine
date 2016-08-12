@@ -323,11 +323,14 @@ void UI_ShipBuilder::PlaceTile(void)
 // Method that is called when the UI controller is deactivated
 void UI_ShipBuilder::Deactivate(void)
 {
-	// Remove any reference to the target ship
-	m_ship = NULL;
-
 	// Revert any editor-specific render data
 	RevertRenderData();
+
+	// TODO: For now, return to section mode since this mode does not use any fade/transparency effects
+	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
+
+	// Remove any reference to the target ship
+	m_ship = NULL;
 
 	// Release the camera to return to normal user control
 	Game::Engine->GetCamera()->ReleaseCamera();
