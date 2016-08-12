@@ -483,29 +483,36 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		Actor *a = new Actor(D::Actors.Get("human_soldier_basic"));
+		Actor *a = D::Actors.Get("human_soldier_basic")->CreateInstance();
 		if (a && cs())
 		{
 			a->MoveIntoEnvironment(cs());
-			
-			unsigned int i = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
-			unsigned int j = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
-			if (i && i >= 0 && i < cs()->GetTilesOfType(D::TileClass::Corridor).size())
+			unsigned int ix = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
+			if (ix >= 0 && ix < cs()->GetTilesOfType(D::TileClass::Corridor).size())
 			{
-				ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor).at(i).value;
-				ComplexShipTile *t2 = cs()->GetTilesOfType(D::TileClass::Corridor).at(j).value;
-				if (t && t2)
-				{
-					XMVECTOR actorpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t->GetWorldSize(), 0.5f));
-					XMVECTOR targetpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t2->GetWorldSize(), 0.5f));
+				ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor).at(ix).value;
+				XMVECTOR actorpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t->GetWorldSize(), 0.5f));
+				a->SetEnvironmentPositionAndOrientation(actorpos, ID_QUATERNION);
 
-					a->SetPositionAndOrientation(actorpos, ID_QUATERNION);
-					a->AssignNewOrder(new Order_ActorTravelToPosition(cs(), a->GetEnvironmentPosition(), targetpos, 2.0f, 1.0f, false));
+				XMVECTOR lastpos = actorpos;
+				Order::ID_TYPE lastorder = 0;
+				for (int i = 0; i < 50; ++i)
+				{
+					unsigned int tx = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
+					ComplexShipTile *ttile = cs()->GetTilesOfType(D::TileClass::Corridor).at(tx).value;
+					if (ttile)
+					{
+						XMVECTOR targetpos = XMVectorAdd(ttile->GetElementPosition(), XMVectorScale(ttile->GetWorldSize(), 0.5f));
+						Order_ActorTravelToPosition *order = new Order_ActorTravelToPosition(cs(), lastpos, targetpos, 6.0f, 6.0f, false);
+						order->Dependency = lastorder;
+						lastorder = a->AssignNewOrder(order);
+						lastpos = targetpos;
+					}
 				}
 			}
-
-			
 		}
+
+		*** TEST ABOVE - ACTOR IS BEING ASSIGNED ORDERS, BUT DOES NOT SEEM TO BE MOVING ***
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
