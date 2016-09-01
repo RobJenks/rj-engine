@@ -209,7 +209,6 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	if		(lm.z > 0.0f) lm_delta.z = -min(drag, lm.z);
 	else if (lm.z < 0.0f) lm_delta.z = min(drag, -lm.z);
 
-
 	// We have now composed all dimensions of the delta local momentum vector; apply it to the object now
 	ApplyLocalLinearForceDirect(XMLoadFloat3(&lm_delta));
 

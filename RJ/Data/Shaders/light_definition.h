@@ -35,22 +35,22 @@ struct LightData
 	float3							Colour;
 
 	// Float4
-	int								Type;					// Accepts a value from LightingManager::LightType
+	int								Type;							// Accepts a value from Light::LightType
 	float							AmbientIntensity;
 	float							DiffuseIntensity;
 	float							SpecularPower;
 
 	// Float4
-	float3							Direction;				// Only relevant for directional lights; calculated otherwise
-	float							Range;
+	float3							Direction;						// Only relevant for directional or spot lights (different usage in each)
+	float							SpotlightInnerHalfAngleCos;		// Only relevant for spot lights.  Inner half-angle where the spotlight intensity is still 1.0
 
 	// Float4
+	float							SpotlightOuterHalfAngleCos;		// Only relevant for spot lights.  Outer half-angle where light intensity drops to 0.0
 	float3							Position;
-	float							_padding1;
 
 	// Float4	
 	AttenuationData					Attenuation;
-	float							_padding2;
+	float							Range;
 
 	// Size % 16 == 0
 

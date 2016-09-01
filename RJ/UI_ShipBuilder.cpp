@@ -10,6 +10,7 @@
 #include "CSCorridorTile.h"
 #include "TileAdjacency.h"
 #include "UserInterface.h"
+#include "Light.h"
 #include "SimpleShip.h"	// DBG
 
 #include "UI_ShipBuilder.h"
@@ -100,7 +101,7 @@ void UI_ShipBuilder::Activate(void)
 void UI_ShipBuilder::InitialiseRenderData(void)
 {
 	// We want to add a	new directional light that will shine 'out' of the camera
-	LightData dirlight = LightData(LightingManagerObject::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
+	LightData dirlight = LightData(Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
 
 	// Check whether we can create a new directional light one, or whether we are at the limit and so 
 	// have to create a new one (which will be reverted on exit)

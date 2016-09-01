@@ -4,6 +4,16 @@
 #include "material_definition.h"
 #include "light_definition.h"
 
+// Returns the cosine of the angle between the two specified vectors, in the plane
+// defined by their mutually-orthogonal normal
+float CosAngleBetweenNormalisedVectors(float3 a, float3 b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	// for unit vectors, |a|==|b|==1 so cos(angle) = (a.b)
+	return dot(a, b);
+}
+
 // Base method to calculate the light value for a basic (e.g. directional) light
 // 'index' is index into the light data array
 // 'material' is the index of the material being illuminated
@@ -57,7 +67,26 @@ float4 CalculatePointLight(unsigned int index, MATERIAL_ID material, float3 worl
 	// Determine light vector and distance to this pixel in world space
 	float3 light_direction = (world_position - Lights[index].Position);
 	float distance = length(light_direction);
-	light_direction = normalize(light_direction);
+	light_direction /= distance; // normalize(light_direction);
+
+	// We may early-exit here if this is a spotlight, and the pixel is not within the defined spotlight cone
+	// If we are within the cone, set the light multiplier to be applied later
+	float multiplier;
+	if (Lights[index].Type == 2 /*Light::LightType::SpotLight*/)
+	{
+		// Get cosine of the angle between the spotlight direction and pixel light vector, both already normalised
+		float cos_theta = CosAngleBetweenNormalisedVectors(Lights[index].Direction, light_direction);
+
+		// Set the light multiplier based on the half-angle from light direction
+		// Multiplier = (cos_angle - cos_outer) / (cos_inner - cos_outer), clamped to [0 1]
+		multiplier = ((cos_theta - Lights[index].SpotlightOuterHalfAngleCos) / (Lights[index].SpotlightInnerHalfAngleCos - Lights[index].SpotlightOuterHalfAngleCos));
+		multiplier = clamp(multiplier, 0.0f, 1.0f);
+	}
+	else
+	{
+		// If this is not a spotlight then do not scale the light value
+		multiplier = 1.0f;
+	}
 
 	// Perform base light calculations
 	float4 colour = CalculateLightBase(index, material, world_position, light_direction, normal);
@@ -67,8 +96,8 @@ float4 CalculatePointLight(unsigned int index, MATERIAL_ID material, float3 worl
 						Lights[index].Attenuation.Linear * distance +
 						Lights[index].Attenuation.Exp * (distance * distance);
 
-	// Return attenuated light value
-	return (colour / attenuation);
+	// Return attenuated and post-multiplied light value
+	return ((colour / attenuation) * multiplier);
 }
 
 

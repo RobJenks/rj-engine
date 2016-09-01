@@ -394,7 +394,15 @@ void Actor::Move(Direction direction, bool run)
 	}
 
 	// Apply this delta vector as a direct change in local object momentum
+	OutputDebugString(concat(">> Actor \"")(m_id)("\" with lm of {")(Vector3ToString(PhysicsState.LocalMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.LocalMomentum)))("] / ")
+		(Vector3ToString(PhysicsState.WorldMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.WorldMomentum)))("]} moving by ")
+		(Vector3ToString(delta))("[")(XMVectorGetX(XMVector3Length(delta)))("], now ").str().c_str());
+
 	ApplyLocalLinearForceDirect(delta);
+
+	OutputDebugString(concat("{")(Vector3ToString(PhysicsState.LocalMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.LocalMomentum)))("] / ")
+		(Vector3ToString(PhysicsState.WorldMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.WorldMomentum)))("\n").str().c_str());
+
 }
 
 

@@ -228,6 +228,7 @@ void EntityAI::ProcessOrderQueue(unsigned int interval)
 			if (order->Dependency != 0 || (order->TimeSinceLastEvaluation < order->EvaluationFrequency)) continue;
 
 			// Execute the order and test the result
+			OutputDebugString(concat("Entity ")(this)(" executing order ")(order->ID)("\n").str().c_str());
 			result = ProcessOrder(order);
 
 			// If we have signalled the order is complete, or invalid, set it to inactive and trigger maintenance of the order queue

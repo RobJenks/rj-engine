@@ -489,6 +489,82 @@ void QuaternionNormalise(const XMFLOAT4 & q, XMFLOAT4 & outQNorm)
 	outQNorm.w = (q.w * one_over_mag);
 }
 
+// Calculate the cosine of the angle between two 3D vectors
+XMVECTOR CalculateCosAngleBetweenVectors(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	return (XMVectorDivide(
+		XMVector3Dot(a, b),
+		XMVectorAdd(XMVector3Length(a), XMVector3Length(b))));
+}
+
+// Calculate the cosine of the angle between two 3D vectors.  Not guarantee to be exact, but is faster
+XMVECTOR CalculateCosAngleBetweenVectorsEst(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	return (XMVectorDivide(
+		XMVector3Dot(a, b),
+		XMVectorAdd(XMVector3LengthEst(a), XMVector3LengthEst(b))));
+}
+
+// Calculate the cosine of the angle between two NORMALISED 3D vectors (result is undefined where !(|a| == 1 && |b| == 1))
+XMVECTOR CalculateCosAngleBetweenNormalisedVectors(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	// for unit vectors, |a|==|b|==1 so cos(angle) = (a.b)
+	return XMVector3Dot(a, b);
+}
+
+// Calculate the angle between two 3D vectors
+XMVECTOR CalculateAngleBetweenVectors(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	//			  angle = acos((a.b) / (|a| * |b|))
+	return (XMVectorACos(
+		XMVectorDivide(
+		XMVector3Dot(a, b),
+		XMVectorAdd(XMVector3Length(a), XMVector3Length(b)))));
+}
+
+// Calculate the angle between two 3D vectors.  Not guarantee to be exact, but is faster
+XMVECTOR CalculateAngleBetweenVectorsEst(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	//			  angle = acos((a.b) / (|a| * |b|))
+	return (XMVectorACosEst(
+		XMVectorDivide(
+		XMVector3Dot(a, b),
+		XMVectorAdd(XMVector3LengthEst(a), XMVector3LengthEst(b)))));
+}
+
+// Calculate the angle between two NORMALISED 3D vectors (result is undefined where !(|a| == 1 && |b| == 1))
+XMVECTOR CalculateAngleBetweenNormalisedVectors(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	// for unit vectors, |a|==|b|==1 so 
+	//		cos(angle) = (a.b)
+	//		angle = acos(a.b)
+	return XMVectorACos(XMVector3Dot(a, b));
+}
+
+// Calculate the angle between two NORMALISED 3D vectors (result is undefined where !(|a| == 1 && |b| == 1))
+// Not guaranteed to be exact, but is faster
+XMVECTOR CalculateAngleBetweenNormalisedVectorsEst(const FXMVECTOR a, const FXMVECTOR b)
+{
+	// dot(a,b) = (a.x*b.x) + (a.y*b.y) + (a.z*b.z) = |a|*|b|*cos(angle)
+	// therefore, cos(angle) = (a.b) / (|a| * |b|)
+	// for unit vectors, |a|==|b|==1 so 
+	//		cos(angle) = (a.b)
+	//		angle = acos(a.b)
+	return XMVectorACosEst(XMVector3Dot(a, b));
+}
+
 // Computes the approximate (but very close) inverse sqrt of a number VERY quickly.
 // Requires use of 32-bit integer within the method for correct bitwise operations, so 
 // set to use _int32 specifically.  Carmack.

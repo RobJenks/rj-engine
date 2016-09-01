@@ -200,7 +200,7 @@ void LightingManagerObject::ClearDirectionalLightData(void)
 void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = LightingManagerObject::LightType::Directional;
+	outLight.Type = Light::LightType::Directional;
 	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
 	outLight.AmbientIntensity = 0.1f;
 	outLight.DiffuseIntensity = 0.1f;
@@ -212,7 +212,7 @@ void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
 void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = LightingManagerObject::LightType::PointLight;
+	outLight.Type = Light::LightType::PointLight;
 	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
 	outLight.AmbientIntensity = 30.0f;
 	outLight.DiffuseIntensity = 26.0f;
@@ -223,6 +223,22 @@ void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 	outLight.Attenuation.Exp = 0.0052f;
 }
 
+// Returns data for a basic, default spot light
+void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
+{
+	// Populate with default values
+	outLight.Type = Light::LightType::SpotLight;
+	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	outLight.AmbientIntensity = 30.0f;
+	outLight.DiffuseIntensity = 26.0f;
+	outLight.SpecularPower = 0.5f;
+	outLight.Range = 500.0f;
+	outLight.Attenuation.Constant = 1.0f;
+	outLight.Attenuation.Linear = 0.012f;
+	outLight.Attenuation.Exp = 0.0052f;
+	outLight.SpotlightInnerHalfAngleCos = std::cosf(PIBY180 * 30.0f);
+	outLight.SpotlightOuterHalfAngleCos = std::cosf(PIBY180 * 35.0f);
+}
 
 bool LightingManagerObject::_LightSourceEntryPriorityComparator::operator() (const LightSourceEntry & lhs, const LightSourceEntry & rhs) const
 {

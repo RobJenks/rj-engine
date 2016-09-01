@@ -249,6 +249,22 @@ CMPINLINE float CalculateQuaternionRotationAngle(const FXMVECTOR q)
 	return (2.0f * atan2f(length, XMVectorGetW(q)));
 }
 
+// Calculate the cosine of the angle between two 3D vectors
+XMVECTOR CalculateCosAngleBetweenVectors(const FXMVECTOR a, const FXMVECTOR b);
+XMVECTOR CalculateCosAngleBetweenVectorsEst(const FXMVECTOR a, const FXMVECTOR b);
+
+// Calculate the cosine of the angle between two NORMALISED 3D vectors (result is undefined where !(|a| == 1 && |b| == 1))
+XMVECTOR CalculateCosAngleBetweenNormalisedVectors(const FXMVECTOR a, const FXMVECTOR b);
+
+// Calculate the angle between two 3D vectors
+XMVECTOR CalculateAngleBetweenVectors(const FXMVECTOR a, const FXMVECTOR b);
+XMVECTOR CalculateAngleBetweenVectorsEst(const FXMVECTOR a, const FXMVECTOR b);
+
+// Calculate the angle between two NORMALISED 3D vectors (result is undefined where !(|a| == 1 && |b| == 1))
+XMVECTOR CalculateAngleBetweenNormalisedVectors(const FXMVECTOR a, const FXMVECTOR b);
+XMVECTOR CalculateAngleBetweenNormalisedVectorsEst(const FXMVECTOR a, const FXMVECTOR b);
+
+
 //CMPINLINE void RotateVectorByQuaternion(const D3DXVECTOR3 & v, const D3DXQUATERNION & q, D3DXVECTOR3 & outVPrime)
 //{
 //	// Extract the vector part of the quaternion, which will be used separately from the scalar (w) part

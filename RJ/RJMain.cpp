@@ -491,6 +491,7 @@ void RJMain::ProcessKeyboardInput(void)
 			if (ix >= 0 && ix < cs()->GetTilesOfType(D::TileClass::Corridor).size())
 			{
 				ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor).at(ix).value;
+				t = cs()->GetElement(5, 4, 0)->GetTile();
 				XMVECTOR actorpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t->GetWorldSize(), 0.5f));
 				a->SetEnvironmentPositionAndOrientation(actorpos, ID_QUATERNION);
 
@@ -503,16 +504,15 @@ void RJMain::ProcessKeyboardInput(void)
 					if (ttile)
 					{
 						XMVECTOR targetpos = XMVectorAdd(ttile->GetElementPosition(), XMVectorScale(ttile->GetWorldSize(), 0.5f));
-						Order_ActorTravelToPosition *order = new Order_ActorTravelToPosition(cs(), lastpos, targetpos, 6.0f, 6.0f, false);
+						Order_ActorTravelToPosition *order = new Order_ActorTravelToPosition(cs(), lastpos, targetpos, 6.0f, 6.0f, true);
 						order->Dependency = lastorder;
 						lastorder = a->AssignNewOrder(order);
 						lastpos = targetpos;
 					}
 				}
 			}
+			a1 = a;
 		}
-
-		*** TEST ABOVE - ACTOR IS BEING ASSIGNED ORDERS, BUT DOES NOT SEEM TO BE MOVING ***
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
@@ -2045,13 +2045,15 @@ void RJMain::__CreateDebugScenario(void)
 	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
 
 	Light l;
-	Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
+	//Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
+	Game::Engine->LightingManager.GetDefaultSpotLightData(l.Data);
 	LightSource *ls = new LightSource();
+	ls->SetModel(Model::GetModel("unit_cone_model"));
 	ls->SetLight(l);
 	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
 	Game::RegisterObject(ls);
 	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 100.0f), ID_QUATERNION);
+	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 10.0f), ID_QUATERNION);
 
 
 	/*DynamicTileSet::DynamicTileRequirements req;
@@ -2153,35 +2155,12 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
-	{			
-		INTVECTOR3 loc = INTVECTOR3(-1), aloc = INTVECTOR3(-1); XMVECTOR apos = XMVectorReplicate(-1.0f); float adist = -1.0f;
-		if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot && Game::CurrentPlayer->GetActor() && cs())
-		{
-			loc = Game::CurrentPlayer->GetActor()->GetElementLocation();
-			if (a1())
-			{
-				aloc = a1()->GetElementLocation();
-				//apos = a1()->GetPosition();
-				adist = XMVectorGetX(XMVector3LengthEst(XMVectorSubtract(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), a1()->GetEnvironmentPosition())));
-				EnvironmentTree *node = a1()->GetEnvironmentTreeNode();
-				if (node)
-				{
-					apos = Game::ElementPartialLocationToPhysicalPosition(node->GetActualCentrePoint());
-					XMMATRIX world = XMMatrixMultiply(XMMatrixTranslationFromVector(node->GetActualCentrePoint()), cs()->GetZeroPointWorldMatrix());
-					XMVECTOR npos = XMVector3TransformCoord(NULL_VECTOR, world);
-
-					XMFLOAT3 col = (Game::Engine->GetViewFrustrum()->CheckSphere(npos, node->GetBoundingSphereRadius()) ?
-						XMFLOAT3(0.0f, 1.0f, 0.0f) : XMFLOAT3(1.0f, 0.0f, 0.0f));
-					//Game::Engine->GetOverlayRenderer()->RenderCuboid(world, node->GetSizeF().x, node->GetSizeF().y, node->GetSizeF().z, col, 0.75f, 
-					//	XMVector3TransformCoord(NULL_VECTOR, world));			
-				}
-			}
-		}
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Player el: %s  |  Actor el: %s  |  Node pos: %s|  Dist = %.2f", 
-			loc.ToString().c_str(), aloc.ToString().c_str(), Vector3ToString(apos).c_str(), adist);
+	{	
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
+
+
 }
 
 

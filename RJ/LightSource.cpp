@@ -44,7 +44,7 @@ void LightSource::PerformPostSimulationUpdate(void)
 	m_light.Data.Position = m_positionf;
 
 	// Update light direction based on orientation of the light source object
-	XMVECTOR DirAdj = XMVector3Rotate(XMLoadFloat3(&m_light.Data.Direction), m_orientation);
+	XMVECTOR DirAdj = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
 	XMStoreFloat3(&m_light.Data.Direction, DirAdj);
 }
 

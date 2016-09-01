@@ -31,9 +31,6 @@ public:
 	static const unsigned int						LIGHT_LIMIT = C_LIGHT_LIMIT;
 	static const unsigned int						TOTAL_LIGHT_LIMIT = C_TOTAL_LIGHT_LIMIT;
 
-	// Enumeration of possible light types
-	enum LightType						{ Directional = 0, PointLight };
-
 	// Default constructor
 	LightingManagerObject(void);
 
@@ -86,6 +83,9 @@ public:
 
 	// Returns data for a basic, default point light
 	void								GetDefaultPointLightData(LightData & outLight);
+
+	// Returns data for a basic, default spot light
+	void								GetDefaultSpotLightData(LightData & outLight);
 
 	// Default destructor
 	~LightingManagerObject(void);
