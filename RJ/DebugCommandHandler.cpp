@@ -5,11 +5,22 @@
 #include "GameObjects.h"
 #include "ObjectReference.h"
 #include "Player.h"
-#include "Ship.h"
-#include "SimpleShip.h"
 #include "GameUniverse.h"
 #include "SpaceSystem.h"
 #include "Order_MoveToPosition.h"
+
+// Debug command handler needs to include the full object hierarchy to support per-object command handling
+#include "Actor.h"
+#include "CapitalShipPerimeterBeacon.h"
+#include "ComplexShip.h"
+#include "ComplexShipSection.h"
+#include "LightSource.h"
+#include "SpaceProjectile.h"
+#include "Ship.h"
+#include "SimpleShip.h"
+#include "SpaceEmitter.h"
+
+
 
 #include "DebugCommandHandler.h"
 
@@ -23,8 +34,45 @@ DebugCommandHandler::DebugCommandHandler(void)
 // Virtual inherited method to accept a command from the console
 bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 {
+	/* Execute debug command on a specific object */
+	if (command.InputCommand == "obj")
+	{
+		iObject *object = NULL;
+		if (command.Parameter(0) == "") {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+				concat("Object not specified").str()); return true;
+		}
+		if (command.Parameter(1) == "") {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCommandDoesNotSpecifyFunction,
+				concat("Object debug function not specified").str()); return true;
+		}
+
+		// First attempt to get the object using this as an instance code
+		object = Game::GetObjectByInstanceCode(command.Parameter(0));
+		if (!object) {
+
+			// Also try to use this as an ID, if numeric and if it can be found
+			int id = atoi(command.Parameter(0).c_str());
+			object = Game::GetObjectByID(id);
+			if (!object) {
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+					concat("Object \"")(command.Parameter(0))("\" does not exist").str()); return true;
+			}
+		}
+
+		ExecuteDebugCommandOnObject(object, command);
+		if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
+		{
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCannotAcceptConsoleComand,
+				concat("Object \"")(command.Parameter(0))("\" cannot execute command \"")(command.Parameter(1))("\"").str());
+		}
+		
+		// We have handled this command, whether or not it was successful
+		return true;
+	}
+
 	/* Change player environment to a system */
-	if (command.InputCommand == "enter_system_env")
+	else if (command.InputCommand == "enter_system_env")
 	{
 		SpaceSystem *system = Game::Universe->GetSystem(command.Parameter(0));
 		if (!system) { command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::SystemDoesNotExist,
@@ -116,6 +164,33 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 
 	// We did not recognise the command
 	return false;
+}
+
+
+// Executes a debug command on the specified object.  Will locate the appropriate subclass to begin
+// passing the command down from.  Ugly, but avoids adding another function to the iObject vtable
+void DebugCommandHandler::ExecuteDebugCommandOnObject(iObject *object, GameConsoleCommand & command)
+{
+	// Parameter check
+	if (!object) return;
+
+	// Manually determine the subclass that we want to use (avoiding the vptr)
+	switch (object->GetObjectType())
+	{
+		case iObject::ObjectType::ActorObject:							((Actor*)object)->ProcessDebugCommand(command);							return;
+		case iObject::ObjectType::CapitalShipPerimeterBeaconObject:		((CapitalShipPerimeterBeacon*)object)->ProcessDebugCommand(command);	return;
+		case iObject::ObjectType::ComplexShipObject:					((ComplexShip*)object)->ProcessDebugCommand(command);					return;
+		case iObject::ObjectType::ComplexShipSectionObject:				((ComplexShipSection*)object)->ProcessDebugCommand(command);			return;
+		case iObject::ObjectType::LightSourceObject:					((LightSource*)object)->ProcessDebugCommand(command);					return;
+		case iObject::ObjectType::ProjectileObject:						((SpaceProjectile*)object)->ProcessDebugCommand(command);				return;
+		case iObject::ObjectType::ShipObject:							((Ship*)object)->ProcessDebugCommand(command);							return;
+		case iObject::ObjectType::SimpleShipObject:						((SimpleShip*)object)->ProcessDebugCommand(command);					return;
+		case iObject::ObjectType::SpaceEmitterObject:					((SpaceEmitter*)object)->ProcessDebugCommand(command);					return;
+	}
+
+	// This object type is not currently supported; return an error
+	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectTypeCannotAcceptDebugCommands,
+		concat("Object of type \"")(object->GetObjectType())("\" cannot accept debug commands").str());
 }
 
 // Debug spawn a set of ships near the player

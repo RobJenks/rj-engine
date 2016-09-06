@@ -156,10 +156,16 @@ public:
 		AddLocalMomentum(localforcevector);
 	}
 
+	// Output debug data on the object.  Acts from this point in the hierarchy downwards
+	//std::string								DebugOutput(void) const;
+
 protected:
 
 	// Mass and precalculated inverse mass of the object
 	float									m_mass, m_invmass;				
+
+	// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
+	//void									DebugOutput(std::ostringstream &ss) const;
 
 };
 

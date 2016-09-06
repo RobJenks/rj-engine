@@ -73,6 +73,10 @@ struct GameConsoleCommand
 		else													return InputParameters[index];
 	}
 
+	// Return a parameter as a different type, if possible
+	float ParameterAsFloat(int index);
+	int ParameterAsInt(int index);
+
 	// Duplicates the command and all input parameters.  New command will always be 
 	// created in not-executed state without any output results
 	void CopyCommand(GameConsoleCommand & outNewCommand) const

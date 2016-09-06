@@ -708,5 +708,19 @@ std::string 					TranslateVisibilityModeToString(const VisibilityTestingModeType
 #	define DBG_OUTPUT_SIZE(x) { OutputDebugString(concat("Sizeof("#x") == ")(sizeof(x))("\n").str().c_str()); }
 #endif
 
+#define DBGVAL(x) ss << name << ": " << x << ", "
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, int x) { DBGVAL(x); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, float x) { DBGVAL(x); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, double x) { DBGVAL(x); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, char x) { DBGVAL(x); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const char *x) { DBGVAL(x); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const XMFLOAT2 & x) { DBGVAL("[" << x.x << ", " << x.y << "]"); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const XMFLOAT3 & x) { DBGVAL("[" << x.x << ", " << x.y << ", " << x.z << "]"); }
+CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const FXMVECTOR x) 
+{ 
+	XMFLOAT4 f; XMStoreFloat4(&f, x);
+	DBGVAL("[" << f.x << ", " << f.y << ", " << f.z << ", " << f.w << "]"); 
+}
+
 
 #endif

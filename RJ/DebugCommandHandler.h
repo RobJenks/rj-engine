@@ -19,6 +19,10 @@ public:
 	// Virtual inherited method to accept a command from the console
 	bool					ProcessConsoleCommand(GameConsoleCommand & command);
 
+	// Executes a debug command on the specified object.  Will locate the appropriate subclass to begin
+	// passing the command down from.  Ugly, but avoids adding another function to the iObject vtable
+	void					ExecuteDebugCommandOnObject(iObject *object, GameConsoleCommand & command);
+
 	// Default destructor
 	~DebugCommandHandler(void);
 

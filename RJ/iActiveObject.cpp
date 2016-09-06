@@ -27,6 +27,32 @@ void iActiveObject::InitialiseCopiedObject(iActiveObject *source)
 	iObject::InitialiseCopiedObject(source);
 }
 
+
+// Output debug data on the object.  Acts from this point in the hierarchy downwards
+/*std::string iActiveObject::DebugOutput(void) const
+{
+	std::ostringstream ss;
+	DebugOutput(ss);
+	return ss.str();
+}
+
+// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
+void iActiveObject::DebugOutput(std::ostringstream &ss) const
+{
+	// Stream direct class data
+	ss << "{ ";
+	DbgValue(ss, "Mass", m_mass);
+	DbgValue(ss, "InvMass", m_mass);
+	DbgValue(ss, "Mass", m_mass);
+
+
+
+	// Base classes
+	iObject::DebugOutput(ss);
+	ss << " }";
+}*/
+
+
 // Default destructor
 iActiveObject::~iActiveObject(void)
 {

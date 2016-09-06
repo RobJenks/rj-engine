@@ -19,6 +19,7 @@
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
 #include "Faction.h"
+#include "GameConsoleCommand.h"
 class Model;
 class ArticulatedModel;
 struct BasicProjectile;
@@ -424,6 +425,17 @@ public:
 		return iObject::SimStateRelations[state1][state2];
 	}
 
+	// Output debug data on the object.  Acts from this point in the hierarchy downwards
+	//std::string									DebugOutput(void) const;
+
+	// Convenience macros used to invoke debug functions on the object
+#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); bool executed = false; if (false) { } 
+#	define REGISTER_DEBUG_FN(fn_name, ...)		else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__)); executed = true; } 
+
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void										ProcessDebugCommand(GameConsoleCommand & command);
+
 	// Destructor
 	virtual ~iObject(void) = 0;
 
@@ -439,6 +451,9 @@ protected:
 	// Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
 	// updates to the central data collections.  Returns a value indicating whether the code could be successfully set
 	bool								SetInstanceCode(const std::string & instance_code);
+
+	// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
+	//void								DebugOutput(std::ostringstream &ss) const;
 
 	// Threshold (number of changes) for internally renormalising object quaternions, depending on state
 	static const int					ORIENT_NORMALISE_THRESHOLD_FULLSIM = 100;

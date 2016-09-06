@@ -588,6 +588,9 @@ namespace ErrorCodes {
 	const Result		NoSpatialPartitioningTreeToRender				= 5605;
 	const Result		NoValidEnvironmentSpecified						= 5606;
 	const Result		RequiredCommandParametersNotProvided			= 5607;
+	const Result		ObjectCannotAcceptConsoleComand					= 5608;
+	const Result		ObjectCommandDoesNotSpecifyFunction				= 5609;
+	const Result		ObjectTypeCannotAcceptDebugCommands				= 5610;
 
 	// Turret simulation / controller errors							(6000-6099)
 	const Result		TurretModelDoesNotContainRequiredModelTags		= 6000;

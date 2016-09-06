@@ -8,6 +8,7 @@
 #include "Faction.h"
 #include "BasicProjectile.h"
 #include "BasicProjectileDefinition.h"
+#include "GameConsoleCommand.h"
 
 #include "iObject.h"
 
@@ -606,6 +607,41 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::
 	ApplyDamage(proj.Definition->GetProjectileDamage());
 }
 
+// Output debug data on the object.  Acts from this point in the hierarchy downwards
+/*std::string iObject::DebugOutput(void) const
+{
+	
+}
+
+// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
+void iObject::DebugOutput(std::ostringstream &ss) const
+{
+
+}*/
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void iObject::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+	REGISTER_DEBUG_FN(SetInstanceCode, command.Parameter(2))
+	REGISTER_DEBUG_FN(SetPosition, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
+	
+	// Return success if the command was successfully executed
+	if (executed)
+	{
+		command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str());
+		return;
+	}
+
+	// Pass processing back to any base classes, if applicable, since we could not execute the function
+	/* No base classes for iObject; processing stops here */
+
+}
 
 // Static method to translate from an object simulation state to its string representation
 std::string iObject::TranslateSimulationStateToString(iObject::ObjectSimulationState state)
