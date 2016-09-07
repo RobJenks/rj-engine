@@ -630,7 +630,8 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
 	REGISTER_DEBUG_FN(SetInstanceCode, command.Parameter(2))
 	REGISTER_DEBUG_FN(SetPosition, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
-	
+	REGISTER_DEBUG_ACCESSOR_FN(GetPosition)
+
 	// Return success if the command was successfully executed
 	if (executed)
 	{

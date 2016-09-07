@@ -84,6 +84,7 @@ struct INTVECTOR2
 	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
 
 	bool IsZeroVector(void) { return (x == 0 && y == 0); }
+	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << "]"; return s.str(); }
 
 	INTVECTOR2& operator +=(const INTVECTOR2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
 	INTVECTOR2& operator -=(const INTVECTOR2& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }
@@ -139,6 +140,7 @@ inline INTVECTOR3 operator *(INTVECTOR3 lhs, const int scalar) { lhs *= scalar; 
 inline INTVECTOR3 operator *(INTVECTOR3 lhs, const float scalar) { lhs *= scalar; return lhs; }
 inline INTVECTOR3 operator /(INTVECTOR3 lhs, const int scalar) { lhs /= scalar; return lhs; }
 inline INTVECTOR3 operator /(INTVECTOR3 lhs, const float scalar) { lhs /= scalar; return lhs; }
+
 
 void clower(char *);			// Converts a string to lowercase in-place
 void cupper(char *);			// Converts a string to uppercase in-place
@@ -415,8 +417,10 @@ void StreamToDebugOutput(T obj)
 	OutputDebugString(s.str().c_str());
 }
 
-CMPINLINE string IntVectorToString(INTVECTOR2 *v) { return (concat("(")(v->x)(", ")(v->y)(")").str()); }
-CMPINLINE string IntVectorToString(INTVECTOR3 *v) { return (concat("(")(v->x)(", ")(v->y)(", ")(v->z)(")").str()); }
+CMPINLINE string IntVectorToString(INTVECTOR2 *v) { return v->ToString(); }
+CMPINLINE string IntVectorToString(INTVECTOR3 *v) { return v->ToString(); }
+CMPINLINE string IntVectorToString(INTVECTOR2 & v) { return v.ToString(); }
+CMPINLINE string IntVectorToString(INTVECTOR3 & v) { return v.ToString(); }
 CMPINLINE string Vector2ToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
 CMPINLINE string Vector3ToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
 CMPINLINE string Vector4ToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
@@ -428,6 +432,16 @@ CMPINLINE string QuaternionToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFlo
 CMPINLINE string VectorToString(const XMFLOAT2 & v) { return Vector2ToString(v); }
 CMPINLINE string VectorToString(const XMFLOAT3 & v) { return Vector3ToString(v); }
 CMPINLINE string VectorToString(const XMFLOAT4 & v) { return Vector4ToString(v); }
+
+// Generic 'ToString' method that can be specialised as required
+template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }
+template <> CMPINLINE std::string				StringValue<XMFLOAT2>(XMFLOAT2 value) { return VectorToString(value); }
+template <> CMPINLINE std::string				StringValue<XMFLOAT3>(XMFLOAT3 value) { return VectorToString(value); }
+template <> CMPINLINE std::string				StringValue<XMFLOAT4>(XMFLOAT4 value) { return VectorToString(value); }
+template <> CMPINLINE std::string				StringValue<XMVECTOR>(XMVECTOR value) { return Vector4ToString(value); }
+template <> CMPINLINE std::string				StringValue<INTVECTOR2>(INTVECTOR2 value) { return IntVectorToString(value); }
+template <> CMPINLINE std::string				StringValue<INTVECTOR3>(INTVECTOR3 value) { return IntVectorToString(value); }
+
 
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize);
 
