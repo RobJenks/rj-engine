@@ -433,6 +433,12 @@ CMPINLINE string VectorToString(const XMFLOAT2 & v) { return Vector2ToString(v);
 CMPINLINE string VectorToString(const XMFLOAT3 & v) { return Vector3ToString(v); }
 CMPINLINE string VectorToString(const XMFLOAT4 & v) { return Vector4ToString(v); }
 
+void MatrixToCharStream(const XMFLOAT4X4 *m, char *out);
+void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
+std::string MatrixToString(const XMFLOAT4X4 & m);
+CMPINLINE std::string MatrixToString(const XMMATRIX & m) { XMFLOAT4X4 mf; XMStoreFloat4x4(&mf, m); return MatrixToString(mf); }
+
+
 // Generic 'ToString' method that can be specialised as required
 template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }
 template <> CMPINLINE std::string				StringValue<XMFLOAT2>(XMFLOAT2 value) { return VectorToString(value); }
@@ -441,12 +447,11 @@ template <> CMPINLINE std::string				StringValue<XMFLOAT4>(XMFLOAT4 value) { ret
 template <> CMPINLINE std::string				StringValue<XMVECTOR>(XMVECTOR value) { return Vector4ToString(value); }
 template <> CMPINLINE std::string				StringValue<INTVECTOR2>(INTVECTOR2 value) { return IntVectorToString(value); }
 template <> CMPINLINE std::string				StringValue<INTVECTOR3>(INTVECTOR3 value) { return IntVectorToString(value); }
+template <> CMPINLINE std::string				StringValue<XMMATRIX>(XMMATRIX value) { return MatrixToString(value); }
+template <> CMPINLINE std::string				StringValue<const XMMATRIX &>(const XMMATRIX & value) { return MatrixToString(value); }
 
 
 bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 areasize);
-
-void MatrixToCharStream(const XMFLOAT4X4 *m, char *out);
-void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
 
 XMMATRIX RotationMatrixFromBasisVectors(XMFLOAT3(&bases)[3]);
 void RotationMatrixFromBasisVectors(XMFLOAT3(&bases)[3], XMFLOAT4X4 & outMatrix);

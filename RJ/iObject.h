@@ -134,6 +134,8 @@ public:
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
+	CMPINLINE void							SetOrientation(const XMFLOAT4 & orient)			{ SetOrientation(XMLoadFloat4(&orient)); }
+
 
 	CMPINLINE void							SetPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
 	{
@@ -160,6 +162,8 @@ public:
 		SetOrientation(XMVectorAdd(m_orientation, dq));
 	}
 
+	CMPINLINE void							ChangeOrientation(const XMFLOAT4 & rot)			{ ChangeOrientation(XMLoadFloat4(&rot)); }
+	CMPINLINE void							AddDeltaOrientation(const XMFLOAT4 & dq)		{ AddDeltaOrientation(XMLoadFloat4(&dq)); }
 
 	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
 	CMPINLINE const XMMATRIX				GetOrientationMatrix(void) const		{ return m_orientationmatrix; }
@@ -252,6 +256,7 @@ public:
 
 	// The size of this object in world coordinates
 	void									SetSize(const FXMVECTOR size);
+	CMPINLINE void							SetSize(const XMFLOAT3 & size)		{ SetSize(XMLoadFloat3(&size)); }
 	CMPINLINE XMVECTOR						GetSize(void) const					{ return m_size; }
 	CMPINLINE const XMFLOAT3 &				GetSizeF(void) const				{ return m_sizef; }
 	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }
@@ -429,7 +434,7 @@ public:
 	//std::string									DebugOutput(void) const;
 
 	// Convenience macros used to invoke debug functions on the object
-#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); bool executed = false; if (false) { } 
+#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); if (false) { } 
 #	define REGISTER_DEBUG_FN(fn_name, ...)										\
 			else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
 			command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str()); } 

@@ -35,6 +35,20 @@ int GameConsoleCommand::ParameterAsInt(int index)
 	return 0;
 }
 
+
+// Return a parameter as a different type, if possible
+bool GameConsoleCommand::ParameterAsBool(int index)
+{
+	std::string s = Parameter(index);
+	if (s != NullString)
+	{
+		StrLowerC(s);
+		return (s == "true");
+	}
+
+	return false;
+}
+
 // Static method that translates a status code to a string
 std::string GameConsoleCommand::StatusToString(GameConsoleCommand::CommandResult status)
 {

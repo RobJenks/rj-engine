@@ -619,31 +619,6 @@ void iObject::DebugOutput(std::ostringstream &ss) const
 
 }*/
 
-// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
-// Updates the command with its result if the command can be processed at this level
-void iObject::ProcessDebugCommand(GameConsoleCommand & command)
-{
-	// Debug functions are largely handled via macros above for convenience
-	INIT_DEBUG_FN_TESTING(command)
-
-	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
-	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
-	REGISTER_DEBUG_FN(SetInstanceCode, command.Parameter(2))
-	REGISTER_DEBUG_FN(SetPosition, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
-	REGISTER_DEBUG_ACCESSOR_FN(GetPosition)
-
-	// Return success if the command was successfully executed
-	if (executed)
-	{
-		command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str());
-		return;
-	}
-
-	// Pass processing back to any base classes, if applicable, since we could not execute the function
-	/* No base classes for iObject; processing stops here */
-
-}
-
 // Static method to translate from an object simulation state to its string representation
 std::string iObject::TranslateSimulationStateToString(iObject::ObjectSimulationState state)
 {
@@ -709,5 +684,123 @@ std::string iObject::TranslateObjectTypeToString(iObject::ObjectType type)
 		default:													return "(Unknown)";
 	}
 }
+
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void iObject::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetID)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCode)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInstanceCode)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInstanceCodeHash)
+	REGISTER_DEBUG_ACCESSOR_FN(OverrideInstanceCode, command.Parameter(2))		// Mutator, but returns a value that we want to display
+	REGISTER_DEBUG_ACCESSOR_FN(TestForOverrideOfInstanceCode)
+	REGISTER_DEBUG_ACCESSOR_FN(GetName)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCodeHash)
+	REGISTER_DEBUG_ACCESSOR_FN(GetObjectType)
+	REGISTER_DEBUG_ACCESSOR_FN(GetObjectClass)
+	REGISTER_DEBUG_ACCESSOR_FN(IsEnvironment)
+	REGISTER_DEBUG_ACCESSOR_FN(IsShip)
+	REGISTER_DEBUG_ACCESSOR_FN(IsStandardObject)
+	REGISTER_DEBUG_ACCESSOR_FN(GetPosition)
+	REGISTER_DEBUG_ACCESSOR_FN(GetOrientation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetOrientationMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseOrientationMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(GetWorldMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseWorldMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(IsPostSimulationUpdateRequired)
+	REGISTER_DEBUG_ACCESSOR_FN(SimulationState)
+	REGISTER_DEBUG_ACCESSOR_FN(RequestedSimulationState)
+	REGISTER_DEBUG_ACCESSOR_FN(SimulationStateChangePending)
+	REGISTER_DEBUG_ACCESSOR_FN(IsVisible)
+	REGISTER_DEBUG_ACCESSOR_FN(IsSimulationHub)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSize)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSizeRatio)
+	REGISTER_DEBUG_ACCESSOR_FN(MostAppropriateBoundingVolumeType)
+	REGISTER_DEBUG_ACCESSOR_FN(GetFaction)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCentreOffsetTranslation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionMode)
+	REGISTER_DEBUG_ACCESSOR_FN(GetColliderType)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionSphereRadius)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionSphereRadiusSq)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionSphereMarginRadius)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSpatialTreeNode)
+	REGISTER_DEBUG_ACCESSOR_FN(GetVisibilityTestingMode)
+	REGISTER_DEBUG_ACCESSOR_FN(HaveParentAttachment)
+	REGISTER_DEBUG_ACCESSOR_FN(GetChildObjectCount)
+	REGISTER_DEBUG_ACCESSOR_FN(HasChildAttachments)
+	REGISTER_DEBUG_ACCESSOR_FN(Simulated)
+	REGISTER_DEBUG_ACCESSOR_FN(CanSimulateMovement)
+	REGISTER_DEBUG_ACCESSOR_FN(PositionUpdated)
+	REGISTER_DEBUG_ACCESSOR_FN(SpatialDataChanged)
+	REGISTER_DEBUG_ACCESSOR_FN(HasCollisionExclusions)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionExclusionCount)
+	REGISTER_DEBUG_ACCESSOR_FN(IsCurrentlyVisible)
+	REGISTER_DEBUG_ACCESSOR_FN(GetFastMoverThresholdSq)
+	REGISTER_DEBUG_ACCESSOR_FN(CollisionExcludedWithObject, (Game::ID_TYPE)command.ParameterAsInt(2))
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(AssignNewUniqueID)
+	REGISTER_DEBUG_FN(SetName, command.Parameter(2))
+	REGISTER_DEBUG_FN(SetCode, command.Parameter(2))
+	REGISTER_DEBUG_FN(SetInstanceCode, command.Parameter(2))
+	REGISTER_DEBUG_FN(DetermineInstanceCode)
+	REGISTER_DEBUG_FN(SetIsStandardObject, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(SetPosition, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
+	REGISTER_DEBUG_FN(SetOrientation, XMFLOAT4(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(ChangeOrientation, XMFLOAT4(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(AddDeltaOrientation, XMFLOAT4(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(DeriveNewWorldMatrix)
+	REGISTER_DEBUG_FN(RefreshPositionImmediate)
+	REGISTER_DEBUG_FN(Simulate)
+	REGISTER_DEBUG_FN(SimulateObject)
+	REGISTER_DEBUG_FN(UpdateSpatialPartitioningTreePosition)
+	REGISTER_DEBUG_FN(PerformPostSimulationUpdate)
+	REGISTER_DEBUG_FN(PerformRenderUpdate)
+	REGISTER_DEBUG_FN(SetSimulationState, (ObjectSimulationState)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetIsVisible, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(SetAsSimulationHub)
+	REGISTER_DEBUG_FN(RemoveSimulationHub)
+	REGISTER_DEBUG_FN(SetSize, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
+	REGISTER_DEBUG_FN(SetFaction, (Faction::F_ID)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetCollisionMode, (Game::CollisionMode)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetColliderType, (Game::ColliderType)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetCollisionSphereRadius, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(SetCollisionSphereRadiusSq, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(ForceOBBUpdate)
+	REGISTER_DEBUG_FN(SetVisibilityTestingMode, (VisibilityTestingModeType)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(UpdatePositionOfChildObjects)
+	REGISTER_DEBUG_FN(ReleaseAllAttachments)
+	REGISTER_DEBUG_FN(SetSimulatedFlag, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(SetPositionUpdated, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(FlagSpatialDataChange)
+	REGISTER_DEBUG_FN(ClearSpatialChangeFlag)
+	REGISTER_DEBUG_FN(AddCollisionExclusion, (Game::ID_TYPE)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(RemoveCollisionExclusion, (Game::ID_TYPE)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(MarkAsVisible)
+	REGISTER_DEBUG_FN(RemoveCurrentVisibilityFlag)
+	REGISTER_DEBUG_FN(RenormaliseSpatialData)
+	REGISTER_DEBUG_FN(ResetSimulationFlags)
+
+
+	// Return now if the command was executed by this object 
+	if (command.OutputStatus != GameConsoleCommand::CommandResult::NotExecuted)
+	{
+		return;
+	}
+
+	// Pass processing back to any base classes, if applicable, since we could not execute the function
+	/* No base classes for iObject; processing stops here */
+
+}
+
 
 

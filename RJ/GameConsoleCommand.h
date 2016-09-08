@@ -76,6 +76,7 @@ struct GameConsoleCommand
 	// Return a parameter as a different type, if possible
 	float ParameterAsFloat(int index);
 	int ParameterAsInt(int index);
+	bool ParameterAsBool(int index);
 
 	// Duplicates the command and all input parameters.  New command will always be 
 	// created in not-executed state without any output results

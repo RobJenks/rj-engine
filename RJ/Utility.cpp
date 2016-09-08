@@ -139,6 +139,19 @@ void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out)
 		m->_11, m->_12, m->_13, m->_14, m->_21, m->_22, m->_23, m->_24, m->_31, m->_32, m->_33, m->_34, m->_41, m->_42, m->_43, m->_44); 
 }
 
+std::string MatrixToString(const XMFLOAT4X4 & m)
+{
+	char *c = new char[1024];
+	if (!c) return "";
+
+	MatrixToCharStream(&m, c);
+
+	std::string s = std::string(c);
+
+	delete[] c;
+	return s;
+}
+
 XMMATRIX RotationMatrixFromBasisVectors(XMFLOAT3 (&bases)[3])
 {
 	return XMMatrixSet(	bases[0].x, bases[0].y, bases[0].z, 0.0f,
