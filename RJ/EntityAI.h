@@ -7,6 +7,7 @@
 #include "ErrorCodes.h"
 #include "EntityAIStates.h"
 #include "Order.h"
+#include "GameConsoleCommand.h"
 using namespace std;
 
 // This class does not have any special alignment requirements
@@ -101,6 +102,10 @@ public:
 
 	// Returns a string representation of the entity's current order queue, for debug purposes
 	std::string								GetDebugOrderQueueString(void) const;
+
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void									ProcessDebugCommand(GameConsoleCommand & command);
 
 	// Constructor / destructor
 	EntityAI(void);

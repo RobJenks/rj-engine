@@ -1241,3 +1241,41 @@ string ComplexShip::DetermineXMLDataFullFilename(void)
 	return concat(DetermineXMLDataPath())("\\")(DetermineXMLDataFilename()).str();
 }
 
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void ComplexShip::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetSection, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetSectionCount)
+	REGISTER_DEBUG_ACCESSOR_FN(GetShipSectionContainingElement, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(GetShipMinimumBounds)
+	REGISTER_DEBUG_ACCESSOR_FN(GetShipMaximumBounds)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSDOffset)
+	REGISTER_DEBUG_ACCESSOR_FN(InteriorShouldAlwaysBeRendered)
+	REGISTER_DEBUG_ACCESSOR_FN(DebugOutputPerimeterBeacons)
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(BuildHardpointCollection)
+	REGISTER_DEBUG_FN(FadeToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
+	REGISTER_DEBUG_FN(SuspendUpdates)
+	REGISTER_DEBUG_FN(ResumeUpdates)
+	REGISTER_DEBUG_FN(GenerateCapitalShipPerimeterBeacons)
+	REGISTER_DEBUG_FN(SimulateObject)
+	REGISTER_DEBUG_FN(RecalculateAllShipData)
+	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
+	REGISTER_DEBUG_FN(ForceRenderingOfInterior, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(DestroyObject)
+
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iSpaceObjectEnvironment::ProcessDebugCommand(command);
+
+}

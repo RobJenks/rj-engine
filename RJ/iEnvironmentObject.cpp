@@ -235,4 +235,38 @@ void iEnvironmentObject::Shutdown(void)
 }
 
 
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void iEnvironmentObject::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetParentEnvironment)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEnvironmentPosition)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEnvironmentOrientation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementLocation)
+	REGISTER_DEBUG_ACCESSOR_FN(IsWithinEnvironment)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEnvironmentTreeNode)
+	REGISTER_DEBUG_ACCESSOR_FN(IsOnGround)
+
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(SetEnvironmentPosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(SetEnvironmentOrientation, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(ChangeEnvironmentOrientation, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(AddDeltaPosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(SimulateObjectPhysics)
+	REGISTER_DEBUG_FN(SetGroundFlag, command.ParameterAsBool(2))
+	
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iActiveObject::ProcessDebugCommand(command);
+
+}
+
 

@@ -1357,6 +1357,82 @@ Ship::~Ship(void)
 
 }
 
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void Ship::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
 
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetShipClass)
+	REGISTER_DEBUG_ACCESSOR_FN(GetDefaultLoadout)
+	REGISTER_DEBUG_ACCESSOR_FN(IsAvoidingCollision)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCollisionAvoidanceTarget)
+	REGISTER_DEBUG_ACCESSOR_FN(CanAcceptOrderType, (Order::OrderType)command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(HasNearbyEnemyContacts)
+	REGISTER_DEBUG_ACCESSOR_FN(AssessCurrentSituation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetCurrentAttackTarget)
+	REGISTER_DEBUG_ACCESSOR_FN(AssessEnemyTarget, (iSpaceObject*)Game::FindObjectByIdentifier(command.Parameter(2)))
+	REGISTER_DEBUG_ACCESSOR_FN(AssessRelativeStrength, (iSpaceObject*)Game::FindObjectByIdentifier(command.Parameter(2)))
+	REGISTER_DEBUG_ACCESSOR_FN(FindBestTarget)
+	REGISTER_DEBUG_ACCESSOR_FN(IsBraking)
+	REGISTER_DEBUG_ACCESSOR_FN(IsTurning)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTargetPitch)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTargetYaw)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTargetAngularVelocity)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEngineAngularVelocity)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEngineAngularMomentum)
+	REGISTER_DEBUG_ACCESSOR_FN(ShipEngineControl)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTargetSpeed)
+	REGISTER_DEBUG_ACCESSOR_FN(GetUnadjustedOrientation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseUnadjustedOrientation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetContactCount)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEnemyContactCount)
+	REGISTER_DEBUG_ACCESSOR_FN(DetermineCollisionAvoidanceCheckVector)
+	REGISTER_DEBUG_ACCESSOR_FN(ThrustVectorsChanged)
+	REGISTER_DEBUG_ACCESSOR_FN(ShipMassChanged)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTargetLeadingMultiplier, (Game::ID_TYPE)command.ParameterAsInt(2))
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(SetDefaultLoadout, command.Parameter(2))
+	REGISTER_DEBUG_FN(SimulateObject)
+	REGISTER_DEBUG_FN(SetTargetThrustOfAllEngines, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(SetTargetThrustPercentageOfAllEngines, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(IncrementTargetThrustOfAllEngines)
+	REGISTER_DEBUG_FN(DecrementTargetThrustOfAllEngines)
+	REGISTER_DEBUG_FN(FullStop)
+	REGISTER_DEBUG_FN(TurnShip, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
+	REGISTER_DEBUG_FN(RunEntityAI)
+	REGISTER_DEBUG_FN(RunShipFlightComputer)
+	REGISTER_DEBUG_FN(AnalyseNearbyContacts)
+	REGISTER_DEBUG_FN(AssessNearbyEnemyContacts)
+	REGISTER_DEBUG_FN(DetermineNewCourseOfAction)
+	REGISTER_DEBUG_FN(FindBestTarget)
+	REGISTER_DEBUG_FN(Attack, (iSpaceObject*)Game::FindObjectByIdentifier(command.Parameter(2)))
+	REGISTER_DEBUG_FN(CancelAllCombatOrders)
+	REGISTER_DEBUG_FN(FleeFromEnemies)
+	REGISTER_DEBUG_FN(IdentifyCollisionThreats)
+	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
+	REGISTER_DEBUG_FN(SetBaseMass, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(OverrideTargetAngularVelocity, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(ApplyBrakes)
+	REGISTER_DEBUG_FN(RemoveBrakes)
+	REGISTER_DEBUG_FN(EnableShipEngineControl)
+	REGISTER_DEBUG_FN(DisableShipEngineControl)
+	REGISTER_DEBUG_FN(SetTargetSpeed, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(SetTargetSpeedPercentage, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(ClearAllImmediateEntityData)
+	REGISTER_DEBUG_FN(DestroyObject)
+
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		EntityAI::ProcessDebugCommand(command);
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iActiveObject::ProcessDebugCommand(command);
+
+}
 
 

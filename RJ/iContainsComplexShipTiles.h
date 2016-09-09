@@ -7,6 +7,7 @@
 #include "CompilerSettings.h"
 #include "GameDataExtern.h"
 #include "ALIGN16.h"
+#include "GameConsoleCommand.h"
 class ComplexShipTile;
 
 // 16-bit aligned to allow use of SIMD instruction set
@@ -31,7 +32,7 @@ public:
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
-	void										InitialiseCopiedObject(iContainsComplexShipTiles *source);
+	void									InitialiseCopiedObject(iContainsComplexShipTiles *source);
 
 
 	// Standard methods to add/remove/retrieve the tiles that are contained within this parent object
@@ -82,6 +83,9 @@ public:
 	// Shuts down and (optionally) deallocates all tile data in this object
 	void									ShutdownAllTileData(bool deallocate);
 
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void									ProcessDebugCommand(GameConsoleCommand & command);
 
 
 protected:

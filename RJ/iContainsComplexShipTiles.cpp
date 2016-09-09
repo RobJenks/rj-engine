@@ -151,4 +151,34 @@ void iContainsComplexShipTiles::ShutdownAllTileData(bool deallocate)
 	}
 }
 
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void iContainsComplexShipTiles::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetTile, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetTileCount)
+	REGISTER_DEBUG_ACCESSOR_FN(HasTiles)
+	REGISTER_DEBUG_ACCESSOR_FN(GetTileCountOfType, (D::TileClass)command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(FindTileWithSpecificLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(FindTileAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	
+	// Mutator methods
+	REGISTER_DEBUG_FN(RemoveAllShipTiles)
+	REGISTER_DEBUG_FN(RecalculateShipTileData)
+	REGISTER_DEBUG_FN(FadeAllTiles, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
+	REGISTER_DEBUG_FN(SuspendTileRecalculation)
+	REGISTER_DEBUG_FN(ReactivateTileRecalculation)
+	REGISTER_DEBUG_FN(ShutdownAllTileData, command.ParameterAsBool(2))
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	/* No base classes to pass back to */
+
+}
 

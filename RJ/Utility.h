@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include "CompilerSettings.h"
+class iObject;
 using namespace std;
 using namespace std::tr1;
 
@@ -441,6 +442,7 @@ CMPINLINE std::string MatrixToString(const XMMATRIX & m) { XMFLOAT4X4 mf; XMStor
 
 // Generic 'ToString' method that can be specialised as required
 template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }
+template <> CMPINLINE std::string				StringValue<bool>(bool value) { return (value ? "true" : "false"); }
 template <> CMPINLINE std::string				StringValue<XMFLOAT2>(XMFLOAT2 value) { return VectorToString(value); }
 template <> CMPINLINE std::string				StringValue<XMFLOAT3>(XMFLOAT3 value) { return VectorToString(value); }
 template <> CMPINLINE std::string				StringValue<XMFLOAT4>(XMFLOAT4 value) { return VectorToString(value); }
@@ -740,6 +742,18 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 	XMFLOAT4 f; XMStoreFloat4(&f, x);
 	DBGVAL("[" << f.x << ", " << f.y << ", " << f.z << ", " << f.w << "]"); 
 }
+
+
+// Convenience macros used to invoke debug functions on objects
+#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); if (false) { } 
+#	define REGISTER_DEBUG_FN(fn_name, ...)										\
+						else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
+			command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str()); } 
+#	define REGISTER_DEBUG_ACCESSOR_FN(fn_name, ...)										\
+						else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
+			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(command.Parameter(1))("(...) == ")(tmp_output_##fn_name).str()); } 
+
+
 
 
 #endif

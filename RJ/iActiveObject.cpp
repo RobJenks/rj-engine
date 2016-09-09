@@ -138,13 +138,31 @@ void iActiveObject::ProcessDebugCommand(GameConsoleCommand & command)
 	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
 
 	// Accessor methods
-	REGISTER_DEBUG_ACCESSOR_FN(...)
-	
+	REGISTER_DEBUG_ACCESSOR_FN(GetMass)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseMass)
+	REGISTER_DEBUG_ACCESSOR_FN(IsFastMover)
+	REGISTER_DEBUG_ACCESSOR_FN(IsStatic)
+
 	// Mutator methods
-	REGISTER_DEBUG_FN(...)
-	
+	REGISTER_DEBUG_FN(SetMass, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(ApplyLocalForce,	XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f), 
+										XMVectorSet(command.ParameterAsFloat(5), command.ParameterAsFloat(6), command.ParameterAsFloat(7), 0.0f))
+	REGISTER_DEBUG_FN(ApplyWorldSpaceForce, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f),
+											XMVectorSet(command.ParameterAsFloat(5), command.ParameterAsFloat(6), command.ParameterAsFloat(7), 0.0f))
+	REGISTER_DEBUG_FN(ApplyAngularMomentum, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(ApplyAngularVelocity, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(SetLocalMomentum, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(AddLocalMomentum, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(SetWorldMomentum, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(AddWorldMomentum, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(RecalculateInertiaTensor)
+	REGISTER_DEBUG_FN(ApplyWorldSpaceLinearForce, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(ApplyWorldSpaceLinearForceDirect, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(ApplyLocalLinearForce, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(ApplyLocalLinearForceDirect, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function
-	if (command.OutputStatus != GameConsoleCommand::CommandResult::NotExecuted)		iObject::ProcessDebugCommand(command);
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iObject::ProcessDebugCommand(command);
 
 }

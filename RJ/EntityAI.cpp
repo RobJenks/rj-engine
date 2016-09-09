@@ -371,3 +371,46 @@ EntityAI::~EntityAI(void)
 	// Cancel any orders still in the queue to deallocate any associated memory
 	CancelAllOrders();
 }
+
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void EntityAI::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetOrder, (Order::ID_TYPE)command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(HasOrders)
+	REGISTER_DEBUG_ACCESSOR_FN(GetOrderCount)
+	REGISTER_DEBUG_ACCESSOR_FN(GetExecutingOrderCount)
+	REGISTER_DEBUG_ACCESSOR_FN(CanAcceptOrderType, (Order::OrderType)command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetEntityAIState)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEntityAIEngagementState)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEstimatedEntityStrength)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEntityBraveryModifier)
+	REGISTER_DEBUG_ACCESSOR_FN(GetEntityBadSituationThreshold)
+	REGISTER_DEBUG_ACCESSOR_FN(GetDebugOrderQueueString)
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(CancelOrder, (Order::ID_TYPE)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(CancelAllOrders)
+	REGISTER_DEBUG_FN(CancelAllOrdersFromSource, (Order::OrderSource)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(CancelAllOrdersOfType, (Order::OrderType)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(CancelAllCombatOrders)
+	REGISTER_DEBUG_FN(ProcessOrderQueue, (unsigned int)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(MaintainOrderQueue)
+	REGISTER_DEBUG_FN(ChangeEntityAIState, (EntityAIStates::EntityAIState)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(ChangeEntityAIEngagementState, (EntityAIStates::EntityEngagementState)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetEntityBraveryModifier, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(SetEntityBadSituationThreshold, command.ParameterAsFloat(2))
+
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	/* No base classes to pass control back to */
+
+}

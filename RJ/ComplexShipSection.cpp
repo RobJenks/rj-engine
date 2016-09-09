@@ -317,3 +317,47 @@ void ComplexShipSection::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXM
 	// No section-specific logic; simply pass back to the base class
 	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
 }
+
+
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void ComplexShipSection::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetParent)
+	REGISTER_DEBUG_ACCESSOR_FN(SectionIsUpdated)
+	REGISTER_DEBUG_ACCESSOR_FN(GetRelativePosition)
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementLocation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementSize)
+	REGISTER_DEBUG_ACCESSOR_FN(GetRotation)
+	REGISTER_DEBUG_ACCESSOR_FN(InteriorShouldAlwaysBeRendered)	
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(ClearAllHardpoints, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(SuspendUpdates)
+	REGISTER_DEBUG_FN(ResumeUpdates)
+	REGISTER_DEBUG_FN(SetSectionUpdateFlag)
+	REGISTER_DEBUG_FN(ClearSectionUpdateFlag)
+	REGISTER_DEBUG_FN(SetRelativePosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_FN(UpdatePositionFromParent)
+	REGISTER_DEBUG_FN(RefreshPositionImmediate)
+	REGISTER_DEBUG_FN(SetElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_FN(SetElementSize, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_FN(SetRotation, (Rotation90Degree)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
+	REGISTER_DEBUG_FN(SimulateObject)
+	REGISTER_DEBUG_FN(ForceRenderingOfInterior, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(DestroyObject)
+
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iSpaceObject::ProcessDebugCommand(command);
+
+}

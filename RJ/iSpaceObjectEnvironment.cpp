@@ -1363,3 +1363,56 @@ iSpaceObjectEnvironment::~iSpaceObjectEnvironment(void)
 {
 
 }
+
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetElement, command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4))
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementByIndex, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementSize)
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementCount)
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementIndex, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(GetZeroPointTranslation)
+	REGISTER_DEBUG_ACCESSOR_FN(GetZeroPointWorldMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseZeroPointWorldMatrix)
+	REGISTER_DEBUG_ACCESSOR_FN(IsEnvironmentUpdateSuspended)
+	REGISTER_DEBUG_ACCESSOR_FN(ContainsSimulationHubs)
+	REGISTER_DEBUG_ACCESSOR_FN(GetNavNetwork)
+	REGISTER_DEBUG_ACCESSOR_FN(IsValidElementID, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetDeckIndex, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(ElementIndexToLocation, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetElementContainingPositionUnbounded, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+	REGISTER_DEBUG_ACCESSOR_FN(GetClampedElementContainingPosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
+
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(BuildSpatialPartitioningTree)
+	REGISTER_DEBUG_FN(SimulateObject)
+	REGISTER_DEBUG_FN(PerformPostSimulationUpdate)
+	REGISTER_DEBUG_FN(SetSimulationStateOfEnvironmentContents, (iObject::ObjectSimulationState)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(UpdateGravity)
+	REGISTER_DEBUG_FN(UpdateOxygenLevels)
+	REGISTER_DEBUG_FN(RefreshPositionImmediate)
+	REGISTER_DEBUG_FN(UpdateEnvironment)
+	REGISTER_DEBUG_FN(SuspendEnvironmentUpdates)
+	REGISTER_DEBUG_FN(ResumeEnvironmentUpdates)
+	REGISTER_DEBUG_FN(NotifyIsContainerOfSimulationHubs, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(ClearAllTerrainObjects)
+	REGISTER_DEBUG_FN(ShutdownNavNetwork)
+	REGISTER_DEBUG_FN(UpdateNavigationNetwork)
+	REGISTER_DEBUG_FN(UpdateElementSpaceStructure)
+
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iContainsComplexShipTiles::ProcessDebugCommand(command);
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		Ship::ProcessDebugCommand(command);
+}
+

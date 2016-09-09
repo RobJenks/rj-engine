@@ -433,18 +433,16 @@ public:
 	// Output debug data on the object.  Acts from this point in the hierarchy downwards
 	//std::string									DebugOutput(void) const;
 
-	// Convenience macros used to invoke debug functions on the object
-#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); if (false) { } 
-#	define REGISTER_DEBUG_FN(fn_name, ...)										\
-			else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
-			command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str()); } 
-#	define REGISTER_DEBUG_ACCESSOR_FN(fn_name, ...)										\
-			else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
-			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(command.Parameter(1))("(...) == ")(tmp_output_##fn_name).str()); } 
 
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void										ProcessDebugCommand(GameConsoleCommand & command);
+
+	// Override string stream operator
+	friend std::ostream & operator<<(std::ostream &os, const iObject & obj) 
+	{
+		return os << obj.GetInstanceCode() << " [" << iObject::TranslateObjectTypeToString(obj.GetObjectType()) << "]";
+	}
 
 	// Destructor
 	virtual ~iObject(void) = 0;

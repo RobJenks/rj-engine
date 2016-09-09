@@ -162,6 +162,20 @@ namespace Game
 		return (entry.Active ? entry.Object : NULL);
 	}
 
+	// Attempts to locate an object that matches either the instance code (priority) or ID provided
+	CMPINLINE iObject *							FindObjectByIdentifier(const std::string & identifier)
+	{
+		if (identifier == NullString) return NULL;
+
+		iObject *o = GetObjectByInstanceCode(identifier);
+		if (o) return o;
+
+		const char *c = identifier.c_str();
+		int id = atoi(c);
+		return GetObjectByID(id);
+	}
+
+
 	// Notifies the central object collection that the code of the specified object has changed.  Ensures that
 	// correct references are maintained in the central object collection
 	void										NotifyChangeOfObjectInstanceCode(iObject *object, const std::string & old_code);

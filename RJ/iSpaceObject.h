@@ -44,6 +44,10 @@ public:
 	// Shutdown method to remove the space object from simulation
 	void									Shutdown(void);
 
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void									ProcessDebugCommand(GameConsoleCommand & command);
+
 
 protected:
 

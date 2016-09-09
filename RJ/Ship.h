@@ -209,8 +209,8 @@ public:
 
 	// Enable and disable ship computer control of ship functions
 	CMPINLINE bool				ShipEngineControl(void)			{ return m_shipenginecontrol; }
-	CMPINLINE bool				EnableShipEngineControl(void)	{ m_shipenginecontrol = true; }
-	CMPINLINE bool				DisableShipEngineControl(void)	{ m_shipenginecontrol = false; }
+	CMPINLINE void				EnableShipEngineControl(void)	{ m_shipenginecontrol = true; }
+	CMPINLINE void				DisableShipEngineControl(void)	{ m_shipenginecontrol = false; }
 
 	// Methods to set and retrieve the current ship target speed
 	CMPINLINE float				GetTargetSpeed(void)			{ return m_targetspeed; }
@@ -301,6 +301,10 @@ public:
 
 	// Calculates a new target lead multiplier for the specified target object
 	float						CalculateTargetLeadMultiplier(iSpaceObject *target);
+
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void						ProcessDebugCommand(GameConsoleCommand & command);
 
 	// Event triggered upon destruction of the object
 	void						DestroyObject(void);

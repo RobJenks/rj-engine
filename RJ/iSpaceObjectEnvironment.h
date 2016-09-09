@@ -53,6 +53,7 @@ public:
 	CMPINLINE ComplexShipElement *	GetElement(const INTVECTOR3 & loc)								{ return GetElement(loc.x, loc.y, loc.z); }
 	CMPINLINE ComplexShipElement *	GetElement(int x, int y, int z);
 	CMPINLINE ComplexShipElement *	GetElement(int index)											{ return ((index >= 0 && index < m_elementcount) ? &m_elements[index] : NULL); }
+	CMPINLINE ComplexShipElement *	GetElementByIndex(int index)									{ return GetElement(index); }
 
 	CMPINLINE void					SetElement(const INTVECTOR3 & loc, ComplexShipElement * e)		{ SetElement(loc.x, loc.y, loc.z, e); }
 	CMPINLINE void					SetElement(int x, int y, int z, ComplexShipElement * e);
@@ -311,6 +312,10 @@ public:
 	// which supplies a focal object, since the relevant node has to be determined based on the position
 	void							GetAllObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float distance,
 																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void							ProcessDebugCommand(GameConsoleCommand & command);
 
 
 
