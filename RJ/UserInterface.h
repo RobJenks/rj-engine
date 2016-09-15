@@ -10,6 +10,7 @@
 #include "RenderComponentGroup.h"
 #include "UIManagedControlDefinition.h"
 #include "iAcceptsConsoleCommands.h"
+#include "SentenceType.h"
 class CoreEngine;
 class Render2DGroup;
 class TextBlock;
@@ -38,17 +39,17 @@ public:
 	// Collection of text strings that are required for the UI
 	struct TextStringData
 	{
-		TextManager::SentenceType	*S_DBG_FPSCOUNTER;			// For displaying the current FPS
-		char						 C_DBG_FPSCOUNTER		[DEBUG_STRING_MAX_LENGTH];
+		SentenceType *				S_DBG_FPSCOUNTER;										// For displaying the current FPS
+		char						C_DBG_FPSCOUNTER		[DEBUG_STRING_MAX_LENGTH];
 
-		TextManager::SentenceType	*S_DBG_FLIGHTINFO_1;		// Line 1 of debug flight information
-		TextManager::SentenceType	*S_DBG_FLIGHTINFO_2;		// Line 2 of debug flight information
-		TextManager::SentenceType	*S_DBG_FLIGHTINFO_3;		// Line 3 of debug flight information
-		TextManager::SentenceType	*S_DBG_FLIGHTINFO_4;		// Line 4 of debug flight information
-		char						 C_DBG_FLIGHTINFO_1		[DEBUG_STRING_MAX_LENGTH];	
-		char						 C_DBG_FLIGHTINFO_2		[DEBUG_STRING_MAX_LENGTH];	
-		char						 C_DBG_FLIGHTINFO_3		[DEBUG_STRING_MAX_LENGTH];	
-		char						 C_DBG_FLIGHTINFO_4		[DEBUG_STRING_MAX_LENGTH];
+		SentenceType *				S_DBG_FLIGHTINFO_1;										// Line 1 of debug flight information
+		SentenceType *				S_DBG_FLIGHTINFO_2;										// Line 2 of debug flight information
+		SentenceType *				S_DBG_FLIGHTINFO_3;										// Line 3 of debug flight information
+		SentenceType *				S_DBG_FLIGHTINFO_4;										// Line 4 of debug flight information
+		char						C_DBG_FLIGHTINFO_1		[DEBUG_STRING_MAX_LENGTH];	
+		char						C_DBG_FLIGHTINFO_2		[DEBUG_STRING_MAX_LENGTH];	
+		char						C_DBG_FLIGHTINFO_3		[DEBUG_STRING_MAX_LENGTH];	
+		char						C_DBG_FLIGHTINFO_4		[DEBUG_STRING_MAX_LENGTH];
 
 	} TextStrings;
 
@@ -65,7 +66,7 @@ public:
 	TextBlock *				CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render);
 
 	// Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
-	Result					InitialiseTextString(TextManager *tm, TextManager::SentenceType **sentence, char *textbuffer, int fontID, 
+	Result					InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
 
 	// Creates a new component, for addition to one of the UI component sets

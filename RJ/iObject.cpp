@@ -572,6 +572,25 @@ void iObject::DetachFromParent(void)
 	}
 }
 
+// Generates a debug output of all child objects attached to this one
+std::string iObject::ListChildren(void) const
+{
+	// Trivial case if we have no attachments
+	if (!HasChildAttachments()) return "[No children]";
+
+	// Otherwise we want to build a string listing of each attachment
+	std::ostringstream os; iObject *child;
+	os << "Children[" << m_childcount << "] { ";
+	for (int i = 0; i < m_childcount; ++i)
+	{
+		child = m_childobjects.at(i).Child;
+		os << (child ? child->str() : "[NULL]") << (i < (m_childcount - 1) ? ", " : "");
+	}
+
+	os << " }";
+	return os.str();
+}
+
 // Add a new exclusion, preventing this object from colliding with the designated object
 void iObject::AddCollisionExclusion(Game::ID_TYPE object)
 {
@@ -737,6 +756,7 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(HaveParentAttachment)
 	REGISTER_DEBUG_ACCESSOR_FN(GetChildObjectCount)
 	REGISTER_DEBUG_ACCESSOR_FN(HasChildAttachments)
+	REGISTER_DEBUG_ACCESSOR_FN(ListChildren)
 	REGISTER_DEBUG_ACCESSOR_FN(Simulated)
 	REGISTER_DEBUG_ACCESSOR_FN(CanSimulateMovement)
 	REGISTER_DEBUG_ACCESSOR_FN(PositionUpdated)

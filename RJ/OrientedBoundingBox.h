@@ -177,6 +177,10 @@ public:
 	// Method to determine the vertices of this bounding box in world space
 	void						DetermineVertices(AXMVECTOR_P (&pOutVertices)[8]) const;
 
+	// Calculates the outer extents of this object in world space based on vertex positions.  Returns minimum
+	// and maximum bounds via reference parameters
+	void						DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const;
+
 	// Generates a world matrix that will transform to the position & orientation of this OBB
 	void						GenerateWorldMatrix(XMMATRIX & outMatrix) const;
 

@@ -556,6 +556,7 @@
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
+    <ClInclude Include="SentenceType.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ObjectSearch.h" />
     <ClInclude Include="Ray.h" />

@@ -902,6 +902,9 @@ void RJMain::UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool 
 		// Window should begin in the top-left of the screen
 		Game::WindowPosition = NULL_INTVECTOR2;
 	}
+
+	// Notify the game engine of this change, if it is initialised at this point
+	if (Game::Engine) Game::Engine->WindowResized();
 }
 
 
@@ -2160,6 +2163,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
+	***	MAKE SURE DEBUG OBJ FUNCTIONS ARE EXTENDED TO LIGHTSOURCE OBJECTS ***
 
 }
 

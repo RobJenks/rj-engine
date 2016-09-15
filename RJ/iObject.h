@@ -335,6 +335,9 @@ public:
 	Attachment<iObject*>						RetrieveChildAttachmentDetails(iObject *child);
 	void										RemoveChildAttachment(iObject *child);
 
+	// Generates a debug output of all child objects attached to this one
+	std::string									ListChildren(void) const;
+
 	// Method to update the position of any attached child objects
 	void										UpdatePositionOfChildObjects(void);
 
@@ -441,7 +444,15 @@ public:
 	// Override string stream operator
 	friend std::ostream & operator<<(std::ostream &os, const iObject & obj) 
 	{
-		return os << obj.GetInstanceCode() << " [" << iObject::TranslateObjectTypeToString(obj.GetObjectType()) << "]";
+		return os << "[" << obj.GetID() << "] " << obj.GetInstanceCode() << " (" << iObject::TranslateObjectTypeToString(obj.GetObjectType()) << ")";
+	}
+
+	// Custom "ToString" function
+	CMPINLINE std::string str(void) const
+	{
+		ostringstream os;
+		os << (*this);
+		return os.str();
 	}
 
 	// Destructor

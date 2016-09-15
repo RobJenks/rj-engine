@@ -53,6 +53,7 @@ class VolLineShader;
 class EnvironmentTree;
 struct GameConsoleCommand;
 struct VolumetricLine;
+struct SentenceType;
 
 using namespace std;
 using namespace std::tr1;
@@ -252,6 +253,7 @@ public:
 	void DebugRenderSpatialPartitioningTree(void);
 	void DebugRenderEnvironmentTree(void);
 	void DebugRenderEnvironmentNavNetwork(void);
+	void DebugRenderObjectIdentifiers(void);
 
 	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
@@ -260,6 +262,8 @@ public:
 	CMPINLINE void SetDebugTreeRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvtree = environment_id; }
 	CMPINLINE Game::ID_TYPE GetDebugNavNetworkRenderEnvironment(void) const { return m_debug_renderenvnetwork; }
 	CMPINLINE void SetDebugNavNetworkRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvnetwork = environment_id; }
+	CMPINLINE float GetDebugObjectIdentifierRenderingDistance(void) const { return m_debug_renderobjid_distance; }
+	CMPINLINE void SetDebugObjectIdentifierRenderingDistance(float dist) { m_debug_renderobjid_distance = clamp(dist, 1.0f, 100000.0f); }
 
 	
 	// Structure keeping track of render info per frame
@@ -276,6 +280,9 @@ public:
 
 	// Function to return the per-frame render info
 	CMPINLINE EngineRenderInfoData GetRenderInfo(void) { return m_renderinfo; }
+
+	// Event triggered when the application window is resized
+	void WindowResized(void);
 
 	// Virtual inherited method to accept a command from the console
 	bool ProcessConsoleCommand(GameConsoleCommand & command);
@@ -306,6 +313,7 @@ public:
 		RenderOBBs,
 		RenderTerrainBoxes,
 		RenderNavNetwork,
+		RenderObjectIdentifiers,
 		_RFLAG_COUNT
 	};
 
@@ -313,6 +321,26 @@ public:
 	CMPINLINE bool	GetRenderFlag(RenderFlag flag)							{ return m_renderflags[flag]; }
 	CMPINLINE void	SetRenderFlag(RenderFlag flag, bool value)				{ m_renderflags[flag] = value; }
 
+	// Transform the specified world location into projection space ([-1 +1], [-1 +1])
+	CMPINLINE XMVECTOR		WorldToProjection(const FXMVECTOR world_pos) 
+	{ 
+		return XMVector3TransformCoord(world_pos, r_viewproj);
+	}
+
+	// Transform the specified world location into screen space ([0 ScreenWidth], [0 ScreenHeight])
+	CMPINLINE XMVECTOR		WorldToScreen(const FXMVECTOR world_pos)
+	{
+		return XMVector3TransformCoord(world_pos, r_viewprojscreen);
+	}
+
+	// Calculates the bounds of this object in screen space
+	void				DetermineObjectScreenBounds(const iObject & obj, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds);
+
+	// Returns a position in screen space corresponding to the specified object.  Accepts an offset parameter
+	// in screen coordinates based on the object size; [0, +0.5] would be centred in x, and return a position
+	// at the top edge of the object in screen space
+	XMVECTOR				GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset);
+	
 
 private:
 	
@@ -409,6 +437,8 @@ private:
 	AXMMATRIX				r_invview;				// We will also store the inverse view matrix given its usefulness
 	AXMMATRIX				r_viewproj;				// Store the combined (view * proj) matrix
 	AXMMATRIX				r_invviewproj;			// Also store the inverse viewproj matrix, i.e. (view * proj)^-1
+	AXMMATRIX				m_projscreen;			// Adjustment matrix from projection to screen coordinates (only recalculated when screen parameters change)
+	AXMMATRIX				r_viewprojscreen;		// Combined (view * proj * screen) matrix
 	XMFLOAT4X4				r_view_f;				// Local float representation of the current frame view matrix
 	XMFLOAT4X4				r_projection_f;			// Local float representation of the current frame projection matrix
 	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
@@ -581,6 +611,9 @@ public:
 	Game::ID_TYPE 				m_debug_renderenvboxes;
 	Game::ID_TYPE				m_debug_renderenvtree;
 	Game::ID_TYPE				m_debug_renderenvnetwork;
+	float						m_debug_renderobjid_distance;
+	std::vector<SentenceType*> 
+								m_debug_renderobjid_text;
 
 	// Enumeration of possible debug terain render modes
 	enum DebugTerrainRenderMode { Normal = 0, Solid };

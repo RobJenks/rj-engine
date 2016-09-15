@@ -1281,6 +1281,9 @@
     <ClInclude Include="DynamicTileSet.h">
       <Filter>Objects\Ships\Tiles</Filter>
     </ClInclude>
+    <ClInclude Include="SentenceType.h">
+      <Filter>Engine\Text</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

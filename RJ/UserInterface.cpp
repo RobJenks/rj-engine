@@ -16,6 +16,7 @@
 #include "UI_ShipDesigner.h"
 #include "UI_ModelBuilder.h"
 #include "UI_ShipBuilder.h"
+#include "SentenceType.h"
 class GameInputDevice;
 using namespace std;
 
@@ -135,7 +136,7 @@ Result UserInterface::InitialiseUITextComponents(void)
 TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
 {
 	Result result;
-	TextManager::SentenceType *sentence;
+	SentenceType *sentence;
 
 	// Initialise a new sentence object which will hold the core text rendering data
 	result = InitialiseTextString(Game::Engine->GetTextManager(), &sentence, NULL, font, pos.x, pos.y, maxlength, size, col, render);
@@ -153,7 +154,7 @@ TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int max
 }
 
 // Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
-Result UserInterface::InitialiseTextString(TextManager *tm, TextManager::SentenceType **sentence, char *textbuffer, int fontID, 
+Result UserInterface::InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render)
 {
 	(*sentence) = tm->CreateSentence(fontID, maxlength);

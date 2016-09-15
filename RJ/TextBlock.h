@@ -7,7 +7,7 @@
 #include "Utility.h"
 #include "iUIComponent.h"
 class TextManager;
-struct TextManager::SentenceType;
+struct SentenceType;
 using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
@@ -21,7 +21,7 @@ public:
 	~TextBlock(void);
 
 	// Initialises the text block object
-	Result Initialise(string code, TextManager *tm, TextManager::SentenceType *sentence, int maxlength);
+	Result Initialise(string code, TextManager *tm, SentenceType *sentence, int maxlength);
 
 	// Methods to set the text block contents
 	void SetText(string text);
@@ -62,7 +62,7 @@ private:
 	string										m_code;
 
 	TextManager *								m_textmanager;
-	TextManager::SentenceType *					m_sentence;
+	SentenceType *					m_sentence;
 	
 	char *										m_textbuffer;
 	std::string									m_string_textbuffer;	// Updated when a std::string 'text' value is requested

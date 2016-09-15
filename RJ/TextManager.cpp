@@ -1,5 +1,6 @@
 #include "FontData.h"
 #include "FontShader.h"
+#include "SentenceType.h"
 
 #include "TextManager.h"
 
@@ -51,7 +52,7 @@ Result TextManager::InitializeFont(string name, const char *fontdata, const char
 	return ErrorCodes::NoError;	
 }
 
-TextManager::SentenceType *TextManager::CreateSentence(int fontID, int maxlength)
+SentenceType *TextManager::CreateSentence(int fontID, int maxlength)
 {
 	SentenceType *sentence;
 	
@@ -240,7 +241,7 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 }
 
 
-Result TextManager::UpdateSentence(SentenceType* sentence, char* text, int positionX, int positionY, bool render, 
+Result TextManager::UpdateSentence(SentenceType* sentence, const char *text, int positionX, int positionY, bool render, 
 								   const XMFLOAT4 & textcolour, float size)
 {
 	// Make sure that we have been passed a valid sentence pointer
@@ -259,7 +260,7 @@ Result TextManager::UpdateSentence(SentenceType* sentence, char* text, int posit
 	return SetSentenceText(sentence, text, size);
 }
 
-Result TextManager::SetSentenceText(SentenceType *sentence, char *text, float size)
+Result TextManager::SetSentenceText(SentenceType *sentence, const char *text, float size)
 {
 	int numLetters;
 	VertexType* vertices;

@@ -22,6 +22,7 @@
 #include "BoundingObject.h"
 #include "FontShader.h"
 #include "TextManager.h"
+#include "Fonts.h"
 #include "EffectManager.h"
 #include "ParticleEngine.h"
 #include "Render2DManager.h"
@@ -59,6 +60,7 @@
 #include "EnvironmentTree.h"
 #include "NavNetwork.h"
 #include "NavNode.h"
+#include "SentenceType.h"
 #include <tchar.h>
 #include <unordered_map>
 
@@ -94,9 +96,10 @@ CoreEngine::CoreEngine(void)
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = m_debug_renderenvtree = 0;
+	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
 	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
-	
+
 	// Set default values for game engine parameters
 	m_hwnd = NULL;
 	m_vsync = false;
@@ -110,6 +113,10 @@ CoreEngine::CoreEngine(void)
 	// Set pre-populated parameter values for render-time efficiency
 	m_current_modelbuffer = NULL;
 	m_instanceparams = NULL_FLOAT4;
+
+	// Initialise all key matrices to the identity
+	r_view = r_projection = r_orthographic = r_invview = r_viewproj = r_invviewproj = m_projscreen = r_viewprojscreen = ID_MATRIX;
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
 
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -127,6 +134,9 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 
 	// Initialise each component in turn; in case of failure, attempt to roll back anything possible and return an error
 	Game::Log << "\n" << LOG_INIT_START << "Beginning initialisation of game engine\n";
+
+	// Trigger the window resize event to ensure the engine has the latest window/screen parameters
+	WindowResized();
 
 	// Initialise all render flags to their default values
 	res = InitialiseRenderFlags();
@@ -1076,6 +1086,14 @@ void CoreEngine::ShutdownEnvironmentRendering(void)
 	// No action required, for now
 }
 
+// Event triggered when the application window is resized
+void CoreEngine::WindowResized(void)
+{
+	// Update any dependent calculations
+	m_projscreen = XMMatrixMultiply(XMMatrixTranslation(1.0f, -1.0f, 0.0f), XMMatrixScaling(Game::ScreenWidth * 0.5f, Game::ScreenHeight * -0.5f, 1.0f));
+
+}
+
 
 // The main rendering function; renders everything in turn as required
 void CoreEngine::Render(void)
@@ -1091,6 +1109,7 @@ void CoreEngine::Render(void)
 	m_D3D->GetOrthoMatrix(r_orthographic);
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
+	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
 
 	// Store local float representations of each key matrix for runtime efficiency
 	XMStoreFloat4x4(&r_view_f, r_view);
@@ -2063,6 +2082,7 @@ void CoreEngine::RenderDebugData(void)
 	if (m_renderflags[CoreEngine::RenderFlag::RenderOBBs]) DebugRenderSpaceCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderTerrainBoxes]) DebugRenderEnvironmentCollisionBoxes();
 	if (m_renderflags[CoreEngine::RenderFlag::RenderNavNetwork]) DebugRenderEnvironmentNavNetwork();
+	if (m_renderflags[CoreEngine::RenderFlag::RenderObjectIdentifiers]) DebugRenderObjectIdentifiers();
 }
 
 // Performs debug rendering of the active spatial partitioning tree
@@ -2224,6 +2244,80 @@ void CoreEngine::DebugRenderEnvironmentNavNetwork(void)
 	}
 }
 
+// Renders the identifier of all visible objects in the player's immediate vicinity
+void CoreEngine::DebugRenderObjectIdentifiers(void)
+{
+	static const XMFLOAT2 DEBUG_ID_TEXT_OFFSET = XMFLOAT2(0.0f, 0.0f);
+	static const XMFLOAT4 DEBUG_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f);
+	static const float DEBUG_ID_TEXT_SIZE = 1.0f;
+	static const unsigned int DEBUG_ID_MAX_DISPLAYED = 32U;
+
+	// Maintain a static set of sentence objects that we can use for debug rendering 
+	// (TODO: temporary and inefficient.  Replace when text rendering is upgraded.  We also do not dispose of these at shutdown right now)
+	if (m_debug_renderobjid_text.size() == 0)
+	{
+		for (unsigned int i = 0; i < DEBUG_ID_MAX_DISPLAYED; ++i)
+		{
+			SentenceType *s = m_textmanager->CreateSentence(Game::Fonts::FONT_BASIC1, 256);
+			if (!s) break;
+
+			s->render = false;
+			m_debug_renderobjid_text.push_back(s);
+		}
+	}
+	
+	// Locate the spatial partitioning tree node that contains the current camera position (take
+	// this longer approach to account for cases where the player is using the debug camera)
+	const XMVECTOR & pos = GetCamera()->GetPosition();
+	const SpaceSystem *sysenv = Game::CurrentPlayer->GetSystem(); 
+	if (!sysenv || !sysenv->SpatialPartitioningTree) return;
+	Octree<iObject*> *node = sysenv->SpatialPartitioningTree->GetNodeContainingPoint(pos);
+	if (!node) return;
+
+	// Get the set of all objects near the camera
+	std::vector<iObject*> objects;
+	int n = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(pos, node, m_debug_renderobjid_distance, objects, Game::ObjectSearchOptions::NoSearchOptions);
+
+	// Iterate over each object in turn
+	unsigned int sentence_id = 0U; unsigned int sentence_count = m_debug_renderobjid_text.size();
+	std::vector<iObject*>::const_iterator it_end = objects.end();
+	for (std::vector<iObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+	{
+		// Skip the object if it is invalid or is not visible
+		iObject *obj = (*it); 
+		if (!obj || !obj->IsCurrentlyVisible()) continue;
+
+		// Get a sentence object to render this identifier.  If we have used all available objects, quit here
+		if (sentence_id >= sentence_count) break;
+		SentenceType *text = m_debug_renderobjid_text.at(sentence_id);
+		if (!text) break;
+		++sentence_id;
+
+		// Create a text object for this identifer (TODO: inefficient)
+		std::string textstring = obj->str();
+		m_textmanager->UpdateSentence(text, textstring.c_str(),
+			0, 0, true, DEBUG_ID_TEXT_COLOUR, DEBUG_ID_TEXT_SIZE);
+
+		// Calculate the screen-space position for the centre of this text, then offset so that the text is centred over it
+		// Force-update the object OBB to ensure that the latest values are used
+		obj->CollisionOBB.UpdateIfRequired();
+		XMVECTOR pos = XMVectorSubtract(
+			GetScreenLocationForObject(*obj, DEBUG_ID_TEXT_OFFSET),
+			XMVectorSet(text->sentencewidth * 0.5f, text->sentenceheight * 0.5f, 0.0f, 0.0f));
+
+		// Update the sentence position by performing a full update on the sentence again.  This will
+		// regenerate the text VBs.  (TODO: EVEN MORE INEFFICIENT.  Replace)
+		m_textmanager->UpdateSentence(text, textstring.c_str(), (int)XMVectorGetX(pos), (int)XMVectorGetY(pos), true,
+			DEBUG_ID_TEXT_COLOUR, DEBUG_ID_TEXT_SIZE);
+	}
+
+	// Set any unused text objects to be hidden this frame
+	for (unsigned int i = sentence_id; i < sentence_count; ++i)
+	{
+		if (m_debug_renderobjid_text.at(i)) m_textmanager->DisableSentenceRendering(m_debug_renderobjid_text.at(i));
+	}
+}
+
 
 // Activate or deactivate a particular stage of the rendering cycle.  Changing the 'All' stage will overwrite all stage values
 void CoreEngine::SetRenderStageState(CoreEngine::RenderStage stage, bool active)
@@ -2243,6 +2337,33 @@ void CoreEngine::SetRenderStageState(CoreEngine::RenderStage stage, bool active)
 	}
 }
 
+// Calculates the bounds of this object in screen space
+void CoreEngine::DetermineObjectScreenBounds(const iObject & obj, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds)
+{
+	// Get the bounds of this object in world space
+	XMVECTOR wmin, wmax;
+	obj.CollisionOBB.DetermineWorldSpaceBounds(wmin, wmax);
+
+	// Transform these world bounds into screen space and return
+	outMinBounds = WorldToScreen(wmin);
+	outMaxBounds = WorldToScreen(wmax);
+}
+
+// Returns a position in screen space corresponding to the specified object.  Accepts an offset parameter
+// in screen coordinates based on the object size; [0, +0.5] would be centred in x, and return a position
+// at the top edge of the object in screen space
+XMVECTOR CoreEngine::GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset)
+{
+	// Get the object bounds in screen space
+	XMVECTOR smin, smax;
+	DetermineObjectScreenBounds(obj, smin, smax);
+
+	// Offset will be a linear interpolation between min and max.  We define [0,0] as the centre point, so
+	// increase each offset value by 0.5f such that [0,0] moves from bottom-left to centre point
+	return XMVectorLerpV(smin, smax, XMVectorSet(offset.x + 0.5f, offset.y + 0.5f, 0.5f, 0.5f));
+}
+
+
 // Virtual inherited method to accept a command from the console
 bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 {
@@ -2252,7 +2373,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::NoSpatialPartitioningTreeToRender, 
 				"No tree to render"); return true; }
 
-		bool b = (command.Parameter(0) == "1");
+		bool b = (command.ParameterAsBool(0));
 		SetRenderFlag(CoreEngine::RenderFlag::RenderTree, b);
 		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" render of spatial partitioning tree").str());
 		return true;
@@ -2263,7 +2384,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		bool render = false; iSpaceObjectEnvironment *env = NULL;
 		if (pcount == 1)
 		{
-			render = (command.Parameter(0) == "1");
+			render = (command.ParameterAsBool(0));
 			if (!Game::CurrentPlayer || !Game::CurrentPlayer->GetActor() || !Game::CurrentPlayer->GetActor()->GetParentEnvironment())
 			{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::NoValidEnvironmentSpecified,
 					"Cannot determine valid environment tree to render"); return true; }
@@ -2301,19 +2422,19 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	}
 	else if (command.InputCommand == "hull_render")
 	{
-		bool b = !(command.Parameter(0) == "1");
+		bool b = !(command.ParameterAsBool(0));
 		SetRenderFlag(CoreEngine::RenderFlag::DisableHullRendering, b);
 		command.SetSuccessOutput(concat((b ? "Disabling" : "Enabling"))(" rendering of ship hulls").str()); return true;
 	}
 	else if (command.InputCommand == "render_obb")
 	{
-		bool b = (command.Parameter(0) == "1");
+		bool b = (command.ParameterAsBool(0));
 		SetRenderFlag(CoreEngine::RenderFlag::RenderOBBs, b);
 		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" rendering of object OBBs").str()); return true;
 	}
 	else if (command.InputCommand == "render_terrainboxes")
 	{
-		if (command.Parameter(1) == "1")
+		if (command.ParameterAsBool(1) == true)
 		{
 			iObject *env = Game::GetObjectByInstanceCode(command.Parameter(0));
 			if (!env || !env->IsEnvironment())
@@ -2342,7 +2463,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		}
 		iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)obj;
 
-		if (command.Parameter(1) == "1")
+		if (command.ParameterAsBool(1) == true)
 		{
 			int n = env->GetTileCount();
 			for (int i = 0; i < n; ++i)
@@ -2381,7 +2502,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	}
 	else if (command.InputCommand == "render_navnetwork")
 	{
-		if (command.Parameter(1) == "1")
+		if (command.ParameterAsBool(1) == true)
 		{
 			iObject *env = Game::GetObjectByInstanceCode(command.Parameter(0));
 			if (!env || !env->IsEnvironment())
@@ -2400,6 +2521,29 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			m_debug_renderenvnetwork = 0;
 			command.SetSuccessOutput("Disabling render of environment nav network");
 		}
+		return true;
+	}
+	else if (command.InputCommand == "render_identifiers")
+	{
+		bool b = command.ParameterAsBool(0);
+		SetRenderFlag(CoreEngine::RenderFlag::RenderObjectIdentifiers, b);
+
+		// If we are disabling the render of IDs, hide any existing text objects that are being used
+		if (!b)
+		{
+			std::vector<SentenceType*>::iterator it_end = m_debug_renderobjid_text.end();
+			for (std::vector<SentenceType*>::iterator it = m_debug_renderobjid_text.begin(); it != it_end; ++it)
+				if (*it) (*it)->render = false;
+		}
+
+		if (command.Parameter(1) != NullString)
+		{
+			float dist = command.ParameterAsFloat(1);
+			if (dist == 0.0f) dist = 10000.0f;
+			SetDebugObjectIdentifierRenderingDistance(dist);
+		}
+
+		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" render of object identifiers").str());
 		return true;
 	}
 

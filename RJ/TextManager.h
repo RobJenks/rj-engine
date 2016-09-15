@@ -8,6 +8,7 @@
 
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "SentenceType.h"
 class FontData;
 class FontShader;
 
@@ -28,16 +29,6 @@ private:
 	};
 
 public:
-	struct SentenceType
-	{
-		bool render;
-		int x, y;
-		XMFLOAT4 colour;
-		ID3D11Buffer *vertexBuffer, *indexBuffer;
-		int vertexCount, indexCount, maxLength;
-		int fontID;
-		float sentencewidth, sentenceheight;
-	};
 
 	TextManager(void);
 	TextManager(const TextManager&);
@@ -53,7 +44,7 @@ public:
 	SentenceType *CreateSentence(int fontID, int maxlength);
 
 	// Updates a sentence to set the text, position, colour and render flag as necessary
-	Result UpdateSentence(SentenceType* sentence, char* text, int xpos, int ypos, bool render, 
+	Result UpdateSentence(SentenceType* sentence, const char *text, int xpos, int ypos, bool render, 
 							const XMFLOAT4 & textcolour, float size);
 
 	// Renders all text sentences (dependent on render flag) using the font shader instance
@@ -70,7 +61,7 @@ public:
 	CMPINLINE void SetSentenceColour(SentenceType *sentence, XMFLOAT4 colour) { sentence->colour = colour; }
 
 	// Set the sentence text, which invokes regeneration of the vertex buffers
-	Result SetSentenceText(SentenceType *sentence, char *text, float size);
+	Result SetSentenceText(SentenceType *sentence, const char *text, float size);
 
 
 

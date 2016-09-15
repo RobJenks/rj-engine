@@ -76,6 +76,21 @@ void OrientedBoundingBox::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
 	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// -x, +y, +z	(End face #2)
 }
 
+// Calculates the outer extents of this object in world space based on vertex positions.  Returns minimum
+// and maximum bounds via reference parameters
+void OrientedBoundingBox::DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const
+{
+	// Get the location of all vertices in world space
+	AXMVECTOR_P v[8];
+	DetermineVertices(v);
+
+	// Determine the min and max bounds based on these vertices (unrolled)
+	outMinBounds = XMVectorMin(XMVectorMin(XMVectorMin(XMVectorMin(XMVectorMin(XMVectorMin(XMVectorMin(
+		v[0].value, v[1].value), v[2].value), v[3].value), v[4].value), v[5].value), v[6].value), v[7].value);
+	outMaxBounds = XMVectorMax(XMVectorMax(XMVectorMax(XMVectorMax(XMVectorMax(XMVectorMax(XMVectorMax(
+		v[0].value, v[1].value), v[2].value), v[3].value), v[4].value), v[5].value), v[6].value), v[7].value);
+}
+
 // Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
 void OrientedBoundingBox::UpdateExtentFromSize(const FXMVECTOR size)
 {

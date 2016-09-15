@@ -2,6 +2,7 @@
 #include "TextManager.h"
 
 #include "TextBlock.h"
+#include "SentenceType.h"
 using namespace std;
 
 #if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
@@ -10,7 +11,7 @@ using namespace std;
 #endif
 
 
-Result TextBlock::Initialise(string code, TextManager *tm, TextManager::SentenceType *sentence, int maxlength)
+Result TextBlock::Initialise(string code, TextManager *tm, SentenceType *sentence, int maxlength)
 {
 	// Parameter check
 	if (code.empty() || !tm || !sentence) return ErrorCodes::CannotInitialiseTextBlockWithInvalidParameters;
