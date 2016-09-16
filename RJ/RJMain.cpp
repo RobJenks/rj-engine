@@ -955,12 +955,21 @@ HWND RJMain::CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc)
 	return hwnd;
 }
 
+// Primary quit method for the application
+void RJMain::Quit(void)
+{
+	// Post a WM_DESTROY message.  This will be caught by the WinApi callback and invoke all relevant game termination 
+	// functions before correctly exiting
+	::DestroyWindow(m_hwnd);
+}
+
+
 #include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
-
+	
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
@@ -2162,8 +2171,6 @@ void RJMain::DEBUGDisplayInfo(void)
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
-
-	***	MAKE SURE DEBUG OBJ FUNCTIONS ARE EXTENDED TO LIGHTSOURCE OBJECTS ***
 
 }
 

@@ -8,6 +8,7 @@
 #include "GameUniverse.h"
 #include "SpaceSystem.h"
 #include "Order_MoveToPosition.h"
+#include "RJMain.h"
 
 // Debug command handler needs to include the full object hierarchy to support per-object command handling
 #include "Actor.h"
@@ -160,6 +161,12 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		DebugPrintAllGameObjects();
 		command.SetSuccessOutput("Printed all registered game objects to debug output");
 		return true;
+	}
+
+	/* Quit the application */
+	else if (command.InputCommand == "exit")
+	{
+		Game::Application.Quit();
 	}
 
 	// We did not recognise the command

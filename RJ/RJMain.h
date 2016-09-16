@@ -82,6 +82,9 @@ public:
 	// Region update methods
 	void				UpdateRegions(void);
 
+	// Primary quit method for the application
+	void				Quit(void);
+
 	// Termination methods
 	void				TerminateApplication(void);
 	void				TerminateCoreDataStructures(void);

@@ -753,6 +753,14 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 						else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
 			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(command.Parameter(1))("(...) == ")(tmp_output_##fn_name).str()); } 
 
+// Redirects debug processing based on the specified trigger command
+#	define REGISTER_DEBUG_FN_REDIRECT(trigger, redirect_to)										\
+						else if (fn == #trigger) { redirect_to(command); }		\
+
+// Redirected debug testing allows us to specify "parameter_level", which is the level at which 
+// useful parameters (firstly, the command name) begin in the parameter list
+#	define INIT_DEBUG_FN_TESTING_AT_LEVEL(command, parameter_level)		std::string fn = command.Parameter(parameter_level); if (false) { } 
+
 
 
 

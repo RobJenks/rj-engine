@@ -48,8 +48,30 @@ void LightSource::PerformPostSimulationUpdate(void)
 	XMStoreFloat3(&m_light.Data.Direction, DirAdj);
 }
 
+// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+// Updates the command with its result if the command can be processed at this level
+void LightSource::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros above for convenience
+	INIT_DEBUG_FN_TESTING(command)
 
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, and Parameter(1) is the function name, so we pass Parameter(2) onwards
 
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetPriority)
+	REGISTER_DEBUG_ACCESSOR_FN(GetRange)
 
+	// Mutator methods
+	REGISTER_DEBUG_FN(SetPriority, command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(SetRange, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(DestroyObject)
 
+	// Redirect method for all Light object properties
+	REGISTER_DEBUG_FN_REDIRECT(Light, m_light.ProcessDebugCommand)
+
+	// Pass processing back to any base classes, if applicable, if we could not execute the function
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iObject::ProcessDebugCommand(command);
+
+}
 

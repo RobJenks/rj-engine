@@ -1,5 +1,6 @@
 #include "FastMath.h"
 #include "Light.h"
+#include "GameConsoleCommand.h"
 #include "Data\\Shaders\\light_definition.h"
 
 // Static counter used to assign unique light IDs
@@ -76,3 +77,60 @@ void Light::InitialiseSpotLight(const XMFLOAT3 & position, const XMFLOAT3 & colo
 Light::~Light(void)
 {
 }
+
+
+// Process a debug command from the console.  "Light" objects are not part of the object hierarchy, but 
+// members of that hierarchy will invokve this method when asked to perform lighting-related actions
+void Light::ProcessDebugCommand(GameConsoleCommand & command)
+{
+	// Note: all command parameters will begin at level 2, rather than one, since Light
+	// objects are accessed via redirection from a parent object
+	INIT_DEBUG_FN_TESTING_AT_LEVEL(command, 2)
+
+	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(GetID)
+	REGISTER_DEBUG_ACCESSOR_FN(GetColour)
+	REGISTER_DEBUG_ACCESSOR_FN(GetType)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAmbient)
+	REGISTER_DEBUG_ACCESSOR_FN(GetDiffuse)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSpecular)
+	REGISTER_DEBUG_ACCESSOR_FN(GetDirection)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightInnerHalfAngleCos)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightOuterHalfAngleCos)
+	REGISTER_DEBUG_ACCESSOR_FN(GetPosition)
+	REGISTER_DEBUG_ACCESSOR_FN(GetRange)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuationConstant)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuationLinear)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuationExp)
+
+	// Mutator methods
+	REGISTER_DEBUG_FN(SetID, (unsigned int)command.ParameterAsInt(3))
+	REGISTER_DEBUG_FN(SetColour, XMFLOAT3(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(SetType, command.ParameterAsInt(3))
+	REGISTER_DEBUG_FN(SetAmbient, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetDiffuse, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetSpecular, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetDirection, XMFLOAT3(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(SetSpotlightInnerHalfAngleCos, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetSpotlightOuterHalfAngleCos, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetPosition, XMFLOAT3(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
+	REGISTER_DEBUG_FN(SetRange, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetAttenuationConstant, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetAttenuationLinear, command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetAttenuationExp, command.ParameterAsFloat(3))
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
