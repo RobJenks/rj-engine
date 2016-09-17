@@ -2637,7 +2637,7 @@ Result IO::Data::PostProcessResources(void)
 
 	// Create a temporary vector of resource pointers for linear processing reasons
 	vector<Resource*> resources; 
-	VectorFromUnorderedMap<string, Resource*>(D::Resources.Data, &resources);
+	VectorFromUnorderedMap<string, Resource*>(D::Resources.Data, resources);
 
 	// First, we need to build the set of dependencies between resources based on their respective production costs
 	std::vector<Resource*>::size_type n = resources.size();
@@ -2687,7 +2687,7 @@ Result IO::Data::PostProcessComplexShipTileData(void)
 	
 	// Create a temporary vector of tile definition pointers for linear processing reasons
 	vector<ComplexShipTileDefinition*> tiles;
-	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles.Data, &tiles);
+	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles.Data, tiles);
 
 	// We need to run post-processing on the tile production requirements, to link to resources/other tile dependencies
 	vector<ComplexShipTileDefinition*>::size_type n = tiles.size();

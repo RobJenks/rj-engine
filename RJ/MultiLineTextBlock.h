@@ -95,6 +95,7 @@ protected:
 	bool										m_render;
 	OperationMode								m_mode;
 
+	std::string *								m_linecodes;
 	TextBlock **								m_lines;
 	std::string									m_text;
 
@@ -107,6 +108,7 @@ protected:
 	float										m_fontsize;
 	XMFLOAT4									m_colour;
 	Image2D *									m_back;
+	std::string									m_backcode;
 
 };
 

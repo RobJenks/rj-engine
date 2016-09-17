@@ -18,6 +18,7 @@ MultiLineTextBlock::MultiLineTextBlock(void)
 	m_code = "";
 	m_render = false;
 	m_lines = NULL;
+	m_linecodes = NULL;
 	m_mode = MultiLineTextBlock::OperationMode::IndividualLines;
 	m_text = NullString;
 
@@ -30,6 +31,7 @@ MultiLineTextBlock::MultiLineTextBlock(void)
 	m_fontsize = 0.0f;
 	m_colour = NULL_FLOAT4;
 	m_back = NULL;
+	m_backcode = "";
 }
 
 // Initialise the component and set up all resources
@@ -61,7 +63,13 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	// Allocate space for each line of the text block
 	if (m_lines) { free(m_lines); m_lines = NULL; }
 	m_lines = (TextBlock**)malloc(sizeof(TextBlock*) * m_linecount);
-	if (!m_lines) return ErrorCodes::CouldNotAllocateMemoryForMLTBlock;
+	m_linecodes = new std::string[m_linecount];
+	if (!m_lines || m_linecodes) return ErrorCodes::CouldNotAllocateMemoryForMLTBlock;
+	for (int i = 0; i < m_linecount; ++i)
+	{
+		m_lines[i] = NULL;
+		m_linecodes[i] = NullString;
+	}
 
 	// We now want to create a new text block for each of these lines
 	TextBlock *tb; 
@@ -69,15 +77,17 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	for (int i = 0; i < linecount; ++i)
 	{
 		// Attempt to create the line
-		tb = D::UI->CreateTextBlock(concat(m_code)(".line")(i).str().c_str(), "", (int)m_maxlinelength, m_font, pos, m_fontsize, m_colour, m_render);
+		std::string line_code = concat(m_code)(".line")(i).str();
+		tb = D::UI->CreateTextBlock(line_code.c_str(), "", (int)m_maxlinelength, m_font, pos, m_fontsize, m_colour, m_render);
 		if (!tb) return ErrorCodes::CouldNotCreateLineWithinMLTBlock;
 
 		// Store the line and add it to our parent render group 
 		m_lines[i] = tb;
+		m_linecodes[i] = line_code;
 		m_parent->Components.TextBlocks.AddItem(tb->GetCode(), tb);
 		
 		// Slight hack; for one line, fill the line to max length with a medium-width character, test the size 
-		// to determine control width (if required) , then revert back to null string
+		// to determine control width (if required), then revert back to null string
 		if (i == 0 && m_size.x == 0)
 		{
 			std::string s = std::string(m_maxlinelength, 'o');
@@ -102,7 +112,8 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 
 	// Create a backdrop component for the control
 	std::string back_filename = concat(D::IMAGE_DATA)(MultiLineTextBlock::BACKDROP_COMPONENT).str();
-	m_back = D::UI->NewComponent(concat(m_code)(".back").str(), back_filename.c_str(), m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
+	m_backcode = concat(m_code)(".back").str();
+	m_back = D::UI->NewComponent(m_backcode, back_filename.c_str(), m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
 	if (m_back)
 	{
 		// Set the render state based on this control state
@@ -336,14 +347,22 @@ void MultiLineTextBlock::Shutdown(void)
 		// Make sure this is a valid line
 		if (!m_lines[i]) continue;
 
-		// Attempt to remove from the parent render group
-		if (m_parent) m_parent->Components.TextBlocks.RemoveItem(m_lines[i]->GetCode());
-
-		// Shut down the component and release all its resource.  NOTE: this may not deallocate the underlying sentence
-		// object.  These are only deallocated by the text manager in one batch on shutdown.  Probably need to correct
-		// this, unless the volume will be low enough that we simply tolerate the accumulation of memory
-		m_lines[i]->Shutdown();
-		SafeDelete(m_lines[i]);
+		// Attempt to remove from the parent render group based on the LINE CODE, since that will be 
+		// unaffected if the underlying TextBlock object has already been deallocated
+		if (m_parent)
+		{
+			TextBlock *tb = m_parent->Components.TextBlocks.GetItem(m_linecodes[i]);
+			if (tb)
+			{
+				// Shut down the component and release all its resource.  NOTE: this may not deallocate the underlying sentence
+				// object.  These are only deallocated by the text manager in one batch on shutdown.  Probably need to correct
+				// this, unless the volume will be low enough that we simply tolerate the accumulation of memory
+				tb->Shutdown();
+				m_parent->Components.TextBlocks.RemoveItem(m_linecodes[i]);
+				delete tb;
+				m_lines[i] = NULL;
+			}
+		}
 	}
 
 	// Also deallocate the control backdrop
@@ -351,15 +370,22 @@ void MultiLineTextBlock::Shutdown(void)
 	{
 		if (m_parent)
 		{
-			m_parent->UnregisterRenderableComponent(m_back);
-			m_parent->Components.Image2D.RemoveItem(m_back->GetCode());
+			Image2D *back = m_parent->Components.Image2D.GetItem(m_backcode);
+			if (back)
+			{
+				m_parent->UnregisterRenderableComponent(m_back);
+				m_parent->Components.Image2D.RemoveItem(m_backcode);
+				back->Shutdown();
+				delete back;
+				m_back = NULL;
+			}
+
 		}
-		m_back->Shutdown();
-		SafeDelete(m_back);
 	}
 
 	// Deallocate any memory that was allocated specifically for this component
 	SafeFree(m_lines);
+	SafeDeleteArray(m_linecodes);
 }
 
 

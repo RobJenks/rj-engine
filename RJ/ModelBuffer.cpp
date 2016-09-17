@@ -181,7 +181,7 @@ void ModelBuffer::ReleaseAllResources(void)
 	// Deallocate material data if relevant
 	if (m_materials)
 	{
-		SafeDelete(m_materials);
+		SafeDeleteArray(m_materials);
 	}
 }
 

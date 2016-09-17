@@ -472,16 +472,13 @@ bool FileExists(const char *szPath);
 bool DirectoryExists(const char *szPath);
 
 template <typename TKey, typename TVal>
-void VectorFromUnorderedMap(unordered_map<TKey, TVal> &map, vector<TVal> *pOutVector)
+void VectorFromUnorderedMap(unordered_map<TKey, TVal> &map, vector<TVal> & pOutVector)
 {
-	// Make sure we have a valid output vector
-	if (!pOutVector) return;
-
 	// Iterate through the map in a linear fashion and copy items to the vector
 	unordered_map<TKey,TVal>::iterator it_end = map.end();
 	for (unordered_map<TKey, TVal>::iterator it = map.begin(); it != it_end; ++it)
 	{
-		pOutVector->push_back(it->second);
+		pOutVector.push_back(it->second);
 	}
 }
 

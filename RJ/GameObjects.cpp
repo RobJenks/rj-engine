@@ -43,29 +43,25 @@ namespace Game
 	// Deallocates all object register data on application shutdown
 	void ShutdownObjectRegisters(void)
 	{
-		// Traverse the object register one at a time
-		Game::ObjectRegister::iterator it = Game::Objects.begin();
-		Game::ObjectRegister::iterator it_end = Game::Objects.end();
-		while (it != it_end)
+		// Flatten the object register down to a vector so we can easily traverse and deallocate it
+		std::vector<ObjectRegisterEntry> object_vector;
+		VectorFromUnorderedMap<Game::ID_TYPE, ObjectRegisterEntry>(Game::Objects, object_vector);
+
+		// Iterate over the vector one element at a time.  Not using iterators to avoid potential invalidation
+		int n = object_vector.size();
+		for (int i = 0; i < n; ++i)
 		{
-			// Make sure this object still exists
-			if (it->second.Active && it->second.Object)
+			ObjectRegisterEntry & entry = object_vector.at(i);
+			if (entry.Active && entry.Object)
 			{
-				it->second.Active = false;				// Inactivate all entries so they now return null
-				it->second.Object->Shutdown();			// Call virtual shutdown method on the object
-				delete (it++)->second.Object;			// Delete the object, using post-increment to avoid invalidating the pointer
-			}
-			else
-			{
-				it->second.Active = false;				// Inactivate all entries so they now return null
-				++it;									// If this object does not exist then simply increment immediately and move on
+				entry.Object->Shutdown();
 			}
 		}
 
-		// Call the unordered_map::clear method, which will call the destructor for every element in turn (now unnecessary) before clearing the collection
-		// We no longer need to do this; leaving the entries present means that any shutdown logic beyond this that (incorrectly) tries to access
-		// an object will retrieve NULL and therefore take no action
-		//Game::Objects.clear();
+		// Now clear both this temporary vector and the primary game object collections
+		object_vector.clear();
+		Game::Objects.clear();
+		Game::ObjectsByCode.clear();
 
 		// Deallocate the null object register entry
 		SafeDelete(Game::NullObjectReference);
