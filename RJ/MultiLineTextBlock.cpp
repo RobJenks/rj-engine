@@ -64,7 +64,7 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	if (m_lines) { free(m_lines); m_lines = NULL; }
 	m_lines = (TextBlock**)malloc(sizeof(TextBlock*) * m_linecount);
 	m_linecodes = new std::string[m_linecount];
-	if (!m_lines || m_linecodes) return ErrorCodes::CouldNotAllocateMemoryForMLTBlock;
+	if (!m_lines || !m_linecodes) return ErrorCodes::CouldNotAllocateMemoryForMLTBlock;
 	for (int i = 0; i < m_linecount; ++i)
 	{
 		m_lines[i] = NULL;
