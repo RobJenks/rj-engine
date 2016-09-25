@@ -14,7 +14,7 @@ unsigned int Light::NewUniqueID(void)
 
 // Default constructor
 Light::Light(void)
-	: Data()
+	: m_active(true), Data()
 {
 	// Assign a new unique ID
 	Data.ID = Light::NewUniqueID();
@@ -22,7 +22,7 @@ Light::Light(void)
 
 // Custom copy constructor
 Light::Light(const Light & source) 
-	: Data(source.Data)
+	: m_active(source.IsActive()), Data(source.Data)
 {
 	// Assign a new unique ID to distingush from the source light object
 	Data.ID = Light::NewUniqueID();
@@ -88,6 +88,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	INIT_DEBUG_FN_TESTING_AT_LEVEL(command, 2)
 
 	// Accessor methods
+	REGISTER_DEBUG_ACCESSOR_FN(IsActive)
 	REGISTER_DEBUG_ACCESSOR_FN(GetID)
 	REGISTER_DEBUG_ACCESSOR_FN(GetColour)
 	REGISTER_DEBUG_ACCESSOR_FN(GetType)
@@ -104,6 +105,9 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetAttenuationExp)
 
 	// Mutator methods
+	REGISTER_DEBUG_FN(Activate)
+	REGISTER_DEBUG_FN(Deactivate)
+	REGISTER_DEBUG_FN(SetIsActive, command.ParameterAsBool(3))
 	REGISTER_DEBUG_FN(SetID, (unsigned int)command.ParameterAsInt(3))
 	REGISTER_DEBUG_FN(SetColour, XMFLOAT3(command.ParameterAsFloat(3), command.ParameterAsFloat(4), command.ParameterAsFloat(5)))
 	REGISTER_DEBUG_FN(SetType, command.ParameterAsInt(3))

@@ -1,5 +1,50 @@
+#include "GameVarsExtern.h"
+#include "CoreEngine.h"
+#include "LightingManagerObject.h"
+#include "Light.h"
+
 #include "LightSource.h"
 
+
+// Creates a new light source with default properties
+LightSource * LightSource::Create(void)
+{
+	// Create a new light source object
+	LightSource *ls = new LightSource();
+	if (!ls) return NULL;
+
+	// Apply default point light properties, assign to the light source and return
+	Light l;
+	Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
+	ls->SetLight(l);
+	return ls;
+}
+
+// Creates a new light source based on the supplied light object
+LightSource * LightSource::Create(const Light & light)
+{
+	// Create a new light source object
+	LightSource *ls = new LightSource();
+	if (!ls) return NULL;
+
+	// Apply supplied lighting data and return
+	ls->SetLight(light);
+	return ls;
+}
+
+// Creates a new light source based on the supplied light data
+LightSource * LightSource::Create(const LightData & data)
+{
+	// Create a new light source object
+	LightSource *ls = new LightSource();
+	if (!ls) return NULL;
+
+	// Apply supplied lighting data and return
+	Light l;
+	l.Data = data;
+	ls->SetLight(l);
+	return ls;
+}
 
 // Default constructor
 LightSource::LightSource(void)

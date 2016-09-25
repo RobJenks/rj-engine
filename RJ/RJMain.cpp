@@ -518,7 +518,17 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_5])
 	{
-		s2()->AssignNewOrder(new Order_AttackBasic(s2(), s3[0]()));
+		iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
+		for (iObject::AttachmentSet::iterator it = a1()->GetChildObjects().begin(); it != it_end; ++it)
+		{
+			if ((*it).Child && (*it).Child->GetObjectType() == iObject::ObjectType::LightSourceObject)
+			{
+				Light & light = ((LightSource*)(*it).Child)->LightObject();
+				light.SetIsActive(!light.IsActive());
+				break;
+			}
+		}
+
 		Game::Keyboard.LockKey(DIK_5);
 	}
 	if (b[DIK_6])
@@ -2057,11 +2067,8 @@ void RJMain::__CreateDebugScenario(void)
 	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
 
 	Light l;
-	//Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
 	Game::Engine->LightingManager.GetDefaultSpotLightData(l.Data);
-	LightSource *ls = new LightSource();
-	ls->SetModel(Model::GetModel("unit_cone_model"));
-	ls->SetLight(l);
+	LightSource *ls = LightSource::Create(l);
 	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
 	Game::RegisterObject(ls);
 	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -2093,6 +2100,13 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring nse_t = (up | right | down);			// == 14
 	bitstring nsew = (up | left | down | right);	// == 15
 
+	// Add a spotlight to the player actor
+	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
+	LightSource *player_light = LightSource::Create(pl);
+	cs()->GetSpaceEnvironment()->AddBaseObject(player_light, NULL_VECTOR);
+	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	Game::RegisterObject(ls);
+	a1()->AddChildAttachment(ls, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

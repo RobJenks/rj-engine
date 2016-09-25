@@ -21,6 +21,14 @@ public:
 	// Lighting data
 	LightData						Data;
 
+	// Returns a flag indicating whether the light is currently active
+	CMPINLINE bool					IsActive(void) const		{ return m_active; }
+
+	// Sets the active/inactive status of this light
+	CMPINLINE void					Activate(void) 				{ m_active = true; }
+	CMPINLINE void					Deactivate(void)			{ m_active = false; }
+	CMPINLINE void					SetIsActive(bool active)	{ m_active = active; }
+
 	// Default constructor
 	Light(void);
 
@@ -81,6 +89,9 @@ public:
 	~Light(void);
 
 protected:
+
+	// Flag that indicates whether this light is active
+	bool							m_active;
 
 };
 

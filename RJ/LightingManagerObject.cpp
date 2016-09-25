@@ -135,15 +135,15 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 	Game::LIGHT_CONFIG config = 0U;
 
 	// Iterate through each potentially-relevant light in turn
-	const LightSource *light; 
 	for (LightSources::size_type i = 0; i < m_source_count; ++i)
 	{
-		// Get a reference to the light
-		light = m_sources[i].Source;
+		// Get a reference to the light and make sure it is active
+		const LightSource & light = *(m_sources[i].Source);
+		if (light.GetLight().IsActive() == false) continue;
 
 		// Set this light source to active in the output light config if it is in range
-		float r1r2 = (object->GetCollisionSphereRadius() + light->GetCollisionSphereRadius());
-		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), light->GetPosition())));
+		float r1r2 = (object->GetCollisionSphereRadius() + light.GetCollisionSphereRadius());
+		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), light.GetPosition())));
 		if (distsq < (r1r2 * r1r2))
 		{
 			// The object is in range of this light

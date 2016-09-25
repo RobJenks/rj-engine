@@ -14,8 +14,17 @@ public:
 	// Specify the correct aligned allocators to use for this object type
 	USE_ALIGN16_ALLOCATORS(LightSource)
 
-	// Default constructor
-	LightSource(void);
+	// Creates a new light source with default properties
+	static LightSource *								Create(void);
+
+	// Creates a new light source based on the supplied light object
+	static LightSource *								Create(const Light & light);
+
+	// Creates a new light source based on the supplied light data
+	static LightSource *								Create(const LightData & data);
+
+	// Return a non-const reference to the underlying light object
+	CMPINLINE Light &									LightObject(void)					{ return m_light; }
 
 	// Return or set the light data for this light source
 	CMPINLINE const Light &								GetLight(void) const				{ return m_light; }
@@ -56,6 +65,9 @@ protected:
 
 	// Importance of the light for use when rendering needs to be prioritised
 	int													m_priority;
+
+	// Default constructor; protected since all light sources should be initialised via Create() method
+	LightSource(void);
 
 };
 
