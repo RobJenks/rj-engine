@@ -130,6 +130,11 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
 		(tex->GetTexture() != NULL ? tex : NULL));
 
+	// Initialise the volumetric line used for rendering the collider trajectory in structural test mode
+	tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"));
+	m_intersect_test_trajectory = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 0.243f, 0.11f, 0.75f), 0.5f,
+		(tex->GetTexture() != NULL ? tex : NULL));
+
 }
 
 // Revert any editor-specific render states and data
@@ -163,12 +168,17 @@ void UI_ShipBuilder::Render(void)
 	// Perform any rendering updates required for the editor
 	PerformRenderUpdate();
 
-	// Render the current selection and any objects part-way through being placed
-	RenderCurrentActions();
-
 	// Render the editor grid, depending on editor mode
 	RenderEditorGrid();
 
+	// Perform any editor-mode-specific rendering
+	switch (m_mode)
+	{
+		case EditorMode::ShipSectionMode:		/* Nothing for now */						break;
+		case EditorMode::TileMode:				PerformTileModeRendering();					break;
+		case EditorMode::ObjectMode:			/* Nothing for now */						break;
+		case EditorMode::StructuralTestMode:	PerformStructuralTestModeRendering();		break;
+	}
 }
 
 
@@ -181,11 +191,11 @@ void UI_ShipBuilder::PerformRenderUpdate(void)
 	Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);
 }
 
-// Render the current selection and any objects part-way through being placed
-void UI_ShipBuilder::RenderCurrentActions()
+// Perform editor-mode-specific rendering
+void UI_ShipBuilder::PerformTileModeRendering(void)
 {
-	// Actions to be performed when the user is in tile mode and has the mouse over a valid ship tile
-	if (m_mouse_is_over_element && m_mode == UI_ShipBuilder::EditorMode::TileMode)
+	// Actions to be performed when the user has the mouse over a valid ship tile
+	if (m_mouse_is_over_element)
 	{
 		// Render a highlighting effect on the element currently being highlighted, if applicable
 		//Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_mouse_over_element, XMFLOAT3(128.0f, 255.0f, 255.0f), 255.0f);
@@ -194,6 +204,18 @@ void UI_ShipBuilder::RenderCurrentActions()
 
 		// If the user is trying to place a ship tile we may also need to render it here
 		RenderTilePlacement();
+	}
+}
+
+// Perform editor-mode-specific rendering
+void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
+{
+	// If the two intersection test markers are visible, draw the trajectory between them
+	if (m_intersect_marker_start && m_intersect_marker_end)
+	{
+		m_intersect_test_trajectory.P1 = m_intersect_marker_start->GetPosition();
+		m_intersect_test_trajectory.P2 = m_intersect_marker_end->GetPosition();
+		Game::Engine->RenderVolumetricLine(m_intersect_test_trajectory);
 	}
 }
 
@@ -813,7 +835,17 @@ void UI_ShipBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 	// Take different action depending on the active editor mode
 	if (m_mode == EditorMode::StructuralTestMode)
 	{
-		HandleStructuralModeMouseMove(void);
+		HandleStructuralModeMouseMove();
+	}
+}
+
+// Method to handle the mouse up event
+void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+{
+	// Take different action depending on the active editor mode
+	if (m_mode == EditorMode::StructuralTestMode)
+	{
+		HandleStructuralModeMouseUp();
 	}
 }
 
@@ -970,7 +1002,8 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// Parameter checks
 	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
 
-
+	*** ADD ISPACEOBJENVIRONMENT METHOD WHICH HANDLES A COLLISION THROUGH THE ENVIRONMENT, THEN CALL IT HERE
+		AND RENDER EACH ELEMENT THAT IS DESTROYED/DAMAGED BY THE PROJECTILE ***
 
 
 }
@@ -1008,16 +1041,24 @@ void UI_ShipBuilder::HandleStructuralModeMouseMove(void)
 	// If we currently have a marker selected, we want to move it
 	if (m_selected_intersection_marker && (*m_selected_intersection_marker))
 	{
-		<< MOVE THE MARKER >>
+		// Get the marker and mouse positions in screen space
+		XMVECTOR marker_sc = Game::Engine->WorldToScreen((*m_selected_intersection_marker)->GetPosition());
+		XMVECTOR mouse_sc = VectorFromIntVector2(Game::Mouse.GetCursor());
+
+		// Replace the marker xy coords with the equivalent mouse coords, then unproject back into 
+		// world space and set the marker position
+		XMVECTOR new_sc = XMVectorSelect(mouse_sc, marker_sc, VCTRL_0011);
+		XMVECTOR new_world = Game::Engine->ScreenToWorld(new_sc);
+		(*m_selected_intersection_marker)->SetPosition(new_world);
 	}
-		
 }
 
 
 // Handles the mouse up event while in structural testing mode
 void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
 {
-	// << Perform a test >>
+	// Perform an intersection test with the markers at their current positions
+	PerformIntersectionTest();
 
 	// Clear the currently-selected marker
 	m_selected_intersection_marker = NULL;

@@ -117,7 +117,7 @@ public:
 	// Methods to accept mouse events from the UI manager
 	void ProcessMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
 	void ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component);
-	void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) { }
+	void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component);
 
 	void ProcessRightMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
 	void ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component);
@@ -206,8 +206,9 @@ protected:
 	// Render the editor grid, depending on editor mode
 	void										RenderEditorGrid(void);
 
-	// Render the current selection and any objects part-way through being placed
-	void										RenderCurrentActions(void);
+	// Perform editor-mode-specific rendering
+	void										PerformTileModeRendering(void);
+	void										PerformStructuralTestModeRendering(void);
 
 	// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
 	void										MovePlacementTile(const INTVECTOR3 & location);
@@ -286,11 +287,12 @@ protected:
 	std::vector<TilePlacementIssue>				m_tile_placement_issues;			// Vector populated with each tile placement error that is encountered
 	std::vector<INTVECTOR3>						m_placement_tile_changes;			// Vector populated with the location of all tiles that were temporarily modified during 
 																					// tile placement, and which need to be reverted once tile placement ends or moves to another element
-
+public:
 	// Fields relating to the structural testing functionality
 	SimpleShip *								m_intersect_marker_start;			// Marker at the start of the projectile intersection test path
 	SimpleShip *								m_intersect_marker_end;				// Marker at the end of the projectile intersection test path
 	SimpleShip **								m_selected_intersection_marker;		// The marker that is currently being manipulated (if applicable)
+	VolumetricLine								m_intersect_test_trajectory;		// Trajectory of the collider in interection test mode
 
 };
 

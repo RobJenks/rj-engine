@@ -115,7 +115,8 @@ CoreEngine::CoreEngine(void)
 	m_instanceparams = NULL_FLOAT4;
 
 	// Initialise all key matrices to the identity
-	r_view = r_projection = r_orthographic = r_invview = r_viewproj = r_invviewproj = m_projscreen = r_viewprojscreen = ID_MATRIX;
+	r_view = r_projection = r_orthographic = r_invview = r_viewproj = r_invviewproj = m_projscreen 
+		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
 	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
 
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
@@ -1110,6 +1111,7 @@ void CoreEngine::Render(void)
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
 	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
+	r_invviewprojscreen = XMMatrixInverse(NULL, r_viewprojscreen);
 
 	// Store local float representations of each key matrix for runtime efficiency
 	XMStoreFloat4x4(&r_view_f, r_view);

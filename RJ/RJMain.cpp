@@ -538,55 +538,16 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_7])
 	{
-		if (!b[DIK_LSHIFT])
-		{
-			if (true)
-			{
-				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-				Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorSet(298.0f, 75.0f, 1463.0f, 0.0f));
-				XMVECTOR orient = XMQuaternionNormalize(XMVectorSet(0.0546f, -0.99057f, 0.0973f, 0.4090f));
-				XMFLOAT3 pos; XMStoreFloat3(&pos, cs()->GetPosition());
-				XMFLOAT3 size; XMStoreFloat3(&size, cs()->GetSize());
-				Game::Engine->GetCamera()->SetDebugCameraOrientation(orient);
+		XMVECTOR pos = ss()->GetPosition();
+		XMVECTOR proj = Game::Engine->WorldToProjection(pos);
+		
+		XMVECTOR adj = XMVectorSetX(NULL_VECTOR, 10.0f * Game::TimeFactor);
+		XMVECTOR newproj = XMVectorAdd(proj, adj);
+		
+		XMVECTOR unproj = XMVector3TransformCoord(newproj, Game::Engine->GetRenderInverseViewProjectionMatrix());
+		ss()->SetPosition(unproj);
 
-				for (int x = 0; x < 10; ++x)
-					for (int y = 0; y < 10; ++y)
-					{
-						SimpleShip *tmp = SimpleShip::Create("testship1");
-						SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(tmp);
-						XMFLOAT3 tmpsize; XMStoreFloat3(&tmpsize, tmp->GetSize());
-						
-						tmp->SetName("DIK_7_SPAWNED_SHIP");
-						tmp->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(
-							pos.x + ((x - 5)*tmpsize.x*1.2f),
-							pos.y + ((y - 5)*tmpsize.y*1.2f),
-							pos.z + (size.z*0.5f) + 1000.0f, 0.0f));
-						tmp->SetOrientation(ID_QUATERNION);
-						tmp->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-
-					}
-			}
-		}
-		else
-		{
-			Game::ObjectRegister::iterator it_end = Game::Objects.end();
-			for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
-			{
-				if (it->second.Object && it->second.Object->GetName() == "DIK_7_SPAWNED_SHIP" && 
-					it->second.Object->GetObjectType() == iObject::ObjectType::SimpleShipObject)
-				{
-					SimpleShip *s = (SimpleShip*)it->second.Object;
-					XMFLOAT3 spos; XMStoreFloat3(&spos, s->GetPosition());
-					s->CancelAllOrders();
-					s->AssignNewOrder(new Order_MoveToPosition(XMLoadFloat3(&XMFLOAT3(
-						spos.x + frand_lh(-2500.0f, 2500.0f),
-						0.0f,
-						spos.z + frand_lh(-2500.0f, 2500.0f))), 250.0f));
-				}
-			}
-			
-		}
-		Game::Keyboard.LockKey(DIK_7);
+		//Game::Keyboard.LockKey(DIK_7);
 	}
 
 	if (b[DIK_8])
@@ -2182,7 +2143,28 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		/*XMVECTOR pos = ss()->GetPosition();
+		XMVECTOR proj = Game::Engine->WorldToProjection(pos);
+		XMVECTOR unproj = XMVector3TransformCoord(proj, Game::Engine->GetRenderInverseViewProjectionMatrix());
+		*/
+
+		iUIController *controller = D::UI->GetActiveUIController();
+		if (!controller || controller->GetCode() != "UI_SHIPBUILDER") return;
+		
+		UI_ShipBuilder *ui = (UI_ShipBuilder*)controller;
+		XMVECTOR start, end;
+		if (ui)
+		{
+			start = (ui->m_intersect_marker_start ? ui->m_intersect_marker_start->GetPosition() : LARGE_VECTOR_P);
+			end = (ui->m_intersect_marker_end ? ui->m_intersect_marker_end->GetPosition() : LARGE_VECTOR_P);
+		}
+		else
+		{
+			start = end = LARGE_VECTOR_N;
+		}
+	
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Start: %s  |  End: %s",
+			Vector3ToString(start).c_str(), Vector3ToString(end).c_str());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
