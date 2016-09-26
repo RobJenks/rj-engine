@@ -1284,6 +1284,9 @@
     <ClInclude Include="SentenceType.h">
       <Filter>Engine\Text</Filter>
     </ClInclude>
+    <ClInclude Include="ModifierDetails.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

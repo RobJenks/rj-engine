@@ -796,6 +796,70 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRay(const Ray & ray, 
 	}
 }
 
+// Determines the sequence of elements intersected by a world-space ray.  Returns a flag indicating 
+// whether any intersection does take place
+bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, std::vector<int> & outElements)
+{
+	// Locate the entry point of the ray in this environment (and early-exit if there is no intersection)
+	INTVECTOR3 start_el;
+	if (DetermineElementIntersectedByRay(ray, start_el) == false) return false;
+
+	// Maintain a (bitstring) vector of all elements that have been tested for intersection, to avoid infinite loops
+	std::vector<bool> checked = std::vector<bool>(m_elementcount, false);
+
+	// Maintain a vector of elements to test intersections from; starting element is the first value
+	std::vector<int> test;
+	test.push_back(ELEMENT_INDEX(start_el.x, start_el.y, start_el.z));
+
+	// Get a reference to the environment OBB data, forcing a recalculation at the same time if required
+	const OrientedBoundingBox::CoreOBBData & obb = CollisionOBB.Data();
+
+	// Create an AABB to represent element (0,0,0), with bounds expanded to account for the 'width' of the ray
+	XMVECTOR extent = XMVectorAdd(Game::C_CS_ELEMENT_EXTENT_V, XMVectorReplicate(ray_radius));
+	AABB bounds = AABB(XMVectorNegate(extent), extent);
+
+	// Transform the ray into local environment space, and then translate it into element (0,0,0) space
+	Ray localray = Ray(ray); 
+	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
+	XMVECTOR el0adj = XMVectorSubtract(obb.ExtentV, Game::C_CS_ELEMENT_MIDPOINT_NEG_V);	// Since El0 = -(obb_extent - el_midpoint)
+	XMVECTOR ray_in_el0 = XMVectorAdd(localray.Origin, el0adj);
+	localray.SetOrigin(ray_in_el0);
+
+	// Iterate until we have no more elements to test
+	int id; INTVECTOR3 location;
+	int current = -1;
+	while (++current < (int)test.size())
+	{
+		// Retrieve the next element to be tested, and record the fact that we are now processing it
+		id = test[current];	
+		checked[id] = true; 
+		const ComplexShipElement & el = m_elements[id];
+
+		// Translate the ray into the local space of this element, based on an offset from (0,0,0)
+		localray.SetOrigin(XMVectorAdd(ray_in_el0, Game::ElementLocationToPhysicalPosition(el.GetLocation())));
+
+		// Test for a collision between this ray and the element AABB; if none, skip processing this element immediately
+		if (Game::PhysicsEngine.DetermineRayVsAABBIntersection(localray, bounds) == false) continue;
+
+		// We have an intersection.  First, add this to the list of elements that were intersected
+		outElements.push_back(id);
+
+		// Now consider all neighbours of this element for intersection, if they have not already been tested
+		const int(&adj)[Direction::_Count] = el.AdjacentElements();
+		for (int i = 0; i < Direction::_Count; ++i)
+		{
+			if (adj[i] != -1 && checked[adj[i]] == false)	test.push_back(adj[i]);
+		}
+	}
+ 
+	// Testing complete; return true since we know we had an intersection of some kind
+	return true;
+}
+
+"PROCESS_COLLISION" METHOD CAN NOW USE THIS PATH AND PROCESS EACH ELEMENT IN THE PATH IN TURN.  ACCOUNT FOR THE MASS & 'HARDNESS' OF ALL
+TILES AND OBJECT WITHIN THE ELEMENT WHEN DETERMINING WHETHER IT IS DESTROYED
+
+
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 
 // if necessary.  Returns a bool indicating whether reallocation was necessary
 Result iSpaceObjectEnvironment::EnsureShipElementSpaceIncorporatesLocation(INTVECTOR3 location)

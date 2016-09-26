@@ -1,4 +1,7 @@
 <gamedata>
+
+  <!-- Null faction -->
+  <include file="Factions\Faction_NONE.xml" />
   
   <!-- Primary factions -->
   <include file="Factions\Faction_US.xml" />

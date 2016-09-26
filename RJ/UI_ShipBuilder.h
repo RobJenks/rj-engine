@@ -21,7 +21,7 @@ public:
 	USE_ALIGN16_ALLOCATORS(UI_ShipBuilder)
 
 	// Enumeration of possible editor modes
-	enum EditorMode { ShipSectionMode = 0, TileMode, ObjectMode };
+	enum EditorMode { ShipSectionMode = 0, TileMode, ObjectMode, StructuralTestMode };
 
 	// Enumeration of possible camera states
 	enum SBCameraState { Normal = 0, Rotating, Locked };
@@ -116,7 +116,7 @@ public:
 
 	// Methods to accept mouse events from the UI manager
 	void ProcessMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
-	void ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
+	void ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component);
 	void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) { }
 
 	void ProcessRightMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
@@ -175,6 +175,7 @@ protected:
 	void										ActivateSectionMode(EditorMode previous_mode);
 	void										ActivateTileMode(EditorMode previous_mode);
 	void										ActivateObjectMode(EditorMode previous_mode);
+	void										ActivateStructuralTestMode(EditorMode previous_mode);
 
 	// Locks the camera for the specified period of time, after which it will be released again to the user
 	void										LockCamera(unsigned int time_ms);
@@ -222,6 +223,24 @@ protected:
 	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location, 
 																	std::vector<TilePlacementIssue> & outPlacementIssues);
 
+	// Reset the position of the intersection test markers and the test parameters
+	void										ResetStructuralTestParameters(void);
+
+	// Sets the position of an intersection test marker in world space
+	void										SetIntersectionTestMarkerPosition(SimpleShip **ppMarker, const FXMVECTOR position);
+
+	// Performs the intesection test in 'structural test' mode
+	void										PerformIntersectionTest(void);
+
+	// Handles the LMB first-down event in structural test mode
+	void										HandleStructuralModeMouseFirstDown(void);
+
+	// Handles the mouse move event while in structural testing mode
+	void										HandleStructuralModeMouseMove(void);
+
+	// Handles the mouse up event while in structural testing mode
+	void										HandleStructuralModeMouseUp(void);
+
 	// Internal methods to get the current position/orientation of the game camera
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
@@ -268,6 +287,10 @@ protected:
 	std::vector<INTVECTOR3>						m_placement_tile_changes;			// Vector populated with the location of all tiles that were temporarily modified during 
 																					// tile placement, and which need to be reverted once tile placement ends or moves to another element
 
+	// Fields relating to the structural testing functionality
+	SimpleShip *								m_intersect_marker_start;			// Marker at the start of the projectile intersection test path
+	SimpleShip *								m_intersect_marker_end;				// Marker at the end of the projectile intersection test path
+	SimpleShip **								m_selected_intersection_marker;		// The marker that is currently being manipulated (if applicable)
 
 };
 

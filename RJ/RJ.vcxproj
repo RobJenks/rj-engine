@@ -484,6 +484,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
+    <ClInclude Include="ModifierDetails.h" />
     <ClInclude Include="MValue.h" />
     <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />

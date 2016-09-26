@@ -46,6 +46,12 @@ public:
 		Origin = origin;
 	}
 
+	// Move the ray origin
+	CMPINLINE void				MoveOrigin(const FXMVECTOR offset)
+	{
+		Origin = XMVectorAdd(Origin, offset);
+	}
+
 	// Update the ray direction
 	void						SetDirection(const FXMVECTOR direction);
 

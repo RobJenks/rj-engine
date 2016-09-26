@@ -227,6 +227,11 @@ namespace Game {
 	XMVECTOR C_CS_ELEMENT_SCALE_V = XMVectorReplicate(C_CS_ELEMENT_SCALE);				// The physical size of each CS element in space (replicated vector form)
 	XMVECTOR C_CS_ELEMENT_MIDPOINT_V = XMVectorReplicate(C_CS_ELEMENT_MIDPOINT);		// Midpoint of an element in each dimension  (replicated vector form)
 	XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V = XMVectorReplicate(C_CS_ELEMENT_SCALE_RECIP);	// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
+	float C_CS_ELEMENT_EXTENT = C_CS_ELEMENT_MIDPOINT;									// Extent (centre-to-edge) of an element in each dimension
+	XMVECTOR C_CS_ELEMENT_EXTENT_V = XMVectorReplicate(C_CS_ELEMENT_EXTENT);			// Extent (centre-to-edge) of an element in each dimension (replicated vector form)
+	XMVECTOR C_CS_ELEMENT_SCALE_NEG_V = XMVectorNegate(C_CS_ELEMENT_SCALE_V);			// Negation of the element scale (replicated vector form)
+	XMVECTOR C_CS_ELEMENT_MIDPOINT_NEG_V = XMVectorNegate(C_CS_ELEMENT_MIDPOINT_V);		// Negation of the element midpoint (replicated vector form)
+	XMVECTOR C_CS_ELEMENT_EXTENT_NEG_V = XMVectorNegate(C_CS_ELEMENT_EXTENT_V);			// Negation of the element extent (replicated vector form)
 
 	int C_CS_ELEMENT_SIZE_LIMIT = (500 * 500 * 100);									// Maximum element count for any complex ship element environment
 	float C_CS_PERIMETER_BEACON_FREQUENCY = 400.0f;										// The (approx, max) spacing between perimeter beacons on a capital ship

@@ -241,6 +241,9 @@ public:
 	// intersection does take place
 	bool							DetermineElementIntersectedByRay(const Ray & ray, int level, INTVECTOR3 & outElement);
 
+	// Determines the sequence of elements intersected by a world-space ray.  Returns a flag indicating 
+	// whether any intersection does take place
+	bool							DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, std::vector<int> & outElements);
 
 	// Get a reference to the navigation network assigned to this ship
 	CMPINLINE NavNetwork *			GetNavNetwork(void)				{ return m_navnetwork; }

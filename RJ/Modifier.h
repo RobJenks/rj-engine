@@ -30,6 +30,9 @@ public:
 	// Constuctor that passes required modifier values
 	Modifier(ModifierType type, T value) : Type(type), Value(value)								{ }
 
+	// Copy constructor
+	Modifier(const Modifier<T> & other) : Type(other.Type), Value(other.Value)					{ }
+
 	// Define custom equality operators for this type
 	CMPINLINE friend bool operator== (const Modifier<T> &v1, const Modifier<T> &v2) { return (v1.Type == v2.Type && v1.Value == v2.Value); }
 	CMPINLINE friend bool operator!= (const Modifier<T> &v1, const Modifier<T> &v2) { return (v1.Type != v2.Type || v1.Value != v2.Value); }

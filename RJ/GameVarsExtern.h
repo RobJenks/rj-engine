@@ -238,6 +238,11 @@ namespace Game {
 	extern XMVECTOR C_CS_ELEMENT_SCALE_V;			// The physical size of each CS element in space (replicated vector form)
 	extern XMVECTOR C_CS_ELEMENT_MIDPOINT_V;		// Midpoint of an element in each dimension  (replicated vector form)
 	extern XMVECTOR C_CS_ELEMENT_SCALE_RECIP_V;		// Reiprocal of the element scale (1.0f/scale)  (replicated vector form)
+	extern float C_CS_ELEMENT_EXTENT;				// Extent (centre-to-edge) of an element in each dimension
+	extern XMVECTOR C_CS_ELEMENT_EXTENT_V;			// Extent (centre-to-edge) of an element in each dimension (replicated vector form)
+	extern XMVECTOR C_CS_ELEMENT_SCALE_NEG_V;		// Negation of the element scale (replicated vector form)
+	extern XMVECTOR C_CS_ELEMENT_MIDPOINT_NEG_V;	// Negation of the element midpoint (replicated vector form)
+	extern XMVECTOR C_CS_ELEMENT_EXTENT_NEG_V;		// Negation of the element extent (replicated vector form) 
 
 	extern int C_CS_ELEMENT_SIZE_LIMIT;					// Maximum element count for any complex ship element environment
 	extern float C_CS_PERIMETER_BEACON_FREQUENCY;		// The (approx, max) spacing between perimeter beacons on a capital ship

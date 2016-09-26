@@ -34,8 +34,10 @@ Actor *ActorBase::CreateInstance(void)
 	m_model->CreateInstance(a->GetModelReference());
 	
 	// Generate a random set of attributes based on the base class traits
-	for (int i=0; i<(int)ActorAttr::A_COUNT; i++)
-		a->Attributes[i].BaseValue = this->Attributes[i].Generate();
+	for (int i = 0; i < (int)ActorAttr::A_COUNT; ++i)
+	{
+		a->Attributes[i].SetBaseValue(this->Attributes[i].Generate());
+	}
 
 	// Apply any other effects, e.g. random events influencing the actor traits, add equipped items etc.
 

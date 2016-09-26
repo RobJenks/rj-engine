@@ -525,7 +525,7 @@ void RJMain::ProcessKeyboardInput(void)
 			{
 				Light & light = ((LightSource*)(*it).Child)->LightObject();
 				light.SetIsActive(!light.IsActive());
-				break;
+				break; 
 			}
 		}
 

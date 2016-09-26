@@ -8,6 +8,7 @@
 #include "FastMath.h"
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
+#include "ModifiedValue.h"
 class TiXmlElement;
 
 // Enumeration of actor attributes
@@ -19,10 +20,8 @@ enum ActorAttr
 	A_Constitution,			// Primary attribute
 	A_Will,					// Primary attribute
 
-	// Basic properties
+	// Properties
 	A_BaseHealth,			// Affected by: Constitution
-
-	// Movement properties
 	A_RunSpeed,				// Affected by: Agility
 	A_WalkSpeed,			// Affected by: RunSpeed
 	A_StrafeSpeed,			// Affected by: RunSpeed
@@ -115,17 +114,9 @@ struct ActorBaseAttributeData
 		}
 
 		// Constrain to be within the min & max bounds, then return the value
-		return (min(max(result, MinBound), MaxBound));
+		return clamp(result, MinBound, MaxBound);
 	}
 
-};
-
-// Struct used to store actor instance attributes.  Becomes the template type for the ActorAttributes collection
-// This class has no special alignment requirements
-struct ActorInstanceAttributeData
-{
-	float						BaseValue;			// Base value inherited from the ActorBase object
-	float						Value;				// Final value, once modifiers etc. have been applied for this actor instance
 };
 
 // Struct holding all the key actor attributes.  Used in multiple places to ensure consistency
@@ -150,9 +141,11 @@ struct ActorAttributes
 	}
 };
 
-// Define types for each templated version of the attribute collection
+// Type used for generation of all base attributes
 typedef			ActorAttributes<ActorBaseAttributeData>			ActorBaseAttributes;
-typedef			ActorAttributes<ActorInstanceAttributeData>		ActorInstanceAttributes;
+
+// Type that holds all base & modified actor attributes
+typedef			ActorAttributes<ModifiedValue<float>>			ActorInstanceAttributes;
 
 
 #endif

@@ -1,6 +1,7 @@
 <gamedata>
 
   <ActorAttributeGeneration>
+
     <!-- Basic values for each attribute -->
     <AttributeRange name="Accuracy" min="0.0" base="25.0" max="100.0" />
     <AttributeRange name="Agility" min="0.0" base="25.0" max="100.0" />

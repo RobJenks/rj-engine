@@ -11,6 +11,7 @@
 #include "TileAdjacency.h"
 #include "UserInterface.h"
 #include "Light.h"
+#include "FactionManagerObject.h"
 #include "SimpleShip.h"	// DBG
 
 #include "UI_ShipBuilder.h"
@@ -87,6 +88,8 @@ void UI_ShipBuilder::Activate(void)
 	m_tile_being_placed = NULL;
 	m_tile_placement_is_valid = false;
 	m_placing_generic_corridors = false;
+	m_intersect_marker_start = m_intersect_marker_end = NULL;
+	m_selected_intersection_marker = NULL;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -402,6 +405,7 @@ void UI_ShipBuilder::EditorModeActivated(EditorMode mode, EditorMode previous_mo
 		case EditorMode::ShipSectionMode:		ActivateSectionMode(previous_mode);			break;
 		case EditorMode::TileMode:				ActivateTileMode(previous_mode);			break;
 		case EditorMode::ObjectMode:			ActivateObjectMode(previous_mode);			break;
+		case EditorMode::StructuralTestMode:	ActivateStructuralTestMode(previous_mode);	break;
 		default:
 			return;
 	}
@@ -410,37 +414,53 @@ void UI_ShipBuilder::EditorModeActivated(EditorMode mode, EditorMode previous_mo
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateSectionMode(EditorMode previous_mode)
 {
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+
 	// Remove any fade effect from the ship or its contents when building entire ship sections
-	if (m_ship)
-	{ 
-		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
-		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
-		m_ship->ForceRenderingOfInterior(false);
-	}
+	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->ForceRenderingOfInterior(false);
 }
 
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateTileMode(EditorMode previous_mode)
 {
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+	
 	// Fade out the ship exterior, leaving all tiles at full alpha
-	if (m_ship)
-	{
-		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
-		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
-		m_ship->ForceRenderingOfInterior(true);
-	}
+	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->ForceRenderingOfInterior(true);
 }
 
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateObjectMode(EditorMode previous_mode)
 {
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+
 	// Fade out the ship exterior and tile exteriors
-	if (m_ship)
-	{
-		m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
-		m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
-		m_ship->ForceRenderingOfInterior(true);
-	}
+	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->ForceRenderingOfInterior(true);
+}
+
+
+// Activate the specified editor mode
+void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
+{
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+
+	// Fade out the ship exterior so we can show damage per element
+	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->ForceRenderingOfInterior(true);
+	
+	// Reset the position of the intersection test markers and the test parameters
+	ResetStructuralTestParameters();
 }
 
 // Locks the camera for the specified period of time, after which it will be released again to the user
@@ -616,16 +636,17 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keys[DIK_PGDN])	ZoomOut();
 	
 	// Controls to change editor mode
-	if (keys[DIK_1])			{ SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);	keyboard->LockKey(DIK_1); }
-	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);			keyboard->LockKey(DIK_2); }
-	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);		keyboard->LockKey(DIK_3); }
+	if (keys[DIK_1])			{ SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);		keyboard->LockKey(DIK_1); }
+	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);				keyboard->LockKey(DIK_2); }
+	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);			keyboard->LockKey(DIK_3); }
+	else if (keys[DIK_9])		{ SetEditorMode(UI_ShipBuilder::EditorMode::StructuralTestMode);	keyboard->LockKey(DIK_9); }
 
 	// Adjust which deck of the ship is being modified
-	if (keys[DIK_O])			{ MoveUpLevel();												keyboard->LockKey(DIK_O); }
-	else if (keys[DIK_L])		{ MoveDownLevel();												keyboard->LockKey(DIK_L); }
+	if (keys[DIK_O])			{ MoveUpLevel();													keyboard->LockKey(DIK_O); }
+	else if (keys[DIK_L])		{ MoveDownLevel();													keyboard->LockKey(DIK_L); }
 
 	// The user can quit the ship designer by pressing tab again
-	if (keys[DIK_TAB])			{ Shutdown();													keyboard->LockKey(DIK_TAB); }
+	if (keys[DIK_TAB])			{ Shutdown();														keyboard->LockKey(DIK_TAB); }
 
 	// TODO: DEBUG
 	if (keys[DIK_T])			{ 
@@ -760,6 +781,15 @@ void UI_ShipBuilder::RevertPlacementTileUpdates(void)
 	m_placement_tile_changes.clear();
 }
 
+// Event raised when the LMB is first depressed
+void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+{
+	// Take different action depending on the editor mode
+	if (m_mode == EditorMode::StructuralTestMode)
+	{
+		HandleStructuralModeMouseFirstDown();
+	}
+}
 
 // Event raised when the RMB is first depressed
 void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
@@ -780,7 +810,11 @@ void UI_ShipBuilder::ProcessMouseClickAtLocation(INTVECTOR2 location)
 // Method to handle the mouse move event
 void UI_ShipBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 {
-
+	// Take different action depending on the active editor mode
+	if (m_mode == EditorMode::StructuralTestMode)
+	{
+		HandleStructuralModeMouseMove(void);
+	}
 }
 
 // Determines the correct positioning for the camera based on current mouse events
@@ -885,5 +919,111 @@ void UI_ShipBuilder::MoveToLevel(int level)
 	// Store the new level being edited
 	m_level = level;
 }
+
+// Reset the position of the intersection test markers and the test parameters
+void UI_ShipBuilder::ResetStructuralTestParameters(void)
+{
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+
+	// Make sure the intersection test markers exist; if not, create them
+	SimpleShip **markers[2] = { &m_intersect_marker_start, &m_intersect_marker_end };
+	for (int i = 0; i < 2; ++i)
+	{
+		if (*markers[i] == NULL)
+		{
+			(*markers[i]) = SimpleShip::Create("null_ship");
+			(*markers[i])->SetFaction(Game::FactionManager.GetFaction("faction_none"));
+			(*markers[i])->SetModel(Model::GetModel("unit_cone_model"));
+			(*markers[i])->SetCollisionMode(Game::CollisionMode::NoCollision);
+			(*markers[i])->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorScale(ONE_VECTOR, (i * 1000.0f)));
+			(*markers[i])->SetOrientation(ID_QUATERNION);
+		}
+	}
+
+	// Both markers exist; we now want to position them at either side of the ship as a default position
+	XMVECTOR offset = XMVector3TransformCoord(
+		XMVectorSetX(NULL_VECTOR, m_ship->CollisionOBB.Data().ExtentF.x * 1.25f),		// Position to the side (x) of ship in local space
+		m_ship->GetOrientationMatrix());												// Transformed by the orientation of the ship in world space
+
+	// Set the position of each marker accordingly
+	SetIntersectionTestMarkerPosition(&m_intersect_marker_start, XMVectorSubtract(m_ship->GetPosition(), offset));
+	SetIntersectionTestMarkerPosition(&m_intersect_marker_end, XMVectorAdd(m_ship->GetPosition(), offset));
+
+	// Perform an initial intersection test with the markers at these default positions
+	PerformIntersectionTest();
+}
+
+// Sets the position of an intersection test marker in world space
+void UI_ShipBuilder::SetIntersectionTestMarkerPosition(SimpleShip **ppMarker, const FXMVECTOR position)
+{
+	// Parameter check
+	if (!ppMarker || !(*ppMarker)) return;
+
+	// Adjust the marker position
+	(*ppMarker)->SetPosition(position);
+}
+
+// Performs the intesection test in 'structural test' mode
+void UI_ShipBuilder::PerformIntersectionTest(void)
+{
+	// Parameter checks
+	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
+
+
+
+
+}
+
+// Handles the LMB first-down event in structural test mode
+void UI_ShipBuilder::HandleStructuralModeMouseFirstDown(void)
+{
+	// See if we are clicking on an object in the world
+	if (m_lmb_down_component == NULL)
+	{
+		// Test whether we have selected either of the intersection markers
+		const BasicRay & ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
+		if (m_intersect_marker_start && 
+			Game::PhysicsEngine.TestRaySphereIntersection(ray, m_intersect_marker_start->GetPosition(), XMVectorReplicate(m_intersect_marker_start->GetCollisionSphereRadiusSq())))
+		{
+			// We have selected the start-marker
+			m_selected_intersection_marker = &m_intersect_marker_start;
+		}
+		else if (m_intersect_marker_end &&
+			Game::PhysicsEngine.TestRaySphereIntersection(ray, m_intersect_marker_end->GetPosition(), XMVectorReplicate(m_intersect_marker_end->GetCollisionSphereRadiusSq())))
+		{
+			// We have selected the end-marker
+			m_selected_intersection_marker = &m_intersect_marker_end;
+		}
+		else
+		{
+			m_selected_intersection_marker = NULL;
+		}
+	}
+}
+
+// Handles the mouse move event while in structural testing mode
+void UI_ShipBuilder::HandleStructuralModeMouseMove(void)
+{
+	// If we currently have a marker selected, we want to move it
+	if (m_selected_intersection_marker && (*m_selected_intersection_marker))
+	{
+		<< MOVE THE MARKER >>
+	}
+		
+}
+
+
+// Handles the mouse up event while in structural testing mode
+void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
+{
+	// << Perform a test >>
+
+	// Clear the currently-selected marker
+	m_selected_intersection_marker = NULL;
+}
+
+
+
 
 

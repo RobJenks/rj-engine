@@ -70,7 +70,7 @@ void Actor::RecalculateAttributes(void)
 	{
 		// Determine the position of the current value within the range of values for this attribute
 		attr = (int)it->source;
-		ActorAttributeGeneration::ActorAttributeGenerationParams arange = ActorAttributeGeneration::ActorAttributeParams[attr];
+		const ActorAttributeGeneration::ActorAttributeGenerationParams & arange = ActorAttributeGeneration::ActorAttributeParams[attr];
 		if (Attributes[attr].Value > arange.base)		
 		{
 			// We are greater than the base value, so use [Modifier = EffectAtBase + (((Val-Base)/(Max-Base)) * (EffectAtMax-EffectAtBase))]

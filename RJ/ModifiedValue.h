@@ -12,16 +12,23 @@ class ModifiedValue
 public:
 
 	// Default constructor for a null value
-	ModifiedValue(void)			: BaseValue(DefaultValues<T>::NullValue()), Value(DefaultValues<T>::NullValue()), m_update_suspended(false) { }
+	ModifiedValue(void)							: BaseValue(DefaultValues<T>::NullValue()), Value(DefaultValues<T>::NullValue()), m_update_suspended(false) { }
 
 	// Constructor to wrap a base value in modifier logic
-	ModifiedValue(T value)		: BaseValue(value), Value(value), m_update_suspended(false) { }
+	ModifiedValue(T value)						: BaseValue(value), Value(value), m_update_suspended(false) { }
 
 	// Base value
 	T											BaseValue;
+	CMPINLINE T									GetBaseValue(void) const										{ return BaseValue; }
+	CMPINLINE void								SetBaseValue(T value)
+	{
+		BaseValue = value;
+		if (!m_update_suspended) RecalculateValue();
+	}
 
 	// Resulting (fully-modified) value
 	T											Value;
+	CMPINLINE T									GetValue(void) const											{ return Value; }
 
 	// Adds a new modifier
 	CMPINLINE void 								AddModifier(typename Modifier<T>::ModifierType type, T value)	{ AddModifier(Modifier<T>(type, value)); }

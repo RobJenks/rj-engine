@@ -156,6 +156,10 @@ public:
 	// Link this element to a neighbour in the three-dimensional space
 	CMPINLINE void					LinkNeighbour(Direction dir, int neighbour_index)		{ m_adj[dir] = neighbour_index; }
 
+	// Return a constant reference to the Direction::_Count neighbours of this element
+	typedef int AdjacencyData[Direction::_Count];
+	CMPINLINE AdjacencyData const&	AdjacentElements() const								{ return m_adj; }
+
 	// Indicates that no element is present, when working with element IDs
 	static const int				NO_ELEMENT = -1;
 
