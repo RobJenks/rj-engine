@@ -226,6 +226,9 @@ public:
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObjectEnvironment::SimulationStateChanged() to maintain the chain
 	void							SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
 
+	// Determines and applies the effect of a collision with trajectory through the environment
+	void							ProcessCollisionThroughEnvironment(iObject *object, GamePhysicsEngine::ImpactData & impact);
+
 	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
 	virtual void					ElementLayoutChanged(void);
 

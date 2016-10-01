@@ -1046,7 +1046,8 @@ void ComplexShip::RecalculateAllShipData(void)
 // is the one that will be used for CS, since only the sections themselves can collide with anything
 void ComplexShip::CollisionWithObject(iObject *object, ComplexShipSection *collidingsection, const GamePhysicsEngine::ImpactData & impact)
 {
-	
+	// Pass to the environment method to determine any internal ship damage 
+	iSpaceObjectEnvironment::ProcessCollisionThroughEnvironment(object, impact);
 }
 
 // Fits the element space around this ship, eliminating any extra space allocated outside of the (cuboid) bounds it requires

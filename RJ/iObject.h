@@ -407,6 +407,11 @@ public:
 		return false;
 	}
 
+	// The 'hardness' value of the object, default 1.0, that acts as e.g. a collision 
+	// penetration multiplier.  Acts as a proxy for e.g. force per cross-sectional area
+	CMPINLINE float								GetHardness(void) const				{ return m_hardness; }
+	CMPINLINE void								SetHardness(float h)				{ m_hardness = h; }
+
 	// Resets the simulation flags; called at the start of a simulation cycle in which this object is being simulated
 	// TODO: set all at once via one bitwise call once flags are swtiched to the bitwise method?
 	CMPINLINE void								ResetSimulationFlags(void)		
@@ -540,6 +545,8 @@ protected:
 	
 	std::vector<Game::ID_TYPE>			m_nocollision;					// Array of any other objects that this object will NOT collide with
 	int									m_nocollision_count;			// The number of objects that the object will not collide with
+	float								m_hardness;						// The "hardness" of the object, default 1.0, that acts as e.g. a collision 
+																		// penetration multiplier.  Acts as a proxy for e.g. force per cross-sectional area
 
 	// Each object has a threshold travel distance (sq) per frame, above which they are considered a fast-mover that needs to be handled
 	// via continuous collision detection (CCD) rather than normal discrete collision testing.  This value is recalculated whenever the

@@ -856,9 +856,12 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	return true;
 }
 
-//"PROCESS_COLLISION" METHOD CAN NOW USE THIS PATH AND PROCESS EACH ELEMENT IN THE PATH IN TURN.  ACCOUNT FOR THE MASS & 'HARDNESS' OF ALL
-//TILES AND OBJECT WITHIN THE ELEMENT WHEN DETERMINING WHETHER IT IS DESTROYED
-
+// Determines and applies the effect of a collision with trajectory through the environment
+void iSpaceObjectEnvironment::ProcessCollisionThroughEnvironment(iObject *object, GamePhysicsEngine::ImpactData & impact)
+{
+	// Determine path, apply mass/hardness of tiles and all objects in the path to determine penetration etc.
+	*** DO THIS.  Perhaps integrate environment & c.ship first.  Mainly so that armour rating per elemnet can be stored in the c.ship, which seems more sensible ***
+}
 
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 
 // if necessary.  Returns a bool indicating whether reallocation was necessary

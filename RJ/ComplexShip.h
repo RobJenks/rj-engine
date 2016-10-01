@@ -74,8 +74,8 @@ public:
 	void										SetSDOffset(INTVECTOR3 offset) { m_sdoffset = offset; }
 
 	// Methods to set and check the flag that determines whether a ship has been directly generated from the SD
-	bool							HasBeenDirectlyGeneratedFromSD(void)				{ return m_directlygeneratedfromSD; }
-	void							FlagShipAsDirectlyGeneratedFromShipDesigner(bool b)	{ m_directlygeneratedfromSD = b; }
+	bool										HasBeenDirectlyGeneratedFromSD(void)				{ return m_directlygeneratedfromSD; }
+	void										FlagShipAsDirectlyGeneratedFromShipDesigner(bool b)	{ m_directlygeneratedfromSD = b; }
 	
 	// Fade the ship to the specified alpha level
 	void										FadeToAlpha(float time, float alpha, bool ignore_pause);
