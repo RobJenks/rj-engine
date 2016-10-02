@@ -32,7 +32,7 @@ public:
 	CMPINLINE void				SimulateObject(void) { }
 
 	// Virtual inheritance from iObject.  This object does not collide with anything so do nothing here.
-	CMPINLINE void				CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
+	CMPINLINE void				CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 
 	// Virtual inheritance from iObject.  There are no intra-frame activities we can take to refresh our data, since we 
 	// are effectively just a wrapper around a position

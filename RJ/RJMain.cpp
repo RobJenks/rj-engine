@@ -2143,28 +2143,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-		/*XMVECTOR pos = ss()->GetPosition();
-		XMVECTOR proj = Game::Engine->WorldToProjection(pos);
-		XMVECTOR unproj = XMVector3TransformCoord(proj, Game::Engine->GetRenderInverseViewProjectionMatrix());
-		*/
-
-		iUIController *controller = D::UI->GetActiveUIController();
-		if (!controller || controller->GetCode() != "UI_SHIPBUILDER") return;
 		
-		UI_ShipBuilder *ui = (UI_ShipBuilder*)controller;
-		XMVECTOR start, end;
-		if (ui)
-		{
-			start = (ui->m_intersect_marker_start ? ui->m_intersect_marker_start->GetPosition() : LARGE_VECTOR_P);
-			end = (ui->m_intersect_marker_end ? ui->m_intersect_marker_end->GetPosition() : LARGE_VECTOR_P);
-		}
-		else
-		{
-			start = end = LARGE_VECTOR_N;
-		}
-	
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Start: %s  |  End: %s",
-			Vector3ToString(start).c_str(), Vector3ToString(end).c_str());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "World momentum: %s  |  End: %s", "", "");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 

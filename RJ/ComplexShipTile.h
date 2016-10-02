@@ -556,6 +556,15 @@ public:
 	// Rotates all terrain objects associated with this tile by the specified angle
 	void								RotateAllTerrainObjects(Rotation90Degree rotation);
 
+	// Mass of the tile
+	CMPINLINE float						GetMass(void) const									{ return m_mass; }
+	CMPINLINE void						SetMass(float m)									{ m_mass = m; }
+
+	// 'Hardness' of the tile, used during collision & penetration tests.  Used to approximate e.g. force per cross-sectional area, 
+	// or the density of external armour which can deflect a significant impact
+	CMPINLINE float						GetHardness(void) const								{ return m_hardness; }
+	CMPINLINE void						SetHardness(float h)								{ m_hardness = h; }
+
 	// Methods to get and recalculate the aggregate health value of this tile
 	CMPINLINE float						GetAggregateHealth(void)							{ return m_aggregatehealth; }
 	void								ElementHealthChanged(void);	
@@ -753,6 +762,13 @@ protected:
 
 	// Rotation of this tile; contents are already rotated, this is mainly for geometry rendering & the SD
 	Rotation90Degree			m_rotation;
+
+	// Mass of the tile
+	float						m_mass;
+
+	// 'Hardness' of the tile, used during collision & penetration tests.  Used to approximate e.g. force per cross-sectional area, 
+	// or the density of external armour which can deflect a significant impact
+	float						m_hardness;
 
 	// Flag which indicates whether the connections from this tile have been 'fixed' (true) or are allowed to update based on surroundings
 	bool						m_connections_fixed;

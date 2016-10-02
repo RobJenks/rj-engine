@@ -5,6 +5,7 @@
 #include "VolumetricLine.h"
 #include "Player.h"
 #include "ComplexShip.h"
+#include "iSpaceObjectEnvironment.h"
 #include "OverlayRenderer.h"
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
@@ -1002,10 +1003,33 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// Parameter checks
 	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
 
-	*** ADD ISPACEOBJENVIRONMENT METHOD WHICH HANDLES A COLLISION THROUGH THE ENVIRONMENT, THEN CALL IT HERE
-		AND RENDER EACH ELEMENT THAT IS DESTROYED/DAMAGED BY THE PROJECTILE ***
+	// Test parameters which can later be user-specified
+	float proj_velocity = 20.0f;
+	float proj_radius = 5.0f;
 
+	// Determine ray direction
+	XMVECTOR dir = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
 
+	// Test for intersection and store the output in the results vector
+	iSpaceObjectEnvironment::ElementIntersections result;
+	bool intersect = m_ship->DetermineElementPathIntersectedByRay(Ray(m_intersect_marker_start->GetPosition(), dir), proj_radius, result);
+
+	// Highlight intersection path, if there is one
+	/*static const XMFLOAT3 INTERSECT_COLOUR = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	if (intersect)
+	{
+		std::vector<int>::const_iterator it_end = elements.end();
+		for (std::vector<int>::const_iterator it = elements.begin(); it != it_end; ++it)
+		{
+			// Get a reference to the element
+			assert(m_ship->GetElement(*it) != NULL);
+			const ComplexShipElement & el = m_ship->GetElementDirect(*it);
+
+			OutputDebugString(concat("Collided with element ")(m_ship->GetElementByIndex(*it)->GetLocation().ToString())("\n").str().c_str());
+
+			Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_ship->GetElementByIndex(*it)->GetLocation(), INTERSECT_COLOUR, 0.75f);
+		}
+	}*/
 }
 
 // Handles the LMB first-down event in structural test mode
@@ -1057,8 +1081,12 @@ void UI_ShipBuilder::HandleStructuralModeMouseMove(void)
 // Handles the mouse up event while in structural testing mode
 void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
 {
-	// Perform an intersection test with the markers at their current positions
-	PerformIntersectionTest();
+	// If we are currently moving one of the projectile markers, perform an intersection 
+	// test with the markers at their current positions
+	if (m_selected_intersection_marker && (*m_selected_intersection_marker))
+	{
+		PerformIntersectionTest();
+	}
 
 	// Clear the currently-selected marker
 	m_selected_intersection_marker = NULL;

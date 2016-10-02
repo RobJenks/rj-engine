@@ -562,6 +562,9 @@
     <ClCompile Include="DynamicTileSet.cpp">
       <Filter>Objects\Ships\Tiles</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentCollision.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1286,6 +1289,12 @@
     </ClInclude>
     <ClInclude Include="ModifierDetails.h">
       <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentCollision.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementIntersection.h">
+      <Filter>Objects\Ships\Elements</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -8,6 +8,7 @@
 #include "Ship.h"
 #include "ComplexShipElement.h"
 #include "TileAdjacency.h"
+#include "EnvironmentCollision.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -31,6 +32,9 @@ public:
 	// accepts the element space size and precalculated y/z size product.  Allows use on element spaces
 	// other than our own, e.g. when allocating a new space with different dimensions
 #	define ELEMENT_INDEX_EX(_x, _y, _z, _size, _size_xy) (_x + (_y * _size.x) + (_z * _size_xy))
+
+	// Debug flag indicating whether we should output information on element collision tests
+#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
 
 	// Environment terrain collection
 	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
@@ -227,7 +231,14 @@ public:
 	void							SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
 
 	// Determines and applies the effect of a collision with trajectory through the environment
-	void							ProcessCollisionThroughEnvironment(iObject *object, GamePhysicsEngine::ImpactData & impact);
+	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
+	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
+
+	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
+	void							ProcessAllEnvironmentCollisions(void);
+
+	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
+	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
 
 	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
 	virtual void					ElementLayoutChanged(void);
@@ -246,7 +257,7 @@ public:
 
 	// Determines the sequence of elements intersected by a world-space ray.  Returns a flag indicating 
 	// whether any intersection does take place
-	bool							DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, std::vector<int> & outElements);
+	bool							DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, ElementIntersectionData & outElements);
 
 	// Get a reference to the navigation network assigned to this ship
 	CMPINLINE NavNetwork *			GetNavNetwork(void)				{ return m_navnetwork; }
@@ -324,7 +335,6 @@ public:
 	void							ProcessDebugCommand(GameConsoleCommand & command);
 
 
-
 protected:
 
 	// The individual elements that make up this object
@@ -363,6 +373,12 @@ protected:
 	// Private methods used to update key ship properties
 	void							PerformGravityUpdate(void);
 	void							PerformOxygenUpdate(void);
+
+	// The set of all active collision events
+	std::vector<EnvironmentCollision>	m_collision_events;
+
+	// Indicates whether there are any collision events currently taking place in the environment
+	CMPINLINE bool					HaveActiveCollisionEvents(void) const		{ return !m_collision_events.empty(); }
 
 	// Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer
 	// neighbouring tiles.  Accepts the address of a tile pointer and will adjust that tile pointer if
@@ -412,7 +428,12 @@ CMPINLINE void iSpaceObjectEnvironment::SetElement(int x, int y, int z, ComplexS
 	m_elements[ELEMENT_INDEX(x, y, z)] = (*e);
 }
 
-
+// Outputs debug information on environment collision testing
+#if defined(_DEBUG) && defined(DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING)
+#	define DBG_COLLISION_OUTPUT(text)  OutputDebugString(text)
+#else
+#	define DBG_COLLISION_OUTPUT(text)
+#endif
 
 
 #endif

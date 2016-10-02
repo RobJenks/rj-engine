@@ -136,7 +136,7 @@ public:
 	iSpaceObject *								GetSpaceObjectReference(void)	{ return (iSpaceObject*)this; }
 
 	// Method called when this object collides with another.  Virtual inheritance from iObject
-	void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
+	void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
 	
 	// Methods triggered based on major events impacting this object
 	void										ShipTileAdded(ComplexShipTile *tile);		// When a tile is added.  Virtual inherited from interface.

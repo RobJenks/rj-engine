@@ -6,6 +6,7 @@
 #include "malloc.h"
 #include <time.h>
 #include <random>
+#include <limits>
 #include "GameVarsExtern.h"
 #include "iObject.h"
 
@@ -19,6 +20,14 @@ const float PIOVER2 = PI / 2.0f;
 const float ROOT2 = 1.414213562f;
 const float ONE_BY_ROOT2 = 1.0f / ROOT2;
 const float FLT_MAX_NEG = -(std::numeric_limits<float>::infinity());
+
+const int INF_INT = std::numeric_limits<int>::infinity();
+const unsigned int INF_UINT = std::numeric_limits<unsigned int>::infinity();
+const short INF_SHORT = std::numeric_limits<short>::infinity();
+const long INF_LONG = std::numeric_limits<long>::infinity();
+const float INF_FLOAT = std::numeric_limits<float>::infinity();
+const double INF_DOUBLE = std::numeric_limits<double>::infinity();
+
 
 const INTVECTOR2 NULL_INTVECTOR2 = INTVECTOR2(0, 0);
 const INTVECTOR3 NULL_INTVECTOR3 = INTVECTOR3(0, 0, 0);

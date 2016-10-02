@@ -32,7 +32,7 @@ public:
 	void						SimulateObject(void);
 
 	// Virtual inheritance from iObject.  No action since this object does not collide with anything
-	CMPINLINE void				CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
+	CMPINLINE void				CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 
 	// Virtual inheritance from iObject.  There are no intra-frame activities we can take to refresh our data, since  
 	// emitters are only updated by some parent object and cannot change themselves outside of that

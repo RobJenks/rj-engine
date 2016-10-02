@@ -293,6 +293,7 @@ public:
 	SimpleShip *								m_intersect_marker_end;				// Marker at the end of the projectile intersection test path
 	SimpleShip **								m_selected_intersection_marker;		// The marker that is currently being manipulated (if applicable)
 	VolumetricLine								m_intersect_test_trajectory;		// Trajectory of the collider in interection test mode
+	//std::vector<int>							m_intersect_test_result;			// Vector of elements 
 
 };
 

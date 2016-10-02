@@ -256,7 +256,7 @@ void ComplexShipSection::Shutdown(void)
 }
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
-void ComplexShipSection::CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact)
+void ComplexShipSection::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
 	// Pass the collision message to the parent ship, assuming we have a valid pointer back from this section
 	if (m_parent) m_parent->CollisionWithObject(object, this, impact);

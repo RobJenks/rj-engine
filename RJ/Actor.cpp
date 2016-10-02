@@ -407,7 +407,7 @@ void Actor::Move(Direction direction, bool run)
 
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
-void Actor::CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact)
+void Actor::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
 
 }

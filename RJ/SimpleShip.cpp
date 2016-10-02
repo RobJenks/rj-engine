@@ -310,7 +310,7 @@ XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 }
 
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
-void SimpleShip::CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact)
+void SimpleShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
 
 }

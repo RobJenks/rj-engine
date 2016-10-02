@@ -3,6 +3,7 @@
 
 #include "Utility.h"
 #include "FastMath.h"
+#include "DefaultValues.h"
 #include "GameVarsExtern.h"
 #include "Octree.h"
 #include "ObjectSearch.h"
@@ -1733,7 +1734,10 @@ bool GamePhysicsEngine::DetermineRayVsAABBIntersection(const Ray & ray, const AA
 	RayIntersectionResult.tmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
 
 	// If min<max then we have an intersection
-	return (RayIntersectionResult.tmax >= max(0.0f, RayIntersectionResult.tmin) && RayIntersectionResult.tmin < t);
+	return (RayIntersectionResult.tmax >= 0.0f &&						// The entire intersection must take place after t=0, i.e. not in the past
+			RayIntersectionResult.tmin < t &&							// The intersection must begin before the specified upper bound t in the future
+			RayIntersectionResult.tmax >= RayIntersectionResult.tmin &&	// The intersection must begin before it ends
+			RayIntersectionResult.tmin >= -FLT_MAX);					// Ensure tmin is not -INFINITY, i.e. avoid parallel/non-crossing intersection
 }
 
 /*/ Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated

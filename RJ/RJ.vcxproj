@@ -273,6 +273,7 @@
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="EnvironmentCollision.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Faction.cpp" />
@@ -475,7 +476,9 @@
     <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="DynamicTileSet.h" />
+    <ClInclude Include="ElementIntersection.h" />
     <ClInclude Include="EntityAIStates.h" />
+    <ClInclude Include="EnvironmentCollision.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />

@@ -133,6 +133,9 @@ namespace Game {
 	extern ColliderType TranslateColliderTypeFromString(const std::string & type);
 	extern std::string TranslateColliderTypeToString(ColliderType type);
 
+	// Enumeration of all major entity types
+	enum EntityType { E_Unknown = 0, E_Object, E_Element, E_Tile, E_BasicProjectile, E_SpaceSystem };
+
 	// General application constants
 	extern int C_LOG_FLUSH_INTERVAL;
 	extern unsigned int C_MAX_FRAME_DELTA;				// Maximum frame delta (ms)

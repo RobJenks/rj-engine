@@ -59,7 +59,7 @@ public:
 
 
 	// Method called when this object collides with another.  Virtual inheritance from iObject
-	void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
+	void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
 
 	// Event triggered upon destruction of the object
 	void										DestroyObject(void);

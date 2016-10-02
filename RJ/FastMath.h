@@ -19,6 +19,13 @@ extern const float ROOT2;
 extern const float ONE_BY_ROOT2;
 extern const float FLT_MAX_NEG;
 
+extern const int INF_INT; 
+extern const unsigned int INF_UINT; 
+extern const short INF_SHORT;
+extern const long INF_LONG;
+extern const float INF_FLOAT;
+extern const double INF_DOUBLE;
+
 #define DegToRad(x) ((x)*PIBY180)
 #define RadToDeg(x) ((x)*_180BYPI)
 

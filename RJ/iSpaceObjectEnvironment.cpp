@@ -6,7 +6,7 @@
 #include "iEnvironmentObject.h"
 #include "ComplexShipTileDefinition.h"
 #include "ComplexShipTile.h"
-#include  "DynamicTileSet.h"
+#include "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "Ship.h"
 #include "iContainsComplexShipTiles.h"
@@ -16,6 +16,8 @@
 #include "Ray.h"
 #include "AABB.h"
 #include "OrientedBoundingBox.h"
+#include "ElementIntersection.h"
+#include "EnvironmentCollision.h"
 
 #include "iSpaceObjectEnvironment.h"
 
@@ -91,6 +93,12 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 	// Update properties of the environment if required
 	if (m_gravityupdaterequired)		PerformGravityUpdate();
 	if (m_oxygenupdaterequired)			PerformOxygenUpdate();
+
+	// Process any active collision events
+	if (HaveActiveCollisionEvents())
+	{
+		ProcessAllEnvironmentCollisions();
+	}
 }
 
 // Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
@@ -745,8 +753,11 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray &
 	// Transform this position into local ship space, and make sure it is within the ship bounds
 	// We artificially extend the ship bounds slightly (by [1,1,1], and here only) to allow for imprecision in the intersection tests
 	XMVECTOR localpos = XMVector3TransformCoord(pos, m_inversezeropointworldmatrix);
-	if ((XMVector3GreaterOrEqual(localpos, ONE_VECTOR_N) && XMVector3LessOrEqual(localpos, XMVectorAdd(m_size, ONE_VECTOR_P))) == false)
-		return false;
+
+	// TODO: this check removed for now, since imprecision in the ray/OBB test was frequently leading to an actual collision point 
+	// outside of the expected element bounds.  We now clamp to the element bounds in the final statement below
+	/*if ((XMVector3GreaterOrEqual(localpos, ONE_VECTOR_N) && XMVector3LessOrEqual(localpos, XMVectorAdd(m_size, ONE_VECTOR_P))) == false)
+		return false;*/
 
 	// We know this is a valid element within the ship, so determine and return the element location
 	// Clamp the position value within bounds that will translate directly to an element index ([0,0,0] to (size-[eps,eps,eps]))
@@ -798,7 +809,7 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRay(const Ray & ray, 
 
 // Determines the sequence of elements intersected by a world-space ray.  Returns a flag indicating 
 // whether any intersection does take place
-bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, std::vector<int> & outElements)
+bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, ElementIntersectionData & outElements)
 {
 	// Locate the entry point of the ray in this environment (and early-exit if there is no intersection)
 	INTVECTOR3 start_el;
@@ -821,47 +832,131 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	// Transform the ray into local environment space, and then translate it into element (0,0,0) space
 	Ray localray = Ray(ray); 
 	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
-	XMVECTOR el0adj = XMVectorSubtract(obb.ExtentV, Game::C_CS_ELEMENT_MIDPOINT_NEG_V);	// Since El0 = -(obb_extent - el_midpoint)
-	XMVECTOR ray_in_el0 = XMVectorAdd(localray.Origin, el0adj);
+	//XMVECTOR el0adj = XMVectorSubtract(obb.ExtentV, Game::C_CS_ELEMENT_MIDPOINT_NEG_V);	// Since El0 = -(obb_extent - el_midpoint)
+	XMVECTOR ray_in_el0 = XMVectorAdd(localray.Origin, /*el0adj*/ obb.ExtentV);
 	localray.SetOrigin(ray_in_el0);
 
 	// Iterate until we have no more elements to test
+	DBG_COLLISION_OUTPUT("> Beginning environment collision test\n");
 	int id; INTVECTOR3 location;
 	int current = -1;
 	while (++current < (int)test.size())
 	{
-		// Retrieve the next element to be tested, and record the fact that we are now processing it
+		// Retrieve the next element to be tested, and only proceed if we have not already processed it
 		id = test[current];	
+		DBG_COLLISION_OUTPUT(concat("    Testing element ")(id).str().c_str());
+		if (checked[id] == true)
+		{
+			DBG_COLLISION_OUTPUT("...ALREADY TESTED\n");
+			continue;
+		}
+
+		// Record the fact that we are now processing this element
 		checked[id] = true; 
 		const ComplexShipElement & el = m_elements[id];
 
 		// Translate the ray into the local space of this element, based on an offset from (0,0,0)
-		localray.SetOrigin(XMVectorAdd(ray_in_el0, Game::ElementLocationToPhysicalPosition(el.GetLocation())));
+		localray.SetOrigin(XMVectorSubtract(ray_in_el0, Game::ElementLocationToPhysicalPosition(el.GetLocation())));
+		DBG_COLLISION_OUTPUT(concat(" ")(el.GetLocation().ToString()).str().c_str());
 
 		// Test for a collision between this ray and the element AABB; if none, skip processing this element immediately
-		if (Game::PhysicsEngine.DetermineRayVsAABBIntersection(localray, bounds) == false) continue;
+		if (Game::PhysicsEngine.DetermineRayVsAABBIntersection(localray, bounds) == false)
+		{
+			DBG_COLLISION_OUTPUT(": No collision\n");
+			continue;
+		}
 
 		// We have an intersection.  First, add this to the list of elements that were intersected
-		outElements.push_back(id);
+		outElements.push_back(ElementIntersection(id, Game::PhysicsEngine.RayIntersectionResult.tmin, Game::PhysicsEngine.RayIntersectionResult.tmax));
+		DBG_COLLISION_OUTPUT(concat(": COLLIDES (t=")(Game::PhysicsEngine.RayIntersectionResult.tmin)(", ")(Game::PhysicsEngine.RayIntersectionResult.tmax)("), adding { ").str().c_str());
 
 		// Now consider all neighbours of this element for intersection, if they have not already been tested
 		const int(&adj)[Direction::_Count] = el.AdjacentElements();
 		for (int i = 0; i < Direction::_Count; ++i)
 		{
-			if (adj[i] != -1 && checked[adj[i]] == false)	test.push_back(adj[i]);
+			if (adj[i] != -1 && checked[adj[i]] == false)
+			{
+				DBG_COLLISION_OUTPUT(concat(adj[i])(" ").str().c_str());
+				test.push_back(adj[i]);
+			}
 		}
+		DBG_COLLISION_OUTPUT("}\n");
 	}
  
 	// Testing complete; return true since we know we had an intersection of some kind
 	return true;
 }
 
-// Determines and applies the effect of a collision with trajectory through the environment
-void iSpaceObjectEnvironment::ProcessCollisionThroughEnvironment(iObject *object, GamePhysicsEngine::ImpactData & impact)
+// Determines the effect of a collision with trajectory through the environment
+// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
+bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult)
 {
-	// Determine path, apply mass/hardness of tiles and all objects in the path to determine penetration etc.
-	*** DO THIS.  Perhaps integrate environment & c.ship first.  Mainly so that armour rating per elemnet can be stored in the c.ship, which seems more sensible ***
+	// Parameter check
+	if (!object) return;
+
+	// Initialise the output data object for this collision
+	outResult.Collider = object;
+	outResult.CollisionStartTime = Game::ClockTime;
+
+	// Determine the trajectory and properties of the colliding object
+	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
+	Ray proj_trajectory = Ray(object->GetPosition(), object->PhysicsState.WorldMomentum);	// Note: World "momentum" is currently the world velocity, name to be fixed
+
+	// Calcualate the path of elements intersected by this ray
+	ElementIntersectionData elements;
+	bool intersects = DetermineElementPathIntersectedByRay(proj_trajectory, proj_radius, elements);
+
+	// Quit here if there is no intersection
+	if (intersects == false)
+	{
+		outResult.IsActive = false;
+		return false;
+	}
+
+	// Add an event for the processing of each intersected element
+	ElementIntersectionData::const_iterator it_end = elements.end();
+	for (ElementIntersectionData::const_iterator it = elements.begin(); it != it_end; ++it)
+	{
+		// Add an event for this collision.  This will automatically be sorted into the correct sequence
+		// based upon start time.  This will almost always be ~equal to a push_back since 
+		// intersections have generally been determined in temporal order
+		const ElementIntersection & item = (*it);
+		outResult.AddElementIntersection(item.ID, item.StartTime, (item.EndTime - item.StartTime));
+
+		// Also push a copy of the intersection data into the result object for reference later, in case it is needed
+		outResult.IntersectionData.push_back(*it);
+	}
+
+	// Return true to indicate that a collision occured
+	outResult.IsActive = true;
+	return true;
 }
+
+// Processes all active environment collisions at the current point in time.  Called as part of object simulation
+void iSpaceObjectEnvironment::ProcessAllEnvironmentCollisions(void)
+{
+	// Iterate through all active collisions
+	std::vector<EnvironmentCollision>::iterator c_it_end = m_collision_events.end();
+	for (std::vector<EnvironmentCollision>::iterator c_it = m_collision_events.begin(); c_it != c_it_end; /* No increment */)
+	{
+		// Process each collision event in turn
+		ProcessEnvironmentCollision(*c_it);
+
+		// If the collision event is no longer active/valid, we can remove it from the vector here
+		if ((*c_it).IsActive == false)		{ c_it = m_collision_events.erase(c_it); }
+		else								{ ++c_it; }
+	}
+}
+
+// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
+void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision & collision)
+{
+	// Parameter check; make sure the collision is still active
+	if (!collision.IsActive) return;
+
+	*** PARSE THE EVENTS FROM LASTEXECUTED + 1 TO N UNTIL WE REACH THE FIRST FUTURE EVENT.  APPLY EFFECTS TO ENVIRONMENT (E.G. DAMAGE) AND COLLIDER (E.G. MOMENTUM AND DESTRUCTION) ***
+}
+
 
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 
 // if necessary.  Returns a bool indicating whether reallocation was necessary
@@ -1430,6 +1525,7 @@ iSpaceObjectEnvironment::~iSpaceObjectEnvironment(void)
 {
 
 }
+
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level

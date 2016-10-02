@@ -317,7 +317,7 @@ public:
 	bool									DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb, float t);
 	CMPINLINE bool							DetermineRayVsAABBIntersection(const Ray & ray, const AABB & aabb)
 	{
-		return DetermineRayVsAABBIntersection(ray, aabb, FLT_MAX);		// By default, do not limit the extent of the ray
+		return DetermineRayVsAABBIntersection(ray, aabb, 1e8f);		// By default, do not limit the extent of the ray by extending it out 100m (secs) in the future
 	}
 
 	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated

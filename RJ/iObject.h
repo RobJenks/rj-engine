@@ -293,9 +293,6 @@ public:
 	void									SetCollisionSphereRadius(float radius);
 	void									SetCollisionSphereRadiusSq(float radius_sq);
 
-	// Virtual method, called when this object collides with another
-	virtual void							CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) = 0;
-
 	// Method called when a projectile (not an object, but a basic projectile) collides with this object
 	// Handles any damage or effects of the collision, and also triggers rendering of appropriate effects if required
 	void									HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::OBBIntersectionData & impact);

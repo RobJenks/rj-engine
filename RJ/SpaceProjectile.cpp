@@ -136,7 +136,7 @@ void SpaceProjectile::SimulateObject(void)
 }
 
 // Method called when this object collides with another.  Inherited from iObject
-void SpaceProjectile::CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact)
+void SpaceProjectile::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
 
 }

@@ -47,7 +47,7 @@ public:
 	void							SimulateObject(void);
 
 	// Method called when this object collides with another.  Inherited from iObject
-	void							CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact);
+	void							CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
 
 	// Method called when the projectile exceeds its defined lifetime
 	void							EndProjectileLifetime(void);

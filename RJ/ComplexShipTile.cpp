@@ -63,6 +63,8 @@ ComplexShipTile::ComplexShipTile(void)
 	m_worldmatrix = ID_MATRIX;
 	m_definition = NULL;
 	m_classtype = D::TileClass::Unknown;
+	m_mass = 1.0f;
+	m_hardness = 1.0f;
 	m_aggregatehealth = 1.0f;
 	m_constructedstate = new ProductionCost();
 	m_elementconstructedstate = NULL;
@@ -97,6 +99,8 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_worldsize = C.GetWorldSize();
 	m_model = C.GetModel();
 	m_rotation = C.GetRotation(); 
+	m_mass = C.GetMass();
+	m_hardness = C.GetHardness();
 	m_boundingbox = BoundingObject::Copy(C.GetBoundingObject());
 	m_multiplemodels = C.HasCompoundModel();
 	m_models.CopyFrom(C.GetCompoundModelSet());
