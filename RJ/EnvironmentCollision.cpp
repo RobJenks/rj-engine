@@ -7,7 +7,7 @@ EnvironmentCollision::_EventTimeOrderComparator EnvironmentCollision::EventTimeO
 // Default constructor
 EnvironmentCollision::EnvironmentCollision(void)
 	:
-	IsActive(false), LastEventExecuted(-1), Collider(), CollisionStartTime(0.0f)
+	IsActive(false), m_nextevent(0U), Collider(), CollisionStartTime(0.0f), ClosingVelocity(0.0f)
 {
 }
 
@@ -38,7 +38,7 @@ EnvironmentCollision::EnvironmentCollision(const EnvironmentCollision & other)
 {
 	// Copy all data across directly
 	Events = other.Events;
-	LastEventExecuted = other.LastEventExecuted;
+	m_nextevent = other.m_nextevent;
 }
 
 // Default destructor

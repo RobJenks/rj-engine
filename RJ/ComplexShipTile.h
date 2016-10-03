@@ -511,6 +511,7 @@ public:
 	CMPINLINE INTVECTOR3				GetElementSize(void) const { return m_elementsize; }
 	CMPINLINE INTVECTOR3 *				GetElementSizePointer(void) { return &m_elementsize; }
 	void								SetElementSize(const INTVECTOR3 & size);
+	CMPINLINE unsigned int				GetElementCount(void) const { return m_elementcount; }
 	CMPINLINE XMVECTOR					GetWorldSize(void) const { return m_worldsize; }
 	
 	// Methods to get and set the string code of this tile
@@ -564,6 +565,10 @@ public:
 	// or the density of external armour which can deflect a significant impact
 	CMPINLINE float						GetHardness(void) const								{ return m_hardness; }
 	CMPINLINE void						SetHardness(float h)								{ m_hardness = h; }
+
+	// Returns the impact resistance of this tile, i.e. the remaining force it can withstand from physical 
+	// impacts, with an impact point at the specified element
+	float								GetImpactResistance(const ComplexShipElement & at_element) const;
 
 	// Methods to get and recalculate the aggregate health value of this tile
 	CMPINLINE float						GetAggregateHealth(void)							{ return m_aggregatehealth; }
@@ -733,6 +738,7 @@ protected:
 	INTVECTOR3					m_elementlocation;
 	AXMVECTOR					m_elementposition;
 	INTVECTOR3					m_elementsize;
+	unsigned int				m_elementcount;
 	AXMVECTOR					m_worldsize;
 	bool						m_multielement;
 

@@ -358,8 +358,9 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 	// Make sure this is a valid size
 	if (size.x <= 0 || size.y <= 0 || size.z <= 0) return;
 
-	// Store the new element size
+	// Store the new element size and count of elements
 	m_elementsize = size; 
+	m_elementcount = (unsigned int)(size.x * size.y * size.z);	// We know all components are >= 0 so this is okay
 
 	// Determine the world size of this tile based on the element size
 	m_worldsize = Game::ElementLocationToPhysicalPosition(m_elementsize);
@@ -400,6 +401,17 @@ void ComplexShipTile::ClearTerrainObjectLinks(void)
 		std::vector<StaticTerrain*>::size_type n = m_definition->GetTerrainObjectCount();
 		if (n > 0) m_terrain_ids.reserve(n);
 	}
+}
+
+// Returns the impact resistance of this tile, i.e. the remaining force it can withstand from physical 
+// impacts, with an impact point at the specified element
+float ComplexShipTile::GetImpactResistance(const ComplexShipElement & at_element) const
+{
+	// Calculated as ((mass * hardness) / elementsize) * element_health_percentage
+	if (m_elementcount <= 1)
+		return ((m_mass * m_hardness) * at_element.GetHealth());
+	else
+		return (((m_mass * m_hardness) / (float)m_elementcount) * at_element.GetHealth());
 }
 
 // Deallocates any existing per-element construction progress for this tile

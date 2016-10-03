@@ -95,7 +95,7 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 	if (m_oxygenupdaterequired)			PerformOxygenUpdate();
 
 	// Process any active collision events
-	if (HaveActiveCollisionEvents())
+	if (HaveActiveEnvironmentCollisionEvents())
 	{
 		ProcessAllEnvironmentCollisions();
 	}
@@ -887,6 +887,39 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	return true;
 }
 
+
+// Registers a new collision with this environment, calculates the effect and begins to apply the effects
+// Returns a flag indicating whether the event was registered (there are several validations that may prevent this)
+bool iSpaceObjectEnvironment::RegisterEnvironmentImpact(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
+{
+	// Parameter check; quit immediately if object is invalid, or if it is valid but we are already processing the collision
+	if (!object || EnvironmentIsCollidingWithObject(object)) return false;
+
+	// Calculate the effect of the intersection with this environment (if any)
+	EnvironmentCollision collision;
+	bool intersects = CalculateCollisionThroughEnvironment(object, impact, collision);
+	if (intersects == false) return false;
+
+	// Add this collision event to the collection and return success
+	m_collision_events.push_back(collision);
+	return true;
+}
+
+// Checks whether collision of the specified object with this environment is already being simulated
+bool iSpaceObjectEnvironment::EnvironmentIsCollidingWithObject(iActiveObject *object)
+{
+	if (HaveActiveEnvironmentCollisionEvents() && object)
+	{
+		std::vector<EnvironmentCollision>::const_iterator it_end = m_collision_events.end();
+		for (std::vector<EnvironmentCollision>::const_iterator it = m_collision_events.begin(); it != it_end; ++it)
+		{
+			if ((*it).Collider() == object) return true;
+		}
+	}
+
+	return false;
+}
+
 // Determines the effect of a collision with trajectory through the environment
 // Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
 bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult)
@@ -897,6 +930,7 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 	// Initialise the output data object for this collision
 	outResult.Collider = object;
 	outResult.CollisionStartTime = Game::ClockTime;
+	outResult.ClosingVelocity = XMVectorGetX(impact.TotalImpactVelocity);
 
 	// Determine the trajectory and properties of the colliding object
 	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
@@ -927,6 +961,9 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 		outResult.IntersectionData.push_back(*it);
 	}
 
+	// Safety check: there should always be >0 events since a collision has occured, but make sure of that here
+	if (outResult.Events.empty()) { outResult.IsActive = false; return false; }
+
 	// Return true to indicate that a collision occured
 	outResult.IsActive = true;
 	return true;
@@ -954,7 +991,63 @@ void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision &
 	// Parameter check; make sure the collision is still active
 	if (!collision.IsActive) return;
 
-	*** PARSE THE EVENTS FROM LASTEXECUTED + 1 TO N UNTIL WE REACH THE FIRST FUTURE EVENT.  APPLY EFFECTS TO ENVIRONMENT (E.G. DAMAGE) AND COLLIDER (E.G. MOMENTUM AND DESTRUCTION) ***
+	// Loop through collision events while the object is still valid
+	std::vector<EnvironmentCollision>::size_type event_count = collision.GetEventCount();
+	while (collision.IsActive)
+	{
+		// Get the next event in the sequence
+		std::vector<EnvironmentCollision>::size_type index = collision.GetNextEvent();
+		if (index >= event_count) { collision.IsActive = false; return; }
+
+		// Test whether it is now ready to execute
+		const EnvironmentCollision::EventDetails & ev = collision.Events[index];
+		if ((collision.CollisionStartTime + ev.EventTime) >= Game::ClockTime)
+		{
+			// Process the collision with this element. TODO: in future, account for event type and take different actions
+			ExecuteElementCollision(ev, collision);
+
+			// Move on to the next event (or inactivate the object if this was the final event in the sequence)
+			collision.CurrentEventCompleted();
+		}
+		else
+		{
+			// We are not ready to run the next event yet, so quit here
+			return;
+		}
+	}
+}
+
+
+// Executes the collision of an object with the specified object, as part of an environment collision event
+void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision)
+{
+	// Get a reference to the element 
+	if (ElementIndexIsValid(ev.EntityID) == false) return;
+	const ComplexShipElement & el = GetElementDirect(ev.EntityID);
+
+	// Get a reference to the colliding object
+	iActiveObject *object = collision.Collider();
+	if (!object) return;
+
+	// Determine the current momentum of the object, which will be its normal impact resistance * the current closing velocity (not momentum, 
+	// since already incl in impact resistance).  This gives us (obj_vel * obj_mass) + (env_vel * [1.0f]) - we don't want to account
+	// for the environment momentum/mass here since we are dealing with the impact on only a very small part of the environment, that does
+	// not share the same momentum of the entire structure
+	float obj_momentum = object->GetImpactResistance() * collision.ClosingVelocity;		
+	if (obj_momentum < 1.0f) return;
+
+	// Get the aggregate stopping power of the element based on its properties, parent tile, and the actual contents of the element
+	ComplexShipTile *tile = el.GetTile();
+	if (tile)
+	{
+		// First, the tile currently in this element (if any)
+		float tile_strength = tile->GetImpactResistance(el);
+
+		// Next, any objects or terrain in the element
+		*** CONTINUE WITH THIS METHOD ***
+	}
+
+
 }
 
 

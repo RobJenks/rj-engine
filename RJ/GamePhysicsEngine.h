@@ -164,12 +164,13 @@ public:
 			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = XMVectorZero(); }
 		};
 
+		AXMVECTOR			TotalImpactVelocity;			// The combined closing velocity at the collision point (vectorised single value)
 		AXMVECTOR			TotalImpactForce;				// The combined closing momentum at the collision point (vectorised single value)
 
 		ObjectImpactData	Object;							// Impact data for the current object
 		ObjectImpactData	Collider;						// Impact data for the colliding object
 
-		ImpactData(void)	{ TotalImpactForce = XMVectorZero(); }
+		ImpactData(void)	{ TotalImpactVelocity = TotalImpactForce = XMVectorZero(); }
 	};
 
 	// Struct holding data on an impact between an object and the terrain

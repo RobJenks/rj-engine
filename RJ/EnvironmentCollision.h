@@ -51,16 +51,29 @@ public:
 	// Vector of events, sorted in time order
 	std::vector<EventDetails>						Events;
 
-	// Index of the last event that was processed in the sequence.  Can be used to execute the events
-	// more efficiently since we only need to test events [last n), and can exit at the first future event
-	// Set as an int rather than std::vector<..>::size_type since the latter is unsigned, and need to initialise as -1
-	int												LastEventExecuted;
+	// Returns the number of events in this collision
+	std::vector<EventDetails>::size_type			GetEventCount(void) const						{ return Events.size(); }
+
+	// Index of the next event to be processed in the sequence.  Can be used to execute the events
+	// more efficiently since we only need to test events [next n), and can exit at the first future event
+	std::vector<EventDetails>::size_type			GetNextEvent(void) const						{ return m_nextevent; };
+
+	// Marks the current event as completed, and increments the counter to the next one.  If this brings us to
+	// the end of the event sequence, the object will be inactivated
+	void											CurrentEventCompleted(void)
+	{
+		// Move the event counter, inactivating the object if we are done
+		if (++m_nextevent >= GetEventCount()) IsActive = false;
+	}
 
 	// Reference to the object that is colliding with this environment
-	ObjectReference<iObject*>						Collider;
+	ObjectReference<iActiveObject>					Collider;
 
 	// The time (clock time, secs) at which the collision event began
 	float											CollisionStartTime;
+
+	// Closing velocity between the object and environment.  Will be adjusted downwards as each collision effect is applied
+	float											ClosingVelocity;
 
 	// Flag indicating whether this represents a valid collision that is currently is progress
 	bool											IsActive;
@@ -95,6 +108,9 @@ public:
 
 
 protected:
+
+	// Index of the next event to be executed
+	std::vector<EventDetails>::size_type							m_nextevent;
 
 };
 

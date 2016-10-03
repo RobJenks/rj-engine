@@ -1016,6 +1016,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	ObjectImpact.Collider.VelocityChangeMagnitude = XMVector3LengthEst(ObjectImpact.Collider.VelocityChange);
 	ObjectImpact.Object.ImpactForce = XMVectorScale(ObjectImpact.Object.VelocityChangeMagnitude, object0->GetMass());
 	ObjectImpact.Collider.ImpactForce = XMVectorScale(ObjectImpact.Collider.VelocityChangeMagnitude, object1->GetMass());
+	ObjectImpact.TotalImpactVelocity = XMVectorAdd(ObjectImpact.Object.VelocityChangeMagnitude, ObjectImpact.Collider.VelocityChangeMagnitude);
 	ObjectImpact.TotalImpactForce = XMVectorAdd(ObjectImpact.Object.ImpactForce, ObjectImpact.Collider.ImpactForce);
 
 	// Notify object 0 of the collision

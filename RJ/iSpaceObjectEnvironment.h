@@ -79,6 +79,9 @@ public:
 	// Returns the element index corresponding to the specified element location
 	CMPINLINE int					GetElementIndex(const INTVECTOR3 & location)					{ return ELEMENT_INDEX(location.x, location.y, location.z); }
 
+	// Validates whether the given element index is valid in this environment
+	CMPINLINE bool					ElementIndexIsValid(int index) const							{ return (index >= 0 && index < m_elementcount); }
+
 	// Allocates a new element space of the specified size.  Contents are copied from the existing 
 	// space (as far as possible, and if relevant).  If any element space does already exist 
 	// it will be deallocated first
@@ -126,6 +129,13 @@ public:
 		m_zeropointtranslation = offset; 
 		XMStoreFloat3(&m_zeropointtranslationf, m_zeropointtranslation);
 	}
+
+	// Registers a new collision with this environment, calculates the effect and begins to apply the effects
+	// Returns a flag indicating whether the event was registered (there are several validations that may prevent this)
+	bool							RegisterEnvironmentImpact(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
+
+	// Checks whether collision of the specified object with this environment is already being simulated
+	bool							EnvironmentIsCollidingWithObject(iActiveObject *object);
 
 	// Derive the world matrix that translates to the (0,0) point of this environment.  Based upon the object world matrix and 
 	// object size.  Called once we know that the environment needs to be rendered this frame; subsequent rendering methods
@@ -229,16 +239,6 @@ public:
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObjectEnvironment::SimulationStateChanged() to maintain the chain
 	void							SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
-
-	// Determines and applies the effect of a collision with trajectory through the environment
-	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
-	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
-
-	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
-	void							ProcessAllEnvironmentCollisions(void);
-
-	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
-	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
 
 	// When the layout (e.g. active/walkable state, connectivity) of elements is changed
 	virtual void					ElementLayoutChanged(void);
@@ -378,7 +378,7 @@ protected:
 	std::vector<EnvironmentCollision>	m_collision_events;
 
 	// Indicates whether there are any collision events currently taking place in the environment
-	CMPINLINE bool					HaveActiveCollisionEvents(void) const		{ return !m_collision_events.empty(); }
+	CMPINLINE bool					HaveActiveEnvironmentCollisionEvents(void) const		{ return !m_collision_events.empty(); }
 
 	// Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer
 	// neighbouring tiles.  Accepts the address of a tile pointer and will adjust that tile pointer if
@@ -392,6 +392,19 @@ protected:
 	// Sets the size of the element space within this environment.  Protected.  Only called by
 	// object methods which are handling the effects of the element space change
 	void							SetElementSize(const INTVECTOR3 & size);
+
+	// Determines and applies the effect of a collision with trajectory through the environment
+	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
+	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
+
+	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
+	void							ProcessAllEnvironmentCollisions(void);
+
+	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
+	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
+
+	// Executes the collision of an object with the specified object, as part of an envrionment collision event
+	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision);
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
