@@ -102,6 +102,19 @@ public:
 		RecalculatePositionalData();
 	}
 
+	// Terrain object mass
+	CMPINLINE float									GetMass(void) const								{ return m_mass; }
+	CMPINLINE void									SetMass(float m)								{ m_mass = m; }
+
+	// Object hardness; used as a proxy for penetration testing / force per cross-sectional area in an impact
+	CMPINLINE float									GetHardness(void) const							{ return m_hardness; }
+	CMPINLINE void									SetHardness(float h)							{ m_hardness = h; }
+
+	// Returns the impact resistance of this object, i.e. the remaining force it can withstand from physical 
+	// impacts, with an impact point at the specified element
+	float											GetImpactResistance(void) const;
+
+
 	// Recalculates the positional data for this terrain following a change to its primary pos/orient data
 	void											RecalculatePositionalData(void);
 
@@ -109,11 +122,14 @@ public:
 	void											Highlight(const XMFLOAT3 & colour, float alpha) const;
 	void											Highlight(const XMFLOAT4 & colour) const;
 
+	// Event triggered upon destruction of the entity
+	void											DestroyObject(void);
+
+	// Shutdown method to deallocate resources and remove the terrain object
+	void											Shutdown(void);
+	
 	// Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 	StaticTerrain *									Copy(void) const;
-
-	// Shutdown method - not required for this class
-	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	// Default destructor
 	~StaticTerrain();
@@ -141,6 +157,8 @@ protected:
 	Game::ID_TYPE							m_parenttile;						// Store the ID of the tile that 'owns' this object, if relevant
 
 	float									m_health;							// Current state of the terrain object
+	float									m_mass;								// Mass of the object
+	float									m_hardness;							// Measure of object strength against an impact.  Used as a proxy for penetration/force per cross-sectional area
 
 	bool									m_postponeupdates;					// Flag indicating whether the terrain object should postpone updates until it is released again
 																				// Used to make multiple adjustments without recalculating derived data each time

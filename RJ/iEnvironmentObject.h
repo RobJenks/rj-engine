@@ -82,6 +82,9 @@ public:
 	// a defined threshold, so excluding e.g. normal floor collisions
 	void										CollisionWithTerrain(const GamePhysicsEngine::TerrainImpactData & impact);
 
+	// Event triggered upon destruction of the entity
+	void										DestroyObject(void);
+
 	// Shut down the environment object, notifying any parent environment of the change
 	void										Shutdown(void);
 

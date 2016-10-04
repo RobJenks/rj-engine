@@ -224,6 +224,14 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	}
 }
 
+
+// Event triggered upon destruction of the entity
+void iEnvironmentObject::DestroyObject(void)
+{
+	// Call the base class method
+	iActiveObject::DestroyObject();
+}
+
 // Shut down the environment object, notifying any parent environment of the change
 void iEnvironmentObject::Shutdown(void)
 {

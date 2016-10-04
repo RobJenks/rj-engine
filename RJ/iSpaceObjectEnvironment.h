@@ -406,6 +406,12 @@ protected:
 	// Executes the collision of an object with the specified object, as part of an envrionment collision event
 	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision);
 
+	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
+	void							TriggerElementDamage(int element_id, float damage);
+
+	// Triggers immediate destruction of an element
+	void							TriggerElementDestruction(int element_id);
+
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
 

@@ -55,6 +55,10 @@ public:
 	CMPINLINE float							GetInverseMass(void) const			{ return m_invmass; }
 	void									SetMass(const float mass);
 
+	// Returns the impact resistance of this object, i.e. the remaining force it can withstand from physical 
+	// impacts, with an impact point at the specified element
+	float									GetImpactResistance(void) const;
+
 
 	// Virtual method, called when this object collides with another
 	virtual void							CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) = 0;
@@ -158,8 +162,13 @@ public:
 		AddLocalMomentum(localforcevector);
 	}
 
-	// Output debug data on the object.  Acts from this point in the hierarchy downwards
-	//std::string								DebugOutput(void) const;
+
+	// Event triggered upon destruction of the entity
+	void									DestroyObject(void);
+
+	// Shut down the object, unregister it and deallocate all resources
+	void									Shutdown(void);
+
 
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level

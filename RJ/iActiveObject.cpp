@@ -107,6 +107,13 @@ void iActiveObject::SetMass(const float mass)
 	RecalculateInertiaTensor();
 }
 
+// Returns the impact resistance of this object, i.e. the remaining force it can withstand from physical 
+// impacts, with an impact point at the specified element
+float iActiveObject::GetImpactResistance(void) const
+{
+	// Impact resistance is calculated as (mass * hardness)
+	return (m_mass * m_hardness);
+}
 
 // Method to recalculate the object inertia tensor.  Called whenever a contributing factor (size, mass) changes
 void iActiveObject::RecalculateInertiaTensor(void)
@@ -126,6 +133,23 @@ void iActiveObject::RecalculateInertiaTensor(void)
 	// Precalculate the inverse I for runtime efficiency
 	PhysicsState.InverseInertiaTensor = XMMatrixInverse(NULL, PhysicsState.InertiaTensor);
 }
+
+
+// Event triggered upon destruction of the entity
+void iActiveObject::DestroyObject(void)
+{
+	// Pass to the base class
+	iObject::DestroyObject();
+}
+
+// Shut down the object, unregister it and deallocate all resources
+void iActiveObject::Shutdown(void)
+{
+	// Pass to the base class
+	iObject::Shutdown();
+}
+
+
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level

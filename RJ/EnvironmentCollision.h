@@ -73,6 +73,7 @@ public:
 	float											CollisionStartTime;
 
 	// Closing velocity between the object and environment.  Will be adjusted downwards as each collision effect is applied
+	// This represents the incoming velocity of the object, relative to a static environment
 	float											ClosingVelocity;
 
 	// Flag indicating whether this represents a valid collision that is currently is progress

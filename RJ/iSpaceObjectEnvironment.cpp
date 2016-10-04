@@ -925,7 +925,7 @@ bool iSpaceObjectEnvironment::EnvironmentIsCollidingWithObject(iActiveObject *ob
 bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult)
 {
 	// Parameter check
-	if (!object) return;
+	if (!object) return false;
 
 	// Initialise the output data object for this collision
 	outResult.Collider = object;
@@ -995,11 +995,14 @@ void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision &
 	std::vector<EnvironmentCollision>::size_type event_count = collision.GetEventCount();
 	while (collision.IsActive)
 	{
+		// Make sure the collider still has momentum; if not, the collision event is over
+		if (collision.ClosingVelocity <= 0.0f) { collision.IsActive = false; return; }
+
 		// Get the next event in the sequence
 		std::vector<EnvironmentCollision>::size_type index = collision.GetNextEvent();
 		if (index >= event_count) { collision.IsActive = false; return; }
 
-		// Test whether it is now ready to execute
+		// Test whether the event is now ready to execute
 		const EnvironmentCollision::EventDetails & ev = collision.Events[index];
 		if ((collision.CollisionStartTime + ev.EventTime) >= Game::ClockTime)
 		{
@@ -1024,6 +1027,7 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// Get a reference to the element 
 	if (ElementIndexIsValid(ev.EntityID) == false) return;
 	const ComplexShipElement & el = GetElementDirect(ev.EntityID);
+	const INTVECTOR3 & el_loc = el.GetLocation();
 
 	// Get a reference to the colliding object
 	iActiveObject *object = collision.Collider();
@@ -1033,22 +1037,132 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// since already incl in impact resistance).  This gives us (obj_vel * obj_mass) + (env_vel * [1.0f]) - we don't want to account
 	// for the environment momentum/mass here since we are dealing with the impact on only a very small part of the environment, that does
 	// not share the same momentum of the entire structure
-	float obj_momentum = object->GetImpactResistance() * collision.ClosingVelocity;		
-	if (obj_momentum < 1.0f) return;
+	float obj_force = object->GetImpactResistance() * collision.ClosingVelocity;		
+	if (obj_force < 1.0f) return;
 
 	// Get the aggregate stopping power of the element based on its properties, parent tile, and the actual contents of the element
 	ComplexShipTile *tile = el.GetTile();
+	float tile_strength = 0.0f, objects_strength = 0.0f, terrain_strength = 0.0f;
+	std::vector<iEnvironmentObject*> objects;
+	std::vector<StaticTerrain*> terrain;
+
+	// First, the tile currently in this element (if any)
 	if (tile)
 	{
-		// First, the tile currently in this element (if any)
-		float tile_strength = tile->GetImpactResistance(el);
+		tile_strength = tile->GetImpactResistance(el);
+	}
+	
+	// Next, any objects or terrain in the element
+	EnvironmentTree *node;
+	if (this->SpatialPartitioningTree)
+	{
+		node = this->SpatialPartitioningTree->GetNodeContainingElement(el.GetLocation());
+		if (node)
+		{
+			// Get all the objects & terrain in this tree node
+			node->GetAllItems(objects, terrain);
+			
+			// Add the contribution from all objects in the element
+			std::vector<iEnvironmentObject*>::const_iterator it_end = objects.end();
+			for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+			{
+				if (*it && (*it)->GetElementLocation() == el_loc) objects_strength += (*it)->GetImpactResistance();
+			}
 
-		// Next, any objects or terrain in the element
-		*** CONTINUE WITH THIS METHOD ***
+			// Also add the contribution from all terrain in the element
+			std::vector<StaticTerrain*>::const_iterator it2_end = terrain.end();
+			for (std::vector<StaticTerrain*>::const_iterator it2 = terrain.begin(); it2 != it2_end; ++it2)
+			{
+				if (*it2 && (*it2)->GetElementLocation() == el_loc) terrain_strength += (*it2)->GetImpactResistance();
+			}
+		}
 	}
 
+	// Sum the total impact resistance and compare to the incoming object force
+	float total_strength = (tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
+	float damage_pc = (obj_force / total_strength);
 
+	// Reduce the object closing velocity based on this impact.  obj_force is currently (velocity * obj_impact_resistance),
+	// so as a quick solution we can divide the remaining force through by obj_impact_resistance to get back to velocity
+	// If this now takes the object velocity <= 0 it will trigger destruction of the collider in the next collision evaluation
+	float obj_remaining_force = (obj_force - total_strength);
+	collision.ClosingVelocity -= obj_remaining_force;
+
+	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
+	float damage_abs = (el.GetHealth() * damage_pc);
+	TriggerElementDamage(el.GetID(), damage_abs);
 }
+
+// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
+void iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
+{
+	// Get a reference to the element
+	if (ElementIndexIsValid(element_id) == false) return;
+	ComplexShipElement & el = GetElementDirect(element_id);
+
+	// Check this normalised [0.0 1.0] damage against the element health
+	if (damage > el.GetHealth())
+	{
+		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
+		TriggerElementDestruction(element_id);
+		return;
+	}
+
+	// Otherwise we want to apply damage to the element
+	el.SetHealth(el.GetHealth() - damage);
+
+	// Notify any tile in this location that the element has been damaged
+	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
+
+	// We may also apply damage to the contents of the element if the damage state is significant enough
+	/*if (el.GetHealth() < Game::C_ELEMENT_DAMAGE_CONTENTS_THRESHOLD)
+	{
+
+	}*/
+}
+
+// Triggers immediate destruction of an element
+void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
+{
+	// Get a reference to the element
+	if (ElementIndexIsValid(element_id) == false) return;
+	ComplexShipElement & el = GetElementDirect(element_id);
+	const INTVECTOR3 & el_loc = el.GetLocation();
+
+	// Update the element state
+	el.SetHealth(0.0f);
+
+	// Notify any tile in this location that the element has been damaged
+	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
+
+	// All objects and terrain in the element are in trouble
+	if (this->SpatialPartitioningTree)
+	{
+		EnvironmentTree *node = this->SpatialPartitioningTree->GetNodeContainingElement(el.GetLocation());
+		if (node)
+		{
+			// Get all the objects & terrain in this tree node
+			std::vector<iEnvironmentObject*> objects; 
+			std::vector<StaticTerrain*> terrain;
+			node->GetAllItems(objects, terrain);
+
+			// Add the contribution from all objects in the element
+			std::vector<iEnvironmentObject*>::size_type n_obj = objects.size();
+			for (std::vector<iEnvironmentObject*>::size_type i_obj = 0U; i_obj < n_obj; ++i_obj)
+			{
+				if (objects[i_obj] && objects[i_obj]->GetElementLocation() == el_loc) objects[i_obj]->DestroyObject();
+			}
+
+			// Also add the contribution from all terrain in the element
+			std::vector<StaticTerrain*>::size_type n_ter = terrain.size();
+			for (std::vector<StaticTerrain*>::size_type i_ter = 0U; i_ter < n_ter; ++i_ter)
+			{
+				if (terrain[i_ter] && terrain[i_ter]->GetElementLocation() == el_loc) terrain[i_ter]->DestroyObject();
+			}
+		}
+	}
+}
+
 
 
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 

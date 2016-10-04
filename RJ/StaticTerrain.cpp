@@ -249,6 +249,14 @@ void StaticTerrain::Highlight(const XMFLOAT4 & colour) const
 	Game::Engine->GetOverlayRenderer()->RenderCuboid(world, tsize.x, tsize.y, tsize.z, colour);
 }
 
+// Returns the impact resistance of this object, i.e. the remaining force it can withstand from physical 
+// impacts, with an impact point at the specified element
+float StaticTerrain::GetImpactResistance(void) const
+{
+	// Impact resistance is calculated as (mass * hardness)
+	return (m_mass * m_hardness);
+}
+
 // Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 StaticTerrain * StaticTerrain::Copy(void) const
 {
@@ -261,6 +269,22 @@ StaticTerrain * StaticTerrain::Copy(void) const
 
 	// Return the new terrain object
 	return t;
+}
+
+// Event triggered upon destruction of the entity
+void StaticTerrain::DestroyObject(void)
+{
+	// Apply any destruction effect
+
+	// Now shut down the object
+	Shutdown();
+	OutputDebugString("Destruction of Terrain\n");
+}
+
+// Shutdown method to deallocate resources and remove the terrain object
+void StaticTerrain::Shutdown(void)
+{
+	// Nothing to do here
 }
 
 // Default destructor

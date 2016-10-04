@@ -13,6 +13,7 @@
 #include "UserInterface.h"
 #include "Light.h"
 #include "FactionManagerObject.h"
+#include "ElementIntersection.h"
 #include "SimpleShip.h"	// DBG
 
 #include "UI_ShipBuilder.h"
@@ -1011,7 +1012,7 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	XMVECTOR dir = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
 
 	// Test for intersection and store the output in the results vector
-	iSpaceObjectEnvironment::ElementIntersections result;
+	ElementIntersectionData result;
 	bool intersect = m_ship->DetermineElementPathIntersectedByRay(Ray(m_intersect_marker_start->GetPosition(), dir), proj_radius, result);
 
 	// Highlight intersection path, if there is one

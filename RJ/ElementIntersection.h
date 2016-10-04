@@ -1,3 +1,9 @@
+#pragma once
+
+#ifndef __ElementIntersectionH__
+#define __ElementIntersectionH__
+
+
 #include <vector>
 #include "CompilerSettings.h"
 
@@ -52,9 +58,14 @@ public:
 		{
 			push_back(*it);
 		}
+
+		return *this;
 	}
 };
 
 
+
+
+#endif
 
 

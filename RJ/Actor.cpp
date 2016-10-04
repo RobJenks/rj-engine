@@ -415,6 +415,11 @@ void Actor::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::
 // Event triggered upon destruction of the entity
 void Actor::DestroyObject(void)
 {
+	// Call the base class method
+	iEnvironmentObject::DestroyObject();
+
+	// Now shut down the object
+	Shutdown();
 	OutputDebugString("Destruction of Actor\n");
 }
 
