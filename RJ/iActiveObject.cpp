@@ -134,14 +134,6 @@ void iActiveObject::RecalculateInertiaTensor(void)
 	PhysicsState.InverseInertiaTensor = XMMatrixInverse(NULL, PhysicsState.InertiaTensor);
 }
 
-
-// Event triggered upon destruction of the entity
-void iActiveObject::DestroyObject(void)
-{
-	// Pass to the base class
-	iObject::DestroyObject();
-}
-
 // Shut down the object, unregister it and deallocate all resources
 void iActiveObject::Shutdown(void)
 {
@@ -166,6 +158,16 @@ void iActiveObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetInverseMass)
 	REGISTER_DEBUG_ACCESSOR_FN(IsFastMover)
 	REGISTER_DEBUG_ACCESSOR_FN(IsStatic)
+
+	REGISTER_DEBUG_ACCESSOR_FN(GetAcceleration)
+	REGISTER_DEBUG_ACCESSOR_FN(GetWorldMomentum)
+	REGISTER_DEBUG_ACCESSOR_FN(GetHeading)
+	REGISTER_DEBUG_ACCESSOR_FN(GetAngularVelocity)
+	REGISTER_DEBUG_ACCESSOR_FN(GetLocalMomentum)
+	REGISTER_DEBUG_ACCESSOR_FN(GetWorldAcceleration)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInertiaTensor)
+	REGISTER_DEBUG_ACCESSOR_FN(GetInverseInertiaTensor)
+	REGISTER_DEBUG_ACCESSOR_FN(GetDeltaMoveDistSq)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(SetMass, command.ParameterAsFloat(2))

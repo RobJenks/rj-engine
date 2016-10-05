@@ -24,6 +24,8 @@
 
 // Initialise static working vector for environment object search; holds nodes being considered in the search
 std::vector<EnvironmentTree*> iSpaceObjectEnvironment::m_search_nodes;
+Game::ID_TYPE iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = 0U;
+std::vector<iSpaceObjectEnvironment::SimulatedEnvironmentCollisionEvent> iSpaceObjectEnvironment::EnvironmentCollisionTestResults;
 
 // Default constructor
 iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
@@ -1090,7 +1092,16 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
 	float damage_abs = (el.GetHealth() * damage_pc);
-	TriggerElementDamage(el.GetID(), damage_abs);
+	if (GetID() == iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment)
+	{
+		// Test whether we are simulating an environment collision, in which case we do not apply any real damage
+		SimulateElementDamage(el.GetID(), damage_abs);
+	}
+	else
+	{
+		// Apply damage to the element, as normal
+		TriggerElementDamage(el.GetID(), damage_abs);
+	}
 }
 
 // Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
@@ -1117,8 +1128,28 @@ void iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
 	// We may also apply damage to the contents of the element if the damage state is significant enough
 	/*if (el.GetHealth() < Game::C_ELEMENT_DAMAGE_CONTENTS_THRESHOLD)
 	{
-
 	}*/
+}
+
+// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
+void iSpaceObjectEnvironment::SimulateElementDamage(int element_id, float damage) const
+{
+	// Get a reference to the element
+	if (ElementIndexIsValid(element_id) == false) return;
+	const ComplexShipElement & el = GetConstElementDirect(element_id);
+
+	// Check this normalised [0.0 1.0] damage against the element health
+	if (damage > el.GetHealth())
+	{
+		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
+		iSpaceObjectEnvironment::EnvironmentCollisionTestResults.push_back(
+			SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType::ElementDestroyed, element_id, 0.0f));
+		return;
+	}
+
+	// Otherwise we want to apply damage to the element
+	iSpaceObjectEnvironment::EnvironmentCollisionTestResults.push_back(
+		SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType::ElementDamaged, element_id, damage));
 }
 
 // Triggers immediate destruction of an element
@@ -1163,6 +1194,26 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 	}
 }
 
+// Enable the ability to simulate environment collisions
+void iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env)
+{
+	// Reset all simulation data first
+	iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
+
+	// Now initialise for the specified environment, if applicable
+	if (env)
+	{
+		iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = env->GetID();
+	}
+}
+
+// Disable the ability to simulate environment collisions
+void iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode(void)
+{
+	// Clear and reset the simulation data
+	iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = 0U;
+	iSpaceObjectEnvironment::EnvironmentCollisionTestResults.clear();
+}
 
 
 // Ensures that the ship element space is sufficiently large to incorporate the location specified, by reallocating 

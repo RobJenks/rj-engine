@@ -69,6 +69,8 @@ public:
 	CMPINLINE void					SetElementDirect(const INTVECTOR3 & loc, ComplexShipElement *e)	{ m_elements[ELEMENT_INDEX(loc.x, loc.y, loc.z)] = (*e); }
 	CMPINLINE void					SetElementDirect(int x, int y, int z, ComplexShipElement *e)	{ m_elements[ELEMENT_INDEX(x, y, z)] = (*e); }
 
+	CMPINLINE const ComplexShipElement & GetConstElementDirect(int index) const						{ return m_elements[index]; }
+
 	// Methods to retrieve and manipulate the size of the environment
 	CMPINLINE INTVECTOR3 			GetElementSize(void) const										{ return m_elementsize; }
 	CMPINLINE INTVECTOR3 *			GetElementSizePointer(void)										{ return &m_elementsize; }
@@ -409,8 +411,16 @@ protected:
 	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
 	void							TriggerElementDamage(int element_id, float damage);
 
+	// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
+	void							SimulateElementDamage(int element_id, float damage) const;
+
 	// Triggers immediate destruction of an element
 	void							TriggerElementDestruction(int element_id);
+
+
+	// Enable or disable the ability to simulate environment collisions
+	static void						EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env);
+	static void						DisableEnvironmentCollisionSimulationMode(void);
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
@@ -426,6 +436,22 @@ protected:
 
 	// Static working vector for environment object search; holds nodes being considered in the search
 	static std::vector<EnvironmentTree*>	m_search_nodes;
+
+	// Data structures holding data on a simulated environment collision event
+	enum SimulatedEnvironmentCollisionEventType { ElementDamaged = 0, ElementDestroyed };
+	struct SimulatedEnvironmentCollisionEvent
+	{
+		SimulatedEnvironmentCollisionEventType		EventType;
+		int											ElementID;
+		float										Value;
+		
+		SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType event_type, int element_id, float value)
+			: EventType(event_type), ElementID(element_id), Value(value) { }
+	};
+
+	// Static data used when simulating environment collisions (rather than actually applying them)
+	static Game::ID_TYPE									EnvironmentCollisionTestEnvironment;
+	static std::vector<SimulatedEnvironmentCollisionEvent>	EnvironmentCollisionTestResults;
 };
 
 

@@ -162,9 +162,17 @@ public:
 		AddLocalMomentum(localforcevector);
 	}
 
+	// Accessor methods for key data in the PhysicsState structure
+	CMPINLINE XMVECTOR						GetAcceleration(void) const					{ return PhysicsState.Acceleration; }
+	CMPINLINE XMVECTOR						GetWorldMomentum(void) const				{ return PhysicsState.WorldMomentum; }
+	CMPINLINE XMVECTOR						GetHeading(void) const						{ return PhysicsState.Heading; }
+	CMPINLINE XMVECTOR						GetAngularVelocity(void) const				{ return PhysicsState.AngularVelocity; }
+	CMPINLINE XMVECTOR						GetLocalMomentum(void) const				{ return PhysicsState.LocalMomentum; }
+	CMPINLINE XMVECTOR						GetWorldAcceleration(void) const			{ return PhysicsState.WorldAcceleration; }
+	CMPINLINE XMMATRIX						GetInertiaTensor(void) const				{ return PhysicsState.InertiaTensor; }
+	CMPINLINE XMMATRIX						GetInverseInertiaTensor(void) const			{ return PhysicsState.InverseInertiaTensor; }
+	CMPINLINE float							GetDeltaMoveDistSq(void) const				{ return PhysicsState.DeltaMoveDistanceSq; }
 
-	// Event triggered upon destruction of the entity
-	void									DestroyObject(void);
 
 	// Shut down the object, unregister it and deallocate all resources
 	void									Shutdown(void);

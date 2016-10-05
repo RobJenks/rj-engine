@@ -13,6 +13,8 @@
 #include "UserInterface.h"
 #include "Light.h"
 #include "FactionManagerObject.h"
+#include "GamePhysicsEngine.h"
+#include "SpaceProjectile.h"
 #include "ElementIntersection.h"
 #include "SimpleShip.h"	// DBG
 
@@ -91,6 +93,7 @@ void UI_ShipBuilder::Activate(void)
 	m_tile_placement_is_valid = false;
 	m_placing_generic_corridors = false;
 	m_intersect_marker_start = m_intersect_marker_end = NULL;
+	m_intersect_test_proj = NULL;
 	m_selected_intersection_marker = NULL;
 
 	// Initialise any editor-specific render data
@@ -1005,32 +1008,27 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
 
 	// Test parameters which can later be user-specified
-	float proj_velocity = 20.0f;
+	float proj_velocity = 200.0f;
 	float proj_radius = 5.0f;
 
 	// Determine ray direction
-	XMVECTOR dir = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
+	XMVECTOR proj_vec = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
 
-	// Test for intersection and store the output in the results vector
-	ElementIntersectionData result;
-	bool intersect = m_ship->DetermineElementPathIntersectedByRay(Ray(m_intersect_marker_start->GetPosition(), dir), proj_radius, result);
+	// Create the projectile used for this test; shutdown any previous one and create a new projectile
+	if (m_intersect_test_proj()) m_intersect_test_proj()->Shutdown();
+	m_intersect_test_proj = SimpleShip::Create("null_ship");
+	m_intersect_test_proj()->SetFaction(Game::FactionManager.GetFaction("faction_none"));
+	m_intersect_test_proj()->SetModel(Model::GetModel("unit_cone_model"));
+	m_intersect_test_proj()->SetCollisionMode(Game::CollisionMode::BroadphaseCollisionOnly);
+	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorSetY(NULL_VECTOR, -1000.0f));
+	m_intersect_test_proj()->SetOrientation(ID_QUATERNION);
+	m_intersect_test_proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 
-	// Highlight intersection path, if there is one
-	/*static const XMFLOAT3 INTERSECT_COLOUR = XMFLOAT3(1.0f, 0.0f, 0.0f);
-	if (intersect)
-	{
-		std::vector<int>::const_iterator it_end = elements.end();
-		for (std::vector<int>::const_iterator it = elements.begin(); it != it_end; ++it)
-		{
-			// Get a reference to the element
-			assert(m_ship->GetElement(*it) != NULL);
-			const ComplexShipElement & el = m_ship->GetElementDirect(*it);
+	// Move the projectile into position, set its velocity and start the collision detection test
+	m_intersect_test_proj()->SetPosition(m_intersect_marker_start->GetPosition());
+	m_intersect_test_proj()->SetCollisionSphereRadius(proj_radius);
+	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
 
-			OutputDebugString(concat("Collided with element ")(m_ship->GetElementByIndex(*it)->GetLocation().ToString())("\n").str().c_str());
-
-			Game::Engine->GetOverlayRenderer()->RenderElementOverlay(m_ship, m_ship->GetElementByIndex(*it)->GetLocation(), INTERSECT_COLOUR, 0.75f);
-		}
-	}*/
 }
 
 // Handles the LMB first-down event in structural test mode
