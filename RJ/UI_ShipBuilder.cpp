@@ -17,6 +17,7 @@
 #include "SpaceProjectile.h"
 #include "ElementIntersection.h"
 #include "SimpleShip.h"	// DBG
+#include "GameConsole.h"// DBG
 
 #include "UI_ShipBuilder.h"
 
@@ -95,6 +96,7 @@ void UI_ShipBuilder::Activate(void)
 	m_intersect_marker_start = m_intersect_marker_end = NULL;
 	m_intersect_test_proj = NULL;
 	m_selected_intersection_marker = NULL;
+	m_intersect_test_last_render_time = 0.0f;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -221,6 +223,18 @@ void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
 		m_intersect_test_trajectory.P1 = m_intersect_marker_start->GetPosition();
 		m_intersect_test_trajectory.P2 = m_intersect_marker_end->GetPosition();
 		Game::Engine->RenderVolumetricLine(m_intersect_test_trajectory);
+	}
+
+	// If we have a new event update since the last time we rendered it, show the new status here
+	if (iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.LastEventTime > m_intersect_test_last_render_time)
+	{
+		// FOR NOW, simply output the results
+		OutputDebugString("*** Environment collision begin ***\n");
+		OutputDebugString(iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.ToString().c_str());
+		OutputDebugString("*** Environment collision end ***\n\n");
+
+		// Update the last render time
+		m_intersect_test_last_render_time = Game::TimeFactor;
 	}
 }
 
@@ -1008,17 +1022,21 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
 
 	// Test parameters which can later be user-specified
-	float proj_velocity = 200.0f;
+	float proj_velocity = 1000.0f;
 	float proj_radius = 5.0f;
+	float proj_mass = 250.0f;
+	float proj_hardness = 1.0f;
 
 	// Determine ray direction
 	XMVECTOR proj_vec = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
 
+	// Enable SIMULATED environment collision mode for this test
+	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
+
 	// Create the projectile used for this test; shutdown any previous one and create a new projectile
 	if (m_intersect_test_proj()) m_intersect_test_proj()->Shutdown();
-	m_intersect_test_proj = SimpleShip::Create("null_ship");
+	m_intersect_test_proj = SimpleShip::Create("intersection_test_proj_ship");
 	m_intersect_test_proj()->SetFaction(Game::FactionManager.GetFaction("faction_none"));
-	m_intersect_test_proj()->SetModel(Model::GetModel("unit_cone_model"));
 	m_intersect_test_proj()->SetCollisionMode(Game::CollisionMode::BroadphaseCollisionOnly);
 	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorSetY(NULL_VECTOR, -1000.0f));
 	m_intersect_test_proj()->SetOrientation(ID_QUATERNION);
@@ -1027,8 +1045,14 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// Move the projectile into position, set its velocity and start the collision detection test
 	m_intersect_test_proj()->SetPosition(m_intersect_marker_start->GetPosition());
 	m_intersect_test_proj()->SetCollisionSphereRadius(proj_radius);
-	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
+	m_intersect_test_proj()->SetMass(proj_mass);
+	m_intersect_test_proj()->SetHardness(proj_hardness);
+	m_intersect_test_proj()->ApplyWorldSpaceLinearForceDirect(proj_vec);
 
+Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enable_physics_debug ")(m_intersect_test_proj()->GetID()).str().c_str()));
+
+	// Disable simulated environment collisions again following the test
+	//iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
 }
 
 // Handles the LMB first-down event in structural test mode

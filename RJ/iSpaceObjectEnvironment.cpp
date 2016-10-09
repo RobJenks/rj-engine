@@ -18,14 +18,14 @@
 #include "OrientedBoundingBox.h"
 #include "ElementIntersection.h"
 #include "EnvironmentCollision.h"
+#include"SimulatedEnvironmentCollision.h"
 
 #include "iSpaceObjectEnvironment.h"
 
 
 // Initialise static working vector for environment object search; holds nodes being considered in the search
 std::vector<EnvironmentTree*> iSpaceObjectEnvironment::m_search_nodes;
-Game::ID_TYPE iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = 0U;
-std::vector<iSpaceObjectEnvironment::SimulatedEnvironmentCollisionEvent> iSpaceObjectEnvironment::EnvironmentCollisionTestResults;
+SimulatedEnvironmentCollision iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults;;
 
 // Default constructor
 iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
@@ -1092,7 +1092,7 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
 	float damage_abs = (el.GetHealth() * damage_pc);
-	if (GetID() == iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment)
+	if (EnvironmentCollisionsAreBeingSimulated())
 	{
 		// Test whether we are simulating an environment collision, in which case we do not apply any real damage
 		SimulateElementDamage(el.GetID(), damage_abs);
@@ -1142,13 +1142,13 @@ void iSpaceObjectEnvironment::SimulateElementDamage(int element_id, float damage
 	if (damage > el.GetHealth())
 	{
 		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
-		iSpaceObjectEnvironment::EnvironmentCollisionTestResults.push_back(
+		iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.push_back(
 			SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType::ElementDestroyed, element_id, 0.0f));
 		return;
 	}
 
 	// Otherwise we want to apply damage to the element
-	iSpaceObjectEnvironment::EnvironmentCollisionTestResults.push_back(
+	iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.push_back(
 		SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType::ElementDamaged, element_id, damage));
 }
 
@@ -1203,7 +1203,7 @@ void iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(const iSp
 	// Now initialise for the specified environment, if applicable
 	if (env)
 	{
-		iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = env->GetID();
+		iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.EnvironmentID = env->GetID();
 	}
 }
 
@@ -1211,8 +1211,7 @@ void iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(const iSp
 void iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode(void)
 {
 	// Clear and reset the simulation data
-	iSpaceObjectEnvironment::EnvironmentCollisionTestEnvironment = 0U;
-	iSpaceObjectEnvironment::EnvironmentCollisionTestResults.clear();
+	iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.Reset();
 }
 
 

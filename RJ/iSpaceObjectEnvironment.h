@@ -9,6 +9,7 @@
 #include "ComplexShipElement.h"
 #include "TileAdjacency.h"
 #include "EnvironmentCollision.h"
+#include "SimulatedEnvironmentCollision.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -319,6 +320,13 @@ public:
 		return IntVector3Clamp(Game::PhysicalPositionToElementLocation(position), NULL_INTVECTOR3, m_elementsize);
 	}
 
+	// Enable or disable the ability to simulate environment collisions
+	static void						EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env);
+	static void						DisableEnvironmentCollisionSimulationMode(void);
+
+	// Static data used when simulating environment collisions (rather than actually applying them)
+	static SimulatedEnvironmentCollision		EnvironmentCollisionSimulationResults;
+
 	// Find all objects within a given distance of the specified object.  Object & Terrain output
 	// vectors will be populated if valid pointers are supplied
 	void							GetAllObjectsWithinDistance(iEnvironmentObject *focal_object, float distance,
@@ -411,16 +419,14 @@ protected:
 	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
 	void							TriggerElementDamage(int element_id, float damage);
 
+	// Returns a flag indicating whether environment collisions are currently being simulated for this environment
+	CMPINLINE bool					EnvironmentCollisionsAreBeingSimulated(void) const		{ return iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.EnvironmentID == m_id; }
+
 	// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
 	void							SimulateElementDamage(int element_id, float damage) const;
 
 	// Triggers immediate destruction of an element
 	void							TriggerElementDestruction(int element_id);
-
-
-	// Enable or disable the ability to simulate environment collisions
-	static void						EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env);
-	static void						DisableEnvironmentCollisionSimulationMode(void);
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
@@ -435,23 +441,8 @@ protected:
 									 							 std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
 
 	// Static working vector for environment object search; holds nodes being considered in the search
-	static std::vector<EnvironmentTree*>	m_search_nodes;
-
-	// Data structures holding data on a simulated environment collision event
-	enum SimulatedEnvironmentCollisionEventType { ElementDamaged = 0, ElementDestroyed };
-	struct SimulatedEnvironmentCollisionEvent
-	{
-		SimulatedEnvironmentCollisionEventType		EventType;
-		int											ElementID;
-		float										Value;
-		
-		SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType event_type, int element_id, float value)
-			: EventType(event_type), ElementID(element_id), Value(value) { }
-	};
-
-	// Static data used when simulating environment collisions (rather than actually applying them)
-	static Game::ID_TYPE									EnvironmentCollisionTestEnvironment;
-	static std::vector<SimulatedEnvironmentCollisionEvent>	EnvironmentCollisionTestResults;
+	static std::vector<EnvironmentTree*>		m_search_nodes;
+	
 };
 
 

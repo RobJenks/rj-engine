@@ -21,6 +21,11 @@ class AABB;
 class Ray;
 
 
+// Compiler flag which enables per-entity physics debugging
+#ifdef _DEBUG
+#	define RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+#endif
+
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
 class GamePhysicsEngine : public ALIGN16<GamePhysicsEngine>
@@ -391,6 +396,15 @@ public:
 	// Returns the distance that should be tested around an object for CCD contacts.  No parameter checking for efficiency
 	float									GetCCDTestDistance(const iActiveObject *object) const;
 
+	// Debug methods to enable to disable per-entity physics debugging
+#	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+		CMPINLINE void						SetPhysicsDebugEntity(Game::ID_TYPE id)					{ m_physics_debug_entity_id = id; }
+		CMPINLINE void						ClearPhysicsDebugEntity(void)							{ m_physics_debug_entity_id = 0U; }
+#	else
+		CMPINLINE void						SetPhysicsDebugEntity(Game::ID_TYPE id)					{ }
+		CMPINLINE void						ClearPhysicsDebugEntity(void)							{ }
+#	endif
+
 	// Set or test the flag that indicates whether the engine will still handle collisions between diverging objects.  Default: no
 	CMPINLINE bool							TestFlag_HandleDivergingCollisions(void) const			{ return m_flag_handle_diverging_collisions; }
 	CMPINLINE void							SetFlag_HandleDivergingCollisions(void)					{ m_flag_handle_diverging_collisions = true; }
@@ -436,7 +450,6 @@ protected:
 	// Performs full SAT collision testing between the object and terrain OBBs.  If a collision is detected, applies an appropriate response
 	// to move the object out of the terrain collision box by the minimum separating axis.  Returns a value indicating whether any
 	// collisions were detected
-public:
 	bool									TestAndHandleTerrainCollision(	iSpaceObjectEnvironment *env, iEnvironmentObject *object,
 																			StaticTerrain *terrain );
 protected:
@@ -452,6 +465,11 @@ protected:
 	// we can exclude these since static objects will very rarely be colliding
 	unsigned int							m_static_cd_counter;
 	bool									m_cd_include_static;
+
+	// ID of the object which will be caught during debug physics testing (if applicable compiler flags are set)
+#	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+	Game::ID_TYPE							m_physics_debug_entity_id;
+#	endif
 
 	// Temporary variables to avoid multiple reallocations per physics cycle
 	AXMVECTOR								_diffpos;

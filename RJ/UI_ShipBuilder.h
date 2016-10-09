@@ -294,7 +294,7 @@ public:
 	SimpleShip **								m_selected_intersection_marker;		// The marker that is currently being manipulated (if applicable)
 	VolumetricLine								m_intersect_test_trajectory;		// Trajectory of the collider in interection test mode
 	ObjectReference<SimpleShip>					m_intersect_test_proj;				// The projectile used to perform the intersection test
-	//std::vector<int>							m_intersect_test_result;			// Vector of elements 
+	float										m_intersect_test_last_render_time;	// The time (secs) at which we rendered the most recent intersection results
 
 };
 

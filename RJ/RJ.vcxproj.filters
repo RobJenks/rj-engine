@@ -565,6 +565,9 @@
     <ClCompile Include="EnvironmentCollision.cpp">
       <Filter>Physics</Filter>
     </ClCompile>
+    <ClCompile Include="SimulatedEnvironmentCollision.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1295,6 +1298,9 @@
     </ClInclude>
     <ClInclude Include="ElementIntersection.h">
       <Filter>Objects\Ships\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulatedEnvironmentCollision.h">
+      <Filter>Physics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

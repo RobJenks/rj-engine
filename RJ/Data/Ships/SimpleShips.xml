@@ -83,4 +83,23 @@
     <BankExtent x="0.000000" y="0.000000" z="0.000000" />
     <BankRate>0.0</BankRate>
   </SimpleShip>
+
+  <SimpleShip>
+    <Code>intersection_test_proj_ship</Code>
+    <Name>Projectile</Name>
+    <StandardObject>True</StandardObject>
+    <Model>unit_cone_model</Model>
+    <CameraPosition x="0.000000" y="0.000000" z="0.000000" />
+    <CameraRotation x="0.000000" y="0.000000" z="0.000000" />
+    <CameraElasticity>0.0</CameraElasticity>
+    <Mass>50.0</Mass>
+    <VelocityLimit>1000000.0</VelocityLimit>
+    <AngularVelocityLimit>10.0</AngularVelocityLimit>
+    <BrakeFactor>0.25</BrakeFactor>
+    <TurnRate>0.000000</TurnRate>
+    <TurnAngle>0.000000</TurnAngle>
+    <BankExtent x="0.000000" y="0.000000" z="0.000000" />
+    <BankRate>0.0</BankRate>
+  </SimpleShip>
+
 </GameData>

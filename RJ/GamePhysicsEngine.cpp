@@ -218,6 +218,14 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 		// Get a reference to this object
 		object = (iSpaceObject*)objects[i]; if (!object) continue;
 
+		// Debug control; allow breaking at collision detection for a specific object
+#		ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+			if (object->GetID() == m_physics_debug_entity_id)
+			{
+				OutputDebugString(concat("Testing collision of physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+			}
+#		endif
+
 		// Test whether this object is moving at very high speed
 		if (object->IsFastMover())
 		{
@@ -250,6 +258,14 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 				// uniqueness and sequential nature of object IDs means this will always work.  Only exception is if the candidate is
 				// a passive collider.  In this case it cannot test for collisions itself, and so we will allow it as the candidate here
 				if (object_id >= candidate->GetID() && candidate->GetColliderType() != Game::ColliderType::PassiveCollider) continue;
+
+				// Debug control; allow breaking at collision detection for a specific object
+#				ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+					if (candidate->GetID() == m_physics_debug_entity_id)
+					{
+						OutputDebugString(concat("Testing collision against physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+					}
+#				endif
 
 				// Also test whether either object has an exclusion in place to prevent collision with the other
 				if ((hasexclusions && object->CollisionExcludedWithObject(candidate->GetID())) ||

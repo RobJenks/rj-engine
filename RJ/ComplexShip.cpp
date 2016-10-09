@@ -1047,8 +1047,7 @@ void ComplexShip::RecalculateAllShipData(void)
 void ComplexShip::CollisionWithObject(iActiveObject *object, ComplexShipSection *collidingsection, const GamePhysicsEngine::ImpactData & impact)
 {
 	// Pass to the environment method to determine any internal ship damage 
-	EnvironmentCollision tmpresult;
-	iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(object, impact, tmpresult);
+	RegisterEnvironmentImpact(object, impact);
 }
 
 // Fits the element space around this ship, eliminating any extra space allocated outside of the (cuboid) bounds it requires
