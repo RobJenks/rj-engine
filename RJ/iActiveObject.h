@@ -47,6 +47,18 @@ public:
 		// The distance sq that the object moved during this physics cycle
 		float						DeltaMoveDistanceSq;	// m
 
+		// Default constructor
+		ObjectPhysicsState(void);
+
+		// Copy constructor
+		ObjectPhysicsState(const ObjectPhysicsState & other);
+
+		// Assignment operator
+		ObjectPhysicsState& operator=(const ObjectPhysicsState&);
+		
+		// Detructor
+		CMPINLINE ~ObjectPhysicsState(void) { }
+
 	} PhysicsState;
 
 

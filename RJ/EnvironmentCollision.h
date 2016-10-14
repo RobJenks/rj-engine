@@ -90,6 +90,9 @@ public:
 	// Adds an element intersection event
 	void											AddElementIntersection(int elementID, float intersectTime, float intersectDuration);
 
+	// Make the environment collision data immediately-executable so that it can be simulated immediately 
+	// in this method, without waiting for the actual intersection times to occur
+	void											MakeImmediatelyExecutable(void);
 
 	// Default constructor
 	EnvironmentCollision(void);

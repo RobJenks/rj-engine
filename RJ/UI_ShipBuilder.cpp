@@ -229,10 +229,7 @@ void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
 	if (iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.LastEventTime > m_intersect_test_last_render_time)
 	{
 		// FOR NOW, simply output the results
-		OutputDebugString("*** Environment collision begin ***\n");
-		OutputDebugString(iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.ToString().c_str());
-		OutputDebugString("*** Environment collision end ***\n\n");
-
+		
 		// Update the last render time
 		m_intersect_test_last_render_time = Game::TimeFactor;
 	}
@@ -1028,31 +1025,77 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	float proj_hardness = 1.0f;
 
 	// Determine ray direction
-	XMVECTOR proj_vec = XMVectorScale(XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition())), proj_velocity);
+	XMVECTOR norm_proj_vec = XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition()));
+	XMVECTOR proj_vec = XMVectorScale(norm_proj_vec, proj_velocity);
 
-	// Enable SIMULATED environment collision mode for this test
-	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
+	// Detemrine the ray/OBBB intersection from projectile start location along proj_vec
+	Ray proj_ray = Ray(m_intersect_marker_start->GetPosition(), proj_vec);
+	bool intersects = Game::PhysicsEngine.DetermineRayVsOBBIntersection(proj_ray, m_ship->CollisionOBB.Data());
+	if (intersects == false) return;
 
-	// Create the projectile used for this test; shutdown any previous one and create a new projectile
-	if (m_intersect_test_proj()) m_intersect_test_proj()->Shutdown();
-	m_intersect_test_proj = SimpleShip::Create("intersection_test_proj_ship");
+	// Determine the corresponding intersection point.  Back up approximately 80% of the projectile bounding sphere radius
+	// to ensure we have an approx surface/surface collision.  TODO: in future, make this exact using proj OBB?
+	// If projectile has a velocity of v == 2m/s, it will travel its radius r == 6m  in t_rad = r/v = 3s.  We then want to 
+	// decrease the intersection time t by t_rad* ~0.8
+	float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin - ((proj_radius / proj_velocity) * 0.8f);
+	if (intersect_time < 0.0f) return;
+	XMVECTOR intersection = proj_ray.PositionAtTime(intersect_time);
+
+	// Save the state of the ship before this test - any data that could be impacted by the test
+	// The environment collisions are simulated so this is primarily the effects of the PhysicsEngine collision itself
+	iActiveObject::ObjectPhysicsState phys_state(m_ship->PhysicsState);
+
+	// Create the projectile used for this test if necessary, and set basic properties
+	if (m_intersect_test_proj() == NULL)
+	{
+		m_intersect_test_proj = SimpleShip::Create("intersection_test_proj_ship");
+	}
 	m_intersect_test_proj()->SetFaction(Game::FactionManager.GetFaction("faction_none"));
 	m_intersect_test_proj()->SetCollisionMode(Game::CollisionMode::BroadphaseCollisionOnly);
 	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorSetY(NULL_VECTOR, -1000.0f));
 	m_intersect_test_proj()->SetOrientation(ID_QUATERNION);
 	m_intersect_test_proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 
-	// Move the projectile into position, set its velocity and start the collision detection test
-	m_intersect_test_proj()->SetPosition(m_intersect_marker_start->GetPosition());
+	// Move the projectile into intersection position and set other collision properties
+	m_intersect_test_proj()->SetPosition(intersection);
 	m_intersect_test_proj()->SetCollisionSphereRadius(proj_radius);
 	m_intersect_test_proj()->SetMass(proj_mass);
 	m_intersect_test_proj()->SetHardness(proj_hardness);
+	m_intersect_test_proj()->SetHealthPercentage(1.0f);
 	m_intersect_test_proj()->ApplyWorldSpaceLinearForceDirect(proj_vec);
 
-Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enable_physics_debug ")(m_intersect_test_proj()->GetID()).str().c_str()));
+	// Process the collision at this intersection point and store the collision results
+	bool collision = Game::PhysicsEngine.CheckSingleCollision(m_ship, m_intersect_test_proj());
+	if (collision == false) return;
+	GamePhysicsEngine::ImpactData impact = Game::PhysicsEngine.ObjectImpact;
 
-	// Disable simulated environment collisions again following the test
-	//iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
+	// We now want to determine the effect on the environment; enable simulated collision mode for the ship
+	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
+
+	// Calculate the path of the collision through this environment
+	EnvironmentCollision env_collision;
+	m_ship->CalculateCollisionThroughEnvironment(m_intersect_test_proj(), impact, env_collision);
+
+	// Make the environment collision data immediately-executable so that it can be simulated immediately 
+	// in this method, without waiting for the actual intersection times to occur
+	env_collision.MakeImmediatelyExecutable();
+
+	// Process this collision in the environment adn retrieve data from the simulation results vector
+	m_ship->ProcessEnvironmentCollision(env_collision);
+	SimulatedEnvironmentCollision events = SimulatedEnvironmentCollision(iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults);
+
+	// Disable collision simulation now that we have generated all results
+	iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
+
+	// Move the projectile away from the ship (if it still exists), and restore the ship state
+	if (m_intersect_test_proj()) m_intersect_test_proj()->SetPosition(XMVectorSetX(NULL_VECTOR, -1000.0f));
+	m_ship->PhysicsState = phys_state;
+
+	// Render these results in the ship designer 
+	// TODO: for now, stream out
+	OutputDebugString("*** Environment collision begin ***\n");
+	OutputDebugString(events.ToString().c_str());
+	OutputDebugString("*** Environment collision end ***\n\n");
 }
 
 // Handles the LMB first-down event in structural test mode

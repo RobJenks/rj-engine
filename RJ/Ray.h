@@ -40,6 +40,18 @@ public:
 	// Transforms the ray into a different coordinate system
 	void TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_P(&bases)[3]);
 
+	// Get a position along the ray at the specified time
+	CMPINLINE XMVECTOR			PositionAtTime(float t) const
+	{
+		return XMVectorMultiplyAdd(Direction, XMVectorReplicate(t), Origin);
+	}
+
+	// Get a position along the ray at the specified (vectorised) time
+	CMPINLINE XMVECTOR			PositionAtTime(const FXMVECTOR t) const
+	{
+		return XMVectorMultiplyAdd(Direction, t, Origin);
+	}
+
 	// Update the ray origin
 	CMPINLINE void				SetOrigin(const FXMVECTOR origin)
 	{

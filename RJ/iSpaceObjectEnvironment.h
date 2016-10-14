@@ -320,6 +320,16 @@ public:
 		return IntVector3Clamp(Game::PhysicalPositionToElementLocation(position), NULL_INTVECTOR3, m_elementsize);
 	}
 
+	// Determines and applies the effect of a collision with trajectory through the environment
+	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
+	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
+
+	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
+	void							ProcessAllEnvironmentCollisions(void);
+
+	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
+	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
+
 	// Enable or disable the ability to simulate environment collisions
 	static void						EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env);
 	static void						DisableEnvironmentCollisionSimulationMode(void);
@@ -402,16 +412,6 @@ protected:
 	// Sets the size of the element space within this environment.  Protected.  Only called by
 	// object methods which are handling the effects of the element space change
 	void							SetElementSize(const INTVECTOR3 & size);
-
-	// Determines and applies the effect of a collision with trajectory through the environment
-	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
-	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
-
-	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
-	void							ProcessAllEnvironmentCollisions(void);
-
-	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
-	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
 
 	// Executes the collision of an object with the specified object, as part of an envrionment collision event
 	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision);

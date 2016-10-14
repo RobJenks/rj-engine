@@ -28,6 +28,16 @@ public:
 	SimulatedEnvironmentCollisionEvent(SimulatedEnvironmentCollisionEventType event_type, int element_id, float value)
 		: EventType(event_type), ElementID(element_id), Value(value) { }
 
+	// Copy constructor
+	SimulatedEnvironmentCollisionEvent(const SimulatedEnvironmentCollisionEvent & other)
+		: EventType(other.EventType), ElementID(other.ElementID), Value(other.Value) { }
+
+	// Assignment operator
+	SimulatedEnvironmentCollisionEvent & operator=(const SimulatedEnvironmentCollisionEvent & other)
+	{
+		EventType = other.EventType; ElementID = other.ElementID; Value = other.Value; return *this;
+	}
+
 	// Generates a string representation of the event
 	std::string									ToString(void) const;
 };
@@ -49,6 +59,12 @@ public:
 		EnvironmentID = 0U;
 		LastEventTime = 0.0f;
 	}
+
+	// Copy constructor
+	SimulatedEnvironmentCollision(const SimulatedEnvironmentCollision & other);
+
+	// Assignment operator
+	SimulatedEnvironmentCollision & operator=(const SimulatedEnvironmentCollision & other);
 
 	// Adds a new event to the collection
 	void										AddEvent(const SimulatedEnvironmentCollisionEvent & new_event);

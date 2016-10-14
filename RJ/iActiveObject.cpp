@@ -12,11 +12,42 @@ iActiveObject::iActiveObject(void)
 	
 	// Initialise physical state of the object
 	SetMass(10.0f);
-	PhysicsState.Acceleration = PhysicsState.AngularVelocity = PhysicsState.Heading =
-	PhysicsState.LocalMomentum = PhysicsState.WorldAcceleration = PhysicsState.WorldMomentum = NULL_VECTOR;
-	PhysicsState.InertiaTensor = PhysicsState.InverseInertiaTensor = ID_MATRIX;
-	PhysicsState.DeltaMoveDistanceSq = 0.0f;
+	
 }
+
+// Default constructor for the PhysicsState data
+iActiveObject::ObjectPhysicsState::ObjectPhysicsState(void)
+	:
+	Acceleration(NULL_VECTOR), AngularVelocity(NULL_VECTOR), Heading(NULL_VECTOR), LocalMomentum(NULL_VECTOR), WorldAcceleration(NULL_VECTOR), WorldMomentum(NULL_VECTOR), 
+	InertiaTensor(ID_MATRIX), InverseInertiaTensor(ID_MATRIX), 
+	DeltaMoveDistanceSq(0.0f)
+{
+}
+
+// Copy constructor
+iActiveObject::ObjectPhysicsState::ObjectPhysicsState(const iActiveObject::ObjectPhysicsState & other)
+	:
+	Acceleration(other.Acceleration), AngularVelocity(other.AngularVelocity), Heading(other.Heading), LocalMomentum(other.LocalMomentum), 
+	WorldAcceleration(other.WorldAcceleration), WorldMomentum(other.WorldMomentum), 
+	InertiaTensor(other.InertiaTensor), InverseInertiaTensor(other.InverseInertiaTensor)
+{
+}
+
+// Assignment operator
+iActiveObject::ObjectPhysicsState& iActiveObject::ObjectPhysicsState::operator= (const iActiveObject::ObjectPhysicsState& other)
+{
+	Acceleration = other.Acceleration; 
+	AngularVelocity = other.AngularVelocity;
+	Heading = other.Heading;
+	LocalMomentum = other.LocalMomentum;
+	WorldAcceleration = other.WorldAcceleration; 
+	WorldMomentum = other.WorldMomentum;
+	InertiaTensor = other.InertiaTensor;
+	InverseInertiaTensor = other.InverseInertiaTensor;
+
+	return *this;
+}
+
 
 // Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 // lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within

@@ -33,6 +33,9 @@
 //#define RJ_OLD_COLLISION_HANDLING
 //#define RJ_OLD_COLLISION_HANDLING_2
 
+// Initialise static fields
+const GamePhysicsEngine::ImpactData::ObjectImpactData GamePhysicsEngine::NullObjectImpactData = GamePhysicsEngine::ImpactData::ObjectImpactData();
+
 // Default constructor
 GamePhysicsEngine::GamePhysicsEngine(void)
 {
@@ -312,6 +315,35 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 					}
 				}
 			}
+		}
+	}
+}
+
+// Checks a single, isolated collision between two object.  Not part of the primary collision detection cycle
+bool GamePhysicsEngine::CheckSingleCollision(iSpaceObject *obj0, iSpaceObject *obj1)
+{
+	OrientedBoundingBox *collider0 = NULL, *collider1 = NULL;
+
+	// First, broadphase collision testing
+	if (CheckBroadphaseCollision(obj0, obj1) == false)
+	{
+		// We do NOT have a collision, so early-exit here
+		return false;
+	}
+	else
+	{
+		// These two objects are potentially colliding.  We should now therefore pass them to the more computationally-expensive
+		// narrowphase collision handling (if applicable) to determine if there is a true collision between components of each object
+		if (CheckFullCollision(obj0, obj1, &collider0, &collider1) == false)
+		{
+			// No collision
+			return false;
+		}
+		else
+		{
+			// These two objects are colliding.  Determine the collision response and apply it
+			HandleCollision(obj0, obj1, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
+			return true;
 		}
 	}
 }
@@ -1024,6 +1056,8 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	object1->RecalculateLocalMomentum();
 
 	// Determine the impact force on each object by comparing pre- & post-collision momentum
+	ObjectImpact.Object.ID = object0->GetID();
+	ObjectImpact.Collider.ID = object1->GetID();
 	ObjectImpact.Object.PreImpactVelocity = obj0_pre_wm;
 	ObjectImpact.Collider.PreImpactVelocity = obj1_pre_wm;
 	ObjectImpact.Object.VelocityChange = XMVectorSubtract(object0->PhysicsState.WorldMomentum, obj0_pre_wm);
@@ -2280,6 +2314,12 @@ Game::BoundingVolumeType GamePhysicsEngine::DetermineBestBoundingVolumeTypeForOb
 		object->GetCollisionSphereRadius() > Game::C_OBB_SIZE_THRESHOLD &&
 		object->GetSizeRatio() > Game::C_OBB_SIZE_RATIO_THRESHOLD ?
 			Game::BoundingVolumeType::OrientedBoundingBox : Game::BoundingVolumeType::BoundingSphere);
+}
+
+// Returns a constant reference to the object-specific data for one party in the impact
+const GamePhysicsEngine::ImpactData::ObjectImpactData & GamePhysicsEngine::ImpactData::GetObjectData(Game::ID_TYPE id) const 
+{
+	return (id == Object.ID ? Object : (id == Collider.ID ? Collider : GamePhysicsEngine::NullObjectImpactData));
 }
 
 #ifdef RJ_OLD_COLLISION_HANDLING

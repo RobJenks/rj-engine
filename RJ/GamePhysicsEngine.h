@@ -161,12 +161,20 @@ public:
 		__declspec(align(16))
 		struct ObjectImpactData : public ALIGN16<ObjectImpactData>
 		{
+			Game::ID_TYPE	ID;								// Entity ID of this object
 			AXMVECTOR		PreImpactVelocity;				// Our velocity before the impact
 			AXMVECTOR		VelocityChange;					// The change in our velocity following the impact
 			AXMVECTOR		VelocityChangeMagnitude;		// The magnitude of our change in velocity (VelocityChange.Length) (vectorised single value)
 			AXMVECTOR		ImpactForce;					// The force with which we have been impacted (The momentum we were hit with) (vectorised single value)
 
-			ObjectImpactData(void) { PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = XMVectorZero(); }
+			ObjectImpactData(void) { ID = 0U; PreImpactVelocity = VelocityChange = VelocityChangeMagnitude = ImpactForce = XMVectorZero(); }
+			ObjectImpactData & operator=(const ObjectImpactData &other) 
+			{ 
+				ID = other.ID;
+				PreImpactVelocity = other.PreImpactVelocity; VelocityChange = other.VelocityChange; 
+				VelocityChangeMagnitude = other.VelocityChangeMagnitude; ImpactForce = other.ImpactForce;
+				return *this;
+			}
 		};
 
 		AXMVECTOR			TotalImpactVelocity;			// The combined closing velocity at the collision point (vectorised single value)
@@ -175,8 +183,19 @@ public:
 		ObjectImpactData	Object;							// Impact data for the current object
 		ObjectImpactData	Collider;						// Impact data for the colliding object
 
-		ImpactData(void)	{ TotalImpactVelocity = TotalImpactForce = XMVectorZero(); }
+		// Returns a constant reference to the object-specific data for one party in the impact
+		const ObjectImpactData & GetObjectData(Game::ID_TYPE id) const;
+
+		ImpactData(void) :	TotalImpactVelocity(NULL_VECTOR), TotalImpactForce(NULL_VECTOR) { }
+		ImpactData & operator=(const ImpactData &other)
+		{
+			Object = other.Object; Collider = other.Collider;
+			TotalImpactVelocity = other.TotalImpactVelocity; TotalImpactForce = other.TotalImpactForce;
+		}
 	};
+
+	// Static instance of an object impact data structure, acting as the "null" case
+	static const ImpactData::ObjectImpactData NullObjectImpactData;
 
 	// Struct holding data on an impact between an object and the terrain
 	// Class is 16-bit aligned to allow use of SIMD member variables
@@ -258,6 +277,9 @@ public:
 
 	// Performs collision detection for the specified environment object with its surroundings
 	void									PerformEnvironmentCollisionDetection(iEnvironmentObject *obj);
+
+	// Checks a single, isolated collision between two object.  Not part of the primary collision detection cycle
+	bool									CheckSingleCollision(iSpaceObject *obj0, iSpaceObject *obj1);
 
 	// Performs hierarchical collision detection between two OBB hierarchies, returning the two OBBs that collided (if applicable)
 	bool									TestOBBvsOBBHierarchy(	OrientedBoundingBox & obj0, OrientedBoundingBox & obj1, 

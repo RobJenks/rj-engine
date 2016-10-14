@@ -929,6 +929,11 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 	// Parameter check
 	if (!object) return false;
 
+	// Get a reference to this environment and the colliding object (and validate at the same time)
+	const GamePhysicsEngine::ImpactData::ObjectImpactData & impact_env = impact.GetObjectData(m_id);
+	const GamePhysicsEngine::ImpactData::ObjectImpactData & impact_coll = impact.GetObjectData(object->GetID());
+	if (impact_env.ID == 0U || impact_coll.ID == 0U) return false;		// If the collision was not between these objects
+	
 	// Initialise the output data object for this collision
 	outResult.Collider = object;
 	outResult.CollisionStartTime = Game::ClockTime;
@@ -936,7 +941,7 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 
 	// Determine the trajectory and properties of the colliding object
 	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
-	Ray proj_trajectory = Ray(object->GetPosition(), object->PhysicsState.WorldMomentum);	// Note: World "momentum" is currently the world velocity, name to be fixed
+	Ray proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);	// Pre-impact velocity, since the collision handling will have adjusted this by now
 
 	// Calcualate the path of elements intersected by this ray
 	ElementIntersectionData elements;
@@ -1006,7 +1011,7 @@ void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision &
 
 		// Test whether the event is now ready to execute
 		const EnvironmentCollision::EventDetails & ev = collision.Events[index];
-		if ((collision.CollisionStartTime + ev.EventTime) >= Game::ClockTime)
+		if (Game::ClockTime >= (collision.CollisionStartTime + ev.EventTime))
 		{
 			// Process the collision with this element. TODO: in future, account for event type and take different actions
 			ExecuteElementCollision(ev, collision);
@@ -1055,10 +1060,9 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	}
 	
 	// Next, any objects or terrain in the element
-	EnvironmentTree *node;
 	if (this->SpatialPartitioningTree)
 	{
-		node = this->SpatialPartitioningTree->GetNodeContainingElement(el.GetLocation());
+		EnvironmentTree *node = this->SpatialPartitioningTree->GetNodeContainingElement(el.GetLocation());
 		if (node)
 		{
 			// Get all the objects & terrain in this tree node

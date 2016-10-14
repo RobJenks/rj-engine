@@ -47,6 +47,16 @@ EnvironmentCollision::~EnvironmentCollision(void)
 
 }
 
+// Make the environment collision data immediately-executable so that it can be simulated immediately 
+// in this method, without waiting for the actual intersection times to occur
+void EnvironmentCollision::MakeImmediatelyExecutable(void)
+{
+	// We simply need to wind the collision start time back.  All event times are relative
+	// to the collision start time, so all will remain in sequence and eligible to fire immediately
+	CollisionStartTime = -100000000.f;
+}
+
+
 // Comparator for sorting/searching events in chronological order
 bool EnvironmentCollision::_EventTimeOrderComparator::operator() (const EventDetails & lhs, const EventDetails & rhs) const
 {

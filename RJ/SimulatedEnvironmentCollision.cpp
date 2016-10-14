@@ -25,6 +25,30 @@ void SimulatedEnvironmentCollision::AddEvent(const SimulatedEnvironmentCollision
 	LastEventTime = Game::TimeFactor;
 }
 
+// Copy constructor
+SimulatedEnvironmentCollision::SimulatedEnvironmentCollision(const SimulatedEnvironmentCollision & other)
+{
+	// Copy key parameters
+	EnvironmentID = other.EnvironmentID;
+	LastEventTime = other.LastEventTime;
+
+	// Copy all data out of the source vector
+	insert(begin(), other.begin(), other.end());
+}
+
+// Assignment operator
+SimulatedEnvironmentCollision & SimulatedEnvironmentCollision::operator=(const SimulatedEnvironmentCollision & other)
+{
+	// Copy key parameters
+	EnvironmentID = other.EnvironmentID;
+	LastEventTime = other.LastEventTime;
+
+	// Copy all data out of the source vector
+	insert(begin(), other.begin(), other.end());
+
+	return *this;
+}
+
 // Generates a string representation of the entire simulated collision
 std::string SimulatedEnvironmentCollision::ToString(void) const
 {
