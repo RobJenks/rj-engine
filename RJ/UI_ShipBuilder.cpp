@@ -96,7 +96,6 @@ void UI_ShipBuilder::Activate(void)
 	m_intersect_marker_start = m_intersect_marker_end = NULL;
 	m_intersect_test_proj = NULL;
 	m_selected_intersection_marker = NULL;
-	m_intersect_test_last_render_time = 0.0f;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -225,13 +224,31 @@ void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
 		Game::Engine->RenderVolumetricLine(m_intersect_test_trajectory);
 	}
 
-	// If we have a new event update since the last time we rendered it, show the new status here
-	if (iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.LastEventTime > m_intersect_test_last_render_time)
+	// Render any intersection test results
+	if (m_ship)
 	{
-		// FOR NOW, simply output the results
-		
-		// Update the last render time
-		m_intersect_test_last_render_time = Game::TimeFactor;
+		XMFLOAT3 el_colour = NULL_FLOAT3; float el_alpha = 0.8f;
+		SimulatedEnvironmentCollision::const_iterator it_end = m_simulated_intersection.end();
+		for (SimulatedEnvironmentCollision::const_iterator it = m_simulated_intersection.begin(); it != it_end; ++it)
+		{
+			// Get a reference to the element
+			const SimulatedEnvironmentCollisionEvent & evt = (*it);
+			const ComplexShipElement *el = m_ship->GetElement(evt.ElementID);
+			if (!el) continue;
+
+			// Determine the overlay effect required based on the event details
+			if (evt.EventType == SimulatedEnvironmentCollisionEventType::ElementDestroyed)
+			{
+				el_colour = XMFLOAT3(0.5f, 1.0f, 1.0f);		// Light blue
+			}
+			else if (evt.EventType == SimulatedEnvironmentCollisionEventType::ElementDamaged)
+			{
+				el_colour = XMFLOAT3(1.0f, clamp(evt.Value, 0.0f, 1.0f) * 0.9f, 0.0f);		// Scaled colour from 255,0,0 (red) to 255,230,0 (dark yellow)
+			}
+
+			// Render an overlay on this element
+			Game::Engine->GetOverlayRenderer()->RenderCuboidAtRelativeElementLocation(m_ship, el->GetLocation(), ONE_INTVECTOR3, el_colour, el_alpha);
+		}
 	}
 }
 
@@ -1062,12 +1079,16 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	m_intersect_test_proj()->SetMass(proj_mass);
 	m_intersect_test_proj()->SetHardness(proj_hardness);
 	m_intersect_test_proj()->SetHealthPercentage(1.0f);
-	m_intersect_test_proj()->ApplyWorldSpaceLinearForceDirect(proj_vec);
+	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
 
 	// Process the collision at this intersection point and store the collision results
 	bool collision = Game::PhysicsEngine.CheckSingleCollision(m_ship, m_intersect_test_proj());
 	if (collision == false) return;
 	GamePhysicsEngine::ImpactData impact = Game::PhysicsEngine.ObjectImpact;
+
+	// Restore the physics state of ship and collider following this collisiion
+	m_ship->PhysicsState = phys_state;
+	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
 
 	// We now want to determine the effect on the environment; enable simulated collision mode for the ship
 	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
@@ -1080,9 +1101,9 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// in this method, without waiting for the actual intersection times to occur
 	env_collision.MakeImmediatelyExecutable();
 
-	// Process this collision in the environment adn retrieve data from the simulation results vector
+	// Process this collision in the environment and retrieve data from the simulation results vector
 	m_ship->ProcessEnvironmentCollision(env_collision);
-	SimulatedEnvironmentCollision events = SimulatedEnvironmentCollision(iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults);
+	StoreIntersectionTestResults(iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults);
 
 	// Disable collision simulation now that we have generated all results
 	iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
@@ -1091,12 +1112,31 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	if (m_intersect_test_proj()) m_intersect_test_proj()->SetPosition(XMVectorSetX(NULL_VECTOR, -1000.0f));
 	m_ship->PhysicsState = phys_state;
 
-	// Render these results in the ship designer 
-	// TODO: for now, stream out
+	// Results will be displayed via the per-frame rendering method
+
+	// TODO: for now, also stream out
 	OutputDebugString("*** Environment collision begin ***\n");
-	OutputDebugString(events.ToString().c_str());
+	OutputDebugString(m_simulated_intersection.ToString().c_str());
 	OutputDebugString("*** Environment collision end ***\n\n");
 }
+
+
+// Store the results of an intersection test
+void UI_ShipBuilder::StoreIntersectionTestResults(const SimulatedEnvironmentCollision & results)
+{
+	// Clear any existing results
+	ClearIntersectionTestResults();
+
+	// Store the new results
+	m_simulated_intersection = results;
+}
+
+// Clear any stored intersection test results
+void UI_ShipBuilder::ClearIntersectionTestResults(void)
+{
+	m_simulated_intersection.Reset();
+}
+
 
 // Handles the LMB first-down event in structural test mode
 void UI_ShipBuilder::HandleStructuralModeMouseFirstDown(void)

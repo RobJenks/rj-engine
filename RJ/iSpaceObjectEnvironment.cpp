@@ -1092,7 +1092,7 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// so as a quick solution we can divide the remaining force through by obj_impact_resistance to get back to velocity
 	// If this now takes the object velocity <= 0 it will trigger destruction of the collider in the next collision evaluation
 	float obj_remaining_force = (obj_force - total_strength);
-	collision.ClosingVelocity -= obj_remaining_force;
+	collision.ClosingVelocity = (obj_remaining_force / object->GetImpactResistance());
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
 	float damage_abs = (el.GetHealth() * damage_pc);

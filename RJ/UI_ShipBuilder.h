@@ -8,6 +8,7 @@
 #include "iUIController.h"
 #include "VolumetricLine.h"
 #include "TileAdjacency.h"
+#include "SimulatedEnvironmentCollision.h"
 class ComplexShip;
 class UIButton;
 
@@ -233,6 +234,12 @@ protected:
 	// Performs the intesection test in 'structural test' mode
 	void										PerformIntersectionTest(void);
 
+	// Store the results of an intersection test
+	void										StoreIntersectionTestResults(const SimulatedEnvironmentCollision & results);
+
+	// Clear any stored intersection test results
+	void										ClearIntersectionTestResults(void);
+
 	// Handles the LMB first-down event in structural test mode
 	void										HandleStructuralModeMouseFirstDown(void);
 
@@ -294,7 +301,7 @@ public:
 	SimpleShip **								m_selected_intersection_marker;		// The marker that is currently being manipulated (if applicable)
 	VolumetricLine								m_intersect_test_trajectory;		// Trajectory of the collider in interection test mode
 	ObjectReference<SimpleShip>					m_intersect_test_proj;				// The projectile used to perform the intersection test
-	float										m_intersect_test_last_render_time;	// The time (secs) at which we rendered the most recent intersection results
+	SimulatedEnvironmentCollision				m_simulated_intersection;			// The sequence of intersection events that occured during the last intersection event
 
 };
 
