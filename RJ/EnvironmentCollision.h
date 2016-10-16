@@ -35,17 +35,20 @@ public:
 		// Duration of the event (secs)
 		float										EventDuration;
 
+		// Parameters for the event
+		float										Param1;					// E.g. the degree of intersection with an element
+
 		// Default constructor
 		EventDetails(void) :	EntityID(0), EntityType(Game::EntityType::E_Unknown), EventType(CollisionEventType::Unknown), 
-								EventTime(0.0f), EventDuration(0.0f) { }
+								EventTime(0.0f), EventDuration(0.0f), Param1(0.0f) { }
 
 		// Constructor with all core parameters
-		EventDetails(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType)
-			: EventType(eventType), EventTime(eventTime), EventDuration(eventDuration), EntityID(entity), EntityType(entityType) { }
+		EventDetails(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType, float param1)
+			: EventType(eventType), EventTime(eventTime), EventDuration(eventDuration), EntityID(entity), EntityType(entityType), Param1(param1) { }
 
 		// Copy constructor
 		EventDetails(const EventDetails & other) :	EntityID(other.EntityID), EntityType(other.EntityType), EventType(other.EventType), 
-													EventTime(other.EventTime), EventDuration(other.EventDuration) { }
+													EventTime(other.EventTime), EventDuration(other.EventDuration), Param1(other.Param1) { }
 	};
 
 	// Vector of events, sorted in time order
@@ -85,10 +88,10 @@ public:
 
 
 	// Adds an event to the sequence
-	void											AddEvent(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType);
+	void											AddEvent(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType, float param1);
 
 	// Adds an element intersection event
-	void											AddElementIntersection(int elementID, float intersectTime, float intersectDuration);
+	void											AddElementIntersection(int elementID, float intersectTime, float intersectDuration, float degree);
 
 	// Make the environment collision data immediately-executable so that it can be simulated immediately 
 	// in this method, without waiting for the actual intersection times to occur

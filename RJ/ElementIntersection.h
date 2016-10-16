@@ -13,11 +13,12 @@ struct ElementIntersection
 	int							ID;				// The element that was intersected
 	float						StartTime;		// The clock time (secs) at which the intersection begins
 	float						EndTime;		// The clock time (secs) at which the intersection ends
+	float						Degree;			// The degree of intersection (in range [0.0-1.0]) with this element
 
-	ElementIntersection(void) : ID(0), StartTime(0U), EndTime(0U) { }
-	ElementIntersection(int id, float startTime, float endTime) : ID(id), StartTime(startTime), EndTime(endTime) { }
-	ElementIntersection(const ElementIntersection & other) : ID(other.ID), StartTime(other.StartTime), EndTime(other.EndTime) { }
-	CMPINLINE ElementIntersection & operator=(const ElementIntersection & other) { ID = other.ID; StartTime = other.StartTime; EndTime = other.EndTime; }
+	CMPINLINE ElementIntersection(void) : ID(0), StartTime(0U), EndTime(0U), Degree(0.0f) { }
+	CMPINLINE ElementIntersection(int id, float startTime, float endTime, float degree) : ID(id), StartTime(startTime), EndTime(endTime), Degree(degree) { }
+	CMPINLINE ElementIntersection(const ElementIntersection & other) : ID(other.ID), StartTime(other.StartTime), EndTime(other.EndTime), Degree(other.Degree) { }
+	CMPINLINE ElementIntersection & operator=(const ElementIntersection & other) { ID = other.ID; StartTime = other.StartTime; EndTime = other.EndTime; Degree = other.Degree; }
 };
 
 // Custom collection of element intersection data

@@ -834,9 +834,16 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	// Transform the ray into local environment space, and then translate it into element (0,0,0) space
 	Ray localray = Ray(ray); 
 	localray.TransformIntoCoordinateSystem(obb.Centre, obb.Axis);
-	//XMVECTOR el0adj = XMVectorSubtract(obb.ExtentV, Game::C_CS_ELEMENT_MIDPOINT_NEG_V);	// Since El0 = -(obb_extent - el_midpoint)
-	XMVECTOR ray_in_el0 = XMVectorAdd(localray.Origin, /*el0adj*/ obb.ExtentV);
+	XMVECTOR ray_in_el0 = XMVectorAdd(localray.Origin, obb.ExtentV);
 	localray.SetOrigin(ray_in_el0);
+	XMVECTOR norm_ray_dir = XMVector3NormalizeEst(localray.Direction);
+
+	// Define the distance (squared) thresholds for the 'degree' of collision with each element
+	// Minimum distance (100% collision) is defined as proj bounding sphere sq (== ray radius sq).  Max distance 
+	// is (proj_sph_sq + el_sph_sq)
+	float degree_min_dist = ray_radius;
+	float degree_max_dist = (degree_min_dist + GetElementBoundingSphereRadius_Unchecked(1));
+	float degree_max_minus_min = (degree_max_dist - degree_min_dist); 
 
 	// Iterate until we have no more elements to test
 	DBG_COLLISION_OUTPUT("> Beginning environment collision test\n");
@@ -858,7 +865,8 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 		const ComplexShipElement & el = m_elements[id];
 
 		// Translate the ray into the local space of this element, based on an offset from (0,0,0)
-		localray.SetOrigin(XMVectorSubtract(ray_in_el0, Game::ElementLocationToPhysicalPosition(el.GetLocation())));
+		XMVECTOR elpos = Game::ElementLocationToPhysicalPosition(el.GetLocation());
+		localray.SetOrigin(XMVectorSubtract(ray_in_el0, elpos));
 		DBG_COLLISION_OUTPUT(concat(" ")(el.GetLocation().ToString()).str().c_str());
 
 		// Test for a collision between this ray and the element AABB; if none, skip processing this element immediately
@@ -868,9 +876,22 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 			continue;
 		}
 
-		// We have an intersection.  First, add this to the list of elements that were intersected
-		outElements.push_back(ElementIntersection(id, Game::PhysicsEngine.RayIntersectionResult.tmin, Game::PhysicsEngine.RayIntersectionResult.tmax));
-		DBG_COLLISION_OUTPUT(concat(": COLLIDES (t=")(Game::PhysicsEngine.RayIntersectionResult.tmin)(", ")(Game::PhysicsEngine.RayIntersectionResult.tmax)("), adding { ").str().c_str());
+		// We have an intersection.  Determine the degree of intersection based on how close to the centre of the ray 
+		// this intersection occured.  Use the dot product A.B = (Origin>ElementCentre).(Origin>ProjDirection) where |B|=1
+		// to get the distance along localray.  Then find the point which this represents, and get the distance from this
+		// point on the ray to the element centre itself.  This is the distance between colliding object centres
+		XMVECTOR dot = XMVector3Dot(XMVectorSubtract(NULL_VECTOR, localray.Origin), norm_ray_dir);
+		float dist = XMVectorGetX(XMVector3LengthEst(XMVectorSubtract(NULL_VECTOR,					// Vector from the element position...
+			XMVectorMultiplyAdd(norm_ray_dir, dot, localray.Origin))));								// ...to the point on the ray at Origin+(dot*Direction)
+
+		// Use this distsq to determine the degree of intersection, based on a min/max dist threshold and 
+		// degree = Clamp(1.0 - ((d - min_d) / (max_d - min_d)), 0.0, 1.0)
+		float degree = (1.0f - ((dist - degree_min_dist) / degree_max_minus_min));
+		degree = clamp(degree, 0.0f, 1.0f);
+
+		// Add this intersection to the list of elements that were intersected
+		outElements.push_back(ElementIntersection(id, Game::PhysicsEngine.RayIntersectionResult.tmin, Game::PhysicsEngine.RayIntersectionResult.tmax, degree));
+		DBG_COLLISION_OUTPUT(concat(": COLLIDES (t=[")(Game::PhysicsEngine.RayIntersectionResult.tmin)(", ")(Game::PhysicsEngine.RayIntersectionResult.tmax)("], degree=")(degree)("), adding { ").str().c_str());
 
 		// Now consider all neighbours of this element for intersection, if they have not already been tested
 		const int(&adj)[Direction::_Count] = el.AdjacentElements();
@@ -941,7 +962,7 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 
 	// Determine the trajectory and properties of the colliding object
 	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
-	Ray proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);	// Pre-impact velocity, since the collision handling will have adjusted this by now
+	Ray proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);		// Pre-impact velocity, since the collision handling will have adjusted this by now
 
 	// Calcualate the path of elements intersected by this ray
 	ElementIntersectionData elements;
@@ -962,7 +983,7 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 		// based upon start time.  This will almost always be ~equal to a push_back since 
 		// intersections have generally been determined in temporal order
 		const ElementIntersection & item = (*it);
-		outResult.AddElementIntersection(item.ID, item.StartTime, (item.EndTime - item.StartTime));
+		outResult.AddElementIntersection(item.ID, item.StartTime, (item.EndTime - item.StartTime), item.Degree);
 
 		// Also push a copy of the intersection data into the result object for reference later, in case it is needed
 		outResult.IntersectionData.push_back(*it);
@@ -1084,27 +1105,34 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 		}
 	}
 
-	// Sum the total impact resistance and compare to the incoming object force
+	// Sum the total impact resistance and compare to the incoming object force.  The percentage of force
+	// transferred to this impacted hull is scaled by the degree of impact
 	float total_strength = (tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
-	float damage_pc = (obj_force / total_strength);
+	float damage_pc = (obj_force / total_strength) * ev.Param1;
 
-	// Reduce the object closing velocity based on this impact.  obj_force is currently (velocity * obj_impact_resistance),
-	// so as a quick solution we can divide the remaining force through by obj_impact_resistance to get back to velocity
-	// If this now takes the object velocity <= 0 it will trigger destruction of the collider in the next collision evaluation
-	float obj_remaining_force = (obj_force - total_strength);
+	// The final damage value (in the range 0.0-1.0) can be derived from this damage_pc and any relevant damage 
+	// resistance properties of the elemnet
+	float damage_actual = (damage_pc * 1.0f);		// TODO: Apply these resistances
+
+	// Reduce the object closing force based on this impact.  The force is reduced by the hull strength, scaled by degree since
+	// a 50% glancing hit against hull will bleed off around 50% of the object velocity compared to a 100% collision
+	float obj_remaining_force = (obj_force - (total_strength * ev.Param1));
+
+	// Determine remaining velocity by dividing the projectile force through by its impact_resistance, since we originally
+	// derived obj_force = (obj_vel * impact_resist).  If this now takes the object velocity <= 0 it will trigger 
+	// destruction of the collider in the next collision evaluation
 	collision.ClosingVelocity = (obj_remaining_force / object->GetImpactResistance());
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
-	float damage_abs = (el.GetHealth() * damage_pc);
 	if (EnvironmentCollisionsAreBeingSimulated())
 	{
 		// Test whether we are simulating an environment collision, in which case we do not apply any real damage
-		SimulateElementDamage(el.GetID(), damage_abs);
+		SimulateElementDamage(el.GetID(), damage_actual);
 	}
 	else
 	{
 		// Apply damage to the element, as normal
-		TriggerElementDamage(el.GetID(), damage_abs);
+		TriggerElementDamage(el.GetID(), damage_actual);
 	}
 }
 

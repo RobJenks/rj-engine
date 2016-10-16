@@ -2,6 +2,7 @@
 #include "GameDataExtern.h"
 #include "GameObjects.h"
 #include "SimulationStateManager.h"
+#include "Model.h"
 #include "Octree.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "FactionManagerObject.h"
@@ -144,6 +145,20 @@ void iObject::InitialiseCopiedObject(iObject *source)
 	// Set the simulation state of the new object to strategic as a starting point.  This will likely be overridden
 	// in the next update cycle, but setting an active simulation state here means it will be registered on construction
 	SetSimulationState(iObject::ObjectSimulationState::StrategicSimulation);
+}
+
+// Set the model used for rendering this object (or NULL if object is non-renderable)
+void iObject::SetModel(Model *model)
+{
+	// Store the new model
+	m_model = model;
+
+	// Derive additional data from the model if it was provided
+	if (model)
+	{
+		// Update the object size to match the model bounds
+		SetSize(XMLoadFloat3(&model->GetModelSize()));
+	}
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 

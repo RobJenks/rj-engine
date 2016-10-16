@@ -264,7 +264,7 @@ public:
 
 	// The model used for rendering this object (or NULL if object is non-renderable)
 	CMPINLINE Model *						GetModel(void)						{ return m_model; }
-	CMPINLINE void							SetModel(Model *model)				{ m_model = model; }
+	void									SetModel(Model *model);
 
     // The articulated model used for rendering this object (or NULL if not applicable)
 	CMPINLINE ArticulatedModel *            GetArticulatedModel(void)                       { return m_articulatedmodel; }

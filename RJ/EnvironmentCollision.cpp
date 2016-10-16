@@ -12,11 +12,11 @@ EnvironmentCollision::EnvironmentCollision(void)
 }
 
 // Adds an event to the sequence
-void EnvironmentCollision::AddEvent(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType)
+void EnvironmentCollision::AddEvent(CollisionEventType eventType, float eventTime, float eventDuration, Game::ID_TYPE entity, Game::EntityType entityType, float param1)
 {
 	// Simply push this generic event into the event sequence.  Minimal parameter validation since this is an internal process
 	// and responsibility is on the calling methods to validate their own actions
-	EventDetails new_event = EventDetails(eventType, eventTime, max(eventDuration, Game::C_EPSILON), entity, entityType);
+	EventDetails new_event = EventDetails(eventType, eventTime, max(eventDuration, Game::C_EPSILON), entity, entityType, param1);
 
 	// We want to maintain the chonological order of the event sequence when adding this item.  Use lower_bound to 
 	// find the first event that takes place AFTER this one
@@ -25,10 +25,10 @@ void EnvironmentCollision::AddEvent(CollisionEventType eventType, float eventTim
 }
 
 // Adds an element intersection event
-void EnvironmentCollision::AddElementIntersection(int elementID, float intersectTime, float intersectDuration)
+void EnvironmentCollision::AddElementIntersection(int elementID, float intersectTime, float intersectDuration, float degree)
 {
 	// Push into the event sequence
-	AddEvent(CollisionEventType::ElementCollision, intersectTime, intersectDuration, elementID, Game::EntityType::E_Element);
+	AddEvent(CollisionEventType::ElementCollision, intersectTime, intersectDuration, elementID, Game::EntityType::E_Element, degree);
 }
 
 
