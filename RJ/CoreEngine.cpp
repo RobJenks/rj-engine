@@ -1128,7 +1128,11 @@ void CoreEngine::Render(void)
 	m_frustrum->ConstructFrustrum(r_view, r_invview);
 
 	// Initialise the lighting manager for this frame
-	LightingManager.AnalyseNewFrame();
+	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
+	{
+		LightingManager.AnalyseNewFrame();
+	}
+	RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting);
 
 	/*** Perform rendering that is common to all player environment & states ***/
 

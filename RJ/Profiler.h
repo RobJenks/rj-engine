@@ -19,23 +19,25 @@
 // The functions in scope for profiling, and struct definition for holding the data
 namespace Profiler {
 	enum ProfiledFunctions {
-		Prf_BeginCycle = 0,							// 0
-		Prf_ProcessInput,							// 1
-		Prf_CentralScheduler,						// 2
-		Prf_SimulateSpaceObjectMovement,			// 3
-		Prf_CollisionDetection,						// 4
-		Prf_UpdateRegions,							// 5
-		Prf_Render,									// 6
-		Prf_Render_SimpleShips,						// 7
-		Prf_Render_ComplexShips,					// 8
-		Prf_Render_ObjectEnvironments,				// 9
-		Prf_Render_Actors,							// 10
-		Prf_Render_ImmediateRegion,					// 11
-		Prf_Render_SystemRegion,					// 12
-		Prf_Render_UI,								// 13
-		Prf_Render_Effects,							// 14
-		Prf_Render_Particles,						// 15
-		Prf_Render_ProcessRenderQueue,				// 16
+		Prf_BeginCycle = 0,							
+		Prf_ProcessInput,							
+		Prf_CentralScheduler,						
+		Prf_SimulateSpaceObjectMovement,			
+		Prf_CollisionDetection,						
+		Prf_UpdateRegions,							
+		Prf_Render,									
+		Prf_Render_AnalyseFrameLighting,
+		Prf_Render_SimpleShips,						
+		Prf_Render_ComplexShips,					
+		Prf_Render_ObjectEnvironments,				
+		Prf_Render_Actors,							
+		Prf_Render_ImmediateRegion,					
+		Prf_Render_SystemRegion,					
+		Prf_Render_UI,								
+		Prf_Render_Effects,							
+		Prf_Render_Particles,						
+		Prf_Render_ProcessRenderQueue,				
+		Prf_DebugInfoRendering,						
 
 		Prf_COUNT
 	};
@@ -47,8 +49,10 @@ namespace Profiler {
 		clock_t total_clocks;		// Sum of (clock_end-clock_start) accumulated so far
 		unsigned int iterations;	// The number of times we have summed the total above
 
+		std::string description;	// Description of the profiling group
+
 		// Default constructor to initialise all values 
-		ProfilingDataType() { clock_start = clock_end = total_clocks = 0; iterations = 0U; }
+		ProfilingDataType() : clock_start(0), clock_end(0), total_clocks(0), iterations(0U), description("[Unknown]") { }
 	};
 };
 
@@ -65,6 +69,9 @@ namespace Profiler {
 		extern unsigned int			ClocksSinceLastProfile;
 		extern unsigned int			FramesSinceLastProfile;
 		extern float				CurrentResult;				// Used to store current profile calculation during streaming
+
+		// Initialisation method for the profiler
+		void InitialiseProfiler(void);
 	}
 
 #endif
@@ -97,7 +104,7 @@ namespace Profiler {
 	// Called once per frame.  Update profiling results and output details when applicable
 #	define RJ_PROFILE_LOG \
 		(++Profiler::FramesSinceLastProfile); \
-		(Profiler::ClocksSinceLastProfile += Game::ClockDelta); \
+		(Profiler::ClocksSinceLastProfile += Game::PersistentClockDelta); \
 		if (Profiler::ClocksSinceLastProfile >= RJ_PROFILER_LOG_FREQ) \
 		{ \
 			RJ_PROFILE_STREAMOUT_OPEN \
@@ -135,7 +142,7 @@ namespace Profiler {
 #	ifdef RJ_PROFILE_TO_STREAM_OUT
 #		define RJ_PROFILE_STREAMOUT_OPEN \
 			Game::Log.ProfilingStream().clear(); \
-			Game::Log.ProfilingStream() << Game::ClockMs << ", -1, " << Profiler::FramesSinceLastProfile << "\n";
+			Game::Log.ProfilingStream() << Game::PersistentClockMs << ", -1, " << Profiler::FramesSinceLastProfile << "\n";
 #	else
 #		define RJ_PROFILE_STREAMOUT_OPEN ;
 #	endif
@@ -143,7 +150,7 @@ namespace Profiler {
 	// Opens the debug streaming for a set of results
 #	ifdef RJ_PROFILE_TO_DEBUG_OUT
 #		define RJ_PROFILE_DEBUGOUT_OPEN \
-			OutputDebugString(concat("PROFILE, ")(Game::ClockMs)(", -1, ")(Profiler::FramesSinceLastProfile)("\n").str().c_str());
+			OutputDebugString(concat("PROFILE, ")(Game::PersistentClockMs)(", -1, ")(Profiler::FramesSinceLastProfile)("\n").str().c_str());
 #	else
 #		define RJ_PROFILE_DEBUGOUT_OPEN ;
 #	endif
@@ -151,7 +158,8 @@ namespace Profiler {
 	// Stream the results for profile i to the output file
 #	ifdef RJ_PROFILE_TO_STREAM_OUT
 #		define RJ_PROFILE_STREAM_OUT(i) \
-			Game::Log.ProfilingStream() << Game::ClockMs << ", " << i << ", " << Profiler::ProfilingData[i].total_clocks << ", " \
+			Game::Log.ProfilingStream() << Game::PersistentClockMs << ", " << i << ", " << Profiler::ProfilingData[i].description << ", " \
+										<< Profiler::ProfilingData[i].total_clocks << ", " \
 										<< Profiler::ProfilingData[i].iterations << ", " << Profiler::CurrentResult << "\n";
 #	else
 #		define RJ_PROFILE_STREAM_OUT(i) ;
@@ -160,7 +168,8 @@ namespace Profiler {
 	// Stream the results for profile i to the debug output
 #	ifdef RJ_PROFILE_TO_DEBUG_OUT
 #		define RJ_PROFILE_DEBUG_OUT(i) \
-			OutputDebugString(concat("PROFILE, ")(Game::ClockMs)(", ")(i)(", ")(Profiler::ProfilingData[i].total_clocks)(", ") \
+			OutputDebugString(concat("PROFILE, ")(Game::PersistentClockMs)(", ")(i)(", ")(Profiler::ProfilingData[i].description)(", ") \
+									(Profiler::ProfilingData[i].total_clocks)(", ") \
 									(Profiler::ProfilingData[i].iterations)(", ")(Profiler::CurrentResult)("\n").str().c_str());
 #	else
 #		define RJ_PROFILE_DEBUG_OUT(i) ;
@@ -207,6 +216,12 @@ namespace Profiler {
 #	define RJ_PROFILE_DEBUG_OUT(i) ;
 #	define RJ_PROFILE_STREAM_OUT(i) ;
 #	define RJ_PROFILE_STREAM_FLUSH ;
+
+	namespace Profiler
+	{
+		// No profiler initialisation if it is not active
+		CMPINLINE InitialiseProfiler(void) { }
+	}
 
 
 #endif	// End test of whether profiling is enabled

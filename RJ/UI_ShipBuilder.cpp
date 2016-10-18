@@ -1072,6 +1072,7 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorSetY(NULL_VECTOR, -1000.0f));
 	m_intersect_test_proj()->SetOrientation(ID_QUATERNION);
 	m_intersect_test_proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	m_intersect_test_proj()->SetIsVisible(false);
 
 	// Move the projectile into intersection position and set other collision properties
 	m_intersect_test_proj()->SetPosition(intersection);
@@ -1109,7 +1110,11 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	iSpaceObjectEnvironment::DisableEnvironmentCollisionSimulationMode();
 
 	// Move the projectile away from the ship (if it still exists), and restore the ship state
-	if (m_intersect_test_proj()) m_intersect_test_proj()->SetPosition(XMVectorSetX(NULL_VECTOR, -1000.0f));
+	if (m_intersect_test_proj())
+	{
+		m_intersect_test_proj()->SetPosition(XMVectorSetX(NULL_VECTOR, -1000.0f));
+		m_intersect_test_proj()->SetWorldMomentum(NULL_VECTOR);
+	}
 	m_ship->PhysicsState = phys_state;
 
 	// Results will be displayed via the per-frame rendering method

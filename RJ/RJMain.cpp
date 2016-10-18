@@ -336,7 +336,11 @@ bool RJMain::Display(void)
 		PerformFPSCalculations();
 
 		// DEBUG DISPLAY FUNCTIONS
-		DEBUGDisplayInfo();
+		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_DebugInfoRendering)
+		{
+			DEBUGDisplayInfo();
+		}
+		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_DebugInfoRendering);
 
 		// End the current frame
 		Game::Engine->EndFrame();
@@ -345,7 +349,7 @@ bool RJMain::Display(void)
 		EndInternalClockCycle();
 
 		// Log all profiling information, if profiling is enabled
-		RJ_PROFILE_LOG(Game::ClockDelta); 
+		RJ_PROFILE_LOG; 
 	}
 	return true;
 }
@@ -955,6 +959,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// every operation during the initialisation phase, to ensure that all data is output before any crash
 	InitialiseLogging();
 	Game::Log.EnableFlushAfterEveryOperation();
+
+	// Initialise the profiler (if it is active)
+	Profiler::InitialiseProfiler();
 
 	// Initialise the central object registers
 	Game::InitialiseObjectRegisters();
@@ -2022,7 +2029,7 @@ void RJMain::__CreateDebugScenario(void)
 
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
-	LightData dirlight;
+	/*LightData dirlight;
 	Game::Engine->LightingManager.GetDefaultDirectionalLightData(dirlight);
 	dirlight.Direction = XMFLOAT3(0, -1, 0);
 	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
@@ -2033,7 +2040,7 @@ void RJMain::__CreateDebugScenario(void)
 	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
 	Game::RegisterObject(ls);
 	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 10.0f), ID_QUATERNION);
+	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 10.0f), ID_QUATERNION);*/
 
 
 	/*DynamicTileSet::DynamicTileRequirements req;
@@ -2065,9 +2072,9 @@ void RJMain::__CreateDebugScenario(void)
 	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
 	LightSource *player_light = LightSource::Create(pl);
 	cs()->GetSpaceEnvironment()->AddBaseObject(player_light, NULL_VECTOR);
-	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	Game::RegisterObject(ls);
-	a1()->AddChildAttachment(ls, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
+	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	Game::RegisterObject(player_light);
+	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2143,22 +2150,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		XMVECTOR pos = NULL_VECTOR, wm = NULL_VECTOR;
-
-		iUIController *uic = D::UI->GetActiveUIController();
-		if (uic && uic->GetCode() == "UI_SHIPBUILDER")
-		{
-			UI_ShipBuilder *ui = (UI_ShipBuilder*)uic;
-			SimpleShip *proj = ui->m_intersect_test_proj();
-			if (proj)
-			{
-				pos = proj->GetPosition();
-				wm = proj->GetWorldMomentum();
-			}
-		}
-		
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %s  |  World momentum: %s",
-			Vector3ToString(pos).c_str(), Vector3ToString(wm).c_str());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 

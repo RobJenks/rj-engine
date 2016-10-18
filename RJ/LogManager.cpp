@@ -11,6 +11,8 @@ LogManager::LogManager(void)
 	// Create the profiling log, if relevant
 	#ifdef RJ_PROFILER_ACTIVE
 		m_profilingstream = std::ofstream("profiling.txt", std::ofstream::out | std::ofstream::trunc);
+		m_profilingstream << "Clock time(ms), Profiling group ID, Profiling group, Total clocks (ms), Iterations, Clocks per iteration (ms)\n";
+		m_profilingstream.flush();
 	#endif
 
 	// By default the log will not flush after every operation
