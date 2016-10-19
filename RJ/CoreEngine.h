@@ -355,6 +355,8 @@ public:
 	// at the top edge of the object in screen space
 	XMVECTOR				GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset);
 	
+	// Outputs the contents of the render queue to debug-out
+	void					DebugOutputRenderQueueContents(void);
 
 private:
 	

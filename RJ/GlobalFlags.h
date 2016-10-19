@@ -8,7 +8,8 @@
 /*** Defines whether profiling should be performed ***/
 #define RJ_PROFILER_ACTIVE
 
-
+/*** Defines whether the per-frame profiler will be included in the build ***/
+#define RJ_ENABLE_FRAME_PROFILER
 
 
 

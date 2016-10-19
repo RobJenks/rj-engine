@@ -14,6 +14,7 @@
 #include <vector>
 #include <algorithm>
 #include <unordered_map>
+#include <chrono>
 #include "CompilerSettings.h"
 class iObject;
 using namespace std;

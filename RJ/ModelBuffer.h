@@ -32,6 +32,8 @@ public:
 	ID3D11Buffer *					IndexBuffer;
 
 	// Methods to return buffer data
+	CMPINLINE std::string			GetCode(void) const					{ return m_code; }
+	CMPINLINE void					SetCode(const std::string & code)	{ m_code = code; }
 	CMPINLINE Texture *				GetTexture(void)					{ return m_texture; }
 	CMPINLINE unsigned int			GetVertexCount(void) const			{ return m_vertexcount; }
 	CMPINLINE unsigned int			GetIndexCount(void) const			{ return m_indexcount; }
@@ -70,6 +72,8 @@ public:
 
 
 protected:
+
+	std::string				m_code;
 
 	unsigned int			m_vertexcount;
 	unsigned int			m_indexcount;

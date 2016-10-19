@@ -50,6 +50,7 @@
 #include "SpaceSystem.h"
 
 #include "Profiler.h"
+#include "FrameProfiler.h"
 
 #include "SpaceEmitter.h"
 #include "Ship.h"
@@ -242,13 +243,17 @@ void RJMain::Unpause(void)
 
 bool RJMain::Display(void)
 {
-	// Initial validation: the engine must be operational, and we must have a current player, in order to begin rendering
-	if (Game::Engine->Operational() && Game::CurrentPlayer)
+	// Initial validation: the engine must be operational in order to begin rendering
+	if (Game::Engine->Operational())
 	{
 		// Calculate time modifiers in ms/secs based on time delta since last frame, then store them globally for use in all methods
 		RunInternalClockCycle();
 
-		// Retrieve required data
+		// Notify the frame profiler that a new frame is starting (if the profiler is enabled)
+		RJ_FRAME_PROFILER_NEW_FRAME
+
+		// Retrieve and validate required data
+		if (Game::CurrentPlayer == NULL) return false;
 		SpaceSystem *player_system = Game::CurrentPlayer->GetSystem();
 
 		// Begin the simulation cycle
@@ -345,6 +350,9 @@ bool RJMain::Display(void)
 		// End the current frame
 		Game::Engine->EndFrame();
 
+		// Notify the frame profiler that the frame has ended (if the profiler is enabled)
+		RJ_FRAME_PROFILER_END_FRAME
+			
 		// End the cycle by storing the previous clock values, for calculating the delta time in the next frame
 		EndInternalClockCycle();
 

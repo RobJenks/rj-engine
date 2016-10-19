@@ -568,6 +568,9 @@
     <ClCompile Include="SimulatedEnvironmentCollision.cpp">
       <Filter>Physics</Filter>
     </ClCompile>
+    <ClCompile Include="FrameProfiler.cpp">
+      <Filter>Profiling</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1302,6 +1305,16 @@
     <ClInclude Include="SimulatedEnvironmentCollision.h">
       <Filter>Physics</Filter>
     </ClInclude>
+    <ClInclude Include="FrameProfiler.h">
+      <Filter>Profiling</Filter>
+    </ClInclude>
+    <ClInclude Include="Timers.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\chrono_io.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility\ratio_io.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

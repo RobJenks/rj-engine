@@ -9,6 +9,7 @@
 #include "SpaceSystem.h"
 #include "Order_MoveToPosition.h"
 #include "RJMain.h"
+#include "UserInterface.h"
 
 // Debug command handler needs to include the full object hierarchy to support per-object command handling
 #include "Actor.h"
@@ -188,6 +189,17 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 	{
 		Game::PhysicsEngine.ClearPhysicsDebugEntity();
 		command.SetSuccessOutput("Disabling entity phsyics debugging");
+		return true;
+	}
+
+	/* Enable the frame profiler for the next frame */
+	else if (command.InputCommand == "profile_frame")
+	{
+		// We need to deactivate the console before profiling since it will otherwise prevent most rendering from being performed
+		D::UI->DeactivateConsole();
+		FrameProfiler::ProfileNextFrame();
+		command.SetSuccessOutput("Frame profiling completed (console was closed to enable full profiling)");
+		return true;
 	}
 
 	/* Quit the application */

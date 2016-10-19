@@ -67,8 +67,8 @@ class Model
 		// Public accessor/modifer methods for key variables
 		CMPINLINE int				GetID(void) { return m_id; }
 		CMPINLINE void				SetID(int id) { m_id = id; }
-		CMPINLINE string			GetCode(void) { return m_code; }
-		CMPINLINE void				SetCode(string code) { m_code = code; }
+		CMPINLINE string			GetCode(void) { return m_buffer.GetCode(); }
+		CMPINLINE void				SetCode(string code) { m_buffer.SetCode(code); }
 		CMPINLINE string			GetFilename(void) { return m_filename; }
 		CMPINLINE void				SetFilename(string filename) { m_filename = filename; }
 		CMPINLINE ModelClass		GetModelClass(void) { return m_modelclass; }
@@ -154,7 +154,6 @@ class Model
 
 		// Private variables for other, supporting model information
 		int						m_id;
-		string					m_code;
 		string					m_filename;
 		ModelClass				m_modelclass;
 		string					m_texturefilename;

@@ -511,6 +511,8 @@ void D3DMain::SetFillMode(D3D11_FILL_MODE fillmode)
 	// Make sure we are actually changing the fill mode, otherwise do nothing
 	if (fillmode != m_fillmode)
 	{
+		RJ_FRAME_PROFILER_EXECUTE(OutputDebugString(concat("Changing fill mode from {")(m_fillmode)("} to {")(fillmode)("}\n").str().c_str());)
+
 		// Retrieve the rasteriser state, and from there the rasteriser description		
 		m_deviceContext->RSGetState(&rstate);
 		rstate->GetDesc(&rdesc);
@@ -625,12 +627,16 @@ void D3DMain::DisableZBuffer(void)
 {
 	// Disable z-buffering for functions such as 2D/UI rendering
 	m_deviceContext->OMSetDepthStencilState(m_depthDisabledStencilState, 1);
+
+	RJ_FRAME_PROFILER_EXECUTE(OutputDebugString("Disabling Z-buffer\n");)
 }
 
 void D3DMain::DisableZBufferWriting(void)
 {
 	// Disable depth WRITING (but not depth testing) for some alpha blending operations
 	m_deviceContext->OMSetDepthStencilState(m_depthStencilStateNoDepthWrite, 1);
+
+	RJ_FRAME_PROFILER_EXECUTE(OutputDebugString("Disabling Z-buffer writing\n");)
 }
 
 void D3DMain::EnableRasteriserCulling(void)
@@ -638,12 +644,15 @@ void D3DMain::EnableRasteriserCulling(void)
 	// Apply the normal rasteriser state
 	m_deviceContext->RSSetState(m_rasterState);
 	
+	RJ_FRAME_PROFILER_EXECUTE(OutputDebugString("Enabling rasteriser culling\n");)
 }
 
 void D3DMain::DisableRasteriserCulling(void)
 {
 	// Apply the modified rasteriser state that disables backface culling
 	m_deviceContext->RSSetState(m_rasterStateNoCulling);
+
+	RJ_FRAME_PROFILER_EXECUTE(OutputDebugString("Disabling rasteriser culling\n");)
 }
 
 // Static method to convert a display mode to readable string

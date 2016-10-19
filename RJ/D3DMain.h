@@ -8,7 +8,8 @@
 #include "DX11_Core.h" // #include "FullDX11.h"
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
-
+#include "Utility.h"
+#include "FrameProfiler.h"
 
 // Constant values for buffer background colour; each frame reset to this base colour before rendering begins
 const float					m_bufferbg[4] = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -82,25 +83,32 @@ public:
 	}
 
 	// Sets alpha blending to enabled and normal
-	CMPINLINE void					SetAlphaBlendModeEnabled(void) 
-	{ 
-		m_alphablendstate = AlphaBlendState::AlphaBlendEnabledNormal;
-		m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, m_alphablendfactor, 0xffffffff); 
-	}
-	
-	// Enables alpha blending and applies additive filters (for e.g. effect rendering)
-	/*CMPINLINE void					SetAlphaBlendModeAdditive(void) 
+	CMPINLINE void					SetAlphaBlendModeEnabled(void)
 	{
-		m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
-		m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff); 
+		if (m_alphablendstate == AlphaBlendState::AlphaBlendEnabledNormal) return;
+		RJ_FRAME_PROFILER_EXECUTE(OutputDebugString(concat("Enabling alpha blending (")(m_alphablendstate)(" -> ")(AlphaBlendState::AlphaBlendEnabledNormal)(")\n").str().c_str());)
+
+		m_alphablendstate = AlphaBlendState::AlphaBlendEnabledNormal;
+		m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, m_alphablendfactor, 0xffffffff);
+	}
+
+	// Enables alpha blending and applies additive filters (for e.g. effect rendering)
+	/*CMPINLINE void					SetAlphaBlendModeAdditive(void)
+	{
+	m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
+	m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff);
 	}*/
 
 	// Disables alpha blending
-	CMPINLINE void					SetAlphaBlendModeDisabled(void) 
+	CMPINLINE void					SetAlphaBlendModeDisabled(void)
 	{
+		if (m_alphablendstate == AlphaBlendState::AlphaBlendDisabled) return;
+		RJ_FRAME_PROFILER_EXECUTE(OutputDebugString(concat("Disabling alpha blending (")(m_alphablendstate)(" -> ")(AlphaBlendState::AlphaBlendDisabled)(")\n").str().c_str());)
+
 		m_alphablendstate = AlphaBlendState::AlphaBlendDisabled;
-		m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, m_alphablendfactor, 0xffffffff); 
+		m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, m_alphablendfactor, 0xffffffff);
 	}
+
 
 	// Static method to convert a display mode to readable string
 	static std::string				DisplayModeToString(const DXGI_MODE_DESC & mode);
@@ -135,6 +143,7 @@ private:
 	float						m_FOV;
 	float						m_aspectratio;
 	AlphaBlendState				m_alphablendstate;
+
 };
 
 

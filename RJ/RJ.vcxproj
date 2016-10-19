@@ -286,6 +286,7 @@
     <ClCompile Include="FontData.cpp" />
     <ClCompile Include="Fonts.cpp" />
     <ClCompile Include="FontShader.cpp" />
+    <ClCompile Include="FrameProfiler.cpp" />
     <ClCompile Include="GameConsole.cpp" />
     <ClCompile Include="GameConsoleCommand.cpp" />
     <ClCompile Include="GameDataExtern.cpp" />
@@ -481,6 +482,7 @@
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
     <ClInclude Include="EnvironmentTree.h" />
+    <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="LightingManagerObject.h" />
@@ -572,6 +574,7 @@
     <ClInclude Include="SpaceTurret.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
+    <ClInclude Include="Timers.h" />
     <ClInclude Include="TurretController.h" />
     <ClInclude Include="UI_Console.h" />
     <ClInclude Include="UI_ModelBuilder.h" />
@@ -655,6 +658,8 @@
     <ClInclude Include="UI_ShipDesigner.h" />
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Utility\chrono_io.h" />
+    <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="ViewFrustrum.h" />
     <ClInclude Include="VolLineShader.h" />
     <ClInclude Include="VolumetricLine.h" />
