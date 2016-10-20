@@ -1130,6 +1130,7 @@ void CoreEngine::Render(void)
 	m_frustrum->ConstructFrustrum(r_view, r_invview);
 
 	// Initialise the lighting manager for this frame
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Analysing frame lighting");
 	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
 	{
 		LightingManager.AnalyseNewFrame();
@@ -1139,10 +1140,12 @@ void CoreEngine::Render(void)
 	/*** Perform rendering that is common to all player environment & states ***/
 
 	// Render the system region
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: System region");
 	if (RenderStageActive(RenderStage::Render_SystemRegion)) 
 		RenderSystemRegion();			// The system-wide rendering, e.g. space backdrop and scenery
 
 	// Render the immmediate player region, e.g. localised space dust
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Immediate region");
 	if (RenderStageActive(RenderStage::Render_ImmediateRegion)) 
 		RenderImmediateRegion();
 
@@ -1152,32 +1155,40 @@ void CoreEngine::Render(void)
 	if (system)
 	{
 		// Render all objects
+		RJ_FRAME_PROFILER_CHECKPOINT("Render: System objects");
 		if (RenderStageActive(RenderStage::Render_SystemObjects))
 			RenderAllSystemObjects(system);
 
 		// Render all visible basic projectiles
+		RJ_FRAME_PROFILER_CHECKPOINT("Render: Basic projectiles");
 		if (RenderStageActive(RenderStage::Render_BasicProjectiles))
 			RenderProjectileSet(system->Projectiles);
 	}
 
 	// Render effects and particle emitters
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Effects");
 	if (RenderStageActive(RenderStage::Render_Effects)) RenderEffects();
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Particles");
 	if (RenderStageActive(RenderStage::Render_ParticleEmitters)) RenderParticleEmitters();
 
 	// Perform all 2D rendering of text and UI components
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: User interface");
 	if (RenderStageActive(RenderStage::Render_UserInterface))
 		RenderUserInterface();	
 
 	// Perform any debug/special rendering 
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Debug data");
 	if (RenderStageActive(RenderStage::Render_DebugData))
 		RenderDebugData();
 
 	// Activate the render queue optimiser here if it is ready for its next cycle
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Optimising render queue");
 	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
 
 	// Final activity: process all items queued for rendering.  Any item that benefits from instanced/batched geometry rendering is
 	// added to the render queue during the process above.  We now use instanced rendering on the entire render queue.  The more 
 	// high-volume items that can be moved to use instanced rendering the better
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Processing render queue");
 	ProcessRenderQueue();
 }
 

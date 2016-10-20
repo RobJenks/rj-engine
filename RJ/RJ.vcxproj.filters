@@ -571,6 +571,9 @@
     <ClCompile Include="FrameProfiler.cpp">
       <Filter>Profiling</Filter>
     </ClCompile>
+    <ClCompile Include="Timers.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

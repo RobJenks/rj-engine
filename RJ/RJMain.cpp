@@ -257,6 +257,7 @@ bool RJMain::Display(void)
 		SpaceSystem *player_system = Game::CurrentPlayer->GetSystem();
 
 		// Begin the simulation cycle
+		RJ_FRAME_PROFILER_CHECKPOINT("Initialising simulation cycle");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_BeginCycle)
 		{
 			Game::Logic::BeginSimulationCycle();
@@ -266,6 +267,7 @@ bool RJMain::Display(void)
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_BeginCycle)
 
 		// Read user input from the mouse and keyboard
+		RJ_FRAME_PROFILER_CHECKPOINT("Processing user input");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_ProcessInput)
 		{
 			// Read the current state of all input devices
@@ -282,6 +284,7 @@ bool RJMain::Display(void)
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_ProcessInput)
 
 		// Run the central scheduler to process all scheduled jobs this frame
+		RJ_FRAME_PROFILER_CHECKPOINT("Running central scheduler");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_CentralScheduler)
 		{
 			Game::Scheduler.RunScheduler();
@@ -290,6 +293,7 @@ bool RJMain::Display(void)
 
 		// Simluate the current valid area of universe.  Note: in future, to be split between full, real-time simulation
 		// and more distant simulation that is less frequent/detailed/accurate
+		RJ_FRAME_PROFILER_CHECKPOINT("Simulating all objects");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_SimulateSpaceObjectMovement)
 		{
 			// Simulate objects
@@ -301,6 +305,7 @@ bool RJMain::Display(void)
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_SimulateSpaceObjectMovement)
 
 		// Simulate all game physics
+		RJ_FRAME_PROFILER_CHECKPOINT("Simulating physics and collision detection");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_CollisionDetection)
 		{
 			Game::PhysicsEngine.SimulatePhysics();
@@ -308,6 +313,7 @@ bool RJMain::Display(void)
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_CollisionDetection);
 
 		// Update all regions, particularly those centred on the player ship
+		RJ_FRAME_PROFILER_CHECKPOINT("Updating regions");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_UpdateRegions)
 		{
 			UpdateRegions();
@@ -315,6 +321,7 @@ bool RJMain::Display(void)
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_UpdateRegions);
 
 		// Update the player state, including camera view calculation etc. for rendering
+		RJ_FRAME_PROFILER_CHECKPOINT("Updating player state");
 		Game::CurrentPlayer->UpdatePlayerState();
 
 		/* *** Begin rendering process ****/
@@ -341,6 +348,7 @@ bool RJMain::Display(void)
 		PerformFPSCalculations();
 
 		// DEBUG DISPLAY FUNCTIONS
+		RJ_FRAME_PROFILER_CHECKPOINT("Rendering debug info");
 		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_DebugInfoRendering)
 		{
 			DEBUGDisplayInfo();
@@ -351,6 +359,7 @@ bool RJMain::Display(void)
 		Game::Engine->EndFrame();
 
 		// Notify the frame profiler that the frame has ended (if the profiler is enabled)
+		RJ_FRAME_PROFILER_CHECKPOINT("Frame complete");
 		RJ_FRAME_PROFILER_END_FRAME
 			
 		// End the cycle by storing the previous clock values, for calculating the delta time in the next frame
@@ -970,6 +979,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 
 	// Initialise the profiler (if it is active)
 	Profiler::InitialiseProfiler();
+
+	// Initialise the high-resolution timer 
+	Timers::Initialise();
 
 	// Initialise the central object registers
 	Game::InitialiseObjectRegisters();

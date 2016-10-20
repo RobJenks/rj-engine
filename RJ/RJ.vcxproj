@@ -344,6 +344,7 @@
     <ClCompile Include="ProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="TileConnections.cpp" />
+    <ClCompile Include="Timers.cpp" />
     <ClCompile Include="TurretController.cpp" />
     <ClCompile Include="UI_Console.cpp" />
     <ClCompile Include="UI_ModelBuilder.cpp" />

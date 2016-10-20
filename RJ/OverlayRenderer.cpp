@@ -58,6 +58,7 @@ Result OverlayRenderer::Initialise(void)
 	{
 		m_models[i] = new Model();
 		m_models[i]->SetCentredAboutOrigin(false);
+		m_models[i]->SetCode(concat("OverlayModel")(i).str());
 		result = m_models[i]->Initialise(	concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str(),
 											concat(D::IMAGE_DATA)("\\Models\\Misc\\")(line_models[i]).str());
 		if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
@@ -65,6 +66,7 @@ Result OverlayRenderer::Initialise(void)
 
 	// Initialise blueprint overlay model
 	m_blueprintoverlay = new Model();
+	m_blueprintoverlay->SetCode("OverlayBlueprintModel");
 	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
 											concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
 	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;

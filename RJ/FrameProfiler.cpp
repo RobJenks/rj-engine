@@ -6,11 +6,19 @@
 	namespace FrameProfiler
 	{
 		// Flag which indicates that the next frame should be profiled
-		bool				ActivateProfiler = false;
+		bool					ActivateProfiler = false;
 
 		// Flag which indicates whether this frame is currently being profiled
-		bool				ProfilerActive = false;
+		bool					ProfilerActive = false;
 
+		// Clock time recorded when profiling began at the start of the frame
+		Timers::HRClockTime		FrameStart = Timers::GetZeroTime();
+
+		// Clock time recorded at the last checkpoint
+		Timers::HRClockTime		LastCheckpoint = Timers::GetZeroTime();
+
+		// Index of the current checkpoint
+		int						CheckpointNumber = 0;
 	}
 
 
