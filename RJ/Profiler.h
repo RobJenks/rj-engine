@@ -9,6 +9,7 @@
 #include "Utility.h"
 #include "GameVarsExtern.h"
 #include "LogManager.h"
+#include "Timers.h"
 
 // The components in this file have no special alignment requirements
 
@@ -43,13 +44,13 @@ namespace Profiler {
 	};
 
 	struct ProfilingDataType {
-		clock_t clock_start;
-		clock_t clock_end;
+		Timers::HRClockTime clock_start;
+		Timers::HRClockTime clock_end;
 
-		clock_t total_clocks;		// Sum of (clock_end-clock_start) accumulated so far
-		unsigned int iterations;	// The number of times we have summed the total above
+		Timers::HRClockDuration total_clocks;		// Sum of (clock_end-clock_start) accumulated so far
+		unsigned int iterations;					// The number of times we have summed the total above
 
-		std::string description;	// Description of the profiling group
+		std::string description;					// Description of the profiling group
 
 		// Default constructor to initialise all values 
 		ProfilingDataType() : clock_start(0), clock_end(0), total_clocks(0), iterations(0U), description("[Unknown]") { }
@@ -65,10 +66,10 @@ namespace Profiler {
 
 	// Data used to log profiling data
 	namespace Profiler {
-		extern ProfilingDataType	ProfilingData[Profiler::ProfiledFunctions::Prf_COUNT];
-		extern unsigned int			ClocksSinceLastProfile;
-		extern unsigned int			FramesSinceLastProfile;
-		extern float				CurrentResult;				// Used to store current profile calculation during streaming
+		extern ProfilingDataType		ProfilingData[Profiler::ProfiledFunctions::Prf_COUNT];
+		extern unsigned int				ClocksSinceLastProfile;
+		extern unsigned int				FramesSinceLastProfile;
+		extern Timers::HRClockDuration	CurrentResult;				// Used to store current profile calculation during streaming
 
 		// Initialisation method for the profiler
 		void InitialiseProfiler(void);
@@ -93,12 +94,12 @@ namespace Profiler {
 
 	// Begin profiling the specified area
 #	define RJ_PROFILE_START(fn) \
-		(Profiler::ProfilingData[fn].clock_start = clock());
+		(Profiler::ProfilingData[fn].clock_start = Timers::GetHRClockTime());
 
 	// End profiling of the specific area
 #	define RJ_PROFILE_END(fn) \
-		(Profiler::ProfilingData[fn].clock_end = clock()); \
-		(Profiler::ProfilingData[fn].total_clocks += (Profiler::ProfilingData[fn].clock_end - Profiler::ProfilingData[fn].clock_start)); \
+		(Profiler::ProfilingData[fn].clock_end = Timers::GetHRClockTime()); \
+		(Profiler::ProfilingData[fn].total_clocks += Timers::GetMillisecondDuration(Profiler::ProfilingData[fn].clock_start, Profiler::ProfilingData[fn].clock_end)); \
 		(++(Profiler::ProfilingData[fn].iterations)); 
 
 	// Called once per frame.  Update profiling results and output details when applicable
@@ -106,15 +107,16 @@ namespace Profiler {
 		(++Profiler::FramesSinceLastProfile); \
 		(Profiler::ClocksSinceLastProfile += Game::PersistentClockDelta); \
 		if (Profiler::ClocksSinceLastProfile >= RJ_PROFILER_LOG_FREQ) \
-		{ \
+				{ \
 			RJ_PROFILE_STREAMOUT_OPEN \
 			RJ_PROFILE_DEBUGOUT_OPEN \
 			for (int i = 0; i < Profiler::ProfiledFunctions::Prf_COUNT; ++i) \
-				{ \
-					Profiler::CurrentResult = (Profiler::ProfilingData[i].iterations == 0U ? 0.0f : (float)Profiler::ProfilingData[i].total_clocks / (float)Profiler::ProfilingData[i].iterations); \
+							{ \
+					Profiler::CurrentResult = (Profiler::ProfilingData[i].iterations == 0U ? 0.0f : (double)Profiler::ProfilingData[i].total_clocks / (double)Profiler::ProfilingData[i].iterations); \
 					RJ_PROFILE_DEBUG_OUT(i) \
 					RJ_PROFILE_STREAM_OUT(i) \
-					(Profiler::ProfilingData[i].clock_start = Profiler::ProfilingData[i].clock_end = Profiler::ProfilingData[i].total_clocks = 0); (Profiler::ProfilingData[i].iterations = 0U); \
+					(Profiler::ProfilingData[i].clock_start = Profiler::ProfilingData[i].clock_end = Timers::GetZeroTime()); \
+					(Profiler::ProfilingData[i].total_clocks = Timers::GetZeroDuration()); (Profiler::ProfilingData[i].iterations = 0U); \
 				} \
 			(Profiler::ClocksSinceLastProfile = 0U); \
 			(Profiler::FramesSinceLastProfile = 0U); \

@@ -64,8 +64,8 @@
 			if (FrameProfiler::ProfilerActive) \
 			{ \
 				Timers::HRClockTime time_now = Timers::GetHRClockTime(); \
-				double event_time = Timers::GetMillisecondDuration(FrameProfiler::FrameStart, time_now); \
-				double last_event_duration = Timers::GetMillisecondDuration(FrameProfiler::LastCheckpoint, time_now); \
+				Timers::HRClockDuration event_time = Timers::GetMillisecondDuration(FrameProfiler::FrameStart, time_now); \
+				Timers::HRClockDuration last_event_duration = Timers::GetMillisecondDuration(FrameProfiler::LastCheckpoint, time_now); \
 				FrameProfiler::LastCheckpoint = time_now; \
 				if (FrameProfiler::CheckpointNumber != 0) OutputDebugString(concat("-- CP-")(FrameProfiler::CheckpointNumber)(" completed in ")(last_event_duration)("ms\n").str().c_str()); \
 				OutputDebugString(concat("-- CP-")(++FrameProfiler::CheckpointNumber)(" [")(event_time)("ms]: ")(text)("\n").str().c_str()); \

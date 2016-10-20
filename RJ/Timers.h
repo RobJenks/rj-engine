@@ -19,11 +19,14 @@ public:
 	// High resolution clock timer types and other required data
 #	ifdef RJ_USE_QPF_TIMER_OVERRIDE
 		typedef double										HRClockTime;
+		typedef double										HRClockDuration;
+
 		static __int64										HRClockStart;
 		static double										HRClockFreq, HRClockFreqRecip;
 #	else
 		typedef std::chrono::steady_clock					HRClock;
 		typedef std::chrono::steady_clock::time_point		HRClockTime;
+		typedef double										HRClockDuration;
 #	endif 
 
 	// Initialisation method for the HR timer
@@ -60,7 +63,7 @@ public:
 	}
 
 	// Returns the time elapsed between two high-resolution clock times
-	CMPINLINE static double				GetMillisecondDuration(HRClockTime start, HRClockTime end) 
+	CMPINLINE static HRClockDuration	GetMillisecondDuration(HRClockTime start, HRClockTime end) 
 	{
 #		ifdef RJ_USE_QPF_TIMER_OVERRIDE
 			return (end - start);
@@ -72,9 +75,18 @@ public:
 	CMPINLINE static HRClockTime		GetZeroTime(void)
 	{
 #		ifdef RJ_USE_QPF_TIMER_OVERRIDE
-			return 0;
+			return 0.0;
 #		else
 			std::chrono::steady_clock::from_time_t(0U)
+#		endif
+	}
+
+	CMPINLINE static HRClockDuration	GetZeroDuration(void)
+	{
+#		ifdef RJ_USE_QPF_TIMER_OVERRIDE
+			return 0.0;
+#		else
+			return 0.0;
 #		endif
 	}
 };

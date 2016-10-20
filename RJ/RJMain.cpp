@@ -977,11 +977,11 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseLogging();
 	Game::Log.EnableFlushAfterEveryOperation();
 
-	// Initialise the profiler (if it is active)
-	Profiler::InitialiseProfiler();
-
 	// Initialise the high-resolution timer 
 	Timers::Initialise();
+
+	// Initialise the profiler (if it is active)
+	Profiler::InitialiseProfiler();
 
 	// Initialise the central object registers
 	Game::InitialiseObjectRegisters();

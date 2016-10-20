@@ -7,10 +7,10 @@
 	namespace Profiler 
 	{
 		// Data used to log profiling data
-		ProfilingDataType		ProfilingData[Profiler::ProfiledFunctions::Prf_COUNT];
-		unsigned int			ClocksSinceLastProfile = 0U;
-		unsigned int			FramesSinceLastProfile = 0U;
-		float					CurrentResult = 0.0f;
+		ProfilingDataType			ProfilingData[Profiler::ProfiledFunctions::Prf_COUNT];
+		unsigned int				ClocksSinceLastProfile = 0U;
+		unsigned int				FramesSinceLastProfile = 0U;
+		Timers::HRClockDuration		CurrentResult = Timers::GetZeroDuration();
 
 
 		// Initialisation method for the profiler
