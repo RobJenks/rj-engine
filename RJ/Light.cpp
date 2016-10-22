@@ -20,6 +20,14 @@ Light::Light(void)
 	Data.ID = Light::NewUniqueID();
 }
 
+// Constructor accepting the core light data struct as a parameter
+Light::Light(const LightData & light_data)
+	: m_active(true), Data(light_data)
+{
+	// Assign a new unique ID
+	Data.ID = Light::NewUniqueID();
+}
+
 // Custom copy constructor
 Light::Light(const Light & source) 
 	: m_active(source.IsActive()), Data(source.Data)

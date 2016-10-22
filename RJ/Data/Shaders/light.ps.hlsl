@@ -32,25 +32,18 @@ float4 main(PixelInputType input) : SV_TARGET
 {
 	float4 TotalLight = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Normalise the input normal.  This is passed un-normalised since interpolation at the 
+	// Normalise the input normal.  This is passed to us un-normalised since interpolation at the 
 	// PS means it needs to be normalised here
 	float3 normal = normalize(input.normal);
 
-	// Apply global directional lights first
-	for (unsigned int i = 0U; i < DirLightCount; ++i)
-	{
-		TotalLight += CalculateDirectionalLight(i, input.material, input.worldpos, normal);
-	}
-	
-	// Now apply the effect of any active point lights
+	// Apply the effect of each light in turn
 	unsigned int bit;
-	for (unsigned int j = 0U; j < LightCount; ++j)
+	for (unsigned int i = 0U; i < LightCount; ++i)
 	{
-		bit = CONFIG_VAL[j];
+		bit = CONFIG_VAL[i];
 		if ((input.LightConfig & bit) == bit)
 		{
-			// Index into the light array is (DIR_LIGHT_LIMIT + j), since light data is packed as [Dir_1, ..., Dir_n, Pt_1, ..., Pt_n]
-			TotalLight += CalculatePointLight(C_DIR_LIGHT_LIMIT + j, input.material, input.worldpos, normal);
+			TotalLight += CalculateLight(i, input.material, input.worldpos, normal);
 		}
 	}
 

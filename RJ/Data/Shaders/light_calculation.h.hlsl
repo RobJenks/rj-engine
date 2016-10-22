@@ -100,5 +100,21 @@ float4 CalculatePointLight(unsigned int index, MATERIAL_ID material, float3 worl
 	return ((colour / attenuation) * multiplier);
 }
 
+// Calculates the effect of a light on the given world-space pixel
+float4 CalculateLight(unsigned int index, MATERIAL_ID material, float3 world_position, float3 normal)
+{
+	// Pass to the relevant method based on light type
+	if (Lights[index].Type == 0)		
+	{
+		// Directional
+		return CalculateDirectionalLight(index, material, world_position, normal);
+	}
+	else
+	{
+		// Point- or spot-light
+		return CalculatePointLight(index, material, world_position, normal);
+	}
+}
+
 
 #endif

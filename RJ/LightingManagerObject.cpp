@@ -18,7 +18,7 @@ LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject
 // Default constructor
 LightingManagerObject::LightingManagerObject(void)
 	:
-	m_dir_light_count(0U), m_source_count(0U), m_active_config(0U)
+	m_source_count(0U), m_active_config(0U), m_lighting_is_overridden(false), m_source_vector_is_sorted(false)
 {
 	// Initialise space in the light source vector to hold the maximum possible number of lights
 	m_sources.clear();
@@ -31,9 +31,9 @@ LightingManagerObject::LightingManagerObject(void)
 		m_config_lookup[i] = (1 << i);
 	}
 
-	// Initialise space in the directional light data vector to hold the maximum possible number of directional lights
-	m_dir_light.clear();
-	m_dir_light.reserve(LightingManagerObject::DIR_LIGHT_LIMIT);
+	// Initialise space in the lighting override vector to hold the maximum possible number of lights
+	m_override_lights.clear();
+	m_override_lights.reserve(LightingManagerObject::LIGHT_LIMIT);
 }
 
 // Initialise the lighting manager for a new frame
@@ -42,10 +42,22 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	// Clear the current set of registered light sources
 	ClearAllLightSources();
 
-	// Perform a search of the local area for all light sources
-	std::vector<iObject*> lights;
-	int count = Game::ObjectSearch<iObject>::CustomSearch(Game::Engine->GetCamera()->GetPosition(), Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree,
-		Game::C_LIGHT_RENDER_DISTANCE, lights, Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::LightSourceObject));
+	// Test whether there is a lighting override in place
+	std::vector<iObject*> & lights = _m_frame_light_sources;
+	if (m_lighting_is_overridden)
+	{
+		// Special case.  Lighting is overriden so instead just reference the override vector directly
+		lights = m_override_lights;
+	}
+	else
+	{
+		// Usual case.  First add all directional lights to the vector (since they will be universally-relevant)
+		
+
+		// Now perform a search of the local area for all NON-DIRECTIONAL light sources
+		Game::ObjectSearch<iObject>::CustomSearch(Game::Engine->GetCamera()->GetPosition(), Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree,
+			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(Light::LightType::Directional));
+	}
 
 	// Register any lights which could have an impact on the current viewing frustum.  If we exceed
 	// the maxmimum supported light count, sources will be prioritised and culled accordingly
@@ -56,24 +68,20 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// We know that all search results will be light sources
 		light = (LightSource*)(*it); if (!light) continue;
 
-		// Check whether the light could impact the viewing frustum
-		if (Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
+		// Check whether the light could impact the viewing frustum.   We can skip the range check for
+		// directional lights since they are defined to be unsituated
+		if (light->GetLight().GetType() == Light::LightType::Directional ||  
+			Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
 		{
 			// Register this as a potentialy-important light source
 			RegisterLightSource(light);
 		}
 	}
 
-	// Directional light sources are always located at the start of the light data array
-	if (m_dir_light_count != 0U)
-	{
-		memcpy(&(m_light_data[0]), &(m_dir_light[0]), sizeof(LightData) * m_dir_light_count);
-	}
-
-	// Now parse any registered light sources and transfer core lighting data to the data array
+	// Copy relevant lighting data out of each light source for rendering
 	for (LightSources::size_type i = 0; i < m_source_count; ++i)
 	{
-		m_light_data[LightingManagerObject::DIR_LIGHT_LIMIT + i] = m_sources[i].Source->GetLight().Data;
+		m_light_data[i] = m_sources[i].Source->GetLight().Data;
 	}
 }
 
@@ -86,26 +94,37 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 	// Lights are prioritised in part based on their position relative to the camera
 	const XMVECTOR & cam_pos = Game::Engine->GetCamera()->GetPosition();
 
+	// Determine a distance/priority for the light; directional lights always have top priority so set a distsq of -999
+	// This ensures that directional light sources will ALWAYS be at the start of the light vector
+	float distsq = -999.0f;
+	if ((Light::LightType)light->GetLight().GetType() != Light::LightType::Directional)
+	{
+		// Directional lights keep a distsq value of -999.  For all other light types, determine the actual squared
+		// distance here.  Will always be >= 0 and so always lower priority than the directional lights
+		distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(light->GetPosition(), cam_pos)));
+	}
+
 	// Take different action depending on how many lights are currently registered
 	if (m_source_count < LIGHT_LIMIT)
 	{
 		// We are under the light limit, so simply add to the collection and increment the counter
-		m_sources[m_source_count] = LightingManagerObject::LightSourceEntry(light, XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(light->GetPosition(), cam_pos))));
+		m_sources[m_source_count] = LightingManagerObject::LightSourceEntry(light, distsq);
 		++m_source_count;
 		return true;
 	}
 	else
 	{
 		// Otherwise, we need to perform prioritisation of light sources to fit within the limit
-		if (m_source_count == LIGHT_LIMIT)
+		// We sort the vector ONCE at the point we first reach the limit, and then perfomed a sorted-insert
+		// for all future light sources
+		if (m_source_vector_is_sorted == false)
 		{
-			// If we are exactly at the limit, we need to sort all elements.  Every subsequent addition (including this
-			// one) this frame must then be prioritised against the existing sorted objects
 			std::sort(m_sources.begin(), m_sources.end(), LightingManagerObject::LightSourceEntryPriorityComparator);
+			m_source_vector_is_sorted = true;
 		}
 
 		// Find the first light source that is lower priority than us; if == end() we are lower priority than all of them
-		LightSourceEntry entry = LightSourceEntry(light, XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(light->GetPosition(), cam_pos))));
+		LightSourceEntry entry = LightSourceEntry(light, distsq);
 		LightSources::iterator it = std::lower_bound(m_sources.begin(), m_sources.end(), entry, LightingManagerObject::LightSourceEntryPriorityComparator);
 		if (it != m_sources.end())
 		{
@@ -113,7 +132,8 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 		}
 
 		// We are higher priority than the item at 'it'.  Insert this light before it, and discard the lowest
-		// element (since we now have LIMIT+1 elements)
+		// element (since we now have LIMIT+1 elements).  DO NOT increment the source count since we are 
+		// replacing an existing light source
 		m_sources.insert(it, entry);
 		m_sources.pop_back();
 		return true;
@@ -125,6 +145,12 @@ void LightingManagerObject::ClearAllLightSources(void)
 {
 	// Remove all currently-registered light sources by simply setting the count back to zero
 	m_source_count = 0U;	
+
+	// The vector is also no longer sorted, and will not be sorted again until needed
+	m_source_vector_is_sorted = false;
+
+	// Remove any temporary light source search results from the previous frame
+	_m_frame_light_sources.clear();
 }
 
 
@@ -138,16 +164,26 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 	for (LightSources::size_type i = 0; i < m_source_count; ++i)
 	{
 		// Get a reference to the light and make sure it is active
-		const LightSource & light = *(m_sources[i].Source);
-		if (light.GetLight().IsActive() == false) continue;
+		const LightSource & lightsrc = *(m_sources[i].Source);
+		const Light & light = lightsrc.GetLight();
+		if (light.IsActive() == false) continue;
 
-		// Set this light source to active in the output light config if it is in range
-		float r1r2 = (object->GetCollisionSphereRadius() + light.GetCollisionSphereRadius());
-		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), light.GetPosition())));
-		if (distsq < (r1r2 * r1r2))
+		// Take different action based on the type of light
+		if (light.Data.Type == (int)Light::LightType::Directional)
 		{
-			// The object is in range of this light
+			// If this is a directional light it should always be included
 			SetBit(config, m_config_lookup[i]);
+		}
+		else
+		{
+			// Otherwise, only set this light source to active in the output light config if it is in range
+			float r1r2 = (object->GetCollisionSphereRadius() + lightsrc.GetCollisionSphereRadius());
+			float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(object->GetPosition(), lightsrc.GetPosition())));
+			if (distsq < (r1r2 * r1r2))
+			{
+				// The object is in range of this light
+				SetBit(config, m_config_lookup[i]);
+			}
 		}
 	}
 
@@ -155,45 +191,11 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 	return config;
 }
 
-// Update directional light data for the scene
-bool LightingManagerObject::AddDirectionalLight(const LightData & data)
+// Called at the end of a frame to perform any final lighting-related activities
+void LightingManagerObject::EndFrame(void)
 {
-	// Ensure we remain below the limit
-	if (m_dir_light_count >= LightingManagerObject::DIR_LIGHT_LIMIT) return false;
-
-	// Push into the collection and return success
-	m_dir_light.push_back(data);
-	m_dir_light_count = m_dir_light.size();
-	return true;
-}
-
-// Returns a flag indicating whether we can add any new directional lights to the scene (or whether we are at the limit)
-bool LightingManagerObject::CanAddNewDirectionalLight(void) const
-{
-	return ((m_dir_light_count + 1) < LightingManagerObject::DIR_LIGHT_LIMIT);
-}
-
-// Update directional light data for the scene
-void LightingManagerObject::UpdateDirectionalLight(DirLightData::size_type index, const LightData & data)
-{
-	if (index >= 0 && index < m_dir_light_count) m_dir_light[index] = data;
-}
-
-// Update directional light data for the scene
-void LightingManagerObject::RemoveDirectionalLight(DirLightData::size_type index)
-{
-	if (index >= 0 && index < m_dir_light_count) 
-	{
-		m_dir_light.erase(m_dir_light.begin() + index);
-		m_dir_light_count = m_dir_light.size();
-	}
-}
-
-// Remove all directional lights from the scene
-void LightingManagerObject::ClearDirectionalLightData(void)
-{
-	m_dir_light.clear();
-	m_dir_light_count = m_dir_light.size();
+	// Clear any lighting override that was applied this frame
+	DisableLightingOverride();
 }
 
 // Returns data for a basic, default unsituated directional light
@@ -238,6 +240,31 @@ void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 	outLight.Attenuation.Exp = 0.0052f;
 	outLight.SpotlightInnerHalfAngleCos = std::cosf(PIBY180 * 30.0f);
 	outLight.SpotlightOuterHalfAngleCos = std::cosf(PIBY180 * 35.0f);
+}
+
+
+// Returns data for a basic, default unsituated directional light.  Creates a returns a new instance by value
+LightData LightingManagerObject::GetDefaultDirectionalLightData(void)
+{
+	LightData data;
+	GetDefaultDirectionalLightData(data);
+	return data;
+}
+
+// Returns data for a basic, default point light.  Creates a returns a new instance by value
+LightData LightingManagerObject::GetDefaultPointLightData(void)
+{
+	LightData data;
+	GetDefaultPointLightData(data);
+	return data;
+}
+
+// Returns data for a basic, default spot light.  Creates a returns a new instance by value
+LightData LightingManagerObject::GetDefaultSpotLightData(void)
+{
+	LightData data;
+	GetDefaultSpotLightData(data);
+	return data;
 }
 
 bool LightingManagerObject::_LightSourceEntryPriorityComparator::operator() (const LightSourceEntry & lhs, const LightSourceEntry & rhs) const

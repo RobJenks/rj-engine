@@ -1190,6 +1190,10 @@ void CoreEngine::Render(void)
 	// high-volume items that can be moved to use instanced rendering the better
 	RJ_FRAME_PROFILER_CHECKPOINT("Render: Processing render queue");
 	ProcessRenderQueue();
+
+	// End the frame
+	RJ_FRAME_PROFILER_CHECKPOINT("Render: Ending frame");
+	LightingManager.EndFrame();
 }
 
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame

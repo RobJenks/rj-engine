@@ -6,7 +6,10 @@
 #include <string.h>
 #include <iostream>
 #include <tchar.h>
+#include <functional>
+#include <algorithm>
 #include "time.h"
+
 
 #include "FastMath.h"
 #include "Octree.h"
@@ -56,6 +59,7 @@
 #include "Ship.h"
 #include "Ships.h"
 #include "SimpleShip.h"
+#include "iSpaceObjectEnvironment.h"
 #include "ComplexShip.h"
 #include "ComplexShipSection.h"
 #include "ComplexShipElement.h"
@@ -631,12 +635,55 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
-		CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetTilesOfType(D::TileClass::LifeSupport)[0].value;
-		for (int x = 0; x < cs()->GetElementSize().x; ++x)
-			for (int y = 0; y < cs()->GetElementSize().y; ++y)
-				Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), INTVECTOR3(x, y, 0),
-					XMFLOAT3(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
-					cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f), 0.2f);
+		if (b[DIK_LSHIFT])
+		{
+			static std::vector<iObject*> lights;
+			if (lights.empty())
+			{
+				LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
+				Game::CurrentPlayer->GetSystem()->AddBaseObject(l, NULL_VECTOR);
+				lights.push_back(l);
+			}
+
+			std::vector<iObject*>::iterator it_end = lights.end();
+			for (std::vector<iObject*>::iterator it = lights.begin(); it != it_end; ++it)
+			{
+				(*it)->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
+			}
+
+			Game::Engine->LightingManager.AddOverrideLights(lights);
+		}
+
+		cs()->Fade.SetFadeAlpha(0.1f);
+		cs()->Fade.FadeIn(1.0f);
+
+		if (true)
+		{
+			Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), [](iSpaceObjectEnvironment & env, int id)
+			{
+				float v = (float)id / (float)env.GetElementCount();
+				v = 0.9f;
+				return XMFLOAT4(v, 1.0f-v, 1.0f-v, 1.0f);// 1.0f - v, v, v, 0.2f);
+			});
+
+			return;
+		}
+		else
+		{
+			CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetTilesOfType(D::TileClass::LifeSupport)[0].value;
+			for (int x = 0; x < cs()->GetElementSize().x; ++x)
+				for (int y = 0; y < cs()->GetElementSize().y; ++y)
+				{
+					INTVECTOR3 el = INTVECTOR3(x, y, 0);
+					XMFLOAT4 col_alpha = XMFLOAT4(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
+						cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.2f);
+
+					Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), el, col_alpha);
+					OutputDebugString(concat("Rendering element ")(el.ToString())(" as ")(Vector4ToString(col_alpha))("\n").str().c_str());
+				}
+
+			return;
+		}
 	}
 
 	if (false && b[DIK_I]) {
@@ -961,7 +1008,7 @@ void RJMain::Quit(void)
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
-	
+
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
@@ -2087,6 +2134,11 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring ne_corner = (up | right);				// == 6
 	bitstring nse_t = (up | right | down);			// == 14
 	bitstring nsew = (up | left | down | right);	// == 15
+
+	// Temp: Create a directional light source for the system
+	LightSource *l = LightSource::Create(Game::Engine->LightingManager.GetDefaultDirectionalLightData());
+	Game::Universe->GetSystem("AB01")->AddBaseObject(l, NULL_VECTOR);
+	l->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
 	// Add a spotlight to the player actor
 	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);

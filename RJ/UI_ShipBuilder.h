@@ -178,6 +178,9 @@ protected:
 	void										ActivateObjectMode(EditorMode previous_mode);
 	void										ActivateStructuralTestMode(EditorMode previous_mode);
 
+	// Deactivate the specified editor mode
+	void										DeactivateStructuralTestMode(EditorMode previous_mode);
+
 	// Locks the camera for the specified period of time, after which it will be released again to the user
 	void										LockCamera(unsigned int time_ms);
 	void										LockCamera(float time_secs);
@@ -278,9 +281,7 @@ protected:
 	float										m_zoom_increment_end;		// Time at which the current zoom increment will end
 
 	// Data relating to editor-specific lighting
-	unsigned int								m_revert_dir_light_index;			// Index of the directional light that is being used for the editor
-	bool										m_revert_dir_light_is_overriding;	// Flag indicating whether the directional light is overriding another (that needs to be reverted afterwards)
-	LightData									m_revert_dir_light;					// Data on the directional light that was temporarily overridden
+	LightSource *								m_editor_light;						// Directional light that overrides normal lighting when using the editor
 
 	// Fields related to selection of ship elements
 	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element

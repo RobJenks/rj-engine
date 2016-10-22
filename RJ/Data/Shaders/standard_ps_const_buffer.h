@@ -32,18 +32,14 @@ cbuffer StandardPSConstBuffer
 	// Float4
 	float							FogStart;
 	float							FogRange;
-	unsigned int					DirLightCount;
 	unsigned int					LightCount;
-
-	// Float4
 	unsigned int					MaterialCount;
-	float3							_padding;
 
 	// Float4
-	MaterialData					Materials[C_MATERIAL_LIMIT];		// Guaranteed to have SIZE % 16 == 0
+	MaterialData					Materials[C_MATERIAL_LIMIT];		// Each element is guaranteed to have SIZE % 16 == 0
 
 	// Float4
-	LightData						Lights[C_TOTAL_LIGHT_LIMIT];		// Guaranteed to have SIZE % 16 == 0
+	LightData						Lights[C_LIGHT_LIMIT];				// Each element is guaranteed to have SIZE % 16 == 0
 
 	// Padding only needs to account for the primitive types; all structs have been padded to % 16 == 0 already
 };

@@ -91,6 +91,12 @@ private:
 	// Space backdrop texture
 	string						m_backdroplocation;
 	Texture						*m_backdrop;
+
+	// Set of directional lights in this system
+	std::vector<iObject*>		m_directional_lights;
+
+	// Identifies and stores a reference to all directional system light sources in the system object collection
+	void						RegisterAllSystemLights(void);
 };
 
 

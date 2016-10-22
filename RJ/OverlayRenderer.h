@@ -3,8 +3,8 @@
 #ifndef __OverlayRendererH__
 #define __OverlayRendererH__
 
+#include <functional>
 #include "DX11_Core.h"
-
 #include "ErrorCodes.h"
 #include "Utility.h"
 class iShader;
@@ -95,7 +95,16 @@ public:
 																const XMFLOAT3 & colour, float alpha);
 	
 	// Methods to render semi-transparent overlay components
-	void				RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
+	void				RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
+	void				RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha);
+	CMPINLINE void		RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
+	{
+		if (ship) RenderElementOverlay(*ship, element, colour, alpha);
+	}
+	CMPINLINE void		RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
+	{
+		if (ship) RenderElementOverlay(*ship, element, colour_alpha);
+	}
 
 	// Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 	// will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects
@@ -113,6 +122,11 @@ public:
 	// Methods to render the path being taken by an actor through a complex ship environment
 	void				RenderActorPath(Actor *actor, float thickness);
 
+	// Renders an overlay over the specified environment.  Accepts a function that determines the overlay at each element
+	// The function parameter has signature "XMFLOAT4 func(environment, element_id)" and returns the colour/alpha for the 
+	// overlay.  It is applied for each element in turn
+	void				RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
+	
 	// Performs debug rendering of an octree node, and optionally all the way down the subtree as well
 	template <typename T>
 	void				DebugRenderSpatialPartitioningTree(const Octree<T> *tree, bool include_children)

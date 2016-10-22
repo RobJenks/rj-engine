@@ -5,6 +5,7 @@
 #include "ObjectReference.h"
 #include "GameSpatialPartitioningTrees.h"
 #include "SimulationStateManager.h"
+#include "LightSource.h"
 
 #include "SpaceSystem.h"
 
@@ -117,6 +118,18 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 	// Remove the reference to this system from the object
 	object->SetSpaceEnvironmentDirect(NULL);
 
+	// Also update the system light collection if this object was a light
+	if (object->GetObjectType() == iObject::ObjectType::LightSourceObject)
+	{
+		RegisterAllSystemLights();
+	}
+
+	// Register this object as a system light if is a directional light source
+	if (object->GetObjectType() == iObject::ObjectType::LightSourceObject)
+	{
+		RegisterAllSystemLights();
+	}
+
 	// Notify the state manager so it can handle any necessary changes in state
 	Game::StateManager.ObjectLeavingSpaceEnvironment(object, this);
 
@@ -140,6 +153,12 @@ Result SpaceSystem::AddBaseObject(iObject *object, const FXMVECTOR location)
 
 	// Store a reference to the new system this object exists in
 	//object->SetSpaceEnvironmentDirect(this);
+
+	// Register this object as a system light if is a directional light source
+	if (object->GetObjectType() == iObject::ObjectType::LightSourceObject)
+	{
+		RegisterAllSystemLights();
+	}
 
 	// Set the position of the object in the system, and add it to the system spatial positioning tree
 	object->SetPosition(pos);
@@ -167,10 +186,39 @@ Result SpaceSystem::RemoveBaseObject(iObject *object)
 		object->SetSpatialTreeNode(NULL);
 	}
 
+	// Also update the system light collection if this object was a light
+	if (object->GetObjectType() == iObject::ObjectType::LightSourceObject)
+	{
+		RegisterAllSystemLights();
+	}
+
 	// TODO: Also remove from the Objects collection if we do add to it in future
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+
+// Identifies and stores a reference to all directional system light sources in the system object collection
+void SpaceSystem::RegisterAllSystemLights(void)
+{
+	// Clear the current record of directional light sources
+	m_directional_lights.clear();
+
+	// Now locate any directional lights and store them
+	const iSpaceObject *obj;
+	std::vector<ObjectReference<iSpaceObject>>::const_iterator it_end = Objects.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::const_iterator it = Objects.begin(); it != it_end; ++it)
+	{
+		obj = (*it)(); 
+		if (obj && obj->GetObjectType() == iObject::ObjectType::LightSourceObject)
+		{
+			if (((LightSource*)obj)->GetLight().Data.Type == Light::LightType::Directional)
+			{
+				m_directional_lights.push_back((iObject*)obj);
+			}
+		}
+	}
 }
 
 

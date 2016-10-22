@@ -32,6 +32,9 @@ public:
 	// Default constructor
 	Light(void);
 
+	// Constructor accepting the core light data struct as a parameter
+	Light(const LightData & light_data);
+
 	// Custom copy constructor
 	Light(const Light & source);
 

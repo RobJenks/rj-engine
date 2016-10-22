@@ -16,6 +16,8 @@
 #include "GamePhysicsEngine.h"
 #include "SpaceProjectile.h"
 #include "ElementIntersection.h"
+#include "LightSource.h"
+#include "SpaceSystem.h"
 #include "SimpleShip.h"	// DBG
 #include "GameConsole.h"// DBG
 
@@ -85,9 +87,7 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
 	m_level = 0;
-	m_revert_dir_light_index = 0;
-	m_revert_dir_light_is_overriding = false;
-	m_revert_dir_light = LightData();
+	m_editor_light = NULL;
 	m_mouse_is_over_element = false;
 	m_mouse_over_element = NULL_INTVECTOR3;
 	m_tile_being_placed = NULL;
@@ -111,25 +111,9 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 {
 	// We want to add a	new directional light that will shine 'out' of the camera
 	LightData dirlight = LightData(Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
-
-	// Check whether we can create a new directional light one, or whether we are at the limit and so 
-	// have to create a new one (which will be reverted on exit)
-	if (Game::Engine->LightingManager.CanAddNewDirectionalLight())
-	{
-		// We cam simply add a new light
-		Game::Engine->LightingManager.AddDirectionalLight(dirlight);
-		m_revert_dir_light_index = Game::Engine->LightingManager.GetDirectionalLightSourceCount() - 1;
-		m_revert_dir_light_is_overriding = false;
-	}
-	else
-	{
-		// We need to override an existing light; pick the last, rather arbitrarily.  TODO: Potential risk if directional lights
-		// are removed part-way through use of the editor
-		m_revert_dir_light_index = Game::Engine->LightingManager.GetDirectionalLightSourceCount() - 1;
-		m_revert_dir_light = Game::Engine->LightingManager.GetDirectionalLightDataEntry(m_revert_dir_light_index); 
-		m_revert_dir_light_is_overriding = true; 
-		Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);	
-	}
+	m_editor_light = LightSource::Create(dirlight);
+	m_editor_light->LightObject().Activate();
+	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem()) Game::CurrentPlayer->GetSystem()->AddBaseObject(m_editor_light, NULL_VECTOR);
 
 	// Initialise the volumetric line used for rendering the editor grid
 	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
@@ -146,16 +130,9 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 // Revert any editor-specific render states and data
 void UI_ShipBuilder::RevertRenderData(void)
 {
-	// We either need to remove the editor directional light, or revert back to the original light, depending on 
-	// whether we added a new light or overrode an existing one on initialisation
-	if (m_revert_dir_light_is_overriding)
-	{
-		Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, m_revert_dir_light);
-	}
-	else
-	{
-		Game::Engine->LightingManager.RemoveDirectionalLight(m_revert_dir_light_index);
-	}
+	// Deallocate the editor-specific lights
+	m_editor_light->Shutdown();
+	m_editor_light = NULL;
 
 	// Deallocate the editor gridline objects
 	if (m_gridline.RenderTexture)
@@ -191,10 +168,9 @@ void UI_ShipBuilder::Render(void)
 // Updates any editor-specific render data for the current frame
 void UI_ShipBuilder::PerformRenderUpdate(void)
 {
-	// Update the editor directional light to ensure it is always pointing 'out' of the camera
-	LightData dirlight = Game::Engine->LightingManager.GetDirectionalLightDataEntry(m_revert_dir_light_index);
-	dirlight.Direction = Game::Engine->GetCamera()->GetViewForwardBasisVectorF();
-	Game::Engine->LightingManager.UpdateDirectionalLight(m_revert_dir_light_index, dirlight);
+	// Override lighting with the editor-specific lights and make sure they are oriented with the camera
+	m_editor_light->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
+	Game::Engine->LightingManager.AddOverrideLight(m_editor_light);
 }
 
 // Perform editor-mode-specific rendering
@@ -449,7 +425,15 @@ void UI_ShipBuilder::SetEditorMode(EditorMode mode)
 // Event triggered when an editor mode is deactivated.  "mode" is the mode being deactivated
 void UI_ShipBuilder::EditorModeDeactivated(EditorMode mode, EditorMode next_mode)
 {
-
+	switch (mode)
+	{
+		case EditorMode::ShipSectionMode:		/*DeactivateSectionMode(next_mode);*/		break;
+		case EditorMode::TileMode:				/*DeactivateTileMode(next_mode);*/			break;
+		case EditorMode::ObjectMode:			/*DeactivateObjectMode(next_mode);*/		break;
+		case EditorMode::StructuralTestMode:	DeactivateStructuralTestMode(next_mode);	break;
+		default:
+			return;
+	}
 }
 
 // Event triggered when an editor mode is activated.  "mode" is the mode being activated
@@ -516,6 +500,15 @@ void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
 	
 	// Reset the position of the intersection test markers and the test parameters
 	ResetStructuralTestParameters();
+}
+
+// Deactivate the specified editor mode
+void UI_ShipBuilder::DeactivateStructuralTestMode(EditorMode previous_mode)
+{
+	// Remove any of the structural test components that should not be persistent
+	if (m_intersect_marker_start) m_intersect_marker_start->SetIsVisible(false);
+	if (m_intersect_marker_end) m_intersect_marker_end->SetIsVisible(false);
+	if (m_intersect_test_proj()) m_intersect_test_proj()->SetIsVisible(false);
 }
 
 // Locks the camera for the specified period of time, after which it will be released again to the user
@@ -1004,6 +997,8 @@ void UI_ShipBuilder::ResetStructuralTestParameters(void)
 			(*markers[i])->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorScale(ONE_VECTOR, (i * 1000.0f)));
 			(*markers[i])->SetOrientation(ID_QUATERNION);
 		}
+
+		(*markers[i])->SetIsVisible(true);
 	}
 
 	// Both markers exist; we now want to position them at either side of the ship as a default position

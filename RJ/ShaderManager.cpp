@@ -253,14 +253,13 @@ Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
 	buffer->EyeWorldPos = Game::Engine->GetCamera()->GetPositionF();
 
 	// Populate lighting data
-	unsigned int dir_light_count = Game::Engine->LightingManager.GetDirectionalLightSourceCount();
 	unsigned int light_count = Game::Engine->LightingManager.GetLightSourceCount(); 
-	buffer->DirLightCount = dir_light_count;
 	buffer->LightCount = light_count; 
 
-	// Copy the total number of directional lights + the number of point lights, since memory packing is [Dir_1, ..., Dir_n, Pt_1, ..., Pt_n]
-	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * (LightingManagerObject::DIR_LIGHT_LIMIT + light_count));
+	// Copy all lighting data into the buffer
+	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
 	
+	// Copy all material data into the buffer
 	unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
 	buffer->MaterialCount = material_count;
 	memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
