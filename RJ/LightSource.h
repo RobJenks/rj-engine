@@ -4,10 +4,10 @@
 #define __LightSourceH__
 
 #include "ALIGN16.h"
-#include "iObject.h"
+#include "iSpaceObject.h"
 #include "Light.h"
 
-class LightSource : public ALIGN16<LightSource>, public iObject
+class LightSource : public ALIGN16<LightSource>, public iSpaceObject
 {
 public:
 
@@ -51,7 +51,7 @@ public:
 	CMPINLINE void										SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate) { }
 
 	// Inherited from iObject, called when this object collides with another.  Not relevant since light sources cannot collide with the world
-	CMPINLINE void										CollisionWithObject(iObject *object, const GamePhysicsEngine::ImpactData & impact) { }
+	CMPINLINE void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
