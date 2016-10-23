@@ -246,17 +246,22 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 	if (!template_ship || count <= 0 || !Game::CurrentPlayer || !Game::CurrentPlayer->GetPlayerShip()) return;
 
 	// Determine the best spawn point
+	SpaceSystem *spawnsystem = NULL;
 	XMVECTOR spawnpos = XMVectorSetZ(NULL_VECTOR, max(template_ship->GetCollisionSphereRadius()*1.2f, 25.0f));			// Player-relative spawn point for ships
-	XMVECTOR spawninterval = XMVectorSetX(NULL_VECTOR, max(template_ship->GetCollisionSphereRadius()*1.1f, 30.0f));	// Spacing between spawned ships
+	XMVECTOR spawninterval = XMVectorSetX(NULL_VECTOR, max(template_ship->GetCollisionSphereRadius()*1.1f, 30.0f));		// Spacing between spawned ships
 	
-	if (Game::CurrentPlayer->GetState() == Player::StateType::ShipPilot)
+	if (Game::CurrentPlayer->GetState() == Player::StateType::ShipPilot && Game::CurrentPlayer->GetPlayerShip() != NULL)
 	{
+		spawnsystem = Game::CurrentPlayer->GetPlayerShip()->GetSpaceEnvironment();
+		if (!spawnsystem) spawnsystem = &Game::Universe->GetCurrentSystem();
 		spawnpos = XMVector3TransformCoord(spawnpos, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
 		spawninterval = XMVector3TransformCoord(spawninterval, Game::CurrentPlayer->GetPlayerShip()->GetWorldMatrix());
 		spawninterval = XMVectorSubtract(spawninterval, Game::CurrentPlayer->GetPlayerShip()->GetPosition());
 	}
-	else {
-		spawnpos = XMVectorAdd(spawnpos, Game::CurrentPlayer->GetPosition());
+	else 
+	{
+		spawnsystem = &Game::Universe->GetCurrentSystem();
+		spawnpos = XMVectorAdd(spawnpos, Game::Engine->GetCamera()->GetPosition());
 	}
 
 	// Spawn ships either side of the spawn point
@@ -265,7 +270,7 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 		Ship *s = SimpleShip::Create(template_ship); if (!s) continue;
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip((SimpleShip*)s);
 		s->SetName("DebugSpawnedShip");										// Will be used to remove ship later
-		s->MoveIntoSpaceEnvironment(Game::CurrentPlayer->GetSystem(), spawnpos + ((i - count*0.5f) * spawninterval));
+		s->MoveIntoSpaceEnvironment(spawnsystem, spawnpos + ((i - count*0.5f) * spawninterval));
 		s->SetOrientation(ID_QUATERNION);
 		
 		// Assign a default order for now

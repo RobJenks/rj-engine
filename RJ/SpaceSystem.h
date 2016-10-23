@@ -42,14 +42,14 @@ public:
 	void						TerminateSystem(void);
 
 	// Methods to get and set the unique string code, and descriptive string name, for this system
-	CMPINLINE string			GetName(void) const			{ return m_name; }
-	CMPINLINE string			GetCode(void) const			{ return m_code; }
-	CMPINLINE void				SetName(string & name)		{ m_name = name; }
-	CMPINLINE void				SetCode(string & code)		{ m_code = code; }
+	CMPINLINE string			GetName(void) const				{ return m_name; }
+	CMPINLINE string			GetCode(void) const				{ return m_code; }
+	CMPINLINE void				SetName(const string & name)	{ m_name = name; }
+	CMPINLINE void				SetCode(const string & code)	{ m_code = code; }
 
 	// Returns the size of the system; should not be changed following system initialisation, and will have no effect if it is
-	CMPINLINE XMVECTOR			GetSize(void) const			{ return m_size; }
-	CMPINLINE XMFLOAT3			GetSizeF(void) const		{ return m_sizef; }
+	CMPINLINE XMVECTOR			GetSize(void) const				{ return m_size; }
+	CMPINLINE XMFLOAT3			GetSizeF(void) const			{ return m_sizef; }
 	void 						SetSize(const FXMVECTOR size);
 	void						SetSize(const XMFLOAT3 & size);
 
@@ -72,6 +72,12 @@ public:
 	CMPINLINE string						GetBackdropLocation(void) { return m_backdroplocation; }
 	CMPINLINE void							SetBackdropLocation(string loc) { m_backdroplocation = loc; }
 	CMPINLINE ID3D11ShaderResourceView *	GetBackdropTextureResource(void) { return m_backdrop->GetTexture(); }
+
+	// Returns a short debug string representation of the system
+	CMPINLINE std::string					DebugString(void) const 
+	{ 
+		return concat("System \"")(m_name)("\" [Code=\"")(m_code)("\", ObjectCount=")(Objects.size())("]").str().c_str(); 
+	}
 
 private:
 	string						m_name;

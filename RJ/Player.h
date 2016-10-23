@@ -42,7 +42,7 @@ public:
 
 	// Retrieve the system that this player is currently in; either directly if piloting a ship, or indirectly
 	// if on foot (in which case this returns the system that our parent environment resides in)
-	CMPINLINE SpaceSystem *			GetSystem(void)							{ return m_systemenv; }
+	CMPINLINE SpaceSystem *			GetPlayerSystem(void)					{ return m_systemenv; }
 
 	// Retrieve the player's parent environment.  Only relevant if state == OnFoot
 	CMPINLINE iSpaceObjectEnvironment *	GetParentEnvironment(void)			{ return m_parentenv(); }

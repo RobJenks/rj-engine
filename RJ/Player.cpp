@@ -14,6 +14,7 @@
 #include "iSpaceObjectEnvironment.h"
 #include "ObjectReference.h"
 #include "ObjectPicking.h"
+#include "GameUniverse.h"
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -81,6 +82,10 @@ void Player::UpdatePlayerState(void)
 		// If the override is active, directly override the relevant fields with stored parameters now
 		ExecuteOverrideOfPlayerEnvironment();
 	}
+
+	// The universe "current system" is derived from this calculation above.  Set the current system here which
+	// will initiate any transition events if necessary
+	Game::Universe->SetCurrentSystem(GetPlayerSystem());
 
 	// Perform a raycast to determine whether the player currently has their mouse over an 
 	// object, and record it for use this frame

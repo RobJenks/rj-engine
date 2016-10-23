@@ -258,7 +258,6 @@ bool RJMain::Display(void)
 
 		// Retrieve and validate required data
 		if (Game::CurrentPlayer == NULL) return false;
-		SpaceSystem *player_system = Game::CurrentPlayer->GetSystem();
 
 		// Begin the simulation cycle
 		RJ_FRAME_PROFILER_CHECKPOINT("Initialising simulation cycle");
@@ -304,7 +303,7 @@ bool RJMain::Display(void)
 			Game::Logic::SimulateAllObjects();
 
 			// Simulate all projectiles in the current player system
-			if (player_system) player_system->Projectiles.SimulateProjectiles(player_system->SpatialPartitioningTree);
+			Game::Universe->GetCurrentSystem().Projectiles.SimulateProjectiles(Game::Universe->GetCurrentSystem().SpatialPartitioningTree);
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_SimulateSpaceObjectMovement)
 
@@ -633,27 +632,26 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Engine->GetCamera()->ZoomToOverheadShipView(cs());
 		}
 	}
-	if (b[DIK_G])
+	if (b[DIK_H])
 	{
-		if (b[DIK_LSHIFT])
+		static std::vector<iObject*> lights;
+		if (lights.empty())
 		{
-			static std::vector<iObject*> lights;
-			if (lights.empty())
-			{
-				LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
-				Game::CurrentPlayer->GetSystem()->AddObjectToSystem(l, NULL_VECTOR);
-				lights.push_back(l);
-			}
-
-			std::vector<iObject*>::iterator it_end = lights.end();
-			for (std::vector<iObject*>::iterator it = lights.begin(); it != it_end; ++it)
-			{
-				(*it)->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
-			}
-
-			Game::Engine->LightingManager.AddOverrideLights(lights);
+			LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
+			l->MoveIntoSpaceEnvironment(&Game::Universe->GetCurrentSystem(), NULL_VECTOR);
+			lights.push_back(l);
 		}
 
+		std::vector<iObject*>::iterator it_end = lights.end();
+		for (std::vector<iObject*>::iterator it = lights.begin(); it != it_end; ++it)
+		{
+			(*it)->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
+		}
+
+		Game::Engine->LightingManager.AddOverrideLights(lights);
+	}
+	if (b[DIK_G])
+	{
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
 

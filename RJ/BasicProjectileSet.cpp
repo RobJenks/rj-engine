@@ -125,8 +125,8 @@ void BasicProjectileSet::ShrinkCollection(void)
 // along their velocity vector.  Accepts a pointer to the spatial partitioning tree for the current area as input
 void BasicProjectileSet::SimulateProjectiles(Octree<iObject*> *sp_tree)
 {
-	// Make sure this collection is active
-	if (!Active) return;
+	// Make sure this collection is active and that we have been passed a valid SP tree
+	if (!Active || !sp_tree) return;
 
 	// Define variables required later in the method
 	Octree<iObject*> *leaf = NULL;

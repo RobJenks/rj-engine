@@ -161,7 +161,7 @@ public:
 		void, RenderImmediateRegion, void, )
 
 	// Renders all objects in the specified system, based on simulation state and visibility testing
-	void					RenderAllSystemObjects(SpaceSystem *system);
+	void					RenderAllSystemObjects(SpaceSystem & system);
 
     // Generic iObject rendering method; used by subclasses wherever possible
 	void                    RenderObject(iObject *object);

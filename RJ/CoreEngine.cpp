@@ -46,6 +46,7 @@
 #include "GameDataExtern.h"
 #include "GameObjects.h"
 #include "ObjectSearch.h"
+#include "GameUniverse.h"
 #include "SpaceSystem.h"
 #include "ImmediateRegion.h"
 #include "SystemRegion.h"
@@ -1129,6 +1130,9 @@ void CoreEngine::Render(void)
 	// Construct the view frustrum for this frame so we can perform culling calculations
 	m_frustrum->ConstructFrustrum(r_view, r_invview);
 
+	// Determine which system we are currently rendering
+	SpaceSystem & system = Game::Universe->GetCurrentSystem();
+
 	// Initialise the lighting manager for this frame
 	RJ_FRAME_PROFILER_CHECKPOINT("Render: Analysing frame lighting");
 	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
@@ -1149,10 +1153,8 @@ void CoreEngine::Render(void)
 	if (RenderStageActive(RenderStage::Render_ImmediateRegion)) 
 		RenderImmediateRegion();
 
-	// Render all objects in the current player system; simulation state & visibility will be taken 
+	// Render all objects in the current system; simulation state & visibility will be taken 
 	// into account to ensure we only render those items that are necessary
-	SpaceSystem *system = Game::CurrentPlayer->GetSystem();
-	if (system)
 	{
 		// Render all objects
 		RJ_FRAME_PROFILER_CHECKPOINT("Render: System objects");
@@ -1162,7 +1164,7 @@ void CoreEngine::Render(void)
 		// Render all visible basic projectiles
 		RJ_FRAME_PROFILER_CHECKPOINT("Render: Basic projectiles");
 		if (RenderStageActive(RenderStage::Render_BasicProjectiles))
-			RenderProjectileSet(system->Projectiles);
+			RenderProjectileSet(system.Projectiles);
 	}
 
 	// Render effects and particle emitters
@@ -1504,16 +1506,13 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 }
 
 // Renders all objects in the specified system, based on simulation state and visibility testing
-void CoreEngine::RenderAllSystemObjects(SpaceSystem *system)
+void CoreEngine::RenderAllSystemObjects(SpaceSystem & system)
 {
 	iSpaceObject *object;
 
-	// Parameter check
-	if (!system) return;
-
 	// Iterate through all objects in the system object collection
-	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = system->Objects.end();
-	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = system->Objects.begin(); it != it_end; ++it)
+	std::vector<ObjectReference<iSpaceObject>>::iterator it_end = system.Objects.end();
+	for (std::vector<ObjectReference<iSpaceObject>>::iterator it = system.Objects.begin(); it != it_end; ++it)
 	{
 		// Get a reference to the object and make sure it is valid
 		object = (*it)(); if (!object) continue;
@@ -2141,8 +2140,8 @@ void CoreEngine::RenderDebugData(void)
 // Performs debug rendering of the active spatial partitioning tree
 void CoreEngine::DebugRenderSpatialPartitioningTree(void)
 {
-	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem() && Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree)
-		m_overlayrenderer->DebugRenderSpatialPartitioningTree<iObject*>(Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree, true);
+	if (Game::Universe->GetCurrentSystem().SpatialPartitioningTree != NULL)
+		m_overlayrenderer->DebugRenderSpatialPartitioningTree<iObject*>(Game::Universe->GetCurrentSystem().SpatialPartitioningTree, true);
 }
 
 // Performs debug rendering of a specified environment spatial partitioning tree
@@ -2321,10 +2320,9 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	
 	// Locate the spatial partitioning tree node that contains the current camera position (take
 	// this longer approach to account for cases where the player is using the debug camera)
-	const XMVECTOR & pos = GetCamera()->GetPosition();
-	const SpaceSystem *sysenv = Game::CurrentPlayer->GetSystem(); 
-	if (!sysenv || !sysenv->SpatialPartitioningTree) return;
-	Octree<iObject*> *node = sysenv->SpatialPartitioningTree->GetNodeContainingPoint(pos);
+	const XMVECTOR & pos = GetCamera()->GetPosition(); 
+	if (Game::Universe->GetCurrentSystem().SpatialPartitioningTree == NULL) return;
+	Octree<iObject*> *node = Game::Universe->GetCurrentSystem().SpatialPartitioningTree->GetNodeContainingPoint(pos);
 	if (!node) return;
 
 	// Get the set of all objects near the camera
@@ -2422,7 +2420,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 {
 	if (command.InputCommand == "render_tree")
 	{
-		if (!Game::CurrentPlayer || !Game::CurrentPlayer->GetSystem() || !Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree)
+		if (Game::Universe->GetCurrentSystem().SpatialPartitioningTree == NULL)
 			{ command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::NoSpatialPartitioningTreeToRender, 
 				"No tree to render"); return true; }
 

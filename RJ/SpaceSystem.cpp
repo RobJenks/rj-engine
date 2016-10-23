@@ -183,7 +183,7 @@ void SpaceSystem::TerminateSystem(void)
 {
 	// Shutdown the spatial partitioning tree that tracks objects in the system.  Moves recursively down the 
 	// tree, returning each node to the memory pool as it goes.  
-	SpatialPartitioningTree->Shutdown();
+	if (SpatialPartitioningTree) SpatialPartitioningTree->Shutdown();
 	SpatialPartitioningTree = NULL;
 
 	// Release the backdrop texture resource maintained for this system
