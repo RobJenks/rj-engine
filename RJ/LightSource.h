@@ -23,6 +23,9 @@ public:
 	// Creates a new light source based on the supplied light data
 	static LightSource *								Create(const LightData & data);
 
+	// Default constructor; should NOT be called directly since all light sources should be initialised via Create() method
+	LightSource(void);
+
 	// Return a non-const reference to the underlying light object
 	CMPINLINE Light &									LightObject(void)					{ return m_light; }
 
@@ -65,9 +68,6 @@ protected:
 
 	// Importance of the light for use when rendering needs to be prioritised
 	int													m_priority;
-
-	// Default constructor; protected since all light sources should be initialised via Create() method
-	LightSource(void);
 
 };
 

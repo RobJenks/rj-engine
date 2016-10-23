@@ -51,12 +51,21 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	}
 	else
 	{
-		// Usual case.  First add all directional lights to the vector (since they will be universally-relevant)
-		
-
 		// Now perform a search of the local area for all NON-DIRECTIONAL light sources
 		Game::ObjectSearch<iObject>::CustomSearch(Game::Engine->GetCamera()->GetPosition(), Game::CurrentPlayer->GetSystem()->SpatialPartitioningTree,
 			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(Light::LightType::Directional));
+
+		// Pre-register all directional system list sources since we know they will always be relevant, and they 
+		// will not be returned by the object search method above
+		const SpaceSystem *system = Game::CurrentPlayer->GetSystem();
+		if (system)
+		{
+			std::vector<ObjectReference<LightSource>>::const_iterator it_end = system->SystemLightSources().end();
+			for (std::vector<ObjectReference<LightSource>>::const_iterator it = system->SystemLightSources().begin(); it != it_end; ++it)
+			{
+				RegisterLightSource((*it)());
+			}
+		}
 	}
 
 	// Register any lights which could have an impact on the current viewing frustum.  If we exceed

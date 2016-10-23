@@ -113,7 +113,7 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 	LightData dirlight = LightData(Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
 	m_editor_light = LightSource::Create(dirlight);
 	m_editor_light->LightObject().Activate();
-	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem()) Game::CurrentPlayer->GetSystem()->AddBaseObject(m_editor_light, NULL_VECTOR);
+	if (Game::CurrentPlayer && Game::CurrentPlayer->GetSystem()) Game::CurrentPlayer->GetSystem()->AddObjectToSystem(m_editor_light, NULL_VECTOR);
 
 	// Initialise the volumetric line used for rendering the editor grid
 	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));

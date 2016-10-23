@@ -641,7 +641,7 @@ void RJMain::ProcessKeyboardInput(void)
 			if (lights.empty())
 			{
 				LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
-				Game::CurrentPlayer->GetSystem()->AddBaseObject(l, NULL_VECTOR);
+				Game::CurrentPlayer->GetSystem()->AddObjectToSystem(l, NULL_VECTOR);
 				lights.push_back(l);
 			}
 
@@ -2137,13 +2137,13 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a directional light source for the system
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager.GetDefaultDirectionalLightData());
-	Game::Universe->GetSystem("AB01")->AddBaseObject(l, NULL_VECTOR);
+	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
 	l->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
 	// Add a spotlight to the player actor
 	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
 	LightSource *player_light = LightSource::Create(pl);
-	cs()->GetSpaceEnvironment()->AddBaseObject(player_light, NULL_VECTOR);
+	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);

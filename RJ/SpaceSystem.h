@@ -13,6 +13,7 @@
 #include "ObjectReference.h"
 #include "iSpaceObject.h"
 #include "BasicProjectileSet.h"
+#include "LightSource.h"
 
 using namespace std;
 
@@ -37,12 +38,6 @@ public:
 	// Handles the exit of an object from the system, removing it from the system collections and updating the simulation state accordingly
 	Result						RemoveObjectFromSystem(iSpaceObject * object);
 
-	// Adds a basic object to the system; no logic besides adding to the relevant collections and SP tree
-	Result						AddBaseObject(iObject *object, const FXMVECTOR location);
-
-	// Removes a basic object from the system; no logic besides removing from the relevant collections and SP tree
-	Result						RemoveBaseObject(iObject *object);
-
 	// Shuts down the system and deallocates resources.  Expect this to only ever be executed upon application shutdown
 	void						TerminateSystem(void);
 
@@ -66,6 +61,9 @@ public:
 
 	// Each system maintains an Octree for tracking the position of its objects
 	Octree<iObject*> *			SpatialPartitioningTree;
+
+	// Returns a constant reference to the collection of directional system lights
+	CMPINLINE const std::vector<ObjectReference<LightSource>> & SystemLightSources(void) const	{ return m_directional_lights; }
 
 	// Methods to retrieve objects in the system
 	CMPINLINE std::vector<ObjectReference<iSpaceObject>> * 	GetObjects(void)					{ return &Objects; }
@@ -93,7 +91,7 @@ private:
 	Texture						*m_backdrop;
 
 	// Set of directional lights in this system
-	std::vector<iObject*>		m_directional_lights;
+	std::vector<ObjectReference<LightSource>> 	m_directional_lights;
 
 	// Identifies and stores a reference to all directional system light sources in the system object collection
 	void						RegisterAllSystemLights(void);

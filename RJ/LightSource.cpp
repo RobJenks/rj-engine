@@ -9,15 +9,13 @@
 // Creates a new light source with default properties
 LightSource * LightSource::Create(void)
 {
-	// Create a new light source object
-	LightSource *ls = new LightSource();
-	if (!ls) return NULL;
+	return LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultPointLightData()));
+}
 
-	// Apply default point light properties, assign to the light source and return
-	Light l;
-	Game::Engine->LightingManager.GetDefaultPointLightData(l.Data);
-	ls->SetLight(l);
-	return ls;
+// Creates a new light source based on the supplied light data
+LightSource * LightSource::Create(const LightData & data)
+{
+	return LightSource::Create(Light(data));
 }
 
 // Creates a new light source based on the supplied light object
@@ -27,24 +25,17 @@ LightSource * LightSource::Create(const Light & light)
 	LightSource *ls = new LightSource();
 	if (!ls) return NULL;
 
-	// Apply supplied lighting data and return
+	// Apply supplied lighting data to the source
 	ls->SetLight(light);
+
+	// Set an initial simulation state.  This will likely be overridden in the next frame, but will
+	// ensure that the object is registered upon construction
+	ls->SetSimulationState(iObject::ObjectSimulationState::StrategicSimulation);
+
+	// Return the new light source
 	return ls;
 }
 
-// Creates a new light source based on the supplied light data
-LightSource * LightSource::Create(const LightData & data)
-{
-	// Create a new light source object
-	LightSource *ls = new LightSource();
-	if (!ls) return NULL;
-
-	// Apply supplied lighting data and return
-	Light l;
-	l.Data = data;
-	ls->SetLight(l);
-	return ls;
-}
 
 // Default constructor
 LightSource::LightSource(void)
