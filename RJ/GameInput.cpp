@@ -288,6 +288,8 @@ GameInputDevice::InputKey GameInputDevice::ReadTextInputKey(void)
 	if (m_pressedKeys[DIK_APOSTROPHE])  { LockKey(DIK_APOSTROPHE);		return GameInputDevice::InputKey(DIK_APOSTROPHE,'\''); }
 	if (m_pressedKeys[DIK_BACKSLASH])	{ LockKey(DIK_BACKSLASH);		return GameInputDevice::InputKey(DIK_BACKSLASH, '\\'); }
 	if (m_pressedKeys[DIK_SLASH])		{ LockKey(DIK_SLASH);			return GameInputDevice::InputKey(DIK_SLASH, (shift ? '?' : '/')); }
+	if (m_pressedKeys[DIK_COMMA])		{ LockKey(DIK_COMMA);			return GameInputDevice::InputKey(DIK_COMMA, (shift ? '<' : ',')); }
+	if (m_pressedKeys[DIK_PERIOD])		{ LockKey(DIK_PERIOD);			return GameInputDevice::InputKey(DIK_PERIOD, (shift ? '>' : '.')); }
 
 	// None of the alphanumeric keys are being pressed, so return 0 to signify no user input
 	return GameInputDevice::InputKey::None;

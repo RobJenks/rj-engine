@@ -101,6 +101,9 @@ public:
 		m_lighting_is_overridden = false;
 	}
 
+	// Apply a standard lighting override this frame
+	void								ApplyStandardCameraFacingLightOverride(void);
+
 	// Default destructor
 	~LightingManagerObject(void);
 
@@ -129,7 +132,17 @@ protected:
 	// Lighting override data
 	bool													m_lighting_is_overridden;
 	std::vector<iObject*>									m_override_lights;
-	
+
+	// Standard pre-configured set of override lights.  Directional lighting only which primarily shines out 
+	// of the camera, but also includes a more limited amount of ambient/surrounding light from other angles
+	std::vector<iObject*>									m_std_override_cameralights;
+
+	// Initialise the pre-configured lighting setups that can be used as a standard override
+	void													InitialiseStandardLightingOverrides(void);
+
+	// Orients a lighting set with the camera
+	void													OrientLightingOverrideSetWithCamera(std::vector<iObject*> & lighting_override);
+
 	// Functor for sorting/searching light sources based on priority
 	static struct _LightSourceEntryPriorityComparator
 	{

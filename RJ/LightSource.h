@@ -41,6 +41,11 @@ public:
 	CMPINLINE float										GetRange(void) const				{ return m_light.Data.Range; }
 	void												SetRange(float range);
 
+	// Light orientation relative to the light source orientation.A forward vector(0, 0, 1) is rotated
+	// by (rel_orient * obj_orient) to give the final light direction
+	CMPINLINE XMVECTOR									GetRelativeLightOrientation(void) const					{ return m_relativelightorient; }
+	CMPINLINE void										SetRelativeLightOrientation(const FXMVECTOR orient)		{ m_relativelightorient = orient; }
+
 	// Object simulation method.  Light sources do not need to take any action (TODO: dynamic lights, e.g. flickering, could use this)
 	CMPINLINE void										SimulateObject(void) { }
 
@@ -69,6 +74,9 @@ protected:
 	// Importance of the light for use when rendering needs to be prioritised
 	int													m_priority;
 
+	// Light orientation relative to the light source orientation.  A forward vector (0,0,1) is rotated 
+	// by (rel_orient * obj_orient) to give the final light direction
+	AXMVECTOR											m_relativelightorient;
 };
 
 

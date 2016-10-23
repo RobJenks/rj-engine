@@ -39,6 +39,9 @@ LightSource * LightSource::Create(const Light & light)
 
 // Default constructor
 LightSource::LightSource(void)
+	:
+	m_priority(0), 
+	m_relativelightorient(ID_QUATERNION)
 {
 	// Set the object type
 	SetObjectType(iObject::ObjectType::LightSourceObject);
@@ -80,8 +83,8 @@ void LightSource::PerformPostSimulationUpdate(void)
 	m_light.Data.Position = m_positionf;
 
 	// Update light direction based on orientation of the light source object
-	XMVECTOR DirAdj = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
-	XMStoreFloat3(&m_light.Data.Direction, DirAdj);
+	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, (XMQuaternionMultiply(m_relativelightorient, m_orientation)));
+	XMStoreFloat3(&m_light.Data.Direction, dir);
 }
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass

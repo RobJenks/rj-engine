@@ -35,6 +35,9 @@ LightingManagerObject::LightingManagerObject(void)
 	// Initialise space in the lighting override vector to hold the maximum possible number of lights
 	m_override_lights.clear();
 	m_override_lights.reserve(LightingManagerObject::LIGHT_LIMIT);
+
+	// Initialise the pre-configured lighting setups that can be used as a standard override
+	InitialiseStandardLightingOverrides();
 }
 
 // Initialise the lighting manager for a new frame
@@ -249,6 +252,46 @@ void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 	outLight.SpotlightOuterHalfAngleCos = std::cosf(PIBY180 * 35.0f);
 }
 
+// Initialise the pre-configured lighting setups that can be used as a standard override
+void LightingManagerObject::InitialiseStandardLightingOverrides(void)
+{
+	LightData std_dim = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.075f, 0.075f, 0.035f, XMFLOAT3(0.0f, 0.0f, 1.0f));
+	LightData std_bright = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.15f, 0.15f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f));
+
+	/* Standard camera-facing override.  Directional lighting only which primarily shines out of the 
+	   camera, but also includes a more limited amount of ambient/surrounding light from other angles */
+	XMVECTOR orient[] = { 
+		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),						// Light 1: Facing directly forwards from the camera; e.g. (0,0,-10) to local (0,0,0)
+		XMVectorSet(0.330013f, 0.660026f, -0.0f, 0.674875f),		// Light 2: Facing from (10,-5,1) up+left to local (0,0,0)
+		XMVectorSet(0.151432f, -0.757161f, 0.0f, 0.635433f) };		// Light 3: Facing from	(10,-2,2) up+right to local (0,0,0)
+
+	for (int i = 0; i < 3; ++i)
+	{
+		LightSource *l = LightSource::Create((i == 0 ? std_bright : std_dim));
+		l->SetRelativeLightOrientation(orient[i]);
+		l->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+		m_std_override_cameralights.push_back((iObject*)l);
+	}
+}
+
+// Orients a lighting set with the camera
+void LightingManagerObject::OrientLightingOverrideSetWithCamera(std::vector<iObject*> & lighting_override)
+{
+	const XMVECTOR & camera_orient = Game::Engine->GetCamera()->GetOrientation();
+
+	std::vector<iObject*>::iterator it_end = lighting_override.end();
+	for (std::vector<iObject*>::iterator it = lighting_override.begin(); it != it_end; ++it)
+	{
+		if ((*it)) (*it)->SetOrientation(camera_orient);
+	}
+}
+
+// Apply a standard lighting override this frame
+void LightingManagerObject::ApplyStandardCameraFacingLightOverride(void)
+{
+	OrientLightingOverrideSetWithCamera(m_std_override_cameralights);
+	AddOverrideLights(m_std_override_cameralights);
+}
 
 // Returns data for a basic, default unsituated directional light.  Creates a returns a new instance by value
 LightData LightingManagerObject::GetDefaultDirectionalLightData(void)

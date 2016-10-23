@@ -155,6 +155,21 @@ bool GameUniverse::ProcessConsoleCommand(GameConsoleCommand & command)
 		command.SetSuccessOutput(m_currentsystem->DebugString());
 		return true;
 	}
+	else if (command.InputCommand == "GetSystemLights")
+	{
+		const std::vector<ObjectReference<LightSource>> & lights = m_currentsystem->SystemLightSources();
+		std::string s = concat("Lights[")(lights.size())("] = {").str();
+
+		std::vector<ObjectReference<LightSource>>::const_iterator it_end = lights.end();
+		for (std::vector<ObjectReference<LightSource>>::const_iterator it = lights.begin(); it != it_end; ++it)
+		{
+			s = concat(s)(it == lights.begin() ? " " : ", ")("[ID=")((*it)()->GetID())("]").str();
+		}
+		s = concat(s)(" }").str();
+
+		command.SetSuccessOutput(s);
+		return true;
+	}
 
 	// We did not recognise the command
 	return false;

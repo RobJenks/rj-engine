@@ -634,7 +634,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_H])
 	{
-		static std::vector<iObject*> lights;
+		/*static std::vector<iObject*> lights;
 		if (lights.empty())
 		{
 			LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
@@ -648,7 +648,8 @@ void RJMain::ProcessKeyboardInput(void)
 			(*it)->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
 		}
 
-		Game::Engine->LightingManager.AddOverrideLights(lights);
+		Game::Engine->LightingManager.AddOverrideLights(lights);*/
+		Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
 	}
 	if (b[DIK_G])
 	{
@@ -1942,6 +1943,14 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
+	XMVECTOR pos[] = { XMVectorSet(0, 0, -10, 0), XMVectorSet(10, -5, 1, 0), XMVectorSet(-10, -2, 2, 0) };
+	for (int i = 0; i < 3; ++i)
+	{
+		XMVECTOR q = QuaternionBetweenVectors(XMVectorSubtract(NULL_VECTOR, pos[i]), FORWARD_VECTOR);
+		OutputDebugString(QuaternionToString(q).c_str());
+		OutputDebugString("\n");
+	}
+
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"),
 		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
@@ -2134,7 +2143,7 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring nsew = (up | left | down | right);	// == 15
 
 	// Temp: Create a directional light source for the system
-	LightSource *l = LightSource::Create(Game::Engine->LightingManager.GetDefaultDirectionalLightData());
+	LightSource *l = LightSource::Create(LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
 	l->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
@@ -2226,6 +2235,6 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-
+*** LIGHTING OVERRIDE IS WORKING; NOW ADD IT IN THE UI_SB ***
 
 
