@@ -584,7 +584,7 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 {
 	// Create a new SimpleShip instance to hold the data
 	SimpleShip *object = new SimpleShip();
-	object->SetShipClass(Ships::Class::Simple);
+	object->SetShipClass(Ship::ShipClass::Simple);
 
 	// Suspend updates while loading the data
 	object->GetHardpoints().SuspendUpdates();
@@ -638,7 +638,7 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 {
 	// Create a new ComplexShip instance to hold the data
 	ComplexShip *object = new ComplexShip();
-	object->SetShipClass(Ships::Class::Complex);
+	object->SetShipClass(Ship::ShipClass::Complex);
 
 	// Suspend updates while data is loaded
 	object->SuspendUpdates();

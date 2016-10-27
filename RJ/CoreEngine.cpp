@@ -2345,7 +2345,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 		++sentence_id;
 
 		// Create a text object for this identifer (TODO: inefficient)
-		std::string textstring = obj->str();
+		std::string textstring = obj->DebugString();
 		m_textmanager->UpdateSentence(text, textstring.c_str(),
 			0, 0, true, DEBUG_ID_TEXT_COLOUR, DEBUG_ID_TEXT_SIZE);
 

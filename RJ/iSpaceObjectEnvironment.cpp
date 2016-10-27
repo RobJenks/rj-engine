@@ -1815,6 +1815,12 @@ iSpaceObjectEnvironment::~iSpaceObjectEnvironment(void)
 
 }
 
+// Custom debug string function
+std::string	iSpaceObjectEnvironment::DebugString(void) const
+{
+	return iObject::DebugString(DebugEnvironmentString());
+}
+
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level

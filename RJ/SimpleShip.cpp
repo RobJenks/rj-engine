@@ -18,7 +18,7 @@ SimpleShip::SimpleShip(void)
 	SetObjectType(iObject::ObjectType::SimpleShipObject);
 
 	// Set the ship class
-	this->m_shipclass = Ships::Class::Simple;
+	this->m_shipclass = Ship::ShipClass::Simple;
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);

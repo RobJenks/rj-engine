@@ -2,7 +2,6 @@
 #include "FastMath.h"
 #include "GameInput.h"
 #include "Ship.h"
-#include "Ships.h"
 #include "GameDataExtern.h"
 #include "ComplexShip.h"
 #include "ComplexShipTile.h"
@@ -297,7 +296,7 @@ void Player::ReturnToShip(void)
 	if (!m_playership()) return;
 
 	// Take different action depending on the player ship type
-	if (m_playership()->GetShipClass() == Ships::Class::Simple)
+	if (m_playership()->GetShipClass() == Ship::ShipClass::Simple)
 	{
 		// Simply set the player to be piloting their simple ship
 		m_state = StateType::ShipPilot;
@@ -309,7 +308,7 @@ void Player::ReturnToShip(void)
 		// Update the player state to take account of its new environment
 		UpdatePlayerState();
 	}
-	else if (m_playership()->GetShipClass() == Ships::Class::Complex)
+	else if (m_playership()->GetShipClass() == Ship::ShipClass::Complex)
 	{
 		// Move the player into this complex ship
 		EnterEnvironment((ComplexShip*)m_playership());

@@ -13,7 +13,7 @@ class Light : public ALIGN16<Light>
 public:
 
 	// Enumeration of possible light types
-	enum LightType					{ Directional = 0, PointLight, SpotLight };
+	enum LightType					{ Directional = 0, PointLight, SpotLight,  };
 
 	// Static counter used to assign unique light IDs
 	static unsigned int				LAST_ID;
@@ -48,6 +48,10 @@ public:
 	void							InitialiseSpotLight(const XMFLOAT3 & position, const XMFLOAT3 & colour, float range,
 														float ambient, float diffuse, float specular, const AttenuationData & attenuation,
 														const XMFLOAT3 & direction, float inner_half_angle, float fade_half_angle);
+
+	// Translate a light type value to/from its string representation
+	static std::string				TranslateLightTypeToString(Light::LightType type);
+	static Light::LightType			TranslateLightTypeFromString(const std::string & type);
 
 	// Process a debug command from the console.  "Light" objects are not part of the object hierarchy, but 
 	// members of that hierarchy will invokve this method when asked to perform lighting-related actions

@@ -280,9 +280,6 @@ protected:
 	float										m_zoom_increment_amount;	// Zoom increment that is currently being applied
 	float										m_zoom_increment_end;		// Time at which the current zoom increment will end
 
-	// Data relating to editor-specific lighting
-	LightSource *								m_editor_light;						// Directional light that overrides normal lighting when using the editor
-
 	// Fields related to selection of ship elements
 	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element
 	INTVECTOR3									m_mouse_over_element;				// Ship element that the mouse is currently over, if m_mouse_is_over_element == true

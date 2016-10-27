@@ -350,6 +350,15 @@ public:
 	void							GetAllObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float distance,
 																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
 
+	// Returns debug string information on the environment
+	CMPINLINE std::string			DebugEnvironmentString(void) const
+	{
+		return concat("Size=")(m_elementsize.ToString())(", Elements=")(m_elementcount)(", Tiles=")(m_tilecount)(", Objects=")(Objects.size())(", Terrain=")(TerrainObjects.size()).str();
+	}
+
+	// Custom debug string function
+	std::string						DebugString(void) const;
+
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void							ProcessDebugCommand(GameConsoleCommand & command);

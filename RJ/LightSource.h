@@ -61,6 +61,12 @@ public:
 	// Inherited from iObject, called when this object collides with another.  Not relevant since light sources cannot collide with the world
 	CMPINLINE void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) { }
 
+	// Custom debug string function
+	std::string											DebugString(void) const;
+
+	// Custom debug string function for light data specifically
+	std::string											DebugLightDataString(void) const;
+
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void												ProcessDebugCommand(GameConsoleCommand & command);

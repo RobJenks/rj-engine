@@ -3,35 +3,35 @@
   <Class Name="iActiveObject" Collapsed="true">
     <Position X="4" Y="1.75" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QEAwAIAAAKAAEGoAJABAAAAMAEAAABAIgACAAABAASA=</HashCode>
+      <HashCode>QEAwAIAAAqAgEGoAJEBgAQAsAEAAABIIgAiAAARAMSA=</HashCode>
       <FileName>iActiveObject.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="iEnvironmentObject" Collapsed="true">
-    <Position X="9.5" Y="3" Width="1.5" />
+    <Position X="11" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAggAACEAABCAAAAEEFAAQABEhACIHIgBCAAAQJACAQ=</HashCode>
+      <HashCode>gAggAASEgAAAAAAAEEBIAQBBABECIHIgBCgAAQJACAA=</HashCode>
       <FileName>iEnvironmentObject.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="iObject" Collapsed="true">
     <Position X="5.75" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>smQGAQVXPXn1ElPAM7Rpjfs8CU+7EnduJKUWUqPJFR0=</HashCode>
+      <HashCode>smQOAQVfHXn1GlPAM/Vpjfscmc+7MndvJKUWUqPJFR0=</HashCode>
       <FileName>iObject.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="iSpaceObject" Collapsed="true">
     <Position X="2" Y="3" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AggYAAAAAAAAACAAAABAgQAAgAAAAAAAAAAAAABACBA=</HashCode>
+      <HashCode>AAgYAAAAAAAAACAAAEBAAQAAgAEAAAAAAAAAAABACBA=</HashCode>
       <FileName>iSpaceObject.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="iSpaceObjectEnvironment" Collapsed="true">
     <Position X="2.5" Y="7" Width="2" />
     <TypeIdentifier>
-      <HashCode>AACgQIIAWCAYoMJAgRBAAQEEAABBICcAAEBEALRYIOI=</HashCode>
+      <HashCode>HGGgSZukWOBwxNJCAVbEKQUEACFBoCcYEEpVJLz4peI=</HashCode>
       <FileName>iSpaceObjectEnvironment.h</FileName>
     </TypeIdentifier>
   </Class>
@@ -43,52 +43,59 @@
     </TypeIdentifier>
   </Class>
   <Class Name="Actor" Collapsed="true">
-    <Position X="9.5" Y="5.25" Width="1.5" />
+    <Position X="11" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EgCAAAEACqCAgAAEAIByAQE3gAAAwBAAAQAAQABABAM=</HashCode>
+      <HashCode>AgCAAAEACqCAhAAEAMByAQE3gAEAwBAAAQAAQABABAM=</HashCode>
       <FileName>Actor.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SpaceEmitter" Collapsed="true">
     <Position X="5.75" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAABACAAAABAAAAAAQEgAIAAEAAAAAAAAABABAA=</HashCode>
+      <HashCode>AAgAAAABACAABABAAEAAAQEgAIEAEAAAAAAAAABABAA=</HashCode>
       <FileName>SpaceEmitter.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Ship" Collapsed="true">
     <Position X="1.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>J5J6VQGoNjSEkmLiEBLeYXgMYbutyhwEgRZQQgrhhio=</HashCode>
+      <HashCode>J5J6VQGoNjSElmbqEFLeYXgMYbuNyhyUgRJYwx7hhio=</HashCode>
       <FileName>Ship.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SimpleShip" Collapsed="true">
     <Position X="0.5" Y="7" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAACAABBBAAAQAAACAAAQEgAQAAAEghACAAAoBADCA=</HashCode>
+      <HashCode>AAAACAABBBAABQAAAGAAAQEgAQAAAEghACAAAoBADCA=</HashCode>
       <FileName>SimpleShip.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ComplexShip" Collapsed="true">
     <Position X="2.75" Y="9" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>EwAIjBkZhGCIFyRCASBACQHgEAEAhFFLACAUFoJEGCg=</HashCode>
+      <HashCode>AwAIjBkZBGCgFyQAAWBACQHgEAEAhFBDACAUEoJEGCg=</HashCode>
       <FileName>ComplexShip.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="ComplexShipSection" Collapsed="true">
     <Position X="3.5" Y="5.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>IEYjogqRhCCIIQZAACAAuQFkgABAoEgbFX0QAoVH2kI=</HashCode>
+      <HashCode>IEYjogqRhCCIJSZAAGAAuQFkgAFAoEgbFX0QAoVH2kI=</HashCode>
       <FileName>ComplexShipSection.h</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SpaceProjectile" Collapsed="true">
     <Position X="7.5" Y="5.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>OAAAAAEoMKAAAAAAgAQAAQQgAAKAEAIIAAAAwAGGABA=</HashCode>
+      <HashCode>OAAAAAEoMKAABAAAgEQAAQQgAAOAEAIIAAAAwAGGABA=</HashCode>
       <FileName>SpaceProjectile.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="LightSource" Collapsed="true">
+    <Position X="9.25" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAACACBABAAAAEBAAAIoAAUAAMIAAAgARAAQCAA=</HashCode>
+      <FileName>LightSource.h</FileName>
     </TypeIdentifier>
   </Class>
   <Font Name="Segoe UI" Size="9" />

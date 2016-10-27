@@ -85,6 +85,9 @@ public:
 	// Shut down the environment object, notifying any parent environment of the change
 	void										Shutdown(void);
 
+	// Custom debug string function
+	std::string									DebugString(void) const;
+
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void										ProcessDebugCommand(GameConsoleCommand & command);

@@ -7,7 +7,6 @@
 
 #include "CompilerSettings.h"
 #include "Player.h"
-#include "Ships.h"
 #include "ErrorCodes.h"
 class iSpaceObject;
 class CameraPath;
@@ -104,10 +103,6 @@ public:
 	bool								ZoomToOverheadShipView(iSpaceObject *target, float time);
 	bool								ZoomToOverheadShipView(iSpaceObject *target, float distance, float time);
 
-	// Accessor/modifier methods for the ship class environment parameter
-	CMPINLINE Ships::Class				GetShipClass(void) { return m_shipclass; }
-	CMPINLINE void						SetShipClass(Ships::Class sclass) { m_shipclass = sclass; }
-
 	// Sets the currently-active ship; if the ship has changed since the last cycle, this will reset any ship-dependent tracking data
 	void								UpdateChaseCamera(const Ship *target);
 
@@ -118,7 +113,6 @@ public:
 private:
 
 	CameraState							m_camerastate;					// Current state of the camera; determines how view matrices are derived
-	Ships::Class						m_shipclass;
 
 	AXMMATRIX							m_view;							// The view matrix
 	AXMMATRIX							m_invview;						// The inverse view matrix

@@ -8,8 +8,9 @@
 #include "Data\\Shaders\\light_definition.h"
 #include "Light.h"
 #include "LightSource.h"
+#include "iAcceptsConsoleCommands.h"
 
-class LightingManagerObject
+class LightingManagerObject : public iAcceptsConsoleCommands
 {
 public:
 
@@ -40,6 +41,9 @@ public:
 
 	// Clear all registered light sources
 	void								ClearAllLightSources(void);
+
+	// Returns a reference to the collection of currently active light sources
+	CMPINLINE const LightSources &		GetCurrentLightSourceData(void) const		{ return m_sources; }
 
 	// Return the number of light sources currently registered
 	LightSources::size_type				GetLightSourceCount(void) const				{ return m_source_count; }
@@ -94,7 +98,7 @@ public:
 		m_lighting_is_overridden = true;
 	}
 
-	// Clear the lighting override for this frame (override is reset each frame anyway; this is for intra-frame clearing only)
+	// Clear the lighting override 
 	CMPINLINE void						DisableLightingOverride(void)						
 	{ 
 		m_override_lights.clear(); 
@@ -103,6 +107,12 @@ public:
 
 	// Apply a standard lighting override this frame
 	void								ApplyStandardCameraFacingLightOverride(void);
+
+	// Generates a debug output string for the current lighting state
+	std::string							DebugOutputLightingState(void) const;
+
+	// Virtual inherited method to accept a command from the console
+	bool								ProcessConsoleCommand(GameConsoleCommand & command);
 
 	// Default destructor
 	~LightingManagerObject(void);

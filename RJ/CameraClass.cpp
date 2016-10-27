@@ -2,7 +2,6 @@
 #include "FastMath.h"
 #include "Ship.h"
 #include "SimpleShip.h"
-#include "Ships.h"
 #include "Player.h"
 #include "CoreEngine.h"
 #include "CameraPath.h"
@@ -14,7 +13,6 @@ CameraClass::CameraClass(void)
 {
 	// Set default parameters
 	m_camerastate = CameraClass::CameraState::NormalCamera;
-	m_shipclass = Ships::Class::Simple;
 	m_position = m_fixedposition = m_debugposition = NULL_VECTOR;
 	m_orientation = m_fixedorientation = m_debugorientation = ID_QUATERNION;
 	m_view = m_invview = ID_MATRIX;
@@ -41,7 +39,7 @@ void CameraClass::CalculateViewMatrix(void)
 	{
 		// If the player is piloting a ship then we need to apply the additional camera offset matrix
 		if (Game::CurrentPlayer->GetState() == Player::StateType::ShipPilot && Game::CurrentPlayer->GetPlayerShip() &&
-			Game::CurrentPlayer->GetPlayerShip()->GetShipClass() == Ships::Class::Simple)
+			Game::CurrentPlayer->GetPlayerShip()->GetShipClass() == Ship::ShipClass::Simple)
 		{
 			// Get a reference to the player ship; we know it is a SimpleShip
 			SimpleShip *ship = (SimpleShip*)Game::CurrentPlayer->GetPlayerShip();

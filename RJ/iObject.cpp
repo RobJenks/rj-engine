@@ -10,6 +10,7 @@
 #include "BasicProjectile.h"
 #include "BasicProjectileDefinition.h"
 #include "GameConsoleCommand.h"
+#include "DebugInvocation.h"
 
 #include "iObject.h"
 
@@ -600,7 +601,7 @@ std::string iObject::ListChildren(void) const
 	for (int i = 0; i < m_childcount; ++i)
 	{
 		child = m_childobjects.at(i).Child;
-		os << (child ? child->str() : "[NULL]") << (i < (m_childcount - 1) ? ", " : "");
+		os << (child ? child->DebugString() : "[NULL]") << (i < (m_childcount - 1) ? ", " : "");
 	}
 
 	os << " }";
@@ -642,19 +643,17 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::
 	ApplyDamage(proj.Definition->GetProjectileDamage());
 }
 
-// Output debug data on the object.  Acts from this point in the hierarchy downwards
-/*std::string iObject::DebugOutput(void) const
+// Custom debug string function which determines the subclass of this object and calls that subclass method directly.  
+// Ugly but avoids having to add an additional vtable entry for a pure debug function
+// @Dependency iObject::ObjectType
+std::string iObject::DebugSubclassString(void) const
 {
-	
+	// Determine and call the appropriate subclass function.  This is BAD but for debug only
+	return DebugInvocation::SubclassInvocations::Invoke_DebugString(this);
 }
 
-// Output debug data on the object.  Internal method that passes a stringbuilder up the hierarchy for more efficient construction
-void iObject::DebugOutput(std::ostringstream &ss) const
-{
-
-}*/
-
 // Static method to translate from an object simulation state to its string representation
+// @Dependency iObject::ObjectSimulationState
 std::string iObject::TranslateSimulationStateToString(iObject::ObjectSimulationState state)
 {
 	switch (state)
@@ -668,6 +667,7 @@ std::string iObject::TranslateSimulationStateToString(iObject::ObjectSimulationS
 }
 
 // Static method to translate to an object simulation state from its string representation
+// @Dependency iObject::ObjectSimulationState
 iObject::ObjectSimulationState iObject::TranslateSimulationStateFromString(const std::string & state)
 {
 	if (state == "fullsimulation")					return iObject::ObjectSimulationState::FullSimulation;
@@ -678,6 +678,7 @@ iObject::ObjectSimulationState iObject::TranslateSimulationStateFromString(const
 }
 
 // Static method to detemine the object class of an object; i.e. whether it is space- or environment-based
+// @Dependency iObject::ObjectType
 iObject::ObjectClass iObject::DetermineObjectClass(const iObject & object)
 {
 	// Object class is based upon the more granular object type
@@ -702,6 +703,7 @@ iObject::ObjectClass iObject::DetermineObjectClass(const iObject & object)
 
 
 // Static method to return the string representation of an object type
+// @Dependency iObject::ObjectType
 std::string iObject::TranslateObjectTypeToString(iObject::ObjectType type)
 {
 	switch (type)
@@ -782,6 +784,8 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(IsCurrentlyVisible)
 	REGISTER_DEBUG_ACCESSOR_FN(GetFastMoverThresholdSq)
 	REGISTER_DEBUG_ACCESSOR_FN(CollisionExcludedWithObject, (Game::ID_TYPE)command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(DebugString)
+	REGISTER_DEBUG_ACCESSOR_FN(DebugSubclassString)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(AssignNewUniqueID)

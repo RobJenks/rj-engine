@@ -87,6 +87,22 @@ void LightSource::PerformPostSimulationUpdate(void)
 	XMStoreFloat3(&m_light.Data.Direction, dir);
 }
 
+// Custom debug string function
+std::string	LightSource::DebugString(void) const
+{
+	return iObject::DebugString(DebugLightDataString());
+}
+
+// Custom debug string function for light data specifically
+std::string LightSource::DebugLightDataString(void) const
+{
+	return concat("Type=")(Light::TranslateLightTypeToString((Light::LightType)m_light.Data.Type))
+		(", Active=")((m_light.IsActive() ? "True" : "False")).str();
+	//	(", R=")(m_light.Data.Colour.x)(", G=")(m_light.Data.Colour.y)(", B=")(m_light.Data.Colour.z)
+	//	(", A=")(m_light.Data.AmbientIntensity)(", D=")(m_light.Data.DiffuseIntensity)(", S=")(m_light.Data.SpecularPower).str();
+}
+
+
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level
 void LightSource::ProcessDebugCommand(GameConsoleCommand & command)

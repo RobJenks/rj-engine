@@ -87,6 +87,27 @@ Light::~Light(void)
 }
 
 
+// Translate a light type value to its string representation.  Defaults to "Directional" if the value is not recognised
+std::string Light::TranslateLightTypeToString(Light::LightType type)
+{
+	switch (type)
+	{
+		case Light::LightType::PointLight:			return "Point";
+		case Light::LightType::SpotLight:			return "Spot";
+		default:									return "Directional";
+	}
+}
+
+// Translate a light type value from its string representation.  Defaults to "Directional" if the value is not recognised
+Light::LightType Light::TranslateLightTypeFromString(const std::string & type)
+{
+	std::string t = type; StrLowerC(t);
+	
+	if (t == "point")								return Light::LightType::PointLight;
+	else if (t == "spot")							return Light::LightType::SpotLight;
+	else											return Light::LightType::Directional;
+}
+
 // Process a debug command from the console.  "Light" objects are not part of the object hierarchy, but 
 // members of that hierarchy will invokve this method when asked to perform lighting-related actions
 void Light::ProcessDebugCommand(GameConsoleCommand & command)

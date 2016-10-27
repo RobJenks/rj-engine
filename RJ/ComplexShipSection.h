@@ -155,6 +155,9 @@ public:
 	// Static method to create a copy of the supplied ship section
 	//static ComplexShipSection *					Copy(ComplexShipSection *sec);
 
+	// Custom debug string function
+	std::string									DebugString(void) const;
+
 	// Methods to return the standard path / filename where this ship section data should be stored, if it is following the standard convention
 	std::string									DetermineXMLDataPath(void);
 	std::string									DetermineXMLDataFilename(void);

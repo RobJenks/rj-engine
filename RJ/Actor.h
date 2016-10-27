@@ -36,6 +36,10 @@ public:
 	// Attributes for this actor, including values inherited from the base actor
 	ActorInstanceAttributes		Attributes;
 
+	// Returns the turn rate of this actor
+	CMPINLINE float				GetTurnRate(void) const	{ return m_turnrate; }
+	CMPINLINE float				___TMP(int a) const { return m_turnrate * (float)a; }
+
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
@@ -110,6 +114,9 @@ public:
 	// Shutdown method to deallocate resources and remove the actor
 	void									Shutdown(void);
 
+	// Custom debug string function
+	std::string								DebugString(void) const;
+
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void									ProcessDebugCommand(GameConsoleCommand & command);
@@ -125,8 +132,7 @@ protected:
 
 	ActorBase *							m_base;
 	SkinnedModelInstance 				m_model;
-	std::string							m_name;
-
+	
 	// Movement and physics parameters for this actor
 	float								m_turnrate;						// Radians/sec turn rate
 

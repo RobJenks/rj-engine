@@ -318,6 +318,12 @@ void ComplexShipSection::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXM
 	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
 }
 
+// Custom debug string function
+std::string	ComplexShipSection::DebugString(void) const
+{
+	return iObject::DebugString(concat
+		("Parent=")(m_parent ? m_parent->GetInstanceCode() : "(NULL)").str());
+}
 
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass

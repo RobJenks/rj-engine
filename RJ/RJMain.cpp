@@ -57,7 +57,6 @@
 
 #include "SpaceEmitter.h"
 #include "Ship.h"
-#include "Ships.h"
 #include "SimpleShip.h"
 #include "iSpaceObjectEnvironment.h"
 #include "ComplexShip.h"
@@ -122,6 +121,7 @@
 #include "ActorAttributes.h"
 #include "ActorBase.h"
 #include "Actor.h"
+#include "DebugInvocation.h"
 #include <random>
 #include <stdlib.h> 
 
@@ -634,21 +634,6 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_H])
 	{
-		/*static std::vector<iObject*> lights;
-		if (lights.empty())
-		{
-			LightSource *l = LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultDirectionalLightData()));
-			l->MoveIntoSpaceEnvironment(&Game::Universe->GetCurrentSystem(), NULL_VECTOR);
-			lights.push_back(l);
-		}
-
-		std::vector<iObject*>::iterator it_end = lights.end();
-		for (std::vector<iObject*>::iterator it = lights.begin(); it != it_end; ++it)
-		{
-			(*it)->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
-		}
-
-		Game::Engine->LightingManager.AddOverrideLights(lights);*/
 		Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
 	}
 	if (b[DIK_G])
@@ -2229,12 +2214,10 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d", Game::Engine->LightingManager.GetLightSourceCount());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
 }
-
-*** LIGHTING OVERRIDE IS WORKING; NOW ADD IT IN THE UI_SB ***
 
 

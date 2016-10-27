@@ -417,13 +417,16 @@ public:
 	}
 
 	// Static method to return the string representation of an object type
+	// @Dependency iObject::ObjectType
 	static std::string							TranslateObjectTypeToString(iObject::ObjectType type);
 
 	// Static methods to translate between object simulation states and their string representations
+	// @Dependency iObject::ObjectSimulationState
 	static std::string							TranslateSimulationStateToString(ObjectSimulationState state);
 	static ObjectSimulationState				TranslateSimulationStateFromString(const std::string & state);
 
 	// Static method to detemine the object class of an object; i.e. whether it is space- or environment-based
+	// @Dependency iObject::ObjectType
 	static ObjectClass							DetermineObjectClass(const iObject & object);
 
 	// Static record of how each simulation state compares to each other
@@ -446,16 +449,26 @@ public:
 	// Override string stream operator
 	friend std::ostream & operator<<(std::ostream &os, const iObject & obj) 
 	{
-		return os << "[" << obj.GetID() << "] " << obj.GetInstanceCode() << " (" << iObject::TranslateObjectTypeToString(obj.GetObjectType()) << ")";
+		return os << obj.GetInstanceCode() << " [ID=" << obj.GetID() << ", Type=" << iObject::TranslateObjectTypeToString(obj.GetObjectType()) << "]";
 	}
 
-	// Custom "ToString" function
-	CMPINLINE std::string str(void) const
+	// Custom debug string function
+	CMPINLINE std::string						DebugString(void) const
 	{
-		ostringstream os;
-		os << (*this);
-		return os.str();
+		return concat(m_instancecode)(" [ID=")(m_id)(", Type=")(iObject::TranslateObjectTypeToString(m_objecttype))("]").str();
 	}
+
+	// Custom debug string function which allows subclass data to be inserted (avoids adding another entry to the vtable
+	// for a pure debug function)
+	CMPINLINE std::string						DebugString(const std::string & detail) const
+	{
+		return concat(m_instancecode)(" [ID=")(m_id)(", Type=")(iObject::TranslateObjectTypeToString(m_objecttype))(" [")(detail)("]]").str();
+	}
+
+	// Custom debug string function which determines the subclass of this object and calls that subclass method directly.  
+	// Ugly but avoids having to add an additional vtable entry for a pure debug function
+	// @Dependency iObject::ObjectType
+	std::string									DebugSubclassString(void) const;
 
 	// Destructor
 	virtual ~iObject(void) = 0;

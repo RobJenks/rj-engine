@@ -52,6 +52,9 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	{
 		// Special case.  Lighting is overriden so instead just reference the override vector directly
 		lights = m_override_lights;
+
+		// Reset the override state now that it has been applied in the current frame
+		DisableLightingOverride();
 	}
 	else
 	{
@@ -100,6 +103,10 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 {
 	// Parameter check
 	if (!light) return false;
+	const Light & l = light->GetLight();
+
+	// We only want to register lights that are currently active
+	if (l.IsActive() == false) return false;
 
 	// Lights are prioritised in part based on their position relative to the camera
 	const XMVECTOR & cam_pos = Game::Engine->GetCamera()->GetPosition();
@@ -107,7 +114,7 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 	// Determine a distance/priority for the light; directional lights always have top priority so set a distsq of -999
 	// This ensures that directional light sources will ALWAYS be at the start of the light vector
 	float distsq = -999.0f;
-	if ((Light::LightType)light->GetLight().GetType() != Light::LightType::Directional)
+	if ((Light::LightType)l.GetType() != Light::LightType::Directional)
 	{
 		// Directional lights keep a distsq value of -999.  For all other light types, determine the actual squared
 		// distance here.  Will always be >= 0 and so always lower priority than the directional lights
@@ -204,8 +211,6 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 // Called at the end of a frame to perform any final lighting-related activities
 void LightingManagerObject::EndFrame(void)
 {
-	// Clear any lighting override that was applied this frame
-	DisableLightingOverride();
 }
 
 // Returns data for a basic, default unsituated directional light
@@ -327,4 +332,43 @@ bool LightingManagerObject::_LightSourceEntryPriorityComparator::operator() (con
 LightingManagerObject::~LightingManagerObject(void)
 {
 
+}
+
+// Generates a debug output string for the current lighting state
+std::string LightingManagerObject::DebugOutputLightingState(void) const
+{
+	const LightSource *ls;
+	std::ostringstream os;
+	os << "Lights" << (m_lighting_is_overridden ? "(OVERIDDEN)" : "") << "[" << m_source_count << "] = {";
+	
+	for (int i = 0; i < m_source_count; ++i)
+	{
+		ls = m_sources[i].Source;
+		os << (i == 0 ? " " : ", ");
+
+		if (ls == NULL)
+		{
+			os << "[ERORR: NULL]";
+		}
+		else
+		{
+			os << "[ID=" << ls->GetID() << ", " << ls->DebugLightDataString() << ", DSQ=" << m_sources[i].DistSq << "]";
+		}
+	}
+
+	os << " }";
+	return os.str();
+}
+
+// Virtual inherited method to accept a command from the console
+bool LightingManagerObject::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "GetCurrentLightSources")
+	{
+		command.SetSuccessOutput(DebugOutputLightingState());
+		return true;
+	}
+
+	// We did not recognise the command
+	return false;
 }

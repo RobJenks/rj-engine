@@ -574,6 +574,9 @@
     <ClCompile Include="Timers.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="DebugInvocation.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -978,9 +981,6 @@
     <ClInclude Include="Ship.h">
       <Filter>Objects\Ships</Filter>
     </ClInclude>
-    <ClInclude Include="Ships.h">
-      <Filter>Objects\Ships</Filter>
-    </ClInclude>
     <ClInclude Include="SimpleShip.h">
       <Filter>Objects\Ships\SimpleShips</Filter>
     </ClInclude>
@@ -1318,6 +1318,9 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="Utility\ratio_io.h" />
+    <ClInclude Include="DebugInvocation.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

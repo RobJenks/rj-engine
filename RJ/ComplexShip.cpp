@@ -30,7 +30,7 @@ ComplexShip::ComplexShip(void)
 	SetObjectType(iObject::ObjectType::ComplexShipObject);
 
 	// Set the class of ship 
-	m_shipclass = Ships::Class::Complex;
+	m_shipclass = Ship::ShipClass::Complex;
 
 	// Set ship properties to default values on object creation
 	m_perimeterbeacons.clear();
@@ -1221,10 +1221,19 @@ std::string ComplexShip::DebugOutputPerimeterBeacons(void)
 	return s;
 }
 
+// Default destructor
 ComplexShip::~ComplexShip(void)
 {
 	
 }
+
+// Custom debug string function
+std::string	ComplexShip::DebugString(void) const
+{
+	return iObject::DebugString(concat("Class=")(Ship::TranslateShipClassToString(m_shipclass))(", Prototype=")(m_prototype != NullString ? m_prototype : "(No prototype)")
+		(", Environment=[")(DebugEnvironmentString())("]").str());
+}
+
 
 // Returns the file path where XML data relating to this ship should be stored
 string ComplexShip::DetermineXMLDataPath(void)

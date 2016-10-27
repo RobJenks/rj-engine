@@ -56,9 +56,17 @@ void SpaceEmitter::SetEmitter(ParticleEmitter *emitter)
 }
 
 
-
+// Default destructor
 SpaceEmitter::~SpaceEmitter(void)
 {
+}
+
+// Custom debug string function
+std::string	SpaceEmitter::DebugString(void) const
+{
+	return iObject::DebugString(concat
+		("Type=")(m_emitter ? m_emitter->GetTypeCode() : "(Error)")
+		(", Active=")(m_emitter ? (m_emitter->IsEmitting() ? "True" : "False") : "(Error)").str());
 }
 
 

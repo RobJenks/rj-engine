@@ -87,7 +87,6 @@ void UI_ShipBuilder::Activate(void)
 	m_revert_zoom_from = UI_ShipBuilder::DEFAULT_ZOOM_LEVEL;
 	m_rmb_down_start_centre = m_centre;
 	m_level = 0;
-	m_editor_light = NULL;
 	m_mouse_is_over_element = false;
 	m_mouse_over_element = NULL_INTVECTOR3;
 	m_tile_being_placed = NULL;
@@ -109,12 +108,6 @@ void UI_ShipBuilder::Activate(void)
 // Initialise any editor-specific render states and data
 void UI_ShipBuilder::InitialiseRenderData(void)
 {
-	// We want to add a	new directional light that will shine 'out' of the camera
-	LightData dirlight = LightData(Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.3f, 0.05f, 0.1f, FORWARD_VECTOR_F);
-	m_editor_light = LightSource::Create(dirlight);
-	m_editor_light->LightObject().Activate();
-	m_editor_light->MoveIntoSpaceEnvironment(&Game::Universe->GetCurrentSystem(), NULL_VECTOR);
-
 	// Initialise the volumetric line used for rendering the editor grid
 	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
 	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
@@ -130,10 +123,6 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 // Revert any editor-specific render states and data
 void UI_ShipBuilder::RevertRenderData(void)
 {
-	// Deallocate the editor-specific lights
-	m_editor_light->Shutdown();
-	m_editor_light = NULL;
-
 	// Deallocate the editor gridline objects
 	if (m_gridline.RenderTexture)
 	{
@@ -168,9 +157,8 @@ void UI_ShipBuilder::Render(void)
 // Updates any editor-specific render data for the current frame
 void UI_ShipBuilder::PerformRenderUpdate(void)
 {
-	// Override lighting with the editor-specific lights and make sure they are oriented with the camera
-	m_editor_light->SetOrientation(Game::Engine->GetCamera()->GetOrientation());
-	Game::Engine->LightingManager.AddOverrideLight(m_editor_light);
+	// Override lighting with a basic camera-oriented lighting override
+	Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
 }
 
 // Perform editor-mode-specific rendering

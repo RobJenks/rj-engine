@@ -22,10 +22,11 @@ Ship::Ship(void)
 	// Set the object type
 	SetObjectType(iObject::ObjectType::ShipObject);
 
-	m_shipclass = Ships::Class::Unknown;
+	m_shipclass = Ship::ShipClass::Unknown;
 
 	m_standardobject = false;
-	m_defaultloadout = "";
+	m_prototype = NullString;
+	m_defaultloadout = NullString;
 
 	BaseMass = 1.0f;
 	VelocityLimit.SetAllValues(1.0f);
@@ -84,6 +85,11 @@ void Ship::InitialiseCopiedObject(Ship *source)
 	EntityAI::InitialiseCopiedObject(source);
 
 	/* Begin Ship-specific initialisation logic here */
+
+	// Store the ID of the prototype used to construct this ship.  If the source ship had a prototype, store that
+	// ultimate prototype.  If it did not (i.e. it is itself the prototype) then store the source ship code
+	std::string prototype = source->GetShipPrototype();
+	m_prototype = (prototype != NullString ? prototype : source->GetCode());
 
 	// Copy the ship hardpoints and link them to this ship
 	m_hardpoints.Clone(source->GetHardpoints());
@@ -1350,12 +1356,39 @@ void Ship::DestroyObject(void)
 	OutputDebugString("Destruction of Ship\n");
 }
 
-
 // Default destructor
 Ship::~Ship(void)
 {
 
 }
+
+// Custom debug string function
+std::string	Ship::DebugString(void) const
+{
+	return iObject::DebugString(concat("Class=")(Ship::TranslateShipClassToString(m_shipclass))(", Prototype=")(m_prototype != NullString ? m_prototype : "(No prototype)").str());
+}
+
+// Translates a ship class value to its string representation
+std::string Ship::TranslateShipClassToString(Ship::ShipClass ship_class)
+{
+	switch (ship_class)
+	{
+		case Ship::ShipClass::Simple:		return "Simple";
+		case Ship::ShipClass::Complex:		return "Complex";
+		default:							return "Unknown";
+	}
+}
+
+// Translates a ship class value from its string representation
+Ship::ShipClass Ship::TranslateShipClassFromString(const std::string & ship_class)
+{
+	std::string sc = ship_class; StrLowerC(sc);
+	
+	if (sc == "simple")				return Ship::ShipClass::Simple;
+	else if (sc == "complex")		return Ship::ShipClass::Complex;
+	else							return Ship::ShipClass::Unknown;
+}
+
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level

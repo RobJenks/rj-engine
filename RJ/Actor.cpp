@@ -434,6 +434,14 @@ Actor::~Actor(void)
 {
 }
 
+// Custom debug string function
+std::string	Actor::DebugString(void) const
+{
+	return iObject::DebugString(concat
+		("Type=")(m_base ? m_base->GetCode() : "(NULL)")
+		(", Env=")(m_parent() ? m_parent()->GetInstanceCode() : "(NULL)").str());
+}
+
 
 // Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 // Updates the command with its result if the command can be processed at this level

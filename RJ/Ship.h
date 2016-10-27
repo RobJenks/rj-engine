@@ -5,7 +5,6 @@
 #include "DX11_Core.h"
 
 #include "GameVarsExtern.h"
-#include "Ships.h"
 #include "FastMath.h"
 #include "CompilerSettings.h"
 #include "iSpaceObject.h"
@@ -42,14 +41,20 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(Ship)
 
+	// Enumeration of the main ship classes
+	enum ShipClass { Unknown, Simple, Complex };
+
 	// Get or set the ship class value
-	CMPINLINE Ships::Class				GetShipClass(void) const		{ return m_shipclass; }
-	CMPINLINE void						SetShipClass(Ships::Class cls)	{ m_shipclass = cls; }
+	CMPINLINE Ship::ShipClass			GetShipClass(void) const			{ return m_shipclass; }
+	CMPINLINE void						SetShipClass(Ship::ShipClass cls)	{ m_shipclass = cls; }
 
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 	// their level of the implementation
 	void								InitialiseCopiedObject(Ship *source);		
+
+	// Returns the prototype ship used to construct this entity (or NULL, if this ship is the base-level prototype)
+	CMPINLINE std::string				GetShipPrototype(void) const		{ return m_prototype; }
 
 	// Default loadout is specified by its string code
 	CMPINLINE std::string	GetDefaultLoadout(void) const					{ return m_defaultloadout; }
@@ -302,6 +307,9 @@ public:
 	// Calculates a new target lead multiplier for the specified target object
 	float						CalculateTargetLeadMultiplier(iSpaceObject *target);
 
+	// Custom debug string function
+	std::string					DebugString(void) const;
+
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level
 	void						ProcessDebugCommand(GameConsoleCommand & command);
@@ -316,9 +324,14 @@ public:
 	Ship(void);
 	virtual ~Ship(void) = 0;
 
+	// Translates a ship class value to/from its string representation
+	static std::string			TranslateShipClassToString(Ship::ShipClass ship_class);
+	static Ship::ShipClass		TranslateShipClassFromString(const std::string & ship_class);
+
 
 protected:
-	Ships::Class		m_shipclass;				// This is either a simple or a complex ship
+	Ship::ShipClass		m_shipclass;				// This is either a simple or a complex ship
+	std::string			m_prototype;				// The ship prototype (if any) that this ship was created from
 	std::string			m_defaultloadout;			// String ID of the default loadout to be applied to this ship
 
 	unsigned int		m_flightcomputer_interval;			// Interval (secs) between executions of the flight computer
