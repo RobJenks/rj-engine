@@ -341,14 +341,14 @@ std::string LightingManagerObject::DebugOutputLightingState(void) const
 	std::ostringstream os;
 	os << "Lights" << (m_lighting_is_overridden ? "(OVERIDDEN)" : "") << "[" << m_source_count << "] = {";
 	
-	for (int i = 0; i < m_source_count; ++i)
+	for (LightSources::size_type i = 0; i < m_source_count; ++i)
 	{
 		ls = m_sources[i].Source;
 		os << (i == 0 ? " " : ", ");
 
 		if (ls == NULL)
 		{
-			os << "[ERORR: NULL]";
+			os << "[ERROR: NULL]";
 		}
 		else
 		{

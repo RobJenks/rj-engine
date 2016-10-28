@@ -25,6 +25,7 @@ class LightShader;
 class LightFadeShader;
 class LightHighlightShader;
 class LightHighlightFadeShader;
+class LightFlatHighlightFadeShader;
 class ParticleShader;
 class TextureShader;
 class TexcubeShader;
@@ -253,6 +254,14 @@ public:
 		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
 	}
 
+	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
+	CMPINLINE void			RenderModelFlat(Model *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
+	{
+		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
+		m_instanceparams = colour_alpha;
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+	}
+
 	// Returns a reference to the model buffer currently being rendered
 	CMPINLINE ModelBuffer *	GetCurrentModelBuffer(void) const			{ return m_current_modelbuffer; }
 
@@ -380,6 +389,7 @@ private:
 	Result					InitialiseLightFadeShader(void);
 	Result					InitialiseLightHighlightShader(void);
 	Result					InitialiseLightHighlightFadeShader(void);
+	Result					InitialiseLightFlatHighlightFadeShader(void);
 	Result					InitialiseParticleShader(void);
 	Result					InitialiseTextureShader(void);
 	Result					InitialiseFrustrum(void);
@@ -408,6 +418,7 @@ private:
 	void					ShutdownLightFadeShader(void);
 	void					ShutdownLightHighlightShader(void);
 	void					ShutdownLightHighlightFadeShader(void);
+	void					ShutdownLightFlatHighlightFadeShader(void);
 	void					ShutdownParticleShader(void);
 	void					ShutdownTextureShader(void);
 	void					ShutdownFrustrum(void);
@@ -428,25 +439,26 @@ private:
 	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
 	// Pointer to each component that makes up this game engine
-	D3DMain					*m_D3D;
-	CameraClass				*m_camera;
-	LightShader				*m_lightshader;
-	LightFadeShader			*m_lightfadeshader;
-	LightHighlightShader	*m_lighthighlightshader;
-	LightHighlightFadeShader*m_lighthighlightfadeshader;
-	ParticleShader			*m_particleshader;
-	TextureShader			*m_textureshader;
-	ViewFrustrum			*m_frustrum;
-	FontShader				*m_fontshader;
-	TextManager				*m_textmanager;
-	TexcubeShader			*m_texcubeshader;
-	FireShader				*m_fireshader;
-	EffectManager			*m_effectmanager;
-	SkinnedNormalMapShader 	*m_skinnedshader;
-	VolLineShader			*m_vollineshader;
-	ParticleEngine			*m_particleengine;
-	Render2DManager			*m_render2d;
-	OverlayRenderer			*m_overlayrenderer;
+	D3DMain							*m_D3D;
+	CameraClass						*m_camera;
+	LightShader						*m_lightshader;
+	LightFadeShader					*m_lightfadeshader;
+	LightHighlightShader			*m_lighthighlightshader;
+	LightHighlightFadeShader		*m_lighthighlightfadeshader;
+	LightFlatHighlightFadeShader 	*m_lightflathighlightfadeshader;
+	ParticleShader					*m_particleshader;
+	TextureShader					*m_textureshader;
+	ViewFrustrum					*m_frustrum;
+	FontShader						*m_fontshader;
+	TextManager						*m_textmanager;
+	TexcubeShader					*m_texcubeshader;
+	FireShader						*m_fireshader;
+	EffectManager					*m_effectmanager;
+	SkinnedNormalMapShader 			*m_skinnedshader;
+	VolLineShader					*m_vollineshader;
+	ParticleEngine					*m_particleengine;
+	Render2DManager					*m_render2d;
+	OverlayRenderer					*m_overlayrenderer;
 
 	// Game engine parameters
 	HWND					m_hwnd;							// Handle to the target window

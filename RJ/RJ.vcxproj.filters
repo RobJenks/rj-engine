@@ -577,6 +577,9 @@
     <ClCompile Include="DebugInvocation.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="LightFlatHighlightFadeShader.cpp">
+      <Filter>Engine\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1321,6 +1324,9 @@
     <ClInclude Include="DebugInvocation.h">
       <Filter>Debug</Filter>
     </ClInclude>
+    <ClInclude Include="LightFlatHighlightFadeShader.h">
+      <Filter>Engine\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1657,6 +1663,12 @@
       <Filter>HLSL</Filter>
     </FxCompile>
     <FxCompile Include="Data\Shaders\vol_line_tex.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>

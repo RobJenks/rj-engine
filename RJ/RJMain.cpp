@@ -638,36 +638,19 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
+		static int tmp_overlay_deck = 0;
+		if (b[DIK_LSHIFT]) { ++tmp_overlay_deck; Game::Keyboard.LockKey(DIK_LSHIFT); }
+		if (b[DIK_LCONTROL]) { --tmp_overlay_deck; Game::Keyboard.LockKey(DIK_LCONTROL); }
+
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
 
-		if (true)
+		Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), tmp_overlay_deck, [](iSpaceObjectEnvironment & env, int id)
 		{
-			Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), [](iSpaceObjectEnvironment & env, int id)
-			{
-				float v = (float)id / (float)env.GetElementCount();
-				v = 0.9f;
-				return XMFLOAT4(v, 1.0f-v, 1.0f-v, 1.0f);// 1.0f - v, v, v, 0.2f);
-			});
+			float v = env.GetElementDirect(id).GetHealth();
+			return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
+		});
 
-			return;
-		}
-		else
-		{
-			CSLifeSupportTile *tile = (CSLifeSupportTile*)cs()->GetTilesOfType(D::TileClass::LifeSupport)[0].value;
-			for (int x = 0; x < cs()->GetElementSize().x; ++x)
-				for (int y = 0; y < cs()->GetElementSize().y; ++y)
-				{
-					INTVECTOR3 el = INTVECTOR3(x, y, 0);
-					XMFLOAT4 col_alpha = XMFLOAT4(1.0f - (cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value),
-						cs()->GetElementDirect(x, y, 0).GetGravityStrength() / tile->Gravity.Value, 0.0f, 0.2f);
-
-					Game::Engine->GetOverlayRenderer()->RenderElementOverlay(cs(), el, col_alpha);
-					OutputDebugString(concat("Rendering element ")(el.ToString())(" as ")(Vector4ToString(col_alpha))("\n").str().c_str());
-				}
-
-			return;
-		}
 	}
 
 	if (false && b[DIK_I]) {
@@ -2219,5 +2202,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 }
+
+
 
 

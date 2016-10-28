@@ -280,6 +280,14 @@ namespace ErrorCodes {
 	const Result		CannotLoadOverlayRendererModelComponents		= 1337;
 	const Result		CouldNotRetrieveShaderInputLayout				= 1338;
 	const Result		CannotPopulateNullConstantBuffer				= 1339;
+	const Result		CouldNotCreateLightFlatHighlightFadeShader		= 1340;
+	const Result		NullInputToCreateLightFHFShaderVS				= 1341;
+	const Result		NullInputToCreateLightFHFShaderPS				= 1342;
+	const Result		ErrorCreatingLightFHFShaderVS					= 1343;
+	const Result		ErrorCreatingLightFHFShaderPS					= 1344;
+	const Result		ErrorCreatingLightFHFShaderConstBuffersVS		= 1345;
+	const Result		ErrorCreatingLightFHFShaderConstBuffersPS		= 1346;
+	const Result		ErrorCreatingLightFHFShaderSamplerPS			= 1347;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;

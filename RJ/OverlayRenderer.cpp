@@ -588,7 +588,7 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const
 		XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V), add));
 
 	// Scale to element size, then translate to the relevant place for rendering
-	Game::Engine->RenderModel(m_blueprintoverlay, ship.GetPosition(), colour_alpha,
+	Game::Engine->RenderModelFlat(m_blueprintoverlay, ship.GetPosition(), colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
 
@@ -700,18 +700,33 @@ void OverlayRenderer::RenderActorPath(Actor *actor, float thickness)
 // overlay.  It is applied for each element in turn
 void OverlayRenderer::RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int))
 {
-	XMFLOAT4 result;
-
 	// Iterate over each element in turn
 	int n = env.GetElementCount();
 	for (int i = 0; i < n; ++i)
 	{
-		// Apply the function to this element and get the resulting colour/alpha
-		result = func(env, i);
+		// Apply the function to this element and get the resulting colour/alpha, then
+		// render an overlay on the corresponding element
+		RenderElementOverlay(env, env.GetElementDirect(i).GetLocation(), func(env, i));
+	}
+}
 
-		// Render an overlay on the corresponding element
-		RenderElementOverlay(env, env.GetElementDirect(i).GetLocation(), result);
-		OutputDebugString(concat("Rendering element ")(env.GetElementDirect(i).GetLocation().ToString())(" as ")(Vector4ToString(result))("\n").str().c_str());
+
+// Renders an overlay over the specified environment, for the specific deck of the environment.  Accepts a function
+// that determines the overlay at each element.  The function parameter has signature "XMFLOAT4 func(environment, element_id)" 
+// and returns the colour/alpha for the overlay.  It is applied for each element in turn
+void OverlayRenderer::RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int))
+{
+	XMFLOAT4 result;
+
+	// Retrieve data on the deck that we want to render
+	const iSpaceObjectEnvironment::DeckInfo & deck_info = env.GetDeckInformation(deck);
+
+	// Iterate over each element in this deck in turn
+	for (int i = deck_info.ElementStart; i <= deck_info.ElementEnd; ++i)
+	{
+		// Apply the function to this element and get the resulting colour/alpha, then
+		// render an overlay on the corresponding element
+		RenderElementOverlay(env, env.GetElementDirect(i).GetLocation(), func(env, i));
 	}
 }
 

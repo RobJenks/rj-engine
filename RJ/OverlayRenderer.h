@@ -126,6 +126,11 @@ public:
 	// The function parameter has signature "XMFLOAT4 func(environment, element_id)" and returns the colour/alpha for the 
 	// overlay.  It is applied for each element in turn
 	void				RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
+
+	// Renders an overlay over the specified environment, for the specific deck of the environment.  Accepts a function
+	// that determines the overlay at each element.  The function parameter has signature "XMFLOAT4 func(environment, element_id)" 
+	// and returns the colour/alpha for the overlay.  It is applied for each element in turn
+	void				RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
 	
 	// Performs debug rendering of an octree node, and optionally all the way down the subtree as well
 	template <typename T>

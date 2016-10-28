@@ -15,6 +15,7 @@
 #include "LightFadeShader.h"
 #include "LightHighlightShader.h"
 #include "LightHighlightFadeShader.h"
+#include "LightFlatHighlightFadeShader.h"
 #include "ParticleShader.h"
 #include "TextureShader.h"
 #include "TexcubeShader.h"
@@ -192,6 +193,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INIT_START << "Shader [Light highlight fade] initialisation complete\n";
 
+	// Initialise the light(flat)/highlight/fade shader
+	res = InitialiseLightFlatHighlightFadeShader();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INIT_START << "Shader [Light flat highlight fade] initialisation complete\n";
+
 	// Initialise the particle shader
 	res = InitialiseParticleShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -285,6 +291,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownLightFadeShader();
 	ShutdownLightHighlightShader();
 	ShutdownLightHighlightFadeShader();
+	ShutdownLightFlatHighlightFadeShader();
 	ShutdownParticleShader();
 	ShutdownTextureShader();
 	ShutdownCamera();
@@ -400,6 +407,9 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_renderqueueshaders[RenderQueueShader::RM_LightFlatHighlightFadeShader] =
+		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal,
+		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
 		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
@@ -532,6 +542,26 @@ Result CoreEngine::InitialiseLightHighlightFadeShader(void)
 	return ErrorCodes::NoError;
 }
 
+
+Result CoreEngine::InitialiseLightFlatHighlightFadeShader(void)
+{
+	// Create the light shader object.
+	m_lightflathighlightfadeshader = new LightFlatHighlightFadeShader();
+	if (!m_lightflathighlightfadeshader)
+	{
+		return ErrorCodes::CouldNotCreateLightFlatHighlightFadeShader;
+	}
+
+	// Initialise the light shader object.
+	Result result = m_lightflathighlightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
+	if (result != ErrorCodes::NoError)
+	{
+		return result;
+	}
+
+	// Return success code if we have reached this point
+	return ErrorCodes::NoError;
+}
 
 Result CoreEngine::InitialiseParticleShader(void)
 {
@@ -941,6 +971,17 @@ void CoreEngine::ShutdownLightHighlightFadeShader(void)
 		m_lighthighlightfadeshader->Shutdown();
 		delete m_lighthighlightfadeshader;
 		m_lighthighlightfadeshader = NULL;
+	}
+}
+
+void CoreEngine::ShutdownLightFlatHighlightFadeShader(void)
+{
+	// Release the light shader object.
+	if (m_lightflathighlightfadeshader)
+	{
+		m_lightflathighlightfadeshader->Shutdown();
+		delete m_lightflathighlightfadeshader;
+		m_lightflathighlightfadeshader = NULL;
 	}
 }
 

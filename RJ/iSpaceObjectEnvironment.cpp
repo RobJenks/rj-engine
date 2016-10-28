@@ -23,6 +23,9 @@
 #include "iSpaceObjectEnvironment.h"
 
 
+// Initialise static data
+const iSpaceObjectEnvironment::DeckInfo iSpaceObjectEnvironment::NULL_DECK = iSpaceObjectEnvironment::DeckInfo();
+
 // Initialise static working vector for environment object search; holds nodes being considered in the search
 std::vector<EnvironmentTree*> iSpaceObjectEnvironment::m_search_nodes;
 SimulatedEnvironmentCollision iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults;;
@@ -590,16 +593,16 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	}
 
 	// Store the number of decks and indices into the relevant z-values
-	m_deckcount = 0; m_deck_indices.clear();
+	m_deckcount = 0; m_deck_data.clear();
 	for (int i = 0; i < (int)nZ; ++i)
 	{
 		if (decks[i])
 		{
+			m_deck_data.push_back(DeckInfo(m_deckcount, i, ELEMENT_INDEX(0, 0, i), (ELEMENT_INDEX(0, 0, i + 1) - 1)));
 			++m_deckcount;
-			m_deck_indices.push_back(i);
 		}
 	}
-	assert(m_deckcount == (int)m_deck_indices.size());
+	assert(m_deckcount == (int)m_deck_data.size());
 
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
@@ -720,11 +723,18 @@ void iSpaceObjectEnvironment::ReplaceTile(ComplexShipTile *old_tile, ComplexShip
 	ReactivateTileRecalculation();
 }
 
+// Returns the deck data for the deck with specified index.  Returns a reference to a "null deck" if invalid parameter
+const iSpaceObjectEnvironment::DeckInfo & iSpaceObjectEnvironment::GetDeckInformation(int deck) const
+{
+	if (deck < 0 || deck >= m_deckcount)		return iSpaceObjectEnvironment::NULL_DECK;
+	else										return m_deck_data[deck];
+}
+
 // Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
 int iSpaceObjectEnvironment::GetDeckIndex(int deck) const
 {
 	if (deck < 0 || deck >= m_deckcount)		return 0;
-	else										return m_deck_indices[deck];
+	else										return m_deck_data[deck].ElementZIndex;
 }
 
 // Determines the element intersected by a world-space ray.  Returns a flag indicating whether any

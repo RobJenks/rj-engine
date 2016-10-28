@@ -123,6 +123,7 @@ enum RenderQueueShader
 
 	RM_LightFadeShader,					// Requires: alpha blending
 	RM_LightHighlightFadeShader,		// Requires: alpha blending
+	RM_LightFlatHighlightFadeShader,	// Requires: alpha blending
 	RM_VolLineShader,					// Requires: alpha blending
 
 	RM_RENDERQUEUESHADERCOUNT			// Count of shaders that can be used within the render queue	

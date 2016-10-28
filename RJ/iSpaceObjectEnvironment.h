@@ -40,6 +40,21 @@ public:
 	// Environment terrain collection
 	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
 
+	// Structure holding information on a particular deck of the environment
+	struct DeckInfo
+	{
+		int DeckNumber;			// The deck number (which may not be the same a Z-value, if there are 
+								// empty levels between decks.  Corresponds to the index in m_deck_data
+		int ElementZIndex;		// Z-index for all elements on this deck
+
+		int ElementStart;		// The first and last elements in the range that cover this deck.  Elements
+		int ElementEnd;			// are indexed in order of x>y>z, so all elements on the same deck will be contiguous
+
+		DeckInfo(void) : DeckNumber(0), ElementZIndex(0), ElementStart(0), ElementEnd(0) { }
+		DeckInfo(int deck, int zindex, int el_start, int el_end) : DeckNumber(deck), ElementZIndex(zindex), ElementStart(el_start), ElementEnd(el_end) { }
+	};
+	static const DeckInfo NULL_DECK;
+
 	// Default constructor
 	iSpaceObjectEnvironment(void);
 
@@ -289,6 +304,10 @@ public:
 	// if necessary.  Returns a bool indicating whether reallocation was necessary
 	Result							EnsureShipElementSpaceIncorporatesLocation(INTVECTOR3 location);
 
+	// Returns the deck data for the deck with specified index.  Returns a reference to a "null deck" if invalid parameter
+	const iSpaceObjectEnvironment::DeckInfo &
+									GetDeckInformation(int deck) const;
+
 	// Returns the element index corresponding to the supplied deck.  Default 0 if invalid parameter
 	int								GetDeckIndex(int deck) const;
 
@@ -440,9 +459,9 @@ protected:
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
 
-	// We store the number of decks in this environment, and a pointer to the element Z value for each
+	// We store the number of decks in this environment, and a pointer to relevant data for each
 	int								m_deckcount;
-	std::vector<int>				m_deck_indices;
+	std::vector<DeckInfo>			m_deck_data;
 
 	// Internal method; get all objects within a given distaance of the specified position, within the 
 	// specified EnvironmentTree node

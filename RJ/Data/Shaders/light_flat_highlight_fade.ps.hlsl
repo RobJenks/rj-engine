@@ -14,17 +14,19 @@ SamplerState SampleType;
 #include "light_calculation.h.hlsl"
 
 
-// Pixel input format
+//////////////
+// TYPEDEFS //
+//////////////
 struct PixelInputType
 {
 	float4 position : SV_POSITION;
 	float2 tex : TEXCOORD0;
 	float3 worldpos : TEXCOORD1;				// Position in world space (interpolated)
-	float3 normal : NORMAL;						// Un-normalised; will be interpolated so is normalised in the PS
-	float3 highlight : TEXCOORD2;				// Highlight colour for the object
+	float3 normal : NORMAL;
+	float4 highlight_alpha : TEXCOORD2;			// Highlight colour and alpha value for the object
 	unsigned int material : MATERIAL;
-	unsigned int LightConfig : LightConfig;
 };
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pixel Shader
@@ -37,24 +39,12 @@ float4 main(PixelInputType input) : SV_TARGET
 	// PS means it needs to be normalised here
 	float3 normal = normalize(input.normal);
 
-	// Apply the effect of each light in turn
-	unsigned int bit;
-	for (unsigned int i = 0U; i < LightCount; ++i)
-	{
-		bit = CONFIG_VAL[i];
-		if ((input.LightConfig & bit) == bit)
-		{
-			TotalLight += CalculateLight(i, input.material, input.worldpos, normal);
-		}
-	}
+	// Determine the average color intensity across all components, then use the highlight colour weighted by this value
+	// Also set the alpha value manually to override any sampled data
+	float4 colour = shaderTexture.Sample(SampleType, input.tex);
+	float intensity = (colour.r + colour.g + colour.b) * 0.3333f;
+	colour = float4( saturate(input.highlight_alpha.xyz * intensity), input.highlight_alpha.a );
 
-    // Determine the average color intensity across all components, then use the highlight colour weighted by this value
-	float intensity = (TotalLight.r + TotalLight.g + TotalLight.b) * 0.3333f;
-	TotalLight.rgb = input.highlight * intensity;
-
-    // Saturate the final light colour
-	TotalLight = saturate(TotalLight);
-
-    // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
-	return (shaderTexture.Sample(SampleType, input.tex) * TotalLight);
+	// Return the final calculated colour
+	return colour;
 }
