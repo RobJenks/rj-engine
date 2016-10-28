@@ -191,7 +191,7 @@ void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
 	// Render any intersection test results
 	if (m_ship)
 	{
-		XMFLOAT3 el_colour = NULL_FLOAT3; float el_alpha = 0.8f;
+		XMFLOAT4 el_colour = NULL_FLOAT4;
 		SimulatedEnvironmentCollision::const_iterator it_end = m_simulated_intersection.end();
 		for (SimulatedEnvironmentCollision::const_iterator it = m_simulated_intersection.begin(); it != it_end; ++it)
 		{
@@ -203,15 +203,15 @@ void UI_ShipBuilder::PerformStructuralTestModeRendering(void)
 			// Determine the overlay effect required based on the event details
 			if (evt.EventType == SimulatedEnvironmentCollisionEventType::ElementDestroyed)
 			{
-				el_colour = XMFLOAT3(0.5f, 1.0f, 1.0f);		// Light blue
+				el_colour = XMFLOAT4(0.8f*3.0f, 1.0f*3.0f, 1.0f*3.0f, 0.8f);						// Blueish-white (scaled 3x intensity)
 			}
 			else if (evt.EventType == SimulatedEnvironmentCollisionEventType::ElementDamaged)
 			{
-				el_colour = XMFLOAT3(1.0f, clamp(evt.Value, 0.0f, 1.0f) * 0.9f, 0.0f);		// Scaled colour from 255,0,0 (red) to 255,230,0 (dark yellow)
+				el_colour = XMFLOAT4(1.0f, clamp(evt.Value, 0.0f, 1.0f) * 0.9f, 0.0f, 0.8f);		// Scaled colour from 255,0,0 (red) to 255,230,0 (dark yellow)
 			}
 
 			// Render an overlay on this element
-			Game::Engine->GetOverlayRenderer()->RenderCuboidAtRelativeElementLocation(m_ship, el->GetLocation(), ONE_INTVECTOR3, el_colour, el_alpha);
+			Game::Engine->GetOverlayRenderer()->RenderElement3DOverlay(m_ship, el->GetLocation(), el_colour);
 		}
 	}
 }
@@ -1075,7 +1075,7 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
 
 	// We now want to determine the effect on the environment; enable simulated collision mode for the ship
-	//iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
+	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
 
 	// Calculate the path of the collision through this environment
 	EnvironmentCollision env_collision;

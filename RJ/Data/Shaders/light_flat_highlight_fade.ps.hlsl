@@ -43,7 +43,7 @@ float4 main(PixelInputType input) : SV_TARGET
 	// Also set the alpha value manually to override any sampled data
 	float4 colour = shaderTexture.Sample(SampleType, input.tex);
 	float intensity = (colour.r + colour.g + colour.b) * 0.3333f;
-	colour = float4( saturate(input.highlight_alpha.xyz * intensity), input.highlight_alpha.a );
+	colour = float4( /*saturate*/(input.highlight_alpha.xyz * intensity), input.highlight_alpha.a );
 
 	// Return the final calculated colour
 	return colour;

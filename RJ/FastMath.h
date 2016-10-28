@@ -185,6 +185,11 @@ CMPINLINE XMFLOAT3	Float3Multiply(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 	return XMFLOAT3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 }
 
+CMPINLINE XMFLOAT4	Float4MultiplyScalar(const XMFLOAT4 & v, const float s)
+{
+	return XMFLOAT4(v.x * s, v.y * s, v.z * s, v.w * s);
+}
+
 CMPINLINE void Vector3ToIntVector(const FXMVECTOR vec, INTVECTOR3 & outVec)
 {
 	XMFLOAT3 vecf; XMStoreFloat3(&vecf, vec);
