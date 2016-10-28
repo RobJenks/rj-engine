@@ -44,6 +44,7 @@ OverlayRenderer::OverlayRenderer(void)
 
 	// Also set other models to NULL before initialisation
 	m_blueprintoverlay = NULL;
+	m_blueprintcubeoverlay = NULL;
 	m_matrix_boxtransforms = NULL;
 }
 
@@ -71,6 +72,14 @@ Result OverlayRenderer::Initialise(void)
 	m_blueprintoverlay->SetCode("OverlayBlueprintModel");
 	result = m_blueprintoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_facing_square.rjm").str(),
 											concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
+	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
+
+	// Initialise blueprint element-sized model
+	m_blueprintcubeoverlay = new Model();
+	m_blueprintcubeoverlay->SetCode("OverlayBlueprintCubeModel");
+	result = m_blueprintcubeoverlay->Initialise(concat(D::DATA)("\\Models\\Misc\\unit_line.rjm").str(),
+		concat(D::IMAGE_DATA)("\\Models\\Misc\\overlay_blueprint.dds").str());
+	//m_blueprintcubeoverlay->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(INTVECTOR3(1, 1, 1)));
 	if (result != ErrorCodes::NoError) return ErrorCodes::CannotLoadOverlayRendererModelComponents;
 
 	// Initialise all pre-cached transform matrices for render efficiency
@@ -559,23 +568,6 @@ void OverlayRenderer::RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::
 }
 
 // Renders a semi-transparent ovelay above the specified element
-void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
-{
-	// Create a transform matrix to translate to the desired element, and also to the centre of that element.  
-	// Switch y & z since going from element > world space.  
-	// D3DXMatrixTranslation(&mtrans,	(element.x * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT,
-	//									((element.z + 1) * Game::C_CS_ELEMENT_SCALE),							// Render at base of element layer above
-	// 									(element.y * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT);
-	XMVECTOR add = XMVectorSetY(XMVectorReplicate(Game::C_CS_ELEMENT_MIDPOINT), Game::C_CS_ELEMENT_SCALE);		// { MidP, Scale, MidP }
-	XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorAdd(													// (El*Scale) + { MidP, Scale, MidP }
-		XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V), add));
-
-	// Scale to element size, then translate to the relevant place for rendering
-	Game::Engine->RenderModel(m_blueprintoverlay, ship.GetPosition(), colour, alpha,
-		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
-}
-
-// Renders a semi-transparent ovelay above the specified element
 void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
 {
 	// Create a transform matrix to translate to the desired element, and also to the centre of that element.  
@@ -589,6 +581,23 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const
 
 	// Scale to element size, then translate to the relevant place for rendering
 	Game::Engine->RenderModelFlat(m_blueprintoverlay, ship.GetPosition(), colour_alpha,
+		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
+}
+
+// Renders a semi-transparent ovelay 3D overlay around the specified element
+void OverlayRenderer::RenderElement3DOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
+{
+	// Create a transform matrix to translate to the desired element, and also to the centre of that element.  
+	// Switch y & z since going from element > world space.  
+	// D3DXMatrixTranslation(&mtrans,	(element.x * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT,
+	//									(element.z * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT,
+	// 									(element.y * Game::C_CS_ELEMENT_SCALE) + Game::C_CS_ELEMENT_MIDPOINT);
+	XMMATRIX trans = XMMatrixTranslationFromVector(XMVectorAdd(													// (El*Scale) 
+		XMVectorMultiply(VectorFromIntVector3SwizzleYZ(element), Game::C_CS_ELEMENT_SCALE_V),					// + { MidP, MidP, MidP }
+		Game::C_CS_ELEMENT_MIDPOINT_V));
+
+	// Scale to element size, then translate to the relevant place for rendering
+	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay, ship.GetPosition(), colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
 
@@ -710,14 +719,11 @@ void OverlayRenderer::RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, XM
 	}
 }
 
-
 // Renders an overlay over the specified environment, for the specific deck of the environment.  Accepts a function
 // that determines the overlay at each element.  The function parameter has signature "XMFLOAT4 func(environment, element_id)" 
 // and returns the colour/alpha for the overlay.  It is applied for each element in turn
 void OverlayRenderer::RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int))
 {
-	XMFLOAT4 result;
-
 	// Retrieve data on the deck that we want to render
 	const iSpaceObjectEnvironment::DeckInfo & deck_info = env.GetDeckInformation(deck);
 
@@ -727,6 +733,39 @@ void OverlayRenderer::RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, in
 		// Apply the function to this element and get the resulting colour/alpha, then
 		// render an overlay on the corresponding element
 		RenderElementOverlay(env, env.GetElementDirect(i).GetLocation(), func(env, i));
+	}
+}
+
+
+// Renders an overlay over the specified environment.  Accepts a function that determines the overlay at each element
+// The function parameter has signature "XMFLOAT4 func(environment, element_id)" and returns the colour/alpha for the 
+// overlay.  It is applied for each element in turn and generates a 3D overlay around each element
+void OverlayRenderer::RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int))
+{
+	// Iterate over each element in turn
+	int n = env.GetElementCount();
+	for (int i = 0; i < n; ++i)
+	{
+		// Apply the function to this element and get the resulting colour/alpha, then
+		// render an overlay on the corresponding element
+		RenderElement3DOverlay(env, env.GetElementDirect(i).GetLocation(), func(env, i));
+	}
+}
+
+// Renders an overlay over the specified environment, for the specific deck of the environment.  Accepts a function
+// that determines the overlay at each element.  The function parameter has signature "XMFLOAT4 func(environment, element_id)" 
+// and returns the colour/alpha for the overlay.  It is applied for each element in turn and generates a 3D overlay around each element
+void OverlayRenderer::RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int))
+{
+	// Retrieve data on the deck that we want to render
+	const iSpaceObjectEnvironment::DeckInfo & deck_info = env.GetDeckInformation(deck);
+
+	// Iterate over each element in this deck in turn
+	for (int i = deck_info.ElementStart; i <= deck_info.ElementEnd; ++i)
+	{
+		// Apply the function to this element and get the resulting colour/alpha, then
+		// render an overlay on the corresponding element
+		RenderElement3DOverlay(env, env.GetElementDirect(i).GetLocation(), func(env, i));
 	}
 }
 
@@ -762,7 +801,9 @@ void OverlayRenderer::Shutdown(void)
 	}
 
 	// Shutdown all cached/pre-calculated data
-	if (m_matrix_boxtransforms ) { delete m_matrix_boxtransforms; m_matrix_boxtransforms = NULL; }
+	if (m_matrix_boxtransforms) { SafeDeleteArray(m_matrix_boxtransforms); }
+	if (m_blueprintoverlay) { m_blueprintoverlay->Shutdown(); SafeDelete(m_blueprintoverlay); }
+	if (m_blueprintcubeoverlay) { m_blueprintcubeoverlay->Shutdown(); SafeDelete(m_blueprintcubeoverlay); }
 }
 
 

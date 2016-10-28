@@ -638,18 +638,25 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
-		static int tmp_overlay_deck = 0;
-		if (b[DIK_LSHIFT]) { ++tmp_overlay_deck; Game::Keyboard.LockKey(DIK_LSHIFT); }
-		if (b[DIK_LCONTROL]) { --tmp_overlay_deck; Game::Keyboard.LockKey(DIK_LCONTROL); }
-
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
 
-		Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), tmp_overlay_deck, [](iSpaceObjectEnvironment & env, int id)
+		if (b[DIK_LSHIFT])
 		{
-			float v = env.GetElementDirect(id).GetHealth();
-			return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
-		});
+			Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
+			{
+				float v = env.GetElementDirect(id).GetHealth();
+				return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
+			});
+		}
+		else
+		{
+			Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
+			{
+				float v = env.GetElementDirect(id).GetHealth();
+				return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
+			});
+		}
 
 	}
 

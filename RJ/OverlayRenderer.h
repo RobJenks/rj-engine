@@ -94,16 +94,18 @@ public:
 	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_pos, const INTVECTOR3 & element_size,
 																const XMFLOAT3 & colour, float alpha);
 	
-	// Methods to render semi-transparent overlay components
-	void				RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha);
+	// Methods to render a semi-transparent 2D overlay over the top of an element
 	void				RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha);
-	CMPINLINE void		RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT3 & colour, float alpha)
-	{
-		if (ship) RenderElementOverlay(*ship, element, colour, alpha);
-	}
 	CMPINLINE void		RenderElementOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
 	{
 		if (ship) RenderElementOverlay(*ship, element, colour_alpha);
+	}
+
+	// Methods to render a semi-transparent 3D overlay around an element
+	void				RenderElement3DOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha);
+	CMPINLINE void		RenderElement3DOverlay(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
+	{
+		if (ship) RenderElement3DOverlay(*ship, element, colour_alpha);
 	}
 
 	// Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
@@ -126,11 +128,14 @@ public:
 	// The function parameter has signature "XMFLOAT4 func(environment, element_id)" and returns the colour/alpha for the 
 	// overlay.  It is applied for each element in turn
 	void				RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
-
-	// Renders an overlay over the specified environment, for the specific deck of the environment.  Accepts a function
-	// that determines the overlay at each element.  The function parameter has signature "XMFLOAT4 func(environment, element_id)" 
-	// and returns the colour/alpha for the overlay.  It is applied for each element in turn
 	void				RenderEnvironmentOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
+
+	// Renders an overlay over the specified environment.  Accepts a function that determines the overlay at each element
+	// The function parameter has signature "XMFLOAT4 func(environment, element_id)" and returns the colour/alpha for the 
+	// overlay.  It is applied for each element in turn and generates a 3D overlay around each element
+	void				RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
+	void				RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
+
 	
 	// Performs debug rendering of an octree node, and optionally all the way down the subtree as well
 	template <typename T>
@@ -171,6 +176,7 @@ private:
 
 	// Other, more complex overlay models
 	Model *											m_blueprintoverlay;	
+	Model *											m_blueprintcubeoverlay;
 
 	// Cached simple transforms for use during transformation calculations
 	AXMMATRIX										m_matrix_yrot;							// 90 degree rotation about the y axis

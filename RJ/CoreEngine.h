@@ -255,6 +255,14 @@ public:
 	}
 
 	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
+	CMPINLINE void			RenderModelFlat(Model *model, const FXMVECTOR position, const XMFLOAT3 & highlight, float alpha, CXMMATRIX world)
+	{
+		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
+		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+	}
+	
+	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModelFlat(Model *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
