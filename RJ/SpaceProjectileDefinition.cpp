@@ -17,6 +17,10 @@ SpaceProjectile * SpaceProjectileDefinition::CreateProjectile(void) const
 	SpaceProjectile *proj = new SpaceProjectile(this);
 	if (!proj) return NULL;
 
+	// Initialise the simulation state.  This will likely be overidden in the next frame to
+	// full simulation, but this will ensure that it is at least registered upon creation
+	proj->SetSimulationState(iObject::ObjectSimulationState::StrategicSimulation);
+
 	// Apply any other changes as required
 
 	// Return a reference to the new projectile

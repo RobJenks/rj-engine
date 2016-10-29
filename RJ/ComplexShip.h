@@ -132,7 +132,7 @@ public:
 
 	// Methods called when this object collides with another.  Virtual inheritance from iSpaceObject.  Overriden method providing a section
 	// reference is the one that will be used for CS, since only the sections themselves can collide with anything
-	CMPINLINE void								CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) { }
+	void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
 	void										CollisionWithObject(iActiveObject *object, ComplexShipSection *collidingsection, 
 																	const GamePhysicsEngine::ImpactData & impact);
 

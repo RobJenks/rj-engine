@@ -172,7 +172,7 @@ namespace Game {
 	const unsigned int C_STATIC_PAIR_CD_INTERVAL = 1000U;				// The interval (ms) between 'full' collision detection checks, where we also include static/static pairs
 	const float C_CONSTANT_COLLISION_AVOIDANCE_RANGE_MULTIPLIER = 2.5f;	// Constant multiplier applied to collision range when performing collision avoidance
 	const float C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER = 1.25f;	// Safety multiplier on the minimum required response to avoid a collision
-	const float C_OBB_SIZE_THRESHOLD = 250.0f;							// The size at which we begin considering OBB as a better alternative to bounding sphere for the object
+	const float C_OBB_SIZE_THRESHOLD = 25.0f;							// The size at which we begin considering OBB as a better alternative to bounding sphere for the object
 	const float C_OBB_SIZE_RATIO_THRESHOLD = 2.0f;						// The size ratio at which we begin using OBB rather than bounding sphere (for large objects), due to better accuracy
 	const float C_GROUND_COLLISION_STEP_THRESHOLD = 0.2f;				// The max size of 'step' that an object will traverse when moving along a horizontal surface
 	const float C_GROUND_COLLISION_STEP_THRESHOLD_HALF = C_GROUND_COLLISION_STEP_THRESHOLD * 0.5f;			// Half of the constant step threshold for ground traversal

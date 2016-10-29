@@ -76,11 +76,11 @@ namespace Game
 		struct CachedSearchResults
 		{
 			XMFLOAT3												Position;
-			float													SearchDistanceSq;
+			float													SearchDistance;
 			SearchOptions											Options;
 			std::vector<CachedSearchResult>							Results;
 
-			CachedSearchResults(void) : Position(NULL_FLOAT3), SearchDistanceSq(0.0f), Options(0) { }
+			CachedSearchResults(void) : Position(NULL_FLOAT3), SearchDistance(0.0f), Options(0) { }
 		};
 
 		// Maximum accepted search cache size
@@ -490,40 +490,40 @@ namespace Game
 		bool ignore_target_boundaries = CheckBit_Single(options, ObjectSearchOptions::IgnoreTargetObjectBoundaries);
 		ClearBit(options, ObjectSearchOptions::IgnoreTargetObjectBoundaries);
 
-		// All comparisons will be based on squared distance to avoid costly sqrt operations
+		// Precalculate squared distance for most calculations
 		float distsq = (distance * distance);
+		XMVECTOR vdist = XMVectorReplicate(distance);
 		XMVECTOR vdistsq = XMVectorReplicate(distsq);
 
 		/* Test whether a cached search result can be used without searching */
 		if (m_cache_enabled)
 		{
 			// Test whether any cached search result contains our desired search as a subset; if so, we can return it immediately
-			XMVECTOR cacheposdiff, cacheposdistsq;
+			XMVECTOR cacheposdiff, cacheposdist;
 			for (std::vector<CachedSearchResults>::size_type i = 0; i < m_cachesize; ++i)
 			{
 				// We can only used cached results that were obtained using the same search options
 				if (m_searchcache[i].Options != options) continue;
 
-				// Determine squared distance between our current search object and the centre of the cached search
+				// Determine distance between our current search object and the centre of the cached search
 				cacheposdiff = XMVectorSubtract(position, XMLoadFloat3(&m_searchcache[i].Position));
-				cacheposdistsq = XMVector3LengthSq(cacheposdiff);
+				cacheposdist = XMVector3LengthEst(cacheposdiff);
 
 				// We can use these cached results if (cachedsearchdistSQ > (searchdistSQ + posdifferenceSQ))
 				// Use a vector2 comparison since the distance values are replicated across all elements anyway
-				if (m_searchcache[i].SearchDistanceSq > XMVectorGetX(XMVectorAdd(vdistsq, cacheposdistsq)))
+				if (m_searchcache[i].SearchDistance > XMVectorGetX(XMVectorAdd(vdist, cacheposdist)))
 				{
 					// Clear the results vector 
 					outResult.clear();
 					int matches = 0;
 
 					// Add any items within the adjusted threshold
-					float threshold = XMVectorGetX(XMVectorSubtract(vdistsq, cacheposdistsq));
 					std::vector<CachedSearchResult>::const_iterator it_end = m_searchcache[i].Results.end();
 					for (std::vector<CachedSearchResult>::const_iterator it = m_searchcache[i].Results.begin(); it != it_end; ++it)
 					{
 						// Add any items within the threshold
 						const CachedSearchResult & result = (*it);
-						if (result.DistanceSquared < threshold && result.Object())
+						if (result.Object() && XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(position, result.Object()->GetPosition())), vdistsq))
 						{
 							outResult.push_back(result.Object());
 							++matches;
@@ -536,7 +536,7 @@ namespace Game
 
 #					ifdef OBJMGR_LOG_DEBUG_OUTPUT
 					OutputDebugString(concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(XMVectorGetX(position))(",")(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)
-						(") met by cache ")(i)(" (")(sqrtf(XMVectorGetX(m_searchcache[i].SearchDistanceSq)))(" of [")(XMVectorGetX(m_searchcache[i].Position))(",")
+						(") met by cache ")(i)(" (")(m_searchcache[i].SearchDistance)(" of [")(XMVectorGetX(m_searchcache[i].Position))(",")
 						(XMVectorGetY(m_searchcache[i].Position))(",")(XMVectorGetZ(m_searchcache[i].Position))("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
 #					endif
 #				endif
@@ -574,7 +574,7 @@ namespace Game
 		// We are ready to perform a full search; initialise the cache that we will be creating
 		CachedSearchResults & cache = m_searchcache[m_nextcacheindex];
 		XMStoreFloat3(&cache.Position, position);
-		cache.SearchDistanceSq = search_distance * search_distance;
+		cache.SearchDistance = search_distance;
 		cache.Options = options;
 		cache.Results.clear();
 

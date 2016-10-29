@@ -775,7 +775,8 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRayAtTime(const Ray &
 	// Clamp the position value within bounds that will translate directly to an element index ([0,0,0] to (size-[eps,eps,eps]))
 	// since we already know the collision is approximately within the ship bounds
 	static const AXMVECTOR clamp_neg = XMVectorSetW(NULL_VECTOR, FLT_MAX_NEG);			// Since XMVectorClamp() will assert Min<=Max, and the W component may not be
-	outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(localpos, clamp_neg, XMVectorAdd(m_size, Game::C_EPSILON_NEG_V)));
+	static const AXMVECTOR clamp_pos_delta = XMVectorReplicate(-0.001f);				// Since a value of exactly (<=) m_size rather than (<) will map to the next element, which could be invalid
+	outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(localpos, clamp_neg, XMVectorAdd(m_size, clamp_pos_delta)));
 	return true;
 }
 
@@ -808,7 +809,8 @@ bool iSpaceObjectEnvironment::DetermineElementIntersectedByRay(const Ray & ray, 
 		// Clamp the position value within bounds that will translate directly to an element index ([0,0,0] to (size-[eps,eps,eps]))
 		// since we already know the collision is approximately within the ship bounds
 		static const AXMVECTOR clamp_neg = XMVectorSetW(NULL_VECTOR, FLT_MAX_NEG);			// Since XMVectorClamp() will assert Min<=Max, and the W component may not be
-		outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(local_pos, clamp_neg, XMVectorAdd(size, Game::C_EPSILON_NEG_V)));
+		static const AXMVECTOR clamp_pos_delta = XMVectorReplicate(0.001f);					// Since a value of exactly (<=) m_size rather than (<) will map to the next element, which could be invalid
+		outElement = Game::PhysicalPositionToElementLocation(XMVectorClamp(local_pos, clamp_neg, XMVectorAdd(size, clamp_pos_delta)));
 		outElement.z = level;
 		return true;
 	}
@@ -861,12 +863,18 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	int current = -1;
 	while (++current < (int)test.size())
 	{
-		// Retrieve the next element to be tested, and only proceed if we have not already processed it
+		// Retrieve the next element to be tested, and only proceed if we have not already processed it & it is valid
 		id = test[current];	
+		assert(id >= 0 && id < m_elementcount);
 		DBG_COLLISION_OUTPUT(concat("    Testing element ")(id).str().c_str());
 		if (checked[id] == true)
 		{
 			DBG_COLLISION_OUTPUT("...ALREADY TESTED\n");
+			continue;
+		}
+		else if (!IsValidElementID(id))		// This should not happen except in very very rare edge cases that may not exist any more, but just to be compleetely safe
+		{
+			DBG_COLLISION_OUTPUT("...ELEMENT ID IS NOT VALID!\n");
 			continue;
 		}
 
@@ -1018,7 +1026,7 @@ void iSpaceObjectEnvironment::ProcessAllEnvironmentCollisions(void)
 		ProcessEnvironmentCollision(*c_it);
 
 		// If the collision event is no longer active/valid, we can remove it from the vector here
-		if ((*c_it).IsActive == false)		{ c_it = m_collision_events.erase(c_it); }
+		if ((*c_it).IsActive == false)		{ c_it = m_collision_events.erase(c_it); c_it_end = m_collision_events.end(); }
 		else								{ ++c_it; }
 	}
 }

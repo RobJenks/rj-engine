@@ -576,7 +576,9 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_8])
 	{
-		
+		SpaceTurret *t = ss()->TurretController.GetTurret(0);
+		if (!t) return;
+		t->Fire();
 	}
 
 	if (b[DIK_9])
@@ -605,14 +607,54 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_EQUALS])
 	{
-		if (ss()->Highlight.IsActive())
-			ss()->Highlight.Deactivate();
+		std::vector<iObject*> objects;
+		int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
+			Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
+		if (count == 0) return;
+		SpaceProjectile *proj = (SpaceProjectile*)objects[0];
+
+		if (b[DIK_LSHIFT])
+		{
+			XMVECTOR dist;
+			XMVECTOR pos = Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.Data(), proj->GetPosition(), dist);
+			proj->SetPosition(pos);
+
+//			Game::PhysicsEngine.PerformCollisionDetection(ss());
+			Game::Keyboard.LockKey(DIK_EQUALS);
+			return;
+		}
 		else
 		{
-			XMFLOAT4 options[6] = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
-				XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f) };
-			ss()->Highlight.Activate();
-			ss()->Highlight.SetColour(options[(int)floor(frand_lh(0, 6))]);
+			bool result = Game::PhysicsEngine.CheckSingleCollision(cs(), proj);
+			float disttopt = XMVectorGetX(XMVector3Length(XMVectorSubtract(proj->GetPosition(), Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.ConstData(), proj->GetPosition()))));
+			if (result)
+			{
+				OutputDebugString(concat("*** COLLISION: DistToSurface=")(disttopt)("\n").str().c_str());
+				cs()->Highlight.SetColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+				cs()->Highlight.Activate();
+			}
+			else
+			{
+				cs()->Highlight.Deactivate();
+			}
+			return;
+
+			std::vector<iObject*> objects;
+			int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
+				Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
+			for (int i = 0; i < count; ++i)
+			{
+				SpaceProjectile *proj = (SpaceProjectile*)objects[i];
+				if (!proj) continue;
+
+				proj->SetPositionAndOrientation(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetZ(NULL_VECTOR, -0.5f * cs()->CollisionOBB.ConstData().ExtentF.z)),
+					XMVectorSetZ(ONE_VECTOR, -10.0f)), ID_QUATERNION);
+				proj->PhysicsState.LocalMomentum = XMVectorSetZ(NULL_VECTOR, 950.0f);
+				proj->PhysicsState.WorldMomentum = XMVectorSetZ(NULL_VECTOR, 950.0f);
+
+
+				break;		// Only modify one projectile
+			}
 		}
 
 		Game::Keyboard.LockKey(DIK_EQUALS);
@@ -716,7 +758,7 @@ void RJMain::ProcessKeyboardInput(void)
 			s->SetOrientation(ID_QUATERNION);
 			s->SetFaction(Game::FactionManager.GetFaction("faction_us"));
 
-			SpaceTurret *turret = ss()->TurretController.Turrets.at(0)->Copy();
+			SpaceTurret *turret = ss()->TurretController.GetTurret(0)->Copy();
 			s->TurretController.AddTurret(turret);
 
 			s->AssignNewOrder(new Order_AttackBasic(s, cs()));
@@ -2057,9 +2099,9 @@ void RJMain::__CreateDebugScenario(void)
 	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
 	for (int i = 0; i < sst->GetLauncherCount(); ++i)
 	{
-		sst->GetLauncher(i)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
-		sst->GetLauncher(i)->SetLaunchInterval(100U);
-		sst->GetLauncher(i)->SetProjectileSpread(0.01f);
+	//	sst->GetLauncher(i)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
+		//sst->GetLauncher(i)->SetLaunchInterval(100U);
+		sst->GetLauncher(i)->SetProjectileSpread(0.00f);
 	}
 	sst->SetRelativePosition(XMVectorSet(0, -20, 10.0f, 0));
 	sst->SetBaseRelativeOrientation(ID_QUATERNION);
@@ -2068,7 +2110,7 @@ void RJMain::__CreateDebugScenario(void)
 	sst->SetPitchLimits(-0.15f, 0.15f);
 	sst->SetYawRate(PI);
 	sst->SetPitchRate(PI);
-	sst->SetControlMode(SpaceTurret::ControlMode::AutomaticControl);
+	sst->SetControlMode(SpaceTurret::ControlMode::ManualControl);
 	sst->RecalculateTurretStatistics();
 	ss()->TurretController.AddTurret(sst);
 	SpaceTurret *sst2 = sst->Copy();
@@ -2204,12 +2246,32 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%d", Game::Engine->LightingManager.GetLightSourceCount());
+		//Game::ObjectSearchManager::DisableSearchCache();
+
+		std::vector<iObject*> objects;
+		int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
+			Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
+		if (count == 0) return;
+		SpaceProjectile *proj = (SpaceProjectile*)objects[0];
+
+		XMVECTOR dist;
+		XMVECTOR pos = Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.Data(), proj->GetPosition(), dist);
+		float tgt_dist = XMVectorGetX(XMVector3Length(XMVectorSubtract(proj->GetPosition(), pos)));
+		std::string s = "";
+		if (tgt_dist <= 5.0f)
+		{
+			s = concat("INTERSECTING; distance = ")(tgt_dist).str();
+//			OutputDebugString(s.c_str());
+		}
+		else if (tgt_dist < 35.0f)
+		{
+			s = concat("Approaching; distance = ")(tgt_dist).str();
+	//		OutputDebugString(s.c_str());
+		}
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", s.c_str());
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
 }
-
-
-
 

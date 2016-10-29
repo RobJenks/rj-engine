@@ -35,7 +35,7 @@ public:
 #	define ELEMENT_INDEX_EX(_x, _y, _z, _size, _size_xy) (_x + (_y * _size.x) + (_z * _size_xy))
 
 	// Debug flag indicating whether we should output information on element collision tests
-#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
+//#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
 
 	// Environment terrain collection
 	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;

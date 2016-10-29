@@ -227,6 +227,10 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			{
 				OutputDebugString(concat("Testing collision of physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
 			}
+			if (object->GetObjectType() == iObject::ObjectType::ProjectileObject)
+			{
+				int asafsafs = 12;	// TODO: DEBUG
+			}
 #		endif
 
 		// Test whether this object is moving at very high speed

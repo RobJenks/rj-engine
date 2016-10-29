@@ -36,8 +36,8 @@ ComplexShipSection::ComplexShipSection(void)
 	m_forcerenderinterior = false;
 	m_previewimage = NULL;
 
-	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
-	this->SetCollisionMode(Game::CollisionMode::FullCollision);
+	// Ship sections will no longer perform collision detection - the ship itself will do this
+	this->SetCollisionMode(Game::CollisionMode::NoCollision);
 }
 
 ComplexShipSection *ComplexShipSection::Create(const string & code)

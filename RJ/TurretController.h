@@ -19,7 +19,17 @@ public:
 	typedef std::vector<SpaceTurret*>				TurretCollection;
 
 	// Collection of turret objects
-	TurretCollection								Turrets;
+	CMPINLINE const TurretCollection &				GetTurrets(void) const					{ return m_turrets; }
+
+	// Returns a pointer to the specified turret, or NULL if no such turret exists
+	CMPINLINE SpaceTurret *							GetTurret(TurretCollection::size_type index)
+	{
+		if (index < m_turretcount)					return m_turrets[index];
+		else										return NULL;
+	}
+
+	// Modifiable reference to the turret collection, if absolutely required
+	CMPINLINE TurretCollection &					Turrets(void)							{ return m_turrets; }
 
 	// Default constructor
 	TurretController(void);
@@ -42,7 +52,7 @@ public:
 	bool											RemoveTurret(SpaceTurret *turret);
 	void											RemoveAllTurrets(void);
 	bool											HaveTurret(SpaceTurret *turret);
-	CMPINLINE int									TurretCount(void)						{ return m_turretcount; }
+	CMPINLINE TurretCollection::size_type			TurretCount(void)						{ return m_turretcount; }
 
 	// Clears all controller contents without affecting any of the turrets themselves.  Generally used post-clone
 	// to reset the controller without resetting the parent pointer of the (old) turrets being removed
@@ -73,11 +83,14 @@ public:
 
 protected:
 
+	// Collection of turrets managed by the controller
+	TurretCollection								m_turrets;
+
 	// Reference to the parent object
 	Ship *											m_parent;
 
 	// Maintain a record of the number of turret objects, to avoid recalculating via size() each time
-	int												m_turretcount;
+	TurretCollection::size_type						m_turretcount;
 
 	// Indicates whether the turret controller is active, based on whether it is managing any turrets
 	bool											m_active;

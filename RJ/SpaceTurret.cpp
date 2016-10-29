@@ -566,9 +566,10 @@ void SpaceTurret::RecalculateTurretStatistics(void)
 	// Determine an appropriate firing region for the turret, based on accuracy of all launchers
 	DetermineFiringRegion(); 
 
-	// Initialise the firing readiness for each launcher
+	// Initialise the firing readiness for each launcher and recalculate its statistics
 	for (int i = 0; i < m_launchercount; ++i)
 	{
+		m_launchers[i].RecalculateLauncherStatistics();
 		m_launchers[i].ForceReload();
 	}
 }

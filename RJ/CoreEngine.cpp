@@ -1872,8 +1872,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		m_instanceparams.x = alpha;
 
 		// Iterate through each turret in turn
-		TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
-		for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+		TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+		for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 		{
 			// Get a reference to the model for this turret
 			turret = (*it);
@@ -1902,8 +1902,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 			m_instanceparams = parent->Highlight.GetColour();
 
 			// Iterate through each turret in turn
-			TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
-			for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+			TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+			for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 			{
 				// Get a reference to the model for this turret
 				turret = (*it);
@@ -1927,8 +1927,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		else
 		{
 			// Iterate through each turret in turn
-			TurretController::TurretCollection::iterator it_end = controller.Turrets.end();
-			for (TurretController::TurretCollection::iterator it = controller.Turrets.begin(); it != it_end; ++it)
+			TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+			for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 			{
 				// Get a reference to the model for this turret
 				turret = (*it);

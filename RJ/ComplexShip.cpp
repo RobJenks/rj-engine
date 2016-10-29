@@ -43,6 +43,9 @@ ComplexShip::ComplexShip(void)
 	m_sdoffset = INTVECTOR3(0, 0, 0);
 	m_directlygeneratedfromSD = false;
 
+	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
+	SetCollisionMode(Game::CollisionMode::FullCollision);
+
 	// Recalculate ship stats so they are consistent with the properties set during object construction
 	RecalculateShipDataFromCurrentState();
 }
@@ -1042,10 +1045,18 @@ void ComplexShip::RecalculateAllShipData(void)
 
 }
 
+void ComplexShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
+{
+	// Pass to the environment method to determine any internal ship damage 
+	RegisterEnvironmentImpact(object, impact);
+}
+
 // Method called when this object collides with another.  Overriden method providing a section reference
 // is the one that will be used for CS, since only the sections themselves can collide with anything
 void ComplexShip::CollisionWithObject(iActiveObject *object, ComplexShipSection *collidingsection, const GamePhysicsEngine::ImpactData & impact)
 {
+	throw "SECTIONS SHOULD NOT COLLIDE ANY MORE";
+
 	// Pass to the environment method to determine any internal ship damage 
 	RegisterEnvironmentImpact(object, impact);
 }

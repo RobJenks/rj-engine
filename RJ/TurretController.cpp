@@ -7,7 +7,7 @@
 
 // Default constructor
 TurretController::TurretController(void)
-	: m_parent(NULL), m_turretcount(0), m_active(false)
+	: m_parent(NULL), m_turretcount(0U), m_active(false)
 {
 }
 
@@ -25,8 +25,8 @@ void TurretController::Update(std::vector<ObjectReference<iSpaceObject>> & enemy
 		/* Full simulation; model individual turret orientations, firing arcs etc */
 
 		// Iterate over every turret and run its full-simulation update
-		TurretCollection::iterator it_end = Turrets.end();
-		for (TurretCollection::iterator it = Turrets.begin(); it != it_end; ++it)
+		TurretCollection::iterator it_end = m_turrets.end();
+		for (TurretCollection::iterator it = m_turrets.begin(); it != it_end; ++it)
 		{
 			if ((*it)) (*it)->Update(enemy_contacts);
 		}
@@ -37,8 +37,8 @@ void TurretController::Update(std::vector<ObjectReference<iSpaceObject>> & enemy
 void TurretController::SetControlModeOfAllTurrets(SpaceTurret::ControlMode mode)
 {
 	// Iterate over every turret and set the desired control mode
-	TurretCollection::iterator it_end = Turrets.end();
-	for (TurretCollection::iterator it = Turrets.begin(); it != it_end; ++it)
+	TurretCollection::iterator it_end = m_turrets.end();
+	for (TurretCollection::iterator it = m_turrets.begin(); it != it_end; ++it)
 	{
 		if ((*it)) (*it)->SetControlMode(mode);
 	}
@@ -54,9 +54,9 @@ void TurretController::SetParent(Ship *parent)
 	RefreshTurretCollection();
 
 	// Notify each turret of its new parent object
-	for (int i = 0; i < m_turretcount; ++i)
+	for (TurretCollection::size_type i = 0; i < m_turretcount; ++i)
 	{
-		Turrets[i]->SetParent(m_parent);
+		if (m_turrets[i]) m_turrets[i]->SetParent(m_parent);
 	}
 }
 
@@ -67,7 +67,7 @@ bool TurretController::AddTurret(SpaceTurret *turret)
 	if (!turret || HaveTurret(turret)) return false;
 
 	// Add to the turret collection
-	Turrets.push_back(turret);
+	m_turrets.push_back(turret);
 
 	// Notify the turret of its parent object
 	turret->SetParent(m_parent);
@@ -86,12 +86,12 @@ bool TurretController::RemoveTurret(SpaceTurret *turret)
 	if (!turret) return false;
 
 	// Attempt to locate the turret
-	for (int i = 0; i < m_turretcount; ++i)
+	for (TurretCollection::size_type i = 0; i < m_turretcount; ++i)
 	{
-		if (Turrets[i] == turret)
+		if (m_turrets[i] == turret)
 		{
 			// Remove the item
-			RemoveFromVectorAtIndex<SpaceTurret*>(Turrets, i);
+			RemoveFromVectorAtIndex<SpaceTurret*>(m_turrets, i);
 
 			// The turret is no longer owned by our parent object
 			turret->SetParent(NULL);
@@ -112,13 +112,13 @@ bool TurretController::RemoveTurret(SpaceTurret *turret)
 void TurretController::RemoveAllTurrets(void)
 {
 	// Notify all turrets that they are no longer owned by our parent object
-	for (int i = 0; i < m_turretcount; ++i)
+	for (TurretCollection::size_type i = 0; i < m_turretcount; ++i)
 	{
-		Turrets[i]->SetParent(NULL);
+		if (m_turrets[i]) m_turrets[i]->SetParent(NULL);
 	}
 
 	// Clear the turret collection
-	Turrets.clear();
+	m_turrets.clear();
 	
 	// Update turret collection status
 	RefreshTurretCollection();
@@ -128,8 +128,8 @@ void TurretController::RemoveAllTurrets(void)
 // Test whether the specified turret exists in this collection
 bool TurretController::HaveTurret(SpaceTurret *turret)
 {
-	TurretCollection::const_iterator it_end = Turrets.end();
-	for (TurretCollection::const_iterator it = Turrets.begin(); it != it_end; ++it)
+	TurretCollection::const_iterator it_end = m_turrets.end();
+	for (TurretCollection::const_iterator it = m_turrets.begin(); it != it_end; ++it)
 	{
 		if ((*it) == turret) return true;
 	}
@@ -141,18 +141,18 @@ bool TurretController::HaveTurret(SpaceTurret *turret)
 void TurretController::RefreshTurretCollection(void)
 {
 	// Cache the turret collection size for runtime efficiency
-	m_turretcount = (int)Turrets.size();
+	m_turretcount = m_turrets.size();
 
 	// Controller will be considered active if it is managing at least one turret
-	m_active = (m_turretcount != 0);
+	m_active = (m_turretcount != 0U);
 
 	// Reset any statistics that are based on the contents of the turret collection
 	m_avg_projectile_velocity = 0.0f;
 
 	// Now recalculate those statistics, assuming there are any turrets in the collection
 	SpaceTurret *t; ProjectileLauncher *l; int count = 0;
-	TurretCollection::const_iterator it_end = Turrets.end();
-	for (TurretCollection::const_iterator it = Turrets.begin(); it != it_end; ++it)
+	TurretCollection::const_iterator it_end = m_turrets.end();
+	for (TurretCollection::const_iterator it = m_turrets.begin(); it != it_end; ++it)
 	{
 		// We need to consider each launcher in turn; maintain a count of the total launchers processed
 		t = (*it); if (!t) continue;
@@ -182,7 +182,7 @@ void TurretController::RefreshTurretCollection(void)
 void TurretController::SetTarget(iSpaceObject *target)
 {
 	if (!m_active) return;
-	std::for_each(Turrets.begin(), Turrets.end(),
+	std::for_each(m_turrets.begin(), m_turrets.end(),
 		[&target](SpaceTurret *t) { if (t) t->SetTarget(target); });
 }
 
@@ -190,7 +190,7 @@ void TurretController::SetTarget(iSpaceObject *target)
 void TurretController::ChangeTarget(iSpaceObject *current_target, iSpaceObject *new_target)
 {
 	if (!m_active) return;
-	std::for_each(Turrets.begin(), Turrets.end(),
+	std::for_each(m_turrets.begin(), m_turrets.end(),
 		[&current_target, &new_target](SpaceTurret *t) { if (t && t->GetTarget() == current_target) t->SetTarget(new_target); });
 }
 
@@ -198,7 +198,7 @@ void TurretController::ChangeTarget(iSpaceObject *current_target, iSpaceObject *
 void TurretController::SetDesignatedTarget(iSpaceObject *designated_target)
 {
 	if (!m_active) return;
-	std::for_each(Turrets.begin(), Turrets.end(),
+	std::for_each(m_turrets.begin(), m_turrets.end(),
 		[&designated_target](SpaceTurret *t) { if (t) t->DesignateTarget(designated_target); });
 }
 
@@ -206,7 +206,7 @@ void TurretController::SetDesignatedTarget(iSpaceObject *designated_target)
 void TurretController::ChangeDesignatedTarget(iSpaceObject *current_designation, iSpaceObject *new_designation)
 {
 	if (!m_active) return;
-	std::for_each(Turrets.begin(), Turrets.end(),
+	std::for_each(m_turrets.begin(), m_turrets.end(),
 		[&current_designation, &new_designation](SpaceTurret *t) 
 			{ if (t && t->GetDesignatedTarget() == current_designation) t->DesignateTarget(new_designation); });
 }
@@ -217,7 +217,7 @@ void TurretController::ChangeDesignatedTarget(iSpaceObject *current_designation,
 void TurretController::ForceClearContents(void)
 {
 	// Simply remove all turret pointers and refresh the internal collection state
-	Turrets.clear();
+	m_turrets.clear();
 	RefreshTurretCollection();
 }
 

@@ -138,7 +138,6 @@ void SpaceProjectile::SimulateObject(void)
 // Method called when this object collides with another.  Inherited from iObject
 void SpaceProjectile::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
-
 }
 
 // Method called when the projectile exceeds its defined lifetime
