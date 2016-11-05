@@ -270,7 +270,8 @@ void DebugCommandHandler::SpawnDebugShips(SimpleShip *template_ship, int count)
 		Ship *s = SimpleShip::Create(template_ship); if (!s) continue;
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip((SimpleShip*)s);
 		s->SetName("DebugSpawnedShip");										// Will be used to remove ship later
-		s->MoveIntoSpaceEnvironment(spawnsystem, spawnpos + ((i - count*0.5f) * spawninterval));
+		s->MoveIntoSpaceEnvironment(spawnsystem);
+		s->SetPosition(spawnpos + ((i - count*0.5f) * spawninterval));
 		s->SetOrientation(ID_QUATERNION);
 		
 		// Assign a default order for now

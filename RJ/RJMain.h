@@ -142,14 +142,9 @@ protected:
 public:
 	// Debug objects for testing; delete after use
 	ObjectReference<SimpleShip> ss, s2, s3[3], sproj;
-	ObjectReference<ComplexShip> cs;
+	ObjectReference<ComplexShip> cs, cs2;
 	ObjectReference<Actor> a1;
 	ObjectReference<SpaceProjectile> proj;
-	//SimpleShip *ss, *s2, *s3[3];
-	//SimpleShip *sproj;
-	//ComplexShip *cs;
-	//Actor *a1;
-	//SpaceProjectile *proj;
 
 	ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
 	UINT					m_vertexcount;

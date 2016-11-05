@@ -8,17 +8,17 @@
     <Range min="10.0" max="100000.0" />
     <TurretFireDelay ms="250" />
 
-    <CreateLaunchers count="2">
+    <CreateLaunchers count="1">
       <ProjectileLauncher index="0">
         <Code>projectile_launcher_basic01</Code>
         <RelativePosition x="-0.5" y="0.0" z="0.1" />
         <RelativeOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
       </ProjectileLauncher>
-      <ProjectileLauncher index="1">
+      <!-->ProjectileLauncher index="1">
         <Code>projectile_launcher_basic01</Code>
         <RelativePosition x="0.5" y="0.0" z="0.1" />
         <RelativeOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
-      </ProjectileLauncher>
+      </ProjectileLauncher-->
     </CreateLaunchers>
     
   </Turret>

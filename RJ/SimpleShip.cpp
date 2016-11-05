@@ -226,12 +226,8 @@ void SimpleShip::CalculateEngineStatistics()
 
 SimpleShip *SimpleShip::Create(const string & code)
 {
-	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
-	SimpleShip *template_ship = D::SimpleShips.Get(code);
-	if (template_ship == NULL) return NULL;
-
-	// Invoke the spawn function using these template details & return the result
-	return (SimpleShip::Create(template_ship));
+	// Invoke the spawn function using a template ship corresponding to this definition (if one exists)
+	return (SimpleShip::Create(D::SimpleShips.Get(code)));
 }
 
 SimpleShip *SimpleShip::Create(SimpleShip *template_ship)
@@ -312,7 +308,8 @@ XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
 void SimpleShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
-
+	// Pass to the base class method
+	iActiveObject::CollisionWithObject(object, impact);
 }
 
 // Event triggered upon destruction of the object

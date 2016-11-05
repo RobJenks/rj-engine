@@ -1,6 +1,7 @@
 #include "DX11_Core.h"
 #include "Utility.h"
 #include "FastMath.h"
+#include "GameDataExtern.h"
 #include "ArticulatedModel.h"
 #include "SpaceProjectile.h"
 #include "ProjectileLauncher.h"
@@ -40,6 +41,23 @@ SpaceTurret::SpaceTurret(void)
 	m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
 	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
 	m_firedelay = 0U;
+}
+
+// Static factory method to create new turret objects
+SpaceTurret *SpaceTurret::Create(const std::string & code)
+{
+	// Invoke the spawn function using a template ship corresponding to this definition (if one exists)
+	return (SpaceTurret::Create(D::Turrets.Get(code)));
+}
+
+// Static factory method to create new turret objects
+SpaceTurret *SpaceTurret::Create(SpaceTurret *template_turret)
+{
+	// If we are passed an invalid class pointer then return NULL immediately
+	if (template_turret == NULL) return NULL;
+
+	// Create a new instance of the turret from this template and return it
+	return (template_turret->Copy());
 }
 
 // Full-simulation method for the turret when it is under ship computer control.  Tracks towards targets 

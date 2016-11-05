@@ -35,7 +35,7 @@ public:
 
 	// Moves the object into a new space environment.  Declared virtual so that subclasses can implement class-specific logic if required, 
 	// before finally calling the base iSpaceObject method
-	virtual void							MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
+	virtual void							MoveIntoSpaceEnvironment(SpaceSystem *system);
 
 	// Virtual method implementation from iObject to handle a change in simulation state.  We are guaranteed that prevstate != newstate
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObject::SimulationStateChanged() to maintain the chain
@@ -54,7 +54,7 @@ public:
 
 protected:
 
-	SpaceSystem *						m_spaceenvironment;				// Stores a pointer to the system that this object exists in
+	SpaceSystem *							m_spaceenvironment;				// Stores a pointer to the system that this object exists in
 
 };
 

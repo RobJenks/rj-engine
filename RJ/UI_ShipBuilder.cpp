@@ -979,11 +979,11 @@ void UI_ShipBuilder::ResetStructuralTestParameters(void)
 		if (*markers[i] == NULL)
 		{
 			(*markers[i]) = SimpleShip::Create("null_ship");
-			(*markers[i])->SetFaction(Game::FactionManager.GetFaction("faction_none"));
+			(*markers[i])->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_none"));
 			(*markers[i])->SetModel(Model::GetModel("unit_cone_model"));
 			(*markers[i])->SetCollisionMode(Game::CollisionMode::NoCollision);
-			(*markers[i])->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorScale(ONE_VECTOR, (i * 1000.0f)));
-			(*markers[i])->SetOrientation(ID_QUATERNION);
+			(*markers[i])->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment());
+			(*markers[i])->SetPositionAndOrientation(XMVectorScale(ONE_VECTOR, (i * 1000.0f)), ID_QUATERNION);
 		}
 
 		(*markers[i])->SetIsVisible(true);
@@ -1050,10 +1050,10 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	{
 		m_intersect_test_proj = SimpleShip::Create("intersection_test_proj_ship");
 	}
-	m_intersect_test_proj()->SetFaction(Game::FactionManager.GetFaction("faction_none"));
+	m_intersect_test_proj()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_none"));
 	m_intersect_test_proj()->SetCollisionMode(Game::CollisionMode::BroadphaseCollisionOnly);
-	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment(), XMVectorSetY(NULL_VECTOR, -1000.0f));
-	m_intersect_test_proj()->SetOrientation(ID_QUATERNION);
+	m_intersect_test_proj()->MoveIntoSpaceEnvironment(m_ship->GetSpaceEnvironment());
+	m_intersect_test_proj()->SetPositionAndOrientation(XMVectorSetY(NULL_VECTOR, -1000.0f), ID_QUATERNION);
 	m_intersect_test_proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	m_intersect_test_proj()->SetIsVisible(false);
 

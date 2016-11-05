@@ -51,10 +51,20 @@ Faction::F_ID FactionManagerObject::AddFaction(Faction *faction)
 
 // Returns a faction ID based upon the faction's unique string code.  Returns the null 
 // faction (0) if the code cannot be found
-Faction::F_ID FactionManagerObject::GetFaction(const std::string & code)
+Faction::F_ID FactionManagerObject::GetFactionIDByCode(const std::string & code)
 {
 	if (m_factioncodemap.count(code) == 0)			return Faction::NullFaction;
 	else											return m_factioncodemap[code];
+}
+
+// Returns a faction ID based upon the faction's name.  Returns the null faction
+// (0) if the code cannot be found
+Faction::F_ID FactionManagerObject::GetFactionIDByName(const std::string & name)
+{
+	std::vector<Faction*>::const_iterator it = std::find_if(m_factions.begin(), m_factions.end(),
+		[&name](const Faction *faction) { return (faction && faction->GetName() == name); });
+
+	return (it == m_factions.end() ? 0 : (*it)->GetFactionID());
 }
 
 // Changes the disposition of one faction towards another.  Triggered by the faction objects as they analyse all contributing 
@@ -151,4 +161,94 @@ FactionManagerObject::~FactionManagerObject(void)
 {
 	// Release all allocated memory; first deallocate the dispositon matrix
 	ShutdownDispositionMatrix();
+}
+
+
+// Virtual inherited method to accept a command from the console
+bool FactionManagerObject::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	if (command.InputCommand == "GetFaction")
+	{
+		if (!command.HasParameter(0)) {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure,
+				ErrorCodes::RequiredCommandParametersNotProvided, "Faction name / code not provided");
+		}
+		else {
+			// First attempt to get the function based on faction ID, then based on code and name
+			bool found = true;
+			Faction::F_ID id = command.ParameterAsInt(0);
+			if (id == Faction::NullFaction && command.Parameter(0) != "0") {			// 0 signifies no conversion to int, unless we actually specified "0"
+				id = GetFactionIDByCode(command.Parameter(0));
+				if (id == Faction::NullFaction) id = GetFactionIDByName(command.Parameter(0));
+				if (id == Faction::NullFaction) found = false;
+			}
+
+			if (found && IsValidFactionID(id) && GetFaction(id) != NULL) {
+				command.SetSuccessOutput(GetFaction(id)->DebugString());
+			}
+			else {
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure,
+					ErrorCodes::CommandParameterIsNotValid, "No faction exists with the specified name / code");
+			}
+		}
+		return true;
+	}
+	else if (command.InputCommand == "GetFactionDisposition")
+	{
+		if (command.ParameterCount() < 2) {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure,
+				ErrorCodes::RequiredCommandParametersNotProvided, "Expected format: GetFactionDisposition [FactionID] [FactionID]");
+		}
+		else {
+			Faction::F_ID f0 = command.ParameterAsInt(0);
+			Faction::F_ID f1 = command.ParameterAsInt(1);
+			if ( !IsValidFactionID(f0) || !IsValidFactionID(f1) || GetFaction(f0) == NULL || GetFaction(f1) == NULL || 
+				(f0 == Faction::NullFaction && command.Parameter(0) != "0") ||
+				(f1 == Faction::NullFaction && command.Parameter(1) != "0")) 
+			{
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure,
+					ErrorCodes::CommandParameterIsNotValid, "Valid faction IDs not provided");
+			}
+			else {
+				Faction::FactionDisposition disp = GetDisposition(f0, f1);
+				command.SetSuccessOutput(concat("Faction \"")(GetFaction(f0)->GetName())("\" (")(f0)(") is ")
+					(StrLower(Faction::TranslateFactionDispositionToString(disp)))(" towards faction \"")
+					(GetFaction(f1)->GetName())("\" (")(f1)(")").str());
+			}
+		}
+		return true;
+	}
+	else if (command.InputCommand == "GetFactionRelations")
+	{
+		if (!command.HasParameter(0))
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::RequiredCommandParametersNotProvided, "No faction ID provided");
+		else
+		{
+			Faction::F_ID id = command.ParameterAsInt(0);
+			if (!IsValidFactionID(id) || GetFaction(id) == NULL || (id == Faction::NullFaction && command.Parameter(0) != "0"))
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::CommandParameterIsNotValid, "Faction ID is not valid");
+			else
+			{
+				std::string friends = NullString, enemies = NullString;
+				for (int i = 0; i < m_factioncount; ++i)
+				{
+					if (i == id) continue;	// Ignore the self-relation
+
+					Faction::FactionDisposition disp = GetDisposition(id, i);
+					if (disp == Faction::FactionDisposition::Friendly)
+						friends = concat((friends == NullString ? "{ \"" : ", \""))(GetFaction(i)->GetName())("\" (")(id)(")").str();
+					else if (disp == Faction::FactionDisposition::Hostile)
+						enemies = concat((enemies == NullString ? "{ \"" : ", \""))(GetFaction(i)->GetName())("\" (")(id)(")").str();
+				}
+				friends += (friends == NullString ? "no-one" : "}");
+				enemies += (enemies == NullString ? "no-one" : "}");
+				command.SetSuccessOutput(concat("Faction \"")(GetFaction(id)->GetName())("\" (")(id)(") is friendly towards ")
+					(friends)(" and hostile towards ")(enemies).str());
+			}
+		}
+		return true;
+	}
+
+	// We did not recognise the command
+	return false;
 }

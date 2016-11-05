@@ -31,18 +31,20 @@ void iSpaceObject::SimulationStateChanged(iObject::ObjectSimulationState prevsta
 	// TODO: this will not always be true in future when we have more granular simulation states 
 	if (prevstate == iObject::ObjectSimulationState::NoSimulation)
 	{
-		// Take action
+		// If we are located in a system, add ourselves to the system object collection
+		if (m_spaceenvironment) m_spaceenvironment->AddObjectToSystem(this);
 	}
 
 	// Conversely, if we are no longer going to be simulated, we may be able to stop simulating certain things
 	if (newstate == iObject::ObjectSimulationState::NoSimulation)
 	{
-		// Take action
+		// If we are located in a system, remove ourselves from the system object collection
+		if (m_spaceenvironment) m_spaceenvironment->RemoveObjectFromSystem(this);
 	}
 }
 
 // Moves the space object into a new environment
-void iSpaceObject::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
+void iSpaceObject::MoveIntoSpaceEnvironment(SpaceSystem *system)
 {
 	// First, remove the object from its current environment (if applicable)
 	if (m_spaceenvironment)
@@ -53,9 +55,8 @@ void iSpaceObject::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR
 	// Now add to the new environment, assuming a valid environment has been specified
 	if (system)
 	{
-		system->AddObjectToSystem(this, location);
+		system->AddObjectToSystem(this);
 	}
-
 }
 
 // Removes the object from its current space environment

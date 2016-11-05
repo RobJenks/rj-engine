@@ -377,6 +377,7 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 	object->CollisionOBB.UpdateIfRequired();
 
 	// Get basic information on the object that will be needed for each comparison
+	Game::ID_TYPE id = object->GetID();
 	bool hasexclusions = object->HasCollisionExclusions();
 
 	// We will handle up to a maximum number of intra-frame collisions
@@ -387,8 +388,11 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 		collider = NULL;
 		for (int c = 0; c < numcandidates; ++c)
 		{
-			// Make sure the object is valid, and we aren't excluded from colliding with it
-			candidate = (iSpaceObject*)candidates[c]; if (!candidate) continue;
+			// Make sure the object is valid, and is not ourself
+			candidate = (iSpaceObject*)candidates[c]; 
+			if (!candidate || candidate->GetID() == id) continue;
+
+			// Make sure we aren't excluded from colliding with this object
 			if (candidate == exclude || (hasexclusions && object->CollisionExcludedWithObject(candidate->GetID()))) continue;
 
 			// We are testing against the candidate's OBB, so update it if it has been invalidated
@@ -803,7 +807,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	// No parameter checks here; we rely on the integrity of main collision detection method (which should be the only method
 	// to invoke this one) to ensure that object[0|1] are non-null valid objects.  For efficiency.  
 	// collider[0|1] can be null if there is no relevant colliding OBB (e.g. if the object is broadphase collision-only)
-
+	
 	// Special case; if either object is a ship section & part of a larger complex ship, move up the hierarchy one level
 	// and treat the ship itself as being the colliding object.  Ship statistics (e.g. mass) are derived from the combination of all
 	// its sections, so this is the correct object to be involving in the collision
@@ -1078,7 +1082,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 
 	// Swap the definition of object & collider and then notify object1 of the impact
 	std::swap(ObjectImpact.Object, ObjectImpact.Collider);
-	object1->CollisionWithObject(object1, ObjectImpact);	
+	object1->CollisionWithObject(object0, ObjectImpact);	
 }
 #endif
 

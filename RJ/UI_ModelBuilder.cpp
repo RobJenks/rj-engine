@@ -341,15 +341,14 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	if (m_playerviewpoint)
 	{
 		// Player viewpoint is at the origin
-		m_playerviewpoint->SetPosition(NULL_VECTOR);
-		m_playerviewpoint->SetOrientation(ID_QUATERNION);
+		m_playerviewpoint->SetPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 
 		// Remove any model from the player ship, and manually remove the OBB data so it is not rendered
 		m_playerviewpoint->SetModel(NULL);
 		m_playerviewpoint->CollisionOBB.Clear();
 
 		// Add the object to the system
-		m_system->AddObjectToSystem(m_playerviewpoint, m_playerviewpoint->GetPosition());
+		m_playerviewpoint->MoveIntoSpaceEnvironment(m_system);
 
 		// Set as a simulation hub to ensure the object is always fully-simulated
 		m_playerviewpoint->SetAsSimulationHub();
@@ -361,15 +360,14 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	if (m_object)
 	{
 		// Default the position and orientation of this ship
-		m_object->SetPosition(XMVectorSetZ(NULL_VECTOR, 10.0f));
-		m_object->SetOrientation(ID_QUATERNION);
+		m_object->SetPositionAndOrientation(XMVectorSetZ(NULL_VECTOR, 10.0f), ID_QUATERNION);
 
 		// Remove any model reference from the ship, and also the collision data so it is not rendered
 		m_object->SetModel(NULL);
 		m_object->CollisionOBB.Clear();
 
 		// Add the object to the system
-		m_system->AddObjectToSystem(m_object, m_object->GetPosition());
+		m_object->MoveIntoSpaceEnvironment(m_system);
 
 		// Set as a simulation hub to ensure the object is always fully-simulated
 		m_object->SetAsSimulationHub();
@@ -380,14 +378,13 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	if (m_nullenv)
 	{
 		// Set a position and orientation out of the viewer area
-		m_nullenv->SetPosition(m_object->GetPosition());
-		m_nullenv->SetOrientation(m_object->GetOrientation());
+		m_nullenv->SetPositionAndOrientation(m_object->GetPosition(), m_object->GetOrientation());
 
 		// Clear the ship collision data so it is not rendered
 		m_nullenv->CollisionOBB.Clear();
 
 		// Add the object to the system, and set as a simulation hub so it is always simulated
-		m_system->AddObjectToSystem(m_nullenv, m_nullenv->GetPosition());
+		m_nullenv->MoveIntoSpaceEnvironment(m_system);
 		m_nullenv->SetAsSimulationHub();
 	}
 

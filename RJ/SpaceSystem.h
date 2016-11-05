@@ -33,10 +33,17 @@ public:
 	Result						InitialiseSystem(ID3D11Device *device);
 
 	// Handles the entry of an object into the system, adding it to the system collections and updating the simulation state accordingly
-	Result						AddObjectToSystem(iSpaceObject * object, const FXMVECTOR location);
+	Result						AddObjectToSystem(iSpaceObject * object);
 
 	// Handles the exit of an object from the system, removing it from the system collections and updating the simulation state accordingly
 	Result						RemoveObjectFromSystem(iSpaceObject * object);
+
+	// Checks whether an object exists in the system object collection
+	bool						ObjectIsRegisteredWithSystem(Game::ID_TYPE id) const; 
+	CMPINLINE bool				ObjectIsRegisteredWithSystem(const iObject *object) const
+	{
+		return (object ? ObjectIsRegisteredWithSystem(object->GetID()) : false);
+	}
 
 	// Shuts down the system and deallocates resources.  Expect this to only ever be executed upon application shutdown
 	void						TerminateSystem(void);
@@ -79,7 +86,8 @@ public:
 		return concat("System \"")(m_name)("\" [Code=\"")(m_code)("\", ObjectCount=")(Objects.size())("]").str().c_str(); 
 	}
 
-private:
+protected:
+
 	string						m_name;
 	string						m_code;
 	bool						m_initialised;			// Flag indicating whether the system has been initialised
@@ -98,6 +106,13 @@ private:
 
 	// Set of directional lights in this system
 	std::vector<ObjectReference<LightSource>> 	m_directional_lights;
+
+	// Inserts an object into the system object collection, assuming it exists in Game::Objects and is not already in our collection
+	void						InsertIntoObjectCollection(iObject *object);
+
+	// Removes an object from the system object collection
+	void						RemoveFromObjectCollection(iObject *object);
+
 
 	// Identifies and stores a reference to all directional system light sources in the system object collection
 	void						RegisterAllSystemLights(void);

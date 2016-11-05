@@ -54,7 +54,7 @@ public:
 	virtual void								ElementLayoutChanged(void);					
 
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
-	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
+	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system);
 
 	// Builds the complex ship hardpoint collection based on its constituent ship sections
 	void										BuildHardpointCollection(void);

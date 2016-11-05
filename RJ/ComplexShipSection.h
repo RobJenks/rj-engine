@@ -90,7 +90,7 @@ public:
 	void										RecalculateShipDataFromCurrentState(void);
 
 	// Overrides the iSpaceObject virtual method
-	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location);
+	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system);
 
 	// Implemented to satisfy iSpaceObject interface.  In reality all section positions are determined by the parent ship
 	CMPINLINE void								SimulateObject(void) { }

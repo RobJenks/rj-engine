@@ -743,7 +743,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_3]) {
 		if (!ss() || !cs()) return;
-		cs()->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		cs()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
 		cs()->CancelAllOrders();
 		cs()->AssignNewOrder(new Order_MoveToTarget(ss(), 100.0f, true));
 
@@ -753,10 +753,10 @@ void RJMain::ProcessKeyboardInput(void)
 			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s);
 
 			s->SetName("DIK_3_SPAWNED_SHIP");
-			s->MoveIntoSpaceEnvironment(ss()->GetSpaceEnvironment(),
-				XMVectorSetZ(ss()->GetPosition(), i * 1.2f * ss()->GetSizeF().z));
+			s->MoveIntoSpaceEnvironment(ss()->GetSpaceEnvironment());
+			s->SetPosition(XMVectorSetZ(ss()->GetPosition(), i * 1.2f * ss()->GetSizeF().z));
 			s->SetOrientation(ID_QUATERNION);
-			s->SetFaction(Game::FactionManager.GetFaction("faction_us"));
+			s->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 
 			SpaceTurret *turret = ss()->TurretController.GetTurret(0)->Copy();
 			s->TurretController.AddTurret(turret);
@@ -1960,45 +1960,75 @@ void RJMain::DebugFullCCDTest(void)
 
 void RJMain::__CreateDebugScenario(void)
 {
-	XMVECTOR pos[] = { XMVectorSet(0, 0, -10, 0), XMVectorSet(10, -5, 1, 0), XMVectorSet(-10, -2, 2, 0) };
-	for (int i = 0; i < 3; ++i)
-	{
-		XMVECTOR q = QuaternionBetweenVectors(XMVectorSubtract(NULL_VECTOR, pos[i]), FORWARD_VECTOR);
-		OutputDebugString(QuaternionToString(q).c_str());
-		OutputDebugString("\n");
-	}
-
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
-	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_us"),
-		Game::FactionManager.GetFaction("faction_prc"), Faction::FactionDisposition::Hostile);
-	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFaction("faction_prc"),
-		Game::FactionManager.GetFaction("faction_us"), Faction::FactionDisposition::Hostile);
+	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFactionIDByCode("faction_us"),
+		Game::FactionManager.GetFactionIDByCode("faction_prc"), Faction::FactionDisposition::Hostile);
+	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFactionIDByCode("faction_prc"),
+		Game::FactionManager.GetFactionIDByCode("faction_us"), Faction::FactionDisposition::Hostile);
 
 	// Temp: Create a new ship for the player to use
 	SimpleShip *ss_ship = SimpleShip::Create("testship1");
 	ss_ship->SetName("Player ship ss");
 	ss_ship->OverrideInstanceCode("ss");
 	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
-	ss_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(600, 200, -200, 0.0f));
+	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	ss_ship->SetPosition(XMVectorSet(600, 200, -200, 0.0f));
 	ss_ship->SetOrientation(ID_QUATERNION);
 	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
 	ss = ss_ship;
 
-	// Temp: Create a complex ship in this scenario
+	// Temp: Create two complex ships in this scenario
 	if (true) {
-		ComplexShip *cs_ship = ComplexShip::Create("testfrigate12");		// Previously 12
-		cs_ship->SetName("Test frigate cs");
-		cs_ship->GetSection(0)->SetName("cs section 0");
-		cs_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		cs_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorSet(-100, 0, 225, 0.0f));
-		cs_ship->SetOrientation(ID_QUATERNION);
-		cs_ship->OverrideInstanceCode("cs");
-		cs = cs_ship;
+		ComplexShip *css[2];
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_prc") };
+		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
+		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
+		for (int c = 0; c < 2; ++c)
+		{
+			css[c] = ComplexShip::Create("testfrigate12");
+			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
+			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+			css[c]->SetPosition(positions[c]);
+			css[c]->SetOrientation(orients[c]);
+			css[c]->SetInvulnerabilityFlag(true);
+			css[c]->SetFaction(factions[c]);
 
-		Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
-		cs_ship->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
+			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
+			//css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
+
+			XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
+			XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
+			XMFLOAT3 sz; XMStoreFloat3(&sz, css[c]->GetSize());
+			for (int i = 0; i < 4; ++i)
+			{
+				for (int j = 0; j < 2; ++j)
+				{
+					SpaceTurret *nt = SpaceTurret::Create("turret_basic01"); if (!nt) continue;
+					
+					XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
+					pos = XMVectorSubtract(pos, XMVectorMultiply(css[c]->GetSize(), HALF_VECTOR)); 
+					nt->SetRelativePosition(pos);
+					nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
+
+					nt->SetYawRate(PI);
+					nt->SetPitchRate(PI);
+					nt->SetYawLimitFlag(false);
+					nt->SetPitchLimits(-PIOVER2, PIOVER2);
+					nt->RecalculateTurretStatistics();
+
+					css[c]->TurretController.AddTurret(nt);
+
+					// *** Temporarily required since CS objects are currently defaulting to "tactical" simulation
+					css[c]->SetAsSimulationHub();
+				}
+			}
+		}
+
+		cs = css[0];
+		cs2 = css[1];
 	}
+
 
 	// Temp: Create a second ship in this scenario
 	if (true) {
@@ -2006,8 +2036,9 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
 		s2_ship->SetName("Test ship s2");
 		s2_ship->OverrideInstanceCode("Test ship s2");
-		s2_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
+		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+		s2_ship->SetPosition(XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
 		s2_ship->SetOrientation(ID_QUATERNION);
 		s2 = s2_ship;
 	}
@@ -2016,8 +2047,9 @@ void RJMain::__CreateDebugScenario(void)
 	if (true) {
 		SimpleShip *s3_0_ship = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_0_ship);
-		s3_0_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3_0_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2()->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
+		s3_0_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+		s3_0_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+		s3_0_ship->SetPosition(XMVectorAdd(s2()->GetPosition(), XMVectorSet(0.0f, 0.0f, 100.0f, 0.0f)));
 		s3_0_ship->SetOrientation(ID_QUATERNION);
 		s3[0] = s3_0_ship;
 	}
@@ -2025,8 +2057,9 @@ void RJMain::__CreateDebugScenario(void)
 	if (true) {
 		SimpleShip *s3_1_ship = SimpleShip::Create("test_placeholder_ship");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_1_ship);
-		s3_1_ship->SetFaction(Game::FactionManager.GetFaction("faction_us"));
-		s3_1_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), XMVectorAdd(s2()->GetPosition(), XMVectorSet(-10000.0f, 0.0f, 100.0f, 0.0f)));
+		s3_1_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+		s3_1_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+		s3_1_ship->SetPosition(XMVectorAdd(s2()->GetPosition(), XMVectorSet(-10000.0f, 0.0f, 100.0f, 0.0f)));
 		s3_1_ship->SetOrientation(ID_QUATERNION);
 		s3[1] = s3_1_ship;
 	}
@@ -2036,7 +2069,7 @@ void RJMain::__CreateDebugScenario(void)
 	{
 		Actor *a1_actor = D::Actors.Get("human_soldier_basic")->CreateInstance();
 		a1_actor->SetName("A1");
-		a1_actor->SetFaction(Game::FactionManager.GetFaction("faction_prc"));
+		a1_actor->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
 		a1_actor->MoveIntoEnvironment(cs());
 		if (cs()->GetTileCountOfType(D::TileClass::Corridor) > 0)
 		{
@@ -2050,57 +2083,9 @@ void RJMain::__CreateDebugScenario(void)
 		a1 = a1_actor;
 	}
 
-	SpaceProjectileDefinition *def = new SpaceProjectileDefinition();
-	def->SetCode("tmp1");
-	def->SetModel(Model::GetModel("unit_cone_model"));
-	def->SetMass(25000.0f);
-	def->SetDefaultLifetime(3.0f);
-
-	D::BasicProjectiles.Get("basiclaser01")->AddDamageType(Damage(DamageType::Laser, 5.0f));
-	ss()->SetMaxHealth(1000.0f);
-	ss()->SetHealthPercentage(1.0f);	
-	s2()->SetMaxHealth(100.0f);
-	s2()->SetHealthPercentage(1.0f);
-	s3[0]()->SetMaxHealth(100.0f);
-	s3[0]()->SetHealthPercentage(1.0f);
-	cs()->SetMaxHealth(1000.0f);
-	cs()->SetHealthPercentage(1.0f);
-
-	XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
-	XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
-	SpaceTurret *t = D::Turrets.Get("turret_basic01");
-	XMFLOAT3 sz; XMStoreFloat3(&sz, cs()->GetSize());
-	for (int i = 0; i < 4; ++i)
-		for (int j = 0; j < 2; ++j)
-		{
-			XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
-			pos = XMVectorSubtract(pos, XMVectorMultiply(cs()->GetSize(), HALF_VECTOR));
-			SpaceTurret *nt = t->Copy();
-			nt->SetRelativePosition(pos);
-			nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
-
-			// Update to use basic proj
-			for (int l = 0; l < nt->GetLauncherCount(); ++l)
-			{
-				nt->GetLauncher(l)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
-				nt->GetLauncher(l)->SetLaunchInterval(100U);
-				nt->GetLauncher(l)->SetProjectileSpread(0.01f);
-			}
-			nt->SetYawRate(PI);
-			nt->SetPitchRate(PI);
-			nt->SetYawLimitFlag(false);
-			nt->SetPitchLimits(-PIOVER2, PIOVER2);
-			nt->RecalculateTurretStatistics();
-
-			cs()->TurretController.AddTurret(nt);
-			//OutputDebugString(concat("Created turret ")(i)(" at ")(XMVectorGetX(pos))(",")(XMVectorGetY(pos))(",")(XMVectorGetZ(pos))("\n").str().c_str());
-		}
-
 	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
 	for (int i = 0; i < sst->GetLauncherCount(); ++i)
 	{
-	//	sst->GetLauncher(i)->SetProjectileDefinition(D::BasicProjectiles.Get("basiclaser01"));
-		//sst->GetLauncher(i)->SetLaunchInterval(100U);
 		sst->GetLauncher(i)->SetProjectileSpread(0.00f);
 	}
 	sst->SetRelativePosition(XMVectorSet(0, -20, 10.0f, 0));
@@ -2161,13 +2146,14 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a directional light source for the system
 	LightSource *l = LightSource::Create(LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
-	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
-	l->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
+	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
 	// Add a spotlight to the player actor
 	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
 	LightSource *player_light = LightSource::Create(pl);
-	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"), NULL_VECTOR);
+	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
@@ -2274,4 +2260,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 }
-

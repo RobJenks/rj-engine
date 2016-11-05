@@ -73,7 +73,7 @@ public:
 
 
 	// Virtual method, called when this object collides with another
-	virtual void							CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact) = 0;
+	virtual void							CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);// = 0;
 
 	// Returns a flag indicating whether this object is a 'fast mover' that should be simulated via continuous (CCD) rather
 	// than discrete collision detection.  Definition of a 'fast mover' is an object that will move more than a defined

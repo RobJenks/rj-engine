@@ -258,7 +258,11 @@ void ComplexShipSection::Shutdown(void)
 // Method called when this object collides with another.  Virtual inheritance from iSpaceObject
 void ComplexShipSection::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
+	// Pass to the base class method
+	iActiveObject::CollisionWithObject(object, impact);
+
 	// Pass the collision message to the parent ship, assuming we have a valid pointer back from this section
+	throw "SECTIONS SHOULD NOT COLLIDE ANYMORE";
 	if (m_parent) m_parent->CollisionWithObject(object, this, impact);
 }
 
@@ -312,10 +316,10 @@ std::string ComplexShipSection::DetermineXMLDataFullFilename(void)
 
 
 // Overrides the iSpaceObject virtual method
-void ComplexShipSection::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
+void ComplexShipSection::MoveIntoSpaceEnvironment(SpaceSystem *system)
 {
 	// No section-specific logic; simply pass back to the base class
-	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
+	iSpaceObject::MoveIntoSpaceEnvironment(system);
 }
 
 // Custom debug string function

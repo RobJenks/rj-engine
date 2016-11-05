@@ -151,8 +151,8 @@ char *upper(const char *);		// Converts a string to uppercase as a new string
 
 void StrLowerC(string &);				// Converts a std::string to lowercase in-place
 void StrUpperC(string &);				// Converts a std::string to uppercase in-place
-string StrLower(const string &);		// Converts a std::string to lowercase as a new string
-string StrUpper(const string &);		// Converts a std::string to uppercase as a new string
+string StrLower(std::string);		// Converts a std::string to lowercase as a new string
+string StrUpper(std::string);		// Converts a std::string to uppercase as a new string
 
 char *BuildFilename(const char *, const char *);
 string BuildStrFilename(const string &, const string &);

@@ -140,8 +140,9 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		proj->AddCollisionExclusion(m_parent->GetID());
 		m_parent->AddCollisionExclusion(proj->GetID());
 
-		// Finally, move into the world and return a pointer to the new projectile
-		proj->MoveIntoSpaceEnvironment(m_parent->GetSpaceEnvironment(), proj->GetPosition());
+		// Move into the world, set full simulation state and return a pointer to the new projectile
+		proj->SetSimulationState(iObject::ObjectSimulationState::FullSimulation); 
+		proj->MoveIntoSpaceEnvironment(m_parent->GetSpaceEnvironment());
 		return proj;
 	}
 

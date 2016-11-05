@@ -66,6 +66,12 @@ struct GameConsoleCommand
 		OutputString = outputString;
 	}
 
+	// Returns a flag indicating whether a parameter with the specified index has been provided
+	CMPINLINE bool HasParameter(std::vector<std::string>::size_type index) const	{ return (InputParameters.size() > index); }
+
+	// Returns the overall parameter count
+	CMPINLINE std::vector<std::string>::size_type ParameterCount(void) const		{ return (InputParameters.size()); }
+
 	// Managed method to return the value of a parameter, or the empty string if no parameter exists
 	CMPINLINE const std::string & Parameter(int index)
 	{

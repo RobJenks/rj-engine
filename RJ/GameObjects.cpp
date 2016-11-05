@@ -116,7 +116,7 @@ namespace Game
 	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
 	void PerformObjectUnregistration(Game::ID_TYPE id)
 	{
-		// Check the object exists.  It definitely should , but check to be safe
+		// Check the object exists.  It definitely should, but check to be safe
 		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
 		if (entry != Game::Objects.end())
 		{

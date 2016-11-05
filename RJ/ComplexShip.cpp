@@ -65,6 +65,9 @@ void ComplexShip::InitialiseCopiedObject(ComplexShip *source)
 	GetHardpoints().SuspendUpdates();
 	GetHardpoints().ClearData();
 
+	// Also clear the perimeter beacon collection so we can recreate our own instances
+	m_perimeterbeacons.clear();
+
 	// Clear the set of ship sections copied from the source, and re-add those ship sections one-by-one
 	// This will also bring across hardpoints etc. and create references within the ship
 	this->GetSections()->clear();
@@ -281,10 +284,10 @@ void ComplexShip::BuildHardpointCollection(void)
 
 // Overrides the virtual iSpaceObject method to ensure that all ship sections are also moved into 
 // the environment along with the 'ship' itself
-void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR location)
+void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system)
 {
 	// Move the ship itself into the environment by calling the base iSpaceObject method
-	iSpaceObject::MoveIntoSpaceEnvironment(system, location);
+	iSpaceObject::MoveIntoSpaceEnvironment(system);
 
 	// Perform an initial derivation of the world/zero point matrices, as a starting point, since these 
 	// will otherwise only be recalculated once the ship moves for the first time in its new environment
@@ -302,7 +305,7 @@ void ComplexShip::MoveIntoSpaceEnvironment(SpaceSystem *system, const FXMVECTOR 
 			OutputDebugString(sec->GetName().c_str());
 			OutputDebugString(sec->GetSpaceEnvironment() ? sec->GetSpaceEnvironment()->GetName().c_str() : "");
 
-			m_sections[i]->MoveIntoSpaceEnvironment(system, location);
+			m_sections[i]->MoveIntoSpaceEnvironment(system);
 
 			// Have the section recalculate its own position based on the parent ship location
 			m_sections[i]->UpdatePositionFromParent();
@@ -1047,6 +1050,9 @@ void ComplexShip::RecalculateAllShipData(void)
 
 void ComplexShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
+	// Pass to the base class method
+	iActiveObject::CollisionWithObject(object, impact);
+
 	// Pass to the environment method to determine any internal ship damage 
 	RegisterEnvironmentImpact(object, impact);
 }
@@ -1055,7 +1061,7 @@ void ComplexShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEn
 // is the one that will be used for CS, since only the sections themselves can collide with anything
 void ComplexShip::CollisionWithObject(iActiveObject *object, ComplexShipSection *collidingsection, const GamePhysicsEngine::ImpactData & impact)
 {
-	throw "SECTIONS SHOULD NOT COLLIDE ANY MORE";
+	throw "SECTIONS SHOULD NOT COLLIDE ANYMORE";
 
 	// Pass to the environment method to determine any internal ship damage 
 	RegisterEnvironmentImpact(object, impact);

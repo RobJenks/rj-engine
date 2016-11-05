@@ -22,6 +22,10 @@ public:
 	// Define the possible turret status codes
 	enum TurretStatus				{ Idle = 0, UnderManualControl, TrackingTarget, EngagingTarget, ReturningToIdle };
 
+	// Static factory method to create new turret objects
+	static SpaceTurret *			Create(const std::string & code);
+	static SpaceTurret *			Create(SpaceTurret *template_turret);
+
 	// Default constructor
 	SpaceTurret(void);
 	

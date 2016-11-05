@@ -62,34 +62,47 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 }
 
 // Handles the entry of an object into the system, adding it to the system collections and updating the simulation state accordingly
-Result SpaceSystem::AddObjectToSystem(iSpaceObject * object, const FXMVECTOR location)
+// This method can be run more than once on the same object and is guaranteed to maintain the integrity of system & object collections
+// This is important for when objects move in and out of the simulation
+Result SpaceSystem::AddObjectToSystem(iSpaceObject * object)
 {
-	// Parameter check; ensure this is a valid object, and that it doesn't already belong to another system
-	if (object == NULL)								return ErrorCodes::CannotAddNullObjectToSystem;
-	if (object->GetSpaceEnvironment())				return ErrorCodes::ObjectAlreadyExistsInOtherSystem;
-	if (object->GetSpatialTreeNode())				return ErrorCodes::ObjectAlreadyExistsInOtherSpatialTree;
+	// Parameter check; ensure this is a valid object
+	if (object == NULL) return ErrorCodes::CannotAddNullObjectToSystem;
 
-	// Add to the list of system objects
-	Objects.push_back(ObjectReference<iSpaceObject>(object));
+	// If the object already exists in a system, we can only proceed if the system is the same as this current one
+	if (object->GetSpaceEnvironment() && object->GetSpaceEnvironment() != this) return ErrorCodes::ObjectAlreadyExistsInOtherSystem;
 
-	// Clamp the entry position to the bounds of the system
-	XMVECTOR pos = XMVectorClamp(location, m_minbounds, m_maxbounds);
+	// If the object already exists in a spatial tree node, remove it now before it is re-added
+	if (object->GetSpatialTreeNode() != NULL)
+	{
+		object->GetSpatialTreeNode()->RemoveItem(object);
+		object->SetSpatialTreeNode(NULL);
+	}
+
+	// Add to the list of system objects, IF this object currently "exists" in the global object collection.  If not (generally because
+	// the object has just been created and has simulation state of NoSimulation) we will not add it to the system object collection.
+	// It will be added to the environment once its simulation state changes to something other than NoSimulation in the 
+	// object SimulationStateChanged() method
+	InsertIntoObjectCollection(object); 
 
 	// Store a reference to the new system this object exists in
 	object->SetSpaceEnvironmentDirect(this);
+
+	// Clamp the object position to the bounds of this system
+	XMVECTOR pos = XMVectorClamp(object->GetPosition(), m_minbounds, m_maxbounds);
+	object->SetPosition(pos);
+	object->RefreshPositionImmediate();
+
+	// Refresh the position of the object in the system, and add it to the system spatial positioning tree
+	if (SpatialPartitioningTree)
+	{
+		SpatialPartitioningTree->AddItem(object, pos);
+	}
 
 	// Also update the system light collection if this object was a light
 	if (object->GetObjectType() == iObject::ObjectType::LightSourceObject)
 	{
 		RegisterAllSystemLights();
-	}
-
-	// Set the position of the object in the system, and add it to the system spatial positioning tree
-	object->SetPosition(pos);
-	object->RefreshPositionImmediate();
-	if (SpatialPartitioningTree)
-	{
-		SpatialPartitioningTree->AddItem(object, pos);
 	}
 
 	// Notify the state manager that this object has entered the system
@@ -112,14 +125,10 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 		object->SetSpatialTreeNode(NULL);
 	}
 
-	// Remove from the system collection itself; ensure that there are not multiple copies of the same object to be safe
-	while (true)
-	{
-		std::vector<ObjectReference<iSpaceObject>>::iterator it = std::find_if(Objects.begin(), Objects.end(),
-			[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); });
-		if (it == Objects.end()) break;
-		Objects.erase(it);
-	}
+	// Remove from the system collection itself; std::remove_if will identify an iterator range covering ALL instances
+	// of the matching object, so this will ensure we remove any erroneous cases of multiple copies in the collection
+	Objects.erase(std::remove_if(Objects.begin(), Objects.end(),
+		[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); }));
 
 	// Remove the reference to this system from the object
 	object->SetSpaceEnvironmentDirect(NULL);
@@ -157,6 +166,46 @@ void SpaceSystem::RegisterAllSystemLights(void)
 			}
 		}
 	}
+}
+
+
+// Checks whether an object exists in the system object collection
+bool SpaceSystem::ObjectIsRegisteredWithSystem(Game::ID_TYPE id) const 
+{
+	return Objects.end() != std::find_if(Objects.begin(), Objects.end(),
+		[&id](const ObjectReference<iSpaceObject> & entry) { return (entry() && entry()->GetID() == id); });
+}
+
+// Inserts an object into the system object collection, assuming it exists in Game::Objects and is not already in our collection
+void SpaceSystem::InsertIntoObjectCollection(iObject *object)
+{
+	// Parameter check
+	if (!object) return;
+	Game::ID_TYPE id = object->GetID();
+
+	// Only add the object if it exists in the global object collection
+	if (Game::ObjectExists(id) == false) return;
+
+	// We should also not add the object if we already have a reference to it
+	if (ObjectIsRegisteredWithSystem(id)) return;
+
+	// All checks passed, so add the object
+	Objects.push_back(ObjectReference<iSpaceObject>(id));
+}
+
+// Removes an object from the system object collection
+void SpaceSystem::RemoveFromObjectCollection(iObject *object)
+{
+	// Parameter check
+	if (!object) return;
+	Game::ID_TYPE id = object->GetID();
+
+	// Attempt to locate this object in our collection
+	std::vector<ObjectReference<iSpaceObject>>::iterator it = std::find_if(Objects.begin(), Objects.end(),
+		[&id](const ObjectReference<iSpaceObject> & entry) { return (entry() && entry()->GetID() == id); });
+
+	// Erase this item if it was found
+	if (it != Objects.end()) Objects.erase(it);
 }
 
 

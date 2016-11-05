@@ -82,18 +82,16 @@ void StrUpperC(string &str)
 		if (str[i] >= 0x61 && str[i] <= 0x7A) str[i] -= 0x20;
 }
 
-string StrLower(const string &str)
+string StrLower(std::string str)
 {
-	string tmp = str;
-	StrLowerC(tmp);
-	return tmp;
+	StrLowerC(str);
+	return str;
 }
 
-string StrUpper(const string &str)
+string StrUpper(std::string str)
 {
-	string tmp = str;
-	StrUpperC(tmp);
-	return tmp;
+	StrUpperC(str);
+	return str;
 }
 
 bool FileExists(const char *szPath)

@@ -232,7 +232,7 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			spacehub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 			if (spacehub->IsEnvironment())
 			{
-				env = (iSpaceObjectEnvironment*)spaceobject;
+				env = (iSpaceObjectEnvironment*)spacehub;
 				env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
 			}
 

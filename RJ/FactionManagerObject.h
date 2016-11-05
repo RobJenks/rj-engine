@@ -4,12 +4,13 @@
 #define __FactionManagerObjectH__
 
 #include <vector>
+#include "iAcceptsConsoleCommands.h"
 #include "CompilerSettings.h"
 #include "Faction.h"
 
 
 // This class has no special alignment requirements
-class FactionManagerObject
+class FactionManagerObject : public iAcceptsConsoleCommands
 {
 public:
 
@@ -18,7 +19,8 @@ public:
 
 	// Returns a reference to the faction with this ID
 	CMPINLINE Faction *						GetFaction(Faction::F_ID ID)					{ return m_factions[ID]; }
-	Faction::F_ID							GetFaction(const std::string & code);
+	Faction::F_ID							GetFactionIDByCode(const std::string & code);
+	Faction::F_ID							GetFactionIDByName(const std::string & name);
 
 	// Tests whether the supplied faction ID is valid
 	CMPINLINE bool							IsValidFactionID(Faction::F_ID ID) const 		{ return (ID >= 0 && ID < m_factioncount); }
@@ -36,8 +38,14 @@ public:
 	// Returns the disposition of Faction A towards Faction B, i.e. whether Faction A likes Faction B
 	CMPINLINE Faction::FactionDisposition	GetDisposition(Faction::F_ID FactionA, Faction::F_ID FactionB)	{ return m_dispmatrix[FactionA][FactionB]; }
 
+	// Returns the number of factions that exist (including 0, the null faction)
+	CMPINLINE int							FactionCount(void) const						{ return m_factioncount; }
+
 	// Default destructor
 	~FactionManagerObject(void);
+
+	// Virtual inherited method to accept a command from the console
+	bool									ProcessConsoleCommand(GameConsoleCommand & command);
 
 protected:
 

@@ -34,9 +34,15 @@ public:
 	CMPINLINE const std::string &	GetName(void) const						{ return m_name; }
 	CMPINLINE void					SetName(const std::string & name)		{ m_name = name; }
 
+	// Custom debug string function
+	std::string						DebugString(void) const;
+
 	// Default destructor
 	~Faction(void);
 
+	// Translates a faction disposition to/from its string representation
+	static std::string					TranslateFactionDispositionToString(Faction::FactionDisposition disp);
+	static Faction::FactionDisposition	TranslateFactionDispositionFromString(std::string disp);
 
 protected:
 

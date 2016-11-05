@@ -334,7 +334,7 @@ void Player::EnterEnvironment(SpaceSystem *system)
 	// If the player ship is not currently located in this system then move it now
 	if (m_playership()->GetSpaceEnvironment() != m_systemenv)
 	{
-		m_playership()->MoveIntoSpaceEnvironment(m_systemenv, NULL_VECTOR);
+		m_playership()->MoveIntoSpaceEnvironment(m_systemenv);
 	}
 }
 
