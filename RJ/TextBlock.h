@@ -35,7 +35,7 @@ public:
 	// Methods to change the render state of the textblock
 	void SetRenderActive(bool render);
 	void ParentRenderStateChanged(bool parentstate);
-	bool GetRenderActive(void) { return m_render; }
+	bool GetRenderActive(void) const { return m_render; }
 	bool IsActuallyVisible(void) { return (m_render && m_parentrender); }
 
 	// Set the position of this text block
@@ -43,10 +43,6 @@ public:
 
 	// Sets the colour of the text in this block
 	void SetColour(const XMFLOAT4 & colour);
-
-	// Methods to set/retrieve text block properties
-	CMPINLINE string	GetCode(void) { return m_code; }
-	CMPINLINE void		SetCode(string code) { m_code = code; }
 
 	CMPINLINE float		GetSize(void) { return m_size; }
 	const std::string &	GetText(void);
@@ -59,17 +55,15 @@ public:
 	void				Shutdown(void);
 
 private:
-	string										m_code;
-
+	
 	TextManager *								m_textmanager;
-	SentenceType *					m_sentence;
+	SentenceType *								m_sentence;
 	
 	char *										m_textbuffer;
 	std::string									m_string_textbuffer;	// Updated when a std::string 'text' value is requested
 	int											m_maxlength;
 	float										m_size;
 
-	bool										m_render;
 	bool										m_parentrender;
 
 

@@ -33,12 +33,11 @@ public:
 	~UITextBox(void);
 
 	// Methods to retrieve key properties
-	CMPINLINE string							GetCode(void) { return m_code; }
 	CMPINLINE INTVECTOR2						GetPosition(void) { return m_position; }
 	CMPINLINE INTVECTOR2						GetSize(void) { return m_size; }
 	const std::string & 						GetText(void);
 	void										SetText(std::string text);
-	CMPINLINE bool								GetRenderActive(void) { return m_render; }
+	CMPINLINE bool								GetRenderActive(void) const { return m_render; }
 	CMPINLINE INTVECTOR2						GetTextOffset(void) { return m_textoffset; }
 
 	// Methods to retrieve text box components
@@ -47,7 +46,6 @@ public:
 	CMPINLINE TextBlock *									GetTextComponent(void) { return m_textcomponent; }
 
 	// Methods to change properties, which will also propogate to component parts as required
-	CMPINLINE void								SetCode(string code) { m_code = code; }
 	void										SetPosition(INTVECTOR2 pos);
 	void										SetSize(INTVECTOR2 size);
 	void										SetRenderActive(bool render);
@@ -96,9 +94,6 @@ public:
 
 private:
 	
-	// Uniquely-identifying control code
-	string										m_code;
-
 	// Current state of the control
 	iUIControl::ControlState					m_state;
 
@@ -114,7 +109,6 @@ private:
 	// Text box properties
 	INTVECTOR2									m_position;
 	INTVECTOR2									m_size;
-	bool										m_render;
 	INTVECTOR2									m_textoffset;
 
 	// Determines whether the control can accept focus

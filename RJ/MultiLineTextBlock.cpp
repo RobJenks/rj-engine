@@ -15,8 +15,6 @@ const char *MultiLineTextBlock::BACKDROP_COMPONENT = "\\UI\\Common\\Content\\mlt
 MultiLineTextBlock::MultiLineTextBlock(void)
 {
 	// Set default values
-	m_code = "";
-	m_render = false;
 	m_lines = NULL;
 	m_linecodes = NULL;
 	m_mode = MultiLineTextBlock::OperationMode::IndividualLines;
@@ -275,7 +273,7 @@ void MultiLineTextBlock::SetPosition(INTVECTOR2 pos)
 }
 
 // Sets the unique string code for this component
-void MultiLineTextBlock::SetCode(std::string code)
+void MultiLineTextBlock::SetCodeEx(const std::string & code)
 {
 	// Make sure the code is valid
 	if (code == NullString) return;

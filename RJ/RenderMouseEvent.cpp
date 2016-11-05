@@ -4,6 +4,7 @@
 RenderMouseEvent::RenderMouseEvent(string code)
 {
 	m_code = code;
+	m_render = true;
 	m_state = MOUSE_EVENT_TYPE::None;		// Ensures that first trigger will update to default
 
 	m_mousedefaultid = ""; 
@@ -22,6 +23,7 @@ RenderMouseEvent::RenderMouseEvent(string code, string mouse_default, string mou
 {
 	// Set properties based on supplied parameters
 	m_code = code;
+	m_render = true;
 	m_mousedefaultid = mouse_default;
 	m_mousehoverid = mouse_hover;
 	m_mousedownid = mouse_down;

@@ -21,7 +21,6 @@ Image2DRenderGroup::Image2DRenderGroup(void)
 	m_ftexturesize = XMFLOAT2(1.0f, 1.0f);
 	m_vertices = NULL;
 	m_zorder = 0.0f;
-	m_render = true;
 	m_indexCount = 0;
 	m_bufferinstances = 0;
 	m_forcefullupdate = false;

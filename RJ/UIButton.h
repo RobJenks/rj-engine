@@ -32,10 +32,9 @@ public:
 	~UIButton(void);
 
 	// Methods to retrieve key properties
-	string										GetCode(void) { return m_code; }
 	INTVECTOR2									GetPosition(void) { return m_position; }
 	INTVECTOR2									GetSize(void) { return m_size; }
-	bool										GetRenderActive(void) { return m_render; }
+	bool										GetRenderActive(void) const { return m_render; }
 	INTVECTOR2									GetTextOffset(void) { return m_textoffset; }
 
 	// Methods to retrieve components that make up the button control
@@ -44,7 +43,6 @@ public:
 	CMPINLINE TextBlock *									GetTextComponent(void) { return m_textcomponent; }
 
 	// Methods to change properties, which will also propogate to component parts as required
-	CMPINLINE void								SetCode(string code) { m_code = code; }
 	void										SetPosition(INTVECTOR2 pos);
 	void										SetSize(INTVECTOR2 size);
 	void										SetRenderActive(bool render);
@@ -95,9 +93,6 @@ public:
 
 private:
 
-	// Uniquely-identifying control code
-	string										m_code;
-
 	// Current state of the control
 	iUIControl::ControlState					m_state;
 
@@ -112,7 +107,6 @@ private:
 	// Button properties
 	INTVECTOR2									m_position;
 	INTVECTOR2									m_size;
-	bool										m_render;
 	INTVECTOR2									m_textoffset;
 
 	// Determines whether the control can accept focus

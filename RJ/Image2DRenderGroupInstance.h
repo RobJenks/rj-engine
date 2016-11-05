@@ -24,12 +24,8 @@ public:
 	CMPINLINE string				GetKey(void) { return m_key; }	
 	CMPINLINE void					SetKey(string key) { m_key = key; }
 
-	// Methods to get and set the unique string code, inherited from iUIComponent.  This is equivalent to the key
-	CMPINLINE string				GetCode(void) { return GetKey(); }
-	CMPINLINE void					SetCode(string code) { SetKey(code); }
-
 	// Method to test the render active flag for this instance
-	CMPINLINE bool					GetRenderActive(void)
+	CMPINLINE bool					GetRenderActive(void) const
 	{
 		Image2DRenderGroup::Instance *instance = m_rendergroup->GetInstanceByCode(m_key);
 		if (instance && instance->render) return true; else return false;

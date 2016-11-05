@@ -7,8 +7,7 @@
 #include "Utility.h"
 #include "iUIComponent.h"
 #include "Image2DRenderGroup.h"
-using namespace std;
-
+class UIManagedControlDefinition;
 class GameInputDevice;
 
 class iUIControl : public iUIComponent
@@ -26,9 +25,6 @@ public:
 	typedef vector<iUIComponent*> ControlComponentCollection;
 
 	virtual bool WithinControlBounds(INTVECTOR2 point) = 0;
-
-	virtual string GetCode(void) = 0;
-	virtual void SetCode(string code) = 0;
 
 	virtual Type GetType(void) = 0;
 	virtual ControlState GetControlState(void) = 0;
@@ -60,10 +56,17 @@ public:
 	virtual ControlComponentCollection *GetComponents(void) = 0;
 
 	// Derives a control type from its string representation
-	static iUIControl::Type DeriveType(string typestring);
+	static iUIControl::Type DeriveType(std::string typestring);
 
 	// Generates a new unique control ID
 	static int iUIControl::GenerateControlID(void);
+
+protected:
+
+	// Method to initialise an image component for this control with default parameters
+	Result InitialiseImageComponentDefault(UIManagedControlDefinition *def, Image2DRenderGroup **component,
+		std::string componentname, int instancecount, float zorder);
+
 };
 
 

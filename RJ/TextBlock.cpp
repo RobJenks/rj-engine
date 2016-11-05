@@ -164,7 +164,6 @@ TextBlock::TextBlock(void)
 		++inst_con;
 	#endif
 
-	m_code = "";
 	m_textmanager = NULL;
 	m_sentence = NULL;
 	m_textbuffer = NULL;

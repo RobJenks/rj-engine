@@ -81,7 +81,7 @@ public:
 		// Standard methods to satisfy the iUIComponent interface
 		string GetCode(void) { return code; }
 		void SetCode(string _code) { code = _code; }
-		bool GetRenderActive(void) { return render; }
+		bool GetRenderActive(void) const { return render; }
 		void SetRenderActive(bool _render) { render = _render; }
 
 		// Shutdown method to satisfy the interface requirement
@@ -118,9 +118,9 @@ public:
 		if (index >= m_instances.size()) return NULL; else return &(m_instances.at(index)); 
 	}
 
-	// Return or set the unique object key
-	CMPINLINE string					GetCode(void) { return m_code; }
-	CMPINLINE void						SetCode(string code) { m_code = code; }
+	// The entire group can be set to render or not; this flag is checked by the render manager before it takes any action
+	CMPINLINE bool						GetRenderActive(void) const		{ return m_render; }
+	CMPINLINE void						SetRenderActive(bool render)		{ m_render = render; }
 
 	// Return or set the z-order for this component group
 	CMPINLINE float						GetZOrder(void) { return m_zorder; }
@@ -129,10 +129,6 @@ public:
 	// Determines whether instances of this group will accept or ignore mouse input.  Default is false.
 	CMPINLINE bool						AcceptsMouseInput(void) { return m_acceptsmouse; }
 	CMPINLINE void						SetAcceptsMouseInput(bool flag) { m_acceptsmouse = flag; }
-
-	// The entire group can be set to render or not; this flag is checked by the render manager before it takes any action
-	CMPINLINE bool GetRenderActive(void) { return m_render; }
-	CMPINLINE void SetRenderActive(bool render) { m_render = render; }
 
 	CMPINLINE void ForceFullUpdateNextCycle(void) { m_forcefullupdate = true; }
 	CMPINLINE void CancelFullUpdateNextCycle(void) { m_forcefullupdate = false; }
@@ -179,7 +175,6 @@ private:
 
 
 private:
-	string								m_code;
 	InstanceCollection					m_instances;		// All the instances within this render group
 	int									m_bufferinstances;	// The number of instances currently allocated in the vertex buffer
 
@@ -191,7 +186,6 @@ private:
 	INTVECTOR2							m_texturesize;		// Size of the texture to be applied to this render group
 	XMFLOAT2							m_ftexturesize;		// Texture size, stored in floating point representation to avoid casts later
 
-	bool								m_render;
 	bool								m_forcefullupdate;
 
 	float								m_zorder;			// The z-order of this component *group*, which determines order of rendering by the render manager

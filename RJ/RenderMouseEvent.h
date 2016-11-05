@@ -45,13 +45,10 @@ public:
 	// Method that attempts to locate the specified component ID in the supplied index and returns it if found
 	Image2D *			ResolveComponentID(string component, Render2DGroup::Image2DCollection &componentindex);
 
-	// Methods for accessing/modifying the unique event code
-	CMPINLINE string	GetCode(void) { return m_code; }
-	CMPINLINE void		SetCode(string code) { m_code = code; }
 	
 	// Methods for accessing/modifying whether or not this event is active
-	CMPINLINE bool		GetRenderActive(void) { return m_render; }
-	CMPINLINE void		SetRenderActive(bool render) { m_render = render; }
+	CMPINLINE bool		GetRenderActive(void) const		{ return m_render; }
+	CMPINLINE void		SetRenderActive(bool render)	{ m_render = render; }
 
 	// Methods around region bounds
 	CMPINLINE int		GetX(void) { return m_x; }
@@ -86,9 +83,6 @@ private:
 	
 	// Method that attempts to locate the specified component ID in the supplied index and returns it if found
 	Image2D *			ResolveComponentID(string component, Render2DGroup::Image2DCollection *componentindex);
-
-	// String ID of this event
-	string				m_code;
 
 	// Current event state of this item
 	MOUSE_EVENT_TYPE	m_state;

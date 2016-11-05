@@ -50,20 +50,16 @@ public:
 	CMPINLINE iUIControl::Type					GetType(void) { return iUIControl::Type::Combobox; }
 
 	// Constructor that takes a definition as parameter
-	UIComboBox(UIManagedControlDefinition *def);
+	UIComboBox(void);
 
 	// Initialises the control from a supplied control definition
 	Result Initialise(UIManagedControlDefinition *def, string code, int expandsize, int x, int y, float z, int width, int height, bool render);
 
-	// Methods to get and set the unique control code
-	CMPINLINE string	GetCode(void)							{ return m_code; }
-	CMPINLINE void		SetCode(string code)					{ m_code = code; }
-
 	// Inline methods to get aspects of the control positioning
-	INTVECTOR2			GetPosition(void)		{ return m_location; }
-	INTVECTOR2			GetSize(void)			{ return m_size; }
-	float				GetZOrder(void)			{ return m_zorder; }
-	bool				GetRenderActive(void)	{ return m_render; }
+	INTVECTOR2			GetPosition(void)			{ return m_location; }
+	INTVECTOR2			GetSize(void)				{ return m_size; }
+	float				GetZOrder(void)				{ return m_zorder; }
+	bool				GetRenderActive(void) const	{ return m_render; }
 	
 	// Methods to set aspects of the control positioning
 	void				SetPosition(INTVECTOR2 location);
@@ -177,21 +173,16 @@ public:
 	// Shutdown method to satisfy the interface requirement (only basic components, e.g. Image2Ds & text, need to be disposed of)
 	void Shutdown(void) { }
 
-
-	UIComboBox(void);
 	~UIComboBox(void);
 
 
 private:
-	// Unique string ID of this control
-	string														m_code;
 
 	// Size & position properties for this control
 	INTVECTOR2													m_location;
 	INTVECTOR2													m_size;
 	float														m_zorder;
-	bool														m_render;
-
+	
 	// Render group that this control is registered with
 	Render2DGroup *												m_rendergroup;
 
@@ -238,10 +229,6 @@ private:
 	
 	// Determines whether this control can accept focus
 	bool														m_canacceptfocus;
-
-	// Method to initialise an image component for this control with default parameters
-	Result					InitialiseImageComponentDefault(	UIManagedControlDefinition *def, Image2DRenderGroup **component, 
-																string componentname, int instancecount, float zorder );
 
 };
 

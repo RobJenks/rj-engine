@@ -10,7 +10,7 @@
 using namespace std;
 
 
-class UIComponentGroup : iUIComponent
+class UIComponentGroup : public iUIComponent
 {
 
 public:
@@ -37,12 +37,8 @@ public:
 	iUIComponent *				GetItem(int index);
 	ComponentGroupItems *		GetItems(void);
 
-	// Methods to set/retrieve the group code
-	CMPINLINE string			GetCode(void) { return m_code; }
-	CMPINLINE void				SetCode(string code) { m_code = code; } 
-	
 	// Method to query or change the render state 
-	CMPINLINE bool				IsGroupRenderingEnabled(void) { return m_render; }
+	CMPINLINE bool				IsGroupRenderingEnabled(void) const { return m_render; }
 	void						DisableGroupRendering();
 	void						EnableGroupRendering(bool ignore_previous_state);
 
@@ -54,21 +50,15 @@ public:
 	void						Shutdown(void);
 
 	// Methods to satisfy the iUIComponent interface and thereby allow nested component groups
-	CMPINLINE bool				GetRenderActive(void) { return IsGroupRenderingEnabled(); }
+	CMPINLINE bool				GetRenderActive(void) const  { return IsGroupRenderingEnabled(); }
 	void						SetRenderActive(bool render);
 
 
 private:
 
-	// Code that identifies this component group
-	string					m_code;
-
 	// The collection of all items within this component group
 	ComponentGroupItems		m_items;
 	
-	// The current render state of the group
-	bool					m_render;
-
 };
 
 

@@ -37,14 +37,11 @@ public:
 	void Render(void);
 	void Render(int xPosition, int yPosition, float zOrder);
 
+	CMPINLINE bool GetRenderActive(void) const		{ return m_render; }
+	CMPINLINE void SetRenderActive(bool render)		{ m_render = render; }
+
 	CMPINLINE int GetIndexCount() { return m_indexCount; }
 	CMPINLINE ID3D11ShaderResourceView* GetTexture() { return m_Texture->GetTexture(); }
-
-	CMPINLINE string GetCode(void) { return m_code; }
-	CMPINLINE void SetCode(string code) { m_code = code; }
-
-	CMPINLINE bool GetRenderActive(void) { return m_render; }
-	CMPINLINE void SetRenderActive(bool render) { m_render = render; }
 
 	CMPINLINE int GetXPosition(void) { return m_x; }
 	CMPINLINE int GetYPosition(void) { return m_y; }
@@ -66,8 +63,7 @@ private:
 	void ReleaseTexture();
 
 private:
-	string m_code;
-	bool m_render;
+
 	int m_x, m_y;
 	float m_z;
 

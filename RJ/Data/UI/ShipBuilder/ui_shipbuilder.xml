@@ -3,8 +3,29 @@
     <Code>UI_SHIPBUILDER</Code>
     <Description>Ship Builder</Description>
 
-    
-    
+    <!-- Textbox components -->
+    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_projmass_fr" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
+      <Instance code="txt_projvel_fr" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_projmass_frf" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
+      <Instance code="txt_projvel_frf" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
+    </Image2DGroup>
+
+
+    <!-- Projectile mass textbox -->
+    <TextBlock code="txt_projmass_label" text="Mass: " x="964" y="42" render="true" capacity="8" size="1.000000" />
+    <TextBlock code="txt_projmass_text" text="10000.0" x="1018" y="42" render="true" capacity="64" size="1.000000" />
+    <TextBox code="txt_projmass" frame="textbox_frame" frame_key="txt_projmass_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_projmass_frf" text="txt_projmass_text" render="true" />
+
+    <!-- Projectile mass textbox -->
+    <TextBlock code="txt_projvel_label" text="Velocity: " x="948" y="90" render="true" capacity="12" size="1.000000" />
+    <TextBlock code="txt_projvel_text" text="10000.0" x="1018" y="90" render="true" capacity="64" size="1.000000" />
+    <TextBox code="txt_projvel" frame="textbox_frame" frame_key="txt_projvel_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_projvel_frf" text="txt_projvel_text" render="true" />
+
+
+
   </uilayout>
 </gamedata>
 

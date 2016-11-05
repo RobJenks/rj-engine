@@ -7,10 +7,6 @@ Image2DRenderGroupInstance::Image2DRenderGroupInstance(void) : m_rendergroup(NUL
 {
 }
 
-/*Image2DRenderGroupInstance(Image2DRenderGroup *rg, string key) : m_rendergroup(rg), m_key(key)
-{
-}*/
-
 Image2DRenderGroupInstance::~Image2DRenderGroupInstance(void)
 {
 }

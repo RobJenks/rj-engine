@@ -7,7 +7,6 @@
 
 Image2D::Image2D()
 {
-	m_render = true;
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;

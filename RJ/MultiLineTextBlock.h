@@ -29,19 +29,18 @@ public:
 	Result										Initialise(	Render2DGroup *parent, std::string code, MultiLineTextBlock::OperationMode mode, INTVECTOR2 location, float z,
 															INTVECTOR2 size, int linecount, int maxlinelength, int font, float fontsize, XMFLOAT4 col, bool render);
 
-	// Methods to set/retrieve the string code
-	CMPINLINE std::string						GetCode(void) { return m_code; }
-	void										SetCode(std::string code);
-
 	// Methods to retrieve the operation mode of this component (read-only)
 	CMPINLINE OperationMode						GetOperationMode(void) const { return m_mode; }
 
 	// Methods to retrieve and set the render state of this component
-	CMPINLINE bool								GetRenderActive(void) { return m_render; }
+	CMPINLINE bool								GetRenderActive(void) const { return m_render; }
 	void										SetRenderActive(bool render);
 
 	// Set the text for this component.  Only valid where (mode == WordWrap)
 	void										SetText(const std::string & text);
+
+	// This control uses the extended SetCode method
+	void										SetCodeEx(const std::string & code);
 
 	// Set the text for a particular line of this component.  Only valid where (mode == IndividualLines)
 	void										SetText(int line_number, const std::string & text);
@@ -91,8 +90,6 @@ public:
 protected:
 
 	Render2DGroup *								m_parent;
-	std::string									m_code;
-	bool										m_render;
 	OperationMode								m_mode;
 
 	std::string *								m_linecodes;
