@@ -576,21 +576,30 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 
 					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
 					// end location are both within a particular control. 
-					// First, test whether the current (mouse up) location is within a component
-					if (m_mousecurrenthovercomponent.instance) {
-						// If the mouse IS within a component then test whether it also began the mouse event within the same component
-						if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
-							// If it did, raise a mouse click event for this component
-							m_controller->ProcessMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
+					// First, test whether the current (mouse up) location is within a component, and whether began the mouse event within the same component
+					if (m_mousecurrenthovercomponent.instance && 
+						PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size))
+					{
+						// If it did, raise a mouse click event for this component
+						m_controller->ProcessMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
 
-							// Also raise a control-click method (both at the controller and the control itself) if this is a managed control
-							if (m_mousecurrenthovercomponent.instance->control)
-							{
-								m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent.instance->control);
-								m_mousecurrenthovercomponent.instance->control->HandleMouseClickEvent(
-									m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
-							}
+						// Also raise a control-click method (both at the controller and the control itself) if this is a managed control
+						if (m_mousecurrenthovercomponent.instance->control)
+						{
+							m_controller->ProcessControlClickEvent(m_mousecurrenthovercomponent.instance->control);
+							m_mousecurrenthovercomponent.instance->control->HandleMouseClickEvent(
+								m_mousecurrenthovercomponent.rendergroup, m_mousecurrenthovercomponent.instance, m_mouselocation, startloc);
 						}
+						else
+						{
+							// We were clicking entirely within a component, but that component is not part of a focus-able control
+							m_controller->SetControlInFocus(NULL);
+						}
+					}
+					else
+					{
+						// We were not clicking on an component, or the down/up events did not take place within the same component.  Deselect any control
+						m_controller->SetControlInFocus(NULL);
 					}
 
 					// Pass a mouse up notification to any managed control that requires it to revert from a mouse down state
