@@ -1984,16 +1984,19 @@ void RJMain::__CreateDebugScenario(void)
 		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_prc") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
-		bool is_armed[2] = { false, false };
+		bool is_armed[2] = { false, true };
+		bool has_engine_control[2] = { false, false };
 		for (int c = 0; c < 2; ++c)
 		{
 			css[c] = ComplexShip::Create("testfrigate12");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
+			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 			css[c]->SetPosition(positions[c]);
 			css[c]->SetOrientation(orients[c]);
 			css[c]->SetInvulnerabilityFlag(true);
 			css[c]->SetFaction(factions[c]);
+			css[c]->SetShipEngineControl(has_engine_control[c]);
 
 			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
 			//css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
@@ -2022,7 +2025,7 @@ void RJMain::__CreateDebugScenario(void)
 
 						css[c]->TurretController.AddTurret(nt);
 
-						// *** Temporarily required since CS objects are currently defaulting to "tactical" simulation
+						// *** TODO: temporarily required since CS objects are currently defaulting to "tactical" simulation
 						css[c]->SetAsSimulationHub();
 					}
 				}

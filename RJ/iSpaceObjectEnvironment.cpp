@@ -1068,7 +1068,7 @@ void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision &
 
 
 // Executes the collision of an object with the specified object, as part of an environment collision event
-void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision)
+void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision::EventDetails & ev, EnvironmentCollision & collision)
 {
 	// Get a reference to the element 
 	if (ElementIndexIsValid(ev.EntityID) == false) return;
@@ -1092,7 +1092,11 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	std::vector<iEnvironmentObject*> objects;
 	std::vector<StaticTerrain*> terrain;
 
-	// First, the tile currently in this element (if any)
+	// First, the inherent strength of the element.  This is scaled by the current element health to simulate
+	// the loss of structural integrity as the hull takes more damage
+	float el_strength = el.GetImpactResistance();
+
+	// Next, the tile currently in this element (if any).  This is also scaled by the health of the underlying element
 	if (tile)
 	{
 		tile_strength = tile->GetImpactResistance(el);
@@ -1124,8 +1128,8 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	}
 
 	// Sum the total impact resistance and compare to the incoming object force.  The percentage of force
-	// transferred to this impacted hull is scaled by the degree of impact
-	float total_strength = (tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
+	// transferred to this impacted hull is scaled by the degree of impact (Param1)
+	float total_strength = (el_strength + tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
 	float damage_pc = (obj_force / total_strength) * ev.Param1;
 
 	// The final damage value (in the range 0.0-1.0) can be derived from this damage_pc and any relevant damage 

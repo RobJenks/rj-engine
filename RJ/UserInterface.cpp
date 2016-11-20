@@ -638,8 +638,10 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 					// end location are both within a particular control. 
 					// First, test whether the current (mouse up) location is within a component
 					if (m_mousecurrenthovercomponent.instance) {
+
 						// If the mouse IS within a component then test whether it also began the mouse event within the same component
 						if (PointWithinBounds(startloc, m_mousecurrenthovercomponent.instance->position, m_mousecurrenthovercomponent.instance->size)) {
+
 							// If it did, raise a right mouse click event for this component
 							m_controller->ProcessRightMouseClickEvent(m_mousecurrenthovercomponent, m_mouselocation, startloc);
 

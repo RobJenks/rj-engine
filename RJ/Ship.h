@@ -213,9 +213,10 @@ public:
 	CMPINLINE void				RemoveBrakes(void)				{ m_isbraking = false; }
 
 	// Enable and disable ship computer control of ship functions
-	CMPINLINE bool				ShipEngineControl(void)			{ return m_shipenginecontrol; }
-	CMPINLINE void				EnableShipEngineControl(void)	{ m_shipenginecontrol = true; }
-	CMPINLINE void				DisableShipEngineControl(void)	{ m_shipenginecontrol = false; }
+	CMPINLINE bool				ShipEngineControl(void)				{ return m_shipenginecontrol; }
+	CMPINLINE void				EnableShipEngineControl(void)		{ m_shipenginecontrol = true; }
+	CMPINLINE void				DisableShipEngineControl(void)		{ m_shipenginecontrol = false; }
+	CMPINLINE void				SetShipEngineControl(bool control)	{ m_shipenginecontrol = control; }
 
 	// Methods to set and retrieve the current ship target speed
 	CMPINLINE float				GetTargetSpeed(void)			{ return m_targetspeed; }

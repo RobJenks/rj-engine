@@ -442,7 +442,7 @@ protected:
 	void							SetElementSize(const INTVECTOR3 & size);
 
 	// Executes the collision of an object with the specified object, as part of an envrionment collision event
-	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails ev, EnvironmentCollision & collision);
+	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails & ev, EnvironmentCollision & collision);
 
 	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
 	void							TriggerElementDamage(int element_id, float damage);

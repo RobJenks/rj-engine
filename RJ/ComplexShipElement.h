@@ -96,9 +96,18 @@ public:
 	// Is the element walkable?  Used for pathfinding and routing calculations
 	CMPINLINE bool					IsWalkable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_WALKABLE); }
 
-	// Other key fields relating to this element
+	// Health of the element.  Ranges from 0.0-1.0.  Element is destroyed at <= 0.0
 	CMPINLINE float					GetHealth(void) const			{ return m_health; }
 	CMPINLINE void					SetHealth(float h)				{ m_health = h; }
+
+	// Inherent strength of the element.  Generally inherited from the hull that contains this element.  This is the
+	// base impact resistance when determining the effect of a collider intersection with an environment
+	CMPINLINE float					GetStrength(void) const			{ return m_strength; }
+	CMPINLINE void					SetStrength(float s)			{ m_strength = s; }
+
+	// Impact resistance of the element.  This is its health-scaled strength value.  I.e. simulates the decrease
+	// in element integrity as the hull takes damage
+	CMPINLINE float					GetImpactResistance(void) const	{ return (m_strength * m_health); }
 
 	// Get or change the gravity strength at this element
 	CMPINLINE float					GetGravityStrength(void) const	{ return m_gravity; }
@@ -275,6 +284,10 @@ private:
 	// Health of the element from 0.0-1.0
 	float							m_health;
 	
+	// Inherent strength of the element.  Generally inherited from the hull that contains this element.  This is the
+	// base impact resistance when determining the effect of a collider intersection with an environment
+	float							m_strength;
+
 	// Other properties of the element
 	float							m_gravity;
 

@@ -30,6 +30,7 @@ ComplexShipElement::ComplexShipElement(void)
 	m_properties = ComplexShipElement::DefaultPropertyValues;
 	m_tile = NULL;
 	m_health = 1.0f;
+	m_strength = 1000.0f;
 	m_gravity = 0.0f;
 
 	// No attach points by default
