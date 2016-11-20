@@ -571,7 +571,7 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 					m_controller->ProcessMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
 
 					// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
-					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
+					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) && (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
 						m_controller->ProcessMouseClickAtLocation(m_mouselocation);
 
 					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
@@ -631,7 +631,7 @@ void UserInterface::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 					m_controller->ProcessRightMouseUpEvent_Base(m_mouselocation, startloc, m_mousecurrenthovercomponent);
 
 					// If we start & end the mouse click within a certain tolerance, generate a generic click event at the end position
-					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) || (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
+					if ((abs(startloc.x - m_mouselocation.x) < UserInterface::CLICK_TOLERANCE) && (abs(startloc.y - m_mouselocation.y) < UserInterface::CLICK_TOLERANCE))
 						m_controller->ProcessRightMouseClickAtLocation(m_mouselocation);
 
 					// Also test whether this qualifies as a mouse click event on a specific component, if the mouse start and 
