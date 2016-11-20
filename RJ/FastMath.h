@@ -33,6 +33,8 @@ extern const double INF_DOUBLE;
 #define DOT_3D(v0, v1) ((v0.x*v1.x) + (v0.y*v1.y) + (v0.z*v1.z))
 #define DOTPERP_2D(v0, v1) ((v0.x*v1.y) + (v0.y*-v1.x))				// DotPerp(v0,v1) == Dot(v0, Perp(v1)), where Perp(u,v) == (v, -u).  [v1.x=v1.y, v1.y=-v1.x]
 
+#define FLOAT_EQ(a, b) (std::abs(a - b) < Game::C_EPSILON)
+
 extern const INTVECTOR2 NULL_INTVECTOR2;
 extern const INTVECTOR3 NULL_INTVECTOR3;
 extern const INTVECTOR2 ONE_INTVECTOR2;

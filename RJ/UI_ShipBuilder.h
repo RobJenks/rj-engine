@@ -133,7 +133,7 @@ public:
 	void ProcessRightMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
 
 	// Methods to accept the processed mouse click events for managed components, e.g. buttons
-	void ProcessControlClickEvent(iUIControl *control) { }
+	void ProcessControlClickEvent(iUIControl *control);
 	void ProcessControlRightClickEvent(iUIControl *control) { }
 
 	// Process button click events in the UI
@@ -145,6 +145,9 @@ public:
 
 	// Methods to process specific events raised from individual controls, and routed through the UserInterface
 	void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex) { }
+
+	// Methods to accept other managed control events
+	void ProcessTextboxChangedEvent(iUIControl *control);
 
 
 protected:
@@ -233,7 +236,10 @@ protected:
 
 	// Sets the position of an intersection test marker in world space
 	void										SetIntersectionTestMarkerPosition(SimpleShip **ppMarker, const FXMVECTOR position);
-
+	
+	// Updates the parameters used in the intersection test based on user interface input
+	void										UpdateIntersectionTestParameters(void);
+	
 	// Performs the intesection test in 'structural test' mode
 	void										PerformIntersectionTest(void);
 
@@ -255,7 +261,6 @@ protected:
 	// Internal methods to get the current position/orientation of the game camera
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
-
 
 
 
@@ -292,7 +297,6 @@ protected:
 	std::vector<TilePlacementIssue>				m_tile_placement_issues;			// Vector populated with each tile placement error that is encountered
 	std::vector<INTVECTOR3>						m_placement_tile_changes;			// Vector populated with the location of all tiles that were temporarily modified during 
 																					// tile placement, and which need to be reverted once tile placement ends or moves to another element
-public:
 	// Fields relating to the structural testing functionality
 	SimpleShip *								m_intersect_marker_start;			// Marker at the start of the projectile intersection test path
 	SimpleShip *								m_intersect_marker_end;				// Marker at the end of the projectile intersection test path
@@ -300,6 +304,13 @@ public:
 	VolumetricLine								m_intersect_test_trajectory;		// Trajectory of the collider in interection test mode
 	ObjectReference<SimpleShip>					m_intersect_test_proj;				// The projectile used to perform the intersection test
 	SimulatedEnvironmentCollision				m_simulated_intersection;			// The sequence of intersection events that occured during the last intersection event
+
+	// Intersection test parameters
+	float										m_intersect_proj_mass;				// Mass of the intersection test projectile
+	float										m_intersect_proj_vel;				// Velocity of the intersection test projectile
+	float										m_intersect_proj_radius;			// Radius of the intersection test projectile
+	float										m_intersect_proj_hardness;			// Hardness of the intersection test projectile
+
 
 };
 

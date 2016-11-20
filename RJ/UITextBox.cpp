@@ -3,7 +3,10 @@
 #include "Image2DRenderGroup.h"
 #include "TextBlock.h"
 #include "Utility.h"
+#include "GameDataExtern.h"
 #include "GameInput.h"
+#include "UserInterface.h"
+#include "iUIController.h"
 #include "UITextBox.h"
 
 UITextBox::UITextBox(	string code, 
@@ -111,8 +114,29 @@ const std::string & UITextBox::GetText(void)
 // Directly sets the text held in this textbox control
 void UITextBox::SetText(std::string text)
 {
+	// Set the underlying text data
 	if (m_textcomponent)
+	{
 		m_textcomponent->SetText(text);
+	}
+
+	// Raise an event to inform our UI controller that the textbox contents have changed (or at least been set)
+	// TODO: This is a hack in order to get back to the active UI controller and pass on the event.  No guarantee
+	// that this control is actually part of that controller (but likely, given that it is being updated)
+	if (D::UI && D::UI->GetActiveUIController())
+	{
+		D::UI->GetActiveUIController()->ProcessTextboxChangedEvent(this);
+	}
+}
+
+// Directly sets the text held in this textbox control, without raising any associated events or notifying any controllers
+void UITextBox::SetTextSilent(const std::string & text)
+{
+	// Set the underlying text data
+	if (m_textcomponent)
+	{
+		m_textcomponent->SetText(text);
+	}
 }
 
 // Determines whether the supplied point lies within the control bounds; part of the iUIControl interface
@@ -186,7 +210,7 @@ void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 			// Add to the textbox string
 			string newtext = m_textcomponent->GetText();
 			newtext.push_back(key.keychar);
-			m_textcomponent->SetText( newtext );
+			SetText( newtext );
 		}
 
 		// The textbox should consume this key so that it is not also registered by in-game objects
@@ -200,7 +224,7 @@ void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 		{
 			// Reduce the text by one character
 			newtext = newtext.substr(0, newtext.size()-1);
-			m_textcomponent->SetText(newtext);
+			SetText(newtext);
 
 			// Lock the backspace key to avoid repeated processing each frame, until the next key-up
 			keyboard->LockKey(DIK_BACKSPACE);

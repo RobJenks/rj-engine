@@ -199,6 +199,9 @@ public:
 	// Methods to process user events relating to each class of managed control
 	void								ProcessButtonClickEvent(UIButton *button);
 
+	// Methods to accept other managed control events
+	void								ProcessTextboxChangedEvent(iUIControl *control) { }
+
 	// Called when a control panel tab is clicked; changes the SD view accordingly
 	void								ControlPanelTabClicked(UIButton *button);
 

@@ -20,7 +20,10 @@ public:
 
 	// Enumeration of possible camera states
 	enum CameraState					{ NormalCamera = 0, FixedCamera, PathCamera, DebugCamera };
-	
+
+	// Enumeration of possible zoom-to-overhead-view completion actions
+	enum ZoomToOverheadCompletionAction	{ ReleaseCameraAfterOverheadZoom = 0, FixInSpaceAfterOverheadZoom, FixOverShipAfterOverheadZoom };
+
 	// Initialisation function for this camera component
 	Result								Initialise(void);
 
@@ -100,8 +103,9 @@ public:
 
 	// Zooms the camera to an overhead view of the specified space object.  Returns true if the path was started sucessfully
 	bool								ZoomToOverheadShipView(iSpaceObject *target);
-	bool								ZoomToOverheadShipView(iSpaceObject *target, float time);
-	bool								ZoomToOverheadShipView(iSpaceObject *target, float distance, float time);
+	bool								ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete);
+	bool								ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete, float time);
+	bool								ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete, float distance, float time);
 
 	// Sets the currently-active ship; if the ship has changed since the last cycle, this will reset any ship-dependent tracking data
 	void								UpdateChaseCamera(const Ship *target);

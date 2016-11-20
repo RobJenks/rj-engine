@@ -105,15 +105,19 @@ bool CameraPath::Advance(float timefactor)
 
 	// Target position & orientation will always be those held in node[index].  Transform from object to world space if required
 	XMVECTOR targetpos, targetorient; 
-	if (m_nodes[m_index].Object == NULL)
+	if (m_nodes[m_index].IsObjectRelative)
 	{
-		targetpos = m_nodes[m_index].Position;
-		targetorient = m_nodes[m_index].Orientation;
+		// Get the target object.  If it no longer exists (e.g. was destroyed) then terminate the path immediately
+		iSpaceObject *obj = m_nodes[m_index].Object();
+		if (obj == NULL) return true;
+
+		targetpos = XMVector3TransformCoord(m_nodes[m_index].Position, obj->GetWorldMatrix());
+		targetorient = XMQuaternionMultiply(m_nodes[m_index].Orientation, obj->GetOrientation());
 	}
 	else
 	{
-		targetpos = XMVector3TransformCoord(m_nodes[m_index].Position, m_nodes[m_index].Object->GetWorldMatrix());
-		targetorient = XMQuaternionMultiply(m_nodes[m_index].Object->GetOrientation(), m_nodes[m_index].Orientation);
+		targetpos = m_nodes[m_index].Position;
+		targetorient = m_nodes[m_index].Orientation;
 	}
 
 	// Determine which node we are interpolating from, towards node[index]
@@ -131,15 +135,19 @@ bool CameraPath::Advance(float timefactor)
 
 	// Now get the source position & orientation, again transforming from local space if required
 	XMVECTOR sourcepos, sourceorient; 
-	if (m_nodes[previndex].Object == NULL)
+	if (m_nodes[previndex].IsObjectRelative)
 	{
-		sourcepos = m_nodes[previndex].Position;
-		sourceorient = m_nodes[previndex].Orientation;
+		// Get the target object.  If it no longer exists (e.g. was destroyed) then terminate the path immediately
+		iSpaceObject *obj = m_nodes[previndex].Object();
+		if (obj == NULL) return true;
+
+		sourcepos = XMVector3TransformCoord(m_nodes[previndex].Position, obj->GetWorldMatrix());
+		sourceorient = XMQuaternionMultiply(m_nodes[previndex].Orientation, obj->GetOrientation());
 	}
 	else
 	{
-		sourcepos = XMVector3TransformCoord(m_nodes[previndex].Position, m_nodes[previndex].Object->GetWorldMatrix());
-		sourceorient = XMQuaternionMultiply(m_nodes[previndex].Object->GetOrientation(), m_nodes[previndex].Orientation);
+		sourcepos = m_nodes[previndex].Position;
+		sourceorient = m_nodes[previndex].Orientation;
 	}
 
 	// We can now interpolate between the two relevant path nodes to get the current camera state
@@ -188,6 +196,22 @@ void CameraPath::ClearNodes(void)
 	m_nodecount = 0;
 }
 
+// Static method to generate a "tracking path" that will simply maintain the camera position & orientation
+// relative to the target object
+CameraPath* CameraPath::CreateTrackingPath(iSpaceObject *target, const FXMVECTOR relative_pos, const FXMVECTOR relative_orient)
+{
+	// Parameter check; we need a target object
+	if (!target) return NULL;
+
+	// Create a path which will continually track the target object, without changing its relative pos/orient
+	CameraPath *path = new CameraPath();
+	path->AddNode(relative_pos, relative_orient, target, 0.0f);
+	path->AddNode(XMVectorAdd(relative_pos, Game::C_EPSILON_V), relative_orient, target, 100000.0f);
+	path->SetPathMode(CameraPath::CameraPathMode::RepeatingInReverse);
+	path->SetIsPausable(false);
+	path->SetPathCompletionAction(CameraPath::CameraPathCompletionAction::ReleaseOnCompletion);		// Will not happen until directly terminated, however
+	return path;
+}
 
 // Default destructor
 CameraPath::~CameraPath(void)

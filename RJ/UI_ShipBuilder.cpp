@@ -11,6 +11,8 @@
 #include "CSCorridorTile.h"
 #include "TileAdjacency.h"
 #include "UserInterface.h"
+#include "Render2DGroup.h"
+#include "UITextBox.h"
 #include "Light.h"
 #include "FactionManagerObject.h"
 #include "GamePhysicsEngine.h"
@@ -95,6 +97,7 @@ void UI_ShipBuilder::Activate(void)
 	m_intersect_marker_start = m_intersect_marker_end = NULL;
 	m_intersect_test_proj = NULL;
 	m_selected_intersection_marker = NULL;
+	m_intersect_proj_mass = m_intersect_proj_vel = m_intersect_proj_radius = m_intersect_proj_hardness = 1.0f;
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
@@ -382,7 +385,8 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 	if (!m_ship || !ship->GetSpaceEnvironment()) { m_ship = NULL; return; }
 
 	// Initialise a camera transition to overhead view of the ship
-	Game::Engine->GetCamera()->ZoomToOverheadShipView(m_ship, GetDefaultZoomLevel(), Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
+	Game::Engine->GetCamera()->ZoomToOverheadShipView(m_ship, CameraClass::ZoomToOverheadCompletionAction::FixOverShipAfterOverheadZoom, 
+		GetDefaultZoomLevel(), Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
 	LockCamera(Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
 
 	// Set the zoom level based on this ship
@@ -1018,15 +1022,14 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// Parameter checks
 	if (!m_ship || !m_intersect_marker_start || !m_intersect_marker_end) return;
 
-	// Test parameters which can later be user-specified
-	float proj_velocity = 1000.0f;
-	float proj_radius = 5.0f;
-	float proj_mass = 250.0f;
-	float proj_hardness = 1.0f;
+	// Retrieve test parameters from the UI
+	UpdateIntersectionTestParameters();
+
+	OutputDebugString(concat("Starting test with mass = ")(m_intersect_proj_mass)(", velocity = ")(m_intersect_proj_vel)(", radius = ")(m_intersect_proj_radius)(", hardness = ")(m_intersect_proj_hardness)("\n").str().c_str());
 
 	// Determine ray direction
 	XMVECTOR norm_proj_vec = XMVector3NormalizeEst(XMVectorSubtract(m_intersect_marker_end->GetPosition(), m_intersect_marker_start->GetPosition()));
-	XMVECTOR proj_vec = XMVectorScale(norm_proj_vec, proj_velocity);
+	XMVECTOR proj_vec = XMVectorScale(norm_proj_vec, m_intersect_proj_vel);
 
 	// Detemrine the ray/OBBB intersection from projectile start location along proj_vec
 	Ray proj_ray = Ray(m_intersect_marker_start->GetPosition(), proj_vec);
@@ -1037,7 +1040,7 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// to ensure we have an approx surface/surface collision.  TODO: in future, make this exact using proj OBB?
 	// If projectile has a velocity of v == 2m/s, it will travel its radius r == 6m  in t_rad = r/v = 3s.  We then want to 
 	// decrease the intersection time t by t_rad* ~0.8
-	float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin - ((proj_radius / proj_velocity) * 0.8f);
+	float intersect_time = Game::PhysicsEngine.RayIntersectionResult.tmin - ((m_intersect_proj_radius / m_intersect_proj_vel) * 0.8f);
 	if (intersect_time < 0.0f) return;
 	XMVECTOR intersection = proj_ray.PositionAtTime(intersect_time);
 
@@ -1059,9 +1062,9 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 
 	// Move the projectile into intersection position and set other collision properties
 	m_intersect_test_proj()->SetPosition(intersection);
-	m_intersect_test_proj()->SetCollisionSphereRadius(proj_radius);
-	m_intersect_test_proj()->SetMass(proj_mass);
-	m_intersect_test_proj()->SetHardness(proj_hardness);
+	m_intersect_test_proj()->SetCollisionSphereRadius(m_intersect_proj_radius);
+	m_intersect_test_proj()->SetMass(m_intersect_proj_mass);
+	m_intersect_test_proj()->SetHardness(m_intersect_proj_hardness);
 	m_intersect_test_proj()->SetHealthPercentage(1.0f);
 	m_intersect_test_proj()->SetWorldMomentum(proj_vec);
 
@@ -1186,6 +1189,77 @@ void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
 	m_selected_intersection_marker = NULL;
 }
 
+
+// Event is triggered whenever a mouse click event occurs on a managed control, e.g. a button
+void UI_ShipBuilder::ProcessControlClickEvent(iUIControl *control)
+{
+	// Change focus to this control, if it is one that can accept focus
+	if (control->CanAcceptFocus()) this->SetControlInFocus(control);
+
+	// Pass to more granular downstream methods to handle each type of control as required
+	switch (control->GetType())
+	{
+	case iUIControl::Type::Button:
+		ProcessButtonClickEvent((UIButton*)control);
+		break;
+	}
+}
+
+// Methods to accept other managed control events
+void UI_ShipBuilder::ProcessTextboxChangedEvent(iUIControl *control)
+{
+	if (!control) return;
+
+	// If we are in intersection test mode, and this control holds one of the test parameters, 
+	// re-execute the collision test with the new parameters
+	if (m_mode == UI_ShipBuilder::EditorMode::StructuralTestMode)
+	{
+		if (control->GetCode() == "txt_projmass" || control->GetCode() == "txt_projvel" || 
+			control->GetCode() == "txt_projradius" || control->GetCode() == "txt_projhardness")
+		{
+			PerformIntersectionTest();
+		}
+	}
+}
+
+// Updates the parameters used in the intersection test based on user interface input
+void UI_ShipBuilder::UpdateIntersectionTestParameters(void)
+{
+	UITextBox *tb = NULL;
+	const std::string param_src[4] = { "txt_projmass", "txt_projvel", "txt_projradius", "txt_projhardness" };
+	float *param_fields[4] = { &m_intersect_proj_mass, &m_intersect_proj_vel, &m_intersect_proj_radius, &m_intersect_proj_hardness };
+	float param_limits[4][2] = { { 1.0f, 1000000000.0f }, { 1.0f, 1000000000.0f }, { 0.0001f, 1000.0f }, { 0.0001f, 1000.0f } };
+
+	for (int i = 0; i < 4; ++i)
+	{
+		tb = m_render->Components.TextBoxes.GetItem(param_src[i]);
+		if (tb)
+		{
+			// Parse out the value and ensure it is within a valid range.  NOTE: We have to use the SetTextSilent() method below 
+			// since this method is called in response to SetText() -> ProcessTextboxChangedEvent() -> UpdateIntersectionTestParameters(), 
+			// and we therefore cannot make another call to SetText within the "UpdateIntersectionTestParameters" method
+			float val = 0.0f;
+			const std::string & text = tb->GetText();
+			if (text == NullString)
+			{
+				// Default to the minimum acceptable value if no text has been entered
+				val = param_limits[i][0];
+			}
+			else
+			{
+				float orig_val = std::stof(tb->GetText());
+				val = clamp(orig_val, param_limits[i][0], param_limits[i][1]);
+				if (!FLOAT_EQ(val, orig_val))
+				{
+					tb->SetTextSilent(std::to_string(val));
+				}
+			}
+			
+			// Store the parameter value
+			*(param_fields[i]) = val;
+		}
+	}
+}
 
 
 

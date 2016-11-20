@@ -92,6 +92,9 @@ public:
 	// Returns the current state of the control
 	CMPINLINE iUIControl::ControlState			GetControlState(void) { return m_state; }
 
+	// Directly sets the text held in this textbox control, without raising any associated events or notifying any controllers
+	void										SetTextSilent(const std::string & text);
+
 private:
 	
 	// Current state of the control

@@ -308,18 +308,29 @@ void CameraClass::DebugCameraRoll(float radians)
 	// Apply the delta quaternion to our current orientation
 	AddDeltaDebugCameraOrientation(roll);
 }
+
 // Zooms the camera to an overhead view of the specified space object.  Returns true if the path was started sucessfully
 bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target)
 {
 	// Parameter check
 	if (!target) return false;
 
-	// Call the overloaded method with a default path time
-	return ZoomToOverheadShipView(target, Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
+	// Call the overloaded method with a default completion action
+	return ZoomToOverheadShipView(target, CameraClass::ZoomToOverheadCompletionAction::FixOverShipAfterOverheadZoom);
 }
 
 // Zooms the camera to an overhead view of the specified space object.  Returns true if the path was started sucessfully
-bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float time)
+bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete)
+{
+	// Parameter check
+	if (!target) return false;
+
+	// Call the overloaded method with a default path time
+	return ZoomToOverheadShipView(target, on_complete, Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
+}
+
+// Zooms the camera to an overhead view of the specified space object.  Returns true if the path was started sucessfully
+bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete, float time)
 {
 	// Parameter check
 	if (!target || time < Game::C_EPSILON) return false;
@@ -328,7 +339,7 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float time)
 	XMVECTOR objectsize = target->GetSize();
 	if (!XMVector3GreaterOrEqual(objectsize, Game::C_EPSILON_V))
 	{
-		return ZoomToOverheadShipView(target, Game::C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE, time);
+		return ZoomToOverheadShipView(target, on_complete, Game::C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE, time);
 	}
 	else
 	{
@@ -339,12 +350,12 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float time)
 		//		s = size of the object (z dimension will be considered)
 		//		a = camera FOV.  (use precalculated tan(FOV/2) exposed by frustum in GetTanOfHalfFOV())
 		float distance = ((XMVectorGetZ(objectsize) * 1.25f) / 2.0f) / Game::Engine->GetViewFrustrum()->GetTanOfHalfFOV();
-		return ZoomToOverheadShipView(target, distance, time);
+		return ZoomToOverheadShipView(target, on_complete, distance, time);
 	}
 }
 
 // Zooms the camera to an overhead view of the specified space object.  Returns true if the path was started sucessfully
-bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, float time)
+bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCompletionAction on_complete, float distance, float time)
 {
 	// Parameter check
 	if (!target || time < Game::C_EPSILON || distance < Game::C_EPSILON) return false;
@@ -404,8 +415,24 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, float distance, f
 	path->AddNode(overheadpos, overheadorient, target, time);
 
 	// Set the path properties
-	path->SetPathMode(CameraPath::CameraPathMode::Normal);												// Normal linear path
-	path->SetPathCompletionAction(CameraPath::CameraPathCompletionAction::FixInPositionOnCompletion);	// Fix in position once we reach the ship
+	path->SetPathMode(CameraPath::CameraPathMode::Normal);
+
+	// Determine the action to be taken once the path completes
+	switch (on_complete)
+	{
+		case CameraClass::ZoomToOverheadCompletionAction::FixInSpaceAfterOverheadZoom:
+			path->SetPathCompletionAction(CameraPath::CameraPathCompletionAction::FixInPositionOnCompletion);
+			break;
+
+		case CameraClass::ZoomToOverheadCompletionAction::FixOverShipAfterOverheadZoom:
+			path->SetPathCompletionAction(CameraPath::CameraPathCompletionAction::StartNewPathOnCompletion);
+			path->SetPathToBeInitiatedOnCompletion(CameraPath::CreateTrackingPath(target, overheadpos, overheadorient));
+			break;
+
+		default:
+			path->SetPathCompletionAction(CameraPath::CameraPathCompletionAction::ReleaseOnCompletion);
+			break;
+	}	
 
 	// We can now start the camera on this path and return true to indicate it has started
 	StartCameraPath(path);

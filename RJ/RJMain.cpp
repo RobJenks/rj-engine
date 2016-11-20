@@ -1984,6 +1984,7 @@ void RJMain::__CreateDebugScenario(void)
 		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_prc") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
+		bool is_armed[2] = { false, false };
 		for (int c = 0; c < 2; ++c)
 		{
 			css[c] = ComplexShip::Create("testfrigate12");
@@ -1997,30 +1998,33 @@ void RJMain::__CreateDebugScenario(void)
 			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
 			//css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
 
-			XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
-			XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
-			XMFLOAT3 sz; XMStoreFloat3(&sz, css[c]->GetSize());
-			for (int i = 0; i < 4; ++i)
+			if (is_armed[c])
 			{
-				for (int j = 0; j < 2; ++j)
+				XMVECTOR rotleft = XMQuaternionRotationNormal(UP_VECTOR, -PI / 4.0f);
+				XMVECTOR rotright = XMQuaternionRotationNormal(UP_VECTOR, PI / 4.0f);
+				XMFLOAT3 sz; XMStoreFloat3(&sz, css[c]->GetSize());
+				for (int i = 0; i < 4; ++i)
 				{
-					SpaceTurret *nt = SpaceTurret::Create("turret_basic01"); if (!nt) continue;
-					
-					XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
-					pos = XMVectorSubtract(pos, XMVectorMultiply(css[c]->GetSize(), HALF_VECTOR)); 
-					nt->SetRelativePosition(pos);
-					nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
+					for (int j = 0; j < 2; ++j)
+					{
+						SpaceTurret *nt = SpaceTurret::Create("turret_basic01"); if (!nt) continue;
 
-					nt->SetYawRate(PI);
-					nt->SetPitchRate(PI);
-					nt->SetYawLimitFlag(false);
-					nt->SetPitchLimits(-PIOVER2, PIOVER2);
-					nt->RecalculateTurretStatistics();
+						XMVECTOR pos = XMVectorSet((((float)j * (sz.x * 0.9f)) + (sz.x * 0.05f)), sz.y, (((((float)i + 1.0f) / 4.0f) * (sz.z * 0.9f)) + (sz.z * 0.05f)), 0.0f);
+						pos = XMVectorSubtract(pos, XMVectorMultiply(css[c]->GetSize(), HALF_VECTOR));
+						nt->SetRelativePosition(pos);
+						nt->SetBaseRelativeOrientation((j == 0 ? rotleft : rotright));
 
-					css[c]->TurretController.AddTurret(nt);
+						nt->SetYawRate(PI);
+						nt->SetPitchRate(PI);
+						nt->SetYawLimitFlag(false);
+						nt->SetPitchLimits(-PIOVER2, PIOVER2);
+						nt->RecalculateTurretStatistics();
 
-					// *** Temporarily required since CS objects are currently defaulting to "tactical" simulation
-					css[c]->SetAsSimulationHub();
+						css[c]->TurretController.AddTurret(nt);
+
+						// *** Temporarily required since CS objects are currently defaulting to "tactical" simulation
+						css[c]->SetAsSimulationHub();
+					}
 				}
 			}
 		}

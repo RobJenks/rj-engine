@@ -8,6 +8,7 @@
 
 #include "CompilerSettings.h"
 #include "Utility.h"
+#include "ObjectReference.h"
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -26,16 +27,17 @@ public:
 	__declspec(align(16))
 	struct CameraPathNode : public ALIGN16<CameraPathNode>
 	{
-		AXMVECTOR					Position;				// Position of the node
-		AXMVECTOR					Orientation;			// Orientation of the camera at this node
-		float						Time;					// Time at this node (secs), used for interpolation
-		iSpaceObject *				Object;					// Object that this node is relative to, if applicable
+		AXMVECTOR						Position;				// Position of the node
+		AXMVECTOR						Orientation;			// Orientation of the camera at this node
+		float							Time;					// Time at this node (secs), used for interpolation
+		ObjectReference<iSpaceObject>	Object;					// Object that this node is relative to, if applicable
+		bool							IsObjectRelative;		// Flag indicating whether we should have an object to track
 
 		CameraPathNode(const FXMVECTOR pos, const FXMVECTOR orient, float time)
-		{ Position = pos; Orientation = orient; Time = time; Object = NULL; }
+			: Position(pos), Orientation(orient), Time(time), Object(), IsObjectRelative(false) { }
 
 		CameraPathNode(const FXMVECTOR relativepos, const FXMVECTOR relativeorient, iSpaceObject *obj, float time)
-		{ Position = relativepos; Orientation = relativeorient; Time = time; Object = obj; }
+			: Position(relativepos), Orientation(relativeorient), Time(time), Object(obj), IsObjectRelative((obj != NULL)) { }
 	};
 
 	// Starts the path, setting all values to their starting values.  "reverse" flag determines whether we start at beginning or end
@@ -78,6 +80,10 @@ public:
 	CMPINLINE int					GetNodeCount(void)									{ return m_nodecount; }
 	CMPINLINE vector<CameraPathNode>::const_iterator	GetNodeIteratorStart(void)		{ return m_nodes.begin(); }
 	CMPINLINE vector<CameraPathNode>::const_iterator	GetNodeIteratorEnd(void)		{ return m_nodes.end(); }
+
+	// Static method to generate a "tracking path" that will simply maintain the camera position & orientation
+	// relative to the target object
+	static CameraPath *				CreateTrackingPath(iSpaceObject *target, const FXMVECTOR relative_pos, const FXMVECTOR relative_orient);
 
 	// Default constructor
 	CameraPath(void);

@@ -73,6 +73,9 @@ public:
 	// Methods to accept the processed mouse click events for managed components, e.g. buttons
 	virtual void ProcessControlClickEvent(iUIControl *control) = 0;
 	virtual void ProcessControlRightClickEvent(iUIControl *control) = 0;
+	
+	// Methods to accept other managed control events
+	virtual void ProcessTextboxChangedEvent(iUIControl *control) = 0;
 
 	// Method to accept mouse move events, and also mouse hover events for specific components
 	virtual void ProcessMouseMoveEvent(INTVECTOR2 location) = 0;

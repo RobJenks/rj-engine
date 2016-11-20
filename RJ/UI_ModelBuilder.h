@@ -160,6 +160,9 @@ public:
 	// Process button click events in the UI
 	void ProcessButtonClickEvent(UIButton *button);
 
+	// Methods to accept other managed control events
+	void ProcessTextboxChangedEvent(iUIControl *control) { }
+
 	// Method to accept mouse move events, and also mouse hover events for specific components
 	void ProcessMouseMoveEvent(INTVECTOR2 location);
 	void ProcessMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, bool lmb, bool rmb) { }
