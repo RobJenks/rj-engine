@@ -2174,28 +2174,36 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (m_debug_ccdspheretest) DebugCCDSphereTest();
 	if (m_debug_ccdobbtest) DebugFullCCDTest(); // DebugCCDOBBTest();
 
-	// Debug info line 1 - flight location & orientation
+	// Debug info line 1 - basic location data
 	if (m_debuginfo_flightstats)
 	{
-		const iActiveObject *a_obj = (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot ? 
-										(const iActiveObject*)Game::CurrentPlayer->GetActor() : 
-										(const iActiveObject*)Game::CurrentPlayer->GetPlayerShip());
-		if (a_obj)
+		const XMFLOAT3 & cam_pos = Game::Engine->GetCamera()->GetPositionF();
+		XMFLOAT3 player_pos; INTVECTOR3 player_el; 
+		if (Game::CurrentPlayer)
 		{
-			// Get local float representations of this data
-			XMFLOAT3 pos; XMStoreFloat3(&pos, Game::CurrentPlayer->GetPosition());
-			XMFLOAT3 epos; XMStoreFloat3(&epos, Game::CurrentPlayer->GetEnvironmentPosition());
-			const INTVECTOR3 & csepos = Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation();
-			XMFLOAT3 wm; XMStoreFloat3(&wm, a_obj->PhysicsState.WorldMomentum);
-
-			// Output debug string
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_1, "Pos: (%.2f, %.2f, %.2f), EnvPos: (%.2f, %.2f, %.2f), El: (%d, %d, %d), LMom: (%.4f, %.4f, %.4f)",
-					pos.x, pos.y, pos.z,
-					epos.x, epos.y, epos.z,
-					csepos.x, csepos.y, csepos.z,
-					wm.x, wm.y, wm.z);
-			Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_1, D::UI->TextStrings.C_DBG_FLIGHTINFO_1, 1.0f);
+			XMStoreFloat3(&player_pos, Game::CurrentPlayer->GetPosition());
+			if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
+			{
+				player_el = Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation();
+			}
+			else
+			{
+				player_el = INTVECTOR3(-1, -1, -1);
+			}
 		}
+		else
+		{
+			player_pos = XMFLOAT3(-1.0f, -1.0f, -1.0f);
+			player_el = INTVECTOR3(-1, -1, -1);
+		}
+
+		// Output debug string
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_1, "Cam: (%.2f, %.2f, %.2f), Player: (%.2f, %.2f, %.2f), PlayerEl: (%d, %d, %d)",
+			cam_pos.x, cam_pos.y, cam_pos.z,
+			player_pos.x, player_pos.y, player_pos.z,
+			player_el.x, player_el.y, player_el.z
+		);
+		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_1, D::UI->TextStrings.C_DBG_FLIGHTINFO_1, 1.0f);
 	}
 
 	// Debug info line 2 - engine rendering info
@@ -2239,31 +2247,14 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		//Game::ObjectSearchManager::DisableSearchCache();
+		XMVECTOR wm = cs()->GetWorldMomentum();
+		XMFLOAT3 wmf; XMStoreFloat3(&wmf, wm);
+		float wmflen = XMVectorGetX(XMVector3Length(wm));
 
-		std::vector<iObject*> objects;
-		int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
-			Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
-		if (count == 0) return;
-		SpaceProjectile *proj = (SpaceProjectile*)objects[0];
-
-		XMVECTOR dist;
-		XMVECTOR pos = Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.Data(), proj->GetPosition(), dist);
-		float tgt_dist = XMVectorGetX(XMVector3Length(XMVectorSubtract(proj->GetPosition(), pos)));
-		std::string s = "";
-		if (tgt_dist <= 5.0f)
-		{
-			s = concat("INTERSECTING; distance = ")(tgt_dist).str();
-//			OutputDebugString(s.c_str());
-		}
-		else if (tgt_dist < 35.0f)
-		{
-			s = concat("Approaching; distance = ")(tgt_dist).str();
-	//		OutputDebugString(s.c_str());
-		}
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", s.c_str());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.1f, %.1f, %.1f   |wm| == %.1f", wmf.x, wmf.y, wmf.z, wmflen);
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
+	*** 1. Test why CS impacts are not triggering the environment damage method ***
+	*** 2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 }
