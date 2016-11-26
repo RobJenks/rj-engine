@@ -91,20 +91,24 @@ void SpaceProjectile::SimulateObject(void)
 	// Degrade linear velocity, if applicable
 	if (m_degrade_lv)
 	{
-		PhysicsState.WorldMomentum -= (PhysicsState.WorldMomentum * m_degrade_lv_pc * Game::TimeFactor);
+		// WorldMomentum -= (WorldMomentum * m_degrade_lv_pc * TimeFactor)
+		PhysicsState.WorldMomentum = XMVectorSubtract(PhysicsState.WorldMomentum,
+			XMVectorScale(PhysicsState.WorldMomentum, m_degrade_lv_pc * Game::TimeFactor));
 		RecalculateLocalMomentum();
 	}
 
 	// Degrade angular velocity, if applicable
 	if (m_degrade_av)
 	{
-		PhysicsState.AngularVelocity -= (PhysicsState.AngularVelocity * m_degrade_av_pc * Game::TimeFactor);
+		// AngularVelocity -= (AngularVelocity * m_degrade_av_pc * TimeFactor);
+		PhysicsState.AngularVelocity = XMVectorSubtract(PhysicsState.AngularVelocity,
+			XMVectorScale(PhysicsState.AngularVelocity, m_degrade_av_pc * Game::TimeFactor));
 	}
 
 	// Apply a shift in orientation if required
 	if (m_orient_change)
 	{
-		this->SetOrientation((m_orient_change_amount * Game::TimeFactor) * m_orientation);
+		ChangeOrientation(XMVectorMultiply(m_orient_change_amount, Game::TimeFactorV));
 	}
 
 	// Move the projectile based upon its current linear momentum
