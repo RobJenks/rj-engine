@@ -858,7 +858,7 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	float degree_max_minus_min = (degree_max_dist - degree_min_dist); 
 
 	// Iterate until we have no more elements to test
-	DBG_COLLISION_OUTPUT("> Beginning environment collision test\n");
+	DBG_COLLISION_TEST("> Beginning environment collision test\n");
 	int id; INTVECTOR3 location;
 	int current = -1;
 	while (++current < (int)test.size())
@@ -866,15 +866,15 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 		// Retrieve the next element to be tested, and only proceed if we have not already processed it & it is valid
 		id = test[current];	
 		assert(id >= 0 && id < m_elementcount);
-		DBG_COLLISION_OUTPUT(concat("    Testing element ")(id).str().c_str());
+		DBG_COLLISION_TEST(concat("    Testing element ")(id).str().c_str());
 		if (checked[id] == true)
 		{
-			DBG_COLLISION_OUTPUT("...ALREADY TESTED\n");
+			DBG_COLLISION_TEST("...ALREADY TESTED\n");
 			continue;
 		}
 		else if (!IsValidElementID(id))		// This should not happen except in very very rare edge cases that may not exist any more, but just to be compleetely safe
 		{
-			DBG_COLLISION_OUTPUT("...ELEMENT ID IS NOT VALID!\n");
+			DBG_COLLISION_TEST("...ELEMENT ID IS NOT VALID!\n");
 			continue;
 		}
 
@@ -885,12 +885,12 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 		// Translate the ray into the local space of this element, based on an offset from (0,0,0)
 		XMVECTOR elpos = Game::ElementLocationToPhysicalPosition(el.GetLocation());
 		localray.SetOrigin(XMVectorSubtract(ray_in_el0, elpos));
-		DBG_COLLISION_OUTPUT(concat(" ")(el.GetLocation().ToString()).str().c_str());
+		DBG_COLLISION_TEST(concat(" ")(el.GetLocation().ToString()).str().c_str());
 
 		// Test for a collision between this ray and the element AABB; if none, skip processing this element immediately
 		if (Game::PhysicsEngine.DetermineRayVsAABBIntersection(localray, bounds) == false)
 		{
-			DBG_COLLISION_OUTPUT(": No collision\n");
+			DBG_COLLISION_TEST(": No collision\n");
 			continue;
 		}
 
@@ -909,7 +909,7 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 
 		// Add this intersection to the list of elements that were intersected
 		outElements.push_back(ElementIntersection(id, Game::PhysicsEngine.RayIntersectionResult.tmin, Game::PhysicsEngine.RayIntersectionResult.tmax, degree));
-		DBG_COLLISION_OUTPUT(concat(": COLLIDES (t=[")(Game::PhysicsEngine.RayIntersectionResult.tmin)(", ")(Game::PhysicsEngine.RayIntersectionResult.tmax)("], degree=")(degree)("), adding { ").str().c_str());
+		DBG_COLLISION_TEST(concat(": COLLIDES (t=[")(Game::PhysicsEngine.RayIntersectionResult.tmin)(", ")(Game::PhysicsEngine.RayIntersectionResult.tmax)("], degree=")(degree)("), adding { ").str().c_str());
 
 		// Now consider all neighbours of this element for intersection, if they have not already been tested
 		const int(&adj)[Direction::_Count] = el.AdjacentElements();
@@ -917,11 +917,11 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 		{
 			if (adj[i] != -1 && checked[adj[i]] == false)
 			{
-				DBG_COLLISION_OUTPUT(concat(adj[i])(" ").str().c_str());
+				DBG_COLLISION_TEST(concat(adj[i])(" ").str().c_str());
 				test.push_back(adj[i]);
 			}
 		}
-		DBG_COLLISION_OUTPUT("}\n");
+		DBG_COLLISION_TEST("}\n");
 	}
  
 	// Testing complete; return true since we know we had an intersection of some kind
@@ -1140,10 +1140,16 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// a 50% glancing hit against hull will bleed off around 50% of the object velocity compared to a 100% collision
 	float obj_remaining_force = (obj_force - (total_strength * ev.Param1));
 
+	// Log details of this collision if required
+	DBG_COLLISION_RESULT(concat(m_instancecode)(": \"")(object->GetInstanceCode())("\" collided with element ")
+		(el.GetID())(" ")(el.GetLocation().ToString())(" at ")(ev.EventTime)("s causing ")(damage_actual)(" damage.  Element had strength of ")
+		(total_strength)(" and closing velocity fell from ")(collision.ClosingVelocity).str().c_str());
+		
 	// Determine remaining velocity by dividing the projectile force through by its impact_resistance, since we originally
 	// derived obj_force = (obj_vel * impact_resist).  If this now takes the object velocity <= 0 it will trigger 
 	// destruction of the collider in the next collision evaluation
 	collision.ClosingVelocity = (obj_remaining_force / object->GetImpactResistance());
+	DBG_COLLISION_RESULT(concat(" to ")(obj_remaining_force)("\n").str().c_str());
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
 	if (EnvironmentCollisionsAreBeingSimulated())
@@ -1216,6 +1222,7 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 
 	// Update the element state
 	el.SetHealth(0.0f);
+	DBG_COLLISION_RESULT(concat(m_instancecode)(": Element ")(el.GetID())(" ")(el.GetLocation().ToString())(" was destroyed\n").str().c_str());
 
 	// Notify any tile in this location that the element has been damaged
 	if (el.GetTile()) el.GetTile()->ElementHealthChanged();

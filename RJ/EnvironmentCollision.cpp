@@ -35,10 +35,11 @@ void EnvironmentCollision::AddElementIntersection(int elementID, float intersect
 
 // Copy constructor
 EnvironmentCollision::EnvironmentCollision(const EnvironmentCollision & other)
-{
-	// Copy all data across directly
-	Events = other.Events;
-	m_nextevent = other.m_nextevent;
+	: 
+	Events(other.Events), m_nextevent(other.GetNextEvent()), Collider(other.Collider), 
+	CollisionStartTime(other.CollisionStartTime), ClosingVelocity(other.ClosingVelocity), 
+	IsActive(other.IsActive), IntersectionData(other.IntersectionData)
+{	
 }
 
 // Default destructor

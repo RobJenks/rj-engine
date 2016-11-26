@@ -682,6 +682,8 @@ void RJMain::ProcessKeyboardInput(void)
 	{
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
+		cs()->SetWorldMomentum(NULL_VECTOR);
+		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
 
 		if (b[DIK_LSHIFT])
 		{
@@ -699,7 +701,6 @@ void RJMain::ProcessKeyboardInput(void)
 				return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
 			});
 		}
-
 	}
 
 	if (false && b[DIK_I]) {
@@ -1981,7 +1982,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create two complex ships in this scenario
 	if (true) {
 		ComplexShip *css[2];
-		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_prc") };
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_prc"), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { false, true };
@@ -2021,8 +2022,11 @@ void RJMain::__CreateDebugScenario(void)
 						nt->SetPitchRate(PI);
 						nt->SetYawLimitFlag(false);
 						nt->SetPitchLimits(-PIOVER2, PIOVER2);
-						nt->RecalculateTurretStatistics();
+						
+						for (int l = 0; l < nt->GetLauncherCount(); ++l)
+							nt->GetLauncher(0)->SetProjectileSpread(0.1f);
 
+						nt->RecalculateTurretStatistics();
 						css[c]->TurretController.AddTurret(nt);
 
 						// *** TODO: temporarily required since CS objects are currently defaulting to "tactical" simulation
@@ -2255,6 +2259,6 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
-	*** 1. Test why CS impacts are not triggering the environment damage method ***
-	*** 2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
+	//*** 1. Test why CS impacts are not triggering the environment damage method ***
+	//*** 2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 }

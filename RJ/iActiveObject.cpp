@@ -168,8 +168,6 @@ void iActiveObject::RecalculateInertiaTensor(void)
 // Virtual method, called when this object collides with another
 void iActiveObject::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {
-	if (object) OutputDebugString(concat("Collision of \"")(m_code)("\" (")(m_id)(", ")(iObject::TranslateObjectTypeToString(m_objecttype))
-		(") with \"")(object->GetCode())("\" (")(object->GetID())(", ")(iObject::TranslateObjectTypeToString(object->GetObjectType()))(")\n").str().c_str());
 }
 
 // Shut down the object, unregister it and deallocate all resources

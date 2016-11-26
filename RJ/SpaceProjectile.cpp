@@ -140,8 +140,6 @@ void SpaceProjectile::CollisionWithObject(iActiveObject *object, const GamePhysi
 {
 	// Pass to the base class method
 	iActiveObject::CollisionWithObject(object, impact);
-
-	OutputDebugString(concat("Projectile owner is ID ")(m_owner->GetID())("\n").str().c_str());
 }
 
 // Method called when the projectile exceeds its defined lifetime

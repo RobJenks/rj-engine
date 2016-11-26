@@ -54,7 +54,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
 	m_nocollision_count = 0;
-	m_hardness = 0.0f;
+	m_hardness = 1.0f;
 
 	// Initialise this object with a unique ID
 	AssignNewUniqueID();

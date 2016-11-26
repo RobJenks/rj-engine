@@ -36,6 +36,7 @@ public:
 
 	// Debug flag indicating whether we should output information on element collision tests
 //#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
+#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_RESULT
 
 	// Environment terrain collection
 	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
@@ -494,10 +495,16 @@ CMPINLINE void iSpaceObjectEnvironment::SetElement(int x, int y, int z, ComplexS
 
 // Outputs debug information on environment collision testing
 #if defined(_DEBUG) && defined(DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING)
-#	define DBG_COLLISION_OUTPUT(text)  OutputDebugString(text)
+#	define DBG_COLLISION_TEST(text)  OutputDebugString(text)
 #else
-#	define DBG_COLLISION_OUTPUT(text)
+#	define DBG_COLLISION_TEST(text)
 #endif
 
+// Outputs debug information on the results of an environment collision
+#if defined(_DEBUG) && defined(DEBUG_OUTPUT_ENVIRONMENT_COLLISION_RESULT)
+#	define DBG_COLLISION_RESULT(text)  OutputDebugString(text)
+#else
+#	define DBG_COLLISION_RESULT(text)
+#endif
 
 #endif
