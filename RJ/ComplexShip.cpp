@@ -1062,9 +1062,6 @@ void ComplexShip::CollisionWithObject(iActiveObject *object, const GamePhysicsEn
 void ComplexShip::CollisionWithObject(iActiveObject *object, ComplexShipSection *collidingsection, const GamePhysicsEngine::ImpactData & impact)
 {
 	throw "SECTIONS SHOULD NOT COLLIDE ANYMORE";
-
-	// Pass to the environment method to determine any internal ship damage 
-	RegisterEnvironmentImpact(object, impact);
 }
 
 // Fits the element space around this ship, eliminating any extra space allocated outside of the (cuboid) bounds it requires

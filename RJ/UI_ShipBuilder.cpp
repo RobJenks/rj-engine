@@ -1080,9 +1080,11 @@ void UI_ShipBuilder::PerformIntersectionTest(void)
 	// We now want to determine the effect on the environment; enable simulated collision mode for the ship
 	iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(m_ship);
 
-	// Calculate the path of the collision through this environment
+	// Calculate the path of the collision through this environment.  We do not need to explicitly set 
+	// this to be an external collision since the start point is fixed & known, with no potential
+	// for issues with high-speed objects, and the start point may in fact be placed within the ship
 	EnvironmentCollision env_collision;
-	m_ship->CalculateCollisionThroughEnvironment(m_intersect_test_proj(), impact, env_collision);
+	m_ship->CalculateCollisionThroughEnvironment(m_intersect_test_proj(), impact, false, env_collision);
 
 	// Make the environment collision data immediately-executable so that it can be simulated immediately 
 	// in this method, without waiting for the actual intersection times to occur

@@ -342,7 +342,8 @@ public:
 
 	// Determines and applies the effect of a collision with trajectory through the environment
 	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
-	bool							CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult);
+	bool							CalculateCollisionThroughEnvironment(	iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, 
+																			bool external_collider, EnvironmentCollision & outResult);
 
 	// Processes all active environment collisions at the current point in time.  Called as part of object simulation
 	void							ProcessAllEnvironmentCollisions(void);

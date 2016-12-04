@@ -938,7 +938,7 @@ bool iSpaceObjectEnvironment::RegisterEnvironmentImpact(iActiveObject *object, c
 
 	// Calculate the effect of the intersection with this environment (if any)
 	EnvironmentCollision collision;
-	bool intersects = CalculateCollisionThroughEnvironment(object, impact, collision);
+	bool intersects = CalculateCollisionThroughEnvironment(object, impact, true, collision);
 	if (intersects == false) return false;
 
 	// Add this collision event to the collection and return success
@@ -963,7 +963,8 @@ bool iSpaceObjectEnvironment::EnvironmentIsCollidingWithObject(iActiveObject *ob
 
 // Determines the effect of a collision with trajectory through the environment
 // Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
-bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, EnvironmentCollision & outResult)
+bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, 
+																	bool external_collider, EnvironmentCollision & outResult)
 {
 	// Parameter check
 	if (!object) return false;
@@ -978,9 +979,29 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 	outResult.CollisionStartTime = Game::ClockTime;
 	outResult.ClosingVelocity = XMVectorGetX(impact.TotalImpactVelocity);
 
-	// Determine the trajectory and properties of the colliding object
+	// Retrieve properties of the colliding object
 	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
-	Ray proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);		// Pre-impact velocity, since the collision handling will have adjusted this by now
+
+	// Calculate the collider trajectory. If this is an external collider, dial the start position 
+	// back along its trajectory vector to ensure there are no issues with high-speed objects 
+	// skipping over the outer elements during inter-frame time.
+	// All trajectory calculations are performed using pre-impact velocity, since the collision handling will have 
+	// adjusted actual collider trajectory by now
+	Ray proj_trajectory; 
+	float ext_adj = 0.0f;
+	if (external_collider)
+	{
+		// Move back |env_collisionradius*2| along the trajectory vector to be sure, and record the travel time this represents
+		float pvel = XMVectorGetX(XMVector3LengthEst(impact_coll.PreImpactVelocity)) + 1.0f; // +1.0f to avoid any erroneous DIV/0 
+		ext_adj = ((m_collisionsphereradius * 2.0f) / pvel);
+
+		proj_trajectory = Ray(XMVectorSubtract(object->GetPosition(), XMVectorScale(impact_coll.PreImpactVelocity, ext_adj)), impact_coll.PreImpactVelocity);
+	}
+	else
+	{
+		// We can simply start from the current object position
+		proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);
+	}
 
 	// Calcualate the path of elements intersected by this ray
 	ElementIntersectionData elements;
@@ -994,13 +1015,17 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(iActiveObject
 	}
 
 	// Add an event for the processing of each intersected element
-	ElementIntersectionData::const_iterator it_end = elements.end();
-	for (ElementIntersectionData::const_iterator it = elements.begin(); it != it_end; ++it)
+	ElementIntersectionData::iterator it_end = elements.end();
+	for (ElementIntersectionData::iterator it = elements.begin(); it != it_end; ++it)
 	{
+		ElementIntersection & item = (*it);
+
+		// Adjust all intersection times to negate the adjustment for external colliders applied above
+		item.StartTime -= ext_adj; item.EndTime -= ext_adj;
+
 		// Add an event for this collision.  This will automatically be sorted into the correct sequence
 		// based upon start time.  This will almost always be ~equal to a push_back since 
 		// intersections have generally been determined in temporal order
-		const ElementIntersection & item = (*it);
 		outResult.AddElementIntersection(item.ID, item.StartTime, (item.EndTime - item.StartTime), item.Degree);
 
 		// Also push a copy of the intersection data into the result object for reference later, in case it is needed
