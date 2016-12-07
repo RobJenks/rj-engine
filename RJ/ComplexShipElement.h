@@ -49,12 +49,13 @@ public:
 	
 	// Properties of the element, indexed into the m_properties bitstring
 	enum PROPERTY {
-		PROP_UNKNOWN		= (1 << 0),
-		PROP_ACTIVE			= (1 << 1),				// Is the element active, i.e. can be used in the SD
-		PROP_BUILDABLE		= (1 << 2),				// Can the element have tiles built on it?
-		PROP_WALKABLE		= (1 << 3),				// Is the element an (easy, walking) route for player & AI?
-		PROP_POWER_CABLES	= (1 << 4),				// Are there power cables running through this element?
-		PROPERTY_COUNT		= (1 << 5)				// (The total number of properties per element)
+		PROP_UNKNOWN			= (1 << 0),
+		PROP_ACTIVE				= (1 << 1),				// Is the element active, i.e. can be used in the SD
+		PROP_BUILDABLE			= (1 << 2),				// Can the element have tiles built on it?
+		PROP_WALKABLE			= (1 << 3),				// Is the element an (easy, walking) route for player & AI?
+		PROP_POWER_CABLES		= (1 << 4),				// Are there power cables running through this element?
+		PROP_OUTER_HULL_ELEMENT = (1 << 5),				// Is this element part of the outer ship hull?
+		PROPERTY_COUNT			= (1 << 6)				// (The total number of properties per element)
 	};
 
 	// Struct holding data on a connection from one nav node to another
@@ -76,10 +77,12 @@ public:
 	
 	// Test the value of a property.  Multiple properties can be provided at once (e.g. GetProperty(Property::Active | Property::Buildable)), 
 	// in which case the method will return a value indicating whether all properties are true for the element
-	CMPINLINE bool					GetProperty(PROPERTY prop)				{ return CheckBit_All(m_properties, prop); }
+	CMPINLINE bool					GetProperty(PROPERTY prop)					{ return CheckBit_All(m_properties, prop); }
 
 	// Set the value of a property.  Multiple properties can be provided, in which case the method will set all at once
-	CMPINLINE void					SetProperty(PROPERTY prop, bool value)	{ SetBitState(m_properties, prop, value); }
+	CMPINLINE void					SetProperty(PROPERTY prop)					{ SetBit(m_properties, prop); }
+	CMPINLINE void					ClearProperty(PROPERTY prop)				{ ClearBit(m_properties, prop); }
+	CMPINLINE void					SetPropertyValue(PROPERTY prop, bool value)	{ SetBitState(m_properties, prop, value); }
 
 	// Get or set the full property set in one operation
 	CMPINLINE bitstring				GetProperties(void) const { return m_properties; }
@@ -96,9 +99,15 @@ public:
 	// Is the element walkable?  Used for pathfinding and routing calculations
 	CMPINLINE bool					IsWalkable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_WALKABLE); }
 
+	// Is the element part of the outer environment hull?
+	CMPINLINE bool					IsOuterHullElement(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT); }
+
 	// Health of the element.  Ranges from 0.0-1.0.  Element is destroyed at <= 0.0
 	CMPINLINE float					GetHealth(void) const			{ return m_health; }
 	CMPINLINE void					SetHealth(float h)				{ m_health = h; }
+
+	// Returns a flag indicating whether the element has been destroyed
+	CMPINLINE bool					IsDestroyed(void) const			{ return (m_health <= 0.0f); }
 
 	// Inherent strength of the element.  Generally inherited from the hull that contains this element.  This is the
 	// base impact resistance when determining the effect of a collider intersection with an environment

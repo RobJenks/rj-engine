@@ -197,6 +197,9 @@ public:
 		UpdateEnvironment();
 	}
 
+	// Identify the elements that make up this environment's outer hull
+	void							BuildOuterHullModel(void);
+
 	// Adds a new object to this environment
 	void							ObjectEnteringEnvironment(iEnvironmentObject *obj);
 

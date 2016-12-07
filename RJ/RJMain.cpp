@@ -676,7 +676,67 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_H])
 	{
-		Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
+		cs()->Fade.SetFadeAlpha(0.1f);
+		cs()->Fade.FadeIn(1.0f);
+
+		if (b[DIK_LSHIFT])
+		{
+			Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
+			{
+				bool dst = env.GetElementDirect(id).IsDestroyed();
+				bool outer = env.GetElementDirect(id).IsOuterHullElement();
+				if (dst) {
+					if (outer) {
+						// THIS SHOULD NOT HAPPEN
+						return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+					}
+					else {
+						// Destroyed
+						return XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+					}
+				}
+				else {
+					if (outer) {
+						// Outer element
+						return XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+					}
+					else {
+						// Regular element
+						float v = env.GetElementDirect(id).GetHealth();
+						return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
+					}
+				}
+			});
+		}
+		else
+		{
+			Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
+			{
+				bool dst = env.GetElementDirect(id).IsDestroyed();
+				bool outer = env.GetElementDirect(id).IsOuterHullElement();
+				if (dst) {
+					if (outer) {
+						// THIS SHOULD NOT HAPPEN
+						return XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+					}
+					else {
+						// Destroyed
+						return XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+					}
+				}
+				else {
+					if (outer) {
+						// Outer element
+						return XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+					}
+					else {
+						// Regular element
+						float v = env.GetElementDirect(id).GetHealth();
+						return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
+					}
+				}
+			});
+		}
 	}
 	if (b[DIK_G])
 	{

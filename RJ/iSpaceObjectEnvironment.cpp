@@ -604,6 +604,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	}
 	assert(m_deckcount == (int)m_deck_data.size());
 
+	// Identify the elements that make up this environment's outer hull
+	BuildOuterHullModel();
+
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
 }
@@ -619,6 +622,65 @@ void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
 
 	// TODO: Find any actors currently following a path provided by the previous network, and have them recalculate their paths
 }
+
+
+// Identify the elements that make up this environment's outer hull
+void iSpaceObjectEnvironment::BuildOuterHullModel(void)
+{
+	// Reset all elements before building the model
+	for (int i = 0; i < m_elementcount; ++i)
+	{
+		m_elements[i].ClearProperty(ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT);
+	}
+
+	// Constant array of parameters for the traversal process
+	enum hull_param { x_start = 0, y_start, z_start, x_end, y_end, z_end, traverse_direction };
+	const INTVECTOR3 & max_el = (m_elementsize - ONE_INTVECTOR3);
+	const int params[6][7] = { 
+		// { X_START, Y_START, Z_START, X_END, Y_END, Z_END, TRAVERSE_DIRECTION }
+		{ 0, 0, 0, 0, max_el.y, max_el.z, (int)Direction::Right },					// Left side:	[0,0,0] to [0,y,z], increment +x
+		{ 0, max_el.y, 0, max_el.x, max_el.y, max_el.z, (int)Direction::ZDown },	// Upper side:	[0,y,0] to [x,y,z], increment -y
+		{ max_el.x, 0, 0, max_el.x, max_el.y, max_el.z, (int)Direction::Left },		// Right side:	[x,0,0] to [x,y,z], increment -x
+		{ 0, 0, 0, max_el.x, 0, max_el.z, (int)Direction::ZUp },					// Bottom side:	[0,0,0] to [x,0,z], increment +y
+		{ 0, 0, max_el.z, max_el.x, max_el.y, max_el.z, (int)Direction::Down },		// Front side:	[0,0,z] to [x,y,z], increment -z
+		{ 0, 0, 0, max_el.x, max_el.y, 0, (int)Direction::Up }						// Rear side:	[0,0,0] to [x,y,0], increment +z
+	};
+
+	// Traverse each outer face in turn
+	int index = -1;
+	for (int face = 0; face < 6; ++face)
+	{
+		// Iterate over the elements of this face.  Note we can always ++ since #_start is always <= #_end
+		for (int x = params[face][hull_param::x_start]; x <= params[face][hull_param::x_end]; ++x)
+		{
+			for (int y = params[face][hull_param::y_start]; y <= params[face][hull_param::y_end]; ++y)
+			{
+				for (int z = params[face][hull_param::z_start]; z <= params[face][hull_param::z_end]; ++z)
+				{
+					// Traverse inward from this element until we find the first intact element
+					index = ELEMENT_INDEX(x, y, z);
+					while (ElementIndexIsValid(index))
+					{
+						ComplexShipElement & el = GetElementDirect(index);
+						if (!el.IsDestroyed())
+						{
+							// This is the outermost intact element, so mark it as a hull element
+							el.SetProperty(ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT);
+							break;
+						}
+						else
+						{
+							// This element has been destroyed so keep moving inwards
+							index = el.GetNeighbour((Direction)params[face][hull_param::traverse_direction]);
+						}
+					}
+				}
+			}
+		}
+	}
+
+}
+
 
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 {
@@ -1248,6 +1310,9 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 	// Update the element state
 	el.SetHealth(0.0f);
 	DBG_COLLISION_RESULT(concat(m_instancecode)(": Element ")(el.GetID())(" ")(el.GetLocation().ToString())(" was destroyed\n").str().c_str());
+
+	// Perform a recalculation over the entire environment
+	UpdateEnvironment();
 
 	// Notify any tile in this location that the element has been damaged
 	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
