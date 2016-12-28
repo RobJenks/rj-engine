@@ -280,9 +280,12 @@ void StaticTerrain::DestroyObject(void)
 {
 	// Apply any destruction effect
 
+	// Debug logging
+	OutputDebugString(concat("Destruction of Terrain (ID=")(m_id)(", Class=")
+		(m_definition ? m_definition->GetCode() : "<null>")(")\n").str().c_str());
+
 	// Now shut down the object
 	Shutdown();
-	OutputDebugString("Destruction of Terrain\n");
 }
 
 // Shutdown method to deallocate resources and remove the terrain object

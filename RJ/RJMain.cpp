@@ -2340,3 +2340,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	//*** 1. Test why CS impacts are not triggering the environment damage method ***
 	//*** 2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 }
+
+OPEN ISSUES:
+	1. CS IS GAINING VELOCITY WHEN IMPACTED?
+	2. COLLIDER ONLY SHOWS AS MOVING THROUGH ENVIRONMENT ONCE IT HITS FIRST NON-DESTROYED ELEMENT.  NEED TO DO MORE PRECISE INITIAL COLLISION DETECTION?
