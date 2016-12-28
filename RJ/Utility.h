@@ -406,6 +406,11 @@ public:
 	{
 		return m_out.str() ;
 	}
+	std::wstring wstr() const
+	{
+		return ConvertStringToWString(m_out.str());
+	}
+
 private:
 	std::ostringstream m_out ;
 } ;

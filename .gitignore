@@ -13,6 +13,9 @@
 *.dylib
 *.dll
 
+# Compiled shaders
+*.cso
+
 # Fortran module files
 *.mod
 
@@ -38,9 +41,10 @@
 *.log
 *.tlog
 
-# Exclude debug & release intermediate build directories
+# Exclude debug, release & any other intermediate build directories
 /RJ/Debug/*
 /RJ/Release/*
+/RJ/Test/*
 /RJ-VS10/RJ-VS10/Debug/*
 /RJ-VS10/RJ-VS10/Release/*
 /RJ-VS10/ipch/*

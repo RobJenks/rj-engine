@@ -678,7 +678,6 @@ void iSpaceObjectEnvironment::BuildOuterHullModel(void)
 			}
 		}
 	}
-
 }
 
 
@@ -1030,16 +1029,25 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObjec
 {
 	// Parameter check
 	if (!object) return false;
+	DBG_COLLISION_RESULT(concat(m_instancecode)(": Testing for collision of \"")(object->GetInstanceCode())
+		("\" with environment").str().c_str());
 
 	// Get a reference to this environment and the colliding object (and validate at the same time)
 	const GamePhysicsEngine::ImpactData::ObjectImpactData & impact_env = impact.GetObjectData(m_id);
 	const GamePhysicsEngine::ImpactData::ObjectImpactData & impact_coll = impact.GetObjectData(object->GetID());
-	if (impact_env.ID == 0U || impact_coll.ID == 0U) return false;		// If the collision was not between these objects
+	if (impact_env.ID == 0U || impact_coll.ID == 0U)
+	{
+		DBG_COLLISION_RESULT(", collision data mismatch, NO COLLISION\n");
+		return false;		// If the collision was not between these objects
+	}
 	
 	// Initialise the output data object for this collision
 	outResult.Collider = object;
-	outResult.CollisionStartTime = Game::ClockTime;
+	outResult.CollisionStartTime = Game::ClockTime; 
 	outResult.ClosingVelocity = XMVectorGetX(impact.TotalImpactVelocity);
+	outResult.ColliderPreImpactTrajectory = impact_coll.PreImpactVelocity;
+	DBG_COLLISION_RESULT(concat(", t0=")(outResult.CollisionStartTime)(", closing_vel=")(outResult.ClosingVelocity)
+		(", pre_impact_trajectory=")(Vector3ToString(outResult.ColliderPreImpactTrajectory).c_str()).str().c_str());
 
 	// Retrieve properties of the colliding object
 	float proj_radius = object->GetCollisionSphereRadius();									// TODO: *** Need to get actual colliding cross-section ***
@@ -1055,7 +1063,8 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObjec
 	{
 		// Move back |env_collisionradius*2| along the trajectory vector to be sure, and record the travel time this represents
 		float pvel = XMVectorGetX(XMVector3LengthEst(impact_coll.PreImpactVelocity)) + 1.0f; // +1.0f to avoid any erroneous DIV/0 
-		ext_adj = ((m_collisionsphereradius * 2.0f) / pvel);
+		ext_adj = ((m_collisionsphereradius * 2.0f) / pvel);	// seconds
+		DBG_COLLISION_RESULT(concat(", ext_adj=")(ext_adj).str().c_str());
 
 		proj_trajectory = Ray(XMVectorSubtract(object->GetPosition(), XMVectorScale(impact_coll.PreImpactVelocity, ext_adj)), impact_coll.PreImpactVelocity);
 	}
@@ -1064,15 +1073,18 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObjec
 		// We can simply start from the current object position
 		proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);
 	}
+	DBG_COLLISION_RESULT(concat(", proj_ray=")(proj_trajectory.ToString()).str().c_str());
 
 	// Calcualate the path of elements intersected by this ray
 	ElementIntersectionData elements;
-	bool intersects = DetermineElementPathIntersectedByRay(proj_trajectory, proj_radius, elements);
+	outResult.Intersects = DetermineElementPathIntersectedByRay(proj_trajectory, proj_radius, elements);
+	DBG_COLLISION_RESULT(concat(", intersects=")(outResult.Intersects ? "true" : "false")(" (")(elements.size())(" elements)").str().c_str());
 
 	// Quit here if there is no intersection
-	if (intersects == false)
+	if (outResult.Intersects == false)
 	{
-		outResult.IsActive = false;
+		outResult.EndCollision(EnvironmentCollision::EnvironmentCollisionState::Inactive_NoCollision);
+		DBG_COLLISION_RESULT(", NO COLLISION\n");
 		return false;
 	}
 
@@ -1095,10 +1107,19 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObjec
 	}
 
 	// Safety check: there should always be >0 events since a collision has occured, but make sure of that here
-	if (outResult.Events.empty()) { outResult.IsActive = false; return false; }
+	if (outResult.Events.empty()) 
+	{ 
+		outResult.EndCollision(EnvironmentCollision::EnvironmentCollisionState::Inactive_NoCollision);
+		DBG_COLLISION_RESULT(", unexpected zero event count, NO COLLISION\n");
+		return false; 
+	}
 
-	// Return true to indicate that a collision occured
-	outResult.IsActive = true;
+	// Perform post-processing on the event collection, finally return true to indicate that a collision occured
+	outResult.Activate();
+	outResult.Finalise();
+	DBG_COLLISION_RESULT(concat("\n")(m_instancecode)(": Registered new collision with \"")(object->GetInstanceCode())("\" at ")
+		(outResult.CollisionStartTime)("s, with ")(outResult.GetEventCount())(" collision events, and closing velocity of ")
+		(outResult.ClosingVelocity)("m/s\n").str().c_str());
 	return true;
 }
 
@@ -1113,27 +1134,37 @@ void iSpaceObjectEnvironment::ProcessAllEnvironmentCollisions(void)
 		ProcessEnvironmentCollision(*c_it);
 
 		// If the collision event is no longer active/valid, we can remove it from the vector here
-		if ((*c_it).IsActive == false)		{ c_it = m_collision_events.erase(c_it); c_it_end = m_collision_events.end(); }
-		else								{ ++c_it; }
+		if ((*c_it).IsActive() == false)		
+		{ 
+			DBG_COLLISION_RESULT(concat(m_instancecode)(": collision with \"")
+				(c_it->Collider() ? c_it->Collider()->GetInstanceCode() : "<destroyed>")("\" has ended (")
+				(EnvironmentCollision::GetStateDescription((*c_it).GetState()))(")\n").str().c_str());
+
+			c_it = m_collision_events.erase(c_it); 
+			c_it_end = m_collision_events.end(); 
+		}
+		else								
+		{ 
+			++c_it; 
+		}
 	}
 }
 
 // Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
 void iSpaceObjectEnvironment::ProcessEnvironmentCollision(EnvironmentCollision & collision)
 {
-	// Parameter check; make sure the collision is still active
-	if (!collision.IsActive) return;
+	// Parameter check not required; we don't need to check if IsActive() since that will be tested by the loop below
 
 	// Loop through collision events while the object is still valid
 	std::vector<EnvironmentCollision>::size_type event_count = collision.GetEventCount();
-	while (collision.IsActive)
+	while (collision.IsActive())
 	{
 		// Make sure the collider still has momentum; if not, the collision event is over
-		if (collision.ClosingVelocity <= 0.0f) { collision.IsActive = false; return; }
+		if (collision.ClosingVelocity <= 0.0f) { collision.EndCollision(EnvironmentCollision::EnvironmentCollisionState::Inactive_Stopped); return; }
 
 		// Get the next event in the sequence
 		std::vector<EnvironmentCollision>::size_type index = collision.GetNextEvent();
-		if (index >= event_count) { collision.IsActive = false; return; }
+		if (index >= event_count) { collision.EndCollision(EnvironmentCollision::EnvironmentCollisionState::Inactive_Completed); return; }
 
 		// Test whether the event is now ready to execute
 		const EnvironmentCollision::EventDetails & ev = collision.Events[index];
@@ -1172,6 +1203,14 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// not share the same momentum of the entire structure
 	float obj_force = object->GetImpactResistance() * collision.ClosingVelocity;		
 	if (obj_force < 1.0f) return;
+
+	// Make sure this element is not already destroyed.  If it is, simply allow the object to pass through
+	if (el.IsDestroyed())
+	{
+		DBG_COLLISION_RESULT(concat(m_instancecode)(": \"")(object->GetInstanceCode())("\" intersected element ")
+			(el.GetID())(" ")(el.GetLocation().ToString())(" which has already been destroyed\n").str().c_str());
+		return;
+	}
 
 	// Get the aggregate stopping power of the element based on its properties, parent tile, and the actual contents of the element
 	ComplexShipTile *tile = el.GetTile();
@@ -1229,14 +1268,16 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 
 	// Log details of this collision if required
 	DBG_COLLISION_RESULT(concat(m_instancecode)(": \"")(object->GetInstanceCode())("\" collided with element ")
-		(el.GetID())(" ")(el.GetLocation().ToString())(" at ")(ev.EventTime)("s causing ")(damage_actual)(" damage.  Element had strength of ")
-		(total_strength)(" and closing velocity fell from ")(collision.ClosingVelocity).str().c_str());
+		(el.GetID())(" ")(el.GetLocation().ToString())(" at ")(ev.EventTime)("s causing ")(damage_actual)(" damage (([ObjForce=")
+		("[IR=")(object->GetImpactResistance())("]*[CVel=")(collision.ClosingVelocity)("]=")(obj_force)
+		("] / [ElStrength=")(total_strength)("]) * [Degree=")(ev.Param1)("])")
+		(". Closing velocity fell from ")(collision.ClosingVelocity)("m/s").str().c_str());
 		
 	// Determine remaining velocity by dividing the projectile force through by its impact_resistance, since we originally
 	// derived obj_force = (obj_vel * impact_resist).  If this now takes the object velocity <= 0 it will trigger 
 	// destruction of the collider in the next collision evaluation
 	collision.ClosingVelocity = (obj_remaining_force / object->GetImpactResistance());
-	DBG_COLLISION_RESULT(concat(" to ")(obj_remaining_force)("\n").str().c_str());
+	DBG_COLLISION_RESULT(concat(" to ")(collision.ClosingVelocity)("m/s\n").str().c_str());
 
 	// Assess the damage from this impact and apply to the element, potentially destroying it if the damage is sufficiently high
 	if (EnvironmentCollisionsAreBeingSimulated())
@@ -1247,15 +1288,43 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	else
 	{
 		// Apply damage to the element, as normal
-		TriggerElementDamage(el.GetID(), damage_actual);
+		EnvironmentCollision::ElementCollisionResult result = TriggerElementDamage(el.GetID(), damage_actual);
+
+		// If this was the first valid (not already destroyed) element to be impacted, test the outcome
+		// to determine if the remainder of the collision will be a deflection or penetrating impact
+		// We know the element is valid (not already destroyed) at this point since destroyed elements
+		// are tested for and rejected earlier in the method
+		if (collision.HasPenetratedOuterHull == false)
+		{
+			if (result == EnvironmentCollision::ElementCollisionResult::ElementDamaged)
+			{
+				// Treat this as a deflection.  Stop evaluating the collision path, and allow the projectile
+				// to follow a deflection trajectory that has already been applied by the physics engine
+				collision.EndCollision(EnvironmentCollision::EnvironmentCollisionState::Inactive_Deflected);
+
+				DBG_COLLISION_RESULT(concat(m_instancecode)(": \"")(object->GetInstanceCode())("\" was deflected by element ")
+					(el.GetID())(" and did not penetrate the environment\n").str().c_str());
+			}
+			else if (result == EnvironmentCollision::ElementCollisionResult::ElementDestroyed)
+			{
+				// This is a penetrating impact.  Update the projectile trajectory to pass through the 
+				// environment (with no further physics engine calculations between the two objects or contents)
+				collision.HasPenetratedOuterHull = true;
+				object->SetWorldMomentum(collision.ColliderPreImpactTrajectory);
+				object->AddCollisionExclusion(GetID());
+
+				DBG_COLLISION_RESULT(concat(m_instancecode)(": \"")(object->GetInstanceCode())("\" penetrated the hull at element ")
+					(el.GetID())(" and is intersecting the environment\n").str().c_str());
+			}
+		}
 	}
 }
 
 // Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
-void iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
+EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
 {
 	// Get a reference to the element
-	if (ElementIndexIsValid(element_id) == false) return;
+	if (ElementIndexIsValid(element_id) == false) return EnvironmentCollision::ElementCollisionResult::NoImpact;
 	ComplexShipElement & el = GetElementDirect(element_id);
 
 	// Check this normalised [0.0 1.0] damage against the element health
@@ -1263,7 +1332,7 @@ void iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
 	{
 		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
 		TriggerElementDestruction(element_id);
-		return;
+		return EnvironmentCollision::ElementCollisionResult::ElementDestroyed;
 	}
 
 	// Otherwise we want to apply damage to the element
@@ -1276,6 +1345,9 @@ void iSpaceObjectEnvironment::TriggerElementDamage(int element_id, float damage)
 	/*if (el.GetHealth() < Game::C_ELEMENT_DAMAGE_CONTENTS_THRESHOLD)
 	{
 	}*/
+
+	// Return a value to confirm that the element was damaged by this collision
+	return EnvironmentCollision::ElementCollisionResult::ElementDamaged;
 }
 
 // SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged

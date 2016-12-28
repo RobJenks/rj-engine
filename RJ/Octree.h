@@ -5,7 +5,9 @@
 
 #include <string>
 #include "CompilerSettings.h"
+#include "Utility.h"
 #include "MemoryPool.h"
+#include "DX11_Core.h"
 template <class Octree> class MemoryPool;
 
 // The index into child node pointers for each of the eight possible subdivision directions

@@ -674,6 +674,24 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Engine->GetCamera()->ZoomToOverheadShipView(cs());
 		}
 	}
+	if (b[DIK_PERIOD])
+	{
+		static float force = 25.0f;
+		SpaceProjectile *proj = D::SpaceProjectiles.Get("projectile_basic01")->CreateProjectile();
+		proj->MoveIntoSpaceEnvironment(cs()->GetSpaceEnvironment());
+		//proj->SetPosition(XMVector3TransformCoord(XMVectorSet(50.0f, 0.0f, -50.0f, 0.0f), cs()->GetWorldMatrix()));
+		proj->SetPosition(XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
+		//proj->SetOrientation(XMQuaternionMultiply(XMQuaternionRotationAxis(UP_VECTOR, (-PI / 4.0f)), cs()->GetOrientation()));
+		proj->SetOrientation(XMQuaternionMultiply(ID_QUATERNION, cs()->GetOrientation()));
+		//proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(-25.0f, 0.0f, 25.0f, 0.0f), cs()->GetOrientationMatrix())));
+		proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, force, 0.0f), cs()->GetOrientationMatrix())));
+		proj->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+		proj->SetIsVisible(true);
+
+		force += 25.0f;
+		Game::Keyboard.LockKey(DIK_PERIOD);
+		OutputDebugString(concat("Generated debug projectile with ID=")(proj->GetID())("\n").str().c_str());
+	}
 	if (b[DIK_H])
 	{
 		cs()->Fade.SetFadeAlpha(0.1f);
@@ -2042,7 +2060,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create two complex ships in this scenario
 	if (true) {
 		ComplexShip *css[2];
-		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_prc"), Game::FactionManager.GetFactionIDByCode("faction_us") };
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"/*_prc*/), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { false, true };

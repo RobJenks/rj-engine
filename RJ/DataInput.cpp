@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <Windows.h>
 
 #include "GameDataExtern.h"
 #include "CoreEngine.h"

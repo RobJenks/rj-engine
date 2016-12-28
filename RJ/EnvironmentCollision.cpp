@@ -7,7 +7,18 @@ EnvironmentCollision::_EventTimeOrderComparator EnvironmentCollision::EventTimeO
 // Default constructor
 EnvironmentCollision::EnvironmentCollision(void)
 	:
-	IsActive(false), m_nextevent(0U), Collider(), CollisionStartTime(0.0f), ClosingVelocity(0.0f)
+	ClosingVelocity(0.0f), Collider(), ColliderPreImpactTrajectory(FORWARD_VECTOR), CollisionStartTime(0.0f),
+	HasPenetratedOuterHull(false), Intersects(false), m_nextevent(0U), m_state(EnvironmentCollisionState::Inactive)
+{
+}
+
+// Copy constructor
+EnvironmentCollision::EnvironmentCollision(const EnvironmentCollision & other)
+	:
+	ClosingVelocity(other.ClosingVelocity), Collider(other.Collider), ColliderPreImpactTrajectory(other.ColliderPreImpactTrajectory),
+	CollisionStartTime(other.CollisionStartTime), Events(other.Events), HasPenetratedOuterHull(other.HasPenetratedOuterHull),
+	Intersects(other.Intersects), IntersectionData(other.IntersectionData), m_nextevent(other.GetNextEvent()),
+	m_state(other.GetState())
 {
 }
 
@@ -32,16 +43,6 @@ void EnvironmentCollision::AddElementIntersection(int elementID, float intersect
 }
 
 
-
-// Copy constructor
-EnvironmentCollision::EnvironmentCollision(const EnvironmentCollision & other)
-	: 
-	Events(other.Events), m_nextevent(other.GetNextEvent()), Collider(other.Collider), 
-	CollisionStartTime(other.CollisionStartTime), ClosingVelocity(other.ClosingVelocity), 
-	IsActive(other.IsActive), IntersectionData(other.IntersectionData)
-{	
-}
-
 // Default destructor
 EnvironmentCollision::~EnvironmentCollision(void)
 {
@@ -58,8 +59,41 @@ void EnvironmentCollision::MakeImmediatelyExecutable(void)
 }
 
 
+// Performs post-processing on the collision object before it is returned for evaluation
+void EnvironmentCollision::Finalise(void)
+{
+	bool outer = false;
+
+	// Post-process the event collection
+	std::vector<EnvironmentCollision::EventDetails>::size_type n = Events.size();
+	for (std::vector<EnvironmentCollision::EventDetails>::size_type index = 0; index < n; ++index)
+	{
+		// Add a unique sequence number to each collision event
+		Events[index].Index = index;
+	}
+
+}
+
+
 // Comparator for sorting/searching events in chronological order
 bool EnvironmentCollision::_EventTimeOrderComparator::operator() (const EventDetails & lhs, const EventDetails & rhs) const
 {
 	return (lhs.EventTime <= rhs.EventTime);
 }
+
+
+// Static method to return a string description of each possible collision state
+std::string EnvironmentCollision::GetStateDescription(EnvironmentCollisionState state)
+{
+	switch (state)
+	{
+		case EnvironmentCollisionState::Active:					return "Active collision";
+		case EnvironmentCollisionState::Inactive:				return "Inactive";
+		case EnvironmentCollisionState::Inactive_Completed:		return "Inactive: Collision completed";
+		case EnvironmentCollisionState::Inactive_Deflected:		return "Inactive: Collider was deflected";
+		case EnvironmentCollisionState::Inactive_Destroyed:		return "Inactive: Collider was destroyed";
+		case EnvironmentCollisionState::Inactive_NoCollision:	return "Inactive: No collision occured";
+		case EnvironmentCollisionState::Inactive_Stopped:		return "Inactive: Collider ran out of momentum";
+		default:												return "<UNKNOWN STATE>";
+	}
+};	

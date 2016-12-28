@@ -155,11 +155,11 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 void ProjectileLauncher::SetProjectileSpread(float s)
 {
 	// Store the new value
-	m_spread = s;
+	m_spread = max(s, 0.0f);
 
 	// Expand out the frand_lh macro to save repeated calculations: frand_lh(l,h) = (l + rand()/(RAND_MAX/(h-l)))
 	// We can precalc the second divisor here for efficiency [ (RAND_MAX / (h-l) ]
-	if (fabs(m_spread) > Game::C_EPSILON)
+	if (m_spread > Game::C_EPSILON)
 		m_spread_divisor = (float)RAND_MAX / (m_spread + m_spread);	// (m_sp - (-m_sp)) == (m_sp + m_sp)
 	else
 	{

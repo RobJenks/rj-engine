@@ -450,7 +450,8 @@ protected:
 	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails & ev, EnvironmentCollision & collision);
 
 	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
-	void							TriggerElementDamage(int element_id, float damage);
+	// Returns a value indicating the effect of the collision on this element
+	EnvironmentCollision::ElementCollisionResult	TriggerElementDamage(int element_id, float damage);
 
 	// Returns a flag indicating whether environment collisions are currently being simulated for this environment
 	CMPINLINE bool					EnvironmentCollisionsAreBeingSimulated(void) const		{ return iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.EnvironmentID == m_id; }

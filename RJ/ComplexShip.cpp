@@ -1238,7 +1238,7 @@ std::string ComplexShip::DebugOutputPerimeterBeacons(void)
 // Default destructor
 ComplexShip::~ComplexShip(void)
 {
-	
+
 }
 
 // Custom debug string function
