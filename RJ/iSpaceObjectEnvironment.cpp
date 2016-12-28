@@ -1258,6 +1258,11 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	float total_strength = (el_strength + tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
 	float damage_pc = (obj_force / total_strength) * ev.Param1;
 
+	if (total_strength > 10000.0f)
+	{
+		int a = 1;
+	}
+
 	// The final damage value (in the range 0.0-1.0) can be derived from this damage_pc and any relevant damage 
 	// resistance properties of the elemnet
 	float damage_actual = (damage_pc * 1.0f);		// TODO: Apply these resistances

@@ -13,8 +13,9 @@ class StaticTerrainDefinition
 public:
 
 	// Default construtor; initialises all fields to default values
-	StaticTerrainDefinition(void) 
-		: m_model(NULL), m_defaultextent(NULL_FLOAT3), m_destructible(false), m_maxhealth(1.0f)
+	StaticTerrainDefinition(void) : 
+		m_model(NULL), m_defaultextent(NULL_FLOAT3), m_destructible(false), m_maxhealth(1.0f), 
+		m_mass(1.0f), m_hardness(1.0f)
 	{
 	}
 
@@ -36,6 +37,12 @@ public:
 	CMPINLINE float							GetMaxHealth(void) const			{ return m_maxhealth; }
 	CMPINLINE void							SetMaxHealth(float h)				{ m_maxhealth = h; }
 
+	// Data on other attributes of the terrain object
+	CMPINLINE float							GetMass(void) const					{ return m_mass; }
+	CMPINLINE void							SetMass(float m)					{ m_mass = max(m, Game::C_EPSILON); }
+	CMPINLINE float							GetHardness(void) const				{ return m_hardness; }
+	CMPINLINE void							SetHardness(float h)				{ m_hardness = max(h, Game::C_EPSILON); }
+
 	// Shutdown method - not required for this class
 	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
@@ -50,6 +57,9 @@ protected:
 
 	bool									m_destructible;					// Determines whether the object can be damaged
 	float									m_maxhealth;					// Maximum health value, for destructible objects	
+
+	float									m_mass;							// Mass of the entire terrain object
+	float									m_hardness;						// Approximation to object density, used primarily in collision calculations
 
 };
 

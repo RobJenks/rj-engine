@@ -20,7 +20,7 @@ Game::ID_TYPE StaticTerrain::InstanceCreationCount = 0;
 StaticTerrain::StaticTerrain()
 	:	m_definition(NULL), m_parent(NULL), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), m_collisionradius(0.0f), m_collisionradiussq(0.0f),
 		m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), m_multielement(false), m_postponeupdates(false), 
-		m_env_treenode(NULL), m_parenttile(0)
+		m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;
@@ -46,6 +46,10 @@ void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
 
 		// Also initialise the health of this instance to the max health specified in its definition, if it has not already been set
 		if (m_health == 0.0f) SetHealth(m_definition->GetMaxHealth());
+
+		// Pull other data from the definition
+		SetMass(m_definition->GetMass());
+		SetHardness(m_definition->GetHardness());
 
 		// Recalculate positional data, since e.g. the range of elements this object covers may now be different
 		RecalculatePositionalData();
