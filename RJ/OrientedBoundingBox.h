@@ -55,6 +55,17 @@ public:
 			Extent[2].value = XMVectorReplicate(ExtentF.z);
 		}
 
+		// Updates the extent data and recalculates based on the new values
+		CMPINLINE void			UpdateExtent(const XMFLOAT3 & extent)
+		{
+			ExtentF = extent;
+			ExtentV = XMLoadFloat3(&extent);
+
+			Extent[0].value = XMVectorReplicate(ExtentF.x);
+			Extent[1].value = XMVectorReplicate(ExtentF.y);
+			Extent[2].value = XMVectorReplicate(ExtentF.z);
+		}
+
 		// Updates the extent data by copying from another source data structure
 		CMPINLINE void			UpdateExtent(const CoreOBBData & source)
 		{
@@ -63,6 +74,12 @@ public:
 			Extent[0].value = source.Extent[0].value;
 			Extent[1].value = source.Extent[1].value;
 			Extent[2].value = source.Extent[2].value;
+		}
+
+		// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
+		CMPINLINE void UpdateExtentFromSize(const FXMVECTOR size)
+		{
+			UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
 		}
 	};
 
@@ -135,24 +152,29 @@ public:
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from the given extent values
 	CMPINLINE void				UpdateExtent(const FXMVECTOR extent)
 	{
-		_Data.ExtentV = extent;
-		XMStoreFloat3(&_Data.ExtentF, extent);
-
-		_Data.Extent[0].value = XMVectorReplicate(_Data.ExtentF.x);
-		_Data.Extent[1].value = XMVectorReplicate(_Data.ExtentF.y);
-		_Data.Extent[2].value = XMVectorReplicate(_Data.ExtentF.z);
+		_Data.UpdateExtent(extent);
 		RecalculateData();
 	}
 
 	// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
-	void						UpdateExtentFromSize(const FXMVECTOR size);
-	
-	// Updates the matrix to offset this OBB from its parent
+	CMPINLINE void				UpdateExtentFromSize(const FXMVECTOR size)
+	{
+		_Data.UpdateExtentFromSize(size);
+		RecalculateData();
+	}
+
+	// Updates the matrix to offset this OBB from its parent.  Accepts an offset matrix as its parameter
 	void XM_CALLCONV			UpdateOffset(const FXMMATRIX offset)
 	{
 		Offset = offset;
 		SetOffsetFlag(true);
 		RecalculateData();
+	}
+
+	// Updates the matrix to offset this OBB from its parent.  Accepts a position offset for a non-rotated offset
+	void XM_CALLCONV			UpdateOffset(const FXMVECTOR offset)
+	{
+		UpdateOffset(XMMatrixTranslationFromVector(offset));
 	}
 
 	// Removes the offset applied to this child OBB

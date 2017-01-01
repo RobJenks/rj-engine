@@ -387,6 +387,7 @@
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnvironmentCollision.cpp" />
+    <ClCompile Include="EnvironmentOBBRegion.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Faction.cpp" />
@@ -597,6 +598,7 @@
     <ClInclude Include="ElementIntersection.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
+    <ClInclude Include="EnvironmentOBBRegion.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />

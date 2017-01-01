@@ -10,6 +10,7 @@
 #include "TileAdjacency.h"
 #include "EnvironmentCollision.h"
 #include "SimulatedEnvironmentCollision.h"
+#include "EnvironmentOBBRegion.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -199,6 +200,10 @@ public:
 
 	// Identify the elements that make up this environment's outer hull
 	void							BuildOuterHullModel(void);
+
+	// Generates a bounding box hierarchy to represent the environment, accounting for any elements that may 
+	// have been destroyed
+	void							BuildBoundingBoxHierarchy(void);
 
 	// Adds a new object to this environment
 	void							ObjectEnteringEnvironment(iEnvironmentObject *obj);
@@ -473,6 +478,20 @@ protected:
 	// specified EnvironmentTree node
 	void							_GetAllObjectsWithinDistance(EnvironmentTree *tree_node, const FXMVECTOR position, float distance,
 									 							 std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+
+	// Internal recursive method for building the environment OBB hierarchy.  Returns the number of child
+	// regions created below this node, in the range [0 - 8]
+	EnvironmentOBBRegion::RegionState	DetermineOBBRegionHierarchy(EnvironmentOBBRegion & region) const;
+
+	// Internal method to subdivide a region into child nodes.  Return the number of subnodes created.  Output 
+	// parameter returns the new subnode data
+	void								SubdivideOBBRegion(EnvironmentOBBRegion & region) const;
+
+	// Builds the compound environment OBB based on calculated region data
+	void								BuildOBBFromRegionData(const EnvironmentOBBRegion & region);
+
+	// Recursively builds each node of the OBB that matches the supplied hierarchical region structure
+	void								BuildOBBNodeFromRegionData(OrientedBoundingBox & obb, const EnvironmentOBBRegion & region);
 
 	// Static working vector for environment object search; holds nodes being considered in the search
 	static std::vector<EnvironmentTree*>		m_search_nodes;

@@ -580,6 +580,9 @@
     <ClCompile Include="LightFlatHighlightFadeShader.cpp">
       <Filter>Engine\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentOBBRegion.cpp">
+      <Filter>Data structures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1326,6 +1329,9 @@
     </ClInclude>
     <ClInclude Include="LightFlatHighlightFadeShader.h">
       <Filter>Engine\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentOBBRegion.h">
+      <Filter>Data structures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -91,12 +91,6 @@ void OrientedBoundingBox::DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMV
 		v[0].value, v[1].value), v[2].value), v[3].value), v[4].value), v[5].value), v[6].value), v[7].value);
 }
 
-// Updates the extent (centre-to-bounds distance) of this bounding volume from a size (total -ve to +ve bounds size)
-void OrientedBoundingBox::UpdateExtentFromSize(const FXMVECTOR size)
-{
-	UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
-}
-
 // Allocates space for new child OBBs below this one
 void OrientedBoundingBox::AllocateChildren(int children)
 {

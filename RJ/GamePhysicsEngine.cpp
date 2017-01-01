@@ -808,20 +808,6 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	// to invoke this one) to ensure that object[0|1] are non-null valid objects.  For efficiency.  
 	// collider[0|1] can be null if there is no relevant colliding OBB (e.g. if the object is broadphase collision-only)
 	
-	// Special case; if either object is a ship section & part of a larger complex ship, move up the hierarchy one level
-	// and treat the ship itself as being the colliding object.  Ship statistics (e.g. mass) are derived from the combination of all
-	// its sections, so this is the correct object to be involving in the collision
-	if (object0->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject) 
-	{
-		ComplexShipSection *sec = (ComplexShipSection*)object0;
-		if (sec->GetParent()) object0 = (iActiveObject*)sec->GetParent();
-	}
-	if (object1->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject)
-	{
-		ComplexShipSection *sec = (ComplexShipSection*)object1;
-		if (sec->GetParent()) object1 = (iActiveObject*)sec->GetParent();
-	}
-
 	// Store the momentum of each object before applying a response, to allow calculation of the impact force
 	XMVECTOR obj0_pre_wm = object0->PhysicsState.WorldMomentum;
 	XMVECTOR obj1_pre_wm = object1->PhysicsState.WorldMomentum;

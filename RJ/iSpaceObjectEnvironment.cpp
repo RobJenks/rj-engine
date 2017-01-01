@@ -16,9 +16,10 @@
 #include "Ray.h"
 #include "AABB.h"
 #include "OrientedBoundingBox.h"
+#include "EnvironmentOBBRegion.h"
 #include "ElementIntersection.h"
 #include "EnvironmentCollision.h"
-#include"SimulatedEnvironmentCollision.h"
+#include "SimulatedEnvironmentCollision.h"
 
 #include "iSpaceObjectEnvironment.h"
 
@@ -607,6 +608,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Identify the elements that make up this environment's outer hull
 	BuildOuterHullModel();
 
+	// Rebuild the object bounding box to acccount for any elements that may have been destroyed
+	BuildBoundingBoxHierarchy();
+
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
 }
@@ -680,6 +684,135 @@ void iSpaceObjectEnvironment::BuildOuterHullModel(void)
 	}
 }
 
+// Generates a bounding box hierarchy to represent the environment, accounting for any elements that may 
+// have been destroyed
+void iSpaceObjectEnvironment::BuildBoundingBoxHierarchy(void)
+{
+	// Determine the hierarchy of element-aligned bounding boxes that will encompass
+	// all non-destroyed elements in this environment
+	EnvironmentOBBRegion region = EnvironmentOBBRegion(0, m_elementsize);
+	EnvironmentOBBRegionBuilder::Initialise(region);
+	DetermineOBBRegionHierarchy(region);
+
+	// Now process this region hierarchy and use it to construct the compound OBB
+	BuildOBBFromRegionData(region);
+}
+
+// Internal recursive method for building the environment OBB hierarchy.  Returns the number of child
+// regions created below this node, in the range [0 - 8]
+EnvironmentOBBRegion::RegionState iSpaceObjectEnvironment::DetermineOBBRegionHierarchy(EnvironmentOBBRegion & region) const
+{
+	if (region.size == ONE_INTVECTOR3)
+	{
+		// Trivial case; single elements are either 100% or 0% complete
+		return (m_elements[region.element].IsDestroyed() ? EnvironmentOBBRegion::RegionState::Empty 
+														 : EnvironmentOBBRegion::RegionState::Complete);
+	}
+	else
+	{
+		// The region contains multiple elements, so subdivide it down into (maximum 8) sub-regions
+		SubdivideOBBRegion(region);
+
+		// Run this method recursively on each subregion
+		EnvironmentOBBRegion::RegionState regionstate = EnvironmentOBBRegion::RegionState::Unknown;
+		for (int i = 0; i < region.childcount; ++i)
+		{
+			// Run recursively on this child region and record its resulting state
+			EnvironmentOBBRegion::RegionState state = DetermineOBBRegionHierarchy(EnvironmentOBBRegionBuilder::Get(region.children[i]));
+			regionstate = EnvironmentOBBRegion::ApplyChildRegionState(regionstate, state);
+
+			// If the child region is empty we do not need a node to cover this area
+			// Also decrement the index here since we want to re-process this index, which now contains the next
+			// child moved down
+			if (state == EnvironmentOBBRegion::RegionState::Empty) { region.RemoveChild(i); --i; }
+		}
+
+		// If this entire region is complete we can remove all child nodes, since we don't need
+		// any more granular detail for this area
+		if (regionstate == EnvironmentOBBRegion::RegionState::Complete) region.RemoveAllChildren();
+
+		// Return the state of this region and pass control back up the hierarchy
+		return regionstate;
+	}
+}
+
+
+// Builds the compound environment OBB based on calculated region data
+void iSpaceObjectEnvironment::BuildOBBFromRegionData(const EnvironmentOBBRegion & region)
+{
+	// Deallocate any existing OBB data
+	CollisionOBB.Clear();
+
+	// Now recursively build an OBB that matches the hierarchical region structure
+	BuildOBBNodeFromRegionData(CollisionOBB, region);
+}
+
+
+// Recursively builds each node of the OBB that matches the supplied hierarchical region structure
+void iSpaceObjectEnvironment::BuildOBBNodeFromRegionData(OrientedBoundingBox & obb, const EnvironmentOBBRegion & region)
+{
+	// Node size is easily calculated based on element size of the region
+	XMVECTOR extent = XMVectorScale(Game::ElementLocationToPhysicalPosition(region.size), 0.5f);
+	obb.UpdateExtent(extent);
+
+	// Node offset is based upon the (top-left) element location of the region
+	const ComplexShipElement & el = m_elements[region.element];
+	obb.UpdateOffset(XMVectorSubtract(XMVectorAdd(							// Node position ==
+		Game::ElementLocationToPhysicalPosition(el.GetLocation()),		//   Position of the region top-left element
+		extent),														//   PLUS half the size of the region (to move from top-left > centre position of region)
+		XMVectorScale(m_size, 0.5f)));									//   MINUS half the size of the environment itself (to move from el[0,0,0] > centre positon of environment)
+
+	// Now allocate space for the child nodes below this one and create each in turn
+	obb.AllocateChildren(region.childcount);
+	for (int i = 0; i < region.childcount; ++i)
+	{
+		BuildOBBNodeFromRegionData(obb.Children[i], EnvironmentOBBRegionBuilder::Get(region.children[i]));
+	}
+}
+
+
+/* Internal method to subdivide a region into child nodes.  Return the number of subnodes created.  Output 
+   parameter returns the new subnode data
+   
+   Example for [3x2x2] region --> subdivide into [2x1x1] + [1x1x1]:
+
+   xyz	Pos		Size	Vol	Condition for creating subregion
+   ===========================================================
+   ---	0,0,0	2,1,1	2	if (true)
+   +--	2,0,0	1,1,1	1	if (sx != 0)
+   -+-	0,1,0	2,1,1	2	if (sy != 0)
+   ++-	2,1,0	1,1,1	1	if (sx != 0 && sy != 0)
+
+   --+	0,0,1	2,1,1	2	if (sz != 0)
+   +-+	2,0,1	1,1,1	1	if (sz != 0 && sx != 0)
+   -++	0,2,1	2,1,1	2	if (sz != 0 && sy != 0)
+   +++	2,1,1	1,1,1	1	if (sz != 0 && sx != 0 && sy != 0)
+*/
+void iSpaceObjectEnvironment::SubdivideOBBRegion(EnvironmentOBBRegion & region) const
+{
+	const INTVECTOR3 & neg_pos = m_elements[region.element].GetLocation();
+	INTVECTOR3 pos_size = region.size / 2;				// Positive == 'after' the centre point
+	INTVECTOR3 neg_size = region.size - pos_size;		// Negative == 'before' the centre point
+	INTVECTOR3 pos_pos = (neg_pos + neg_size);		
+
+	// Precalc some conditions for efficiency
+	bool x_and_y = (pos_size.x != 0 && pos_size.y != 0);
+
+	// Add each region if required; first, those negative to the z-centre
+	region.AddChild(region.element, neg_size);																									// ---
+	if (pos_size.x != 0) region.AddChild(ELEMENT_INDEX(pos_pos.x, neg_pos.y, neg_pos.z), INTVECTOR3(pos_size.x, neg_size.y, neg_size.z));		// +--
+	if (pos_size.y != 0) region.AddChild(ELEMENT_INDEX(neg_pos.x, pos_pos.y, neg_pos.z), INTVECTOR3(neg_size.x, pos_size.y, neg_size.z));		// -+-
+	if (x_and_y) region.AddChild(ELEMENT_INDEX(pos_pos.x, pos_pos.y, neg_pos.z), INTVECTOR3(pos_size.x, pos_size.y, neg_size.z));				// ++-
+
+	// Now add the other half of the regions, in the positive z direction
+	if (pos_size.z != 0)
+	{
+		region.AddChild(ELEMENT_INDEX(neg_pos.x, neg_pos.y, pos_pos.z), INTVECTOR3(neg_size.x, neg_size.y, pos_size.z));						// --+
+		if (pos_size.x != 0) region.AddChild(ELEMENT_INDEX(pos_pos.x, neg_pos.y, pos_pos.z), INTVECTOR3(pos_size.x, neg_size.y, pos_size.z));	// +-+
+		if (pos_size.y != 0) region.AddChild(ELEMENT_INDEX(neg_pos.x, pos_pos.y, pos_pos.z), INTVECTOR3(neg_size.x, pos_size.y, pos_size.z));	// -++
+		if (x_and_y) region.AddChild(ELEMENT_INDEX(pos_pos.x, pos_pos.y, pos_pos.z), INTVECTOR3(pos_size.x, pos_size.y, pos_size.z));			// +++
+	}
+}
 
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 {
@@ -1257,11 +1390,6 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 	// transferred to this impacted hull is scaled by the degree of impact (Param1)
 	float total_strength = (el_strength + tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
 	float damage_pc = (obj_force / total_strength) * ev.Param1;
-
-	if (total_strength > 10000.0f)
-	{
-		int a = 1;
-	}
 
 	// The final damage value (in the range 0.0-1.0) can be derived from this damage_pc and any relevant damage 
 	// resistance properties of the elemnet

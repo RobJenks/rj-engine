@@ -781,19 +781,9 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 
-	if (false && b[DIK_I]) {
-		Order::ID_TYPE last_id = 0;
-		a1()->CancelAllOrders();
-		for (int i = 0; i<3; i++)
-		{
-			Order::ID_TYPE id = a1()->AssignNewOrder(new Order_ActorMoveToPosition(XMVectorSetY(XMVectorSetW(
-				XMVectorAdd(Game::CurrentPlayer->GetPosition(), Vector3Random(-15.0f, 15.0f)), 0.0f), 0.0f),
-				2.0f, false));
-			Order_ActorMoveToPosition *order = (Order_ActorMoveToPosition*)a1()->GetOrder(id); if (!order) break;
-			if (i > 0) order->Dependency = last_id;
+	if (b[DIK_I]) {
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_obb ")(b[DIK_LSHIFT] ? "false" : "true").str()));
 
-			last_id = id;
-		}
 		Game::Keyboard.LockKey(DIK_I);
 	}
 
@@ -2329,18 +2319,19 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		XMVECTOR wm = cs()->GetWorldMomentum();
-		XMFLOAT3 wmf; XMStoreFloat3(&wmf, wm);
-		float wmflen = XMVectorGetX(XMVector3Length(wm));
+		if (cs())
+		{
+			XMVECTOR wm = cs()->GetWorldMomentum();
+			XMVECTOR a = cs()->GetWorldAcceleration();
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%.1f, %.1f, %.1f   |wm| == %.1f", wmf.x, wmf.y, wmf.z, wmflen);
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "|wm| == %.1f, |a| == %.1f,   (wm == %s, a == %s)",
+				XMVectorGetX(XMVector3Length(wm)), XMVectorGetX(XMVector3Length(a)), Vector3ToString(wm).c_str(), Vector3ToString(a).c_str());
+		}
+
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
-	//*** 1. Test why CS impacts are not triggering the environment damage method ***
-	//*** 2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
-}
+	//1. COLLIDER ONLY SHOWS AS MOVING THROUGH ENVIRONMENT ONCE IT HITS FIRST NON - DESTROYED ELEMENT.NEED TO DO MORE PRECISE INITIAL COLLISION DETECTION ?
+	//2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
-OPEN ISSUES:
-	1. CS IS GAINING VELOCITY WHEN IMPACTED?
-	2. COLLIDER ONLY SHOWS AS MOVING THROUGH ENVIRONMENT ONCE IT HITS FIRST NON-DESTROYED ELEMENT.  NEED TO DO MORE PRECISE INITIAL COLLISION DETECTION?
+}
