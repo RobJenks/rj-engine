@@ -1668,7 +1668,6 @@ Result iSpaceObjectEnvironment::InitialiseElements(INTVECTOR3 size, const Comple
 			// Values precalculated for use during the copy operation
 			int scount = (source_size.x * source_size.y * source_size.z);
 			INTVECTOR3 ubound = (size - INTVECTOR3(1, 1, 1));
-			int size_xy = (size.x * size.y);
 
 			// Loop through all elements in the source collection
 			for (int i = 0; i < scount; ++i)
@@ -1679,7 +1678,7 @@ Result iSpaceObjectEnvironment::InitialiseElements(INTVECTOR3 size, const Comple
 				if (IntVector3Between(sloc, NULL_INTVECTOR3, ubound))
 				{
 					// Copy the source element into the new space
-					el[ELEMENT_INDEX_EX(sloc.x, sloc.y, sloc.z, size, size_xy)] = src;
+					el[ELEMENT_INDEX_EX(sloc.x, sloc.y, sloc.z, size)] = src;
 				}
 			}
 		}
@@ -1980,7 +1979,6 @@ Result iSpaceObjectEnvironment::RotateElementSpace(Rotation90Degree rotation)
 	// Determine new element space dimensions
 	INTVECTOR3 newsize = ((rotation == Rotation90Degree::Rotate90 || rotation == Rotation90Degree::Rotate270) ?
 		INTVECTOR3(m_elementsize.y, m_elementsize.x, m_elementsize.z) : m_elementsize);
-	int newsize_xy = (newsize.x * newsize.y);
 
 	// Reassign each element in turn
 	int index;
@@ -1994,11 +1992,11 @@ Result iSpaceObjectEnvironment::RotateElementSpace(Rotation90Degree rotation)
 		switch (rotation)
 		{
 		case Rotation90Degree::Rotate90:
-			index = ELEMENT_INDEX_EX(loc.y, (m_elementsize.x - 1) - loc.x, loc.z, newsize, newsize_xy);							break;
+			index = ELEMENT_INDEX_EX(loc.y, (m_elementsize.x - 1) - loc.x, loc.z, newsize);							break;
 		case Rotation90Degree::Rotate180:
-			index = ELEMENT_INDEX_EX((m_elementsize.x - 1) - loc.x, (m_elementsize.y - 1) - loc.y, loc.z, newsize, newsize_xy);	break;
+			index = ELEMENT_INDEX_EX((m_elementsize.x - 1) - loc.x, (m_elementsize.y - 1) - loc.y, loc.z, newsize);	break;
 		case Rotation90Degree::Rotate270:
-			index = ELEMENT_INDEX_EX((m_elementsize.y - 1) - loc.y, loc.x, loc.z, newsize, newsize_xy);							break;
+			index = ELEMENT_INDEX_EX((m_elementsize.y - 1) - loc.y, loc.x, loc.z, newsize);							break;
 		}
 
 		// Copy the element contents 

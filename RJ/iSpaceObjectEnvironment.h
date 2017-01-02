@@ -28,12 +28,14 @@ public:
 	USE_ALIGN16_ALLOCATORS(iSpaceObjectEnvironment)
 
 	// Formula to translate x/y/z coordinates into an index in the element collection
-#	define ELEMENT_INDEX(_x, _y, _z) (_x + (_y * m_elementsize.x) + (_z * m_xy_size))
+	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)"
+#	define ELEMENT_INDEX(_x, _y, _z) (_x + m_elementsize.x * (_y + (_z * m_elementsize.y)))
 
 	// Special overloaded formula to translate x/y/z coordinates into an index in the element collection, which also
-	// accepts the element space size and precalculated y/z size product.  Allows use on element spaces
-	// other than our own, e.g. when allocating a new space with different dimensions
-#	define ELEMENT_INDEX_EX(_x, _y, _z, _size, _size_xy) (_x + (_y * _size.x) + (_z * _size_xy))
+	// accepts the element space size.  Allows use on element spaces other than our own, e.g. 
+	// when allocating a new space with different dimensions
+	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)" 
+#	define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z + _size.y)))
 
 	// Debug flag indicating whether we should output information on element collision tests
 //#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
@@ -334,6 +336,10 @@ public:
 	// Converts an element index into its x/y/z location
 	INTVECTOR3						ElementIndexToLocation(int index) const;
 	void							ElementIndexToLocation(int index, INTVECTOR3 & outVector) const;
+
+	// Converts an element location into its element index
+	CMPINLINE int					ElementLocationToIndex(const INTVECTOR3 & location) const		{ return ELEMENT_INDEX(location.x, location.y, location.z); }
+	CMPINLINE int					ElementLocationToIndex(int x, int y, int z) const				{ return ELEMENT_INDEX(x, y, z); }
 	
 	// Returns the element location containing the specified position.  Unbounded, so can return an element
 	// location outside the bounds of this environment
@@ -402,10 +408,10 @@ protected:
 	INTVECTOR3						m_elementsize;
 
 	// Precalculated values for efficiency
-	int								m_xy_size;				// Product of element size in the x & y dimensions for lookup efficiency
-	int								m_yz_size;				// Product of element size in the y & z dimensions for lookup efficiency
-	int								m_elementcount;			// Total element count
-	
+	int								m_elementcount;				// Total element count
+	int								m_xy_size;					// Precalculated (element_size.x * element_size.y)
+	int								m_yz_size;					// Precalculated (element_size.y * element_size.z)
+
 	// Flag that indicates whether environment updates are currently suspended, e.g. when adding a large set
 	// of tiles in one go where we don't want to run UpdateEnvironment() after each addition
 	bool							m_updatesuspended;
