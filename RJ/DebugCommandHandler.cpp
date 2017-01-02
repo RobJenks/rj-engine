@@ -164,34 +164,6 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		return true;
 	}
 
-	/* Enable physics debugging on the specified entity */
-	else if (command.InputCommand == "enable_physics_debug")
-	{
-		iObject *object = NULL;
-		if (command.Parameter(0) == "") {
-			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
-				concat("Entity not specified").str()); return true;
-		}
-
-		object = Game::FindObjectByIdentifier(command.Parameter(0));
-		if (!object) {
-			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
-				concat("Object \"")(command.Parameter(0))("\" does not exist").str()); return true;
-		}
-
-		Game::PhysicsEngine.SetPhysicsDebugEntity(object->GetID());
-		command.SetSuccessOutput(concat("Enabling physics debug for entity \"")(command.Parameter(0))("\"").str());
-		return true;
-	}
-
-	/* Disable physics debugging */
-	else if (command.InputCommand == "disable_physics_debug")
-	{
-		Game::PhysicsEngine.ClearPhysicsDebugEntity();
-		command.SetSuccessOutput("Disabling entity phsyics debugging");
-		return true;
-	}
-
 	/* Enable the frame profiler for the next frame */
 	else if (command.InputCommand == "profile_frame")
 	{

@@ -680,7 +680,7 @@ void RJMain::ProcessKeyboardInput(void)
 		SpaceProjectile *proj = D::SpaceProjectiles.Get("projectile_basic01")->CreateProjectile();
 		proj->MoveIntoSpaceEnvironment(cs()->GetSpaceEnvironment());
 		//proj->SetPosition(XMVector3TransformCoord(XMVectorSet(50.0f, 0.0f, -50.0f, 0.0f), cs()->GetWorldMatrix()));
-		proj->SetPosition(XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
+		proj->SetPosition(XMVector3TransformCoord(XMVectorSet(frand_lh(-1.0f, 1.0f), 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
 		//proj->SetOrientation(XMQuaternionMultiply(XMQuaternionRotationAxis(UP_VECTOR, (-PI / 4.0f)), cs()->GetOrientation()));
 		proj->SetOrientation(XMQuaternionMultiply(ID_QUATERNION, cs()->GetOrientation()));
 		//proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(-25.0f, 0.0f, 25.0f, 0.0f), cs()->GetOrientationMatrix())));

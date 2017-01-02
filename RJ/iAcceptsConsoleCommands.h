@@ -9,7 +9,7 @@ struct GameConsoleCommand;
 
 // Interface for any object that accepts commands from the console.  Objects implementing this interface are 
 // automatically added to a list of components which are polled to accept each console command.  Should 
-// be reserved for only a few, core components.  Should also be reserved for components that are onlhy 
+// be reserved for only a few, core components.  Should also be reserved for components that are only 
 // instantiated once, otherwise the first instance of an implementing class will process the command and
 // subsequent instances will not, which is probably not the intended outcome.
 // This class has no special alignment requirements

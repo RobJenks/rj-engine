@@ -6,6 +6,7 @@
 #include "DefaultValues.h"
 #include "GameVarsExtern.h"
 #include "Octree.h"
+#include "GameConsoleCommand.h"
 #include "ObjectSearch.h"
 #include "iObject.h"
 #include "iActiveObject.h"
@@ -22,10 +23,15 @@
 
 #include "GamePhysicsEngine.h"
 
-// Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds
 #ifdef _DEBUG
+/* Compiler settings that, if defined, will cause all collision details to be logged to the debug output.  Only available in debug builds */
 //#	define RJ_LOG_COLLISION_DETAILS
 //#	define RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
+
+/* Debug-specific includes */
+#	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+#		include <intrin.h>
+#	endif
 #endif
 
 // Compiler setting to define the collision detection method in use
@@ -40,10 +46,15 @@ const GamePhysicsEngine::ImpactData::ObjectImpactData GamePhysicsEngine::NullObj
 GamePhysicsEngine::GamePhysicsEngine(void)
 {
 	// Initialise fields to their default values wherever required
-	m_static_cd_counter = 0U; m_cd_include_static = false;
+	m_static_cd_counter = 0U; 
+	m_cd_include_static = false;
 
 	// Default physics engine flags
 	m_flag_handle_diverging_collisions = false;
+
+	// Debug flags and data
+	m_physics_debug_entity_id = 0U;
+	m_debug_collision_break[0] = m_debug_collision_break[1] = 0U;
 }
 
 // Primary method to simulate all physics in the world.  Uses semi-fixed time step to maintain reasonably frame-rate 
@@ -226,10 +237,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			if (object->GetID() == m_physics_debug_entity_id)
 			{
 				OutputDebugString(concat("Testing collision of physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
-			}
-			if (object->GetObjectType() == iObject::ObjectType::ProjectileObject)
-			{
-				int asafsafs = 12;	// TODO: DEBUG
+				__debugbreak();
 			}
 #		endif
 
@@ -271,6 +279,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 					if (candidate->GetID() == m_physics_debug_entity_id)
 					{
 						OutputDebugString(concat("Testing collision against physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+						__debugbreak();
 					}
 #				endif
 
@@ -807,7 +816,17 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 	// No parameter checks here; we rely on the integrity of main collision detection method (which should be the only method
 	// to invoke this one) to ensure that object[0|1] are non-null valid objects.  For efficiency.  
 	// collider[0|1] can be null if there is no relevant colliding OBB (e.g. if the object is broadphase collision-only)
-	
+
+	// Debug assist; will break at this point if break-on-collision is enabled for these two objects
+#	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+	if (TestDebugCollisionBreak(object0->GetID(), object1->GetID()))
+	{
+		OutputDebugString(concat("Collision break triggered between objects \"")(object0->GetInstanceCode())("\" (")(object0->GetID())
+			(") and \"")(object1->GetInstanceCode())("\" (")(object1->GetID())(") at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+		__debugbreak();
+	}
+#	endif
+
 	// Store the momentum of each object before applying a response, to allow calculation of the impact force
 	XMVECTOR obj0_pre_wm = object0->PhysicsState.WorldMomentum;
 	XMVECTOR obj1_pre_wm = object1->PhysicsState.WorldMomentum;
@@ -2314,6 +2333,94 @@ Game::BoundingVolumeType GamePhysicsEngine::DetermineBestBoundingVolumeTypeForOb
 const GamePhysicsEngine::ImpactData::ObjectImpactData & GamePhysicsEngine::ImpactData::GetObjectData(Game::ID_TYPE id) const 
 {
 	return (id == Object.ID ? Object : (id == Collider.ID ? Collider : GamePhysicsEngine::NullObjectImpactData));
+}
+
+// Virtual inherited method to accept a command from the console
+bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
+{
+	/* Enable physics debugging on the specified entity */
+	if (command.InputCommand == "enable_physics_debug")
+	{
+		iObject *object = NULL;
+		if (command.Parameter(0) == "") {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+				concat("Entity not specified").str()); return true;
+		}
+
+		object = Game::FindObjectByIdentifier(command.Parameter(0));
+		if (!object) {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+				concat("Object \"")(command.Parameter(0))("\" does not exist").str()); return true;
+		}
+
+		SetPhysicsDebugEntity(object->GetID());
+		command.SetSuccessOutput(concat("Enabling physics debug for entity \"")(command.Parameter(0))("\"").str());
+		return true;
+	}
+
+	/* Disable physics debugging */
+	else if (command.InputCommand == "disable_physics_debug")
+	{
+		ClearPhysicsDebugEntity();
+		command.SetSuccessOutput("Disabling entity phsyics debugging");
+		return true;
+	}
+
+	/* Enable collision handling debug */
+	else if (command.InputCommand == "enable_collision_break")
+	{
+		std::string obj_s[2] = { command.Parameter(0), command.Parameter(1) };
+		if (obj_s[0] != NullString || obj_s[1] != NullString)	// Only one parameter is mandatory; [0|1] = all collisions with object, [0]+[1] = all collisions between these two objects
+		{
+			iObject *obj[2] = { Game::FindObjectByIdentifier(obj_s[0]), Game::FindObjectByIdentifier(obj_s[1]) };
+			if (obj[0] != NULL || obj[1] != NULL)
+			{
+				SetCollisionDebugEntities((obj[0] ? obj[0]->GetID() : 0U), (obj[1] ? obj[1]->GetID() : 0U));
+				command.SetSuccessOutput(concat("Enabling collision debug for \"")(obj_s[0])("\" and \"")(obj_s[1])("\"").str());
+				return true;
+			}
+		}
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+			concat("Invalid data provided; could not set collision break between \"")(obj_s[0])("\" and \"")(obj_s[1])("\"").str());
+		return true;
+	}
+
+	/* Disable collision handling debug */
+	else if (command.InputCommand == "disable_collision_break")
+	{
+		ClearCollisionDebugEntities();
+		command.SetSuccessOutput("Disabling entity physics collision break");
+		return true;
+	}
+
+	return false;
+}
+
+bool GamePhysicsEngine::TestDebugCollisionBreak(Game::ID_TYPE obj0, Game::ID_TYPE obj1)
+{
+	int index = 0;
+	if (m_debug_collision_break[0] == 0U)
+	{
+		if (m_debug_collision_break[1] == 0U)		{ return false; }	// Collision break is disabled
+		else										{ index = 1; }		// break[1] is the only specified ID
+	}
+	else
+	{
+		if (m_debug_collision_break[1] == 0U)		{ index = 0; }		// break[0] is the only specified ID
+		else										{ index = 2; }		// both break[0] and break[1] are specified
+	}
+
+	if (index == 2)
+	{
+		// Both objects are specified, so both must match
+		return ((obj0 == m_debug_collision_break[0] && obj1 == m_debug_collision_break[1]) ||
+				(obj1 == m_debug_collision_break[0] && obj0 == m_debug_collision_break[1]));
+	}
+	else
+	{
+		// Only one object (break[index]) was specified, so we do not care what the other object is
+		return (obj0 == m_debug_collision_break[index] || obj1 == m_debug_collision_break[index]);
+	}
 }
 
 #ifdef RJ_OLD_COLLISION_HANDLING

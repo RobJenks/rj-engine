@@ -8,6 +8,7 @@
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
 #include "FastMath.h"
+#include "iAcceptsConsoleCommands.h"
 #include "BasicRay.h"
 #include "OrientedBoundingBox.h"
 #include "CollisionDetectionResultsStruct.h"
@@ -28,7 +29,7 @@ class Ray;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class GamePhysicsEngine : public ALIGN16<GamePhysicsEngine>
+class GamePhysicsEngine : public ALIGN16<GamePhysicsEngine>, public iAcceptsConsoleCommands
 {
 public:
 
@@ -422,9 +423,18 @@ public:
 #	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 		CMPINLINE void						SetPhysicsDebugEntity(Game::ID_TYPE id)					{ m_physics_debug_entity_id = id; }
 		CMPINLINE void						ClearPhysicsDebugEntity(void)							{ m_physics_debug_entity_id = 0U; }
+		CMPINLINE void						SetCollisionDebugEntities(Game::ID_TYPE obj0, Game::ID_TYPE obj1) 
+		{ 
+			m_debug_collision_break[0] = obj0; m_debug_collision_break[1] = obj1;
+		}
+		CMPINLINE void						ClearCollisionDebugEntities(void)						{ SetCollisionDebugEntities(0U, 0U); } 
+		bool								TestDebugCollisionBreak(Game::ID_TYPE obj0, Game::ID_TYPE obj1);
 #	else
 		CMPINLINE void						SetPhysicsDebugEntity(Game::ID_TYPE id)					{ }
 		CMPINLINE void						ClearPhysicsDebugEntity(void)							{ }
+		CMPINLINE void						SetCollisionDebugEntities(Game::ID_TYPE obj0, Game::ID_TYPE obj1) { }
+		CMPINLINE void						ClearCollisionDebugEntities(void)						{ }
+		CMPINLINE bool						TestDebugCollisionBreak(Game::ID_TYPE obj0, Game::ID_TYPE obj1) { }
 #	endif
 
 	// Set or test the flag that indicates whether the engine will still handle collisions between diverging objects.  Default: no
@@ -474,6 +484,10 @@ protected:
 	// collisions were detected
 	bool									TestAndHandleTerrainCollision(	iSpaceObjectEnvironment *env, iEnvironmentObject *object,
 																			StaticTerrain *terrain );
+
+	// Virtual inherited method to accept a command from the console
+	bool									ProcessConsoleCommand(GameConsoleCommand & command);
+
 protected:
 
 	// Store the last collision detection result in a structure that can be accessed by collision handling/response functions
@@ -491,6 +505,7 @@ protected:
 	// ID of the object which will be caught during debug physics testing (if applicable compiler flags are set)
 #	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 	Game::ID_TYPE							m_physics_debug_entity_id;
+	Game::ID_TYPE							m_debug_collision_break[2];
 #	endif
 
 	// Temporary variables to avoid multiple reallocations per physics cycle
