@@ -260,9 +260,12 @@ Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
 	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
 	
 	// Copy all material data into the buffer
-	unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
-	buffer->MaterialCount = material_count;
-	memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
+	if (Game::Engine->GetCurrentModelBuffer())
+	{
+		unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
+		buffer->MaterialCount = material_count;
+		memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
+	}
 
 	// Return success
 	return ErrorCodes::NoError;
