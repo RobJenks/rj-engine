@@ -234,7 +234,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 
 		// Debug control; allow breaking at collision detection for a specific object
 #		ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
-			if (object->GetID() == m_physics_debug_entity_id)
+			if (IsPhysicsDebugEnabled(PhysicsDebugType::PhysicsDebugOnTest) && object->GetID() == m_physics_debug_entity_id)
 			{
 				OutputDebugString(concat("Testing collision of physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
 				__debugbreak();
@@ -274,15 +274,6 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 				// a passive collider.  In this case it cannot test for collisions itself, and so we will allow it as the candidate here
 				if (object_id >= candidate->GetID() && candidate->GetColliderType() != Game::ColliderType::PassiveCollider) continue;
 
-				// Debug control; allow breaking at collision detection for a specific object
-#				ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
-					if (candidate->GetID() == m_physics_debug_entity_id)
-					{
-						OutputDebugString(concat("Testing collision against physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
-						__debugbreak();
-					}
-#				endif
-
 				// Also test whether either object has an exclusion in place to prevent collision with the other
 				if ((hasexclusions && object->CollisionExcludedWithObject(candidate->GetID())) ||
 					(candidate->HasCollisionExclusions() && candidate->CollisionExcludedWithObject(object_id))) continue;
@@ -313,6 +304,16 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 					//		m_normal = D3DXVec3Normalize(objpos - candpos)
 					//		m_point = objpos - (m_normal * (obj.radius - m_penetration * 0.5f ));
 
+
+					// Debug control; allow breaking at collision detection for a specific object
+#					ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+						if (IsPhysicsDebugEnabled(PhysicsDebugType::PhysicsDebugOnBroadphase) && candidate->GetID() == m_physics_debug_entity_id)
+						{
+							OutputDebugString(concat("Broadphase collision detected for physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+							__debugbreak();
+						}
+#					endif
+
 					// Increment the count of broadphase collisions
 					++CollisionDetectionResults.SpaceCollisions.BroadphaseCollisions;
 
@@ -322,6 +323,15 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 
 					if (result)
 					{
+						// Debug control; allow breaking at collision detection for a specific object
+#						ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+							if (IsPhysicsDebugEnabled(PhysicsDebugType::PhysicsDebugOnCollision) && candidate->GetID() == m_physics_debug_entity_id)
+							{
+								OutputDebugString(concat("Full collision detected for physics debug entity ")(m_physics_debug_entity_id)(" at ")(Game::PersistentClockMs)("ms\n").str().c_str());
+								__debugbreak();
+							}
+#						endif
+
 						// These two objects are colliding.  Determine the collision response and apply it
 						HandleCollision(object, candidate, (collider0 ? &(collider0->ConstData()) : NULL), (collider1 ? &(collider1->ConstData()) : NULL));
 						++CollisionDetectionResults.SpaceCollisions.Collisions;
@@ -2344,7 +2354,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		iObject *object = NULL;
 		if (command.Parameter(0) == "") {
 			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
-				concat("Entity not specified").str()); return true;
+				concat("Entity not specified (Usage: \"enable_physics_debug <Object> [<Mode1>, ..., <ModeN>]\" where Mode = {Test | Broadphase | Collision}").str()); return true;
 		}
 
 		object = Game::FindObjectByIdentifier(command.Parameter(0));
@@ -2354,7 +2364,15 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		}
 
 		SetPhysicsDebugEntity(object->GetID());
-		command.SetSuccessOutput(concat("Enabling physics debug for entity \"")(command.Parameter(0))("\"").str());
+
+		// Enable each debug type that is specified
+		ClearPhysicsDebugOptions();
+
+		for (std::vector<std::string>::size_type i = 1U; i < command.ParameterCount(); ++i)
+			EnablePhysicsDebugType(command.Parameter(i));
+		if (m_physics_debug_type == 0U) EnablePhysicsDebugType("BROADPHASE");	// Default if none specified
+
+		command.SetSuccessOutput(concat("Enabling physics debug (")(m_physics_debug_type)(") for entity \"")(command.Parameter(0))("\"").str());
 		return true;
 	}
 
@@ -2362,6 +2380,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	else if (command.InputCommand == "disable_physics_debug")
 	{
 		ClearPhysicsDebugEntity();
+		ClearPhysicsDebugOptions();
 		command.SetSuccessOutput("Disabling entity phsyics debugging");
 		return true;
 	}
@@ -2396,6 +2415,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	return false;
 }
 
+#ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 bool GamePhysicsEngine::TestDebugCollisionBreak(Game::ID_TYPE obj0, Game::ID_TYPE obj1)
 {
 	int index = 0;
@@ -2422,6 +2442,20 @@ bool GamePhysicsEngine::TestDebugCollisionBreak(Game::ID_TYPE obj0, Game::ID_TYP
 		return (obj0 == m_debug_collision_break[index] || obj1 == m_debug_collision_break[index]);
 	}
 }
+#endif
+
+#ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+void GamePhysicsEngine::EnablePhysicsDebugType(const std::string & type)
+{
+	if (type == NullString) return;
+	std::string t = StrUpper(type);
+
+	if (t == "TEST")					SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnTest);
+	else if (t == "BROADPHASE")			SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnBroadphase);
+	else if (t == "COLLISION")			SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnCollision);
+}
+#endif
+
 
 #ifdef RJ_OLD_COLLISION_HANDLING
 // Determines and applies collision response based upon a collision between object0.Collider0 and object1.Collider1.  

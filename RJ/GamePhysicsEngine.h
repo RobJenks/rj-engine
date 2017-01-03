@@ -502,10 +502,17 @@ protected:
 	unsigned int							m_static_cd_counter;
 	bool									m_cd_include_static;
 
-	// ID of the object which will be caught during debug physics testing (if applicable compiler flags are set)
+	// Fields used for collision engine debugging
 #	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+	enum PhysicsDebugType { PhysicsDebugDisabled = 0, PhysicsDebugOnTest = 1, PhysicsDebugOnBroadphase = 2 , PhysicsDebugOnCollision = 4 };
+	CMPINLINE void							ClearPhysicsDebugOptions(void)		{ m_physics_debug_type = PhysicsDebugType::PhysicsDebugDisabled; }
+	CMPINLINE bool							IsPhysicsDebugEnabled(PhysicsDebugType type)	{ return CheckBit_Any(m_physics_debug_type, type); }
+	void									EnablePhysicsDebugType(const std::string & type);
+
 	Game::ID_TYPE							m_physics_debug_entity_id;
+	bitstring								m_physics_debug_type;
 	Game::ID_TYPE							m_debug_collision_break[2];
+
 #	endif
 
 	// Temporary variables to avoid multiple reallocations per physics cycle
