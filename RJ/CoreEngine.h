@@ -86,7 +86,26 @@ public:
 		Render_DebugData,
 		Render_STAGECOUNT
 	};
-		
+
+	// Enumeration of render flags
+	enum RenderFlag
+	{
+		None = 0,
+		RenderTree,
+		RenderEnvTree,
+		DisableHullRendering,
+		RenderOBBs,
+		RenderOBBLeafNodesOnly,
+		RenderTerrainBoxes,
+		RenderNavNetwork,
+		RenderObjectIdentifiers,
+		_RFLAG_COUNT
+	};
+
+	// Methods to get and set render flags (to potentially be replaced by a parameterised method in future)
+	CMPINLINE bool	GetRenderFlag(RenderFlag flag)							{ return m_renderflags[flag]; }
+	CMPINLINE void	SetRenderFlag(RenderFlag flag, bool value)				{ m_renderflags[flag] = value; }
+
 	// Constructor/destructor/copy constructor/assignment operator
 	CoreEngine(void);
 	~CoreEngine(void);
@@ -329,24 +348,6 @@ public:
 
 	// Activate or deactivate a particular stage of the rendering cycle.  Changing the 'All' stage will overwrite all stage values
 	void SetRenderStageState(RenderStage stage, bool active);
-
-	// Enumeration of render flags
-	enum RenderFlag
-	{
-		None = 0,
-		RenderTree,
-		RenderEnvTree,
-		DisableHullRendering,
-		RenderOBBs,
-		RenderTerrainBoxes,
-		RenderNavNetwork,
-		RenderObjectIdentifiers,
-		_RFLAG_COUNT
-	};
-
-	// Methods to get and set render flags (to potentially be replaced by a parameterised method in future)
-	CMPINLINE bool	GetRenderFlag(RenderFlag flag)							{ return m_renderflags[flag]; }
-	CMPINLINE void	SetRenderFlag(RenderFlag flag, bool value)				{ m_renderflags[flag] = value; }
 
 	// Transform the specified world location into projection space ([-1 +1], [-1 +1])
 	CMPINLINE XMVECTOR		WorldToProjection(const FXMVECTOR world_pos) 

@@ -603,7 +603,7 @@ void OverlayRenderer::RenderElement3DOverlay(iSpaceObjectEnvironment & ship, con
 
 // Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 // will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects
-void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness)
+void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive, bool leaf_nodes_only, OverlayRenderer::RenderColour colour, float basethickness)
 {
 	// Make sure the OBB is valid
 	if (IsZeroFloat3(obb.ConstData().ExtentF)) return;
@@ -614,13 +614,14 @@ void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive,
 
 	// Render lines connecting the vertices.  [0-3] represent one end face in ccw order, [4-7] represent
 	// the second end face in ccw order.  v[x] and v[x+4] are opposite vertices in the two end faces
-	RenderCuboid(v, colour, (obb.HasChildren() ? basethickness : (basethickness * 4.0f)));
+	if (!leaf_nodes_only || obb.HasChildren() == false)
+		RenderCuboid(v, colour, (obb.HasChildren() ? basethickness : (basethickness * 4.0f)));
 
 	// If we are rendering recursively, move down to the child OBBs of this object
 	if (recursive)
 	{
 		for (int i = 0; i < obb.ChildCount; ++i)	
-			RenderOBB(obb.Children[i], true, colour, basethickness);
+			RenderOBB(obb.Children[i], true, leaf_nodes_only, colour, basethickness);
 	}
 }
 

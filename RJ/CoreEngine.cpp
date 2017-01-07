@@ -2226,6 +2226,7 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	}
 
 	// Iterate through the active objects
+	bool leaf_nodes_only = GetRenderFlag(CoreEngine::RenderFlag::RenderOBBLeafNodesOnly);
 	std::vector<iObject*>::iterator it_end = objects.end();
 	for (std::vector<iObject*>::iterator it = objects.begin(); it != it_end; ++it)
 	{
@@ -2241,7 +2242,7 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 			if (invalidated) object->CollisionOBB.UpdateFromObject(*object);
 
 			// Render the OBB
-			Game::Engine->GetOverlayRenderer()->RenderOBB(object->CollisionOBB, true, 
+			Game::Engine->GetOverlayRenderer()->RenderOBB(object->CollisionOBB, true, leaf_nodes_only, 
 				(invalidated ? OverlayRenderer::RenderColour::RC_LightBlue : OverlayRenderer::RenderColour::RC_Green), 0.1f);
 		}
 	}
@@ -2520,9 +2521,13 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	}
 	else if (command.InputCommand == "render_obb")
 	{
-		bool b = (command.ParameterAsBool(0));
-		SetRenderFlag(CoreEngine::RenderFlag::RenderOBBs, b);
-		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" rendering of object OBBs").str()); return true;
+		bool render = (command.ParameterAsBool(0));
+		bool leaf_only = (command.ParameterAsBool(1) & render);		// We can only set this flag if "render" is also true
+		SetRenderFlag(CoreEngine::RenderFlag::RenderOBBs, render);
+		SetRenderFlag(CoreEngine::RenderFlag::RenderOBBLeafNodesOnly, leaf_only);
+
+		command.SetSuccessOutput(concat((render ? "Enabling" : "Disabling"))(" rendering of object OBBs")
+			(leaf_only ? " (leaf nodes only)" : "").str()); return true;
 	}
 	else if (command.InputCommand == "render_terrainboxes")
 	{

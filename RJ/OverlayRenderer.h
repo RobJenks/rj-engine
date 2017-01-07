@@ -110,7 +110,12 @@ public:
 
 	// Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 	// will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects
-	void				RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness);
+	void				RenderOBB(	const OrientedBoundingBox & obb, bool recursive, bool leaf_nodes_only, 
+									OverlayRenderer::RenderColour colour, float basethickness);
+	CMPINLINE void		RenderOBB(const OrientedBoundingBox & obb, bool recursive, OverlayRenderer::RenderColour colour, float basethickness)
+	{
+		RenderOBB(obb, recursive, false, colour, basethickness);
+	}
 
 	// Method to add a node for rendering.  Uses line model.  Spins in place.
 	void XM_CALLCONV	RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
