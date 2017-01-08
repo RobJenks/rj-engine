@@ -288,6 +288,13 @@ void StaticTerrain::DestroyObject(void)
 	Shutdown();
 }
 
+// Custom debug string function
+std::string StaticTerrain::DebugString(void) const
+{
+	return concat("Terrain [ID=")(m_id)(", Type=")(m_definition ? m_definition->GetCode() : "<null>").str();
+}
+
+
 // Shutdown method to deallocate resources and remove the terrain object
 void StaticTerrain::Shutdown(void)
 {

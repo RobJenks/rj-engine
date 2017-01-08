@@ -43,7 +43,12 @@ typedef __declspec(align(16))XMVECTOR AXMVECTOR;	// 16-bit aligned vector class
 typedef __declspec(align(16))XMMATRIX AXMMATRIX;	// 16-bit aligned matrix class
 
 // Custom vector type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
-typedef __declspec(align(16)) struct AXMVECTOR_P_T : public ALIGN16<AXMVECTOR_P_T> { AXMVECTOR value; } AXMVECTOR_P;
+typedef __declspec(align(16)) struct AXMVECTOR_P_T : public ALIGN16<AXMVECTOR_P_T> 
+{ 
+	AXMVECTOR value; 
+	AXMVECTOR_P_T(void) { }
+	AXMVECTOR_P_T(const XMVECTOR & v) : value(v) { }
+} AXMVECTOR_P;
 
 // Custom matrix type suitable for use in arrays; will ensure that all array elements are themselves 16-bit aligned
 typedef __declspec(align(16)) struct AXMMATRIX_P_T : public ALIGN16<AXMMATRIX_P_T> { AXMMATRIX value; } AXMMATRIX_P;

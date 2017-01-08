@@ -81,6 +81,18 @@ public:
 		{
 			UpdateExtent(XMVectorMultiply(size, HALF_VECTOR));
 		}
+
+		// Method to determine the vertices of this bounding box in world space
+		void					DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const;
+
+		// Calculates the outer extents of this object in world space based on vertex positions.  Returns minimum
+		// and maximum bounds via reference parameters
+		void					DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const;
+
+		// Intermediate calculations; basis axes * extent along each of those axes, and the corresponding
+		// negation.  Permanent static allocation to reduce runtime allocations
+		static AXMVECTOR_P		ExtentAlongAxis[3];
+		static AXMVECTOR_P		NegAxisExtent[3];
 	};
 
 	const iObject *				Parent;				// The parent object that this OBB relates to 
@@ -130,9 +142,6 @@ public:
 	CMPINLINE void				Invalidate(void) { SetBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	CMPINLINE void				RemoveInvalidation(void) { ClearBit(Flags, OrientedBoundingBox::OBBFlags::OBBInvalidated); }
 	
-	// Intermediate calculations; basis axes * extent along each of those axes
-	AXMVECTOR_P					ExtentAlongAxis[3];
-
 
 	// Constructors to create a new OBB object
 	OrientedBoundingBox(void);
@@ -190,18 +199,21 @@ public:
 	// Method to update this bounding volume based upon its underlying data
 	CMPINLINE void				RecalculateData(void)
 	{
-		// Store intermediate calculations of basis axes * extent along those axes
-		ExtentAlongAxis[0].value = XMVectorMultiply(_Data.Extent[0].value, _Data.Axis[0].value);
-		ExtentAlongAxis[1].value = XMVectorMultiply(_Data.Extent[1].value, _Data.Axis[1].value);
-		ExtentAlongAxis[2].value = XMVectorMultiply(_Data.Extent[2].value, _Data.Axis[2].value);
+		// Perform any required intermediate calculations
 	}
 
 	// Method to determine the vertices of this bounding box in world space
-	void						DetermineVertices(AXMVECTOR_P (&pOutVertices)[8]) const;
+	CMPINLINE void				DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
+	{
+		_Data.DetermineVertices(pOutVertices);
+	}
 
 	// Calculates the outer extents of this object in world space based on vertex positions.  Returns minimum
 	// and maximum bounds via reference parameters
-	void						DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const;
+	CMPINLINE void				DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const
+	{
+		_Data.DetermineWorldSpaceBounds(outMinBounds, outMaxBounds);
+	}
 
 	// Generates a world matrix that will transform to the position & orientation of this OBB
 	void						GenerateWorldMatrix(XMMATRIX & outMatrix) const;
@@ -224,9 +236,6 @@ public:
 
 	// Default destructor; deallocates memory assigned to any child OBBs below this one
 	~OrientedBoundingBox(void);
-
-	// Static array of vectors used to store negative axis extents, to reduce allocations required at runtime
-	static AXMVECTOR_P			NegAxisExtent[3];
 
 protected:
 

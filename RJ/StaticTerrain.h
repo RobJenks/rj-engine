@@ -128,6 +128,9 @@ public:
 	// Shutdown method to deallocate resources and remove the terrain object
 	void											Shutdown(void);
 	
+	// Custom debug string function
+	std::string										DebugString(void) const;
+
 	// Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 	StaticTerrain *									Copy(void) const;
 

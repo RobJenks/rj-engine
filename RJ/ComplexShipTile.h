@@ -710,6 +710,9 @@ public:
 	FadeEffect							Fade;					// Allows the object to be faded in and out
 	HighlightEffect						Highlight;				
 
+	// Return a debug string representation of the tile
+	CMPINLINE std::string				DebugString(void)  const		{ return concat("Tile (ID=")(m_id)(", Type=")(m_code)(")").str(); }
+
 	// Shutdown method - not required for this class
 	CMPINLINE void						Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 

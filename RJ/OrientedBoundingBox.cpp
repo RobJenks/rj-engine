@@ -6,7 +6,8 @@
 #include "OrientedBoundingBox.h"
 
 // Initialise static variables
-AXMVECTOR_P OrientedBoundingBox::NegAxisExtent[3];
+AXMVECTOR_P OrientedBoundingBox::CoreOBBData::ExtentAlongAxis[3];
+AXMVECTOR_P OrientedBoundingBox::CoreOBBData::NegAxisExtent[3];
 
 // Default constructor, where no parameters are provided
 OrientedBoundingBox::OrientedBoundingBox(void) :
@@ -57,28 +58,33 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR size) 
 
 // Method to determine the vertices of this bounding box in world space.  [0-3] represent one end face in ccw order, [4-7] represent
 // the second end face in ccw order.  v[x] and v[x+4] are opposite vertices in the two end faces
-void OrientedBoundingBox::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
+void OrientedBoundingBox::CoreOBBData::DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const
 {
+	// Calculate the extent along each axis in world space
+	ExtentAlongAxis[0].value = XMVectorMultiply(Extent[0].value, Axis[0].value);
+	ExtentAlongAxis[1].value = XMVectorMultiply(Extent[1].value, Axis[1].value);
+	ExtentAlongAxis[2].value = XMVectorMultiply(Extent[2].value, Axis[2].value);
+
 	// We also need the negated versions of each axis extent
 	NegAxisExtent[0].value = XMVectorNegate(ExtentAlongAxis[0].value);
 	NegAxisExtent[1].value = XMVectorNegate(ExtentAlongAxis[1].value);
 	NegAxisExtent[2].value = XMVectorNegate(ExtentAlongAxis[2].value);
 
 	// Now use these values to determine the location of each bounding volume vertex in local space
-	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		// -x, -y, -z	(End face #1)
-	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		// +x, -y, -z	(End face #1)
-	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);	// +x, +y, -z	(End face #1)
-	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  	// -x, +y, -z	(End face #1)
+	pOutVertices[0].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);			// -x, -y, -z	(End face #1)
+	pOutVertices[1].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), NegAxisExtent[2].value);		// +x, -y, -z	(End face #1)
+	pOutVertices[2].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);		// +x, +y, -z	(End face #1)
+	pOutVertices[3].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), NegAxisExtent[2].value);  		// -x, +y, -z	(End face #1)
 
-	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);		// -x, -y, +z	(End face #2)
-	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);	// +x, -y, +z	(End face #2)
-	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// +x, +y, +z	(End face #2)
-	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(_Data.Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// -x, +y, +z	(End face #2)
+	pOutVertices[4].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, NegAxisExtent[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);		// -x, -y, +z	(End face #2)
+	pOutVertices[5].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, ExtentAlongAxis[0].value), NegAxisExtent[1].value), ExtentAlongAxis[2].value);		// +x, -y, +z	(End face #2)
+	pOutVertices[6].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, ExtentAlongAxis[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);	// +x, +y, +z	(End face #2)
+	pOutVertices[7].value = XMVectorAdd(XMVectorAdd(XMVectorAdd(Centre, NegAxisExtent[0].value), ExtentAlongAxis[1].value), ExtentAlongAxis[2].value);		// -x, +y, +z	(End face #2)
 }
 
 // Calculates the outer extents of this object in world space based on vertex positions.  Returns minimum
 // and maximum bounds via reference parameters
-void OrientedBoundingBox::DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const
+void OrientedBoundingBox::CoreOBBData::DetermineWorldSpaceBounds(XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds) const
 {
 	// Get the location of all vertices in world space
 	AXMVECTOR_P v[8];

@@ -100,6 +100,7 @@ CoreEngine::CoreEngine(void)
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = m_debug_renderenvtree = 0;
+	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
 	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
@@ -2342,9 +2343,12 @@ void CoreEngine::DebugRenderEnvironmentNavNetwork(void)
 void CoreEngine::DebugRenderObjectIdentifiers(void)
 {
 	static const XMFLOAT2 DEBUG_ID_TEXT_OFFSET = XMFLOAT2(0.0f, 0.0f);
-	static const XMFLOAT4 DEBUG_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f);
-	static const float DEBUG_ID_TEXT_SIZE = 1.0f;
-	static const unsigned int DEBUG_ID_MAX_DISPLAYED = 32U;
+	static const XMFLOAT4 DEBUG_MAJOR_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f);
+	static const XMFLOAT4 DEBUG_MINOR_ID_TEXT_COLOUR = XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	static const float DEBUG_MAJOR_ID_TEXT_SIZE = 1.0f;
+	static const float DEBUG_MINOR_ID_TEXT_SIZE = 1.0f; // 0.75f;
+	static const unsigned int DEBUG_ID_MAX_DISPLAYED = 128U;
+	static const XMVECTOR DEBUG_TERRAIN_ID_RENDER_DIST_SQ = XMVectorReplicate(Game::ElementLocationToPhysicalPosition(4));	// Render terrain IDs within two elements of the camera
 
 	// Maintain a static set of sentence objects that we can use for debug rendering 
 	// (TODO: temporary and inefficient.  Replace when text rendering is upgraded.  We also do not dispose of these at shutdown right now)
@@ -2359,27 +2363,92 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 			m_debug_renderobjid_text.push_back(s);
 		}
 	}
-	
-	// Locate the spatial partitioning tree node that contains the current camera position (take
-	// this longer approach to account for cases where the player is using the debug camera)
-	const XMVECTOR & pos = GetCamera()->GetPosition(); 
-	if (Game::Universe->GetCurrentSystem().SpatialPartitioningTree == NULL) return;
-	Octree<iObject*> *node = Game::Universe->GetCurrentSystem().SpatialPartitioningTree->GetNodeContainingPoint(pos);
-	if (!node) return;
 
-	// Get the set of all objects near the camera
-	std::vector<iObject*> objects;
-	int n = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(pos, node, m_debug_renderobjid_distance, objects, Game::ObjectSearchOptions::NoSearchOptions);
+	// We can potentially select a specific object (and its contents) for rendering
+	Game::ID_TYPE target = GetDebugObjectIdentifierRenderTargetObject();
+
+	// Get the set of all objects to be rendered
+	std::vector<DebugIDRenderDetails> objects;
+	if (target == 0)
+	{
+		// Locate the spatial partitioning tree node that contains the current camera position (take
+		// this longer approach to account for cases where the player is using the debug camera)
+		const XMVECTOR & pos = GetCamera()->GetPosition();
+		if (Game::Universe->GetCurrentSystem().SpatialPartitioningTree == NULL) return;
+		Octree<iObject*> *node = Game::Universe->GetCurrentSystem().SpatialPartitioningTree->GetNodeContainingPoint(pos);
+		if (!node) return;
+
+		// Get the set of all objects nearby
+		std::vector<iObject*> spaceobjects;
+		int n = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(pos, node, m_debug_renderobjid_distance, spaceobjects, Game::ObjectSearchOptions::NoSearchOptions);
+
+		// Store required data in the object array
+		for (int i = 0; i < n; ++i)
+			if (spaceobjects[i] && spaceobjects[i]->IsCurrentlyVisible())
+				objects.push_back(DebugIDRenderDetails(spaceobjects[i]->CollisionOBB.Data(), NULL_VECTOR, 
+					spaceobjects[i]->DebugString(), DEBUG_MAJOR_ID_TEXT_COLOUR, DEBUG_MAJOR_ID_TEXT_SIZE));
+	}
+	else
+	{
+		
+		// If we set a specific target object, and that object is an environment, also render idenitifers of objects within th environment
+		iObject *obj = Game::GetObjectByID(target);
+		if (obj) 
+		{
+			objects.push_back(DebugIDRenderDetails(obj->CollisionOBB.Data(), NULL_VECTOR, obj->DebugString(), 
+				DEBUG_MAJOR_ID_TEXT_COLOUR, DEBUG_MAJOR_ID_TEXT_SIZE));
+
+			if (obj->IsEnvironment())
+			{
+				// Render all environment objects
+				iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)obj;
+				env->CollisionOBB.UpdateIfRequired();
+
+				std::vector<ObjectReference<iEnvironmentObject>>::iterator it_o_end = env->Objects.end();
+				for (std::vector<ObjectReference<iEnvironmentObject>>::iterator it_o = env->Objects.begin(); it_o != it_o_end; ++it_o) {
+					if ((*it_o)() && (*it_o)()->IsCurrentlyVisible()) 
+						objects.push_back(DebugIDRenderDetails((*it_o)()->CollisionOBB.Data(), NULL_VECTOR, 
+						concat((*it_o)()->GetCode())(" (")((*it_o)()->GetID())(")").str(), DEBUG_MAJOR_ID_TEXT_COLOUR, DEBUG_MAJOR_ID_TEXT_SIZE));
+				}
+				
+				// We will use a temporary OBB and precalcualted position multiplier for element contents stored in local space
+				XMVECTOR pos_local = XMVector3TransformCoord(ONE_VECTOR, env->GetOrientationMatrix());
+				XMVECTOR zero_pos = XMVectorSubtract(env->GetPosition(), XMVectorMultiply(pos_local, env->CollisionOBB.ConstData().ExtentV));
+				const XMVECTOR & cam_pos = m_camera->GetPosition();
+				OrientedBoundingBox::CoreOBBData obb;
+				obb.Axis[0] = env->CollisionOBB.ConstData().Axis[0];
+				obb.Axis[1] = env->CollisionOBB.ConstData().Axis[1];
+				obb.Axis[2] = env->CollisionOBB.ConstData().Axis[2];
+				
+				// Render all tiles
+				iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_t_end = env->GetTiles().end();
+				for (iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_t = env->GetTiles().begin(); it_t != it_t_end; ++it_t) {
+					if (!(*it_t).value) continue;
+					obb.Centre = XMVectorMultiplyAdd(pos_local, XMVectorAdd((*it_t).value->GetElementPosition(), XMVectorMultiply((*it_t).value->GetWorldSize(), HALF_VECTOR)), zero_pos);
+					obb.UpdateExtentFromSize((*it_t).value->GetWorldSize());
+					objects.push_back(DebugIDRenderDetails(obb, NULL_VECTOR, 
+						concat((*it_t).value->GetCode())(" (")((*it_t).value->GetID())(")").str(), DEBUG_MAJOR_ID_TEXT_COLOUR, DEBUG_MAJOR_ID_TEXT_SIZE));
+				}
+
+				// Render all terrain objects
+				iSpaceObjectEnvironment::TerrainCollection::iterator it_e_end = env->TerrainObjects.end();
+				for (iSpaceObjectEnvironment::TerrainCollection::iterator it_e = env->TerrainObjects.begin(); it_e != it_e_end; ++it_e) {
+					if (!(*it_e)) continue;
+					obb.Centre = XMVectorMultiplyAdd(pos_local, (*it_e)->GetPosition(), zero_pos);
+					if (XMVector3Greater(XMVector3LengthSq(XMVectorSubtract(cam_pos, obb.Centre)), DEBUG_TERRAIN_ID_RENDER_DIST_SQ)) continue;
+					obb.UpdateExtent((*it_e)->GetExtentF());
+					objects.push_back(DebugIDRenderDetails(obb, NULL_VECTOR, concat((*it_e)->GetID()).str(), 
+						DEBUG_MINOR_ID_TEXT_COLOUR, DEBUG_MINOR_ID_TEXT_SIZE));
+				}
+			}
+		}
+	}
 
 	// Iterate over each object in turn
 	unsigned int sentence_id = 0U; unsigned int sentence_count = m_debug_renderobjid_text.size();
-	std::vector<iObject*>::const_iterator it_end = objects.end();
-	for (std::vector<iObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+	std::vector<DebugIDRenderDetails>::const_iterator it_end = objects.end();
+	for (std::vector<DebugIDRenderDetails>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
-		// Skip the object if it is invalid or is not visible
-		iObject *obj = (*it); 
-		if (!obj || !obj->IsCurrentlyVisible()) continue;
-
 		// Get a sentence object to render this identifier.  If we have used all available objects, quit here
 		if (sentence_id >= sentence_count) break;
 		SentenceType *text = m_debug_renderobjid_text.at(sentence_id);
@@ -2387,21 +2456,20 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 		++sentence_id;
 
 		// Create a text object for this identifer (TODO: inefficient)
-		std::string textstring = obj->DebugString();
+		std::string textstring = (*it).text;
 		m_textmanager->UpdateSentence(text, textstring.c_str(),
-			0, 0, true, DEBUG_ID_TEXT_COLOUR, DEBUG_ID_TEXT_SIZE);
+			0, 0, true, (*it).text_col, (*it).text_size);
 
 		// Calculate the screen-space position for the centre of this text, then offset so that the text is centred over it
 		// Force-update the object OBB to ensure that the latest values are used
-		obj->CollisionOBB.UpdateIfRequired();
 		XMVECTOR pos = XMVectorSubtract(
-			GetScreenLocationForObject(*obj, DEBUG_ID_TEXT_OFFSET),
+			GetScreenLocationForObject((*it).obb, DEBUG_ID_TEXT_OFFSET),
 			XMVectorSet(text->sentencewidth * 0.5f, text->sentenceheight * 0.5f, 0.0f, 0.0f));
 
 		// Update the sentence position by performing a full update on the sentence again.  This will
 		// regenerate the text VBs.  (TODO: EVEN MORE INEFFICIENT.  Replace)
 		m_textmanager->UpdateSentence(text, textstring.c_str(), (int)XMVectorGetX(pos), (int)XMVectorGetY(pos), true,
-			DEBUG_ID_TEXT_COLOUR, DEBUG_ID_TEXT_SIZE);
+			(*it).text_col, (*it).text_size);
 	}
 
 	// Set any unused text objects to be hidden this frame
@@ -2431,31 +2499,58 @@ void CoreEngine::SetRenderStageState(CoreEngine::RenderStage stage, bool active)
 }
 
 // Calculates the bounds of this object in screen space
-void CoreEngine::DetermineObjectScreenBounds(const iObject & obj, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds)
+void CoreEngine::DetermineObjectScreenBounds(const OrientedBoundingBox::CoreOBBData & obb, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds)
 {
 	// Get the bounds of this object in world space
 	XMVECTOR wmin, wmax;
-	obj.CollisionOBB.DetermineWorldSpaceBounds(wmin, wmax);
+	obb.DetermineWorldSpaceBounds(wmin, wmax);
 
 	// Transform these world bounds into screen space and return
 	outMinBounds = WorldToScreen(wmin);
 	outMaxBounds = WorldToScreen(wmax);
 }
 
+// Calculates the bounds of this object in screen space, after applying a world-space offset to the object position
+void CoreEngine::DetermineObjectScreenBoundsWithWorldSpaceOffset(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR world_offset, 
+																 XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds)
+{
+	// Get the bounds of this object in world space
+	XMVECTOR wmin, wmax;
+	obb.DetermineWorldSpaceBounds(wmin, wmax);
+
+	// Incorporate the offset and transform these world bounds into screen space
+	outMinBounds = WorldToScreen(XMVectorAdd(wmin, world_offset));
+	outMaxBounds = WorldToScreen(XMVectorAdd(wmax, world_offset));
+}
+
 // Returns a position in screen space corresponding to the specified object.  Accepts an offset parameter
 // in screen coordinates based on the object size; [0, +0.5] would be centred in x, and return a position
 // at the top edge of the object in screen space
-XMVECTOR CoreEngine::GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset)
+XMVECTOR CoreEngine::GetScreenLocationForObject(const OrientedBoundingBox::CoreOBBData & obb, const XMFLOAT2 & offset)
 {
 	// Get the object bounds in screen space
 	XMVECTOR smin, smax;
-	DetermineObjectScreenBounds(obj, smin, smax);
+	DetermineObjectScreenBounds(obb, smin, smax);
 
 	// Offset will be a linear interpolation between min and max.  We define [0,0] as the centre point, so
 	// increase each offset value by 0.5f such that [0,0] moves from bottom-left to centre point
 	return XMVectorLerpV(smin, smax, XMVectorSet(offset.x + 0.5f, offset.y + 0.5f, 0.5f, 0.5f));
 }
 
+// Returns a position in screen space corresponding to the specified object, after applying the specified
+// world offset to object position.  Accepts an offset parameter in screen coordinates based on the 
+// object size; [0, +0.5] would be centred in x, and return a position at the top edge of the object in screen space
+XMVECTOR CoreEngine::GetScreenLocationForObjectWithWorldOffset(const OrientedBoundingBox::CoreOBBData & obb, 
+															   const FXMVECTOR world_offset, const XMFLOAT2 & offset)
+{
+	// Get the object bounds in screen space
+	XMVECTOR smin, smax;
+	DetermineObjectScreenBoundsWithWorldSpaceOffset(obb, world_offset, smin, smax);
+
+	// Offset will be a linear interpolation between min and max.  We define [0,0] as the centre point, so
+	// increase each offset value by 0.5f such that [0,0] moves from bottom-left to centre point
+	return XMVectorLerpV(smin, smax, XMVectorSet(offset.x + 0.5f, offset.y + 0.5f, 0.5f, 0.5f));
+}
 
 // Virtual inherited method to accept a command from the console
 bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
@@ -2633,12 +2728,14 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 				if (*it) (*it)->render = false;
 		}
 
-		if (command.Parameter(1) != NullString)
-		{
-			float dist = command.ParameterAsFloat(1);
-			if (dist == 0.0f) dist = 10000.0f;
-			SetDebugObjectIdentifierRenderingDistance(dist);
-		}
+		// Render distance is an optional parameter
+		float dist = command.ParameterAsFloat(1);
+		if (dist == 0.0f) dist = 10000.0f;
+		SetDebugObjectIdentifierRenderingDistance(dist);
+		
+		// Specific target object (usually an environment) is an optional parameter
+		iObject *target = command.ParameterAsObject(2);
+		SetDebugObjectIdentifierRenderTargetObject(target ? target->GetID() : 0);
 
 		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" render of object identifiers").str());
 		return true;

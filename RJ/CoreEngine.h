@@ -308,6 +308,8 @@ public:
 	CMPINLINE void SetDebugTreeRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvtree = environment_id; }
 	CMPINLINE Game::ID_TYPE GetDebugNavNetworkRenderEnvironment(void) const { return m_debug_renderenvnetwork; }
 	CMPINLINE void SetDebugNavNetworkRenderEnvironment(Game::ID_TYPE environment_id) { m_debug_renderenvnetwork = environment_id; }
+	CMPINLINE Game::ID_TYPE GetDebugObjectIdentifierRenderTargetObject(void) const { return m_debug_renderobjid_object; }
+	CMPINLINE void SetDebugObjectIdentifierRenderTargetObject(Game::ID_TYPE id) { m_debug_renderobjid_object = id; }
 	CMPINLINE float GetDebugObjectIdentifierRenderingDistance(void) const { return m_debug_renderobjid_distance; }
 	CMPINLINE void SetDebugObjectIdentifierRenderingDistance(float dist) { m_debug_renderobjid_distance = clamp(dist, 1.0f, 100000.0f); }
 
@@ -374,12 +376,30 @@ public:
 	}
 
 	// Calculates the bounds of this object in screen space
-	void				DetermineObjectScreenBounds(const iObject & obj, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds);
+	void				DetermineObjectScreenBounds(const OrientedBoundingBox::CoreOBBData & obb, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds);
+	CMPINLINE void		DetermineObjectScreenBounds(const iObject & obj, XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds)
+	{
+		DetermineObjectScreenBounds(obj.CollisionOBB.ConstData(), outMinBounds, outMaxBounds);
+	}
+
+	// Calculates the bounds of this object in screen space, after applying a world-space offset to the object position
+	void				DetermineObjectScreenBoundsWithWorldSpaceOffset(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR world_offset,
+																		XMVECTOR & outMinBounds, XMVECTOR & outMaxBounds);
 
 	// Returns a position in screen space corresponding to the specified object.  Accepts an offset parameter
 	// in screen coordinates based on the object size; [0, +0.5] would be centred in x, and return a position
 	// at the top edge of the object in screen space
-	XMVECTOR				GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset);
+	XMVECTOR				GetScreenLocationForObject(const OrientedBoundingBox::CoreOBBData & obb, const XMFLOAT2 & offset);
+	CMPINLINE XMVECTOR		GetScreenLocationForObject(const iObject & obj, const XMFLOAT2 & offset)
+	{
+		return GetScreenLocationForObject(obj.CollisionOBB.ConstData(), offset);
+	}
+
+	// Returns a position in screen space corresponding to the specified object, after applying the specified
+	// world offset to object position.  Accepts an offset parameter in screen coordinates based on the 
+	// object size; [0, +0.5] would be centred in x, and return a position at the top edge of the object in screen space
+	XMVECTOR				GetScreenLocationForObjectWithWorldOffset(const OrientedBoundingBox::CoreOBBData & obb,
+																	  const FXMVECTOR world_offset, const XMFLOAT2 & offset);
 	
 	// Outputs the contents of the render queue to debug-out
 	void					DebugOutputRenderQueueContents(void);
@@ -657,12 +677,22 @@ public:
 	Game::ID_TYPE 				m_debug_renderenvboxes;
 	Game::ID_TYPE				m_debug_renderenvtree;
 	Game::ID_TYPE				m_debug_renderenvnetwork;
-	float						m_debug_renderobjid_distance;
+	Game::ID_TYPE				m_debug_renderobjid_object;						// Specific object for which we should render IDs (generally an environment)
+	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
-								m_debug_renderobjid_text;
+								m_debug_renderobjid_text;						// Vector of text objects for debug render object identifiers
 
 	// Enumeration of possible debug terain render modes
 	enum DebugTerrainRenderMode { Normal = 0, Solid };
+
+	// Structure holding info required for debug ID rendering
+	__declspec(align(16))
+	struct DebugIDRenderDetails { 	
+		OrientedBoundingBox::CoreOBBData obb; AXMVECTOR_P pos_offset; std::string text; XMFLOAT4 text_col; float text_size;
+		DebugIDRenderDetails(const OrientedBoundingBox::CoreOBBData & _obb, const XMVECTOR & _pos_offset, 
+			const std::string & _text, const XMFLOAT4 & _text_col, float _text_size) 
+			: obb(_obb), pos_offset(_pos_offset), text(_text), text_col(_text_col), text_size(_text_size) { }
+	};
 
 	// Debug terrain rendering mode
 	DebugTerrainRenderMode		m_debug_terrain_render_mode;
