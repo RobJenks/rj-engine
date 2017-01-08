@@ -83,6 +83,7 @@ struct GameConsoleCommand
 	float ParameterAsFloat(int index);
 	int ParameterAsInt(int index);
 	bool ParameterAsBool(int index);
+	iObject *ParameterAsObject(int index);
 
 	// Duplicates the command and all input parameters.  New command will always be 
 	// created in not-executed state without any output results

@@ -1182,8 +1182,16 @@ GamePhysicsEngine::~GamePhysicsEngine(void)
 bool GamePhysicsEngine::TestOBBvsOBBHierarchy(OrientedBoundingBox & obj0, OrientedBoundingBox & obj1, 
 											  OrientedBoundingBox ** ppOutCollider0, OrientedBoundingBox ** ppOutCollider1)
 {
+#	if defined(RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING) && defined(RJ_LOG_OBB_HIERARCHY_TESTING)
+		XMVECTOR pos0 = (obj0.Parent ? XMVectorSubtract(obj0.Data().Centre, obj0.Parent->GetPosition()) : obj0.Data().Centre);
+		XMVECTOR pos1 = (obj1.Parent ? XMVectorSubtract(obj1.Data().Centre, obj1.Parent->GetPosition()) : obj1.Data().Centre);
+		std::string data = concat(": { Pos=")(Vector3ToString(pos0))(", Ext=")(Vector3ToString(obj0.ConstData().ExtentF))(" }, { Pos=")
+			(Vector3ToString(pos1))(", Ext=")(Vector3ToString(obj1.ConstData().ExtentF))(" }\n").str();
+#	endif
+
 	// Test the two objects for overlap; if they are not colliding then early-exit immediately
-	if (TestOBBvsOBBCollision(obj0.Data(), obj1.Data()) == false) return false;
+	if (TestOBBvsOBBCollision(obj0.Data(), obj1.Data()) == false) OBB_RTN_LOG(false, concat("Objects do not overlap")(data).str().c_str());
+	OBB_LOG(concat("Objects are overlapping")(data).str().c_str());
 
 	// Otherwise, we have a collision
 	if (!obj0.HasChildren())
@@ -1192,7 +1200,7 @@ bool GamePhysicsEngine::TestOBBvsOBBHierarchy(OrientedBoundingBox & obj0, Orient
 		{
 			// If both obj0 & obj1 are leaf OBBs then report the collision immediately
 			(*ppOutCollider0) = &obj0; (*ppOutCollider1) = &obj1;
-			return true;
+			OBB_RTN_LOG(true, concat("Leaf nodes are colliding")(data).str().c_str());
 		}
 		else
 		{
@@ -1200,7 +1208,8 @@ bool GamePhysicsEngine::TestOBBvsOBBHierarchy(OrientedBoundingBox & obj0, Orient
 			for (int i = 0; i < obj1.ChildCount; ++i)
 			{
 				// Roll up a positive result if we receive one
-				if (TestOBBvsOBBHierarchy(obj0, obj1.Children[i], ppOutCollider0, ppOutCollider1) == true) return true;
+				if (TestOBBvsOBBHierarchy(obj0, obj1.Children[i], ppOutCollider0, ppOutCollider1) == true) 
+					OBB_RTN_LOG(true, concat("Leaf/branch are colliding")(data).str().c_str());
 			}
 		}
 	}
@@ -1210,12 +1219,13 @@ bool GamePhysicsEngine::TestOBBvsOBBHierarchy(OrientedBoundingBox & obj0, Orient
 		for (int i = 0; i < obj0.ChildCount; ++i)
 		{
 			 // Roll up a positive result if we receive one
-			if (TestOBBvsOBBHierarchy(obj0.Children[0], obj1, ppOutCollider0, ppOutCollider1) == true) return true;
+			if (TestOBBvsOBBHierarchy(obj0.Children[i], obj1, ppOutCollider0, ppOutCollider1) == true)
+				OBB_RTN_LOG(true, concat("Branch/")(obj1.HasChildren() ? "branch" : "leaf")(" are colliding")(data).str().c_str());
 		}
 	}
 
 	// There were no successful collisions after traversing both hierarchies, so the objects are not colliding
-	return false;
+	OBB_RTN_LOG(false, concat("No collision detected")(data).str().c_str());
 }
 
 
@@ -2354,7 +2364,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		iObject *object = NULL;
 		if (command.Parameter(0) == "") {
 			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
-				concat("Entity not specified (Usage: \"enable_physics_debug <Object> [<Mode1>, ..., <ModeN>]\" where Mode = {Test | Broadphase | Collision}").str()); return true;
+				concat("Entity not specified (Usage: \"enable_physics_debug <Object> [<Mode1>, ..., <ModeN>]\" where Mode = {Test | Broadphase | Collision | OBBTest}").str()); return true;
 		}
 
 		object = Game::FindObjectByIdentifier(command.Parameter(0));
@@ -2370,7 +2380,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 
 		for (std::vector<std::string>::size_type i = 1U; i < command.ParameterCount(); ++i)
 			EnablePhysicsDebugType(command.Parameter(i));
-		if (m_physics_debug_type == 0U) EnablePhysicsDebugType("BROADPHASE");	// Default if none specified
+		if (m_physics_debug_type == PhysicsDebugType::PhysicsDebugDisabled) EnablePhysicsDebugType("BROADPHASE");	// Default if none specified
 
 		command.SetSuccessOutput(concat("Enabling physics debug (")(m_physics_debug_type)(") for entity \"")(command.Parameter(0))("\"").str());
 		return true;
@@ -2409,6 +2419,24 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	{
 		ClearCollisionDebugEntities();
 		command.SetSuccessOutput("Disabling entity physics collision break");
+		return true;
+	}
+
+	/* Trigger a collision check between the two specified objects */
+	else if (command.InputCommand == "test_collision")
+	{
+		iObject *obj[2] = { command.ParameterAsObject(0), command.ParameterAsObject(1) };
+		if (obj[0] != NULL && obj[0]->GetObjectClass() == iObject::ObjectClass::SpaceObjectClass && 
+			obj[1] != NULL && obj[1]->GetObjectClass() == iObject::ObjectClass::SpaceObjectClass)
+		{
+			bool result = CheckSingleCollision((iSpaceObject*)obj[0], (iSpaceObject*)obj[1]);
+			command.SetSuccessOutput(concat("Collision test between \"")(obj[0]->GetInstanceCode())("\" and \"")
+				(obj[1]->GetInstanceCode())("\": ")(result ? "COLLISION" : "No collision").str());
+		}
+		else {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters,
+				"Invalid parameters.  Usage: \"test_collision <obj1> <obj2>\"");
+		}
 		return true;
 	}
 
@@ -2453,6 +2481,7 @@ void GamePhysicsEngine::EnablePhysicsDebugType(const std::string & type)
 	if (t == "TEST")					SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnTest);
 	else if (t == "BROADPHASE")			SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnBroadphase);
 	else if (t == "COLLISION")			SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugOnCollision);
+	else if (t == "OBBTEST")			SetBit(m_physics_debug_type, PhysicsDebugType::PhysicsDebugLogOBBTests);
 }
 #endif
 

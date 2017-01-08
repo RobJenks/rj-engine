@@ -25,6 +25,7 @@ class Ray;
 // Compiler flag which enables per-entity physics debugging
 #ifdef _DEBUG
 #	define RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
+#	define RJ_LOG_OBB_HIERARCHY_TESTING
 #endif
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -504,7 +505,7 @@ protected:
 
 	// Fields used for collision engine debugging
 #	ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
-	enum PhysicsDebugType { PhysicsDebugDisabled = 0, PhysicsDebugOnTest = 1, PhysicsDebugOnBroadphase = 2 , PhysicsDebugOnCollision = 4 };
+	enum PhysicsDebugType { PhysicsDebugDisabled = 0, PhysicsDebugOnTest = 1, PhysicsDebugOnBroadphase = 2 , PhysicsDebugOnCollision = 4, PhysicsDebugLogOBBTests = 8 };
 	CMPINLINE void							ClearPhysicsDebugOptions(void)		{ m_physics_debug_type = PhysicsDebugType::PhysicsDebugDisabled; }
 	CMPINLINE bool							IsPhysicsDebugEnabled(PhysicsDebugType type)	{ return CheckBit_Any(m_physics_debug_type, type); }
 	void									EnablePhysicsDebugType(const std::string & type);
@@ -513,6 +514,18 @@ protected:
 	bitstring								m_physics_debug_type;
 	Game::ID_TYPE							m_debug_collision_break[2];
 
+#	endif
+
+	// Functions used for debug collision test logging
+#	if defined(RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING) && defined(RJ_LOG_OBB_HIERARCHY_TESTING)
+#		define OBB_LOG(text)						{ if ((obj0.Parent && obj0.Parent->GetID() == m_physics_debug_entity_id) || \
+														  (obj1.Parent && obj1.Parent->GetID() == m_physics_debug_entity_id)) { OutputDebugString(text); } }
+#		define OBB_RTN_LOG(return_value, text)		{ if ((obj0.Parent && obj0.Parent->GetID() == m_physics_debug_entity_id) || \
+														  (obj1.Parent && obj1.Parent->GetID() == m_physics_debug_entity_id)) { RETURN_LOG(return_value, text); } \
+													  else { return return_value; } }
+#	else
+#		define OBB_LOG(text)						;
+#		define OBB_RTN_LOG(return_value, text)		return return_value;
 #	endif
 
 	// Temporary variables to avoid multiple reallocations per physics cycle

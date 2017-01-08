@@ -416,6 +416,10 @@ public:
 		m_simulated = m_posupdated /*= m_spatialdatachanged */= false; 
 	}
 
+	// Passthrough methods to the FadeEffect component to allow invocation via console command
+	CMPINLINE void								FadeToAlpha(float timeperiod, float alpha)		{ Fade.FadeToAlpha(timeperiod, alpha); }
+	CMPINLINE void								SetFadeAlpha(float alpha)						{ Fade.SetFadeAlpha(alpha); }
+
 	// Static method to return the string representation of an object type
 	// @Dependency iObject::ObjectType
 	static std::string							TranslateObjectTypeToString(iObject::ObjectType type);

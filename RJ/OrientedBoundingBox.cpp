@@ -102,6 +102,10 @@ void OrientedBoundingBox::AllocateChildren(int children)
 
 	// Allocate new space and initialise it to NULL
 	Children = new OrientedBoundingBox[children];
+
+	// Propogate the parent object pointer (TODO: temporary; should make this more efficient when moving
+	// from many new-allocated blocks to some kind of stack/memory pool allocation)
+	for (int i = 0; i < children; ++i) Children[i].Parent = Parent;
 	
 	// Store the new child count
 	ChildCount = children;
@@ -223,6 +227,9 @@ void OrientedBoundingBox::AppendNewChildNode(void)
 	obb[newchildcount - 1] = OrientedBoundingBox(NULL, NULL_VECTOR, ONE_VECTOR);
 	obb[newchildcount - 1].SetOffsetFlag(true);
 
+	// All children inherit the object pointer from their parent
+	obb[newchildcount - 1].Parent = Parent;
+
 	// Keep a reference to the previous child data, then set the pointer to this newly-allocated child data
 	OrientedBoundingBox *oldchildren = Children;
 	Children = obb;
@@ -287,6 +294,12 @@ void OrientedBoundingBox::SetAutoFitMode(bool autofit)
 	}
 }
 
+// Returns a string representation of the OBB node
+std::string OrientedBoundingBox::ToString(void) const
+{
+	return concat("{ Parent=\"")(this->Parent ? this->Parent->GetInstanceCode() : "<null>")("\", Centre=")
+		(Vector3ToString(_Data.Centre))(", Extent=")(Vector3ToString(_Data.ExtentF))(" }").str();
+}
 
 // Performs a deep copy of an OBB hierarchy into the specified destination
 void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest, iObject *new_parent)

@@ -1,4 +1,6 @@
+#include "GameObjects.h"
 #include "GameConsoleCommand.h"
+
 
 // Instantiate the static 'null' command
 const GameConsoleCommand GameConsoleCommand::NullCommand = GameConsoleCommand();
@@ -47,6 +49,18 @@ bool GameConsoleCommand::ParameterAsBool(int index)
 	}
 
 	return false;
+}
+
+// Return a parameter as a different type, if possible
+iObject *GameConsoleCommand::ParameterAsObject(int index)
+{
+	std::string s = Parameter(index);
+	if (s != NullString)
+	{
+		return Game::FindObjectByIdentifier(s);
+	}
+
+	return NULL;
 }
 
 // Static method that translates a status code to a string

@@ -42,6 +42,13 @@ using namespace std::tr1;
 // Convenience macro for releasing non-null COM resources
 #define ReleaseIfExists(x) { if (x) { x->Release(); x = 0; } }
 
+// Debug logging macro; logs to the debug output stream before returning
+#ifdef _DEBUG
+#	define RETURN_LOG(return_value, msg)		OutputDebugString(msg); return return_value
+#else
+#	define RETURN_LOG(return_value, msg)		return return_value
+#endif
+
 // Accepts either a reference or a pointer and universally returns a pointer
 template<typename T>
 CMPINLINE T * ptr(T & obj) { return &obj; }	// If object is a reference type then return a pointer

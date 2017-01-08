@@ -216,6 +216,9 @@ public:
 	// Removes a child node below this OBB.  Takes care of maintaining references to existing nodes and shrinking the child storage
 	void						RemoveChildNode(int index);
 
+	// Returns a string representation of the OBB node
+	std::string					ToString(void) const;
+
 	// Performs a deep copy of an OBB hierarchy into the specified destination
 	static void					CloneOBBHierarchy(const OrientedBoundingBox & source, OrientedBoundingBox &dest, iObject *new_parent);
 

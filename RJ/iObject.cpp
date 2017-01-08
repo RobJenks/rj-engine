@@ -829,6 +829,8 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(RemoveCurrentVisibilityFlag)
 	REGISTER_DEBUG_FN(RenormaliseSpatialData)
 	REGISTER_DEBUG_FN(ResetSimulationFlags)
+	REGISTER_DEBUG_FN(FadeToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(SetFadeAlpha, command.ParameterAsFloat(2))
 
 
 	// Return now if the command was executed by this object 

@@ -676,22 +676,36 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_PERIOD])
 	{
-		static float force = 25.0f;
-		SpaceProjectile *proj = D::SpaceProjectiles.Get("projectile_basic01")->CreateProjectile();
-		proj->MoveIntoSpaceEnvironment(cs()->GetSpaceEnvironment());
-		//proj->SetPosition(XMVector3TransformCoord(XMVectorSet(50.0f, 0.0f, -50.0f, 0.0f), cs()->GetWorldMatrix()));
-		proj->SetPosition(XMVector3TransformCoord(XMVectorSet(frand_lh(-1.0f, 1.0f), 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
-		//proj->SetOrientation(XMQuaternionMultiply(XMQuaternionRotationAxis(UP_VECTOR, (-PI / 4.0f)), cs()->GetOrientation()));
-		proj->SetOrientation(XMQuaternionMultiply(ID_QUATERNION, cs()->GetOrientation()));
-		//proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(-25.0f, 0.0f, 25.0f, 0.0f), cs()->GetOrientationMatrix())));
-		proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, force, 0.0f), cs()->GetOrientationMatrix())));
-		proj->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-		proj->SetIsVisible(true);
+		if (!b[DIK_LSHIFT])
+		{
+			static float force = 25.0f;
+			proj = D::SpaceProjectiles.Get("projectile_basic01")->CreateProjectile();
+			proj()->MoveIntoSpaceEnvironment(cs()->GetSpaceEnvironment());
+			//proj->SetPosition(XMVector3TransformCoord(XMVectorSet(50.0f, 0.0f, -50.0f, 0.0f), cs()->GetWorldMatrix()));
+			proj()->SetPosition(XMVector3TransformCoord(XMVectorSet(frand_lh(-1.0f, 1.0f), 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
+			//proj->SetOrientation(XMQuaternionMultiply(XMQuaternionRotationAxis(UP_VECTOR, (-PI / 4.0f)), cs()->GetOrientation()));
+			proj()->SetOrientation(XMQuaternionMultiply(ID_QUATERNION, cs()->GetOrientation()));
+			//proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(-25.0f, 0.0f, 25.0f, 0.0f), cs()->GetOrientationMatrix())));
+			proj()->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, force, 0.0f), cs()->GetOrientationMatrix())));
+			proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+			proj()->SetIsVisible(true);
 
-		force += 25.0f;
+			force += 25.0f;
+			OutputDebugString(concat("Generated debug projectile with ID=")(proj()->GetID())("\n").str().c_str());
+		}
+		else
+		{
+			if (cs() && proj())
+			{
+				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enable_physics_debug ")(cs()->GetID())(" OBBTest").str()));
+				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("test_collision ")(cs()->GetID())(" ")(proj()->GetID()).str()));
+				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("disable_physics_debug").str()));
+			}
+		}
+
 		Game::Keyboard.LockKey(DIK_PERIOD);
-		OutputDebugString(concat("Generated debug projectile with ID=")(proj->GetID())("\n").str().c_str());
 	}
+
 	if (b[DIK_H])
 	{
 		cs()->Fade.SetFadeAlpha(0.1f);
