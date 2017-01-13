@@ -165,6 +165,11 @@ public:
 	CMPINLINE void							ChangeOrientation(const XMFLOAT4 & rot)			{ ChangeOrientation(XMLoadFloat4(&rot)); }
 	CMPINLINE void							AddDeltaOrientation(const XMFLOAT4 & dq)		{ AddDeltaOrientation(XMLoadFloat4(&dq)); }
 
+	// Rotate the object about one of its axes
+	CMPINLINE void							RotateAboutX(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, rad)); }
+	CMPINLINE void							RotateAboutY(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(UP_VECTOR, rad)); }
+	CMPINLINE void							RotateAboutZ(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(FORWARD_VECTOR, rad)); }
+
 	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
 	CMPINLINE const XMMATRIX				GetOrientationMatrix(void) const		{ return m_orientationmatrix; }
 	CMPINLINE const XMMATRIX				GetInverseOrientationMatrix(void) const	{ return m_inverseorientationmatrix; }

@@ -122,7 +122,7 @@ public:
 	// Add world momentum to the object, recalculating the object local momentum accordingly
 	CMPINLINE void							AddWorldMomentum(const FXMVECTOR dm)
 	{
-		PhysicsState.WorldMomentum += dm;
+		PhysicsState.WorldMomentum = XMVectorSetW(XMVectorAdd(PhysicsState.WorldMomentum, dm), 0.0f);
 		RecalculateLocalMomentum();
 	}
 
@@ -213,14 +213,14 @@ CMPINLINE void iActiveObject::ApplyAngularMomentum(const FXMVECTOR angular_momen
 	XMVECTOR avec = XMVector3TransformCoord(angular_momentum, PhysicsState.InverseInertiaTensor);
 
 	// Apply this change in angular velocity
-	PhysicsState.AngularVelocity = XMVectorAdd(PhysicsState.AngularVelocity, avec);
+	PhysicsState.AngularVelocity = XMVectorSetW(XMVectorAdd(PhysicsState.AngularVelocity, avec), 0.0f);
 }
 
 // Apply angular velocity to an object.  Not scaled by the object intertia tensor
 CMPINLINE void iActiveObject::ApplyAngularVelocity(const FXMVECTOR angular_velocity)
 {
 	// Simply apply this change in angular velocity directly
-	PhysicsState.AngularVelocity = XMVectorAdd(PhysicsState.AngularVelocity, angular_velocity);
+	PhysicsState.AngularVelocity = XMVectorSetW(XMVectorAdd(PhysicsState.AngularVelocity, angular_velocity), 0.0f);
 }
 
 
