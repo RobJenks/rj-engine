@@ -69,7 +69,7 @@ void iSpaceObjectEnvironment::InitialiseCopiedObject(iSpaceObjectEnvironment *so
 	// Important: Set to NULL first, otherwise deallocation method will deallocate the original element space before replacing it
 	SetElements(NULL);
 	InitialiseElements(m_elementsize, source->GetElements(), source->GetElementSize());
-
+	
 	// Remove the nav network pointer in this environment, since we want to generate a new one for the environment when first required
 	this->RemoveNavNetworkLink();
 
@@ -329,7 +329,7 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
 	if (it != TerrainObjects.end()) TerrainObjects.erase(it);
 
 	// Remove from the spatial partitioning tree
-	if (SpatialPartitioningTree) SpatialPartitioningTree->RemoveItem<StaticTerrain*>(obj);
+	if (obj->GetEnvironmentTreeNode()) obj->GetEnvironmentTreeNode()->RemoveItem<StaticTerrain*>(obj);
 
 	// Finally, deallocate the terrain object
 	SafeDelete(obj);
@@ -1533,20 +1533,54 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 			std::vector<StaticTerrain*> terrain;
 			node->GetAllItems(objects, terrain);
 
-			// Add the contribution from all objects in the element
+			// Destroy all objects currently in the element
 			std::vector<iEnvironmentObject*>::size_type n_obj = objects.size();
 			for (std::vector<iEnvironmentObject*>::size_type i_obj = 0U; i_obj < n_obj; ++i_obj)
 			{
 				if (objects[i_obj] && objects[i_obj]->GetElementLocation() == el_loc) objects[i_obj]->DestroyObject();
 			}
 
-			// Also add the contribution from all terrain in the element
+			// Destroy all terrain currently in the element
 			std::vector<StaticTerrain*>::size_type n_ter = terrain.size();
 			for (std::vector<StaticTerrain*>::size_type i_ter = 0U; i_ter < n_ter; ++i_ter)
 			{
-				if (terrain[i_ter] && terrain[i_ter]->GetElementLocation() == el_loc) terrain[i_ter]->DestroyObject();
+				if (terrain[i_ter] && !terrain[i_ter]->IsDestroyed() &&
+					terrain[i_ter]->OverlapsElement(el_loc))
+				{
+					terrain[i_ter]->DestroyObject();
+				}
 			}
 		}
+	}
+}
+
+
+
+// Set the destruction state of the specified terrain object
+void iSpaceObjectEnvironment::SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed)
+{
+	TerrainCollection::iterator it = std::find_if(TerrainObjects.begin(), TerrainObjects.end(),
+		[id](const StaticTerrain* obj) { return (obj->GetID() == id); });
+
+	if (it != TerrainObjects.end()) (*it)->SetObjectDestroyedState(is_destroyed);
+}
+
+// Set the destruction state of the specified terrain objects
+void iSpaceObjectEnvironment::SetTerrainDestructionState(const std::vector<Game::ID_TYPE> & ids, bool is_destroyed)
+{
+	// Partition the terrain collection based on a binary search of the supplied ID vector
+	TerrainCollection::iterator partition = std::partition(TerrainObjects.begin(), TerrainObjects.end(), 
+		[ids](const StaticTerrain *obj)
+	{
+		return (!std::binary_search(ids.begin(), ids.end(), obj->GetID()));
+	});
+
+	// All elements after the partition point "it" are located in the "ids" collection, so apply
+	// the requested destruction state to each in turn
+	TerrainCollection::iterator it_end = TerrainObjects.end();
+	for (TerrainCollection::iterator it = partition; it != it_end; ++it)
+	{
+		(*it)->SetObjectDestroyedState(is_destroyed);
 	}
 }
 
@@ -2195,4 +2229,6 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iContainsComplexShipTiles::ProcessDebugCommand(command);
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		Ship::ProcessDebugCommand(command);
 }
+
+
 

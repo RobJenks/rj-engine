@@ -54,6 +54,7 @@
 
 #include "Profiler.h"
 #include "FrameProfiler.h"
+#include "MemDebug.h"
 
 #include "SpaceEmitter.h"
 #include "Ship.h"
@@ -2338,14 +2339,13 @@ void RJMain::DEBUGDisplayInfo(void)
 			XMVECTOR wm = cs()->GetWorldMomentum();
 			XMVECTOR a = cs()->GetWorldAcceleration();
 
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "|wm| == %.1f, |a| == %.1f,   (wm == %s, a == %s)",
-				XMVectorGetX(XMVector3Length(wm)), XMVectorGetX(XMVector3Length(a)), Vector3ToString(wm).c_str(), Vector3ToString(a).c_str());
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Tiles: %d, Objects: %d, Terrain: %d",
+				cs()->GetTileCount(), cs()->Objects.size(), cs()->TerrainObjects.size());
 		}
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
-	//1. COLLIDER ONLY SHOWS AS MOVING THROUGH ENVIRONMENT ONCE IT HITS FIRST NON - DESTROYED ELEMENT.NEED TO DO MORE PRECISE INITIAL COLLISION DETECTION ?
-	//2. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
+	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }

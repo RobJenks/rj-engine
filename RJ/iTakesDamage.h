@@ -16,7 +16,7 @@ public:
 	iTakesDamage(void)					: m_maxhealth(1.0f), m_health(1.0f), m_is_invulnerable(false)		{ } 
 
 	// Destructor
-	virtual ~iTakesDamage(void) = 0;
+	~iTakesDamage(void);
 
 	// Current HP of the entity
 	CMPINLINE Game::HitPoints			GetHealth(void) const							{ return m_health; }
@@ -67,7 +67,7 @@ public:
 	// Primary method called when the object takes a particular type of damage.  Calculates modified 
 	// damage value (based on e.g. damage resistances) and applies to the object hitpoints.  Returns 
 	// true if the object was destroyed by this damage
-	bool								ApplyDamage(const Damage damage);
+	bool								ApplyDamage(Damage damage);
 
 	// Primary method called when the object takes multiple types of damage.  Calculates modified 
 	// damage value (based on e.g. damage resistances) and applies to the object hitpoints.  Damage

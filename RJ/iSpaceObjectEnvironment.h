@@ -35,7 +35,7 @@ public:
 	// accepts the element space size.  Allows use on element spaces other than our own, e.g. 
 	// when allocating a new space with different dimensions
 	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)" 
-#	define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z + _size.y)))
+#	define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z * _size.y)))
 
 	// Debug flag indicating whether we should output information on element collision tests
 //#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
@@ -236,6 +236,14 @@ public:
 		return (std::find_if(TerrainObjects.begin(), TerrainObjects.end(),
 			[&id](const StaticTerrain *element) { return (element && element->GetID() == id); }));
 	}
+
+	// Destroy the specified terrain object(s)
+	CMPINLINE void					DestroyTerrain(Game::ID_TYPE id)						{ SetTerrainDestructionState(id, true); }
+	CMPINLINE void					DestroyTerrain(const std::vector<Game::ID_TYPE> & ids)	{ SetTerrainDestructionState(ids, true); }
+
+	// Repair the specified terrain object(s)
+	CMPINLINE void					RepairTerrain(Game::ID_TYPE id)							{ SetTerrainDestructionState(id, false); }
+	CMPINLINE void					RepairTerrain(const std::vector<Game::ID_TYPE> & ids)	{ SetTerrainDestructionState(ids, false); }
 
 	// Add a tile to the environment
 	void							AddTile(ComplexShipTile **ppTile);
@@ -472,6 +480,10 @@ protected:
 
 	// Triggers immediate destruction of an element
 	void							TriggerElementDestruction(int element_id);
+
+	// Set the destruction state of the specified terrain object(s)
+	void							SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed);
+	void							SetTerrainDestructionState(const std::vector<Game::ID_TYPE> & ids, bool is_destroyed);
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);

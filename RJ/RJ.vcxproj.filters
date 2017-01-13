@@ -583,6 +583,15 @@
     <ClCompile Include="EnvironmentOBBRegion.cpp">
       <Filter>Data structures</Filter>
     </ClCompile>
+    <ClCompile Include="iTakesDamageSimple.cpp">
+      <Filter>Concepts\Damage</Filter>
+    </ClCompile>
+    <ClCompile Include="MemDebugCheck.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="MemDebug.cpp">
+      <Filter>Debug</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1332,6 +1341,18 @@
     </ClInclude>
     <ClInclude Include="EnvironmentOBBRegion.h">
       <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="iTakesDamageSimple.h">
+      <Filter>Concepts\Damage</Filter>
+    </ClInclude>
+    <ClInclude Include="RepairableObject.h">
+      <Filter>Concepts\Damage</Filter>
+    </ClInclude>
+    <ClInclude Include="MemDebug.h">
+      <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="MemDebugCheck.h">
+      <Filter>Debug</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

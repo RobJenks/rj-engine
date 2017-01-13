@@ -1756,6 +1756,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 		terrain = (*t_it);
 		if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
 
+		// We should not render anything if the object has been destroyed
+		if (terrain->IsDestroyed()) continue;
+
 		// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 		// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
 		SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
@@ -1769,6 +1772,10 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 {
 	// Parameter check
 	if (!tile) return;
+
+	// Do not render anything if the tile has been destroyed (TODO: in future, render "destroyed" representation
+	// of the tile and its contents instead
+	if (tile->IsDestroyed()) return;
 
 	// Calculate the absolute world matrix for this tile as (WM = Child * Parent)
 	XMMATRIX world = XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
@@ -2275,7 +2282,7 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 	std::vector<StaticTerrain*>::iterator t_it_end = parent->TerrainObjects.end();
 	for (std::vector<StaticTerrain*>::iterator t_it = parent->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
 	{
-		t_obj = (*t_it); if (!t_obj) continue;
+		t_obj = (*t_it); if (!t_obj || t_obj->IsDestroyed()) continue;
 
 		if (m_debug_terrain_render_mode == DebugTerrainRenderMode::Solid)
 		{

@@ -1,12 +1,16 @@
 #ifndef __CopyObjectH__
 #define __CopyObjectH__
 
+#include "MemDebug.h"
+
 // Creates and returns a copy of the specified object.  Performs a shallow copy-constructor copy before
 // passing control to the hierarchy of post-copy methods which will handle any deep-copying or defaulting 
 // required at each level in the hierarchy.  Class being copied must implement the PerformCopy(src) method.
 template <typename T>
 T * CopyObject(T *source)
 {
+	//MemDebugCheck check = MemDebug::AnalyseLocalHeapOperations();
+
 	// Parameter check
 	if (!source) return NULL;
 

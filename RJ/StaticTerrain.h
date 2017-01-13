@@ -7,13 +7,15 @@
 #include "GameDataExtern.h"
 #include "Utility.h"
 #include "OrientedBoundingBox.h"
+#include "iTakesDamage.h"
+#include "RepairableObject.h"
 class Model;
 class StaticTerrainDefinition;
 class EnvironmentTree;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class StaticTerrain : public ALIGN16<StaticTerrain>
+class StaticTerrain : public ALIGN16<StaticTerrain>, public iTakesDamage, public RepairableObject
 {
 public:
 
@@ -42,7 +44,7 @@ public:
 	void											SetDefinition(const StaticTerrainDefinition *d);
 
 	CMPINLINE const iSpaceObjectEnvironment *		GetParentEnvironment(void) const				{ return m_parent; }
-	void											SetParentEnvironment(const iSpaceObjectEnvironment *env);
+	void											SetParentEnvironment(iSpaceObjectEnvironment *env);
 	
 	CMPINLINE XMVECTOR								GetPosition(void) const							{ return m_data.Centre; }
 	CMPINLINE XMVECTOR								GetEnvironmentPosition(void) const				{ return m_data.Centre; }
@@ -77,6 +79,9 @@ public:
 	// Returns a value indicating whether this terrain object spans multiple elements
 	CMPINLINE bool									SpansMultipleElements(void) const				{ return m_multielement; }
 	
+	// Returns a value indicating whether this terrain object overlaps the specified element
+	bool											OverlapsElement(const INTVECTOR3 & el) const;
+
 	// Pointer to the environment tree node this terrain object resides in
 	CMPINLINE EnvironmentTree *						GetEnvironmentTreeNode(void)					{ return m_env_treenode; }
 	CMPINLINE void									SetEnvironmentTreeNode(EnvironmentTree *node)	{ m_env_treenode = node; }
@@ -140,7 +145,7 @@ public:
 protected:
 
 	Game::ID_TYPE							m_id;								// Unique ID of the terrain object
-	const iSpaceObjectEnvironment *			m_parent;							// Parent environment that contains this terrain object
+	iSpaceObjectEnvironment *				m_parent;							// Parent environment that contains this terrain object
 	const StaticTerrainDefinition *			m_definition;						// Pointer to the definition of this terrain type, which includes model details etc.  
 																				// Can be null for collision regions that have no associated visible terrain
 

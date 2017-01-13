@@ -527,18 +527,19 @@ void InsertIntoVector(std::vector<T> &vec, T obj, typename std::vector<T>::size_
 
 // Inserts an item into a sorted vector using binary search.  Search operates in O(logN) although the insert 
 // can be up to O(N).  Effcicient enough for small datasets, consider 'set' for large amounts of data.
+// Returns an iterator pointing to the newly-added element
 template <typename T, typename Pred>
-void InsertIntoSortedVector(std::vector<T> & vec, T const& item, Pred pred)
+typename std::vector<T>::iterator InsertIntoSortedVector(std::vector<T> & vec, T const& item, Pred pred)
 {
-	vec.insert(std::upper_bound(vec.begin(), vec.end(), item, pred), item);
+	return vec.insert(std::upper_bound(vec.begin(), vec.end(), item, pred), item);
 }
 
 // Inserts an item into a sorted vector using binary search.  Search operates in O(logN) although the insert 
 // can be up to O(N).  Effcicient enough for small datasets, consider 'set' for large amounts of data.
 template <typename T>
-void InsertIntoSortedVector(std::vector<T> & vec, T const& item)
+typename std::vector<T>::iterator InsertIntoSortedVector(std::vector<T> & vec, T const& item)
 {
-	vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
+	return vec.insert(std::upper_bound(vec.begin(), vec.end(), item), item);
 }
 
 // Inserts an item into a sorted vector using binary search, if it does not already exist.  Returns 

@@ -437,6 +437,7 @@
     <ClCompile Include="iSpaceObject.cpp" />
     <ClCompile Include="iStaticObject.cpp" />
     <ClCompile Include="iTakesDamage.cpp" />
+    <ClCompile Include="iTakesDamageSimple.cpp" />
     <ClCompile Include="iUIController.cpp" />
     <ClCompile Include="LightFlatHighlightFadeShader.cpp" />
     <ClCompile Include="LightHighlightFadeShader.cpp" />
@@ -444,6 +445,8 @@
     <ClCompile Include="LightSource.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MemDebug.cpp" />
+    <ClCompile Include="MemDebugCheck.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
     <ClCompile Include="ObjectPicking.cpp" />
@@ -603,10 +606,13 @@
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="iTakesDamage.h" />
+    <ClInclude Include="iTakesDamageSimple.h" />
     <ClInclude Include="LightFlatHighlightFadeShader.h" />
     <ClInclude Include="LightingManagerObject.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MemDebug.h" />
+    <ClInclude Include="MemDebugCheck.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="ModifierDetails.h" />
@@ -614,6 +620,7 @@
     <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
+    <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
     <ClInclude Include="DX11_Compatibility.h" />

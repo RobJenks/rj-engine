@@ -36,6 +36,7 @@ public:
 	void MemoryPool::ExtendPool(void)
 	{
 		// Add new items to the pool to double the existing capacity.  TODO: Can this be done in bulk more efficiently?
+		m_items.reserve(m_capacity * 2);
 		for (PoolItemCollection::size_type i = 0; i < m_capacity; ++i)
 		{
 			m_items.push_back(new T());

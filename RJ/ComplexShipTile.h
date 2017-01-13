@@ -11,6 +11,8 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
+#include "iTakesDamage.h"
+#include "RepairableObject.h"
 #include "Model.h"
 #include "ComplexShipElement.h"
 #include "TileConnections.h"
@@ -29,7 +31,7 @@ using namespace std;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class ComplexShipTile : public ALIGN16<ComplexShipTile>
+class ComplexShipTile : public ALIGN16<ComplexShipTile>, public iTakesDamage, public RepairableObject
 {
 public:
 
@@ -687,7 +689,7 @@ public:
 
 	// Tiles maintain a vector of unique terrain IDs, corresponding to the terrain objects which are 'owned' by the tile
 	CMPINLINE std::vector<Game::ID_TYPE> &		GetTerrainObjectLinks(void)						{ return m_terrain_ids; }
-	CMPINLINE void								AddTerrainObjectLink(Game::ID_TYPE ID)			{ m_terrain_ids.push_back(ID); }
+	void										AddTerrainObjectLink(Game::ID_TYPE ID);
 	void										ClearTerrainObjectLinks(void);
 
 	// Returns a value indicating whether this tile spans multiple elements
@@ -712,6 +714,12 @@ public:
 
 	// Return a debug string representation of the tile
 	CMPINLINE std::string				DebugString(void)  const		{ return concat("Tile (ID=")(m_id)(", Type=")(m_code)(")").str(); }
+
+	// Event triggered upon destruction of the entity
+	void								DestroyObject(void);
+
+	// Destroy all terrain objects owned by this tile
+	void								DestroyAllOwnedTerrain(void);
 
 	// Shutdown method - not required for this class
 	CMPINLINE void						Shutdown(void) { throw "Shutdown method not implemented for this class"; }

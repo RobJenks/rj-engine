@@ -110,7 +110,7 @@ ID3D11ShaderResourceView *Texture::CreateSRV(const string & filename)
 	else
 	{
 		// Otherwise, attempt to create a new resource from the specified file
-		HRESULT result = CreateDDSTextureFromFile(Game::Engine->GetDevice(), (wchar_t*)filename.c_str(), NULL, &res);
+		HRESULT result = CreateDDSTextureFromFile(Game::Engine->GetDevice(), ConvertStringToWString(filename).c_str(), NULL, &res);
 		if(FAILED(result) || !res)
 		{
 			return NULL;

@@ -57,7 +57,7 @@ void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
 }
 
 // Set the parent environment that contains this terrain object, or NULL if no environment
-void StaticTerrain::SetParentEnvironment(const iSpaceObjectEnvironment *env)
+void StaticTerrain::SetParentEnvironment(iSpaceObjectEnvironment *env)
 {
 	// Store a reference to the new environment (or NULL)
 	m_parent = env;
@@ -155,6 +155,12 @@ void StaticTerrain::RecalculatePositionalData(void)
 
 	// Set the flag that indicates whether we span multiple elements, for render-time efficiency
 	m_multielement = (m_element_min != m_element_max);
+}
+
+// Returns a value indicating whether this terrain object overlaps the specified element
+bool StaticTerrain::OverlapsElement(const INTVECTOR3 & el) const
+{
+	return (m_multielement ? (m_element_min <= el && m_element_max >= el) : m_element_location == el);
 }
 
 // Determines the vertices of the surrounding collision volume
@@ -278,14 +284,17 @@ StaticTerrain * StaticTerrain::Copy(void) const
 // Event triggered upon destruction of the entity
 void StaticTerrain::DestroyObject(void)
 {
+	// If we are already destroyed then take no further action
+	if (IsDestroyed()) return;
+
 	// Apply any destruction effect
 
 	// Debug logging
 	OutputDebugString(concat("Destruction of Terrain (ID=")(m_id)(", Class=")
 		(m_definition ? m_definition->GetCode() : "<null>")(")\n").str().c_str());
 
-	// Now shut down the object
-	Shutdown();
+	// Now (repairably) destroy the object
+	MarkObjectAsDestroyed();
 }
 
 // Custom debug string function
@@ -298,7 +307,17 @@ std::string StaticTerrain::DebugString(void) const
 // Shutdown method to deallocate resources and remove the terrain object
 void StaticTerrain::Shutdown(void)
 {
-	// Nothing to do here
+	// Remove this object from its parent environment, which will also deallocate this object
+	if (m_parent)
+	{
+		m_parent->RemoveTerrainObject(this);
+	}
+	else
+	{
+		// This is an error.  Object must always be part of a parent environment, since the parent environment
+		// has ownership for its terrain and is responsible for deallocating it
+		OutputDebugString(concat("ERROR: Terrain object")(m_id)(" is being shut down but has no parent environment\n").str().c_str());
+	}
 }
 
 // Default destructor

@@ -513,6 +513,9 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 		// Make sure this is a valid terrain object
 		terrain = (*t_it); if (!terrain) continue;
 
+		// We cannot collide with objects that have been destroyed (TODO: for now; what about the wreckage of terrain objects?)
+		if (terrain->IsDestroyed()) continue;
+
 		// Record the fact that we are testing this object/terrain collision pair
 		++CollisionDetectionResults.EnvironmentCollisions.ObjectVsTerrainChecks;
 

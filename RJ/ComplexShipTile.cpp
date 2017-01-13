@@ -390,6 +390,13 @@ void ComplexShipTile::InitialiseConnectionState()
 	Connections.Initialise(m_elementsize);
 }
 
+// Adds a new terrain object link to this tile
+void ComplexShipTile::AddTerrainObjectLink(Game::ID_TYPE ID)
+{
+	// We maintain a SORTED vector of terrain links
+	InsertIntoSortedVector<Game::ID_TYPE>(m_terrain_ids, ID);
+}
+
 // Clears all terrain object links.  If a tile definition exists for this tile, the method also reserves
 // space for the expected number of terrain objects that will be linked to the tile upon addition to an environment
 void ComplexShipTile::ClearTerrainObjectLinks(void)
@@ -606,33 +613,63 @@ void ComplexShipTile::InitialiseConstructionState(ProductionCost *state)
 
 void ComplexShipTile::ElementHealthChanged(void)
 {
+	float health = 0.0f;
+
 	// If the health of an underlying element changes we want to recalculate the aggregate health of this tile
-	RecalculateAggregateHealth();
-}
-
-void ComplexShipTile::RecalculateAggregateHealth(void)
-{
-	ComplexShipElement *el;
-
-	// Before we start, make sure the ship & element size are valid to avoid any errors later
+	// If any elements have been destroyed, this tile will also be destroyed
 	if (!m_parent || m_elementsize.x == 0 || m_elementsize.y == 0 || m_elementsize.z == 0) return;
 
-	// We will build up aggregate construction state by first summing the state of every element
-	m_aggregatehealth = 0.0f;
-
-	// Loop over each dimension in turn
+	// Iterate over all elements covered by this tile
+	ComplexShipElement *el;
 	for (int x = 0; x < m_elementsize.x; x++) {
 		for (int y = 0; y < m_elementsize.y; y++) {
-			for (int z = 0; z < m_elementsize.z; z++)
+			for (int z = 0; z < m_elementsize.z; z++) 
 			{
-				el = m_parent->GetElement(x, y, z);
-				if (el) m_aggregatehealth += el->GetHealth();
+				el = m_parent->GetElement(m_elementlocation.x + x, m_elementlocation.y + y, m_elementlocation.z + z);
+				if (el && !el->IsDestroyed())
+				{
+					health += el->GetHealth();
+				}
+				else
+				{
+					// At least one element under this tile has been destroyed, so (repairably) destroy the tile
+					SetHealth(0.0f);
+				}
 			}
 		}
 	}
 
 	// Divide through by the number of elements to get an average aggregate value
-	m_aggregatehealth /= (m_elementsize.x * m_elementsize.y * m_elementsize.z);
+	SetHealth(health / (m_elementsize.x * m_elementsize.y * m_elementsize.z));
+
+}
+
+// Event triggered upon destruction of the entity
+void ComplexShipTile::DestroyObject(void)
+{
+	// If we are already destroyed then take no further action
+	if (IsDestroyed()) return;
+
+	// Apply any destruction effect
+
+	// Debug logging
+	OutputDebugString(concat("Destruction of Tile (ID=")(m_id)(", Class=")
+		(m_definition ? m_definition->GetCode() : "<null>")(")\n").str().c_str());
+
+	// Destroy all terrain objects owned by this tile
+	DestroyAllOwnedTerrain();
+
+	// Now (repairably) destroy the object
+	MarkObjectAsDestroyed();
+}
+
+// Destroy all terrain objects owned by this tile
+void ComplexShipTile::DestroyAllOwnedTerrain(void)
+{
+	if (!m_parent) return;
+
+	// Tell our parent environment to destroy all items of terrain that we own	
+	m_parent->DestroyTerrain(m_terrain_ids);
 }
 
 // Default destructor
