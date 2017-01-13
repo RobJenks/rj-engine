@@ -150,6 +150,7 @@ void GamePhysicsEngine::PerformCollisionDetection(iObject *focalobject)
 	CollisionDetectionResults.ClearData();
 
 	// Use a different collision method & distance based upon the type of object being tested
+	// TODO: Improve this in future
 	switch (focalobject->GetObjectType())
 	{
 		case iObject::ObjectType::SimpleShipObject:
@@ -165,6 +166,7 @@ void GamePhysicsEngine::PerformCollisionDetection(iObject *focalobject)
 
 			// Actor-level collisions can be performed with low active collision distance, since visibility should be much smaller
 			iEnvironmentObject *envobj = (iEnvironmentObject*)focalobject;
+			PerformSpaceCollisionDetection(envobj->GetParentEnvironment(), Game::C_ACTIVE_COLLISION_DISTANCE_SHIPLEVEL);
 			PerformEnvironmentCollisionDetection(	envobj->GetParentEnvironment(), envobj->GetEnvironmentPosition(), 
 													Game::C_ACTIVE_COLLISION_DISTANCE_ACTORLEVEL);
 			break;

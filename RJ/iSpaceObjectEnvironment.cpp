@@ -1474,7 +1474,7 @@ EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::TriggerEle
 	// Notify any tile in this location that the element has been damaged
 	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
 
-	// We may also apply damage to the contents of the element if the damage state is significant enough
+	// TODO: We may also apply damage to the contents of the element if the damage state is significant enough
 	/*if (el.GetHealth() < Game::C_ELEMENT_DAMAGE_CONTENTS_THRESHOLD)
 	{
 	}*/

@@ -2334,13 +2334,13 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		if (cs())
+		Actor *a = Game::CurrentPlayer->GetActor();
+		if (a)
 		{
-			XMVECTOR wm = cs()->GetWorldMomentum();
-			XMVECTOR a = cs()->GetWorldAcceleration();
-
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Tiles: %d, Objects: %d, Terrain: %d",
-				cs()->GetTileCount(), cs()->Objects.size(), cs()->TerrainObjects.size());
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "LocalM: (%.2f, %.2f, %.2f), WorldM: (%.2f, %.2f, %.2f), OnGround: %s",
+				XMVectorGetX(a->PhysicsState.LocalMomentum), XMVectorGetY(a->PhysicsState.LocalMomentum), XMVectorGetZ(a->PhysicsState.LocalMomentum),
+				XMVectorGetX(a->PhysicsState.WorldMomentum), XMVectorGetY(a->PhysicsState.WorldMomentum), XMVectorGetZ(a->PhysicsState.WorldMomentum), 
+				(a->IsOnGround() ? "true" : "false"));
 		}
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
