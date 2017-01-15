@@ -414,6 +414,7 @@
     <ClCompile Include="Hardpoint.cpp" />
     <ClCompile Include="Hardpoints.cpp" />
     <ClCompile Include="HashFunctions.cpp" />
+    <ClCompile Include="HashIndexedVector.cpp" />
     <ClCompile Include="Hp.cpp" />
     <ClCompile Include="HpEngine.cpp" />
     <ClCompile Include="HpMissileLauncher.cpp" />
@@ -448,6 +449,8 @@
     <ClCompile Include="MemDebug.cpp" />
     <ClCompile Include="MemDebugCheck.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
+    <ClCompile Include="ModifierDetails.cpp" />
+    <ClCompile Include="Modifiers.cpp" />
     <ClCompile Include="MultiLineTextBlock.cpp" />
     <ClCompile Include="ObjectPicking.cpp" />
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
@@ -605,6 +608,7 @@
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />
+    <ClInclude Include="HashIndexedVector.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="iTakesDamageSimple.h" />
     <ClInclude Include="LightFlatHighlightFadeShader.h" />
@@ -616,6 +620,7 @@
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="ModifierDetails.h" />
+    <ClInclude Include="Modifiers.h" />
     <ClInclude Include="MValue.h" />
     <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />
@@ -698,6 +703,12 @@
     <ClInclude Include="SpaceProjectileDefinition.h" />
     <ClInclude Include="ProjectileLauncher.h" />
     <ClInclude Include="SpaceTurret.h" />
+    <ClInclude Include="StandardModifiers.list">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="StandardModifiers.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
     <ClInclude Include="Timers.h" />

@@ -12,6 +12,8 @@
 #include "Attachment.h"
 #include "Model.h"
 #include "ArticulatedModel.h"
+#include "Modifiers.h"
+#include "ModifierDetails.h"
 
 #include "Hardpoint.h"
 #include "Hardpoints.h"
@@ -194,6 +196,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 			res = IO::Data::LoadSpaceProjectileDefinition(child);
 		} else if (name == D::NODE_DynamicTileSet) {
 			res = IO::Data::LoadDynamicTileSet(child);
+		} else if (name == D::NODE_ModifierDetails) {
+			res = IO::Data::LoadModifier(child);
 		} else {
 			// Unknown level one node type
 			res = ErrorCodes::UnknownDataNodeType;
@@ -3612,14 +3616,18 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 			a->SetModel(val);
 			if (a->GetModel() == NULL) { delete a; a = NULL; return ErrorCodes::CouldNotLinkBaseActorToSkinnedModel; }
 		}
-		else if (key == "attribute") {
+		else if (key == "attribute") 
+		{
 			// Pull xml attrs for this attribute
-			const char *ctype = child->Attribute("type");
-			const char *cmin = child->Attribute("min");
-			const char *cmax = child->Attribute("max");
-			const char *cminbound = child->Attribute("minbound");
+			const char *ctype = child->Attribute("type");					// The attribute being loaded
+			const char *cmin = child->Attribute("min");						// Minimum possible value for this attribute
+			const char *cmax = child->Attribute("max");						// Maximum possible value for this attribute
+			const char *cderive = child->Attribute("derivation");			// Derivation method used to generate the attribute; 
+																			// [NoDerivation] (default) = uses base value, otherwise uses generate_{min|max}
+			const char *cbase = child->Attribute("base");					// Base value directly specified
+			const char *cminbound = child->Attribute("minbound");			
 			const char *cmaxbound = child->Attribute("maxbound");
-			const char *cderive = child->Attribute("derivation");
+			
 
 			// Check for required parameters.  Use defaults if not specified and if not mandatory
 			ActorBaseAttributeData attr;
@@ -3796,6 +3804,33 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 
 	// Otherwise the model is valid; add to the central collection and return success
 	ArticulatedModel::AddModel(model);
+	return ErrorCodes::NoError;
+}
+
+// Loads modifier data from the specified node
+Result IO::Data::LoadModifier(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadModifierWithNullData;
+
+	// Attempt to get all data from node attributes
+	const char *cID = node->Attribute("id");
+	const char *cDesc = node->Attribute("desc");
+	if (cID == NULL || cDesc == NULL) return ErrorCodes::CannotLoadModifierWithInvalidData;
+	std::string id = cID; std::string desc = cDesc;
+
+	// See whether we already have a modifier defined with this ID
+	ModifierDetails & modifier = Modifiers::Get(id);
+	if (modifier.IsNull())
+	{
+		Modifiers::Add(id, desc);
+	}
+	else
+	{
+		modifier.SetName(id);
+		modifier.SetDescription(desc);
+	}
+	
+	// Return success
 	return ErrorCodes::NoError;
 }
 

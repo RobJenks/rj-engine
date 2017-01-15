@@ -53,6 +53,20 @@ public:
 		m_items.push_back(item);
 	}
 
+	// Sets the value of the object at the specified location.  Takes no action if the location is invalid
+	// Hash indices to this element will remain in place; remove using RemoveIndex() if desired
+	CMPINLINE void														Set(Index index, T item)
+	{
+		if (index < m_items.size()) m_items[index] = item;
+	}
+
+	// Sets the value of the object at the specified location.  Takes no action if the location is invalid
+	// Hash indices to this element will remain in place; remove using RemoveIndex() if desired
+	CMPINLINE void														Set(typename CollectionType::iterator index, T item)
+	{
+		if (index != m_items.end()) (*index) = item;
+	}
+
 	// Link an existing item to the specified hash index
 	CMPINLINE void														SetIndex(Index item, TIndex index)
 	{
@@ -69,7 +83,7 @@ public:
 	// Remove an item from the collection.  All indices and iterators beyond this item in the collection are invalidated
 	CMPINLINE void														Remove(Index item)
 	{
-		if (index < 0 || index >= m_items.size()) return;
+		if (index >= m_items.size()) return;
 		m_items.erase(m_items.begin() + item);
 		
 		MapType::iterator it_end = m_map.end();
@@ -105,12 +119,43 @@ public:
 		}
 	}
 
+	// Removes any indices referencing the specified item
+	CMPINLINE void														RemoveIndex(typename CollectionType::iterator item)
+	{
+		if (item == m_items.end()) return;
+		Index index = std::distance(m_items.begin(), item);
+
+		MapType::iterator it_end = m_map.end();
+		for (MapType::iterator it = m_map.begin(); it != it_end; /* No increment */)
+		{
+			if (it->second == index)	it = m_map.erase(it);
+			else						++it;
+		}
+	}
+
+	// Removes any indices referencing the specified item
+	CMPINLINE void														RemoveIndex(Index item)
+	{
+		if (item >= m_items.size()) return;
+
+		MapType::iterator it_end = m_map.end();
+		for (MapType::iterator it = m_map.begin(); it != it_end; /* No increment */)
+		{
+			if (it->second == item)		it = m_map.erase(it);
+			else						++it;
+		}
+	}
+
+
 	// Clear the collection
 	CMPINLINE void														Clear(void)
 	{
 		m_items.clear();
 		m_map.clear();
 	}
+
+	// Returns a flag indicating whether the collection is empty
+	CMPINLINE bool														Empty(void) const		{ return m_items.empty(); }
 
 	// Returns the size of the collection
 	CMPINLINE Index														Size(void) const		{ return m_items.size(); }

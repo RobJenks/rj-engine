@@ -103,6 +103,8 @@
 #include "LightSource.h"					// DBG
 #include "ObjectPicking.h"					// DBG
 #include "DynamicTileSet.h"					// DBG
+#include "Modifiers.h"						// DBG
+#include "StandardModifiers.h"				// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -1187,6 +1189,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	Game::ObjectSearchManager::Initialise();
 	Game::ObjectSearchManager::DisableSearchCache();
 
+	// Initialise all standard modifiers
+	StandardModifiers::InitialiseStandardModifiers();
+
 	// Initialise the universe
 	res = InitialiseUniverse();
 	if (res != ErrorCodes::NoError) {
@@ -2174,7 +2179,7 @@ void RJMain::__CreateDebugScenario(void)
 			else
 				a1_actor->SetEnvironmentPositionAndOrientation(NULL_VECTOR, ID_QUATERNION);
 		}
-		a1 = a1_actor;
+		a1 = a1_actor; 
 	}
 
 	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
@@ -2198,35 +2203,6 @@ void RJMain::__CreateDebugScenario(void)
 	s3[0]()->TurretController.AddTurret(sst3);
 
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
-
-	/*LightData dirlight;
-	Game::Engine->LightingManager.GetDefaultDirectionalLightData(dirlight);
-	dirlight.Direction = XMFLOAT3(0, -1, 0);
-	Game::Engine->LightingManager.AddDirectionalLight(dirlight);
-
-	Light l;
-	Game::Engine->LightingManager.GetDefaultSpotLightData(l.Data);
-	LightSource *ls = LightSource::Create(l);
-	ss()->GetSpaceEnvironment()->AddBaseObject(ls, NULL_VECTOR);
-	Game::RegisterObject(ls);
-	ls->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	ss()->AddChildAttachment(ls, XMVectorSetY(NULL_VECTOR, 10.0f), ID_QUATERNION);*/
-
-
-	/*DynamicTileSet::DynamicTileRequirements req;
-	req.TileDefinition = D::ComplexShipTiles.Get("corridor_nse");
-	TileConnections conn;
-	conn.Initialise(ONE_INTVECTOR3);
-	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Up_BS);
-	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Down_BS);
-	conn.AddConnection(TileConnections::TileConnectionType::Walkable, NULL_INTVECTOR3, DirectionBS::Right_BS);
-	req.Connections = conn;
-
-	DynamicTileSet *dts = new DynamicTileSet();
-	dts->SetCode("dts_corridor");
-	dts->SetDefault(D::ComplexShipTiles.Get("corridor_ns"));
-	dts->AddEntry(req);
-	D::DynamicTileSets.Store(dts);*/
 
 	bitstring up = DirectionBS::Up_BS;				// == 2
 	bitstring left = DirectionBS::Left_BS;			// == 1
@@ -2252,8 +2228,11 @@ void RJMain::__CreateDebugScenario(void)
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 
+	
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
+
+*** NOW USE NEW MODIFIER FUNCTIONALITY TO A) DEFINE INTRA-ATTRIBUTE ACTOR MODIFIERS, AND B) APPLY THE MODIFIERS AT RECALCULATION TIME ***
 
 void RJMain::DEBUGDisplayInfo(void)
 {

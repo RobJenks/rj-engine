@@ -6,6 +6,8 @@
 #include "GameVarsExtern.h"
 #include "Actor.h"
 
+#include "StandardModifiers.h"
+
 #include "ActorBase.h"
 
 ActorBase::ActorBase(void)

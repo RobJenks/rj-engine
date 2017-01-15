@@ -84,9 +84,11 @@ extern AttributeDerivationType TranslateAttributeDerivationTypeFromString(const 
 // This class has no special alignment requirements
 struct ActorBaseAttributeData
 {
+	// We generate a new base attribute value in the range [BaseMinValue BaseMaxValue)
 	float						BaseMinValue;		// Low end of the range that the base value can take
 	float						BaseMaxValue;		// high end of the range that the base value can take
 
+	// This attribute is never permitted to be outside the bounds [MinBound MaxBound]
 	float						MinBound;			// Value can go no lower than this, regardless of any modifiers etc.
 	float						MaxBound;			// Value can go no higher than this, regardless of any modifiers etc.
 

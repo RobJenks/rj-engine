@@ -21,8 +21,9 @@ public:
 
 
 	// Key fields
-	ModifierType		Type;
-	T					Value;
+	ModifierType				Type;
+	T							Value;
+//	ModifierDetails::Index		Details;
 
 	// Default constructor; set all values to default
 	Modifier(void) : Type(ModifierType::Multiplicative), Value(DefaultValues<T>::OneValue())	{ }

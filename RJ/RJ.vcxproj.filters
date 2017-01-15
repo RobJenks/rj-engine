@@ -592,6 +592,15 @@
     <ClCompile Include="MemDebug.cpp">
       <Filter>Debug</Filter>
     </ClCompile>
+    <ClCompile Include="HashIndexedVector.cpp">
+      <Filter>Data structures</Filter>
+    </ClCompile>
+    <ClCompile Include="Modifiers.cpp">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClCompile>
+    <ClCompile Include="ModifierDetails.cpp">
+      <Filter>Concepts\Damage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1353,6 +1362,18 @@
     </ClInclude>
     <ClInclude Include="MemDebugCheck.h">
       <Filter>Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="HashIndexedVector.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="Modifiers.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardModifiers.h">
+      <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="StandardModifiers.list">
+      <Filter>Concepts\Modifiers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

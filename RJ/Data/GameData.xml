@@ -7,6 +7,9 @@
   
   <!-- Load all factions -->
   <include file="Factions\Factions.xml" />
+
+  <!-- Load modifier data -->
+  <include file="Modifiers\Modifiers.xml" />
   
   <!-- Load static model data -->
   <include file="Models\BasicModels.xml" />

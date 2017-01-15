@@ -21,6 +21,8 @@
 #include "ComplexShipSection.h"
 #include "StaticTerrain.h"
 
+#include "StandardModifiers.h"
+
 #include "GamePhysicsEngine.h"
 
 #ifdef _DEBUG

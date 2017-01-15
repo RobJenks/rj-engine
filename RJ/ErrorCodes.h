@@ -407,6 +407,8 @@ namespace ErrorCodes {
 	const Result		CannotLoadDynamicTileSetWithInvalidReference	= 2676;
 	const Result		CouldNotLoadDynamicTileSetEntryWithNullData		= 2677;
 	const Result		CouldNotAddDynamicTileSetWithoutMandatoryData	= 2678;
+	const Result		CannotLoadModifierWithNullData					= 2679;
+	const Result		CannotLoadModifierWithInvalidData				= 2680;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

@@ -70,9 +70,9 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 			ActorAttr a = TranslateActorAttributeFromString(sname);
 			if (a == ActorAttr::A_COUNT) continue;
 
-			// Convert the range values for this attribute and then validate; make sure that min<base<max
+			// Convert the range values for this attribute and then validate; make sure that min <= base <= max
 			float vmin = (float)atof(cmin); float vbase = (float)atof(cbase); float vmax = (float)atof(cmax);
-			if (vmin >= vbase || vbase >= vmax) continue;
+			if (vmin > vbase || vbase > vmax) continue;
 
 			// Store the range values for this attribute
 			ActorAttributeParams[(int)a].min = vmin;

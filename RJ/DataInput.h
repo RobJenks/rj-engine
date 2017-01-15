@@ -130,6 +130,8 @@ namespace IO { namespace Data {
 	Result LoadActor(TiXmlElement *node);
 
 	Result LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnections *pOutConnections);
+	
+	Result LoadModifier(TiXmlElement *node);
 
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
