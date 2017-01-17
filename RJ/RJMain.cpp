@@ -2232,7 +2232,6 @@ void RJMain::__CreateDebugScenario(void)
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
-*** NOW USE NEW MODIFIER FUNCTIONALITY TO A) DEFINE INTRA-ATTRIBUTE ACTOR MODIFIERS, AND B) APPLY THE MODIFIERS AT RECALCULATION TIME ***
 
 void RJMain::DEBUGDisplayInfo(void)
 {
@@ -2313,13 +2312,16 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		Actor *a = Game::CurrentPlayer->GetActor();
-		if (a)
+		ComplexShip *c = cs();
+		if (c)
 		{
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "LocalM: (%.2f, %.2f, %.2f), WorldM: (%.2f, %.2f, %.2f), OnGround: %s",
-				XMVectorGetX(a->PhysicsState.LocalMomentum), XMVectorGetY(a->PhysicsState.LocalMomentum), XMVectorGetZ(a->PhysicsState.LocalMomentum),
-				XMVectorGetX(a->PhysicsState.WorldMomentum), XMVectorGetY(a->PhysicsState.WorldMomentum), XMVectorGetZ(a->PhysicsState.WorldMomentum), 
-				(a->IsOnGround() ? "true" : "false"));
+			XMVECTOR pos = c->GetPosition();
+			XMVECTOR obb = c->CollisionOBB.ConstData().Centre;
+
+			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: (%.2f, %.2f, %.2f), OBBPos: (%.2f, %.2f, %.2f), Invalidated: %s",
+				XMVectorGetX(pos), XMVectorGetY(pos), XMVectorGetZ(pos),
+				XMVectorGetX(obb), XMVectorGetY(obb), XMVectorGetZ(obb),
+				(c->CollisionOBB.IsInvalidated() ? "true" : "false"));
 		}
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);

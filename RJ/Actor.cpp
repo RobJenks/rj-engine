@@ -60,9 +60,12 @@ void Actor::RecalculateAttributes(void)
 {
 	int attr; float modifier;
 
-	// Set all attributes to their base values by default
-	for (int i=0; i<(int)ActorAttr::A_COUNT; i++)
-		Attributes[i].Value = Attributes[i].BaseValue;
+	// Remove all modifiers before starting.  NOTE: we cannot suspend modifier recalculation during
+	// this process since attr>attr effects are allowed to cascade
+	for (int i = 0; i < (int)ActorAttr::A_COUNT; ++i)
+	{
+		Attributes[i].RemoveAllModifiers();
+	}
 
 	// Now apply all direct effects from one attribute to another
 	vector<ActorAttributeGeneration::ActorAttributeEffect>::const_iterator it_end = ActorAttributeGeneration::ActorAttributeEffects.end();
@@ -84,14 +87,14 @@ void Actor::RecalculateAttributes(void)
 		else modifier = it->atbase;
 
 		// Now apply this modifier to update the current target attribute value
-		Attributes[(int)it->target].Value += (Attributes[(int)it->target].BaseValue * modifier);
+		Attributes[(int)it->target].AddModifier(Modifier<float>::ModifierType::Multiplicative, (1.0f + modifier));
 	}
 
 	// Derived attributes: walk & run speed.  If at default of 1.0 then scale from our current run speed
-	if (Attributes[ActorAttr::A_WalkSpeed].Value == 1.0f)	Attributes[ActorAttr::A_WalkSpeed].Value = 
-															Attributes[ActorAttr::A_RunSpeed].Value * Game::C_ACTOR_DEFAULT_WALK_MULTIPLIER;
-	if (Attributes[ActorAttr::A_StrafeSpeed].Value == 1.0f)	Attributes[ActorAttr::A_StrafeSpeed].Value = 
-															Attributes[ActorAttr::A_RunSpeed].Value * Game::C_ACTOR_DEFAULT_STRAFE_MULTIPLIER;
+	if (Attributes[ActorAttr::A_WalkSpeed].BaseValue == 1.0f)	Attributes[ActorAttr::A_WalkSpeed].BaseValue = 
+																Attributes[ActorAttr::A_RunSpeed].Value * Game::C_ACTOR_DEFAULT_WALK_MULTIPLIER;
+	if (Attributes[ActorAttr::A_StrafeSpeed].BaseValue == 1.0f)	Attributes[ActorAttr::A_StrafeSpeed].Value = 
+																Attributes[ActorAttr::A_RunSpeed].Value * Game::C_ACTOR_DEFAULT_STRAFE_MULTIPLIER;
 }
 
 // Update the actor model for rendering.  NOTE: actor world matrix is calculated HERE, i.e. only when required for rendeirng

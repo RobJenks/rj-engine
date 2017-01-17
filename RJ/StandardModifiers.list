@@ -1,2 +1,7 @@
+// The null modifier == 0 and must always be the first one loaded
 DMod(NO_MODIFIER)
 DMod(SOME_MODIFIER)
+
+// Modifiers applying to actor attributes
+DMod(ACTOR_AGILITY_EFFECT_ON_RUN_SPEED)
+DMod(ACTOR_CONSTITUTION_EFFECT_ON_HEALTH)

@@ -31,7 +31,18 @@ public:
 	CMPINLINE T									GetValue(void) const											{ return Value; }
 
 	// Adds a new modifier
-	CMPINLINE void 								AddModifier(typename Modifier<T>::ModifierType type, T value)	{ AddModifier(Modifier<T>(type, value)); }
+	CMPINLINE void 								AddModifier(typename Modifier<T>::ModifierType type, T value)	
+	{ 
+		AddModifier(Modifier<T>(type, value)); 
+	}
+
+	// Adds a new modifier
+	CMPINLINE void 								AddModifier(typename Modifier<T>::ModifierType type, T value, ModifierDetails::ModifierID details)	
+	{ 
+		AddModifier(Modifier<T>(type, value, details)); 
+	}
+
+	// Adds a new modifier
 	CMPINLINE void								AddModifier(const Modifier<T> & modifier)				
 	{ 
 		m_modifiers.push_back(modifier); 

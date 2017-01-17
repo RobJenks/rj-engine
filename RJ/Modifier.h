@@ -5,6 +5,8 @@
 
 #include <vector>
 #include "DefaultValues.h"
+#include "ModifierDetails.h"
+#include "StandardModifiers.h"
 
 // Defines a modifier to be applied to some attribute or calculation
 // This class has no special alignment requirements
@@ -21,18 +23,19 @@ public:
 
 
 	// Key fields
-	ModifierType				Type;
-	T							Value;
-//	ModifierDetails::Index		Details;
+	ModifierType					Type;
+	T								Value;
+	ModifierDetails::ModifierID		Details;
 
 	// Default constructor; set all values to default
-	Modifier(void) : Type(ModifierType::Multiplicative), Value(DefaultValues<T>::OneValue())	{ }
+	Modifier(void) : Type(ModifierType::Multiplicative), Value(DefaultValues<T>::OneValue()), Details(StandardModifiers::NO_MODIFIER)	{ }
 
 	// Constuctor that passes required modifier values
-	Modifier(ModifierType type, T value) : Type(type), Value(value)								{ }
+	Modifier(ModifierType type, T value) : Type(type), Value(value), Details(StandardModifiers::NO_MODIFIER)							{ }
+	Modifier(ModifierType type, T value, ModifierDetails::ModifierID details) : Type(type), Value(value), Details(details)				{ }
 
 	// Copy constructor
-	Modifier(const Modifier<T> & other) : Type(other.Type), Value(other.Value)					{ }
+	Modifier(const Modifier<T> & other) : Type(other.Type), Value(other.Value), Details(other.Details)									{ }
 
 	// Define custom equality operators for this type
 	CMPINLINE friend bool operator== (const Modifier<T> &v1, const Modifier<T> &v2) { return (v1.Type == v2.Type && v1.Value == v2.Value); }

@@ -9,6 +9,7 @@
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
 #include "ModifiedValue.h"
+#include "StandardModifiers.h"
 class TiXmlElement;
 
 // Enumeration of actor attributes
@@ -46,14 +47,14 @@ namespace ActorAttributeGeneration
 	// This class has no special alignment requirements
 	struct ActorAttributeEffect
 	{
-		ActorAttr source, target;			// Source and target attributes for this effect; source will have the calculated modifier effect on target.
-		float atmin, atbase, atmax;			// Percentage of base modifier at each of the min, base and max.  Lerp between these points.
+		ActorAttr source, target;				// Source and target attributes for this effect; source will have the calculated modifier effect on target.
+		float atmin, atbase, atmax;				// Percentage of base modifier at each of the min, base and max.  Lerp between these points.
+		ModifierDetails::ModifierID modifier;	// Reference to the modifier that this represents
 
-		ActorAttributeEffect(void) { atmin = 0.0f; atbase = 0.0f; atmax = 0.0f; }
-		ActorAttributeEffect(ActorAttr _src, ActorAttr _tgt, float _atmin, float _atbase, float _atmax)
+		ActorAttributeEffect(void) : atmin(0.0f), atbase(0.0f), atmax(0.0f), modifier(StandardModifiers::NO_MODIFIER) { }
+		ActorAttributeEffect(ActorAttr _src, ActorAttr _tgt, float _atmin, float _atbase, float _atmax, ModifierDetails::ModifierID _modifier)
+			: source(_src), target(_tgt), atmin(_atmin), atbase(_atbase), atmax(_atmax), modifier(_modifier)
 		{
-			source = _src; target = _tgt;
-			atmin = _atmin; atbase = _atbase; atmax = _atmax;
 		}
 	};
 	extern std::vector<ActorAttributeEffect> ActorAttributeEffects;
@@ -74,8 +75,9 @@ extern std::string TranslateActorAttributeToStringName(ActorAttr attr);
 // The methods that can be used to derive attribute values from the base values
 enum AttributeDerivationType
 {
-	Uniform = 0,				// Default
-	NormalDistribution
+	Fixed,					// No derivation; value is simply specified
+	Uniform,				// Uniform random value within a range
+	NormalDistribution		// Normally-distributed value within a range
 };
 
 extern AttributeDerivationType TranslateAttributeDerivationTypeFromString(const std::string & name);
@@ -84,9 +86,8 @@ extern AttributeDerivationType TranslateAttributeDerivationTypeFromString(const 
 // This class has no special alignment requirements
 struct ActorBaseAttributeData
 {
-	// We generate a new base attribute value in the range [BaseMinValue BaseMaxValue)
-	float						BaseMinValue;		// Low end of the range that the base value can take
-	float						BaseMaxValue;		// high end of the range that the base value can take
+	// We either specify a value directly (FixedValue) or the parameters required in
+	// order to generate the parameter (DerivationType, GenerateMin, GenerateMax)
 
 	// This attribute is never permitted to be outside the bounds [MinBound MaxBound]
 	float						MinBound;			// Value can go no lower than this, regardless of any modifiers etc.
@@ -94,9 +95,16 @@ struct ActorBaseAttributeData
 
 	AttributeDerivationType		DerivationType;		// Method used to derive a value from the base values
 
+	float						FixedBaseValue;		// Fixed value for this attribute if DerivationType == Fixed
+
+	// We generate a new base attribute value in the range [BaseMinValue BaseMaxValue)
+	float						GenerateMin;		// Low end of the range that the base value can take
+	float						GenerateMax;		// high end of the range that the base value can take
+
+	
+
 	// Default constructor to set default values
-	ActorBaseAttributeData(void) {	BaseMinValue = 1.0f; BaseMaxValue = 1.0f; 
-									MinBound = 1.0f; MaxBound = 1.0f; DerivationType = AttributeDerivationType::Uniform; }
+	ActorBaseAttributeData(void) {	MinBound = 1.0f; MaxBound = 1.0f; DerivationType = AttributeDerivationType::NormalDistribution; }
 
 	// Method to generate a value based on our base values and derivation methods
 	float Generate(void)
@@ -107,12 +115,16 @@ struct ActorBaseAttributeData
 		if (DerivationType == AttributeDerivationType::NormalDistribution)
 		{
 			// Generate based on a normal distribution between the min & max base values
-			result = NormalDistRange(BaseMinValue, BaseMaxValue);
+			result = NormalDistRange(GenerateMin, GenerateMax);
+		}
+		else if (DerivationType == AttributeDerivationType::Uniform)
+		{
+			// Default: generate a uniform random value between the min & max
+			result = frand_lh(GenerateMin, GenerateMax);
 		}
 		else
 		{
-			// Default: generate a uniform random value between the min & max
-			result = frand_lh(BaseMinValue, BaseMaxValue);
+			result = FixedBaseValue;
 		}
 
 		// Constrain to be within the min & max bounds, then return the value
@@ -130,8 +142,10 @@ struct ActorAttributes
 	T							_data[ActorAttr::A_COUNT];
 
 	// Define the [] operator to return a member from the data array based on its index.  Compiler should optimise to constant memory offsets
-	CMPINLINE T&				operator[] (ActorAttr attr) { return _data[(int)attr]; }
-	CMPINLINE T&				operator[] (int attr)		{ return _data[attr]; }
+	CMPINLINE const T &			operator[] (ActorAttr attr) const	{ return _data[(int)attr]; }
+	CMPINLINE T&				operator[] (ActorAttr attr)			{ return _data[(int)attr]; }
+	CMPINLINE const T &			operator[] (int attr) const			{ return _data[attr]; }
+	CMPINLINE T&				operator[] (int attr)				{ return _data[attr]; }
 
 	// Method to set the values of an attribute based on the string representation of its name
 	void SetData(const std::string & name, const T & data)

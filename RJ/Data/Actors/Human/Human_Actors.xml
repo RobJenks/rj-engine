@@ -13,8 +13,8 @@
     <Attribute type="Constitution" min="0.0" max="100.0" generate_min="15.0" generate_max="30.0" derivation="normal" />
     <Attribute type="Will" min="0.0" max="100.0" generate_min="15.0" generate_max="30.0" derivation="normal" />
     
-    <Attribute type="Max Health" base="100.0" min="25.0" max="1000.0" />
-    <Attribute type="Run Speed" base="14.0" min="10.0" max="24.0" />
+    <Attribute type="Base Health" min="25.0" max="1000.0" value="100.0" />
+    <Attribute type="Run Speed" min="10.0" max="24.0" value="14.0" />
 
     <!-- Other parameters -->
     

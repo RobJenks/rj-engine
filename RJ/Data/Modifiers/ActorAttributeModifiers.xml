@@ -1,0 +1,6 @@
+<GameData>
+
+  <ModifierDetails id="ACTOR_AGILITY_EFFECT_ON_RUN_SPEED" desc="Agility" />
+  <ModifierDetails id="ACTOR_CONSTITUTION_EFFECT_ON_HEALTH" desc="Constitution" />
+  
+</GameData>

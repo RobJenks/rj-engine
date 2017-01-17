@@ -3622,22 +3622,36 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 			const char *ctype = child->Attribute("type");					// The attribute being loaded
 			const char *cmin = child->Attribute("min");						// Minimum possible value for this attribute
 			const char *cmax = child->Attribute("max");						// Maximum possible value for this attribute
-			const char *cderive = child->Attribute("derivation");			// Derivation method used to generate the attribute; 
-																			// [NoDerivation] (default) = uses base value, otherwise uses generate_{min|max}
-			const char *cbase = child->Attribute("base");					// Base value directly specified
-			const char *cminbound = child->Attribute("minbound");			
-			const char *cmaxbound = child->Attribute("maxbound");
 			
-
+			const char *cderive, *cgen_min, *cgen_max;
+			const char *cbase = child->Attribute("value");					// Either base value is directly specified, or 
+																			// derivation parameters are provided
+			if (cbase == NULL)
+			{
+				cderive = child->Attribute("derivation");					// Derivation method used to generate the attribute; 
+				cgen_min = child->Attribute("generate_min");				// Minimum bound for the generated value
+				cgen_max = child->Attribute("generate_max");				// Maximum bound for the generated value
+			}
+			
 			// Check for required parameters.  Use defaults if not specified and if not mandatory
 			ActorBaseAttributeData attr;
 			if (!ctype)			continue;
-			if (cmin)			attr.BaseMinValue = (float)atof(cmin);
-			if (cmax)			attr.BaseMaxValue = (float)atof(cmax);
-			if (cminbound)		attr.MinBound = (float)atof(cminbound);
-			if (cmaxbound)		attr.MaxBound = (float)atof(cmaxbound);
-			if (cderive)		{ string sderive = cderive; attr.DerivationType = TranslateAttributeDerivationTypeFromString(sderive); }
-
+			if (cmin)			attr.MinBound = (float)atof(cmin);
+			if (cmax)			attr.MaxBound = (float)atof(cmax);
+			if (cbase)
+			{
+				attr.DerivationType = AttributeDerivationType::Fixed;
+				attr.FixedBaseValue = (float)atof(cbase);
+			}
+			else
+			{
+				if (!cderive || !cgen_min || !cgen_max) continue;
+				string sderive = cderive; 
+				attr.DerivationType = TranslateAttributeDerivationTypeFromString(sderive);
+				attr.GenerateMin = (float)atof(cgen_min);
+				attr.GenerateMax = (float)atof(cgen_max);
+			}
+			
 			// Now assign these values to the relevant attribute in the collection
 			a->Attributes.SetData(ctype, attr);
 		}

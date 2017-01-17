@@ -14,7 +14,7 @@ public:
 	typedef unsigned int							ModifierID;
 	
 	// Default constructor
-	CMPINLINE ModifierDetails(void)					: m_id(0U-1U), m_name("<null>"), m_description("<null>") { }
+	CMPINLINE ModifierDetails(void)					: m_id(0U), m_name("<null>"), m_description("<null>") { }
 
 	// Constructor to define object with primary data
 	CMPINLINE ModifierDetails(ModifierID id, const std::string & name, const std::string & description) 
@@ -30,11 +30,8 @@ public:
 	CMPINLINE void									SetDescription(const std::string desc)	{ m_description = desc; }
 
 	// Indicates whether this object is a "null" modifier
-	CMPINLINE bool									IsNull(void) const						{ return (m_id == (0U-1U)); }
+	bool											IsNull(void) const;
 
-	// Static instance to represent the "null modifier"
-	static ModifierDetails &						NULL_MODIFIER;
-	
 
 private:
 

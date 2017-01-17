@@ -1,6 +1,5 @@
 <GameData>
 
-  <ModifierDetails id="NO_MODIFIER" desc="No modifier" />
   <ModifierDetails id="SOME_MODIFIER" desc="Some other modifier" />
   
 </GameData>

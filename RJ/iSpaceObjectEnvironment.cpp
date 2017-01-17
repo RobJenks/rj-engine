@@ -745,6 +745,9 @@ void iSpaceObjectEnvironment::BuildOBBFromRegionData(const EnvironmentOBBRegion 
 
 	// Now recursively build an OBB that matches the hierarchical region structure
 	BuildOBBNodeFromRegionData(CollisionOBB, region);
+
+	// Invalidate the OBB so that the changes are reflected next frame
+	CollisionOBB.UpdateFromParent();
 }
 
 

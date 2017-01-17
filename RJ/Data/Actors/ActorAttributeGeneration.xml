@@ -8,9 +8,11 @@
     <AttributeRange name="Constitution" min="0.0" base="25.0" max="100.0" />
     <AttributeRange name="Will" min="0.0" base="25.0" max="100.0" />
 
-    <!-- Direct effects from one attribute onto another -->
-    <AttributeEffect source="Agility" target="Run Speed" at_min="-0.5" at_max="1.0" />
-    <AttributeEffect source="Constitution" target="Base Health" at_min="-0.9" at_max="10.0" />
+
+    <!-- Direct effects from one attribute onto another.  NOTE: sequence is -->
+    <!-- important since attribute effects can cascade from A1 > A2 and then A2 > A3 -->
+    <AttributeEffect source="Agility" target="Run Speed" at_min="-0.5" at_max="1.0" modifier="ACTOR_AGILITY_EFFECT_ON_RUN_SPEED" />
+    <AttributeEffect source="Constitution" target="Base Health" at_min="-0.9" at_max="10.0" modifier="ACTOR_CONSTITUTION_EFFECT_ON_HEALTH" />
 
 
 

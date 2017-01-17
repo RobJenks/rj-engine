@@ -1,5 +1,6 @@
 <GameData>
 
   <include file="Modifiers\CoreModifiers.xml" />
+  <include file="Modifiers\ActorAttributeModifiers.xml" />
   
 </GameData>

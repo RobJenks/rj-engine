@@ -111,7 +111,7 @@ public:
 	// Will update the OBB if it has become invalidated before returning the data
 	CMPINLINE CoreOBBData &	Data(void)
 	{
-		if (IsInvalidated() && Parent) UpdateFromObject(*Parent);
+		if (IsInvalidated()) UpdateFromParent();
 		return _Data;
 	}
 
@@ -123,7 +123,7 @@ public:
 	}
 
 	// Updates the OBB data based on its parent object, if the OBB has become invalidated
-	CMPINLINE void				UpdateIfRequired(void)			{ if (IsInvalidated() && Parent) UpdateFromObject(*Parent); }
+	CMPINLINE void				UpdateIfRequired(void)			{ if (IsInvalidated()) UpdateFromParent(); }
 
 	// Flag to indicate whether an offset is being applied to this OBB
 	CMPINLINE bool				HasOffset(void) const			{ return CheckBit_Single(Flags, OrientedBoundingBox::OBBFlags::OBBHasOffset); }
@@ -195,6 +195,9 @@ public:
 
 	// Update the OBB position and basis vectors based upon a world matrix
 	void						UpdateFromObject(const iObject & object);
+
+	// Update the OBB position and basis vectors based upon its parent object
+	CMPINLINE void				UpdateFromParent(void) { if (Parent) UpdateFromObject(*Parent); }
 
 	// Method to update this bounding volume based upon its underlying data
 	CMPINLINE void				RecalculateData(void)

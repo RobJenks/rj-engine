@@ -3,6 +3,8 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "XML\\tinyxml.h"
+#include "Modifiers.h"
+#include "ModifierDetails.h"
 #include "ActorAttributes.h"
 using namespace ActorAttributeGeneration;
 
@@ -87,8 +89,11 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 			const char *atmin = child->Attribute("at_min");
 			const char *atbase = child->Attribute("at_base");
 			const char *atmax = child->Attribute("at_max");
+			const char *cmodifier = child->Attribute("modifier");
 			if (!csrc || !ctgt || !atmin || !atmax) continue;
 			if (!atbase) atbase = "0.0";
+			if (!cmodifier) cmodifier = "0";
+			string modifier = cmodifier;
 
 			// Attempt to translate both the source and target attributes to in-game values
 			ActorAttr asrc = TranslateActorAttributeFromString(csrc);
@@ -97,7 +102,8 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 
 			// Store this effect as a new entry in the attribute effects table
 			ActorAttributeEffects.push_back(
-				ActorAttributeEffect(asrc, atgt, (float)atof(atmin), (float)atof(atbase), (float)atof(atmax)) );
+				ActorAttributeEffect(asrc, atgt, (float)atof(atmin), (float)atof(atbase), (float)atof(atmax), 
+				Modifiers::Get(modifier).GetID()));
 		}
 	}
 

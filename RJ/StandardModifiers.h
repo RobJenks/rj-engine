@@ -5,12 +5,13 @@
 
 #include "CompilerSettings.h"
 #include "Modifiers.h"
+#include "ModifierDetails.h"
 
 namespace StandardModifiers
 {
 
 	static unsigned int Count = 0;
-#	define DMod(id) static const unsigned int id = Count++;
+#	define DMod(id) static const ModifierDetails::ModifierID id = Count++;
 #	include "StandardModifiers.list"
 #	undef DMod
 
