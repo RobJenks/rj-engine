@@ -140,8 +140,9 @@ void iObject::InitialiseCopiedObject(iObject *source)
 	m_nocollision.clear();
 	m_nocollision_count = 0;
 
-	// Deep-copy the object collision data
+	// Deep-copy the object collision data and force an update
 	OrientedBoundingBox::CloneOBBHierarchy(source->CollisionOBB, CollisionOBB, this);
+	CollisionOBB.UpdateFromParent();
 
 	// Set the simulation state of the new object to strategic as a starting point.  This will likely be overridden
 	// in the next update cycle, but setting an active simulation state here means it will be registered on construction
