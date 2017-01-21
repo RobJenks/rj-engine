@@ -301,6 +301,11 @@ public:
 	// Retrieve any immediate-term information on the specified object, if we have any
 	const ImmediateEntityInfo *	GetImmediateEntityData(Game::ID_TYPE id) const;
 
+	// Attempt to lead the specified target.  Returns an adjusted target position which accounts
+	// for our target leading estimate
+	XMVECTOR					DetermineTargetLeadingPosition(const iActiveObject *target);
+	XMVECTOR					DetermineTargetLeadingPosition(const iActiveObject & target);
+
 	// Get an appropriate target leading multiplier for the specified object.  Uses average projectile velocity
 	// to determine the leading multiplier
 	float						GetTargetLeadingMultiplier(Game::ID_TYPE id);
@@ -386,7 +391,7 @@ protected:
 
 	// Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
 	// avoidance target for efficiency; this is a protected method that can assume the avoidance target is non-null and valid
-	void				DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw);
+	XMFLOAT2			DetermineCollisionAvoidanceResponse(void);
 
 	// Executes per-frame collision avoidance.  Does not peform a null test on the collision avoidance target for 
 	// efficiency; this is a protected method that can assume the avoidance target is non-null and valid

@@ -68,8 +68,25 @@ public:
 	CMPINLINE XMVECTOR				GetBaseRelativeOrientation(void) const					{ return m_baserelativeorient; }
 	void							SetBaseRelativeOrientation(const FXMVECTOR orient);
 
-	// Return the actual relative orientation of the turret.  This accounts for pitch & yaw
+	// Return the orientation of the turret cannon relative to its parent object (NOT relative
+	// to the turret base).  This accounts for pitch & yaw
 	CMPINLINE XMVECTOR				GetTurretRelativeOrientation(void) const				{ return m_turretrelativeorient; }
+
+	// Return the world orientation of the turret cannon
+	CMPINLINE XMVECTOR				GetCannonOrientation(void) const						{ return m_cannonorient; }
+
+	// Return the inverse world orientation of the turret cannon
+	CMPINLINE XMVECTOR				GetInverseCannonOrientation(void) const					{ return m_invcannonorient; }
+
+	// Returns the pitch/yaw required to align the turret cannon with the specified vector
+	XMFLOAT2						DetermineCannonYawAndPitchToVector(const XMVECTOR target_vector) const;
+
+	// Returns the pitch/yaw required to align the turret cannon with the specified target
+	XMFLOAT2						DetermineCannonYawAndPitchToTarget(const iActiveObject & target) const;
+
+	// Determines whether the cannon is currently aligned to fire along the specified vector (with 
+	// tolerance specified by the turret 'firing region threshold')
+	bool							IsCannonAlignedToVector(const FXMVECTOR target_vector) const;
 
 	// Returns the current status of this turret
 	CMPINLINE TurretStatus			GetTurretStatus(void) const								{ return m_turretstatus; }
@@ -284,9 +301,13 @@ protected:
 	AXMVECTOR						m_baserelativeorient;
 	AXMVECTOR						m_turretrelativeorient;
 
-	// Store world position, orientation and inverse orientation.  Derived during update by turret controller
+	// Store world position, orientation and inverse orientation.  Derived during (full simulation) update by turret controller
 	AXMVECTOR						m_position;
 	AXMVECTOR						m_orientation, m_invorient;
+
+	// Store cannon orientation and inverse.  Derived during (full simulation) update by turret controller
+	AXMVECTOR						m_cannonorient;
+	AXMVECTOR						m_invcannonorient;
 
 	// Pitch and yaw of the turret, and resulting relative relative orientation.  Specified in the range [0 2PI]
 	float							m_yaw, m_pitch;

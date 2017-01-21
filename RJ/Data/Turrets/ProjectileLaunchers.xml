@@ -10,8 +10,15 @@
     <LaunchAngularVelocity x="0.0" y="0.0" z="1.5" />
     <DegradeLinearVelocity rate="0.05" />
     <DegradeAngularVelocity rate="0.01" />
-    <!-- AddOrientationDrift x="0.0" y="0.0" z="0.0" w="1.0" /-->
-
   </ProjectileLauncher>
 
+  <ProjectileLauncher>
+    <Code>projectile_launcher_laser01</Code>
+    <Name>Basic laser cannon</Name>
+    <Projectile>basiclaser01</Projectile>
+    <Spread radians="0.1" />
+    <LaunchInterval ms="200" />
+    <Launch type="SetVelocityDirect" impulse="1000" />
+  </ProjectileLauncher>
+  
 </GameData>

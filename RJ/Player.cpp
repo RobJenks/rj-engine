@@ -201,6 +201,7 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 			if (keys[DIK_T])			{ m_playership()->SetTargetSpeedPercentage(1.0f);			keyboard->LockKey(DIK_T); }
 			if (keys[DIK_BACKSPACE])	{ m_playership()->SetTargetSpeed(0.0f);						keyboard->LockKey(DIK_BACKSPACE); }
 			if (keys[DIK_SPACE])		{ ToggleShipMouseControlMode();								keyboard->LockKey(DIK_SPACE); }
+			if (keys[DIK_E])			{ FireShipWeaponsAtVector(); }
 		}
 	}
 }
@@ -236,6 +237,18 @@ void Player::SetShipMouseControlMode(MouseInputControlMode mode)
 
 	// Store the new mouse control mode
 	Game::MouseControlMode = mode;
+}
+
+// Fires any player ship weapons that are approximately aligned to the target firing vector
+void Player::FireShipWeaponsAtVector(void)
+{
+	// Parameter check
+	Ship *ship = m_playership();
+	if (!ship) return;
+
+	// Get the firing direction in world space and fire any turrets that are aligned to the vector
+	const Ray & world_ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
+	ship->TurretController.FireTurretsAlongVector(world_ray.Direction);
 }
 
 // Moves the player in the specified direction.  Only options are forward/back (normal walking) and left/right (strafing)

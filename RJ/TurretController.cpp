@@ -211,6 +211,15 @@ void TurretController::ChangeDesignatedTarget(iSpaceObject *current_designation,
 			{ if (t && t->GetDesignatedTarget() == current_designation) t->DesignateTarget(new_designation); });
 }
 
+// Fires all turrets that can currently launch a projectile along the specififed target vector.  Turrets
+// which are not currently aligned to the vector will do nothing
+void TurretController::FireTurretsAlongVector(const FXMVECTOR target_vector)
+{
+	if (!m_active) return;
+	std::for_each(m_turrets.begin(), m_turrets.end(),
+		[target_vector](SpaceTurret *t) { if (t && t->IsCannonAlignedToVector(target_vector)) t->Fire(); });
+}
+
 
 // Clears all controller contents without affecting any of the turrets themselves.  Generally used post-clone
 // to reset the controller without resetting the parent pointer of the (old) turrets being removed

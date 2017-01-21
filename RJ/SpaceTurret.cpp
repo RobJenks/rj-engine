@@ -21,9 +21,11 @@ SpaceTurret::SpaceTurret(void)
 	m_target = m_designatedtarget = NULL;
 	m_relativepos = NULL_VECTOR;
 	m_baserelativeorient = m_turretrelativeorient = ID_QUATERNION;
+	m_cannonorient = m_invcannonorient = ID_QUATERNION;
 	m_position = NULL_VECTOR;
 	m_orientation = m_invorient = ID_QUATERNION;
 	m_worldmatrix = ID_MATRIX;
+	m_articulatedmodel = NULL;
 	m_turretstatus = TurretStatus::Idle;
 	m_atrest = true;
 	m_isfixed = false;
@@ -96,12 +98,8 @@ void SpaceTurret::Update(std::vector<ObjectReference<iSpaceObject>> & enemy_cont
 		{
 			// Determine any pitch/yaw required to keep the target in view.  Implements
 			// target leading ahead of the target object
-			XMFLOAT2 pitch_yaw;
-			XMVECTOR invorient = XMQuaternionInverse(XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation()));
-			DetermineYawAndPitchToTarget(CannonPosition(), 
-				XMVectorAdd(m_target->GetPosition(), XMVectorScale(m_target->PhysicsState.WorldMomentum, m_parent->GetTargetLeadingMultiplier(m_target->GetID()))),
-				invorient, pitch_yaw);
-
+			XMFLOAT2 pitch_yaw = DetermineCannonYawAndPitchToTarget(*m_target); 
+			
 			// If pitch and yaw are very close to target, we can begin firing
 			float ayaw = fabs(pitch_yaw.y), apitch = fabs(pitch_yaw.x);
 			if (ayaw < m_firing_region_threshold && apitch < m_firing_region_threshold)
@@ -370,6 +368,31 @@ void SpaceTurret::ResetOrientation(void)
 	m_atrest = true;
 }
 
+// Returns the pitch/yaw required to align the turret cannon with the specified target
+XMFLOAT2 SpaceTurret::DetermineCannonYawAndPitchToTarget(const iActiveObject & target) const
+{
+	// Call the overloaded method with a target vector of (target_pos - cannon_pos)
+	return DetermineCannonYawAndPitchToVector(XMVectorSubtract(m_parent->DetermineTargetLeadingPosition(target), CannonPosition()));
+}
+
+// Returns the pitch/yaw required to align the turret cannon with the specified vector
+XMFLOAT2 SpaceTurret::DetermineCannonYawAndPitchToVector(const XMVECTOR target_vector) const
+{
+	return DetermineYawAndPitchToWorldVector(target_vector, m_invcannonorient);
+}
+
+// Determines whether the cannon is currently aligned to fire along the specified vector (with 
+// tolerance specified by the turret 'firing region threshold')
+bool SpaceTurret::IsCannonAlignedToVector(const FXMVECTOR target_vector) const
+{
+	// Calculate the pitch/yaw difference between our current cannon orientation
+	// and the specified target vector
+	XMFLOAT2 pitch_yaw = DetermineCannonYawAndPitchToVector(target_vector);
+
+	// Test whether this differential is within the turret firing threshold
+	return (fabs(pitch_yaw.y) < m_firing_region_threshold && fabs(pitch_yaw.x) < m_firing_region_threshold);
+}
+
 // Determines the max range of the turret based on its component launchers & projectiles.  Is only
 // an approximation since the projectiles may have linear velocity degradation or in-flight orientation 
 // changes that we cannot simulate accurately here (without actually firing a projectile)
@@ -465,6 +488,10 @@ void SpaceTurret::UpdatePositioning(void)
 	// then derive the inverse
 	m_orientation = XMQuaternionMultiply(m_baserelativeorient, m_parent->GetOrientation());
 	m_invorient = XMQuaternionInverse(m_orientation);
+
+	// Also determine the cannon orientation in world space & its inverse
+	m_cannonorient = XMQuaternionMultiply(m_turretrelativeorient, m_parent->GetOrientation());
+	m_invcannonorient = XMQuaternionInverse(m_cannonorient);
 }
 
 // Returns a flag indicating whether the target is within the firing arc of this turret.  We do not 

@@ -2070,7 +2070,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create two complex ships in this scenario
 	if (true) {
 		ComplexShip *css[2];
-		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"/*_prc*/), Game::FactionManager.GetFactionIDByCode("faction_us") };
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_prc"), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { false, true };
@@ -2182,26 +2182,20 @@ void RJMain::__CreateDebugScenario(void)
 		a1 = a1_actor; 
 	}
 
-	SpaceTurret *sst = D::Turrets.Get("turret_basic01")->Copy();
-	for (int i = 0; i < sst->GetLauncherCount(); ++i)
-	{
-		sst->GetLauncher(i)->SetProjectileSpread(0.00f);
-	}
-	sst->SetRelativePosition(XMVectorSet(0, -20, 10.0f, 0));
-	sst->SetBaseRelativeOrientation(ID_QUATERNION);
-	sst->SetYawLimitFlag(true);
-	sst->SetYawLimits(-0.15f, 0.15f);
-	sst->SetPitchLimits(-0.15f, 0.15f);
-	sst->SetYawRate(PI);
-	sst->SetPitchRate(PI);
-	sst->SetControlMode(SpaceTurret::ControlMode::ManualControl);
-	sst->RecalculateTurretStatistics();
-	ss()->TurretController.AddTurret(sst);
+	ss()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
+	s2()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
+	s3[0]()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
+
+	ss()->TurretController.SetControlModeOfAllTurrets(SpaceTurret::ControlMode::ManualControl);
+	s2()->TurretController.SetControlModeOfAllTurrets(SpaceTurret::ControlMode::AutomaticControl);
+	s3[0]()->TurretController.SetControlModeOfAllTurrets(SpaceTurret::ControlMode::AutomaticControl);
+	
+	/*ss()->TurretController.AddTurret(sst);
 	SpaceTurret *sst2 = sst->Copy();
 	s2()->TurretController.AddTurret(sst2);
 	SpaceTurret *sst3 = sst->Copy();
 	s3[0]()->TurretController.AddTurret(sst3);
-
+	*/
 	OutputDebugString(cs()->SpatialPartitioningTree->DebugOutput().c_str());
 
 	bitstring up = DirectionBS::Up_BS;				// == 2

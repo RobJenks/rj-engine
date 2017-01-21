@@ -489,18 +489,21 @@ CMPINLINE float GetElementBoundingSphereRadius(int n_elements)
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
 // outPitchYaw.x == pitch, outPitchYaw = yaw
-void DetermineYawAndPitchToTarget(const iObject & object, const FXMVECTOR target, XMFLOAT2 & outPitchYaw);
+XMFLOAT2 DetermineYawAndPitchToTarget(const iObject & object, const FXMVECTOR target);
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
 // outPitchYaw.x == pitch, outPitchYaw = yaw
-void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const FXMVECTOR invOrientation, XMFLOAT2 & outPitchYaw);
+XMFLOAT2 DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const FXMVECTOR invOrientation);
 
 // Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
 // outPitchYaw.x == pitch, outPitchYaw = yaw
-void DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const CXMMATRIX invOrientMatrix, XMFLOAT2 & outPitchYaw);
+XMFLOAT2 DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR target, const CXMMATRIX invOrientMatrix);
 
+// Determines the yaw and pitch required to turn an object to face a point in space.  Assumes local object heading is [0 0 1] and performs
+// test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
+XMFLOAT2 DetermineYawAndPitchToWorldVector(const FXMVECTOR target_vector, const FXMVECTOR object_inv_orient);
 
 
 

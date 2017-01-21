@@ -109,6 +109,9 @@ public:
 	void							ToggleShipMouseControlMode(void);
 	void							SetShipMouseControlMode(MouseInputControlMode mode);
 
+	// Fires any player ship weapons that are approximately aligned to the target firing vector
+	void							FireShipWeaponsAtVector(void);
+
 	// Returns the object currently selected by the player using the mouse
 	iObject *						GetMouseSelectedObject(void)				{ return m_mouse_over_object(); }
 	iObject *						GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }

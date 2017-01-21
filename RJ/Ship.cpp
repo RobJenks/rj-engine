@@ -907,14 +907,13 @@ void Ship::PerformCollisionAvoidance(void)
 {
 	// Execute target avoidance if appropriate; this will override existing turn commands where required to avoid a collision (since 
 	// this call to TurnShip() is being made last
-	XMFLOAT2 pitch_yaw;
-	DetermineCollisionAvoidanceResponse(pitch_yaw);
+	XMFLOAT2 pitch_yaw = DetermineCollisionAvoidanceResponse();
 	TurnShipIfRequired(pitch_yaw.y, pitch_yaw.x, true);
 }
 
 // Determines the maneuver required to avoid the current avoidance target.  Does not perform a null test on the 
 // avoidance target for efficiency; this is a protected method that can assume the avoidance target is non-null and valid
-void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
+XMFLOAT2 Ship::DetermineCollisionAvoidanceResponse(void)
 {
 	static const AXMVECTOR parallel_adj = XMVectorSetX(NULL_VECTOR, 0.1f);
 
@@ -933,7 +932,7 @@ void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
 
 	// If the dot product projection is negative, the angle between WM and TGT vectors is obtuse.  This means the 
 	// target is behind us and we can safely ignore it
-	if (XMVector2Less(proj, NULL_VECTOR)) { outPitchYaw = NULL_FLOAT2; return; }
+	if (XMVector2Less(proj, NULL_VECTOR)) { return NULL_FLOAT2; }
 
 	// If the cross product of WM and TGT is ~zero, the two vectors are ~parallel.  We need to add a small offset
 	// to the target vector in this case.  We will use a minor offset along the ship local right basis vector
@@ -950,7 +949,7 @@ void Ship::DetermineCollisionAvoidanceResponse(XMFLOAT2 & outPitchYaw)
 		((m_collisionsphereradius + m_avoid_target()->GetCollisionSphereRadius()) * Game::C_COLLISION_AVOIDANCE_RESPONSE_SAFETY_MULTIPLIER));
 
 	// Finally, determine the pitch and yaw required to turn the ship towards this target 
-	DetermineYawAndPitchToTarget(*this, XMVectorAdd(m_avoid_target()->GetPosition(), response), outPitchYaw);
+	return DetermineYawAndPitchToTarget(*this, XMVectorAdd(m_avoid_target()->GetPosition(), response));
 }
 
 void Ship::DetermineNewPosition(void)
@@ -1046,11 +1045,10 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 void Ship::TurnToTarget(iObject *target, bool bank)
 {
 	// Parameter check
-	XMFLOAT2 pitch_yaw;
 	if (!target) return;
 
 	// Determine the yaw and pitch required to align ourselves with this target
-	DetermineYawAndPitchToTarget((*this), target->GetPosition(), pitch_yaw);
+	XMFLOAT2 pitch_yaw = DetermineYawAndPitchToTarget((*this), target->GetPosition());
 
 	// Multiply the turn percentages by the turn modifier for our current state (peaceful, in combat, etc)
 	pitch_yaw.x *= m_turnmodifier; pitch_yaw.y *= m_turnmodifier;
@@ -1062,10 +1060,8 @@ void Ship::TurnToTarget(iObject *target, bool bank)
 // Turns the ship to a specified target position, banking if required
 void Ship::TurnToTarget(FXMVECTOR target, bool bank)
 {
-	XMFLOAT2 pitch_yaw;
-
 	// Determine the yaw and pitch required to align ourselves with this target position
-	DetermineYawAndPitchToTarget((*this), target, pitch_yaw);
+	XMFLOAT2 pitch_yaw = DetermineYawAndPitchToTarget((*this), target);
 
 	// Multiply the turn percentages by the turn modifier for our current state (peaceful, in combat, etc)
 	pitch_yaw.x *= m_turnmodifier; pitch_yaw.y *= m_turnmodifier;
@@ -1261,6 +1257,21 @@ const Ship::ImmediateEntityInfo *Ship::GetImmediateEntityData(Game::ID_TYPE id) 
 	std::vector<Ship::ImmediateEntityInfo>::const_iterator it = std::find_if(m_immediate_entity_data.begin(), m_immediate_entity_data.end(),
 		[&id](const Ship::ImmediateEntityInfo &data) { return (data.ID == id); });
 	return (it == m_immediate_entity_data.end() ? NULL : &(*it));
+}
+
+// Attempt to lead the specified target.  Returns an adjusted target position which accounts
+// for our target leading estimate
+XMVECTOR Ship::DetermineTargetLeadingPosition(const iActiveObject *target)
+{
+	return (!target ? NULL_VECTOR :
+		XMVectorAdd(target->GetPosition(), XMVectorScale(target->PhysicsState.WorldMomentum, GetTargetLeadingMultiplier(target->GetID()))));
+}
+
+// Attempt to lead the specified target.  Returns an adjusted target position which accounts
+// for our target leading estimate
+XMVECTOR Ship::DetermineTargetLeadingPosition(const iActiveObject & target)
+{
+	return (XMVectorAdd(target.GetPosition(), XMVectorScale(target.PhysicsState.WorldMomentum, GetTargetLeadingMultiplier(target.GetID()))));
 }
 
 // Get an appropriate target leading multiplier for the specified object.  Uses average projectile velocity

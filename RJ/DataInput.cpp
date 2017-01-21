@@ -1813,7 +1813,17 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 		else if (hash == HashedStrings::H_Projectile)
 		{
 			val = child->GetText(); StrLowerC(val);
-			launcher->SetProjectileDefinition(D::SpaceProjectiles.Get(val));
+
+			// Determine whether this is a basic or space projectile and update the launcher accordingly
+			SpaceProjectileDefinition *space_proj = D::SpaceProjectiles.Get(val);
+			if (space_proj)
+			{
+				launcher->SetProjectileDefinition(space_proj);						// Takes precedence if we have both projectile types with the same identifier
+			}
+			else
+			{
+				launcher->SetProjectileDefinition(D::BasicProjectiles.Get(val));	// Will assign null if not found
+			}
 		}
 		else if (hash == HashedStrings::H_LaunchInterval)
 		{

@@ -77,6 +77,10 @@ public:
 	// Returns the average projectile velocity for all turrets managed by this controller
 	CMPINLINE float									GetAverageProjectileVelocity(void) const	{ return m_avg_projectile_velocity; }
 
+	// Fires all turrets that can currently launch a projectile along the specififed target vector.  Turrets
+	// which are not currently aligned to the vector will do nothing
+	void											FireTurretsAlongVector(const FXMVECTOR target_vector);
+
 	// Default destructor
 	~TurretController(void);
 
