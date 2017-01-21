@@ -1470,7 +1470,6 @@ void Ship::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetTargetSpeed, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(SetTargetSpeedPercentage, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(ClearAllImmediateEntityData)
-	REGISTER_DEBUG_FN(DestroyObject)
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

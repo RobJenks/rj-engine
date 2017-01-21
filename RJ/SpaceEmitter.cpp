@@ -87,7 +87,6 @@ void SpaceEmitter::ProcessDebugCommand(GameConsoleCommand & command)
 	// Mutator methods
 	REGISTER_DEBUG_FN(SimulateObject)
 	REGISTER_DEBUG_FN(RefreshPositionImmediate)
-	REGISTER_DEBUG_FN(DestroyObject)
 	
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

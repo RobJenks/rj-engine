@@ -120,7 +120,6 @@ void LightSource::ProcessDebugCommand(GameConsoleCommand & command)
 	// Mutator methods
 	REGISTER_DEBUG_FN(SetPriority, command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(SetRange, command.ParameterAsFloat(2))
-	REGISTER_DEBUG_FN(DestroyObject)
 
 	// Redirect method for all Light object properties
 	REGISTER_DEBUG_FN_REDIRECT(Light, m_light.ProcessDebugCommand)

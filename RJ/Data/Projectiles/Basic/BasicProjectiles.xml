@@ -3,7 +3,7 @@
   <BasicProjectileDefinition>
     <Code>BasicLaser01</Code>
     <Name>Basic testing laser</Name>
-    <Speed>1000.0</Speed>
+    <Speed>2000.0</Speed>
     <ProjectileBeamLength>200.0</ProjectileBeamLength>
     <ProjectileBeamRadius>3.0</ProjectileBeamRadius>
     <Lifetime>3000</Lifetime>

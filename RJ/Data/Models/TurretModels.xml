@@ -1,5 +1,5 @@
 <GameData>
-
+  
   <ArticulatedModel components="3">
     <Code>turret_basic01_model</Code>
     
@@ -29,6 +29,28 @@
     <ConstraintTag parent="1" child="2" tag="turret_pitch" />
     <ComponentTag component="2" tag="turret_cannon" />
     
+  </ArticulatedModel>
+
+
+  <ArticulatedModel components="2">
+    <Code>null_turret_model</Code>
+
+    <Component index="0" model="null_model" />
+    <Component index="1" model="null_model" />
+
+    <Attachment parent="0" child="1">
+      <Constraint>
+        <Axis x="0.0" y="1.0" z="0.0" />
+        <ParentPoint x="0.0" y="0.0" z="0.0" />
+        <ChildPoint x="0.0" y="0.0" z="0.0" />
+        <BaseOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
+      </Constraint>
+    </Attachment>
+
+    <ConstraintTag parent="0" child="1" tag="turret_yaw" />
+    <ConstraintTag parent="0" child="1" tag="turret_pitch" />
+    <ComponentTag component="0" tag="turret_cannon" />
+
   </ArticulatedModel>
 
 

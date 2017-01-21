@@ -2182,9 +2182,18 @@ void RJMain::__CreateDebugScenario(void)
 		a1 = a1_actor; 
 	}
 
-	ss()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
-	s2()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
-	s3[0]()->TurretController.AddTurret(SpaceTurret::Create("turret_laser01"));
+	Ship *_s[3] = { ss(), s2(), s3[0]() };
+	for (int i = 0; i < 3; ++i)
+	{
+		const float xoffset = 12.0f;
+		SpaceTurret *left = SpaceTurret::Create("turret_laser01");
+		SpaceTurret *right = SpaceTurret::Create("turret_laser01");
+		left->SetRelativePosition(XMVectorSet(-xoffset, -0.1f, 0.25f, 0.0f));
+		right->SetRelativePosition(XMVectorSet(xoffset, -0.1f, 0.25f, 0.0f));
+
+		_s[i]->TurretController.AddTurret(left);
+		_s[i]->TurretController.AddTurret(right);
+	}
 
 	ss()->TurretController.SetControlModeOfAllTurrets(SpaceTurret::ControlMode::ManualControl);
 	s2()->TurretController.SetControlModeOfAllTurrets(SpaceTurret::ControlMode::AutomaticControl);

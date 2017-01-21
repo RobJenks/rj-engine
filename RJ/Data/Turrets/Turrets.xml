@@ -26,7 +26,7 @@
 <Turret>
     <Code>turret_laser01</Code>
     <Name>Basic laser turret</Name>
-    <ArticulatedModel>turret_basic01_model</ArticulatedModel>
+    <ArticulatedModel>null_turret_model</ArticulatedModel>
     <Yaw min="-0.2" max="0.2" rate="0.5" />
     <Pitch min="-0.15" max="0.15" rate="0.25"/>
     <Range min="10.0" max="20000.0" />

@@ -472,7 +472,6 @@ void Actor::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(UpdateForRendering, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(SetAnimationImmediate, command.Parameter(2))
 	REGISTER_DEBUG_FN(Jump)
-	REGISTER_DEBUG_FN(DestroyObject)
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

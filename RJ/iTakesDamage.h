@@ -6,6 +6,7 @@
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
 #include "Damage.h"
+#include "GameConsoleCommand.h"
 
 class iTakesDamage
 {
@@ -74,6 +75,14 @@ public:
 	// is applied in the order in which is was added to the damage set.  Returns true if the object
 	// was destroyed by any of the damage in this damage set
 	bool								ApplyDamage(const DamageSet & damage);
+
+	// Simple method to apply an amount of damage.  Damage has no ("ANY") type and so is not affected
+	// by any damage resistances except universal ("ALL") resistance.  Returns true if the object was destroyed by this damage
+	CMPINLINE bool						ApplyDamage(float damage) { return ApplyDamage(Damage(DamageType::ANY, damage)); }
+
+	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
+	// Updates the command with its result if the command can be processed at this level
+	void								ProcessDebugCommand(GameConsoleCommand & command);
 
 	// Virtual method to be implemented by inheriting classes.  Destruction method triggered when object HP hits zero
 	virtual void						DestroyObject(void) = 0;

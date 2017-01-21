@@ -343,7 +343,6 @@ void SimpleShip::ProcessDebugCommand(GameConsoleCommand & command)
 	// Mutator methods
 	REGISTER_DEBUG_FN(RecalculateAllShipData)
 	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
-	REGISTER_DEBUG_FN(DestroyObject)
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		Ship::ProcessDebugCommand(command);

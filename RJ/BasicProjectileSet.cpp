@@ -35,7 +35,7 @@ void BasicProjectileSet::AddProjectile(	const BasicProjectileDefinition *def, Ga
 	{
 		Active = true;
 		LiveIndex = 0;
-		m_threshold_crossed = (0U - 1);		// UINT_MAX
+		m_threshold_crossed = (0U - 1U);		// UINT_MAX
 	}
 	else
 	{

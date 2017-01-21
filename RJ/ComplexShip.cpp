@@ -1296,7 +1296,6 @@ void ComplexShip::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(RecalculateAllShipData)
 	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
 	REGISTER_DEBUG_FN(ForceRenderingOfInterior, command.ParameterAsBool(2))
-	REGISTER_DEBUG_FN(DestroyObject)
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

@@ -214,7 +214,6 @@ void SpaceProjectile::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetOrientationShift, command.ParameterAsBool(2))
 	REGISTER_DEBUG_FN(SetOrientationShiftAmount, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
 	REGISTER_DEBUG_FN(SimulateObject)
-	REGISTER_DEBUG_FN(DestroyObject)
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function
