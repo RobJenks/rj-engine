@@ -245,6 +245,8 @@ namespace HashedStrings
 	DefineHash(H_CanConnect, "canconnect");
 	DefineHash(H_Connection, "connection");
 	DefineHash(H_DynamicTileSet, "dynamictileset");
+	DefineHash(H_Damage, "damage");
+	DefineHash(H_DamageSet, "damageset");
 }
 
 

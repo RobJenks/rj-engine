@@ -32,6 +32,10 @@ public:
 
 	// Validation method that determines whether this damage is valid
 	CMPINLINE bool		IsValid(void) const		{ return ((int)Type >= 0 && (int)Type < (int)DamageType::ANY); }
+
+	// Static methods to translate damage types to/from their string representation
+	static std::string	TranslateDamageTypeToString(DamageType type);
+	static DamageType	TranslateDamageTypeFromString(std::string type);
 };
 
 // Class holding information on resistance to a specific amount of damage of a particular type

@@ -105,6 +105,8 @@ namespace D {
 	const char *NODE_ProjectileLauncher = "projectilelauncher";
 	const char *NODE_DynamicTileSet = "dynamictileset";
 	const char *NODE_ModifierDetails = "modifierdetails";
+	const char *NODE_Damage = "damage";
+	const char *NODE_DamageSet = "damageset";
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";

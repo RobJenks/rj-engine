@@ -644,8 +644,6 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::
 	ApplyDamage(proj.Definition->GetProjectileDamage());
 }
 
-*** ADD DATAINPUT METHOD TO PARSE DAMAGE & DAMAGESET BLOCKS, THEN ADD TO BASIC (& SPACE?) PROJECTILE XML DEFINITION ***
-
 // Custom debug string function which determines the subclass of this object and calls that subclass method directly.  
 // Ugly but avoids having to add an additional vtable entry for a pure debug function
 // @Dependency iObject::ObjectType

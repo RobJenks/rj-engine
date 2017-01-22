@@ -1954,6 +1954,10 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 				proj->SetTexture(BuildStrFilename(D::IMAGE_DATA_S, val));
 			}
 		}
+		else if (hash == HashedStrings::H_DamageSet)
+		{
+			LoadDamageSet(child, proj->ProjectileDamageSet());
+		}
 	}
 
 	// Make sure we have all required fields
@@ -3857,6 +3861,44 @@ Result IO::Data::LoadModifier(TiXmlElement *node)
 	// Return success
 	return ErrorCodes::NoError;
 }
+
+// Load a single damage entry
+Result IO::Data::LoadDamage(TiXmlElement *node, Damage & outDamage)
+{
+	if (!node) return ErrorCodes::CannotLoadDamageEntryWithNullInputData;
+
+	// All data should be held within the attributes of this node
+	const char *ctype = node->Attribute("type");
+	const char *camt = node->Attribute("amount");
+	if (!ctype || !camt) return ErrorCodes::CannotLoadDamageEntryWithoutRequiredData;
+
+	// Return a damage entry based on these attributes
+	outDamage.Type = Damage::TranslateDamageTypeFromString(ctype);
+	outDamage.Amount = (float)atof(camt);
+	return ErrorCodes::NoError;
+}
+
+// Load a damage set definition
+Result IO::Data::LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet)
+{
+	if (!node) return ErrorCodes::CannotLoadDamageSetWithNullInputData;
+
+	// Look at each child node in turn
+	std::string key; Result res; Damage damage;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		key = child->Value(); StrLowerC(key);
+		if (key == D::NODE_Damage)
+		{
+			res = LoadDamage(child, damage);
+			if (res == ErrorCodes::NoError) outDamageSet.push_back(damage);
+		}
+	}
+
+	return ErrorCodes::NoError;
+}
+
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)

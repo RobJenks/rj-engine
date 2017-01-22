@@ -52,8 +52,11 @@ public:
 	// Remove all types of damage currently performed by this projectile type
 	CMPINLINE void							RemoveAllDamageTypes(void)						{ m_damage.clear(); }
 
-	// Returns a reference to the damage imparted by this projectile type
+	// Returns the immutable set of damage imparted by this projectile type
 	CMPINLINE const DamageSet &				GetProjectileDamage(void) const					{ return m_damage; }
+
+	// Returns a modifiable reference to the damage imparted by this projectile type
+	CMPINLINE DamageSet &					ProjectileDamageSet(void)						{ return m_damage; }
 
 	// Generates the volumetric rendering data for this projectile type; will recalculate all derived rendering data
 	// Must be called after all definition properties are set

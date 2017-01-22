@@ -409,6 +409,9 @@ namespace ErrorCodes {
 	const Result		CouldNotAddDynamicTileSetWithoutMandatoryData	= 2678;
 	const Result		CannotLoadModifierWithNullData					= 2679;
 	const Result		CannotLoadModifierWithInvalidData				= 2680;
+	const Result		CannotLoadDamageEntryWithNullInputData			= 2681;
+	const Result		CannotLoadDamageSetWithNullInputData			= 2682;
+	const Result		CannotLoadDamageEntryWithoutRequiredData		= 2683;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

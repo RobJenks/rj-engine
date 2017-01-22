@@ -2231,6 +2231,11 @@ void RJMain::__CreateDebugScenario(void)
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 
+	s2()->SetMaxHealth(100.0f);
+	s3[0]()->SetMaxHealth(100.0f);
+	s2()->SetHealth(100.0f);
+	s3[0]()->SetHealth(100.0f);
+	*** Add health/maxhealth as loadable properties of iObject entities.  ComplexShips (for example) should override this though ***
 	
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2315,18 +2320,10 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		ComplexShip *c = cs();
-		if (c)
-		{
-			XMVECTOR pos = c->GetPosition();
-			XMVECTOR obb = c->CollisionOBB.ConstData().Centre;
-
-			sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: (%.2f, %.2f, %.2f), OBBPos: (%.2f, %.2f, %.2f), Invalidated: %s",
-				XMVectorGetX(pos), XMVectorGetY(pos), XMVectorGetZ(pos),
-				XMVectorGetX(obb), XMVectorGetY(obb), XMVectorGetZ(obb),
-				(c->CollisionOBB.IsInvalidated() ? "true" : "false"));
-		}
-
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "s2: %s   |   s3: %s",
+			(s2() ? concat(s2()->GetHealth())("/")(s2()->GetMaxHealth()).str().c_str() : "<Destroyed>"),
+			(s3[0]() ? concat(s3[0]()->GetHealth())("/")(s3[0]()->GetMaxHealth()).str().c_str() : "<Destroyed>"));
+		
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 

@@ -133,6 +133,9 @@ namespace IO { namespace Data {
 	
 	Result LoadModifier(TiXmlElement *node);
 
+	Result LoadDamage(TiXmlElement *node, Damage & outDamage);
+	Result LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet);
+
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
 	ComplexShipSection *FindInTemporaryCSSBuffer(const std::string & code);
