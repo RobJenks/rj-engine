@@ -34,6 +34,7 @@
     <TurnAngle>2.000000</TurnAngle>
     <BankExtent x="0.174500" y="0.174500" z="0.436300" />
     <BankRate>1.0</BankRate>
+    <MaxHealth>100.0</MaxHealth>
 
     <Hardpoint code="hpengine01" type="Engine">
       <Position x="0.0000000" y="10.000000" z="-30.000000" />

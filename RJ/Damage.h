@@ -64,7 +64,7 @@ class DamageSet : public std::vector<Damage>
 };
 
 // Definition of the 'damage resistance' collection, i.e. a resistance level to (potentially) multiple different types of damage
-class DamageResistanceSet : public std::vector <DamageResistance>
+class DamageResistanceSet : public std::vector<DamageResistance>
 {
 public:
 	

@@ -462,6 +462,9 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_CollisionMode)				object->SetCollisionMode(Game::TranslateCollisionModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_CollisionOBB)					LoadCollisionOBB(object, node, object->CollisionOBB, true);
 
+	// Otherwise check against any superclasses
+	else if (LoadDamageableEntityData(node, hash, object))			return true;
+
 	// 'Else' case - none of the fields matched this hash, so return false now
 	else															return false;
 
@@ -469,17 +472,42 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	return true;
 }
 
+// Loads iTakesDamage class data, returning true if the value was loaded
+bool IO::Data::LoadDamageableEntityData(TiXmlElement *node, HashVal hash, iObject *object)
+{
+	// Compare the hash against all iTakesDamage-related fields
+	if (hash == HashedStrings::H_MaxHealth)
+	{
+		float health = GetFloatValue(node);
+		object->SetMaxHealth(health);
+		object->SetHealth(health);
+	}
+	else if (hash == HashedStrings::H_Health)						object->SetHealth(GetFloatValue(node));		// Note: should be set AFTER max health if Health > Old_MaxHealth
+	else if (hash == HashedStrings::H_IsInvulnerable)				object->SetInvulnerabilityFlag(GetBoolValue(node));
+	else if (hash == HashedStrings::H_DamageResistanceSet)			LoadDamageResistanceSet(node, object->DamageResistanceData());
+
+	// Otherwise check against any superclasses
+	/* No superclasses */
+
+	// 'Else' case - none of the fields matched this hash, so return false now
+	else															return false;
+
+	// If we didn't hit the "else" clause, and return false, we must have matched one of the fields.  So return true here.
+	return true;
+}
+
+
 // Loads iActiveObject class data, returning true if the value was loaded
 bool IO::Data::LoadActiveObjectData(TiXmlElement *node, HashVal hash, iActiveObject *object)
 {	
 	// Compare the hash against all iActiveObject-related fields
-	if (hash == HashedStrings::H_Mass)							object->SetMass(GetFloatValue(node));
+	if (hash == HashedStrings::H_Mass)								object->SetMass(GetFloatValue(node));
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
-	else if (LoadObjectData(node, hash, object))				return true;
+	else if (LoadObjectData(node, hash, object))					return true;
 
 	// 'Else' case - none of the fields matched this hash, so return false now
-	else														return false;
+	else															return false;
 
 	// If we didn't hit the "else" clause, and return false, we must have matched one of the direct class fields.  So return true here.
 	return true;
@@ -493,10 +521,10 @@ bool IO::Data::LoadStaticObjectData(TiXmlElement *node, HashVal hash, iStaticObj
 	// (No iStaticObject-specific fields at this point)
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
-	if (LoadObjectData(node, hash, object)) return true;
+	if (LoadObjectData(node, hash, object))							return true;
 
 	// 'Else' case - none of the fields matched this hash, so return false now
-	else														return false;
+	else															return false;
 	
 	// If we didn't hit the "else" clause, and return false, we must have matched one of the direct class fields.  So return true here.
 	return true;
@@ -508,10 +536,10 @@ bool IO::Data::LoadSpaceObjectData(TiXmlElement *node, HashVal hash, iSpaceObjec
 	// (No iSpaceObject-specific fields at this point)
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
-	if (LoadActiveObjectData(node, hash, object))				return true;
+	if (LoadActiveObjectData(node, hash, object))					return true;
 
 	// 'Else' case - none of the fields matched this hash, so return false now
-	else														return false;
+	else															return false;
 
 	// If we didn't hit the "else" clause, and return false, we must have matched one of the direct class fields.  So return true here.
 	return true;
@@ -523,10 +551,10 @@ bool IO::Data::LoadEnvironmentObjectData(TiXmlElement *node, HashVal hash, iEnvi
 	// (No iEnvironmentObject-specific fields at this point)
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
-	if (LoadActiveObjectData(node, hash, object))				return true;
+	if (LoadActiveObjectData(node, hash, object))					return true;
 
 	// 'Else' case - none of the fields matched this hash, so return false now
-	else														return false;
+	else															return false;
 
 	// If we didn't hit the "else" clause, and return false, we must have matched one of the direct class fields.  So return true here.
 	return true;
@@ -575,7 +603,7 @@ bool IO::Data::LoadShipData(TiXmlElement *node, HashVal hash, Ship *object)
 	else if (hash == HashedStrings::H_Mass)							object->SetBaseMass(GetFloatValue(node));	// Overrides the iActiveObject behaviour, since ships have base & overall mass
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
-	if (LoadSpaceObjectData(node, hash, object))					return true;
+	else if (LoadSpaceObjectData(node, hash, object))				return true;
 
 	// 'Else' case - none of the fields matched this hash, so return false now
 	else															return false;
@@ -1177,7 +1205,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_Level) {
 			val = child->GetText();
-			if (val == NullString)						tiledef->SetTileLevel(1);
+			if (val == NullString)				tiledef->SetTileLevel(1);
 			else								tiledef->SetTileLevel(atoi(val.c_str()));
 			if (tiledef->GetTileLevel() < 1)	tiledef->SetTileLevel(1);
 		}
@@ -3884,6 +3912,7 @@ Result IO::Data::LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet)
 	if (!node) return ErrorCodes::CannotLoadDamageSetWithNullInputData;
 
 	// Look at each child node in turn
+	Result overallresult = ErrorCodes::NoError;
 	std::string key; Result res; Damage damage;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child = child->NextSiblingElement())
@@ -3893,12 +3922,54 @@ Result IO::Data::LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet)
 		{
 			res = LoadDamage(child, damage);
 			if (res == ErrorCodes::NoError) outDamageSet.push_back(damage);
+			else							overallresult = ErrorCodes::InvalidDataEncounteredInDamageSet;
 		}
 	}
+
+	return overallresult;
+}
+
+// Load a single damage resistance entry
+Result IO::Data::LoadDamageResistance(TiXmlElement *node, DamageResistance & outDR)
+{
+	if (!node) return ErrorCodes::CannotLoadDREntryWithNullInputData;
+
+	// All data should be held within the attributes of this node
+	const char *ctype = node->Attribute("type");
+	const char *cthreshold= node->Attribute("threshold");
+	const char *cmodifier = node->Attribute("modifier");
+	if (!ctype || !cmodifier) return ErrorCodes::CannotLoadDREntryWithoutRequiredData;
+
+	// Return a damage resistance entry based on these attributes
+	outDR.Type = Damage::TranslateDamageTypeFromString(ctype);
+	outDR.Modifier = (float)atof(cmodifier);
+	outDR.Threshold = (cthreshold ? (float)atof(cthreshold) : 0.0f);
 
 	return ErrorCodes::NoError;
 }
 
+// Load a damage set definition
+Result IO::Data::LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet & outDRSet)
+{
+	if (!node) return ErrorCodes::CannotLoadDRSetWithNullInputData;
+
+	// Look at each child node in turn
+	Result overallresult = ErrorCodes::NoError;
+	std::string key; Result res; DamageResistance dr;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		key = child->Value(); StrLowerC(key);
+		if (key == D::NODE_DamageResistance)
+		{
+			res = LoadDamageResistance(child, dr);
+			if (res == ErrorCodes::NoError) outDRSet.push_back(dr);
+			else							overallresult = ErrorCodes::InvalidDataEncounteredInDRSet;
+		}
+	}
+
+	return overallresult;
+}
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)

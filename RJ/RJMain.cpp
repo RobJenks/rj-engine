@@ -2135,7 +2135,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
 		s2_ship->SetName("Test ship s2");
 		s2_ship->OverrideInstanceCode("Test ship s2");
-		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
 		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 		s2_ship->SetPosition(XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
 		s2_ship->SetOrientation(ID_QUATERNION);
@@ -2230,12 +2230,6 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
-
-	s2()->SetMaxHealth(100.0f);
-	s3[0]()->SetMaxHealth(100.0f);
-	s2()->SetHealth(100.0f);
-	s3[0]()->SetHealth(100.0f);
-	*** Add health/maxhealth as loadable properties of iObject entities.  ComplexShips (for example) should override this though ***
 	
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
@@ -2320,7 +2314,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "s2: %s   |   s3: %s",
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "ss: %s  |  s2: %s   |   s3: %s",
+			(ss() ? concat(ss()->GetHealth())("/")(ss()->GetMaxHealth()).str().c_str() : "<Destroyed>"), 
 			(s2() ? concat(s2()->GetHealth())("/")(s2()->GetMaxHealth()).str().c_str() : "<Destroyed>"),
 			(s3[0]() ? concat(s3[0]()->GetHealth())("/")(s3[0]()->GetMaxHealth()).str().c_str() : "<Destroyed>"));
 		

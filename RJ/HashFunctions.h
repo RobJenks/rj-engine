@@ -141,6 +141,7 @@ namespace HashedStrings
 	DefineHash(H_NoiseDistortionBias, "noisedistortionbias");
 	DefineHash(H_Health, "health"); 
 	DefineHash(H_MaxHealth, "maxhealth");
+	DefineHash(H_IsInvulnerable, "isinvulnerable");
 	DefineHash(H_MaxThrust, "maxthrust");
 	DefineHash(H_MinThrust, "minthrust");
 	DefineHash(H_Acceleration, "acceleration");
@@ -247,6 +248,8 @@ namespace HashedStrings
 	DefineHash(H_DynamicTileSet, "dynamictileset");
 	DefineHash(H_Damage, "damage");
 	DefineHash(H_DamageSet, "damageset");
+	DefineHash(H_DamageResistance, "damageresistance");
+	DefineHash(H_DamageResistanceSet, "damageresistanceset");
 }
 
 

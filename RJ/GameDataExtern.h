@@ -117,6 +117,8 @@ namespace D {
 	extern const char *NODE_ModifierDetails;
 	extern const char *NODE_Damage;
 	extern const char *NODE_DamageSet;
+	extern const char *NODE_DamageResistance;
+	extern const char *NODE_DamageResistanceSet;
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	extern const char *FILE_ComplexShipRegister;

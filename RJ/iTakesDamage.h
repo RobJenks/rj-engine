@@ -65,6 +65,12 @@ public:
 	// Clear all damage resistances for this entity
 	CMPINLINE void						RemoveAllDamageResistance(void)					{ m_damageresistance.RemoveAllDamageResistance(); }
 
+	// Return the immutable set of damage resistance values for this object
+	CMPINLINE const DamageResistanceSet &	GetDamageResistance(void) const				{ return m_damageresistance; }
+
+	// Return a modifiable reference to the object damage resistance set
+	CMPINLINE DamageResistanceSet &			DamageResistanceData(void)					{ return m_damageresistance; }
+
 	// Primary method called when the object takes a particular type of damage.  Calculates modified 
 	// damage value (based on e.g. damage resistances) and applies to the object hitpoints.  Returns 
 	// true if the object was destroyed by this damage

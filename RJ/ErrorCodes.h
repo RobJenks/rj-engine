@@ -412,6 +412,11 @@ namespace ErrorCodes {
 	const Result		CannotLoadDamageEntryWithNullInputData			= 2681;
 	const Result		CannotLoadDamageSetWithNullInputData			= 2682;
 	const Result		CannotLoadDamageEntryWithoutRequiredData		= 2683;
+	const Result		CannotLoadDREntryWithNullInputData				= 2684;
+	const Result		CannotLoadDRSetWithNullInputData				= 2685;
+	const Result		CannotLoadDREntryWithoutRequiredData			= 2686;
+	const Result		InvalidDataEncounteredInDamageSet				= 2687;
+	const Result		InvalidDataEncounteredInDRSet					= 2688;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

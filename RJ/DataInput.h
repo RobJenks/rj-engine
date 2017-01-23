@@ -53,6 +53,7 @@ namespace IO { namespace Data {
 	
 	// Common methods to load intermediate class data
 	bool LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object);									// Loads iObject class data
+	bool LoadDamageableEntityData(TiXmlElement *node, HashVal hash, iObject *object);						// Loads iTakesDamage class data
 	bool LoadActiveObjectData(TiXmlElement *node, HashVal hash, iActiveObject *object);						// Loads iActiveObject class data
 	bool LoadStaticObjectData(TiXmlElement *node, HashVal hash, iStaticObject *object);						// Loads iStaticObject class data
 	bool LoadSpaceObjectData(TiXmlElement *node, HashVal hash, iSpaceObject *object);						// Loads iSpaceObject class data
@@ -135,6 +136,8 @@ namespace IO { namespace Data {
 
 	Result LoadDamage(TiXmlElement *node, Damage & outDamage);
 	Result LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet);
+	Result LoadDamageResistance(TiXmlElement *node, DamageResistance & outDR);
+	Result LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet & outDRSet);
 
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
