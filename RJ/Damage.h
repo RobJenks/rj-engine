@@ -7,6 +7,9 @@
 #include "CompilerSettings.h"
 #include "GameVarsExtern.h"
 
+// Forward declarations
+class DamageResistanceSet;
+
 // Enumeration of the possible damage types
 enum DamageType
 {
@@ -32,6 +35,9 @@ public:
 
 	// Validation method that determines whether this damage is valid
 	CMPINLINE bool		IsValid(void) const		{ return ((int)Type >= 0 && (int)Type < (int)DamageType::ANY); }
+
+	// Applies a set of resistances and reduces damage amounts accordingly
+	void				ApplyDamageResistance(const DamageResistanceSet & dr);
 
 	// Static methods to translate damage types to/from their string representation
 	static std::string	TranslateDamageTypeToString(DamageType type);
@@ -60,6 +66,16 @@ public:
 // Definition of the 'damage' collection, i.e. an amount of (potentially) multiple different types of damage
 class DamageSet : public std::vector<Damage>
 {
+public:
+	// Base default constructor
+	DamageSet(void) : std::vector<Damage>() { }
+
+	// Implement base constructor to initialise with data
+	DamageSet(DamageSet::size_type _Count, const DamageSet::value_type & _Val)
+		: std::vector<Damage>(_Count, _Val) { }
+
+	// Applies a set of resistances and reduces damage amounts accordingly
+	void ApplyDamageResistance(const DamageResistanceSet & dr);
 
 };
 

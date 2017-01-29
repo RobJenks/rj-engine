@@ -337,6 +337,13 @@ public:
 	// connection is setup and that the adjacent tile is also updated
 	void							UpdateTileConnectionState(ComplexShipTile **ppTile);
 
+	// Primary method called when the object takes damage at a specified (object-local) position.  
+	// Calculates modified damage value (based on e.g. damage resistances) and applies to the 
+	// object hitpoints.  Damage is applied in the order in which is was added to the damage 
+	// set.  Returns true if the object was destroyed by any of the damage in this damage set
+	// Overrides the base iTakesDamage method to calculate per-element damage
+	virtual bool					ApplyDamage(const DamageSet & damage, const FXMVECTOR location);
+
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }
 	void							Shutdown(bool unlink_tiles);
@@ -468,18 +475,24 @@ protected:
 	// Executes the collision of an object with the specified object, as part of an envrionment collision event
 	void							ExecuteElementCollision(const EnvironmentCollision::EventDetails & ev, EnvironmentCollision & collision);
 
-	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
-	// Returns a value indicating the effect of the collision on this element
-	EnvironmentCollision::ElementCollisionResult	TriggerElementDamage(int element_id, float damage);
-
 	// Returns a flag indicating whether environment collisions are currently being simulated for this environment
 	CMPINLINE bool					EnvironmentCollisionsAreBeingSimulated(void) const		{ return iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.EnvironmentID == m_id; }
+
+	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
+	// Returns a value indicating the effect of the collision on this element
+	EnvironmentCollision::ElementCollisionResult
+									TriggerElementDamage(int element_id, float damage);
 
 	// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
 	void							SimulateElementDamage(int element_id, float damage) const;
 
 	// Triggers immediate destruction of an element
 	void							TriggerElementDestruction(int element_id);
+
+	// Applies a damage component to the specified element.  Returns true if the damage was sufficient
+	// to destroy the element
+	EnvironmentCollision::ElementCollisionResult	
+									ApplyDamageComponentToElement(ComplexShipElement & el, Damage damage, const FXMVECTOR location);
 
 	// Set the destruction state of the specified terrain object(s)
 	void							SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed);

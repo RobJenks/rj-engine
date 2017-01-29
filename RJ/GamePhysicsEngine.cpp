@@ -1815,12 +1815,13 @@ bool GamePhysicsEngine::DetermineRayVsAABBIntersection(const Ray & ray, const AA
 	// Get the minimum value for each component
 	XMVECTOR tmin = XMVectorMin(t1, t2);
 	XMVECTOR tmax = XMVectorMax(t1, t2);
-
+	
 	// We want to choose the largest of all min components, and the smallest of all max components, as the intersection times
+	// TODO: Replaced min/max with MinFinite/MaxFinite; need to make sure this doesn't cause any issues elsewhere
 	XMFLOAT3 tminf, tmaxf;
 	XMStoreFloat3(&tminf, tmin); XMStoreFloat3(&tmaxf, tmax);
-	RayIntersectionResult.tmin = max(max(tminf.x, tminf.y), tminf.z);
-	RayIntersectionResult.tmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
+	RayIntersectionResult.tmin = MaxFinite(MaxFinite(tminf.x, tminf.y), tminf.z);
+	RayIntersectionResult.tmax = MinFinite(MinFinite(tmaxf.x, tmaxf.y), tmaxf.z);
 
 	// If min<max then we have an intersection
 	return (RayIntersectionResult.tmax >= 0.0f &&						// The entire intersection must take place after t=0, i.e. not in the past
@@ -1935,7 +1936,13 @@ bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection(const FXMV
 				// This is closer than the current intersection, so store it
 				OBBIntersectionResult.OBB = &node;
 				OBBIntersectionResult.IntersectionTime = RayIntersectionResult.tmin;
-				OBBIntersectionResult.CollisionPoint = XMVectorAdd(line_pos, XMVectorScale(line_delta, OBBIntersectionResult.IntersectionTime));
+				OBBIntersectionResult.IntersectionTimeV = XMVectorReplicate(RayIntersectionResult.tmin);
+				OBBIntersectionResult.CollisionPoint = worldray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV); 
+				OBBIntersectionResult.CollisionPointOBBLocal = localray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV);
+
+				Ray objray = worldray; 
+				objray.TransformIntoCoordinateSystem(obb.ConstData().Centre, obb.ConstData().Axis);
+				OBBIntersectionResult.CollisionPointObjectLocal = objray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV);					
 			}
 		}
 	}

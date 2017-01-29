@@ -110,6 +110,8 @@ public:
 	void DebugCCDSphereTest(void);
 	void DebugCCDOBBTest(void);
 	void DebugFullCCDTest(void);
+	void DebugFireBasicProjectile(void) const;
+
 
 	// Default destructor
 	~RJMain(void);

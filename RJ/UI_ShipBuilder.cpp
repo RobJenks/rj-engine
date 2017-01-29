@@ -2,10 +2,14 @@
 #include "RJMain.h"
 #include "CoreEngine.h"
 #include "CameraClass.h"
+#include "GameDataExtern.h"
 #include "VolumetricLine.h"
 #include "Player.h"
 #include "ComplexShip.h"
 #include "iSpaceObjectEnvironment.h"
+#include "SpaceSystem.h"
+#include "BasicProjectile.h"
+#include "BasicProjectileDefinition.h"
 #include "OverlayRenderer.h"
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
@@ -1262,6 +1266,8 @@ void UI_ShipBuilder::UpdateIntersectionTestParameters(void)
 		}
 	}
 }
+
+
 
 
 

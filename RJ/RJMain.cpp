@@ -679,34 +679,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_PERIOD])
 	{
-		if (!b[DIK_LSHIFT])
-		{
-			static float force = 25.0f;
-			proj = D::SpaceProjectiles.Get("projectile_basic01")->CreateProjectile();
-			proj()->MoveIntoSpaceEnvironment(cs()->GetSpaceEnvironment());
-			//proj->SetPosition(XMVector3TransformCoord(XMVectorSet(50.0f, 0.0f, -50.0f, 0.0f), cs()->GetWorldMatrix()));
-			proj()->SetPosition(XMVector3TransformCoord(XMVectorSet(frand_lh(-1.0f, 1.0f), 0.0f, -((cs()->GetSizeF().z * 0.5f) + 50.0f), 0.0f), cs()->GetWorldMatrix()));
-			//proj->SetOrientation(XMQuaternionMultiply(XMQuaternionRotationAxis(UP_VECTOR, (-PI / 4.0f)), cs()->GetOrientation()));
-			proj()->SetOrientation(XMQuaternionMultiply(ID_QUATERNION, cs()->GetOrientation()));
-			//proj->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(-25.0f, 0.0f, 25.0f, 0.0f), cs()->GetOrientationMatrix())));
-			proj()->SetWorldMomentum(XMVectorAdd(cs()->GetWorldMomentum(), XMVector3TransformCoord(XMVectorSet(0.0f, 0.0f, force, 0.0f), cs()->GetOrientationMatrix())));
-			proj()->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-			proj()->SetIsVisible(true);
-
-			force += 25.0f;
-			OutputDebugString(concat("Generated debug projectile with ID=")(proj()->GetID())("\n").str().c_str());
-		}
-		else
-		{
-			if (cs() && proj())
-			{
-				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enable_physics_debug ")(cs()->GetID())(" OBBTest").str()));
-				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("test_collision ")(cs()->GetID())(" ")(proj()->GetID()).str()));
-				Game::Console.ProcessRawCommand(GameConsoleCommand(concat("disable_physics_debug").str()));
-			}
-		}
-
-		Game::Keyboard.LockKey(DIK_PERIOD);
+		DebugFireBasicProjectile();	
 	}
 
 	if (b[DIK_H])
@@ -2047,6 +2020,39 @@ void RJMain::DebugFullCCDTest(void)
 	Game::PhysicsEngine.PhysicsClock.TimeFactor = restore_physicstime;
 }
 
+// Fires a basic projectile along the structural test path for debug testing
+void RJMain::DebugFireBasicProjectile(void) const
+{
+	static const float PROJ_SPEED = 100.0f;
+	static const unsigned int PROJ_INTERVAL = 250U;
+	static unsigned int last_proj = 0U;
+
+	if (Game::PersistentClockMs < (last_proj + PROJ_INTERVAL)) return;
+	last_proj = Game::PersistentClockMs;
+
+	// Make sure we have all required data
+	BasicProjectileDefinition *def = D::BasicProjectiles.Get("basiclaser01");
+	if (!def) return;
+
+	if (!cs()) return;
+	SpaceSystem *sys = cs()->GetSpaceEnvironment();
+	if (!sys) return;
+
+	// Determine start and end points
+	XMFLOAT3 size = cs()->GetSizeF();
+	XMVECTOR start = XMVectorSet(-size.x - 100.0f, 0.0f, 0.0f, 0.0f);
+	XMVECTOR end = XMVectorSet(size.x + 100.0f, 0.0f, 0.0f, 0.0f);
+	
+	// Create the projectile and set it on a path between the two test markers
+	XMVECTOR startpos = XMVector3TransformCoord(start, cs()->GetWorldMatrix());
+	XMVECTOR endpos = XMVector3TransformCoord(end, cs()->GetWorldMatrix());
+	XMVECTOR vel_n = XMVector3NormalizeEst(XMVectorSubtract(endpos, startpos));
+	sys->Projectiles.AddProjectile(def, 0U, startpos, 
+		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), XMVectorScale(vel_n, PROJ_SPEED));
+
+	*** MAKE OBB COLLISION / ELEMENT DETERMINATION WORK CORRECTLY IN ALL CASES, INCL EDGE CASES LIKE THIS AT EXACT ELEMENT BOUNDARY.  STOP USING [MIN|MAX]FINITE IF NOT THE SOLUTION ***
+}
+
 void RJMain::__CreateDebugScenario(void)
 {
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
@@ -2070,10 +2076,10 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create two complex ships in this scenario
 	if (true) {
 		ComplexShip *css[2];
-		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_prc"), Game::FactionManager.GetFactionIDByCode("faction_us") };
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
-		bool is_armed[2] = { false, true };
+		bool is_armed[2] = { false, false };
 		bool has_engine_control[2] = { false, false };
 		for (int c = 0; c < 2; ++c)
 		{
@@ -2135,7 +2141,7 @@ void RJMain::__CreateDebugScenario(void)
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s2_ship);
 		s2_ship->SetName("Test ship s2");
 		s2_ship->OverrideInstanceCode("Test ship s2");
-		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
+		s2_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 		s2_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 		s2_ship->SetPosition(XMVectorAdd(ss()->GetPosition(), XMVectorSet(0.0f, 0.0f, 120.0f, 0.0f)));
 		s2_ship->SetOrientation(ID_QUATERNION);
@@ -2314,6 +2320,17 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
+		AABB upper = AABB(XMVectorSet(-5, 0, -5, 0), XMVectorSet(5, 10, 5, 0));
+		AABB lower = AABB(XMVectorSet(-5, -10, -5, 0), XMVectorSet(5, 0, 5, 0));
+		Ray ray = Ray(XMVectorSet(-15, 0, 0, 0), XMVectorSet(+1, 0, 0, 0));
+		bool bupper = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, upper);
+		bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
+
+		AABB disjoint = AABB(XMVectorSet(20, 20, 20, 0), XMVectorSet(30, 30, 30, 0));
+		Ray ray2 = Ray(XMVectorSet(-10, 0, 0, 0), XMVectorSet(0.707, 0.707, 0.1, 0));
+		bool bdisjoint = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray2, disjoint);
+
+
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "ss: %s  |  s2: %s   |   s3: %s",
 			(ss() ? concat(ss()->GetHealth())("/")(ss()->GetMaxHealth()).str().c_str() : "<Destroyed>"), 
 			(s2() ? concat(s2()->GetHealth())("/")(s2()->GetMaxHealth()).str().c_str() : "<Destroyed>"),

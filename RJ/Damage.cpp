@@ -23,6 +23,40 @@ void DamageResistanceSet::AddDamageResistance(const DamageResistance & dr)
 	m_has_damage_resistance = true;
 }
 
+// Applies a set of resistances and reduces damage amounts accordingly
+void Damage::ApplyDamageResistance(const DamageResistanceSet & dr)
+{
+	// Look for resistance to this particular type of damage
+	DamageResistanceSet::const_iterator it_end = dr.end();
+	for (DamageResistanceSet::const_iterator it = dr.begin(); it != it_end; ++it)
+	{
+		if ((*it).Type == Type)
+		{
+			// We have resistance to this type.  First, if it is below our damage threshold then we can simply ignore the damage
+			const DamageResistance & dr = (*it);
+			if (Amount <= dr.Threshold) { Amount = 0.0f; return; }
+
+			// If not, we can at least scale the damage based on our resistance
+			Amount *= dr.Modifier;
+
+			// There is only one DR entry per damage type, so we can stop searching here
+			break;
+		}
+	}
+}
+
+// Applies a set of resistances and reduces damage amounts accordingly
+void DamageSet::ApplyDamageResistance(const DamageResistanceSet & dr)
+{
+	if (!dr.HasDamageResistance()) return;
+
+	DamageSet::iterator it_end = end();
+	for (DamageSet::iterator it = begin(); it != it_end; ++it)
+	{
+		(*it).ApplyDamageResistance(dr);
+	}
+}
+
 // Static method to translate damage types to their string representation
 std::string Damage::TranslateDamageTypeToString(DamageType type)
 {

@@ -66,7 +66,10 @@ public:
 	{
 		OrientedBoundingBox *						OBB;
 		float										IntersectionTime;
-		AXMVECTOR									CollisionPoint;
+		AXMVECTOR									IntersectionTimeV;
+		AXMVECTOR									CollisionPoint;				// Collision point in world space
+		AXMVECTOR									CollisionPointObjectLocal;	// Collision point local to the object
+		AXMVECTOR									CollisionPointOBBLocal;		// Collision point local to the specific impacted OBB
 	} OBBIntersectionResult;
 
 	// Struct holding data on a SAT test

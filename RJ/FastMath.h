@@ -232,6 +232,11 @@ CMPINLINE bool IntVector3Between(const INTVECTOR3 & v, const INTVECTOR3 & v_min,
 			v.x <= v_max.x && v.y <= v_max.y && v.z <= v_max.z);
 }
 
+template <typename T>
+CMPINLINE T MinFinite(T x1, T x2) { return (isinf(x2) ? x1 : (isinf(x1) ? x2 : min(x1, x2))); }
+
+template <typename T>
+CMPINLINE T MaxFinite(T x1, T x2) { return (isinf(x2) ? x1 : (isinf(x1) ? x2 : max(x1, x2))); }
 
 
 XMVECTOR OrientationFromPitchYawRollVector(const FXMVECTOR vec);

@@ -1464,7 +1464,7 @@ EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::TriggerEle
 	ComplexShipElement & el = GetElementDirect(element_id);
 
 	// Check this normalised [0.0 1.0] damage against the element health
-	if (damage > el.GetHealth())
+	if (damage >= el.GetHealth())
 	{
 		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
 		TriggerElementDestruction(element_id);
@@ -1558,6 +1558,55 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 }
 
 
+// Primary method called when the object takes damage at a specified (object-local) position.  
+// Calculates modified damage value (based on e.g. damage resistances) and applies to the 
+// object hitpoints.  Damage is applied in the order in which is was added to the damage 
+// set.  Returns true if the object was destroyed by any of the damage in this damage set
+// Overrides the base iTakesDamage method to calculate per-element damage
+bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const FXMVECTOR location)
+{
+	// Get the element that should receive this damage.  We offset the incoming location by
+	// environment extent to ensure that [0,0,0] is at bottom-bottom-left (rather than centre)
+	XMVECTOR envpos = XMVectorAdd(location, CollisionOBB.ConstData().ExtentV);
+	INTVECTOR3 eloc = GetClampedElementContainingPosition(envpos);
+	OutputDebugString(concat("Pos: ")(Vector3ToString(envpos))(" = El: ")(eloc.ToString())("\n").str().c_str());
+	int index = GetElementIndex(eloc);
+	if (!ElementIndexIsValid(index)) return false;
+	ComplexShipElement & el = m_elements[index];
+
+	// Iterate over each type of damage being inflicted
+	DamageSet::const_iterator it_end = damage.end();
+	for (DamageSet::const_iterator it = damage.begin(); it != it_end; ++it)
+	{
+		// Apply this damage; if the damage is enough to destroy the element we can 
+		// terminate the method immediately
+		if (ApplyDamageComponentToElement(el, (*it), envpos) == 
+			EnvironmentCollision::ElementCollisionResult::ElementDestroyed) return true;
+	}
+
+	// This damage was not sufficient to destroy the element
+	return false;
+}
+
+// Applies a damage component to the specified element.  Returns true if the damage was sufficient
+// to destroy the element
+EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::ApplyDamageComponentToElement(
+	ComplexShipElement & el, Damage damage, const FXMVECTOR location)
+{
+	// Make sure this element has not already been destroyed
+	if (el.IsDestroyed()) return EnvironmentCollision::ElementCollisionResult::NoImpact;
+
+	// If a tile exists at this element location, apply any damage resistance that it may provide
+	ComplexShipTile *tile = el.GetTile();
+	if (tile)
+	{
+		if (tile->IsInvulnerable()) return EnvironmentCollision::ElementCollisionResult::NoImpact;
+		if (tile->HasDamageResistance()) damage.ApplyDamageResistance(tile->GetDamageResistance());
+	}
+
+	// Apply any remaining damage to this element
+	return TriggerElementDamage(el.GetID(), damage.Amount);
+}
 
 // Set the destruction state of the specified terrain object
 void iSpaceObjectEnvironment::SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed)
