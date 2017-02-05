@@ -300,7 +300,7 @@ public:
 
 	// Method called when a projectile (not an object, but a basic projectile) collides with this object
 	// Handles any damage or effects of the collision, and also triggers rendering of appropriate effects if required
-	void									HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::OBBIntersectionData & impact);
+	void									HandleProjectileImpact(BasicProjectile & proj, const GamePhysicsEngine::OBBIntersectionData & impact);
 
 	// Narrowphase-specific collision data.  We make this public to allow direct & fast manipulation of the data
 	OrientedBoundingBox						CollisionOBB;				// The hierarchy of oriented bounding boxes that make up our collision mesh

@@ -2049,8 +2049,6 @@ void RJMain::DebugFireBasicProjectile(void) const
 	XMVECTOR vel_n = XMVector3NormalizeEst(XMVectorSubtract(endpos, startpos));
 	sys->Projectiles.AddProjectile(def, 0U, startpos, 
 		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), XMVectorScale(vel_n, PROJ_SPEED));
-
-	*** MAKE OBB COLLISION / ELEMENT DETERMINATION WORK CORRECTLY IN ALL CASES, INCL EDGE CASES LIKE THIS AT EXACT ELEMENT BOUNDARY.  STOP USING [MIN|MAX]FINITE IF NOT THE SOLUTION ***
 }
 
 void RJMain::__CreateDebugScenario(void)
@@ -2237,6 +2235,46 @@ void RJMain::__CreateDebugScenario(void)
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 	
+
+	XMVECTOR base = XMVectorAdd(XMVectorSet(5, 5, 5, 0), XMVectorSetW(XMVectorReplicate(0.0001f), 0.0f));
+	XMVECTOR adj[] = { XMVectorSet(5, 0, 0, 0), XMVectorSet(0, 5, 0, 0), XMVectorSet(0, 0, 5, 0) };
+	XMVECTOR raydir[] = { XMVectorSet(0, 0, 1, 0), XMVectorSet(1, 0, 0, 0), XMVectorSet(0, 1, 0, 0) };
+
+	for (int i = 0; i < 3; ++i)
+	{
+		AABB lower = AABB(	XMVectorAdd(XMVectorNegate(base), XMVectorNegate(adj[i])), 
+							XMVectorAdd(base, XMVectorNegate(adj[i])));
+		AABB higher = AABB(	XMVectorAdd(XMVectorNegate(base), adj[i]),
+							XMVectorAdd(base, adj[i]));
+		Ray ray = Ray(XMVectorScale(XMVectorNegate(raydir[i]), 15.0f), raydir[i]);
+		OutputDebugString(concat("Lower: ")(lower.str())(", Higher: ")(higher.str())
+							(", Ray: ")(ray.str())("\n").str().c_str());
+
+		bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
+		OutputDebugString(concat("lower: tmin=")(Game::PhysicsEngine.RayIntersectionResult.tmin)
+			(", tmax=")(Game::PhysicsEngine.RayIntersectionResult.tmax)("\n").str().c_str());
+		bool bhigher = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, higher);
+		OutputDebugString(concat("higher: tmin=")(Game::PhysicsEngine.RayIntersectionResult.tmin)
+			(", tmax=")(Game::PhysicsEngine.RayIntersectionResult.tmax)("\n").str().c_str());
+
+		OutputDebugString(concat("Intersect: Lower = ")(blower)(", Higher = ")(bhigher)("\n").str().c_str());
+	}
+
+
+
+	AABB upper = AABB(XMVectorSet(-5, 0, -5, 0), XMVectorSet(5, 10, 5, 0));
+	AABB lower = AABB(XMVectorSet(-5, -10, -5, 0), XMVectorSet(5, 0, 5, 0));
+	Ray ray = Ray(XMVectorSet(-15, 0, 0, 0), XMVectorSet(+1, 0, 0, 0));
+	bool bupper = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, upper);
+	bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
+
+	AABB disjoint = AABB(XMVectorSet(20, 20, 20, 0), XMVectorSet(30, 30, 30, 0));
+	Ray ray2 = Ray(XMVectorSet(-10, 0, 0, 0), XMVectorSet(0.707, 0.707, 0.1, 0));
+	bool bdisjoint = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray2, disjoint);
+
+	OutputDebugString(concat(bupper)(", ")(blower)(", ")(bdisjoint).str().c_str());
+
+
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }
 
@@ -2320,21 +2358,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		AABB upper = AABB(XMVectorSet(-5, 0, -5, 0), XMVectorSet(5, 10, 5, 0));
-		AABB lower = AABB(XMVectorSet(-5, -10, -5, 0), XMVectorSet(5, 0, 5, 0));
-		Ray ray = Ray(XMVectorSet(-15, 0, 0, 0), XMVectorSet(+1, 0, 0, 0));
-		bool bupper = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, upper);
-		bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
-
-		AABB disjoint = AABB(XMVectorSet(20, 20, 20, 0), XMVectorSet(30, 30, 30, 0));
-		Ray ray2 = Ray(XMVectorSet(-10, 0, 0, 0), XMVectorSet(0.707, 0.707, 0.1, 0));
-		bool bdisjoint = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray2, disjoint);
-
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "ss: %s  |  s2: %s   |   s3: %s",
-			(ss() ? concat(ss()->GetHealth())("/")(ss()->GetMaxHealth()).str().c_str() : "<Destroyed>"), 
-			(s2() ? concat(s2()->GetHealth())("/")(s2()->GetMaxHealth()).str().c_str() : "<Destroyed>"),
-			(s3[0]() ? concat(s3[0]()->GetHealth())("/")(s3[0]()->GetMaxHealth()).str().c_str() : "<Destroyed>"));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
 		
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

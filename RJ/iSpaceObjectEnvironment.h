@@ -342,7 +342,7 @@ public:
 	// object hitpoints.  Damage is applied in the order in which is was added to the damage 
 	// set.  Returns true if the object was destroyed by any of the damage in this damage set
 	// Overrides the base iTakesDamage method to calculate per-element damage
-	virtual bool					ApplyDamage(const DamageSet & damage, const FXMVECTOR location);
+	virtual bool					ApplyDamage(const DamageSet & damage, const GamePhysicsEngine::OBBIntersectionData & impact);
 
 	// Shutdown method to deallocate the contents of the environment
 	CMPINLINE void					Shutdown(void)						{ Shutdown(true); }
@@ -356,6 +356,12 @@ public:
 	CMPINLINE int					ElementLocationToIndex(const INTVECTOR3 & location) const		{ return ELEMENT_INDEX(location.x, location.y, location.z); }
 	CMPINLINE int					ElementLocationToIndex(int x, int y, int z) const				{ return ELEMENT_INDEX(x, y, z); }
 	
+	// Clamps an element location to the bounds of this environment
+	CMPINLINE INTVECTOR3			ClampElementLocationToEnvironment(const INTVECTOR3 & loc) const
+	{
+		return IntVector3Clamp(loc, NULL_INTVECTOR3, m_elementsize);
+	}
+
 	// Returns the element location containing the specified position.  Unbounded, so can return an element
 	// location outside the bounds of this environment
 	CMPINLINE INTVECTOR3			GetElementContainingPositionUnbounded(const FXMVECTOR position) const
@@ -366,7 +372,7 @@ public:
 	// Returns the element containing the specified position, clamped to the environment bounds
 	CMPINLINE INTVECTOR3			GetClampedElementContainingPosition(const FXMVECTOR position) const
 	{
-		return IntVector3Clamp(Game::PhysicalPositionToElementLocation(position), NULL_INTVECTOR3, m_elementsize);
+		return ClampElementLocationToEnvironment(Game::PhysicalPositionToElementLocation(position));
 	}
 
 	// Determines and applies the effect of a collision with trajectory through the environment
@@ -492,7 +498,7 @@ protected:
 	// Applies a damage component to the specified element.  Returns true if the damage was sufficient
 	// to destroy the element
 	EnvironmentCollision::ElementCollisionResult	
-									ApplyDamageComponentToElement(ComplexShipElement & el, Damage damage, const FXMVECTOR location);
+									ApplyDamageComponentToElement(ComplexShipElement & el, Damage damage);
 
 	// Set the destruction state of the specified terrain object(s)
 	void							SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed);
@@ -523,6 +529,9 @@ protected:
 
 	// Recursively builds each node of the OBB that matches the supplied hierarchical region structure
 	void								BuildOBBNodeFromRegionData(OrientedBoundingBox & obb, const EnvironmentOBBRegion & region);
+
+	// Returns the location of the element at the specified point within this OBB node
+	INTVECTOR3							DetermineElementAtOBBLocation(const OrientedBoundingBox *obb, const FXMVECTOR obb_local_pos);
 
 	// Static working vector for environment object search; holds nodes being considered in the search
 	static std::vector<EnvironmentTree*>		m_search_nodes;

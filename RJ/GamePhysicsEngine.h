@@ -70,6 +70,17 @@ public:
 		AXMVECTOR									CollisionPoint;				// Collision point in world space
 		AXMVECTOR									CollisionPointObjectLocal;	// Collision point local to the object
 		AXMVECTOR									CollisionPointOBBLocal;		// Collision point local to the specific impacted OBB
+
+		// Constructors
+		OBBIntersectionData(void) { }
+		OBBIntersectionData(OrientedBoundingBox *obb, float intersect_time, const XMVECTOR & intersect_time_v,
+			const XMVECTOR & collisionpoint, const XMVECTOR & collisionpoint_objlocal, const XMVECTOR & collisionpoint_obblocal)
+			:
+			OBB(obb), IntersectionTime(intersect_time), IntersectionTimeV(intersect_time_v), CollisionPoint(collisionpoint),
+			CollisionPointObjectLocal(collisionpoint_objlocal), CollisionPointOBBLocal(collisionpoint_obblocal) { }
+
+		// Static 'null' instance representing a default intersection
+		static const OBBIntersectionData NullValue;
 	} OBBIntersectionResult;
 
 	// Struct holding data on a SAT test

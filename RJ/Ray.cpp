@@ -32,7 +32,7 @@ void Ray::TransformIntoCoordinateSystem(const FXMVECTOR origin, const AXMVECTOR_
 }
 
 // Generates a string representation of the ray
-std::string Ray::ToString(void) const
+std::string Ray::str(void) const
 {
 	return concat("Ray { ")(Vector3ToString(Origin))(" + k")(Vector3ToString(Direction))(" }").str();
 }

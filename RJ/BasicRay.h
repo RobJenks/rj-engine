@@ -24,7 +24,7 @@ public:
 	}
 
 	// Generates a string representation of the ray
-	std::string				ToString(void) const;
+	std::string				str(void) const;
 
 };
 

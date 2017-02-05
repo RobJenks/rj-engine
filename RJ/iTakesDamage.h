@@ -8,6 +8,7 @@
 #include "FastMath.h"
 #include "Damage.h"
 #include "GameConsoleCommand.h"
+#include "GamePhysicsEngine.h"
 
 class iTakesDamage
 {
@@ -76,25 +77,25 @@ public:
 	// Calculates modified damage value (based on e.g. damage resistances) and applies to the 
 	// object hitpoints.  Damage is applied in the order in which is was added to the damage 
 	// set.  Returns true if the object was destroyed by any of the damage in this damage set
-	virtual bool						ApplyDamage(const DamageSet & damage, const FXMVECTOR location);
-	CMPINLINE bool						ApplyDamage(const DamageSet & damage) { return ApplyDamage(damage, NULL_VECTOR); }
+	virtual bool						ApplyDamage(const DamageSet & damage, const GamePhysicsEngine::OBBIntersectionData & impact);
+	CMPINLINE bool						ApplyDamage(const DamageSet & damage) { return ApplyDamage(damage, GamePhysicsEngine::OBBIntersectionData::NullValue); }
 
 	// Simple method to apply a single component of damage.  Pass-through to the primary damage method
 	// Returns true if the object is destroyed by this damage
-	CMPINLINE bool						ApplyDamage(const Damage & damage, const FXMVECTOR location)
+	CMPINLINE bool						ApplyDamage(const Damage & damage, const GamePhysicsEngine::OBBIntersectionData & impact)
 	{
 		_tmp_damageset[0] = damage;
-		return ApplyDamage(_tmp_damageset, location);
+		return ApplyDamage(_tmp_damageset, impact);
 	}
-	CMPINLINE bool						ApplyDamage(const Damage & damage) { return ApplyDamage(damage, NULL_VECTOR); }
+	CMPINLINE bool						ApplyDamage(const Damage & damage) { return ApplyDamage(damage, GamePhysicsEngine::OBBIntersectionData::NullValue); }
 
 	// Simple method to apply an amount of damage.  Damage has no ("ANY") type and so is not affected
 	// by any damage resistances except universal ("ALL") resistance.  Returns true if the object was destroyed by this damage
-	CMPINLINE bool						ApplyDamage(float damage, const FXMVECTOR location) 
+	CMPINLINE bool						ApplyDamage(float damage, const GamePhysicsEngine::OBBIntersectionData & impact)
 	{ 
-		return ApplyDamage(Damage(DamageType::ANY, damage), location); 
+		return ApplyDamage(Damage(DamageType::ANY, damage), impact); 
 	}
-	CMPINLINE bool						ApplyDamage(float damage) { return ApplyDamage(damage, NULL_VECTOR); }
+	CMPINLINE bool						ApplyDamage(float damage) { return ApplyDamage(damage, GamePhysicsEngine::OBBIntersectionData::NullValue); }
 
 	// Process a debug command from the console.  Passed down the hierarchy to this base class when invoked in a subclass
 	// Updates the command with its result if the command can be processed at this level

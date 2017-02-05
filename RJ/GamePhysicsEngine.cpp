@@ -41,6 +41,7 @@
 
 // Initialise static fields
 const GamePhysicsEngine::ImpactData::ObjectImpactData GamePhysicsEngine::NullObjectImpactData = GamePhysicsEngine::ImpactData::ObjectImpactData();
+const GamePhysicsEngine::OBBIntersectionData GamePhysicsEngine::OBBIntersectionData::NullValue = OBBIntersectionData(NULL, 0.0f, NULL_VECTOR, NULL_VECTOR, NULL_VECTOR, NULL_VECTOR);
 
 // Default constructor
 GamePhysicsEngine::GamePhysicsEngine(void)

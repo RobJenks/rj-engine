@@ -633,7 +633,7 @@ void iObject::RemoveCollisionExclusion(Game::ID_TYPE object)
 
 // Method called when a projectile (not an object, but a basic projectile) collides with this object
 // Handles any damage or effects of the collision, and also triggers rendering of appropriate effects if required
-void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::OBBIntersectionData & impact)
+void iObject::HandleProjectileImpact(BasicProjectile & proj, const GamePhysicsEngine::OBBIntersectionData & impact)
 {
 	// The projectile must have a definition to provide the required data
 	if (!proj.Definition) return;
@@ -643,7 +643,7 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, GamePhysicsEngine::
 	// Apply damage from the impact
 	OutputDebugString(concat("OBB: ")(impact.OBB->ToString())("\n").str().c_str());
 	OutputDebugString(concat("Pos: ")(Vector3ToString(impact.CollisionPoint))("\n").str().c_str());
-	ApplyDamage(proj.Definition->GetProjectileDamage(), impact.CollisionPointObjectLocal);
+	ApplyDamage(proj.Definition->GetProjectileDamage(), impact);
 }
 
 // Custom debug string function which determines the subclass of this object and calls that subclass method directly.  

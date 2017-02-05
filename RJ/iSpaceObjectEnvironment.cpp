@@ -817,6 +817,23 @@ void iSpaceObjectEnvironment::SubdivideOBBRegion(EnvironmentOBBRegion & region) 
 	}
 }
 
+// Returns the location of the element at the specified point within this OBB node
+INTVECTOR3 iSpaceObjectEnvironment::DetermineElementAtOBBLocation(const OrientedBoundingBox *obb, const FXMVECTOR obb_local_pos)
+{
+	// Determine the (clamped) element location within this OBB
+	INTVECTOR3 loc = Game::PhysicalPositionToElementLocation(obb_local_pos);
+
+	// Position of the OBB bottom-left corner = ((OBBOffset-OBBExtent) + (ObjExtent))
+	// i.e. get bottom-left pos of OBB, then shift by obj extent to go from centre-relative to bottom-left-relative
+	INTVECTOR3 obb_loc = Game::PhysicalPositionToElementLocation(
+		XMVectorAdd(XMVectorSubtract(obb->TranslationOffset, obb->ConstData().ExtentV), CollisionOBB.ConstData().ExtentV));
+	OutputDebugString(concat("*** Calculated location: ")(obb_loc.ToString())("\n").str().c_str());
+	*** Trace this method for example impact and see why incorrectly selecting[0,1,0] in this case ***
+	// Return the combined location
+	// NOTE: We must do each part separately to ensure we don't select the wrong element in edge cases along boundaries
+	return ClampElementLocationToEnvironment(obb_loc + loc);
+}
+
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 {
 	if (m_navnetwork)
@@ -1209,7 +1226,7 @@ bool iSpaceObjectEnvironment::CalculateCollisionThroughEnvironment(	iActiveObjec
 		// We can simply start from the current object position
 		proj_trajectory = Ray(object->GetPosition(), impact_coll.PreImpactVelocity);
 	}
-	DBG_COLLISION_RESULT(concat(", proj_ray=")(proj_trajectory.ToString()).str().c_str());
+	DBG_COLLISION_RESULT(concat(", proj_ray=")(proj_trajectory.str()).str().c_str());
 
 	// Calcualate the path of elements intersected by this ray
 	ElementIntersectionData elements;
@@ -1563,15 +1580,20 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 // object hitpoints.  Damage is applied in the order in which is was added to the damage 
 // set.  Returns true if the object was destroyed by any of the damage in this damage set
 // Overrides the base iTakesDamage method to calculate per-element damage
-bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const FXMVECTOR location)
+bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const GamePhysicsEngine::OBBIntersectionData & impact)
 {
 	// Get the element that should receive this damage.  We offset the incoming location by
 	// environment extent to ensure that [0,0,0] is at bottom-bottom-left (rather than centre)
-	XMVECTOR envpos = XMVectorAdd(location, CollisionOBB.ConstData().ExtentV);
-	INTVECTOR3 eloc = GetClampedElementContainingPosition(envpos);
-	OutputDebugString(concat("Pos: ")(Vector3ToString(envpos))(" = El: ")(eloc.ToString())("\n").str().c_str());
+	// We also get the *closest" element to this position, since we know it is a valid
+	// collision, but there is a chance of edge cases at OBB/element boundaries where we may otherwise
+	// select an adjacent & destroyed element location
+	/*XMVECTOR envpos = XMVectorAdd(location, CollisionOBB.ConstData().ExtentV);
+	INTVECTOR3 eloc = GetNearestActiveElementToPosition(envpos);
+	OutputDebugString(concat("Pos: ")(Vector3ToString(envpos))(" = El: ")(eloc.ToString())("\n").str().c_str());*/
+	if (!impact.OBB) return false;
+	INTVECTOR3 eloc = DetermineElementAtOBBLocation(impact.OBB, impact.CollisionPointOBBLocal);
+	
 	int index = GetElementIndex(eloc);
-	if (!ElementIndexIsValid(index)) return false;
 	ComplexShipElement & el = m_elements[index];
 
 	// Iterate over each type of damage being inflicted
@@ -1580,7 +1602,7 @@ bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const FXMVEC
 	{
 		// Apply this damage; if the damage is enough to destroy the element we can 
 		// terminate the method immediately
-		if (ApplyDamageComponentToElement(el, (*it), envpos) == 
+		if (ApplyDamageComponentToElement(el, (*it)) == 
 			EnvironmentCollision::ElementCollisionResult::ElementDestroyed) return true;
 	}
 
@@ -1591,7 +1613,7 @@ bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const FXMVEC
 // Applies a damage component to the specified element.  Returns true if the damage was sufficient
 // to destroy the element
 EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::ApplyDamageComponentToElement(
-	ComplexShipElement & el, Damage damage, const FXMVECTOR location)
+	ComplexShipElement & el, Damage damage)
 {
 	// Make sure this element has not already been destroyed
 	if (el.IsDestroyed()) return EnvironmentCollision::ElementCollisionResult::NoImpact;

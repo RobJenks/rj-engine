@@ -1,5 +1,6 @@
 #include "Damage.h"
 #include "GameConsoleCommand.h"
+#include "GamePhysicsEngine.h"
 #include "iTakesDamage.h"
 
 // Static local vector used to translate Damage > DamageSet without the need for an additional virtual call
@@ -27,7 +28,7 @@ bool iTakesDamage::ApplyDamageComponent(Damage damage)
 // damage value (based on e.g. damage resistances) and applies to the object hitpoints.  Damage
 // is applied in the order in which is was added to the damage set.  Returns true if the object
 // was destroyed by any of the damage in this damage set
-bool iTakesDamage::ApplyDamage(const DamageSet & damage, const FXMVECTOR location)
+bool iTakesDamage::ApplyDamage(const DamageSet & damage, const GamePhysicsEngine::OBBIntersectionData & location)
 {
 	// Invulnerable objects ignore all damage
 	if (m_is_invulnerable) return false;
