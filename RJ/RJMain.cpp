@@ -679,7 +679,15 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_PERIOD])
 	{
-		DebugFireBasicProjectile();	
+		XMVECTOR pos = XMVector3TransformCoord(XMVectorSet(-(cs()->GetSizeF().x + 50.0f), -4.0f, -24.0f, 0.0f), cs()->GetWorldMatrix());
+		XMVECTOR dir = XMVectorSet(200.0f, 7.0f, 50.0f, 0.0f);
+		DebugFireBasicProjectile(BasicRay(pos, dir));
+	}
+	if (b[DIK_COMMA])
+	{
+		XMVECTOR pos = XMVector3TransformCoord(XMVectorSet(-(cs()->GetSizeF().x + 50.0f), -4.0f, -24.0f, 0.0f), cs()->GetWorldMatrix());
+		XMVECTOR dir = XMVectorSet(200.0f, 7.0f, 50.0f, 0.0f);
+		cs()->DebugRenderRayIntersectionTest(BasicRay(pos, dir));
 	}
 
 	if (b[DIK_H])
@@ -748,27 +756,23 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
+		static int dbg_z = 0;
+		static BOOL ctrl_g_down = FALSE;
+		if (b[DIK_LCONTROL] && !ctrl_g_down)
+		{
+			if (++dbg_z >= cs()->GetElementSize().z) dbg_z = 0;
+		}
+		ctrl_g_down = b[DIK_LCONTROL];
+
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
 		cs()->SetWorldMomentum(NULL_VECTOR);
 		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
 
 		if (b[DIK_LSHIFT])
-		{
-			Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
-			{
-				float v = env.GetElementDirect(id).GetHealth();
-				return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
-			});
-		}
+			cs()->DebugRenderElementState(dbg_z);
 		else
-		{
-			Game::Engine->GetOverlayRenderer()->RenderEnvironmentOverlay(*(cs()), 0, [](iSpaceObjectEnvironment & env, int id)
-			{
-				float v = env.GetElementDirect(id).GetHealth();
-				return XMFLOAT4(1.0f - v, v, 0.0f, 0.75f);
-			});
-		}
+			cs()->DebugRenderElementState();
 	}
 
 	if (b[DIK_I]) {
@@ -2021,9 +2025,8 @@ void RJMain::DebugFullCCDTest(void)
 }
 
 // Fires a basic projectile along the structural test path for debug testing
-void RJMain::DebugFireBasicProjectile(void) const
+void RJMain::DebugFireBasicProjectile(const BasicRay & trajectory) const
 {
-	static const float PROJ_SPEED = 100.0f;
 	static const unsigned int PROJ_INTERVAL = 250U;
 	static unsigned int last_proj = 0U;
 
@@ -2034,21 +2037,13 @@ void RJMain::DebugFireBasicProjectile(void) const
 	BasicProjectileDefinition *def = D::BasicProjectiles.Get("basiclaser01");
 	if (!def) return;
 
-	if (!cs()) return;
-	SpaceSystem *sys = cs()->GetSpaceEnvironment();
+	SpaceSystem *sys = Game::CurrentPlayer->GetPlayerSystem();
 	if (!sys) return;
 
-	// Determine start and end points
-	XMFLOAT3 size = cs()->GetSizeF();
-	XMVECTOR start = XMVectorSet(-size.x - 100.0f, 0.0f, 0.0f, 0.0f);
-	XMVECTOR end = XMVectorSet(size.x + 100.0f, 0.0f, 0.0f, 0.0f);
-	
 	// Create the projectile and set it on a path between the two test markers
-	XMVECTOR startpos = XMVector3TransformCoord(start, cs()->GetWorldMatrix());
-	XMVECTOR endpos = XMVector3TransformCoord(end, cs()->GetWorldMatrix());
-	XMVECTOR vel_n = XMVector3NormalizeEst(XMVectorSubtract(endpos, startpos));
-	sys->Projectiles.AddProjectile(def, 0U, startpos, 
-		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), XMVectorScale(vel_n, PROJ_SPEED));
+	XMVECTOR vel_n = XMVector3NormalizeEst(trajectory.Direction);
+	sys->Projectiles.AddProjectile(def, 0U, trajectory.Origin, 
+		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), trajectory.Direction);
 }
 
 void RJMain::__CreateDebugScenario(void)
@@ -2234,46 +2229,6 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
-	
-
-	XMVECTOR base = XMVectorAdd(XMVectorSet(5, 5, 5, 0), XMVectorSetW(XMVectorReplicate(0.0001f), 0.0f));
-	XMVECTOR adj[] = { XMVectorSet(5, 0, 0, 0), XMVectorSet(0, 5, 0, 0), XMVectorSet(0, 0, 5, 0) };
-	XMVECTOR raydir[] = { XMVectorSet(0, 0, 1, 0), XMVectorSet(1, 0, 0, 0), XMVectorSet(0, 1, 0, 0) };
-
-	for (int i = 0; i < 3; ++i)
-	{
-		AABB lower = AABB(	XMVectorAdd(XMVectorNegate(base), XMVectorNegate(adj[i])), 
-							XMVectorAdd(base, XMVectorNegate(adj[i])));
-		AABB higher = AABB(	XMVectorAdd(XMVectorNegate(base), adj[i]),
-							XMVectorAdd(base, adj[i]));
-		Ray ray = Ray(XMVectorScale(XMVectorNegate(raydir[i]), 15.0f), raydir[i]);
-		OutputDebugString(concat("Lower: ")(lower.str())(", Higher: ")(higher.str())
-							(", Ray: ")(ray.str())("\n").str().c_str());
-
-		bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
-		OutputDebugString(concat("lower: tmin=")(Game::PhysicsEngine.RayIntersectionResult.tmin)
-			(", tmax=")(Game::PhysicsEngine.RayIntersectionResult.tmax)("\n").str().c_str());
-		bool bhigher = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, higher);
-		OutputDebugString(concat("higher: tmin=")(Game::PhysicsEngine.RayIntersectionResult.tmin)
-			(", tmax=")(Game::PhysicsEngine.RayIntersectionResult.tmax)("\n").str().c_str());
-
-		OutputDebugString(concat("Intersect: Lower = ")(blower)(", Higher = ")(bhigher)("\n").str().c_str());
-	}
-
-
-
-	AABB upper = AABB(XMVectorSet(-5, 0, -5, 0), XMVectorSet(5, 10, 5, 0));
-	AABB lower = AABB(XMVectorSet(-5, -10, -5, 0), XMVectorSet(5, 0, 5, 0));
-	Ray ray = Ray(XMVectorSet(-15, 0, 0, 0), XMVectorSet(+1, 0, 0, 0));
-	bool bupper = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, upper);
-	bool blower = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray, lower);
-
-	AABB disjoint = AABB(XMVectorSet(20, 20, 20, 0), XMVectorSet(30, 30, 30, 0));
-	Ray ray2 = Ray(XMVectorSet(-10, 0, 0, 0), XMVectorSet(0.707, 0.707, 0.1, 0));
-	bool bdisjoint = Game::PhysicsEngine.DetermineRayVsAABBIntersection(ray2, disjoint);
-
-	OutputDebugString(concat(bupper)(", ")(blower)(", ")(bdisjoint).str().c_str());
-
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

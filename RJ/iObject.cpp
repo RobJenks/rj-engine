@@ -9,6 +9,9 @@
 #include "Faction.h"
 #include "BasicProjectile.h"
 #include "BasicProjectileDefinition.h"
+#include "CoreEngine.h"
+#include "BasicRay.h"
+#include "OverlayRenderer.h"
 #include "GameConsoleCommand.h"
 #include "DebugInvocation.h"
 
@@ -653,6 +656,30 @@ std::string iObject::DebugSubclassString(void) const
 {
 	// Determine and call the appropriate subclass function.  This is BAD but for debug only
 	return DebugInvocation::SubclassInvocations::Invoke_DebugString(this);
+}
+
+// Show a debug visualisation of a ray intersection test with this object
+void iObject::DebugRenderRayIntersectionTest(const BasicRay & world_ray)
+{
+	OrientedBoundingBox *closest = NULL;
+	std::vector<OrientedBoundingBox*> branches, leaves;
+	bool intersection = Game::PhysicsEngine.DetermineLineVectorVsOBBHierarchyIntersection_Debug(world_ray.Origin, world_ray.Direction, CollisionOBB,
+		branches, leaves, &closest);
+
+	if (intersection)
+	{
+		Game::Engine->GetOverlayRenderer()->Render3DOverlay(closest->Data().Centre, XMVectorScale(closest->Data().ExtentV, 2.0f),
+			XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
+
+		for (OrientedBoundingBox *o : leaves)
+		{
+			Game::Engine->GetOverlayRenderer()->Render3DOverlay(o->Data().Centre, XMVectorScale(o->Data().ExtentV, 2.0f),
+				XMFLOAT4(0.0f, 1.0f, 0.0f, 0.75f));
+		}
+	}
+
+	Game::Engine->RenderVolumetricLine(VolumetricLine(world_ray.Origin, XMVectorAdd(world_ray.Origin, world_ray.Direction), 
+		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"))));
 }
 
 // Static method to translate from an object simulation state to its string representation

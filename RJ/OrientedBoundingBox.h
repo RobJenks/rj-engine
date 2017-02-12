@@ -99,7 +99,7 @@ public:
 	
 	AXMMATRIX					Offset;				// The offset of this OBB from its parent object, if applicable.  Offsets are always relative to the object 
 													// position, rather than that of any OBB above it in the hierarchy
-	AXMVECTOR					TranslationOffset;	// Translation-only offset of this OBB.  Useful for and only relevant to non-rotated OBBs
+	int							Index;				// Numeric index used to identify the OBB in some scenarios
 
 	OrientedBoundingBox *		Children;			// Array of child OBBs below this one, for hierarchical collision detection
 	int							ChildCount;			// The number of children below this OBB
@@ -204,10 +204,11 @@ public:
 	CMPINLINE void				RecalculateData(void)
 	{
 		// Perform any required intermediate calculations
-		
-		// Calculate the effective translation offset if relevant.  Useful shortcut for non-rotated OBBs
-		TranslationOffset = (HasOffset() ? XMVector3TransformCoord(NULL_VECTOR, Offset) : NULL_VECTOR);
 	}
+
+	// Numeric index used to identify the OBB in some scenarios
+	CMPINLINE int				GetIndex(void) const			{ return Index; }
+	CMPINLINE void				SetIndex(int index)				{ Index = index; }
 
 	// Method to determine the vertices of this bounding box in world space
 	CMPINLINE void				DetermineVertices(AXMVECTOR_P(&pOutVertices)[8]) const

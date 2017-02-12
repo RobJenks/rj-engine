@@ -584,7 +584,7 @@ void OverlayRenderer::RenderElementOverlay(iSpaceObjectEnvironment & ship, const
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
 
-// Renders a semi-transparent ovelay 3D overlay around the specified element
+// Renders a semi-transparent 3D overlay around the specified element
 void OverlayRenderer::RenderElement3DOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha)
 {
 	// Create a transform matrix to translate to the desired element, and also to the centre of that element.  
@@ -600,6 +600,64 @@ void OverlayRenderer::RenderElement3DOverlay(iSpaceObjectEnvironment & ship, con
 	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay, ship.GetPosition(), colour_alpha,
 		XMMatrixMultiply(XMMatrixMultiply(ELEMENT_SCALE_MATRIX, trans), ship.GetZeroPointWorldMatrix()));
 }
+
+// Renders a semi-transparent 3D overlay
+void OverlayRenderer::Render3DOverlay(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & colour_alpha)
+{
+	// Build a world matrix based on the supplied parameters
+	XMMATRIX trans = XMMatrixTranslationFromVector(position);
+	XMMATRIX rot = XMMatrixRotationQuaternion(orientation);
+	XMMATRIX scale = XMMatrixScalingFromVector(size);
+
+	// Render using a basic overlay texture and flat shading
+	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay, position, colour_alpha,
+		XMMatrixMultiply(XMMatrixMultiply(scale, rot), trans));
+}
+
+// Renders a semi-transparent 3D overlay
+void OverlayRenderer::Render3DOverlay(const FXMVECTOR position, const FXMVECTOR size, const XMFLOAT4 & colour_alpha)
+{
+	// Build a world matrix based on the supplied parameters
+	XMMATRIX trans = XMMatrixTranslationFromVector(position);
+	XMMATRIX scale = XMMatrixScalingFromVector(size);
+
+	// Render using a basic overlay texture and flat shading
+	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay, position, colour_alpha,
+		XMMatrixMultiply(scale, trans));
+}
+
+// Renders a semi-transparent 3D overlay
+void OverlayRenderer::Render3DOverlay(const XMMATRIX & world, const XMFLOAT4 & colour_alpha)
+{
+	// Render using a basic overlay texture and flat shading
+	Game::Engine->RenderModelFlat(m_blueprintcubeoverlay, XMVector3TransformCoord(NULL_VECTOR, world), colour_alpha, world);
+}
+
+// Renders an overlay over the specified environment.  Accepts iterators into a range of colour/alpha data, and an offset parameter
+// which specified the element to begin rendering this data from.  If no offset parameter is provided the rendering begins at element zero
+void OverlayRenderer::RenderEnvironment3DOverlay(	iSpaceObjectEnvironment & env, const std::vector<XMFLOAT4>::const_iterator begin, 
+													const std::vector<XMFLOAT4>::const_iterator end, int element_start)
+{
+	// Parameter check; make sure the iterator range does not take us beyond the end of the element collection.  If parameters
+	// are invalid then nothing will be rendered
+	if (element_start < 0) return;
+	if (std::distance(begin, end) > (env.GetElementCount() - element_start)) return;
+
+	// Render each element in the range in turn
+	INTVECTOR3 location;
+	for (std::vector<XMFLOAT4>::const_iterator it = begin; it != end; ++it)
+	{
+		location = env.GetElementDirect(element_start++).GetLocation();
+		RenderElement3DOverlay(env, location, *it);
+	}
+}
+
+void OverlayRenderer::RenderEnvironment3DOverlay(	iSpaceObjectEnvironment & env, const std::vector<XMFLOAT4>::const_iterator begin, 
+													const std::vector<XMFLOAT4>::const_iterator end)
+{
+	RenderEnvironment3DOverlay(env, begin, end, 0);
+}
+
 
 // Renders an OBB to world space.  Base thickness is the width of the bounding lines that will be drawn for branch OBBs.  Leaf OBBs
 // will be rendered at a multiple of this thickness so it is clear which OBBs are actually colliding objects

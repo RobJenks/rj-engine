@@ -3,6 +3,8 @@
 #include "FastMath.h"
 #include "GameVarsExtern.h"
 #include "ComplexShipElement.h"
+#include "CoreEngine.h"
+#include "OverlayRenderer.h"
 #include "iEnvironmentObject.h"
 #include "ComplexShipTileDefinition.h"
 #include "ComplexShipTile.h"
@@ -765,6 +767,9 @@ void iSpaceObjectEnvironment::BuildOBBNodeFromRegionData(OrientedBoundingBox & o
 		extent),														//   PLUS half the size of the region (to move from top-left > centre position of region)
 		XMVectorScale(m_size, 0.5f)));									//   MINUS half the size of the environment itself (to move from el[0,0,0] > centre positon of environment)
 
+	// Store index of the top-left element in the OBB index
+	obb.SetIndex(region.element);
+
 	// Now allocate space for the child nodes below this one and create each in turn
 	obb.AllocateChildren(region.childcount);
 	for (int i = 0; i < region.childcount; ++i)
@@ -818,20 +823,20 @@ void iSpaceObjectEnvironment::SubdivideOBBRegion(EnvironmentOBBRegion & region) 
 }
 
 // Returns the location of the element at the specified point within this OBB node
-INTVECTOR3 iSpaceObjectEnvironment::DetermineElementAtOBBLocation(const OrientedBoundingBox *obb, const FXMVECTOR obb_local_pos)
+INTVECTOR3 iSpaceObjectEnvironment::DetermineElementAtOBBLocation(const OrientedBoundingBox & obb, const FXMVECTOR obb_local_pos)
 {
-	// Determine the (clamped) element location within this OBB
-	INTVECTOR3 loc = Game::PhysicalPositionToElementLocation(obb_local_pos);
+	// Parameter check
+	if (!IsValidElementID(obb.Index)) return NULL_INTVECTOR3;
 
-	// Position of the OBB bottom-left corner = ((OBBOffset-OBBExtent) + (ObjExtent))
-	// i.e. get bottom-left pos of OBB, then shift by obj extent to go from centre-relative to bottom-left-relative
-	INTVECTOR3 obb_loc = Game::PhysicalPositionToElementLocation(
-		XMVectorAdd(XMVectorSubtract(obb->TranslationOffset, obb->ConstData().ExtentV), CollisionOBB.ConstData().ExtentV));
-	OutputDebugString(concat("*** Calculated location: ")(obb_loc.ToString())("\n").str().c_str());
-	*** Trace this method for example impact and see why incorrectly selecting[0,1,0] in this case ***
-	// Return the combined location
-	// NOTE: We must do each part separately to ensure we don't select the wrong element in edge cases along boundaries
-	return ClampElementLocationToEnvironment(obb_loc + loc);
+	// Determine the (clamped) element location within this OBB; add OBB extent to make this bottom-corner-relative
+	INTVECTOR3 loc = ClampElementLocationToEnvironment(Game::PhysicalPositionToElementLocation(
+		XMVectorAdd(obb_local_pos, obb.ConstData().ExtentV)));
+
+	// Position of the OBB bottom-left corner is recorded in the OBB index
+	INTVECTOR3 obb_loc = GetElementDirect(obb.Index).GetLocation();
+	OutputDebugString(concat("OBB = ")(obb_loc.ToString())(", Loc within OBB = ")(loc.ToString())("\n").str().c_str());
+	// Return the combined location; OBB location + location within OBB
+	return (loc + obb_loc);
 }
 
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
@@ -1591,7 +1596,7 @@ bool iSpaceObjectEnvironment::ApplyDamage(const DamageSet & damage, const GamePh
 	INTVECTOR3 eloc = GetNearestActiveElementToPosition(envpos);
 	OutputDebugString(concat("Pos: ")(Vector3ToString(envpos))(" = El: ")(eloc.ToString())("\n").str().c_str());*/
 	if (!impact.OBB) return false;
-	INTVECTOR3 eloc = DetermineElementAtOBBLocation(impact.OBB, impact.CollisionPointOBBLocal);
+	INTVECTOR3 eloc = DetermineElementAtOBBLocation(*(impact.OBB), impact.CollisionPointOBBLocal);
 	
 	int index = GetElementIndex(eloc);
 	ComplexShipElement & el = m_elements[index];
@@ -2123,6 +2128,42 @@ Result iSpaceObjectEnvironment::RotateElementSpace(Rotation90Degree rotation)
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+// Renders a 3D overlay showing the state of each element in the environment, for all elements
+void iSpaceObjectEnvironment::DebugRenderElementState(void)
+{
+	DebugRenderElementState(0, m_elementcount - 1);
+}
+// Renders a 3D overlay showing the state of each element in the environment, for the specified z-level 
+// of the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(int z_index)
+{
+	if (z_index >= 0 && z_index < m_elementsize.z)
+	{
+		DebugRenderElementState(ELEMENT_INDEX(0, 0, z_index), ELEMENT_INDEX(m_elementsize.x - 1, m_elementsize.y - 1, z_index));
+	}
+}
+
+// Renders a 3D overlay of element state.  Accepts the first/element in a contiguous sequence of
+// elements to be rendered as its parameters
+void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
+{
+	// Parameter check; this must be a contiguous range within the set of environment elements
+	if (start < 0 || end >= m_elementcount || start > end) return;
+	unsigned int count = (unsigned int)(end - start + 1);
+
+	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
+	std::vector<XMFLOAT4>::size_type data_index = 0U;
+	std::vector<XMFLOAT4> data(count);
+	for (int i = start; i <= end; ++i, ++data_index)
+	{
+		float x = m_elements[i].GetHealth();
+		data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
+	}
+
+	// Render this overlay on the environment
+	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
 }
 
 // Internal method; get all objects within a given distance of the specified position, within the 

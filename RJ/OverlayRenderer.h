@@ -141,7 +141,18 @@ public:
 	void				RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
 	void				RenderEnvironment3DOverlay(iSpaceObjectEnvironment & env, int deck, XMFLOAT4(*func)(iSpaceObjectEnvironment&, int));
 
-	
+	// Renders an overlay over the specified environment.  Accepts iterators into a range of colour/alpha data, and an offset parameter
+	// which specified the element to begin rendering this data from.  If no offset parameter is provided the rendering begins at element zero
+	void				RenderEnvironment3DOverlay(	iSpaceObjectEnvironment & env, const std::vector<XMFLOAT4>::const_iterator begin, 
+													const std::vector<XMFLOAT4>::const_iterator end, int element_start);
+	void				RenderEnvironment3DOverlay(	iSpaceObjectEnvironment & env, const std::vector<XMFLOAT4>::const_iterator begin, 
+													const std::vector<XMFLOAT4>::const_iterator end);
+
+	// Renders a semi-transparent 3D overlay
+	void				Render3DOverlay(const FXMVECTOR position, const FXMVECTOR orientation, const FXMVECTOR size, const XMFLOAT4 & colour_alpha);
+	void				Render3DOverlay(const FXMVECTOR position, const FXMVECTOR size, const XMFLOAT4 & colour_alpha);
+	void				Render3DOverlay(const XMMATRIX & world, const XMFLOAT4 & colour_alpha);
+
 	// Performs debug rendering of an octree node, and optionally all the way down the subtree as well
 	template <typename T>
 	void				DebugRenderSpatialPartitioningTree(const Octree<T> *tree, bool include_children)

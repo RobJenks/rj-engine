@@ -389,6 +389,14 @@ public:
 	// intersection took place.  If min<0 then the ray began inside the OBB
 	bool									DetermineLineVectorVsOBBHierarchyIntersection(const FXMVECTOR line_pos, const FXMVECTOR line_delta, OrientedBoundingBox & obb);
 
+	// Debug version of line vector vs OBB hierarchy testing method.  Returns the collection of OBBs that were tested, along with the 
+	// eventual collider, in case a collision is detected
+#	ifdef _DEBUG
+	bool									DetermineLineVectorVsOBBHierarchyIntersection_Debug(const FXMVECTOR line_pos, const FXMVECTOR line_delta, 
+												OrientedBoundingBox & obb, std::vector<OrientedBoundingBox*> & outIntersectingBranches,
+												std::vector<OrientedBoundingBox*> & outIntersectingLeaves, OrientedBoundingBox **ppOutClosestCollider);
+#	endif
+
 	// Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
 	// OBB with temporarily expanded bounds.  Not a completely precise test but sufficient for most purposes.  ray_point_volume
 	// indicates the expansion of OBB bounds; use a replicated "radius" vector if we just want to simulate a ray with certain radius 

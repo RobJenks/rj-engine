@@ -425,6 +425,9 @@ public:
 	CMPINLINE void								FadeToAlpha(float timeperiod, float alpha)		{ Fade.FadeToAlpha(timeperiod, alpha); }
 	CMPINLINE void								SetFadeAlpha(float alpha)						{ Fade.SetFadeAlpha(alpha); }
 
+	// Show a debug visualisation of a ray intersection test with this object
+	void										DebugRenderRayIntersectionTest(const BasicRay & world_ray);
+
 	// Static method to return the string representation of an object type
 	// @Dependency iObject::ObjectType
 	static std::string							TranslateObjectTypeToString(iObject::ObjectType type);

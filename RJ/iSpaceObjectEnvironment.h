@@ -375,6 +375,9 @@ public:
 		return ClampElementLocationToEnvironment(Game::PhysicalPositionToElementLocation(position));
 	}
 
+	// Returns the location of the element at the specified point within this OBB node
+	INTVECTOR3						DetermineElementAtOBBLocation(const OrientedBoundingBox & obb, const FXMVECTOR obb_local_pos);
+
 	// Determines and applies the effect of a collision with trajectory through the environment
 	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
 	bool							CalculateCollisionThroughEnvironment(	iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, 
@@ -386,12 +389,33 @@ public:
 	// Processes an environment collision at the current point in time.  Determines and applies all effects since the last frame
 	void							ProcessEnvironmentCollision(EnvironmentCollision & collision);
 
+	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
+	// Returns a value indicating the effect of the collision on this element
+	EnvironmentCollision::ElementCollisionResult
+									TriggerElementDamage(int element_id, float damage);
+
+	// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
+	void							SimulateElementDamage(int element_id, float damage) const;
+
+	// Triggers immediate destruction of an element
+	void							TriggerElementDestruction(int element_id);
+
 	// Enable or disable the ability to simulate environment collisions
 	static void						EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env);
 	static void						DisableEnvironmentCollisionSimulationMode(void);
 
 	// Static data used when simulating environment collisions (rather than actually applying them)
 	static SimulatedEnvironmentCollision		EnvironmentCollisionSimulationResults;
+
+	// Renders a 3D overlay showing the state of each element in the environment, for all decks
+	void							DebugRenderElementState(void);
+
+	// Renders a 3D overlay showing the state of each element in the environment, for the specified z-level of the environment
+	void							DebugRenderElementState(int z_index);
+
+	// Renders a 3D overlay of element state.  Accepts the first/element in a contiguous sequence of
+	// elements to be rendered as its parameters
+	void							DebugRenderElementState(int start, int end);
 
 	// Find all objects within a given distance of the specified object.  Object & Terrain output
 	// vectors will be populated if valid pointers are supplied
@@ -484,17 +508,6 @@ protected:
 	// Returns a flag indicating whether environment collisions are currently being simulated for this environment
 	CMPINLINE bool					EnvironmentCollisionsAreBeingSimulated(void) const		{ return iSpaceObjectEnvironment::EnvironmentCollisionSimulationResults.EnvironmentID == m_id; }
 
-	// Triggers damage to an element (and potentially its contents).  Element may be destroyed if sufficiently damaged
-	// Returns a value indicating the effect of the collision on this element
-	EnvironmentCollision::ElementCollisionResult
-									TriggerElementDamage(int element_id, float damage);
-
-	// SIMULATES damage to an element (and potentially its contents).  Element may be destroyed (in the simulation) if sufficiently damaged
-	void							SimulateElementDamage(int element_id, float damage) const;
-
-	// Triggers immediate destruction of an element
-	void							TriggerElementDestruction(int element_id);
-
 	// Applies a damage component to the specified element.  Returns true if the damage was sufficient
 	// to destroy the element
 	EnvironmentCollision::ElementCollisionResult	
@@ -529,9 +542,6 @@ protected:
 
 	// Recursively builds each node of the OBB that matches the supplied hierarchical region structure
 	void								BuildOBBNodeFromRegionData(OrientedBoundingBox & obb, const EnvironmentOBBRegion & region);
-
-	// Returns the location of the element at the specified point within this OBB node
-	INTVECTOR3							DetermineElementAtOBBLocation(const OrientedBoundingBox *obb, const FXMVECTOR obb_local_pos);
 
 	// Static working vector for environment object search; holds nodes being considered in the search
 	static std::vector<EnvironmentTree*>		m_search_nodes;

@@ -1818,11 +1818,10 @@ bool GamePhysicsEngine::DetermineRayVsAABBIntersection(const Ray & ray, const AA
 	XMVECTOR tmax = XMVectorMax(t1, t2);
 	
 	// We want to choose the largest of all min components, and the smallest of all max components, as the intersection times
-	// TODO: Replaced min/max with MinFinite/MaxFinite; need to make sure this doesn't cause any issues elsewhere
 	XMFLOAT3 tminf, tmaxf;
 	XMStoreFloat3(&tminf, tmin); XMStoreFloat3(&tmaxf, tmax);
-	RayIntersectionResult.tmin = MaxFinite(MaxFinite(tminf.x, tminf.y), tminf.z);
-	RayIntersectionResult.tmax = MinFinite(MinFinite(tmaxf.x, tmaxf.y), tmaxf.z);
+	RayIntersectionResult.tmin = max(max(tminf.x, tminf.y), tminf.z);
+	RayIntersectionResult.tmax = min(min(tmaxf.x, tmaxf.y), tmaxf.z);
 
 	// If min<max then we have an intersection
 	return (RayIntersectionResult.tmax >= 0.0f &&						// The entire intersection must take place after t=0, i.e. not in the past
@@ -1889,7 +1888,7 @@ bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection(const FXMV
 {
 	AABB box; Ray localray; 
 	bool intersection = false; 
-	float closest_intersection = 1.1f;		// Intersection should always be within t = [0 1], so 1.1 is a fine as an unachievable maximum
+	float closest_intersection = 1.1f;		// Intersection should always be within t = [0 1], so 1.1 is fine as an unachievable maximum
 
 	// Construct a ray in world space from the line vector data provided
 	Ray worldray = Ray(line_pos, line_delta);
@@ -1951,6 +1950,93 @@ bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection(const FXMV
 	// We have processed all nodes in the OBB hierarchy, so return the intersection flag (results are returned in OBBIntersectionResult)
 	return intersection;
 }
+
+
+// Debug version of line vector vs OBB hierarchy testing method.  Returns the collection of OBBs that were tested, along with the 
+// eventual collider, in case a collision is detected
+#ifdef _DEBUG
+bool GamePhysicsEngine::DetermineLineVectorVsOBBHierarchyIntersection_Debug(const FXMVECTOR line_pos, const FXMVECTOR line_delta,
+		OrientedBoundingBox & obb, std::vector<OrientedBoundingBox*> & outIntersectingBranches,
+		std::vector<OrientedBoundingBox*> & outIntersectingLeaves, OrientedBoundingBox **ppOutClosestCollider)
+{
+	AABB box; Ray localray;
+	bool intersection = false;
+	float closest_intersection = 1.1f;		// Intersection should always be within t = [0 1], so 1.1 is fine as an unachievable maximum
+
+	// Construct a ray in world space from the line vector data provided
+	Ray worldray = Ray(line_pos, line_delta);
+
+	// Update the OBB with a recursive refresh if invalidated & required
+	obb.UpdateIfRequired();
+
+	// Push this OBB onto the search vector as the top-level node to be tested
+	_obb_vector.clear();
+	_obb_vector.push_back(&obb);
+
+	// Process each OBB in the search vector in turn.  This allows us to perform a linear equivalent to recursive search
+	while (!_obb_vector.empty())
+	{
+		// Get a reference to the OBB
+		OrientedBoundingBox & node = *(_obb_vector.back());
+		_obb_vector.pop_back();
+
+		// We will use a ray/AABB intersection test.  Treat the line vector as a ray and transform into 
+		// the OBB's coordinate frame.  Once in the OBB's frame we can treat it as an AABB
+		box = AABB(node);
+		localray = worldray;
+		localray.TransformIntoCoordinateSystem(node.ConstData().Centre, node.ConstData().Axis);
+
+		// Now test as a ray/AABB intersection, and quit if this element of the hierachy is not colliding (since then 
+		// none of its children will be colliding either).  This will populate the RayIntersectionResult if a collision occured
+		if (DetermineRayVsAABBIntersection(localray, box, 1.0f) == false) continue;
+
+		// This OBB is colliding.  If it is a branch, we want to test its children.  If it is
+		// a leaf, we want to consider it as the final colliding OBB
+		if (node.HasChildren())
+		{
+			// Add all child nodes to the search vector
+			for (int i = 0; i < node.ChildCount; ++i)
+			{
+				_obb_vector.push_back(&node.Children[i]);
+			}
+
+			// Debug; branch is colliding
+			outIntersectingBranches.push_back(&node);
+		}
+		else
+		{
+			// Debug; branch is colliding
+			outIntersectingLeaves.push_back(&node);
+
+			// This is a leaf node which has collided; test whether it is closer than any current collision
+			intersection = true;
+			if (RayIntersectionResult.tmin < closest_intersection)
+			{
+				// This is closer than the current intersection, so store it
+				OBBIntersectionResult.OBB = &node;
+				OBBIntersectionResult.IntersectionTime = RayIntersectionResult.tmin;
+				OBBIntersectionResult.IntersectionTimeV = XMVectorReplicate(RayIntersectionResult.tmin);
+				OBBIntersectionResult.CollisionPoint = worldray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV);
+				OBBIntersectionResult.CollisionPointOBBLocal = localray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV);
+
+				Ray objray = worldray;
+				objray.TransformIntoCoordinateSystem(obb.ConstData().Centre, obb.ConstData().Axis);
+				OBBIntersectionResult.CollisionPointObjectLocal = objray.PositionAtTime(OBBIntersectionResult.IntersectionTimeV);
+			}
+		}
+	}
+	
+	// Report the closest intersecting OBB via output debug parameter, and also remove it from the list of non-closest candidates
+	if (intersection)
+	{
+		(*ppOutClosestCollider) = OBBIntersectionResult.OBB;
+		std::remove(outIntersectingLeaves.begin(), outIntersectingLeaves.end(), OBBIntersectionResult.OBB);
+	}
+
+	// We have processed all nodes in the OBB hierarchy, so return the intersection flag (results are returned in OBBIntersectionResult)
+	return intersection;
+}
+#endif
 
 // Tests for the (approximate) intersection between a volumetric ray and an OBB, by testing a point ray against an
 // OBB with temporarily expanded bounds.  Not a completely precise test but sufficient for most purposes

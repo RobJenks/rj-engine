@@ -11,7 +11,7 @@ AXMVECTOR_P OrientedBoundingBox::CoreOBBData::NegAxisExtent[3];
 
 // Default constructor, where no parameters are provided
 OrientedBoundingBox::OrientedBoundingBox(void) :
-Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
+	Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0), Index(0)
 {
 	_Data.Centre = NULL_VECTOR;
 	_Data.ExtentF = NULL_FLOAT3;
@@ -23,7 +23,7 @@ Parent(NULL), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
 
 // Default constructor, only parent pointer provided
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent) : 
-	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
+	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0), Index(0)
 {
 	_Data.Centre = NULL_VECTOR;
 	_Data.ExtentF = NULL_FLOAT3;
@@ -35,7 +35,7 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent) :
 
 // Constructor to build an OBB based on position & size.  Assumes axis aligment.
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR centre, const FXMVECTOR size) :
-	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
+	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0), Index(0)
 {
 	_Data.Centre = centre;
 	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];
@@ -46,7 +46,7 @@ OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR centre
 
 // Constructor to build an OBB based on size only.  Assumes centred at the origin and axis-aligned.
 OrientedBoundingBox::OrientedBoundingBox(iObject *parent, const FXMVECTOR size) :
-	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0)
+	Parent(parent), Offset(ID_MATRIX), Children(NULL), ChildCount(0), Flags(0), Index(0)
 {
 	_Data.Centre = NULL_VECTOR;
 	_Data.Axis[0].value = UNIT_BASES[0]; _Data.Axis[1].value = UNIT_BASES[1]; _Data.Axis[2].value = UNIT_BASES[2];

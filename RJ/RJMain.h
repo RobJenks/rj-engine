@@ -110,7 +110,7 @@ public:
 	void DebugCCDSphereTest(void);
 	void DebugCCDOBBTest(void);
 	void DebugFullCCDTest(void);
-	void DebugFireBasicProjectile(void) const;
+	void DebugFireBasicProjectile(const BasicRay & trajectory) const;
 
 
 	// Default destructor
