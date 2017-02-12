@@ -82,6 +82,16 @@ typedef unsigned long bitstring_l;
 #define Vector3Components(v)	(v.x, v.y, v.z)
 #define Vector4Components(v)	(v.x, v.y, v.z, v.w)
 
+// Formula to translate x/y/z coordinates into an index in the element collection
+// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)"
+#define ELEMENT_INDEX(_x, _y, _z) (_x + m_elementsize.x * (_y + (_z * m_elementsize.y)))
+
+// Special overloaded formula to translate x/y/z coordinates into an index in the element collection, which also
+// accepts the element space size.  Allows use on element spaces other than our own, e.g. 
+// when allocating a new space with different dimensions
+// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)" 
+#define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z * _size.y)))
+
 struct INTVECTOR2
 { 
 	int x; int y;

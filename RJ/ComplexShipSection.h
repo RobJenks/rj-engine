@@ -74,17 +74,38 @@ public:
 	// sections are moved by their parent ship objects and cannot change their own state
 	CMPINLINE void								RefreshPositionImmediate(void) { }
 
-	CMPINLINE INTVECTOR3 						GetElementLocation(void)			{ return m_elementlocation; }
-	CMPINLINE void								SetElementLocation(INTVECTOR3 loc)	{ m_elementlocation = loc; } 
+	CMPINLINE INTVECTOR3 						GetElementLocation(void) const				{ return m_elementlocation; }
+	CMPINLINE void								SetElementLocation(const INTVECTOR3 & loc)	{ m_elementlocation = loc; } 
+	CMPINLINE INTVECTOR3 						GetElementSize(void) const					{ return m_elementsize; }
+	CMPINLINE Rotation90Degree					GetRotation(void)							{ return m_rotation; }
 
-	CMPINLINE INTVECTOR3 						GetElementSize(void)				{ return m_elementsize; }
-	CMPINLINE int								GetElementSizeX(void) const			{ return m_elementsize.x; }
-	CMPINLINE int								GetElementSizeY(void) const			{ return m_elementsize.y; }
-	CMPINLINE int								GetElementSizeZ(void) const			{ return m_elementsize.z; }
-	CMPINLINE void								SetElementSize(INTVECTOR3 size)		{ m_elementsize = size; }
+	// Updating the section size or rotation will trigger a recalculation of its underlying properties
+	void										ResizeSection(const INTVECTOR3 & size);
+	void										RotateSection(Rotation90Degree rot);
 
-	CMPINLINE Rotation90Degree					GetRotation(void)					{ return m_rotation; }
-	void										SetRotation(Rotation90Degree rot);
+	// Sets all base element properties to their default values
+	void										ResetElementPropertiesToDefaults(void);
+
+	// Returns a reference to the element property data for this section
+	CMPINLINE const bitstring *					GetElementPropertyData(void) const	{ return m_element_properties; }
+
+	// Return properties of a specific element in this section
+	CMPINLINE bitstring							GetElementProperties(const INTVECTOR3 & location) const
+	{
+		return GetElementProperties(location.x, location.y, location.z);
+	}
+	CMPINLINE bitstring							GetElementProperties(int x, int y, int z) const
+	{
+		int index = ELEMENT_INDEX(x, y, z);
+		return ((index >= 0 && index < m_elementcount) ? m_element_properties[index] : 0U);
+	}
+
+	// Set the properties of a specific element in this section
+	CMPINLINE void								SetElementProperties(const INTVECTOR3 & location, bitstring properties)
+	{
+		int index = ELEMENT_INDEX(location.x, location.y, location.z);
+		if (index >= 0 && index < m_elementcount) m_element_properties[index] = properties;
+	}
 
 	// Recalculates all section statistics based upon the loadout and base statistics
 	void										RecalculateShipDataFromCurrentState(void);
@@ -132,9 +153,6 @@ public:
 	bool										InteriorShouldAlwaysBeRendered(void) const	{ return m_forcerenderinterior; }
 	void										ForceRenderingOfInterior(bool render)		{ m_forcerenderinterior = render; }
 
-	// Interface method from iContainsHardpoints; returns a reference back to this object's base iSpaceObject object
-	iSpaceObject *								GetSpaceObjectReference(void)	{ return (iSpaceObject*)this; }
-
 	// Method called when this object collides with another.  Virtual inheritance from iObject
 	void										CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact);
 	
@@ -173,7 +191,9 @@ private:
 	ComplexShip *					m_parent;					// The ship that this section belongs to
 	INTVECTOR3						m_elementlocation;			// x,y,z location of the top-top-left element, in element space
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
+	int								m_elementcount;				// The number of elements that this section covers
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
+	bitstring *						m_element_properties;		// Array of properties to be applied to underlying elements
 	AXMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
 	AXMVECTOR						m_relativeorient;			// Orientation relative to the parent ship object, in world space
 

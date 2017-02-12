@@ -23,9 +23,11 @@ ComplexShipSection::ComplexShipSection(void)
 	m_sectionupdated = false;
 	m_elementlocation = NULL_INTVECTOR3;
 	m_elementsize = NULL_INTVECTOR3;
+	m_element_properties = NULL;
 	m_rotation = Rotation90Degree::Rotate0;
 	m_relativepos = NULL_VECTOR;
 	m_relativeorient = ID_QUATERNION;
+
 	m_velocitylimit = 1.0f;
 	m_angularvelocitylimit = 1.0f;
 	m_turnrate = 0.01f;
@@ -33,6 +35,7 @@ ComplexShipSection::ComplexShipSection(void)
 	m_bankrate = 0.0f;
 	m_bankextent = NULL_VECTOR;
 	m_brakefactor = m_brakeamount = 1.0f;
+	
 	m_forcerenderinterior = false;
 	m_previewimage = NULL;
 
@@ -104,14 +107,92 @@ void ComplexShipSection::SetRelativePosition(const FXMVECTOR relativepos)
 	m_relativepos = relativepos;
 }
 
-// Sets the section rotation, relative to its parent ship
-void ComplexShipSection::SetRotation(Rotation90Degree rot)
+
+// Update the size of this section, measured in elements.  Will allocate/deallocate memory accordingly
+void ComplexShipSection::ResizeSection(const INTVECTOR3 & size)
 {
-	// Store the new rotation value
-	m_rotation = rot;
+	// We do not preserve any data if the section is resized; simply deallocate any existing space
+	if (m_element_properties) SafeDeleteArray(m_element_properties);
+
+	// Store the new element size
+	m_elementsize = size;
+	m_elementcount = (size.x * size.y * size.z);
+
+	// Allocate new space for the element data
+	m_element_properties = new bitstring[m_elementcount];
+	memset(m_element_properties, 0U, sizeof(bitstring) * m_elementcount);
+}
+
+// Sets the section rotation, relative to its parent ship
+void ComplexShipSection::RotateSection(Rotation90Degree new_rotation)
+{
+	// Determine the change in rotation from our current to new value
+	Rotation90Degree delta = Rotation90BetweenValues(m_rotation, new_rotation);
+	if (delta == Rotation90Degree::Rotate0) return;
+
+	// This may also change the section dimensions
+	INTVECTOR3 newsize = ((delta == Rotation90Degree::Rotate90 || delta == Rotation90Degree::Rotate270) ?
+		INTVECTOR3(m_elementsize.y, m_elementsize.x, m_elementsize.z) : m_elementsize);
+
+	// We need to perform some reallocation if we have existing element data
+	if (m_element_properties)
+	{
+		// Allocate a new array of memory for the underlying elements
+		bitstring *new_data = new bitstring[m_elementcount];
+		memset(new_data, 0U, sizeof(bitstring) * m_elementcount);
+
+		// Precalculate the element location that currently corresponds to each array index
+		INTVECTOR3 *old_loc = new INTVECTOR3[m_elementcount];
+		memset(old_loc, 0, sizeof(INTVECTOR3) * m_elementcount);
+		for (int x = 0; x < m_elementsize.x; ++x)
+			for (int y = 0; y < m_elementsize.y; ++y)
+				for (int z = 0; z < m_elementsize.z; ++z)
+					old_loc[ELEMENT_INDEX_EX(x, y, z, m_elementsize)] = INTVECTOR3(x, y, z);
+
+		// Now reallocate data into its new locations
+		for (int i = 0; i < m_elementcount; ++i)
+		{
+			int index = -1;
+			const INTVECTOR3 & loc = old_loc[i];
+
+			switch (delta)
+			{
+				case Rotation90Degree::Rotate90:
+					index = ELEMENT_INDEX_EX(loc.y, (m_elementsize.x - 1) - loc.x, loc.z, newsize);							break;
+				case Rotation90Degree::Rotate180:
+					index = ELEMENT_INDEX_EX((m_elementsize.x - 1) - loc.x, (m_elementsize.y - 1) - loc.y, loc.z, newsize);	break;
+				case Rotation90Degree::Rotate270:
+					index = ELEMENT_INDEX_EX((m_elementsize.y - 1) - loc.y, loc.x, loc.z, newsize);							break;
+			}
+
+			if (index >= 0 && index < m_elementcount) new_data[index] = m_element_properties[i];
+		}
+
+		// Deallocate the temporary location data that is no longer needed
+		SafeDeleteArray(old_loc);
+
+		// Deallocate and replace the existing property data 
+		SafeDeleteArray(m_element_properties);
+		m_element_properties = new_data;
+	}
+
+	// Store the new size and rotation values
+	m_rotation = new_rotation;
+	m_elementsize = newsize;
 
 	// Recalculate the orientation offset for this section
-	m_relativeorient = GetRotationQuaternion(rot);
+	m_relativeorient = GetRotationQuaternion(new_rotation);
+}
+
+// Sets all base element properties to their default values
+void ComplexShipSection::ResetElementPropertiesToDefaults(void)
+{
+	if (!m_element_properties) return;
+
+	for (int i = 0; i < m_elementcount; ++i)
+	{
+		m_element_properties[i] = ComplexShipElement::DefaultProperties;
+	}
 }
 
 // Update the section based on a change to the parent ship's position or orientation
@@ -262,7 +343,7 @@ void ComplexShipSection::CollisionWithObject(iActiveObject *object, const GamePh
 	iActiveObject::CollisionWithObject(object, impact);
 
 	// Pass the collision message to the parent ship, assuming we have a valid pointer back from this section
-	throw "SECTIONS SHOULD NOT COLLIDE ANYMORE";
+	throw "SECTIONS SHOULD NOT COLLIDE ANY MORE";
 	if (m_parent) m_parent->CollisionWithObject(object, this, impact);
 }
 
@@ -359,8 +440,8 @@ void ComplexShipSection::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(UpdatePositionFromParent)
 	REGISTER_DEBUG_FN(RefreshPositionImmediate)
 	REGISTER_DEBUG_FN(SetElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
-	REGISTER_DEBUG_FN(SetElementSize, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
-	REGISTER_DEBUG_FN(SetRotation, (Rotation90Degree)command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(ResizeSection, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_FN(RotateSection, (Rotation90Degree)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(RecalculateShipDataFromCurrentState)
 	REGISTER_DEBUG_FN(SimulateObject)
 	REGISTER_DEBUG_FN(ForceRenderingOfInterior, command.ParameterAsBool(2))

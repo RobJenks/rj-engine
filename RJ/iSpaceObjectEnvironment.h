@@ -27,16 +27,6 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(iSpaceObjectEnvironment)
 
-	// Formula to translate x/y/z coordinates into an index in the element collection
-	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)"
-#	define ELEMENT_INDEX(_x, _y, _z) (_x + m_elementsize.x * (_y + (_z * m_elementsize.y)))
-
-	// Special overloaded formula to translate x/y/z coordinates into an index in the element collection, which also
-	// accepts the element space size.  Allows use on element spaces other than our own, e.g. 
-	// when allocating a new space with different dimensions
-	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)" 
-#	define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z * _size.y)))
-
 	// Debug flag indicating whether we should output information on element collision tests
 //#	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_TESTING
 #	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_RESULT
@@ -219,11 +209,15 @@ public:
 	// Notifies the environment of whether it contains at least one interior simulation hub
 	CMPINLINE void					NotifyIsContainerOfSimulationHubs(bool is_container)			{ m_containssimulationhubs = is_container; }
 
+	// Virtual method to set the base properties of the environment, which must be implemented by 
+	// each environment-type object
+	virtual void					SetBaseEnvironmentProperties(void) = 0;
+
 	// Methods to add, find or remove terrain objects in the environment
 	void							AddTerrainObject(StaticTerrain *obj);
 	void							RemoveTerrainObject(StaticTerrain *obj);
 	void							ClearAllTerrainObjects(void);
-	
+
 	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found
 	TerrainCollection::const_iterator FindTerrainObject(StaticTerrain *obj)
 	{ 

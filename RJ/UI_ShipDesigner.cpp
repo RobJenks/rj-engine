@@ -334,8 +334,8 @@ void UI_ShipDesigner::UpdateSDGridLayout(void)
 	}
 
 	// Also recalculate the size of any ship section being dragged onto the SD grid
-	m_consview_selected_gridsize = INTVECTOR2(	m_consview_selected->GetElementSizeX() * m_gridsize, 
-												m_consview_selected->GetElementSizeY() * m_gridsize );
+	m_consview_selected_gridsize = INTVECTOR2(	m_consview_selected->GetElementSize().x * m_gridsize, 
+												m_consview_selected->GetElementSize().y * m_gridsize );
 
 }
 
@@ -1138,8 +1138,8 @@ void UI_ShipDesigner::ShipSectionSelectedInConstructionView(string code)
 	m_consview_selected = D::ComplexShipSections.Get(code);
 
 	// Calculate the size of this ship section on the SD grid
-	m_consview_selected_gridsize = INTVECTOR2(	m_consview_selected->GetElementSizeX() * m_gridsize, 
-												m_consview_selected->GetElementSizeY() * m_gridsize );
+	m_consview_selected_gridsize = INTVECTOR2(	m_consview_selected->GetElementSize().x * m_gridsize, 
+												m_consview_selected->GetElementSize().y * m_gridsize );
 
 	// Reset the rotation of the selected ship section back to normal
 	m_consview_selected_rotation = Rotation90Degree::Rotate0;
@@ -1371,8 +1371,8 @@ void UI_ShipDesigner::UpdateSDGridRendering(void)
 
 		// Calculate the range of elements (if any) that are visible in the section
 		startpos = INTVECTOR2(max(m_gridstart.x, sectionpos.x), max(m_gridstart.y, sectionpos.y));
-		endpos = INTVECTOR2(min(gridend.x, sectionpos.x + section->GetElementSizeX()), 
-							min(gridend.y, sectionpos.y + section->GetElementSizeY()));
+		endpos = INTVECTOR2(min(gridend.x, sectionpos.x + section->GetElementSize().x), 
+							min(gridend.y, sectionpos.y + section->GetElementSize().y));
 
 		// Determine whether the section is actually visible; if the endpos < startpos in either x or y direction
 		// then no part of the section is visible and we can skip the remainder of rendering for the section
@@ -1630,7 +1630,7 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 		// at this point since it will be set during the next update method
 		if (rg) { 
 			instance = rg->AddInstance(	INTVECTOR2(0, 0), z_shipsections, 
-				INTVECTOR2(sec->GetElementSizeX() * m_gridsize, sec->GetElementSizeY() * m_gridsize),
+				INTVECTOR2(sec->GetElementSize().x * m_gridsize, sec->GetElementSize().y * m_gridsize),
 				true, Rotation90Degree::Rotate0);
 			if (instance) instance->code = key;
 		}
@@ -1845,9 +1845,7 @@ void UI_ShipDesigner::PlaceShipSection(void)
 	section->SetRotation(m_consview_selected_rotation);
 
 	// Before attaching to the ship, we need to expand the ship element space if necessary to fully include the new section
-	INTVECTOR3 extent = INTVECTOR3(	location.x + section->GetElementSizeX(),
-									location.y + section->GetElementSizeY(),
-									location.z + section->GetElementSizeZ());
+	INTVECTOR3 extent = (location + section->GetElementSize());
 	m_ship->EnsureShipElementSpaceIncorporatesLocation(extent);
 
 	// Add this section to the ship

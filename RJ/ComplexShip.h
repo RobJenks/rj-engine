@@ -56,6 +56,9 @@ public:
 	// Overrides the iSpaceObject method to ensure that all ship sections are also moved into the environment along with the 'ship' itself
 	virtual void								MoveIntoSpaceEnvironment(SpaceSystem *system);
 
+	// Set the base properties of the complex ship environment; implementation of virtual environment method
+	void										SetBaseEnvironmentProperties(void);
+
 	// Builds the complex ship hardpoint collection based on its constituent ship sections
 	void										BuildHardpointCollection(void);
 

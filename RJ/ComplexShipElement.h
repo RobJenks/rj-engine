@@ -53,9 +53,10 @@ public:
 		PROP_ACTIVE				= (1 << 1),				// Is the element active, i.e. can be used in the SD
 		PROP_BUILDABLE			= (1 << 2),				// Can the element have tiles built on it?
 		PROP_WALKABLE			= (1 << 3),				// Is the element an (easy, walking) route for player & AI?
-		PROP_POWER_CABLES		= (1 << 4),				// Are there power cables running through this element?
-		PROP_OUTER_HULL_ELEMENT = (1 << 5),				// Is this element part of the outer ship hull?
-		PROPERTY_COUNT			= (1 << 6)				// (The total number of properties per element)
+		PROP_TRANSMITS_POWER	= (1 << 4),				// Are there power cables running through this element?
+		PROP_TRANSMITS_DATA		= (1 << 5),				// Are there data cables running through this element?
+		PROP_OUTER_HULL_ELEMENT = (1 << 6),				// Is this element part of the outer ship hull?
+		PROPERTY_COUNT			= (1 << 7)				// (The total number of properties per element)
 	};
 
 	// Struct holding data on a connection from one nav node to another
@@ -82,6 +83,7 @@ public:
 	// Set the value of a property.  Multiple properties can be provided, in which case the method will set all at once
 	CMPINLINE void					SetProperty(PROPERTY prop)					{ SetBit(m_properties, prop); }
 	CMPINLINE void					ClearProperty(PROPERTY prop)				{ ClearBit(m_properties, prop); }
+	CMPINLINE void					ClearAllProperties(void)					{ m_properties = 0U; }
 	CMPINLINE void					SetPropertyValue(PROPERTY prop, bool value)	{ SetBitState(m_properties, prop, value); }
 
 	// Get or set the full property set in one operation
@@ -271,8 +273,8 @@ public:
 	static XMFLOAT3							GetEdgePosition(Direction direction);
 	static XMFLOAT3							GetAdjacentElementCentrePosition(Direction direction);
 
-	// Method to initialise static data, for use in any static runtime calls
-	static const bitstring					DefaultPropertyValues;
+	// Default property state for a complex ship element
+	static const bitstring					DefaultProperties;
 
 
 

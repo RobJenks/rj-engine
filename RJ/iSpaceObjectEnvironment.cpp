@@ -570,11 +570,16 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Only perform the update if updates are not suspended
 	if (m_updatesuspended) return;
 
-	// Reset all element properties that will be set during the update steps below
+	// Reset all tile assignments and all element properties.  All properties will be
+	// re-derived during the environment update
 	for (int i = 0; i < m_elementcount; ++i)
 	{
+		m_elements[i].ClearAllProperties();
 		m_elements[i].SetTile(NULL);
 	}
+
+	// The base "Active" and "Buildable" element properties will be set by our parent
+	SetBaseEnvironmentProperties();
 	
 	// Keep a temporary record of all decks that contain tiles
 	unsigned int nZ = max((unsigned int)m_elementsize.z, 1);

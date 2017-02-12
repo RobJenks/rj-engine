@@ -227,6 +227,29 @@ void ComplexShip::RemoveShipSection(std::vector<ComplexShip::ComplexShipSectionC
 	}
 }
 
+// Set the base properties of the complex ship environment; implementation of virtual environment method
+void ComplexShip::SetBaseEnvironmentProperties(void)
+{
+	// Base properties are applied by our ship sections
+	ComplexShipSectionCollection::const_iterator it_end = m_sections.end(); 
+	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
+	{
+		const ComplexShipSection *sec = (*it);
+		INTVECTOR3 loc = sec->GetElementLocation();
+		INTVECTOR3 size = sec->GetElementSize();
+
+		for (int x = 0; x < size.x; ++x) {
+			for (int y = 0; y < size.y; ++y) {
+				for (int z = 0; x < size.z; ++z)
+				{
+					ComplexShipElement *el = GetElement(loc.x + x, loc.y + y, loc.z + z);
+					if (el) el->SetProperties(sec->GetElementProperties(x, y, z));
+				}
+			}
+		}
+	}
+}
+
 // Method to handle the addition of a ship tile to this object
 void ComplexShip::TileAdded(ComplexShipTile *tile)
 {
@@ -1088,9 +1111,7 @@ INTVECTOR3 ComplexShip::GetShipMaximumBounds(void)
 		if (!sec) continue;
 
 		// Determine the location of the far extent of this section
-		INTVECTOR3 size = sec->GetElementLocation();
-		size = INTVECTOR3(	size.x + sec->GetElementSizeX() - 1, size.y + sec->GetElementSizeY() - 1,
-							size.z + sec->GetElementSizeZ() - 1);
+		INTVECTOR3 size = (sec->GetElementLocation() + sec->GetElementSize() - ONE_INTVECTOR3);
 
 		// Store the extent of this section if it extends beyond the current bounds in any dimension
 		if (size.x > bounds.x) bounds.x = size.x;

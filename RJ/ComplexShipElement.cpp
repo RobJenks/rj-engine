@@ -13,7 +13,7 @@
 #endif
 
 // Static variables
-const bitstring ComplexShipElement::DefaultPropertyValues = 0U;
+const bitstring ComplexShipElement::DefaultProperties = (ComplexShipElement::PROPERTY::PROP_ACTIVE | ComplexShipElement::PROPERTY::PROP_BUILDABLE);
 
 // Default constructor
 ComplexShipElement::ComplexShipElement(void)
@@ -228,7 +228,8 @@ string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY 
 		case ComplexShipElement::PROPERTY::PROP_ACTIVE:				return "active";
 		case ComplexShipElement::PROPERTY::PROP_BUILDABLE:			return "buildable";
 		case ComplexShipElement::PROPERTY::PROP_WALKABLE:			return "walkable";
-		case ComplexShipElement::PROPERTY::PROP_POWER_CABLES:		return "powercables";
+		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER:	return "transmitspower";
+		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA:		return "transmitsdata";
 		default:													return "";
 	}
 }
@@ -242,7 +243,8 @@ ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(strin
 	if		(s == "active")				return ComplexShipElement::PROPERTY::PROP_ACTIVE;	
 	else if (s == "buildable")			return ComplexShipElement::PROPERTY::PROP_BUILDABLE;
 	else if (s == "walkable")			return ComplexShipElement::PROPERTY::PROP_WALKABLE;
-	else if (s == "powercables")		return ComplexShipElement::PROPERTY::PROP_POWER_CABLES;
+	else if (s == "transmitspower")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER;
+	else if (s == "transmitsdata")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA;
 	else								return ComplexShipElement::PROPERTY::PROP_UNKNOWN;
 }
 
