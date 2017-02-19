@@ -197,6 +197,18 @@ Rotation90Degree Rotation90BetweenValues(Rotation90Degree start_rotation, Rotati
 	return (Rotation90Degree)rot_value;
 }
 
+// Transforms a location by the specified rotation and returns the new location
+INTVECTOR3 GetRotatedElementLocation(const INTVECTOR3 & element_location, Rotation90Degree rotate_by, const INTVECTOR3 & element_size)
+{
+	switch (rotate_by)
+	{
+		case Rotation90Degree::Rotate90:	return INTVECTOR3(element_location.y, (element_size.y - 1) - element_location.x, element_location.z);						 // [y, (sy-1)-x]
+		case Rotation90Degree::Rotate180:	return INTVECTOR3((element_size.x - 1) - element_location.x, (element_size.y - 1) - element_location.y, element_location.z); // [(sx-1)-x, (sy-1)-y
+		case Rotation90Degree::Rotate270:	return INTVECTOR3((element_size.x - 1) - element_location.y, element_location.x, element_location.z);						 // [(sx-1)-y, x]
+		default:							return element_location;																									 // [x, y]
+	}
+}
+
 // Returns a unit integer offset in the indicated direction
 INTVECTOR3 DirectionUnitOffset(Direction direction)
 {

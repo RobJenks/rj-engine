@@ -240,7 +240,7 @@ void ComplexShip::SetBaseEnvironmentProperties(void)
 
 		for (int x = 0; x < size.x; ++x) {
 			for (int y = 0; y < size.y; ++y) {
-				for (int z = 0; x < size.z; ++z)
+				for (int z = 0; z < size.z; ++z)
 				{
 					ComplexShipElement *el = GetElement(loc.x + x, loc.y + y, loc.z + z);
 					if (el) el->SetProperties(sec->GetElementProperties(x, y, z));

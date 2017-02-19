@@ -752,7 +752,7 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 		else
 		{
 			// Compare the hash against all ComplexShipSection-related fields
-			if (hash == HashedStrings::H_ElementSize)						object->SetElementSize(IO::GetInt3CoordinatesFromAttr(node));
+			if (hash == HashedStrings::H_ElementSize)						object->ResizeSection(IO::GetInt3CoordinatesFromAttr(node));
 			else if (hash == HashedStrings::H_VelocityLimit)				object->SetVelocityLimit(GetFloatValue(node));
 			else if (hash == HashedStrings::H_AngularVelocityLimit)			object->SetAngularVelocityLimit(GetFloatValue(node));
 			else if (hash == HashedStrings::H_BrakeFactor)					object->SetBrakeFactor(GetFloatValue(node));
@@ -852,7 +852,7 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 	// This is a a valid section, so set the details now 
 	sec->SetRelativePosition(a_pos);
 	sec->SetElementLocation(a_elpos);
-	sec->SetRotation(a_rot);
+	sec->RotateSection(a_rot);
 
 	// Add this section to the ship and return the result
 	Result result = object->AddShipSection(sec);
@@ -1239,7 +1239,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			tiledef->AddTerrainObject(t);
 		}
 		else if (hash == HashedStrings::H_DefaultProperties) {
-			tiledef->DefaultProperties = IO::GetIntValue(child);
+			//tiledef->DefaultProperties = IO::GetIntValue(child); #1
 		}
 		else if (hash == HashedStrings::H_CanConnect) {
 			LoadAndApplyTileConnectionState(child, &(tiledef->Connectivity));

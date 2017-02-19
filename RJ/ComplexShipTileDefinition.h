@@ -11,6 +11,7 @@
 #include "ComplexShipElement.h"
 #include "ProductionCost.h"
 #include "TileConnections.h"
+#include "TileDefinitionElementState.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -136,6 +137,9 @@ public:
 		else															return GetModelFromSet(&(m_models.at(category)));
 	}
 
+	// Default property set applied to all elements of the tile; element-specific changes are then made when compiling the tile
+	TileDefinitionElementState		DefaultElementState;
+
 	// Creates a new tile based on this definition
 	ComplexShipTile *				CreateTile(void) const;
 
@@ -160,11 +164,6 @@ public:
 	// Constructor / destructor
 	ComplexShipTileDefinition(void);
 	~ComplexShipTileDefinition(void);
-
-	// Default property set applied to all elements of the tile; element-specific changes are then made when compiling the tile
-	*** REPLACE THIS WITH 4X SETS OF PER-ELEMENT PROPERTIES, ONE PER ROTATION VALUE, THAT ARE ALL SET AT ONCE AND 
-		CAN BE RETRIEVED VIA GETPROP(ELEMENT, ROTATION).THEN WE SET ELEMENT PROPERTIES VIA CSTILE::APPLYTIlE(), BY LOOKING UP IN THIS DEFINITION ***
-	bitstring						DefaultProperties;
 
 	// Adds a new model to the tile model set
 	CMPINLINE bool AddItemToCompoundModelCollection(string type, string code, float prob)

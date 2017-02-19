@@ -601,6 +601,9 @@
     <ClCompile Include="ModifierDetails.cpp">
       <Filter>Concepts\Damage</Filter>
     </ClCompile>
+    <ClCompile Include="TileDefinitionElementState.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1374,6 +1377,9 @@
     </ClInclude>
     <ClInclude Include="StandardModifiers.list">
       <Filter>Concepts\Modifiers</Filter>
+    </ClInclude>
+    <ClInclude Include="TileDefinitionElementState.h">
+      <Filter>Objects\Ships\Tiles</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

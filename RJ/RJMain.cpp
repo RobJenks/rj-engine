@@ -105,6 +105,7 @@
 #include "DynamicTileSet.h"					// DBG
 #include "Modifiers.h"						// DBG
 #include "StandardModifiers.h"				// DBG
+#include "TileDefinitionElementState.h"		// DBG
 #include "ViewFrustrum.h"
 
 #include "Equipment.h"
@@ -2229,6 +2230,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
+
 
 	Game::Log << LOG_INIT_START << "--- Debug scenario created\n";
 }

@@ -465,6 +465,7 @@
     <ClCompile Include="ProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="TileConnections.cpp" />
+    <ClCompile Include="TileDefinitionElementState.cpp" />
     <ClCompile Include="Timers.cpp" />
     <ClCompile Include="TurretController.cpp" />
     <ClCompile Include="UI_Console.cpp" />
@@ -711,6 +712,7 @@
     <ClInclude Include="StandardModifiers.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
+    <ClInclude Include="TileDefinitionElementState.h" />
     <ClInclude Include="Timers.h" />
     <ClInclude Include="TurretController.h" />
     <ClInclude Include="UI_Console.h" />

@@ -1842,7 +1842,7 @@ void UI_ShipDesigner::PlaceShipSection(void)
 	section->SetPosition(Game::ElementLocationToPhysicalPosition(location));
 
 	// Set the ship section rotation.  This impacts the physical orientation, but elements are rotation-independent and calculated by the SD
-	section->SetRotation(m_consview_selected_rotation);
+	section->RotateSection(m_consview_selected_rotation);
 
 	// Before attaching to the ship, we need to expand the ship element space if necessary to fully include the new section
 	INTVECTOR3 extent = (location + section->GetElementSize());

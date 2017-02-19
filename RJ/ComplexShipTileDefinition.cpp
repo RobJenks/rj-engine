@@ -74,7 +74,6 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 	tile->SetName(m_name);
 	tile->SetTileDefinition(this);
 	tile->SetTileClass(m_classtype);
-	tile->DefaultProperties = this->DefaultProperties;
 	
 	// Set a default tile size; either the class-specified default, or 1x1x1 if it is a resizable tile
 	if (m_elementsize.x > 0 && m_elementsize.y > 0 && m_elementsize.z > 0)
@@ -303,11 +302,11 @@ Result ComplexShipTileDefinition::ValidateTileHardStop(ComplexShipTile *tile) co
 // Sets the element size for this definition, allocating other data accordingly
 void ComplexShipTileDefinition::SetElementSize(const INTVECTOR3 & size)					
 {
-	// Store the new element size
-	m_elementsize = size; 
+// Store the new element size
+m_elementsize = size;
 
-	// Initialise the connection data to an equivalent size
-	Connectivity.Initialise(m_elementsize);
+// Initialise the connection data to an equivalent size
+Connectivity.Initialise(m_elementsize);
 }
 
 // Adds a link to a dynamic tileset
@@ -363,7 +362,7 @@ Model *ComplexShipTileDefinition::GetModelFromSet(const ProbabilityWeightedModel
 	}
 
 	// Return NULL by default, although we should not expect to reach this point
-	return NULL; 
+	return NULL;
 }
 
 // Sets the class of this tile definition, based on the string code of the class
@@ -391,7 +390,6 @@ bool ComplexShipTileDefinition::SetClass(ComplexShipTileClass *cls)
 	// Return true for success
 	return true;
 }
-
 
 // Shutdown method to deallocate all resources
 void ComplexShipTileDefinition::Shutdown(void)

@@ -188,6 +188,12 @@ Rotation90Degree Compose90DegreeRotations(Rotation90Degree current_rotation, Rot
 // Returns the 90-degree rotation required to transform between two rotation values
 Rotation90Degree Rotation90BetweenValues(Rotation90Degree start_rotation, Rotation90Degree end_rotation);
 
+// Transforms a location by the specified rotation and returns the new location
+INTVECTOR3 GetRotatedElementLocation(const INTVECTOR3 & element_location, Rotation90Degree rotate_by, const INTVECTOR3 & element_size);
+
+// Indicates whether the specified 90-degree rotation value is valid
+CMPINLINE bool Rotation90DegreeIsValid(Rotation90Degree rotation) { return (int)rotation >= (int)Rotate0 && (int)rotation <= (int)Rotate270; }
+
 // Enumeration of possible 90-degree directions
 enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };
 const int DirectionCount = 10;
