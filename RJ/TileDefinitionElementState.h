@@ -88,7 +88,7 @@ protected:
 	ElementState					m_defaultstate;				// Default state for any element which is not explicitly set
 
 	// Returns the relevant area dimensions for a particular tile rotation
-	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) 
+	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) const
 	{ 
 		return ((rotation == Rotation90Degree::Rotate90 || rotation == Rotation90Degree::Rotate270) ? m_size_transposed : m_size);
 	}

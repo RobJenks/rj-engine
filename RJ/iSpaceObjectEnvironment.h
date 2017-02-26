@@ -401,14 +401,14 @@ public:
 	// Static data used when simulating environment collisions (rather than actually applying them)
 	static SimulatedEnvironmentCollision		EnvironmentCollisionSimulationResults;
 
-	// Renders a 3D overlay showing the state of each element in the environment, for all decks
+	// Renders a 3D overlay showing the health of each element in the environment
+	void							DebugRenderElementHealth(void);
+	void							DebugRenderElementHealth(int z_index);
+	void							DebugRenderElementHealth(int start, int end);
+
+	// Renders a 3D overlay showing the properties of each element in the environment
 	void							DebugRenderElementState(void);
-
-	// Renders a 3D overlay showing the state of each element in the environment, for the specified z-level of the environment
 	void							DebugRenderElementState(int z_index);
-
-	// Renders a 3D overlay of element state.  Accepts the first/element in a contiguous sequence of
-	// elements to be rendered as its parameters
 	void							DebugRenderElementState(int start, int end);
 
 	// Find all objects within a given distance of the specified object.  Object & Terrain output
@@ -513,6 +513,12 @@ protected:
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);
+
+	// Determines the contiguous range of elements between the specified two elements
+	INTVECTOR2						GetElementRange(const INTVECTOR3 & el1, const INTVECTOR3 & el2);
+
+	// Determines the contiguous range of elements on the specified z-level of the environment
+	INTVECTOR2						GetElementRange(int zlevel);
 
 	// We store the number of decks in this environment, and a pointer to relevant data for each
 	int								m_deckcount;

@@ -771,6 +771,27 @@ void RJMain::ProcessKeyboardInput(void)
 		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
 
 		if (b[DIK_LSHIFT])
+			cs()->DebugRenderElementHealth(dbg_z);
+		else
+			cs()->DebugRenderElementHealth();
+	}
+
+	if (b[DIK_B])
+	{
+		static int dbg_z = 0;
+		static BOOL ctrl_g_down = FALSE;
+		if (b[DIK_LCONTROL] && !ctrl_g_down)
+		{
+			if (++dbg_z >= cs()->GetElementSize().z) dbg_z = 0;
+		}
+		ctrl_g_down = b[DIK_LCONTROL];
+
+		cs()->Fade.SetFadeAlpha(0.1f);
+		cs()->Fade.FadeIn(1.0f);
+		cs()->SetWorldMomentum(NULL_VECTOR);
+		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
+
+		if (b[DIK_LSHIFT])
 			cs()->DebugRenderElementState(dbg_z);
 		else
 			cs()->DebugRenderElementState();

@@ -73,7 +73,12 @@
 using namespace std;
 using namespace std::tr1;
 
+// Initialise static data
+const std::array<XMFLOAT4, 8> CoreEngine::BASIC_COLOURS = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f),
+	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
+	XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.5f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) };
 
+// Default constructor
 CoreEngine::CoreEngine(void)
 	:
 	m_rq_optimiser(m_renderqueue)

@@ -3,6 +3,7 @@
 #ifndef __CoreEngineH__
 #define __CoreEngineH__
 
+#include <array>
 #include <unordered_map>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
@@ -403,6 +404,10 @@ public:
 	
 	// Outputs the contents of the render queue to debug-out
 	void					DebugOutputRenderQueueContents(void);
+
+	// Static constant collection of basic colours, for ease of use in e.g. simple debug overlays
+	static const std::array<XMFLOAT4, 8> BASIC_COLOURS;
+
 
 private:
 	

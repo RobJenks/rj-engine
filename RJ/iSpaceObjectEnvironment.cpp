@@ -2135,27 +2135,50 @@ Result iSpaceObjectEnvironment::RotateElementSpace(Rotation90Degree rotation)
 	return ErrorCodes::NoError;
 }
 
-// Renders a 3D overlay showing the state of each element in the environment, for all elements
-void iSpaceObjectEnvironment::DebugRenderElementState(void)
+
+// Determines the contiguous range of elements between the specified two elements
+INTVECTOR2 iSpaceObjectEnvironment::GetElementRange(const INTVECTOR3 & el1, const INTVECTOR3 & el2)
 {
-	DebugRenderElementState(0, m_elementcount - 1);
+	// Get the index of each element
+	int i1 = ELEMENT_INDEX(el1.x, el1.y, el1.z); 
+	int i2 = ELEMENT_INDEX(el2.x, el2.y, el2.z);
+
+	// Make sure both indices are valid
+	if (i1 < 0 || i2 < 0 || i1 >= m_elementcount || i2 >= m_elementcount) return NULL_INTVECTOR2;
+
+	// Return the range of elements between these two points (ignoring the relative order of el1 & el2)
+	return (i2 < i1 ? INTVECTOR2(i2, i1) : INTVECTOR2(i1, i2));
+}
+
+// Determines the contiguous range of elements on the specified z-level of the environment
+INTVECTOR2 iSpaceObjectEnvironment::GetElementRange(int zlevel)
+{
+	return GetElementRange(INTVECTOR3(0, 0, zlevel), INTVECTOR3(m_elementsize.x - 1, m_elementsize.y - 1, zlevel));
+}
+
+// Renders a 3D overlay showing the state of each element in the environment, for all elements
+void iSpaceObjectEnvironment::DebugRenderElementHealth(void)
+{
+	DebugRenderElementHealth(0, m_elementcount - 1);
 }
 // Renders a 3D overlay showing the state of each element in the environment, for the specified z-level 
 // of the environment
-void iSpaceObjectEnvironment::DebugRenderElementState(int z_index)
+void iSpaceObjectEnvironment::DebugRenderElementHealth(int z_index)
 {
 	if (z_index >= 0 && z_index < m_elementsize.z)
 	{
-		DebugRenderElementState(ELEMENT_INDEX(0, 0, z_index), ELEMENT_INDEX(m_elementsize.x - 1, m_elementsize.y - 1, z_index));
+		INTVECTOR2 range = GetElementRange(z_index);
+		DebugRenderElementHealth(range.x, range.y);
 	}
 }
 
 // Renders a 3D overlay of element state.  Accepts the first/element in a contiguous sequence of
 // elements to be rendered as its parameters
-void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
+void iSpaceObjectEnvironment::DebugRenderElementHealth(int start, int end)
 {
 	// Parameter check; this must be a contiguous range within the set of environment elements
-	if (start < 0 || end >= m_elementcount || start > end) return;
+	if (start > end) std::swap(start, end);
+	if (start < 0 || end >= m_elementcount) return;
 	unsigned int count = (unsigned int)(end - start + 1);
 
 	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
@@ -2169,6 +2192,56 @@ void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
 
 	// Render this overlay on the environment
 	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
+}
+
+
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(void)
+{
+	return DebugRenderElementState(0, m_elementcount - 1);
+}
+
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(int z_index)
+{
+	INTVECTOR2 range = GetElementRange(z_index);
+	return DebugRenderElementState(range.x, range.y);
+}
+
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
+{
+	// We will map each distinct property to a different colour
+	std::unordered_map<bitstring, XMFLOAT4> cols;
+
+	// Parameter check; this must be a contiguous range within the set of environment elements
+	if (start > end) std::swap(start, end);
+	if (start < 0 || end >= m_elementcount) return;
+	unsigned int count = (unsigned int)(end - start + 1);
+
+	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
+	std::vector<XMFLOAT4>::size_type data_index = 0U;
+	std::vector<XMFLOAT4> data(count);
+	for (int i = start; i <= end; ++i, ++data_index)
+	{
+		bitstring x = m_elements[i].GetProperties();
+		std::unordered_map<bitstring, XMFLOAT4>::const_iterator it = cols.find(x);
+		if (it == cols.end())
+		{
+			// We do not yet have a colour for this property combination, so add one now
+			cols[x] = (cols.size() < CoreEngine::BASIC_COLOURS.size() ?
+				CoreEngine::BASIC_COLOURS.at(cols.size()) :
+				XMFLOAT4(frand(), frand(), frand(), 1.0f));
+			it = cols.find(x);
+		}
+
+		assert(it != cols.end());
+		data[data_index] = it->second;
+	}
+
+	// Render this overlay on the environment
+	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
+
 }
 
 // Internal method; get all objects within a given distance of the specified position, within the 
