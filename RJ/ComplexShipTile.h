@@ -489,9 +489,6 @@ public:
 	// Applies the effects of this tile on the underlying elements
 	void								ApplyTile(void);
 
-	// Applies the effects of this tile to a specific underlying element
-	void								ApplyTileToElement(ComplexShipElement *el);
-
 	// Subclass-implemented virtual method, called by base class method
 	virtual void						ApplyTileSpecific(void) = 0;		
 
@@ -815,6 +812,9 @@ protected:
 	ProductionCost *			m_constructedstate;
 	ProductionCost****			m_elementconstructedstate;					// 3D array of constructed state values
 	INTVECTOR3					m_constructedstate_previousallocatedsize;	// The last allocation that was made, for purposes of re/de-allocating
+
+	// Applies the effects of this tile to a specific underlying element
+	void						ApplyTileToElement(ComplexShipElement *el);
 
 public:
 	// Debug variables to log instance creation

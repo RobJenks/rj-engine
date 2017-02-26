@@ -243,7 +243,7 @@ void ComplexShip::SetBaseEnvironmentProperties(void)
 				for (int z = 0; z < size.z; ++z)
 				{
 					ComplexShipElement *el = GetElement(loc.x + x, loc.y + y, loc.z + z);
-					if (el) el->SetProperties(sec->GetElementProperties(x, y, z));
+					if (el) el->ApplyElementState((TileDefinitionElementState::ElementState)sec->GetElementProperties(x, y, z));
 				}
 			}
 		}

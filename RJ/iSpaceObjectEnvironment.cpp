@@ -574,7 +574,7 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// re-derived during the environment update
 	for (int i = 0; i < m_elementcount; ++i)
 	{
-		m_elements[i].ClearAllProperties();
+		m_elements[i].ResetElementState();
 		m_elements[i].SetTile(NULL);
 	}
 

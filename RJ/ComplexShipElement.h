@@ -14,6 +14,7 @@
 #include "Utility.h"
 #include "GameDataExtern.h"
 #include "iContainsComplexShipTiles.h"
+#include "TileDefinitionElementState.h"
 #include "NavNode.h"
 
 class ComplexShipTile;
@@ -107,6 +108,17 @@ public:
 
 	// Is the element part of the outer environment hull?
 	CMPINLINE bool					IsOuterHullElement(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT); }
+
+
+	// Add to the element state (e.g. apply additional properties)
+	void							ApplyElementState(const TileDefinitionElementState::ElementState & state);
+
+	// Overwrite the entire element state with another
+	void							OverwriteElementState(const TileDefinitionElementState::ElementState & state);
+
+	// Reset the element state
+	void							ResetElementState(void);
+
 
 	// Health of the element.  Ranges from 0.0-1.0.  Element is destroyed at <= 0.0
 	CMPINLINE float					GetHealth(void) const			{ return m_health; }

@@ -3,6 +3,7 @@
 #include "ErrorCodes.h"
 #include "ComplexShipTile.h"
 #include "iSpaceObjectEnvironment.h"
+#include "TileDefinitionElementState.h"
 #include "Damage.h"
 
 #include "ComplexShipElement.h"
@@ -112,6 +113,26 @@ bool ComplexShipElement::AttachmentIsCompatible(ComplexShipElement *element, Dir
 	return false;
 }
 
+
+// Add to the element state (e.g. apply additional properties)
+void ComplexShipElement::ApplyElementState(const TileDefinitionElementState::ElementState & state)
+{
+	// Update element properties
+	SetProperty((PROPERTY)state.Properties);
+}
+
+// Overwrite the entire element state with another
+void ComplexShipElement::OverwriteElementState(const TileDefinitionElementState::ElementState & state)
+{
+	// Update element properties
+	SetProperties((PROPERTY)state.Properties);
+}
+
+// Reset the element state
+void ComplexShipElement::ResetElementState(void)
+{
+	SetProperties((PROPERTY)0U);
+}
 
 // Allow assignment of one element contents to another
 void ComplexShipElement::operator=(const ComplexShipElement & rhs)

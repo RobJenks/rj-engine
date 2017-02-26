@@ -330,15 +330,21 @@ void ComplexShipTile::ApplyTileToElement(ComplexShipElement *el)
 	// Parameter check
 	if (!el) return;
 
+	// Get the relative offset within this tile, and make sure we actually cover the element
+	INTVECTOR3 tgt = (el->GetLocation() - m_elementlocation);
+	if (!(tgt >= NULL_INTVECTOR3 && tgt < m_elementsize)) return;
+
 	// Set the element pointer to this tile
 	el->SetTile(this);
 
-	// Set element properties
-	el->SetProperties(DefaultProperties);
+	// Set element properties based on our tile definition
+	if (m_definition)
+	{
+		el->ApplyElementState(m_definition->DefaultElementState.GetElementState(tgt, m_rotation));
+	}
 
 	// See if there are any connection values specified for this element, and apply them if there are
 	// TODO: Currently only copying the "walkable" connection state.  Element may need to store all types in future
-	INTVECTOR3 tgt = (el->GetLocation() - m_elementlocation);
 	el->SetConnectionState(Connections.GetConnectionState(TileConnections::TileConnectionType::Walkable, tgt));
 }
 

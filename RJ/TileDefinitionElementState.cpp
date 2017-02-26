@@ -11,7 +11,7 @@ void TileDefinitionElementState::ApplyDefaultElementState(TileDefinitionElementS
 }
 
 // Retuns the default state of an element at the specified location, given the specified tile orientation
-TileDefinitionElementState::ElementState TileDefinitionElementState::GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation)
+TileDefinitionElementState::ElementState TileDefinitionElementState::GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const
 {
 	int index = ELEMENT_INDEX_EX(location.x, location.y, location.z, GetSize(tile_rotation));
 	if (index < 0 || index >= m_count || !Rotation90DegreeIsValid(tile_rotation)) return ElementState();

@@ -45,10 +45,10 @@ public:
 	void ApplyDefaultElementState(ElementState default_state);
 	
 	// Retuns the default state of an element at the specified location, given the specified tile orientation
-	ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation);
+	ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const;
 
 	// Retuns the default state of an element at the specified location, in the default unrotated tile orientation
-	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location) 
+	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location) const 
 	{ 
 		return GetElementState(location, Rotation90Degree::Rotate0); 
 	}
