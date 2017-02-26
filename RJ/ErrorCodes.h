@@ -417,6 +417,7 @@ namespace ErrorCodes {
 	const Result		CannotLoadDREntryWithoutRequiredData			= 2686;
 	const Result		InvalidDataEncounteredInDamageSet				= 2687;
 	const Result		InvalidDataEncounteredInDRSet					= 2688;
+	const Result		CannotLoadElementStateDefinitionFromNullData	= 2689;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

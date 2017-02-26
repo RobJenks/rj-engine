@@ -48,15 +48,19 @@ public:
 	enum AttachType { Standard = 0, TurretModule, _AttachTypeCount };
 	
 	// Properties of the element, indexed into the m_properties bitstring
-	enum PROPERTY {
-		PROP_UNKNOWN			= (1 << 0),
-		PROP_ACTIVE				= (1 << 1),				// Is the element active, i.e. can be used in the SD
-		PROP_BUILDABLE			= (1 << 2),				// Can the element have tiles built on it?
-		PROP_WALKABLE			= (1 << 3),				// Is the element an (easy, walking) route for player & AI?
-		PROP_TRANSMITS_POWER	= (1 << 4),				// Are there power cables running through this element?
-		PROP_TRANSMITS_DATA		= (1 << 5),				// Are there data cables running through this element?
-		PROP_OUTER_HULL_ELEMENT = (1 << 6),				// Is this element part of the outer ship hull?
-		PROPERTY_COUNT			= (1 << 7)				// (The total number of properties per element)
+	enum PROPERTY 
+	{
+		// Structural properties; set by e.g. ship hull or sections
+		PROP_ACTIVE				= (1 << 0),				// 1:     Is the element active, i.e. can be used in the SD
+		PROP_BUILDABLE			= (1 << 1),				// 2:     Can the element have tiles built on it?
+		PROP_OUTER_HULL_ELEMENT = (1 << 2),				// 4:     Is this element part of the outer ship hull?
+
+		// More detaileed properties; set by e.g. ship tiles
+		PROP_WALKABLE			= (1 << 3),				// 8:     Is the element an (easy, walking) route for player & AI?
+		PROP_TRANSMITS_POWER	= (1 << 4),				// 16:    Are there power cables running through this element?
+		PROP_TRANSMITS_DATA		= (1 << 5),				// 32:    Are there data cables running through this element?
+		
+		PROPERTY_COUNT			= (1 << 6)				//        (The total number of properties per element)
 	};
 
 	// Struct holding data on a connection from one nav node to another
@@ -268,6 +272,9 @@ public:
 	// Static methods to convert between element properties and their string name representation
 	static ComplexShipElement::PROPERTY		TranslatePropertyFromName(string name);
 	static string							TranslatePropertyToName(ComplexShipElement::PROPERTY prop);
+
+	// Static method to parse a property string and determine the final element state
+	static ComplexShipElement::PROPERTY		ParsePropertyString(const std::string & prop_string);
 
 	// Returns the coordinates of a point on specific adjoining edges or elements
 	static XMFLOAT3							GetEdgePosition(Direction direction);

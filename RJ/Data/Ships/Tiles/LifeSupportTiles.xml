@@ -6,9 +6,6 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="1" y="1" z="1" />
     <Level>1</Level>
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
-
 <!--
     <CompoundTileModelData>
       <Model type="interior" code="lifesupport_basic01_interior_model" prob="1.0"/>
@@ -24,6 +21,10 @@
       <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
     </CompoundTileModelData>
 
+    
+    <ElementStateDefinition>
+      <DefaultState state="Walkable|TransmitsPower" />
+    </ElementStateDefinition>
     
     <ProductionCost type="PerElement">
       <TimeRequirement secs="300.000000" />
@@ -53,9 +54,6 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="3" y="3" z="1" />
     <Level>1</Level>
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
-
     <!--
     <CompoundTileModelData>
       <Model type="interior" code="lifesupport_basic01_interior_model" prob="1.0"/>
@@ -71,6 +69,11 @@
       <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
     </CompoundTileModelData>
 
+    <ElementStateDefinition>
+      <DefaultState state="Walkable" />
+      <State x="0" y="1" z="0" state="Walkable|TransmitsPower" />
+      <State x="1" y="2" z="0" state="Walkable|TransmitsData|TransmitsPower" />      
+    </ElementStateDefinition>
 
     <ProductionCost type="PerElement">
       <TimeRequirement secs="3000.000000" />

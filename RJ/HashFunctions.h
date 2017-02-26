@@ -250,6 +250,9 @@ namespace HashedStrings
 	DefineHash(H_DamageSet, "damageset");
 	DefineHash(H_DamageResistance, "damageresistance");
 	DefineHash(H_DamageResistanceSet, "damageresistanceset");
+	DefineHash(H_ElementStateDefinition, "elementstatedefinition");
+	DefineHash(H_State, "state");
+	DefineHash(H_DefaultState, "defaultstate");
 }
 
 

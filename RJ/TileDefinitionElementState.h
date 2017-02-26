@@ -41,39 +41,27 @@ public:
 		}
 	}
 
+	// Store a default element state, and apply it to all elements in the area
+	void ApplyDefaultElementState(ElementState default_state);
+	
 	// Retuns the default state of an element at the specified location, given the specified tile orientation
-	CMPINLINE ElementState			GetDefaultElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation)
-	{
-		int index = ELEMENT_INDEX_EX(location.x, location.y, location.z, GetSize(tile_rotation));
-		if (index < 0 || index >= m_count || !Rotation90DegreeIsValid(tile_rotation)) return ElementState();
-
-		return m_state[(int)tile_rotation][index];
-	}
+	ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation);
 
 	// Retuns the default state of an element at the specified location, in the default unrotated tile orientation
-	CMPINLINE ElementState			GetDefaultElementState(const INTVECTOR3 & location) { return GetDefaultElementState(location, Rotation90Degree::Rotate0); }
+	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location) 
+	{ 
+		return GetElementState(location, Rotation90Degree::Rotate0); 
+	}
 
 	// Set the default state of an element within the tile.  Properties are replicated to each copy of 
 	// the ElementState set (once per orientation)
-	CMPINLINE void					SetDefaultElementState(ElementState element_state, const INTVECTOR3 & location, Rotation90Degree rotation)
-	{
-		for (int rot = (int)Rotation90Degree::Rotate0; rot <= (int)Rotation90Degree::Rotate270; ++rot)
-		{
-			Rotation90Degree delta = Rotation90BetweenValues(rotation, (Rotation90Degree)rot);
-			INTVECTOR3 loc = GetRotatedElementLocation(location, delta, GetSize((Rotation90Degree)rot));
-			int index = ELEMENT_INDEX_EX(loc.x, loc.y, loc.z, GetSize((Rotation90Degree)rot));
-			if (index >= 0 && index < m_count)
-			{
-				m_state[rot][index] = element_state;
-			}
-		}
-	}
+	void							SetElementState(ElementState element_state, const INTVECTOR3 & location, Rotation90Degree rotation);
 
 	// Set the default state of an element within the tile, assuming the tile is unrotated.  Properties are 
 	// replicated to each copy of the ElementState set (once per orientation)
-	void							SetDefaultElementState(ElementState state, const INTVECTOR3 & location)
+	void							SetElementState(ElementState state, const INTVECTOR3 & location)
 	{
-		SetDefaultElementState(state, location, Rotation90Degree::Rotate0);
+		SetElementState(state, location, Rotation90Degree::Rotate0);
 	}
 
 	// Returns a debug string output representing the set of element states, given the specified tile orientation
@@ -93,10 +81,11 @@ public:
 
 protected:
 
-	std::vector<ElementState>		m_state[4];
-	INTVECTOR3						m_size;
-	INTVECTOR3						m_size_transposed;
-	int								m_count;
+	std::vector<ElementState>		m_state[4];					// The element state in each of the four possible area orientations
+	INTVECTOR3						m_size;						// Size in Rotate0 and Rotate180 orientations
+	INTVECTOR3						m_size_transposed;			// Size in Rotate90 and Rotate270 orientations
+	int								m_count;					// Total count of elements in the area
+	ElementState					m_defaultstate;				// Default state for any element which is not explicitly set
 
 	// Returns the relevant area dimensions for a particular tile rotation
 	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) 

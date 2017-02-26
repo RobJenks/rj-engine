@@ -245,7 +245,44 @@ ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(strin
 	else if (s == "walkable")			return ComplexShipElement::PROPERTY::PROP_WALKABLE;
 	else if (s == "transmitspower")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER;
 	else if (s == "transmitsdata")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA;
-	else								return ComplexShipElement::PROPERTY::PROP_UNKNOWN;
+
+	// This usually means something has gone wrong.  'Count' property is not used
+	// for anything so setting it will not have any effect on the element state
+	else								return ComplexShipElement::PROPERTY::PROPERTY_COUNT;
+}
+
+// Static method to parse a property string and determine the final element state
+ComplexShipElement::PROPERTY ComplexShipElement::ParsePropertyString(const std::string & prop_string)
+{
+	// Split the string based on a standard delimiter
+	// TODO: we could probably do this more efficiently by one manual pass through the string character-
+	// by-character, if needed
+	std::vector<std::string> props; 
+	SplitString(prop_string, '|', true, props);
+
+	// Process each component in turn
+	unsigned int state = 0U;
+	for (std::string prop : props)
+	{
+		if (prop.empty()) continue;
+		if (prop.find_first_not_of(" 0123456789") == std::string::npos)
+		{
+			// We couldn't find a non-numeric digit; therefore treat this as a direct state value
+			int signed_st = atoi(prop.c_str());
+			if (signed_st > 0 && signed_st < ComplexShipElement::PROPERTY::PROPERTY_COUNT) 
+				SetBit(state, (unsigned int)signed_st);
+		}
+		else
+		{
+			// The string contains some non-numeric characters, so attempt to parse it as a property name
+			ComplexShipElement::PROPERTY pval = TranslatePropertyFromName(prop);
+			if (pval != ComplexShipElement::PROPERTY::PROPERTY_COUNT)
+				SetBit(state, (unsigned int)pval);
+		}
+	}
+
+	// Return the final calculated state
+	return (ComplexShipElement::PROPERTY)state;
 }
 
 // Returns the coordinates of a point on the specified edge of an element

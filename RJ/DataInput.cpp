@@ -44,6 +44,7 @@
 #include "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "StaticTerrainDefinition.h"
+#include "TileDefinitionElementState.h"
 
 #include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
@@ -1238,8 +1239,11 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			// Add to the vector of terrain objects in the tile definition
 			tiledef->AddTerrainObject(t);
 		}
-		else if (hash == HashedStrings::H_DefaultProperties) {
-			//tiledef->DefaultProperties = IO::GetIntValue(child); #1
+		else if (hash == HashedStrings::H_ElementStateDefinition) {
+			// NOTE: Definition should be set AFTER the tile element size has been defined, since it is passed
+			// into the method below.  Or if not, area size can be specified within the state definition, but 
+			// this would then require definition in two places
+			LoadElementStateDefinition(child, tiledef->GetElementSize(), tiledef->DefaultElementState);
 		}
 		else if (hash == HashedStrings::H_CanConnect) {
 			LoadAndApplyTileConnectionState(child, &(tiledef->Connectivity));
@@ -1253,7 +1257,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			bool perelement = true;										// We assume production cost is per-element unless specified
 			const char *ctype = child->Attribute("type");
 			if (ctype) { string stype = ctype; StrLowerC(stype); perelement = !(stype == "total"); }
-
+			
 			// Load the per-element production cost data from file
 			ProductionCost *pcost = IO::Data::LoadProductionCostData(child);
 			if (!pcost) continue;
@@ -1631,6 +1635,62 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 
 	// Return a reference to the new terrain object
 	return obj;
+}
+
+// Load an element state definition from external XML.  Accepts an element_size parameter for initialisation of the
+// definition object before loading data.  However size can be overridden at load-time using an "ElementSize" node
+Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, TileDefinitionElementState & outStateDefinition)
+{
+	if (!node) return ErrorCodes::CannotLoadElementStateDefinitionFromNullData;
+
+	// If we have passed an element size in via parameters (all components are >0), initialise 
+	// the state object before loading data
+	if (element_size > NULL_INTVECTOR3) outStateDefinition.Initialise(element_size);
+
+	// Process the xml data
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		if (hash == HashedStrings::H_ElementSize)
+		{
+			// Initialises the area based on the given size, overwriting any existing data.  This is optional, in case size is 
+			// not already passed in via parameter to this method
+			INTVECTOR3 size = IO::GetInt3CoordinatesFromAttr(child);
+			outStateDefinition.Initialise(size);
+		}
+		else if (hash == HashedStrings::H_DefaultState)
+		{
+			// NOTE: while element state is only the element properties bitstring, we load as an attribute "state" from the node
+			// This may need to be extended in future if ElementState begin containing additional data
+			val = std::string(child->Attribute("state"));
+			bitstring state = ComplexShipElement::ParsePropertyString(val);
+
+			outStateDefinition.ApplyDefaultElementState(TileDefinitionElementState::ElementState(state));
+		
+		}
+		else if (hash == HashedStrings::H_State)
+		{
+			INTVECTOR3 loc = IO::GetInt3CoordinatesFromAttr(child);
+			val = std::string(child->Attribute("state"));
+			bitstring state = ComplexShipElement::ParsePropertyString(val);
+			
+			outStateDefinition.SetElementState(TileDefinitionElementState::ElementState(state), loc);
+		}
+	}
+
+	return ErrorCodes::NoError;
+}
+
+// Load an element state definition from external XML.  No target size is specified, so this must either be
+// pre-initialised or loaded as part of the xml definition
+Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, TileDefinitionElementState & outStateDefinition)
+{
+	return LoadElementStateDefinition(node, NULL_INTVECTOR3, outStateDefinition);
 }
 
 // Load turret object data from external XML

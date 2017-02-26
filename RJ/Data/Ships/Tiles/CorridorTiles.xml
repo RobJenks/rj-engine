@@ -6,8 +6,10 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_ns_model</Model>
     <Size x="1" y="1" z="1" />
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
+    
+    <ElementStateDefinition>
+      <DefaultState state="Walkable" />
+    </ElementStateDefinition>
 
     <CanConnect type="0" x="0" y="0" z="0" state="15" />
     
@@ -25,8 +27,10 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_se_model</Model>
     <Size x="1" y="1" z="1" />
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
+
+    <ElementStateDefinition>
+      <DefaultState state="Walkable" />
+    </ElementStateDefinition>
 
     <CanConnect type="0" x="0" y="0" z="0" state="15" />
     
@@ -49,8 +53,10 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_nse_model</Model>
     <Size x="1" y="1" z="1" />
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
+
+    <ElementStateDefinition>
+      <DefaultState state="Walkable" />
+    </ElementStateDefinition>
 
     <CanConnect type="0" x="0" y="0" z="0" state="15" />
 
@@ -74,8 +80,10 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_nsew_model</Model>
     <Size x="1" y="1" z="1" />
-    <DefaultProperty name="active" value="true" />
-    <DefaultProperty name="walkable" value="true" />
+    
+    <ElementStateDefinition>
+      <DefaultState state="Walkable" />
+    </ElementStateDefinition>
 
     <CanConnect type="0" x="0" y="0" z="0" state="15" />
 
