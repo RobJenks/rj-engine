@@ -20,6 +20,7 @@
 #include "ShaderManager.h"
 #include "Model.h"
 #include "ModelBuffer.h"
+#include "BasicColourDefinition.h"
 class iShader;
 class ModelBuffer;
 class LightShader;
@@ -406,7 +407,7 @@ public:
 	void					DebugOutputRenderQueueContents(void);
 
 	// Static constant collection of basic colours, for ease of use in e.g. simple debug overlays
-	static const std::array<XMFLOAT4, 8> BASIC_COLOURS;
+	static const std::array<BasicColourDefinition, 8> BASIC_COLOURS;
 
 
 private:

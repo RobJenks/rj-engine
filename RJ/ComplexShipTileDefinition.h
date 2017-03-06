@@ -11,7 +11,7 @@
 #include "ComplexShipElement.h"
 #include "ProductionCost.h"
 #include "TileConnections.h"
-#include "TileDefinitionElementState.h"
+#include "ElementStateDefinition.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -138,7 +138,7 @@ public:
 	}
 
 	// Default property set applied to all elements of the tile; element-specific changes are then made when compiling the tile
-	TileDefinitionElementState		DefaultElementState;
+	ElementStateDefinition			DefaultElementState;
 
 	// Creates a new tile based on this definition
 	ComplexShipTile *				CreateTile(void) const;

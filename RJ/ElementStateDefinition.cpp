@@ -1,7 +1,7 @@
-#include "TileDefinitionElementState.h"
+#include "ElementStateDefinition.h"
 
 // Store a default element state, and apply it to all elements in the area
-void TileDefinitionElementState::ApplyDefaultElementState(TileDefinitionElementState::ElementState default_state)
+void ElementStateDefinition::ApplyDefaultElementState(ElementStateDefinition::ElementState default_state)
 {
 	m_defaultstate = default_state;
 	for (int i = 0; i < 4; ++i)
@@ -11,7 +11,7 @@ void TileDefinitionElementState::ApplyDefaultElementState(TileDefinitionElementS
 }
 
 // Retuns the default state of an element at the specified location, given the specified tile orientation
-TileDefinitionElementState::ElementState TileDefinitionElementState::GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const
+ElementStateDefinition::ElementState ElementStateDefinition::GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const
 {
 	int index = ELEMENT_INDEX_EX(location.x, location.y, location.z, GetSize(tile_rotation));
 	if (index < 0 || index >= m_count || !Rotation90DegreeIsValid(tile_rotation)) return ElementState();
@@ -21,8 +21,11 @@ TileDefinitionElementState::ElementState TileDefinitionElementState::GetElementS
 
 // Set the default state of an element within the tile.  Properties are replicated to each copy of 
 // the ElementState set (once per orientation)
-void TileDefinitionElementState::SetElementState(TileDefinitionElementState::ElementState element_state, const INTVECTOR3 & location, Rotation90Degree rotation)
+void ElementStateDefinition::SetElementState(ElementStateDefinition::ElementState element_state, const INTVECTOR3 & location, Rotation90Degree rotation)
 {
+	// Apply our element state filter first, if applicable
+	element_state.Properties &= m_filter;
+
 	for (int rot = (int)Rotation90Degree::Rotate0; rot <= (int)Rotation90Degree::Rotate270; ++rot)
 	{
 		Rotation90Degree delta = Rotation90BetweenValues(rotation, (Rotation90Degree)rot);
@@ -35,12 +38,36 @@ void TileDefinitionElementState::SetElementState(TileDefinitionElementState::Ele
 	}
 }
 
+// Change the state filter in use by this definition.  Will re-evaluate all current state data to ensure 
+// it complies with the new filter
+void ElementStateDefinition::ChangeStateFilter(ElementStateFilters::ElementStateFilter filter)
+{
+	// Store the new filter
+	m_filter = filter;
+
+	// Re-evaluate all existing state data to ensure it complies with the new filter
+	ApplyStateFilter();
+}
+
+// Applies the state filter to all stored element state data
+void ElementStateDefinition::ApplyStateFilter(ElementStateFilters::ElementStateFilter filter)
+{
+	// Re-evaluate all existing state data to ensure it complies with the specified filter
+	for (int r = (int)Rotation90Degree::Rotate0; r <= (int)Rotation90Degree::Rotate270; ++r)
+	{
+		for (int i = 0; i < m_count; ++i)
+		{
+			// Bitwise-AND every property with the new filter to remove any non-compliant values
+			m_state[r][i].Properties &= filter;
+		}
+	}
+}
 
 
 // Internal method which returns a debug string output representing the set of element states, given 
 // the specified tile orientation(s) to be returned. Shown as a 2D x/y representation, with z 
 // values represented within an array at each element
-std::string TileDefinitionElementState::DebugStringOutput_Internal(Rotation90Degree start_rotation, Rotation90Degree end_rotation)
+std::string ElementStateDefinition::DebugStringOutput_Internal(Rotation90Degree start_rotation, Rotation90Degree end_rotation)
 {
 	if (start_rotation > end_rotation) return "";
 	concat result = concat("");

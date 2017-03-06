@@ -14,7 +14,7 @@
 #include "Utility.h"
 #include "GameDataExtern.h"
 #include "iContainsComplexShipTiles.h"
-#include "TileDefinitionElementState.h"
+#include "ElementStateDefinition.h"
 #include "NavNode.h"
 
 class ComplexShipTile;
@@ -61,7 +61,7 @@ public:
 		PROP_TRANSMITS_POWER	= (1 << 4),				// 16:    Are there power cables running through this element?
 		PROP_TRANSMITS_DATA		= (1 << 5),				// 32:    Are there data cables running through this element?
 		
-		PROPERTY_COUNT			= (1 << 6)				//        (The total number of properties per element)
+		PROPERTY_MAX			= (1 << 6)				//        (The total number of properties per element)
 	};
 
 	// Struct holding data on a connection from one nav node to another
@@ -111,10 +111,10 @@ public:
 
 
 	// Add to the element state (e.g. apply additional properties)
-	void							ApplyElementState(const TileDefinitionElementState::ElementState & state);
+	void							ApplyElementState(const ElementStateDefinition::ElementState & state);
 
 	// Overwrite the entire element state with another
-	void							OverwriteElementState(const TileDefinitionElementState::ElementState & state);
+	void							OverwriteElementState(const ElementStateDefinition::ElementState & state);
 
 	// Reset the element state
 	void							ResetElementState(void);
@@ -288,12 +288,15 @@ public:
 	// Static method to parse a property string and determine the final element state
 	static ComplexShipElement::PROPERTY		ParsePropertyString(const std::string & prop_string);
 
+	// Builds a descriptive property string from the supplied property state value
+	static std::string						DeterminePropertyStringDescription(bitstring properties);
+
 	// Returns the coordinates of a point on specific adjoining edges or elements
 	static XMFLOAT3							GetEdgePosition(Direction direction);
 	static XMFLOAT3							GetAdjacentElementCentrePosition(Direction direction);
 
-	// Default property state for a complex ship element
-	static const bitstring					DefaultProperties;
+	// Default property state for a complex ship element (completely inactive)
+	static const bitstring					NULL_PROPERTIES;
 
 
 

@@ -32,6 +32,7 @@
 #include "SkinnedNormalMapShader.h"
 #include "VolLineShader.h"
 #include "OverlayRenderer.h"
+#include "BasicColourDefinition.h"
 
 #include "Fonts.h"
 #include "Player.h"
@@ -72,11 +73,6 @@
 
 using namespace std;
 using namespace std::tr1;
-
-// Initialise static data
-const std::array<XMFLOAT4, 8> CoreEngine::BASIC_COLOURS = { XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f),
-	XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f),
-	XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), XMFLOAT4(1.0f, 0.0f, 0.5f, 1.0f), XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f) };
 
 // Default constructor
 CoreEngine::CoreEngine(void)
@@ -2563,6 +2559,20 @@ XMVECTOR CoreEngine::GetScreenLocationForObjectWithWorldOffset(const OrientedBou
 	// increase each offset value by 0.5f such that [0,0] moves from bottom-left to centre point
 	return XMVectorLerpV(smin, smax, XMVectorSet(offset.x + 0.5f, offset.y + 0.5f, 0.5f, 0.5f));
 }
+
+// Initialise static collection of basic colour data
+const std::array<BasicColourDefinition, 8> CoreEngine::BASIC_COLOURS =
+{
+	BasicColourDefinition(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f), "Red"),
+	BasicColourDefinition(XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), "Yellow"),
+	BasicColourDefinition(XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), "Green"),
+	BasicColourDefinition(XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f), "Blue"),
+	BasicColourDefinition(XMFLOAT4(1.0f, 0.5f, 0.0f, 1.0f), "Orange"),
+	BasicColourDefinition(XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), "Cyan"),
+	BasicColourDefinition(XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), "Purple"),
+	BasicColourDefinition(XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), "White")
+};
+
 
 // Virtual inherited method to accept a command from the console
 bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)

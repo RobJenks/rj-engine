@@ -1,14 +1,15 @@
 #pragma once
 
-#ifndef __TileDefinitionElementState__
-#define __TileDefinitionElementState__
+#ifndef __ElementStateDefinition__
+#define __ElementStateDefinition__
 
 #include <vector>
 #include "CompilerSettings.h"
 #include "Utility.h"
 #include "FastMath.h"
+#include "ElementStateFilters.h"
 
-class TileDefinitionElementState
+class ElementStateDefinition
 {
 public:
 
@@ -23,10 +24,19 @@ public:
 
 
 	// Default constructor	
-	CMPINLINE TileDefinitionElementState()
+	CMPINLINE ElementStateDefinition()
 	{ 
 		m_size = m_size_transposed = NULL_INTVECTOR3;
 		m_count = 0;
+		m_filter = ElementStateFilters::ALL_PROPERTIES;
+	}
+
+	// Constructor with specific state type specified
+	CMPINLINE ElementStateDefinition(ElementStateFilters::ElementStateFilter state_filter)
+	{
+		m_size = m_size_transposed = NULL_INTVECTOR3;
+		m_count = 0;
+		m_filter = state_filter;
 	}
 
 	// Initialise the element state for a specific area size
@@ -45,7 +55,7 @@ public:
 	void ApplyDefaultElementState(ElementState default_state);
 	
 	// Retuns the default state of an element at the specified location, given the specified tile orientation
-	ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const;
+	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const;
 
 	// Retuns the default state of an element at the specified location, in the default unrotated tile orientation
 	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location) const 
@@ -63,6 +73,13 @@ public:
 	{
 		SetElementState(state, location, Rotation90Degree::Rotate0);
 	}
+
+	// Retrieve any state filter currently applied to this definition (default: 111...111)
+	CMPINLINE ElementStateFilters::ElementStateFilter GetCurrentStateFilter(void) const { return m_filter; }
+
+	// Change the state filter in use by this definition.  Will re-evaluate all current state data to ensure 
+	// it complies with the new filter
+	void							ChangeStateFilter(ElementStateFilters::ElementStateFilter filter);
 
 	// Returns a debug string output representing the set of element states, given the specified tile orientation
 	// Shown as a 2D x/y representation, with z values represented within an array at each element
@@ -86,12 +103,17 @@ protected:
 	INTVECTOR3						m_size_transposed;			// Size in Rotate90 and Rotate270 orientations
 	int								m_count;					// Total count of elements in the area
 	ElementState					m_defaultstate;				// Default state for any element which is not explicitly set
+	ElementStateFilters::ElementStateFilter m_filter;			// Filter which can be applied to limit the definition to only certain properties
 
 	// Returns the relevant area dimensions for a particular tile rotation
 	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) const
 	{ 
 		return ((rotation == Rotation90Degree::Rotate90 || rotation == Rotation90Degree::Rotate270) ? m_size_transposed : m_size);
 	}
+
+	// Applies the state filter to all stored element state data
+	void							ApplyStateFilter(ElementStateFilters::ElementStateFilter filter);
+	CMPINLINE void					ApplyStateFilter(void) { ApplyStateFilter(m_filter); }
 
 
 	// Internal method which returns a debug string output representing the set of element states, given 

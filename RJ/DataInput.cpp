@@ -44,7 +44,7 @@
 #include "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "StaticTerrainDefinition.h"
-#include "TileDefinitionElementState.h"
+#include "ElementStateDefinition.h"
 
 #include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
@@ -945,9 +945,9 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 		if (hash == HashedStrings::H_ElementLocation) {
 			el.SetLocation(IO::GetInt3CoordinatesFromAttr(child));
 		}
-		else if (hash == HashedStrings::H_Properties) {
+		/*else if (hash == HashedStrings::H_Properties) {
 			el.SetProperties(IO::GetIntValue(child));
-		}
+		}*/
 		else if (hash == HashedStrings::H_Health) {
 			el.SetHealth(IO::GetFloatValue(child));
 		}
@@ -1639,7 +1639,7 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 
 // Load an element state definition from external XML.  Accepts an element_size parameter for initialisation of the
 // definition object before loading data.  However size can be overridden at load-time using an "ElementSize" node
-Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, TileDefinitionElementState & outStateDefinition)
+Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, ElementStateDefinition & outStateDefinition)
 {
 	if (!node) return ErrorCodes::CannotLoadElementStateDefinitionFromNullData;
 
@@ -1670,7 +1670,7 @@ Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3
 			val = std::string(child->Attribute("state"));
 			bitstring state = ComplexShipElement::ParsePropertyString(val);
 
-			outStateDefinition.ApplyDefaultElementState(TileDefinitionElementState::ElementState(state));
+			outStateDefinition.ApplyDefaultElementState(ElementStateDefinition::ElementState(state));
 		
 		}
 		else if (hash == HashedStrings::H_State)
@@ -1679,7 +1679,14 @@ Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3
 			val = std::string(child->Attribute("state"));
 			bitstring state = ComplexShipElement::ParsePropertyString(val);
 			
-			outStateDefinition.SetElementState(TileDefinitionElementState::ElementState(state), loc);
+			outStateDefinition.SetElementState(ElementStateDefinition::ElementState(state), loc);
+		}
+		else if (hash == HashedStrings::H_StateFilter)
+		{
+			val = std::string(child->Attribute("state"));
+			bitstring state_filter = ComplexShipElement::ParsePropertyString(val);
+
+			outStateDefinition.ChangeStateFilter(state_filter);
 		}
 	}
 
@@ -1688,7 +1695,7 @@ Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3
 
 // Load an element state definition from external XML.  No target size is specified, so this must either be
 // pre-initialised or loaded as part of the xml definition
-Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, TileDefinitionElementState & outStateDefinition)
+Result IO::Data::LoadElementStateDefinition(TiXmlElement *node, ElementStateDefinition & outStateDefinition)
 {
 	return LoadElementStateDefinition(node, NULL_INTVECTOR3, outStateDefinition);
 }

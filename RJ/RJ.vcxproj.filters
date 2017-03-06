@@ -601,8 +601,11 @@
     <ClCompile Include="ModifierDetails.cpp">
       <Filter>Concepts\Damage</Filter>
     </ClCompile>
-    <ClCompile Include="TileDefinitionElementState.cpp">
-      <Filter>Objects\Ships\Tiles</Filter>
+    <ClCompile Include="ElementStateDefinition.cpp">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClCompile>
+    <ClCompile Include="ElementStateFilters.cpp">
+      <Filter>Objects\Ships\Elements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1378,8 +1381,14 @@
     <ClInclude Include="StandardModifiers.list">
       <Filter>Concepts\Modifiers</Filter>
     </ClInclude>
-    <ClInclude Include="TileDefinitionElementState.h">
-      <Filter>Objects\Ships\Tiles</Filter>
+    <ClInclude Include="ElementStateDefinition.h">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="ElementStateFilters.h">
+      <Filter>Objects\Ships\Elements</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicColourDefinition.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

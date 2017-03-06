@@ -235,15 +235,16 @@ void ComplexShip::SetBaseEnvironmentProperties(void)
 	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
 	{
 		const ComplexShipSection *sec = (*it);
-		INTVECTOR3 loc = sec->GetElementLocation();
 		INTVECTOR3 size = sec->GetElementSize();
+		INTVECTOR3 loc = sec->GetElementLocation();
 
-		for (int x = 0; x < size.x; ++x) {
-			for (int y = 0; y < size.y; ++y) {
-				for (int z = 0; z < size.z; ++z)
+		INTVECTOR3 section = NULL_INTVECTOR3;
+		for (; section.x < size.x; ++section.x) {
+			for (; section.y < size.y; ++section.y) {
+				for (; section.z < size.z; ++section.z)
 				{
-					ComplexShipElement *el = GetElement(loc.x + x, loc.y + y, loc.z + z);
-					if (el) el->ApplyElementState((TileDefinitionElementState::ElementState)sec->GetElementProperties(x, y, z));
+					ComplexShipElement *el = GetElement(loc + section);
+					if (el) el->ApplyElementState(sec->DefaultElementState.GetElementState(section, sec->GetRotation()));
 				}
 			}
 		}

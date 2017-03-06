@@ -385,6 +385,7 @@
     <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="ElementStateFilters.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnvironmentCollision.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
@@ -465,7 +466,7 @@
     <ClCompile Include="ProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="TileConnections.cpp" />
-    <ClCompile Include="TileDefinitionElementState.cpp" />
+    <ClCompile Include="ElementStateDefinition.cpp" />
     <ClCompile Include="Timers.cpp" />
     <ClCompile Include="TurretController.cpp" />
     <ClCompile Include="UI_Console.cpp" />
@@ -554,6 +555,7 @@
     <ClInclude Include="ArticulatedModel.h" />
     <ClInclude Include="ArticulatedModelComponent.h" />
     <ClInclude Include="Attachment.h" />
+    <ClInclude Include="BasicColourDefinition.h" />
     <ClInclude Include="BasicProjectile.h" />
     <ClInclude Include="BasicProjectileDefinition.h" />
     <ClInclude Include="BasicProjectileSet.h" />
@@ -603,6 +605,7 @@
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="ElementIntersection.h" />
+    <ClInclude Include="ElementStateFilters.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
     <ClInclude Include="EnvironmentOBBRegion.h" />
@@ -712,7 +715,7 @@
     <ClInclude Include="StandardModifiers.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
-    <ClInclude Include="TileDefinitionElementState.h" />
+    <ClInclude Include="ElementStateDefinition.h" />
     <ClInclude Include="Timers.h" />
     <ClInclude Include="TurretController.h" />
     <ClInclude Include="UI_Console.h" />

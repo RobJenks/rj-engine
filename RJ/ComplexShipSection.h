@@ -10,6 +10,7 @@
 #include "iContainsComplexShipTiles.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
+#include "ElementStateDefinition.h"
 class ComplexShipSectionDetails;
 class ComplexShipElement;
 class ComplexShipTile;
@@ -77,35 +78,14 @@ public:
 	CMPINLINE INTVECTOR3 						GetElementLocation(void) const				{ return m_elementlocation; }
 	CMPINLINE void								SetElementLocation(const INTVECTOR3 & loc)	{ m_elementlocation = loc; } 
 	CMPINLINE INTVECTOR3 						GetElementSize(void) const					{ return m_elementsize; }
-	CMPINLINE Rotation90Degree					GetRotation(void)							{ return m_rotation; }
+	CMPINLINE Rotation90Degree					GetRotation(void) const						{ return m_rotation; }
 
 	// Updating the section size or rotation will trigger a recalculation of its underlying properties
 	void										ResizeSection(const INTVECTOR3 & size);
 	void										RotateSection(Rotation90Degree rot);
 
-	// Sets all base element properties to their default values
-	void										ResetElementPropertiesToDefaults(void);
-
-	// Returns a reference to the element property data for this section
-	CMPINLINE const bitstring *					GetElementPropertyData(void) const	{ return m_element_properties; }
-
-	// Return properties of a specific element in this section
-	CMPINLINE bitstring							GetElementProperties(const INTVECTOR3 & location) const
-	{
-		return GetElementProperties(location.x, location.y, location.z);
-	}
-	CMPINLINE bitstring							GetElementProperties(int x, int y, int z) const
-	{
-		int index = ELEMENT_INDEX(x, y, z);
-		return ((index >= 0 && index < m_elementcount) ? m_element_properties[index] : 0U);
-	}
-
-	// Set the properties of a specific element in this section
-	CMPINLINE void								SetElementProperties(const INTVECTOR3 & location, bitstring properties)
-	{
-		int index = ELEMENT_INDEX(location.x, location.y, location.z);
-		if (index >= 0 && index < m_elementcount) m_element_properties[index] = properties;
-	}
+	// Default property set applied to all elements of the tile; element-specific changes are then made when compiling the tile
+	ElementStateDefinition						DefaultElementState;
 
 	// Recalculates all section statistics based upon the loadout and base statistics
 	void										RecalculateShipDataFromCurrentState(void);
@@ -127,8 +107,8 @@ public:
 	void				CalculateVelocityLimits();		// Recalculates velocity limit based on all contributing factors
 	void				CalculateBrakeFactor();			// Recalculates brake factor for the section; dependent on velocity limit
 	void				CalculateTurnRate();			// Recalculates the overall turn rate based on all contributing factors
-	void				CalculateBankRate();			// Recalculates the overall turn rate based on all contributing factors
-	void				CalculateBankExtents();			// Recalculates the overall turn rate based on all contributing factors
+	void				CalculateBankRate();			// Recalculates the overall bank rate based on all contributing factors
+	void				CalculateBankExtents();			// Recalculates the overall bank extents based on all contributing factors
 
 	// Methods to return properties of this section once they have been calculated
 	CMPINLINE float								GetVelocityLimit(void)			{ return m_velocitylimit; }
@@ -193,7 +173,6 @@ private:
 	INTVECTOR3						m_elementsize;				// The size in elements, taking into account rotation etc
 	int								m_elementcount;				// The number of elements that this section covers
 	Rotation90Degree				m_rotation;					// Rotation of this section about the Y axis
-	bitstring *						m_element_properties;		// Array of properties to be applied to underlying elements
 	AXMVECTOR						m_relativepos;				// x,y,z position relative to parent ship object, in world space
 	AXMVECTOR						m_relativeorient;			// Orientation relative to the parent ship object, in world space
 

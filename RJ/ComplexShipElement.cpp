@@ -3,7 +3,7 @@
 #include "ErrorCodes.h"
 #include "ComplexShipTile.h"
 #include "iSpaceObjectEnvironment.h"
-#include "TileDefinitionElementState.h"
+#include "ElementStateDefinition.h"
 #include "Damage.h"
 
 #include "ComplexShipElement.h"
@@ -14,7 +14,7 @@
 #endif
 
 // Static variables
-const bitstring ComplexShipElement::DefaultProperties = (ComplexShipElement::PROPERTY::PROP_ACTIVE | ComplexShipElement::PROPERTY::PROP_BUILDABLE);
+const bitstring ComplexShipElement::NULL_PROPERTIES = (bitstring)0U;
 
 // Default constructor
 ComplexShipElement::ComplexShipElement(void)
@@ -28,7 +28,7 @@ ComplexShipElement::ComplexShipElement(void)
 	m_id = -1;
 	m_location = NULL_INTVECTOR3;
 	m_parent = NULL;
-	//m_properties = ComplexShipElement::DefaultPropertyValues;#1
+	m_properties = ComplexShipElement::NULL_PROPERTIES;
 	m_tile = NULL;
 	m_health = 1.0f;
 	m_strength = 1000.0f;
@@ -115,23 +115,23 @@ bool ComplexShipElement::AttachmentIsCompatible(ComplexShipElement *element, Dir
 
 
 // Add to the element state (e.g. apply additional properties)
-void ComplexShipElement::ApplyElementState(const TileDefinitionElementState::ElementState & state)
+void ComplexShipElement::ApplyElementState(const ElementStateDefinition::ElementState & state)
 {
 	// Update element properties
 	SetProperty((PROPERTY)state.Properties);
 }
 
 // Overwrite the entire element state with another
-void ComplexShipElement::OverwriteElementState(const TileDefinitionElementState::ElementState & state)
+void ComplexShipElement::OverwriteElementState(const ElementStateDefinition::ElementState & state)
 {
 	// Update element properties
-	SetProperties((PROPERTY)state.Properties);
+	SetProperties(state.Properties);
 }
 
 // Reset the element state
 void ComplexShipElement::ResetElementState(void)
 {
-	SetProperties((PROPERTY)0U);
+	SetProperties(NULL_PROPERTIES);
 }
 
 // Allow assignment of one element contents to another
@@ -227,9 +227,9 @@ void ComplexShipElement::DeallocateNavPointConnectionData(void)
 string ComplexShipElement::AttachTypeToString(ComplexShipElement::AttachType type)
 {
 	switch (type) {
-		case ComplexShipElement::AttachType::Standard:				return "standard";
-		case ComplexShipElement::AttachType::TurretModule:			return "turret";
-		default:													return "disallowed";
+		case ComplexShipElement::AttachType::Standard:				return "Standard";
+		case ComplexShipElement::AttachType::TurretModule:			return "Turret";
+		default:													return "Disallowed";
 	}
 }
 ComplexShipElement::AttachType ComplexShipElement::AttachTypeFromString(string type)
@@ -246,11 +246,12 @@ string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY 
 {
 	switch (prop)
 	{
-		case ComplexShipElement::PROPERTY::PROP_ACTIVE:				return "active";
-		case ComplexShipElement::PROPERTY::PROP_BUILDABLE:			return "buildable";
-		case ComplexShipElement::PROPERTY::PROP_WALKABLE:			return "walkable";
-		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER:	return "transmitspower";
-		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA:		return "transmitsdata";
+		case ComplexShipElement::PROPERTY::PROP_ACTIVE:				return "Active";
+		case ComplexShipElement::PROPERTY::PROP_BUILDABLE:			return "Buildable";
+		case ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT:	return "OuterHullElement";
+		case ComplexShipElement::PROPERTY::PROP_WALKABLE:			return "Walkable";
+		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER:	return "TransmitsPower";
+		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA:		return "TransmitsData";
 		default:													return "";
 	}
 }
@@ -263,13 +264,14 @@ ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(strin
 
 	if		(s == "active")				return ComplexShipElement::PROPERTY::PROP_ACTIVE;	
 	else if (s == "buildable")			return ComplexShipElement::PROPERTY::PROP_BUILDABLE;
+	else if (s == "outerhullelement")	return ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT;
 	else if (s == "walkable")			return ComplexShipElement::PROPERTY::PROP_WALKABLE;
 	else if (s == "transmitspower")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER;
 	else if (s == "transmitsdata")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA;
 
 	// This usually means something has gone wrong.  'Count' property is not used
 	// for anything so setting it will not have any effect on the element state
-	else								return ComplexShipElement::PROPERTY::PROPERTY_COUNT;
+	else								return ComplexShipElement::PROPERTY::PROPERTY_MAX;
 }
 
 // Static method to parse a property string and determine the final element state
@@ -290,20 +292,37 @@ ComplexShipElement::PROPERTY ComplexShipElement::ParsePropertyString(const std::
 		{
 			// We couldn't find a non-numeric digit; therefore treat this as a direct state value
 			int signed_st = atoi(prop.c_str());
-			if (signed_st > 0 && signed_st < ComplexShipElement::PROPERTY::PROPERTY_COUNT) 
+			if (signed_st > 0 && signed_st < ComplexShipElement::PROPERTY::PROPERTY_MAX) 
 				SetBit(state, (unsigned int)signed_st);
 		}
 		else
 		{
 			// The string contains some non-numeric characters, so attempt to parse it as a property name
 			ComplexShipElement::PROPERTY pval = TranslatePropertyFromName(prop);
-			if (pval != ComplexShipElement::PROPERTY::PROPERTY_COUNT)
+			if (pval != ComplexShipElement::PROPERTY::PROPERTY_MAX)
 				SetBit(state, (unsigned int)pval);
 		}
 	}
 
 	// Return the final calculated state
 	return (ComplexShipElement::PROPERTY)state;
+}
+
+// Builds a descriptive property string from the supplied property state value
+std::string ComplexShipElement::DeterminePropertyStringDescription(bitstring properties)
+{
+	concat s("");
+
+	// Iterate through all possible property values (i == {1, 2, 4, 8, ..., 2^(N-1)})
+	for (bitstring i = 1; i < PROPERTY::PROPERTY_MAX; i <<= 1)
+	{
+		if (CheckBit_Any(properties, i)) s(TranslatePropertyToName((PROPERTY)i))(", ");
+	}
+
+	// We either have "Prop1, Prop2, ..., PropN, " or "", depending on whether the input contained
+	// any valid properties.  In the case of the former, strip the trailing ", " before returning
+	std::string result = s.str();
+	return (result.empty() ? result : result.substr(0U, result.length() - 2U));	
 }
 
 // Returns the coordinates of a point on the specified edge of an element

@@ -11,6 +11,7 @@
 #include "EnvironmentCollision.h"
 #include "SimulatedEnvironmentCollision.h"
 #include "EnvironmentOBBRegion.h"
+#include "BasicColourDefinition.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -406,10 +407,15 @@ public:
 	void							DebugRenderElementHealth(int z_index);
 	void							DebugRenderElementHealth(int start, int end);
 
-	// Renders a 3D overlay showing the properties of each element in the environment
+	// Renders a 3D overlay showing the properties of each element in the environment.  If the reference 'outLegend' is provided
+	// it will be populated with a mapping from overlay colours to the corresponding property state definitions.  The render process
+	// will also make use of any existing mappings if they are provided within the legend object reference
 	void							DebugRenderElementState(void);
+	void							DebugRenderElementState(std::unordered_map<bitstring, BasicColourDefinition> & outLegend);
 	void							DebugRenderElementState(int z_index);
+	void							DebugRenderElementState(int z_index, std::unordered_map<bitstring, BasicColourDefinition> & outLegend);
 	void							DebugRenderElementState(int start, int end);
+	void							DebugRenderElementState(int start, int end, std::unordered_map<bitstring, BasicColourDefinition> & outLegend);
 
 	// Find all objects within a given distance of the specified object.  Object & Terrain output
 	// vectors will be populated if valid pointers are supplied

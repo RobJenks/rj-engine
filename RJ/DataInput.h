@@ -38,7 +38,7 @@ class StaticTerrain;
 class EffectBase;
 class FireEffect;
 class TileConnections;
-class TileDefinitionElementState;
+class ElementStateDefinition;
 
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
@@ -120,8 +120,8 @@ namespace IO { namespace Data {
 	Result LoadComplexShipTileCompoundModel(TiXmlElement *node, ComplexShipTileDefinition *tiledef);
 	Result LoadDynamicTileSet(TiXmlElement *node);
 	Result LoadDynamicTileSetOption(TiXmlElement *node, DynamicTileSet *pOutDTS);
-	Result LoadElementStateDefinition(TiXmlElement *node, TileDefinitionElementState & outStateDefinition);
-	Result LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, TileDefinitionElementState & outStateDefinition);
+	Result LoadElementStateDefinition(TiXmlElement *node, ElementStateDefinition & outStateDefinition);
+	Result LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, ElementStateDefinition & outStateDefinition);
 
 	Result LoadStaticTerrainDefinition(TiXmlElement *node);
 	StaticTerrain *LoadStaticTerrain(TiXmlElement *node);

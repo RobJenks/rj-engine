@@ -13,7 +13,11 @@
         <TurnRate>0.000100</TurnRate>
         <TurnAngle>0.000100</TurnAngle>
         <BankExtent x="1.000000" y="1.000000" z="1.000000" />
-        <BankRate>0.1</BankRate>  
+        <BankRate>0.1</BankRate>
+
+        <ElementStateDefinition>
+          <DefaultState state="Active|Buildable" />
+        </ElementStateDefinition>
       
         <complexshipelement x="0" y="0" z="0">
             <Properties active="true" buildable="true" />

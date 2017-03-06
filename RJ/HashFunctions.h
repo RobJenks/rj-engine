@@ -253,6 +253,7 @@ namespace HashedStrings
 	DefineHash(H_ElementStateDefinition, "elementstatedefinition");
 	DefineHash(H_State, "state");
 	DefineHash(H_DefaultState, "defaultstate");
+	DefineHash(H_StateFilter, "statefilter");
 }
 
 

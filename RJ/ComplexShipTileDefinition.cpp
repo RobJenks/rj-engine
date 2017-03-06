@@ -41,6 +41,7 @@ ComplexShipTileDefinition::ComplexShipTileDefinition(void)
 	m_productioncost = NULL;
 	m_member_of_dynamic_tileset = false;
 	m_dynamic_tileset = NullString;
+	DefaultElementState = ElementStateDefinition(ElementStateFilters::TILE_PROPERTIES);
 }
 
 // Static method to create definition objects of the desired subclass type

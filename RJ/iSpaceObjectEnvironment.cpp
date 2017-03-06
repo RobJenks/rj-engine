@@ -5,6 +5,7 @@
 #include "ComplexShipElement.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
+#include "BasicColourDefinition.h"
 #include "iEnvironmentObject.h"
 #include "ComplexShipTileDefinition.h"
 #include "ComplexShipTile.h"
@@ -578,7 +579,7 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 		m_elements[i].SetTile(NULL);
 	}
 
-	// The base "Active" and "Buildable" element properties will be set by our parent
+	// The base section-relevant element properties will be set by our parent
 	SetBaseEnvironmentProperties();
 	
 	// Keep a temporary record of all decks that contain tiles
@@ -2198,22 +2199,37 @@ void iSpaceObjectEnvironment::DebugRenderElementHealth(int start, int end)
 // Renders a 3D overlay showing the properties of each element in the environment
 void iSpaceObjectEnvironment::DebugRenderElementState(void)
 {
-	return DebugRenderElementState(0, m_elementcount - 1);
+	return DebugRenderElementState(std::unordered_map<bitstring, BasicColourDefinition>());
+}
+
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(std::unordered_map<bitstring, BasicColourDefinition> & outLegend)
+{
+	return DebugRenderElementState(0, m_elementcount - 1, outLegend);
 }
 
 // Renders a 3D overlay showing the properties of each element in the environment
 void iSpaceObjectEnvironment::DebugRenderElementState(int z_index)
 {
+	return DebugRenderElementState(z_index, std::unordered_map<bitstring, BasicColourDefinition>());
+}
+
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(int z_index, std::unordered_map<bitstring, BasicColourDefinition> & outLegend)
+{
 	INTVECTOR2 range = GetElementRange(z_index);
-	return DebugRenderElementState(range.x, range.y);
+	return DebugRenderElementState(range.x, range.y, outLegend);
 }
 
 // Renders a 3D overlay showing the properties of each element in the environment
 void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
 {
-	// We will map each distinct property to a different colour
-	std::unordered_map<bitstring, XMFLOAT4> cols;
+	return DebugRenderElementState(start, end, std::unordered_map<bitstring, BasicColourDefinition>());
+}
 
+// Renders a 3D overlay showing the properties of each element in the environment
+void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end, std::unordered_map<bitstring, BasicColourDefinition> & outLegend)
+{
 	// Parameter check; this must be a contiguous range within the set of environment elements
 	if (start > end) std::swap(start, end);
 	if (start < 0 || end >= m_elementcount) return;
@@ -2225,18 +2241,18 @@ void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end)
 	for (int i = start; i <= end; ++i, ++data_index)
 	{
 		bitstring x = m_elements[i].GetProperties();
-		std::unordered_map<bitstring, XMFLOAT4>::const_iterator it = cols.find(x);
-		if (it == cols.end())
+		std::unordered_map<bitstring, BasicColourDefinition>::const_iterator it = outLegend.find(x);
+		if (it == outLegend.end())
 		{
 			// We do not yet have a colour for this property combination, so add one now
-			cols[x] = (cols.size() < CoreEngine::BASIC_COLOURS.size() ?
-				CoreEngine::BASIC_COLOURS.at(cols.size()) :
-				XMFLOAT4(frand(), frand(), frand(), 1.0f));
-			it = cols.find(x);
+			outLegend[x] = (outLegend.size() < CoreEngine::BASIC_COLOURS.size() ?
+				CoreEngine::BASIC_COLOURS.at(outLegend.size()) :
+				BasicColourDefinition(XMFLOAT4(frand(), frand(), frand(), 1.0f), "(Other)"));
+			it = outLegend.find(x);
 		}
 
-		assert(it != cols.end());
-		data[data_index] = it->second;
+		assert(it != outLegend.end());
+		data[data_index] = it->second.colour;
 	}
 
 	// Render this overlay on the environment

@@ -105,8 +105,9 @@
 #include "DynamicTileSet.h"					// DBG
 #include "Modifiers.h"						// DBG
 #include "StandardModifiers.h"				// DBG
-#include "TileDefinitionElementState.h"		// DBG
+#include "ElementStateDefinition.h"			// DBG
 #include "ViewFrustrum.h"
+#include "Fonts.h"
 
 #include "Equipment.h"
 #include "Engine.h"
@@ -776,7 +777,15 @@ void RJMain::ProcessKeyboardInput(void)
 			cs()->DebugRenderElementHealth();
 	}
 
-	if (b[DIK_B])
+	static SentenceType **dbg_b_sentences = NULL;
+	static const unsigned int dbg_b_text_limit = 32U;
+	if (!b[DIK_B])
+	{
+		if (dbg_b_sentences)
+			for (unsigned int i = 0; i < dbg_b_text_limit; ++i)
+				dbg_b_sentences[i]->render = false;
+	}
+	else
 	{
 		static int dbg_z = 0;
 		static BOOL ctrl_g_down = FALSE;
@@ -786,15 +795,44 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 		ctrl_g_down = b[DIK_LCONTROL];
 
+		if (dbg_b_sentences == NULL)
+		{
+			dbg_b_sentences = new SentenceType*[dbg_b_text_limit];
+			for (int i = 0; i < dbg_b_text_limit; ++i)
+			{
+				dbg_b_sentences[i] = Game::Engine->GetTextManager()->CreateSentence(Game::Fonts::FONT_BASIC1, 256);
+				dbg_b_sentences[i]->render = false;
+			}
+		}
+
 		cs()->Fade.SetFadeAlpha(0.1f);
 		cs()->Fade.FadeIn(1.0f);
 		cs()->SetWorldMomentum(NULL_VECTOR);
 		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
 
+		std::unordered_map<bitstring, BasicColourDefinition> legend;
 		if (b[DIK_LSHIFT])
-			cs()->DebugRenderElementState(dbg_z);
+			cs()->DebugRenderElementState(dbg_z, legend);
 		else
-			cs()->DebugRenderElementState();
+			cs()->DebugRenderElementState(legend);
+
+		unsigned int index = 0U;
+		INTVECTOR2 location = INTVECTOR2(20, 128);
+		std::unordered_map<bitstring, BasicColourDefinition>::const_iterator it_end = legend.end();
+		for (std::unordered_map<bitstring, BasicColourDefinition>::const_iterator it = legend.begin(); it != it_end; ++it)
+		{
+			if (index >= dbg_b_text_limit) break;
+			std::string s = concat(it->second.name)(": ")(ComplexShipElement::DeterminePropertyStringDescription(it->first)).str();
+
+			SentenceType *sentence = dbg_b_sentences[index++];
+			if (!sentence) break;
+			Game::Engine->GetTextManager()->UpdateSentence(sentence, s.c_str(), location.x, location.y, true, ONE_FLOAT4, 1.0f);
+
+			location.y += ((int)sentence->sentenceheight + 4);
+		}
+
+		for (unsigned int i = index; i < dbg_b_text_limit; ++i) dbg_b_sentences[i]->render = false;
+
 	}
 
 	if (b[DIK_I]) {
@@ -2344,3 +2382,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
+
+
+*** CHECK WHY ELEMENT STATE DEFINITION IS NOT BEING APPLIED(OR IS BEING OVERRIDDEN) FROM SECTION OBJECTS ***
+

@@ -23,6 +23,12 @@
     
     <Elementsize x="4" y="7" z="1" />
 
+    <ElementStateDefinition>
+      <DefaultState state="Active|Buildable" />
+      <State x="0" y="6" z="1" state="Active" />
+      <State x="3" y="6" z="1" state="Active" />
+    </ElementStateDefinition>
+
     <ComplexShipElement x="0" y="0" z="0">
       <Properties active="true" buildable="true" />
       <AttachPoint edge="left" type="standard" />
