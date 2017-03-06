@@ -238,10 +238,10 @@ void ComplexShip::SetBaseEnvironmentProperties(void)
 		INTVECTOR3 size = sec->GetElementSize();
 		INTVECTOR3 loc = sec->GetElementLocation();
 
-		INTVECTOR3 section = NULL_INTVECTOR3;
-		for (; section.x < size.x; ++section.x) {
-			for (; section.y < size.y; ++section.y) {
-				for (; section.z < size.z; ++section.z)
+		INTVECTOR3 section;
+		for (section.x = 0; section.x < size.x; ++section.x) {
+			for (section.y = 0; section.y < size.y; ++section.y) {
+				for (section.z = 0; section.z < size.z; ++section.z)
 				{
 					ComplexShipElement *el = GetElement(loc + section);
 					if (el) el->ApplyElementState(sec->DefaultElementState.GetElementState(section, sec->GetRotation()));

@@ -371,23 +371,23 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 
 		// Set as a simulation hub to ensure the object is always fully-simulated
 		m_object->SetAsSimulationHub();
+
+
+		// Null container: create a new null environment to act as the container for all terrain objects in the viewer
+		m_nullenv = ComplexShip::Create("null_environment");
+		if (m_nullenv)
+		{
+			// Set a position and orientation out of the viewer area
+			m_nullenv->SetPositionAndOrientation(m_object->GetPosition(), m_object->GetOrientation());
+
+			// Clear the ship collision data so it is not rendered
+			m_nullenv->CollisionOBB.Clear();
+
+			// Add the object to the system, and set as a simulation hub so it is always simulated
+			m_nullenv->MoveIntoSpaceEnvironment(m_system);
+			m_nullenv->SetAsSimulationHub();
+		}
 	}
-
-	// Null container: create a new null environment to act as the container for all terrain objects in the viewer
-	m_nullenv = ComplexShip::Create("null_environment");
-	if (m_nullenv)
-	{
-		// Set a position and orientation out of the viewer area
-		m_nullenv->SetPositionAndOrientation(m_object->GetPosition(), m_object->GetOrientation());
-
-		// Clear the ship collision data so it is not rendered
-		m_nullenv->CollisionOBB.Clear();
-
-		// Add the object to the system, and set as a simulation hub so it is always simulated
-		m_nullenv->MoveIntoSpaceEnvironment(m_system);
-		m_nullenv->SetAsSimulationHub();
-	}
-
 }
 
 // Shut down and deallocate the models/ships used in this scenario

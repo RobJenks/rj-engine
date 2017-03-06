@@ -321,8 +321,8 @@ ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
 	}
 
 	// Deallocate the model vertex and index data
-	SafeDelete(v);
-	SafeDelete(i);
+	SafeDeleteArray(v);
+	SafeDeleteArray(i);
 
 	// Return the new line model
 	return buffer;

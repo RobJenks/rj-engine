@@ -363,6 +363,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Create a new empty instance stream, for initialisation of the buffer
 	RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
+	if (!idata) return ErrorCodes::CouldNotAllocateMemoryForRenderQueue;
 	memset(idata, 0, Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
 
 	// Create the instance buffer description

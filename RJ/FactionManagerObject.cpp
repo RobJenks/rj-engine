@@ -104,6 +104,7 @@ Result FactionManagerObject::InitialiseDispositionMatrix(void)
 
 	// We want to allocate an nxn matrix for n factions
 	m_dispmatrix = (Faction::FactionDisposition**)malloc(sizeof(Faction::FactionDisposition*) * m_factioncount);
+	if (!m_dispmatrix) return ErrorCodes::CouldNotAllocateMemoryForFactionDispMatrix;
 	for (int i = 0; i < m_factioncount; ++i)
 	{
 		// Allocate memory for all factions

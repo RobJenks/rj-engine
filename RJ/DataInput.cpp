@@ -767,6 +767,12 @@ Result IO::Data::LoadComplexShipSection(TiXmlElement *root)
 				Hardpoint *h = LoadHardpoint(node);
 				if (h) object->AddHardpoint(h);
 			}
+			else if (hash == HashedStrings::H_ElementStateDefinition) {
+				// NOTE: Definition should be set AFTER the tile element size has been defined, since it is passed
+				// into the method below.  Or if not, area size can be specified within the state definition, but 
+				// this would then require definition in two places
+				LoadElementStateDefinition(node, object->GetElementSize(), object->DefaultElementState);
+			}
 		}
 	}
 

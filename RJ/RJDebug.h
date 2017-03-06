@@ -72,7 +72,7 @@ public:
 		_DebugPrint_Core(str.c_str());
 
 		// Deallocate the temporary buffer that was allocated
-		delete output;
+		SafeDeleteArray(output);
 	}
 
 	CMPINLINE static void Print(const char *format_string, ...)

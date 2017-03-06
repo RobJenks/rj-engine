@@ -288,6 +288,7 @@ namespace ErrorCodes {
 	const Result		ErrorCreatingLightFHFShaderConstBuffersVS		= 1345;
 	const Result		ErrorCreatingLightFHFShaderConstBuffersPS		= 1346;
 	const Result		ErrorCreatingLightFHFShaderSamplerPS			= 1347;
+	const Result		CouldNotAllocateMemoryForRenderQueue			= 1348;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;
@@ -418,6 +419,7 @@ namespace ErrorCodes {
 	const Result		InvalidDataEncounteredInDamageSet				= 2687;
 	const Result		InvalidDataEncounteredInDRSet					= 2688;
 	const Result		CannotLoadElementStateDefinitionFromNullData	= 2689;
+	const Result		CouldNotAllocateMemoryForFactionDispMatrix		= 2690;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -573,6 +575,7 @@ namespace ErrorCodes {
 	// Errors with core game data structures and processes				(4600-4799)
 	const Result		CouldNotInitialiseSpatialPartitioningTree		= 4600;
 	const Result		CouldNotAllocateBinaryHeap						= 4601;
+	const Result		CouldNotAllocateMemoryForBinaryHeap				= 4602;
 
 	// Resource and item crafting related errors						(4800-4999)
 	const Result		CannotLoadResourceFromNullData					= 4800;

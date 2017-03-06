@@ -18,42 +18,30 @@ public:
 	{
 		bitstring Properties;
 
-		ElementState() { Properties = 0U; }
-		ElementState(bitstring properties) { Properties = properties; }
+		ElementState()								: Properties(0U) { }
+		ElementState(bitstring properties)			: Properties(properties) { }
+		ElementState(const ElementState & other)	: Properties(other.Properties) { }
 	};
 
 
 	// Default constructor	
-	CMPINLINE ElementStateDefinition()
-	{ 
-		m_size = m_size_transposed = NULL_INTVECTOR3;
-		m_count = 0;
-		m_filter = ElementStateFilters::ALL_PROPERTIES;
-	}
+	ElementStateDefinition();
 
 	// Constructor with specific state type specified
-	CMPINLINE ElementStateDefinition(ElementStateFilters::ElementStateFilter state_filter)
-	{
-		m_size = m_size_transposed = NULL_INTVECTOR3;
-		m_count = 0;
-		m_filter = state_filter;
-	}
+	ElementStateDefinition(ElementStateFilters::ElementStateFilter state_filter);
+
+	// Copy constructor
+	ElementStateDefinition(const ElementStateDefinition & other);
 
 	// Initialise the element state for a specific area size
-	CMPINLINE void Initialise(const INTVECTOR3 & elementsize) 
-	{
-		m_size = elementsize;
-		m_size_transposed = INTVECTOR3(m_size.y, m_size.x, m_size.z);
-		m_count = (m_size.x * m_size.y * m_size.z);
-		for (int i = 0; i < 4; ++i)
-		{
-			m_state[i] = std::vector<ElementState>(m_count);
-		}
-	}
-
-	// Store a default element state, and apply it to all elements in the area
-	void ApplyDefaultElementState(ElementState default_state);
+	void							Initialise(const INTVECTOR3 & elementsize);
 	
+	// Store a default element state, and apply it to all elements in the area
+	void							ApplyDefaultElementState(ElementState default_state);
+
+	// Returns the default element state for this object
+	CMPINLINE ElementState			GetDefaultElementState(void) const { return m_defaultstate; }
+
 	// Retuns the default state of an element at the specified location, given the specified tile orientation
 	CMPINLINE ElementState			GetElementState(const INTVECTOR3 & location, Rotation90Degree tile_rotation) const;
 
@@ -72,6 +60,19 @@ public:
 	void							SetElementState(ElementState state, const INTVECTOR3 & location)
 	{
 		SetElementState(state, location, Rotation90Degree::Rotate0);
+	}
+
+	// Returns the relevant area dimensions for a particular tile rotation
+	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) const
+	{
+		return ((rotation == Rotation90Degree::Rotate90 || rotation == Rotation90Degree::Rotate270) ? m_size_transposed : m_size);
+	}
+
+	// Returns a constant reference to a particular state vector
+	CMPINLINE const std::vector<ElementState> & GetStateVector(Rotation90Degree rotation) const 
+	{ 
+		int index = (Rotation90DegreeIsValid(rotation) ? (int)rotation : 0);
+		return m_state[index];
 	}
 
 	// Retrieve any state filter currently applied to this definition (default: 111...111)
@@ -105,11 +106,6 @@ protected:
 	ElementState					m_defaultstate;				// Default state for any element which is not explicitly set
 	ElementStateFilters::ElementStateFilter m_filter;			// Filter which can be applied to limit the definition to only certain properties
 
-	// Returns the relevant area dimensions for a particular tile rotation
-	CMPINLINE INTVECTOR3			GetSize(Rotation90Degree rotation) const
-	{ 
-		return ((rotation == Rotation90Degree::Rotate90 || rotation == Rotation90Degree::Rotate270) ? m_size_transposed : m_size);
-	}
 
 	// Applies the state filter to all stored element state data
 	void							ApplyStateFilter(ElementStateFilters::ElementStateFilter filter);

@@ -176,7 +176,7 @@ Result RJMain::RetrieveExecutableData(void)
 	Game::ExePath = ConvertWStringToString(wsnewpath);
 
 	// Deallocate any temporary data and return success
-	delete cexe; delete cpath;
+	SafeDeleteArray(cexe); SafeDeleteArray(cpath);
 	return ErrorCodes::NoError;
 }
 
@@ -2382,7 +2382,4 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
-
-
-*** CHECK WHY ELEMENT STATE DEFINITION IS NOT BEING APPLIED(OR IS BEING OVERRIDDEN) FROM SECTION OBJECTS ***
 

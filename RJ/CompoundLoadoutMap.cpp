@@ -54,7 +54,7 @@ Equipment *CompoundLoadoutMap::GetEquipment(void) const
 	}
 
 	// Default to the last item if necessary, to avoid float rounding errors
-	delete cprob;
+	SafeDeleteArray(cprob);
 	return Items.at(n-1)->Equip;
 }
 

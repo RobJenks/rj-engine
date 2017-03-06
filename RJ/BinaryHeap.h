@@ -50,12 +50,17 @@ public:
 		if (Items) { free(Items); Items = NULL; Capacity = Size = 0; }
 
 		// Make sure this is a valid size
-		if (size < 0 || size > HEAP_SIZE_LIMIT) { Items = NULL; Capacity = Size = 0; return ErrorCodes::CouldNotAllocateBinaryHeap; }
+		if (size < 0 || size > HEAP_SIZE_LIMIT) 
+		{ 
+			Items = NULL; Capacity = Size = 0; 
+			return ErrorCodes::CouldNotAllocateBinaryHeap; 
+		}
 
 		// Allocate space for the heap and zero it by default.  We will use a 1-base array since this is more efficient
 		// for tracing back to parent elements by dividing by two.  It means that element[0] will always be unused & zero.
 		Capacity = size;
 		Items = (Element*)malloc(sizeof(Element) * (Capacity + 1));
+		if (!Items) return ErrorCodes::CouldNotAllocateMemoryForBinaryHeap;
 		memset(Items, 0, sizeof(Element) * (Capacity + 1));
 
 		// No items exist in the heap to start with

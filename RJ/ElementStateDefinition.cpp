@@ -1,12 +1,62 @@
 #include "ElementStateDefinition.h"
 
+// Default constructor	
+ElementStateDefinition::ElementStateDefinition()
+{
+	m_size = m_size_transposed = NULL_INTVECTOR3;
+	m_count = 0;
+	m_filter = ElementStateFilters::ALL_PROPERTIES;
+}
+
+// Constructor with specific state type specified
+ElementStateDefinition::ElementStateDefinition(ElementStateFilters::ElementStateFilter state_filter)
+{
+	m_size = m_size_transposed = NULL_INTVECTOR3;
+	m_count = 0;
+	m_filter = state_filter;
+}
+
+// Copy constructor
+ElementStateDefinition::ElementStateDefinition(const ElementStateDefinition & other)
+{
+	// Initialise to the same dimensions as the source
+	Initialise(other.GetSize(Rotation90Degree::Rotate0));
+	
+	// Copy the default element state 
+	ApplyDefaultElementState(other.GetDefaultElementState());
+
+	// Copy each state vector in turn
+	for (int rot = (int)Rotation90Degree::Rotate0; rot <= (int)Rotation90Degree::Rotate270; ++rot)
+	{
+		m_state[rot] = other.GetStateVector((Rotation90Degree)rot);
+	}
+	
+	// Copy (and apply) the state filter from the source object
+	ChangeStateFilter(other.GetCurrentStateFilter());	
+}
+
+// Initialise the element state for a specific area size
+void ElementStateDefinition::Initialise(const INTVECTOR3 & elementsize)
+{
+	m_size = elementsize;
+	m_size_transposed = INTVECTOR3(m_size.y, m_size.x, m_size.z);
+	m_count = (m_size.x * m_size.y * m_size.z);
+	for (int i = 0; i < 4; ++i)
+	{
+		m_state[i] = std::vector<ElementState>(m_count);
+	}
+}
+
 // Store a default element state, and apply it to all elements in the area
 void ElementStateDefinition::ApplyDefaultElementState(ElementStateDefinition::ElementState default_state)
 {
+	// Default state is subject to the same state filter as all per-element states
 	m_defaultstate = default_state;
-	for (int i = 0; i < 4; ++i)
+	m_defaultstate.Properties &= m_filter;
+
+	for (int rot = (int)Rotation90Degree::Rotate0; rot <= (int)Rotation90Degree::Rotate270; ++rot)
 	{
-		for (int el = 0; el < m_count; ++el) m_state[i][el] = default_state;
+		for (int el = 0; el < m_count; ++el) m_state[rot][el] = default_state;
 	}
 }
 
@@ -61,6 +111,9 @@ void ElementStateDefinition::ApplyStateFilter(ElementStateFilters::ElementStateF
 			m_state[r][i].Properties &= filter;
 		}
 	}
+
+	// Also apply the filter to our default element state
+	m_defaultstate.Properties &= filter;
 }
 
 

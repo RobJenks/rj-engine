@@ -43,7 +43,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	IDXGIFactory* factory;
 	IDXGIAdapter* adapter;
 	IDXGIOutput* adapterOutput;
-	unsigned int numModes, i;
+	unsigned int numModes = 0U, i;
 	size_t stringLength;
 	DXGI_MODE_DESC* displayModeList;
 	DXGI_ADAPTER_DESC adapterDesc;
