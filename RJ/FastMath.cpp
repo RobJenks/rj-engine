@@ -20,6 +20,7 @@ const float PIOVER2 = PI / 2.0f;
 const float ROOT2 = 1.414213562f;
 const float ONE_BY_ROOT2 = 1.0f / ROOT2;
 const float FLT_MAX_NEG = -(std::numeric_limits<float>::infinity());
+const float RAND_MAX_RECIP = (1.0f / RAND_MAX);
 
 const int INF_INT = std::numeric_limits<int>::infinity();
 const unsigned int INF_UINT = std::numeric_limits<unsigned int>::infinity();

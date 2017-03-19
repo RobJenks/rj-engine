@@ -134,6 +134,9 @@ public:
 	CMPINLINE void					UpdateGravity(void)			{ m_gravityupdaterequired = true; }
 	CMPINLINE void					UpdateOxygenLevels(void)	{ m_oxygenupdaterequired = true; }
 
+	// Build all environment maps (power, data, oxygen, munitions, ...)
+	Result							BuildAllEnvironmentMaps(void);
+
 	// Set or retrieve the zero-element translation for this environment
 	CMPINLINE XMVECTOR				GetZeroPointTranslation(void) const						{ return m_zeropointtranslation; }
 	CMPINLINE XMFLOAT3				GetZeroPointTranslationF(void) const					{ return m_zeropointtranslationf; }

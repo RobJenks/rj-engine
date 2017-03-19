@@ -1390,6 +1390,15 @@
     <ClInclude Include="BasicColourDefinition.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentMap.h">
+      <Filter>Objects\Ships\Environments</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMapBlendMode.h">
+      <Filter>Objects\Ships\Environments</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMapFalloffMethod.h">
+      <Filter>Objects\Ships\Environments</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1640,6 +1649,9 @@
     </Filter>
     <Filter Include="Engine\Picking">
       <UniqueIdentifier>{0112f23b-bb53-447c-990b-ccff107fb515}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments">
+      <UniqueIdentifier>{a136ef42-be75-4d76-acfa-e17dbe550b49}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

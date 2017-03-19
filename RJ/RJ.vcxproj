@@ -608,6 +608,9 @@
     <ClInclude Include="ElementStateFilters.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
+    <ClInclude Include="EnvironmentMap.h" />
+    <ClInclude Include="EnvironmentMapBlendMode.h" />
+    <ClInclude Include="EnvironmentMapFalloffMethod.h" />
     <ClInclude Include="EnvironmentOBBRegion.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FrameProfiler.h" />

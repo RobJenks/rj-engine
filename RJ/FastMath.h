@@ -18,6 +18,7 @@ extern const float PIOVER2;
 extern const float ROOT2;
 extern const float ONE_BY_ROOT2;
 extern const float FLT_MAX_NEG;
+extern const float RAND_MAX_RECIP;
 
 extern const int INF_INT; 
 extern const unsigned int INF_UINT; 
@@ -102,7 +103,7 @@ extern const AXMVECTOR VCTRL_1111;
 
 // Random number generation functions
 // TODO: Replace with better-optimised versions?
-#define frand()			((float)rand()/(float)RAND_MAX)
+#define frand()			((float)rand() * RAND_MAX_RECIP)
 #define frand_h(h)		((float)rand()/((float)RAND_MAX/(h)))
 #define frand_lh(l,h)	((l) + (float)rand()/((float)RAND_MAX/((h)-(l))))
 

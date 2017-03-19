@@ -619,6 +619,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Rebuild the object bounding box to acccount for any elements that may have been destroyed
 	BuildBoundingBoxHierarchy();
 
+	// Build all environment maps (power, data, oxygen, munitions, ...)
+	BuildAllEnvironmentMaps();
+
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
 }
