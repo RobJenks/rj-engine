@@ -16,6 +16,9 @@
 // Static variables
 const bitstring ComplexShipElement::NULL_PROPERTIES = (bitstring)0U;
 
+// Constant indicating that all property values are set
+const bitstring ComplexShipElement::ALL_PROPERTIES = (bitstring)((unsigned int)ComplexShipElement::PROPERTY::PROPERTY_MAX - 1U);
+
 // Default constructor
 ComplexShipElement::ComplexShipElement(void)
 {

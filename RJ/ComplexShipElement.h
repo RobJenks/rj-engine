@@ -298,6 +298,9 @@ public:
 	// Default property state for a complex ship element (completely inactive)
 	static const bitstring					NULL_PROPERTIES;
 
+	// Constant indicating that all property values are set
+	static const bitstring					ALL_PROPERTIES;
+
 
 
 private:

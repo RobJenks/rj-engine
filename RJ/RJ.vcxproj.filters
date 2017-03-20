@@ -1399,6 +1399,21 @@
     <ClInclude Include="EnvironmentMapFalloffMethod.h">
       <Filter>Objects\Ships\Environments</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentMapTests.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBase.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestResult.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRunner.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestApplication.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1652,6 +1667,9 @@
     </Filter>
     <Filter Include="Objects\Ships\Environments">
       <UniqueIdentifier>{a136ef42-be75-4d76-acfa-e17dbe550b49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests">
+      <UniqueIdentifier>{20c4d13d-fd34-4e3b-b9d2-8616ca7c310a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

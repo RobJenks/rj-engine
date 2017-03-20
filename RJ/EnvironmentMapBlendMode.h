@@ -25,7 +25,7 @@ public:
 	template <typename T>
 	struct BlendAdditive 
 	{ 
-		CMPINLINE static const bool USES_INITIAL_VALUE = false;
+		static const bool USES_INITIAL_VALUE = false;
 		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */}
 		CMPINLINE T Apply(T current, T newvalue) { return (current + newvalue); }
 	};

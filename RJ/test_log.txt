@@ -1,0 +1,11 @@
+
+=== Test application initialised; executing tests ===
+
+Executed 1 tests:
+Test 0: 43 Passed, 21 Failed, 3 Messages:
+    Some first message
+    Message number 2
+    A third message
+
+=== Test execution completed ===
+

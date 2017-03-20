@@ -102,6 +102,9 @@ public:
 	CMPINLINE void		SetPauseState(bool pause)		{ if (pause) Pause(); else Unpause(); }
 
 
+	// *** TESTING ***
+	void RunAllTests(void);
+
 	// *** DEBUG ***
 	void __CreateDebugScenario(void);
 	void DEBUGDisplayInfo(void);

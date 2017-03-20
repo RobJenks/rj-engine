@@ -638,6 +638,12 @@ void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
 	// TODO: Find any actors currently following a path provided by the previous network, and have them recalculate their paths
 }
 
+// Build all environment maps (power, data, oxygen, munitions, ...)
+Result iSpaceObjectEnvironment::BuildAllEnvironmentMaps(void)
+{
+	return 0;
+}
+
 
 // Identify the elements that make up this environment's outer hull
 void iSpaceObjectEnvironment::BuildOuterHullModel(void)

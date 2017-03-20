@@ -1,5 +1,5 @@
 #include "Utility.h"
-#include "ComplexShipElement.h"
+#include "TestApplication.h"
 
 #include "RJ.h"
 
@@ -38,7 +38,16 @@ int WINAPI WinMain(HINSTANCE hinstance,
 
 	if (result == ErrorCodes::NoError)
 	{
-		EnterMsgLoop( &RJMain::Display );
+		// DEBUG: Run tests if required
+#		if (defined(_DEBUG) && defined(RJ_RUN_TESTS))
+			TestApplication TestApp;
+			TestApp.RunAllTests(Game::Application);
+#		else
+
+			// Enter the main game loop
+			EnterMsgLoop(&RJMain::Display);
+
+#		endif
 	}
 	else
 	{
@@ -50,12 +59,7 @@ int WINAPI WinMain(HINSTANCE hinstance,
 	// Terminate the application when execution completes, or if initialisation failed
 	Game::Application.TerminateApplication();
 
-	#if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
-		OutputDebugString(concat("*\n*\n*\n*\n*\n*\nCSE constructed: ")(ComplexShipElement::inst_con)(", CSE destructed: ")(ComplexShipElement::inst_des)("\n").str().c_str());
-		//OutputDebugString(concat("Text constructed: ")(TextBlock::inst_con)(", Text destructed: ")(TextBlock::inst_des)("\n").str().c_str());
-	#endif
-
-	// TODO: Return the eventual ErrorCode here, eithe 0 for no error or the specific error that caused a failure (e.g. return value from Initialise())
+	// TODO: Return the eventual ErrorCode here, either 0 for no error or the specific error that caused a failure (e.g. return value from Initialise())
 }
 
 int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )

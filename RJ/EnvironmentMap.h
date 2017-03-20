@@ -5,7 +5,9 @@
 
 #include "DefaultValues.h"
 #include "Utility.h"
+#include "EnvironmentMapBlendMode.h"
 #include "EnvironmentMapFalloffMethod.h"
+#include "ComplexShipElement.h"
 
 // Templated with <T, EnvironmentMapBlendMode::'BlendMode'<T>>
 template <typename T, template<typename> class TBlendMode>
@@ -44,8 +46,8 @@ public:
 	// have "USES_INITIAL_VALUE" == false
 	EnvironmentMap &								WithInitialValueRange(T min_initial_value, T max_initial_value);
 
-	// Executes an update of the map
-	Result											Execute(void);
+	// Executes an update of the map.  Accepts a reference to the underlying element collection as a mandatory parameter
+	Result											Execute(const ComplexShipElement *elements);
 
 
 	// Set the properties that allow transmission of value through the map
@@ -55,11 +57,15 @@ public:
 	void											SetBlockingProperties(bitstring properties);
 
 	// Set the falloff method as value is transmitted through the map
-	void											SetFalloffMethod(const EnvironmentMapFalloffMethod & falloff_method);
+	void											SetFalloffMethod(const EnvironmentMapFalloffMethod<T> & falloff_method);
 
 	// Sets the 'zero threshold', below which we consider the value to have fallen to insignificance and cease processing it
 	void											SetZeroThreshold(T zero_threshold);
-	
+
+
+	// Default values of each transmission-relevant property
+	static const bitstring							DEFAULT_TRANSMISSION_PROPERTIES;
+	static const bitstring							DEFAULT_BLOCKING_PROPERTIES;	
 
 	
 
@@ -72,16 +78,18 @@ protected:
 	// updated via update construction calls "With*"
 	void											InitialiseUpdateParameters(void);
 
+	// Triggered when any property-related fields are updated
+	void											PropertyParametersUpdated(void);
 
 	// Blend method for applying multiple results on top of each other
 	TBlendMode<T>									m_blend;
 
 	// Falloff method for attenuating values as they pass between cells
-	EnvironmentMapFalloffMethod						m_fallout;
+	EnvironmentMapFalloffMethod<T>					m_falloff;
 
 	// Dimensions and count of elements in the map
 	INTVECTOR3										m_elementsize;
-	std::vector<T>::size_type						m_elementcount;
+	typename std::vector<T>::size_type				m_elementcount;
 
 	// Index deltas for a move in each direction on the map
 	static const int								NEIGHBOUR_COUNT = (int)Direction::_Count;
@@ -103,6 +111,7 @@ protected:
 	// Property bitstrings that transmit or block value passing between cells
 	bitstring										m_transmission_properties;
 	bitstring										m_blocking_properties;
+	bool											m_property_dependent_transmission;
 
 	// Any values which fall below the 'zero threshold' will be considered insignificant and cease being processed
 	T												m_zero_threshold;
@@ -118,8 +127,9 @@ EnvironmentMap<T, TBlendMode>::EnvironmentMap(const INTVECTOR3 & element_size)
 	SetElementSize(element_size);
 	
 	// Set default per-map values
-	m_transmission_properties = m_blocking_properties = 0U;
-	m_zero_threshold = DefaultValues<T>::NullValue();
+	SetZeroThreshold(DefaultValues<T>::NullValue());
+	SetTransmissionProperties(DEFAULT_TRANSMISSION_PROPERTIES);
+	SetBlockingProperties(DEFAULT_BLOCKING_PROPERTIES);
 
 	// Set default per-update values (though these will be reset on each BeginUpdate() call)
 	InitialiseUpdateParameters();	
@@ -141,7 +151,7 @@ void EnvironmentMap<T, TBlendMode>::SetElementSize(const INTVECTOR3 & element_si
 	}
 
 	// Initialise the data array for this map
-	Data = std::vector<T>(m_element_count);
+	Data = std::vector<T>(m_elementcount);
 }
 
 // Initialises all update-relevant fields to their default starting values, before they are potentially
@@ -217,11 +227,18 @@ EnvironmentMap<T, TBlendMode> & EnvironmentMap<T, TBlendMode>::WithInitialValueR
 	return this;
 }
 
+// Initialise transmission-relevant property constants
+template <typename T, template<typename> class TBlendMode> 
+const bitstring EnvironmentMap<T, TBlendMode>::DEFAULT_TRANSMISSION_PROPERTIES = ComplexShipElement::ALL_PROPERTIES;
+template <typename T, template<typename> class TBlendMode>
+const bitstring EnvironmentMap<T, TBlendMode>::DEFAULT_BLOCKING_PROPERTIES = ComplexShipElement::NULL_PROPERTIES;
+
 // Set the properties that allow transmission of value through the map
 template <typename T, template<typename> class TBlendMode>
 void EnvironmentMap<T, TBlendMode>::SetTransmissionProperties(bitstring properties)
 {
 	m_transmission_properties = properties;
+	PropertyParametersUpdated();
 }
 
 // Set the properties that prevent transmission of value through the map
@@ -229,11 +246,23 @@ template <typename T, template<typename> class TBlendMode>
 void EnvironmentMap<T, TBlendMode>::SetBlockingProperties(bitstring properties)
 {
 	m_blocking_properties = properties;
+	PropertyParametersUpdated();
 }
+
+// Triggered when any property-related fields are updated
+template <typename T, template<typename> class TBlendMode>
+void EnvironmentMap<T, TBlendMode>::PropertyParametersUpdated(void)
+{
+	m_property_dependent_transmission = (
+		(m_transmission_properties != DEFAULT_TRANSMISSION_PROPERTIES) ||
+		(m_blocking_properties != DEFAULT_BLOCKING_PROPERTIES)
+	);
+}
+
 
 // Set the falloff method as value is transmitted through the map
 template <typename T, template<typename> class TBlendMode>
-void EnvironmentMap<T, TBlendMode>::SetFalloffMethod(const EnvironmentMapFalloffMethod & falloff_method)
+void EnvironmentMap<T, TBlendMode>::SetFalloffMethod(const EnvironmentMapFalloffMethod<T> & falloff_method)
 {
 	m_falloff = falloff_method;
 }
@@ -248,9 +277,9 @@ void EnvironmentMap<T, TBlendMode>::SetZeroThreshold(T zero_threshold)
 
 
 
-// Executes an update of the map
+// Executes an update of the map.  Accepts a reference to the underlying element collection as a mandatory parameter
 template <typename T, template<typename> class TBlendMode>
-Result EnvironmentMap<T, TBlendMode>::Execute(void)
+Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements)
 {
 	// Set initial value for all cells, UNLESS we have chosen to retain the existing data
 	if (!m_append_to_existing_data)
@@ -270,6 +299,10 @@ Result EnvironmentMap<T, TBlendMode>::Execute(void)
 	// Initialise the blend mode with our initial value.  This can only be a fixed initial value for blend modes
 	// which actually make use of it (those which have 'USES_INITIAL_VALUE = true' set)
 	m_blend.SetInitialValue(m_initial_value);
+
+	// We must have a reference to the underlying elements to do any computation.  Exit here if we do not 
+	// have that reference, in which case all elements will simply be set to their initial values
+	if (elements == null) return;
 
 	// We maintain a fixed array of values to indicate when a value has been updated.  Use int rather than bool
 	// so we can quickly revert via memset on each cycle
@@ -298,27 +331,34 @@ Result EnvironmentMap<T, TBlendMode>::Execute(void)
 		updated[index] = 1;
 
 		// Now calculate the recursive transmission to all neighbouring cells via non-recursive vector traversal
-		while (queue_index++ < queue.size())
+		while (queue_index < queue.size())
 		{
 			// Get the next index to be processed
 			index = queue[queue_index];
+			const ComplexShipElement & el = elements[index];
 			T current_value = Data[index];
+
+			// Increment the queue index
+			++queue_index;
 
 			// We want to check all neighbours of this cell that have not yet been processed
 			for (int i = 0; i < NEIGHBOUR_COUNT; ++i)
 			{
-				int neighbour = (index + m_movedelta[i]);
-				if (neighbour < 0 || neighbour >= m_elementcount) continue;		// Must be within the environment map area
+				// Get the neighbour and perform basic checks of whether it should be processed
+				int neighbour = el.GetNeighbour((Direction)i);
+				if (neighbour == -1) continue;									// Must be within the environment map area; -1 signifies not a valid element
 				if (updated[neighbour] != 0) continue;							// Ignore any elements we have already updated
 				updated[neighbour] = 1;											// Mark this neighbour as processed
+
+				// Check against both transmission and blocking element properties
+				bitstring neighbour_properties = elements[neighbour].GetProperties();
+				if ((CheckBit_All_NotSet(neighbour_properties, m_transmission_properties)) ||
+					(CheckBit_Any(neighbour_properties, m_blocking_properties))) continue;
 
 				// We want to transmit to this cell.  First calculate the transmitted value.  If it has fallen
 				// below the zero threshold then we can stop propogating it here
 				T transmitted = m_falloff.ApplyFalloff(current_value, (Direction)i);
-				if (transmitted < m_zero_threshold)
-				{
-					continue;
-				}
+				if (transmitted < m_zero_threshold) continue;
 
 				// Blend this value into the target cell
 				Data[neighbour] = m_blend.apply(Data[neighbour], transmitted);
@@ -330,9 +370,6 @@ Result EnvironmentMap<T, TBlendMode>::Execute(void)
 		}
 
 	}
-
-	*** NEED TO ACCOUNT FOR TRANSMISSION / BLOCKING PROPERTIES SOMEHOW.  PERHAPS VIA REFERENCE TO ELEMENT VECTOR WHICH WE ACCESS TO RETRIEVE 
-		PROPERTY VALUES IN THE TESTS ABOVE.  SHOULD ALSO ADD LOCAL FLAG THAT INDICATES WHETHER WE *HAVE* THESE PROPERTIES SO WE CAN SKIP THE CHECK IF POSSIBLE ***
 
 }
 

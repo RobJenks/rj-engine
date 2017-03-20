@@ -64,7 +64,7 @@ protected:
 		m_rel_falloff_diag = clamp(m_rel_falloff_diag, 0.0001f, 0.9999f);			// Apply same constraint to diag versions
 
 		// Store these values in precalculated per-direction lookup tables
-		for (int i 0; i < Direction::_Count; ++i)
+		for (int i = 0; i < Direction::_Count; ++i)
 		{
 			if (m_transmission_type == FalloffTransmissionType::Distance)
 			{
