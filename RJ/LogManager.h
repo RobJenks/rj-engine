@@ -10,16 +10,20 @@
 #include "GameVarsExtern.h"
 #include "Utility.h"
 
+// Common body of a log prefix
+#define LOG_PREFIX_BODY "[" << Game::PersistentClockMs << "|" << __FILE__ << ":" << __LINE__ << "] "
+#define LOG_INIT_PREFIX_BODY "[" << (unsigned int)timeGetTime() << "|" << __FILE__ << ":" << __LINE__ << "] "
+
 // Standard line prefix for a logged event
-#define LOG_INFO "INFO: [" << Game::PersistentClockMs << "] "
-#define LOG_WARN "WARNING: [" << Game::PersistentClockMs << "] "
-#define LOG_ERROR "ERROR: [" << Game::PersistentClockMs << "] "
+#define LOG_INFO "INFO: " << LOG_PREFIX_BODY
+#define LOG_WARN "WARNING: [" << LOG_PREFIX_BODY
+#define LOG_ERROR "ERROR: [" << LOG_PREFIX_BODY
 
 // Standard line prefix for a logged event.  Version for use during initialisation, before the main game loop 
 // begins, since the internal clocks will not be running until that point
-#define LOG_INIT_INFO "INFO: [" << (unsigned int)timeGetTime() << "] "
-#define LOG_INIT_WARN "WARNING: [" << (unsigned int)timeGetTime() << "] "
-#define LOG_INIT_ERROR "ERROR: [" << (unsigned int)timeGetTime() << "] "
+#define LOG_INIT_INFO "INFO: [" << LOG_INIT_PREFIX_BODY
+#define LOG_INIT_WARN "WARNING: [" << LOG_INIT_PREFIX_BODY
+#define LOG_INIT_ERROR "ERROR: [" << LOG_INIT_PREFIX_BODY
 
 
 // This class has no special alignment requirements
