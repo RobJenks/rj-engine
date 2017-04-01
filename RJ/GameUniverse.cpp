@@ -41,7 +41,7 @@ Result GameUniverse::ProcessLoadedSystems(ID3D11Device *device)
 			if (res != ErrorCodes::NoError)
 			{
 				overallresult = res;
-				Game::Log << LOG_INIT_START << "ERROR during post-processing of system \"" << it->second->GetName() << "\"\n";
+				Game::Log << LOG_INIT_ERROR << "Error during post-processing of system \"" << it->second->GetName() << "\"\n";
 			}
 		}
 	}

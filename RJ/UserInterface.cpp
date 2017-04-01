@@ -72,7 +72,7 @@ Result UserInterface::BuildUILayouts(void)
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result; 
-		Game::Log << LOG_INIT_START << "ERROR building ship designer UI layout\n";
+		Game::Log << LOG_INIT_ERROR << "Error building ship designer UI layout\n";
 	}
 
 	// Initialise the model builder UI
@@ -80,7 +80,7 @@ Result UserInterface::BuildUILayouts(void)
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result;
-		Game::Log << LOG_INIT_START << "ERROR building model builder UI layout\n";
+		Game::Log << LOG_INIT_ERROR << "Error building model builder UI layout\n";
 	}
 
 	// Initialise the model builder UI
@@ -88,7 +88,7 @@ Result UserInterface::BuildUILayouts(void)
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result;
-		Game::Log << LOG_INIT_START << "ERROR building ship builder UI layout\n";
+		Game::Log << LOG_INIT_ERROR << "Error building ship builder UI layout\n";
 	}
 
 	// Initialise the game console UI
@@ -96,7 +96,7 @@ Result UserInterface::BuildUILayouts(void)
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result;
-		Game::Log << LOG_INIT_START << "ERROR building console UI layout\n";
+		Game::Log << LOG_INIT_ERROR << "Error building console UI layout\n";
 	}
 
 	// Return the overall result

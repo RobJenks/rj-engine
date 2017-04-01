@@ -11,11 +11,15 @@
 #include "Utility.h"
 
 // Standard line prefix for a logged event
-#define LOG_START "[" << Game::PersistentClockMs << "] "
+#define LOG_INFO "INFO: [" << Game::PersistentClockMs << "] "
+#define LOG_WARN "WARNING: [" << Game::PersistentClockMs << "] "
+#define LOG_ERROR "ERROR: [" << Game::PersistentClockMs << "] "
 
 // Standard line prefix for a logged event.  Version for use during initialisation, before the main game loop 
 // begins, since the internal clocks will not be running until that point
-#define LOG_INIT_START "[" << (unsigned int)timeGetTime() << "] "
+#define LOG_INIT_INFO "INFO: [" << (unsigned int)timeGetTime() << "] "
+#define LOG_INIT_WARN "WARNING: [" << (unsigned int)timeGetTime() << "] "
+#define LOG_INIT_ERROR "ERROR: [" << (unsigned int)timeGetTime() << "] "
 
 
 // This class has no special alignment requirements
@@ -113,7 +117,7 @@ protected:
 	
 	// Flag indicating whether the primary log should flush after every stream operation.  Used during initialisation
 	// to make sure that all data is output before any potential crash
-		bool						m_alwaysflush;
+	bool						m_alwaysflush;
 	
 };
 
