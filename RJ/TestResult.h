@@ -27,9 +27,22 @@ public:
 	CMPINLINE const std::vector<std::string> & GetMessages(void) const { return m_messages; }
 	CMPINLINE bool HasMessages(void) const { return !m_messages.empty(); }
 
+	CMPINLINE void combineWith(const TestResult & other)
+	{
+		m_passed += other.GetPassCount();
+		m_failed += other.GetFailCount();
+		m_messages.insert(m_messages.end(), other.GetMessages().begin(), other.GetMessages().end());
+	}
+
+	CMPINLINE TestResult & operator+=(const TestResult & rhs) { combineWith(rhs); return *this; }
+
 private:
 
 	int m_passed, m_failed;
 	std::vector<std::string> m_messages;
 
 };
+
+CMPINLINE TestResult operator+(TestResult lhs, const TestResult & rhs) { lhs += rhs; return lhs; }
+
+
