@@ -70,8 +70,10 @@ namespace Game
 	// Unregister an object from the global collection
 	void UnregisterObject(iObject *obj)
 	{
-		// Make sure this is a valid object
-		if (!obj) return;
+		// Make sure this is a valid object.  Also quit immediately if the object map is empty; required in order to circumvent
+		// an apparent bug with the std::unordered_map implementation where it attempts to index [2 * _Bucket] (with _Bucket == 1)
+		// then the underlying vector _Vec is empty
+		if (!obj || Game::Objects.empty()) return;
 
 		// Check whether this object is in fact registered with the global collection
 		Game::ObjectRegister::iterator entry = Game::Objects.find(obj->GetID());

@@ -2,10 +2,11 @@
 === Test application initialised; executing tests ===
 
 Executed 1 tests:
-Test 0: 43 Passed, 21 Failed, 3 Messages:
-    Some first message
-    Message number 2
-    A third message
+Test 0: 16 Passed, 7 Failed, 4 Messages:
+    ERROR: [1356695551|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:47] Absolute integer distance falloff method incorrectly applied to diagonal
+    ERROR: [1356695551|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:55] Relative float square falloff method incorrectly applied to diagonal
+    ERROR: [1356695551|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:57] Relative float distance falloff method incorrectly applied to diagonal
+    ERROR: [1356695551|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:85] Ignore new float blending failed
 
 === Test execution completed ===
 

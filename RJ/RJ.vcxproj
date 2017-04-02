@@ -390,6 +390,7 @@
     <ClCompile Include="ElementStateFilters.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnvironmentCollision.cpp" />
+    <ClCompile Include="EnvironmentMapTests.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
@@ -721,6 +722,7 @@
     <ClInclude Include="StandardModifiers.h" />
     <ClInclude Include="TestApplication.h" />
     <ClInclude Include="TestBase.h" />
+    <ClInclude Include="TestError.h" />
     <ClInclude Include="TestResult.h" />
     <ClInclude Include="TestRunner.h" />
     <ClInclude Include="TileAdjacency.h" />

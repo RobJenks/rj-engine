@@ -22,7 +22,7 @@ template <> class DefaultValues<int>
 public:
 	CMPINLINE static int NullValue(void) { return 0; }
 	CMPINLINE static int OneValue(void) { return 1; }
-	CMPINLINE static int EpsilonValue(void) { throw "Epsilon value not valid for type"; }
+	CMPINLINE static int EpsilonValue(void) { return 1; }
 	CMPINLINE static int InfiniteValue(void) { return INF_INT; }
 };
 
@@ -42,7 +42,7 @@ template <> class DefaultValues<short>
 public:
 	CMPINLINE static short NullValue(void) { return 0; }
 	CMPINLINE static short OneValue(void) { return 1; }
-	CMPINLINE static short EpsilonValue(void) { throw "Epsilon value not valid for type"; }
+	CMPINLINE static short EpsilonValue(void) { return 1; }
 	CMPINLINE static short InfiniteValue(void) { return INF_SHORT; }
 };
 
@@ -50,9 +50,9 @@ public:
 template <> class DefaultValues<long>
 {
 public:
-	CMPINLINE static long NullValue(void) { return 0; }
-	CMPINLINE static long OneValue(void) { return 1; }
-	CMPINLINE static long EpsilonValue(void) { throw "Epsilon value not valid for type"; }
+	CMPINLINE static long NullValue(void) { return 0L; }
+	CMPINLINE static long OneValue(void) { return 1L; }
+	CMPINLINE static long EpsilonValue(void) { return 1L; }
 	CMPINLINE static long InfiniteValue(void) { return INF_LONG; }
 };
 
@@ -72,7 +72,7 @@ template <> class DefaultValues<unsigned int>
 public:
 	CMPINLINE static unsigned int NullValue(void) { return 0U; }
 	CMPINLINE static unsigned int OneValue(void) { return 1U; }
-	CMPINLINE static unsigned int EpsilonValue(void) { throw "Epsilon value not valid for type"; }
+	CMPINLINE static unsigned int EpsilonValue(void) { return 1U; }
 	CMPINLINE static unsigned int InfiniteValue(void) { return INF_UINT; }
 };
 

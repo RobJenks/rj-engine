@@ -180,6 +180,7 @@ EnvironmentMap<T, TBlendMode> & EnvironmentMap<T, TBlendMode>::BeginUpdate(void)
 	// Set default values that may be supplied by other methods in the update construction
 	InitialiseUpdateParameters();
 
+	return *this;
 }
 
 
@@ -188,7 +189,7 @@ template <typename T, template<typename> class TBlendMode>
 EnvironmentMap<T, TBlendMode> & EnvironmentMap<T, TBlendMode>::WithSourceCell(MapCell source)
 {
 	m_sources.push_back(source);
-	return this;
+	return *this;
 }
 
 // Adds multiple source cells to the update
@@ -196,7 +197,7 @@ template <typename T, template<typename> class TBlendMode>
 EnvironmentMap<T, TBlendMode> & EnvironmentMap<T, TBlendMode>::WithSourceCells(const std::vector<MapCell> & sources)
 {
 	m_sources.insert(m_sources.end(), sources.begin(), sources.end());
-	return this;
+	return *this;
 }
 
 // Sets the initial value to be applied to all cells before updating the map.  Overridden by "UpdateAppendingToExistingData" if set
@@ -205,7 +206,7 @@ EnvironmentMap<T, TBlendMode> & EnvironmentMap<T, TBlendMode>::WithInitialValues
 {
 	m_fixed_initial_value = true;
 	m_initial_value = initial_value;
-	return this;
+	return *this;
 }
 
 // Sets the possible range of initial values for each map cell.  ONLY compatible with blend modes that 
@@ -286,13 +287,13 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 	{
 		if (m_fixed_initial_value)
 		{
-			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i, ++v)
+			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i)
 				Data[i] = m_initial_value;
 		}
 		else
 		{
-			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i, ++v)
-				Data[i] = (m_initial_value_min + (frand() * m_initial_value_range));
+			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i)
+				Data[i] = (m_initial_value_min + (T)(frand() * m_initial_value_range));
 		}
 	}
 
@@ -302,11 +303,11 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 	// We must have a reference to the underlying elements to do any computation.  Exit here if we do not 
 	// have that reference, in which case all elements will simply be set to their initial values
-	if (elements == null) return;
+	if (elements == NULL) return ErrorCodes::CannotEvaluateEnvironmentMapWithoutElementRef;
 
 	// We maintain a fixed array of values to indicate when a value has been updated.  Use int rather than bool
 	// so we can quickly revert via memset on each cycle
-	int updated[m_elementcount];
+	int *updated = new int[m_elementcount];
 	size_t update_size = (sizeof(int) * m_elementcount);
 
 	// Process each source cell in turn
@@ -361,7 +362,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				if (transmitted < m_zero_threshold) continue;
 
 				// Blend this value into the target cell
-				Data[neighbour] = m_blend.apply(Data[neighbour], transmitted);
+				Data[neighbour] = m_blend.Apply(Data[neighbour], transmitted);
 
 				// We want to move on and process all this cell's neighbours in a future cycle
 				queue.push_back(neighbour);
@@ -371,6 +372,11 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 	}
 
+	// Delete any temporarily-allocate memory
+	delete[] updated;
+
+	// Return success
+	return ErrorCodes::NoError;
 }
 
 

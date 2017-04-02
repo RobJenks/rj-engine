@@ -9,12 +9,27 @@ public:
 
 	CMPINLINE TestResult RunTests(void)
 	{
-		std::vector<std::string> msgs;
-		msgs.push_back("Some first message");
-		msgs.push_back("Message number 2");
-		msgs.push_back("A third message");
+		TestResult result;
 
-		return TestResult(43, 21, msgs);
+		result += BasicInitialisationTests();
+		result += FalloffMethodTests();
+		result += BlendModeTests();
+		result += BasicAdditivePropogationTests();
+
+		return result;
 	}
+
+
+private:
+
+	TestResult BasicInitialisationTests();
+	TestResult FalloffMethodTests();
+	TestResult BlendModeTests();
+
+	TestResult BasicAdditivePropogationTests();
+
+
+	std::unique_ptr<ComplexShip> GenerateTestElementEnvironment(const INTVECTOR3 & size);
+
 
 };

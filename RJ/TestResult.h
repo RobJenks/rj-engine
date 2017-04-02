@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include "CompilerSettings.h"
+#include "LogManager.h"
+#include "TestError.h"
+
 
 class TestResult
 {
@@ -26,6 +29,21 @@ public:
 	CMPINLINE int GetTestCount(void) const { return (m_passed + m_failed); }
 	CMPINLINE const std::vector<std::string> & GetMessages(void) const { return m_messages; }
 	CMPINLINE bool HasMessages(void) const { return !m_messages.empty(); }
+
+	CMPINLINE void Assert(bool condition)
+	{
+		if (condition) ++m_passed; else ++m_failed;
+	}
+	CMPINLINE void Assert(bool condition, TEST_ERR_MSG failure_message)
+	{
+		if (condition) ++m_passed;
+		else
+		{
+			++m_failed;
+			LogMessage(failure_message());
+		}
+	}
+
 
 	CMPINLINE void combineWith(const TestResult & other)
 	{

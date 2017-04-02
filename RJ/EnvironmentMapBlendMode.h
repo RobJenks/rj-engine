@@ -4,6 +4,7 @@
 #define __EnvironmentMapBlendModeH__
 
 #include "CompilerSettings.h"
+#include "DefaultValues.h"
 
 class EnvironmentMapBlendMode
 {
@@ -30,11 +31,48 @@ public:
 		CMPINLINE T Apply(T current, T newvalue) { return (current + newvalue); }
 	};
 
-	struct BlendSelectMin { };
-	struct BlendSelectMax { };
-	struct BlendMultiplicative { };
-	struct BlendReplaceDestination { };
-	struct BlendIgnoreNewValue { };
+	template <typename T>
+	struct BlendMultiplicative
+	{
+		static const bool USES_INITIAL_VALUE = false;
+		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
+		CMPINLINE T Apply(T current, T newvalue) { return (current * newvalue); }
+	};
+
+	template <typename T>
+	struct BlendMinimumValue
+	{
+		static const bool USES_INITIAL_VALUE = false;
+		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
+		CMPINLINE T Apply(T current, T newvalue) { return min(current, newvalue); }
+	};
+
+	template <typename T>
+	struct BlendMaximumValue
+	{
+		static const bool USES_INITIAL_VALUE = false;
+		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
+		CMPINLINE T Apply(T current, T newvalue) { return max(current, newvalue); }
+	};
+
+	template <typename T>
+	struct BlendReplaceDestination
+	{
+		static const bool USES_INITIAL_VALUE = false;
+		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
+		CMPINLINE T Apply(T current, T newvalue) { return newvalue; }
+	};
+
+	template <typename T>
+	struct BlendIgnoreNewValue
+	{
+		static const bool USES_INITIAL_VALUE = true;
+		CMPINLINE void SetInitialValue(T value) { m_initialvalue = value; }
+		CMPINLINE T Apply(T current, T newvalue) { return (current == m_initialvalue ? newvalue : current); }
+
+	private:
+		T m_initialvalue = DefaultValues<T>::NullValue();
+	};
 
 };
 

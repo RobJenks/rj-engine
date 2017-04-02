@@ -607,6 +607,9 @@
     <ClCompile Include="ElementStateFilters.cpp">
       <Filter>Objects\Ships\Elements</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentMapTests.cpp">
+      <Filter>_Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1412,6 +1415,9 @@
       <Filter>_Tests</Filter>
     </ClInclude>
     <ClInclude Include="TestApplication.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="TestError.h">
       <Filter>_Tests</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,6 +5,7 @@
 
 // Disable compiler warnings about macro redefiniiton, caused by the use of new Win 8.1 Dev kit alongside the existing
 // DirectX SDK content.
+#pragma warning( push )
 #pragma warning( disable : 4005 )
 
 // Flag to enable DX debug mode, if required.  Only available if we are in application debug mode
@@ -54,7 +55,7 @@ typedef __declspec(align(16)) struct AXMVECTOR_P_T : public ALIGN16<AXMVECTOR_P_
 typedef __declspec(align(16)) struct AXMMATRIX_P_T : public ALIGN16<AXMMATRIX_P_T> { AXMMATRIX value; } AXMMATRIX_P;
 
 // Re-enable compiler warnings for macro redefinition, once all DX headers have been processed
-#pragma warning( default : 4005 )
+#pragma warning( pop )
 
 
 #endif
