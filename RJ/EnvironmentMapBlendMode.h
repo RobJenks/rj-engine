@@ -16,6 +16,7 @@ public:
 	{
 		Additive = 0,
 		Multiplicative, 
+		Averaged,
 		MinimumValue,
 		MaximumValue,
 		ReplaceDestination,			// Ignores and overwrites any existing value
@@ -37,6 +38,14 @@ public:
 		static const bool USES_INITIAL_VALUE = false;
 		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
 		CMPINLINE T Apply(T current, T newvalue) { return (current * newvalue); }
+	};
+
+	template <typename T>
+	struct BlendAveraged
+	{
+		static const bool USES_INITIAL_VALUE = false;
+		CMPINLINE void SetInitialValue(T value) { /* Blend does not incorporate the initial value */ }
+		CMPINLINE T Apply(T current, T newvalue) { return (T)((current + newvalue) * 0.5f); }
 	};
 
 	template <typename T>

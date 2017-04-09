@@ -10,6 +10,7 @@ struct TEST_ERR_MSG
 private:
 	std::string m_msg;
 public:
+	TEST_ERR_MSG(void) : m_msg(NullString) { }
 	TEST_ERR_MSG(const std::string & msg) : m_msg(msg) { }
 	std::string operator()(void) { return m_msg; }
 };

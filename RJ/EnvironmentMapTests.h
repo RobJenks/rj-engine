@@ -9,12 +9,15 @@ public:
 
 	CMPINLINE TestResult RunTests(void)
 	{
-		TestResult result;
+		TestResult result = NewResult();
 
 		result += BasicInitialisationTests();
 		result += FalloffMethodTests();
 		result += BlendModeTests();
 		result += BasicAdditivePropogationTests();
+		result += BasicMultiplicativePropogationTests();
+		result += BasicAveragedPropogationTests();
+		result += BasicRelativeFalloffPropogationTests();
 
 		return result;
 	}
@@ -27,6 +30,9 @@ private:
 	TestResult BlendModeTests();
 
 	TestResult BasicAdditivePropogationTests();
+	TestResult BasicMultiplicativePropogationTests();
+	TestResult BasicAveragedPropogationTests();
+	TestResult BasicRelativeFalloffPropogationTests();
 
 
 	std::unique_ptr<ComplexShip> GenerateTestElementEnvironment(const INTVECTOR3 & size);

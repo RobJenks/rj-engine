@@ -11,12 +11,12 @@ class TestResult
 {
 public:
 
-	CMPINLINE TestResult(void) : m_passed(0), m_failed(0) { }
-	CMPINLINE TestResult(int _passed, int _failed) : m_passed(_passed), m_failed(_failed) { }
-	CMPINLINE TestResult(int _passed, int _failed, const std::vector<std::string> & _messages) : m_passed(_passed), m_failed(_failed), m_messages(_messages) { }
+	CMPINLINE TestResult(void) : m_passed(0), m_failed(0), m_failallcases(false) { }
+	CMPINLINE TestResult(int _passed, int _failed) : m_passed(_passed), m_failed(_failed), m_failallcases(false) { }
+	CMPINLINE TestResult(int _passed, int _failed, const std::vector<std::string> & _messages) : m_passed(_passed), m_failed(_failed), m_messages(_messages), m_failallcases(false) { }
 
 
-	CMPINLINE void TestPassed(void) { ++m_passed; }
+	CMPINLINE void TestPassed(void) { if (!m_failallcases) ++m_passed; else ++m_failed; }
 	CMPINLINE void TestFailed(void) { ++m_failed; }
 
 	CMPINLINE void LogMessage(const std::string & message) { m_messages.push_back(message); }
@@ -30,17 +30,28 @@ public:
 	CMPINLINE const std::vector<std::string> & GetMessages(void) const { return m_messages; }
 	CMPINLINE bool HasMessages(void) const { return !m_messages.empty(); }
 
-	CMPINLINE void Assert(bool condition)
-	{
-		if (condition) ++m_passed; else ++m_failed;
-	}
+	CMPINLINE void FailAllCases(void) { m_failallcases = true; }
+
+	//CMPINLINE void Assert(bool condition) { Assert(condition, TEST_ERR_MSG()); }
 	CMPINLINE void Assert(bool condition, TEST_ERR_MSG failure_message)
 	{
-		if (condition) ++m_passed;
+		AssertEqual(condition, true, failure_message);
+	}
+
+	//template <typename T>
+	//CMPINLINE void AssertEqual(T x0, T x1) { AssertEquals(x0, x1, TEST_ERR_MSG()); }
+	template <typename T>
+	CMPINLINE void AssertEqual(T x0, T x1, TEST_ERR_MSG failure_message)
+	{
+		if (x0 == x1 && !m_failallcases) ++m_passed;
 		else
 		{
 			++m_failed;
-			LogMessage(failure_message());
+
+			std::string inequality = concat("[")(x0)("] != [")(x1)("]").str();
+			OutputDebugString(concat("Equality assertion failed; ")(inequality)("\n").str().c_str());
+
+			if (!failure_message().empty()) LogMessage(concat(failure_message())(" (")(inequality)(")").str());
 		}
 	}
 
@@ -58,6 +69,7 @@ private:
 
 	int m_passed, m_failed;
 	std::vector<std::string> m_messages;
+	bool m_failallcases;
 
 };
 

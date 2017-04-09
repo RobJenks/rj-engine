@@ -62,6 +62,13 @@ public:
 	// Sets the 'zero threshold', below which we consider the value to have fallen to insignificance and cease processing it
 	void											SetZeroThreshold(T zero_threshold);
 
+	// Generates a debug string output of the environment map contents
+	CMPINLINE std::string							DebugStringOutput(void) { return DebugStringOutput(0, m_elementsize.z - 1, NULL); }
+	CMPINLINE std::string							DebugStringOutput(const char *format) { return DebugStringOutput(0, m_elementsize.z - 1, format); }
+	CMPINLINE std::string							DebugStringOutput(int z_level) { return DebugStringOutput(z_level, z_level, NULL); }
+	CMPINLINE std::string							DebugStringOutput(int z_level, const char *format) { return DebugStringOutput(z_level, z_level, format); }
+	CMPINLINE std::string							DebugStringOutput(int z_start, int z_end) { return DebugStringOutput(z_start, z_end, NULL); }
+	std::string										DebugStringOutput(int z_start, int z_end, const char *format);
 
 	// Default values of each transmission-relevant property
 	static const bitstring							DEFAULT_TRANSMISSION_PROPERTIES;
@@ -339,6 +346,12 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 			const ComplexShipElement & el = elements[index];
 			T current_value = Data[index];
 
+			int TINDEX = ELEMENT_INDEX_EX(2, 3, 3, m_elementsize);
+			if (index == TINDEX)
+			{
+				int p = 1;
+			}
+
 			// Increment the queue index
 			++queue_index;
 
@@ -377,6 +390,43 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+
+
+// Returns a debug string representation of the environment map contents, for the selected set of z-levels
+// Internal method which returns a debug string output representing the set of element states, given 
+// the specified tile orientation(s) to be returned. Shown as a 2D x/y representation, with z 
+// values represented within an array at each element
+template <typename T, template<typename> class TBlendMode>
+std::string EnvironmentMap<T, TBlendMode>::DebugStringOutput(int z_start, int z_end, const char *format)
+{
+	if (z_start > z_end || z_start < 0 || z_end >= m_elementsize.z) return "";
+	int zsize = ((z_end - z_start) + 1);
+	concat result = concat("");
+
+	for (int y = (m_elementsize.y - 1); y >= 0; --y)			// Note: decrement y from max>min, since elements are arranged with the origin at bottom-bottom-left 
+	{
+		for (int x = 0; x < m_elementsize.x; ++x)
+		{
+			result("[");
+			for (int z = z_start; z <= z_end; ++z)
+			{
+				result((z != z_start ? "," : ""));
+				if (!format)
+					result(Data[ELEMENT_INDEX_EX(x, y, z, m_elementsize)]);			
+				else
+				{
+					char str[128]; memset(str, 0, 128);
+					sprintf(str, format, Data[ELEMENT_INDEX_EX(x, y, z, m_elementsize)]);
+					result(str);
+				}
+			}
+			result("] ");
+		}
+		result("\n");
+	}
+	return result.str();
 }
 
 

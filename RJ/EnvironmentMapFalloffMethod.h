@@ -62,10 +62,10 @@ protected:
 		m_abs_falloff_diag = (T)(m_abs_falloff * ROOT2);							// Calculate diag version
 		m_rel_falloff_diag = (T)(1.0f - ((1.0f - m_rel_falloff) * ROOT2));			// Calculate diag version (take from remaining% to reduce% before applying, then revert back)
 
-		m_abs_falloff_diag = min(m_abs_falloff, -DefaultValues<T>::EpsilonValue());	// Apply same constraint to diag versions
-		m_rel_falloff_diag = (T)clamp(m_rel_falloff_diag,							// Apply same constraint to diag versions
+		m_abs_falloff_diag = min(m_abs_falloff_diag, -DefaultValues<T>::EpsilonValue());	// Apply same constraint to diag versions
+		m_rel_falloff_diag = (T)clamp(m_rel_falloff_diag,									// Apply same constraint to diag versions
 			min(DefaultValues<T>::EpsilonValue(), (DefaultValues<T>::OneValue() - DefaultValues<T>::EpsilonValue())),	// Use min/max to handle special case of 
-			max(DefaultValues<T>::EpsilonValue(), (DefaultValues<T>::OneValue() - DefaultValues<T>::EpsilonValue())));	// <T=int> where (1-Eps) > (Eps)
+			max(DefaultValues<T>::EpsilonValue(), (DefaultValues<T>::OneValue() - DefaultValues<T>::EpsilonValue())));	// <T=int> where (1-Eps) < (Eps)
 
 		// Store these values in precalculated per-direction lookup tables
 		for (int i = 0; i < Direction::_Count; ++i)
@@ -130,6 +130,7 @@ template <typename T>
 EnvironmentMapFalloffMethod<T> & EnvironmentMapFalloffMethod<T>::WithFalloffTransmissionType(FalloffTransmissionType type)
 {
 	m_transmission_type = type;
+	CalculateDerivedFalloffValues();
 	return *this;
 }
 

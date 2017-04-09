@@ -12,12 +12,16 @@ class TestApplication
 {
 public:
 
+	// Debug flag; can be set to report all tests as failed, such that all useful debug output is generated
+	static const bool DEBUG_FAIL_ALL_CASES = false;
+
+
 	// Run all tests - debug mode only
 	void RunAllTests(RJMain & ApplicationReference)
 	{
 		// Initialise test runner
 		TestRunner tester = Initialise();
-
+		if (DEBUG_FAIL_ALL_CASES) tester.FailAllCases();
 
 		// Run all required tests
 		tester.Run<EnvironmentMapTests>();
