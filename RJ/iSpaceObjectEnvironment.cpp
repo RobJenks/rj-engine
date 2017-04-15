@@ -217,6 +217,7 @@ void iSpaceObjectEnvironment::PerformOxygenUpdate(void)
 	m_oxygenupdaterequired = false;
 
 	// TODO: Do this
+	
 }
 
 
@@ -616,6 +617,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Identify the elements that make up this environment's outer hull
 	BuildOuterHullModel();
 
+	// Build detail caches on the state of environment elements
+	BuildEnvironmentDetailCaches();
+
 	// Rebuild the object bounding box to acccount for any elements that may have been destroyed
 	BuildBoundingBoxHierarchy();
 
@@ -644,6 +648,25 @@ Result iSpaceObjectEnvironment::BuildAllEnvironmentMaps(void)
 	return 0;
 }
 
+
+// Build detail caches on the state of environment elements
+void iSpaceObjectEnvironment::BuildEnvironmentDetailCaches(void)
+{
+	// Reset the element property cache
+	for (int i = 0; i < ComplexShipElement::PROPERTY::PROPERTY_MAX; ++i)
+		m_element_property_count[i] = 0;
+
+	// Traverse the element collection and update property counts where applicable
+	for (int i = 0; i < m_elementcount; ++i)
+	{
+		bitstring properties = m_elements[i].GetProperties();
+		for (int prop = 0; prop < ComplexShipElement::PROPERTY_COUNT; ++prop)
+		{
+			if (CheckBit_Any(properties, ComplexShipElement::PROPERTY_VALUES[prop]))
+				++(m_element_property_count[prop]);
+		}
+	}
+}
 
 // Identify the elements that make up this environment's outer hull
 void iSpaceObjectEnvironment::BuildOuterHullModel(void)

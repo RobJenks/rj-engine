@@ -6,6 +6,7 @@
 #include "ComplexShipTileDefinition.h"
 #include "AdjustableParameter.h"
 #include "Utility.h"
+#include "Oxygen.h"
 
 class CSLifeSupportTileDefinition : public ComplexShipTileDefinition
 {
@@ -23,9 +24,9 @@ public:
 
 
 	// Store the starting values for key properties maintained by the life support system
-	AdjustableParameter<float>	InitialGravity;
-	AdjustableParameter<int>	InitialOxygenLevel;
-	AdjustableParameter<int>	InitialOxygenRange;
+	AdjustableParameter<float>			InitialGravity;
+	AdjustableParameter<Oxygen::Type>	InitialOxygenLevel;
+	AdjustableParameter<Oxygen::Type>	InitialOxygenRange;
 
 	// Returns the standard gravity strength expected at the specified distance
 	CMPINLINE float				GetGravityStrength(int distance) const				

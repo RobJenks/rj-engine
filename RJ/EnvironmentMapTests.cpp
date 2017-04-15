@@ -114,7 +114,7 @@ TestResult EnvironmentMapTests::BasicAdditivePropogationTests()
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), (1 + (10 - (int)(2 * ROOT2))), ERR("Single-cell diagonal additive propogation failed"));
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), (1 + ((1 + (10 - 2)) - 2)), ERR("Multi-cell additive propogation failed"));
 
-	OutputDebugString(concat("\Environment map additive propogation tests:\n")(map.DebugStringOutput("%d"))("\n").str().c_str());
+	OutputDebugString(concat("Environment map additive propogation tests:\n")(map.DebugStringOutput("%d"))("\n").str().c_str());
 	return result;
 }
 
@@ -143,7 +143,7 @@ TestResult EnvironmentMapTests::BasicMultiplicativePropogationTests()
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), (2.0f * (10.0f - (2.0f * ROOT2))), ERR("Single-cell diagonal multiplictive propogation failed"));
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), (2.0f * ((2.0f * (10.0f - 2.0f)) - 2.0f)), ERR("Multi-cell multiplictive propogation failed"));
 
-	OutputDebugString(concat("\Environment map multiplicative propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
+	OutputDebugString(concat("Environment map multiplicative propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
 	return result;
 }
 
@@ -172,7 +172,7 @@ TestResult EnvironmentMapTests::BasicAveragedPropogationTests()
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), 0.5f * (2.0f + (10.0f - (2.0f * ROOT2))), ERR("Single-cell diagonal averaged propogation failed"));
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), 0.5f * (2.0f + ((0.5f * (2.0f + (10.0f - 2.0f)))-2.0f)), ERR("Multi-cell averaged propogation failed"));
 
-	OutputDebugString(concat("\Environment map averaged propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
+	OutputDebugString(concat("Environment map averaged propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
 	return result;
 }
 

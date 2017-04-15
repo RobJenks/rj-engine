@@ -6,6 +6,7 @@
 #include "CompilerSettings.h"
 #include "GameDataExtern.h"
 #include "AdjustableParameter.h"
+#include "Oxygen.h"
 #include "CSLifeSupportTileDefinition.h"
 #include "ComplexShipTile.h"
 class TiXmlElement;
@@ -23,9 +24,9 @@ public:
 	void						PerformTileSimulation(unsigned int delta_ms);
 
 	// Key properties maintained by the life support system
-	AdjustableParameter<float>	Gravity;
-	AdjustableParameter<int>	OxygenLevel;
-	AdjustableParameter<int>	OxygenRange;
+	AdjustableParameter<float>			Gravity;
+	AdjustableParameter<Oxygen::Type>	OxygenLevel;
+	AdjustableParameter<Oxygen::Type>	OxygenRange;
 
 	// Life support system has a general effectivity property dependent on its current state (e.g. damage, maintenance level)
 	CMPINLINE float				GetEffectivity(void) const				{ return m_effectivity; }

@@ -392,6 +392,7 @@
     <ClCompile Include="EnvironmentCollision.cpp" />
     <ClCompile Include="EnvironmentMapTests.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
+    <ClCompile Include="EnvironmentOxygenMap.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Faction.cpp" />
@@ -459,6 +460,7 @@
     <ClCompile Include="ObjectPicking.cpp" />
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
+    <ClCompile Include="Oxygen.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
@@ -616,6 +618,7 @@
     <ClInclude Include="EnvironmentMapFalloffMethod.h" />
     <ClInclude Include="EnvironmentMapTests.h" />
     <ClInclude Include="EnvironmentOBBRegion.h" />
+    <ClInclude Include="EnvironmentOxygenMap.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />
@@ -636,6 +639,7 @@
     <ClInclude Include="ObjectPicking.h" />
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
+    <ClInclude Include="Oxygen.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />

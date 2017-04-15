@@ -48,6 +48,7 @@ public:
 	Result				InitialiseDirect3DApplication(void);
 	Result				InitialiseDirectInput(void);
 	Result				InitialiseDirect3D(void);
+	Result				InitialiseStaticData(void);
 	Result				InitialiseRegions(void);
 	Result				InitialiseUniverse(void);
 	Result				InitialiseUserInterface(void);

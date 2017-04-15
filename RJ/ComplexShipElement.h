@@ -56,13 +56,16 @@ public:
 		PROP_BUILDABLE			= (1 << 1),				// 2:     Can the element have tiles built on it?
 		PROP_OUTER_HULL_ELEMENT = (1 << 2),				// 4:     Is this element part of the outer ship hull?
 
-		// More detaileed properties; set by e.g. ship tiles
+		// More detailed properties; set by e.g. ship tiles
 		PROP_WALKABLE			= (1 << 3),				// 8:     Is the element an (easy, walking) route for player & AI?
 		PROP_TRANSMITS_POWER	= (1 << 4),				// 16:    Are there power cables running through this element?
 		PROP_TRANSMITS_DATA		= (1 << 5),				// 32:    Are there data cables running through this element?
 		
-		PROPERTY_MAX			= (1 << 6)				//        (The total number of properties per element)
+		PROPERTY_MAX			= (1 << 6)				//        (The maximum property value per element)
 	};
+
+	static const int PROPERTY_COUNT = 6;				// ENSURE THIS REMAINS IN SYNC WITH PROPERTIES ABOVE
+	static int PROPERTY_VALUES[PROPERTY_COUNT];
 
 	// Struct holding data on a connection from one nav node to another
 	struct NavNodeConnection { 
@@ -301,6 +304,8 @@ public:
 	// Constant indicating that all property values are set
 	static const bitstring					ALL_PROPERTIES;
 
+	// Initialises static supporting data
+	static void								InitialiseStaticData(void);
 
 
 private:

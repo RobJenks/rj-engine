@@ -18,8 +18,8 @@ CSLifeSupportTile::CSLifeSupportTile(void)
 
 	// Initialise default values for each life support property
 	Gravity = AdjustableParameter<float>(0.0f, 20.0f, 9.8f, 9.8f, 1.0f);
-	OxygenLevel = AdjustableParameter<int>(0, 100, 100, 100, 2);
-	OxygenRange = AdjustableParameter<int>(10, 30, 20, 20, 1);
+	OxygenLevel = AdjustableParameter<Oxygen::Type>((Oxygen::Type)0, (Oxygen::Type)100, (Oxygen::Type)100, (Oxygen::Type)100, (Oxygen::Type)2);
+	OxygenRange = AdjustableParameter<Oxygen::Type>((Oxygen::Type)10, (Oxygen::Type)30, (Oxygen::Type)20, (Oxygen::Type)20, (Oxygen::Type)1);
 
 	// Life support systems begin at full effectivity
 	m_effectivity = 1.0f;

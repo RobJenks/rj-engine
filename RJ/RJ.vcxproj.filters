@@ -610,6 +610,12 @@
     <ClCompile Include="EnvironmentMapTests.cpp">
       <Filter>_Tests</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentOxygenMap.cpp">
+      <Filter>Objects\Ships\Environments\Oxygen</Filter>
+    </ClCompile>
+    <ClCompile Include="Oxygen.cpp">
+      <Filter>Objects\Ships\Environments\Oxygen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1393,15 +1399,6 @@
     <ClInclude Include="BasicColourDefinition.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="EnvironmentMap.h">
-      <Filter>Objects\Ships\Environments</Filter>
-    </ClInclude>
-    <ClInclude Include="EnvironmentMapBlendMode.h">
-      <Filter>Objects\Ships\Environments</Filter>
-    </ClInclude>
-    <ClInclude Include="EnvironmentMapFalloffMethod.h">
-      <Filter>Objects\Ships\Environments</Filter>
-    </ClInclude>
     <ClInclude Include="EnvironmentMapTests.h">
       <Filter>_Tests</Filter>
     </ClInclude>
@@ -1419,6 +1416,21 @@
     </ClInclude>
     <ClInclude Include="TestError.h">
       <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMap.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMapBlendMode.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMapFalloffMethod.h">
+      <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentOxygenMap.h">
+      <Filter>Objects\Ships\Environments\Oxygen</Filter>
+    </ClInclude>
+    <ClInclude Include="Oxygen.h">
+      <Filter>Objects\Ships\Environments\Oxygen</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1676,6 +1688,9 @@
     </Filter>
     <Filter Include="_Tests">
       <UniqueIdentifier>{20c4d13d-fd34-4e3b-b9d2-8616ca7c310a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments\Oxygen">
+      <UniqueIdentifier>{6983cf2a-aa7b-4e5f-b268-c383cff4204d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

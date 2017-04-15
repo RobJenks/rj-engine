@@ -1224,6 +1224,15 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	InitialiseMathFunctions();
 	Game::Log << LOG_INIT_INFO << "Math functions initialised\n";
 
+	// Run all static initialisation logic
+	res = InitialiseStaticData();
+	if (res != ErrorCodes::NoError) {
+		std::string errorstring = concat("Fatal Error: Static data initialisation failed [")((int)res)("]").str();
+		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
+		return res;
+	}
+
 	// Initialise object search capabilities, and also disable search caching during initialisation while objects are being created in large numbers
 	Game::ObjectSearchManager::Initialise();
 	Game::ObjectSearchManager::DisableSearchCache();
@@ -1372,6 +1381,16 @@ Result RJMain::InitialiseDirectInput()
 	return ErrorCodes::NoError;
 }
 
+// Run all static data initialisation methods upon initialisation
+Result RJMain::InitialiseStaticData(void)
+{
+	// Run each initialisation method in turn
+	ComplexShipElement::InitialiseStaticData();
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
 Result RJMain::InitialiseRegions(void)
 {
 	Result res;
@@ -1380,7 +1399,7 @@ Result RJMain::InitialiseRegions(void)
 	D::Regions::Immediate = new ImmediateRegion();
 	res = D::Regions::Immediate->Initialise(
 		Game::Engine->GetDevice(),																		// Pointer to the D3D device
-		BuildStrFilename(D::IMAGE_DATA, "Particles\\dust_particle.dds").c_str(),								// Texture to be mapped onto all dust particles
+		BuildStrFilename(D::IMAGE_DATA, "Particles\\dust_particle.dds").c_str(),						// Texture to be mapped onto all dust particles
 		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),											// Starting centre point = player location
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),										// Minimum region bounds
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),									// Maximum region bounds
@@ -2298,7 +2317,6 @@ void RJMain::__CreateDebugScenario(void)
 	EnvironmentMap<float, EnvironmentMapBlendMode::BlendAdditive> em(INTVECTOR3(12, 34, 56));
 	em.Data.push_back(12.3);
 	em.Data.push_back(4.1);
-
 
 	Game::Log << LOG_INIT_INFO << "--- Debug scenario created\n";
 }

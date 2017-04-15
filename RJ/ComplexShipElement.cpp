@@ -15,9 +15,8 @@
 
 // Static variables
 const bitstring ComplexShipElement::NULL_PROPERTIES = (bitstring)0U;
-
-// Constant indicating that all property values are set
 const bitstring ComplexShipElement::ALL_PROPERTIES = (bitstring)((unsigned int)ComplexShipElement::PROPERTY::PROPERTY_MAX - 1U);
+int ComplexShipElement::PROPERTY_VALUES[ComplexShipElement::PROPERTY_COUNT];
 
 // Default constructor
 ComplexShipElement::ComplexShipElement(void)
@@ -384,4 +383,11 @@ int ComplexShipElement::DetermineNumberOfWalkableConnections(void)
 }
 
 
+// Initialises static supporting data
+void ComplexShipElement::InitialiseStaticData(void)
+{
+	// Initialise property index > value mapping
+	for (int i = 0; i < PROPERTY_COUNT; ++i)
+		PROPERTY_VALUES[i] = (1 << i);
+}
 

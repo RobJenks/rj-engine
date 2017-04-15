@@ -111,6 +111,7 @@ public:
 
 	// Vector of active objects within the ship; each CS-Element also holds a pointer to its local objects for runtime efficiency
 	std::vector<ObjectReference<iEnvironmentObject>>						Objects;
+	CMPINLINE std::vector<ObjectReference<iEnvironmentObject>>::size_type	GetEnvironmentObjectCount(void) const { return Objects.size(); }
 
 	// Vector of terrain objects held within this ship; each CS-Element also holds a pointer to the terrain for runtime efficiency
 	TerrainCollection														TerrainObjects;
@@ -196,6 +197,9 @@ public:
 
 	// Identify the elements that make up this environment's outer hull
 	void							BuildOuterHullModel(void);
+
+	// Build detail caches on the state of environment elements
+	void							BuildEnvironmentDetailCaches(void);
 
 	// Generates a bounding box hierarchy to represent the environment, accounting for any elements that may 
 	// have been destroyed
@@ -376,6 +380,9 @@ public:
 	// Returns the location of the element at the specified point within this OBB node
 	INTVECTOR3						DetermineElementAtOBBLocation(const OrientedBoundingBox & obb, const FXMVECTOR obb_local_pos);
 
+	// Returns the number of elements with the specified property
+	CMPINLINE int					ElementsWithProperty(ComplexShipElement::PROPERTY prop) { return m_element_property_count[(int)prop]; }
+
 	// Determines and applies the effect of a collision with trajectory through the environment
 	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
 	bool							CalculateCollisionThroughEnvironment(	iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, 
@@ -532,6 +539,9 @@ protected:
 	// We store the number of decks in this environment, and a pointer to relevant data for each
 	int								m_deckcount;
 	std::vector<DeckInfo>			m_deck_data;
+
+	// We cache the number of environment elements which have each element property
+	int								m_element_property_count[ComplexShipElement::PROPERTY::PROPERTY_MAX];
 
 	// Internal method; get all objects within a given distaance of the specified position, within the 
 	// specified EnvironmentTree node
