@@ -12,6 +12,7 @@
 #include "SimulatedEnvironmentCollision.h"
 #include "EnvironmentOBBRegion.h"
 #include "BasicColourDefinition.h"
+#include "EnvironmentOxygenMap.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -132,11 +133,11 @@ public:
 	void							SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState state);
 
 	// Methods to update life support-related properties of the ship; we set flags that force an update next cycle
+	// Note that this method is available both for properties update in response to certain events (e.g. gravity) and 
+	// those which are updated on a periodic basis; in the case of the latter, these methods force an update 
+	// of the property ahead of its next scheduled update and reset the time to next update
 	CMPINLINE void					UpdateGravity(void)			{ m_gravityupdaterequired = true; }
-	CMPINLINE void					UpdateOxygenLevels(void)	{ m_oxygenupdaterequired = true; }
-
-	// Build all environment maps (power, data, oxygen, munitions, ...)
-	Result							BuildAllEnvironmentMaps(void);
+	CMPINLINE void					UpdateOxygen(void)			{ m_oxygenupdaterequired = true; }
 
 	// Set or retrieve the zero-element translation for this environment
 	CMPINLINE XMVECTOR				GetZeroPointTranslation(void) const						{ return m_zeropointtranslation; }
@@ -204,6 +205,9 @@ public:
 	// Generates a bounding box hierarchy to represent the environment, accounting for any elements that may 
 	// have been destroyed
 	void							BuildBoundingBoxHierarchy(void);
+
+	// Build all environment maps (power, data, oxygen, munitions, ...)
+	Result							BuildAllEnvironmentMaps(void);
 
 	// Adds a new object to this environment
 	void							ObjectEnteringEnvironment(iEnvironmentObject *obj);
@@ -416,6 +420,9 @@ public:
 	void							DebugRenderElementHealth(void);
 	void							DebugRenderElementHealth(int z_index);
 	void							DebugRenderElementHealth(int start, int end);
+	void							DebugRenderOxygenLevels(void);
+	void							DebugRenderOxygenLevels(int z_index);
+	void							DebugRenderOxygenLevels(int start, int end);
 
 	// Renders a 3D overlay showing the properties of each element in the environment.  If the reference 'outLegend' is provided
 	// it will be populated with a mapping from overlay colours to the corresponding property state definitions.  The render process
@@ -488,6 +495,18 @@ protected:
 	// Flags used to indicate whether certain ship properties need to be recalculated
 	bool							m_gravityupdaterequired;
 	bool							m_oxygenupdaterequired;
+	
+	// Oxygen map and recalculation parameters
+	EnvironmentOxygenMap			m_oxygenmap;					// Map holding oxygen levels for the environment
+	unsigned int					m_nextoxygenupdate;				// Clock ms time that the oxygen map should next be updated
+	float							m_lastoxygenupdatetime;			// Timestamp (secs) of the last oxygen update; used to perform time-dependent map updates
+
+	// Methods determining when environment updates are required
+	CMPINLINE bool					GravityUpdateRequired() const		{ return m_gravityupdaterequired; }
+	CMPINLINE bool					OxygenUpdateRequired() const		{ return (m_oxygenupdaterequired || m_nextoxygenupdate <= Game::ClockMs); }
+
+	// Determines the time that we should next update the environment oxygen map
+	CMPINLINE unsigned int			DetermineNextOxygenUpdateTime() const { return (Game::ClockMs + Oxygen::GetOxygenUpdateInterval(m_simulationstate)); }
 
 	// Private methods used to update key ship properties
 	void							PerformGravityUpdate(void);

@@ -569,15 +569,14 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_7])
 	{
-		XMVECTOR pos = ss()->GetPosition();
-		XMVECTOR proj = Game::Engine->WorldToProjection(pos);
-		
-		XMVECTOR adj = XMVectorSetX(NULL_VECTOR, 10.0f * Game::TimeFactor);
-		XMVECTOR newproj = XMVectorAdd(proj, adj);
-		
-		XMVECTOR unproj = XMVector3TransformCoord(newproj, Game::Engine->GetRenderInverseViewProjectionMatrix());
-		ss()->SetPosition(unproj);
-
+		if (!b[DIK_LSHIFT])
+		{
+			cs()->DebugRenderOxygenLevels();
+		}
+		else
+		{
+			cs()->UpdateEnvironment();
+		}
 		//Game::Keyboard.LockKey(DIK_7);
 	}
 

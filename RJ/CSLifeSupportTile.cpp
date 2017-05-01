@@ -41,7 +41,7 @@ void CSLifeSupportTile::PerformTileSimulation(unsigned int delta_ms)
 	OxygenRange.Update(delta_ms);
 
 	// Refresh the oxygen content of all elements in range of this system
-	m_parent->UpdateOxygenLevels();
+	m_parent->UpdateOxygen();
 
 	// If all life-support parameters are now at their target value, stop simulating.  Otherwise we
 	// keep the flag set for continued simulation next frame

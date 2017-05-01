@@ -9,6 +9,9 @@
 #include "EnvironmentMapFalloffMethod.h"
 #include "ComplexShipElement.h"
 
+// Compiler flag which can be set to enable output of map-related debug information during each update
+#define ENV_MAP_DEBUG_OUTPUT
+
 // Templated with <T, EnvironmentMapBlendMode::'BlendMode'<T>>
 template <typename T, template<typename> class TBlendMode>
 class EnvironmentMap
@@ -33,6 +36,9 @@ public:
 
 	// Constructor; accepts dimensions of the area to be represented
 	EnvironmentMap(const INTVECTOR3 & element_size);
+
+	// Returns the dimensions of the map
+	CMPINLINE INTVECTOR3							GetMapSize(void) const { return m_elementsize; }
 
 	// Begins an update of the environment map
 	EnvironmentMap &								BeginUpdate(void);
@@ -111,6 +117,13 @@ public:
 
 protected:
 
+	// Debug logging for environment map updates, if enabled via relevant flag
+#	ifdef ENV_MAP_DEBUG_OUTPUT
+#		define ENV_MAP_DEBUG_LOG(cstr)				OutputDebugString(cstr)
+#	else
+#		define ENV_MAP_DEBUG_LOG(cstr)				
+#	endif
+
 	// Updates the size of this environment and recalculates dependent data
 	void											SetElementSize(const INTVECTOR3 & element_size);
 
@@ -132,8 +145,7 @@ protected:
 	typename std::vector<T>::size_type				m_elementcount;
 
 	// Index deltas for a move in each direction on the map
-	static const int								NEIGHBOUR_COUNT = (int)Direction::_Count;
-	int												m_movedelta[NEIGHBOUR_COUNT];
+	int												m_movedelta[Direction::_Count];
 
 	// Array of source cells
 	std::vector<MapCell>							m_sources;
@@ -201,7 +213,7 @@ void EnvironmentMap<T, TBlendMode>::SetElementSize(const INTVECTOR3 & element_si
 	m_elementcount = (std::vector<T>::size_type)(m_elementsize.x * m_elementsize.y * m_elementsize.z);
 
 	// Recalculate the move deltas for each direction in the map, based on this new element space
-	for (int i = 0; i < NEIGHBOUR_COUNT; ++i)
+	for (int i = 0; i < Direction::_Count; ++i)
 	{
 		INTVECTOR3 offset = DirectionUnitOffset((Direction)i);
 		m_movedelta[i] = ELEMENT_INDEX_EX(offset.x, offset.y, offset.z, m_elementsize);
@@ -416,6 +428,10 @@ void EnvironmentMap<T, TBlendMode>::SetEmissionBehaviour(EmissionBehaviour behav
 template <typename T, template<typename> class TBlendMode>
 Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements)
 {
+	ENV_MAP_DEBUG_LOG("Beginning new environment map update\nSources: {");
+	for (size_t i = 0; i < m_sources.size(); ++i) ENV_MAP_DEBUG_LOG(concat("[Index=")(m_sources[i].Index)(", Value=")(m_sources[i].Value)("] ").str().c_str());
+	ENV_MAP_DEBUG_LOG("}\n");
+
 	// Set initial value for all cells, UNLESS we have chosen to retain the existing data
 	if (!m_preserve_existing_data)
 	{
@@ -430,7 +446,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 		// If we are preserving the existing data, apply any modifier that has been specified
 		if (m_update_existing_data == ExistingDataUpdate::AdditiveUpdate)
 		{
-			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] += m_existing_data_additive_update;
+			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = ((std::max)((T)0.0f, Data[i] + m_existing_data_additive_update));
 		}
 		else if (m_update_existing_data == ExistingDataUpdate::MultiplicativeUpdate)
 		{
@@ -459,6 +475,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 	for (std::vector<EnvironmentMap<T, TBlendMode>::MapCell>::const_iterator it = m_sources.begin(); it != it_end; ++it)
 	{
 		// Initialise the update tracking array for this cycle
+		ENV_MAP_DEBUG_LOG(concat("> Beginning update for source ")((*it).Index)("\n").str().c_str());
 		memset(updated, 0, update_size);
 
 		// Initialise the value of the source cell
@@ -479,13 +496,14 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 			// Get the next index to be processed
 			index = queue[queue_index];
 			const ComplexShipElement & el = elements[index];
-			T current_value = Data[index];
+			T current_value = Data[index]; 
+			ENV_MAP_DEBUG_LOG(concat(">> Processing queue element ")(queue_index)(" at index ")(index)(", current value = ")(current_value)("\n").str().c_str());
 			
 			// Increment the queue index
 			++queue_index;
 
 			// We want to check all neighbours of this cell that have not yet been processed
-			for (int i = 0; i < NEIGHBOUR_COUNT; ++i)
+			for (int i = 0; i < Direction::_Count; ++i)
 			{
 				// Get the neighbour and perform basic checks of whether it should be processed
 				int neighbour = el.GetNeighbour((Direction)i);
@@ -500,13 +518,16 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 				// We want to transmit to this cell.  First calculate the transmitted value.  If it has fallen
 				// below the zero threshold then we can stop propogating it here
-				T emitted = min(current_value, m_transfer_limit);
+				T emitted = clamp(current_value, 0, m_transfer_limit);
 				T transmitted = m_falloff.ApplyFalloff(emitted, (Direction)i);
-				if (transmitted < m_zero_threshold) continue;
+				if (transmitted <= m_zero_threshold) continue;
 
 				// Remove from the emitting cell (if applicable) and blend this value into the target cell
+				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)("\n").str().c_str());
+				ENV_MAP_DEBUG_LOG(concat(">>> BEFORE: Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 				Data[index] -= (emitted * m_source_emission_multiplier);
 				Data[neighbour] = m_blend.Apply(Data[neighbour], transmitted);
+				ENV_MAP_DEBUG_LOG(concat(">>> AFTER:  Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 
 				// We want to move on and process all this cell's neighbours in a future cycle
 				queue.push_back(neighbour);
@@ -530,6 +551,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 
 	// Return success
+	ENV_MAP_DEBUG_LOG("Environment map update completed\n");
 	return ErrorCodes::NoError;
 }
 

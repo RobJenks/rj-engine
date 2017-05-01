@@ -10,10 +10,10 @@
 // Constructor
 EnvironmentOxygenMap::EnvironmentOxygenMap(iSpaceObjectEnvironment *environment) 
 	: 
-	m_environment(environment), 
+	m_environment(environment),
 	m_map(environment != NULL ? environment->GetElementSize() : ONE_INTVECTOR3)
 {
-
+	Initialise();
 }
 
 // Initialises the oxygen map
@@ -25,11 +25,8 @@ void EnvironmentOxygenMap::Initialise(void)
 	// Initialise the map to a default starting state
 	m_map.InitialiseCellValues(DefaultValues<Oxygen::Type>::NullValue());
 	m_map.SetValueConstraints((Oxygen::Type)0, (Oxygen::Type)100);
-	m_map.SetTransmissionProperties(ComplexShipElement::PROPERTY::PROP_WALKABLE);
+	m_map.SetTransmissionProperties(ComplexShipElement::PROPERTY::PROP_ACTIVE);
 	m_map.SetZeroThreshold((Oxygen::Type)0);
-	m_map.SetFalloffMethod(EnvironmentMapFalloffMethod<Oxygen::Type>::EnvironmentMapFalloffMethod()
-		.WithAbsoluteFalloff((Oxygen::Type)1)
-		.WithFalloffTransmissionType(EnvironmentMapFalloffMethod<Oxygen::Type>::FalloffTransmissionType::Distance));
 	m_map.SetEmissionBehaviour(OxygenMap::EmissionBehaviour::EmissionRemovedFromSource);
 }
 
@@ -59,12 +56,18 @@ void EnvironmentOxygenMap::Update(float timedelta)
 	DetermineOxygenSources(timedelta, sources);
 	float consumption = DetermineOxygenConsumption();
 
-	// Initiate an update of the underlying map
+	// Initiate an update of the underlying map.  Falloff parameters need to be set on each update since they 
+	// are time delta-dependent
+	m_map.SetFalloffMethod(EnvironmentMapFalloffMethod<Oxygen::Type>::EnvironmentMapFalloffMethod()
+		.WithAbsoluteFalloff(Oxygen::BASE_OXYGEN_FALLOFF * timedelta)
+		.WithFalloffTransmissionType(EnvironmentMapFalloffMethod<Oxygen::Type>::FalloffTransmissionType::Distance));
+	OutputDebugString(concat("Oxygen environment map dt = ")(timedelta)("s\n").str().c_str());
+	// Execute the map update	
 	m_map
 		.BeginUpdate()
 		.WithPreserveExistingData()
 		.WithAdditiveModifierToExistingData(-consumption * timedelta)
-		.WithTransferLimit(Oxygen::BASE_TRANSMISSION_LIMIT)
+		.WithTransferLimit(Oxygen::BASE_TRANSMISSION_LIMIT * timedelta)
 		.WithSourceCells(sources)
 		.Execute(env->GetElements());
 }

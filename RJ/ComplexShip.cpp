@@ -38,8 +38,6 @@ ComplexShip::ComplexShip(void)
 	m_activebeacons = 0;
 	m_forcerenderinterior = false;
 	m_suspendupdates = false;
-	m_gravityupdaterequired = true;
-	m_oxygenupdaterequired = true;
 	m_sdoffset = INTVECTOR3(0, 0, 0);
 	m_directlygeneratedfromSD = false;
 

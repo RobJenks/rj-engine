@@ -36,6 +36,9 @@ SimulatedEnvironmentCollision iSpaceObjectEnvironment::EnvironmentCollisionSimul
 
 // Default constructor
 iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
+	:
+	// Environment maps
+	m_oxygenmap(this)
 {
 	// Set the flag that indicates this object is itself an environment that contains objects
 	m_isenvironment = true;
@@ -54,6 +57,10 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_zeropointtranslationf = NULL_FLOAT3;
 	m_zeropointworldmatrix = m_inversezeropointworldmatrix = ID_MATRIX;
 	m_deckcount = 0;
+	m_lastoxygenupdatetime = Game::TimeFactor - 1.0f;
+	m_nextoxygenupdate = Game::ClockMs;
+	m_oxygenupdaterequired = true;
+	m_gravityupdaterequired = true;
 }
 
 
@@ -99,9 +106,11 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 		}
 	}
 
-	// Update properties of the environment if required
-	if (m_gravityupdaterequired)		PerformGravityUpdate();
-	if (m_oxygenupdaterequired)			PerformOxygenUpdate();
+	// Update properties of the environment if event flags have been set
+	if (GravityUpdateRequired())		PerformGravityUpdate();
+
+	// Update oxygen on a periodic basis
+	if (OxygenUpdateRequired())			PerformOxygenUpdate();
 
 	// Process any active collision events
 	if (HaveActiveEnvironmentCollisionEvents())
@@ -213,11 +222,14 @@ void iSpaceObjectEnvironment::PerformGravityUpdate(void)
 // Performs an update of environment oxygen levels, based on each life support system in the ship
 void iSpaceObjectEnvironment::PerformOxygenUpdate(void)
 {
-	// Reset the update flag now we are performing an update
+	// Reset relevant flags now we are performing an update
+	float timedelta = (Game::TimeFactor - m_lastoxygenupdatetime);
 	m_oxygenupdaterequired = false;
+	m_lastoxygenupdatetime = Game::TimeFactor;
+	m_nextoxygenupdate = DetermineNextOxygenUpdateTime();
 
-	// TODO: Do this
-	
+	// Update the environment oxygen map based on the time since the last update
+	m_oxygenmap.Update(timedelta);
 }
 
 
@@ -645,7 +657,12 @@ void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
 // Build all environment maps (power, data, oxygen, munitions, ...)
 Result iSpaceObjectEnvironment::BuildAllEnvironmentMaps(void)
 {
-	return 0;
+	// Oxygen
+	m_oxygenmap = EnvironmentOxygenMap(this);
+
+
+	// Return success
+	return ErrorCodes::NoError;
 }
 
 
@@ -2108,7 +2125,7 @@ void iSpaceObjectEnvironment::UpdateElementSpaceStructure(void)
 // Deallocates the object element space
 void iSpaceObjectEnvironment::DeallocateElementSpace(void)
 {
-	// Deallocate the element spce if it exists
+	// Deallocate the element space if it exists
 	if (m_elements) SafeDeleteArray(m_elements);
 
 	// Reset the current element size to show there are no elements present
@@ -2227,6 +2244,41 @@ void iSpaceObjectEnvironment::DebugRenderElementHealth(int start, int end)
 	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
 }
 
+
+// Renders a 3D overlay showing the state of each element in the environment, for all elements
+void iSpaceObjectEnvironment::DebugRenderOxygenLevels(void)
+{
+	DebugRenderOxygenLevels(0, m_elementcount - 1);
+}
+// Renders a 3D overlay showing the state of each element in the environment, for the specified z-level 
+// of the environment
+void iSpaceObjectEnvironment::DebugRenderOxygenLevels(int z_index)
+{
+	if (z_index >= 0 && z_index < m_elementsize.z)
+	{
+		INTVECTOR2 range = GetElementRange(z_index);
+		DebugRenderOxygenLevels(range.x, range.y);
+	}
+}
+void iSpaceObjectEnvironment::DebugRenderOxygenLevels(int start, int end)
+{
+	// Parameter check; this must be a contiguous range within the set of environment elements
+	if (start > end) std::swap(start, end);
+	if (start < 0 || end >= m_elementcount) return;
+	unsigned int count = (unsigned int)(end - start + 1);
+	
+	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
+	std::vector<XMFLOAT4>::size_type data_index = 0U;
+	std::vector<XMFLOAT4> data(count);
+	for (int i = start; i <= end; ++i, ++data_index)
+	{
+		Oxygen::Type x = m_oxygenmap.GetOxygenLevel(i);
+		data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
+	}
+
+	// Render this overlay on the environment
+	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
+}
 
 // Renders a 3D overlay showing the properties of each element in the environment
 void iSpaceObjectEnvironment::DebugRenderElementState(void)
@@ -2454,7 +2506,7 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(PerformPostSimulationUpdate)
 	REGISTER_DEBUG_FN(SetSimulationStateOfEnvironmentContents, (iObject::ObjectSimulationState)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(UpdateGravity)
-	REGISTER_DEBUG_FN(UpdateOxygenLevels)
+	REGISTER_DEBUG_FN(UpdateOxygen)
 	REGISTER_DEBUG_FN(RefreshPositionImmediate)
 	REGISTER_DEBUG_FN(UpdateEnvironment)
 	REGISTER_DEBUG_FN(SuspendEnvironmentUpdates)
