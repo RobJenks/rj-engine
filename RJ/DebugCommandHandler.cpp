@@ -174,6 +174,26 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		return true;
 	}
 
+	/* Adjust various oxygen simulation parameters */
+	else if (command.InputCommand == "set_oxygen_falloff")
+	{
+		Oxygen::BASE_OXYGEN_FALLOFF = command.ParameterAsFloat(0);
+		command.SetSuccessOutput(concat("Set oxygen falloff /sec to ")(Oxygen::BASE_OXYGEN_FALLOFF).str().c_str());
+		return true;
+	}
+	else if (command.InputCommand == "set_oxygen_transfer_limit")	
+	{
+		Oxygen::BASE_TRANSMISSION_LIMIT = command.ParameterAsFloat(0);
+		command.SetSuccessOutput(concat("Set oxygen transfer limit /sec to ")(Oxygen::BASE_TRANSMISSION_LIMIT).str().c_str());
+		return true;
+	}
+	else if (command.InputCommand == "set_oxygen_simfreq_full")
+	{
+		Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION = (unsigned int)command.ParameterAsInt(0);
+		command.SetSuccessOutput(concat("Set oxygen simulation interval (full sim) to ")(Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION)("ms").str().c_str());
+		return true;
+	}
+
 	/* Quit the application */
 	else if (command.InputCommand == "exit")
 	{

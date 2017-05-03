@@ -464,6 +464,7 @@
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
+    <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
@@ -640,6 +641,7 @@
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
+    <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
@@ -710,6 +712,7 @@
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="SentenceType.h" />
+    <ClInclude Include="SequenceGenerationTests.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ObjectSearch.h" />
     <ClInclude Include="Ray.h" />

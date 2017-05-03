@@ -107,7 +107,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	// Make sure we were able to locate at least one display mode
 	if (numModes == 0U)
 	{
-		Game::Log << LOG_INIT_ERROR << "Error: no display modes available for primary adapter\n";
+		Game::Log << LOG_ERROR << "Error: no display modes available for primary adapter\n";
 		return ErrorCodes::FoundNoDisplayModesAvailableForPrimaryAdapter;
 	}
 
@@ -142,26 +142,26 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	}
 
 	// Output the available display modes to the log
-	Game::Log << LOG_INIT_INFO << numModes << " display modes found for primary adapter (" << modestr << ")\n";
+	Game::Log << LOG_INFO << numModes << " display modes found for primary adapter (" << modestr << ")\n";
 
 	// Make sure we found at least one matching display mode
 	if (modeindex == -1 || (numerator == 0 && denominator == 0))
 	{
 		if (!vsync)
 		{
-			Game::Log << LOG_INIT_WARN << "Warning: No matching display mode located for [" << screenWidth << "x"
+			Game::Log << LOG_WARN << "Warning: No matching display mode located for [" << screenWidth << "x"
 				<< screenHeight << "]; attempting to proceed since vsync is disabled\n";
 		}
 		else
 		{
-			Game::Log << LOG_INIT_ERROR << "Error: No matching display mode located for [" << screenWidth << "x"
+			Game::Log << LOG_ERROR << "Error: No matching display mode located for [" << screenWidth << "x"
 				<< screenHeight << "]; cannot proceed since vsync is required\n";
 			return ErrorCodes::FoundNoSupportedDisplayModeForResolution;
 		}
 	}
 	else
 	{
-		Game::Log << LOG_INIT_INFO << "Enabling display mode of " 
+		Game::Log << LOG_INFO << "Enabling display mode of " 
 			<< DisplayModeToString(displayModeList[modeindex]) << " on primary adapter\n";
 	}
 
@@ -173,7 +173,7 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 
 	// Store the dedicated video card memory in megabytes.
 	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
-	Game::Log << LOG_INIT_INFO << "Located " << m_videoCardMemory << "MB dedicated memory on primary video adapter\n";
+	Game::Log << LOG_INFO << "Located " << m_videoCardMemory << "MB dedicated memory on primary video adapter\n";
 	
 	// Convert the name of the video card to a character array and store it.
 	error = wcstombs_s(&stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);

@@ -32,14 +32,21 @@ public:
 
 	CMPINLINE void FailAllCases(void) { m_failallcases = true; }
 
-	//CMPINLINE void Assert(bool condition) { Assert(condition, TEST_ERR_MSG()); }
 	CMPINLINE void Assert(bool condition, TEST_ERR_MSG failure_message)
 	{
 		AssertEqual(condition, true, failure_message);
 	}
 
-	//template <typename T>
-	//CMPINLINE void AssertEqual(T x0, T x1) { AssertEquals(x0, x1, TEST_ERR_MSG()); }
+	CMPINLINE void AssertTrue(bool value, TEST_ERR_MSG failure_message)
+	{
+		AssertEqual(value, true, failure_message);
+	}
+
+	CMPINLINE void AssertFalse(bool value, TEST_ERR_MSG failure_message)
+	{
+		AssertEqual(value, false, failure_message);
+	}
+	
 	template <typename T>
 	CMPINLINE void AssertEqual(T x0, T x1, TEST_ERR_MSG failure_message)
 	{

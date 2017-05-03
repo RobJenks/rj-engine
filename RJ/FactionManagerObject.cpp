@@ -88,7 +88,7 @@ Result FactionManagerObject::Initialise(void)
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result;
-		Game::Log << LOG_INIT_ERROR << "Error initialising faction disposition matrix\n";
+		Game::Log << LOG_ERROR << "Error initialising faction disposition matrix\n";
 	}
 
 	// Return the overall result

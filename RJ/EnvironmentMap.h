@@ -10,7 +10,7 @@
 #include "ComplexShipElement.h"
 
 // Compiler flag which can be set to enable output of map-related debug information during each update
-#define ENV_MAP_DEBUG_OUTPUT
+//#define ENV_MAP_DEBUG_OUTPUT
 
 // Templated with <T, EnvironmentMapBlendMode::'BlendMode'<T>>
 template <typename T, template<typename> class TBlendMode>
@@ -435,6 +435,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 	// Set initial value for all cells, UNLESS we have chosen to retain the existing data
 	if (!m_preserve_existing_data)
 	{
+		ENV_MAP_DEBUG_LOG("Initialising all cells to starting values\n");
 		if (m_fixed_initial_value)
 			InitialiseCellValues(m_initial_value);
 
@@ -446,10 +447,12 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 		// If we are preserving the existing data, apply any modifier that has been specified
 		if (m_update_existing_data == ExistingDataUpdate::AdditiveUpdate)
 		{
+			ENV_MAP_DEBUG_LOG(concat("Applying additive pre-processing operation of ")(m_existing_data_additive_update)(" to all cells\n").str().c_str());
 			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = ((std::max)((T)0.0f, Data[i] + m_existing_data_additive_update));
 		}
 		else if (m_update_existing_data == ExistingDataUpdate::MultiplicativeUpdate)
 		{
+			ENV_MAP_DEBUG_LOG(concat("Applying multiplicative pre-processing operation of ")(m_existing_data_multiplicative_update)(" to all cells\n").str().c_str());
 			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = (T)((float)Data[i] * m_existing_data_multiplicative_update);
 		}
 	}
@@ -496,8 +499,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 			// Get the next index to be processed
 			index = queue[queue_index];
 			const ComplexShipElement & el = elements[index];
-			T current_value = Data[index]; 
-			ENV_MAP_DEBUG_LOG(concat(">> Processing queue element ")(queue_index)(" at index ")(index)(", current value = ")(current_value)("\n").str().c_str());
+			ENV_MAP_DEBUG_LOG(concat(">> Processing queue element ")(queue_index)(" at index ")(index)(", current value = ")(Data[index])("\n").str().c_str());
 			
 			// Increment the queue index
 			++queue_index;
@@ -516,17 +518,22 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				if ((CheckBit_All_NotSet(neighbour_properties, m_transmission_properties)) ||
 					(CheckBit_Any(neighbour_properties, m_blocking_properties))) continue;
 
-				// We want to transmit to this cell.  First calculate the transmitted value.  If it has fallen
-				// below the zero threshold then we can stop propogating it here
-				T emitted = clamp(current_value, 0, m_transfer_limit);
+				// We want to transmit to this cell.  Calculate the change in value between source and destination
+				T neighbour_new = m_blend.Apply(Data[index], Data[neighbour]);
+				T emitted = (neighbour_new - Data[neighbour]);
+				if (emitted > m_transfer_limit) emitted = m_transfer_limit;
+
+				// We cannot emit any of the value that *entered* the cell this cycle; this portion is reserved
+				
+				// Now calculate the transmitted value.  If it has fallen below the zero threshold then we can stop propogating it here
 				T transmitted = m_falloff.ApplyFalloff(emitted, (Direction)i);
 				if (transmitted <= m_zero_threshold) continue;
 
 				// Remove from the emitting cell (if applicable) and blend this value into the target cell
-				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)("\n").str().c_str());
+				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)(" (direction: ")(DirectionToString((Direction)i))(")\n").str().c_str());
 				ENV_MAP_DEBUG_LOG(concat(">>> BEFORE: Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 				Data[index] -= (emitted * m_source_emission_multiplier);
-				Data[neighbour] = m_blend.Apply(Data[neighbour], transmitted);
+				Data[neighbour] += transmitted;
 				ENV_MAP_DEBUG_LOG(concat(">>> AFTER:  Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 
 				// We want to move on and process all this cell's neighbours in a future cycle

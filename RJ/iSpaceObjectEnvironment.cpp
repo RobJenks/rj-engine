@@ -223,9 +223,9 @@ void iSpaceObjectEnvironment::PerformGravityUpdate(void)
 void iSpaceObjectEnvironment::PerformOxygenUpdate(void)
 {
 	// Reset relevant flags now we are performing an update
-	float timedelta = (Game::TimeFactor - m_lastoxygenupdatetime);
+	float timedelta = (Game::ClockTime - m_lastoxygenupdatetime);
+	m_lastoxygenupdatetime = Game::ClockTime; 
 	m_oxygenupdaterequired = false;
-	m_lastoxygenupdatetime = Game::TimeFactor;
 	m_nextoxygenupdate = DetermineNextOxygenUpdateTime();
 
 	// Update the environment oxygen map based on the time since the last update

@@ -25,7 +25,7 @@ void EnvironmentOxygenMap::Initialise(void)
 	// Initialise the map to a default starting state
 	m_map.InitialiseCellValues(DefaultValues<Oxygen::Type>::NullValue());
 	m_map.SetValueConstraints((Oxygen::Type)0, (Oxygen::Type)100);
-	m_map.SetTransmissionProperties(ComplexShipElement::PROPERTY::PROP_ACTIVE);
+	m_map.SetTransmissionProperties((bitstring)Oxygen::OXYGEN_TRANSMISSION_PROPERTY);
 	m_map.SetZeroThreshold((Oxygen::Type)0);
 	m_map.SetEmissionBehaviour(OxygenMap::EmissionBehaviour::EmissionRemovedFromSource);
 }
@@ -56,12 +56,14 @@ void EnvironmentOxygenMap::Update(float timedelta)
 	DetermineOxygenSources(timedelta, sources);
 	float consumption = DetermineOxygenConsumption();
 
+	OutputDebugString(concat("Updating oxygen map for \"")(m_environment()->GetInstanceCode())("\".  Consumption = ")(consumption)("\n").str().c_str());
+
 	// Initiate an update of the underlying map.  Falloff parameters need to be set on each update since they 
 	// are time delta-dependent
 	m_map.SetFalloffMethod(EnvironmentMapFalloffMethod<Oxygen::Type>::EnvironmentMapFalloffMethod()
 		.WithAbsoluteFalloff(Oxygen::BASE_OXYGEN_FALLOFF * timedelta)
 		.WithFalloffTransmissionType(EnvironmentMapFalloffMethod<Oxygen::Type>::FalloffTransmissionType::Distance));
-	OutputDebugString(concat("Oxygen environment map dt = ")(timedelta)("s\n").str().c_str());
+	
 	// Execute the map update	
 	m_map
 		.BeginUpdate()
@@ -94,15 +96,15 @@ void EnvironmentOxygenMap::DetermineOxygenSources(float timedelta, std::vector<O
 // Determines the current oxygen consumption level (including background decline level)
 float EnvironmentOxygenMap::DetermineOxygenConsumption(void)
 {
-	// Base consumption is a fixed rate per WALKABLE environment element
+	// Base consumption is a fixed rate per tranmissable environment element
 	iSpaceObjectEnvironment *env = m_environment();
-	float consumption	= env->ElementsWithProperty(ComplexShipElement::PROPERTY::PROP_WALKABLE)
+	float consumption	= env->ElementsWithProperty(Oxygen::OXYGEN_TRANSMISSION_PROPERTY)
 						* Oxygen::BASE_CONSUMPTION_PER_ELEMENT;
 
 	// Add the per-actor consumption.  TODO: currently assumes all actors consume oxygen, and
 	// that all actors consume the same amount
 	consumption += (env->GetEnvironmentObjectCount() * Oxygen::BASE_CONSUMPTION_PER_ACTOR);
-
+	
 	// Return total calculated consumption
 	return consumption;
 }

@@ -140,7 +140,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	Result res;
 
 	// Initialise each component in turn; in case of failure, attempt to roll back anything possible and return an error
-	Game::Log << "\n" << LOG_INIT_INFO << "Beginning initialisation of game engine\n";
+	Game::Log << "\n" << LOG_INFO << "Beginning initialisation of game engine\n";
 
 	// Trigger the window resize event to ensure the engine has the latest window/screen parameters
 	WindowResized();
@@ -148,141 +148,141 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	// Initialise all render flags to their default values
 	res = InitialiseRenderFlags();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Render flags initialised\n";
+	Game::Log << LOG_INFO << "Render flags initialised\n";
 
 	// Initialise DirectX math functions 
 	res = InitialiseDirectXMath();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "DX Math initialised\n";
+	Game::Log << LOG_INFO << "DX Math initialised\n";
 
 	// Initialise the Direct3D component
 	res = InitialiseDirect3D(hwnd);
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Direct3D initialisation complete\n";
+	Game::Log << LOG_INFO << "Direct3D initialisation complete\n";
 
 	// Initialise the camera component
 	res = InitialiseCamera();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Camera initialised\n";
+	Game::Log << LOG_INFO << "Camera initialised\n";
 
 	// Initialise the lighting manager
 	res = InitialiseLightingManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Lighting manager initialised\n";
+	Game::Log << LOG_INFO << "Lighting manager initialised\n";
 
 	// Initialise shader support data
 	res = InitialiseShaderSupport();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader support data initialised\n";
+	Game::Log << LOG_INFO << "Shader support data initialised\n";
 
 	// Initialise the light shader
 	res = InitialiseLightShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Light] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Light] initialisation complete\n";
 
 	// Initialise the light/fade shader
 	res = InitialiseLightFadeShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Light fade] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Light fade] initialisation complete\n";
 
 	// Initialise the light/highlight shader
 	res = InitialiseLightHighlightShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Light highlight] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Light highlight] initialisation complete\n";
 
 	// Initialise the light/highlight/fade shader
 	res = InitialiseLightHighlightFadeShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Light highlight fade] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Light highlight fade] initialisation complete\n";
 
 	// Initialise the light(flat)/highlight/fade shader
 	res = InitialiseLightFlatHighlightFadeShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Light flat highlight fade] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Light flat highlight fade] initialisation complete\n";
 
 	// Initialise the particle shader
 	res = InitialiseParticleShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Particle] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Particle] initialisation complete\n";
 
 	// Initialise the texture shader
 	res = InitialiseTextureShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Texture] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Texture] initialisation complete\n";
 
 	// Initialise the view frustrum
 	res = InitialiseFrustrum();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "View frustum created\n";
+	Game::Log << LOG_INFO << "View frustum created\n";
 
 	// Initialise the font shader
 	res = InitialiseFontShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Font] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Font] initialisation complete\n";
 
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Text rendering initialised\n";
+	Game::Log << LOG_INFO << "Text rendering initialised\n";
 
 	// Initialise all game fonts
 	res = InitialiseFonts();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Font initialisation complete\n";
+	Game::Log << LOG_INFO << "Font initialisation complete\n";
 
 	// Initialise the texcube shader
 	res = InitialiseTexcubeShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Texcube] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Texcube] initialisation complete\n";
 
 	// Initialise the fire shader
 	res = InitialiseFireShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Fire] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Fire] initialisation complete\n";
 
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Effect manager initialised\n";
+	Game::Log << LOG_INFO << "Effect manager initialised\n";
 
 	// Initialise the skinned normal map shader
 	res = InitialiseSkinnedNormalMapShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Skinned normal map] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Skinned normal map] initialisation complete\n";
 
 	// Initialise the volumetric line shader
 	res = InitialiseVolLineShader();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Shader [Volumetric line] initialisation complete\n";
+	Game::Log << LOG_INFO << "Shader [Volumetric line] initialisation complete\n";
 	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Particle engine initialised\n" << LogManager::flush;
+	Game::Log << LOG_INFO << "Particle engine initialised\n" << LogManager::flush;
 
 	// Initialise the 2D render manager
 	res = Initialise2DRenderManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "2D render manager initialisation complete\n";
+	Game::Log << LOG_INFO << "2D render manager initialisation complete\n";
 
 	// Initialise the overlay renderer
 	res = InitialiseOverlayRenderer();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Overlay renderer initialised\n";
+	Game::Log << LOG_INFO << "Overlay renderer initialised\n";
 	
 	// Initialise the render queue for geometry instancing & batching (dependent on initialisation of relevant shaders)
 	res = InitialiseRenderQueue();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Render queue initialised for all shaders\n";
+	Game::Log << LOG_INFO << "Render queue initialised for all shaders\n";
 
 	// Initialise the components used for environment rendering
 	res = InitialiseEnvironmentRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INIT_INFO << "Environment rendering initialised\n";
+	Game::Log << LOG_INFO << "Environment rendering initialised\n";
 
 
 	// If we succeed in all initialisation functions then return success now
-	Game::Log << LOG_INIT_INFO << "All game engine initialisation completed successfully\n\n";
+	Game::Log << LOG_INFO << "All game engine initialisation completed successfully\n\n";
 	return ErrorCodes::NoError;
 }
 
@@ -345,11 +345,11 @@ Result CoreEngine::InitialiseDirectXMath(void)
 	// Test whether the client system supports SEE/SIMD instruction sets
 	if (PlatformSupportsSSEInstructionSets())
 	{
-		Game::Log << LOG_INIT_INFO << "Platform supports SSE/SSE2 instruction sets\n";
+		Game::Log << LOG_INFO << "Platform supports SSE/SSE2 instruction sets\n";
 	}
 	else
 	{
-		Game::Log << LOG_INIT_WARN << "Warning: Platform does not support SSE/SSE2 instruction sets\n";
+		Game::Log << LOG_WARN << "Warning: Platform does not support SSE/SSE2 instruction sets\n";
 	}
 
 	// Return success

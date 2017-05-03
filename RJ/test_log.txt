@@ -1,8 +1,15 @@
 
 === Test application initialised; executing tests ===
 
-Executed 1 tests:
-Test 0: 35 Passed, 0 Failed
+Executed 2 tests:
+Test 0: 29 Passed, 6 Failed, 6 Messages:
+    ERROR: [379158350|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:142] Single-cell multiplictive propogation failed ([18] != [16])
+    ERROR: [379158350|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:143] Single-cell diagonal multiplictive propogation failed ([17.1716] != [14.3431])
+    ERROR: [379158350|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:144] Multi-cell multiplictive propogation failed ([34] != [28])
+    ERROR: [379158366|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:171] Single-cell averaged propogation failed ([4] != [5])
+    ERROR: [379158366|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:172] Single-cell diagonal averaged propogation failed ([3.17157] != [4.58579])
+    ERROR: [379158366|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:173] Multi-cell averaged propogation failed ([2] != [2.5])
+Test 1: 9 Passed, 0 Failed
 
 === Test execution completed ===
 

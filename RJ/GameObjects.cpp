@@ -79,9 +79,6 @@ namespace Game
 		Game::ObjectRegister::iterator entry = Game::Objects.find(obj->GetID());
 		if (entry != Game::Objects.end())
 		{
-			// Flag the object as inactive in the global collection to avoid processing it in the upcoming frame
-			entry->second.Active = false;
-
 			// Remove based on object ID.  Use the ID rather than the object itself since this unregistering 
 			// could be requested as part of object shutdown, and when the unregister list is next processed 
 			// the object may no longer be valid.  Either remove immediately or add to the list, depending on lock state
@@ -89,6 +86,9 @@ namespace Game
 			{
 				// If registers are locked, add to the list for removal at the end of the frame
 				Game::UnregisterList.push_back(obj->GetID());
+
+				// Flag the object as inactive in the meantime to avoid processing it in the upcoming frame
+				entry->second.Active = false;
 			}
 			else
 			{
@@ -103,6 +103,7 @@ namespace Game
 	void PerformObjectRegistration(iObject *object)
 	{
 		// Make sure the object is valid and meets all criteria for e.g. uniqueness
+		VERIFY_OBJECT_REGISTER_INTEGRITY();
 		if (!object ||																// Ignore this object if it is NULL
 			object->GetInstanceCode() == NullString ||								// Ignore this object if it has no instance code
 			ObjectExists(object->GetInstanceCode())) return;						// Ignore this object if it does not have a unique instance code
@@ -113,12 +114,14 @@ namespace Game
 		// Register with secondary collections
 		Game::ObjectRegisterEntry *primary_entry = &(Game::Objects[object->GetID()]);
 		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;				// We know the code is unique after the test above
+		VERIFY_OBJECT_REGISTER_INTEGRITY();
 	}
 
 	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
 	void PerformObjectUnregistration(Game::ID_TYPE id)
 	{
 		// Check the object exists.  It definitely should, but check to be safe
+		VERIFY_OBJECT_REGISTER_INTEGRITY();
 		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
 		if (entry != Game::Objects.end())
 		{
@@ -141,6 +144,7 @@ namespace Game
 			// Finally call the destructor for this object to deallocate all resources
 			delete obj;
 		}
+		VERIFY_OBJECT_REGISTER_INTEGRITY();
 	}
 
 	// Performs the requested action on an object.  Protected and should only be called by the higher-level management methods
@@ -198,7 +202,7 @@ namespace Game
 			for (std::vector<iObject*>::size_type i = 0; i < nR; ++i)
 			{
 				// Register this object with the central register
-				Game::PerformObjectRegistration(Game::RegisterList[i]); 
+				Game::PerformObjectRegistration(Game::RegisterList[i]);
 			}
 
 			// Clear the pending registration list
@@ -219,7 +223,7 @@ namespace Game
 		if (entry == Game::ObjectsByCode.end()) return;			// Error: object does not exist with this code (or it may be a standard, non-register object)
 		if (!(entry->second)) return;							// Error: no link to primary entry (major error)
 		if (entry->second->Object != object) return;			// Error: the object with this code is not the one we are attempting to change
-		
+
 		// Remove the secondary register entry for the old code
 		ObjectRegisterEntry *primary_entry = (entry->second);
 		entry->second = NULL;
@@ -229,6 +233,32 @@ namespace Game
 		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;
 	}
 
+	// Verifies the integrity of each object register to ensure no data gets out of sync.  Enabled during debug only
+#	ifdef _DEBUG
+	void									_DebugVerifyObjectRegisterIntegrity(void)
+	{
+		// Size of the secondary collections should equal the number of ACTIVE entries in the primary collection
+		Game::ObjectRegister::difference_type active = std::count_if(Game::Objects.begin(), Game::Objects.end(),
+			[](Game::ObjectRegister::value_type & entry) { return (entry.second.Active); });
+		assert(Game::ObjectsByCode.size() == active);
+
+		Game::ObjectRegister::const_iterator it_end = Game::Objects.end();
+		for (Game::ObjectRegister::const_iterator it = Game::Objects.begin(); it != it_end; ++it)
+		{
+			if (it->second.Object != NULL)
+			{
+				assert(it->first == it->second.ID);
+				assert(it->first == it->second.Object->GetID());
+
+				Game::ObjectRegisterByInstanceCode::const_iterator code_it = Game::ObjectsByCode.find(it->second.Object->GetInstanceCode());
+				assert(code_it != Game::ObjectsByCode.end());
+				assert(code_it->second->Object->GetInstanceCode() == code_it->first);
+				assert(code_it->second == &(it->second));
+				assert(code_it->second->Object == it->second.Object);
+			}
+		}
+	}
+#	endif
 
 };
 

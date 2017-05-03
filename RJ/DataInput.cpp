@@ -207,14 +207,14 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 		// If we encountered any errors loading this node then log them and continue
 		if (res != ErrorCodes::NoError)
 		{
-			Game::Log << LOG_INIT_ERROR << "Error " << res << " loading \"" << name << "\" from game data file \"" << file << "\"\n";
+			Game::Log << LOG_ERROR << "Error " << res << " loading \"" << name << "\" from game data file \"" << file << "\"\n";
 			res = ErrorCodes::NoError;
 		}
 	}
 
 	// Calculate the total time taken to process this file and log it
 	processtime = ((unsigned int)timeGetTime() - processtime);
-	Game::Log << LOG_INIT_INFO << "Game data file \"" << file << "\" processed [" << processtime << "ms]\n";
+	Game::Log << LOG_INFO << "Game data file \"" << file << "\" processed [" << processtime << "ms]\n";
 
 	// Dispose of memory no longer required and return success
 	if (doc) delete doc;
@@ -333,7 +333,7 @@ Result IO::Data::LoadConfigFile(const string &filename)
 
 	// Calculate the total time taken to process this file and log it
 	processtime = ((unsigned int)timeGetTime() - processtime);
-	Game::Log << LOG_INIT_INFO << "Game config file \"" << filename << "\" processed [" << processtime << "ms]\n";
+	Game::Log << LOG_INFO << "Game config file \"" << filename << "\" processed [" << processtime << "ms]\n";
 
 	// Dispose of memory no longer required and return success
 	if (doc) delete doc;
@@ -2683,12 +2683,12 @@ Result IO::Data::LoadAllModelGeometry(void)
 		if (res != ErrorCodes::NoError) 
 		{
 			overallres = ErrorCodes::ErrorsOccuredWhileLoadingMeshes;
-			Game::Log << LOG_INIT_ERROR << "Error loading model geometry for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\"\n";
+			Game::Log << LOG_ERROR << "Error loading model geometry for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\"\n";
 		}
 		else
 		{
 			processtime = ((unsigned int)timeGetTime() - processtime);
-			Game::Log << LOG_INIT_INFO << "Geometry loaded for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\" [" << processtime << "ms]\n";
+			Game::Log << LOG_INFO << "Geometry loaded for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\" [" << processtime << "ms]\n";
 		}
 	}
 

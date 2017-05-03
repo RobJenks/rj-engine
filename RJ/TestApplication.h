@@ -6,6 +6,7 @@
 #include "TestResult.h"
 
 #include "EnvironmentMapTests.h"
+#include "SequenceGenerationTests.h"
 
 
 class TestApplication
@@ -25,9 +26,8 @@ public:
 
 		// Run all required tests
 		tester.Run<EnvironmentMapTests>();
-
-
-	
+		tester.Run<SequenceGenerationTests>();
+			
 
 
 		// Test complete

@@ -106,7 +106,9 @@ extern const AXMVECTOR VCTRL_1111;
 #define frand()			((float)rand() * RAND_MAX_RECIP)
 #define frand_h(h)		((float)rand()/((float)RAND_MAX/(h)))
 #define frand_lh(l,h)	((l) + (float)rand()/((float)RAND_MAX/((h)-(l))))
-
+#define irand()			rand()
+#define irand_h(h)		(rand() % (h))
+#define irand_lh(l, h)	((l) + (rand() % ((h)-(l))))
 
 #define TRIG_TABLE_SIZE 360
 
@@ -511,7 +513,9 @@ XMFLOAT2 DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR 
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
 XMFLOAT2 DetermineYawAndPitchToWorldVector(const FXMVECTOR target_vector, const FXMVECTOR object_inv_orient);
 
-
+// Builds and returns a set of n random integral sequences, with values in the range [low high].  All sequences will be of length (high-low).
+// If 'distinct' is set the sequences will contain each value in the range exactly once, otherwise this is not guaranteed
+int **PrecalculateRandomSequences(int n, int low, int high, bool distinct);
 
 #endif
 

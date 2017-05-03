@@ -179,6 +179,16 @@ namespace Game
 	// Notifies the central object collection that the code of the specified object has changed.  Ensures that
 	// correct references are maintained in the central object collection
 	void										NotifyChangeOfObjectInstanceCode(iObject *object, const std::string & old_code);
+
+	// Verifies the integrity of each object register to ensure no data gets out of sync.  Enabled during debug only
+#	ifdef _DEBUG
+		void									_DebugVerifyObjectRegisterIntegrity(void);
+#		define									VERIFY_OBJECT_REGISTER_INTEGRITY() _DebugVerifyObjectRegisterIntegrity()
+#	else
+#		define									VERIFY_OBJECT_REGISTER_INTEGRITY()
+#	endif
+
+
 };
 
 

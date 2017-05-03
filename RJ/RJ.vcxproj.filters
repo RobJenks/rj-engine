@@ -607,14 +607,17 @@
     <ClCompile Include="ElementStateFilters.cpp">
       <Filter>Objects\Ships\Elements</Filter>
     </ClCompile>
-    <ClCompile Include="EnvironmentMapTests.cpp">
-      <Filter>_Tests</Filter>
-    </ClCompile>
     <ClCompile Include="EnvironmentOxygenMap.cpp">
       <Filter>Objects\Ships\Environments\Oxygen</Filter>
     </ClCompile>
     <ClCompile Include="Oxygen.cpp">
       <Filter>Objects\Ships\Environments\Oxygen</Filter>
+    </ClCompile>
+    <ClCompile Include="SequenceGenerationTests.cpp">
+      <Filter>_Tests\Math</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentMapTests.cpp">
+      <Filter>_Tests\Environments</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1399,24 +1402,6 @@
     <ClInclude Include="BasicColourDefinition.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="EnvironmentMapTests.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="TestBase.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="TestResult.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="TestRunner.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="TestApplication.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
-    <ClInclude Include="TestError.h">
-      <Filter>_Tests</Filter>
-    </ClInclude>
     <ClInclude Include="EnvironmentMap.h">
       <Filter>Data structures</Filter>
     </ClInclude>
@@ -1431,6 +1416,30 @@
     </ClInclude>
     <ClInclude Include="Oxygen.h">
       <Filter>Objects\Ships\Environments\Oxygen</Filter>
+    </ClInclude>
+    <ClInclude Include="PrecalculatedRandomSequence.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="TestBase.h">
+      <Filter>_Tests\_Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="TestError.h">
+      <Filter>_Tests\_Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="TestResult.h">
+      <Filter>_Tests\_Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="TestRunner.h">
+      <Filter>_Tests\_Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="TestApplication.h">
+      <Filter>_Tests</Filter>
+    </ClInclude>
+    <ClInclude Include="SequenceGenerationTests.h">
+      <Filter>_Tests\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentMapTests.h">
+      <Filter>_Tests\Environments</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1691,6 +1700,15 @@
     </Filter>
     <Filter Include="Objects\Ships\Environments\Oxygen">
       <UniqueIdentifier>{6983cf2a-aa7b-4e5f-b268-c383cff4204d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\_Framework">
+      <UniqueIdentifier>{1af492a7-02d0-41f9-a398-5b56e1254b92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\Environments">
+      <UniqueIdentifier>{34647ca4-079c-4458-b0b6-61e49a08d8c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\Math">
+      <UniqueIdentifier>{d3d7f81a-5ceb-4f38-9296-7deddc7e7fdf}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

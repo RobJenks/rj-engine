@@ -1177,7 +1177,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = LoadPlayerConfig();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Could not load core configuration data [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1186,7 +1186,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = InitialiseGameDataDependencies();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Game data dependencies could not be initialised; check config.xml [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1195,7 +1195,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = InitialiseWindow();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Could not initialise main window [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1205,7 +1205,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = Game::Engine->InitialiseGameEngine(m_hwnd);
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Could not initialise core game engine [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1214,20 +1214,20 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = InitialiseDirectInput();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: DirectInput initialisation failed [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
 
 	// Math functions
 	InitialiseMathFunctions();
-	Game::Log << LOG_INIT_INFO << "Math functions initialised\n";
+	Game::Log << LOG_INFO << "Math functions initialised\n";
 
 	// Run all static initialisation logic
 	res = InitialiseStaticData();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Static data initialisation failed [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1243,7 +1243,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	res = InitialiseUniverse();
 	if (res != ErrorCodes::NoError) {
 		std::string errorstring = concat("Fatal Error: Universe initialisation failed [")((int)res)("]").str();
-		Game::Log << LOG_INIT_INFO << errorstring << "\n";
+		Game::Log << LOG_INFO << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1253,7 +1253,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	if (res != ErrorCodes::NoError)
 	{
 		std::string errorstring = concat("Fatal Error: User interface initialisation failed [")((int)res)("]").str();
-		Game::Log << LOG_INIT_INFO << errorstring << "\n";
+		Game::Log << LOG_INFO << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1270,7 +1270,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Now load all game data
 	res = LoadAllGameData();
 	if (res != ErrorCodes::NoError) {
-		Game::Log << LOG_INIT_ERROR << "*** Error while loading game data file, hierarchy load terminated\n";
+		Game::Log << LOG_ERROR << "*** Error while loading game data file, hierarchy load terminated\n";
 	}
 
 	// Perform post-load initialisation of any data just loaded from game files
@@ -1290,7 +1290,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	if (res != ErrorCodes::NoError)
 	{
 		std::string errorstring = concat("Fatal Error: Region initialisation failed [")((int)res)("]").str();
-		Game::Log << LOG_INIT_ERROR << errorstring << "\n";
+		Game::Log << LOG_ERROR << errorstring << "\n";
 		::MessageBox(0, errorstring.c_str(), "Fatal Error", 0);
 		return res;
 	}
@@ -1299,7 +1299,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	Game::ObjectSearchManager::EnableSearchCache();
 
 	// Return success if we have completed all initialisation functions
-	Game::Log << LOG_INIT_INFO << "Initialisation complete\n\n";
+	Game::Log << LOG_INFO << "Initialisation complete\n\n";
 	Game::Log.FlushAllStreams();
 	Game::Log.DisableFlushAfterEveryOperation();
 
@@ -1342,7 +1342,7 @@ Result RJMain::InitialiseGameDataDependencies(void)
 	}
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Game data dependencies initialised successfully\n";
+	Game::Log << LOG_INFO << "Game data dependencies initialised successfully\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1365,7 +1365,7 @@ Result RJMain::InitialiseWindow()
 	if (!m_hwnd) return ErrorCodes::CouldNotInitialiseWindow;
 	
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Game window initialised successfully\n";
+	Game::Log << LOG_INFO << "Game window initialised successfully\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1376,7 +1376,7 @@ Result RJMain::InitialiseDirectInput()
 	if (result != ErrorCodes::NoError) return result;
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "DirectInput initialisation complete\n";
+	Game::Log << LOG_INFO << "DirectInput initialisation complete\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1422,7 +1422,7 @@ Result RJMain::InitialiseRegions(void)
 
 
 	// Return success if we have reached the end
-	Game::Log << LOG_INIT_INFO << "Region initialisation completed\n";
+	Game::Log << LOG_INFO << "Region initialisation completed\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1436,7 +1436,7 @@ Result RJMain::InitialiseUniverse(void)
 	if (res != ErrorCodes::NoError) return res;
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Universe initialised successfully\n";
+	Game::Log << LOG_INFO << "Universe initialised successfully\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1454,7 +1454,7 @@ Result RJMain::InitialiseUserInterface(void)
 	D::UI->SetDebugFlightInfoDisplay(true);
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "User interface initialisation complete\n";
+	Game::Log << LOG_INFO << "User interface initialisation complete\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1482,7 +1482,7 @@ Result RJMain::InitialisePlayer(void)
 	Game::CurrentPlayer->EnterEnvironment(Game::Universe->GetSystem("AB01"));
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Player initialisation completed\n";
+	Game::Log << LOG_INFO << "Player initialisation completed\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1499,7 +1499,7 @@ Result RJMain::InitialiseCoreDataStructures(void)
 	Game::Scheduler.ScheduleInfrequentUpdates(&(Game::TreePruner), 2000);
 
 	// We have initialised all core data structures so return success
-	Game::Log << LOG_INIT_INFO << "Core data structured initialised\n";
+	Game::Log << LOG_INFO << "Core data structured initialised\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1512,7 +1512,7 @@ Result RJMain::InitialiseStateManager(void)
 		Game::C_SIMULATION_STATE_MANAGER_UPDATE_INTERVAL);
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Simulation state manager initialised\n";
+	Game::Log << LOG_INFO << "Simulation state manager initialised\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1540,7 +1540,7 @@ Result RJMain::InitialiseShipData(void)
 	// Nothing to do at this point
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Supporting ship data initialised\n";
+	Game::Log << LOG_INFO << "Supporting ship data initialised\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1550,7 +1550,7 @@ Result RJMain::InitialiseActorData(void)
 	ActorAttributeGeneration::InitialiseActorAttributeData();
 
 	// Return success
-	Game::Log << LOG_INIT_INFO << "Supporting actor data initialised\n";
+	Game::Log << LOG_INFO << "Supporting actor data initialised\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1636,18 +1636,18 @@ void RJMain::TerminateMemoryPools(void)
 Result RJMain::LoadPlayerConfig(void)
 {
 	// Record a log event when we begin loading game data files
-	Game::Log << LOG_INIT_INFO << "Loading player configuration\n";
+	Game::Log << LOG_INFO << "Loading player configuration\n";
 
 	// Attempt to load the main configuration file
 	Result res = IO::Data::LoadConfigFile("./Config.xml");
 	if (res != ErrorCodes::NoError)
 	{
-		Game::Log << LOG_INIT_ERROR << "*** ERROR during load of configuration data [" << res << "]\n";
+		Game::Log << LOG_ERROR << "*** ERROR during load of configuration data [" << res << "]\n";
 		return res;
 	}
 
 	// We have reached this point without a fatal error
-	Game::Log << LOG_INIT_INFO << "All player configuration loaded successfully\n";
+	Game::Log << LOG_INFO << "All player configuration loaded successfully\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1656,18 +1656,18 @@ Result RJMain::LoadAllGameData()
 	Result res = ErrorCodes::NoError;
 
 	// Record a log event when we begin loading game data files
-	Game::Log << "\n" << LOG_INIT_INFO << "Loading game data hierarchy...\n";
+	Game::Log << "\n" << LOG_INFO << "Loading game data hierarchy...\n";
 
 	// Start at the primary index file that should already exist and work recursively outwards
 	res = IO::Data::LoadGameDataFile("\\GameData.xml");
 	if (res != ErrorCodes::NoError)
 	{
-		Game::Log << LOG_INIT_ERROR << "*** ERROR during load of game data hierarchy [" << res << "]\n\n";
+		Game::Log << LOG_ERROR << "*** ERROR during load of game data hierarchy [" << res << "]\n\n";
 		return res;
 	}
 
 	// We have reached this point without a fatal error
-	Game::Log << LOG_INIT_INFO << "All game data files loaded successfully\n\n";
+	Game::Log << LOG_INFO << "All game data files loaded successfully\n\n";
 	return ErrorCodes::NoError;
 }
 
@@ -1676,48 +1676,48 @@ Result RJMain::InitialiseLoadedGameData(void)
 	Result res; bool failures = false;
 
 	// Ships: Load all ship geometry, AFTER the ship data itself has been retrieved
-	Game::Log << LOG_INIT_INFO << "Beginning load of all model geometry\n";
+	Game::Log << LOG_INFO << "Beginning load of all model geometry\n";
 	res = IO::Data::LoadAllModelGeometry();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Completed load of all model geometry\n" : "ERRORS encountered during load of model geometry\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Completed load of all model geometry\n" : "ERRORS encountered during load of model geometry\n");
 
 	// Run post-processing of all model geometry as necessary
 	res = IO::Data::PostProcessAllModelGeometry();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
 
 	// Resources: Run all post-load creation of the interdependencies between resources & their ingredients
 	res = IO::Data::PostProcessResources();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all resource data completed\n" : "ERRORS encountered during post-processing of resource data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all resource data completed\n" : "ERRORS encountered during post-processing of resource data\n");
 
 	// Ship tiles: Perform post-load initialisation of tiles and their construction requirements
 	res = IO::Data::PostProcessComplexShipTileData();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all tile data completed\n" : "ERRORS encountered during post-processing of tile data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all tile data completed\n" : "ERRORS encountered during post-processing of tile data\n");
 
 	// Universe: Process all systems in the universe, with data already loaded as part of LoadAllGameData
 	res = Game::Universe->ProcessLoadedSystems(Game::Engine->GetDevice());
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all system data completed\n" : "ERRORS encountered during post-processing of system data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all system data completed\n" : "ERRORS encountered during post-processing of system data\n");
 
 	// Equipment: Process all equipment to run post-load initialisation
 	Equipment::InitialiseLoadedEquipmentData();
 	res = ErrorCodes::NoError;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all equipment data completed\n" : "ERRORS encountered during post-processing of equipment data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all equipment data completed\n" : "ERRORS encountered during post-processing of equipment data\n");
 
 	// User interface: Build all UI layouts using the data loaded from game data files
 	res = D::UI->BuildUILayouts();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all UI layouts completed\n" : "ERRORS encountered during post-processing UI layout data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all UI layouts completed\n" : "ERRORS encountered during post-processing UI layout data\n");
 
 	// Factions: initialise all faction data once game files have been processed
 	res = Game::FactionManager.Initialise();
 	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INIT_INFO << (res == ErrorCodes::NoError ? "Post-processing of all faction data completed\n" : "ERRORS encountered during post-processing of faction data\n");
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all faction data completed\n" : "ERRORS encountered during post-processing of faction data\n");
 
 	// Report any failures
-	if (failures) Game::Log << LOG_INIT_ERROR << "Errors encountered during post-processing of loaded game data\n";
+	if (failures) Game::Log << LOG_ERROR << "Errors encountered during post-processing of loaded game data\n";
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -2157,7 +2157,10 @@ void RJMain::__CreateDebugScenario(void)
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { false, false };
 		bool has_engine_control[2] = { false, false };
-		for (int c = 0; c < 2; ++c)
+		int create_count = 1; // 2
+
+		css[0] = NULL; css[1] = NULL;
+		for (int c = 0; c < create_count; ++c)
 		{
 			css[c] = ComplexShip::Create("testfrigate12");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
@@ -2317,7 +2320,7 @@ void RJMain::__CreateDebugScenario(void)
 	em.Data.push_back(12.3);
 	em.Data.push_back(4.1);
 
-	Game::Log << LOG_INIT_INFO << "--- Debug scenario created\n";
+	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
 
 
@@ -2408,4 +2411,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
+
+*** 1. Fix environment tests that are no longer working *** 
+*** 2. Use PrecalculatedRandomSequence in EnvironmentMap to randomise the direction of transmission ***
+
+
 
