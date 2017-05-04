@@ -103,7 +103,6 @@ namespace Game
 	void PerformObjectRegistration(iObject *object)
 	{
 		// Make sure the object is valid and meets all criteria for e.g. uniqueness
-		VERIFY_OBJECT_REGISTER_INTEGRITY();
 		if (!object ||																// Ignore this object if it is NULL
 			object->GetInstanceCode() == NullString ||								// Ignore this object if it has no instance code
 			ObjectExists(object->GetInstanceCode())) return;						// Ignore this object if it does not have a unique instance code
@@ -121,7 +120,6 @@ namespace Game
 	void PerformObjectUnregistration(Game::ID_TYPE id)
 	{
 		// Check the object exists.  It definitely should, but check to be safe
-		VERIFY_OBJECT_REGISTER_INTEGRITY();
 		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
 		if (entry != Game::Objects.end())
 		{
@@ -238,7 +236,7 @@ namespace Game
 	void									_DebugVerifyObjectRegisterIntegrity(void)
 	{
 		// Size of the secondary collections should equal the number of ACTIVE entries in the primary collection
-		Game::ObjectRegister::difference_type active = std::count_if(Game::Objects.begin(), Game::Objects.end(),
+		/*Game::ObjectRegister::difference_type active = std::count_if(Game::Objects.begin(), Game::Objects.end(),
 			[](Game::ObjectRegister::value_type & entry) { return (entry.second.Active); });
 		assert(Game::ObjectsByCode.size() == active);
 
@@ -256,7 +254,7 @@ namespace Game
 				assert(code_it->second == &(it->second));
 				assert(code_it->second->Object == it->second.Object);
 			}
-		}
+		}*/
 	}
 #	endif
 

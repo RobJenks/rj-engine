@@ -2412,8 +2412,5 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-*** 1. Fix environment tests that are no longer working *** 
-*** 2. Use PrecalculatedRandomSequence in EnvironmentMap to randomise the direction of transmission ***
-
-
+*** Test oxygen map with different parameters, check whether value is spreading to diagonals more rapidly ***
 

@@ -33,28 +33,28 @@ public:
 protected:
 
 	// Data is stored in one contiguous block for efficiency
-	T *							m_data;
+	T *										m_data;
 
 	// Allocation properties
-	unsigned int				m_length;				// Length of each generated sequence
-	unsigned int				m_count;				// The number of sequences generated
-	unsigned long				m_total_alloc;			// Total number of elements in the allocated data
+	unsigned int							m_length;				// Length of each generated sequence
+	unsigned int							m_count;				// The number of sequences generated
+	unsigned long							m_total_alloc;			// Total number of elements in the allocated data
 
 	// Sets the content of this object to null, in case of error or other issues
-	void						NullData();
+	void									NullData();
 
 	// Allocates a contiguous block of space for 'count' sequences of size 'length'
-	void						AllocateSequenceMemory(unsigned int length, unsigned int count);
+	void									AllocateSequenceMemory(unsigned int length, unsigned int count);
 
 	// Populates the dataset with randomly-generated sequences.  Sequences will contain a random selection of values
 	// with each in the range [low high), and potentially with duplicate entries
-	void						PopulateSequenceData(T low, T high);
+	CMPINLINE void							PopulateSequenceData(T low, T high);
 
 	// Populates the dataset with randomly-generated sequences.  Sequences will contain a random selection of values
 	// with each in the range [low high), where every value is guaranteed to be unique.  In the case of integral 
 	// types where (length == (high - low)), this will result in a set of randomly shuffled |length| sequences.  For
 	// types (e.g. float) where the distinct property does not make sense this method regresses to the non-distinct version
-	void						PopulateSequenceDataDistinct(T low, T high);
+	CMPINLINE void							PopulateSequenceDataDistinct(T low, T high);
 
 
 

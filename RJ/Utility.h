@@ -16,6 +16,8 @@
 #include <unordered_map>
 #include <chrono>
 #include "CompilerSettings.h"
+#include "IntVector.h"
+#include "Direction.h"
 class iObject;
 using namespace std;
 using namespace std::tr1;
@@ -92,73 +94,11 @@ typedef unsigned long bitstring_l;
 // Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)" 
 #define ELEMENT_INDEX_EX(_x, _y, _z, _size) (_x + _size.x * (_y + (_z * _size.y)))
 
-struct INTVECTOR2
-{ 
-	int x; int y;
+// Transforms a location by the specified rotation and returns the new location
+INTVECTOR3 GetRotatedElementLocation(const INTVECTOR3 & element_location, Rotation90Degree rotate_by, const INTVECTOR3 & element_size);
 
-	INTVECTOR2(void) { x = 0; y = 0; }
-	INTVECTOR2(int _x, int _y) { x = _x; y = _y; }
-	INTVECTOR2(float _x, float _y) { x = (int)_x; y = (int)_y; }
-	INTVECTOR2(const XMFLOAT2 & v) { x = (int)v.x; y = (int)v.y; }
-	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
-
-	bool IsZeroVector(void) { return (x == 0 && y == 0); }
-	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << "]"; return s.str(); }
-
-	INTVECTOR2& operator +=(const INTVECTOR2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
-	INTVECTOR2& operator -=(const INTVECTOR2& rhs) { this->x -= rhs.x; this->y -= rhs.y; return *this; }
-	INTVECTOR2& operator *=(const int scalar) { this->x *= scalar; this->y *= scalar; return *this; }
-	INTVECTOR2& operator *=(const float scalar) { this->x = (int)(this->x * scalar); this->y = (int)(this->y * scalar); return *this; }
-	bool operator ==(const INTVECTOR2& rhs) { return (this->x == rhs.x && this->y == rhs.y); }
-	bool operator !=(const INTVECTOR2& rhs) { return (this->x != rhs.x || this->y != rhs.y); }
-};
-inline INTVECTOR2 operator +(INTVECTOR2 lhs, const INTVECTOR2& rhs) { lhs += rhs; return lhs; }
-inline INTVECTOR2 operator -(INTVECTOR2 lhs, const INTVECTOR2& rhs) { lhs -= rhs; return lhs; }
-inline INTVECTOR2 operator *(INTVECTOR2 lhs, const int scalar) { lhs *= scalar; return lhs; }
-inline INTVECTOR2 operator *(INTVECTOR2 lhs, const float scalar) { lhs *= scalar; return lhs; }
-
-
-struct INTVECTOR3 
-{ 
-	int x; int y; int z; 
-
-	INTVECTOR3(void) { x = 0; y = 0; z = 0; }
-	INTVECTOR3(int _x, int _y, int _z) { x = _x; y = _y; z = _z; }
-	INTVECTOR3(float _x, float _y, float _z) { x = (int)_x; y = (int)_y; z = (int)_z; }
-	INTVECTOR3(const XMFLOAT3 & v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
-	INTVECTOR3(int val) { x = y = z = val; }
-
-	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
-
-	INTVECTOR3& operator +=(const INTVECTOR3& rhs) { this->x += rhs.x; this->y += rhs.y; this->z += rhs.z; return *this; }
-	INTVECTOR3& operator -=(const INTVECTOR3& rhs) { this->x -= rhs.x; this->y -= rhs.y; this->z -= rhs.z; return *this; }	
-	INTVECTOR3& operator *=(const int scalar) { this->x *= scalar; this->y *= scalar; this->z *= scalar; return *this; }
-	INTVECTOR3& operator *=(const float scalar) { this->x = (int)(this->x * scalar); this->y = (int)(this->y * scalar); 
-												  this->z = (int)(this->z * scalar); return *this; }
-	INTVECTOR3& operator /=(const int scalar) { this->x /= scalar; this->y /= scalar; this->z /= scalar; return *this; }
-	INTVECTOR3& operator /=(const float scalar) { this->x = (int)((float)this->x / scalar); this->y = (int)((float)this->y / scalar); 
-												  this->z = (int)((float)this->z / scalar); return *this; }
-	INTVECTOR3& operator +=(const int scalar) { this->x += scalar; this->y += scalar; this->z += scalar; return *this; }
-	INTVECTOR3& operator -=(const int scalar) { this->x -= scalar; this->y -= scalar; this->z -= scalar; return *this; }
-	bool operator ==(const INTVECTOR3& rhs) { return (this->x == rhs.x && this->y == rhs.y && this->z == rhs.z); }
-	bool operator !=(const INTVECTOR3& rhs) { return (this->x != rhs.x || this->y != rhs.y || this->z != rhs.z); }
-	bool operator ==(const INTVECTOR3& rhs) const { return (this->x == rhs.x && this->y == rhs.y && this->z == rhs.z); }
-	bool operator !=(const INTVECTOR3& rhs) const { return (this->x != rhs.x || this->y != rhs.y || this->z != rhs.z); }
-
-	bool operator<(const INTVECTOR3 &rhs) const { return (x < rhs.x && y < rhs.y && z < rhs.z); }
-	bool operator<=(const INTVECTOR3 &rhs) const { return (x <= rhs.x && y <= rhs.y && z <= rhs.z); }
-	bool operator>(const INTVECTOR3 &rhs) const { return (x > rhs.x && y > rhs.y && z > rhs.z); }
-	bool operator>=(const INTVECTOR3 &rhs) const { return (x >= rhs.x && y >= rhs.y && z >= rhs.z); }
-
-	XMFLOAT3 ToFloat3(void) const { return XMFLOAT3((float)x, (float)y, (float)z); }
-	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << z << "]"; return s.str(); }
-};
-inline INTVECTOR3 operator +(INTVECTOR3 lhs, const INTVECTOR3& rhs) { lhs += rhs; return lhs; }
-inline INTVECTOR3 operator -(INTVECTOR3 lhs, const INTVECTOR3& rhs) { lhs -= rhs; return lhs; }
-inline INTVECTOR3 operator *(INTVECTOR3 lhs, const int scalar) { lhs *= scalar; return lhs; }
-inline INTVECTOR3 operator *(INTVECTOR3 lhs, const float scalar) { lhs *= scalar; return lhs; }
-inline INTVECTOR3 operator /(INTVECTOR3 lhs, const int scalar) { lhs /= scalar; return lhs; }
-inline INTVECTOR3 operator /(INTVECTOR3 lhs, const float scalar) { lhs /= scalar; return lhs; }
+// Returns a unit integer offset in the indicated direction
+INTVECTOR3 DirectionUnitOffset(Direction direction);
 
 
 void clower(char *);			// Converts a string to lowercase in-place
@@ -176,138 +116,6 @@ string BuildStrFilename(const string &, const string &);
 
 // Enumeration of possible comparison results
 enum ComparisonResult { Equal = 0, LessThan, GreaterThan };
-
-// Enumeration of possible 90-degree rotations
-enum Rotation90Degree { Rotate0 = 0, Rotate90 = 1, Rotate180 = 2, Rotate270 = 3 };
-extern const Rotation90Degree ROT90_VALUES[4];
-Rotation90Degree TranslateRotation90Degree(string rotvalue);
-
-// Returns the result of rotating one 90-degree value by another
-Rotation90Degree Compose90DegreeRotations(Rotation90Degree current_rotation, Rotation90Degree rotate_by);
-
-// Returns the 90-degree rotation required to transform between two rotation values
-Rotation90Degree Rotation90BetweenValues(Rotation90Degree start_rotation, Rotation90Degree end_rotation);
-
-// Transforms a location by the specified rotation and returns the new location
-INTVECTOR3 GetRotatedElementLocation(const INTVECTOR3 & element_location, Rotation90Degree rotate_by, const INTVECTOR3 & element_size);
-
-// Indicates whether the specified 90-degree rotation value is valid
-CMPINLINE bool Rotation90DegreeIsValid(Rotation90Degree rotation) { return (int)rotation >= (int)Rotate0 && (int)rotation <= (int)Rotate270; }
-
-// Enumeration of possible 90-degree directions
-enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };
-const int DirectionCount = 10;
-
-// Structure holding the basic directions, for iteration over the possible movement directions
-const int Directions[DirectionCount] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft, 
-										 Direction::UpRight, Direction::DownRight, Direction::DownLeft,  Direction::ZUp, Direction::ZDown };
-
-// Bitstring direction values
-enum DirectionBS 
-{
-	Left_BS =		(1 << Direction::Left),
-	Up_BS =			(1 << Direction::Up),
-	Right_BS =		(1 << Direction::Right),
-	Down_BS =		(1 << Direction::Down),
-	UpLeft_BS =		(1 << Direction::UpLeft),
-	UpRight_BS =	(1 << Direction::UpRight),
-	DownRight_BS =	(1 << Direction::DownRight),
-	DownLeft_BS =	(1 << Direction::DownLeft),
-	ZUp_BS =		(1 << Direction::ZUp),
-	ZDown_BS =		(1 << Direction::ZDown),
-	None_BS =		(1 << Direction::_Count)
-};
-
-const DirectionBS DirectionBS_All = (DirectionBS)(DirectionBS::Left_BS | DirectionBS::Up_BS | DirectionBS::Right_BS | DirectionBS::Down_BS | DirectionBS::UpLeft_BS |
-	DirectionBS::UpRight_BS | DirectionBS::DownRight_BS | DirectionBS::DownLeft_BS | DirectionBS::ZUp_BS | DirectionBS::ZDown_BS);
-
-// Convert a direction into a bitstring direction
-CMPINLINE DirectionBS		DirectionToBS(Direction direction) { return (DirectionBS)(1 << direction); }
-
-// Convert a bitstring direction into a direction
-CMPINLINE Direction			BSToDirection(DirectionBS direction)
-{
-	switch (direction)
-	{
-		case DirectionBS::Left_BS:		return Direction::Left;
-		case DirectionBS::Up_BS:		return Direction::Up;
-		case DirectionBS::Right_BS:		return Direction::Right;
-		case DirectionBS::Down_BS:		return Direction::Down;
-		case DirectionBS::UpLeft_BS:	return Direction::UpLeft;
-		case DirectionBS::UpRight_BS:	return Direction::UpRight;
-		case DirectionBS::DownRight_BS:	return Direction::DownRight;
-		case DirectionBS::DownLeft_BS:	return Direction::DownLeft;
-		case DirectionBS::ZUp_BS:		return Direction::ZUp;
-		case DirectionBS::ZDown_BS:		return Direction::ZDown;
-		default:						return Direction::_Count;
-	}
-}
-
-// Structure that holds the effect of applying a rotation to each direction value (in 2D only)
-const int RotatedDirections[Direction::_Count+1][4] = { 
-	{ Direction::Left,		Direction::Up,			Direction::Right,		Direction::Down },
-	{ Direction::Up,		Direction::Right,		Direction::Down,		Direction::Left },
-	{ Direction::Right,		Direction::Down,		Direction::Left,		Direction::Up },
-	{ Direction::Down,		Direction::Left,		Direction::Up,			Direction::Right }, 
-	{ Direction::UpLeft,	Direction::UpRight,		Direction::DownRight,	Direction::DownLeft }, 
-	{ Direction::UpRight,	Direction::DownRight,	Direction::DownLeft,	Direction::UpLeft }, 
-	{ Direction::DownRight, Direction::DownLeft,	Direction::UpLeft,		Direction::UpRight }, 
-	{ Direction::DownLeft,	Direction::UpLeft,		Direction::UpRight,		Direction::DownRight }, 
-	{ Direction::ZUp,		Direction::ZUp,			Direction::ZUp,			Direction::ZUp },
-	{ Direction::ZDown,		Direction::ZDown,		Direction::ZDown,		Direction::ZDown },
-	{ Direction::_Count,	Direction::_Count,		Direction::_Count,		Direction::_Count },
-};
-
-// Structure that holds the effect of applying a rotation to each direction value (in 2D only)
-const int RotatedBSDirections[Direction::_Count+1][4] = {
-	{ DirectionBS::Left_BS, DirectionBS::Up_BS, DirectionBS::Right_BS, DirectionBS::Down_BS },
-	{ DirectionBS::Up_BS, DirectionBS::Right_BS, DirectionBS::Down_BS, DirectionBS::Left_BS },
-	{ DirectionBS::Right_BS, DirectionBS::Down_BS, DirectionBS::Left_BS, DirectionBS::Up_BS },
-	{ DirectionBS::Down_BS, DirectionBS::Left_BS, DirectionBS::Up_BS, DirectionBS::Right_BS },
-	{ DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS, DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS },
-	{ DirectionBS::UpRight_BS, DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS },
-	{ DirectionBS::DownRight_BS, DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS },
-	{ DirectionBS::DownLeft_BS, DirectionBS::UpLeft_BS, DirectionBS::UpRight_BS, DirectionBS::DownRight_BS },
-	{ DirectionBS::ZUp_BS, DirectionBS::ZUp_BS, DirectionBS::ZUp_BS, DirectionBS::ZUp_BS },
-	{ DirectionBS::ZDown_BS, DirectionBS::ZDown_BS, DirectionBS::ZDown_BS, DirectionBS::ZDown_BS },
-	{ DirectionBS::None_BS, DirectionBS::None_BS, DirectionBS::None_BS, DirectionBS::None_BS },
-};
-
-
-// Returns a unit integer offset in the indicated direction
-INTVECTOR3 DirectionUnitOffset(Direction direction);
-
-// Method to return the effect of a rotation on a 2D direction, using the above predefined structure
-CMPINLINE Direction GetRotatedDirection(Direction direction, Rotation90Degree rotation) 
-{
-	if ((int)direction >= 0 && (int)direction < Direction::_Count && (int)rotation >= 0 && (int)rotation < 4) 
-		return (Direction)RotatedDirections[direction][rotation];
-	else
-		return direction;
-}
-
-// Method to return the effect of a rotation on a 2D direction, using the above predefined structure
-CMPINLINE DirectionBS GetRotatedBSDirection(DirectionBS direction, Rotation90Degree rotation) 
-{
-	if (rotation < 0 || rotation >= 4) return direction;
-	for (int i = 0; i < Direction::_Count; ++i)
-	{
-		if (direction == RotatedBSDirections[i][0])	return (DirectionBS)RotatedBSDirections[0][(int)rotation];
-	}
-	return direction;
-}
-
-// Returns a value indicating whether this is a diagonal direction or not
-CMPINLINE bool IsDiagonalDirection(Direction direction) { 
-	return (direction == Direction::UpLeft || direction == Direction::UpRight || 
-			direction == Direction::DownLeft || direction == Direction::DownRight);
-}
-
-// Methods to manipulate direction values and translate to/from their string representations
-string DirectionToString(Direction direction);
-Direction DirectionFromString(string direction);
-Direction GetOppositeDirection(Direction dir);
-DirectionBS GetOppositeDirectionBS(DirectionBS dir);
 
 // Rotates a bitstring representing directional data
 bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation);

@@ -139,9 +139,9 @@ TestResult EnvironmentMapTests::BasicMultiplicativePropogationTests()
 		.Execute(env->GetElements());
 
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 3, 3))), 10.0f, ERR("Source cell not initialised correctly in multiplictive propogation test"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 3, 3))), (2.0f * (10.0f - 2.0f)), ERR("Single-cell multiplictive propogation failed"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), (2.0f * (10.0f - (2.0f * ROOT2))), ERR("Single-cell diagonal multiplictive propogation failed"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), (2.0f * ((2.0f * (10.0f - 2.0f)) - 2.0f)), ERR("Multi-cell multiplictive propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 3, 3))), (10.f * 2.0f) - 2.0f, ERR("Single-cell multiplictive propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), (10.f * 2.0f) - (2.0f * ROOT2), ERR("Single-cell diagonal multiplictive propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), (((10.f * 2.0f) - 2.0f) * 2.0f) - 2.0f, ERR("Multi-cell multiplictive propogation failed"));
 
 	OutputDebugString(concat("Environment map multiplicative propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
 	return result;
@@ -168,9 +168,9 @@ TestResult EnvironmentMapTests::BasicAveragedPropogationTests()
 		.Execute(env->GetElements());
 
 	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 3, 3))), 10.0f, ERR("Source cell not initialised correctly in averaged propogation test"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 3, 3))), 0.5f * (2.0f + (10.0f - 2.0f)), ERR("Single-cell averaged propogation failed"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), 0.5f * (2.0f + (10.0f - (2.0f * ROOT2))), ERR("Single-cell diagonal averaged propogation failed"));
-	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), 0.5f * (2.0f + ((0.5f * (2.0f + (10.0f - 2.0f)))-2.0f)), ERR("Multi-cell averaged propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 3, 3))), ((10.0f + 2.0f) * 0.5f) - 2.0f, ERR("Single-cell averaged propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(2, 2, 3))), ((10.0f + 2.0f) * 0.5f) - (2.0f * ROOT2), ERR("Single-cell diagonal averaged propogation failed"));
+	result.AssertEqual(map.Data.at(env->GetElementIndex(INTVECTOR3(3, 1, 3))), (((((10.0f + 2.0f) * 0.5f) - 2.0f) + 2.0f) * 0.5f) - 2.0f, ERR("Multi-cell averaged propogation failed"));
 
 	OutputDebugString(concat("Environment map averaged propogation tests:\n")(map.DebugStringOutput("%.1f"))("\n").str().c_str());
 	return result;

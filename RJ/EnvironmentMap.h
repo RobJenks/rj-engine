@@ -8,6 +8,7 @@
 #include "EnvironmentMapBlendMode.h"
 #include "EnvironmentMapFalloffMethod.h"
 #include "ComplexShipElement.h"
+#include "PrecalculatedRandomSequence.h"
 
 // Compiler flag which can be set to enable output of map-related debug information during each update
 //#define ENV_MAP_DEBUG_OUTPUT
@@ -124,6 +125,9 @@ protected:
 #		define ENV_MAP_DEBUG_LOG(cstr)				
 #	endif
 
+	// Static set of randomised direction values, for use in randomising direction of value spread
+	static const PrecalculatedRandomSequence<int>	DirectionSequenceData;
+
 	// Updates the size of this environment and recalculates dependent data
 	void											SetElementSize(const INTVECTOR3 & element_size);
 
@@ -185,6 +189,10 @@ protected:
 
 };
 
+// Initialise static set of randomised direction values, for use in randomising direction of value spread
+template <typename T, template<typename> class TBlendMode>
+const PrecalculatedRandomSequence<int> EnvironmentMap<T, TBlendMode>::DirectionSequenceData
+	= PrecalculatedRandomSequence<int>(0, (int)Direction::_Count, (int)Direction::_Count, 100, true);
 
 // Constructor; accepts dimensions of the area to to represented
 template <typename T, template<typename> class TBlendMode>
@@ -504,11 +512,14 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 			// Increment the queue index
 			++queue_index;
 
-			// We want to check all neighbours of this cell that have not yet been processed
+			// We want to check all neighbours of this cell that have not yet been processed.  Select a random sequence
+			// to ensure variation in the spread of value through the map
+			const int *directions = EnvironmentMap<T, TBlendMode>::DirectionSequenceData.RandomSequence();
 			for (int i = 0; i < Direction::_Count; ++i)
 			{
 				// Get the neighbour and perform basic checks of whether it should be processed
-				int neighbour = el.GetNeighbour((Direction)i);
+				Direction direction = (Direction)directions[i];
+				int neighbour = el.GetNeighbour(direction);
 				if (neighbour == -1) continue;									// Must be within the environment map area; -1 signifies not a valid element
 				if (updated[neighbour] != 0) continue;							// Ignore any elements we have already updated
 				updated[neighbour] = 1;											// Mark this neighbour as processed
@@ -526,11 +537,11 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				// We cannot emit any of the value that *entered* the cell this cycle; this portion is reserved
 				
 				// Now calculate the transmitted value.  If it has fallen below the zero threshold then we can stop propogating it here
-				T transmitted = m_falloff.ApplyFalloff(emitted, (Direction)i);
+				T transmitted = m_falloff.ApplyFalloff(emitted, direction);
 				if (transmitted <= m_zero_threshold) continue;
 
 				// Remove from the emitting cell (if applicable) and blend this value into the target cell
-				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)(" (direction: ")(DirectionToString((Direction)i))(")\n").str().c_str());
+				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)(" (direction: ")(DirectionToString(direction))(")\n").str().c_str());
 				ENV_MAP_DEBUG_LOG(concat(">>> BEFORE: Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 				Data[index] -= (emitted * m_source_emission_multiplier);
 				Data[neighbour] += transmitted;
