@@ -66,6 +66,7 @@ GameInputDevice::GameInputDevice()
     m_x = m_y = 0;
 	m_cursor = m_screencursor = INTVECTOR2(0, 0);
 	m_mousepos_norm = m_mousedelta_norm = XMFLOAT2(0.0f, 0.0f);
+	m_mousedelta_z = m_lastmouse_z = 0L;
     memset(m_keyLock, 0, sizeof( BOOL ) * 256 );
 	memset(&m_mouseState, 0, sizeof(DIMOUSESTATE));
 	memset(m_keyboardState, 0 , sizeof(char) * 256);
@@ -207,6 +208,11 @@ void GameInputDevice::Read()
 		m_mousepos_norm.y = (float)(m_y - Game::ScreenCentre.y) / (float)Game::ScreenCentre.y;
 		m_mousedelta_norm.x = ((float)m_mouseState.lX / (float)Game::ScreenWidth);
 		m_mousedelta_norm.y = ((float)m_mouseState.lY / (float)Game::ScreenHeight);
+
+		// Mouse z delta should be calculated to account for DX differences in mouse wheel vs touchpad handling
+		long lastz = m_mouseState.lZ;
+		m_mousedelta_z = (m_mouseState.lZ != 0L ? (m_mouseState.lZ - m_lastmouse_z) : 0L);
+		m_lastmouse_z = lastz;
 
 		// Determine a world-space ray based on the camera and mouse position.  Will be used for e.g. mouse picking
 		ObjectPicking::ScreenSpaceToWorldBasicRay(m_mousepos_norm, m_mouse_world_basicray);

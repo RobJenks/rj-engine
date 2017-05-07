@@ -2403,7 +2403,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", "");
+		long zd = Game::Mouse.GetZDelta();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "zdelta = %d", zd);
 		
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
@@ -2411,6 +2412,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
-
-*** Test oxygen map with different parameters, check whether value is spreading to diagonals more rapidly ***
-

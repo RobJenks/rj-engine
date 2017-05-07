@@ -56,7 +56,7 @@ public:
 	CMPINLINE INTVECTOR2 GetCursor() { return m_cursor; }
 	CMPINLINE long GetXDelta()    { return m_mouseState.lX; }
 	CMPINLINE long GetYDelta()    { return m_mouseState.lY; }
-	CMPINLINE long GetZDelta()    { return m_mouseState.lZ; }
+	CMPINLINE long GetZDelta()    { return m_mousedelta_z; }
     
 	CMPINLINE XMFLOAT2 GetNormalisedMousePos(void) const { return m_mousepos_norm; }
 	CMPINLINE const XMFLOAT2 & GetNormalisedMousePositionRef(void) const { return m_mousepos_norm; }
@@ -114,6 +114,8 @@ private:
 	INTVECTOR2			  m_startpos[4];			// Stores the starting position of each mouse down event
 	XMFLOAT2			  m_mousepos_norm;			// Normalised position of the mouse, in the range [-1.0 +1.0] with (0,0) in the screen centre
 	XMFLOAT2			  m_mousedelta_norm;		// Normalised delta movement of the mouse this cycle, as a percentage of total screen bounds (range [0.0 1.0])
+	long				  m_mousedelta_z;			// Current mouse z-delta, i.e. any scrolling of the mouse wheel / touchpad
+	long				  m_lastmouse_z;			// Mouse z-position last frame
 	BasicRay			  m_mouse_world_basicray;	// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
 	Ray					  m_mouse_world_ray;		// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
 
