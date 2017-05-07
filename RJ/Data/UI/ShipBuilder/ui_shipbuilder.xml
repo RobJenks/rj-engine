@@ -23,12 +23,36 @@
       <Instance code="txt_projhardness_frf" x="1000" y="176" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
 
+    <!-- Button type 1 components -->
+    <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="btn_save_up" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_load_up" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+    <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
+      <Instance code="btn_save_down" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_load_down" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
+    </Image2DGroup>
+
+    <!-- =============================== -->
+    <!-- ===== Control definitions ===== -->
+    <!-- =============================== -->
     
     <!-- Ship name textbox -->
     <TextBlock code="txt_shipname_label" text="Name: " x="964" y="42" render="true" capacity="12" size="1.000000" />
     <TextBlock code="txt_shipname_text" text="Ship Design Name" x="1018" y="42" render="true" capacity="256" size="1.000000" />
     <TextBox code="txt_shipname" frame="textbox_frame" frame_key="txt_shipname_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_shipname_frf" text="txt_shipname_text" render="true" />
 
+    <!-- Save button -->
+    <TextBlock code="btn_save_text" text="Save" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_save" up="button1_up" up_key="btn_save_up" down="button1_down" down_key="btn_save_down" text="btn_save_text" render="true"/>
+
+    <!-- Load button -->
+    <TextBlock code="btn_load_text" text="Load" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_load" up="button1_up" up_key="btn_load_up" down="button1_down" down_key="btn_load_down" text="btn_load_text" render="true"/>
+    
+    <!-- General mode status message -->
+    <TextBlock code="txt_status" text=" " x="1000" y="176" render="true" capacity="512" size="1.000000" />
+    
     <!-- Projectile mass textbox -->
     <TextBlock code="txt_projmass_label" text="Mass: " x="964" y="42" render="true" capacity="12" size="1.000000" />
     <TextBlock code="txt_projmass_text" text="250.0" x="1018" y="42" render="true" capacity="64" size="1.000000" />
@@ -53,11 +77,17 @@
     <!-- =========================================== -->
     <!-- ==== Component groups for each UI mode ==== -->
     <!-- =========================================== -->
+    
+    <!-- General mode -->
     <ComponentGroup code="mode_group_general">
       <include code="txt_shipname" />
       <include code="txt_shipname_label" />
+      <include code="btn_save" />
+      <include code="btn_load" />
+      <include code="txt_status" />
     </ComponentGroup>
 
+    <!-- Structural testing mode -->
     <ComponentGroup code="mode_group_structuraltesTIng">
       <include code="txt_projmass" />
       <include code="txt_projmass_label" />

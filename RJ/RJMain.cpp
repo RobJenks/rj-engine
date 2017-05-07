@@ -2412,3 +2412,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
+
+*** ADD OPTION FOR <INCLUDE> XML STATEMENTS TO INCLUDE THE CONTENTS OF A DIRECTORY, E.G. /A/DIR/*, SO IT CAN BE USED FOR LOADING CUSTOM SHIPS IN /SHIPDATA/   ***

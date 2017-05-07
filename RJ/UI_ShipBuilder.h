@@ -110,8 +110,14 @@ public:
 	// If we are holding a tile for placement, revert any changes made when the tile was positioned within this element
 	void												RevertPlacementTileUpdates(void);
 
-	// Activates the UI component group for the given mode, deactivating all others
-	void												ActivateUIModeComponents(EditorMode mode);
+	// Save the current ship design
+	void												SaveShip(void);
+	
+	// Load the specified ship design
+	void												LoadShip(void);
+	
+	// Update the status message text
+	void												SetStatusMessage(const std::string & msg);
 
 	// Method to process user input into the active UI controller
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
@@ -140,7 +146,7 @@ public:
 	void ProcessControlRightClickEvent(iUIControl *control) { }
 
 	// Process button click events in the UI
-	void ProcessButtonClickEvent(UIButton *button) { }
+	void ProcessButtonClickEvent(UIButton *button);
 
 	// Method to accept mouse move events, and also mouse hover events for specific components
 	void ProcessMouseMoveEvent(INTVECTOR2 location);
@@ -188,6 +194,15 @@ protected:
 	// Deactivate the specified editor mode
 	void										DeactivateGeneralMode(EditorMode previous_mode);
 	void										DeactivateStructuralTestMode(EditorMode previous_mode);
+
+	// Activates the UI component group for the given mode, deactivating all others
+	void										ActivateUIModeComponents(EditorMode mode);
+
+	// Attempt to save the current ship and return a status code indicating the result 
+	Result										PerformSave(void);
+	
+	// Attempt to load a specified ship and return a status code indicating the result 
+	Result										PerformLoad(void);
 
 	// Locks the camera for the specified period of time, after which it will be released again to the user
 	void										LockCamera(unsigned int time_ms);

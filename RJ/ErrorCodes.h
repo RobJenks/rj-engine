@@ -623,6 +623,10 @@ namespace ErrorCodes {
 	// Faction errors													(6100-6199)
 	const Result		NoFactionsToBuildFactionDispositionMatrix		= 6100;
 
+	// Ship builder errors												(6200-6499)
+	const Result		ShipBuilderCannotSaveShipWithInvalidCode		= 6200;
+	const Result		ShipBuilderCannotGenerateSaveDirectory			= 6201;
+	const Result		ShipBuilderMissingMandatorySaveParameters		= 6202;
 }
 
 #endif

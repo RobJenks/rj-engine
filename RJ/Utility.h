@@ -552,6 +552,9 @@ void SplitString(const std::string & input, char delimiter, bool skip_empty, std
 // Concatenates a series of strings together, optionally with the supplied string as a delimiter
 std::string ConcatenateStrings(const std::vector<std::string> & elements, const std::string & delimiter);
 
+// Normalise the given string into one suitable for use in object codes
+std::string NormaliseString(const std::string & string_value);
+
 // Enumeration of possible object visibility testing methods
 enum VisibilityTestingModeType { UseBoundingSphere = 0, UseOrientedBoundingBox };
 

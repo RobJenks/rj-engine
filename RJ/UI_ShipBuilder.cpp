@@ -25,6 +25,10 @@
 #include "LightSource.h"
 #include "GameUniverse.h"
 #include "UIComponentGroup.h"
+#include "UIButton.h"
+#include "TextBlock.h"
+#include "XMLGenerator.h"
+#include "DataOutput.h"
 #include "SimpleShip.h"	// DBG
 #include "GameConsole.h"// DBG
 
@@ -398,7 +402,11 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 	// Set the zoom level based on this ship
 	SetZoom(GetDefaultZoomLevel());
 
-	// Initialise the UI to ship tile mode
+	// Update UI components to reflect the new ship
+	UITextBox *nameinput = m_render->Components.TextBoxes.GetItem("txt_shipname");
+	if (nameinput) nameinput->SetText(m_ship->GetName());
+
+	// Initialise the UI to general mode
 	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
 }
 
@@ -1241,6 +1249,20 @@ void UI_ShipBuilder::ProcessControlClickEvent(iUIControl *control)
 	}
 }
 
+// Process button click events in the UI
+void UI_ShipBuilder::ProcessButtonClickEvent(UIButton *button)
+{
+	if (button == NULL) return;
+
+	if (button->GetCode() == "btn_save") {
+		SaveShip();
+	}
+	else if (button->GetCode() == "btn_load") {
+		LoadShip();
+	}
+	
+}
+
 // Methods to accept other managed control events
 void UI_ShipBuilder::ProcessTextboxChangedEvent(iUIControl *control)
 {
@@ -1312,6 +1334,88 @@ void UI_ShipBuilder::ActivateUIModeComponents(EditorMode mode)
 		}
 	}
 }
+
+// Save the current ship design
+void UI_ShipBuilder::SaveShip(void)
+{
+	Result result = PerformSave();
+	if (result == ErrorCodes::NoError && m_ship)
+	{
+		SetStatusMessage("Ship saved successfully");
+	}
+	else
+	{
+		SetStatusMessage(concat("Error saving ship design (")(result)(")").str().c_str());
+	}
+}
+
+// Attempt to save the current ship and return a status code indicating the result 
+Result UI_ShipBuilder::PerformSave(void)
+{
+	// Parameter checks
+	if (m_mode != EditorMode::GeneralMode) return ErrorCodes::ShipBuilderMissingMandatorySaveParameters;
+	if (!m_ship) return ErrorCodes::ShipBuilderMissingMandatorySaveParameters;
+	UITextBox *nameinput = m_render->Components.TextBoxes.GetItem("txt_shipname");
+	if (!nameinput) return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
+
+	// Get and normalise the ship name
+	std::string name = nameinput->GetText();
+	std::string code = NormaliseString(name);
+	if (code == "") return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
+
+	// Set the code and name of the current ship to match.  TODO: this is only temporary, should
+	// not be possible to set the code normally
+	m_ship->SetCode(code);
+	m_ship->SetName(name);
+	m_ship->DetermineInstanceCode();
+
+	// Make sure the custom ship directory exists
+	string path = concat(D::DATA)("/Ships/ShipData").str();
+	if (CreateDirectory(path.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
+		return ErrorCodes::ShipBuilderCannotGenerateSaveDirectory;
+
+	// Generate xml data for the ship
+	TiXmlElement *xml = IO::Data::NewGameDataXMLNode();
+	Result result = IO::Data::SaveComplexShip(xml, m_ship);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Save this xml data to file
+	std::string filename = concat(path)("/")(code)(".xml").str();
+	result = IO::Data::SaveXMLDocument(xml, filename);
+	if (result != ErrorCodes::NoError) return result;
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Load the specified ship design
+void UI_ShipBuilder::LoadShip(void)
+{
+	// TODO: Implement
+}
+
+// Attempt to load the specified ship and return a status code indicating the result 
+Result UI_ShipBuilder::PerformLoad(void)
+{
+	// TODO: Implement
+	return ErrorCodes::NoError;
+}
+
+// Update the status message text
+void UI_ShipBuilder::SetStatusMessage(const std::string & msg)
+{
+	TextBlock *tb = m_render->Components.TextBlocks.GetItem("txt_status");
+	if (!tb) return;
+
+	if (msg.size() < 512)
+		tb->SetText(msg.c_str());
+	else {
+		std::string s = msg.substr(0U, 511);
+		tb->SetText(s.c_str());
+	}
+}
+
+
 
 // Translates the given editor mode to a string representation
 std::string UI_ShipBuilder::TranslateEditorModeToString(EditorMode mode)

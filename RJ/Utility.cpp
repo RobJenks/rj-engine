@@ -324,6 +324,19 @@ std::string ConcatenateStrings(const std::vector<std::string> & elements, const 
 	return ss.str();
 }
 
+// Normalise the given string into one suitable for use in object codes
+std::string NormaliseString(const std::string & string_value)
+{
+	std::ostringstream ss;
+	for (std::string::value_type s : string_value)
+	{
+		if ((s >= '0' && s <= '9') || (s >= 'A' && s <= 'Z') || (s >= 'a' && s <= 'z') || s == '_')
+			ss << s;
+	}
+
+	return ss.str();
+}
+
 // Static method to translate visibility mode from its string representation
 VisibilityTestingModeType TranslateVisibilityModeFromString(const std::string & mode)
 {
