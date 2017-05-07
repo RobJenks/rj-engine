@@ -2,21 +2,32 @@
   <uilayout>
     <Code>UI_SHIPBUILDER</Code>
     <Description>Ship Builder</Description>
-
+    
+    <!-- =============================== -->
+    <!-- ==== Component definitions ==== -->
+    <!-- =============================== -->
+    
     <!-- Textbox components -->
     <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_shipname_fr" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projmass_fr" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projvel_fr" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projradius_fr" x="1000" y="128" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projhardness_fr" x="1000" y="176" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
     <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+      <Instance code="txt_shipname_frf" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projmass_frf" x="1000" y="32" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projvel_frf" x="1000" y="80" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projradius_frf" x="1000" y="128" z="0.01" width="256" height="32" render="true" />
       <Instance code="txt_projhardness_frf" x="1000" y="176" z="0.01" width="256" height="32" render="true" />
     </Image2DGroup>
 
+    
+    <!-- Ship name textbox -->
+    <TextBlock code="txt_shipname_label" text="Name: " x="964" y="42" render="true" capacity="12" size="1.000000" />
+    <TextBlock code="txt_shipname_text" text="Ship Design Name" x="1018" y="42" render="true" capacity="256" size="1.000000" />
+    <TextBox code="txt_shipname" frame="textbox_frame" frame_key="txt_shipname_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_shipname_frf" text="txt_shipname_text" render="true" />
 
     <!-- Projectile mass textbox -->
     <TextBlock code="txt_projmass_label" text="Mass: " x="964" y="42" render="true" capacity="12" size="1.000000" />
@@ -39,6 +50,26 @@
     <TextBox code="txt_projhardness" frame="textbox_frame" frame_key="txt_projhardness_fr" frame_focus="textbox_frame_focus" frame_focus_key="txt_projhardness_frf" text="txt_projhardness_text" render="true" />
 
 
+    <!-- =========================================== -->
+    <!-- ==== Component groups for each UI mode ==== -->
+    <!-- =========================================== -->
+    <ComponentGroup code="mode_group_general">
+      <include code="txt_shipname" />
+      <include code="txt_shipname_label" />
+    </ComponentGroup>
+
+    <ComponentGroup code="mode_group_structuraltesTIng">
+      <include code="txt_projmass" />
+      <include code="txt_projmass_label" />
+      <include code="txt_projvel" />
+      <include code="txt_projvel_label" />
+      <include code="txt_projradius" />
+      <include code="txt_projradius_label" />
+      <include code="txt_projhardness" />
+      <include code="txt_projhardness_label" />
+    </ComponentGroup>
+
+    
   </uilayout>
 </gamedata>
 

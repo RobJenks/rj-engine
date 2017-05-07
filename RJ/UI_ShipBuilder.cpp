@@ -24,6 +24,7 @@
 #include "ElementIntersection.h"
 #include "LightSource.h"
 #include "GameUniverse.h"
+#include "UIComponentGroup.h"
 #include "SimpleShip.h"	// DBG
 #include "GameConsole.h"// DBG
 
@@ -78,7 +79,7 @@ void UI_ShipBuilder::Activate(void)
 	m_ship = NULL;
 
 	// Initialise per-run values 
-	m_mode = EditorMode::ShipSectionMode;
+	m_mode = EditorMode::GeneralMode;
 	m_centre = NULL_VECTOR;
 	m_camerastate = SBCameraState::Normal;
 	m_camera_release = 0U;
@@ -108,7 +109,7 @@ void UI_ShipBuilder::Activate(void)
 
 
 	// Set default starting editor mode
-	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
+	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
 }
 
 
@@ -153,6 +154,7 @@ void UI_ShipBuilder::Render(void)
 	// Perform any editor-mode-specific rendering
 	switch (m_mode)
 	{
+		case EditorMode::GeneralMode:			/* Nothing for now */
 		case EditorMode::ShipSectionMode:		/* Nothing for now */						break;
 		case EditorMode::TileMode:				PerformTileModeRendering();					break;
 		case EditorMode::ObjectMode:			/* Nothing for now */						break;
@@ -356,8 +358,8 @@ void UI_ShipBuilder::Deactivate(void)
 	// Revert any editor-specific render data
 	RevertRenderData();
 
-	// TODO: For now, return to section mode since this mode does not use any fade/transparency effects
-	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
+	// TODO: For now, return to general mode since this mode does not use any fade/transparency effects
+	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
 
 	// Remove any reference to the target ship
 	m_ship = NULL;
@@ -397,7 +399,7 @@ void UI_ShipBuilder::InitialiseForShip(ComplexShip *ship)
 	SetZoom(GetDefaultZoomLevel());
 
 	// Initialise the UI to ship tile mode
-	SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);
+	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
 }
 
 
@@ -423,6 +425,7 @@ void UI_ShipBuilder::EditorModeDeactivated(EditorMode mode, EditorMode next_mode
 {
 	switch (mode)
 	{
+		case EditorMode::GeneralMode:			DeactivateGeneralMode(next_mode);			break;
 		case EditorMode::ShipSectionMode:		/*DeactivateSectionMode(next_mode);*/		break;
 		case EditorMode::TileMode:				/*DeactivateTileMode(next_mode);*/			break;
 		case EditorMode::ObjectMode:			/*DeactivateObjectMode(next_mode);*/		break;
@@ -435,8 +438,13 @@ void UI_ShipBuilder::EditorModeDeactivated(EditorMode mode, EditorMode next_mode
 // Event triggered when an editor mode is activated.  "mode" is the mode being activated
 void UI_ShipBuilder::EditorModeActivated(EditorMode mode, EditorMode previous_mode)
 {
+	// Perform any generic actions common to all editor modes
+	ActivateUIModeComponents(mode);
+
+	// Now perform any mode-specific logic
 	switch (mode)
 	{
+		case EditorMode::GeneralMode:			ActivateGeneralMode(previous_mode);			break;
 		case EditorMode::ShipSectionMode:		ActivateSectionMode(previous_mode);			break;
 		case EditorMode::TileMode:				ActivateTileMode(previous_mode);			break;
 		case EditorMode::ObjectMode:			ActivateObjectMode(previous_mode);			break;
@@ -444,6 +452,18 @@ void UI_ShipBuilder::EditorModeActivated(EditorMode mode, EditorMode previous_mo
 		default:
 			return;
 	}
+}
+
+// Activate the specified editor mode
+void UI_ShipBuilder::ActivateGeneralMode(EditorMode previous_mode)
+{
+	// Parameter check
+	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
+
+	// Remove any fade effect from the ship or its contents when in the default 'general' mode
+	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->ForceRenderingOfInterior(false);
 }
 
 // Activate the specified editor mode
@@ -463,7 +483,7 @@ void UI_ShipBuilder::ActivateTileMode(EditorMode previous_mode)
 {
 	// Parameter check
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
-	
+
 	// Fade out the ship exterior, leaving all tiles at full alpha
 	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
 	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
@@ -496,6 +516,12 @@ void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
 	
 	// Reset the position of the intersection test markers and the test parameters
 	ResetStructuralTestParameters();
+}
+
+// Deactivate the specified editor mode
+void UI_ShipBuilder::DeactivateGeneralMode(EditorMode previous_mode)
+{
+	
 }
 
 // Deactivate the specified editor mode
@@ -680,9 +706,10 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keys[DIK_PGDN])	ZoomOut();
 	
 	// Controls to change editor mode
-	if (keys[DIK_1])			{ SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);		keyboard->LockKey(DIK_1); }
-	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);				keyboard->LockKey(DIK_2); }
-	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);			keyboard->LockKey(DIK_3); }
+	if (keys[DIK_1])			{ SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);			keyboard->LockKey(DIK_1); }
+	else if (keys[DIK_2])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ShipSectionMode);		keyboard->LockKey(DIK_2); }
+	else if (keys[DIK_3])		{ SetEditorMode(UI_ShipBuilder::EditorMode::TileMode);				keyboard->LockKey(DIK_3); }
+	else if (keys[DIK_4])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);			keyboard->LockKey(DIK_4); }
 	else if (keys[DIK_9])		{ SetEditorMode(UI_ShipBuilder::EditorMode::StructuralTestMode);	keyboard->LockKey(DIK_9); }
 
 	// Adjust which deck of the ship is being modified
@@ -695,6 +722,9 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	// TODO: DEBUG
 	if (keys[DIK_T])			{ 
 		m_tile_being_placed = ComplexShipTile::Create("corridor_ns"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_T);
+	}
+	else if (keys[DIK_Y]) {
+		m_tile_being_placed = ComplexShipTile::Create(keys[DIK_LSHIFT] ? "lifesupport_huge_01" : "lifesupport_basic_01"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_Y);
 	}
 
 	// Consume all keys within this UI so they are not passed down to the main application
@@ -1267,6 +1297,35 @@ void UI_ShipBuilder::UpdateIntersectionTestParameters(void)
 	}
 }
 
+// Activates the UI component group for the given mode, deactivating all others
+void UI_ShipBuilder::ActivateUIModeComponents(EditorMode mode)
+{
+	for (int i = 0; i < (int)EditorMode::_MODECOUNT; ++i)
+	{
+		std::string name = concat("mode_group_")(TranslateEditorModeToString((EditorMode)i)).str().c_str();
+		StrLowerC(name);
+
+		UIComponentGroup *group = m_render->Components.ComponentGroups.GetItem(name);
+		if (group != NULL)
+		{
+			group->SetRenderActive((EditorMode)i == mode);
+		}
+	}
+}
+
+// Translates the given editor mode to a string representation
+std::string UI_ShipBuilder::TranslateEditorModeToString(EditorMode mode)
+{
+	switch (mode)
+	{
+		case EditorMode::GeneralMode:				return "General";
+		case EditorMode::ShipSectionMode:			return "Sections";
+		case EditorMode::TileMode:					return "Tiles";
+		case EditorMode::ObjectMode:				return "Objects";
+		case EditorMode::StructuralTestMode:		return "StructuralTesting";
+		default:									return "";
+	}
+}
 
 
 

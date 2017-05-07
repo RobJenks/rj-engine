@@ -77,14 +77,14 @@ void UITextBox::SetRenderActive(bool render)
 	// Set the render value of each component according to the overall button render state
 	if (m_render)
 	{
-	//	if (m_framecomponent.instance) m_framecomponent.instance->render = m_render;
-//		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
+		if (m_framecomponent.instance) m_framecomponent.instance->render = m_render;
+		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
 		if (m_textcomponent) m_textcomponent->SetRenderActive(true);
 	}
 	else 
 	{
-//		if (m_framecomponent.instance) m_framecomponent.instance->render = false;
-//		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
+		if (m_framecomponent.instance) m_framecomponent.instance->render = false;
+		if (m_framefocuscomponent.instance) m_framefocuscomponent.instance->render = false;
 		if (m_textcomponent) m_textcomponent->SetRenderActive(false);
 	}
 }

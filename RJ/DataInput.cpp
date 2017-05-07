@@ -3520,7 +3520,7 @@ Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 
 	// Create a new component group 
 	UIComponentGroup *cg = new UIComponentGroup();
-	cg->SetCode(code);
+	cg->SetCode(StrLower(code));
 
 	// Now look at each child element in turn (each should correspond to an instance) and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -3551,7 +3551,7 @@ Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 	}
 
 	// Add this component group to the render group and return success
-	group->Components.ComponentGroups.AddItem(code, cg);
+	group->Components.ComponentGroups.AddItem(cg->GetCode(), cg);
 	return ErrorCodes::NoError;
 }
 

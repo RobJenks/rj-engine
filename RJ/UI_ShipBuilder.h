@@ -22,7 +22,7 @@ public:
 	USE_ALIGN16_ALLOCATORS(UI_ShipBuilder)
 
 	// Enumeration of possible editor modes
-	enum EditorMode { ShipSectionMode = 0, TileMode, ObjectMode, StructuralTestMode };
+	enum EditorMode { GeneralMode = 0, ShipSectionMode, TileMode, ObjectMode, StructuralTestMode, _MODECOUNT };
 
 	// Enumeration of possible camera states
 	enum SBCameraState { Normal = 0, Rotating, Locked };
@@ -110,6 +110,9 @@ public:
 	// If we are holding a tile for placement, revert any changes made when the tile was positioned within this element
 	void												RevertPlacementTileUpdates(void);
 
+	// Activates the UI component group for the given mode, deactivating all others
+	void												ActivateUIModeComponents(EditorMode mode);
+
 	// Method to process user input into the active UI controller
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 	void ProcessKeyboardInput(GameInputDevice *keyboard);
@@ -176,12 +179,14 @@ protected:
 	void										EditorModeActivated(EditorMode mode, EditorMode previous_mode);
 
 	// Activate the specified editor mode
+	void										ActivateGeneralMode(EditorMode previous_mode);
 	void										ActivateSectionMode(EditorMode previous_mode);
 	void										ActivateTileMode(EditorMode previous_mode);
 	void										ActivateObjectMode(EditorMode previous_mode);
 	void										ActivateStructuralTestMode(EditorMode previous_mode);
 
 	// Deactivate the specified editor mode
+	void										DeactivateGeneralMode(EditorMode previous_mode);
 	void										DeactivateStructuralTestMode(EditorMode previous_mode);
 
 	// Locks the camera for the specified period of time, after which it will be released again to the user
@@ -261,6 +266,9 @@ protected:
 	// Internal methods to get the current position/orientation of the game camera
 	XMVECTOR									GetCameraPosition(void) const;
 	XMVECTOR									GetCameraOrientation(void) const;
+
+	// Translates the given editor mode to a string representation
+	static std::string							TranslateEditorModeToString(EditorMode mode);
 
 
 
