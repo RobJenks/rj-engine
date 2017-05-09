@@ -90,17 +90,25 @@ namespace IO
 
 	CMPINLINE std::string GetLCString(TiXmlElement *node)
 	{
-		___tmp_loading_string = node->GetText();
+		___tmp_loading_cchar = node->GetText();
+		if (!___tmp_loading_cchar) return "";
+
+		___tmp_loading_string = ___tmp_loading_cchar;
 		if (___tmp_loading_string != NullString) {
-			StrLowerC(___tmp_loading_string); return ___tmp_loading_string;
+			StrLowerC(___tmp_loading_string); 
+			return ___tmp_loading_string;
 		}
 		else return "";
 	}
 	CMPINLINE bool GetBoolValue(TiXmlElement *node)
 	{
-		___tmp_loading_string = node->GetText();
+		___tmp_loading_cchar = node->GetText();
+		if (!___tmp_loading_cchar) return "";
+
+		___tmp_loading_string = ___tmp_loading_cchar;
 		if (___tmp_loading_string != NullString) {
-			StrLowerC(___tmp_loading_string); return (___tmp_loading_string == "true");
+			StrLowerC(___tmp_loading_string); 
+			return (___tmp_loading_string == "true");
 		} 
 		else {
 			return false;

@@ -12,6 +12,7 @@
 
 
 #include "FastMath.h"
+#include "FileSystem.h"
 #include "Octree.h"
 #include "OctreePruner.h"
 #include "GameSpatialPartitioningTrees.h"
@@ -173,7 +174,7 @@ Result RJMain::RetrieveExecutableData(void)
 
 	// Parse the executable path to remove the filename, and store the resulting executable directory
 	//if (FAILED(CchRemoveFileSpec((PWSTR)cpath, 4096))) return ErrorCodes::CouldNotParseExecutablePath;
-	if (RemoveFileNameFromPathStringPathW(cpath) == FALSE) return ErrorCodes::CouldNotParseExecutablePath;
+	if (FileSystem::RemoveFileNameFromPathStringPathW(cpath) == FALSE) return ErrorCodes::CouldNotParseExecutablePath;
 	std::wstring wsnewpath = std::wstring(cpath);
 	Game::ExePath = ConvertWStringToString(wsnewpath);
 
@@ -1324,7 +1325,7 @@ Result RJMain::InitialiseGameDataDependencies(void)
 		D::DATA = D::DATA_S.c_str();
 
 		// Make sure the directory is valid
-		if (!DirectoryExists(D::DATA))
+		if (!FileSystem::DirectoryExists(D::DATA))
 		{
 			return ErrorCodes::AbsoluteDataPathIsNotValid;
 		}
@@ -1336,7 +1337,7 @@ Result RJMain::InitialiseGameDataDependencies(void)
 	D::IMAGE_DATA = D::IMAGE_DATA_S.c_str();
 
 	// Make sure paths are valid
-	if (!DirectoryExists(D::IMAGE_DATA)) 
+	if (!FileSystem::DirectoryExists(D::IMAGE_DATA))
 	{
 		return ErrorCodes::ImageResourcePathIsNotValid;
 	}
@@ -2413,4 +2414,5 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-*** ADD OPTION FOR <INCLUDE> XML STATEMENTS TO INCLUDE THE CONTENTS OF A DIRECTORY, E.G. /A/DIR/*, SO IT CAN BE USED FOR LOADING CUSTOM SHIPS IN /SHIPDATA/   ***
+*** NEED TO UPDATE "SAVECOMPLEXSHIP" TO (A) INCLUDE ALL FIELDS, SUCH AS CODE / NAME, AND (B) CORRECT THE SECTION INCLUDE STATEMENTS ***
+

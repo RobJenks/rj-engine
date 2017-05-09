@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "GameUniverse.h"
 #include "Model.h"
+#include "FileSystem.h"
 #include "MultiLineTextBlock.h"
 #include "UIButton.h"
 #include "UITextBox.h"
@@ -1099,7 +1100,7 @@ Result UI_ModelBuilder::LoadCollData_ButtonClicked(void)
 
 	// Check whether this file exists
 	std::string filename = concat(D::DATA)("\\ModelBuilder\\")(name)(".xml").str();
-	if (!FileExists(filename.c_str())) return ErrorCodes::CollisionDataFileDoesNotExist;
+	if (!FileSystem::FileExists(filename.c_str())) return ErrorCodes::CollisionDataFileDoesNotExist;
 
 	// Attempt to load this collision data
 	return LoadCollisionData(filename);

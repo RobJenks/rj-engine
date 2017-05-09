@@ -51,6 +51,9 @@ const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_VALID = XMFLOAT3(0.5f, 1.0f
 const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_INVALID = XMFLOAT3(1.0, 0.0f, 0.0f);
 const XMFLOAT3 UI_ShipBuilder::TILE_PLACEMENT_COLOUR_PLACEMENTERROR = XMFLOAT3(1.0f, 0.4f, 0.4f);
 
+// Location of the custom ship directory
+const char * UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY = "/Ships/CustomDesigns";
+
 // Default constructor
 UI_ShipBuilder::UI_ShipBuilder(void)
 {
@@ -1370,7 +1373,7 @@ Result UI_ShipBuilder::PerformSave(void)
 	m_ship->DetermineInstanceCode();
 
 	// Make sure the custom ship directory exists
-	string path = concat(D::DATA)("/Ships/ShipData").str();
+	string path = concat(D::DATA)(UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY).str();
 	if (CreateDirectory(path.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
 		return ErrorCodes::ShipBuilderCannotGenerateSaveDirectory;
 

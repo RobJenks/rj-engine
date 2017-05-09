@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "FileSystem.h"
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
@@ -51,7 +52,7 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 	if (m_backdroplocation != NullString) 
 	{
 		string filename = BuildStrFilename(D::IMAGE_DATA, m_backdroplocation);
-		if (FileExists(filename.c_str()))
+		if (FileSystem::FileExists(filename.c_str()))
 		{
 			m_backdrop->Initialise(filename.c_str());
 		}

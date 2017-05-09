@@ -1,3 +1,4 @@
+#include "FileSystem.h"
 #include "Utility.h"
 #include "iUIControl.h"
 
@@ -22,7 +23,7 @@ bool UIManagedControlDefinition::ValidateDefinition(void)
 	for (UIManagedControlDefinition::DefinitionComponentCollection::const_iterator it = m_components.begin(); it != it_end; ++it)
 	{
 		// Make sure the specified file exists
-		if (it->second == NullString || !FileExists(it->second.c_str())) return false;
+		if (it->second == NullString || !FileSystem::FileExists(it->second.c_str())) return false;
 	}
 
 	// We have passed all validations so return success

@@ -312,6 +312,9 @@ namespace ErrorCodes {
 	const Result		FileDoesNotExist								= 2000;
 	const Result		CannotOpenFile									= 2001;
 	const Result		NullFilenamePointer								= 2002;
+	const Result		DirectoryDoesNotExist							= 2003;
+	const Result		CouldNotRetrieveDirectoryContents				= 2004;
+	const Result		UnknownFileSystemError							= 2005;
 
 	// DirectInput errors												(2200-2399)
 	const Result		InvalidDirectInputDevice						= 2200;

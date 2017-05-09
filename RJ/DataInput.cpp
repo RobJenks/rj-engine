@@ -8,6 +8,7 @@
 #include "CoreEngine.h"
 #include "Utility.h"
 #include "HashFunctions.h"
+#include "FileSystem.h"
 #include "FileInput.h"
 #include "Attachment.h"
 #include "Model.h"
@@ -113,111 +114,139 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 {
 	// Record the time taken to process this file; store the start time before beginning
 	unsigned int processtime = (unsigned int)timeGetTime();
-	
+
 	// Build full filename
 	if (file == NullString) return ErrorCodes::NullFilenamePointer;
-	string &filename = BuildStrFilename(D::DATA, file);
+	std::string & filename = BuildStrFilename(D::DATA, file);
 
-	// Attempt to load the XML data file
-	Result res = ErrorCodes::NoError;
-	TiXmlDocument *doc = IO::Data::LoadXMLDocument(filename);
-	if (doc == NULL) return ErrorCodes::CannotLoadXMLDocument;
-
-	// The first (and only) root note should be a "GameData" node; if not then stop
-	TiXmlElement *root = doc->FirstChildElement();
-	if (root == NULL) { delete doc; return ErrorCodes::CannotFindXMLRoot; }
-
-	// Make sure the root name is valid
-	string rname = root->Value(); StrLowerC(rname);
-	if (!(rname == D::NODE_GameData)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
-
-	// Now iterate through each child element in turn; these elements at level one should denote the type of object
-	string name = "";
-	TiXmlElement *child = root->FirstChildElement();
-	for (child; child; child=child->NextSiblingElement())
+	// Locate the file system object and make sure it is valid
+	FileSystem::FileSystemObjectType fso_type = FileSystem::GetFileSystemObjectType(filename.c_str());
+	if (fso_type == FileSystem::FileSystemObjectType::FSO_None)
 	{
-		// Test the type of this node
-		// TODO: Add error handling if a function returns =/= 0
-		name = child->Value(); StrLowerC(name);
+		Game::Log << LOG_WARN << "Specified data file/directory does not exist (" << file << ")\n";
+		return ErrorCodes::FileDoesNotExist;
+	}
 
-		if (name == D::NODE_FileIndex) {
-			res = IO::Data::LoadXMLFileIndex(child);
+	// If we have been passed a directory, process each file within it in turn.  We do NOT recurse 
+	// into subdirectories for safety
+	if (fso_type == FileSystem::FileSystemObjectType::FSO_Directory)
+	{
+		std::vector<std::string> files;
+		FileSystem::GetFileSystemObjects(filename, true, false, files);
 
-			// If we caught and terminated an infinite file loop we need to propogate the error backwards to stop it simply repeating
-			if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices) 
-				return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
-
-		} else if (name == D::NODE_SimpleShip) {
-			res = IO::Data::LoadSimpleShip(child);
-		} else if (name == D::NODE_SimpleShipLoadout) {
-			res = IO::Data::LoadSimpleShipLoadout(child);
-		} else if (name == D::NODE_ComplexShip) {
-			res = IO::Data::LoadComplexShip(child);
-		} else if (name == D::NODE_ComplexShipSection) {
-			res = IO::Data::LoadComplexShipSection(child);
-		} else if (name == D::NODE_Engine) {
-			res = IO::Data::LoadEngine(child);
-		} else if (name == D::NODE_System) {
-			res = IO::Data::LoadSystem(child);
-		} else if (name == D::NODE_FireEffect) {
-			res = IO::Data::LoadFireEffect(child);
-		} else if (name == D::NODE_ParticleEmitter) {
-			res = IO::Data::LoadParticleEmitter(child);
-		} else if (name == D::NODE_UILayout) {
-			res = IO::Data::LoadUILayout(child);
-		} else if (name == D::NODE_Model) {
-			res = IO::Data::LoadModelData(child);
-		} else if (name == D::NODE_ArticulatedModel) {
-			res = IO::Data::LoadArticulatedModel(child);
-		} else if (name == D::NODE_UIManagedControlDefinition) {
-			res = IO::Data::LoadUIManagedControlDefinition(child);
-		} else if (name == D::NODE_ComplexShipTileClass) {
-			res = IO::Data::LoadComplexShipTileClass(child);
-		} else if (name == D::NODE_ComplexShipTileDefinition) {
-			res = IO::Data::LoadComplexShipTileDefinition(child);
-		} else if (name == D::NODE_Resource) {
-			res = IO::Data::LoadResource(child);
-		} else if (name == D::NODE_SkinnedModel) {
-			res = IO::Data::LoadSkinnedModel(child);
-		} else if (name == D::NODE_ActorAttributeGeneration) {
-			res = IO::Data::LoadActorAttributeGenerationData(child);
-		} else if (name == D::NODE_ActorBase) {
-			res = IO::Data::LoadActor(child);
-		} else if (name == D::NODE_StaticTerrainDefinition) {
-			res = IO::Data::LoadStaticTerrainDefinition(child);
-		} else if (name == D::NODE_Faction) {
-			res = IO::Data::LoadFaction(child);
-		} else if (name == D::NODE_Turret) {
-			res = IO::Data::LoadTurret(child);
-		} else if (name == D::NODE_ProjectileLauncher) {
-			res = IO::Data::LoadProjectileLauncher(child);
-		} else if (name == D::NODE_BasicProjectileDefinition) {
-			res = IO::Data::LoadBasicProjectileDefinition(child);
-		} else if (name == D::NODE_SpaceProjectileDefinition) {
-			res = IO::Data::LoadSpaceProjectileDefinition(child);
-		} else if (name == D::NODE_DynamicTileSet) {
-			res = IO::Data::LoadDynamicTileSet(child);
-		} else if (name == D::NODE_ModifierDetails) {
-			res = IO::Data::LoadModifier(child);
-		} else {
-			// Unknown level one node type
-			res = ErrorCodes::UnknownDataNodeType;
-		}
-
-		// If we encountered any errors loading this node then log them and continue
-		if (res != ErrorCodes::NoError)
+		Game::Log << LOG_INFO << "Processing directory \"" << filename << "\" (" << files.size() << " files)\n";
+		for (std::string f : files)
 		{
-			Game::Log << LOG_ERROR << "Error " << res << " loading \"" << name << "\" from game data file \"" << file << "\"\n";
-			res = ErrorCodes::NoError;
+			// We need to test for & propogate any circular file indices to ensure they don't cause an issue
+			if (LoadGameDataFile(concat(file)("\\")(f).str(), follow_indices) == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
+				return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 		}
+	}
+	else
+	{
+		// This is a file.  Attempt to load the XML data file
+		Result res = ErrorCodes::NoError;
+		TiXmlDocument *doc = IO::Data::LoadXMLDocument(filename);
+		if (doc == NULL) return ErrorCodes::CannotLoadXMLDocument;
+
+		// The first (and only) root note should be a "GameData" node; if not then stop
+		TiXmlElement *root = doc->FirstChildElement();
+		if (root == NULL) { delete doc; return ErrorCodes::CannotFindXMLRoot; }
+
+		// Make sure the root name is valid
+		string rname = root->Value(); StrLowerC(rname);
+		if (!(rname == D::NODE_GameData)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
+
+		// Now iterate through each child element in turn; these elements at level one should denote the type of object
+		string name = "";
+		TiXmlElement *child = root->FirstChildElement();
+		for (child; child; child = child->NextSiblingElement())
+		{
+			// Test the type of this node
+			// TODO: Add error handling if a function returns =/= 0
+			name = child->Value(); StrLowerC(name);
+
+			if (name == D::NODE_FileIndex) {
+				res = IO::Data::LoadXMLFileIndex(child);
+
+				// If we caught and terminated an infinite file loop we need to propogate the error backwards to stop it simply repeating
+				if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
+					return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
+			}
+			else if (name == D::NODE_SimpleShip) {
+				res = IO::Data::LoadSimpleShip(child);
+			} else if (name == D::NODE_SimpleShipLoadout) {
+				res = IO::Data::LoadSimpleShipLoadout(child);
+			} else if (name == D::NODE_ComplexShip) {
+				res = IO::Data::LoadComplexShip(child);
+			} else if (name == D::NODE_ComplexShipSection) {
+				res = IO::Data::LoadComplexShipSection(child);
+			} else if (name == D::NODE_Engine) {
+				res = IO::Data::LoadEngine(child);
+			} else if (name == D::NODE_System) {
+				res = IO::Data::LoadSystem(child);
+			} else if (name == D::NODE_FireEffect) {
+				res = IO::Data::LoadFireEffect(child);
+			} else if (name == D::NODE_ParticleEmitter) {
+				res = IO::Data::LoadParticleEmitter(child);
+			} else if (name == D::NODE_UILayout) {
+				res = IO::Data::LoadUILayout(child);
+			} else if (name == D::NODE_Model) {
+				res = IO::Data::LoadModelData(child);
+			} else if (name == D::NODE_ArticulatedModel) {
+				res = IO::Data::LoadArticulatedModel(child);
+			} else if (name == D::NODE_UIManagedControlDefinition) {
+				res = IO::Data::LoadUIManagedControlDefinition(child);
+			} else if (name == D::NODE_ComplexShipTileClass) {
+				res = IO::Data::LoadComplexShipTileClass(child);
+			} else if (name == D::NODE_ComplexShipTileDefinition) {
+				res = IO::Data::LoadComplexShipTileDefinition(child);
+			} else if (name == D::NODE_Resource) {
+				res = IO::Data::LoadResource(child);
+			} else if (name == D::NODE_SkinnedModel) {
+				res = IO::Data::LoadSkinnedModel(child);
+			} else if (name == D::NODE_ActorAttributeGeneration) {
+				res = IO::Data::LoadActorAttributeGenerationData(child);
+			} else if (name == D::NODE_ActorBase) {
+				res = IO::Data::LoadActor(child);
+			} else if (name == D::NODE_StaticTerrainDefinition) {
+				res = IO::Data::LoadStaticTerrainDefinition(child);
+			} else if (name == D::NODE_Faction) {
+				res = IO::Data::LoadFaction(child);
+			} else if (name == D::NODE_Turret) {
+				res = IO::Data::LoadTurret(child);
+			} else if (name == D::NODE_ProjectileLauncher) {
+				res = IO::Data::LoadProjectileLauncher(child);
+			} else if (name == D::NODE_BasicProjectileDefinition) {
+				res = IO::Data::LoadBasicProjectileDefinition(child);
+			} else if (name == D::NODE_SpaceProjectileDefinition) {
+				res = IO::Data::LoadSpaceProjectileDefinition(child);
+			} else if (name == D::NODE_DynamicTileSet) {
+				res = IO::Data::LoadDynamicTileSet(child);
+			} else if (name == D::NODE_ModifierDetails) {
+				res = IO::Data::LoadModifier(child);
+			} else {
+				// Unknown level one node type
+				res = ErrorCodes::UnknownDataNodeType;
+			}
+
+			// If we encountered any errors loading this node then log them and continue
+			if (res != ErrorCodes::NoError)
+			{
+				Game::Log << LOG_ERROR << "Error " << res << " loading \"" << name << "\" from game data file \"" << file << "\"\n";
+				res = ErrorCodes::NoError;
+			}
+		}
+
+		// Release any resources used to parse the XML data
+		if (doc) SafeDelete(doc);
 	}
 
 	// Calculate the total time taken to process this file and log it
 	processtime = ((unsigned int)timeGetTime() - processtime);
-	Game::Log << LOG_INFO << "Game data file \"" << file << "\" processed [" << processtime << "ms]\n";
+	Game::Log << LOG_INFO << "Game data " << StrLower(FileSystem::FileSystemObjectName(fso_type)) << " \"" << file << "\" processed [" << processtime << "ms]\n";
 
-	// Dispose of memory no longer required and return success
-	if (doc) delete doc;
+	// Return success
 	return ErrorCodes::NoError;
 }
 
@@ -305,7 +334,7 @@ Result IO::Data::LoadConfigFile(const string &filename)
 		}
 		else if (name == "data") {
 			const char *path = child->Attribute("path");
-			if (path && DirectoryExists(path))
+			if (path && FileSystem::DirectoryExists(path))
 			{
 				// Store the data path in string form; other dependent fields will be initialised in a post-processing step
 				D::DATA_S = std::string(path);

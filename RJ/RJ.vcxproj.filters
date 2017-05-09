@@ -622,6 +622,9 @@
     <ClCompile Include="Direction.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="FileSystem.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1449,6 +1452,9 @@
     </ClInclude>
     <ClInclude Include="IntVector.h">
       <Filter>Data structures</Filter>
+    </ClInclude>
+    <ClInclude Include="FileSystem.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

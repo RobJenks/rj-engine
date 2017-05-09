@@ -401,6 +401,7 @@
     <ClCompile Include="FadeEffect.cpp" />
     <ClCompile Include="FastMath.cpp" />
     <ClCompile Include="FileInput.cpp" />
+    <ClCompile Include="FileSystem.cpp" />
     <ClCompile Include="FireEffect.cpp" />
     <ClCompile Include="FireShader.cpp" />
     <ClCompile Include="FontData.cpp" />
@@ -623,6 +624,7 @@
     <ClInclude Include="EnvironmentOBBRegion.h" />
     <ClInclude Include="EnvironmentOxygenMap.h" />
     <ClInclude Include="EnvironmentTree.h" />
+    <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="HashIndexedVector.h" />

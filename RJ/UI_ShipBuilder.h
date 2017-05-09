@@ -44,6 +44,9 @@ public:
 	static const XMFLOAT3							TILE_PLACEMENT_COLOUR_INVALID;	// Selection outline for invalid placement
 	static const XMFLOAT3							TILE_PLACEMENT_COLOUR_PLACEMENTERROR;	// For specific elements in error
 
+	// Location of the custom ship directory
+	static const char *								CUSTOM_SHIP_DIRECTORY;
+
 	// Default constructor
 	UI_ShipBuilder(void);
 

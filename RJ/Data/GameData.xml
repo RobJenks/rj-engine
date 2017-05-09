@@ -32,8 +32,11 @@
   <!-- Load the set of all standard complex ship sections -->
   <include file="Ships\ComplexShipSections.xml" />
   
-  <!-- Load the complex ship register, covering all complex ships in the game and their associated sections -->
-  <include file="Ships\ComplexShipRegister.xml" />
+  <!-- Load all complex ships in the game and their associated sections -->
+  <include file="Ships\ComplexShips.xml" />
+
+  <!-- Load all custom user ships from the relevant source directory -->
+  <include file="Ships\CustomDesigns" />
 
   <!-- Load turret object data (must load Projectiles > Launchers > Turrets due to dependencies) -->
   <include file="Projectiles\ProjectileDefinitions.xml" />

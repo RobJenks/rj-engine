@@ -1,0 +1,4148 @@
+<gamedata>
+    <complexship>
+        <VelocityLimit>100.000000</VelocityLimit>
+        <AngularVelocityLimit>0.400000</AngularVelocityLimit>
+        <BrakeFactor>0.100000</BrakeFactor>
+        <TurnAngle>0.500000</TurnAngle>
+        <TurnRate>0.500000</TurnRate>
+        <BankRate>0.400000</BankRate>
+        <BankExtent x="0.087266" y="0.087266" z="0.017453" />
+        <DefaultLoadout></DefaultLoadout>
+        <VisibilityTestingMode>useboundingsphere</VisibilityTestingMode>
+        <ElementSize x="10" y="24" z="2" />
+        <complexshipelement id="0">
+            <elementlocation x="0" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="1">
+            <elementlocation x="1" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="2">
+            <elementlocation x="2" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="3">
+            <elementlocation x="3" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="4">
+            <elementlocation x="4" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="5">
+            <elementlocation x="5" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="6">
+            <elementlocation x="6" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="7">
+            <elementlocation x="7" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="8">
+            <elementlocation x="8" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="9">
+            <elementlocation x="9" y="0" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="10">
+            <elementlocation x="0" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="11">
+            <elementlocation x="1" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="12">
+            <elementlocation x="2" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="13">
+            <elementlocation x="3" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="14">
+            <elementlocation x="4" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="15">
+            <elementlocation x="5" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="16">
+            <elementlocation x="6" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="17">
+            <elementlocation x="7" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="18">
+            <elementlocation x="8" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="19">
+            <elementlocation x="9" y="1" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="20">
+            <elementlocation x="0" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="21">
+            <elementlocation x="1" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="22">
+            <elementlocation x="2" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="23">
+            <elementlocation x="3" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="24">
+            <elementlocation x="4" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="25">
+            <elementlocation x="5" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="26">
+            <elementlocation x="6" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="27">
+            <elementlocation x="7" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="28">
+            <elementlocation x="8" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="29">
+            <elementlocation x="9" y="2" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="30">
+            <elementlocation x="0" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="31">
+            <elementlocation x="1" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="32">
+            <elementlocation x="2" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="33">
+            <elementlocation x="3" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="34">
+            <elementlocation x="4" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="35">
+            <elementlocation x="5" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="36">
+            <elementlocation x="6" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="37">
+            <elementlocation x="7" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="38">
+            <elementlocation x="8" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="39">
+            <elementlocation x="9" y="3" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="40">
+            <elementlocation x="0" y="4" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="41">
+            <elementlocation x="1" y="4" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="42">
+            <elementlocation x="2" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>6.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="43">
+            <elementlocation x="3" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="44">
+            <elementlocation x="4" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>7.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="45">
+            <elementlocation x="5" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>7.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="46">
+            <elementlocation x="6" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="47">
+            <elementlocation x="7" y="4" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>3.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="48">
+            <elementlocation x="8" y="4" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="49">
+            <elementlocation x="9" y="4" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="50">
+            <elementlocation x="0" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="51">
+            <elementlocation x="1" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="52">
+            <elementlocation x="2" y="5" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="53">
+            <elementlocation x="3" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="54">
+            <elementlocation x="4" y="5" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>14.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="55">
+            <elementlocation x="5" y="5" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>11.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="56">
+            <elementlocation x="6" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="57">
+            <elementlocation x="7" y="5" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="58">
+            <elementlocation x="8" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="59">
+            <elementlocation x="9" y="5" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="60">
+            <elementlocation x="0" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="61">
+            <elementlocation x="1" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="62">
+            <elementlocation x="2" y="6" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="63">
+            <elementlocation x="3" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="64">
+            <elementlocation x="4" y="6" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>14.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="65">
+            <elementlocation x="5" y="6" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>11.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="66">
+            <elementlocation x="6" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="67">
+            <elementlocation x="7" y="6" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="68">
+            <elementlocation x="8" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="69">
+            <elementlocation x="9" y="6" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="70">
+            <elementlocation x="0" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>6.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="71">
+            <elementlocation x="1" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="72">
+            <elementlocation x="2" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>13.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="73">
+            <elementlocation x="3" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="74">
+            <elementlocation x="4" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>13.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="75">
+            <elementlocation x="5" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>13.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="76">
+            <elementlocation x="6" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="77">
+            <elementlocation x="7" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>13.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="78">
+            <elementlocation x="8" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>5.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="79">
+            <elementlocation x="9" y="7" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>3.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="80">
+            <elementlocation x="0" y="8" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="81">
+            <elementlocation x="1" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="82">
+            <elementlocation x="2" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="83">
+            <elementlocation x="3" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="84">
+            <elementlocation x="4" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="85">
+            <elementlocation x="5" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="86">
+            <elementlocation x="6" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="87">
+            <elementlocation x="7" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="88">
+            <elementlocation x="8" y="8" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="89">
+            <elementlocation x="9" y="8" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="90">
+            <elementlocation x="0" y="9" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="91">
+            <elementlocation x="1" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="92">
+            <elementlocation x="2" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="93">
+            <elementlocation x="3" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="94">
+            <elementlocation x="4" y="9" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="95">
+            <elementlocation x="5" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="96">
+            <elementlocation x="6" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="97">
+            <elementlocation x="7" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="98">
+            <elementlocation x="8" y="9" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="99">
+            <elementlocation x="9" y="9" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>10.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="100">
+            <elementlocation x="0" y="10" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>8.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="101">
+            <elementlocation x="1" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="102">
+            <elementlocation x="2" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="103">
+            <elementlocation x="3" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="104">
+            <elementlocation x="4" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="105">
+            <elementlocation x="5" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="106">
+            <elementlocation x="6" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="107">
+            <elementlocation x="7" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="108">
+            <elementlocation x="8" y="10" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="109">
+            <elementlocation x="9" y="10" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>8.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="110">
+            <elementlocation x="0" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="111">
+            <elementlocation x="1" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="112">
+            <elementlocation x="2" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="113">
+            <elementlocation x="3" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="114">
+            <elementlocation x="4" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="115">
+            <elementlocation x="5" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="116">
+            <elementlocation x="6" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="117">
+            <elementlocation x="7" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="118">
+            <elementlocation x="8" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="119">
+            <elementlocation x="9" y="11" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="120">
+            <elementlocation x="0" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="121">
+            <elementlocation x="1" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="122">
+            <elementlocation x="2" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="123">
+            <elementlocation x="3" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="124">
+            <elementlocation x="4" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="125">
+            <elementlocation x="5" y="12" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="126">
+            <elementlocation x="6" y="12" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="127">
+            <elementlocation x="7" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="128">
+            <elementlocation x="8" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="129">
+            <elementlocation x="9" y="12" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="130">
+            <elementlocation x="0" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="131">
+            <elementlocation x="1" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="132">
+            <elementlocation x="2" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="133">
+            <elementlocation x="3" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="134">
+            <elementlocation x="4" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="135">
+            <elementlocation x="5" y="13" z="0" />
+            <properties>31</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="136">
+            <elementlocation x="6" y="13" z="0" />
+            <properties>15</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="137">
+            <elementlocation x="7" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="138">
+            <elementlocation x="8" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="139">
+            <elementlocation x="9" y="13" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="140">
+            <elementlocation x="0" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="141">
+            <elementlocation x="1" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="142">
+            <elementlocation x="2" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="143">
+            <elementlocation x="3" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="144">
+            <elementlocation x="4" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="145">
+            <elementlocation x="5" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="146">
+            <elementlocation x="6" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="147">
+            <elementlocation x="7" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="148">
+            <elementlocation x="8" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="149">
+            <elementlocation x="9" y="14" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="150">
+            <elementlocation x="0" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="151">
+            <elementlocation x="1" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="152">
+            <elementlocation x="2" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="153">
+            <elementlocation x="3" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="154">
+            <elementlocation x="4" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="155">
+            <elementlocation x="5" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="156">
+            <elementlocation x="6" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="157">
+            <elementlocation x="7" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="158">
+            <elementlocation x="8" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="159">
+            <elementlocation x="9" y="15" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="160">
+            <elementlocation x="0" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="161">
+            <elementlocation x="1" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="162">
+            <elementlocation x="2" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="163">
+            <elementlocation x="3" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="164">
+            <elementlocation x="4" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="165">
+            <elementlocation x="5" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="166">
+            <elementlocation x="6" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="167">
+            <elementlocation x="7" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="168">
+            <elementlocation x="8" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="169">
+            <elementlocation x="9" y="16" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="170">
+            <elementlocation x="0" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="171">
+            <elementlocation x="1" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="172">
+            <elementlocation x="2" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="173">
+            <elementlocation x="3" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="174">
+            <elementlocation x="4" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="175">
+            <elementlocation x="5" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="176">
+            <elementlocation x="6" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="177">
+            <elementlocation x="7" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="178">
+            <elementlocation x="8" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="179">
+            <elementlocation x="9" y="17" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="180">
+            <elementlocation x="0" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="181">
+            <elementlocation x="1" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="182">
+            <elementlocation x="2" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="183">
+            <elementlocation x="3" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="184">
+            <elementlocation x="4" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="185">
+            <elementlocation x="5" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="186">
+            <elementlocation x="6" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="187">
+            <elementlocation x="7" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="188">
+            <elementlocation x="8" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="189">
+            <elementlocation x="9" y="18" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="190">
+            <elementlocation x="0" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="191">
+            <elementlocation x="1" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="192">
+            <elementlocation x="2" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="193">
+            <elementlocation x="3" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="194">
+            <elementlocation x="4" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="195">
+            <elementlocation x="5" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="196">
+            <elementlocation x="6" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="197">
+            <elementlocation x="7" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="198">
+            <elementlocation x="8" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="199">
+            <elementlocation x="9" y="19" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="200">
+            <elementlocation x="0" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="201">
+            <elementlocation x="1" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="202">
+            <elementlocation x="2" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="203">
+            <elementlocation x="3" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="204">
+            <elementlocation x="4" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="205">
+            <elementlocation x="5" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="206">
+            <elementlocation x="6" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="207">
+            <elementlocation x="7" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="208">
+            <elementlocation x="8" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="209">
+            <elementlocation x="9" y="20" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="210">
+            <elementlocation x="0" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="211">
+            <elementlocation x="1" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="212">
+            <elementlocation x="2" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="213">
+            <elementlocation x="3" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="214">
+            <elementlocation x="4" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="215">
+            <elementlocation x="5" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="216">
+            <elementlocation x="6" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="217">
+            <elementlocation x="7" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="218">
+            <elementlocation x="8" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="219">
+            <elementlocation x="9" y="21" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="220">
+            <elementlocation x="0" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="221">
+            <elementlocation x="1" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="222">
+            <elementlocation x="2" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="223">
+            <elementlocation x="3" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="224">
+            <elementlocation x="4" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="225">
+            <elementlocation x="5" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="226">
+            <elementlocation x="6" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="227">
+            <elementlocation x="7" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="228">
+            <elementlocation x="8" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="229">
+            <elementlocation x="9" y="22" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="230">
+            <elementlocation x="0" y="23" z="0" />
+            <properties>5</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="231">
+            <elementlocation x="1" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="232">
+            <elementlocation x="2" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="233">
+            <elementlocation x="3" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="234">
+            <elementlocation x="4" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="235">
+            <elementlocation x="5" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="236">
+            <elementlocation x="6" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="237">
+            <elementlocation x="7" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="238">
+            <elementlocation x="8" y="23" z="0" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="239">
+            <elementlocation x="9" y="23" z="0" />
+            <properties>5</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="240">
+            <elementlocation x="0" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="241">
+            <elementlocation x="1" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="242">
+            <elementlocation x="2" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="243">
+            <elementlocation x="3" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="244">
+            <elementlocation x="4" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="245">
+            <elementlocation x="5" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="246">
+            <elementlocation x="6" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="247">
+            <elementlocation x="7" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="248">
+            <elementlocation x="8" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="249">
+            <elementlocation x="9" y="0" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="250">
+            <elementlocation x="0" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="251">
+            <elementlocation x="1" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="252">
+            <elementlocation x="2" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="253">
+            <elementlocation x="3" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="254">
+            <elementlocation x="4" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="255">
+            <elementlocation x="5" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="256">
+            <elementlocation x="6" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="257">
+            <elementlocation x="7" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="258">
+            <elementlocation x="8" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="259">
+            <elementlocation x="9" y="1" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="260">
+            <elementlocation x="0" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="261">
+            <elementlocation x="1" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="262">
+            <elementlocation x="2" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="263">
+            <elementlocation x="3" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="264">
+            <elementlocation x="4" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="265">
+            <elementlocation x="5" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="266">
+            <elementlocation x="6" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="267">
+            <elementlocation x="7" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="268">
+            <elementlocation x="8" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="269">
+            <elementlocation x="9" y="2" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="270">
+            <elementlocation x="0" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="271">
+            <elementlocation x="1" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="272">
+            <elementlocation x="2" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="273">
+            <elementlocation x="3" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="274">
+            <elementlocation x="4" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="275">
+            <elementlocation x="5" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="276">
+            <elementlocation x="6" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="277">
+            <elementlocation x="7" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="278">
+            <elementlocation x="8" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="279">
+            <elementlocation x="9" y="3" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="280">
+            <elementlocation x="0" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="281">
+            <elementlocation x="1" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="282">
+            <elementlocation x="2" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="283">
+            <elementlocation x="3" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="284">
+            <elementlocation x="4" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="285">
+            <elementlocation x="5" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="286">
+            <elementlocation x="6" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="287">
+            <elementlocation x="7" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="288">
+            <elementlocation x="8" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="289">
+            <elementlocation x="9" y="4" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="290">
+            <elementlocation x="0" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="291">
+            <elementlocation x="1" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="292">
+            <elementlocation x="2" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="293">
+            <elementlocation x="3" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="294">
+            <elementlocation x="4" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="295">
+            <elementlocation x="5" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="296">
+            <elementlocation x="6" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="297">
+            <elementlocation x="7" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="298">
+            <elementlocation x="8" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="299">
+            <elementlocation x="9" y="5" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="300">
+            <elementlocation x="0" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="301">
+            <elementlocation x="1" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="302">
+            <elementlocation x="2" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="303">
+            <elementlocation x="3" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="304">
+            <elementlocation x="4" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="305">
+            <elementlocation x="5" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="306">
+            <elementlocation x="6" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="307">
+            <elementlocation x="7" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="308">
+            <elementlocation x="8" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="309">
+            <elementlocation x="9" y="6" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="310">
+            <elementlocation x="0" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="311">
+            <elementlocation x="1" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="312">
+            <elementlocation x="2" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="313">
+            <elementlocation x="3" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="314">
+            <elementlocation x="4" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="315">
+            <elementlocation x="5" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="316">
+            <elementlocation x="6" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="317">
+            <elementlocation x="7" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="318">
+            <elementlocation x="8" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="319">
+            <elementlocation x="9" y="7" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="320">
+            <elementlocation x="0" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="321">
+            <elementlocation x="1" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="322">
+            <elementlocation x="2" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="323">
+            <elementlocation x="3" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="324">
+            <elementlocation x="4" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="325">
+            <elementlocation x="5" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="326">
+            <elementlocation x="6" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="327">
+            <elementlocation x="7" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="328">
+            <elementlocation x="8" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="329">
+            <elementlocation x="9" y="8" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="330">
+            <elementlocation x="0" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="331">
+            <elementlocation x="1" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="332">
+            <elementlocation x="2" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="333">
+            <elementlocation x="3" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="334">
+            <elementlocation x="4" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="335">
+            <elementlocation x="5" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="336">
+            <elementlocation x="6" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="337">
+            <elementlocation x="7" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="338">
+            <elementlocation x="8" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="339">
+            <elementlocation x="9" y="9" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="340">
+            <elementlocation x="0" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="341">
+            <elementlocation x="1" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="342">
+            <elementlocation x="2" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="343">
+            <elementlocation x="3" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="344">
+            <elementlocation x="4" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="345">
+            <elementlocation x="5" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="346">
+            <elementlocation x="6" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="347">
+            <elementlocation x="7" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="348">
+            <elementlocation x="8" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="349">
+            <elementlocation x="9" y="10" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="350">
+            <elementlocation x="0" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="351">
+            <elementlocation x="1" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="352">
+            <elementlocation x="2" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="353">
+            <elementlocation x="3" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="354">
+            <elementlocation x="4" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="355">
+            <elementlocation x="5" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="356">
+            <elementlocation x="6" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="357">
+            <elementlocation x="7" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="358">
+            <elementlocation x="8" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="359">
+            <elementlocation x="9" y="11" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="360">
+            <elementlocation x="0" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="361">
+            <elementlocation x="1" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="362">
+            <elementlocation x="2" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="363">
+            <elementlocation x="3" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="364">
+            <elementlocation x="4" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="365">
+            <elementlocation x="5" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="366">
+            <elementlocation x="6" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="367">
+            <elementlocation x="7" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="368">
+            <elementlocation x="8" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="369">
+            <elementlocation x="9" y="12" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="370">
+            <elementlocation x="0" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="371">
+            <elementlocation x="1" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="372">
+            <elementlocation x="2" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="373">
+            <elementlocation x="3" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="374">
+            <elementlocation x="4" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="375">
+            <elementlocation x="5" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="376">
+            <elementlocation x="6" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="377">
+            <elementlocation x="7" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="378">
+            <elementlocation x="8" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="379">
+            <elementlocation x="9" y="13" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="380">
+            <elementlocation x="0" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="381">
+            <elementlocation x="1" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="382">
+            <elementlocation x="2" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="383">
+            <elementlocation x="3" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="384">
+            <elementlocation x="4" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="385">
+            <elementlocation x="5" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="386">
+            <elementlocation x="6" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="387">
+            <elementlocation x="7" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="388">
+            <elementlocation x="8" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="389">
+            <elementlocation x="9" y="14" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="390">
+            <elementlocation x="0" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="391">
+            <elementlocation x="1" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="392">
+            <elementlocation x="2" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="393">
+            <elementlocation x="3" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="394">
+            <elementlocation x="4" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="395">
+            <elementlocation x="5" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="396">
+            <elementlocation x="6" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="397">
+            <elementlocation x="7" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="398">
+            <elementlocation x="8" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="399">
+            <elementlocation x="9" y="15" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="400">
+            <elementlocation x="0" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="401">
+            <elementlocation x="1" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="402">
+            <elementlocation x="2" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="403">
+            <elementlocation x="3" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="404">
+            <elementlocation x="4" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="405">
+            <elementlocation x="5" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="406">
+            <elementlocation x="6" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="407">
+            <elementlocation x="7" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="408">
+            <elementlocation x="8" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="409">
+            <elementlocation x="9" y="16" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="410">
+            <elementlocation x="0" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="411">
+            <elementlocation x="1" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="412">
+            <elementlocation x="2" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="413">
+            <elementlocation x="3" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="414">
+            <elementlocation x="4" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="415">
+            <elementlocation x="5" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="416">
+            <elementlocation x="6" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="417">
+            <elementlocation x="7" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="418">
+            <elementlocation x="8" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="419">
+            <elementlocation x="9" y="17" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="420">
+            <elementlocation x="0" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="421">
+            <elementlocation x="1" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="422">
+            <elementlocation x="2" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="423">
+            <elementlocation x="3" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="424">
+            <elementlocation x="4" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="425">
+            <elementlocation x="5" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="426">
+            <elementlocation x="6" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="427">
+            <elementlocation x="7" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="428">
+            <elementlocation x="8" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="429">
+            <elementlocation x="9" y="18" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="430">
+            <elementlocation x="0" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="431">
+            <elementlocation x="1" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="432">
+            <elementlocation x="2" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="433">
+            <elementlocation x="3" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="434">
+            <elementlocation x="4" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="435">
+            <elementlocation x="5" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="436">
+            <elementlocation x="6" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="437">
+            <elementlocation x="7" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="438">
+            <elementlocation x="8" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="439">
+            <elementlocation x="9" y="19" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="440">
+            <elementlocation x="0" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="441">
+            <elementlocation x="1" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="442">
+            <elementlocation x="2" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="443">
+            <elementlocation x="3" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="444">
+            <elementlocation x="4" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="445">
+            <elementlocation x="5" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="446">
+            <elementlocation x="6" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="447">
+            <elementlocation x="7" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="448">
+            <elementlocation x="8" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="449">
+            <elementlocation x="9" y="20" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="450">
+            <elementlocation x="0" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="451">
+            <elementlocation x="1" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="452">
+            <elementlocation x="2" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="453">
+            <elementlocation x="3" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="454">
+            <elementlocation x="4" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="455">
+            <elementlocation x="5" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="456">
+            <elementlocation x="6" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="457">
+            <elementlocation x="7" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="458">
+            <elementlocation x="8" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="459">
+            <elementlocation x="9" y="21" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="460">
+            <elementlocation x="0" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="461">
+            <elementlocation x="1" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="462">
+            <elementlocation x="2" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="463">
+            <elementlocation x="3" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="464">
+            <elementlocation x="4" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="465">
+            <elementlocation x="5" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="466">
+            <elementlocation x="6" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="467">
+            <elementlocation x="7" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="468">
+            <elementlocation x="8" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="469">
+            <elementlocation x="9" y="22" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="470">
+            <elementlocation x="0" y="23" z="1" />
+            <properties>5</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="471">
+            <elementlocation x="1" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="472">
+            <elementlocation x="2" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="473">
+            <elementlocation x="3" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="474">
+            <elementlocation x="4" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="475">
+            <elementlocation x="5" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="476">
+            <elementlocation x="6" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="477">
+            <elementlocation x="7" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="478">
+            <elementlocation x="8" y="23" z="1" />
+            <properties>7</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipelement id="479">
+            <elementlocation x="9" y="23" z="1" />
+            <properties>5</properties>
+            <health>1.000000</health>
+            <connections>0.000000</connections>
+            <attachpoint type="0">0</attachpoint>
+            <attachpoint type="1">0</attachpoint>
+        </complexshipelement>
+        <complexshipsectioninstance>
+            <Code>testfrigate12_section_0</Code>
+            <Position x="150.000000" y="225.000000" z="100.000000" />
+            <ElementLocation x="0" y="0" z="0" />
+            <Rotation>0</Rotation>
+        </complexshipsectioninstance>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="3" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="2" y="5" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="4" y="9" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="6" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="7" y="5" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="6" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="7" y="6" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <Location x="7" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>2</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="3" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="3" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="2" y="6" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <Location x="2" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>3</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="6" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="4" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="13" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="4" y="6" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="14" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="5" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="13" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="4" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>3</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="7" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="5" y="5" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>2</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="11" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="4" y="5" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="14" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="5" y="6" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>2</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="11" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="5" y="4" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>3</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="7" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="lifesupport_huge_01">
+            <basetiledata>
+                <Location x="5" y="12" z="0" />
+                <Size x="2" y="2" z="2" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="1" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="2" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="13" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="8" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="5" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <Location x="7" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>1</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="13" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="9" y="8" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <Location x="9" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>2</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="3" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="9" y="10" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="8" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="9" y="9" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="0" y="8" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <Location x="0" y="7" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>3</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="6" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="0" y="9" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="10" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <Location x="0" y="10" z="0" />
+                <Size x="1" y="1" z="1" />
+                <Rotation>0</Rotation>
+                <CanConnect type="0" x="0" y="0" z="0" State="15" />
+                <Connection type="0" x="0" y="0" z="0" State="8" />
+            </basetiledata>
+        </complexshiptile>
+        <SDOffset x="4" y="2" z="0" />
+        <include file="\Ships\SomeShipabc\testfrigate12_section_0.xml" />
+    </complexship>
+</gamedata>
