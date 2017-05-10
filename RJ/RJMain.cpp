@@ -2163,7 +2163,7 @@ void RJMain::__CreateDebugScenario(void)
 		css[0] = NULL; css[1] = NULL;
 		for (int c = 0; c < create_count; ++c)
 		{
-			css[c] = ComplexShip::Create("testfrigate12");
+			css[c] = ComplexShip::Create(false ? "testfrigate12" : "lscorridortest");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
 			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
@@ -2413,3 +2413,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
 
 }
+
+*** DETERMINE WHY SHIP MOVES TO NEW POSITION WHEN CREATED AS "LSCORRIDTORTEST" RATHER THAN "TESTFRIGATE12" ***
+*** ADD GETOXYGENLEVEL(ELEMENTID | XYZ) METHODS TO ENVIRONMENT, ALSO EXPOSED VIA DEBUG CONSOLE ***
+
+
