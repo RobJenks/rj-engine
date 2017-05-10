@@ -20,6 +20,10 @@ iSpaceObject::iSpaceObject(void)
 // their level of the implementation
 void iSpaceObject::InitialiseCopiedObject(iSpaceObject *source)
 {
+	// We do not want to copy the object environment, since it is not actually registered 
+	// with this environment.  It should be registered via the correct process if this is desired
+	m_spaceenvironment = NULL;
+
 	// Pass control to all base classes
 	iActiveObject::InitialiseCopiedObject(source);
 }

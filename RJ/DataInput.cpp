@@ -134,7 +134,7 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 		std::vector<std::string> files;
 		FileSystem::GetFileSystemObjects(filename, true, false, files);
 
-		Game::Log << LOG_INFO << "Processing directory \"" << filename << "\" (" << files.size() << " files)\n";
+		Game::Log << LOG_INFO << "Processing directory \"" << file << "\" (" << files.size() << " files)\n";
 		for (std::string f : files)
 		{
 			// We need to test for & propogate any circular file indices to ensure they don't cause an issue

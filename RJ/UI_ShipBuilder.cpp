@@ -1366,26 +1366,40 @@ Result UI_ShipBuilder::PerformSave(void)
 	std::string code = NormaliseString(name);
 	if (code == "") return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
 
-	// Set the code and name of the current ship to match.  TODO: this is only temporary, should
-	// not be possible to set the code normally
-	m_ship->SetCode(code);
-	m_ship->SetName(name);
-	m_ship->DetermineInstanceCode();
-
 	// Make sure the custom ship directory exists
 	string path = concat(D::DATA)(UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY).str();
 	if (CreateDirectory(path.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
 		return ErrorCodes::ShipBuilderCannotGenerateSaveDirectory;
 
+	// Make a copy of the ship in order to save it.  This allows us to update certain parameters without
+	// affecting the underlying ship
+	ComplexShip *ship = ComplexShip::Create(m_ship);
+	if (!ship) return ErrorCodes::ShipBuilderCouldNotInstantiateSaveObject;
+
+	// This ship must be marked as an archetype since it will represent a 'standard' class object
+	ship->SetIsStandardObject(true);
+
+	// Make sure the new ship is not visible, though this should not have any practical effect
+	ship->SetSimulationState(iObject::ObjectSimulationState::NoSimulation);
+	ship->SetIsVisible(false);
+
+	// Set the code and name of the new ship to the specified value
+	ship->SetCode(code);
+	ship->SetName(name);
+	ship->DetermineInstanceCode();
+
 	// Generate xml data for the ship
 	TiXmlElement *xml = IO::Data::NewGameDataXMLNode();
-	Result result = IO::Data::SaveComplexShip(xml, m_ship);
+	Result result = IO::Data::SaveComplexShip(xml, ship);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Save this xml data to file
 	std::string filename = concat(path)("/")(code)(".xml").str();
 	result = IO::Data::SaveXMLDocument(xml, filename);
 	if (result != ErrorCodes::NoError) return result;
+
+	// Dispose of the new ship now that it has been saved
+	ship->Shutdown();
 
 	// Return success
 	return ErrorCodes::NoError;

@@ -630,6 +630,7 @@ namespace ErrorCodes {
 	const Result		ShipBuilderCannotSaveShipWithInvalidCode		= 6200;
 	const Result		ShipBuilderCannotGenerateSaveDirectory			= 6201;
 	const Result		ShipBuilderMissingMandatorySaveParameters		= 6202;
+	const Result		ShipBuilderCouldNotInstantiateSaveObject		= 6203;
 }
 
 #endif

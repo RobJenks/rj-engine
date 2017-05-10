@@ -128,8 +128,11 @@ Result SpaceSystem::RemoveObjectFromSystem(iSpaceObject * object)
 
 	// Remove from the system collection itself; std::remove_if will identify an iterator range covering ALL instances
 	// of the matching object, so this will ensure we remove any erroneous cases of multiple copies in the collection
-	Objects.erase(std::remove_if(Objects.begin(), Objects.end(),
-		[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); }));
+	// TODO: if 'it' DOES equal Objects.end() we are guarding against the exception, but this is a PROBLEM.  Should 
+	// probably log a warning about it if this does happen
+	std::vector<ObjectReference<iSpaceObject>>::iterator it = std::remove_if(Objects.begin(), Objects.end(),
+		[&object](const ObjectReference<iSpaceObject> & obj) { return (obj() == object); });
+	/*if (it != Objects.end()) */Objects.erase(it);
 
 	// Remove the reference to this system from the object
 	object->SetSpaceEnvironmentDirect(NULL);

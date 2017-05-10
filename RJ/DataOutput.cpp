@@ -50,16 +50,25 @@ bool IO::Data::SaveObjectData(TiXmlElement *node, iObject *object)
 	if (!node || !object) return false;
 
 	// Save each key iObject field below the supplied node
+	// TODO: need to improve/replace the whole serialization & deserialization process.  When doing so,
+	// there should be a way to distinguish between "instance" cases (which include e.g. "position") and 
+	// "generic" cases (which would represent the "class" of object, and would not have such instance-type attributes)
 	IO::Data::LinkStringXMLElement("Code", object->GetCode(), node);
 	IO::Data::LinkStringXMLElement("Name", object->GetName(), node);
 	IO::Data::LinkBoolXMLElement("StandardObject", object->IsStandardObject(), node);
-	IO::Data::LinkVector3AttrXMLElement("Position", object->GetPosition(), node);
-	IO::Data::LinkQuaternionAttrXMLElement("Orientation", object->GetOrientation(), node);
 	if (object->GetModel()) IO::Data::LinkStringXMLElement("Model", object->GetModel()->GetCode(), node);
-	IO::Data::LinkBoolXMLElement("Visible", object->IsVisible(), node);
 
-	// Set the simulation state last, since when loading the XML back in the change in state will be applied as soon as this value is read
-	IO::Data::LinkStringXMLElement("SimulationState", iObject::TranslateSimulationStateToString(object->SimulationState()), node);	
+	// Some fields are applicable to instance (non-archetype) objects only
+	if (!object->IsStandardObject())
+	{
+		IO::Data::LinkVector3AttrXMLElement("Position", object->GetPosition(), node);
+		IO::Data::LinkQuaternionAttrXMLElement("Orientation", object->GetOrientation(), node);
+		IO::Data::LinkBoolXMLElement("Visible", object->IsVisible(), node);
+
+		// Set the simulation state last, since when loading the XML back in the change in state will be applied as soon as this value is read
+		IO::Data::LinkStringXMLElement("SimulationState", iObject::TranslateSimulationStateToString(object->SimulationState()), node);
+	}
+
 
 	// Return success
 	return true;
@@ -69,6 +78,9 @@ bool IO::Data::SaveActiveObjectData(TiXmlElement *node, iActiveObject *object)
 {
 	// Parameter check
 	if (!node || !object) return false;
+
+	// Save data for direct inherited classes first
+	IO::Data::SaveObjectData(node, object);
 
 	// Save each key iActiveObject field below the supplied node
 	IO::Data::LinkDoubleXMLElement("Mass", object->GetMass(), node);
@@ -94,6 +106,9 @@ bool IO::Data::SaveSpaceObjectData(TiXmlElement *node, iSpaceObject *object)
 	// Parameter check
 	if (!node || !object) return false;
 
+	// Save data for direct inherited classes first
+	IO::Data::SaveActiveObjectData(node, object);
+
 	// Save each key iSpaceObject field below the supplied node
 	// (No additional fields currently in scope)
 
@@ -106,6 +121,9 @@ bool IO::Data::SaveEnvironmentObjectData(TiXmlElement *node, iEnvironmentObject 
 	// Parameter check
 	if (!node || !object) return false;
 
+	// Save data for direct inherited classes first
+	IO::Data::SaveActiveObjectData(node, object);
+
 	// Save each key iEnvironmentObject field below the supplied node
 	// (No additional fields currently in scope)
 
@@ -117,6 +135,11 @@ bool IO::Data::SaveSpaceObjectEnvironmentData(TiXmlElement *node, iSpaceObjectEn
 {
 	// Parameter check
 	if (!node || !object) return false;
+
+	// Save data for direct inherited classes first
+	// NOTE: we do NOT follow the main object hierarchy from iSpaceObjectEnvironment.  We instead
+	// follow it through the ComplexShip > Ship > iSpaceObject > iActiveObject > iObject route.
+	// Passing back to iSpaceObject here would result in duplication of data from that point
 
 	// Save each key iContainsComplexShipElements field below the supplied node
 	INTVECTOR3 elsize = object->GetElementSize();
@@ -138,6 +161,9 @@ bool IO::Data::SaveShipData(TiXmlElement *node, Ship *object)
 {
 	// Parameter check
 	if (!node || !object) return false;
+
+	// Save data for direct inherited classes first
+	IO::Data::SaveSpaceObjectData(node, object);
 
 	// Save each key Ship field below the supplied node
 	IO::Data::LinkFloatXMLElement("VelocityLimit", object->VelocityLimit.BaseValue, node);
@@ -213,7 +239,9 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 
 		// If this is a standard section then it will exist in the central collection so we don't need to save any further 
 		// details; if not, we need to save the section separately and add an 'include' reference in this file
-		if ((*s_it)->IsStandardObject() == false)
+		// NOTE: We now do not need to do this.  Sections are all generic and so we will always be referencing
+		// a section that exists in the global collection
+		/*if ((*s_it)->IsStandardObject() == false)
 		{
 			// Save the section to an external file
 			SaveComplexShipSection(NULL, (*s_it));		// 'Null' parameter for parent node means that the method will store data in a new file
@@ -222,7 +250,7 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 			TiXmlElement *incl = new TiXmlElement("include");
 			incl->SetAttribute("file", (*s_it)->DetermineXMLDataFullFilename().c_str());
 			includefiles.push_back(incl);
-		}	
+		}*/	
 	}
 
 	// Save all tile data for the ship
@@ -237,7 +265,7 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 	// Now save any other data that is specific to this class
 	IO::Data::LinkIntVector3AttrXMLElement("SDOffset", object->GetSDOffset(), node);
 
-	// We want to first link any include files to the parent node, so that dependent data is alwards loaded first
+	// We want to first link any include files to the parent node, so that dependent data is always loaded first
 	std::vector<TiXmlElement*>::const_iterator it_end = includefiles.end();
 	for (std::vector<TiXmlElement*>::const_iterator it = includefiles.begin(); it != it_end; ++it)
 	{
@@ -257,7 +285,7 @@ Result IO::Data::SaveComplexShipSection(TiXmlElement *parent, ComplexShipSection
 	// Create a top-level node for this ship section
 	TiXmlElement *node = new TiXmlElement(D::NODE_ComplexShipSection);
 
-	// Save data for all direct inherited classes now
+	// Save data for all direct inherited classes first
 	IO::Data::SaveSpaceObjectData(node, object);
 
 	// Now save fields specific to this class
