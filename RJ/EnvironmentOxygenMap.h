@@ -27,8 +27,8 @@ public:
 	void																	Update(float timedelta);
 
 	// Returns the oxygen level for a specific element
-	CMPINLINE Oxygen::Type													GetOxygenLevel(int element_id) { return m_map.Data[element_id]; }
-	CMPINLINE Oxygen::Type													GetOxygenLevel(const INTVECTOR3 & location)
+	CMPINLINE Oxygen::Type													GetOxygenLevel(int element_id) const { return m_map.Data[element_id]; }
+	CMPINLINE Oxygen::Type													GetOxygenLevel(const INTVECTOR3 & location) const
 	{
 		const INTVECTOR3 & size = GetSize();
 		return GetOxygenLevel(ELEMENT_INDEX_EX(location.x, location.y, location.z, size));

@@ -139,6 +139,10 @@ public:
 	CMPINLINE void					UpdateGravity(void)			{ m_gravityupdaterequired = true; }
 	CMPINLINE void					UpdateOxygen(void)			{ m_oxygenupdaterequired = true; }
 
+	// Returns the oxygen level for a specific element
+	CMPINLINE Oxygen::Type			GetOxygenLevel(int element_id) const					{ return m_oxygenmap.GetOxygenLevel(element_id); }
+	CMPINLINE Oxygen::Type			GetOxygenLevel(const INTVECTOR3 & location) const		{ return m_oxygenmap.GetOxygenLevel(location); }
+
 	// Set or retrieve the zero-element translation for this environment
 	CMPINLINE XMVECTOR				GetZeroPointTranslation(void) const						{ return m_zeropointtranslation; }
 	CMPINLINE XMFLOAT3				GetZeroPointTranslationF(void) const					{ return m_zeropointtranslationf; }
