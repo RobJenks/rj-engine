@@ -324,7 +324,7 @@ Result IO::Data::SaveComplexShipSectionInstance(TiXmlElement *parent, ComplexShi
 
 	// Save the necessary data for this instance
 	IO::Data::LinkStringXMLElement("Code", object->GetCode(), node);
-	IO::Data::LinkVector3AttrXMLElement("Position", object->GetPosition(), node);
+	IO::Data::LinkVector3AttrXMLElement("Position", object->GetRelativePosition(), node);
 	IO::Data::LinkIntVector3AttrXMLElement("ElementLocation", object->GetElementLocation(), node);
 	IO::Data::LinkIntegerXMLElement("Rotation", (int)object->GetRotation(), node);
 
