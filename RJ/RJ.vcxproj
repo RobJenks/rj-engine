@@ -135,7 +135,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProgramFiles)\Microsoft Visual Studio 9.0\VC\atlmfc\src\atl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader />
@@ -171,7 +171,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProgramFiles)\Microsoft Visual Studio 9.0\VC\atlmfc\src\atl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -397,6 +397,8 @@
     <ClCompile Include="ElementStateFilters.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnvironmentCollision.cpp" />
+    <ClCompile Include="EnvironmentHullBreach.cpp" />
+    <ClCompile Include="EnvironmentHullBreaches.cpp" />
     <ClCompile Include="EnvironmentMapTests.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
     <ClCompile Include="EnvironmentOxygenMap.cpp" />
@@ -623,6 +625,9 @@
     <ClInclude Include="ElementStateFilters.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
+    <ClInclude Include="EnvironmentHullBreach.h" />
+    <ClInclude Include="EnvironmentHullBreachDetails.h" />
+    <ClInclude Include="EnvironmentHullBreaches.h" />
     <ClInclude Include="EnvironmentMap.h" />
     <ClInclude Include="EnvironmentMapBlendMode.h" />
     <ClInclude Include="EnvironmentMapFalloffMethod.h" />

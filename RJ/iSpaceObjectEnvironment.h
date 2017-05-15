@@ -13,6 +13,7 @@
 #include "EnvironmentOBBRegion.h"
 #include "BasicColourDefinition.h"
 #include "EnvironmentOxygenMap.h"
+#include "EnvironmentHullBreaches.h"
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -203,6 +204,9 @@ public:
 	// Identify the elements that make up this environment's outer hull
 	void							BuildOuterHullModel(void);
 
+	// Identify any hull breaches.  Dependent on outer hull model
+	void							IdentifyHullBreaches(void);
+
 	// Build detail caches on the state of environment elements
 	void							BuildEnvironmentDetailCaches(void);
 
@@ -305,6 +309,9 @@ public:
 	// Determines the sequence of elements intersected by a world-space ray.  Returns a flag indicating 
 	// whether any intersection does take place
 	bool							DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, ElementIntersectionData & outElements);
+
+	// Collection of any hull breaches in this environment
+	EnvironmentHullBreaches			HullBreaches;
 
 	// Get a reference to the navigation network assigned to this ship
 	CMPINLINE NavNetwork *			GetNavNetwork(void)				{ return m_navnetwork; }

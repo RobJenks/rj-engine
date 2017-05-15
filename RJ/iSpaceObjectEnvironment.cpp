@@ -629,6 +629,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Identify the elements that make up this environment's outer hull
 	BuildOuterHullModel();
 
+	// Identify any hull breaches.  Dependent on outer hull model
+	IdentifyHullBreaches();
+
 	// Build detail caches on the state of environment elements
 	BuildEnvironmentDetailCaches();
 
@@ -736,6 +739,44 @@ void iSpaceObjectEnvironment::BuildOuterHullModel(void)
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+// Identify any hull breaches.  Dependent on outer hull model
+void iSpaceObjectEnvironment::IdentifyHullBreaches(void)
+{
+	// We will completely recalculate the breach collection
+	HullBreaches.Reset();
+
+	ComplexShipTile *tile;
+	for (int i = 0; i < m_elementcount; ++i)
+	{
+		// Process every element looking for outer hull elements
+		if (!m_elements[i].IsOuterHullElement()) continue;
+
+		// We only need to consider cases where the element contains a tile (empty elements do not transmit anything)
+		tile = m_elements[i].GetTile();
+		if (!tile) continue;
+		const INTVECTOR3 & el_loc = m_elements[i].GetLocation();
+		int tile_element_index = tile->GetLocalElementIndex(tile->GetLocalElementLocation(el_loc));
+		assert(tile_element_index != -1);
+
+		// We only care about outer hull elements adjacent to destroyed elements
+		// TODO: only need to consider a subset of 90-degree directions, since these are the directions we can connect in
+		for (int a = 0; a < (int)Direction::_Count; ++a)	
+		{
+			int adj = m_elements[i].GetNeighbour((Direction)a);
+			if (adj == -1 || !m_elements[adj].IsDestroyed()) continue;
+
+			// Adj is a destroyed element next to outer hull element i & its tile.  Check whether there is a 
+			// connection of tranmitting type (currently, only considering oxygen) from one to the other
+			DirectionBS dirBS = DirectionToBS((Direction)a);
+			if (tile->Connections.ConnectionExists(Oxygen::OXYGEN_TILE_TRANSMISSION_PROPERTY, tile_element_index, dirBS))
+			{
+				// Record this as a breach in the outer hull
+				HullBreaches.RecordHullBreach(i, (Direction)a, adj);
 			}
 		}
 	}
@@ -2516,6 +2557,8 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(ShutdownNavNetwork)
 	REGISTER_DEBUG_FN(UpdateNavigationNetwork)
 	REGISTER_DEBUG_FN(UpdateElementSpaceStructure)
+	REGISTER_DEBUG_FN(TriggerElementDamage, command.ParameterAsInt(2), command.ParameterAsFloat(3))
+	REGISTER_DEBUG_FN(TriggerElementDestruction, command.ParameterAsInt(2))
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

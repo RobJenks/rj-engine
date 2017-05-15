@@ -506,6 +506,20 @@ public:
 		RecalculateTileData();
 	}
 
+	// Transforms a global element location to a tile-local location.  Assumes that the element does lie within this tile, 
+	// or result is undefined 
+	CMPINLINE INTVECTOR3				GetLocalElementLocation(const INTVECTOR3 & global_element_location) const
+	{
+		return (global_element_location - m_elementlocation);
+	}
+
+	// Returns the element index of a local element location in this tile, or -1 if the location is not valid
+	CMPINLINE int						GetLocalElementIndex(const INTVECTOR3 & local_location) const
+	{
+		int id = ELEMENT_INDEX(local_location.x, local_location.y, local_location.z);
+		return ((id >= 0 && id < (int)m_elementcount) ? id : -1);
+	}
+
 	// Methods to get and set the tile size in element space
 	CMPINLINE INTVECTOR3				GetElementSize(void) const { return m_elementsize; }
 	CMPINLINE INTVECTOR3 *				GetElementSizePointer(void) { return &m_elementsize; }

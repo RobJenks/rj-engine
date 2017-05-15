@@ -2414,5 +2414,11 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
+*** Add different highlighting for hull breach elements in element state overlay ***
+*** Check why breach isn't triggering upon destruction of elements 69, 68 & 67 ***
+
+*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
+	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
+
 
 

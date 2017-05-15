@@ -26,22 +26,38 @@ public:
 	void							Initialise(const INTVECTOR3 & element_size);
 
 	// Indicates whether a connection of the specified type exists, from the specified element in a particular direction
-	bool							ConnectionExists(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction) const;
+	bool							ConnectionExists(TileConnectionType type, int element_index, DirectionBS direction) const;
+	CMPINLINE bool					ConnectionExists(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction) const
+	{
+		return ConnectionExists(type, ELEMENT_INDEX(location.x, location.y, location.z), direction);
+	}
 
 	// Indicates whether a connection of the specified type exists, from the specified element (in any direction)
-	bool							ConnectionExists(TileConnectionType type, const INTVECTOR3 & location) const;
+	bool							ConnectionExistsInAnyDirection(TileConnectionType type, int element_index) const;
+	CMPINLINE bool					ConnectionExistsInAnyDirection(TileConnectionType type, const INTVECTOR3 & location) const
+	{
+		return ConnectionExistsInAnyDirection(type, ELEMENT_INDEX(location.x, location.y, location.z));
+	}
 
 	// Indicates whether a connection of the specified type exists in a particular direction (from any element)
-	bool							ConnectionExists(TileConnectionType type, DirectionBS direction) const;
+	bool							ConnectionExistsFromAnyElement(TileConnectionType type, DirectionBS direction) const;
 
 	// Indicates whether a connection (of any type) exists from the specified element in a particular direction
-	bool							ConnectionExists(const INTVECTOR3 & location, DirectionBS direction) const;
+	bool							ConnectionExistsOfAnyType(int element_index, DirectionBS direction) const;
+	CMPINLINE bool					ConnectionExistsOfAnyType(const INTVECTOR3 & location, DirectionBS direction) const
+	{
+		return ConnectionExistsOfAnyType(ELEMENT_INDEX(location.x, location.y, location.z), direction);
+	}
 
 	// Indicates whether a connection (of any type) exists from the specified element, in any direction
-	bool							ConnectionExists(const INTVECTOR3 & location) const;
+	bool							ConnectionExistsInAnyDirectionOfAnyType(int element_index) const;
+	CMPINLINE bool					ConnectionExistsInAnyDirectionOfAnyType(const INTVECTOR3 & location) const
+	{
+		return ConnectionExistsInAnyDirectionOfAnyType(ELEMENT_INDEX(location.x, location.y, location.z));
+	}
 
 	// Indicates whether a connection (of any type) exists in a particular direction, from any element
-	bool							ConnectionExists(DirectionBS direction) const;
+	bool							ConnectionExistsFromAnyElementOfAnyType(DirectionBS direction) const;
 
 	// Adds a particular connection
 	void							AddConnection(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction);
@@ -97,7 +113,9 @@ protected:
 
 
 	// Generates an index into the data collection based on x/y/z coordinates
-#	define TCONN_EL_INDEX(_x, _y, _z) (_x + (_y * m_elementsize.x) + (_z * m_xy_size))
+	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)"
+	// Removed: use global ELEMENT_INDEX now
+	//#define ELEMENT_INDEX(_x, _y, _z) (_x + m_elementsize.x * (_y + (_z * m_elementsize.y)))
 
 	// Raw data used to store the connection information
 	bitstring **					m_data;		// (data[el_index])[connection_type], where each bitstring specifies the directions
@@ -108,8 +126,6 @@ protected:
 	// Total number of elements covered
 	int								m_elementcount;
 
-	// Precalculated for efficiency
-	int								m_xy_size;
 };
 
 

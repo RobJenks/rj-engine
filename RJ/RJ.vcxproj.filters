@@ -625,6 +625,12 @@
     <ClCompile Include="FileSystem.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentHullBreach.cpp">
+      <Filter>Objects\Ships\Environments\HullBreaches</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentHullBreaches.cpp">
+      <Filter>Objects\Ships\Environments\HullBreaches</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1456,6 +1462,15 @@
     <ClInclude Include="FileSystem.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentHullBreach.h">
+      <Filter>Objects\Ships\Environments\HullBreaches</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentHullBreachDetails.h">
+      <Filter>Objects\Ships\Environments\HullBreaches</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentHullBreaches.h">
+      <Filter>Objects\Ships\Environments\HullBreaches</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1724,6 +1739,9 @@
     </Filter>
     <Filter Include="_Tests\Math">
       <UniqueIdentifier>{d3d7f81a-5ceb-4f38-9296-7deddc7e7fdf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments\HullBreaches">
+      <UniqueIdentifier>{85691c73-c33a-40c0-b662-69dc9ee82610}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

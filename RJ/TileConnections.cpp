@@ -7,7 +7,7 @@
 // Default constructor
 TileConnections::TileConnections(void)
 	:
-	m_data(NULL), m_elementsize(NULL_INTVECTOR3), m_elementcount(0), m_xy_size(0)
+	m_data(NULL), m_elementsize(NULL_INTVECTOR3), m_elementcount(0)
 {
 }
 
@@ -19,8 +19,7 @@ void TileConnections::Initialise(const INTVECTOR3 & element_size)
 	
 	// Validate and store the desired area size
 	m_elementsize = IntVector3Max(element_size, ONE_INTVECTOR3);
-	m_xy_size = (m_elementsize.x * m_elementsize.y);
-	m_elementcount = (m_xy_size * m_elementsize.z);
+	m_elementcount = (m_elementsize.x * m_elementsize.y * m_elementsize.z);
 
 	// Allocate new data for this range of elements
 	AllocateData(m_elementsize);
@@ -46,19 +45,19 @@ bool TileConnections::AllocateData(const INTVECTOR3 & element_size)
 }
 
 // Indicates whether a connection of the specified type exists, from the specified element in a particular direction
-bool TileConnections::ConnectionExists(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction) const
+bool TileConnections::ConnectionExists(TileConnectionType type, int element_index, DirectionBS direction) const
 { 
-	return (CheckBit_Any(m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)], direction));
+	return (CheckBit_Any(m_data[(int)type][element_index], direction));
 }
 
 // Indicates whether a connection of the specified type exists, from the specified element (in any direction)
-bool TileConnections::ConnectionExists(TileConnectionType type, const INTVECTOR3 & location) const
+bool TileConnections::ConnectionExistsInAnyDirection(TileConnectionType type, int element_index) const
 {
-	return (CheckBit_Any(m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)], DirectionBS_All));
+	return (CheckBit_Any(m_data[(int)type][element_index], DirectionBS_All));
 }
 
 // Indicates whether a connection of the specified type exists in a particular Direction (from any element)
-bool TileConnections::ConnectionExists(TileConnectionType type, DirectionBS direction) const
+bool TileConnections::ConnectionExistsFromAnyElement(TileConnectionType type, DirectionBS direction) const
 {
 	for (int i = 0; i < m_elementcount; ++i)
 	{
@@ -69,29 +68,29 @@ bool TileConnections::ConnectionExists(TileConnectionType type, DirectionBS dire
 }
 
 // Indicates whether a connection (of any type) exists from the specified element in a particular direction
-bool TileConnections::ConnectionExists(const INTVECTOR3 & location, DirectionBS direction) const
+bool TileConnections::ConnectionExistsOfAnyType(int element_index, DirectionBS direction) const
 {
 	for (unsigned int i = 0; i < TileConnectionType::_COUNT; ++i)
 	{
-		if (CheckBit_Any(m_data[i][TCONN_EL_INDEX(location.x, location.y, location.z)], direction)) return true;
+		if (CheckBit_Any(m_data[i][element_index], direction)) return true;
 	}
 
 	return false;
 }
 
 // Indicates whether a connection (of any type) exists from the specified element, in any direction
-bool TileConnections::ConnectionExists(const INTVECTOR3 & location) const
+bool TileConnections::ConnectionExistsInAnyDirectionOfAnyType(int element_index) const
 {
 	for (unsigned int i = 0; i < TileConnectionType::_COUNT; ++i)
 	{
-		if (CheckBit_Any(m_data[i][TCONN_EL_INDEX(location.x, location.y, location.z)], DirectionBS_All)) return true;
+		if (CheckBit_Any(m_data[i][element_index], DirectionBS_All)) return true;
 	}
 
 	return false;
 }
 
 // Indicates whether a connection (of any type) exists in a particular direction, from any element
-bool TileConnections::ConnectionExists(DirectionBS direction) const
+bool TileConnections::ConnectionExistsFromAnyElementOfAnyType(DirectionBS direction) const
 {
 	for (unsigned int i = 0; i < TileConnectionType::_COUNT; ++i)
 	{
@@ -108,19 +107,19 @@ bool TileConnections::ConnectionExists(DirectionBS direction) const
 // Adds a particular connection
 void TileConnections::AddConnection(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction) 
 {
-	SetBit(m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)], direction);
+	SetBit(m_data[(int)type][ELEMENT_INDEX(location.x, location.y, location.z)], direction);
 }
 
 // Removes a particular connection
 void TileConnections::RemoveConnection(TileConnectionType type, const INTVECTOR3 & location, DirectionBS direction) 
 {
-	ClearBit(m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)], direction);
+	ClearBit(m_data[(int)type][ELEMENT_INDEX(location.x, location.y, location.z)], direction);
 }
 
 // Returns the complete connection state for a particular element & connection type
 bitstring TileConnections::GetConnectionState(TileConnectionType type, const INTVECTOR3 & location) const
 {
-	return (m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)]);
+	return (m_data[(int)type][ELEMENT_INDEX(location.x, location.y, location.z)]);
 }
 
 // Returns the complete connection state for a particular element & connection type
@@ -132,7 +131,7 @@ bitstring TileConnections::GetConnectionState(TileConnectionType type, unsigned 
 // Sets the complete connection state for a particular element & connection type
 void TileConnections::SetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state) 
 {
-	m_data[(int)type][TCONN_EL_INDEX(location.x, location.y, location.z)] = state;
+	m_data[(int)type][ELEMENT_INDEX(location.x, location.y, location.z)] = state;
 }
 
 // Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
@@ -228,7 +227,6 @@ void TileConnections::DeallocateData(void)
 
 	// Reset size parameters accordingly
 	m_elementsize = NULL_INTVECTOR3;
-	m_xy_size = 0;
 }
 
 // Tests whether the data in this object is equivalent to the specified object

@@ -188,7 +188,7 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 				{
 					// Check whether there are any connections from this element; if not, skip it immediately
 					location = INTVECTOR3(x, y, z);
-					if (!tile->Connections.ConnectionExists(type, location)) continue;
+					if (!tile->Connections.ConnectionExistsInAnyDirection(type, location)) continue;
 
 					// There is at least one connection; process each possible direction in turn
 					bitstring data = tile->Connections.GetConnectionState(type, location);
