@@ -2070,7 +2070,7 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile **ppTile
 			TileConnections::TileConnectionType type = (TileConnections::TileConnectionType)i;
 
 			// Test whether it is possible to make a connection between the two tiles at this point
-			if (tile->PossibleConnections.ConnectionExists(type, adj.Location, dirBS) &&			// Tile > Adj
+			if (tile->PossibleConnections.ConnectionExists(type, adj.Location, dirBS) &&		// Tile > Adj
 				adjtile->PossibleConnections.ConnectionExists(type, adj_loc, invDirBS))			// Adj > Tile
 			{
 				// It is; make the connection from this tile, since we previously reset all connections
@@ -2270,16 +2270,33 @@ void iSpaceObjectEnvironment::DebugRenderElementHealth(int start, int end)
 	// Parameter check; this must be a contiguous range within the set of environment elements
 	if (start > end) std::swap(start, end);
 	if (start < 0 || end >= m_elementcount) return;
-	unsigned int count = (unsigned int)(end - start + 1);
+	int count = (end - start + 1);
 
 	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
 	std::vector<XMFLOAT4>::size_type data_index = 0U;
-	std::vector<XMFLOAT4> data(count);
+	std::vector<XMFLOAT4> data((std::vector<XMFLOAT4>::size_type)count);
 	for (int i = start; i <= end; ++i, ++data_index)
 	{
-		float x = m_elements[i].GetHealth();
-		data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
+		if (m_elements[i].IsDestroyed())
+			data[data_index] = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.85f);
+		else
+		{
+			float x = m_elements[i].GetHealth();
+			data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
+		}
 	}
+
+	// Overwrite any elements which contain a hull breach
+	EnvironmentHullBreaches::size_type breach_count = HullBreaches.GetBreachCount();
+	for (EnvironmentHullBreaches::size_type b = 0U; b < breach_count; ++b)
+	{
+		EnvironmentHullBreach & breach = HullBreaches.Get(b);
+		int adj_index = (breach.GetElementIndex() - start);
+		if (adj_index < 0 || adj_index >= count) continue;	// If not within the range we are rendering
+
+		data[adj_index] = XMFLOAT4(0.16f, 0.16f, 1.0f, 0.9f);
+	}
+
 
 	// Render this overlay on the environment
 	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);

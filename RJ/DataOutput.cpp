@@ -485,11 +485,11 @@ Result IO::Data::SaveTileConnectionState(TiXmlElement *parent, const std::string
 					if (data != 0U)
 					{
 						TiXmlElement *conn = new TiXmlElement(elname);
-						conn->SetAttribute("type", i);
-						conn->SetAttribute("x", x);
-						conn->SetAttribute("y", y);
-						conn->SetAttribute("z", z);
-						conn->SetAttribute("State", data);
+						conn->SetAttribute(HashedStrings::H_Type.CStr(), i);
+						conn->SetAttribute(HashedStrings::H_X.CStr(), x);
+						conn->SetAttribute(HashedStrings::H_Y.CStr(), y);
+						conn->SetAttribute(HashedStrings::H_Z.CStr(), z);
+						conn->SetAttribute(HashedStrings::H_State.CStr(), data);
 						parent->LinkEndChild(conn);
 					}
 				}

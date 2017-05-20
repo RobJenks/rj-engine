@@ -34,9 +34,9 @@ void EnvironmentHullBreaches::Reset(void)
 }
 
 // Returns a reference to a particular breach
-EnvironmentHullBreach & EnvironmentHullBreaches::Get(int breach_index)
+EnvironmentHullBreach & EnvironmentHullBreaches::Get(EnvironmentHullBreaches::size_type breach_index)
 {
-	assert(breach_index >= 0 && breach_index < (int)m_breaches.size());
+	assert(breach_index >= 0U && breach_index < m_breaches.size());
 	return m_breaches[breach_index];
 }
 

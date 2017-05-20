@@ -1530,11 +1530,11 @@ Result IO::Data::LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnect
 
 	// Read data out of the relevant attributes
 	INTVECTOR3 loc = INTVECTOR3(); int type, iState;
-	node->Attribute("type", &type);
-	node->Attribute("x", &loc.x);
-	node->Attribute("y", &loc.y);
-	node->Attribute("z", &loc.z);
-	node->Attribute("state", &iState);
+	node->Attribute(HashedStrings::H_Type.CStr(), &type);
+	node->Attribute(HashedStrings::H_X.CStr(), &loc.x);
+	node->Attribute(HashedStrings::H_Y.CStr(), &loc.y);
+	node->Attribute(HashedStrings::H_Z.CStr(), &loc.z);
+	node->Attribute(HashedStrings::H_State.CStr(), &iState);  
 
 	// Make sure the connection state is valid and then apply it directly
 	if (pOutConnections->ValidateAndSetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState))

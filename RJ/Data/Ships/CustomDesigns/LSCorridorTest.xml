@@ -3865,8 +3865,8 @@
                 <Location x="3" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3874,8 +3874,8 @@
                 <Location x="2" y="5" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3883,8 +3883,8 @@
                 <Location x="4" y="9" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3892,8 +3892,8 @@
                 <Location x="6" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3901,8 +3901,8 @@
                 <Location x="7" y="5" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3910,8 +3910,8 @@
                 <Location x="6" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3919,8 +3919,8 @@
                 <Location x="7" y="6" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -3928,8 +3928,8 @@
                 <Location x="7" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>2</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="3" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="3" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -3937,8 +3937,8 @@
                 <Location x="7" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="9" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="9" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3946,8 +3946,8 @@
                 <Location x="3" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -3955,8 +3955,8 @@
                 <Location x="2" y="6" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -3964,8 +3964,8 @@
                 <Location x="2" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>3</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="6" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="6" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -3973,8 +3973,8 @@
                 <Location x="2" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="12" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="12" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -3982,8 +3982,8 @@
                 <Location x="4" y="5" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="14" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -3991,8 +3991,8 @@
                 <Location x="5" y="6" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>2</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="11" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="11" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4000,8 +4000,8 @@
                 <Location x="5" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>3</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="7" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="7" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4009,8 +4009,8 @@
                 <Location x="4" y="4" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>3</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="7" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="7" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4018,8 +4018,8 @@
                 <Location x="5" y="5" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>2</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="11" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="11" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="lifesupport_huge_01">
@@ -4027,8 +4027,8 @@
                 <Location x="5" y="12" z="0" />
                 <Size x="2" y="2" z="2" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="9" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="9" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4036,8 +4036,8 @@
                 <Location x="4" y="8" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nsew">
@@ -4045,8 +4045,8 @@
                 <Location x="4" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="15" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="15" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4054,8 +4054,8 @@
                 <Location x="5" y="7" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="13" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="13" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4063,8 +4063,8 @@
                 <Location x="4" y="6" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="14" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4072,8 +4072,8 @@
                 <Location x="4" y="10" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -4081,8 +4081,8 @@
                 <Location x="5" y="11" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>2</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="3" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="3" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4090,8 +4090,8 @@
                 <Location x="4" y="13" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4099,8 +4099,8 @@
                 <Location x="4" y="12" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="14" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4108,8 +4108,8 @@
                 <Location x="4" y="11" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="14" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4117,8 +4117,8 @@
                 <Location x="4" y="14" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4126,8 +4126,8 @@
                 <Location x="4" y="15" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4135,8 +4135,8 @@
                 <Location x="4" y="16" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4144,8 +4144,8 @@
                 <Location x="4" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4153,8 +4153,8 @@
                 <Location x="4" y="17" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4162,8 +4162,8 @@
                 <Location x="4" y="18" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="8" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="8" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4171,8 +4171,8 @@
                 <Location x="5" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="1" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="1" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4180,8 +4180,8 @@
                 <Location x="3" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4189,8 +4189,8 @@
                 <Location x="6" y="16" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="4" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="4" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4198,8 +4198,8 @@
                 <Location x="7" y="16" z="0" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="1" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="1" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4207,8 +4207,8 @@
                 <Location x="2" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4216,8 +4216,8 @@
                 <Location x="1" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4225,8 +4225,8 @@
                 <Location x="0" y="15" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -4234,8 +4234,8 @@
                 <Location x="0" y="16" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="12" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="12" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4243,8 +4243,8 @@
                 <Location x="1" y="14" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4252,8 +4252,8 @@
                 <Location x="2" y="13" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -4261,8 +4261,8 @@
                 <Location x="2" y="14" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="9" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="9" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4270,8 +4270,8 @@
                 <Location x="2" y="11" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4279,8 +4279,8 @@
                 <Location x="2" y="12" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4288,8 +4288,8 @@
                 <Location x="2" y="10" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4297,8 +4297,8 @@
                 <Location x="2" y="9" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4306,8 +4306,8 @@
                 <Location x="1" y="8" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>1</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="5" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="5" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -4315,8 +4315,8 @@
                 <Location x="2" y="8" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>2</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="3" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="3" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4324,8 +4324,8 @@
                 <Location x="0" y="9" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_se">
@@ -4333,8 +4333,8 @@
                 <Location x="0" y="8" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>3</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="6" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="6" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4342,8 +4342,8 @@
                 <Location x="0" y="10" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4351,8 +4351,8 @@
                 <Location x="0" y="11" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4360,8 +4360,8 @@
                 <Location x="0" y="12" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4369,8 +4369,8 @@
                 <Location x="0" y="13" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="10" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="10" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_nse">
@@ -4378,8 +4378,8 @@
                 <Location x="0" y="14" z="1" />
                 <Size x="1" y="1" z="1" />
                 <Rotation>0</Rotation>
-                <CanConnect type="0" x="0" y="0" z="0" State="15" />
-                <Connection type="0" x="0" y="0" z="0" State="14" />
+                <CanConnect type="0" x="0" y="0" z="0" state="15" />
+                <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
         <SDOffset x="4" y="2" z="0" />

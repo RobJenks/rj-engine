@@ -33,6 +33,7 @@ struct PreHashedStringType
 public:
 	const std::string				Text;
 	const HashVal					Hash;
+	CMPINLINE const char *			CStr() const { return Text.c_str(); }
 
 	// Constructor, to store the text string and hash it
 	PreHashedStringType(const std::string & text) : Text(text), Hash((Text == NullString ? 0U : HashString(text))) { }
@@ -73,6 +74,10 @@ namespace HashedStrings
 	DefineHash(H_Name, "name");
 	DefineHash(H_Model, "model");
 	DefineHash(H_Type, "type");
+	DefineHash(H_X, "x");
+	DefineHash(H_Y, "y");
+	DefineHash(H_Z, "z");
+	DefineHash(H_W, "w");
 	DefineHash(H_CameraPosition, "cameraposition");
 	DefineHash(H_CameraRotation, "camerarotation");
 	DefineHash(H_CameraElasticity, "cameraelasticity");
