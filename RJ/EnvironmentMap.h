@@ -508,7 +508,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 			index = queue[queue_index];
 			const ComplexShipElement & el = elements[index];
 			ENV_MAP_DEBUG_LOG(concat(">> Processing queue element ")(queue_index)(" at index ")(index)(", current value = ")(Data[index])("\n").str().c_str());
-			
+
 			// Increment the queue index
 			++queue_index;
 

@@ -337,15 +337,21 @@ void ComplexShipTile::ApplyTileToElement(ComplexShipElement *el)
 	// Set the element pointer to this tile
 	el->SetTile(this);
 
-	// Set element properties based on our tile definition
-	if (m_definition)
-	{
-		el->ApplyElementState(m_definition->DefaultElementState.GetElementState(tgt, m_rotation));
-	}
-
 	// See if there are any connection values specified for this element, and apply them if there are
 	// TODO: Currently only copying the "walkable" connection state.  Element may need to store all types in future
 	el->SetConnectionState(Connections.GetConnectionState(TileConnections::TileConnectionType::Walkable, tgt));
+
+	// We only apply these effects to this specific element if the tile & element are both alive.  NOTE: in future
+	// we may want to define a bitmask of properties which can/cannot be set on destroyed elements, then
+	// can bitwise-& it here to filter only the ones we still want to set
+	if (!this->IsDestroyed() && !el->IsDestroyed())
+	{
+		// Set element properties based on our tile definition
+		if (m_definition)
+		{
+			el->ApplyElementState(m_definition->DefaultElementState.GetElementState(tgt, m_rotation));
+		}
+	}
 }
 
 // Returns a value indicating whether or not this is a primary tile.  Based on the underlying tile class

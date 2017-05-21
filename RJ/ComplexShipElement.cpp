@@ -90,6 +90,18 @@ void ComplexShipElement::RotateElement(Rotation90Degree rotation)
 
 }
 
+// Set the health of this element and trigger any relevant updates
+void ComplexShipElement::SetHealth(float h)
+{
+	// Update health and the element 'destroyed' state accordingly
+	m_health = h;
+	SetPropertyValue(ComplexShipElement::PROPERTY::PROP_DESTROYED, (m_health <= 0.0f));
+
+	// Propogate an event to our parent tile, if we have one
+	if (m_tile) m_tile->ElementHealthChanged();
+}
+
+
 // Static method to test whether an attachment is possible from the 'elementedge' edge of 'element' into 'neighbourelement'
 bool ComplexShipElement::AttachmentIsCompatible(ComplexShipElement *element, DirectionBS elementedge,
 												ComplexShipElement *neighbourelement)
@@ -133,7 +145,9 @@ void ComplexShipElement::OverwriteElementState(const ElementStateDefinition::Ele
 // Reset the element state
 void ComplexShipElement::ResetElementState(void)
 {
-	SetProperties(NULL_PROPERTIES);
+	// Only auto-derived properties are retained during a reset.  Bitwise-AND with only auto-defined properties.  
+	// Section- and tile-dependent properties are therefore (x & 0 == 0) while auto-derived properties are (x & 1 == x) and retained
+	m_properties &= ElementStateFilters::AUTO_PROPERTIES;
 }
 
 // Allow assignment of one element contents to another

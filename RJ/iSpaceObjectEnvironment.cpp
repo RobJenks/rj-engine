@@ -584,8 +584,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Only perform the update if updates are not suspended
 	if (m_updatesuspended) return;
 
-	// Reset all tile assignments and all element properties.  All properties will be
-	// re-derived during the environment update
+	// Reset all tile assignments and all non-automatic element properties.  All non-auto properties will be
+	// re-derived during the environment update.  Automatically-derived properties (e.g. PROP_DESTROYED) are 
+	// excluded from the reset
 	for (int i = 0; i < m_elementcount; ++i)
 	{
 		m_elements[i].ResetElementState();
@@ -1592,9 +1593,6 @@ EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::TriggerEle
 	// Otherwise we want to apply damage to the element
 	el.SetHealth(el.GetHealth() - damage);
 
-	// Notify any tile in this location that the element has been damaged
-	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
-
 	// TODO: We may also apply damage to the contents of the element if the damage state is significant enough
 	/*if (el.GetHealth() < Game::C_ELEMENT_DAMAGE_CONTENTS_THRESHOLD)
 	{
@@ -1611,7 +1609,7 @@ void iSpaceObjectEnvironment::SimulateElementDamage(int element_id, float damage
 	if (ElementIndexIsValid(element_id) == false) return;
 	const ComplexShipElement & el = GetConstElementDirect(element_id);
 
-	// Check this normalised [0.0 1.0] damage against the element health
+	// Check this normalised damage against the element health
 	if (damage > el.GetHealth())
 	{
 		// If the damage is sufficiently high, trigger immediate destruction of the element and quit immediately
@@ -1639,9 +1637,6 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 
 	// Perform a recalculation over the entire environment
 	UpdateEnvironment();
-
-	// Notify any tile in this location that the element has been damaged
-	if (el.GetTile()) el.GetTile()->ElementHealthChanged();
 
 	// All objects and terrain in the element are in trouble
 	if (this->SpatialPartitioningTree)

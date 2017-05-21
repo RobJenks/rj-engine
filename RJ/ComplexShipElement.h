@@ -56,15 +56,18 @@ public:
 		PROP_BUILDABLE			= (1 << 1),				// 2:     Can the element have tiles built on it?
 		PROP_OUTER_HULL_ELEMENT = (1 << 2),				// 4:     Is this element part of the outer ship hull?
 
+		// Automatically-derived properties, typically based on element state or other properties
+		PROP_DESTROYED			= (1 << 3),				// 8:	  Has the element been destroyed, i.e. has (health <= 0)
+
 		// More detailed properties; set by e.g. ship tiles
-		PROP_WALKABLE			= (1 << 3),				// 8:     Is the element an (easy, walking) route for player & AI?
-		PROP_TRANSMITS_POWER	= (1 << 4),				// 16:    Are there power cables running through this element?
-		PROP_TRANSMITS_DATA		= (1 << 5),				// 32:    Are there data cables running through this element?
+		PROP_WALKABLE			= (1 << 4),				// 16:    Is the element an (easy, walking) route for player & AI?
+		PROP_TRANSMITS_POWER	= (1 << 5),				// 32:    Are there power cables running through this element?
+		PROP_TRANSMITS_DATA		= (1 << 6),				// 64:    Are there data cables running through this element?
 		
-		PROPERTY_MAX			= (1 << 6)				//        (The maximum property value per element)
+		PROPERTY_MAX			= (1 << 7)				//        (The maximum property value per element)
 	};
 
-	static const int PROPERTY_COUNT = 6;				// ENSURE THIS REMAINS IN SYNC WITH PROPERTIES ABOVE
+	static const int PROPERTY_COUNT = 7;				// ENSURE THIS REMAINS IN SYNC WITH PROPERTIES ABOVE
 	static int PROPERTY_VALUES[PROPERTY_COUNT];
 
 	// Struct holding data on a connection from one nav node to another
@@ -100,11 +103,11 @@ public:
 
 	// Is the element active?  If not, it cannot be used for anything and is empty space
 	CMPINLINE bool					IsActive(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_ACTIVE); }
-	CMPINLINE void					SetActive(bool b)		{ SetBitState(m_properties, ComplexShipElement::PROPERTY::PROP_ACTIVE, b); }
+	CMPINLINE void					SetActive(bool b)		{ SetPropertyValue(ComplexShipElement::PROPERTY::PROP_ACTIVE, b); }
 
 	// Can the element be used by the user for construction?  If not, it may still contain other components but is locked and cannot be changed
 	CMPINLINE bool					IsBuildable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_BUILDABLE); }
-	CMPINLINE void					SetBuildable(bool b)	{ SetBitState(m_properties, ComplexShipElement::PROPERTY::PROP_BUILDABLE, b); }
+	CMPINLINE void					SetBuildable(bool b)	{ SetPropertyValue(ComplexShipElement::PROPERTY::PROP_BUILDABLE, b); }
 
 	// Is the element walkable?  Used for pathfinding and routing calculations
 	CMPINLINE bool					IsWalkable(void) const	{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_WALKABLE); }
@@ -125,10 +128,10 @@ public:
 
 	// Health of the element.  Ranges from 0.0-1.0.  Element is destroyed at <= 0.0
 	CMPINLINE float					GetHealth(void) const			{ return m_health; }
-	CMPINLINE void					SetHealth(float h)				{ m_health = h; }
-
+	void							SetHealth(float h);
+	
 	// Returns a flag indicating whether the element has been destroyed
-	CMPINLINE bool					IsDestroyed(void) const			{ return (m_health <= 0.0f); }
+	CMPINLINE bool					IsDestroyed(void) const			{ return CheckBit_Any(m_properties, ComplexShipElement::PROPERTY::PROP_DESTROYED); }
 
 	// Inherent strength of the element.  Generally inherited from the hull that contains this element.  This is the
 	// base impact resistance when determining the effect of a collider intersection with an environment

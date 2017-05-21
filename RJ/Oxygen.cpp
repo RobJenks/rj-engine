@@ -11,9 +11,11 @@ Oxygen::Type Oxygen::BASE_OXYGEN_FALLOFF = (Oxygen::Type)0.05f;			// TODO: Make 
 
 const ComplexShipElement::PROPERTY Oxygen::OXYGEN_TRANSMISSION_PROPERTY = ComplexShipElement::PROPERTY::PROP_WALKABLE;
 const TileConnections::TileConnectionType Oxygen::OXYGEN_TILE_TRANSMISSION_PROPERTY = TileConnections::TileConnectionType::Walkable;
-const bitstring Oxygen::OXYGEN_BLOCKING_PROPERTIES = 0U;
 
-unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION = 1000U;			// ms // TODO: Make const after debugging
+const bitstring Oxygen::OXYGEN_BLOCKING_PROPERTIES = (bitstring)ComplexShipElement::NULL_PROPERTIES;		// None at this point
+
+
+unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION = 1000U;				// ms // TODO: Make const after debugging
 const unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_TACTICAL_SIMULATION = 5000U;		// ms
 const unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_STRATEGIC_SIMULATION = 20000U;	// ms
 const unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_NO_SIMULATION = 60000U;			// ms

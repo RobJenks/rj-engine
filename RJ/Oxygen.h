@@ -14,8 +14,8 @@ public:
 	// Constants relating to oxygen simulation
 	static const Oxygen::Type BASE_CONSUMPTION_PER_ELEMENT;		// Base oxygen loss per environment element /sec
 	static const Oxygen::Type BASE_CONSUMPTION_PER_ACTOR;		// Base oxygen consumption per environment object /sec
-	static Oxygen::Type BASE_TRANSMISSION_LIMIT;			// Maximum volume of oxygen that can be transmitted between elements /sec
-	static Oxygen::Type BASE_OXYGEN_FALLOFF;				// Base oxygen falloff per second
+	static Oxygen::Type BASE_TRANSMISSION_LIMIT;				// Maximum volume of oxygen that can be transmitted between elements /sec
+	static Oxygen::Type BASE_OXYGEN_FALLOFF;					// Base oxygen falloff per second
 
 	static const ComplexShipElement::PROPERTY OXYGEN_TRANSMISSION_PROPERTY;					// We only use a single property for efficiency
 	static const TileConnections::TileConnectionType OXYGEN_TILE_TRANSMISSION_PROPERTY;		// Tile connections (currently) use a different property set

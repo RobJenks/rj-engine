@@ -352,7 +352,7 @@
         </complexshipelement>
         <complexshipelement id="42">
             <elementlocation x="2" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>6.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -360,7 +360,7 @@
         </complexshipelement>
         <complexshipelement id="43">
             <elementlocation x="3" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -368,7 +368,7 @@
         </complexshipelement>
         <complexshipelement id="44">
             <elementlocation x="4" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>7.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -376,7 +376,7 @@
         </complexshipelement>
         <complexshipelement id="45">
             <elementlocation x="5" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>7.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -384,7 +384,7 @@
         </complexshipelement>
         <complexshipelement id="46">
             <elementlocation x="6" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -392,7 +392,7 @@
         </complexshipelement>
         <complexshipelement id="47">
             <elementlocation x="7" y="4" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>3.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -432,7 +432,7 @@
         </complexshipelement>
         <complexshipelement id="52">
             <elementlocation x="2" y="5" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -448,7 +448,7 @@
         </complexshipelement>
         <complexshipelement id="54">
             <elementlocation x="4" y="5" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>14.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -456,7 +456,7 @@
         </complexshipelement>
         <complexshipelement id="55">
             <elementlocation x="5" y="5" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>11.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -472,7 +472,7 @@
         </complexshipelement>
         <complexshipelement id="57">
             <elementlocation x="7" y="5" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -512,7 +512,7 @@
         </complexshipelement>
         <complexshipelement id="62">
             <elementlocation x="2" y="6" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -528,7 +528,7 @@
         </complexshipelement>
         <complexshipelement id="64">
             <elementlocation x="4" y="6" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>14.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -536,7 +536,7 @@
         </complexshipelement>
         <complexshipelement id="65">
             <elementlocation x="5" y="6" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>11.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -552,7 +552,7 @@
         </complexshipelement>
         <complexshipelement id="67">
             <elementlocation x="7" y="6" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -592,7 +592,7 @@
         </complexshipelement>
         <complexshipelement id="72">
             <elementlocation x="2" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>12.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -600,7 +600,7 @@
         </complexshipelement>
         <complexshipelement id="73">
             <elementlocation x="3" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -608,7 +608,7 @@
         </complexshipelement>
         <complexshipelement id="74">
             <elementlocation x="4" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>15.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -616,7 +616,7 @@
         </complexshipelement>
         <complexshipelement id="75">
             <elementlocation x="5" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>13.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -624,7 +624,7 @@
         </complexshipelement>
         <complexshipelement id="76">
             <elementlocation x="6" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -632,7 +632,7 @@
         </complexshipelement>
         <complexshipelement id="77">
             <elementlocation x="7" y="7" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>9.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -688,7 +688,7 @@
         </complexshipelement>
         <complexshipelement id="84">
             <elementlocation x="4" y="8" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -768,7 +768,7 @@
         </complexshipelement>
         <complexshipelement id="94">
             <elementlocation x="4" y="9" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -848,7 +848,7 @@
         </complexshipelement>
         <complexshipelement id="104">
             <elementlocation x="4" y="10" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -928,7 +928,7 @@
         </complexshipelement>
         <complexshipelement id="114">
             <elementlocation x="4" y="11" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>14.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -936,7 +936,7 @@
         </complexshipelement>
         <complexshipelement id="115">
             <elementlocation x="5" y="11" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>3.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1008,7 +1008,7 @@
         </complexshipelement>
         <complexshipelement id="124">
             <elementlocation x="4" y="12" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>14.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1016,7 +1016,7 @@
         </complexshipelement>
         <complexshipelement id="125">
             <elementlocation x="5" y="12" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>9.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1024,7 +1024,7 @@
         </complexshipelement>
         <complexshipelement id="126">
             <elementlocation x="6" y="12" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>0.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1088,7 +1088,7 @@
         </complexshipelement>
         <complexshipelement id="134">
             <elementlocation x="4" y="13" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1096,7 +1096,7 @@
         </complexshipelement>
         <complexshipelement id="135">
             <elementlocation x="5" y="13" z="0" />
-            <properties>31</properties>
+            <properties>55</properties>
             <health>1.000000</health>
             <connections>0.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1104,7 +1104,7 @@
         </complexshipelement>
         <complexshipelement id="136">
             <elementlocation x="6" y="13" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>0.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1168,7 +1168,7 @@
         </complexshipelement>
         <complexshipelement id="144">
             <elementlocation x="4" y="14" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1248,7 +1248,7 @@
         </complexshipelement>
         <complexshipelement id="154">
             <elementlocation x="4" y="15" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1328,7 +1328,7 @@
         </complexshipelement>
         <complexshipelement id="164">
             <elementlocation x="4" y="16" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1344,7 +1344,7 @@
         </complexshipelement>
         <complexshipelement id="166">
             <elementlocation x="6" y="16" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>4.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1352,7 +1352,7 @@
         </complexshipelement>
         <complexshipelement id="167">
             <elementlocation x="7" y="16" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>1.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1408,7 +1408,7 @@
         </complexshipelement>
         <complexshipelement id="174">
             <elementlocation x="4" y="17" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1488,7 +1488,7 @@
         </complexshipelement>
         <complexshipelement id="184">
             <elementlocation x="4" y="18" z="0" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>8.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2576,7 +2576,7 @@
         </complexshipelement>
         <complexshipelement id="320">
             <elementlocation x="0" y="8" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>6.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2584,7 +2584,7 @@
         </complexshipelement>
         <complexshipelement id="321">
             <elementlocation x="1" y="8" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2592,7 +2592,7 @@
         </complexshipelement>
         <complexshipelement id="322">
             <elementlocation x="2" y="8" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>3.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2656,7 +2656,7 @@
         </complexshipelement>
         <complexshipelement id="330">
             <elementlocation x="0" y="9" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2672,7 +2672,7 @@
         </complexshipelement>
         <complexshipelement id="332">
             <elementlocation x="2" y="9" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2736,7 +2736,7 @@
         </complexshipelement>
         <complexshipelement id="340">
             <elementlocation x="0" y="10" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2752,7 +2752,7 @@
         </complexshipelement>
         <complexshipelement id="342">
             <elementlocation x="2" y="10" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2816,7 +2816,7 @@
         </complexshipelement>
         <complexshipelement id="350">
             <elementlocation x="0" y="11" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2832,7 +2832,7 @@
         </complexshipelement>
         <complexshipelement id="352">
             <elementlocation x="2" y="11" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2896,7 +2896,7 @@
         </complexshipelement>
         <complexshipelement id="360">
             <elementlocation x="0" y="12" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2912,7 +2912,7 @@
         </complexshipelement>
         <complexshipelement id="362">
             <elementlocation x="2" y="12" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2976,7 +2976,7 @@
         </complexshipelement>
         <complexshipelement id="370">
             <elementlocation x="0" y="13" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -2992,7 +2992,7 @@
         </complexshipelement>
         <complexshipelement id="372">
             <elementlocation x="2" y="13" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3056,7 +3056,7 @@
         </complexshipelement>
         <complexshipelement id="380">
             <elementlocation x="0" y="14" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>14.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3064,7 +3064,7 @@
         </complexshipelement>
         <complexshipelement id="381">
             <elementlocation x="1" y="14" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3072,7 +3072,7 @@
         </complexshipelement>
         <complexshipelement id="382">
             <elementlocation x="2" y="14" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>9.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3136,7 +3136,7 @@
         </complexshipelement>
         <complexshipelement id="390">
             <elementlocation x="0" y="15" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>10.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3216,7 +3216,7 @@
         </complexshipelement>
         <complexshipelement id="400">
             <elementlocation x="0" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>12.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3224,7 +3224,7 @@
         </complexshipelement>
         <complexshipelement id="401">
             <elementlocation x="1" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3232,7 +3232,7 @@
         </complexshipelement>
         <complexshipelement id="402">
             <elementlocation x="2" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3240,7 +3240,7 @@
         </complexshipelement>
         <complexshipelement id="403">
             <elementlocation x="3" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3248,7 +3248,7 @@
         </complexshipelement>
         <complexshipelement id="404">
             <elementlocation x="4" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>5.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3256,7 +3256,7 @@
         </complexshipelement>
         <complexshipelement id="405">
             <elementlocation x="5" y="16" z="1" />
-            <properties>15</properties>
+            <properties>23</properties>
             <health>1.000000</health>
             <connections>1.000000</connections>
             <attachpoint type="0">0</attachpoint>

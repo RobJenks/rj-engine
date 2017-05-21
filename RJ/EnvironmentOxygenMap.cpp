@@ -26,6 +26,7 @@ void EnvironmentOxygenMap::Initialise(void)
 	m_map.InitialiseCellValues(DefaultValues<Oxygen::Type>::NullValue());
 	m_map.SetValueConstraints((Oxygen::Type)0, (Oxygen::Type)100);
 	m_map.SetTransmissionProperties((bitstring)Oxygen::OXYGEN_TRANSMISSION_PROPERTY);
+	m_map.SetBlockingProperties(Oxygen::OXYGEN_BLOCKING_PROPERTIES);
 	m_map.SetZeroThreshold((Oxygen::Type)0);
 	m_map.SetEmissionBehaviour(OxygenMap::EmissionBehaviour::EmissionRemovedFromSource);
 }
