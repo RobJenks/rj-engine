@@ -2594,6 +2594,9 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(UpdateElementSpaceStructure)
 	REGISTER_DEBUG_FN(TriggerElementDamage, command.ParameterAsInt(2), command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(TriggerElementDestruction, command.ParameterAsInt(2))
+	REGISTER_DEBUG_FN(BuildAllEnvironmentMaps)
+	REGISTER_DEBUG_FN(RevalidateEnvironmentMaps)
+
 
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function

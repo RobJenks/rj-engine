@@ -447,9 +447,11 @@ void EnvironmentMap<T, TBlendMode>::SetEmissionBehaviour(EmissionBehaviour behav
 template <typename T, template<typename> class TBlendMode>
 Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements)
 {
-	ENV_MAP_DEBUG_LOG("Beginning new environment map update\nSources: {");
-	for (size_t i = 0; i < m_sources.size(); ++i) ENV_MAP_DEBUG_LOG(concat("[Index=")(m_sources[i].Index)(", Value=")(m_sources[i].Value)("] ").str().c_str());
-	ENV_MAP_DEBUG_LOG("}\n");
+#	if (ENV_MAP_DEBUG_OUTPUT)
+		ENV_MAP_DEBUG_LOG("Beginning new environment map update\nSources: {");
+		for (size_t i = 0; i < m_sources.size(); ++i) ENV_MAP_DEBUG_LOG(concat("[Index=")(m_sources[i].Index)(", Value=")(m_sources[i].Value)("] ").str().c_str());
+		ENV_MAP_DEBUG_LOG("}\n");
+#	endif
 
 	// Set initial value for all cells, UNLESS we have chosen to retain the existing data
 	if (!m_preserve_existing_data)
@@ -549,7 +551,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				
 				// Now calculate the transmitted value.  If it has fallen below the zero threshold then we can stop propogating it here
 				T transmitted = m_falloff.ApplyFalloff(emitted, direction);
-				if (transmitted <= m_zero_threshold) continue;
+				transmitted = max(0.0f, transmitted);
 
 				// Remove from the emitting cell (if applicable) and blend this value into the target cell
 				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)(" (direction: ")(DirectionToString(direction))(")\n").str().c_str());
@@ -558,8 +560,12 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				Data[neighbour] += transmitted;
 				ENV_MAP_DEBUG_LOG(concat(">>> AFTER:  Cell value = ")(Data[index])(", neighbour value = ")(Data[neighbour])("\n").str().c_str());
 
-				// We want to move on and process all this cell's neighbours in a future cycle
-				queue.push_back(neighbour);
+				// We want to move on and process all this cell's neighbours in a future cycle, as long as 
+				// it is above the zero threshold.  If not, we can stop propogating here
+				if (Data[neighbour] > m_zero_threshold)
+				{
+					queue.push_back(neighbour);
+				}
 			}
 
 		}
