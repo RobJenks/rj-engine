@@ -83,6 +83,9 @@ void iSpaceObjectEnvironment::InitialiseCopiedObject(iSpaceObjectEnvironment *so
 	// Remove the nav network pointer in this environment, since we want to generate a new one for the environment when first required
 	this->RemoveNavNetworkLink();
 
+	// Create new environment maps that reference this new instance
+	BuildAllEnvironmentMaps();
+
 	// Perform an initial derivation of the world/zero point matrices, as a starting point
 	RefreshPositionImmediate();
 }
@@ -639,8 +642,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 	// Rebuild the object bounding box to acccount for any elements that may have been destroyed
 	BuildBoundingBoxHierarchy();
 
-	// Build all environment maps (power, data, oxygen, munitions, ...)
-	BuildAllEnvironmentMaps();
+	// Verify all environment maps (power, data, oxygen, munitions, ...) and adjust them as required to fit 
+	// with the new environment structure
+	RevalidateEnvironmentMaps();
 
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
@@ -666,6 +670,25 @@ Result iSpaceObjectEnvironment::BuildAllEnvironmentMaps(void)
 
 
 	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Verifies all environment maps (power, data, oxygen, munitions, ...) and adjusts them as required to fit 
+// with the new environment structure
+Result iSpaceObjectEnvironment::RevalidateEnvironmentMaps(void)
+{
+	bool success = true;
+
+	// Revalidate each map in turn.  If any map fails the remainder will be short-circuited by &&
+	success = success && m_oxygenmap.RevalidateMap();
+
+	// Initiate a full rebuild if we could not revalidate all maps
+	if (!success)
+	{
+		return BuildAllEnvironmentMaps();
+	}
+
+	// All maps were successfully revalidated
 	return ErrorCodes::NoError;
 }
 

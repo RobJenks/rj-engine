@@ -4,8 +4,8 @@
 #include "Oxygen.h"
 
 // Initialise static class constants
-const Oxygen::Type Oxygen::BASE_CONSUMPTION_PER_ELEMENT = (Oxygen::Type)0.005f * 0;
-const Oxygen::Type Oxygen::BASE_CONSUMPTION_PER_ACTOR = (Oxygen::Type)0.05f * 0;
+const Oxygen::Type Oxygen::BASE_CONSUMPTION_PER_ELEMENT = (Oxygen::Type)0.005f;
+const Oxygen::Type Oxygen::BASE_CONSUMPTION_PER_ACTOR = (Oxygen::Type)0.05f;
 Oxygen::Type Oxygen::BASE_TRANSMISSION_LIMIT = (Oxygen::Type)2.0f;		// TODO: Make const after debugging
 Oxygen::Type Oxygen::BASE_OXYGEN_FALLOFF = (Oxygen::Type)0.05f;			// TODO: Make const after debugging
 

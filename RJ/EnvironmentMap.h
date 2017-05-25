@@ -66,9 +66,20 @@ public:
 	// Executes an update of the map.  Accepts a reference to the underlying element collection as a mandatory parameter
 	Result											Execute(const ComplexShipElement *elements);
 
+	// Returns the value of a specific map cell
+	CMPINLINE T										GetCellValue(int index) const { return Data[index]; }
+
+	// Sets the value of a specific map cell
+	CMPINLINE void									SetCellValue(int index, T value) { Data[index] = value; }
+
+	// Returns the properties that allow transmission of value through the map
+	CMPINLINE bitstring								GetTransmissionProperties(void) const { return m_transmission_properties; }
 
 	// Set the properties that allow transmission of value through the map
 	void											SetTransmissionProperties(bitstring properties);
+
+	// Returns the properties that block transmission of values through the map
+	CMPINLINE bitstring								GetBlockingProperties(void) const { return m_blocking_properties; }
 
 	// Set the properties that prevent transmission of value through the map
 	void											SetBlockingProperties(bitstring properties);

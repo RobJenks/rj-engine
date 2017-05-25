@@ -23,6 +23,11 @@ public:
 	// Rebuilds the map, e.g. if the parent environment size/shape changes
 	void																	RebuildMap(void);
 
+	// Revalidates the map against its underlying environment and attempts to update it to account for
+	// any changes in the environment (e.g. structural changes).  Returns true in case of success.  Returns
+	// false if the environment has changed too significantly and requires a full map rebuild
+	bool																	RevalidateMap(void);
+
 	// Performs an update of the oxygen map for the specified time interval
 	void																	Update(float timedelta);
 

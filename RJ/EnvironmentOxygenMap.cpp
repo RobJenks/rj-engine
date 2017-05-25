@@ -44,6 +44,37 @@ void EnvironmentOxygenMap::RebuildMap(void)
 	Initialise();
 }
 
+// Revalidates the map against its underlying environment and attempts to update it to account for
+// any changes in the environment (e.g. structural changes).  Returns true in case of success.  Returns
+// false if the environment has changed too significantly and requires a full map rebuild
+bool EnvironmentOxygenMap::RevalidateMap(void)
+{
+	// We can only revalidate if we have an environment, and if it has not changed in size
+	const iSpaceObjectEnvironment *env = m_environment();
+	if (!env) return false;
+	if (env->GetElementSize() != m_map.GetMapSize()) return false;
+
+	bitstring transmission_properties = m_map.GetTransmissionProperties();
+	bitstring blocking_properties = m_map.GetBlockingProperties();
+
+	// Process each element in turn
+	int elementcount = env->GetElementCount();
+	for (int i = 0; i < elementcount; ++i)
+	{
+		// Make sure there is no oxygen in any elements which cannot transmit it, or which actively block it
+		const ComplexShipElement & el = env->GetElementDirect(i);
+		bitstring element_properties = el.GetProperties();
+		if (CheckBit_Any(element_properties, transmission_properties) == false ||
+			CheckBit_Any(element_properties, blocking_properties) == true)
+		{
+			m_map.SetCellValue(i, (Oxygen::Type)0.0f);
+		}
+	}
+
+	// Return success
+	return true;
+}
+
 
 // Performs an update of the oxygen map for the specified time interval
 void EnvironmentOxygenMap::Update(float timedelta)

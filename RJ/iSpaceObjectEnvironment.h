@@ -79,6 +79,10 @@ public:
 	CMPINLINE ComplexShipElement &	GetElementDirect(int x, int y, int z)							{ return m_elements[ELEMENT_INDEX(x, y, z)]; }
 	CMPINLINE ComplexShipElement &	GetElementDirect(int index)										{ return m_elements[index]; }
 
+	CMPINLINE const ComplexShipElement &	GetElementDirect(const INTVECTOR3 & loc) const			{ return m_elements[ELEMENT_INDEX(loc.x, loc.y, loc.z)]; }
+	CMPINLINE const ComplexShipElement &	GetElementDirect(int x, int y, int z) const 			{ return m_elements[ELEMENT_INDEX(x, y, z)]; }
+	CMPINLINE const ComplexShipElement &	GetElementDirect(int index) const 						{ return m_elements[index]; }
+
 	CMPINLINE void					SetElementDirect(const INTVECTOR3 & loc, ComplexShipElement *e)	{ m_elements[ELEMENT_INDEX(loc.x, loc.y, loc.z)] = (*e); }
 	CMPINLINE void					SetElementDirect(int x, int y, int z, ComplexShipElement *e)	{ m_elements[ELEMENT_INDEX(x, y, z)] = (*e); }
 
@@ -216,6 +220,10 @@ public:
 
 	// Build all environment maps (power, data, oxygen, munitions, ...)
 	Result							BuildAllEnvironmentMaps(void);
+
+	// Verifies all environment maps (power, data, oxygen, munitions, ...) and adjusts them as required to fit 
+	// with the new environment structure
+	Result							RevalidateEnvironmentMaps(void);
 
 	// Adds a new object to this environment
 	void							ObjectEnteringEnvironment(iEnvironmentObject *obj);
