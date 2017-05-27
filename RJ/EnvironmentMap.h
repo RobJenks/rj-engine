@@ -198,6 +198,9 @@ protected:
 	// value is removed from the source cell when transmitte to the destination, or whether it remains after propogation
 	T												m_source_emission_multiplier;
 
+	// Store a local copy of T-zero for efficiency / cache coherency during tight loop updates
+	T												m_zero;
+
 };
 
 // Initialise static set of randomised direction values, for use in randomising direction of value spread
@@ -208,8 +211,10 @@ const PrecalculatedRandomSequence<int> EnvironmentMap<T, TBlendMode>::DirectionS
 // Constructor; accepts dimensions of the area to to represented
 template <typename T, template<typename> class TBlendMode>
 EnvironmentMap<T, TBlendMode>::EnvironmentMap(const INTVECTOR3 & element_size)
+	: 
+	m_zero(DefaultValues<T>::NullValue())
 {
-	// Determine element space size and dimenstions
+	// Determine element space size and dimensions
 	SetElementSize(element_size);
 	
 	// Set default per-map values
@@ -469,7 +474,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 		if (m_update_existing_data == ExistingDataUpdate::AdditiveUpdate)
 		{
 			ENV_MAP_DEBUG_LOG(concat("Applying additive pre-processing operation of ")(m_existing_data_additive_update)(" to all cells\n").str().c_str());
-			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = ((std::max)((T)0.0f, Data[i] + m_existing_data_additive_update));
+			for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = ((std::max)(m_zero, Data[i] + m_existing_data_additive_update));
 		}
 		else if (m_update_existing_data == ExistingDataUpdate::MultiplicativeUpdate)
 		{
@@ -551,7 +556,7 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 				
 				// Now calculate the transmitted value.  If it has fallen below the zero threshold then we can stop propogating it here
 				T transmitted = m_falloff.ApplyFalloff(emitted, direction);
-				transmitted = max(0.0f, transmitted);
+				transmitted = max(m_zero, transmitted);
 
 				// Remove from the emitting cell (if applicable) and blend this value into the target cell
 				ENV_MAP_DEBUG_LOG(concat(">>> Emitted ")(emitted)(", ")(transmitted)(" of which was transmitted to neighbour ")(neighbour)(" (direction: ")(DirectionToString(direction))(")\n").str().c_str());
