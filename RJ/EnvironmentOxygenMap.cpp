@@ -88,8 +88,6 @@ void EnvironmentOxygenMap::Update(float timedelta)
 	DetermineOxygenSources(timedelta, sources);
 	float consumption = DetermineOxygenConsumption();
 
-	OutputDebugString(concat("Updating oxygen map for \"")(m_environment()->GetInstanceCode())("\".  Consumption = ")(consumption)("\n").str().c_str());
-
 	// Initiate an update of the underlying map.  Falloff parameters need to be set on each update since they 
 	// are time delta-dependent
 	m_map.SetFalloffMethod(EnvironmentMapFalloffMethod<Oxygen::Type>::EnvironmentMapFalloffMethod()
@@ -104,6 +102,11 @@ void EnvironmentOxygenMap::Update(float timedelta)
 		.WithTransferLimit(Oxygen::BASE_TRANSMISSION_LIMIT * timedelta)
 		.WithSourceCells(sources)
 		.Execute(env->GetElements());
+
+
+	// Directly apply the effect of any hull breaches
+	for (const EnvironmentHullBreach & breach : env->HullBreaches.Items())
+		m_map.SetCellValue(breach.GetElementIndex(), (Oxygen::Type)0.0f);
 }
 
 

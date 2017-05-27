@@ -12,7 +12,6 @@ public:
 	EnvironmentHullBreach(void);
 	EnvironmentHullBreach(int element_index);
 
-	// Return basic information on this hull breach
 	CMPINLINE int											GetElementIndex(void) const { return m_element_index; }
 	CMPINLINE int											GetBreachCount(void) const { return m_breach_count; }
 	CMPINLINE EnvironmentHullBreachDetails &				GetBreachDetails(int index) { return m_breaches[index]; }
