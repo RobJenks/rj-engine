@@ -631,6 +631,9 @@
     <ClCompile Include="EnvironmentHullBreaches.cpp">
       <Filter>Objects\Ships\Environments\HullBreaches</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentPowerMap.cpp">
+      <Filter>Objects\Ships\Environments\Power</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1471,6 +1474,12 @@
     <ClInclude Include="EnvironmentHullBreaches.h">
       <Filter>Objects\Ships\Environments\HullBreaches</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentPowerMap.h">
+      <Filter>Objects\Ships\Environments\Power</Filter>
+    </ClInclude>
+    <ClInclude Include="Power.h">
+      <Filter>Objects\Ships\Environments\Power</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1742,6 +1751,9 @@
     </Filter>
     <Filter Include="Objects\Ships\Environments\HullBreaches">
       <UniqueIdentifier>{85691c73-c33a-40c0-b662-69dc9ee82610}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments\Power">
+      <UniqueIdentifier>{50b281b0-1569-4717-ba5c-8fbe4d3922aa}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

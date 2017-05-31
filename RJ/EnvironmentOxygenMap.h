@@ -13,7 +13,7 @@ class EnvironmentOxygenMap
 {
 public:
 
-	// Types used to store oxygen levels throughout the environment
+	// Type used to store oxygen levels throughout the environment
 	typedef EnvironmentMap<Oxygen::Type, EnvironmentMapBlendMode::BlendAveraged>	OxygenMap;
 
 	// Constructor

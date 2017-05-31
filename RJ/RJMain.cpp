@@ -109,6 +109,7 @@
 #include "ElementStateDefinition.h"			// DBG
 #include "EnvironmentMap.h"					// DBG
 #include "EnvironmentMapBlendMode.h"		// DBG
+#include "EnvironmentPowerMap.h"			// DBG
 #include "ViewFrustrum.h"
 #include "Fonts.h"
 
@@ -2320,6 +2321,8 @@ void RJMain::__CreateDebugScenario(void)
 	EnvironmentMap<float, EnvironmentMapBlendMode::BlendAdditive> em(INTVECTOR3(12, 34, 56));
 	em.Data.push_back(12.3);
 	em.Data.push_back(4.1);
+
+	EnvironmentPowerMap pmap = EnvironmentPowerMap(NULL);
 
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }

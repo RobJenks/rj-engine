@@ -402,6 +402,7 @@
     <ClCompile Include="EnvironmentMapTests.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
     <ClCompile Include="EnvironmentOxygenMap.cpp" />
+    <ClCompile Include="EnvironmentPowerMap.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
     <ClCompile Include="Equipment.cpp" />
     <ClCompile Include="Faction.cpp" />
@@ -634,6 +635,7 @@
     <ClInclude Include="EnvironmentMapTests.h" />
     <ClInclude Include="EnvironmentOBBRegion.h" />
     <ClInclude Include="EnvironmentOxygenMap.h" />
+    <ClInclude Include="EnvironmentPowerMap.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FileSystem.h" />
     <ClInclude Include="FrameProfiler.h" />
@@ -657,6 +659,7 @@
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
+    <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
