@@ -634,6 +634,9 @@
     <ClCompile Include="EnvironmentPowerMap.cpp">
       <Filter>Objects\Ships\Environments\Power</Filter>
     </ClCompile>
+    <ClCompile Include="Power.cpp">
+      <Filter>Objects\Ships\Environments\Power</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

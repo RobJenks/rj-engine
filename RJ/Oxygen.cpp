@@ -24,6 +24,7 @@ const unsigned int Oxygen::OXYGEN_UPDATE_INTERVAL_NO_SIMULATION = 60000U;			// m
 // Returns the oxygen update interval for a specific simulation state
 unsigned int Oxygen::GetOxygenUpdateInterval(iObject::ObjectSimulationState simulation_state)
 {
+	// TODO: Can make this a lookup array in future
 	switch (simulation_state)
 	{
 		case iObject::ObjectSimulationState::FullSimulation:		return Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION;

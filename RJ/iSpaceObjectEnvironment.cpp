@@ -38,7 +38,7 @@ SimulatedEnvironmentCollision iSpaceObjectEnvironment::EnvironmentCollisionSimul
 iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	:
 	// Environment maps
-	m_oxygenmap(this)
+	m_oxygenmap(this), m_powermap(this)
 {
 	// Set the flag that indicates this object is itself an environment that contains objects
 	m_isenvironment = true;
@@ -59,8 +59,9 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_deckcount = 0;
 	m_lastoxygenupdatetime = Game::TimeFactor - 1.0f;
 	m_nextoxygenupdate = Game::ClockMs;
-	m_oxygenupdaterequired = true;
 	m_gravityupdaterequired = true;
+	m_powerupdaterequired = true;
+	m_oxygenupdaterequired = true;
 }
 
 
@@ -109,10 +110,11 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 		}
 	}
 
-	// Update properties of the environment if event flags have been set
+	// Properties which are updated based on an event flag
 	if (GravityUpdateRequired())		PerformGravityUpdate();
+	if (PowerUpdateRequired())			PerformPowerUpdate();
 
-	// Update oxygen on a periodic basis
+	// Properties which are updated on a periodic basis
 	if (OxygenUpdateRequired())			PerformOxygenUpdate();
 
 	// Process any active collision events
@@ -220,6 +222,16 @@ void iSpaceObjectEnvironment::PerformGravityUpdate(void)
 			}
 		}	// x/y/z
 	}		// For each life support system
+}
+
+// Performs an update of environment power levels, based on each power source in the ship
+void iSpaceObjectEnvironment::PerformPowerUpdate(void)
+{
+	// Reset the update flag now we are performing an update
+	m_powerupdaterequired = false;
+
+	// Update the map.  All power updates are instant so we don't need to pass the time delta
+	m_powermap.Update();
 }
 
 // Performs an update of environment oxygen levels, based on each life support system in the ship
@@ -666,29 +678,36 @@ void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
 Result iSpaceObjectEnvironment::BuildAllEnvironmentMaps(void)
 {
 	// Oxygen
-	m_oxygenmap = EnvironmentOxygenMap(this);
-
+	BuildEnvironmentOxygenMap();
+	BuildEnvironmentPowerMap();
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+// Build a specific environment map
+void iSpaceObjectEnvironment::BuildEnvironmentOxygenMap(void)
+{
+	m_oxygenmap = EnvironmentOxygenMap(this);
+	UpdateOxygen();
+}
+
+// Build a specific environment map
+void iSpaceObjectEnvironment::BuildEnvironmentPowerMap(void)
+{
+	m_powermap = EnvironmentPowerMap(this);
+	UpdatePower();
 }
 
 // Verifies all environment maps (power, data, oxygen, munitions, ...) and adjusts them as required to fit 
 // with the new environment structure
 Result iSpaceObjectEnvironment::RevalidateEnvironmentMaps(void)
 {
-	bool success = true;
+	// Revalidate each map in turn.  Perform a full build if any cannot be incrementally rebuilt
+	if (!m_oxygenmap.RevalidateMap())		BuildEnvironmentOxygenMap();
+	if (!m_powermap.RevalidateMap())		BuildEnvironmentPowerMap();
 
-	// Revalidate each map in turn.  If any map fails the remainder will be short-circuited by &&
-	success = success && m_oxygenmap.RevalidateMap();
-
-	// Initiate a full rebuild if we could not revalidate all maps
-	if (!success)
-	{
-		return BuildAllEnvironmentMaps();
-	}
-
-	// All maps were successfully revalidated
+	// Return success
 	return ErrorCodes::NoError;
 }
 
@@ -2338,6 +2357,8 @@ void iSpaceObjectEnvironment::DebugRenderOxygenLevels(int z_index)
 }
 void iSpaceObjectEnvironment::DebugRenderOxygenLevels(int start, int end)
 {
+	const XMFLOAT4 render_source = XMFLOAT4(1.0f, 0.745f, 0.078f, 0.85f);
+
 	// Parameter check; this must be a contiguous range within the set of environment elements
 	if (start > end) std::swap(start, end);
 	if (start < 0 || end >= m_elementcount) return;
@@ -2351,6 +2372,56 @@ void iSpaceObjectEnvironment::DebugRenderOxygenLevels(int start, int end)
 		Oxygen::Type x = m_oxygenmap.GetOxygenLevel(i);
 		data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
 	}
+
+	// Also render each source.  Redundant call to DetermineSources but this is for debug only
+	std::vector<EnvironmentOxygenMap::OxygenMap::MapCell> sources;
+	m_oxygenmap.DetermineOxygenSources(0.0f, sources);					// TimeFactor == 0.0f since not relevant here
+	for (EnvironmentOxygenMap::OxygenMap::MapCell source : sources)
+		data[source.Index] = render_source;
+
+	// Render this overlay on the environment
+	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);
+}
+
+// Renders a 3D overlay showing the state of each element in the environment, for all elements
+void iSpaceObjectEnvironment::DebugRenderPowerLevels(void)
+{
+	DebugRenderPowerLevels(0, m_elementcount - 1);
+}
+// Renders a 3D overlay showing the state of each element in the environment, for the specified z-level 
+// of the environment
+void iSpaceObjectEnvironment::DebugRenderPowerLevels(int z_index)
+{
+	if (z_index >= 0 && z_index < m_elementsize.z)
+	{
+		INTVECTOR2 range = GetElementRange(z_index);
+		DebugRenderPowerLevels(range.x, range.y);
+	}
+}
+void iSpaceObjectEnvironment::DebugRenderPowerLevels(int start, int end)
+{
+	const XMFLOAT4 render_power = XMFLOAT4(0.29f, 1.0f, 1.0f, 0.75f);
+	const XMFLOAT4 render_source = XMFLOAT4(1.0f, 0.745f, 0.078f, 0.85f);
+
+	// Parameter check; this must be a contiguous range within the set of environment elements
+	if (start > end) std::swap(start, end);
+	if (start < 0 || end >= m_elementcount) return;
+	unsigned int count = (unsigned int)(end - start + 1);
+
+	// Allocate an array for the rendering data.  We only need to calculate values for the specified range
+	std::vector<XMFLOAT4>::size_type data_index = 0U;
+	std::vector<XMFLOAT4> data(count);
+	for (int i = start; i <= end; ++i, ++data_index)
+	{
+		Power::Type x = m_powermap.GetPowerLevel(i);
+		if (x != 0) data[data_index] = render_power;
+	}
+
+	// Also render each source.  Redundant call to DetermineSources but this is for debug only
+	std::vector<EnvironmentPowerMap::PowerMap::MapCell> sources;
+	m_powermap.DeterminePowerSources(sources);
+	for (EnvironmentPowerMap::PowerMap::MapCell source : sources)
+		data[source.Index] = render_source;
 
 	// Render this overlay on the environment
 	Game::Engine->GetOverlayRenderer()->RenderEnvironment3DOverlay(*this, data.begin(), data.end(), start);

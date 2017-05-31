@@ -23,7 +23,8 @@ public:
 	struct MapCell
 	{
 		int Index; T Value;
-		MapCell(void) : Index(0), Value(DefaultValues<T>::NullValue) { }
+		MapCell(void) : Index(0), Value(DefaultValues<T>::NullValue()) { }
+		MapCell(int index) : Index(index), Value(DefaultValues<T>::NullValue()) { }
 		MapCell(int index, T value) : Index(index), Value(value) { }
 	};
 

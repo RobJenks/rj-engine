@@ -13,6 +13,7 @@
 #include "EnvironmentOBBRegion.h"
 #include "BasicColourDefinition.h"
 #include "EnvironmentOxygenMap.h"
+#include "EnvironmentPowerMap.h"
 #include "EnvironmentHullBreaches.h"
 class iEnvironmentObject;
 class StaticTerrain;
@@ -142,6 +143,7 @@ public:
 	// those which are updated on a periodic basis; in the case of the latter, these methods force an update 
 	// of the property ahead of its next scheduled update and reset the time to next update
 	CMPINLINE void					UpdateGravity(void)			{ m_gravityupdaterequired = true; }
+	CMPINLINE void					UpdatePower(void)			{ m_powerupdaterequired = true; }
 	CMPINLINE void					UpdateOxygen(void)			{ m_oxygenupdaterequired = true; }
 
 	// Returns the oxygen level for a specific element
@@ -220,6 +222,10 @@ public:
 
 	// Build all environment maps (power, data, oxygen, munitions, ...)
 	Result							BuildAllEnvironmentMaps(void);
+
+	// Build a specific environment map
+	void							BuildEnvironmentOxygenMap(void);
+	void							BuildEnvironmentPowerMap(void);
 
 	// Verifies all environment maps (power, data, oxygen, munitions, ...) and adjusts them as required to fit 
 	// with the new environment structure
@@ -442,6 +448,9 @@ public:
 	void							DebugRenderOxygenLevels(void);
 	void							DebugRenderOxygenLevels(int z_index);
 	void							DebugRenderOxygenLevels(int start, int end);
+	void							DebugRenderPowerLevels(void);
+	void							DebugRenderPowerLevels(int z_index);
+	void							DebugRenderPowerLevels(int start, int end);
 
 	// Renders a 3D overlay showing the properties of each element in the environment.  If the reference 'outLegend' is provided
 	// it will be populated with a mapping from overlay colours to the corresponding property state definitions.  The render process
@@ -513,6 +522,7 @@ protected:
 	
 	// Flags used to indicate whether certain ship properties need to be recalculated
 	bool							m_gravityupdaterequired;
+	bool							m_powerupdaterequired;
 	bool							m_oxygenupdaterequired;
 	
 	// Oxygen map and recalculation parameters
@@ -520,8 +530,12 @@ protected:
 	unsigned int					m_nextoxygenupdate;				// Clock ms time that the oxygen map should next be updated
 	float							m_lastoxygenupdatetime;			// Timestamp (secs) of the last oxygen update; used to perform time-dependent map updates
 
+	// Power map for the environment
+	EnvironmentPowerMap				m_powermap;
+
 	// Methods determining when environment updates are required
 	CMPINLINE bool					GravityUpdateRequired() const		{ return m_gravityupdaterequired; }
+	CMPINLINE bool					PowerUpdateRequired() const			{ return m_powerupdaterequired; }
 	CMPINLINE bool					OxygenUpdateRequired() const		{ return (m_oxygenupdaterequired || m_nextoxygenupdate <= Game::ClockMs); }
 
 	// Determines the time that we should next update the environment oxygen map
@@ -529,6 +543,7 @@ protected:
 
 	// Private methods used to update key ship properties
 	void							PerformGravityUpdate(void);
+	void							PerformPowerUpdate(void);
 	void							PerformOxygenUpdate(void);
 
 	// The set of all active collision events

@@ -472,6 +472,7 @@
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
     <ClCompile Include="Oxygen.cpp" />
+    <ClCompile Include="Power.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
