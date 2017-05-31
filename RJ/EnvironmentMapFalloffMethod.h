@@ -59,13 +59,11 @@ protected:
 		m_abs_falloff = min(m_abs_falloff, -DefaultValues<T>::EpsilonValue());		// Ensure negative
 		m_rel_falloff = clamp(m_rel_falloff, 0.0001f, 0.9999f);						// Ensure (0 1)
 
-		m_abs_falloff_diag = (T)(m_abs_falloff * ROOT2);							// Calculate diag version
-		m_rel_falloff_diag = (T)(1.0f - ((1.0f - m_rel_falloff) * ROOT2));			// Calculate diag version (take from remaining% to reduce% before applying, then revert back)
+		m_abs_falloff_diag = (T)((float)m_abs_falloff * ROOT2);						// Calculate diag version
+		m_rel_falloff_diag = (1.0f - ((1.0f - m_rel_falloff) * ROOT2));				// Calculate diag version (take from remaining% to reduce% before applying, then revert back)
 
 		m_abs_falloff_diag = min(m_abs_falloff_diag, -DefaultValues<T>::EpsilonValue());	// Apply same constraint to diag versions
-		m_rel_falloff_diag = (T)clamp(m_rel_falloff_diag,									// Apply same constraint to diag versions
-			min(DefaultValues<T>::EpsilonValue(), (DefaultValues<T>::OneValue() - DefaultValues<T>::EpsilonValue())),	// Use min/max to handle special case of 
-			max(DefaultValues<T>::EpsilonValue(), (DefaultValues<T>::OneValue() - DefaultValues<T>::EpsilonValue())));	// <T=int> where (1-Eps) < (Eps)
+		m_rel_falloff_diag = clamp(m_rel_falloff_diag, 0.0001f, 0.9999f);					// Apply same constraint to diag versions
 
 		// Store these values in precalculated per-direction lookup tables
 		for (int i = 0; i < Direction::_Count; ++i)
