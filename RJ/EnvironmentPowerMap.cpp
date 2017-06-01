@@ -25,6 +25,11 @@ void EnvironmentPowerMap::Initialise(void)
 	m_map.SetBlockingProperties(Power::POWER_BLOCKING_PROPERTIES);
 	m_map.SetZeroThreshold((Power::Type)0);
 	m_map.SetEmissionBehaviour(PowerMap::EmissionBehaviour::EmissionRemainsInSource);
+
+	// Power is not subject to falloff
+	m_map.SetFalloffMethod(EnvironmentMapFalloffMethod<Power::Type>::EnvironmentMapFalloffMethod()
+		.WithAbsoluteFalloff((Power::Type)0)
+		.WithFalloffTransmissionType(EnvironmentMapFalloffMethod<Power::Type>::FalloffTransmissionType::Square));
 }
 
 
@@ -33,7 +38,7 @@ void EnvironmentPowerMap::DeterminePowerSources(std::vector<PowerMap::MapCell> &
 {
 	// Locate all power generator tiles in the environment
 	iSpaceObjectEnvironment *env = m_environment();
-	iContainsComplexShipTiles::ComplexShipTileCollection tiles = env->GetTilesOfType(D::TileClass::Power);
+	iContainsComplexShipTiles::ComplexShipTileCollection tiles = env->GetTilesOfType(D::TileClass::PowerGenerator);
 	iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it_end = tiles.end();
 	for (iContainsComplexShipTiles::ComplexShipTileCollection::const_iterator it = tiles.begin(); it != it_end; ++it)
 	{
@@ -54,6 +59,28 @@ bool EnvironmentPowerMap::RevalidateMap(void)
 	// power state will be recalculated
 	return false;
 }
+
+// Performs an update of the power map for the specified time interval
+void EnvironmentPowerMap::Update(float timedelta)
+{
+	// Note: we don't really care about the timedelta; all updates are instant (for now)
+
+	// Parameter checks
+	iSpaceObjectEnvironment *env = m_environment();
+	if (!env || timedelta <= 0.0f) return;
+
+	// Retrieve required information from the environment
+	std::vector<PowerMap::MapCell> sources;
+	DeterminePowerSources(sources);
+
+	// Execute the map update	
+	m_map
+		.BeginUpdate()
+		.WithInitialValues((Power::Type)0)
+		.WithSourceCells(sources)
+		.Execute(env->GetElements());
+}
+
 
 
 

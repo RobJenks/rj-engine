@@ -2842,11 +2842,11 @@ bool UI_ShipDesigner::TestTilePlacement(INTVECTOR3 location, D::TileClass tilecl
 
 	// Test the tile class provided
 	if (tileclass == D::TileClass::Unknown) return false;
-	bool infrastructure = ComplexShipTile::IsInfrastructureTile(tileclass);
+	bool infrastructure = false; // ComplexShipTile::IsInfrastructureTile(tileclass);
 
 	// Get the class of the tile currently in this place
 	D::TileClass existingclass = tile->GetClass();
-	bool existinginfra = ComplexShipTile::IsInfrastructureTile(existingclass);
+	bool existinginfra = true; // ComplexShipTile::IsInfrastructureTile(existingclass);
 
 	// If we are trying to deploy a 'normal' tile, then we cannot allow any other in this place aside from an infrastructure tile
 	// TODO: This will no longer work since we link max one tile per element
@@ -2874,9 +2874,9 @@ Image2DRenderGroup * UI_ShipDesigner::GetTileRenderGroup(D::TileClass tileclass)
 //			return m_rg_tile_military;
 
 		// Engineering-type tiles
-		case D::TileClass::Power:
-		case D::TileClass::Coolant:
-			return m_rg_tile_engineer;
+		//case D::TileClass::Power:
+		//case D::TileClass::Coolant:
+			//return m_rg_tile_engineer;
 
 		// Civilian-type tiles (default render group if not one of the above)
 		default:

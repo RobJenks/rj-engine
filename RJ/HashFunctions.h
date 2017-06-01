@@ -259,6 +259,8 @@ namespace HashedStrings
 	DefineHash(H_State, "state");
 	DefineHash(H_DefaultState, "defaultstate");
 	DefineHash(H_StateFilter, "statefilter");
+	DefineHash(H_NormalMaxPowerOutput, "normalmaxpoweroutput");
+	DefineHash(H_MaximumOverloadMultiplier, "maximumoverloadmultiplier");
 }
 
 

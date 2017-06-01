@@ -8,8 +8,9 @@ class EnvironmentPowerMap
 {
 public:
 
-	// Type used to store power levels throughout the environment
-	typedef EnvironmentMap<Power::Type, EnvironmentMapBlendMode::BlendReplaceDestination>	PowerMap;
+	// Type used to store power levels throughout the environment.   Uses a MaximumValue blend mode so that
+	// if elements are connected to two power sources they will take & propogate the highest power level
+	typedef EnvironmentMap<Power::Type, EnvironmentMapBlendMode::BlendMaximumValue>	PowerMap;
 
 	// Constructor
 	CMPINLINE EnvironmentPowerMap(void) : EnvironmentPowerMap(NULL) { }
@@ -36,6 +37,9 @@ public:
 	// any changes in the environment (e.g. structural changes).  Returns true in case of success.  Returns
 	// false if the environment has changed too significantly and requires a full map rebuild
 	bool																	RevalidateMap(void);
+
+	// Performs an update of the power map for the specified time interval
+	void																	Update(float timedelta);
 
 
 

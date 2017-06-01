@@ -1,0 +1,46 @@
+<GameData>
+
+  <ComplexShipTileDefinition class="powergenerator">  
+    <Code>POWER_GENERATOR_BASIC_01</Code>
+    <Name>Basic Power Generator</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <Size x="1" y="1" z="1" />
+    <Level>1</Level>
+<!--
+    <CompoundTileModelData>
+      <Model type="interior" code="powergenerator_basic01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="powergenerator_basic01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="powergenerator_basic01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="powergenerator_basic01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+-->
+    <CompoundTileModelData>
+      <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="quarters_dorm01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="quarters_dorm01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+
+    
+    <ElementStateDefinition>
+      <DefaultState state="TransmitsPower" />
+    </ElementStateDefinition>
+    
+    <ProductionCost type="PerElement">
+      <TimeRequirement secs="500.000000" />
+      <ResourceRequirement resource="RES_STEEL_PLATING" amount="180.000000" />
+      <ResourceRequirement resource="RES_COBALT" amount="30.000000" />
+      <ResourceRequirement resource="RES_SUPERCONDUCTORS" amount="140.000000" />
+      
+      <ConstructedBy class="FABRICATOR_STATION" />
+      <ConstructedBy class="SHIPYARD" />
+    </ProductionCost>
+    
+    <ClassSpecificDefinition>
+      <NormalMaxPowerOutput>75</NormalMaxPowerOutput>
+      <MaximumOverloadMultiplier>1.25</MaximumOverloadMultiplier>
+    </ClassSpecificDefinition>
+  
+  </ComplexShipTileDefinition>
+
+</GameData>

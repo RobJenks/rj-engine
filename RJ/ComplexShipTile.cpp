@@ -704,13 +704,6 @@ ComplexShipTile::~ComplexShipTile(void)
 }
 
 
-// Static method to determine whether a given tileclass is 'infrastructural'
-bool ComplexShipTile::IsInfrastructureTile(D::TileClass tileclass)
-{
-	return ( (tileclass == D::TileClass::Power) || (tileclass == D::TileClass::Coolant) );
-}
-
-
 // Static base class method to generate XML data for the base class portion of any tile
 TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 {	

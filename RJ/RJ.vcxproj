@@ -381,6 +381,8 @@
     <ClCompile Include="CSCorridorTile.cpp" />
     <ClCompile Include="CSLifeSupportTile.cpp" />
     <ClCompile Include="CSLifeSupportTileDefinition.cpp" />
+    <ClCompile Include="CSPowerGeneratorTile.cpp" />
+    <ClCompile Include="CSPowerGeneratorTileDefinition.cpp" />
     <ClCompile Include="CSQuartersTile.cpp" />
     <ClCompile Include="CubeMapTexture.cpp" />
     <ClCompile Include="D3DMain.cpp" />
@@ -608,6 +610,8 @@
     <ClInclude Include="CSCorridorTileDefinition.h" />
     <ClInclude Include="CSLifeSupportTile.h" />
     <ClInclude Include="CSLifeSupportTileDefinition.h" />
+    <ClInclude Include="CSPowerGeneratorTile.h" />
+    <ClInclude Include="CSPowerGeneratorTileDefinition.h" />
     <ClInclude Include="CSQuartersTile.h" />
     <ClInclude Include="CSQuartersTileDefinition.h" />
     <ClInclude Include="CubeMapTexture.h" />

@@ -637,6 +637,12 @@
     <ClCompile Include="Power.cpp">
       <Filter>Objects\Ships\Environments\Power</Filter>
     </ClCompile>
+    <ClCompile Include="CSPowerGeneratorTileDefinition.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CSPowerGeneratorTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1482,6 +1488,12 @@
     </ClInclude>
     <ClInclude Include="Power.h">
       <Filter>Objects\Ships\Environments\Power</Filter>
+    </ClInclude>
+    <ClInclude Include="CSPowerGeneratorTileDefinition.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSPowerGeneratorTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

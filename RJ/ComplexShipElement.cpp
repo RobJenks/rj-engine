@@ -265,6 +265,7 @@ string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY 
 		case ComplexShipElement::PROPERTY::PROP_ACTIVE:				return "Active";
 		case ComplexShipElement::PROPERTY::PROP_BUILDABLE:			return "Buildable";
 		case ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT:	return "OuterHullElement";
+		case ComplexShipElement::PROPERTY::PROP_DESTROYED:			return "Destroyed";
 		case ComplexShipElement::PROPERTY::PROP_WALKABLE:			return "Walkable";
 		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER:	return "TransmitsPower";
 		case ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA:		return "TransmitsData";
@@ -281,6 +282,7 @@ ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(strin
 	if		(s == "active")				return ComplexShipElement::PROPERTY::PROP_ACTIVE;	
 	else if (s == "buildable")			return ComplexShipElement::PROPERTY::PROP_BUILDABLE;
 	else if (s == "outerhullelement")	return ComplexShipElement::PROPERTY::PROP_OUTER_HULL_ELEMENT;
+	else if (s == "destroyed")			return ComplexShipElement::PROPERTY::PROP_DESTROYED;
 	else if (s == "walkable")			return ComplexShipElement::PROPERTY::PROP_WALKABLE;
 	else if (s == "transmitspower")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_POWER;
 	else if (s == "transmitsdata")		return ComplexShipElement::PROPERTY::PROP_TRANSMITS_DATA;

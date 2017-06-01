@@ -93,15 +93,12 @@ string ComplexShipTileClass::TranslateTypeToString(D::TileClass type)
 {
 	switch (type) 
 	{
-		case D::TileClass::Corridor:
-			return "corridor";					break;
-		case D::TileClass::Quarters:
-			return "quarters";					break;
-		case D::TileClass::LifeSupport:
-			return "lifesupport";				break;
+		case D::TileClass::Corridor:			return "corridor";				
+		case D::TileClass::Quarters:			return "quarters";
+		case D::TileClass::LifeSupport:			return "lifesupport";
+		case D::TileClass::PowerGenerator:		return "powergenerator";
 
-		default:
-			return "";							break;
+		default:								return "";							
 	}
 }
 
@@ -113,13 +110,18 @@ D::TileClass ComplexShipTileClass::TranslateStringToType(string type)
 	StrLowerC(val);
 
 	// Compare against each string representation in turn
-	if (val == "corridor")
-		return D::TileClass::Corridor;
-	else if (val == "quarters")
-		return D::TileClass::Quarters;
-	else if (val == "lifesupport")
-		return D::TileClass::LifeSupport;
+	// TODO: This and all similar methods should use either hash comparison or lookup tables (for enum>string) in future
+	if (val == "corridor")						return D::TileClass::Corridor;
+	else if (val == "quarters")					return D::TileClass::Quarters;
+	else if (val == "lifesupport")				return D::TileClass::LifeSupport;
+	else if (val == "powergenerator")			return D::TileClass::PowerGenerator;
 
-	else
-		return D::TileClass::Unknown;
+	else										return D::TileClass::Unknown;
 }
+
+
+
+
+
+
+

@@ -231,7 +231,7 @@ void iSpaceObjectEnvironment::PerformPowerUpdate(void)
 	m_powerupdaterequired = false;
 
 	// Update the map.  All power updates are instant so we don't need to pass the time delta
-	m_powermap.Update();
+	m_powermap.Update(Game::TimeFactor);
 }
 
 // Performs an update of environment oxygen levels, based on each life support system in the ship
