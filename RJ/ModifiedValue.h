@@ -77,7 +77,7 @@ public:
 	void										RemoveAnyModifierApprox(typename Modifier<T>::ModifierType type, T value);
 
 	// Retrieves a constant reference to the full modifier set for this value
-	CMPINLINE typename const Modifier<T>::ModifierSet &	GetModifiers(void) const	{ return Modifiers; }
+	CMPINLINE typename const Modifier<T>::ModifierSet &	GetModifiers(void) const	{ return m_modifiers; }
 
 	// Sets modifiers for this value based on a constant reference to the modifiers of another
 	void										SetModifiers(typename const Modifier<T>::ModifierSet & modifiers);
@@ -268,7 +268,7 @@ template <typename T>
 void ModifiedValue<T>::SetModifiers(typename const Modifier<T>::ModifierSet & modifiers)
 {
 	// Simply use direct vector assignment and then recalculate the current value
-	Modifiers = modifiers;
+	this->m_modifiers = modifiers;
 	RecalculateValue();
 }
 
@@ -277,7 +277,7 @@ template <typename T>
 ModifiedValue<T>::ModifiedValue(const ModifiedValue<T> & source)
 {
 	BaseValue = source.BaseValue;
-	Modifiers = source.Modifiers;
+	m_modifiers = source.GetModifiers();
 	Value = source.Value;
 	m_update_suspended = false;
 }

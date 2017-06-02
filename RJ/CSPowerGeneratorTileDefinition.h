@@ -24,6 +24,7 @@ public:
 protected:
 
 	Power::Type					m_max_output;
+	Power::Type					m_change_rate;
 	float						m_max_overload_modifier;
 	
 };

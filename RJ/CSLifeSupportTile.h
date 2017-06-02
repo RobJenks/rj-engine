@@ -21,7 +21,7 @@ public:
 	CMPINLINE static D::TileClass	GetClassStatic(void)	{ return D::TileClass::LifeSupport; }
 
 	// Simulation method for this tile
-	void						PerformTileSimulation(unsigned int delta_ms);
+	void							PerformTileSimulation(unsigned int delta_ms);
 
 	// Key properties maintained by the life support system
 	AdjustableParameter<float>			Gravity;

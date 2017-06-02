@@ -6,7 +6,7 @@
 // Default constructor
 CSPowerGeneratorTileDefinition::CSPowerGeneratorTileDefinition(void)
 	: 
-	m_max_output(1), m_max_overload_modifier(1.0f)
+	m_max_output(1), m_change_rate(1), m_max_overload_modifier(1.0f)
 {
 }
 
@@ -21,8 +21,9 @@ void CSPowerGeneratorTileDefinition::ApplyClassSpecificDefinition(ComplexShipTil
 	t->StorePowerGeneratorTileDefinition(this);
 
 	// Pass relevant fields to the tile
-	t->SetMaxNormalPowerOutput(m_max_output);
-	t->SetMaximumOverloadMultiplier(m_max_overload_modifier);
+	t->SetMaximumOutput(m_max_output);
+	t->SetChangeRate(m_change_rate);
+	t->SetOverloadMultiplier(m_max_overload_modifier);
 }
 
 // Virtual method to read class-specific XML data for the tile
@@ -41,8 +42,9 @@ void CSPowerGeneratorTileDefinition::ReadClassSpecificXMLData(TiXmlElement *node
 		key = child->Value(); StrLowerC(key);
 		hash = HashString(key);
 
-		if (hash == HashedStrings::H_NormalMaxPowerOutput)					m_max_output = IO::GetIntValue(child);
-		else if (hash == HashedStrings::H_MaximumOverloadMultiplier)		m_max_overload_modifier = IO::GetFloatValue(child);
+		if (hash == HashedStrings::H_MaxPowerOutput)					m_max_output = IO::GetIntValue(child);
+		else if (hash == HashedStrings::H_PowerLevelChangeRate)			m_change_rate = IO::GetIntValue(child);
+		else if (hash == HashedStrings::H_PowerOverloadMultiplier)		m_max_overload_modifier = IO::GetFloatValue(child);
 		/* else if ... */
 	}
 }

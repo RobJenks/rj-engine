@@ -448,7 +448,7 @@ public:
 	CMPINLINE void									SetSimulationState(iObject::ObjectSimulationState state)	{ m_simulationstate = state; }
 	
 	// Flag indicating whether this tile requires simulation time; while it does, the SimulateTile() method will be called every <interval>	
-	CMPINLINE void						DeactivateSimulation(void)				{ m_requiressimulation = false; }
+	CMPINLINE void						DeactivateSimulation(void)								{ m_requiressimulation = false; }
 	CMPINLINE void						ActivateSimulation(void) 				
 	{ 
 		m_requiressimulation = true; 
@@ -460,6 +460,7 @@ public:
 		m_simulationinterval = interval_ms;
 		m_lastsimulation = Game::ClockMs;
 	}
+	CMPINLINE void						SetTileSimulationRequired(bool simulation_required)		{ if (simulation_required) ActivateSimulation(); else DeactivateSimulation(); }
 
 	// Simulation interval can be adjusted as required.  Time of last simulation is recorded every time the tile is simulated
 	CMPINLINE bool						SimulationIsActive(void) const			{ return m_requiressimulation; }

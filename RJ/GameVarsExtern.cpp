@@ -287,7 +287,8 @@ namespace Game {
 	float C_DEFAULT_FIRING_SPREAD_THRESHOLD = 5.0f;									// Default multiple on weapon spread within which a turret will begin firing
 	
 	// Default tile simulation values
-	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 100U;						// Life support tiles will be simulated every 100ms, when active
+	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 200U;						// Life support tiles will be simulated with this interval, when active
+	unsigned int C_TILE_POWERGENERATOR_SIMULATION_INTERVAL = 200U;					// Power generator tiles will be simulated with this interval, when active
 
 	// Translate collision mode values to/from their string representation
 	CollisionMode TranslateCollisionModeFromString(const std::string & mode)

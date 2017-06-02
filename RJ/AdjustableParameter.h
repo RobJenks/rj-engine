@@ -36,6 +36,9 @@ struct AdjustableParameter
 	// Methods to determine whether the current value has reached its target.  Specialised as required.
 	CMPINLINE bool				IsAtTarget(void) const;
 
+	// Ensures all data is valid within the allowable bounds of this parameter
+	CMPINLINE void				EnsureValid(void);
+
 	// Method to read the parameter data from an XML node.  Method must be implemented
 	// per type being read, so the default templated method does nothing
 	void						ReadDataFromXML(TiXmlElement *node) { }
@@ -65,7 +68,14 @@ CMPINLINE bool AdjustableParameter<float>::IsAtTarget(void) const
 	return (fabs(Value - Target) < Game::C_EPSILON);
 }
 
-
+// Ensures all data is valid within the allowable bounds of this parameter
+template <typename T>
+CMPINLINE void AdjustableParameter<T>::EnsureValid(void)
+{
+	if (Min > Max) std::swap(Min, Max);
+	Value = clamp(Value, Min, Max);
+	Target = clamp(Target, Min, Max);
+}
 
 
 
