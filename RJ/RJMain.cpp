@@ -67,6 +67,7 @@
 #include "CapitalShipPerimeterBeacon.h"
 
 #include "CSQuartersTile.h"					// DBG
+#include "CSPowerGeneratorTile.h"			// DBG
 #include "ProductionProgress.h"				// DBG
 #include "ProductionCost.h"					// DBG
 #include "NavNetwork.h"						// DBG
@@ -584,9 +585,9 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_8])
 	{
-		SpaceTurret *t = ss()->TurretController.GetTurret(0);
-		if (!t) return;
-		t->Fire();
+		if (b[DIK_LSHIFT])			((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(1.0f);
+		else if (b[DIK_LCONTROL])	((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(0.0f);
+		else						cs()->DebugRenderPowerLevels();
 	}
 
 	if (b[DIK_9])
@@ -2322,8 +2323,7 @@ void RJMain::__CreateDebugScenario(void)
 	em.Data.push_back(12.3);
 	em.Data.push_back(4.1);
 
-	EnvironmentPowerMap pmap = EnvironmentPowerMap(NULL);
-
+	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
 

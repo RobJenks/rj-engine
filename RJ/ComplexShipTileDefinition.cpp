@@ -11,6 +11,7 @@
 #include "CSCorridorTileDefinition.h"
 #include "CSQuartersTileDefinition.h"
 #include "CSLifeSupportTileDefinition.h"
+#include "CSPowerGeneratorTileDefinition.h"
 
 #include "ComplexShipTileDefinition.h"
 
@@ -54,6 +55,7 @@ ComplexShipTileDefinition *	ComplexShipTileDefinition::Create(D::TileClass cls)
 		case D::TileClass::Corridor:		def = new CSCorridorTileDefinition();		break;
 		case D::TileClass::Quarters:		def = new CSQuartersTileDefinition();		break;
 		case D::TileClass::LifeSupport:		def = new CSLifeSupportTileDefinition();	break;
+		case D::TileClass::PowerGenerator:	def = new CSPowerGeneratorTileDefinition();	break;
 
 		// Return error if the class is unknown
 		default:							return NULL;
@@ -86,7 +88,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 	tile->PossibleConnections = Connectivity;
 	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
-	if (m_haveclassspecificdata) this->ApplyClassSpecificDefinition(tile);
+	if (TileDefinitionHasClassSpecificData()) this->ApplyClassSpecificDefinition(tile);
 	
 	// Return the newly-created tile
 	return tile;

@@ -9,7 +9,7 @@ CSLifeSupportTileDefinition::CSLifeSupportTileDefinition(void)
 	m_classtype = D::TileClass::LifeSupport;
 
 	// We do have class-specific data for this tile type
-	m_haveclassspecificdata = true;
+	RegisterClassSpecificDataForTileDefinition();
 
 	// Initialise default values
 	m_gravity_range = 20;

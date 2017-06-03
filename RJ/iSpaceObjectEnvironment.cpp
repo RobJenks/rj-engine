@@ -2645,7 +2645,10 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(ElementIndexToLocation, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetElementContainingPositionUnbounded, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
 	REGISTER_DEBUG_ACCESSOR_FN(GetClampedElementContainingPosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
-
+	REGISTER_DEBUG_ACCESSOR_FN(GetOxygenLevel, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetOxygenLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevel, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(BuildSpatialPartitioningTree)

@@ -8,6 +8,8 @@ CSPowerGeneratorTileDefinition::CSPowerGeneratorTileDefinition(void)
 	: 
 	m_max_output(1), m_change_rate(1), m_max_overload_modifier(1.0f)
 {
+	// This definition contains class-specific data that needs to be applied to new tile instances
+	RegisterClassSpecificDataForTileDefinition();
 }
 
 // Virtual method implemented by definition subclasses, if required, to apply subclass-specific properties to a tile

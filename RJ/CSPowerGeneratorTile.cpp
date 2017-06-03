@@ -1,5 +1,6 @@
 #include "ModifiedValue.h"
 #include "AdjustableParameter.h"
+#include "iSpaceObjectEnvironment.h"
 #include "ComplexShipTileDefinition.h"
 #include "CSPowerGeneratorTile.h"
 
@@ -53,6 +54,11 @@ void CSPowerGeneratorTile::PerformTileSimulation(unsigned int delta_ms)
 	// Update the current power level
 	m_current_output.Update(delta_ms);
 
+	OutputDebugString(concat("PowerGen (Simulating ")(Game::ClockMs)("): Power output = ")(m_current_output.Value)(", Target = ")(m_current_output.Target)("\n").str().c_str());
+
+	// The environment needs to be update its power simulation based on our update
+	m_parent->UpdatePower();
+
 	// We want to continue simulating the tile if we are not yet at target power levels
 	SetTileSimulationRequired( !AtTargetPowerLevel() );
 }
@@ -96,10 +102,6 @@ CSPowerGeneratorTile::~CSPowerGeneratorTile(void)
 {
 
 }
-
-// *** IMPLEMENT REMAINDER OF POWER GENERATOR TILE AND ADD TO TEST SHIP AT ELEMENT 194 ***
-
-
 
 
 

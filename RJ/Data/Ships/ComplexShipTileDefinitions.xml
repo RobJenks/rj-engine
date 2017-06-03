@@ -4,6 +4,7 @@
   <include file="Ships\Tiles\CorridorTiles.xml" />
   <include file="Ships\Tiles\QuartersTiles.xml" />
   <include file="Ships\Tiles\LifeSupportTiles.xml" />
+  <include file="Ships\Tiles\PowerGeneratorTiles.xml" />
 
   <!-- Load dynamic tile sets after all tile definitions have been loaded -->
   <include file="Ships\Tiles\DynamicCorridorTileSets.xml" />

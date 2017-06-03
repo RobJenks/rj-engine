@@ -17,6 +17,7 @@
 #include "CSCorridorTile.h"
 #include "CSQuartersTile.h"
 #include "CSLifeSupportTile.h"
+#include "CSPowerGeneratorTile.h"
 #include "ComplexShipTile.h"
 #include "Damage.h"
 #include "ProductionProgress.h"
@@ -859,6 +860,7 @@ ComplexShipTile * ComplexShipTile::New(D::TileClass cls)
 		case D::TileClass::Corridor:			return new CSCorridorTile();
 		case D::TileClass::Quarters:			return new CSQuartersTile();
 		case D::TileClass::LifeSupport:			return new CSLifeSupportTile();
+		case D::TileClass::PowerGenerator:		return new CSPowerGeneratorTile();
 
 		default:								return NULL;
 	}

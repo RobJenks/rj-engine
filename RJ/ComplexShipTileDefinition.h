@@ -158,6 +158,10 @@ public:
 	// Defines the connectivity for tiles created from this definition
 	TileConnections					Connectivity;
 	
+	// Indicates whether the tile definition contains class-specific data
+	CMPINLINE bool					TileDefinitionHasClassSpecificData(void) const					{ return m_haveclassspecificdata; }
+	CMPINLINE void					RegisterClassSpecificDataForTileDefinition(void)				{ m_haveclassspecificdata = true; }
+
 	// Shutdown method to deallocate all resources
 	void							Shutdown(void);
 

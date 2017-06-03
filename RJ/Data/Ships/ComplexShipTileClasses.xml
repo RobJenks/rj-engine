@@ -22,4 +22,11 @@
     <InfrastructureRequirement class="Power" />
   </ComplexShipTileClass>
 
+  <ComplexShipTileClass>
+    <Code>PowerGenerator</Code>
+    <PrimaryTile>True</PrimaryTile>
+    <MinimumSize x="1" y="1" z="1" />
+    <InfrastructureRequirement class="Power" />
+  </ComplexShipTileClass>
+
 </GameData>

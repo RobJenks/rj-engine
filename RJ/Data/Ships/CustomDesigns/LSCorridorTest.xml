@@ -1568,7 +1568,7 @@
         </complexshipelement>
         <complexshipelement id="194">
             <elementlocation x="4" y="19" z="0" />
-            <properties>7</properties>
+            <properties>39</properties>
             <health>1.000000</health>
             <connections>0.000000</connections>
             <attachpoint type="0">0</attachpoint>
@@ -4381,6 +4381,15 @@
                 <CanConnect type="0" x="0" y="0" z="0" state="15" />
                 <Connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="power_generator_basic_01">
+          <basetiledata>
+            <Location x="4" y="19" z="0" />
+            <Size x="1" y="1" z="1" />
+            <Rotation>0</Rotation>
+            <CanConnect type="0" x="0" y="0" z="0" state="15" />
+            <Connection type="0" x="0" y="0" z="0" state="14" />
+          </basetiledata>
         </complexshiptile>
         <SDOffset x="4" y="2" z="0" />
     </complexship>

@@ -1,5 +1,6 @@
 #include "iSpaceObjectEnvironment.h"
 #include "ComplexShipTile.h"
+#include "CSPowerGeneratorTile.h"
 #include "EnvironmentPowerMap.h"
 
 
@@ -44,8 +45,9 @@ void EnvironmentPowerMap::DeterminePowerSources(std::vector<PowerMap::MapCell> &
 	{
 		// For now, the source will be considered to emit from local (0,0,0) within the tile.
 		// TODO: add an offset here in future to allow multi-tile power generation tiles which emit from a specific local element
+		const CSPowerGeneratorTile * tile = (CSPowerGeneratorTile*)it->value;
 		outSources.push_back(PowerMap::MapCell(
-			env->GetElementIndex((*it).value->GetElementLocation())));
+			env->GetElementIndex(tile->GetElementLocation()), tile->GetPowerOutput()));
 	}
 }
 

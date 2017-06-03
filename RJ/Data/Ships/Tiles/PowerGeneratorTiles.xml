@@ -37,8 +37,9 @@
     </ProductionCost>
     
     <ClassSpecificDefinition>
-      <NormalMaxPowerOutput>75</NormalMaxPowerOutput>
-      <MaximumOverloadMultiplier>1.25</MaximumOverloadMultiplier>
+      <MaxPowerOutput>75</MaxPowerOutput>
+      <PowerLevelChangeRate>10</PowerLevelChangeRate>
+      <OverloadMultiplier>1.25</OverloadMultiplier>
     </ClassSpecificDefinition>
   
   </ComplexShipTileDefinition>
