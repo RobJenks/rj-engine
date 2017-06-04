@@ -283,8 +283,6 @@ Result SimpleShip::AddLoadout(SimpleShip *s, SimpleShipLoadout *loadout)
 
 XMMATRIX SimpleShip::DeriveActualCameraMatrix(void)
 {
-	XMMATRIX trans;
-
 	// Generate a translation matrix to account for the camera elasticity
 	// We only need to test if the bank x/y amount is nonzero; the other coords are undefined
 	if (IsZeroVector2(Bank))

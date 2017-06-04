@@ -24,6 +24,7 @@ void EnvironmentPowerMap::Initialise(void)
 	m_map.InitialiseCellValues(DefaultValues<Power::Type>::NullValue());
 	m_map.SetTransmissionProperties((bitstring)Power::POWER_TRANSMISSION_PROPERTY);
 	m_map.SetBlockingProperties(Power::POWER_BLOCKING_PROPERTIES);
+	m_map.SetTransferProfile(PowerMap::TransferProfile::ManhattanAdjacencyTransferProfile);
 	m_map.SetZeroThreshold((Power::Type)0);
 	m_map.SetEmissionBehaviour(PowerMap::EmissionBehaviour::EmissionRemainsInSource);
 

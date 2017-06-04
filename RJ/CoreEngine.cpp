@@ -72,7 +72,7 @@
 #include "CoreEngine.h"
 
 using namespace std;
-using namespace std::tr1;
+
 
 // Default constructor
 CoreEngine::CoreEngine(void)
@@ -2454,7 +2454,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	}
 
 	// Iterate over each object in turn
-	unsigned int sentence_id = 0U; unsigned int sentence_count = m_debug_renderobjid_text.size();
+	size_t sentence_id = 0U; size_t sentence_count = m_debug_renderobjid_text.size();
 	std::vector<DebugIDRenderDetails>::const_iterator it_end = objects.end();
 	for (std::vector<DebugIDRenderDetails>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
@@ -2482,7 +2482,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 	}
 
 	// Set any unused text objects to be hidden this frame
-	for (unsigned int i = sentence_id; i < sentence_count; ++i)
+	for (size_t i = sentence_id; i < sentence_count; ++i)
 	{
 		if (m_debug_renderobjid_text.at(i)) m_textmanager->DisableSentenceRendering(m_debug_renderobjid_text.at(i));
 	}
@@ -2591,9 +2591,9 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	}
 	else if (command.InputCommand == "render_envtree")
 	{
-		int pcount = command.InputParameters.size();
+		size_t pcount = command.InputParameters.size();
 		bool render = false; iSpaceObjectEnvironment *env = NULL;
-		if (pcount == 1)
+		if (pcount == 1U)
 		{
 			render = (command.ParameterAsBool(0));
 			if (!Game::CurrentPlayer || !Game::CurrentPlayer->GetActor() || !Game::CurrentPlayer->GetActor()->GetParentEnvironment())
@@ -2601,7 +2601,7 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 					"Cannot determine valid environment tree to render"); return true; }
 			env = Game::CurrentPlayer->GetActor()->GetParentEnvironment();
 		}
-		else if (pcount == 2)
+		else if (pcount == 2U)
 		{
 			render = (command.Parameter(1) == "1");
 

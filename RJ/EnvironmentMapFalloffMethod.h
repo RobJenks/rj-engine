@@ -66,14 +66,18 @@ protected:
 		m_rel_falloff_diag = clamp(m_rel_falloff_diag, 0.0f, 1.0f);							// Apply same constraint to diag versions
 
 		// Store these values in precalculated per-direction lookup tables
-		for (int i = 0; i < Direction::_Count; ++i)
+		if (m_transmission_type == FalloffTransmissionType::Distance)
 		{
-			if (m_transmission_type == FalloffTransmissionType::Distance)
+			for (int i = 0; i < (int)Direction::_Count; ++i)
 			{
-				m_abs_falloff_dirs[i] = (IsDiagonalDirection((Direction)i) ? m_abs_falloff_diag : m_abs_falloff);
-				m_rel_falloff_dirs[i] = (IsDiagonalDirection((Direction)i) ? m_rel_falloff_diag : m_rel_falloff);
+				bool diagonal = IsDiagonalDirection((Direction)i);
+				m_abs_falloff_dirs[i] = (diagonal ? m_abs_falloff_diag : m_abs_falloff);
+				m_rel_falloff_dirs[i] = (diagonal ? m_rel_falloff_diag : m_rel_falloff);
 			}
-			else
+		}
+		else /* if (m_transmission_type == FalloffTransmissionType::Square) */
+		{
+			for (int i = 0; i < (int)Direction::_Count; ++i)
 			{
 				m_abs_falloff_dirs[i] = m_abs_falloff;
 				m_rel_falloff_dirs[i] = m_rel_falloff;

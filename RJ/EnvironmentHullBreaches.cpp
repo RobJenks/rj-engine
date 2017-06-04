@@ -17,7 +17,7 @@ void EnvironmentHullBreaches::RecordHullBreach(int element_index, Direction dire
 	{
 		// No breach has been recorded for this location yet, so create a new entry
 		m_breaches.push_back(EnvironmentHullBreach(element_index));
-		index = m_breaches.size() - 1;
+		index = (int)m_breaches.size() - 1;
 	}
 
 	// Add a new entry, assuming it has not already been recorded
@@ -45,10 +45,10 @@ EnvironmentHullBreach & EnvironmentHullBreaches::Get(EnvironmentHullBreaches::si
 int	EnvironmentHullBreaches::GetBreachAtLocation(int element_index)
 {
 	// Perform a simple linear search for a breach at this element, given that the collection will always be very small
-	int n = m_breaches.size();
-	for (int i = 0; i < n; ++i)
+	size_t n = m_breaches.size();
+	for (size_t i = 0; i < n; ++i)
 	{
-		if (m_breaches[i].GetElementIndex() == element_index) return i;
+		if (m_breaches[i].GetElementIndex() == element_index) return (int)i;
 	}
 
 	return -1;

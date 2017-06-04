@@ -6,8 +6,7 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_map>
-using namespace std;
-using namespace std::tr1;
+
 
 #include "ErrorCodes.h"
 class Equipment;
@@ -23,8 +22,8 @@ class CompoundLoadoutMap;
 class SimpleShipLoadout
 {
 public:
-	typedef std::tr1::unordered_map<string, LoadoutMap*> LoadoutMapCollection;
-	typedef std::tr1::unordered_map<string, CompoundLoadoutMap*> CompoundLoadoutMapCollection;
+	typedef std::unordered_map<std::string, LoadoutMap*> LoadoutMapCollection;
+	typedef std::unordered_map<std::string, CompoundLoadoutMap*> CompoundLoadoutMapCollection;
 
 	// Static methods to handle assignment of loadouts to ship instances
 	static Result	AssignDefaultLoadoutToSimpleShip	(SimpleShip *s);
@@ -38,8 +37,8 @@ public:
 
 	std::string GetCode(void) const	{ return Code; }			// Returns the unique code for this loadout
 
-	void AddMap(string hp, Equipment *equip);					// Adds a new standard map to the loadout
-	void AddCompoundMap(string hp, CompoundLoadoutMap *map);	// Adds a new compound map to the loadout
+	void AddMap(std::string hp, Equipment *equip);					// Adds a new standard map to the loadout
+	void AddCompoundMap(std::string hp, CompoundLoadoutMap *map);	// Adds a new compound map to the loadout
 
 	// Shutdown method - not required for this class
 	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }

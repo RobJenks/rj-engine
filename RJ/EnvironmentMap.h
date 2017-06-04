@@ -31,6 +31,7 @@ public:
 	enum ExistingDataUpdate { NoUpdate = 0, AdditiveUpdate, MultiplicativeUpdate };
 	enum MapValueConstraints { NoConstraints = 0, ValueFloor, ValueCeiling, ValueClamped };
 	enum EmissionBehaviour { EmissionRemainsInSource = 0, EmissionRemovedFromSource };
+	enum TransferProfile { NormalTransferProfile = 0, ManhattanAdjacencyTransferProfile };
 
 	// Map data
 	std::vector<T>									Data;
@@ -87,6 +88,9 @@ public:
 	// Set the falloff method as value is transmitted through the map
 	void											SetFalloffMethod(const EnvironmentMapFalloffMethod<T> & falloff_method);
 
+	// Sets the transfer profile for this map, i.e. the configuration of how value can propogate through the map
+	void											SetTransferProfile(TransferProfile transfer_profile);
+
 	// Sets the 'zero threshold', below which we consider the value to have fallen to insignificance and cease processing it
 	void											SetZeroThreshold(T zero_threshold);
 
@@ -136,9 +140,10 @@ protected:
 #		define ENV_MAP_DEBUG_LOG(cstr)				
 #	endif
 
-	// Static set of randomised direction values, for use in randomising direction of value spread
-	static const PrecalculatedRandomSequence<int>	DirectionSequenceData;
-
+	// Set of randomised direction values, for use in randomising direction of value spread
+	PrecalculatedRandomSequence<int>				m_direction_sequence_data;
+	unsigned int									m_direction_sequence_length;
+	
 	// Updates the size of this environment and recalculates dependent data
 	void											SetElementSize(const INTVECTOR3 & element_size);
 
@@ -191,6 +196,9 @@ protected:
 	bitstring										m_blocking_properties;
 	bool											m_property_dependent_transmission;
 
+	// Transfer profile for the map, i.e. the configuration of how value can propogate through the map
+	TransferProfile									m_transferprofile;
+
 	// Any values which fall below the 'zero threshold' will be considered insignificant and cease being processed
 	T												m_zero_threshold;
 
@@ -202,11 +210,6 @@ protected:
 	T												m_zero;
 
 };
-
-// Initialise static set of randomised direction values, for use in randomising direction of value spread
-template <typename T, template<typename> class TBlendMode>
-const PrecalculatedRandomSequence<int> EnvironmentMap<T, TBlendMode>::DirectionSequenceData
-	= PrecalculatedRandomSequence<int>(0, (int)Direction::_Count, (int)Direction::_Count, 100, true);
 
 // Constructor; accepts dimensions of the area to to represented
 template <typename T, template<typename> class TBlendMode>
@@ -222,6 +225,7 @@ EnvironmentMap<T, TBlendMode>::EnvironmentMap(const INTVECTOR3 & element_size)
 	SetTransmissionProperties(DEFAULT_TRANSMISSION_PROPERTIES);
 	SetBlockingProperties(DEFAULT_BLOCKING_PROPERTIES);
 	SetEmissionBehaviour(EmissionBehaviour::EmissionRemainsInSource);
+	SetTransferProfile(TransferProfile::NormalTransferProfile);
 	RemoveValueConstraints();
 
 	// Set default per-update values (though these will be reset on each BeginUpdate() call)
@@ -396,6 +400,25 @@ void EnvironmentMap<T, TBlendMode>::SetFalloffMethod(const EnvironmentMapFalloff
 	m_falloff = falloff_method;
 }
 
+// Sets the transfer profile for this map, i.e. the configuration of how value can propogate through the map
+template <typename T, template<typename> class TBlendMode>
+void EnvironmentMap<T, TBlendMode>::SetTransferProfile(TransferProfile transfer_profile)
+{
+	m_transferprofile = transfer_profile;
+
+	// Transfer profile determines which directions value can be transmitted in
+	if (m_transferprofile == TransferProfile::ManhattanAdjacencyTransferProfile)
+	{
+		m_direction_sequence_data = PrecalculatedRandomSequence<int>(ManhattanDirections, ManhattanDirectionCount, 100);
+		m_direction_sequence_length = (unsigned int)ManhattanDirectionCount;
+	}
+	else
+	{
+		m_direction_sequence_data = PrecalculatedRandomSequence<int>(0, (int)Direction::_Count, (int)Direction::_Count, 100, true);
+		m_direction_sequence_length = (unsigned int)Direction::_Count;
+	}
+}
+
 // Sets the 'zero threshold', below which we consider the value to have fallen to insignificance and cease processing it
 template <typename T, template<typename> class TBlendMode>
 void EnvironmentMap<T, TBlendMode>::SetZeroThreshold(T zero_threshold)
@@ -532,8 +555,9 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 			// We want to check all neighbours of this cell that have not yet been processed.  Select a random sequence
 			// to ensure variation in the spread of value through the map
-			const int *directions = EnvironmentMap<T, TBlendMode>::DirectionSequenceData.RandomSequence();
-			for (int i = 0; i < Direction::_Count; ++i)
+			*** CHECK WHY POWER MAP NOT RENDERING PROPERLY; LIKELY BECAUSE OF CHANGE TO THIS RANDOM GENERATOR.  CHECK SEQ BEING GENERATED ***
+			const int *directions = m_direction_sequence_data.RandomSequence();
+			for (unsigned int i = 0; i < m_direction_sequence_length; ++i)
 			{
 				// Get the neighbour and perform basic checks of whether it should be processed
 				Direction direction = (Direction)directions[i];

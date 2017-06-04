@@ -253,7 +253,7 @@ Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
 	buffer->EyeWorldPos = Game::Engine->GetCamera()->GetPositionF();
 
 	// Populate lighting data
-	unsigned int light_count = Game::Engine->LightingManager.GetLightSourceCount(); 
+	unsigned int light_count = (unsigned int)Game::Engine->LightingManager.GetLightSourceCount(); 
 	buffer->LightCount = light_count; 
 
 	// Copy all lighting data into the buffer

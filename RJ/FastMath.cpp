@@ -166,8 +166,8 @@ float *sintable;		// Contains pre-computed sine values
 float *costable;		// Contains pre-computed cosine values
 float *tantable;		// Contains pre-computed tangent values
 
-std::tr1::ranlux_base_01					norm_reng;
-std::tr1::normal_distribution<float>		norm_rdist;
+std::mt19937						norm_reng;
+std::normal_distribution<double>	norm_rdist;
 
 // Sqrt cache values
 float sqrt_cache[SQRT_CACHE_SIZE + 1];

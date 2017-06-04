@@ -45,7 +45,7 @@ void EnvironmentOBBRegion::AddChild(int el, const INTVECTOR3 & region_size)
 	// capacity that ensures no reallocations are required, however we keep this method
 	// since it is still safer to maintain the two separate operations that cannot be
 	// affected by an invalidation mid-execution
-	children[childcount++] = EnvironmentOBBRegionBuilder::NextRegionIndex();
+	children[childcount++] = (int)EnvironmentOBBRegionBuilder::NextRegionIndex();
 	EnvironmentOBBRegionBuilder::Add(el, region_size);
 }
 

@@ -11,7 +11,7 @@ class ModifierDetails
 public:
 
 	// Type definitions
-	typedef unsigned int							ModifierID;
+	typedef size_t									ModifierID;
 	
 	// Default constructor
 	CMPINLINE ModifierDetails(void)					: m_id(0U), m_name("<null>"), m_description("<null>") { }

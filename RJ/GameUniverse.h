@@ -38,7 +38,7 @@ public:
 	void						TerminateUniverse(void);
 
 	// Collection type for the set of systems in this universe
-	typedef						std::tr1::unordered_map<std::string, SpaceSystem*> SystemRegister;
+	typedef						std::unordered_map<std::string, SpaceSystem*> SystemRegister;
 
 	// The collection of all space systems in the game
 	SystemRegister				Systems;					

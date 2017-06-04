@@ -74,7 +74,7 @@ private:
 	std::vector<ScheduledItemDetails>::iterator		it, it_end;
 
 	// Functor for sorting/searching jobs based on numeric ID
-	static struct _ScheduleIDComparator
+	struct _ScheduleIDComparator
 	{
 		bool operator() (const ScheduledItemDetails & lhs, const ScheduledItemDetails & rhs) const { return lhs.ID < rhs.ID; }
 		bool operator() (const CentralScheduler::ID_TYPE lhs, const ScheduledItemDetails & rhs) const { return lhs < rhs.ID; }

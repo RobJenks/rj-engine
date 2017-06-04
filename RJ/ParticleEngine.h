@@ -11,7 +11,7 @@
 #include "ErrorCodes.h"
 #include "ParticleEmitter.h"
 using namespace std;
-using namespace std::tr1;
+
 class D3DMain;
 
 class CameraClass;

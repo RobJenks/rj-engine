@@ -16,7 +16,7 @@
 class CoreEngine;
 class Player;
 using namespace std;
-using namespace std::tr1;
+
 
 #include "GameVarsExtern.h"
 
@@ -88,7 +88,7 @@ namespace Game {
 	FactionManagerObject			FactionManager = FactionManagerObject();
 
 	// Central logging component
-	LogManager						Log = LogManager();
+	LogManager						Log;
 
 	// The game console, which processes all incoming console commands
 	GameConsole						Console = GameConsole();

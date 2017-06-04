@@ -932,17 +932,17 @@ void RJMain::ProcessKeyboardInput(void)
 
 			ac->SetEnvironmentPosition(XMVectorSet(35.0f, 16.0f, 35.0f, 0.0f));
 
-			int n = cs()->TerrainObjects.size();
-			for (int i = 1; i < n; ++i)
+			size_t n = cs()->TerrainObjects.size();
+			for (size_t i = 1U; i < n; ++i)
 			{
 				cs()->TerrainObjects.at(i)->SetPosition(XMVectorReplicate(1000.0f));
 				cs()->TerrainObjects.at(i)->SetExtent(XMVectorReplicate(0.1f));
 				cs()->TerrainObjects.at(i)->RecalculatePositionalData();
 			}
-			n = cs()->GetTileCount();
-			for (int i = 0; i < n; ++i)
+			int nT = cs()->GetTileCount();
+			for (int i = 0; i < nT; ++i)
 			{
-				cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)n), 0.1f);
+				cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)nT), 0.1f);
 			}
 
 			Game::Keyboard.LockKey(DIK_4);

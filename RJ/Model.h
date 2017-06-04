@@ -13,7 +13,7 @@
 #include "Texture.h"
 
 using namespace std;
-using namespace std::tr1;
+
 
 // This class has no special alignment requirements
 class Model

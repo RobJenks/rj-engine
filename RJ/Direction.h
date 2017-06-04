@@ -3,13 +3,17 @@
 #include <string>
 #include "CompilerSettings.h"
 
-// Enumeration of possible 90-degree directions
+// Enumeration of possible directions
 enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };
-const int DirectionCount = 10;
+const int DirectionCount = Direction::_Count;
 
 // Structure holding the basic directions, for iteration over the possible movement directions
-const int Directions[DirectionCount] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft,
-Direction::UpRight, Direction::DownRight, Direction::DownLeft, Direction::ZUp, Direction::ZDown };
+const int Directions[DirectionCount] = {	Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::UpLeft,
+											Direction::UpRight, Direction::DownRight, Direction::DownLeft, Direction::ZUp, Direction::ZDown };
+
+// Structure holding the Manhattan (edge-adjacent) directions
+const int ManhattanDirectionCount = 6;
+const int ManhattanDirections[ManhattanDirectionCount] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down, Direction::ZUp, Direction::ZDown };
 
 // Bitstring direction values
 enum DirectionBS

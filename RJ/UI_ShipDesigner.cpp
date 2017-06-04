@@ -662,8 +662,8 @@ Result UI_ShipDesigner::PrepareShipForOperation(ComplexShip *s, string code)
 	s->SetCode(code);
 
 	// Also generate a unique code for each of the ship sections
-	int ns = s->GetSectionCount();
-	for (int i=0; i<ns; ++i)
+	size_t ns = s->GetSectionCount();
+	for (size_t i = 0; i < ns; ++i)
 	{
 		s->GetSection(i)->SetCode(concat(code)("_section_")(i).str());
 	}

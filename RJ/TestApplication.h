@@ -68,9 +68,9 @@ private:
 	CMPINLINE void Complete(TestRunner tester)
 	{
 		// Output test results
-		int test_count = tester.ResultCount();
-		Log(concat("Executed ")(test_count)(" tests")(test_count != 0 ? ":\n" : "\n").str());
-		for (int i = 0; i < test_count; ++i)
+		size_t test_count = tester.ResultCount();
+		Log(concat("Executed ")(test_count)(" tests")(test_count != 0U ? ":\n" : "\n").str());
+		for (size_t i = 0U; i < test_count; ++i)
 		{
 			TestResult result = tester.GetResults().at(i);
 			std::string s = concat("Test ")(i)(": ")(result.GetPassCount())(" Passed, ")(result.GetFailCount())(" Failed").str();

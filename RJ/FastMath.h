@@ -336,8 +336,8 @@ extern float sqrt_cache[SQRT_CACHE_SIZE + 1];
 CMPINLINE float fast_cached_sqrt(int n) { return sqrt_cache[n]; }
 CMPINLINE float fast_sqrt(int n) { return (n <= SQRT_CACHE_SIZE ? sqrt_cache[n] : sqrtf((float)n)); }
 
-extern std::tr1::ranlux_base_01						norm_reng;
-extern std::tr1::normal_distribution<float>			norm_rdist;
+extern std::mt19937								norm_reng;
+extern std::normal_distribution<double>			norm_rdist;
 
 #define NormalDist()								(norm_rdist(norm_reng))
 #define NormalDistRange(l, h)						(l + (((norm_rdist(norm_reng)+4.0f)*(1.0f/8.0f)) * (h-l)))

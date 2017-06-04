@@ -64,7 +64,7 @@ namespace ActorAttributeGeneration
 	extern Result LoadAttributeGenerationData(TiXmlElement *node);
 
 	// String representation of each attribute, for lookup purposes in both directions
-	static std::tr1::unordered_map<std::string, ActorAttr> _ActorAttr_lookup;
+	static std::unordered_map<std::string, ActorAttr> _ActorAttr_lookup;
 	static std::string _ActorAttr_names[(int)ActorAttr::A_COUNT];
 }
 
@@ -115,7 +115,7 @@ struct ActorBaseAttributeData
 		if (DerivationType == AttributeDerivationType::NormalDistribution)
 		{
 			// Generate based on a normal distribution between the min & max base values
-			result = NormalDistRange(GenerateMin, GenerateMax);
+			result = (float)NormalDistRange(GenerateMin, GenerateMax);
 		}
 		else if (DerivationType == AttributeDerivationType::Uniform)
 		{

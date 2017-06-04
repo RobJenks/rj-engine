@@ -342,8 +342,8 @@ void EnvironmentTree::PerformPruningCheck(void)
 		m_childcount = 0;
 
 		// Now add the items to this node.  Update the count of all items being added to the node
-		m_objectcount = objects.size(); 
-		m_terraincount = terrain.size();
+		m_objectcount = (int)objects.size(); 
+		m_terraincount = (int)terrain.size();
 		m_totalitemcount = m_objectcount + m_terraincount;
 
 		// Directly assign the collated objects to this node

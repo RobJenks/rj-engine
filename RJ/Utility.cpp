@@ -126,7 +126,7 @@ XMMATRIX RotationMatrixFromBasisVectors(XMFLOAT3 (&bases)[3])
 	return XMMatrixSet(	bases[0].x, bases[0].y, bases[0].z, 0.0f,
 						bases[1].x, bases[1].y, bases[1].z, 0.0f,
 						bases[2].x, bases[2].y, bases[2].z, 0.0f,
-						0.0f, 0.0f, 0.0f, 1.0f); XMMATRIX x; 
+						0.0f, 0.0f, 0.0f, 1.0f); 
 }
 void RotationMatrixFromBasisVectors(XMFLOAT3 (&bases)[3], XMFLOAT4X4 & outMatrix)
 {

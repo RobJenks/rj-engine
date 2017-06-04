@@ -5,7 +5,7 @@
 
 #include "Equipment.h"
 using namespace std;
-using namespace std::tr1;
+
 
 /* Constructor */
 Equipment::Equipment(void)

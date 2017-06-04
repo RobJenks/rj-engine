@@ -13,7 +13,7 @@
 class TextureShader;
 class GameInputDevice;
 using namespace std;
-using namespace std::tr1;
+
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables

@@ -59,7 +59,7 @@ struct VolumetricLine;
 struct SentenceType;
 
 using namespace std;
-using namespace std::tr1;
+
 
 // Constant engine rendering values
 const float SCREEN_DEPTH = 5000.0f;

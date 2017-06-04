@@ -10,7 +10,7 @@
 #include "Render2DManager.h"
 class GameInputDevice;
 using namespace std;
-using namespace std::tr1;
+
 
 
 Render2DManager::Render2DManager(void)

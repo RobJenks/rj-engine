@@ -20,7 +20,7 @@
 #include "Direction.h"
 class iObject;
 using namespace std;
-using namespace std::tr1;
+
 
 
 // Define memory tracking macros for use in the application
@@ -140,7 +140,7 @@ CMPINLINE std::string ConvertWStringToString(const std::wstring & utf16_string)
 
 // Unary function which deletes the subject element.  Used for pointer implementations of remove/erase
 template <typename T>
-struct unary_delete : public std::unary_function<T, void>
+struct unary_delete
 {
 	void operator()(T toDelete) { if (toDelete) delete toDelete; };
 };
@@ -148,7 +148,7 @@ struct unary_delete : public std::unary_function<T, void>
 // Unary function which deletes the ".value" property of the subject element.  
 // Used for pointer implementations of remove/erasein alignment-padded structures
 template <typename T>
-struct unary_delete_value : public std::unary_function<T, void>
+struct unary_delete_value
 {
 	void operator()(const T & toDelete) { if (toDelete.value) delete toDelete.value; };
 };

@@ -20,7 +20,7 @@ class Render2DManager;
 class RenderMouseEvent;
 class UIComponentGroup;
 using namespace std;
-using namespace std::tr1;
+
 
 
 // This class has no special alignment requirements

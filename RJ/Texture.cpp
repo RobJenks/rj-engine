@@ -13,7 +13,7 @@
 #include "Texture.h"
 
 // Static texture resource collection
-std::tr1::unordered_map<std::string, ID3D11ShaderResourceView*> Texture::TextureResources;
+std::unordered_map<std::string, ID3D11ShaderResourceView*> Texture::TextureResources;
 
 // Default constructor
 Texture::Texture()

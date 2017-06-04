@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include "CompilerSettings.h"
 using namespace std;
-using namespace std::tr1;
+
 
 
 template <typename T> class RenderComponentGroup

@@ -8,7 +8,7 @@
 #include "CompilerSettings.h"
 #include "iUIControl.h"
 using namespace std;
-using namespace std::tr1;
+
 
 
 class UIManagedControlDefinition

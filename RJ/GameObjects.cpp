@@ -48,8 +48,8 @@ namespace Game
 		VectorFromUnorderedMap<Game::ID_TYPE, ObjectRegisterEntry>(Game::Objects, object_vector);
 
 		// Iterate over the vector one element at a time.  Not using iterators to avoid potential invalidation
-		int n = object_vector.size();
-		for (int i = 0; i < n; ++i)
+		size_t n = object_vector.size();
+		for (size_t i = 0U; i < n; ++i)
 		{
 			ObjectRegisterEntry & entry = object_vector.at(i);
 			if (entry.Active && entry.Object)

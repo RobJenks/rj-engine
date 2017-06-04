@@ -154,7 +154,7 @@ protected:
 	void													OrientLightingOverrideSetWithCamera(std::vector<iObject*> & lighting_override);
 
 	// Functor for sorting/searching light sources based on priority
-	static struct _LightSourceEntryPriorityComparator
+	struct _LightSourceEntryPriorityComparator
 	{
 		bool operator() (const LightSourceEntry & lhs, const LightSourceEntry & rhs) const;
 	};
@@ -166,7 +166,7 @@ protected:
 	std::vector<iObject*>									_m_frame_light_sources;
 	
 	// Unary predicate for locating specfic light objects
-	class LightOfSpecificType : public std::unary_function<iObject*, bool>
+	class LightOfSpecificType
 	{
 	public:
 		LightOfSpecificType(Light::LightType _type) : type(_type){ }
@@ -180,7 +180,7 @@ protected:
 	};
 
 	// Unary predicate for excluding specific light objects
-	class LightNotOfSpecificType : public std::unary_function<iObject*, bool>
+	class LightNotOfSpecificType 
 	{
 	public:
 		LightNotOfSpecificType(Light::LightType _type) : type(_type){ }

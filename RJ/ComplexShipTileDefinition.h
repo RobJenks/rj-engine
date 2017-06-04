@@ -17,7 +17,7 @@ class ComplexShipTile;
 class ComplexShipTileClass;
 class BoundingObject;
 using namespace std;
-using namespace std::tr1;
+
 
 
 // This class does not have any special alignment requirements

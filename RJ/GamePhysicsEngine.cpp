@@ -2477,7 +2477,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		// Enable each debug type that is specified
 		ClearPhysicsDebugOptions();
 
-		for (std::vector<std::string>::size_type i = 1U; i < command.ParameterCount(); ++i)
+		for (int i = 1; i < (int)command.ParameterCount(); ++i)
 			EnablePhysicsDebugType(command.Parameter(i));
 		if (m_physics_debug_type == PhysicsDebugType::PhysicsDebugDisabled) EnablePhysicsDebugType("BROADPHASE");	// Default if none specified
 

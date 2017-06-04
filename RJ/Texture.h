@@ -59,7 +59,7 @@ protected:
 	std::string					 m_filename;
 
 	// Static controller of texture resources, to avoid having to load multiple instances of the same texture
-	typedef std::tr1::unordered_map<std::string, ID3D11ShaderResourceView*>		TextureResourceRepository;
+	typedef std::unordered_map<std::string, ID3D11ShaderResourceView*>		TextureResourceRepository;
 	static TextureResourceRepository											TextureResources;
 
 	// Retrieves a texture resource from the static collection, if a matching resource exists

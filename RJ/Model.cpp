@@ -399,7 +399,6 @@ Result Model::LoadModel(const char *filename)
 {
 	ifstream fin;
 	char input;
-	XMFLOAT3 bmin, bmax;
 
 	// Initialise min and max bounds before we start loading the model
 	m_minbounds = XMFLOAT3(99999.0f, 99999.0f, 99999.0f);

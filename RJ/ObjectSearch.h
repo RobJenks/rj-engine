@@ -142,7 +142,7 @@ namespace Game
 		CMPINLINE static typename std::vector<CachedSearchResults>::size_type GetCurrentCacheSize(void) { return m_cachesize; }
 
 		// Unary predicate for searching based on object type
-		class ObjectIsOfType : public std::unary_function<T*, bool>
+		class ObjectIsOfType
 		{
 		public:
 			ObjectIsOfType(iObject::ObjectType _type) : type(_type){ }

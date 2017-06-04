@@ -146,7 +146,7 @@ public:
 	~EnvironmentCollision(void);
 
 	// Functor for sorting/searching events in chronological order
-	static struct _EventTimeOrderComparator
+	struct _EventTimeOrderComparator
 	{
 		bool operator() (const EventDetails & lhs, const EventDetails & rhs) const;
 	};

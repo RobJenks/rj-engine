@@ -13,9 +13,26 @@ public:
 	// Static constants
 	static const unsigned long				MAX_SEQUENCE_ALLOCATION = (unsigned long)(1e6 * 1e3);		// Max of 1m sequences, each of 1000 entries, as an approx sensible limit
 
-	// Builds and returns a set of n random integral sequences, with values in the range [low high).  All sequences will be of length (high-low).
+	// Builds and returns a set of 'count' random integral sequences, with values in the range [low high).  All sequences will be of length (high-low).
 	// If 'distinct' is set the sequences will contain each value in the range exactly once, otherwise this is not guaranteed
 	PrecalculatedRandomSequence(T low, T high, unsigned int length, unsigned int count, bool distinct);
+
+	// Builds and returns a set of 'count' random sequences, with values taken from the source array provided.  All sequences will be 
+	// of length 'length'.  All sequences will contain each value in the source set exactly once
+	PrecalculatedRandomSequence(const T *values, unsigned int length, unsigned int count);
+
+	// Default constructor.  Will create an uninitialized sequence generator.  Implemented to allow lazy instantiation by consuming classes
+	PrecalculatedRandomSequence(void);
+	
+	// Copy constructor
+	PrecalculatedRandomSequence(const PrecalculatedRandomSequence & other);
+
+	// Copy assignment operator
+	PrecalculatedRandomSequence & operator=(const PrecalculatedRandomSequence & other);
+
+	// Move assignment operator
+	PrecalculatedRandomSequence & operator=(PrecalculatedRandomSequence && other);
+	
 
 	// Returns a flag indicating whether the sequence data was successfully initialised
 	CMPINLINE bool							IsInitialised(void) const { return (m_data != NULL); }
@@ -26,6 +43,11 @@ public:
 
 	// Returns a pointer to the start of the sequence with the given index, or NULL if this is not a valid sequence
 	const T *								GetSequence(unsigned int index) const;
+
+	CMPINLINE unsigned int					GetSequenceLength(void) const					{ return m_length; }
+	CMPINLINE unsigned int					GetSequenceCount(void) const					{ return m_count; }
+	CMPINLINE unsigned long					GetTotalAllocatedElements(void) const			{ return m_total_alloc; }
+	CMPINLINE T *							DataPtr(void) const								{ return m_data; }
 
 	// Deallocates the sequence object and all associated memory
 	~PrecalculatedRandomSequence();
@@ -46,6 +68,9 @@ protected:
 	// Allocates a contiguous block of space for 'count' sequences of size 'length'
 	void									AllocateSequenceMemory(unsigned int length, unsigned int count);
 
+	// Deallocates all owned memory
+	void									DeallocateMemory(void);
+
 	// Populates the dataset with randomly-generated sequences.  Sequences will contain a random selection of values
 	// with each in the range [low high), and potentially with duplicate entries
 	CMPINLINE void							PopulateSequenceData(T low, T high);
@@ -56,12 +81,15 @@ protected:
 	// types (e.g. float) where the distinct property does not make sense this method regresses to the non-distinct version
 	CMPINLINE void							PopulateSequenceDataDistinct(T low, T high);
 
+	// Populates the dataset with random sequences of values in a given source set.  |source| == 'length', 
+	// and each generated sequence will accordingly be of size 'length'
+	CMPINLINE void							PopulateSequenceDataFromSource(const T *values, unsigned int length);
 
 
 };
 
 
-// Builds and returns a set of n random integral sequences, with values in the range [low high).  All sequences will be of length (high-low).
+// Builds and returns a set of 'count' random integral sequences, with values in the range [low high).  All sequences will be of length (high-low).
 // If 'distinct' is set the sequences will contain each value in the range exactly once, otherwise this is not guaranteed
 template <typename T>
 PrecalculatedRandomSequence<T>::PrecalculatedRandomSequence(T low, T high, unsigned int length, unsigned int count, bool distinct)
@@ -90,17 +118,96 @@ PrecalculatedRandomSequence<T>::PrecalculatedRandomSequence(T low, T high, unsig
 	}
 }
 
+// Builds and returns a set of 'count' random sequences, with values taken from the source array provided.  All sequences will be 
+// of length 'length'.  All sequences will contain each value in the source set exactly once
+template <typename T>
+PrecalculatedRandomSequence<T>::PrecalculatedRandomSequence(const T *values, unsigned int length, unsigned int count)
+{
+	// Set dataset to null in advance of any initialisation
+	m_data = NULL;
+
+	// Parameter check
+	if (values == NULL || length <= 0 || count <= 0)
+	{
+		NullData(); return;
+	}
+
+	// Allocate a contiguous block of space for the sequences
+	AllocateSequenceMemory(length, count);
+	if (m_data == NULL) { NullData(); return; }
+
+	// Populate the sequences based on the provided parameters
+	PopulateSequenceDataFromSource(values, length);
+}
+
+// Default constructor.  Will create an uninitialized sequence generator.  Implemented to allow lazy instantiation by consuming classes
+template <typename T>
+PrecalculatedRandomSequence<T>::PrecalculatedRandomSequence(void)
+{
+	m_data = NULL;
+	NullData();
+}
+
+// Copy constructor
+template <typename T>
+PrecalculatedRandomSequence<T>::PrecalculatedRandomSequence(const PrecalculatedRandomSequence & other)
+{
+	AllocateSequenceMemory(other.GetSequenceLength(), other.GetSequenceCount());
+	std::copy(other.DataPtr(), other.DataPtr() + m_total_alloc, m_data);
+}
+
+// Copy assignment operator
+template <typename T>
+PrecalculatedRandomSequence<T> & PrecalculatedRandomSequence<T>::operator=(const PrecalculatedRandomSequence<T> & other)
+{
+	if (this != &other)
+	{
+		if (m_data != NULL) DeallocateMemory();
+
+		AllocateSequenceMemory(other.GetSequenceLength(), other.GetSequenceCount());
+		std::copy(other.DataPtr(), other.DataPtr() + m_total_alloc, m_data);
+	}
+	return *this;
+}
+
+// Move assignment operator
+template <typename T>
+PrecalculatedRandomSequence<T> & PrecalculatedRandomSequence<T>::operator=(PrecalculatedRandomSequence<T> && other)
+{
+	if (this != &other)
+	{
+		if (m_data != NULL) DeallocateMemory();
+
+		m_length = other.GetSequenceLength();
+		m_count = other.GetSequenceCount();
+		m_total_alloc = other.GetTotalAllocatedElements();
+		m_data = other.DataPtr();
+
+		other.m_data = NULL;		// To prevent deallocation by the other object during "NullData()"
+		other.NullData();
+	}
+	return *this;
+}
+
+
 // Sets the content of this object to null, in case of error or other issues
 template <typename T>
 void PrecalculatedRandomSequence<T>::NullData()
 {
-	if (m_data != NULL) SafeDeleteArray(m_data);
+	DeallocateMemory();
 
 	m_data = NULL;
 	m_length = m_count = 0U;
 	m_total_alloc = 0UL;
 }
 
+// Deallocates all owned memory
+template <typename T>
+void PrecalculatedRandomSequence<T>::DeallocateMemory(void)
+{
+	if (m_data != NULL) SafeDeleteArray(m_data);
+}
+		
 
 // Allocates a contiguous block of space for 'count' sequences of size 'length'
 template <typename T>
@@ -229,6 +336,21 @@ void PrecalculatedRandomSequence<float>::PopulateSequenceDataDistinct(float low,
 	PopulateSequenceData(low, high);
 }
 
+// Populates the dataset with random sequences of values in a given source set.  |source| == 'length', 
+// and each generated sequence will accordingly be of size 'length'
+template <typename T>
+void PrecalculatedRandomSequence<T>::PopulateSequenceDataFromSource(const T *values, unsigned int length)
+{
+	// We will first populate the data array with integers from 0 to (length-1)
+	PopulateSequenceData((T)0, (T)(length - 1U));
+
+	// These values will then be used as indices into our source array
+	for (unsigned long i = 0; i < m_total_alloc; ++i)
+	{
+		m_data[i] = values[m_data[i]];			// Replace current element with source[element]
+	}
+}
+
 
 // Returns a pointer to the start of a randomly-selected sequence.  Guaranteed to return a non-null
 // pointer into the data array as long as the sequence object was successfully initialised
@@ -252,5 +374,5 @@ template <typename T>
 PrecalculatedRandomSequence<T>::~PrecalculatedRandomSequence()
 {
 	// Deallcoate the primary data array
-	if (m_data) SafeDeleteArray(m_data);
+	DeallocateMemory();
 }
