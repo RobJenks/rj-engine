@@ -33,6 +33,8 @@
 # Intellisense, symbol & MSVC data
 *.sdf
 *.opensdf
+*.db
+*.opendb
 *.pdb
 *.idb
 *.dep
