@@ -44,6 +44,7 @@
 *.tlog
 
 # Exclude debug, release & any other intermediate build directories
+/.vs/*
 /RJ/Debug/*
 /RJ/Release/*
 /RJ/Test/*
