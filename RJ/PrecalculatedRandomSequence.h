@@ -341,8 +341,8 @@ void PrecalculatedRandomSequence<float>::PopulateSequenceDataDistinct(float low,
 template <typename T>
 void PrecalculatedRandomSequence<T>::PopulateSequenceDataFromSource(const T *values, unsigned int length)
 {
-	// We will first populate the data array with integers from 0 to (length-1)
-	PopulateSequenceData((T)0, (T)(length - 1U));
+	// We will first populate the data array with distinct integers from 0 to (length-1)
+	PopulateSequenceDataDistinct((T)0, (T)length);
 
 	// These values will then be used as indices into our source array
 	for (unsigned long i = 0; i < m_total_alloc; ++i)

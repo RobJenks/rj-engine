@@ -555,7 +555,6 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 
 			// We want to check all neighbours of this cell that have not yet been processed.  Select a random sequence
 			// to ensure variation in the spread of value through the map
-			*** CHECK WHY POWER MAP NOT RENDERING PROPERLY; LIKELY BECAUSE OF CHANGE TO THIS RANDOM GENERATOR.  CHECK SEQ BEING GENERATED ***
 			const int *directions = m_direction_sequence_data.RandomSequence();
 			for (unsigned int i = 0; i < m_direction_sequence_length; ++i)
 			{
@@ -596,7 +595,6 @@ Result EnvironmentMap<T, TBlendMode>::Execute(const ComplexShipElement *elements
 					queue.push_back(neighbour);
 				}
 			}
-
 		}
 
 	}
