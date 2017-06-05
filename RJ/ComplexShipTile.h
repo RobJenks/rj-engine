@@ -717,7 +717,7 @@ public:
 
 	// The current power level being supplied to this tile
 	CMPINLINE Power::Type				GetPowerLevel(void) const								{ return m_powerlevel; }
-	CMPINLINE void						SetPowerLevel(Power::Type power)						{ m_powerlevel = power; }
+	void								SetPowerLevel(Power::Type power);
 
 	// Power requirement in order for the tile to be functional
 	CMPINLINE Power::Type				GetPowerRequirement(void) const							{ return m_powerrequirement; }

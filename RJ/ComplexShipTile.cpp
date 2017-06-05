@@ -271,6 +271,15 @@ void ComplexShipTile::PerformRenderUpdate(void)
 	Fade.Update();
 }
 
+// Sets the power level of this tile, triggering updates if necessary
+void ComplexShipTile::SetPowerLevel(Power::Type power) 
+{ 
+	bool was_powered = IsPowered();
+	m_powerlevel = power; 
+
+	if (IsPowered() != was_powered) SetTileSimulationRequired(true);
+}
+
 // Event generated before the tile is added to an environment
 void ComplexShipTile::BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {

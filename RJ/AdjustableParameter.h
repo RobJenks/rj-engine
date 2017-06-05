@@ -27,10 +27,21 @@ struct AdjustableParameter
 	}
 
 	// Performs an update of the parameter, moving the parameter value towards its target if applicable
-	void Update(unsigned int delta_ms)
+	CMPINLINE void Update(unsigned int delta_ms)
 	{
 		if (Target > Value)		Value = (T)min(Value + (float)min((Target - Value), (ChangeRate * ((float)delta_ms * 0.001f))), Max);
 		else					Value = (T)max(Value - (float)min((Value - Target), (ChangeRate * ((float)delta_ms * 0.001f))), Min);
+	}
+
+	// Forces an update of the parameter towards a specific target, overriding the current 'Target' value
+	CMPINLINE void UpdateTowardsTarget(T target_override, unsigned int delta_ms)
+	{
+		T current_target = Target;
+		Target = target_override;
+
+		Update(delta_ms);
+
+		Target = current_target;
 	}
 
 	// Methods to determine whether the current value has reached its target.  Specialised as required.
