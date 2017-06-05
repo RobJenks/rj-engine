@@ -12,6 +12,7 @@
 #include "ProductionCost.h"
 #include "TileConnections.h"
 #include "ElementStateDefinition.h"
+#include "Power.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -97,6 +98,10 @@ public:
 	CMPINLINE void										AddTerrainObject(StaticTerrain *t)		{ TerrainObjects.push_back(t); }
 	CMPINLINE void										RemoveTerrainObject(StaticTerrain *t)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, t); }
 	CMPINLINE std::vector<StaticTerrain*>::size_type	GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
+
+	// Power requirement in order for tiles of this type to be functional
+	CMPINLINE Power::Type								GetPowerRequirement(void) const			{ return m_powerrequirement; }
+	CMPINLINE void										SetPowerRequirement(Power::Type power)	{ m_powerrequirement = power; }
 
 	// Production cost of this tile, specified per-element
 	CMPINLINE ProductionCost *	GetProductionCost(void)						{ return m_productioncost; }
@@ -209,6 +214,9 @@ protected:
 
 	// Size of the model.  If set to -1/-1/-1 then the tile is stretchable to user-defined size; if not, it maintains the size specified
 	INTVECTOR3					m_elementsize;
+
+	// Power requirement for tiles of this type to be functional
+	Power::Type					m_powerrequirement;
 
 	// Production cost of this tile, specified per elemnet
 	ProductionCost *			m_productioncost;

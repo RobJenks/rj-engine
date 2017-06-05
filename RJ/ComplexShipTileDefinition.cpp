@@ -33,6 +33,7 @@ ComplexShipTileDefinition::ComplexShipTileDefinition(void)
 	m_name = "";
 	m_class = NULL;
 	m_level = 0;
+	m_powerrequirement = 0;
 	m_classtype = D::TileClass::Unknown;
 	m_haveclassspecificdata = false;
 	m_model = NULL;
@@ -71,12 +72,12 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 	ComplexShipTile *tile = ComplexShipTile::New(m_classtype);
 	if (tile == NULL) return NULL;
 	
-	// Assuming we have created a new tile object, set the code, name, class and pointer back to this definition object
-	// TODO: ERROR: Error here on 64-bit when any lines below uncommented
+	// Set all base tile data
 	tile->SetCode(m_code);
 	tile->SetName(m_name);
 	tile->SetTileDefinition(this);
 	tile->SetTileClass(m_classtype);
+	tile->SetPowerRequirement(m_powerrequirement);
 	
 	// Set a default tile size; either the class-specified default, or 1x1x1 if it is a resizable tile
 	if (m_elementsize.x > 0 && m_elementsize.y > 0 && m_elementsize.z > 0)

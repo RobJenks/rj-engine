@@ -4029,6 +4029,7 @@
                 <Rotation>0</Rotation>
                 <CanConnect type="0" x="0" y="0" z="0" state="15" />
                 <Connection type="0" x="0" y="0" z="0" state="9" />
+                <PowerRequirement>60</PowerRequirement>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">

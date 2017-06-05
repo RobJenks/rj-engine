@@ -1283,6 +1283,9 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 		else if (hash == HashedStrings::H_CanConnect) {
 			LoadAndApplyTileConnectionState(child, &(tiledef->Connectivity));
 		}
+		else if (hash == HashedStrings::H_PowerRequirement) {
+			tiledef->SetPowerRequirement(IO::GetIntValue(child));
+		}
 		else if (hash == HashedStrings::H_DynamicTileSet) {
 			val = child->GetText();
 			tiledef->AddToDynamicTileSet(val);

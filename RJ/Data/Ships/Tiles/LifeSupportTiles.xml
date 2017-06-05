@@ -6,6 +6,7 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="1" y="1" z="1" />
     <Level>1</Level>
+    <PowerRequirement>60</PowerRequirement>
 <!--
     <CompoundTileModelData>
       <Model type="interior" code="lifesupport_basic01_interior_model" prob="1.0"/>

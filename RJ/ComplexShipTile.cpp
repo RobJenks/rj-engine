@@ -108,6 +108,8 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_models.CopyFrom(C.GetCompoundModelSet());
 	DefaultProperties = C.DefaultProperties;
 	m_connections_fixed = C.ConnectionsAreFixed();
+	m_powerrequirement = C.GetPowerRequirement();
+	m_powerlevel = 0;
 
 	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
 	// Per-element construction state can therefore always be initialised to NULL
@@ -772,6 +774,9 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 				}
 				else if (hash == HashedStrings::H_Connection) {
 					IO::Data::LoadAndApplyTileConnectionState(child, &(tile->Connections));
+				}
+				else if (hash == HashedStrings::H_PowerRequirement) {
+					tile->SetPowerRequirement(IO::GetIntValue(child));
 				}
 			}
 		}

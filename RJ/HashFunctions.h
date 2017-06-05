@@ -262,6 +262,7 @@ namespace HashedStrings
 	DefineHash(H_MaxPowerOutput, "maxpoweroutput");
 	DefineHash(H_PowerLevelChangeRate, "powerlevelchangerate");
 	DefineHash(H_PowerOverloadMultiplier, "overloadmultiplier");
+	DefineHash(H_PowerRequirement, "powerrequirement");
 }
 
 
