@@ -232,6 +232,25 @@ void iSpaceObjectEnvironment::PerformPowerUpdate(void)
 
 	// Update the map.  All power updates are instant so we don't need to pass the time delta
 	m_powermap.Update(Game::TimeFactor);
+
+	// Notify environment components of their new power level
+	ComplexShipTile *tile;
+	ComplexShipTileCollection::iterator it_end = m_tiles[0].end();
+	for (ComplexShipTileCollection::iterator it = m_tiles[0].begin(); it != it_end; ++it)
+	{
+		tile = (*it).value;
+		const INTVECTOR3 & location = tile->GetElementLocation();
+		const INTVECTOR3 & size = tile->GetElementSize();
+
+		Power::Type max_power = 0;
+		for (int x = 0; x < size.x; ++x)
+			for (int y = 0; y < size.y; ++y)
+				for (int z = 0; z < size.z; ++z)
+					max_power = max(max_power, m_powermap.GetPowerLevel(
+						ELEMENT_INDEX(location.x + x, location.y + y, location.z + z)));
+
+		tile->SetPowerLevel(max_power);
+	}
 }
 
 // Performs an update of environment oxygen levels, based on each life support system in the ship

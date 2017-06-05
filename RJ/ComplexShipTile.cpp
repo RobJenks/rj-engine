@@ -71,6 +71,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_elementconstructedstate = NULL;
 	m_constructedstate_previousallocatedsize = NULL_INTVECTOR3;
 	m_connections_fixed = false;
+	m_powerlevel = m_powerrequirement = (Power::Type)0;
 	
 	// By default, tiles will not be simulated
 	m_requiressimulation = false;

@@ -19,6 +19,7 @@
 #include "Damage.h"
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
+#include "Power.h"
 class TiXmlElement;
 class ComplexShip;
 class ComplexShipSection;
@@ -714,6 +715,17 @@ public:
 	// Static method to determine whether a given tileclass is 'infrastructural'
 	static bool							IsInfrastructureTile(D::TileClass tileclass);
 
+	// The current power level being supplied to this tile
+	CMPINLINE Power::Type				GetPowerLevel(void) const								{ return m_powerlevel; }
+	CMPINLINE void						SetPowerLevel(Power::Type power)						{ m_powerlevel = power; }
+
+	// Power requirement in order for the tile to be functional
+	CMPINLINE Power::Type				GetPowerRequirement(void) const							{ return m_powerrequirement; }
+	CMPINLINE void						SetPowerRequirement(Power::Type power)					{ m_powerrequirement = power; }
+
+	// Indicates whether the tile is currently powered
+	CMPINLINE bool						IsPowered(void) const									{ return (m_powerlevel >= m_powerrequirement); }
+
 	// Initialise and clear connection data for the tile
 	void								InitialiseConnectionState();
 
@@ -805,6 +817,12 @@ protected:
 	// Vector of unique terrain IDs, corresponding to the terrain objects within our parent environment that are 'owned' by this
 	// tile.  We maintain this link so that terrain objects can be efficiently removed with the tile if required
 	std::vector<Game::ID_TYPE>	m_terrain_ids;
+
+	// Power requirement for the tile to be functional
+	Power::Type					m_powerrequirement;
+
+	// Current power level being supplied to the tile
+	Power::Type					m_powerlevel;
 
 	// Simulation state of this tile.  Light implementation for tiles, since the ship & elements handle most of the logic.  This state 
 	// just determines the extent of activity within SimulateTile()
