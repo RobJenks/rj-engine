@@ -593,6 +593,15 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 #	define INIT_DEBUG_FN_TESTING_AT_LEVEL(command, parameter_level)		std::string fn = command.Parameter(parameter_level); if (false) { } 
 
 
+// Convenience macros used to invoke debug functions on tiles
+#	define INIT_DEBUG_TILE_FN_TESTING(command)		std::string fn = command.Parameter(3); if (false) { } 
+#	define REGISTER_DEBUG_TILE_FN(fn_name, ...)										\
+						else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
+			command.SetSuccessOutput(concat("Function \"")(command.Parameter(3))("\" executed on object \"")(command.Parameter(0))("\", tile ")(command.Parameter(2)).str()); } 
+#	define REGISTER_DEBUG_TILE_ACCESSOR_FN(fn_name, ...)										\
+						else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
+			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").Tile(")(command.Parameter(2))(").")(command.Parameter(3))("(...) == ")(tmp_output_##fn_name).str()); } 
+
 
 
 #endif

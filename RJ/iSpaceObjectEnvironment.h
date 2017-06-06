@@ -150,6 +150,9 @@ public:
 	CMPINLINE Oxygen::Type			GetOxygenLevel(int element_id) const							{ return m_oxygenmap.GetOxygenLevel(element_id); }
 	CMPINLINE Oxygen::Type			GetOxygenLevelAtLocation(const INTVECTOR3 & location) const		{ return m_oxygenmap.GetOxygenLevel(location); }
 
+	// Determines the total oxygen present in the environment
+	CMPINLINE Oxygen::Type			GetTotalOxygenInEnvironment(void) const							{ return m_oxygenmap.GetTotalOxygen(); }
+
 	// Returns the power level for a specific element
 	CMPINLINE Power::Type			GetPowerLevel(int element_id) const								{ return m_powermap.GetPowerLevel(element_id); }
 	CMPINLINE Power::Type			GetPowerLevelAtLocation(const INTVECTOR3 & location) const		{ return m_powermap.GetPowerLevel(location); }
@@ -163,6 +166,10 @@ public:
 		m_zeropointtranslation = offset; 
 		XMStoreFloat3(&m_zeropointtranslationf, m_zeropointtranslation);
 	}
+
+	// Returns the index of the tile at the specified location, or -1 if no tile is present
+	int								GetTileAtElementIndex(int element_id) const;
+	int								GetTileAtElementLocation(const INTVECTOR3 & location) const;
 
 	// Registers a new collision with this environment, calculates the effect and begins to apply the effects
 	// Returns a flag indicating whether the event was registered (there are several validations that may prevent this)

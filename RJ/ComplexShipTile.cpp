@@ -881,3 +881,90 @@ ComplexShipTile * ComplexShipTile::New(D::TileClass cls)
 	}
 }
 
+// Processes a debug tile command from the console
+void ComplexShipTile::ProcessDebugTileCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros for convenience
+	INIT_DEBUG_TILE_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, Parameter(2) is the already-matched tile ID, and Parameter(3) is the function name
+	// We therefore pass Parameter(4) onwards as arguments
+
+	// Accessor methods
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetClass)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTileClass)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetID)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetSimulationState)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(SimulationIsActive)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(LastSimulationTime)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetSimulationInterval)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(RequiresSimulation)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetElementLocation)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetElementPosition)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetLocalElementLocation, INTVECTOR3(command.ParameterAsInt(4), command.ParameterAsInt(5), command.ParameterAsInt(6)))
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetLocalElementIndex, INTVECTOR3(command.ParameterAsInt(4), command.ParameterAsInt(5), command.ParameterAsInt(6)))
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetElementSize)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetElementCount)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetWorldSize)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetCode)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetName)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(IsStandardTile)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(HasCompoundModel)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetRotation)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetMass)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetHardness)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetAggregateHealth)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(ConstructionIsInProgress)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetBoundingSphereRadius)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetRelativePosition)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetWorldMatrix)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(IsPrimaryTile)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(SpansMultipleElements)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(ConnectionsAreFixed)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetPowerLevel)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetPowerRequirement)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(IsPowered)
+
+	
+	// Mutator methods
+	REGISTER_DEBUG_TILE_FN(SetSimulationState, (iObject::ObjectSimulationState)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(DeactivateSimulation)
+	REGISTER_DEBUG_TILE_FN(ActivateSimulation)
+	REGISTER_DEBUG_TILE_FN(SetTileSimulationRequired, command.ParameterAsBool(4))
+	REGISTER_DEBUG_TILE_FN(SetSimulationInterval, (unsigned int)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SimulateTile)
+	REGISTER_DEBUG_TILE_FN(ApplyTile)
+	REGISTER_DEBUG_TILE_FN(SetElementLocation, INTVECTOR3(command.ParameterAsInt(4), command.ParameterAsInt(5), command.ParameterAsInt(6)))
+	REGISTER_DEBUG_TILE_FN(SetElementSize, INTVECTOR3(command.ParameterAsInt(4), command.ParameterAsInt(5), command.ParameterAsInt(6)))
+	REGISTER_DEBUG_TILE_FN(SetCode, command.Parameter(4))
+	REGISTER_DEBUG_TILE_FN(SetName, command.Parameter(4))
+	REGISTER_DEBUG_TILE_FN(SetStandardTile, command.ParameterAsBool(4))
+	REGISTER_DEBUG_TILE_FN(PerformRenderUpdate)
+	REGISTER_DEBUG_TILE_FN(SetTileClass, (D::TileClass)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetRotation, (Rotation90Degree)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(Rotate, (Rotation90Degree)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(RotateAllTerrainObjects, (Rotation90Degree)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetMass, command.ParameterAsFloat(4))
+	REGISTER_DEBUG_TILE_FN(SetHardness, command.ParameterAsFloat(4))
+	REGISTER_DEBUG_TILE_FN(ElementHealthChanged)
+	REGISTER_DEBUG_TILE_FN(RecalculateAggregateHealth)
+	REGISTER_DEBUG_TILE_FN(StartConstruction)
+	REGISTER_DEBUG_TILE_FN(ConstructionComplete)
+	REGISTER_DEBUG_TILE_FN(RecalculateTileData)
+	REGISTER_DEBUG_TILE_FN(RecalculateBoundingVolume)
+	REGISTER_DEBUG_TILE_FN(RecalculateWorldMatrix)
+	REGISTER_DEBUG_TILE_FN(CompileTile)
+	REGISTER_DEBUG_TILE_FN(ValidateHardStopRequirements)
+	REGISTER_DEBUG_TILE_FN(CompileAndValidateTile)
+	REGISTER_DEBUG_TILE_FN(GenerateGeometry)
+	REGISTER_DEBUG_TILE_FN(FixConnections, command.ParameterAsBool(4))
+	REGISTER_DEBUG_TILE_FN(SetPowerLevel, (Power::Type)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetPowerRequirement, (Power::Type)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(DebugString)
+	REGISTER_DEBUG_TILE_FN(DestroyObject)
+	REGISTER_DEBUG_TILE_FN(DestroyAllOwnedTerrain)
+}
+
+
+

@@ -117,6 +117,9 @@ public:
 		for (std::vector<T>::size_type i = 0; i < m_elementcount; ++i) Data[i] = (min_value + (T)(frand() * value_range));
 	}
 
+	// Returns the total amount of value currently present in the map
+	T												GetTotalValue(void) const;
+
 	// Generates a debug string output of the environment map contents
 	CMPINLINE std::string							DebugStringOutput(void) { return DebugStringOutput(0, m_elementsize.z - 1, NULL); }
 	CMPINLINE std::string							DebugStringOutput(const char *format) { return DebugStringOutput(0, m_elementsize.z - 1, format); }
@@ -470,6 +473,16 @@ void EnvironmentMap<T, TBlendMode>::SetEmissionBehaviour(EmissionBehaviour behav
 	else															m_source_emission_multiplier = DefaultValues<T>::NullValue();
 }
 
+// Returns the total amount of value currently present in the map
+template <typename T, template<typename> class TBlendMode>
+T EnvironmentMap<T, TBlendMode>::GetTotalValue(void) const
+{
+	T total = m_zero;
+	std::vector<T>::const_iterator it_end = Data.end();
+	for (std::vector<T>::const_iterator it = Data.begin(); it != it_end; ++it) total += (*it);
+
+	return total;
+}
 
 // Executes an update of the map.  Accepts a reference to the underlying element collection as a mandatory parameter
 template <typename T, template<typename> class TBlendMode>

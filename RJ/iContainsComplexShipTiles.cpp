@@ -59,6 +59,16 @@ ComplexShipTile * iContainsComplexShipTiles::FindTileAtLocation(const INTVECTOR3
 	return NULL;
 }
 
+// Attempts to locate a tile with the specified unique ID
+ComplexShipTile * iContainsComplexShipTiles::FindTileWithUniqueId(Game::ID_TYPE unique_id)
+{
+	ComplexShipTileCollection::const_iterator it = std::find_if(m_tiles[0].begin(), m_tiles[0].end(),
+		[&unique_id](const AComplexShipTile_P & element) {
+		return (element.value && element.value->GetID() == unique_id); });
+
+	return ((it != m_tiles[0].end()) ? (*it).value : NULL);
+}
+
 // Links a new ship tile to this object
 void iContainsComplexShipTiles::AddShipTile(ComplexShipTile *tile)
 {

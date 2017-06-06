@@ -23,6 +23,10 @@ public:
 	// passing the command down from.  Ugly, but avoids adding another function to the iObject vtable
 	void					ExecuteDebugCommandOnObject(iObject *object, GameConsoleCommand & command);
 
+	// Execute a debug command on a specific tile within the given object.  Deliberately not using 
+	// a virtual function here to avoid expanding the vtable for debug functions
+	void					ExecuteDebugCommandOnObjectTile(iObject *object, GameConsoleCommand & command);
+
 	// Default destructor
 	~DebugCommandHandler(void);
 

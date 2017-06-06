@@ -266,7 +266,6 @@ void iSpaceObjectEnvironment::PerformOxygenUpdate(void)
 	m_oxygenmap.Update(timedelta);
 }
 
-
 // Method triggered when the layout (e.g. active/walkable state, connectivity) of elements is changed
 void iSpaceObjectEnvironment::ElementLayoutChanged(void)
 {
@@ -2303,6 +2302,22 @@ INTVECTOR2 iSpaceObjectEnvironment::GetElementRange(int zlevel)
 	return GetElementRange(INTVECTOR3(0, 0, zlevel), INTVECTOR3(m_elementsize.x - 1, m_elementsize.y - 1, zlevel));
 }
 
+// Returns the index of the tile at the specified index, or -1 if no tile is present
+// No validation on element_id; relies on this being passed as a valid index
+int iSpaceObjectEnvironment::GetTileAtElementIndex(int element_id) const
+{
+	const ComplexShipTile *tile = m_elements[element_id].GetTile();
+	return (tile ? tile->GetID() : -1);
+}
+
+// Returns the index of the tile at the specified location, or -1 if no tile is present
+// No validation on location; relies on this being passed as a valid element location
+int iSpaceObjectEnvironment::GetTileAtElementLocation(const INTVECTOR3 & location) const
+{
+	const ComplexShipTile *tile = m_elements[ELEMENT_INDEX(location.x, location.y, location.z)].GetTile();
+	return (tile ? tile->GetID() : -1);
+}
+
 // Renders a 3D overlay showing the state of each element in the environment, for all elements
 void iSpaceObjectEnvironment::DebugRenderElementHealth(void)
 {
@@ -2666,8 +2681,11 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetClampedElementContainingPosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
 	REGISTER_DEBUG_ACCESSOR_FN(GetOxygenLevel, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetOxygenLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(GetTotalOxygenInEnvironment)
 	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevel, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementIndex, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(BuildSpatialPartitioningTree)

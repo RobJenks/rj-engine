@@ -59,3 +59,26 @@ TiXmlElement *CSCorridorTile::GenerateXML(void)
 	// Return a reference to the new node
 	return node;
 }
+
+
+// Processes a debug tile command from the console
+void CSCorridorTile::ProcessDebugTileCommand(GameConsoleCommand & command)
+{
+	// Debug functions are largely handled via macros for convenience
+	INIT_DEBUG_TILE_FN_TESTING(command)
+
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, Parameter(2) is the already-matched tile ID, and Parameter(3) is the function name
+	// We therefore pass Parameter(4) onwards as arguments
+
+	// Accessor methods
+		
+	// Mutator methods
+	REGISTER_DEBUG_TILE_FN(PerformTileSimulation, (unsigned int)command.ParameterAsInt(4))
+
+	// Pass back to our base class if we could not handle the command
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		ComplexShipTile::ProcessDebugTileCommand(command);
+
+}
+
+

@@ -20,6 +20,7 @@
 #include "FadeEffect.h"
 #include "HighlightEffect.h"
 #include "Power.h"
+#include "GameConsoleCommand.h"
 class TiXmlElement;
 class ComplexShip;
 class ComplexShipSection;
@@ -848,6 +849,9 @@ protected:
 
 	// Applies the effects of this tile to a specific underlying element
 	void						ApplyTileToElement(ComplexShipElement *el);
+
+	// Processes a debug tile command from the console.  Protected since this is always called from a subclass
+	void								ProcessDebugTileCommand(GameConsoleCommand & command);
 
 public:
 	// Debug variables to log instance creation

@@ -11,7 +11,7 @@
 #include "RJMain.h"
 #include "UserInterface.h"
 
-// Debug command handler needs to include the full object hierarchy to support per-object command handling
+// Debug command handler needs to include the full object & tile hierarchies to support per-object command handling
 #include "Actor.h"
 #include "CapitalShipPerimeterBeacon.h"
 #include "ComplexShip.h"
@@ -22,6 +22,11 @@
 #include "SimpleShip.h"
 #include "SpaceEmitter.h"
 
+#include "ComplexShipTile.h"
+#include "CSCorridorTile.h"
+#include "CSQuartersTile.h"
+#include "CSLifeSupportTile.h"
+#include "CSPowerGeneratorTile.h"
 
 
 #include "DebugCommandHandler.h"
@@ -62,7 +67,17 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 			}
 		}
 
-		ExecuteDebugCommandOnObject(object, command);
+		// Either execute on the object itself, or on one of its component types in special cases
+		if (command.Parameter(1) == "tile")
+		{
+			ExecuteDebugCommandOnObjectTile(object, command);
+		}
+		else
+		{
+			// Execute on the base object
+			ExecuteDebugCommandOnObject(object, command);
+		}
+		
 		if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
 		{
 			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCannotAcceptConsoleComand,
@@ -232,6 +247,46 @@ void DebugCommandHandler::ExecuteDebugCommandOnObject(iObject *object, GameConso
 	// This object type is not currently supported; return an error
 	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectTypeCannotAcceptDebugCommands,
 		concat("Object of type \"")(object->GetObjectType())("\" cannot accept debug commands").str());
+}
+
+// Execute a debug command on a specific tile within the given object.  Deliberately not using 
+// a virtual function here to avoid expanding the vtable for debug functions
+void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameConsoleCommand & command)
+{
+	// The object must be an environment in order for this command to be used
+	if (!object) return;
+	if (!object->IsEnvironment()) {
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectIsNotEnvironment, 
+			"Cannot execute debug tile command on a non-environment object"); return;
+	}
+
+	// We must have sufficient parameters: [0] = object_id, [1] = "tile", [2] = tile_id, [3+] = function+params
+	if (command.ParameterCount() < 4) {
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters,
+			concat("Cannot execute debug tile command with only ")(command.ParameterCount())(" parameters").str().c_str()); return;
+	}
+
+	// Get the target tile ID and attempt to identify it within the environment
+	int id = command.ParameterAsInt(2);
+	iContainsComplexShipTiles *env = (iContainsComplexShipTiles*)object;
+	ComplexShipTile *tile = env->FindTileWithUniqueId(id);
+	if (!tile) {
+		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
+			concat("Failed to execute debug command; no tile with ID ")(id)(" in environment").str().c_str()); return;
+	}
+
+	// Identify the relevant tile subclass
+	switch (tile->GetTileClass())
+	{
+		case D::TileClass::Corridor:		((CSCorridorTile*)tile)->ProcessDebugTileCommand(command);			return;
+		case D::TileClass::Quarters:		((CSQuartersTile*)tile)->ProcessDebugTileCommand(command);			return;
+		case D::TileClass::LifeSupport:		((CSLifeSupportTile*)tile)->ProcessDebugTileCommand(command);		return;
+		case D::TileClass::PowerGenerator:	((CSPowerGeneratorTile*)tile)->ProcessDebugTileCommand(command);	return;
+	}
+
+	// Return error since we cannot currently handle this tile class
+	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidTileClass,
+		concat("Failed to execute debug command; unrecognised tile class with index ")(tile->GetTileClass()).str().c_str());
 }
 
 // Debug spawn a set of ships near the player

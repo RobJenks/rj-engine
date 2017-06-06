@@ -43,7 +43,10 @@ public:
 	}
 
 	// Returns the size of the oxygen map
-	CMPINLINE INTVECTOR3													GetSize(void) const { return m_map.GetMapSize(); }
+	CMPINLINE INTVECTOR3													GetSize(void) const				{ return m_map.GetMapSize(); }
+
+	// Returns the toatl amount of oxygen in the map
+	CMPINLINE Oxygen::Type													GetTotalOxygen(void) const		{ return m_map.GetTotalValue(); }
 
 	// Destructor
 	~EnvironmentOxygenMap(void);

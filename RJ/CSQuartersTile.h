@@ -38,6 +38,9 @@ public:
 	// Virtual method to read any class-specific data for this tile type
 	CMPINLINE void				ReadClassSpecificXMLData(TiXmlElement *node) { /* No class-specific data for this tile class */ }
 
+	// Processes a debug tile command from the console
+	void						ProcessDebugTileCommand(GameConsoleCommand & command);
+
 private:
 
 };

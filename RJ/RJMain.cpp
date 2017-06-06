@@ -2420,8 +2420,5 @@ void RJMain::DEBUGDisplayInfo(void)
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
 
-*** Add a few debug functions for e.g.GetTotalOxygenInEnvironment, GetTileIndexAtLocation, GetTileIndexAtElement; 
-*** perhaps even some tile->* functions?  Use to verify the oxygen generators are correctly shutting off & levels are dropping
-*** upon power loss.  Also look at reason for high sim speed > reduced oxygen spread, likely rounding diffs ~= 0
-
+*** TEST NEW DEBUG TILE FUNCTIONS.  ALSO PASS BACK FROM COMPLEXSHIPTILE->ITAKESDAMAGE WITH SPECIALISED TILE METHOD ***
 

@@ -34,6 +34,7 @@ public:
 	void												SetPowerOutputTarget(Power::Type target);
 	void												SetPowerOutputTargetPc(float target_pc);
 
+	CMPINLINE Power::Type								GetTargetPowerLevel(void) const										{ return m_current_output.Target; }
 	CMPINLINE bool										AtTargetPowerLevel(void) const										{ return m_current_output.IsAtTarget(); }
 	
 	CMPINLINE Power::Type								GetMaximumOutput(void) const										{ return m_max_output.Value; }
@@ -66,6 +67,9 @@ public:
 
 	// Virtual method to read any class-specific data for this tile type
 	void												ReadClassSpecificXMLData(TiXmlElement *node);
+
+	// Processes a debug tile command from the console
+	void												ProcessDebugTileCommand(GameConsoleCommand & command);
 
 	// Default destructor
 	~CSPowerGeneratorTile(void);

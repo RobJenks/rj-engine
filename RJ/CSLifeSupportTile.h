@@ -49,6 +49,10 @@ public:
 	// Updates the maximum effective gravity range of the tile.  Should only be updated by the tile definition, not directly at runtime
 	CMPINLINE void				SetGravityRange(int r)					{ m_gravityrange = r; }
 
+	// Return oxygen data
+	CMPINLINE Oxygen::Type		GetOxygenOutput(void) const				{ return OxygenLevel.Value; }
+	CMPINLINE Oxygen::Type		GetTargetOxygenOutput(void) const		{ return OxygenLevel.Target; }
+
 	// We store a direct reference to the life support definition for more efficient runtime access
 	const CSLifeSupportTileDefinition *	GetLifeSupportTileDefinition(void) const								{ return m_lifesupportdef; }
 	void								StoreLifeSupportTileDefinition(const CSLifeSupportTileDefinition *def)	{ m_lifesupportdef = def; }
@@ -69,6 +73,9 @@ public:
 
 	// Virtual method to read any class-specific data for this tile type
 	void						ReadClassSpecificXMLData(TiXmlElement *node);
+
+	// Processes a debug tile command from the console
+	void						ProcessDebugTileCommand(GameConsoleCommand & command);
 
 private:
 
