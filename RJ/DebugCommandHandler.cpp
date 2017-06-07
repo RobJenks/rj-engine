@@ -71,17 +71,19 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		if (command.Parameter(1) == "tile")
 		{
 			ExecuteDebugCommandOnObjectTile(object, command);
+
+			if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCannotAcceptConsoleComand,
+					concat("Tile \"")(command.Parameter(2))("\" in object \"")(command.Parameter(0))("\" cannot execute command \"")(command.Parameter(3))("\"").str());
 		}
 		else
 		{
 			// Execute on the base object
 			ExecuteDebugCommandOnObject(object, command);
-		}
-		
-		if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
-		{
-			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCannotAcceptConsoleComand,
-				concat("Object \"")(command.Parameter(0))("\" cannot execute command \"")(command.Parameter(1))("\"").str());
+			
+			if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)
+				command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectCannotAcceptConsoleComand,
+					concat("Object \"")(command.Parameter(0))("\" cannot execute command \"")(command.Parameter(1))("\"").str());
 		}
 		
 		// We have handled this command, whether or not it was successful
@@ -268,7 +270,7 @@ void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameC
 
 	// Get the target tile ID and attempt to identify it within the environment
 	int id = command.ParameterAsInt(2);
-	iContainsComplexShipTiles *env = (iContainsComplexShipTiles*)object;
+	iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)object;
 	ComplexShipTile *tile = env->FindTileWithUniqueId(id);
 	if (!tile) {
 		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,

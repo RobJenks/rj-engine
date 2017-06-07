@@ -2420,5 +2420,3 @@ void RJMain::DEBUGDisplayInfo(void)
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
 
-*** TEST NEW DEBUG TILE FUNCTIONS.  ALSO PASS BACK FROM COMPLEXSHIPTILE->ITAKESDAMAGE WITH SPECIALISED TILE METHOD ***
-
