@@ -643,6 +643,9 @@
     <ClCompile Include="CSPowerGeneratorTile.cpp">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClCompile>
+    <ClCompile Include="CSEngineRoomTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1493,6 +1496,9 @@
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
     <ClInclude Include="CSPowerGeneratorTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSEngineRoomTile.h">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
   </ItemGroup>

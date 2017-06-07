@@ -8,6 +8,8 @@
 #include "ComplexShipElement.h"
 #include "BoundingObject.h"
 #include "ProductionCost.h"
+#include "Hardpoint.h"
+#include "Hardpoints.h"
 #include "CSCorridorTileDefinition.h"
 #include "CSQuartersTileDefinition.h"
 #include "CSLifeSupportTileDefinition.h"
@@ -306,11 +308,23 @@ Result ComplexShipTileDefinition::ValidateTileHardStop(ComplexShipTile *tile) co
 // Sets the element size for this definition, allocating other data accordingly
 void ComplexShipTileDefinition::SetElementSize(const INTVECTOR3 & size)					
 {
-// Store the new element size
-m_elementsize = size;
+	// Store the new element size
+	m_elementsize = size;
 
-// Initialise the connection data to an equivalent size
-Connectivity.Initialise(m_elementsize);
+	// Initialise the connection data to an equivalent size
+	Connectivity.Initialise(m_elementsize);
+}
+
+// Hardpoints which are instantiated along with instances of this tile
+void ComplexShipTileDefinition::AddHardpoint(Hardpoint *hardpoint)
+{
+	// Validate the hardpoint and make sure we don't already have one with the same code
+	if (!hardpoint) return;
+	Hardpoints::HardpointCollection::const_iterator it = std::find_if(m_hardpoints.begin(), m_hardpoints.end(),
+		[&hardpoint](const Hardpoint *hp) { return (hp->Code == hardpoint->Code); });
+	if (it != m_hardpoints.end()) return;
+
+	m_hardpoints.push_back(hardpoint);
 }
 
 // Adds a link to a dynamic tileset

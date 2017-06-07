@@ -1245,6 +1245,10 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			else								tiledef->SetTileLevel(atoi(val.c_str()));
 			if (tiledef->GetTileLevel() < 1)	tiledef->SetTileLevel(1);
 		}
+		else if (hash == HashedStrings::H_Hardpoint) {
+			Hardpoint *h = LoadHardpoint(node);
+			if (h) tiledef->AddHardpoint(h);
+		}
 		else if (hash == HashedStrings::H_Model && !modeldataloaded) {
 			// Link this tile to its standard model, which should have been loaded prior to loading dependent objects
 			val = child->GetText(); StrLowerC(val);

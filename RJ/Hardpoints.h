@@ -19,7 +19,7 @@ public:
 
 	// Define each type of indexed hardpoint collection
 	typedef std::vector<Hardpoint*>									HardpointCollection;
-	typedef std::unordered_map<std::string, Hardpoint*>		IndexedHardpointCollection;
+	typedef std::unordered_map<std::string, Hardpoint*>				IndexedHardpointCollection;
 	typedef std::vector<HardpointCollection>						HardpointGroups;
 	
 	// Default constructor

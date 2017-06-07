@@ -13,6 +13,7 @@
 #include "TileConnections.h"
 #include "ElementStateDefinition.h"
 #include "Power.h"
+#include "Hardpoints.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -99,6 +100,10 @@ public:
 	CMPINLINE void										RemoveTerrainObject(StaticTerrain *t)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, t); }
 	CMPINLINE std::vector<StaticTerrain*>::size_type	GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
 
+	// Hardpoints which are instantiated along with instances of this tile
+	CMPINLINE const Hardpoints::HardpointCollection &	GetHardpoints(void) const				{ return m_hardpoints; }
+	void												AddHardpoint(Hardpoint *hardpoint);
+
 	// Power requirement in order for tiles of this type to be functional
 	CMPINLINE Power::Type								GetPowerRequirement(void) const			{ return m_powerrequirement; }
 	CMPINLINE void										SetPowerRequirement(Power::Type power)	{ m_powerrequirement = power; }
@@ -108,7 +113,7 @@ public:
 	CMPINLINE void				SetProductionCost(ProductionCost *prodcost)	
 	{
 		// Deallocate any existing data
-		if (m_productioncost) { delete m_productioncost; m_productioncost = NULL; }
+		if (m_productioncost) SafeDelete(m_productioncost); 
 
 		// Store a pointer to the new object
 		m_productioncost = prodcost; 
@@ -211,6 +216,9 @@ protected:
 	// Name of the dynamic tile set this definition belongs to, if applicable
 	bool						m_member_of_dynamic_tileset;
 	std::string					m_dynamic_tileset;
+
+	// Collection of any hardpoints that are instantiated along with tiles
+	Hardpoints::HardpointCollection		m_hardpoints;
 
 	// Size of the model.  If set to -1/-1/-1 then the tile is stretchable to user-defined size; if not, it maintains the size specified
 	INTVECTOR3					m_elementsize;

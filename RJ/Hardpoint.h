@@ -11,8 +11,6 @@
 #include "CompilerSettings.h"
 #include <string>
 
-using namespace std;
-
 class Hardpoints;
 class CoreEngine;
 class iContainsHardpoints;
@@ -27,7 +25,7 @@ public:
 	// via overriding function in the Hardpoint vftable
 	virtual CMPINLINE Equip::Class	GetType() const					= 0;
 
-	string							Code;
+	std::string						Code;
 	AXMVECTOR						Position;
 	AXMVECTOR						Orientation;
 
