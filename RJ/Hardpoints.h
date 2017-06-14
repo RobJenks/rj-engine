@@ -32,6 +32,9 @@ public:
 	// Add a new hardpoint to the collection.  Raises a HardpointChanged event to be handled by the parent
 	void												AddHardpoint(Hardpoint *hp);
 
+	// Remove a hardpoint from the collection
+	void												DeleteHardpoint(const std::string & code);
+
 	// Recalculate internal hardpoint data based on new/removed hardpoints.  Will be automatically called
 	// when a hardpoint is added/removed at runtime, or after updates are resumed following a series of changes
 	void												RecalculateHardpoints(void);

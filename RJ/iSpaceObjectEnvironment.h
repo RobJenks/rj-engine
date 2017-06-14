@@ -310,6 +310,13 @@ public:
 	// Adds all terrain objects associated with a tile to the environment
 	void							RemoveTerrainObjectsFromTile(ComplexShipTile *tile);
 
+	// Instantiate any hardpoints that are associated with the given new tile
+	void							InstantiateHardpointsFromTile(ComplexShipTile *tile);
+
+	// Remove any hardpoints that are associated with the given tile.  Any equipment mounted on the hardpoints will
+	// be discarded
+	void							RemoveHardpointsFromTile(ComplexShipTile *tile);
+
 	// Copies all tiles from another object and adds the copies to this object
 	Result							CopyTileDataFromObject(iContainsComplexShipTiles *src);
 

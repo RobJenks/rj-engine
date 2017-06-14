@@ -14,6 +14,7 @@
 #include "ComplexShipTileClass.h"
 #include "ComplexShipElement.h"
 #include "ElementConnection.h"
+#include "Hardpoint.h"
 #include "CSCorridorTile.h"
 #include "CSQuartersTile.h"
 #include "CSLifeSupportTile.h"
@@ -860,6 +861,13 @@ Result ComplexShipTile::GenerateGeometry(void)
 
 	// If we have no definition to validate against then simply return success
 	return ErrorCodes::NoError;
+}
+
+// Determines the code that should be assigned to a hardpoint owned by this tile
+std::string ComplexShipTile::DetermineTileHardpointCode(Hardpoint *hardpoint)
+{
+	if (!hardpoint) return NullString;
+	return concat(m_code)("_")(m_id)("_")(hardpoint->Code).str();
 }
 
 // Methods to retrieve and set the definition associated with this tile

@@ -24,6 +24,7 @@
 class TiXmlElement;
 class ComplexShip;
 class ComplexShipSection;
+class Hardpoint;
 class BoundingObject;
 class Resource;
 class ProductionCost;
@@ -737,6 +738,14 @@ public:
 	FadeEffect							Fade;					// Allows the object to be faded in and out
 	HighlightEffect						Highlight;				
 
+	// Reference to the hardpoints owned by this tile
+	CMPINLINE void									AddHardpointReference(const std::string & hp_ref) { m_hardpoint_refs.push_back(hp_ref); }
+	CMPINLINE void									ClearAllHardpointReferences(void) { m_hardpoint_refs.clear(); }
+	CMPINLINE const std::vector<std::string> &		GetHardpointReferences(void) { return m_hardpoint_refs; }
+
+	// Determines the code that should be assigned to a hardpoint owned by this tile
+	std::string							DetermineTileHardpointCode(Hardpoint *hardpoint);
+
 	// Return a debug string representation of the tile
 	CMPINLINE std::string				DebugString(void)  const		{ return concat("Tile (ID=")(m_id)(", Type=")(m_code)(")").str(); }
 
@@ -818,6 +827,9 @@ protected:
 	// Vector of unique terrain IDs, corresponding to the terrain objects within our parent environment that are 'owned' by this
 	// tile.  We maintain this link so that terrain objects can be efficiently removed with the tile if required
 	std::vector<Game::ID_TYPE>	m_terrain_ids;
+
+	// Vector of hardpoint references, corresponding to the hardpoints in our environment that this tile owns
+	std::vector<std::string>	m_hardpoint_refs;
 
 	// Power requirement for the tile to be functional
 	Power::Type					m_powerrequirement;

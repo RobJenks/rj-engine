@@ -1,3 +1,4 @@
+#include <vector>
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "FastMath.h"
@@ -9,6 +10,7 @@
 #include "iEnvironmentObject.h"
 #include "ComplexShipTileDefinition.h"
 #include "ComplexShipTile.h"
+#include "Hardpoint.h"
 #include "DynamicTileSet.h"
 #include "StaticTerrain.h"
 #include "Ship.h"
@@ -498,6 +500,9 @@ void iSpaceObjectEnvironment::AddTile(ComplexShipTile **ppTile)
 	// Add any terrain objects that come with this tile
 	AddTerrainObjectsFromTile(tile_obj);
 
+	// Add any hardpoints that come with this tile
+	InstantiateHardpointsFromTile(tile_obj);
+
 	// Raise the post-addition event
 	TileAdded(tile_obj);
 
@@ -566,6 +571,65 @@ void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)
 			tile->AddTerrainObjectLink(terrain->GetID());
 		}
 	}
+}
+
+// Instantiate any hardpoints that are associated with the given new tile
+void iSpaceObjectEnvironment::InstantiateHardpointsFromTile(ComplexShipTile *tile)
+{
+	if (!tile) return;
+	const ComplexShipTileDefinition *def = tile->GetTileDefinition();
+	if (!def) return;
+
+	std::vector<Hardpoint*>::const_iterator it_end = def->GetHardpoints().end();
+	for (std::vector<Hardpoint*>::const_iterator it = def->GetHardpoints().begin(); it != it_end; ++it)
+	{
+		Hardpoint *src = (*it); if (!src) continue;
+		Hardpoint *hp = src->Clone(); if (!hp) continue;
+
+		// Give the hardpoint a unique code based upon the parent tile.  Make sure there is no duplicate
+		hp->Code = tile->DetermineTileHardpointCode(hp);
+		if (hp->Code == NullString || GetHardpoints().Get(hp->Code) != NULL)
+		{
+			Game::Log << LOG_WARN << concat("Attempted to add hardpoint \"")(hp->Code)("\" from tile \"")(tile->GetCode())
+				("\" to environment \"")(m_instancecode)("\" but hardpoint is either null or already exists\n").str();
+			hp->Delete(); continue;
+		}
+
+		// Add the hardpoint to this environment
+		this->GetHardpoints().AddHardpoint(hp);
+
+		// The tile should maintain a reference to this hardpoint
+		tile->AddHardpointReference(hp->Code);
+	}
+}
+
+*** WE ARE NOW ADDING HARDPOINTS TO THE ENVIRONMENT WHEN ADDING TILES (& V.V. FOR REMOVING).  TEST THAT THIS WORKS AND THAT CORRECT ***
+*** TILE-UNIQUE CODES ARE ADDED TO EACH HP.  THEN TEST IMPLEMENTATION OF THIS USING AN ENGINE ROOM TILE WITH ATTACHED ENGINE HP ***
+
+// Remove any hardpoints that are associated with the given tile.  Any equipment mounted on the hardpoints will
+// be discarded
+void iSpaceObjectEnvironment::RemoveHardpointsFromTile(ComplexShipTile *tile)
+{
+	if (!tile) return;
+
+	// Iterate through all hardpoints owned by this tile
+	std::vector<std::string>::const_iterator it_end = tile->GetHardpointReferences().end();
+	for (std::vector<std::string>::const_iterator it = tile->GetHardpointReferences().begin(); it != it_end; ++it)
+	{
+		Hardpoint *hp = GetHardpoints().Get(*it);
+		if (!hp)
+		{
+			Game::Log << LOG_WARN << concat("Attempted to remove hardpoint \"")(hp->Code)("\" during removal of tile \"")(tile->GetCode())
+				("\" from environment \"")(m_instancecode)("\" but hardpoint could not be located\n").str();
+			continue;
+		}
+
+		// Remove from the environment
+		GetHardpoints().DeleteHardpoint(*it);
+	}
+
+	// Clear the set of hardpoint references within this tile (since it no longer owns any hardpoints)
+	tile->ClearAllHardpointReferences();
 }
 
 // Adds all terrain objects associated with a tile to the environment

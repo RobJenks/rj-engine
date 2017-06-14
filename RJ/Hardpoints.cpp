@@ -153,3 +153,19 @@ void Hardpoints::AddHardpoint(Hardpoint *hp)
 	}
 
 }
+
+void Hardpoints::DeleteHardpoint(const std::string & code)
+{
+	if (code == NullString) return;
+	
+	// Attempt to locate this hardpoint
+	IndexedHardpointCollection::iterator it = m_items.find(code);
+	if (it == m_items.end()) return;
+
+	// If it exists, deallocate the hardpoint now
+	Hardpoint *hp = (*it).second;
+	if (hp) hp->Delete();
+
+	// Remove this entry from the collection
+	m_items.erase(it);
+}
