@@ -532,6 +532,9 @@ void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile)
 	// Remove any terrain objects that came with this tile
 	RemoveTerrainObjectsFromTile(tile);
 
+	// Remove any hardpoints that came with this tile
+	RemoveHardpointsFromTile(tile);
+	
 	// Raise the post-removal event
 	TileRemoved(tile);
 
@@ -602,9 +605,6 @@ void iSpaceObjectEnvironment::InstantiateHardpointsFromTile(ComplexShipTile *til
 		tile->AddHardpointReference(hp->Code);
 	}
 }
-
-*** WE ARE NOW ADDING HARDPOINTS TO THE ENVIRONMENT WHEN ADDING TILES (& V.V. FOR REMOVING).  TEST THAT THIS WORKS AND THAT CORRECT ***
-*** TILE-UNIQUE CODES ARE ADDED TO EACH HP.  THEN TEST IMPLEMENTATION OF THIS USING AN ENGINE ROOM TILE WITH ATTACHED ENGINE HP ***
 
 // Remove any hardpoints that are associated with the given tile.  Any equipment mounted on the hardpoints will
 // be discarded
@@ -2779,5 +2779,7 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		Ship::ProcessDebugCommand(command);
 }
 
+
+*** HARDPOINT ADDITION/REMOVAL WITH TILES NOW WORKS CORRECTLY.  ADD NEW TILE TYPE (ENGINEROOM) WHICH COMES WITH ENGINE HARDPOINTS INCLUDED ***
 
 

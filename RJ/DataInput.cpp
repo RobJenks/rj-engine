@@ -1246,7 +1246,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			if (tiledef->GetTileLevel() < 1)	tiledef->SetTileLevel(1);
 		}
 		else if (hash == HashedStrings::H_Hardpoint) {
-			Hardpoint *h = LoadHardpoint(node);
+			Hardpoint *h = LoadHardpoint(child);
 			if (h) tiledef->AddHardpoint(h);
 		}
 		else if (hash == HashedStrings::H_Model && !modeldataloaded) {

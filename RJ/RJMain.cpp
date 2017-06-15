@@ -603,17 +603,11 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_MINUS])
 	{
-		if (b[DIK_LSHIFT])
-		{
-			cs()->ForceRenderingOfInterior(false);
-			cs()->GetSection(0)->Fade.FadeIn(1.0f);
-		}
-		else
-		{
-			cs()->ForceRenderingOfInterior(true);
-			cs()->GetSection(0)->Fade.FadeToAlpha(1.0f, 0.25f);
-		}
+
+
+		Game::Keyboard.LockKey(DIK_MINUS);
 	}
+
 	if (b[DIK_EQUALS])
 	{
 		std::vector<iObject*> objects;

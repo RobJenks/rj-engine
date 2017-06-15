@@ -168,4 +168,15 @@ void Hardpoints::DeleteHardpoint(const std::string & code)
 
 	// Remove this entry from the collection
 	m_items.erase(it);
+
+	// Only perform a broader update if we have not suspended updates
+	if (!m_suspendupdates)
+	{
+		// Recalculate the internal hardpoint data based on this addition
+		RecalculateHardpoints();
+
+		// Raise a hardpoint change event to be handled by the parent object.  Pass no
+		// hardpoint, which will initiate a full & hp-type-independent update of the environment
+		if (m_hpparent) m_hpparent->HardpointChanged(NULL);
+	}
 }

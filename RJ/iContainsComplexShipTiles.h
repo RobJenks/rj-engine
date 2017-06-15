@@ -45,12 +45,6 @@ public:
 	int												FindShipTileIndex(ComplexShipTile *tile) const;
 	CMPINLINE ComplexShipTileCollection::iterator	TileNotFound(void) { return m_tiles[0].end(); }
 	
-	// Methods to update and recalculate the tile collection data
-	void									AddShipTile(ComplexShipTile *tile);
-	void									RemoveShipTile(ComplexShipTile *tile);
-	void									RemoveAllShipTiles(void);
-	void									RecalculateShipTileData(void);
-	
 
 	// Collection of ship tile pointers, by tile type, for easy access to specific types of tile.  tiles[Unknown/0] is the full collection
 	CMPINLINE ComplexShipTileCollection &	  GetTilesOfType(D::TileClass type)			{ return m_tiles[(int)type]; }
@@ -75,6 +69,7 @@ public:
 
 	// Methods to get/set the flag determining whether we suspend tile-based refreshes.  Used to allow all tiles to
 	// be added on ship creation without refreshing at every step
+	void									RecalculateShipTileData(void);
 	bool									IsTileRecalculationSuspended(void)			{ return m_tilecalcsuspended; }
 	void									SuspendTileRecalculation(void)				{ m_tilecalcsuspended = true; }
 	void									ReactivateTileRecalculation(void)			
@@ -106,6 +101,12 @@ protected:
 		return (std::find_if(m_tiles[0].begin(), m_tiles[0].end(),
 			[&tile](const AComplexShipTile_P & element) { return (element.value == tile); }));
 	}
+
+	// Methods to update the tile collection data.  Protected; implementing classes should expose this logic
+	void									AddShipTile(ComplexShipTile *tile);
+	void									RemoveShipTile(ComplexShipTile *tile);
+	void									RemoveAllShipTiles(void);
+
 
 
 };
