@@ -20,7 +20,7 @@ void CSEngineRoomTile::PerformTileSimulation(unsigned int delta_ms)
 {
 	if (m_powerlevel > 30)
 	{
-		int a = 1;
+		int a = 1; // REMOVE
 	}
 
 	// Update the state of any engines assigned to this engine room

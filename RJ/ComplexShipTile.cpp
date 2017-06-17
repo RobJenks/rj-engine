@@ -281,7 +281,7 @@ void ComplexShipTile::SetPowerLevel(Power::Type power)
 
 	if (m_classtype == D::TileClass::EngineRoom)
 	{
-		int a = 1;
+		int a = 1;	// REMOVE
 	}
 
 	// Simulate the tile next frame to account for the change in power level, UNLESS this is a

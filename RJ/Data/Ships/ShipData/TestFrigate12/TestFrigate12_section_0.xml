@@ -15,11 +15,6 @@
         <BankExtent x="5.000000" y="5.000000" z="1.000000" />
         <BankRate>0.4</BankRate>
 
-      <Hardpoint code="hpengine01" type="Engine">
-        <Position x="0.0000000" y="0.000000" z="-120.000000" />
-        <Orientation w="0.000000" x="0.000000" y="0.000000" z="1.000000" />
-      </Hardpoint>
-
       <ElementStateDefinition>
         <DefaultState state="Active|Buildable" />
         <State x="0" y="23" z="0" state="Active" />
