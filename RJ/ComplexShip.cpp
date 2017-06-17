@@ -673,9 +673,6 @@ void ComplexShip::AttachCapitalShipBeacon(FXMVECTOR position)
 
 void ComplexShip::RecalculateShipDataFromCurrentState() 
 {
-	// Perform an update of the ship based on all hardpoints
-	HardpointChanged(NULL);
-
 	// Recalculate ship properties based on all our component sections, loadout and any modifiers
 	CalculateShipSizeData();
 	CalculateShipMass();
@@ -714,6 +711,10 @@ void ComplexShip::RecalculateShipDataFromCurrentState()
 	{
 		if ((*it2)) (*it2)->RecalculatePositionalData();
 	}
+
+	// Set all dirty flags to force recalculation of derived data next cycle
+	SetThrustVectorChangeFlag();
+	SetShipMassChangeFlag();
 }
 
 void ComplexShip::CalculateShipSizeData(void)
@@ -809,6 +810,9 @@ void ComplexShip::CalculateShipMass()
 	// TODO: Add the contribution of cargo to ship mass
 
 	// Apply other factors, equipment modifiers etc.
+
+	// Set the mass change flag so that derived data can be updated
+	SetShipMassChangeFlag();
 
 	// Assign this total mass to the ship
 	this->SetMass(mass);
@@ -1021,7 +1025,7 @@ void ComplexShip::CalculateEngineStatistics()
 		e = (Engine*)hp->GetEngine();	if (!e) continue;
 
 		// Add the engine acceleration 
-		accel += e->Acceleration;
+		accel += e->GetAcceleration();
 	}
 
 	// Set the base value before applying any modifiers

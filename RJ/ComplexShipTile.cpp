@@ -19,6 +19,7 @@
 #include "CSQuartersTile.h"
 #include "CSLifeSupportTile.h"
 #include "CSPowerGeneratorTile.h"
+#include "CSEngineRoomTile.h"
 #include "ComplexShipTile.h"
 #include "Damage.h"
 #include "ProductionProgress.h"
@@ -275,10 +276,18 @@ void ComplexShipTile::PerformRenderUpdate(void)
 // Sets the power level of this tile, triggering updates if necessary
 void ComplexShipTile::SetPowerLevel(Power::Type power) 
 { 
-	bool was_powered = IsPowered();
+	// Store the new power level
 	m_powerlevel = power; 
 
-	if (IsPowered() != was_powered) SetTileSimulationRequired(true);
+	if (m_classtype == D::TileClass::EngineRoom)
+	{
+		int a = 1;
+	}
+
+	// Simulate the tile next frame to account for the change in power level, UNLESS this is a
+	// power generation tile.  If that is the case, activating simulation would result in a cycle
+	// of power emission > simulation required > power emission > simulation required > ...
+	if (m_classtype != D::TileClass::PowerGenerator) SetTileSimulationRequired(true);
 }
 
 // Event generated before the tile is added to an environment
@@ -884,6 +893,7 @@ ComplexShipTile * ComplexShipTile::New(D::TileClass cls)
 		case D::TileClass::Quarters:			return new CSQuartersTile();
 		case D::TileClass::LifeSupport:			return new CSLifeSupportTile();
 		case D::TileClass::PowerGenerator:		return new CSPowerGeneratorTile();
+		case D::TileClass::EngineRoom:			return new CSEngineRoomTile();
 
 		default:								return NULL;
 	}

@@ -721,6 +721,14 @@ public:
 	CMPINLINE Power::Type				GetPowerLevel(void) const								{ return m_powerlevel; }
 	void								SetPowerLevel(Power::Type power);
 
+	// Returns the % power satisfaction for this tile, in the range [0.0 1.0].  A tile with no power
+	// requirement will always return a power satisfaction of 1.0
+	CMPINLINE float						GetPowerSatisfaction(void) const 
+	{
+		if (m_powerlevel >= m_powerrequirement) return 1.0f;			// PowerLevel will always be >= 0, so this will always return if we have no power req
+		return ((float)m_powerlevel / (float)m_powerrequirement);		// Meaning that we don't need to guard against power_req == 0 and Div/0 here
+	}
+
 	// Power requirement in order for the tile to be functional
 	CMPINLINE Power::Type				GetPowerRequirement(void) const							{ return m_powerrequirement; }
 	CMPINLINE void						SetPowerRequirement(Power::Type power)					{ m_powerrequirement = power; }

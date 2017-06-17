@@ -212,7 +212,7 @@ void SimpleShip::CalculateEngineStatistics()
 		e = (Engine*)hp->GetEngine();	if (!e) continue;
 
 		// Add the engine acceleration 
-		accel += e->Acceleration;
+		accel += e->GetAcceleration();
 	}
 
 	// Store the base value before applying any modifiers

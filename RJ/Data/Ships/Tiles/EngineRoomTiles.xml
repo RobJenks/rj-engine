@@ -1,0 +1,50 @@
+<GameData>
+
+  <ComplexShipTileDefinition class="engineroom">  
+    <Code>ENGINE_ROOM_BASIC_01</Code>
+    <Name>Basic Engine Room</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <Size x="1" y="1" z="1" />
+    <Level>1</Level>
+    <PowerRequirement>70</PowerRequirement>
+    
+<!--
+    <CompoundTileModelData>
+      <Model type="interior" code="engineroom_basic01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="engineroom_basic01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="engineroom_basic01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="engineroom_basic01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+-->
+    <CompoundTileModelData>
+      <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>
+      <Model type="wall_straight" code="quarters_dorm01_wall_straight_model" prob="1.0"/>
+      <Model type="wall_corner" code="quarters_dorm01_wall_corner_model" prob="1.0"/>
+      <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
+    </CompoundTileModelData>
+
+    
+    <ElementStateDefinition>
+      <DefaultState state="TransmitsPower" />
+    </ElementStateDefinition>
+    
+    <ProductionCost type="PerElement">
+      <TimeRequirement secs="250.000000" />
+      <ResourceRequirement resource="RES_STEEL_PLATING" amount="180.000000" />
+      <ResourceRequirement resource="RES_COBALT" amount="30.000000" />
+      <ResourceRequirement resource="RES_SUPERCONDUCTORS" amount="140.000000" />
+      
+      <ConstructedBy class="FABRICATOR_STATION" />
+      <ConstructedBy class="SHIPYARD" />
+    </ProductionCost>
+
+    <Hardpoint code="hpengine01" type="Engine">
+      <Position x="0.0000000" y="-2.000000" z="-5.000000" />
+      <Orientation w="0.000000" x="0.000000" y="0.000000" z="1.000000" />
+    </Hardpoint>
+
+    <ClassSpecificDefinition></ClassSpecificDefinition>
+  
+  </ComplexShipTileDefinition>
+
+</GameData>

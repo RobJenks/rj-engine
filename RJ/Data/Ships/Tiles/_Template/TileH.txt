@@ -21,9 +21,6 @@ public:
 	// Simulation method for this tile
 	void									PerformTileSimulation(unsigned int delta_ms);
 
-	// Update the state of any engines assigned to this engine room
-	void									UpdateEngines(void);
-
 	// We store a direct reference to the power generator definition for more efficient runtime access
 	const CSEngineRoomTileDefinition *		GetEngineRoomTileDefinition(void) const { return m_engineroomdef; }
 	void									StoreEngineRoomTileDefinition(const CSEngineRoomTileDefinition *def) { m_engineroomdef = def; }

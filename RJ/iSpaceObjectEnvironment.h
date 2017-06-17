@@ -168,7 +168,7 @@ public:
 	}
 
 	// Returns the index of the tile at the specified location, or -1 if no tile is present
-	int								GetTileAtElementIndex(int element_id) const;
+	int								GetTileAtElement(int element_id) const;
 	int								GetTileAtElementLocation(const INTVECTOR3 & location) const;
 
 	// Registers a new collision with this environment, calculates the effect and begins to apply the effects

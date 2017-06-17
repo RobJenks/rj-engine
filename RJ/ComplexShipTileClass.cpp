@@ -97,6 +97,7 @@ string ComplexShipTileClass::TranslateTypeToString(D::TileClass type)
 		case D::TileClass::Quarters:			return "quarters";
 		case D::TileClass::LifeSupport:			return "lifesupport";
 		case D::TileClass::PowerGenerator:		return "powergenerator";
+		case D::TileClass::EngineRoom:			return "engineroom";
 
 		default:								return "";							
 	}
@@ -115,6 +116,7 @@ D::TileClass ComplexShipTileClass::TranslateStringToType(string type)
 	else if (val == "quarters")					return D::TileClass::Quarters;
 	else if (val == "lifesupport")				return D::TileClass::LifeSupport;
 	else if (val == "powergenerator")			return D::TileClass::PowerGenerator;
+	else if (val == "engineroom")				return D::TileClass::EngineRoom;
 
 	else										return D::TileClass::Unknown;
 }

@@ -42,6 +42,7 @@ public:
 
 	// Returns the equipment mounted on this hardpoint, or NULL if nothing is mounted
 	CMPINLINE Equipment *			GetEquipment()					{ return m_equipment; }
+	CMPINLINE bool					HasEquipment(void) const		{ return (m_equipment != NULL); }
 
 	// Returns the object that ultimately owns this hardpoint, e.g. the ship or ship section
 	iObject * 						GetParentObject(void);

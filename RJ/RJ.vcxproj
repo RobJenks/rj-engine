@@ -387,6 +387,7 @@
     <ClCompile Include="Crew.cpp" />
     <ClCompile Include="CSCorridorTile.cpp" />
     <ClCompile Include="CSEngineRoomTile.cpp" />
+    <ClCompile Include="CSEngineRoomTileDefinition.cpp" />
     <ClCompile Include="CSLifeSupportTile.cpp" />
     <ClCompile Include="CSLifeSupportTileDefinition.cpp" />
     <ClCompile Include="CSPowerGeneratorTile.cpp" />
@@ -617,6 +618,7 @@
     <ClInclude Include="CSCorridorTile.h" />
     <ClInclude Include="CSCorridorTileDefinition.h" />
     <ClInclude Include="CSEngineRoomTile.h" />
+    <ClInclude Include="CSEngineRoomTileDefinition.h" />
     <ClInclude Include="CSLifeSupportTile.h" />
     <ClInclude Include="CSLifeSupportTileDefinition.h" />
     <ClInclude Include="CSPowerGeneratorTile.h" />

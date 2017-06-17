@@ -603,63 +603,21 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_MINUS])
 	{
-
+		std::vector<Hardpoint*> hps = cs()->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
+		for (int i = 0; i < hps.size(); ++i)
+		{
+			if (hps[i]->HasEquipment()) continue;
+			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
+			hps[i]->MountEquipment(eng);
+		}
 
 		Game::Keyboard.LockKey(DIK_MINUS);
 	}
 
 	if (b[DIK_EQUALS])
 	{
-		std::vector<iObject*> objects;
-		int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
-			Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
-		if (count == 0) return;
-		SpaceProjectile *proj = (SpaceProjectile*)objects[0];
-
-		if (b[DIK_LSHIFT])
-		{
-			XMVECTOR dist;
-			XMVECTOR pos = Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.Data(), proj->GetPosition(), dist);
-			proj->SetPosition(pos);
-
-//			Game::PhysicsEngine.PerformCollisionDetection(ss());
-			Game::Keyboard.LockKey(DIK_EQUALS);
-			return;
-		}
-		else
-		{
-			bool result = Game::PhysicsEngine.CheckSingleCollision(cs(), proj);
-			float disttopt = XMVectorGetX(XMVector3Length(XMVectorSubtract(proj->GetPosition(), Game::PhysicsEngine.ClosestPointOnOBB(cs()->CollisionOBB.ConstData(), proj->GetPosition()))));
-			if (result)
-			{
-				OutputDebugString(concat("*** COLLISION: DistToSurface=")(disttopt)("\n").str().c_str());
-				cs()->Highlight.SetColour(XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
-				cs()->Highlight.Activate();
-			}
-			else
-			{
-				cs()->Highlight.Deactivate();
-			}
-			return;
-
-			std::vector<iObject*> objects;
-			int count = Game::ObjectSearch<iObject>::CustomSearch(cs(), 10000.0f, objects,
-				Game::ObjectSearch<iObject>::ObjectIsOfType(iObject::ObjectType::ProjectileObject));
-			for (int i = 0; i < count; ++i)
-			{
-				SpaceProjectile *proj = (SpaceProjectile*)objects[i];
-				if (!proj) continue;
-
-				proj->SetPositionAndOrientation(XMVectorAdd(XMVectorAdd(cs()->GetPosition(), XMVectorSetZ(NULL_VECTOR, -0.5f * cs()->CollisionOBB.ConstData().ExtentF.z)),
-					XMVectorSetZ(ONE_VECTOR, -10.0f)), ID_QUATERNION);
-				proj->PhysicsState.LocalMomentum = XMVectorSetZ(NULL_VECTOR, 950.0f);
-				proj->PhysicsState.WorldMomentum = XMVectorSetZ(NULL_VECTOR, 950.0f);
-
-
-				break;		// Only modify one projectile
-			}
-		}
-
+		cs()->SetTargetSpeedPercentage(b[DIK_LCONTROL] ? 0.0f : 1.0f);
+		
 		Game::Keyboard.LockKey(DIK_EQUALS);
 	}
 	
@@ -2169,7 +2127,7 @@ void RJMain::__CreateDebugScenario(void)
 			css[c]->SetFaction(factions[c]);
 			css[c]->SetShipEngineControl(has_engine_control[c]);
 
-			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
+			//Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
 			//css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
 
 			if (is_armed[c])

@@ -15,6 +15,11 @@ void HpEngine::RecalculateHardpointData()
 {
 	// We need to simply multiply a basis vector by our orientation to get the base thrust vector
 	BaseThrustVector = XMVector3Normalize(XMVector3Rotate(BASIS_VECTOR, Orientation));
+
+	// Make sure we are within the bounds allowed by our equipped engine.  We simply call the 
+	// SetX methods here which will take care of querying the mounted equipment
+	SetThrust(Thrust);
+	SetTargetThrust(TargetThrust);
 }
 
 // Virtual method to allow mounting of class-specific equipment by a call to the base class instance
@@ -130,8 +135,8 @@ void HpEngine::RunToTargetThrust(void)
 
 	// Otherwise if we are below target thrust, increase as far as possible up to that level
 	Engine *e = (Engine*)m_equipment; if (!e) return;
-	if		 (Thrust < TargetThrust) SetThrust(min(Thrust + (e->Acceleration * timeinterval), TargetThrust));
-	else if  (Thrust > TargetThrust) SetThrust(max(Thrust - (e->Acceleration * timeinterval), TargetThrust));
+	if		 (Thrust < TargetThrust) SetThrust(min(Thrust + (e->GetAcceleration() * timeinterval), TargetThrust));
+	else if  (Thrust > TargetThrust) SetThrust(max(Thrust - (e->GetAcceleration() * timeinterval), TargetThrust));
 	
 	// Reset the counter for the next time interval
 	timeinterval = 0.0f;
@@ -146,8 +151,8 @@ void HpEngine::SetThrust(float f_thrust)
 	{
 		// If we do have an engine, constrain the thrust to be in the range permitted by this equipment
 		Engine *e = (Engine*)this->m_equipment;
-		f_thrust = max(f_thrust, e->MinThrust);
-		f_thrust = min(f_thrust, e->MaxThrust);
+		f_thrust = max(f_thrust, e->GetMinThrust());
+		f_thrust = min(f_thrust, e->GetMaxThrust());
 	}
 
 	// Store the new value and recalculate the cached thrust vector
@@ -215,7 +220,7 @@ void HpEngine::UpdateEngineThrustEmitter(void)
 	if (!p) return;
 
 	// Determine current thrust level as a percentage of max possible; quit if possible DIV/0 error
-	float maxthrust = ((Engine*)m_equipment)->MaxThrust;
+	float maxthrust = ((Engine*)m_equipment)->GetMaxThrust();
 	if (maxthrust < Game::C_EPSILON) return;
 	float thrustpc = (Thrust / maxthrust);
 	float invpcsq = (1.0f - thrustpc); invpcsq *= invpcsq;
@@ -250,7 +255,7 @@ void HpEngine::SetTargetThrust(float f_thrust)
 	Engine *e = (Engine*)m_equipment;
 
 	// Set thrust value, making sure to stay within the valid range of values
-	this->TargetThrust = max(min(f_thrust, e->MaxThrust), e->MinThrust);
+	this->TargetThrust = max(min(f_thrust, e->GetMaxThrust()), e->GetMinThrust());
 
 	// Notify the parent ship that our thrust vector is changing, so that it can update the physics model	
 	this->NotifyParentOfThrustChange();
@@ -263,16 +268,16 @@ void HpEngine::SetTargetThrustPercentage(float percentage)
 	Engine *e = (Engine*)m_equipment;
 
 	// Treat differently depending on how min & max thrust are defined
-	if (e->MinThrust < 0 && e->MaxThrust > 0)
+	if (e->GetMinThrust() < 0 && e->GetMaxThrust() > 0)
 	{
 		// If minimum and maximum thrust are either side of zero then also allow -ve percentages
-		if (percentage < 0)	SetTargetThrust(-percentage * e->MinThrust);
-		else				SetTargetThrust( percentage * e->MaxThrust);
+		if (percentage < 0)	SetTargetThrust(-percentage * e->GetMinThrust());
+		else				SetTargetThrust( percentage * e->GetMaxThrust());
 	}
 	else
 	{
 		// Otherwise, simply allow a percentage 0.0-1.0 between min and max thrust
-		SetTargetThrust(e->MinThrust + (percentage * (e->MaxThrust - e->MinThrust)));
+		SetTargetThrust(e->GetMinThrust() + (percentage * (e->GetMaxThrust()- e->GetMinThrust())));
 	}
 }
 
@@ -283,7 +288,7 @@ void HpEngine::IncrementTargetThrust(void)
 	Engine *e = (Engine*)m_equipment;
 
 	// Determine the increment to be applied as a percentage of the total possible thrust range
-	float increment = ((e->MaxThrust - e->MinThrust) / Game::C_THRUST_INCREMENT_PC);
+	float increment = ((e->GetMaxThrust() - e->GetMinThrust()) / Game::C_THRUST_INCREMENT_PC);
 
 	// Update the target thrust by this increment
 	SetTargetThrust(this->TargetThrust + increment);
@@ -297,7 +302,7 @@ void HpEngine::DecrementTargetThrust(void)
 	Engine *e = (Engine*)m_equipment;
 
 	// Determine the -ve increment to be applied as a percentage of the total possible thrust range
-	float increment = ((e->MaxThrust - e->MinThrust) / Game::C_THRUST_INCREMENT_PC);
+	float increment = ((e->GetMaxThrust() - e->GetMinThrust()) / Game::C_THRUST_INCREMENT_PC);
 
 	// Update the target thrust by this increment
 	SetTargetThrust(this->TargetThrust - increment);

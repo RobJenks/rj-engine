@@ -1,9 +1,3 @@
-#include "Modifier.h"
-#include "iSpaceObjectEnvironment.h"
-#include "Hardpoints.h"
-#include "Hardpoint.h"
-#include "HpEngine.h"
-#include "Engine.h"
 #include "CSEngineRoomTileDefinition.h"
 #include "CSEngineRoomTile.h"
 
@@ -18,52 +12,9 @@ CSEngineRoomTile::CSEngineRoomTile(void)
 // Simulation method for this tile
 void CSEngineRoomTile::PerformTileSimulation(unsigned int delta_ms)
 {
-	if (m_powerlevel > 30)
-	{
-		int a = 1;
-	}
-
-	// Update the state of any engines assigned to this engine room
-	UpdateEngines();
-
-	// We no longer need to simulate this tile
-	SetTileSimulationRequired(false);
+	// SetTileSimulationRequired(...)
 }
 
-// Update the state of any engines assigned to this engine room
-void CSEngineRoomTile::UpdateEngines(void)
-{
-	float health_pc = GetHealthPercentage();
-	float power_pc = GetPowerSatisfaction();
-
-	// Build required modifier sets.  For now, both thrust and acceleration will vary 
-	// linearly with modifiers, so we can use one modifier set and calculation are also simpler
-	std::vector<Modifier<float>> modifiers;
-	if (health_pc < 1.0f) modifiers.push_back(Modifier<float>(
-		Modifier<float>::ModifierType::Multiplicative, health_pc, StandardModifiers::DAMAGE_SUSTAINED));
-	if (power_pc < 1.0f) modifiers.push_back(Modifier<float>(
-		Modifier<float>::ModifierType::Multiplicative, power_pc, StandardModifiers::INSUFFICIENT_POWER));
-
-	// Apply the modifiers to any engines owned by this tile
-	std::vector<std::string>::const_iterator it_end = m_hardpoint_refs.end();
-	for (std::vector<std::string>::const_iterator it = m_hardpoint_refs.begin(); it != it_end; ++it)
-	{
-		Hardpoint *hp = m_parent->GetHardpoints().Get(*it);
-		if (!hp) continue;
-		if (!hp->GetType() == Equip::Class::Engine) continue;
-
-		HpEngine *hpe = (HpEngine*)hp;
-		Engine *engine = hpe->GetEngine();
-		if (!engine) continue;
-		
-		engine->SetMinThrustModifiers(modifiers);
-		engine->SetMaxThrustModifiers(modifiers);
-		engine->SetAccelerationModifiers(modifiers);
-
-		// Trigger a notification event for this hardpoint
-		hpe->NotifyParentOfThrustChange();
-	}
-}
 
 // Virtual inherited method to make a copy of this tile and return it
 ComplexShipTile * CSEngineRoomTile::Copy(void) const

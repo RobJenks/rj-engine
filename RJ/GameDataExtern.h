@@ -61,7 +61,17 @@ namespace D {
 
 
 	// Enumeration of possible complex ship tile types
-	enum TileClass { Unknown = 0, Corridor, Quarters, PowerGenerator, Coolant, LifeSupport, _COUNT };
+	enum TileClass 
+	{ 
+		Unknown = 0, 
+		Corridor, 
+		Quarters, 
+		PowerGenerator, 
+		LifeSupport, 
+		EngineRoom,
+		Coolant,
+		_COUNT 
+	};
 
 	// The user interface
 	extern UserInterface					*UI;

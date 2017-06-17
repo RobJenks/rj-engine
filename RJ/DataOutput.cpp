@@ -574,8 +574,9 @@ Result IO::Data::SaveEngine(TiXmlElement *parent, Engine *e)
 	// Now create child nodes for basic ship data
 	IO::Data::LinkStringXMLElement("Name", e->Name, node);
 	IO::Data::LinkDoubleXMLElement("MaxHealth", e->GetMaxHealth(), node);
-	IO::Data::LinkDoubleXMLElement("MaxThrust", e->MaxThrust, node);
-	IO::Data::LinkDoubleXMLElement("Acceleration", e->Acceleration, node);
+	IO::Data::LinkDoubleXMLElement("MinThrust", e->GetMinThrust(), node);
+	IO::Data::LinkDoubleXMLElement("MaxThrust", e->GetMaxThrust(), node);
+	IO::Data::LinkDoubleXMLElement("Acceleration", e->GetAcceleration(), node);
 
 	// Finally, link the new node to the parent and return success
 	parent->LinkEndChild(node);

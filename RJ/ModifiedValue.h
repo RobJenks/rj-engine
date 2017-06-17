@@ -43,6 +43,7 @@ public:
 	}
 
 	// Adds a new modifier
+	// TODO: Should probably define a Modifier move constructor and then pass around by value only, since they are only comprised of three values
 	CMPINLINE void								AddModifier(const Modifier<T> & modifier)				
 	{ 
 		m_modifiers.push_back(modifier); 
@@ -79,8 +80,9 @@ public:
 	// Retrieves a constant reference to the full modifier set for this value
 	CMPINLINE typename const Modifier<T>::ModifierSet &	GetModifiers(void) const	{ return m_modifiers; }
 
-	// Sets modifiers for this value based on a constant reference to the modifiers of another
+	// Sets modifiers for this value based on a constant l/r value reference to the modifiers of another
 	void										SetModifiers(typename const Modifier<T>::ModifierSet & modifiers);
+	void										SetModifiers(typename Modifier<T>::ModifierSet && modifiers);
 
 	// Suspends recalculation of the value, e.g. while multiple modifiers are being applied
 	CMPINLINE void								SuspendUpdates(void)		{ m_update_suspended = true; }
@@ -268,7 +270,16 @@ template <typename T>
 void ModifiedValue<T>::SetModifiers(typename const Modifier<T>::ModifierSet & modifiers)
 {
 	// Simply use direct vector assignment and then recalculate the current value
-	this->m_modifiers = modifiers;
+	m_modifiers = modifiers;
+	RecalculateValue();
+}
+
+// Sets modifiers for this value based on a movable rvalue reference to the modifiers of another
+template <typename T>
+void ModifiedValue<T>::SetModifiers(typename Modifier<T>::ModifierSet && modifiers)
+{
+	// Simply use direct vector assignment and then recalculate the current value
+	m_modifiers = modifiers;
 	RecalculateValue();
 }
 

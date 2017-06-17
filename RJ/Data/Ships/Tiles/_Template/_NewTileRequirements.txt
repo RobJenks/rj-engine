@@ -1,0 +1,11 @@
+GameDataExtern			D::TileClass
+(New)				CS___Tile class
+(New)				CS___TileDefinition class
+DebugCommandHandler		ExecuteDebugCommandOnObjectTile
+ComplexShipTileClasses.xml	Add entry
+ComplexShipTileDefinitions.xml	Add entry
+(New)				Ships/Tiles/___Tiles.xml
+ComplexShipTile			ComplexShipTile::New
+ComplexShipTileClass		TranslateTypeToString
+ComplexShipTileClass		TranslateStringToType
+ComplexShipTileDefinition	ComplexShipTileDefinition::Create

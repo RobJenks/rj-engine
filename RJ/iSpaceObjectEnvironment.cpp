@@ -253,6 +253,8 @@ void iSpaceObjectEnvironment::PerformPowerUpdate(void)
 
 		tile->SetPowerLevel(max_power);
 	}
+
+	OutputDebugString("Performing power update\n");
 }
 
 // Performs an update of environment oxygen levels, based on each life support system in the ship
@@ -2368,7 +2370,7 @@ INTVECTOR2 iSpaceObjectEnvironment::GetElementRange(int zlevel)
 
 // Returns the index of the tile at the specified index, or -1 if no tile is present
 // No validation on element_id; relies on this being passed as a valid index
-int iSpaceObjectEnvironment::GetTileAtElementIndex(int element_id) const
+int iSpaceObjectEnvironment::GetTileAtElement(int element_id) const
 {
 	const ComplexShipTile *tile = m_elements[element_id].GetTile();
 	return (tile ? tile->GetID() : -1);
@@ -2748,7 +2750,7 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetTotalOxygenInEnvironment)
 	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevel, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
-	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementIndex, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElement, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 
 	// Mutator methods
@@ -2779,7 +2781,5 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		Ship::ProcessDebugCommand(command);
 }
 
-
-*** HARDPOINT ADDITION/REMOVAL WITH TILES NOW WORKS CORRECTLY.  ADD NEW TILE TYPE (ENGINEROOM) WHICH COMES WITH ENGINE HARDPOINTS INCLUDED ***
 
 

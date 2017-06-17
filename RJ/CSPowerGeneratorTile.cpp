@@ -54,8 +54,6 @@ void CSPowerGeneratorTile::PerformTileSimulation(unsigned int delta_ms)
 	// Update the current power level
 	m_current_output.Update(delta_ms);
 
-	OutputDebugString(concat("PowerGen (Simulating ")(Game::ClockMs)("): Power output = ")(m_current_output.Value)(", Target = ")(m_current_output.Target)("\n").str().c_str());
-
 	// The environment needs to be update its power simulation based on our update
 	m_parent->UpdatePower();
 
@@ -109,28 +107,28 @@ void CSPowerGeneratorTile::ProcessDebugTileCommand(GameConsoleCommand & command)
 	// Debug functions are largely handled via macros for convenience
 	INIT_DEBUG_TILE_FN_TESTING(command)
 
-		// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
-		// Parameter(0) is the already-matched object ID, Parameter(2) is the already-matched tile ID, and Parameter(3) is the function name
-		// We therefore pass Parameter(4) onwards as arguments
+	// Attempt to execute the function.  Relies on data and code added by the init function, so maintain this format for all methods
+	// Parameter(0) is the already-matched object ID, Parameter(2) is the already-matched tile ID, and Parameter(3) is the function name
+	// We therefore pass Parameter(4) onwards as arguments
 
-		// Accessor methods
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(GetPowerOutput)
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTargetPowerLevel)
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(AtTargetPowerLevel)
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(GetMaximumOutput)
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(GetChangeRate)
-		REGISTER_DEBUG_TILE_ACCESSOR_FN(GetOverloadMultiplier)
+	// Accessor methods
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetPowerOutput)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTargetPowerLevel)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(AtTargetPowerLevel)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetMaximumOutput)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetChangeRate)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetOverloadMultiplier)
 
-		// Mutator methods
-		REGISTER_DEBUG_TILE_FN(PerformTileSimulation, (unsigned int)command.ParameterAsInt(4))
-		REGISTER_DEBUG_TILE_FN(SetPowerOutputTarget, (Power::Type)command.ParameterAsInt(4))
-		REGISTER_DEBUG_TILE_FN(SetMaximumOutput, (Power::Type)command.ParameterAsInt(4))
-		REGISTER_DEBUG_TILE_FN(SetChangeRate, (Power::Type)command.ParameterAsInt(4))
-		REGISTER_DEBUG_TILE_FN(SetOverloadMultiplier, command.ParameterAsFloat(4))
-		REGISTER_DEBUG_TILE_FN(RecalculateParameters)
+	// Mutator methods
+	REGISTER_DEBUG_TILE_FN(PerformTileSimulation, (unsigned int)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetPowerOutputTarget, (Power::Type)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetMaximumOutput, (Power::Type)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetChangeRate, (Power::Type)command.ParameterAsInt(4))
+	REGISTER_DEBUG_TILE_FN(SetOverloadMultiplier, command.ParameterAsFloat(4))
+	REGISTER_DEBUG_TILE_FN(RecalculateParameters)
 
-		// Pass back to our base class if we could not handle the command
-		if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		ComplexShipTile::ProcessDebugTileCommand(command);
+	// Pass back to our base class if we could not handle the command
+	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		ComplexShipTile::ProcessDebugTileCommand(command);
 
 }
 

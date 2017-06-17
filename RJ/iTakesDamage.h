@@ -16,7 +16,7 @@ class iTakesDamage
 public:
 
 	// Constructor
-	iTakesDamage(void)					: m_maxhealth(1.0f), m_health(1.0f), m_is_invulnerable(false)		{ } 
+	iTakesDamage(void)					: m_maxhealth(1.0f), m_maxhealth_recip(1.0f), m_health(1.0f), m_is_invulnerable(false)		{ } 
 
 	// Destructor
 	~iTakesDamage(void);
@@ -51,8 +51,12 @@ public:
 	CMPINLINE void						SetMaxHealth(Game::HitPoints max_health)		
 	{ 
 		m_maxhealth = max(1.0f, max_health); 
+		m_maxhealth_recip = (1.0f / m_maxhealth);
 		if (m_health > m_maxhealth) SetHealth(m_maxhealth);
 	}
+
+	// Return the current health of the entity as a percentage of maximum
+	CMPINLINE float						GetHealthPercentage(void) const { return (m_health * m_maxhealth_recip); }
 
 	// Check or set whether this object is invulnerable, i.e. takes no damage of any kind
 	CMPINLINE bool						IsInvulnerable(void) const						{ return m_is_invulnerable; }
@@ -110,6 +114,7 @@ protected:
 	// Hit points
 	Game::HitPoints						m_health;
 	Game::HitPoints						m_maxhealth;
+	Game::HitPoints						m_maxhealth_recip;
 
 	// Entity may have resistances to one or more types of damage
 	DamageResistanceSet					m_damageresistance;

@@ -5,3 +5,9 @@ DMod(SOME_MODIFIER)
 // Modifiers applying to actor attributes
 DMod(ACTOR_AGILITY_EFFECT_ON_RUN_SPEED)
 DMod(ACTOR_CONSTITUTION_EFFECT_ON_HEALTH)
+
+// Generally-applicable basic modifiers
+DMod(DAMAGE_SUSTAINED)
+DMod(INSUFFICIENT_POWER)
+
+

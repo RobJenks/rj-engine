@@ -27,6 +27,7 @@
 #include "CSQuartersTile.h"
 #include "CSLifeSupportTile.h"
 #include "CSPowerGeneratorTile.h"
+#include "CSEngineRoomTile.h"
 
 
 #include "DebugCommandHandler.h"
@@ -284,6 +285,7 @@ void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameC
 		case D::TileClass::Quarters:		((CSQuartersTile*)tile)->ProcessDebugTileCommand(command);			return;
 		case D::TileClass::LifeSupport:		((CSLifeSupportTile*)tile)->ProcessDebugTileCommand(command);		return;
 		case D::TileClass::PowerGenerator:	((CSPowerGeneratorTile*)tile)->ProcessDebugTileCommand(command);	return;
+		case D::TileClass::EngineRoom:		((CSEngineRoomTile*)tile)->ProcessDebugTileCommand(command);		return;
 	}
 
 	// Return error since we cannot currently handle this tile class

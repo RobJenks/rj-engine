@@ -1,5 +1,9 @@
 <GameData>
 
-  <ModifierDetails id="SOME_MODIFIER" desc="Some other modifier" />
+  <ModifierDetails id="SOME_MODIFIER" desc="Some modifier" />
   
+  <!-- Basic & general modifiers -->
+  <ModifierDetails id="DAMAGE_SUSTAINED" desc="Damage sustained" />
+  <ModifierDetails id="INSUFFICIENT_POWER" desc="Insufficient power" />
+
 </GameData>

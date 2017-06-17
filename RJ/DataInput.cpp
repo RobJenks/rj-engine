@@ -2545,15 +2545,15 @@ Result IO::Data::LoadEngine(TiXmlElement *node)
 		}
 		else if (key == "maxthrust") {
 			c_val = child->GetText();
-			e->BaseMaxThrust = e->MaxThrust = (float)atof(c_val);		// Defaults to 0.0f if no conversion possible
+			e->SetBaseMaxThrust((float)atof(c_val));					// Defaults to 0.0f if no conversion possible
 		}
 		else if (key == "minthrust") {
 			c_val = child->GetText();
-			e->BaseMinThrust = e->MinThrust = (float)atof(c_val);		// Defaults to 0.0f if no conversion possible
+			e->SetBaseMinThrust((float)atof(c_val));					// Defaults to 0.0f if no conversion possible
 		}
 		else if (key == "acceleration") {
 			c_val = child->GetText();
-			e->Acceleration = (float)atof(c_val);						// Defaults to 0.0f if no conversion possible
+			e->SetBaseAcceleration((float)atof(c_val));					// Defaults to 0.0f if no conversion possible
 		}
 		else if (key == "emitterclass") {
 			e->EmitterClass = child->GetText();

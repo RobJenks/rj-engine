@@ -49,8 +49,6 @@ void CSLifeSupportTile::PerformTileSimulation(unsigned int delta_ms)
 		SetTileSimulationRequired( Gravity.Value != 0.0f || OxygenLevel.Value != 0.0f );
 	}
 
-	OutputDebugString(concat("Simulation LS tile; Power level = ")(m_powerlevel)(", IsPowered = ")(IsPowered())(", oxygen output = ")(OxygenLevel.Value)(" with targat ")(OxygenLevel.Target)("\n").str().c_str());
-
 	// Trigger an update of the parent environment based on this change
 	m_parent->UpdateGravity();
 	m_parent->UpdateOxygen();
