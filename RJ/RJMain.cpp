@@ -2111,7 +2111,7 @@ void RJMain::__CreateDebugScenario(void)
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { false, false };
-		bool has_engine_control[2] = { false, false };
+		bool has_engine_control[2] = { true, true};
 		int create_count = 1; // 2
 
 		css[0] = NULL; css[1] = NULL;
