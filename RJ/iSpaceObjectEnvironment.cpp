@@ -105,6 +105,7 @@ void iSpaceObjectEnvironment::SimulateObject(void)
 		// Test whether the tile actually requires simulation (e.g. basic tile types do not have any simulation logic, and 
 		// most tiles are simulated at intervals so will not require any simulation time on most cycles)
 		tile = (*t_it).value;
+
 		if (tile && tile->RequiresSimulation())
 		{
 			// Call the tile simulation method

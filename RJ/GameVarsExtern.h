@@ -298,6 +298,7 @@ namespace Game {
 	// Default tile simulation values
 	extern unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL;
 	extern unsigned int C_TILE_POWERGENERATOR_SIMULATION_INTERVAL;
+	extern unsigned int C_TILE_ENGINEROOM_SIMULATION_INTERVAL;
 
 	// Convert from grid location to physical position in 3D space
 	CMPINLINE float						ElementLocationToPhysicalPosition(int location) 

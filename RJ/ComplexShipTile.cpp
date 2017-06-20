@@ -78,7 +78,7 @@ ComplexShipTile::ComplexShipTile(void)
 	// By default, tiles will not be simulated
 	m_requiressimulation = false;
 	m_simulationinterval = 1000U;
-	m_lastsimulation = 0U;
+	m_lastsimulation = Game::ClockMs;
 }
 
 
@@ -279,15 +279,10 @@ void ComplexShipTile::SetPowerLevel(Power::Type power)
 	// Store the new power level
 	m_powerlevel = power; 
 
-	if (m_classtype == D::TileClass::EngineRoom)
-	{
-		int a = 1;	// REMOVE
-	}
-
 	// Simulate the tile next frame to account for the change in power level, UNLESS this is a
 	// power generation tile.  If that is the case, activating simulation would result in a cycle
 	// of power emission > simulation required > power emission > simulation required > ...
-	if (m_classtype != D::TileClass::PowerGenerator) SetTileSimulationRequired(true);
+	if (m_classtype != D::TileClass::PowerGenerator) ActivateSimulation();
 }
 
 // Event generated before the tile is added to an environment

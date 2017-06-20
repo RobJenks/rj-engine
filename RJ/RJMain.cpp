@@ -2358,17 +2358,26 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
-	{
-		long zd = Game::Mouse.GetZDelta();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "zdelta = %d", zd);
+	{		
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Power = %d, Max thrust = %.2f, Max reverse = %.2f", 
+			cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetPowerLevel(), 
+			cs()->GetMaximumPossibleEngineThrust(), cs()->GetMaximumPossibleReverseEngineThrust());
 		
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 
-	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g.CS impact momentum? ***
+	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
 
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
+
+*** ADD A FEW KEY/MOUSEBINDINGS, E.G. MOUSE1 = FIRE IN SIMPLESHIP FOR NOW ***
+*** REVISIT ON-FOOT MODE AND WALKING MECHANIC INSIDE TILES ***
+
+
+
+
+
 

@@ -10,24 +10,19 @@
 // Default constructor
 CSEngineRoomTile::CSEngineRoomTile(void)
 {
-	// Activate simulation if this tile does require periodic (as opposed to ad-hoc) simulation
-	// ActivateSimulation(...);
+	// This tile will be simulated frequently during updates (but will otherwise be deactivated for most of the time)
+	SetSimulationInterval(Game::C_TILE_ENGINEROOM_SIMULATION_INTERVAL);
 }
 
 
 // Simulation method for this tile
 void CSEngineRoomTile::PerformTileSimulation(unsigned int delta_ms)
 {
-	if (m_powerlevel > 30)
-	{
-		int a = 1; // REMOVE
-	}
-
 	// Update the state of any engines assigned to this engine room
 	UpdateEngines();
 
 	// We no longer need to simulate this tile
-	SetTileSimulationRequired(false);
+	DeactivateSimulation();
 }
 
 // Update the state of any engines assigned to this engine room
@@ -49,8 +44,7 @@ void CSEngineRoomTile::UpdateEngines(void)
 	for (std::vector<std::string>::const_iterator it = m_hardpoint_refs.begin(); it != it_end; ++it)
 	{
 		Hardpoint *hp = m_parent->GetHardpoints().Get(*it);
-		if (!hp) continue;
-		if (!hp->GetType() == Equip::Class::Engine) continue;
+		if (!hp || hp->GetType() != Equip::Class::Engine ) continue;
 
 		HpEngine *hpe = (HpEngine*)hp;
 		Engine *engine = hpe->GetEngine();

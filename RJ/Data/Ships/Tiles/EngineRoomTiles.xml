@@ -6,7 +6,7 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="1" y="1" z="1" />
     <Level>1</Level>
-    <PowerRequirement>70</PowerRequirement>
+    <PowerRequirement>100</PowerRequirement>
     
 <!--
     <CompoundTileModelData>

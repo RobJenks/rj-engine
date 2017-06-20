@@ -54,7 +54,7 @@ void CSPowerGeneratorTile::PerformTileSimulation(unsigned int delta_ms)
 	// Update the current power level
 	m_current_output.Update(delta_ms);
 
-	// The environment needs to be update its power simulation based on our update
+	// The environment needs to update its power simulation based on our update
 	m_parent->UpdatePower();
 
 	// We want to continue simulating the tile if we are not yet at target power levels
