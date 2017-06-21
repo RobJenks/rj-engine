@@ -2373,11 +2373,6 @@ void RJMain::DEBUGDisplayInfo(void)
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
 
-*** ADD A FEW KEY/MOUSEBINDINGS, E.G. MOUSE1 = FIRE IN SIMPLESHIP FOR NOW ***
-*** REVISIT ON-FOOT MODE AND WALKING MECHANIC INSIDE TILES ***
-
-
-
 
 
 

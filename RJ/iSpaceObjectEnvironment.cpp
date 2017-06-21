@@ -254,8 +254,6 @@ void iSpaceObjectEnvironment::PerformPowerUpdate(void)
 
 		tile->SetPowerLevel(max_power);
 	}
-
-	OutputDebugString("Performing power update\n");
 }
 
 // Performs an update of environment oxygen levels, based on each life support system in the ship

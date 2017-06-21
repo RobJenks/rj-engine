@@ -682,10 +682,6 @@ void ComplexShipTile::DestroyObject(void)
 
 	// Apply any destruction effect
 
-	// Debug logging
-	OutputDebugString(concat("Destruction of Tile (ID=")(m_id)(", Class=")
-		(m_definition ? m_definition->GetCode() : "<null>")(")\n").str().c_str());
-
 	// Destroy all terrain objects owned by this tile
 	DestroyAllOwnedTerrain();
 
