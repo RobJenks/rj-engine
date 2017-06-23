@@ -201,8 +201,8 @@ namespace Game {
 	float C_DEBUG_CAMERA_ROLL_SPEED = 2.0f;					// The speed at which the debug camera will revert its roll component
 
 	// Player-related contants
-	float C_PLAYER_MOUSE_TURN_MODIFIER_YAW = 50.0f;			// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
-	float C_PLAYER_MOUSE_TURN_MODIFIER_PITCH = 150.0f;		// Modifier to pitch speed (about X) when using the mouse, i.e. the mouse sensitivity
+	float C_PLAYER_MOUSE_TURN_MODIFIER_YAW = 10.0f;			// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
+	float C_PLAYER_MOUSE_TURN_MODIFIER_PITCH = 15.0f;		// Modifier to pitch speed (about X) when using the mouse, i.e. the mouse sensitivity
 	float C_PLAYER_PITCH_MIN = PI * -0.4f;					// Minimum possible pitch of the player view (i.e. furthest extent we can look down)
 	float C_PLAYER_PITCH_MAX = PI * 0.4f;					// Maximum possible pitch of the player view (i.e. furthest extent we can look up)
 	float C_THRUST_INCREMENT_PC = 0.2f;						// Percentage of total thrust range that will be incremented/decremented by player throttle each second

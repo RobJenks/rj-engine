@@ -145,6 +145,9 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	// Trigger the window resize event to ensure the engine has the latest window/screen parameters
 	WindowResized();
 
+	// Hide the system cursor
+	SetSystemCursorVisibility(false);
+
 	// Initialise all render flags to their default values
 	res = InitialiseRenderFlags();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -1140,6 +1143,12 @@ void CoreEngine::WindowResized(void)
 	// Update any dependent calculations
 	m_projscreen = XMMatrixMultiply(XMMatrixTranslation(1.0f, -1.0f, 0.0f), XMMatrixScaling(Game::ScreenWidth * 0.5f, Game::ScreenHeight * -0.5f, 1.0f));
 
+}
+
+// Set the visibility state of the system cursor
+void CoreEngine::SetSystemCursorVisibility(bool cursor_visible)
+{
+	ShowCursor(cursor_visible ? TRUE : FALSE);
 }
 
 

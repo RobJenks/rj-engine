@@ -331,6 +331,9 @@ public:
 	// Function to return the per-frame render info
 	CMPINLINE EngineRenderInfoData GetRenderInfo(void) { return m_renderinfo; }
 
+	// Set the visibility state of the system cursor
+	void SetSystemCursorVisibility(bool cursor_visible);
+
 	// Event triggered when the application window is resized
 	void WindowResized(void);
 
