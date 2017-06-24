@@ -1,6 +1,13 @@
 #include "ErrorCodes.h"
+#include "Utility.h"
 #include "Logging.h"
 #include "AudioManager.h"
+
+// Initialise static constant values
+const float AudioManager::DEFAULT_VOLUME = 1.0f;
+const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
+const float AudioManager::DEFAULT_PAN = 0.0f;
+
 
 
 // Default constructor
@@ -24,6 +31,10 @@ Result AudioManager::Initialise(void)
 	Game::Log << LOG_INFO << "Initialising audio engine (" << engine_flags << ")\n";
 	m_engine = new DirectX::AudioEngine(engine_flags);
 
+
+	effect = new DirectX::SoundEffect(m_engine, L"C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ\\RJ\\Data\\Audio\\test1.wav");
+	
+		
 	// Return success
 	return ErrorCodes::NoError;
 }
@@ -56,6 +67,42 @@ void AudioManager::Update(void)
 	}
 }
 
+// Play a one-shot sound effect based on the specified audio resource.  Less efficient than playing a
+// pre-loaded audio effect, so should be used sparingly
+// Volume: default = 1
+// PitchShift: In the range [-1 +1], default with no shift = 0
+// Pan: In the range [-1 = full left, +1 = full right], default with no panning = 0
+void AudioManager::PlayOneShot(const wchar_t *filename, float volume, float pitch_shift, float pan) const
+{ 
+
+	effect->Play(volume, pitch_shift, pan);
+}
+
+// Play a one-shot sound effect based on the specified audio resource.  Less efficient than playing a
+// pre-loaded audio effect, so should be used sparingly
+// Volume: default = 1
+// PitchShift: In the range [-1 +1], default with no shift = 0
+// Pan: In the range [-1 = full left, +1 = full right], default with no panning = 0
+void AudioManager::PlayOneShot(const std::string & filename, float volume, float pitch_shift, float pan) const
+{
+	std::wstring wstr = ConvertStringToWString(filename);
+	PlayOneShot(wstr.c_str(), volume, pitch_shift, pan);
+}
+
+// Play a one-shot sound effect based on the specified audio resource.  Less efficient than playing a
+// pre-loaded audio effect, so should be used sparingly
+void AudioManager::PlayOneShot(const wchar_t *filename)
+{
+	PlayOneShot(filename, DEFAULT_VOLUME, DEFAULT_PITCH_SHIFT, DEFAULT_PAN);
+}
+
+// Play a one-shot sound effect based on the specified audio resource.  Less efficient than playing a
+// pre-loaded audio effect, so should be used sparingly
+void AudioManager::PlayOneShot(const std::string & filename)
+{
+	std::wstring wstr = ConvertStringToWString(filename);
+	PlayOneShot(wstr.c_str(), DEFAULT_VOLUME, DEFAULT_PITCH_SHIFT, DEFAULT_PAN);
+}
 
 
 

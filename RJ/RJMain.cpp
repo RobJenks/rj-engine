@@ -801,7 +801,8 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_I]) {
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_obb ")(b[DIK_LSHIFT] ? "false" : "true").str()));
+		
+		Game::Engine->GetAudioManager()->PlayOneShot(L"C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ\\RJ\\Data\\Audio\\test1.wav");
 
 		Game::Keyboard.LockKey(DIK_I);
 	}
