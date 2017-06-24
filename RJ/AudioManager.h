@@ -26,6 +26,7 @@ public:
 
 private:
 
+	DirectX::AudioEngine *								m_engine;
 
 
 };

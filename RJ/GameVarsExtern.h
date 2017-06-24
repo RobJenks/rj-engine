@@ -95,9 +95,6 @@ namespace Game {
 	// Faction manager, which maintains the central record of all faction and the relationships between them
 	extern FactionManagerObject FactionManager;
 
-	// Central logging component
-	extern LogManager Log;
-
 	// The game console, which processes all incoming console commands
 	extern GameConsole Console;
 	extern DebugCommandHandler DebugCommandManager;
@@ -137,7 +134,6 @@ namespace Game {
 	enum EntityType { E_Unknown = 0, E_Object, E_Element, E_Tile, E_BasicProjectile, E_SpaceSystem };
 
 	// General application constants
-	extern int C_LOG_FLUSH_INTERVAL;
 	extern unsigned int C_MAX_FRAME_DELTA;				// Maximum frame delta (ms)
 
 	// File input/output constants

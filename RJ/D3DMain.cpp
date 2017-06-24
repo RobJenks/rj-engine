@@ -1,6 +1,6 @@
 #include "ErrorCodes.h"
 
-#include "LogManager.h"
+#include "Logging.h"
 #include "DX11_Core.h"
 #include "FastMath.h"
 

@@ -13,6 +13,7 @@
 
 #include "FastMath.h"
 #include "FileSystem.h"
+#include "Logging.h"
 #include "Octree.h"
 #include "OctreePruner.h"
 #include "GameSpatialPartitioningTrees.h"
@@ -1107,6 +1108,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
+
+	// Set COM initialisation method for the current thread
+	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 
 	// Record the name of and path to the current executable (TODO: Windows only)
 	RetrieveExecutableData();

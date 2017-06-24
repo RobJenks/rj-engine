@@ -3,6 +3,7 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameVarsExtern.h"
+#include "Logging.h"
 #include "ComplexShipElement.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"

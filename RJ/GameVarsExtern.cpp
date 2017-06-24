@@ -87,9 +87,6 @@ namespace Game {
 	// Faction manager, which maintains the central record of all faction and the relationships between them
 	FactionManagerObject			FactionManager = FactionManagerObject();
 
-	// Central logging component
-	LogManager						Log;
-
 	// The game console, which processes all incoming console commands
 	GameConsole						Console = GameConsole();
 	DebugCommandHandler				DebugCommandManager = DebugCommandHandler();
@@ -117,7 +114,6 @@ namespace Game {
 	const clock_t C_SECONDS_PER_CLOCK = (const clock_t)1.0 / (const clock_t)CLOCKS_PER_SEC;
 
 	// General application constants
-	int C_LOG_FLUSH_INTERVAL = 5000;
 	unsigned int C_MAX_FRAME_DELTA = 200;					// Maximum frame delta of 200ms (= minimum 5 FPS)
 
 	// File input/output constants

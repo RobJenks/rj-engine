@@ -8,6 +8,7 @@
 #include "CoreEngine.h"
 #include "Utility.h"
 #include "HashFunctions.h"
+#include "Logging.h"
 #include "FileSystem.h"
 #include "FileInput.h"
 #include "Attachment.h"

@@ -1,7 +1,7 @@
 #include <string>
 #include <unordered_map>
 #include "DX11_Core.h"
-#include "LogManager.h"
+#include "Logging.h"
 #include "SpaceSystem.h"
 
 #include "GameUniverse.h"

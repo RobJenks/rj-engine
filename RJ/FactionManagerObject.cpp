@@ -1,6 +1,6 @@
 #include "Utility.h"
 #include "ErrorCodes.h"
-#include "LogManager.h"
+#include "Logging.h"
 #include "Faction.h"
 
 #include "FactionManagerObject.h"

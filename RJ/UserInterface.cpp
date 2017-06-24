@@ -2,6 +2,7 @@
 
 #include "ErrorCodes.h"
 #include "Utility.h"
+#include "Logging.h"
 #include "CoreEngine.h"
 #include "RJMain.h"
 #include "TextManager.h"
