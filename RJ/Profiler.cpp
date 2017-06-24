@@ -23,6 +23,7 @@
 			ProfilingData[ProfiledFunctions::Prf_SimulateSpaceObjectMovement].description = "Simulate objects";
 			ProfilingData[ProfiledFunctions::Prf_CollisionDetection].description = "Collision detection";
 			ProfilingData[ProfiledFunctions::Prf_UpdateRegions].description = "Update regions";
+			ProfilingData[ProfiledFunctions::Prf_UpdateAudio].description = "Update audio";
 			ProfilingData[ProfiledFunctions::Prf_Render].description = "Render";
 			ProfilingData[ProfiledFunctions::Prf_Render_AnalyseFrameLighting].description = "Render lighting analysis";
 			ProfilingData[ProfiledFunctions::Prf_Render_SimpleShips].description = "Render simple ships";

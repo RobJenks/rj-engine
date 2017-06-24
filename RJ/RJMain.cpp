@@ -22,6 +22,7 @@
 #include "CoreEngine.h"
 #include "D3DMain.h"
 #include "CameraClass.h"
+#include "AudioManager.h"
 #include "LightShader.h"
 
 #include "ParticleEngine.h"
@@ -333,6 +334,13 @@ bool RJMain::Display(void)
 			UpdateRegions();
 		}
 		RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_UpdateRegions);
+
+		// Perform any required audio updates
+		RJ_FRAME_PROFILER_CHECKPOINT("Performing audio update");
+		RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_UpdateAudio)
+		{
+			Game::Engine->GetAudioManager()->Update();
+		}
 
 		// Update the player state, including camera view calculation etc. for rendering
 		RJ_FRAME_PROFILER_CHECKPOINT("Updating player state");

@@ -20,12 +20,13 @@
 // The functions in scope for profiling, and struct definition for holding the data
 namespace Profiler {
 	enum ProfiledFunctions {
-		Prf_BeginCycle = 0,							
-		Prf_ProcessInput,							
-		Prf_CentralScheduler,						
-		Prf_SimulateSpaceObjectMovement,			
-		Prf_CollisionDetection,						
-		Prf_UpdateRegions,							
+		Prf_BeginCycle = 0,
+		Prf_ProcessInput,
+		Prf_CentralScheduler,
+		Prf_SimulateSpaceObjectMovement,
+		Prf_CollisionDetection,
+		Prf_UpdateRegions,
+		Prf_UpdateAudio,
 		Prf_Render,									
 		Prf_Render_AnalyseFrameLighting,
 		Prf_Render_SimpleShips,						

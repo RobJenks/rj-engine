@@ -6,7 +6,7 @@
 // Default constructor
 AudioManager::AudioManager(void)
 	:
-	m_engine(NULL)
+	m_engine(NULL), m_in_error_state(false)
 {
 }
 
@@ -28,6 +28,33 @@ Result AudioManager::Initialise(void)
 	return ErrorCodes::NoError;
 }
 
+// Per-frame update method
+void AudioManager::Update(void)
+{
+	if (!m_engine->Update())
+	{
+		// Engine component will return false if no audio processing was performed this frame.  This
+		// may be because there is nothing to process, or it may be due to an error (e.g. loss of speaker
+		// connectivity).  Test for the latter case here and handle appropriately
+		if (m_engine->IsCriticalError())
+		{
+			// TODO: Handle critical audio engine failures with e.g. reset/re-initialise
+			if (!m_in_error_state)
+			{
+				m_in_error_state = true;
+				Game::Log << LOG_ERROR << "Audio engine encountered critical error\n";
+				return;
+			}
+		}
+	}
+	
+	// Audio engine is operating normally; raise a notification if this was not previously the case
+	if (m_in_error_state)
+	{
+		m_in_error_state = false;
+		Game::Log << LOG_INFO << "Audio engine recovered from critical error\n";
+	}
+}
 
 
 

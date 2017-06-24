@@ -131,6 +131,7 @@ public:
 	CMPINLINE ParticleEngine *GetParticleEngine()		{ return m_particleengine; }
 	CMPINLINE Render2DManager *Get2DRenderManager()		{ return m_render2d; }
 	CMPINLINE OverlayRenderer *GetOverlayRenderer()		{ return m_overlayrenderer; }
+	CMPINLINE AudioManager	  *GetAudioManager()		{ return m_audiomanager; }
 
 	// Methods to retrieve a reference to key shaders implemented by the engine
 	CMPINLINE	FireShader *				GetFireShader(void)						{ return m_fireshader; }
