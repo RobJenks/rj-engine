@@ -36,6 +36,14 @@ public:
 	// Load all audio resources that have not yet been loaded
 	Result								LoadAllAudioResources(void);
 
+	// Release the specified audio resource.  Audio item is preserved, but resource must be
+	// re-loaded before it can be used again
+	void								ReleaseAudioResource(AudioItem::AudioID id);
+
+	// Releases all audio resources.  Audio items are preserved, but resources must be re-loaded 
+	// before they can be used
+	void								ReleaseAllAudioResources(void);
+
 	// Determines whether the supplied audio ID is valid
 	CMPINLINE bool						IsValidID(AudioItem::AudioID id) const { return (id > 0U && id < m_audio_count); }
 

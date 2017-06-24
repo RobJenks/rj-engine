@@ -188,9 +188,35 @@ void AudioManager::Play(const std::string & name, float volume, float pitch_shif
 }
 
 
+
+
+// Release the specified audio resource.  Audio item is preserved, but resource must be
+// re-loaded before it can be used again
+void AudioManager::ReleaseAudioResource(AudioItem::AudioID id)
+{
+	if (!IsValidID(id)) return;
+	m_sounds[id].ReleaseResources();
+}
+
+// Releases all audio resources.  Audio items are preserved, but resources must be re-loaded 
+// before they can be used
+void AudioManager::ReleaseAllAudioResources(void)
+{
+	// Process every item, excluding the NULL_AUDIO item at id == 0
+	for (AudioItem::AudioID id = 1U; id < m_audio_count; ++id)
+	{
+		ReleaseAudioResource(id);
+	}
+}
+
+
 // Shutdown method to deallocate all audio manager resources
 Result AudioManager::Shutdown(void)
 {
+	// Deallocate all audio resource data
+	ReleaseAllAudioResources();
+
+	// Release the engine itself
 	if (m_engine)
 	{
 		SafeDelete(m_engine);
