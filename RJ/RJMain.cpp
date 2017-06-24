@@ -2263,17 +2263,13 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
 	// Add a spotlight to the player actor
-	Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
+	/*Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
 	LightSource *player_light = LightSource::Create(pl);
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
-	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
-
-	EnvironmentMap<float, EnvironmentMapBlendMode::BlendAdditive> em(INTVECTOR3(12, 34, 56));
-	em.Data.push_back(12.3);
-	em.Data.push_back(4.1);
+	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);*/
 
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";

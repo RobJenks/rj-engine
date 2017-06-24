@@ -144,11 +144,10 @@ protected:
 // Turn (about the Y axis) by the specified number of radians
 CMPINLINE void Actor::Turn(float angle)
 {
-	OutputDebugString(concat("Turning by angle ")(angle)(" -> ").str().c_str());
 	// Make sure the turn angle is within our maximum turn rate
 	if (angle < 0.0f)	angle = max(angle, -m_turnrate * Game::TimeFactor);
 	else				angle = min(angle, m_turnrate * Game::TimeFactor);
-	OutputDebugString(concat(angle)("\n").str().c_str());
+	
 	// Generate a delta quaternion for this angle and apply it to our orientation
 	ChangeEnvironmentOrientation(XMQuaternionRotationNormal(UP_VECTOR, angle));
 }

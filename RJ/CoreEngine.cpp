@@ -24,6 +24,7 @@
 #include "ViewFrustrum.h"
 #include "BoundingObject.h"
 #include "FontShader.h"
+#include "AudioManager.h"
 #include "TextManager.h"
 #include "Fonts.h"
 #include "EffectManager.h"
@@ -223,6 +224,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Shader [Font] initialisation complete\n";
 
+	// Initialise the audio manager
+	res = InitialiseAudioManager();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Audio manager initialisation complete\n";
+
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -303,6 +309,7 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownLightingManager();
 	ShutdownShaderSupport();
 	ShutdownFrustrum();
+	ShutdownAudioManager();
 	ShutdownTextRendering();
 	ShutdownFontShader();
 	ShutdownFonts();
@@ -643,6 +650,29 @@ Result CoreEngine::InitialiseFontShader(void)
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+Result CoreEngine::InitialiseAudioManager(void)
+{
+	Result result;
+
+	// Create the text manager object
+	m_audiomanager = new AudioManager();
+	if (!m_audiomanager)
+	{
+		return ErrorCodes::CannotCreateAudioManager;
+	}
+
+	// Now attempt to initialise the audio manager object
+	result = m_audiomanager->Initialise();
+	if (result != ErrorCodes::NoError)
+	{
+		return result;
+	}
+
+	// Return success
+	return ErrorCodes::NoError;
+
 }
 
 Result CoreEngine::InitialiseTextRendering(void)
@@ -1018,6 +1048,16 @@ void CoreEngine::ShutdownFrustrum(void)
 	{
 		delete m_frustrum;
 		m_frustrum = 0;
+	}
+}
+
+void CoreEngine::ShutdownAudioManager(void)
+{
+	// Release the audio manager object.
+	if (m_audiomanager)
+	{
+		m_audiomanager->Shutdown();
+		SafeDelete(m_audiomanager);
 	}
 }
 

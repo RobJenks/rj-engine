@@ -37,6 +37,7 @@ class Light;
 class ViewFrustrum;
 class LightingManager;
 class FontShader;
+class AudioManager;
 class TextManager;
 class EffectManager;
 class SimpleShip;
@@ -432,6 +433,7 @@ private:
 	Result					InitialiseTextureShader(void);
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseFontShader(void);
+	Result					InitialiseAudioManager(void);
 	Result					InitialiseTextRendering(void);
 	Result					InitialiseFonts(void);
 	Result					InitialiseTexcubeShader(void);
@@ -461,6 +463,7 @@ private:
 	void					ShutdownTextureShader(void);
 	void					ShutdownFrustrum(void);
 	void					ShutdownFontShader(void);
+	void					ShutdownAudioManager(void);
 	void					ShutdownTextRendering(void);
 	void					ShutdownFonts(void);
 	void					ShutdownTexcubeShader(void);
@@ -488,6 +491,7 @@ private:
 	TextureShader					*m_textureshader;
 	ViewFrustrum					*m_frustrum;
 	FontShader						*m_fontshader;
+	AudioManager					*m_audiomanager;
 	TextManager						*m_textmanager;
 	TexcubeShader					*m_texcubeshader;
 	FireShader						*m_fireshader;
