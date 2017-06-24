@@ -655,6 +655,9 @@
     <ClCompile Include="Logging.cpp">
       <Filter>Logging</Filter>
     </ClCompile>
+    <ClCompile Include="AudioItem.cpp">
+      <Filter>Engine\Audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1518,6 +1521,9 @@
     </ClInclude>
     <ClInclude Include="Logging.h">
       <Filter>Logging</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioItem.h">
+      <Filter>Engine\Audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

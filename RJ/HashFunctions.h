@@ -263,6 +263,10 @@ namespace HashedStrings
 	DefineHash(H_PowerLevelChangeRate, "powerlevelchangerate");
 	DefineHash(H_PowerOverloadMultiplier, "overloadmultiplier");
 	DefineHash(H_PowerRequirement, "powerrequirement");
+	DefineHash(H_Effect, "effect");
+	DefineHash(H_Music, "music");
+	DefineHash(H_Voice, "voice");
+
 }
 
 

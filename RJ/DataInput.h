@@ -142,6 +142,10 @@ namespace IO { namespace Data {
 	Result LoadDamageResistance(TiXmlElement *node, DamageResistance & outDR);
 	Result LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet & outDRSet);
 
+	// Load an audio item definition (not the audio resource itself)
+	Result LoadAudioItem(TiXmlElement *node);
+
+
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
 	ComplexShipSection *FindInTemporaryCSSBuffer(const std::string & code);

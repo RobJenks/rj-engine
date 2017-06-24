@@ -109,6 +109,7 @@ namespace D {
 	const char *NODE_DamageSet = "damageset";
 	const char *NODE_DamageResistance = "damageresistance";
 	const char *NODE_DamageResistanceSet = "damageresistanceset";
+	const char *NODE_Audio = "audio";
 
 	// String constant data for specific game data files, typically those core ones updated by the program such as the ship register
 	const char *FILE_ComplexShipRegister = "Ships\\ComplexShipRegister.xml";

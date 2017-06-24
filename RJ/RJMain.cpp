@@ -802,7 +802,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_I]) {
 		
-		Game::Engine->GetAudioManager()->PlayOneShot(L"C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ\\RJ\\Data\\Audio\\test1.wav");
+		Game::Engine->GetAudioManager()->Play("test1");
 
 		Game::Keyboard.LockKey(DIK_I);
 	}
@@ -1653,6 +1653,11 @@ Result RJMain::InitialiseLoadedGameData(void)
 	res = IO::Data::PostProcessAllModelGeometry();
 	if (res != ErrorCodes::NoError) failures = true;
 	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
+
+	// Load all audio resources.  TODO: in future, we may not want to load everything on startup
+	Game::Log << LOG_INFO << "Beginning load of all audio resource data\n";
+	res = Game::Engine->GetAudioManager()->LoadAllAudioResources();
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Load of all audio resource data completed\n" : "ERRORS encountered during load of audio resource data\n");
 
 	// Resources: Run all post-load creation of the interdependencies between resources & their ingredients
 	res = IO::Data::PostProcessResources();

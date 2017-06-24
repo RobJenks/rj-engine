@@ -1,0 +1,6 @@
+<gamedata>
+
+  <!-- Test weapon effects -->
+  <Audio name="test1" type="effect" file="Audio\Effects\Weapons\test1.wav" />
+  
+</gamedata>

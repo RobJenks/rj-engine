@@ -53,7 +53,11 @@ namespace DirectX
     HRESULT LoadWAVAudioInMemoryEx( _In_reads_bytes_(wavDataSize) const uint8_t* wavData,
                                     _In_ size_t wavDataSize, _Out_ WAVData& result );
 
-    HRESULT LoadWAVAudioFromFileEx( _In_z_ const wchar_t* szFileName, 
+	/* RJ: Modified to explicitly set __cdecl calling convention on function declarations, as per best practice, 
+	       otherwise call fails with linker error due to mismatched mangled-function names */
+    HRESULT __cdecl LoadWAVAudioFromFileEx( _In_z_ const wchar_t* szFileName,
                                     _Inout_ std::unique_ptr<uint8_t[]>& wavData,
                                     _Out_ WAVData& result );
+
+
 }

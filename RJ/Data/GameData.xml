@@ -18,6 +18,9 @@
 
   <!-- Load articulated model data (must be loaded after static models) -->
   <include file="Models\TurretModels.xml" />
+
+  <!-- Load all audio data -->
+  <include file="Audio\Audio.xml" />
   
   <!-- Load terrain objects -->
   <include file="Terrain\Terrain.xml" />

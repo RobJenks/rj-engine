@@ -635,7 +635,13 @@ namespace ErrorCodes {
 
 	// Audio errors														(6500-6799)
 	const Result		CannotCreateAudioManager						= 6500;
-
+	const Result		CannotLoadAudioItemWithNullInput				= 6501;
+	const Result		CannotLoadAudioItemWithoutMandatoryData			= 6502;
+	const Result		CannotRegisterAudioItemWithInvalidDetails		= 6503;
+	const Result		CannotRegisterDuplicateAudioItem				= 6504;
+	const Result		CannotLoadAudioResourceWithInvalidID			= 6505;
+	const Result		FailedToLoadAudioResource						= 6506;
+	const Result		AudioResourceAlreadyLoaded						= 6507;
 
 }
 

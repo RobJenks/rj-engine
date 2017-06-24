@@ -75,6 +75,7 @@
 #include "ParticleEmitter.h"
 
 #include "UserInterface.h"
+#include "AudioManager.h"
 #include "Render2DManager.h"
 #include "Render2DGroup.h"
 #include "RenderMouseEvent.h"
@@ -226,6 +227,8 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 				res = IO::Data::LoadDynamicTileSet(child);
 			} else if (name == D::NODE_ModifierDetails) {
 				res = IO::Data::LoadModifier(child);
+			} else if (name == D::NODE_Audio) { 
+				res = IO::Data::LoadAudioItem(child);
 			} else {
 				// Unknown level one node type
 				res = ErrorCodes::UnknownDataNodeType;
@@ -4080,6 +4083,34 @@ Result IO::Data::LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet
 
 	return overallresult;
 }
+
+// Load an audio item definition (not the audio resource itself)
+Result IO::Data::LoadAudioItem(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadAudioItemWithNullInput;
+	
+	std::string key;
+	const char *name = NULL, *type = NULL, *filename = NULL;
+
+	const TiXmlAttribute *attr = node->FirstAttribute();
+	while (attr)
+	{
+		key = attr->Name();
+		if (key == "name")					name = attr->Value();
+		else if (key == "type")				type = attr->Value();
+		else if (key == "file")				filename = attr->Value();
+
+		attr = attr->Next();
+	}
+
+	// Certain parameters are mandatory
+	if (!name || !type || !filename) return ErrorCodes::CannotLoadAudioItemWithoutMandatoryData;
+
+	// Register a new audio entry with the audio manager, though do not load the 
+	// resource itself at this point
+	return Game::Engine->GetAudioManager()->RegisterSound(name, type, filename, false);
+}
+
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)
