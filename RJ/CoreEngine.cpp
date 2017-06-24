@@ -920,7 +920,7 @@ void CoreEngine::ShutdownDirect3D(void)
 	if ( m_D3D )
 	{
 		m_D3D->Shutdown();
-		delete m_D3D; m_D3D = NULL;
+		SafeDelete(m_D3D);
 	}
 }
 
@@ -951,8 +951,7 @@ void CoreEngine::ShutdownCamera(void)
 	// Attempt to release the camera component
 	if ( m_camera )
 	{
-		delete m_camera; 
-		m_camera = NULL;
+		SafeDelete(m_camera);
 	}
 }
 
@@ -972,8 +971,7 @@ void CoreEngine::ShutdownLightShader(void)
 	if(m_lightshader)
 	{
 		m_lightshader->Shutdown();
-		delete m_lightshader;
-		m_lightshader = NULL;
+		SafeDelete(m_lightshader);
 	}
 }
 
@@ -983,8 +981,7 @@ void CoreEngine::ShutdownLightFadeShader(void)
 	if(m_lightfadeshader)
 	{
 		m_lightfadeshader->Shutdown();
-		delete m_lightfadeshader;
-		m_lightfadeshader = NULL;
+		SafeDelete(m_lightfadeshader);
 	}
 }
 
@@ -994,8 +991,7 @@ void CoreEngine::ShutdownLightHighlightShader(void)
 	if(m_lighthighlightshader)
 	{
 		m_lighthighlightshader->Shutdown();
-		delete m_lighthighlightshader;
-		m_lighthighlightshader = NULL;
+		SafeDelete(m_lighthighlightshader);
 	}
 }
 
@@ -1005,8 +1001,7 @@ void CoreEngine::ShutdownLightHighlightFadeShader(void)
 	if (m_lighthighlightfadeshader)
 	{
 		m_lighthighlightfadeshader->Shutdown();
-		delete m_lighthighlightfadeshader;
-		m_lighthighlightfadeshader = NULL;
+		SafeDelete(m_lighthighlightfadeshader);
 	}
 }
 
@@ -1016,8 +1011,7 @@ void CoreEngine::ShutdownLightFlatHighlightFadeShader(void)
 	if (m_lightflathighlightfadeshader)
 	{
 		m_lightflathighlightfadeshader->Shutdown();
-		delete m_lightflathighlightfadeshader;
-		m_lightflathighlightfadeshader = NULL;
+		SafeDelete(m_lightflathighlightfadeshader);
 	}
 }
 
@@ -1026,8 +1020,7 @@ void CoreEngine::ShutdownParticleShader(void)
 	if (m_particleshader)
 	{
 		m_particleshader->Shutdown();
-		delete m_particleshader;
-		m_particleshader = NULL;
+		SafeDelete(m_particleshader);
 	}
 }
 
@@ -1036,8 +1029,7 @@ void CoreEngine::ShutdownTextureShader(void)
 	if (m_textureshader)
 	{
 		m_textureshader->Shutdown();
-		delete m_textureshader;
-		m_textureshader = NULL;
+		SafeDelete(m_textureshader);
 	}
 }
 
@@ -1046,8 +1038,7 @@ void CoreEngine::ShutdownFrustrum(void)
 	// Release the view frustrum object.
 	if(m_frustrum)
 	{
-		delete m_frustrum;
-		m_frustrum = 0;
+		SafeDelete(m_frustrum);
 	}
 }
 
@@ -1067,8 +1058,7 @@ void CoreEngine::ShutdownTextRendering(void)
 	if(m_textmanager)
 	{
 		m_textmanager->Shutdown();
-		delete m_textmanager;
-		m_textmanager = 0;
+		SafeDelete(m_textmanager);
 	}
 }
 
@@ -1078,8 +1068,7 @@ void CoreEngine::ShutdownFontShader(void)
 	if(m_fontshader)
 	{
 		m_fontshader->Shutdown();
-		delete m_fontshader;
-		m_fontshader = 0;
+		SafeDelete(m_fontshader);
 	}
 }
 
@@ -1088,8 +1077,7 @@ void CoreEngine::ShutdownTexcubeShader(void)
 	if (m_texcubeshader)
 	{
 		m_texcubeshader->Shutdown();
-		delete m_texcubeshader;
-		m_texcubeshader = NULL;
+		SafeDelete(m_texcubeshader);
 	}
 }
 
@@ -1098,8 +1086,7 @@ void CoreEngine::ShutdownFireShader(void)
 	if (m_fireshader)
 	{
 		m_fireshader->Shutdown();
-		delete m_fireshader;
-		m_fireshader = NULL;
+		SafeDelete(m_fireshader);
 	}
 }
 
@@ -1113,8 +1100,7 @@ void CoreEngine::ShutdownEffectManager(void)
 	if (m_effectmanager)
 	{
 		m_effectmanager->Shutdown();
-		delete m_effectmanager;
-		m_effectmanager = NULL;
+		SafeDelete(m_effectmanager);
 	}
 }
 
@@ -1123,8 +1109,7 @@ void CoreEngine::ShutdownSkinnedNormalMapShader(void)
 	if (m_skinnedshader)
 	{
 		m_skinnedshader->Shutdown();
-		delete m_skinnedshader;
-		m_skinnedshader = NULL;
+		SafeDelete(m_skinnedshader);
 	}
 }
 
@@ -1137,8 +1122,7 @@ void CoreEngine::ShutdownVolLineShader(void)
 	if (m_vollineshader)
 	{
 		m_vollineshader->Shutdown();
-		delete m_vollineshader;
-		m_vollineshader = NULL;
+		SafeDelete(m_vollineshader);
 	}
 }
 
@@ -1147,8 +1131,7 @@ void CoreEngine::ShutdownParticleEngine(void)
 	if (m_particleengine)
 	{
 		m_particleengine->Shutdown();
-		delete m_particleengine;
-		m_particleengine = NULL;
+		SafeDelete(m_particleengine);
 	}
 }
 
@@ -1157,8 +1140,7 @@ void CoreEngine::Shutdown2DRenderManager(void)
 	if (m_render2d)
 	{
 		m_render2d->Shutdown();
-		delete m_render2d;
-		m_render2d = NULL;
+		SafeDelete(m_render2d);
 	}
 }
 
@@ -1167,8 +1149,7 @@ void CoreEngine::ShutdownOverlayRenderer(void)
 	if (m_overlayrenderer)
 	{
 		m_overlayrenderer->Shutdown();
-		delete m_overlayrenderer;
-		m_overlayrenderer = NULL;
+		SafeDelete(m_overlayrenderer);
 	}
 }
 
