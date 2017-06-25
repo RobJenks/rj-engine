@@ -72,6 +72,11 @@ public:
 
 
 
+	// Pauses global sound playback
+	CMPINLINE void						PausePlayback(void)					{ m_engine->Suspend(); }
+
+	// Resumes global sound playback
+	CMPINLINE void						ResumePlayback(void)				{ m_engine->Resume(); }
 
 	// Shutdown method to deallocate all audio manager resources
 	Result								Shutdown(void);
