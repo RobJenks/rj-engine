@@ -16,6 +16,9 @@
 // Initialise static constant values
 const AudioItem::AudioID AudioManager::NULL_AUDIO = 0U;
 const std::string AudioManager::NULL_AUDIO_NAME = "NULL";
+const AudioInstance::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
+const AudioInstance::AudioInstanceID AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT = 20U;
+const AudioInstance::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO = 50U;
 const float AudioManager::DEFAULT_VOLUME = 1.0f;
 const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
@@ -24,7 +27,7 @@ const float AudioManager::DEFAULT_PAN = 0.0f;
 // Default constructor
 AudioManager::AudioManager(void)
 	:
-	m_engine(NULL), m_in_error_state(false), m_audio_count(0U)
+	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U)
 {
 }
 
@@ -77,6 +80,11 @@ void AudioManager::Update(void)
 		m_in_error_state = false;
 		Game::Log << LOG_INFO << "Audio engine recovered from critical error\n";
 	}
+
+	// Perform a periodic audit of active instances and update our internal stats
+	*** If elapsed time > SOME_CONST do { refine instance_count, maybe other things too } ***
+	*** Then: add 3D sound support.  Then: ability to return instance to the caller as an owner, with a Terminate() method exposed? ***
+
 }
 
 // Registers a new sound with the audio manager.  Flag 'load_resouce' determines whether 
@@ -186,6 +194,46 @@ void AudioManager::Play(const std::string & name, float volume, float pitch_shif
 {
 	Play(GetAudioID(name), volume, pitch_shift, pan);
 }
+
+// Ensures that a slot is available for a new audio instance.  Will terminate an instance of the current 
+// audio item if necessary to remain under the global audio instance limit
+void AudioManager::EnsureInstanceIsAvailable(AudioItem::AudioID id, bool requires_3d_support)
+{
+	// We don't need to take any action as long as we are below the global audio instance limit
+	if (m_instance_count <= AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT) return;
+
+	// Otherwise we need to make an existing slot available within this item
+	if (IsValidID(id))
+	{
+		// Disallow new allocations before requesting an instance slot.  This will make sure at least one
+		// instance is available, by terminating an existing instance if necessary, however no new 
+		// allocations will be performed
+		m_sounds[id].DisallowNewInstanceSlots();
+		m_sounds[id].MakeInstanceAvailable(requires_3d_support);
+		m_sounds[id].AllowNewInstanceSlots();
+	}
+}
+
+// Create a new instance of an audio item, if posssible.  Returns non-zero if instantiation fails
+Result AudioManager::CreateInstance(AudioItem::AudioID id)
+{
+	if (!IsValidID(id)) return ErrorCodes::CannotCreateInstanceOfInvalidAudioItem;
+	
+	EnsureInstanceIsAvailable(id, false);
+	RecordNewInstanceCreation();
+	return m_sounds[id].CreateInstance();
+}
+
+// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
+Result AudioManager::Create3DInstance(AudioItem::AudioID id, XMFLOAT4 position)
+{
+	if (!IsValidID(id)) return ErrorCodes::CannotCreateInstanceOfInvalidAudioItem;
+	
+	EnsureInstanceIsAvailable(id, true);
+	RecordNewInstanceCreation(); 
+	return m_sounds[id].Create3DInstance(position);
+}
+
 
 
 

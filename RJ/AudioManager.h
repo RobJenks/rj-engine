@@ -9,11 +9,14 @@ class AudioManager
 public:
 
 	// Static constants
-	static const AudioItem::AudioID		NULL_AUDIO;
-	static const std::string			NULL_AUDIO_NAME;
-	static const float					DEFAULT_VOLUME;
-	static const float					DEFAULT_PITCH_SHIFT;
-	static const float					DEFAULT_PAN;
+	static const AudioItem::AudioID					NULL_AUDIO;
+	static const std::string						NULL_AUDIO_NAME;
+	static const AudioInstance::AudioInstanceID		GLOBAL_AUDIO_INSTANCE_LIMIT;			// Max instances across all audio items
+	static const AudioInstance::AudioInstanceID		DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT;		// Default max instances per audio item
+	static const AudioInstance::AudioInstanceID		HARD_INSTANCE_LIMIT_PER_AUDIO;			// Hard limit for instance count per audio, cannot be overridden
+	static const float								DEFAULT_VOLUME;
+	static const float								DEFAULT_PITCH_SHIFT;
+	static const float								DEFAULT_PAN;
 
 	// Default constructor
 	AudioManager(void);
@@ -68,7 +71,17 @@ public:
 	CMPINLINE void						Play(AudioItem::AudioID id) 		{ Play(id, DEFAULT_VOLUME, DEFAULT_PITCH_SHIFT, DEFAULT_PAN); }
 	CMPINLINE void						Play(const std::string & name)		{ Play(name, DEFAULT_VOLUME, DEFAULT_PITCH_SHIFT, DEFAULT_PAN); }
 	
+	// Ensures that a slot is available for a new audio instance.  Will terminate an instance of the current 
+	// audio item if necessary to remain under the global audio instance limit
+	void								EnsureInstanceIsAvailable(AudioItem::AudioID id, bool requires_3d_support);
 
+	// Create a new instance of an audio item, if posssible.  Returns non-zero if instantiation fails
+	Result								CreateInstance(AudioItem::AudioID id);
+	Result								CreateInstance(const std::string & name) { return CreateInstance(GetAudioID(name)); }
+
+	// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
+	Result								Create3DInstance(AudioItem::AudioID id, XMFLOAT4 position);
+	Result								Create3DInstance(const std::string & name, XMFLOAT4 position) { return Create3DInstance(GetAudioID(name), position); }
 
 
 
@@ -100,8 +113,15 @@ private:
 	// Count of total audio resources registered with this manager
 	AudioItem::AudioID									m_audio_count;
 
+	// Count of total audio instances that are currently active.  Updated on a periodic basis by the AudioManager
+	AudioItem::AudioID									m_instance_count;
+
 	// Flag indicating whether we are currently in an error state
 	bool												m_in_error_state;
+
+	// Updates the instance_count total to reflect the creation of a new instance.  This count is however
+	// an upper-bound estimate that is refined periodically when the audio manager checks for completed instances
+	CMPINLINE void										RecordNewInstanceCreation()			{ ++m_instance_count; }
 
 };
 

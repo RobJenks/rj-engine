@@ -658,6 +658,9 @@
     <ClCompile Include="AudioItem.cpp">
       <Filter>Engine\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="AudioInstance.cpp">
+      <Filter>Engine\Audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1523,6 +1526,9 @@
       <Filter>Logging</Filter>
     </ClInclude>
     <ClInclude Include="AudioItem.h">
+      <Filter>Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioInstance.h">
       <Filter>Engine\Audio</Filter>
     </ClInclude>
   </ItemGroup>

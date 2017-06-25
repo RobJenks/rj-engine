@@ -6,11 +6,15 @@
 #include <memory>
 #include <Audio.h>
 #include "CompilerSettings.h"
+#include "AudioInstance.h"
 
 class AudioItem
 {
 
 public:
+
+	// Debug logging flag that can be set if required
+#	define ENABLE_AUDIO_ITEM_DEBUG_LOGGING
 
 	// Collection type and ID used to uniquely identify audio items
 	typedef std::vector<AudioItem>						AudioCollection;
@@ -33,10 +37,12 @@ public:
 
 
 	// Return key parameters
-	CMPINLINE AudioID									GetID(void) const			{ return m_id; }
-	CMPINLINE std::string								GetName(void) const			{ return m_name; }
-	CMPINLINE AudioType									GetType(void) const			{ return m_type; }
-	CMPINLINE std::string								GetFilename(void) const		{ return m_filename; }
+	CMPINLINE AudioID									GetID(void) const				{ return m_id; }
+	CMPINLINE std::string								GetName(void) const				{ return m_name; }
+	CMPINLINE AudioType									GetType(void) const				{ return m_type; }
+	CMPINLINE std::string								GetFilename(void) const			{ return m_filename; }
+	CMPINLINE unsigned int								GetDuration(void) const			{ return m_duration; }
+	CMPINLINE AudioInstance::AudioInstanceID			GetInstanceLimit(void) const	{ return m_instance_limit; }
 
 
 	// Return a reference to the sound effect object
@@ -52,6 +58,24 @@ public:
 	CMPINLINE  void										ReleaseResources(void)		{ m_effect.release(); }
 
 
+	// Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
+	Result												CreateInstance(void);
+
+	// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
+	Result												Create3DInstance(XMFLOAT4 position);
+
+	// Specify whether this item is allowed to extend its instance collection when no suitable inactive slots are available
+	CMPINLINE void										AllowNewInstanceSlots(void) { m_allow_new_instance_slots = true; }
+	CMPINLINE void										DisallowNewInstanceSlots(void) { m_allow_new_instance_slots = false; }
+
+	// Ensures that at least one instance slot is available within this item, by terminating existing audio
+	// instances if necessary
+	void												MakeInstanceAvailable(bool requires_3d_support);
+
+	// Overrides the maximum instance count for this specific audio item.  Will be constrained to the 
+	// range [1 AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO].  It MUST be possible for audio items to 
+	// support >= 1 instance otherwise the new slot identification process will throw an exception
+	void												OverrideInstanceLimit(AudioInstance::AudioInstanceID instance_limit);
 
 	// Destructor; no-exception guarantee to ensure these objects are moved rather than
 	// copied by STL containers
@@ -63,13 +87,48 @@ public:
 
 private:
 
-	AudioID										m_id;
-	std::string									m_name;
-	AudioType									m_type;
-	std::string									m_filename;
-	size_t										m_duration;	// ms, not accounting for any looping
+	AudioID												m_id;
+	std::string											m_name;
+	AudioType											m_type;
+	std::string											m_filename;
+	unsigned int										m_duration;	// ms, not accounting for any looping
 
-	std::unique_ptr<DirectX::SoundEffect>		m_effect;
+	// Definition of the audio resource
+	std::unique_ptr<DirectX::SoundEffect>				m_effect;
 
+	// List of instances for this audio resource
+	AudioInstance::AudioInstanceCollection				m_instances;
 
+	// Maximum allowed instances of this audio item.  Defaults to AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT
+	// unless a value is manually-specified
+	AudioInstance::AudioInstanceID						m_instance_limit;
+
+	// Indicates whether this item is currently allowed to extend the instance collection, if no suitable
+	// inactive slot can be found.  This extension still observes the instance limit.  The purpose of this
+	// flag is to allow the audio manager to request a new slot without any new slot allocation, in the 
+	// situation where we have exceeded the global audio instance limit (but this item is still within 
+	// its individual limit)
+	bool												m_allow_new_instance_slots;
+
+	// Internal method; determines whether the given instance ID is valid for this audio item
+	bool												IsValidInstanceID(AudioInstance::AudioInstanceID id) const;
+
+	// Internal method; handles creation of audio instances.  Returns non-zero on failure
+	Result												PerformInstantiation(bool is3d, XMFLOAT4 position3d);
+
+	// Identifies an instance slot for this audio item.  Will ALWAYS return a slot ID, even if it requires
+	// terminating an existing instance.  In this case, the oldest instance will be selected for termination
+	// Flag indicates whether the slot must support 3D audio; may result in a new resource instance being
+	// created if no suitable slots are available
+	AudioInstance::AudioInstanceID						GetAvailableInstanceSlot(bool requires_3d_support);
+
+	// Generates a new effect instance from the base audio resource
+	std::unique_ptr<SoundEffectInstance>				CreateNewEffectInstance(bool include_3d_support);
+
+	// Generate macros based on debug logging flag
+#	if defined(_DEBUG) && defined(ENABLE_AUDIO_ITEM_DEBUG_LOGGING)
+#		define AUDIO_ITEM_DEBUG_LOG(str) OutputDebugString(str)
+#	else
+#		define AUDIO_ITEM_DEBUG_LOG(str) 
+#	endif
 };

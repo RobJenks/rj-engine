@@ -801,12 +801,13 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_I]) {
-		
-		if (b[DIK_LSHIFT]) Game::Engine->GetAudioManager()->ResumePlayback();
-		else if (b[DIK_LCONTROL]) Game::Engine->GetAudioManager()->PausePlayback();
-		else Game::Engine->GetAudioManager()->Play("test1");
+		static int tmpi = 0;
 
-		
+		if (++tmpi % 2 == 0)
+			Game::Engine->GetAudioManager()->Create3DInstance("test1", NULL_FLOAT4);
+		else
+			Game::Engine->GetAudioManager()->CreateInstance("test1");
+			
 
 		Game::Keyboard.LockKey(DIK_I);
 	}
