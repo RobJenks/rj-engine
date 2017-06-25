@@ -6,7 +6,7 @@
 // Constructor with all mandatory parameters
 AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename)
 	:
-	m_id(id), m_name(name), m_type(type), m_filename(filename)
+	m_id(id), m_name(name), m_type(type), m_filename(filename), m_duration(0U)
 {
 }
 
@@ -27,11 +27,15 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 	if (!resource)
 	{
 		m_effect.release();
+		m_duration = 0U;
+
 		return ErrorCodes::NoError;
 	}
-
+	
 	// We now own this new resource; any existing resource will be deallocated
 	m_effect.reset(resource);
+	m_duration = resource->GetSampleDurationMS();
+
 	return ErrorCodes::NoError;
 }
 

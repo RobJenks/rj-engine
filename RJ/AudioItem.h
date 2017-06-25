@@ -67,6 +67,7 @@ private:
 	std::string									m_name;
 	AudioType									m_type;
 	std::string									m_filename;
+	size_t										m_duration;	// ms, not accounting for any looping
 
 	std::unique_ptr<DirectX::SoundEffect>		m_effect;
 
