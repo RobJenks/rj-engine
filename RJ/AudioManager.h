@@ -2,6 +2,7 @@
 
 #include <Audio.h>
 #include "ErrorCodes.h"
+#include "ObjectReference.h"
 #include "AudioItem.h"
 
 class AudioManager
@@ -142,14 +143,62 @@ private:
 	// Clock time at which we should perform the next periodic audit
 	unsigned int										m_next_audit_time;
 
-	
 
 	// Single STATIC audio listener centered at the player position & orientation, used for all 3D audio calculations
 	static DirectX::AudioListener						PLAYER_AUDIO_LISTENER;
 
+	// Generates a new instance identifier, which is unique across all audio items
+	static AudioInstance::AudioInstanceIdentifier			AUDIO_INSTANCE_COUNTER;
+	CMPINLINE static AudioInstance::AudioInstanceIdentifier GetNewInstanceIdentifier(void) { return ++AUDIO_INSTANCE_COUNTER; }
+
 	// Updates the instance_count total to reflect the creation of a new instance.  This count is however
 	// an upper-bound estimate that is refined periodically when the audio manager checks for completed instances
 	CMPINLINE void										RecordNewInstanceCreation()			{ ++m_instance_count; }
+
+	
+	// Struct holding the binding between an object and some audio instance
+	class AudioInstanceObjectBinding
+	{
+	public:
+
+		// Create a new binding
+		CMPINLINE AudioInstanceObjectBinding(iObject *object, AudioItem::AudioID audio_item_id,
+			AudioInstance::AudioInstanceID audio_instance_id, AudioInstance::AudioInstanceIdentifier instance_identifier)
+		{
+			m_object = object;
+			m_item_id = audio_item_id;
+			m_instance_id = audio_instance_id;
+			m_identifier = instance_identifier;
+		}
+
+		// Disallow any copy construction or assignment
+		CMPINLINE AudioInstanceObjectBinding(const AudioInstanceObjectBinding & other) = delete;
+		CMPINLINE AudioInstanceObjectBinding & operator=(const AudioInstanceObjectBinding & other) = delete;
+
+		// Move constructor with a noexcept guarantee to ensure it is used by STL containers
+		CMPINLINE AudioInstanceObjectBinding(AudioInstanceObjectBinding && other) noexcept
+			: m_object(std::move(other.m_object)), m_item_id(other.m_item_id), m_instance_id(other.m_instance_id), m_identifier(other.m_identifier) { }
+
+
+		// Return data from the binding
+		CMPINLINE iObject *									GetObj(void) { return m_object(); }
+		CMPINLINE AudioItem::AudioID						GetAudioItemID(void) const { return m_item_id; }
+		CMPINLINE AudioInstance::AudioInstanceID			GetAudioInstanceID(void) const { return m_instance_id; }
+		CMPINLINE AudioInstance::AudioInstanceIdentifier	GetInstanceIdentifier(void) const { return m_identifier; }
+		
+		// Destructor with a noexcept guarantee to ensure move semantics are used by STL containers
+		CMPINLINE ~AudioInstanceObjectBinding(void) noexcept { }
+
+	private:
+
+		ObjectReference<iObject>							m_object;
+		AudioItem::AudioID									m_item_id;
+		AudioInstance::AudioInstanceID						m_instance_id;
+		AudioInstance::AudioInstanceIdentifier				m_identifier;
+	};
+
+	// Vector of currently active object-audio bindings
+	std::vector<AudioInstanceObjectBinding>					m_object_bindings;
 
 };
 

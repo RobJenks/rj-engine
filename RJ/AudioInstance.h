@@ -13,6 +13,8 @@ public:
 	typedef std::vector<AudioInstance>					AudioInstanceCollection;
 	typedef std::vector<AudioInstance>::size_type		AudioInstanceID;
 
+	// Type used to uniquely number instances as they are generated.  Unique across all audio items
+	typedef size_t										AudioInstanceIdentifier;
 
 	// Default constructor
 	AudioInstance(std::unique_ptr<SoundEffectInstance> effect_instance);
@@ -26,6 +28,7 @@ public:
 	AudioInstance(AudioInstance && other) noexcept;
 
 	// Return key parameters
+	CMPINLINE AudioInstanceIdentifier				GetIdentifier(void) const			{ return m_identifier; }
 	CMPINLINE unsigned int							GetStartTime(void) const			{ return m_starttime; }
 	CMPINLINE unsigned int							GetTerminationTime(void) const		{ return m_terminates; }
 	CMPINLINE bool									Is3DAudio(void) const				{ return m_is3d; }
@@ -46,6 +49,9 @@ public:
 	// initial call to Set3DPosition
 	void											UpdatePosition(const FXMVECTOR position, float time_delta);
 
+	// Assigns a new unique identifier to this instance, which is unique across all audio items
+	CMPINLINE void									AssignNewIdentifier(void)			{ m_identifier = AudioManager::GetNewInstanceIdentifier(); }
+
 	// Assign an audio resource to this instance 
 	void											AssignResource(std::unique_ptr<SoundEffectInstance> instance);
 
@@ -64,6 +70,8 @@ public:
 	~AudioInstance(void) noexcept;
 
 private:
+
+	AudioInstanceIdentifier							m_identifier;		// Unique across all audio items
 
 	std::unique_ptr<DirectX::SoundEffectInstance>	m_instance;
 

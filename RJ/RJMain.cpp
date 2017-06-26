@@ -2387,8 +2387,8 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		unsigned int current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d");
+		AudioInstance::AudioInstanceID current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d", current);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

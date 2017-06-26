@@ -7,7 +7,7 @@
 // Default constructor
 AudioInstance::AudioInstance(std::unique_ptr<SoundEffectInstance> effect_instance)
 	:
-	m_starttime(0U), m_terminates(0U), m_is3d(false), m_channel_count(1U), 
+	m_identifier(0U), m_starttime(0U), m_terminates(0U), m_is3d(false), m_channel_count(1U), 
 	m_instance(std::move(effect_instance))
 {
 }
@@ -17,7 +17,7 @@ AudioInstance::AudioInstance(AudioInstance && other) noexcept
 	:
 	m_instance(std::move(other.m_instance)), 
 	m_starttime(other.m_starttime), m_terminates(other.m_terminates), m_is3d(other.m_is3d), 
-	m_channel_count(other.m_channel_count), 
+	m_identifier(0U), m_channel_count(other.m_channel_count), 
 	m_emitter(std::move(other.m_emitter))
 {
 }

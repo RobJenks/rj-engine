@@ -64,6 +64,9 @@ Result AudioItem::CreateInstance(bool loop)
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(false);
 	assert( IsValidInstanceID(id) );
 
+	// Assign a new identifier to this instance, which is unique across all audio items
+	m_instances[id].AssignNewIdentifier();
+
 	// Populate the instance with required details and start playback
 	m_instances[id].Start(m_duration, loop);
 
@@ -77,6 +80,9 @@ Result AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position)
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(true);
 	assert( IsValidInstanceID(id) );
+
+	// Assign a new identifier to this instance, which is unique across all audio items
+	m_instances[id].AssignNewIdentifier();
 
 	// Populate the instance with required details and start playback
 	m_instances[id].SetPosition(position);
@@ -100,65 +106,65 @@ AudioInstance * AudioItem::GetInstance(AudioInstance::AudioInstanceID id)
 AudioInstance::AudioInstanceID AudioItem::GetAvailableInstanceSlot(bool requires_3d_support)
 {
 	AudioInstance::AudioInstanceID oldest_instance = 0U;	// To be safe; will always replace a valid instance
-AudioInstance::AudioInstanceID oldest_starttime = (0U - 1);
-AudioInstance::AudioInstanceID inactive_but_incompatible_properties = (0U - 1);
+	AudioInstance::AudioInstanceID oldest_starttime = (0U - 1);
+	AudioInstance::AudioInstanceID inactive_but_incompatible_properties = (0U - 1);
 
-AudioInstance::AudioInstanceID count = m_instances.size();
-for (AudioInstance::AudioInstanceID i = 0; i < count; ++i)
-{
-	// If this slot is not active we may be able to use it
-	if (!m_instances[i].IsActive())
+	AudioInstance::AudioInstanceID count = m_instances.size();
+	for (AudioInstance::AudioInstanceID i = 0; i < count; ++i)
 	{
-		if (m_instances[i].Is3DAudio() == requires_3d_support)
+		// If this slot is not active we may be able to use it
+		if (!m_instances[i].IsActive())
 		{
-			AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using inactive slot ")(i)("\n").str().c_str());
-			return i;
+			if (m_instances[i].Is3DAudio() == requires_3d_support)
+			{
+				AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using inactive slot ")(i)("\n").str().c_str());
+				return i;
+			}
+			else inactive_but_incompatible_properties = i;
 		}
-		else inactive_but_incompatible_properties = i;
+
+		// If this is the new oldest instance, record it for later
+		if (m_instances[i].GetStartTime() < oldest_starttime)
+		{
+			oldest_instance = i;
+			oldest_starttime = m_instances[i].GetStartTime();
+		}
 	}
 
-	// If this is the new oldest instance, record it for later
-	if (m_instances[i].GetStartTime() < oldest_starttime)
+	// If we got here, there are no existing slots that are suitable and inactive.  See if we have scope to 
+	// extend the instance collection (and make sure this is not currently disallowed)
+	if (count < m_instance_limit && m_allow_new_instance_slots)
 	{
-		oldest_instance = i;
-		oldest_starttime = m_instances[i].GetStartTime();
+		AudioInstance::AudioInstanceID new_id = AllocateNewInstanceSlot(requires_3d_support);
+
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(new_id)("\n").str().c_str());
+		return new_id;
 	}
-}
 
-// If we got here, there are no existing slots that are suitable and inactive.  See if we have scope to 
-// extend the instance collection (and make sure this is not currently disallowed)
-if (count < m_instance_limit && m_allow_new_instance_slots)
-{
-	AudioInstance::AudioInstanceID new_id = AllocateNewInstanceSlot(requires_3d_support);
+	// If we found a slot which was inactive, but had incompatible properties, replace the resource instance
+	// now and use this slot
+	if (IsValidInstanceID(inactive_but_incompatible_properties))
+	{
+		m_instances[inactive_but_incompatible_properties].Set3DSupportFlag(requires_3d_support);
+		m_instances[inactive_but_incompatible_properties].AssignResource(
+			std::move(CreateNewEffectInstance(requires_3d_support)));
 
-	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(new_id)("\n").str().c_str());
-	return new_id;
-}
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using existing slot ")(inactive_but_incompatible_properties)(", but had to override properties to [3d=")(requires_3d_support)("]\n").str().c_str());
+		return inactive_but_incompatible_properties;
+	}
 
-// If we found a slot which was inactive, but had incompatible properties, replace the resource instance
-// now and use this slot
-if (IsValidInstanceID(inactive_but_incompatible_properties))
-{
-	m_instances[inactive_but_incompatible_properties].Set3DSupportFlag(requires_3d_support);
-	m_instances[inactive_but_incompatible_properties].AssignResource(
-		std::move(CreateNewEffectInstance(requires_3d_support)));
-
-	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using existing slot ")(inactive_but_incompatible_properties)(", but had to override properties to [3d=")(requires_3d_support)("]\n").str().c_str());
-	return inactive_but_incompatible_properties;
-}
-
-// There are no inactive slots at all, and we cannot extend the instance collection.  We need to replace
-// the oldest instance.  Update it to make properties compatible first if required.  Note this is 
-// guaranteed to always make a slot available, so we can always return a slot here as a last resort
-AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No other option; had to terminate and reuse active slot ")(oldest_instance)("\n").str().c_str());
-if (m_instances[oldest_instance].Is3DAudio() != requires_3d_support)
-{
-	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Resource also had to be overridden with properties [3d=")(requires_3d_support)("]\n").str().c_str());
-	m_instances[oldest_instance].Set3DSupportFlag(requires_3d_support);
-	m_instances[oldest_instance].AssignResource(
-		std::move(CreateNewEffectInstance(requires_3d_support)));
-}
-return oldest_instance;
+	// There are no inactive slots at all, and we cannot extend the instance collection.  We need to replace
+	// the oldest instance.  Update it to make properties compatible first if required.  Note this is 
+	// guaranteed to always make a slot available, so we can always return a slot here as a last resort
+	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No other option; had to terminate and reuse active slot ")(oldest_instance)("\n").str().c_str());
+	if (m_instances[oldest_instance].Is3DAudio() != requires_3d_support)
+	{
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Resource also had to be overridden with properties [3d=")(requires_3d_support)("]\n").str().c_str());
+		m_instances[oldest_instance].Set3DSupportFlag(requires_3d_support);
+		m_instances[oldest_instance].AssignResource(
+			std::move(CreateNewEffectInstance(requires_3d_support)));
+	}
+	return oldest_instance;
 }
 
 // Ensures that at least one instance slot is available within this item, by terminating existing audio

@@ -27,6 +27,9 @@ const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
 const unsigned int AudioManager::PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL = 100U;
 
+// Initialise the counter used to assign new audio instance identifiers
+AudioInstance::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U;
+
 
 // Default constructor
 AudioManager::AudioManager(void)
@@ -286,12 +289,16 @@ void AudioManager::UpdatePlayerAudioListener(void)
 // Perform a periodic audit of active instances and update our internal state
 void AudioManager::PerformPeriodicAudit(void)
 {
-	// Iterates through all audio items to get an accurate count of active audio instances.  This is required since
+	// Iterate through all audio items to get an accurate count of active audio instances.  This is required since
 	// during per-frame operation the audio manager will only approximate this count based on incrementing for new 
 	// instances created.  It will not search for completed instances per-frame for efficiency
 	m_instance_count = DetermineExactAudioInstanceCount();
 
+	// Identify any object-audio bindings that are no longer valid, terminate them and reclaim the instance resources
+	*** DO THIS: SEE NOTEPAD ***
 
+	// Identify any new object-audio bindings that need to be made based on proximity to the player
+	*** DO THIS : SEE NOTEPAD ***
 }
 
 
