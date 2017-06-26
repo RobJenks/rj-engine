@@ -60,6 +60,10 @@ public:
 	// Indicates whether the audio engine is currently in a failure state
 	CMPINLINE bool						IsInErrorState(void) const			{ return m_in_error_state; }
 
+	// Returns the audio listener centered at the player position and orientation
+	CMPINLINE static const DirectX::AudioListener & 
+										GetPlayerAudioListener(void)		{ return PLAYER_AUDIO_LISTENER; }
+
 	// Play a one-shot sound effect based on the specified audio resource
 	// Volume: default = 1
 	// PitchShift: In the range [-1 +1], default with no shift = 0
@@ -80,10 +84,12 @@ public:
 	Result								CreateInstance(const std::string & name) { return CreateInstance(GetAudioID(name)); }
 
 	// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
-	Result								Create3DInstance(AudioItem::AudioID id, XMFLOAT4 position);
-	Result								Create3DInstance(const std::string & name, XMFLOAT4 position) { return Create3DInstance(GetAudioID(name), position); }
+	Result								Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position);
+	Result								Create3DInstance(const std::string & name, const XMFLOAT3 & position) { return Create3DInstance(GetAudioID(name), position); }
 
 
+	// Update the player audio listener to the current player position and orientation
+	void								UpdatePlayerAudioListener(void);
 
 	// Pauses global sound playback
 	CMPINLINE void						PausePlayback(void)					{ m_engine->Suspend(); }
@@ -118,6 +124,9 @@ private:
 
 	// Flag indicating whether we are currently in an error state
 	bool												m_in_error_state;
+
+	// Single STATIC audio listener centered at the player position & orientation, used for all 3D audio calculations
+	static DirectX::AudioListener						PLAYER_AUDIO_LISTENER;
 
 	// Updates the instance_count total to reflect the creation of a new instance.  This count is however
 	// an upper-bound estimate that is refined periodically when the audio manager checks for completed instances

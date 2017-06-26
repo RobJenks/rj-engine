@@ -2,6 +2,8 @@
 #include "Utility.h"
 #include "Logging.h"
 #include "GameDataExtern.h"
+#include "FastMath.h"
+#include "Player.h"
 #include "AudioManager.h"
 
 
@@ -14,6 +16,7 @@
 
 
 // Initialise static constant values
+DirectX::AudioListener AudioManager::PLAYER_AUDIO_LISTENER;
 const AudioItem::AudioID AudioManager::NULL_AUDIO = 0U;
 const std::string AudioManager::NULL_AUDIO_NAME = "NULL";
 const AudioInstance::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
@@ -29,6 +32,9 @@ AudioManager::AudioManager(void)
 	:
 	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U)
 {
+	// Initialise the static player audio listener to a default state
+	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
+	PLAYER_AUDIO_LISTENER.SetOrientation(FORWARD_VECTOR_F, UP_VECTOR_F);
 }
 
 // Initialise all audio manager resources
@@ -81,9 +87,26 @@ void AudioManager::Update(void)
 		Game::Log << LOG_INFO << "Audio engine recovered from critical error\n";
 	}
 
+	// Update the player audio listener to the current player position and orientation
+	UpdatePlayerAudioListener();
+
 	// Perform a periodic audit of active instances and update our internal stats
-	*** If elapsed time > SOME_CONST do { refine instance_count, maybe other things too } ***
-	*** Then: add 3D sound support.  Then: ability to return instance to the caller as an owner, with a Terminate() method exposed? ***
+	
+
+	*** THIS IS ONLY TEMPORARY; REMOVE IT ***
+	AudioItem::AudioID id = GetAudioID("test1");
+	AudioInstance *inst = m_sounds[id].GetInstance(0);
+	if (inst && inst->Is3DAudio())
+	{
+		AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
+		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientation(NULL_FLOAT3, NULL_FLOAT3);
+
+		XMFLOAT3 newpos = XMFLOAT3(cosf(Game::ClockTime) / 2.0f, 0.0f, sinf(Game::ClockTime));
+		newpos.x *= 35; newpos.z *= 35;
+		newpos = XMFLOAT3(-25, 0, 0);			// 75 is approx fade-out distance
+		inst->UpdatePosition(XMLoadFloat3(&newpos), Game::TimeFactor);
+	}
+
 
 }
 
@@ -225,7 +248,7 @@ Result AudioManager::CreateInstance(AudioItem::AudioID id)
 }
 
 // Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
-Result AudioManager::Create3DInstance(AudioItem::AudioID id, XMFLOAT4 position)
+Result AudioManager::Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position)
 {
 	if (!IsValidID(id)) return ErrorCodes::CannotCreateInstanceOfInvalidAudioItem;
 	
@@ -234,6 +257,24 @@ Result AudioManager::Create3DInstance(AudioItem::AudioID id, XMFLOAT4 position)
 	return m_sounds[id].Create3DInstance(position);
 }
 
+// Update the player audio listener to the current player position and orientation
+void AudioManager::UpdatePlayerAudioListener(void)
+{
+	// TODO: We currently use SetX() rather than Update().  Consider switching in future, 
+	//   i.e. if (currentpos-oldpos < SOME_THRESHOLD) Update() else SetX()
+	// If this gives us any benefit, for example Doppler calculation based on PLAYER movement
+	Player *player = Game::CurrentPlayer;
+	if (player)
+	{
+		AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(player->GetPosition());		// TODO: accounts for local environment pos?
+		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientationFromQuaternion(player->GetOrientation());
+	}
+	else
+	{
+		AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
+		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientation(NULL_FLOAT3, NULL_FLOAT3);
+	}
+}
 
 
 

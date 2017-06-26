@@ -105,7 +105,8 @@ public:
 	CMPINLINE void							SetIsStandardObject(bool standard)		{ m_standardobject = standard; }
 
 	// Position and orientation; all objects exist somewhere in the world
-	CMPINLINE const XMVECTOR 				GetPosition(void) const							{ return m_position; }
+	CMPINLINE XMVECTOR 						GetPosition(void) const					{ return m_position; }
+	CMPINLINE XMFLOAT3						GetPositionF(void) const				{ return m_positionf; }
 	CMPINLINE void							SetPosition(const FXMVECTOR pos)					
 	{ 
 		m_position = pos; 

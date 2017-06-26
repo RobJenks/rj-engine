@@ -643,7 +643,7 @@ namespace ErrorCodes {
 	const Result		FailedToLoadAudioResource						= 6506;
 	const Result		AudioResourceAlreadyLoaded						= 6507;
 	const Result		CannotCreateInstanceOfInvalidAudioItem			= 6508;
-	
+	const Result		CannotReassignExistingAudioItemResource			= 6509;
 
 }
 

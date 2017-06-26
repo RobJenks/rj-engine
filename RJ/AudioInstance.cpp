@@ -1,4 +1,5 @@
 #include "FastMath.h"
+#include "AudioManager.h"
 
 #include "AudioInstance.h"
 
@@ -6,7 +7,7 @@
 // Default constructor
 AudioInstance::AudioInstance(std::unique_ptr<SoundEffectInstance> effect_instance)
 	:
-	m_starttime(0U), m_terminates(0U), m_is3d(false), m_position(NULL_FLOAT4), 
+	m_starttime(0U), m_terminates(0U), m_is3d(false), m_channel_count(1U), 
 	m_instance(std::move(effect_instance))
 {
 }
@@ -16,7 +17,8 @@ AudioInstance::AudioInstance(AudioInstance && other) noexcept
 	:
 	m_instance(std::move(other.m_instance)), 
 	m_starttime(other.m_starttime), m_terminates(other.m_terminates), m_is3d(other.m_is3d), 
-	m_position(std::move(other.m_position))
+	m_channel_count(other.m_channel_count), 
+	m_emitter(std::move(other.m_emitter))
 {
 }
 
@@ -38,7 +40,7 @@ void AudioInstance::Start(unsigned int duration)
 	if (m_instance.get())
 	{
 		m_instance.get()->Stop();
-		m_instance.get()->Play();
+		m_instance.get()->Play(*** PASS & SET LOOP PARAMETER ***);
 	}
 
 	// Set the start and termination timers accordingly
@@ -46,12 +48,48 @@ void AudioInstance::Start(unsigned int duration)
 	m_terminates = (m_starttime + duration);
 }
 
+// Sets the 3D position of a 3D audio instance
+void AudioInstance::SetPosition(const XMFLOAT3 & position)
+{
+	if (m_instance.get())
+	{
+		// Set position and a dummmy orientation.  We (currently) use only omnidirectional audio 
+		// soures, so orientation of the emitter is not important.  Use XMFLOAT versions of pos
+		// and orient since emitter library will otherwise have to XMStore from vector versions
+		m_emitter.SetPosition(position);
+		m_emitter.SetOrientation(FORWARD_VECTOR_F, UP_VECTOR_F);
+		m_instance.get()->Apply3D(AudioManager::GetPlayerAudioListener(), m_emitter);
+	}
+}
+
+// Updates the 3D position of a 3D audio instance.   Should only be called after the 
+// initial call to Set3DPosition
+void AudioInstance::UpdatePosition(const FXMVECTOR position, float time_delta)
+{
+	if (m_instance.get())
+	{
+		m_emitter.Update(position, UP_VECTOR, time_delta);
+		m_instance.get()->Apply3D(AudioManager::GetPlayerAudioListener(), m_emitter);
+	}
+}
+
+// Set audio format properties for this instance
+void AudioInstance::SetAudioFormat(UINT32 channel_count)
+{
+	// Store required data
+	m_channel_count = channel_count;
+
+	// Apply any updates based on this data
+	m_emitter.ChannelCount = m_channel_count;
+}
+
+
 // Stop any audio that is currently playing and release the instance.  Resources are retained
 void AudioInstance::Terminate(void)
 {
 	// Stop any playback immediately
 	if (m_instance.get()) m_instance.get()->Stop(true);
-
+	
 	// Mark this instance as available for cleanup immediately
 	m_terminates = 0U;
 }

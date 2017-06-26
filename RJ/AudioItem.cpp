@@ -10,7 +10,7 @@
 // Constructor with all mandatory parameters
 AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename)
 	:
-	m_id(id), m_name(name), m_type(type), m_filename(filename), m_duration(0U), 
+	m_id(id), m_name(name), m_type(type), m_filename(filename), m_duration(0U), m_channel_count(1U), 
 	m_instance_limit(AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT), 
 	m_allow_new_instance_slots(true)
 {
@@ -22,7 +22,7 @@ AudioItem::AudioItem(AudioItem && other) noexcept
 	:
 	m_id(other.m_id), m_name(std::move(other.m_name)), m_type(other.m_type), 
 	m_filename(std::move(other.m_filename)), m_duration(other.m_duration), 
-	m_instance_limit(other.m_instance_limit), 
+	m_channel_count(other.m_channel_count), m_instance_limit(other.m_instance_limit), 
 	m_allow_new_instance_slots(other.m_allow_new_instance_slots), 
 	m_effect(std::move(other.m_effect)), 
 	m_instances(std::move(other.m_instances))
@@ -33,6 +33,9 @@ AudioItem::AudioItem(AudioItem && other) noexcept
 // Assign an audio resource to this item
 Result AudioItem::AssignResource(SoundEffect *resource)
 {
+	// Audio resource can only be assigned once; it can never be reassigned
+	if (m_effect.get() != NULL) return ErrorCodes::CannotReassignExistingAudioItemResource;
+
 	// A null value can be assigned if we want to release the audio resource
 	if (!resource)
 	{
@@ -44,7 +47,10 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 	
 	// We now own this new resource; any existing resource will be deallocated
 	m_effect.reset(resource);
+
+	// Extract and store information from the audio resource
 	m_duration = (unsigned int)resource->GetSampleDurationMS();
+	m_channel_count = (UINT32)resource->GetFormat()->nChannels;
 
 	return ErrorCodes::NoError;
 }
@@ -54,30 +60,38 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 // Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
 Result AudioItem::CreateInstance(void)
 {
-	return PerformInstantiation(false, NULL_FLOAT4);
-}
-
-// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-Result AudioItem::Create3DInstance(XMFLOAT4 position)
-{
-	return PerformInstantiation(true, position);
-}
-
-
-// Internal method; handles creation of audio instances.  Returns non-zero on failure
-Result AudioItem::PerformInstantiation(bool is3d, XMFLOAT4 position3d)
-{
 	// Find an available instance slot.  This should ALWAYS return a valid slot
-	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(is3d);
+	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(false);
 	assert( IsValidInstanceID(id) );
 
 	// Populate the instance with required details and start playback
-	m_instances[id].Set3DPosition(position3d);
 	m_instances[id].Start(m_duration);
-	
+
 	// Return success
 	return ErrorCodes::NoError;
 }
+
+// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
+Result AudioItem::Create3DInstance(const XMFLOAT3 & position)
+{
+	// Find an available instance slot.  This should ALWAYS return a valid slot
+	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(true);
+	assert( IsValidInstanceID(id) );
+
+	// Populate the instance with required details and start playback
+	m_instances[id].SetPosition(position);
+	m_instances[id].Start(m_duration);
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Returns a pointer to a specific instance, or NULL if none exists with the given ID
+AudioInstance * AudioItem::GetInstance(AudioInstance::AudioInstanceID id)
+{
+	return (IsValidInstanceID(id) ? &(m_instances[id]) : NULL);
+}
+
 
 // Identifies an instance slot for this audio item.  Will ALWAYS return a slot ID, even if it requires
 // terminating an existing instance.  In this case, the oldest instance will be selected for termination
@@ -115,9 +129,10 @@ AudioInstance::AudioInstanceID AudioItem::GetAvailableInstanceSlot(bool requires
 	// extend the instance collection (and make sure this is not currently disallowed)
 	if (count < m_instance_limit && m_allow_new_instance_slots)
 	{
-		m_instances.push_back(AudioInstance(std::move(CreateNewEffectInstance(requires_3d_support))));
-		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(m_instances.size() - 1)("\n").str().c_str());
-		return (m_instances.size() - 1);
+		AudioInstance::AudioInstanceID new_id = AllocateNewInstanceSlot(requires_3d_support);
+		
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(new_id)("\n").str().c_str());
+		return new_id;
 	}
 
 	// If we found a slot which was inactive, but had incompatible properties, replace the resource instance
@@ -153,6 +168,19 @@ void AudioItem::MakeInstanceAvailable(bool requires_3d_support)
 	// Simply call the internal method to retrieve the next available instance slot, since it will
 	// make space available if necessary to ensure a slot is available
 	GetAvailableInstanceSlot(requires_3d_support);
+}
+
+// Allocates a new slot in the instance vector.  Returns the instance ID of the newly-allocated item
+AudioInstance::AudioInstanceID AudioItem::AllocateNewInstanceSlot(bool requires_3d_support)
+{
+	m_instances.push_back(AudioInstance(std::move(CreateNewEffectInstance(requires_3d_support))));
+
+	// Assign any additional required data to the instance
+	AudioInstance::AudioInstanceID new_id = (m_instances.size() - 1U);
+	m_instances[new_id].Set3DSupportFlag(requires_3d_support);
+	m_instances[new_id].SetAudioFormat(m_channel_count);
+
+	return new_id;
 }
 
 // Generates a new effect instance from the base audio resource

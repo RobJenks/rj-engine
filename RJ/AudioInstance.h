@@ -29,7 +29,6 @@ public:
 	CMPINLINE unsigned int							GetStartTime(void) const			{ return m_starttime; }
 	CMPINLINE unsigned int							GetTerminationTime(void) const		{ return m_terminates; }
 	CMPINLINE bool									Is3DAudio(void) const				{ return m_is3d; }
-	CMPINLINE XMFLOAT4								Get3DPosition(void) const			{ return m_position; }
 
 	// Indicates whether this instance is currently active, based on its termination time
 	CMPINLINE bool									IsActive(void) const				{ return (m_terminates > Game::ClockMs); }
@@ -38,10 +37,17 @@ public:
 	CMPINLINE void									Set3DSupportFlag(bool supports_3d)	{ m_is3d = supports_3d; }
 
 	// Sets the 3D position of a 3D audio instance
-	CMPINLINE void									Set3DPosition(XMFLOAT4 position)	{ m_position = position; }
+	void											SetPosition(const XMFLOAT3 & position);
+
+	// Updates the 3D position of a 3D audio instance.   Should only be called after the 
+	// initial call to Set3DPosition
+	void											UpdatePosition(const FXMVECTOR position, float time_delta);
 
 	// Assign an audio resource to this instance 
 	void											AssignResource(std::unique_ptr<SoundEffectInstance> instance);
+
+	// Set audio format properties for this instance
+	void											SetAudioFormat(UINT32 channel_count);
 
 	// Start instance playback
 	void											Start(unsigned int duration);
@@ -58,12 +64,13 @@ private:
 
 	std::unique_ptr<DirectX::SoundEffectInstance>	m_instance;
 
-	unsigned int									m_starttime;	// ms, time at which this instance started playback
-	unsigned int									m_terminates;	// ms, time at which this instance will terminate (if applicable, otherwise UINT_MAX)
-	
+	unsigned int									m_starttime;		// ms, time at which this instance started playback
+	unsigned int									m_terminates;		// ms, time at which this instance will terminate (if applicable, otherwise UINT_MAX)
+	UINT32											m_channel_count;	
+
 	// Applicable to 3D sounds only
 	bool											m_is3d;	
-	XMFLOAT4										m_position;
+	DirectX::AudioEmitter							m_emitter;
 
 };
 

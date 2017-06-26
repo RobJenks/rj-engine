@@ -44,7 +44,6 @@ public:
 	CMPINLINE unsigned int								GetDuration(void) const			{ return m_duration; }
 	CMPINLINE AudioInstance::AudioInstanceID			GetInstanceLimit(void) const	{ return m_instance_limit; }
 
-
 	// Return a reference to the sound effect object
 	CMPINLINE DirectX::SoundEffect *					GetEffect(void)				{ return m_effect.get(); }
 
@@ -62,7 +61,10 @@ public:
 	Result												CreateInstance(void);
 
 	// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-	Result												Create3DInstance(XMFLOAT4 position);
+	Result												Create3DInstance(const XMFLOAT3 & position);
+
+	// Returns a pointer to a specific instance, or NULL if none exists with the given ID
+	AudioInstance *										GetInstance(AudioInstance::AudioInstanceID id);
 
 	// Specify whether this item is allowed to extend its instance collection when no suitable inactive slots are available
 	CMPINLINE void										AllowNewInstanceSlots(void) { m_allow_new_instance_slots = true; }
@@ -71,6 +73,9 @@ public:
 	// Ensures that at least one instance slot is available within this item, by terminating existing audio
 	// instances if necessary
 	void												MakeInstanceAvailable(bool requires_3d_support);
+
+	// Allocates a new slot in the instance vector
+	AudioInstance::AudioInstanceID						AllocateNewInstanceSlot(bool requires_3d_support);
 
 	// Overrides the maximum instance count for this specific audio item.  Will be constrained to the 
 	// range [1 AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO].  It MUST be possible for audio items to 
@@ -96,6 +101,9 @@ private:
 	// Definition of the audio resource
 	std::unique_ptr<DirectX::SoundEffect>				m_effect;
 
+	// Audio format properties for the audio resource
+	UINT32												m_channel_count;
+
 	// List of instances for this audio resource
 	AudioInstance::AudioInstanceCollection				m_instances;
 
@@ -112,9 +120,6 @@ private:
 
 	// Internal method; determines whether the given instance ID is valid for this audio item
 	bool												IsValidInstanceID(AudioInstance::AudioInstanceID id) const;
-
-	// Internal method; handles creation of audio instances.  Returns non-zero on failure
-	Result												PerformInstantiation(bool is3d, XMFLOAT4 position3d);
 
 	// Identifies an instance slot for this audio item.  Will ALWAYS return a slot ID, even if it requires
 	// terminating an existing instance.  In this case, the oldest instance will be selected for termination

@@ -801,10 +801,19 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_I]) {
+		
 		static int tmpi = 0;
 
-		if (++tmpi % 2 == 0)
-			Game::Engine->GetAudioManager()->Create3DInstance("test1", NULL_FLOAT4);
+		if (b[DIK_LSHIFT])
+		{
+			static int tmpi = 0;
+			XMVECTOR pos = XMVector3TransformCoord(XMVectorSetX(NULL_VECTOR,
+				(++tmpi % 2 != 0 ? -100.0f : +1000.0f)), ss()->GetWorldMatrix());
+			XMFLOAT3 fpos;
+			XMStoreFloat3(&fpos, pos);
+
+			Game::Engine->GetAudioManager()->Create3DInstance("test1", NULL_FLOAT3);
+		}
 		else
 			Game::Engine->GetAudioManager()->CreateInstance("test1");
 			
