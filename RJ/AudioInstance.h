@@ -36,6 +36,9 @@ public:
 	// Sets the flag that indicates whether this instance supports 3D audio
 	CMPINLINE void									Set3DSupportFlag(bool supports_3d)	{ m_is3d = supports_3d; }
 
+	// Returns the current position of the 3D audio instance
+	CMPINLINE XMFLOAT3								GetPosition(void) const				{ return static_cast<XMFLOAT3>(m_emitter.Position); }
+
 	// Sets the 3D position of a 3D audio instance
 	void											SetPosition(const XMFLOAT3 & position);
 

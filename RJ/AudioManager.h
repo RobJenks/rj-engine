@@ -17,6 +17,7 @@ public:
 	static const float								DEFAULT_VOLUME;
 	static const float								DEFAULT_PITCH_SHIFT;
 	static const float								DEFAULT_PAN;
+	static const unsigned int						PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL;	// ms; time between periodic audits
 
 	// Default constructor
 	AudioManager(void);
@@ -88,9 +89,21 @@ public:
 	Result								Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position);
 	Result								Create3DInstance(const std::string & name, const XMFLOAT3 & position) { return Create3DInstance(GetAudioID(name), position); }
 
-
 	// Update the player audio listener to the current player position and orientation
 	void								UpdatePlayerAudioListener(void);
+
+	// Perform a periodic audit of active instances and update our internal state
+	void								PerformPeriodicAudit(void);
+
+	// Iterates through all audio items to get an accurate count of active audio instances.  This is required since
+	// during per-frame operation the audio manager will only approximate this count based on incrementing for new 
+	// instances created.  It will not search for completed instances per-frame for efficiency
+	AudioInstance::AudioInstanceID		DetermineExactAudioInstanceCount(void);
+
+	// Returns the number of active instances being maintained by this audio manager, across all audio items.  This is
+	// an upper-bound approximation that is periodically corrected downwards if necessary by the audit process
+	CMPINLINE AudioInstance::AudioInstanceID GetTotalAudioInstanceCount(void) const { return m_instance_count; }
+
 
 	// Pauses global sound playback
 	CMPINLINE void						PausePlayback(void)					{ m_engine->Suspend(); }
@@ -121,10 +134,15 @@ private:
 	AudioItem::AudioID									m_audio_count;
 
 	// Count of total audio instances that are currently active.  Updated on a periodic basis by the AudioManager
-	AudioItem::AudioID									m_instance_count;
+	AudioInstance::AudioInstanceID						m_instance_count;
 
 	// Flag indicating whether we are currently in an error state
 	bool												m_in_error_state;
+
+	// Clock time at which we should perform the next periodic audit
+	unsigned int										m_next_audit_time;
+
+	
 
 	// Single STATIC audio listener centered at the player position & orientation, used for all 3D audio calculations
 	static DirectX::AudioListener						PLAYER_AUDIO_LISTENER;

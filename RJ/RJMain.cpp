@@ -812,7 +812,7 @@ void RJMain::ProcessKeyboardInput(void)
 			XMFLOAT3 fpos;
 			XMStoreFloat3(&fpos, pos);
 
-			Game::Engine->GetAudioManager()->Create3DInstance("test1", NULL_FLOAT3);
+			Game::Engine->GetAudioManager()->Create3DInstance("test1", s2()->GetPositionF());
 		}
 		else
 			Game::Engine->GetAudioManager()->CreateInstance("test1");
@@ -2387,10 +2387,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Power = %d, Max thrust = %.2f, Max reverse = %.2f", 
-			cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetPowerLevel(), 
-			cs()->GetMaximumPossibleEngineThrust(), cs()->GetMaximumPossibleReverseEngineThrust());
-		
+		unsigned int current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d");
+
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
 

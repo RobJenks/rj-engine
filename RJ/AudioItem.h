@@ -76,6 +76,10 @@ public:
 	CMPINLINE bool										IsLoopingByDefault(void) const { return m_default_loop; }
 	CMPINLINE void										SetDefaultLoopState(bool loop) { m_default_loop = loop; }
 
+	// Returns the number of instances that are currently active, i.e. which have not yet reached their 
+	// termination time, or those which are looping indefinitely
+	AudioInstance::AudioInstanceID						GetActiveInstanceCount(void) const;
+
 	// Ensures that at least one instance slot is available within this item, by terminating existing audio
 	// instances if necessary
 	void												MakeInstanceAvailable(bool requires_3d_support);

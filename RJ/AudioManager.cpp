@@ -25,12 +25,13 @@ const AudioInstance::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO
 const float AudioManager::DEFAULT_VOLUME = 1.0f;
 const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
+const unsigned int AudioManager::PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL = 100U;
 
 
 // Default constructor
 AudioManager::AudioManager(void)
 	:
-	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U)
+	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U), m_next_audit_time(0U)
 {
 	// Initialise the static player audio listener to a default state
 	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
@@ -90,21 +91,27 @@ void AudioManager::Update(void)
 	// Update the player audio listener to the current player position and orientation
 	UpdatePlayerAudioListener();
 
-	// Perform a periodic audit of active instances and update our internal stats
-	
+	// Perform a periodic audit of active instances and update our internal state
+	if (Game::ClockMs >= m_next_audit_time)
+	{
+		PerformPeriodicAudit();
+		m_next_audit_time = (Game::ClockMs + AudioManager::PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL);
+	}
 
-	*** THIS IS ONLY TEMPORARY; REMOVE IT ***
+
+
+	//*** THIS IS ONLY TEMPORARY; REMOVE IT ***
 	AudioItem::AudioID id = GetAudioID("test1");
 	AudioInstance *inst = m_sounds[id].GetInstance(0);
 	if (inst && inst->Is3DAudio())
 	{
-		AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
+		/*AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
 		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientation(NULL_FLOAT3, NULL_FLOAT3);
 
 		XMFLOAT3 newpos = XMFLOAT3(cosf(Game::ClockTime) / 2.0f, 0.0f, sinf(Game::ClockTime));
 		newpos.x *= 35; newpos.z *= 35;
-		newpos = XMFLOAT3(-25, 0, 0);			// 75 is approx fade-out distance
-		inst->UpdatePosition(XMLoadFloat3(&newpos), Game::TimeFactor);
+		newpos = XMFLOAT3(-25, 0, 0);			// 75 is approx fade-out distance*/
+		inst->UpdatePosition(XMLoadFloat3(&inst->GetPosition()), Game::TimeFactor);
 	}
 
 
@@ -274,6 +281,36 @@ void AudioManager::UpdatePlayerAudioListener(void)
 		AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
 		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientation(NULL_FLOAT3, NULL_FLOAT3);
 	}
+}
+
+// Perform a periodic audit of active instances and update our internal state
+void AudioManager::PerformPeriodicAudit(void)
+{
+	// Iterates through all audio items to get an accurate count of active audio instances.  This is required since
+	// during per-frame operation the audio manager will only approximate this count based on incrementing for new 
+	// instances created.  It will not search for completed instances per-frame for efficiency
+	m_instance_count = DetermineExactAudioInstanceCount();
+
+
+}
+
+
+
+// Iterates through all audio items to get an accurate count of active audio instances.  This is required since
+// during per-frame operation the audio manager will only approximate this count based on incrementing for new 
+// instances created.  It will not search for completed instances per-frame for efficiency
+AudioInstance::AudioInstanceID AudioManager::DetermineExactAudioInstanceCount(void)
+{
+	AudioInstance::AudioInstanceID count = 0U;
+
+	AudioItem::AudioCollection::const_iterator it_end = m_sounds.end();
+	for (AudioItem::AudioCollection::const_iterator it = m_sounds.begin(); it != it_end; ++it)
+	{
+		count += (*it).GetActiveInstanceCount();
+	}
+
+
+	return count;
 }
 
 
