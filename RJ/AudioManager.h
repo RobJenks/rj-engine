@@ -30,7 +30,8 @@ public:
 	// Registers a new sound with the audio manager.  Flag 'load_resouce' determines whether 
 	// the audio resource will be loaded immediately.  If it is not loaded now, LoadResource()
 	// must be called on the specific audio item before it can be used
-	Result								RegisterSound(const char *name, const char *type, const char *filename, bool load_resource);
+	Result								RegisterSound(	const char *name, const char *type, const char *filename, 
+														bool default_loop_state, bool load_resource);
 
 	// Load the resource associated with the given audio item
 	Result								LoadAudioResource(AudioItem::AudioID id);

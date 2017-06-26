@@ -53,7 +53,7 @@ Result AudioManager::Initialise(void)
 
 	// Register an initial null audio item.  This will always be in slot NULL_AUDIO (== 0)
 	// and will be returned in response to invalid requests
-	RegisterSound(NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false);
+	RegisterSound(NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false, false);
 	assert( GetAudioID(NULL_AUDIO_NAME) == NULL_AUDIO );		// Will always be in slot 0
 		
 	// Return success
@@ -113,7 +113,7 @@ void AudioManager::Update(void)
 // Registers a new sound with the audio manager.  Flag 'load_resouce' determines whether 
 // the audio resource will be loaded immediately.  If it is not loaded now, LoadResource()
 // must be called on the specific audio item before it can be used
-Result AudioManager::RegisterSound(const char *name, const char *type, const char *filename, bool load_resource)
+Result AudioManager::RegisterSound(const char *name, const char *type, const char *filename, bool default_loop_state, bool load_resource)
 {
 	if (!name || !type || !filename) return ErrorCodes::CannotRegisterAudioItemWithInvalidDetails;
 
@@ -126,7 +126,7 @@ Result AudioManager::RegisterSound(const char *name, const char *type, const cha
 
 	// Create a new entry in both collections
 	AudioItem::AudioID id = m_sounds.size();
-	m_sounds.push_back(AudioItem(id, audio_name, audio_type, filename));
+	m_sounds.push_back(AudioItem(id, audio_name, audio_type, filename, default_loop_state));
 	m_sound_name_map[audio_name] = id;
 
 	// Update the audio resource count

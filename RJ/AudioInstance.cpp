@@ -34,13 +34,13 @@ void AudioInstance::AssignResource(std::unique_ptr<SoundEffectInstance> instance
 }
 
 // Start instance playback
-void AudioInstance::Start(unsigned int duration)
+void AudioInstance::Start(unsigned int duration, bool loop)
 {
 	// Begin playback, if we have a valid resource
 	if (m_instance.get())
 	{
 		m_instance.get()->Stop();
-		m_instance.get()->Play(*** PASS & SET LOOP PARAMETER ***);
+		m_instance.get()->Play(loop);
 	}
 
 	// Set the start and termination timers accordingly

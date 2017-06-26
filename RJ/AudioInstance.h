@@ -50,7 +50,7 @@ public:
 	void											SetAudioFormat(UINT32 channel_count);
 
 	// Start instance playback
-	void											Start(unsigned int duration);
+	void											Start(unsigned int duration, bool loop);
 
 
 	// Stop any audio that is currently playing and release the instance.  Resources are retained

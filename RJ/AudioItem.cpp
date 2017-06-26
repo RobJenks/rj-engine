@@ -8,10 +8,10 @@
 
 
 // Constructor with all mandatory parameters
-AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename)
+AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state)
 	:
 	m_id(id), m_name(name), m_type(type), m_filename(filename), m_duration(0U), m_channel_count(1U), 
-	m_instance_limit(AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT), 
+	m_default_loop(default_loop_state), m_instance_limit(AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT), 
 	m_allow_new_instance_slots(true)
 {
 }
@@ -21,7 +21,7 @@ AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType 
 AudioItem::AudioItem(AudioItem && other) noexcept
 	:
 	m_id(other.m_id), m_name(std::move(other.m_name)), m_type(other.m_type), 
-	m_filename(std::move(other.m_filename)), m_duration(other.m_duration), 
+	m_filename(std::move(other.m_filename)), m_duration(other.m_duration), m_default_loop(other.m_default_loop), 
 	m_channel_count(other.m_channel_count), m_instance_limit(other.m_instance_limit), 
 	m_allow_new_instance_slots(other.m_allow_new_instance_slots), 
 	m_effect(std::move(other.m_effect)), 
@@ -58,21 +58,21 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 
 
 // Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
-Result AudioItem::CreateInstance(void)
+Result AudioItem::CreateInstance(bool loop)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(false);
 	assert( IsValidInstanceID(id) );
 
 	// Populate the instance with required details and start playback
-	m_instances[id].Start(m_duration);
+	m_instances[id].Start(m_duration, loop);
 
 	// Return success
 	return ErrorCodes::NoError;
 }
 
 // Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-Result AudioItem::Create3DInstance(const XMFLOAT3 & position)
+Result AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(true);
@@ -80,7 +80,7 @@ Result AudioItem::Create3DInstance(const XMFLOAT3 & position)
 
 	// Populate the instance with required details and start playback
 	m_instances[id].SetPosition(position);
-	m_instances[id].Start(m_duration);
+	m_instances[id].Start(m_duration, loop);
 
 	// Return success
 	return ErrorCodes::NoError;

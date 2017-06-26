@@ -25,7 +25,7 @@ public:
 	enum AudioType { Effect = 0, Music, Voice };
 
 	// Constructor with all mandatory parameters
-	AudioItem(AudioID id, const std::string & name, AudioType type, const std::string & filename);
+	AudioItem(AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state);
 
 	// Copy construction and assignment is disallowed
 	CMPINLINE AudioItem(const AudioItem & other) = delete;
@@ -58,10 +58,12 @@ public:
 
 
 	// Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
-	Result												CreateInstance(void);
+	Result												CreateInstance(bool loop);
+	CMPINLINE Result									CreateInstance(void)		{ return CreateInstance(m_default_loop); }
 
 	// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-	Result												Create3DInstance(const XMFLOAT3 & position);
+	Result												Create3DInstance(bool loop, const XMFLOAT3 & position);
+	CMPINLINE Result									Create3DInstance(const XMFLOAT3 & position) { return Create3DInstance(m_default_loop, position); }
 
 	// Returns a pointer to a specific instance, or NULL if none exists with the given ID
 	AudioInstance *										GetInstance(AudioInstance::AudioInstanceID id);
@@ -69,6 +71,10 @@ public:
 	// Specify whether this item is allowed to extend its instance collection when no suitable inactive slots are available
 	CMPINLINE void										AllowNewInstanceSlots(void) { m_allow_new_instance_slots = true; }
 	CMPINLINE void										DisallowNewInstanceSlots(void) { m_allow_new_instance_slots = false; }
+
+	// Default loop state of all instances created from this audio item
+	CMPINLINE bool										IsLoopingByDefault(void) const { return m_default_loop; }
+	CMPINLINE void										SetDefaultLoopState(bool loop) { m_default_loop = loop; }
 
 	// Ensures that at least one instance slot is available within this item, by terminating existing audio
 	// instances if necessary
@@ -96,7 +102,8 @@ private:
 	std::string											m_name;
 	AudioType											m_type;
 	std::string											m_filename;
-	unsigned int										m_duration;	// ms, not accounting for any looping
+	unsigned int										m_duration;		// ms, not accounting for any looping
+	bool												m_default_loop;	// Indicates whether the sound loops by default
 
 	// Definition of the audio resource
 	std::unique_ptr<DirectX::SoundEffect>				m_effect;
