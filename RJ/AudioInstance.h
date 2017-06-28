@@ -10,6 +10,8 @@ class AudioInstance
 public:
 
 	// Collection type and ID used to uniquely identify audio instances
+	// NOTE: AudioInstanceID is NOT a persistent identifier, and may change between frames 
+	// based on actions by the AudioManager
 	typedef std::vector<AudioInstance>					AudioInstanceCollection;
 	typedef std::vector<AudioInstance>::size_type		AudioInstanceID;
 

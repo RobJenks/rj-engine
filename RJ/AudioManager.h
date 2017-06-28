@@ -143,6 +143,8 @@ private:
 	// Clock time at which we should perform the next periodic audit
 	unsigned int										m_next_audit_time;
 
+	// Clock time at which the last object binding check was performed
+	unsigned int										m_object_bindings_last_valid;
 
 	// Single STATIC audio listener centered at the player position & orientation, used for all 3D audio calculations
 	static DirectX::AudioListener						PLAYER_AUDIO_LISTENER;
@@ -155,6 +157,10 @@ private:
 	// an upper-bound estimate that is refined periodically when the audio manager checks for completed instances
 	CMPINLINE void										RecordNewInstanceCreation()			{ ++m_instance_count; }
 
+	// Identify any object-audio bindings that are no longer valid, terminate them and reclaim the instance resources
+	// Accepts the time of the relevant audit verification as a parameter.  Any binding which does not have that
+	// same clock time as it's "valid_at" parameter will be cleaned up
+	void												TerminateExpiredObjectBindings(unsigned int verification_time);
 	
 	// Struct holding the binding between an object and some audio instance
 	class AudioInstanceObjectBinding
@@ -181,11 +187,15 @@ private:
 
 
 		// Return data from the binding
-		CMPINLINE iObject *									GetObj(void) { return m_object(); }
+		CMPINLINE const iObject *							GetObj(void) const { return m_object(); }
 		CMPINLINE AudioItem::AudioID						GetAudioItemID(void) const { return m_item_id; }
-		CMPINLINE AudioInstance::AudioInstanceID			GetAudioInstanceID(void) const { return m_instance_id; }
+		CMPINLINE AudioInstance::AudioInstanceID			GetAudioInstanceID(void) const { return m_instance_id; }	// TODO: REMOVE unless actually needed.  Shouldn't expose ID really
 		CMPINLINE AudioInstance::AudioInstanceIdentifier	GetInstanceIdentifier(void) const { return m_identifier; }
-		
+
+		// Clock time at which this object binding was last confirmed to be valid
+		CMPINLINE unsigned int								GetLastValid(void) const { return m_last_valid; }
+		CMPINLINE void										SetLastValid(unsigned int clock_ms) { m_last_valid = clock_ms; }
+
 		// Destructor with a noexcept guarantee to ensure move semantics are used by STL containers
 		CMPINLINE ~AudioInstanceObjectBinding(void) noexcept { }
 
@@ -195,6 +205,9 @@ private:
 		AudioItem::AudioID									m_item_id;
 		AudioInstance::AudioInstanceID						m_instance_id;
 		AudioInstance::AudioInstanceIdentifier				m_identifier;
+
+		// Clock time at which this binding was last confirmed to be valid
+		unsigned int										m_last_valid;
 	};
 
 	// Vector of currently active object-audio bindings

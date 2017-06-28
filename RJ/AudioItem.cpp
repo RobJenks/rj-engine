@@ -93,6 +93,7 @@ Result AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position)
 }
 
 // Returns a pointer to a specific instance, or NULL if none exists with the given ID
+// TOOD: REMOVE THIS once we are no longer using it for debug purposes; should not expose individual instances via ID
 AudioInstance * AudioItem::GetInstance(AudioInstance::AudioInstanceID id)
 {
 	return (IsValidInstanceID(id) ? &(m_instances[id]) : NULL);
@@ -215,6 +216,20 @@ AudioInstance::AudioInstanceID AudioItem::GetActiveInstanceCount(void) const
 	return count;
 }
 
+// Terminate an instance based on its instance identifier.  Returns a flag indicating whether the instance was found & removed
+bool AudioItem::TerminateInstanceByIdentifier(AudioInstance::AudioInstanceIdentifier identifier)
+{
+	AudioInstance::AudioInstanceCollection::iterator it = std::find_if(m_instances.begin(), m_instances.end(),
+		[identifier](const AudioInstance & instance) { return (instance.GetIdentifier() == identifier); });
+
+	if (it != m_instances.end())
+	{
+		(*it).Terminate();
+		return true;
+	}
+
+	return false;
+}
 
 // Internal method; determines whether the given instance ID is valid for this audio item
 bool AudioItem::IsValidInstanceID(AudioInstance::AudioInstanceID id) const

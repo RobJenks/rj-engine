@@ -34,7 +34,8 @@ AudioInstance::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U
 // Default constructor
 AudioManager::AudioManager(void)
 	:
-	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U), m_next_audit_time(0U)
+	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U), 
+	m_next_audit_time(0U), m_object_bindings_last_valid(0U)
 {
 	// Initialise the static player audio listener to a default state
 	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
@@ -295,12 +296,11 @@ void AudioManager::PerformPeriodicAudit(void)
 	m_instance_count = DetermineExactAudioInstanceCount();
 
 	// Identify any object-audio bindings that are no longer valid, terminate them and reclaim the instance resources
-	*** DO THIS: SEE NOTEPAD ***
+	TerminateExpiredObjectBindings(m_object_bindings_last_valid);
 
 	// Identify any new object-audio bindings that need to be made based on proximity to the player
 	*** DO THIS : SEE NOTEPAD ***
 }
-
 
 
 // Iterates through all audio items to get an accurate count of active audio instances.  This is required since
@@ -316,10 +316,36 @@ AudioInstance::AudioInstanceID AudioManager::DetermineExactAudioInstanceCount(vo
 		count += (*it).GetActiveInstanceCount();
 	}
 
-
 	return count;
 }
 
+// Identify any object-audio bindings that are no longer valid, terminate them and reclaim the instance resources
+// Accepts the time of the relevant audit verification as a parameter.  Any binding which does not have that
+// same clock time as it's "valid_at" parameter will be cleaned up
+void AudioManager::TerminateExpiredObjectBindings(unsigned int verification_time)
+{
+	// Partition the instance collection based on either (a) object is null, or (b) object 
+	// was not valid during the last verification
+	std::vector<AudioManager::AudioInstanceObjectBinding>::const_iterator it = std::partition(m_object_bindings.begin(), m_object_bindings.end(), 
+		[verification_time](const AudioManager::AudioInstanceObjectBinding & binding) {
+		return (binding.GetObj() != NULL && binding.GetLastValid() == verification_time);
+	});
+	
+	// Terminate any instances that are no longer required and then remove the bindings
+	std::vector<AudioManager::AudioInstanceObjectBinding>::const_iterator it_end = m_object_bindings.end();
+	if (it != it_end)
+	{
+		for (; it != it_end; ++it)
+		{
+			if (!m_sounds[(*it).GetAudioItemID()].TerminateInstanceByIdentifier((*it).GetInstanceIdentifier()))
+			{
+				Game::Log << LOG_ERROR << "Failed to terminate object-audio binding instance for ID " << (*it).GetInstanceIdentifier() << "; instance not found\n";
+			}
+		}
+
+		m_object_bindings.erase(it, it_end);
+	}
+}
 
 
 
