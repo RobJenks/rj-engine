@@ -2388,7 +2388,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	if (true)
 	{		
 		AudioInstance::AudioInstanceID current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d", current);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d", (int)current);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

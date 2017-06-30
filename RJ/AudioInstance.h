@@ -3,6 +3,7 @@
 #include <Audio.h>
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
+#include "GameVarsExtern.h"
 
 
 class AudioInstance
@@ -34,6 +35,7 @@ public:
 	CMPINLINE unsigned int							GetStartTime(void) const			{ return m_starttime; }
 	CMPINLINE unsigned int							GetTerminationTime(void) const		{ return m_terminates; }
 	CMPINLINE bool									Is3DAudio(void) const				{ return m_is3d; }
+	CMPINLINE float									GetVolumeModifier(void) const		{ return m_volume_modifier; }
 
 	// Indicates whether this instance is currently active, based on its termination time
 	CMPINLINE bool									IsActive(void) const				{ return (m_terminates > Game::ClockMs); }
@@ -47,12 +49,15 @@ public:
 	// Sets the 3D position of a 3D audio instance
 	void											SetPosition(const XMFLOAT3 & position);
 
+	// Sets the volume modifier for this instance
+	CMPINLINE void									SetVolumeModifier(float volume_modifier) { m_volume_modifier = max(0.0f, volume_modifier); }
+
 	// Updates the 3D position of a 3D audio instance.   Should only be called after the 
 	// initial call to Set3DPosition
 	void											UpdatePosition(const FXMVECTOR position, float time_delta);
 
 	// Assigns a new unique identifier to this instance, which is unique across all audio items
-	CMPINLINE void									AssignNewIdentifier(void)			{ m_identifier = AudioManager::GetNewInstanceIdentifier(); }
+	void											AssignNewIdentifier(void);
 
 	// Assign an audio resource to this instance 
 	void											AssignResource(std::unique_ptr<SoundEffectInstance> instance);
@@ -80,6 +85,7 @@ private:
 	unsigned int									m_starttime;		// ms, time at which this instance started playback
 	unsigned int									m_terminates;		// ms, time at which this instance will terminate (if applicable, otherwise UINT_MAX)
 	UINT32											m_channel_count;	
+	float											m_volume_modifier;
 
 	// Applicable to 3D sounds only
 	bool											m_is3d;	

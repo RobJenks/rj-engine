@@ -57,13 +57,21 @@ public:
 	CMPINLINE  void										ReleaseResources(void)		{ m_effect.release(); }
 
 
-	// Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
-	Result												CreateInstance(bool loop);
-	CMPINLINE Result									CreateInstance(void)		{ return CreateInstance(m_default_loop); }
+	// Create a new instance of this audio item, if posssible.  Returns identifier for the new
+	// instance, or NULL_INSTANCE if one could not be created
+	AudioInstance::AudioInstanceIdentifier				CreateInstance(bool loop, float volume_modifier = 1.0f); 
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(float volume_modifier = 1.0f) 
+	{ 
+		return CreateInstance(m_default_loop, volume_modifier);
+	}
 
-	// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-	Result												Create3DInstance(bool loop, const XMFLOAT3 & position);
-	CMPINLINE Result									Create3DInstance(const XMFLOAT3 & position) { return Create3DInstance(m_default_loop, position); }
+	// Create a new 3D instance of this audio item, if possible.  Returns identifier for the new
+// instance, or NULL_INSTANCE if one could not be created
+	AudioInstance::AudioInstanceIdentifier				Create3DInstance(bool loop, const XMFLOAT3 & position, float volume_modifier = 1.0f);
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float volume_modifier = 1.0f) 
+	{ 
+		return Create3DInstance(m_default_loop, position, volume_modifier); 
+	}
 
 	// Returns a pointer to a specific instance, or NULL if none exists with the given ID
 	AudioInstance *										GetInstance(AudioInstance::AudioInstanceID id);

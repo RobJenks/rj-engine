@@ -57,8 +57,9 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 
 
 
-// Create a new instance of this audio item, if posssible.  Returns non-zero if instantiation fails
-Result AudioItem::CreateInstance(bool loop)
+// Create a new instance of this audio item, if posssible.  Returns identifier for the new
+// instance, or NULL_INSTANCE if one could not be created
+AudioInstance::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, float volume_modifier)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(false);
@@ -68,14 +69,16 @@ Result AudioItem::CreateInstance(bool loop)
 	m_instances[id].AssignNewIdentifier();
 
 	// Populate the instance with required details and start playback
+	m_instances[id].SetVolumeModifier(volume_modifier);
 	m_instances[id].Start(m_duration, loop);
 
 	// Return success
-	return ErrorCodes::NoError;
+	return m_instances[id].GetIdentifier();
 }
 
-// Create a new 3D instance of this audio item, if possible.  Returns non-zero if instantiation fails
-Result AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position)
+// Create a new 3D instance of this audio item, if possible.  Returns identifier for the new
+// instance, or NULL_INSTANCE if one could not be created
+AudioInstance::AudioInstanceIdentifier AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position, float volume_modifier)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(true);
@@ -86,10 +89,11 @@ Result AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position)
 
 	// Populate the instance with required details and start playback
 	m_instances[id].SetPosition(position);
+	m_instances[id].SetVolumeModifier(volume_modifier);
 	m_instances[id].Start(m_duration, loop);
 
 	// Return success
-	return ErrorCodes::NoError;
+	return m_instances[id].GetIdentifier();
 }
 
 // Returns a pointer to a specific instance, or NULL if none exists with the given ID

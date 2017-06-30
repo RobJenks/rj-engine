@@ -3,7 +3,9 @@
 #include "Logging.h"
 #include "GameDataExtern.h"
 #include "FastMath.h"
+#include "ObjectSearch.h"
 #include "Player.h"
+#include "iSpaceObjectEnvironment.h"
 #include "AudioManager.h"
 
 
@@ -14,11 +16,11 @@
 #include "DirectXTK\Audio\WAVFileReader.h"
 #pragma comment(lib, "DirectXTKAudioWin8.lib")
 
-
 // Initialise static constant values
 DirectX::AudioListener AudioManager::PLAYER_AUDIO_LISTENER;
 const AudioItem::AudioID AudioManager::NULL_AUDIO = 0U;
 const std::string AudioManager::NULL_AUDIO_NAME = "NULL";
+const AudioInstance::AudioInstanceIdentifier AudioManager::NULL_INSTANCE_IDENTIFIER = 0U;
 const AudioInstance::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
 const AudioInstance::AudioInstanceID AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT = 20U;
 const AudioInstance::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO = 50U;
@@ -27,8 +29,28 @@ const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
 const unsigned int AudioManager::PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL = 100U;
 
+// Note: inner range should always be some % < 1.0 of max range to avoid in/out of range thrash at boundary
+const float AudioManager::SPACE_AUDIO_MAX_RANGE = 20000.0f;											// Space events, when in space
+const float AudioManager::SPACE_AUDIO_INNER_RANGE = AudioManager::SPACE_AUDIO_MAX_RANGE * 0.95f;
+const float AudioManager::ENV_AUDIO_MAX_RANGE = 200.0f;												// Env events, when in env		 
+const float	AudioManager::ENV_AUDIO_INNER_RANGE = AudioManager::ENV_AUDIO_MAX_RANGE * 0.9f;
+const float	AudioManager::ENV_SPACE_AUDIO_MAX_RANGE = 10000.0f;										// Space events, when in env	
+const float	AudioManager::ENV_SPACE_AUDIO_INNER_RANGE = AudioManager::ENV_SPACE_AUDIO_MAX_RANGE * 0.95f;
+const float	AudioManager::ENV_SPACE_VOLUME_MODIFIER = 0.25f; // Modifier to space event volume when player is in an environment	
+
+															   // Squared versions of key object binding constants for runtime efficiency
+const float AudioManager::SPACE_AUDIO_MAX_RANGE_SQ = AudioManager::SPACE_AUDIO_MAX_RANGE * AudioManager::SPACE_AUDIO_MAX_RANGE;
+const float AudioManager::SPACE_AUDIO_INNER_RANGE_SQ = AudioManager::SPACE_AUDIO_INNER_RANGE * AudioManager::SPACE_AUDIO_INNER_RANGE;
+const float	AudioManager::ENV_AUDIO_MAX_RANGE_SQ = AudioManager::ENV_AUDIO_MAX_RANGE * AudioManager::ENV_AUDIO_MAX_RANGE;
+const float	AudioManager::ENV_AUDIO_INNER_RANGE_SQ = AudioManager::ENV_AUDIO_INNER_RANGE * AudioManager::ENV_AUDIO_INNER_RANGE;
+const float	AudioManager::ENV_SPACE_AUDIO_MAX_RANGE_SQ = AudioManager::ENV_SPACE_AUDIO_MAX_RANGE * AudioManager::ENV_SPACE_AUDIO_MAX_RANGE;
+const float	AudioManager::ENV_SPACE_AUDIO_INNER_RANGE_SQ = AudioManager::ENV_SPACE_AUDIO_INNER_RANGE * AudioManager::ENV_SPACE_AUDIO_INNER_RANGE;
+
 // Initialise the counter used to assign new audio instance identifiers
 AudioInstance::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U;
+
+// Comparator for efficient sorting and searching of objects
+const struct AudioManager::AudioInstanceObjectBinding::_ComparatorLessThan AudioManager::AudioInstanceObjectBinding::ComparatorLessThan;
 
 
 // Default constructor
@@ -58,8 +80,8 @@ Result AudioManager::Initialise(void)
 
 	// Register an initial null audio item.  This will always be in slot NULL_AUDIO (== 0)
 	// and will be returned in response to invalid requests
-	RegisterSound(NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false, false);
-	assert( GetAudioID(NULL_AUDIO_NAME) == NULL_AUDIO );		// Will always be in slot 0
+	RegisterSound(AudioManager::NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false, false);
+	assert( GetAudioID(AudioManager::NULL_AUDIO_NAME) == AudioManager::NULL_AUDIO );		// Will always be in slot 0
 		
 	// Return success
 	return ErrorCodes::NoError;
@@ -248,20 +270,22 @@ void AudioManager::EnsureInstanceIsAvailable(AudioItem::AudioID id, bool require
 	}
 }
 
-// Create a new instance of an audio item, if posssible.  Returns non-zero if instantiation fails
-Result AudioManager::CreateInstance(AudioItem::AudioID id)
+// Create a new instance of an audio item, if posssible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
+// fails for any reason, otherwise returns the identifier of the newly-created instance
+AudioInstance::AudioInstanceIdentifier AudioManager::CreateInstance(AudioItem::AudioID id)
 {
-	if (!IsValidID(id)) return ErrorCodes::CannotCreateInstanceOfInvalidAudioItem;
+	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
 	EnsureInstanceIsAvailable(id, false);
 	RecordNewInstanceCreation();
 	return m_sounds[id].CreateInstance();
 }
 
-// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
-Result AudioManager::Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position)
+// Create a new 3D instance of an audio item, if possible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
+// fails for any reason, otherwise returns the identifier of the newly-created instance
+AudioInstance::AudioInstanceIdentifier AudioManager::Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position)
 {
-	if (!IsValidID(id)) return ErrorCodes::CannotCreateInstanceOfInvalidAudioItem;
+	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
 	EnsureInstanceIsAvailable(id, true);
 	RecordNewInstanceCreation(); 
@@ -296,10 +320,13 @@ void AudioManager::PerformPeriodicAudit(void)
 	m_instance_count = DetermineExactAudioInstanceCount();
 
 	// Identify any object-audio bindings that are no longer valid, terminate them and reclaim the instance resources
+	// NOTE: This step should always be performed before GenerateNewObjectBindings(), since it means we can then
+	// guarantee that all remaining bindings will have object != NULL
+	// NOTE: It should also be performed first so that newly-created items aren't immediately removed by this method
 	TerminateExpiredObjectBindings(m_object_bindings_last_valid);
 
 	// Identify any new object-audio bindings that need to be made based on proximity to the player
-	*** DO THIS : SEE NOTEPAD ***
+	GenerateNewObjectBindings();
 }
 
 
@@ -347,6 +374,98 @@ void AudioManager::TerminateExpiredObjectBindings(unsigned int verification_time
 	}
 }
 
+// Identify any new object-audio bindings that need to be made based on proximity to the player
+void AudioManager::GenerateNewObjectBindings(void)
+{
+	// TODO: Should use a different focal point (rather than player->{actor, ship}) if the player is not 
+	// controlling either of those at the current time
+	iSpaceObjectEnvironment *env = Game::CurrentPlayer->GetParentEnvironment();
+	if (env && Game::CurrentPlayer->GetState() == Player::StateType::OnFoot) 
+	{
+		GenerateNewEnvironmentObjectBindings(env, (iEnvironmentObject*)Game::CurrentPlayer->GetActor(), AudioManager::ENV_AUDIO_INNER_RANGE, 1.0f);
+		GenerateNewSpaceObjectBindings(Game::CurrentPlayer->GetPlayerShip(), AudioManager::ENV_SPACE_AUDIO_INNER_RANGE, AudioManager::ENV_SPACE_VOLUME_MODIFIER);
+	}
+	else
+	{
+		GenerateNewSpaceObjectBindings(Game::CurrentPlayer->GetPlayerShip(), AudioManager::ENV_SPACE_AUDIO_INNER_RANGE, AudioManager::ENV_SPACE_VOLUME_MODIFIER);
+	}
+}
+
+// Generate new audio bindings for objects in the current player environment.  Bindings are established for new objects which get 
+// within audio_inner_range of the player
+void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment *env, iEnvironmentObject *listener, float audio_inner_range, float volume_modifier)
+{
+	// Get all objects within range.  We do not support audio sources from terrain objects
+	std::vector<iEnvironmentObject*> objects;
+	env->GetAllObjectsWithinDistance(listener, audio_inner_range, &objects, NULL);
+
+	// Check all objects to see if they already have a binding
+	std::vector<iEnvironmentObject*>::const_iterator it_end = objects.end();
+	for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+	{
+		// Ignore any objects without ambient audio (which will be most of them)
+		AudioItem::AudioID audio_id = (*it)->GetAmbientAudio();
+		if (audio_id == AudioManager::NULL_AUDIO) continue;
+
+		// Binary search for the object binding
+		std::vector<AudioInstanceObjectBinding>::const_iterator entry =
+			std::lower_bound(m_object_bindings.begin(), m_object_bindings.end(), (*it)->GetID(), AudioInstanceObjectBinding::ComparatorLessThan);
+	
+		// Test whether a new binding is required.  Need to test for == end() first in case this element is going at the end
+		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
+		{
+			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
+			AudioInstance::AudioInstanceIdentifier identifier = m_sounds[audio_id].Create3DInstance((*it)->GetPositionF(), volume_modifier);
+			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier));
+		}
+	}
+}
+
+// Generate new audio bindings for objects in the current player environment.  Bindings are established for new objects which get
+// within audio_inner_range of the player
+void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio_inner_range, float volume_modifier)
+{
+	// Get all objects within range
+	std::vector<iObject*> objects;
+	Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(listener, audio_inner_range, objects, Game::ObjectSearchOptions::NoSearchOptions);
+
+	// Check all objects to see if they already have a binding
+	std::vector<iObject*>::const_iterator it_end = objects.end();
+	for (std::vector<iObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+	{
+		// Ignore any objects without ambient audio (which will be most of them)
+		AudioItem::AudioID audio_id = (*it)->GetAmbientAudio();
+		if (audio_id == AudioManager::NULL_AUDIO) continue;
+
+		// Binary search for the object binding
+		std::vector<AudioInstanceObjectBinding>::const_iterator entry =
+			std::lower_bound(m_object_bindings.begin(), m_object_bindings.end(), (*it)->GetID(), AudioInstanceObjectBinding::ComparatorLessThan);
+
+		// Test whether a new binding is required.  Need to test for == end() first in case this element is going at the end
+		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
+		{
+			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
+			AudioInstance::AudioInstanceIdentifier identifier = m_sounds[audio_id].Create3DInstance((*it)->GetPositionF(), volume_modifier);
+			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier));
+		}
+	}
+}
+
+*** WE ARE NOW GENERATING AUDIO BINDINGS FOR OBJECTS WHEN THEY COME IN RANGE (IN THEORY).  TEST IF THIS IS THE CASE, THEN 
+    IMPLEMENT THE LAST PART: PER-FRAME UPDATE IN AUDIO MANAGER AUDIT ***
+
+
+
+// Move assignment for object audio bindings with a noexcept guarantee to ensure it is used by STL containers
+AudioManager::AudioInstanceObjectBinding & AudioManager::AudioInstanceObjectBinding::operator=(const AudioManager::AudioInstanceObjectBinding && other) noexcept
+{
+	m_object = other.m_object;
+	m_obj_id = other.m_obj_id;
+	m_item_id = other.m_item_id;
+	m_identifier = other.m_identifier;
+	m_last_valid = other.m_last_valid;
+	return *this;
+}
 
 
 // Release the specified audio resource.  Audio item is preserved, but resource must be
