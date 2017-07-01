@@ -326,6 +326,8 @@ public:
 	// Ambient audio for the object, or 0 if none
 	CMPINLINE AudioItem::AudioID			GetAmbientAudio(void) const									{ return m_audio_id; }
 	CMPINLINE bool							HasAmbientAudio(void) const									{ return (m_audio_id != 0U); }
+	void									SetAmbientAudio(AudioItem::AudioID audio_id);
+	void									SetAmbientAudio(const std::string & audio_name);
 
 	// Methods to retrieve/update attachment details; first, attachments to a parent object, where we are the child
 	CMPINLINE iObject *							GetParentObject(void) const									{ return m_parentobject; }

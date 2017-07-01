@@ -93,12 +93,16 @@ public:
 	void								EnsureInstanceIsAvailable(AudioItem::AudioID id, bool requires_3d_support);
 
 	// Create a new instance of an audio item, if posssible.  Returns non-zero if instantiation fails
-	AudioInstance::AudioInstanceIdentifier				CreateInstance(AudioItem::AudioID id);
-	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(const std::string & name) { return CreateInstance(GetAudioID(name)); }
+	AudioInstance::AudioInstanceIdentifier				CreateInstance(AudioItem::AudioID id, float volume_modifier = 1.0f);
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(const std::string & name, float volume_modifier = 1.0f) { 
+		return CreateInstance(GetAudioID(name), volume_modifier); 
+	}
 
 	// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
-	AudioInstance::AudioInstanceIdentifier				Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position);
-	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position) { return Create3DInstance(GetAudioID(name), position); }
+	AudioInstance::AudioInstanceIdentifier				Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position, float volume_modifier = 1.0f);
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position, float volume_modifier = 1.0f) { 
+		return Create3DInstance(GetAudioID(name), position, volume_modifier); 
+	}
 
 	// Update the player audio listener to the current player position and orientation
 	void								UpdatePlayerAudioListener(void);
@@ -161,6 +165,10 @@ private:
 	// Single STATIC audio listener centered at the player position & orientation, used for all 3D audio calculations
 	static DirectX::AudioListener						PLAYER_AUDIO_LISTENER;
 
+	// Position and orientation of the player listener, stored locally for more efficient per-frame calculations
+	// TODO: orientation removed, may not be required locally?
+	XMFLOAT3											m_player_listener_position;
+
 	// Generates a new instance identifier, which is unique across all audio items
 	static AudioInstance::AudioInstanceIdentifier		AUDIO_INSTANCE_COUNTER;
 
@@ -179,11 +187,18 @@ private:
 	// Generate new audio bindings for objects in the current player environment.  Bindings are established for new objects which get 
 	// within audio_inner_range of the player
 	void												GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment *env, iEnvironmentObject *listener, 
-																							 float audio_inner_range, float volume_modifier);
+																							 float audio_inner_range, float audio_outer_range, float volume_modifier);
 
 	// Generate new audio bindings for objects in the current player environment.  Bindings are established for new objects which get
 	// within audio_inner_range of the player
-	void												GenerateNewSpaceObjectBindings(iObject *listener, float audio_inner_range, float volume_modifier);
+	void												GenerateNewSpaceObjectBindings(iObject *listener, float audio_inner_range, 
+																					   float audio_outer_range, float volume_modifier);
+
+	// Update any active object/audio bindings based on the current world state
+	void												UpdateObjectAudioBindings(unsigned int verification_time);
+
+	// Store position and orientation data for the player listener
+	void												UpdatePlayerListenerPositionData(const FXMVECTOR position, const FXMVECTOR orientation);
 
 	// Squared versions of object binding audio for runtime efficiency
 	static const float									SPACE_AUDIO_MAX_RANGE_SQ;
@@ -200,9 +215,10 @@ private:
 
 		// Create a new binding
 		CMPINLINE AudioInstanceObjectBinding(iObject *object, AudioItem::AudioID audio_item_id,
-			AudioInstance::AudioInstanceIdentifier instance_identifier)
+			AudioInstance::AudioInstanceIdentifier instance_identifier, float max_dist_sq)
 			:
-			m_object(object), m_item_id(audio_item_id), m_identifier(instance_identifier), m_last_valid(0U)
+			m_object(object), m_item_id(audio_item_id), m_identifier(instance_identifier), 
+			m_max_dist_sq(max_dist_sq), m_last_valid(0U)
 		{
 			m_obj_id = (object ? object->GetID() : 0);
 		}
@@ -215,7 +231,7 @@ private:
 		// Move constructor with a noexcept guarantee to ensure it is used by STL containers
 		CMPINLINE AudioInstanceObjectBinding(AudioInstanceObjectBinding && other) noexcept
 			: m_object(std::move(other.m_object)), m_obj_id(other.m_obj_id), m_item_id(other.m_item_id), 
-			m_identifier(other.m_identifier), m_last_valid(other.m_last_valid) { }
+			m_identifier(other.m_identifier), m_max_dist_sq(other.m_max_dist_sq), m_last_valid(other.m_last_valid) { }
 
 		// Move assignment with a noexcept guarantee to ensure it is used by STL containers
 		AudioInstanceObjectBinding & operator=(const AudioInstanceObjectBinding && other) noexcept;
@@ -226,6 +242,7 @@ private:
 		CMPINLINE Game::ID_TYPE								GetObjectID(void) const { return m_obj_id; }
 		CMPINLINE AudioItem::AudioID						GetAudioItemID(void) const { return m_item_id; }
 		CMPINLINE AudioInstance::AudioInstanceIdentifier	GetInstanceIdentifier(void) const { return m_identifier; }
+		CMPINLINE float										GetMaxDistSq(void) const { return m_max_dist_sq; }
 		
 		// Clock time at which this object binding was last confirmed to be valid
 		CMPINLINE unsigned int								GetLastValid(void) const { return m_last_valid; }
@@ -248,6 +265,9 @@ private:
 		Game::ID_TYPE										m_obj_id;
 		AudioItem::AudioID									m_item_id;
 		AudioInstance::AudioInstanceIdentifier				m_identifier;
+
+		// Distance beyond which the audio instance will be terminated
+		float												m_max_dist_sq;	
 		
 		// Clock time at which this binding was last confirmed to be valid
 		unsigned int										m_last_valid;

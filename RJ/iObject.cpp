@@ -407,6 +407,19 @@ void iObject::SetCollisionSphereRadiusSq(float radius_sq)
 	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 }
 
+// Set the ambient audio item for this object, or 0 for none
+void iObject::SetAmbientAudio(AudioItem::AudioID audio_id)
+{
+	if (Game::Engine->GetAudioManager()->IsValidID(audio_id))		m_audio_id = audio_id;
+	else															m_audio_id = AudioManager::NULL_AUDIO;
+}
+
+// Set the ambient audio item for this object, or 0 if the specified audio item could not be located
+void iObject::SetAmbientAudio(const std::string & audio_name)
+{
+	SetAmbientAudio(Game::Engine->GetAudioManager()->GetAudioID(audio_name));
+}
+
 // Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 
 // updates to the central data collections.  Returns a value indicating whether the code could be successfully set
 bool iObject::SetInstanceCode(const std::string & instance_code)

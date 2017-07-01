@@ -45,9 +45,9 @@ void AudioInstance::Start(unsigned int duration, bool loop)
 		m_instance.get()->Play(loop);
 	}
 
-	// Set the start and termination timers accordingly
+	// Set the start and termination timers accordingly (if looping, we have no specific end time)
 	m_starttime = Game::ClockMs;
-	m_terminates = (m_starttime + duration);
+	m_terminates = (loop ? (0U - 1) : (m_starttime + duration));
 }
 
 // Sets the 3D position of a 3D audio instance

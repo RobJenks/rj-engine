@@ -190,6 +190,12 @@ CMPINLINE XMFLOAT3	Float3Multiply(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 	return XMFLOAT3(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 }
 
+CMPINLINE float		Float3DistanceSq(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	XMFLOAT3 diff(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+	return ((diff.x * diff.x) + (diff.y * diff.y) + (diff.z * diff.z));
+}
+
 CMPINLINE XMFLOAT4	Float4MultiplyScalar(const XMFLOAT4 & v, const float s)
 {
 	return XMFLOAT4(v.x * s, v.y * s, v.z * s, v.w * s);

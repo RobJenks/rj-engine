@@ -812,7 +812,7 @@ void RJMain::ProcessKeyboardInput(void)
 			XMFLOAT3 fpos;
 			XMStoreFloat3(&fpos, pos);
 
-			Game::Engine->GetAudioManager()->Create3DInstance("test1", s2()->GetPositionF());
+			Game::Engine->GetAudioManager()->Create3DInstance("test1", s2()->GetPositionF(), 1.0f);
 		}
 		else
 			Game::Engine->GetAudioManager()->CreateInstance("test1");

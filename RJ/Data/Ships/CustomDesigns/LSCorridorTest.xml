@@ -13,6 +13,7 @@
         <BankExtent x="0.087266" y="0.087266" z="0.017453" />
         <DefaultLoadout></DefaultLoadout>
         <VisibilityTestingMode>useboundingsphere</VisibilityTestingMode>
+        <AmbientAudio>test1</AmbientAudio>
         <ElementSize x="10" y="24" z="2" />
         <complexshipelement id="0">
             <elementlocation x="0" y="0" z="0" />

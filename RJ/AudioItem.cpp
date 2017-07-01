@@ -103,6 +103,18 @@ AudioInstance * AudioItem::GetInstance(AudioInstance::AudioInstanceID id)
 	return (IsValidInstanceID(id) ? &(m_instances[id]) : NULL);
 }
 
+// Returns a pointer to a specific instance with the given identifier, or NULL if none exists
+// TODO: Make this more efficient than a linear search in future if necessary
+AudioInstance * AudioItem::GetInstanceByIdentifier(AudioInstance::AudioInstanceIdentifier identifier)
+{
+	std::vector<AudioInstance>::iterator it_end = m_instances.end();
+	for (std::vector<AudioInstance>::iterator it = m_instances.begin(); it != it_end; ++it)
+	{
+		if ((*it).GetIdentifier() == identifier && (*it).IsActive()) return &(*it);
+	}
+
+	return NULL;
+}
 
 // Identifies an instance slot for this audio item.  Will ALWAYS return a slot ID, even if it requires
 // terminating an existing instance.  In this case, the oldest instance will be selected for termination

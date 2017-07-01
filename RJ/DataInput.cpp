@@ -495,6 +495,7 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
 	else if (hash == HashedStrings::H_CollisionMode)				object->SetCollisionMode(Game::TranslateCollisionModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_CollisionOBB)					LoadCollisionOBB(object, node, object->CollisionOBB, true);
+	else if (hash == HashedStrings::H_AmbientAudio)					object->SetAmbientAudio(node->GetText());
 
 	// Otherwise check against any superclasses
 	else if (LoadDamageableEntityData(node, hash, object))			return true;

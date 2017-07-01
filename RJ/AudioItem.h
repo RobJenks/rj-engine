@@ -73,8 +73,12 @@ public:
 		return Create3DInstance(m_default_loop, position, volume_modifier); 
 	}
 
-	// Returns a pointer to a specific instance, or NULL if none exists with the given ID
+	// Returns a pointer to a specific instance, or NULL if none exists with the given ID // TODO: REMOVE
 	AudioInstance *										GetInstance(AudioInstance::AudioInstanceID id);
+
+	// Returns a pointer to a specific instance with the given identifier, or NULL if none exists
+	AudioInstance *										GetInstanceByIdentifier(AudioInstance::AudioInstanceIdentifier identifier);
+
 
 	// Specify whether this item is allowed to extend its instance collection when no suitable inactive slots are available
 	CMPINLINE void										AllowNewInstanceSlots(void) { m_allow_new_instance_slots = true; }
