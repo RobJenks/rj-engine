@@ -8,7 +8,8 @@
 AudioInstance::AudioInstance(std::unique_ptr<SoundEffectInstance> effect_instance)
 	:
 	m_identifier(0U), m_starttime(0U), m_terminates(0U), m_is3d(false), 
-	m_channel_count(1U), m_volume_modifier(AudioManager::DEFAULT_VOLUME), 
+	m_channel_count(1U), 
+	m_base_volume_modifier(AudioManager::DEFAULT_VOLUME), m_volume_modifier(AudioManager::DEFAULT_VOLUME), m_base_volume(AudioManager::DEFAULT_VOLUME), 
 	m_instance(std::move(effect_instance))
 {
 }
@@ -18,7 +19,8 @@ AudioInstance::AudioInstance(AudioInstance && other) noexcept
 	:
 	m_instance(std::move(other.m_instance)), 
 	m_starttime(other.m_starttime), m_terminates(other.m_terminates), m_is3d(other.m_is3d), 
-	m_identifier(0U), m_channel_count(other.m_channel_count), m_volume_modifier(other.m_volume_modifier), 
+	m_identifier(0U), m_channel_count(other.m_channel_count), 
+	m_base_volume_modifier(other.m_base_volume_modifier), m_volume_modifier(other.m_volume_modifier), m_base_volume(other.m_base_volume), 
 	m_emitter(std::move(other.m_emitter))
 {
 }
@@ -41,7 +43,7 @@ void AudioInstance::Start(unsigned int duration, bool loop)
 	if (m_instance.get())
 	{
 		m_instance.get()->Stop();
-		m_instance.get()->SetVolume(m_volume_modifier);
+		UpdateVolume();
 		m_instance.get()->Play(loop);
 	}
 
@@ -74,6 +76,51 @@ void AudioInstance::UpdatePosition(const FXMVECTOR position, float time_delta)
 		m_instance.get()->Apply3D(AudioManager::GetPlayerAudioListener(), m_emitter);
 	}
 }
+
+// Sets the base volume modifier for this instance.  Restricted to the range [0.0 1.0]
+void AudioInstance::SetBaseVolumeModifier(float base_volume_modifier)
+{
+	m_base_volume_modifier = clamp(base_volume_modifier, 0.0f, 1.0f);
+	UpdateVolume();
+}
+
+// Sets the volume modifier for this instance.  Restricted to the range [0.0 1.0]
+void AudioInstance::SetVolumeModifier(float volume_modifier) 
+{ 
+	m_volume_modifier = clamp(volume_modifier, 0.0f, 1.0f);
+	UpdateVolume();
+}
+
+// Sets the desired base volume for this audio instance
+void AudioInstance::SetVolume(float volume) 
+{ 
+	m_base_volume = max(0.0f, volume); 
+	UpdateVolume();
+}
+
+// Sets all volume-related parameters for this instance
+void AudioInstance::SetVolumeParameters(float base_volume, float volume_modifier, float base_volume_modifier)
+{
+	m_base_volume = base_volume;
+	m_volume_modifier = volume_modifier;
+	m_base_volume_modifier = base_volume_modifier;
+	UpdateVolume();
+}
+
+// Update the instance volume.  Accepts a base volume modifier (based on audio item type) as input and
+// calculates as final volume = (base_modifier * volume_modifier * base_volume)
+void AudioInstance::UpdateVolume(void)
+{
+	if (m_instance.get())
+	{
+		// m_base_volume_modifier = base modifier based on audio type (effect vs music vs ...)
+		// m_volume_modifier = instance-specific modifier (e.g. for interior vs exterior sounds)
+		// m_base_volume = desired base volume before any modification
+		float volume = (m_base_volume_modifier * m_volume_modifier * m_base_volume);
+		m_instance.get()->SetVolume(max(0.0f, volume));
+	}
+}
+
 
 // Assigns a new unique identifier to this instance, which is unique across all audio items
 void AudioInstance::AssignNewIdentifier(void) 

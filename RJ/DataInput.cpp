@@ -4091,7 +4091,7 @@ Result IO::Data::LoadAudioItem(TiXmlElement *node)
 	if (!node) return ErrorCodes::CannotLoadAudioItemWithNullInput;
 	
 	std::string key;
-	const char *name = NULL, *type = NULL, *filename = NULL, *defaultloop = NULL;
+	const char *name = NULL, *type = NULL, *filename = NULL, *defaultloop = NULL, *defaultvolume = NULL;
 
 	const TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr)
@@ -4101,6 +4101,7 @@ Result IO::Data::LoadAudioItem(TiXmlElement *node)
 		else if (key == "type")				type = attr->Value();
 		else if (key == "file")				filename = attr->Value();
 		else if (key == "loop")				defaultloop = attr->Value();
+		else if (key == "volume")			defaultvolume = attr->Value();
 
 		attr = attr->Next();
 	}
@@ -4110,10 +4111,11 @@ Result IO::Data::LoadAudioItem(TiXmlElement *node)
 
 	// Process other, optional parameters
 	bool loop = (defaultloop != NULL && strcmp(defaultloop, "true") == 0);
+	float default_volume = (defaultvolume == NULL ? 1.0f : (float)atof(defaultvolume));
 
 	// Register a new audio entry with the audio manager, though do not load the 
 	// resource itself at this point
-	return Game::Engine->GetAudioManager()->RegisterSound(name, type, filename, loop, false);
+	return Game::Engine->GetAudioManager()->RegisterSound(name, type, filename, loop, default_volume, false);
 }
 
 

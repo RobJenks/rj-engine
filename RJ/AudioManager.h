@@ -43,7 +43,7 @@ public:
 	// the audio resource will be loaded immediately.  If it is not loaded now, LoadResource()
 	// must be called on the specific audio item before it can be used
 	Result								RegisterSound(	const char *name, const char *type, const char *filename, 
-														bool default_loop_state, bool load_resource);
+														bool default_loop_state, float default_volume, bool load_resource);
 
 	// Load the resource associated with the given audio item
 	Result								LoadAudioResource(AudioItem::AudioID id);
@@ -103,6 +103,15 @@ public:
 	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position, float volume_modifier = 1.0f) { 
 		return Create3DInstance(GetAudioID(name), position, volume_modifier); 
 	}
+
+	// Return the base type volume modifier for a specific audio item type
+	CMPINLINE float										GetBaseTypeVolumeModifier(AudioItem::AudioType type) { return m_type_volume_modifiers[(int)type]; }
+
+	// Set the base type volume modifier for a specific audio item type, and update all affected audio items & instances accordingly
+	void												SetBaseTypeVolumeModifier(AudioItem::AudioType type, float volume_modifier);
+
+	// Set the base type volume modifier for all audio item types, and update all audio items & instances accordingly
+	void												SetBaseTypeVolumeModifiers(float const(&type_modifiers)[AudioItem::AudioType::_COUNT]);
 
 	// Update the player audio listener to the current player position and orientation
 	void								UpdatePlayerAudioListener(void);
@@ -169,6 +178,9 @@ private:
 	// TODO: orientation removed, may not be required locally?
 	XMFLOAT3											m_player_listener_position;
 
+	// Base type volume modifiers based on audio item type
+	float												m_type_volume_modifiers[AudioItem::AudioType::_COUNT];
+
 	// Generates a new instance identifier, which is unique across all audio items
 	static AudioInstance::AudioInstanceIdentifier		AUDIO_INSTANCE_COUNTER;
 
@@ -199,6 +211,9 @@ private:
 
 	// Store position and orientation data for the player listener
 	void												UpdatePlayerListenerPositionData(const FXMVECTOR position, const FXMVECTOR orientation);
+
+	// Recalculates the final volume of all audio items and instances, based on a change to the audio manager volume settings
+	void												RecalculateAllAudioItemVolumeSettings(void);
 
 	// Squared versions of object binding audio for runtime efficiency
 	static const float									SPACE_AUDIO_MAX_RANGE_SQ;

@@ -49,8 +49,20 @@ public:
 	// Sets the 3D position of a 3D audio instance
 	void											SetPosition(const XMFLOAT3 & position);
 
-	// Sets the volume modifier for this instance
-	CMPINLINE void									SetVolumeModifier(float volume_modifier) { m_volume_modifier = max(0.0f, volume_modifier); }
+	// Sets the base volume modifier for this instance.  Restricted to the range [0.0 1.0]
+	void											SetBaseVolumeModifier(float base_volume_modifier);
+
+	// Sets the volume modifier for this instance.  Restricted to the range [0.0 1.0]
+	void											SetVolumeModifier(float volume_modifier);
+
+	// Sets the desired volume for this audio instance
+	void											SetVolume(float volume);
+
+	// Sets all volume-related parameters for this instance
+	void											SetVolumeParameters(float base_volume, float volume_modifier = 1.0f, float base_volume_modifier = 1.0f);
+
+	// Update the instance volume.  Calculates as final volume = (base_modifier * volume_modifier * base_volume)
+	void											UpdateVolume(void);
 
 	// Updates the 3D position of a 3D audio instance.   Should only be called after the 
 	// initial call to Set3DPosition
@@ -85,7 +97,11 @@ private:
 	unsigned int									m_starttime;		// ms, time at which this instance started playback
 	unsigned int									m_terminates;		// ms, time at which this instance will terminate (if applicable, otherwise UINT_MAX)
 	UINT32											m_channel_count;	
-	float											m_volume_modifier;
+
+	// Final instance volume = (base volume * volume modifier)
+	float											m_base_volume;			// Target volume for the instance
+	float											m_volume_modifier;		// Modifier to instance volume (e.g. interior/exterior) applied per-instance
+	float											m_base_volume_modifier;	// Base modifier, based on audio item type (interior vs exterior vs ...)
 
 	// Applicable to 3D sounds only
 	bool											m_is3d;	

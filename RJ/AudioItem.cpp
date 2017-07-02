@@ -8,11 +8,11 @@
 
 
 // Constructor with all mandatory parameters
-AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state)
+AudioItem::AudioItem(AudioItem::AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state, float default_volume)
 	:
 	m_id(id), m_name(name), m_type(type), m_filename(filename), m_duration(0U), m_channel_count(1U), 
 	m_default_loop(default_loop_state), m_instance_limit(AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT), 
-	m_allow_new_instance_slots(true)
+	m_allow_new_instance_slots(true), m_default_base_volume(max(0.0f, default_volume)), m_type_volume_modifier(1.0f)
 {
 }
 
@@ -23,7 +23,8 @@ AudioItem::AudioItem(AudioItem && other) noexcept
 	m_id(other.m_id), m_name(std::move(other.m_name)), m_type(other.m_type), 
 	m_filename(std::move(other.m_filename)), m_duration(other.m_duration), m_default_loop(other.m_default_loop), 
 	m_channel_count(other.m_channel_count), m_instance_limit(other.m_instance_limit), 
-	m_allow_new_instance_slots(other.m_allow_new_instance_slots), 
+	m_allow_new_instance_slots(other.m_allow_new_instance_slots), m_default_base_volume(other.m_default_base_volume),  
+	m_type_volume_modifier(other.m_type_volume_modifier), 
 	m_effect(std::move(other.m_effect)), 
 	m_instances(std::move(other.m_instances))
 {
@@ -59,7 +60,7 @@ Result AudioItem::AssignResource(SoundEffect *resource)
 
 // Create a new instance of this audio item, if posssible.  Returns identifier for the new
 // instance, or NULL_INSTANCE if one could not be created
-AudioInstance::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, float volume_modifier)
+AudioInstance::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, float base_volume, float volume_modifier)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(false);
@@ -69,7 +70,7 @@ AudioInstance::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, floa
 	m_instances[id].AssignNewIdentifier();
 
 	// Populate the instance with required details and start playback
-	m_instances[id].SetVolumeModifier(volume_modifier);
+	m_instances[id].SetVolumeParameters(base_volume, volume_modifier, m_type_volume_modifier);
 	m_instances[id].Start(m_duration, loop);
 
 	// Return success
@@ -78,7 +79,7 @@ AudioInstance::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, floa
 
 // Create a new 3D instance of this audio item, if possible.  Returns identifier for the new
 // instance, or NULL_INSTANCE if one could not be created
-AudioInstance::AudioInstanceIdentifier AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position, float volume_modifier)
+AudioInstance::AudioInstanceIdentifier AudioItem::Create3DInstance(bool loop, const XMFLOAT3 & position, float base_volume, float volume_modifier)
 {
 	// Find an available instance slot.  This should ALWAYS return a valid slot
 	AudioInstance::AudioInstanceID id = GetAvailableInstanceSlot(true);
@@ -89,7 +90,7 @@ AudioInstance::AudioInstanceIdentifier AudioItem::Create3DInstance(bool loop, co
 
 	// Populate the instance with required details and start playback
 	m_instances[id].SetPosition(position);
-	m_instances[id].SetVolumeModifier(volume_modifier);
+	m_instances[id].SetVolumeParameters(base_volume, volume_modifier, m_type_volume_modifier);
 	m_instances[id].Start(m_duration, loop);
 
 	// Return success
@@ -107,13 +108,29 @@ AudioInstance * AudioItem::GetInstance(AudioInstance::AudioInstanceID id)
 // TODO: Make this more efficient than a linear search in future if necessary
 AudioInstance * AudioItem::GetInstanceByIdentifier(AudioInstance::AudioInstanceIdentifier identifier)
 {
-	std::vector<AudioInstance>::iterator it_end = m_instances.end();
-	for (std::vector<AudioInstance>::iterator it = m_instances.begin(); it != it_end; ++it)
+	AudioInstance::AudioInstanceCollection::iterator it_end = m_instances.end();
+	for (AudioInstance::AudioInstanceCollection::iterator it = m_instances.begin(); it != it_end; ++it)
 	{
 		if ((*it).GetIdentifier() == identifier && (*it).IsActive()) return &(*it);
 	}
 
 	return NULL;
+}
+
+void AudioItem::SetBaseTypeVolumeModifier(float modifier)
+{
+	// Store the new base modifier
+	m_type_volume_modifier = clamp(modifier, 0.0f, 1.0f);
+
+	// Apply to all currently-active instances
+	AudioInstance::AudioInstanceCollection::iterator it_end = m_instances.end();
+	for (AudioInstance::AudioInstanceCollection::iterator it = m_instances.begin(); it != it_end; ++it)
+	{
+		if ((*it).IsActive())
+		{
+			(*it).SetBaseVolumeModifier(m_type_volume_modifier);
+		}
+	}
 }
 
 // Identifies an instance slot for this audio item.  Will ALWAYS return a slot ID, even if it requires

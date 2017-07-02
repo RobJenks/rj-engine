@@ -22,10 +22,10 @@ public:
 	typedef std::unordered_map<std::string, AudioID>	AudioIDMap;
 
 	// Enumeration of possible audio types.  Default = Effect
-	enum AudioType { Effect = 0, Music, Voice };
+	enum AudioType { Effect = 0, Music, Voice, _COUNT };
 
 	// Constructor with all mandatory parameters
-	AudioItem(AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state);
+	AudioItem(AudioID id, const std::string & name, AudioType type, const std::string & filename, bool default_loop_state, float default_volume);
 
 	// Copy construction and assignment is disallowed
 	CMPINLINE AudioItem(const AudioItem & other) = delete;
@@ -37,15 +37,20 @@ public:
 
 
 	// Return key parameters
-	CMPINLINE AudioID									GetID(void) const				{ return m_id; }
-	CMPINLINE std::string								GetName(void) const				{ return m_name; }
-	CMPINLINE AudioType									GetType(void) const				{ return m_type; }
-	CMPINLINE std::string								GetFilename(void) const			{ return m_filename; }
-	CMPINLINE unsigned int								GetDuration(void) const			{ return m_duration; }
-	CMPINLINE AudioInstance::AudioInstanceID			GetInstanceLimit(void) const	{ return m_instance_limit; }
+	CMPINLINE AudioID									GetID(void) const							{ return m_id; }
+	CMPINLINE std::string								GetName(void) const							{ return m_name; }
+	CMPINLINE AudioType									GetType(void) const							{ return m_type; }
+	CMPINLINE std::string								GetFilename(void) const						{ return m_filename; }
+	CMPINLINE unsigned int								GetDuration(void) const						{ return m_duration; }
+	CMPINLINE AudioInstance::AudioInstanceID			GetInstanceLimit(void) const				{ return m_instance_limit; }
 
 	// Return a reference to the sound effect object
-	CMPINLINE DirectX::SoundEffect *					GetEffect(void)				{ return m_effect.get(); }
+	CMPINLINE DirectX::SoundEffect *					GetEffect(void)								{ return m_effect.get(); }
+
+	// Base volume modifier for the item based on its audio item type.  Restricted  to the range [0.0 1.0].  Automatically
+	// recalculates volume of all active instances when changed
+	CMPINLINE float										GetBaseTypeVolumeModifier(void) const		{ return m_type_volume_modifier; }
+	void												SetBaseTypeVolumeModifier(float modifier);
 
 	// Assign an audio resource to this item
 	Result												AssignResource(SoundEffect *resource);
@@ -59,18 +64,22 @@ public:
 
 	// Create a new instance of this audio item, if posssible.  Returns identifier for the new
 	// instance, or NULL_INSTANCE if one could not be created
-	AudioInstance::AudioInstanceIdentifier				CreateInstance(bool loop, float volume_modifier = 1.0f); 
-	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(float volume_modifier = 1.0f) 
-	{ 
-		return CreateInstance(m_default_loop, volume_modifier);
+	AudioInstance::AudioInstanceIdentifier				CreateInstance(bool loop, float base_volume, float volume_modifier = 1.0f); 
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(float base_volume, float volume_modifier) { 
+		return CreateInstance(m_default_loop, base_volume, volume_modifier);
+	}
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	CreateInstance(float volume_modifier) {
+		return CreateInstance(m_default_loop, m_default_base_volume, volume_modifier);
 	}
 
 	// Create a new 3D instance of this audio item, if possible.  Returns identifier for the new
-// instance, or NULL_INSTANCE if one could not be created
-	AudioInstance::AudioInstanceIdentifier				Create3DInstance(bool loop, const XMFLOAT3 & position, float volume_modifier = 1.0f);
-	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float volume_modifier = 1.0f) 
-	{ 
-		return Create3DInstance(m_default_loop, position, volume_modifier); 
+	// instance, or NULL_INSTANCE if one could not be created
+	AudioInstance::AudioInstanceIdentifier				Create3DInstance(bool loop, const XMFLOAT3 & position, float base_volume, float volume_modifier = 1.0f);
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float base_volume, float volume_modifier) { 
+		return Create3DInstance(m_default_loop, position, base_volume, volume_modifier); 
+	}
+	CMPINLINE AudioInstance::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float volume_modifier) {
+		return Create3DInstance(m_default_loop, position, m_default_base_volume, volume_modifier);
 	}
 
 	// Returns a pointer to a specific instance, or NULL if none exists with the given ID // TODO: REMOVE
@@ -90,7 +99,6 @@ public:
 
 	// Terminate an instance based on its instance identifier.  Returns a flag indicating whether the instance was found & removed
 	bool												TerminateInstanceByIdentifier(AudioInstance::AudioInstanceIdentifier identifier);
-
 
 	// Returns the number of instances that are currently active, i.e. which have not yet reached their 
 	// termination time, or those which are looping indefinitely
@@ -127,6 +135,12 @@ private:
 
 	// Definition of the audio resource
 	std::unique_ptr<DirectX::SoundEffect>				m_effect;
+
+	// Base volume modifier for the item based on its audio item type
+	float												m_type_volume_modifier;
+
+	// Default base volume for all instances of this audio item
+	float												m_default_base_volume;
 
 	// Audio format properties for the audio resource
 	UINT32												m_channel_count;

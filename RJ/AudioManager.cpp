@@ -82,7 +82,7 @@ Result AudioManager::Initialise(void)
 
 	// Register an initial null audio item.  This will always be in slot NULL_AUDIO (== 0)
 	// and will be returned in response to invalid requests
-	RegisterSound(AudioManager::NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false, false);
+	RegisterSound(AudioManager::NULL_AUDIO_NAME.c_str(), AudioItem::TranslateAudioTypeToString(AudioItem::AudioType::Effect).c_str(), "", false, 1.0f, false);
 	assert( GetAudioID(AudioManager::NULL_AUDIO_NAME) == AudioManager::NULL_AUDIO );		// Will always be in slot 0
 		
 	// Return success
@@ -128,30 +128,12 @@ void AudioManager::Update(void)
 		PerformPeriodicAudit();
 		m_next_audit_time = (Game::ClockMs + AudioManager::PERIODIC_AUDIO_MANAGER_AUDIO_INTERVAL);
 	}
-
-
-
-	//*** THIS IS ONLY TEMPORARY; REMOVE IT ***
-	AudioItem::AudioID id = GetAudioID("test1");
-	AudioInstance *inst = m_sounds[id].GetInstance(0);
-	if (inst && inst->Is3DAudio())
-	{
-		/*AudioManager::PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
-		AudioManager::PLAYER_AUDIO_LISTENER.SetOrientation(NULL_FLOAT3, NULL_FLOAT3);
-
-		XMFLOAT3 newpos = XMFLOAT3(cosf(Game::ClockTime) / 2.0f, 0.0f, sinf(Game::ClockTime));
-		newpos.x *= 35; newpos.z *= 35;
-		newpos = XMFLOAT3(-25, 0, 0);			// 75 is approx fade-out distance*/
-		inst->UpdatePosition(XMLoadFloat3(&inst->GetPosition()), Game::TimeFactor);
-	}
-
-
 }
 
 // Registers a new sound with the audio manager.  Flag 'load_resouce' determines whether 
 // the audio resource will be loaded immediately.  If it is not loaded now, LoadResource()
 // must be called on the specific audio item before it can be used
-Result AudioManager::RegisterSound(const char *name, const char *type, const char *filename, bool default_loop_state, bool load_resource)
+Result AudioManager::RegisterSound(const char *name, const char *type, const char *filename, bool default_loop_state, float default_volume, bool load_resource)
 {
 	if (!name || !type || !filename) return ErrorCodes::CannotRegisterAudioItemWithInvalidDetails;
 
@@ -164,7 +146,7 @@ Result AudioManager::RegisterSound(const char *name, const char *type, const cha
 
 	// Create a new entry in both collections
 	AudioItem::AudioID id = m_sounds.size();
-	m_sounds.push_back(AudioItem(id, audio_name, audio_type, filename, default_loop_state));
+	m_sounds.push_back(AudioItem(id, audio_name, audio_type, filename, default_loop_state, default_volume));
 	m_sound_name_map[audio_name] = id;
 
 	// Update the audio resource count
@@ -232,6 +214,37 @@ Result AudioManager::LoadAllAudioResources(void)
 Result AudioManager::LoadAudioResource(const std::string & name)
 {
 	return LoadAudioResource(GetAudioID(name));
+}
+
+// Set the base type volume modifier for a specific audio item type, and update all affected audio items & instances accordingly
+void AudioManager::SetBaseTypeVolumeModifier(AudioItem::AudioType type, float volume_modifier)
+{
+	m_type_volume_modifiers[(int)type] = clamp(volume_modifier, 0.0f, 1.0f);
+	RecalculateAllAudioItemVolumeSettings();
+}
+
+// Set the base type volume modifier for all audio item types, and update all audio items & instances accordingly
+void AudioManager::SetBaseTypeVolumeModifiers(float const (&type_modifiers)[AudioItem::AudioType::_COUNT])
+{
+	for (int i = 0; i < AudioItem::AudioType::_COUNT; ++i)
+	{
+		m_type_volume_modifiers[i] = type_modifiers[i];
+	}
+
+	RecalculateAllAudioItemVolumeSettings();
+}
+
+// Recalculates the final volume of all audio items and instances, based on a change to the audio manager volume settings
+void AudioManager::RecalculateAllAudioItemVolumeSettings(void)
+{
+	// Process every audio item in turn
+	AudioItem::AudioCollection::iterator it_end = m_sounds.end();
+	for (AudioItem::AudioCollection::iterator it = m_sounds.begin(); it != it_end; ++it)
+	{
+		float modifier = GetBaseTypeVolumeModifier((*it).GetType());
+		(*it).SetBaseTypeVolumeModifier(modifier);
+	}
+	 
 }
 
 
