@@ -362,6 +362,7 @@
     <ClCompile Include="ArticulatedModelComponent.cpp" />
     <ClCompile Include="Attachment.cpp" />
     <ClCompile Include="AudioInstance.cpp" />
+    <ClCompile Include="AudioInstanceObjectBinding.cpp" />
     <ClCompile Include="AudioItem.cpp" />
     <ClCompile Include="AudioManager.cpp" />
     <ClCompile Include="BasicProjectile.cpp" />

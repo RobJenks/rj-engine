@@ -1127,7 +1127,7 @@ void RJMain::Quit(void)
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
-//MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::VerifyOnEveryOperation);
+MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::VerifyOnEveryOperation);
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
@@ -1284,7 +1284,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	Game::Log << LOG_INFO << "Initialisation complete\n\n";
 	Game::Log.FlushAllStreams();
 	Game::Log.DisableFlushAfterEveryOperation();
-//MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::NoValidation);
+MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::NoValidation);
 	return ErrorCodes::NoError;
 }
 

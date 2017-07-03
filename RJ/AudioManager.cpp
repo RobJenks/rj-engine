@@ -59,8 +59,7 @@ AudioManager::AudioManager(void)
 	:
 	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U), 
 	m_player_listener_position(NULL_FLOAT3), 
-	m_next_audit_time(0U), m_object_bindings_last_valid(0U), 
-	m_object_bindings()
+	m_next_audit_time(0U), m_object_bindings_last_valid(0U)
 {
 	// Initialise the static player audio listener to a default state
 	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
@@ -520,19 +519,6 @@ void AudioManager::UpdateObjectAudioBindings(unsigned int verification_time)
 		}
 	}
 }
-
-// Move assignment for object audio bindings with a noexcept guarantee to ensure it is used by STL containers
-AudioInstanceObjectBinding & AudioInstanceObjectBinding::operator=(const AudioInstanceObjectBinding && other) noexcept
-{
-	m_object = other.m_object;
-	m_obj_id = other.m_obj_id;
-	m_item_id = other.m_item_id;
-	m_identifier = other.m_identifier;
-	m_max_dist_sq = other.m_max_dist_sq;
-	m_last_valid = other.m_last_valid;
-	return *this;
-}
-
 
 // Release the specified audio resource.  Audio item is preserved, but resource must be
 // re-loaded before it can be used again
