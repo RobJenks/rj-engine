@@ -1127,7 +1127,7 @@ void RJMain::Quit(void)
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
-
+//MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::VerifyOnEveryOperation);
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
@@ -1284,7 +1284,7 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	Game::Log << LOG_INFO << "Initialisation complete\n\n";
 	Game::Log.FlushAllStreams();
 	Game::Log.DisableFlushAfterEveryOperation();
-
+//MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::NoValidation);
 	return ErrorCodes::NoError;
 }
 
@@ -2387,7 +2387,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		AudioInstance::AudioInstanceID current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
+		Audio::AudioInstanceID current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d", (int)current);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);

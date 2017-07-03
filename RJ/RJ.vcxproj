@@ -588,7 +588,9 @@
     <ClInclude Include="ArticulatedModel.h" />
     <ClInclude Include="ArticulatedModelComponent.h" />
     <ClInclude Include="Attachment.h" />
+    <ClInclude Include="Audio.h" />
     <ClInclude Include="AudioInstance.h" />
+    <ClInclude Include="AudioInstanceObjectBinding.h" />
     <ClInclude Include="AudioItem.h" />
     <ClInclude Include="AudioManager.h" />
     <ClInclude Include="BasicColourDefinition.h" />

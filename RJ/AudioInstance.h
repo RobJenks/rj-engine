@@ -4,7 +4,7 @@
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
 #include "GameVarsExtern.h"
-
+#include "Audio.h"
 
 class AudioInstance
 {

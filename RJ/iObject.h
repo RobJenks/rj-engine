@@ -324,10 +324,13 @@ public:
 	CMPINLINE void							SetVisibilityTestingMode(VisibilityTestingModeType mode)	{ m_visibilitytestingmode = mode; }
 
 	// Ambient audio for the object, or 0 if none
-	CMPINLINE AudioItem::AudioID			GetAmbientAudio(void) const									{ return m_audio_id; }
+	CMPINLINE Audio::AudioID			GetAmbientAudio(void) const									{ return m_audio_id; }
 	CMPINLINE bool							HasAmbientAudio(void) const									{ return (m_audio_id != 0U); }
-	void									SetAmbientAudio(AudioItem::AudioID audio_id);
-	void									SetAmbientAudio(const std::string & audio_name);
+	void									SetAmbientAudio(Audio::AudioID audio_id, float volume);
+	void									SetAmbientAudio(const std::string & audio_name, float volume);
+
+	// Ambient audio properties
+	CMPINLINE float							GetAmbientAudioVolume(void) const { return m_audio_volume; }
 
 	// Methods to retrieve/update attachment details; first, attachments to a parent object, where we are the child
 	CMPINLINE iObject *							GetParentObject(void) const									{ return m_parentobject; }
@@ -569,7 +572,8 @@ protected:
 
 	VisibilityTestingModeType			m_visibilitytestingmode;		// The method used to test visibility of this object
 
-	AudioItem::AudioID					m_audio_id;						// Ambient audio for this object, or 0 if none
+	Audio::AudioID					m_audio_id;						// Ambient audio for this object, or 0 if none
+	float								m_audio_volume;					// Base volume for the object ambient audio
 
 	AttachmentSet						m_childobjects;					// Vector of any attachments from this object to child objects
 	int									m_childcount;					// The number of child attachments, if any)

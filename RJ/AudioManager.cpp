@@ -19,12 +19,12 @@
 
 // Initialise static constant values
 DirectX::AudioListener AudioManager::PLAYER_AUDIO_LISTENER;
-const AudioItem::AudioID AudioManager::NULL_AUDIO = 0U;
+const Audio::AudioID AudioManager::NULL_AUDIO = 0U;
 const std::string AudioManager::NULL_AUDIO_NAME = "NULL";
-const AudioInstance::AudioInstanceIdentifier AudioManager::NULL_INSTANCE_IDENTIFIER = 0U;
-const AudioInstance::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
-const AudioInstance::AudioInstanceID AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT = 20U;
-const AudioInstance::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO = 50U;
+const Audio::AudioInstanceIdentifier AudioManager::NULL_INSTANCE_IDENTIFIER = 0U;
+const Audio::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
+const Audio::AudioInstanceID AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT = 20U;
+const Audio::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO = 50U;
 const float AudioManager::DEFAULT_VOLUME = 1.0f;
 const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
@@ -48,10 +48,10 @@ const float	AudioManager::ENV_SPACE_AUDIO_MAX_RANGE_SQ = AudioManager::ENV_SPACE
 const float	AudioManager::ENV_SPACE_AUDIO_INNER_RANGE_SQ = AudioManager::ENV_SPACE_AUDIO_INNER_RANGE * AudioManager::ENV_SPACE_AUDIO_INNER_RANGE;
 
 // Initialise the counter used to assign new audio instance identifiers
-AudioInstance::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U;
+Audio::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U;
 
 // Comparator for efficient sorting and searching of objects
-const struct AudioManager::AudioInstanceObjectBinding::_ComparatorLessThan AudioManager::AudioInstanceObjectBinding::ComparatorLessThan;
+const struct AudioInstanceObjectBinding::_ComparatorLessThan AudioInstanceObjectBinding::ComparatorLessThan;
 
 
 // Default constructor
@@ -59,7 +59,8 @@ AudioManager::AudioManager(void)
 	:
 	m_engine(NULL), m_in_error_state(false), m_audio_count(0U), m_instance_count(0U), 
 	m_player_listener_position(NULL_FLOAT3), 
-	m_next_audit_time(0U), m_object_bindings_last_valid(0U)
+	m_next_audit_time(0U), m_object_bindings_last_valid(0U), 
+	m_object_bindings()
 {
 	// Initialise the static player audio listener to a default state
 	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
@@ -145,7 +146,7 @@ Result AudioManager::RegisterSound(const char *name, const char *type, const cha
 	AudioItem::AudioType audio_type = AudioItem::TranslateAudioTypeFromString(type);
 
 	// Create a new entry in both collections
-	AudioItem::AudioID id = m_sounds.size();
+	Audio::AudioID id = m_sounds.size();
 	m_sounds.push_back(AudioItem(id, audio_name, audio_type, filename, default_loop_state, default_volume));
 	m_sound_name_map[audio_name] = id;
 
@@ -165,7 +166,7 @@ Result AudioManager::RegisterSound(const char *name, const char *type, const cha
 }
 
 // Load the resource associated with the given audio item
-Result AudioManager::LoadAudioResource(AudioItem::AudioID id)
+Result AudioManager::LoadAudioResource(Audio::AudioID id)
 {
 	if (!IsValidID(id)) return ErrorCodes::CannotLoadAudioResourceWithInvalidID;
 	if (m_sounds[id].ResourcesLoaded()) return ErrorCodes::AudioResourceAlreadyLoaded;
@@ -201,7 +202,7 @@ Result AudioManager::LoadAllAudioResources(void)
 	Result overallresult = ErrorCodes::NoError;
 
 	// Process every item, excluding the NULL_AUDIO item at id == 0
-	for (AudioItem::AudioID id = 1U; id < m_audio_count; ++id)
+	for (Audio::AudioID id = 1U; id < m_audio_count; ++id)
 	{
 		Result result = LoadAudioResource(id);
 		if (result != ErrorCodes::NoError) overallresult = result;
@@ -238,8 +239,8 @@ void AudioManager::SetBaseTypeVolumeModifiers(float const (&type_modifiers)[Audi
 void AudioManager::RecalculateAllAudioItemVolumeSettings(void)
 {
 	// Process every audio item in turn
-	AudioItem::AudioCollection::iterator it_end = m_sounds.end();
-	for (AudioItem::AudioCollection::iterator it = m_sounds.begin(); it != it_end; ++it)
+	Audio::AudioCollection::iterator it_end = m_sounds.end();
+	for (Audio::AudioCollection::iterator it = m_sounds.begin(); it != it_end; ++it)
 	{
 		float modifier = GetBaseTypeVolumeModifier((*it).GetType());
 		(*it).SetBaseTypeVolumeModifier(modifier);
@@ -252,7 +253,7 @@ void AudioManager::RecalculateAllAudioItemVolumeSettings(void)
 // Volume: default = 1
 // PitchShift: In the range [-1 +1], default with no shift = 0
 // Pan: In the range [-1 = full left, +1 = full right], default with no panning = 0
-void AudioManager::Play(AudioItem::AudioID id, float volume, float pitch_shift, float pan)
+void AudioManager::Play(Audio::AudioID id, float volume, float pitch_shift, float pan)
 { 
 	if (!IsValidID(id)) return;
 
@@ -271,7 +272,7 @@ void AudioManager::Play(const std::string & name, float volume, float pitch_shif
 
 // Ensures that a slot is available for a new audio instance.  Will terminate an instance of the current 
 // audio item if necessary to remain under the global audio instance limit
-void AudioManager::EnsureInstanceIsAvailable(AudioItem::AudioID id, bool requires_3d_support)
+void AudioManager::EnsureInstanceIsAvailable(Audio::AudioID id, bool requires_3d_support)
 {
 	// We don't need to take any action as long as we are below the global audio instance limit
 	if (m_instance_count <= AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT) return;
@@ -290,7 +291,7 @@ void AudioManager::EnsureInstanceIsAvailable(AudioItem::AudioID id, bool require
 
 // Create a new instance of an audio item, if posssible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
 // fails for any reason, otherwise returns the identifier of the newly-created instance
-AudioInstance::AudioInstanceIdentifier AudioManager::CreateInstance(AudioItem::AudioID id, float volume_modifier)
+Audio::AudioInstanceIdentifier AudioManager::CreateInstance(Audio::AudioID id, float volume_modifier)
 {
 	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
@@ -301,7 +302,7 @@ AudioInstance::AudioInstanceIdentifier AudioManager::CreateInstance(AudioItem::A
 
 // Create a new 3D instance of an audio item, if possible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
 // fails for any reason, otherwise returns the identifier of the newly-created instance
-AudioInstance::AudioInstanceIdentifier AudioManager::Create3DInstance(AudioItem::AudioID id, const XMFLOAT3 & position, float volume_modifier)
+Audio::AudioInstanceIdentifier AudioManager::Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float volume_modifier)
 {
 	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
@@ -362,12 +363,12 @@ void AudioManager::PerformPeriodicAudit(void)
 // Iterates through all audio items to get an accurate count of active audio instances.  This is required since
 // during per-frame operation the audio manager will only approximate this count based on incrementing for new 
 // instances created.  It will not search for completed instances per-frame for efficiency
-AudioInstance::AudioInstanceID AudioManager::DetermineExactAudioInstanceCount(void)
+Audio::AudioInstanceID AudioManager::DetermineExactAudioInstanceCount(void)
 {
-	AudioInstance::AudioInstanceID count = 0U;
+	Audio::AudioInstanceID count = 0U;
 
-	AudioItem::AudioCollection::const_iterator it_end = m_sounds.end();
-	for (AudioItem::AudioCollection::const_iterator it = m_sounds.begin(); it != it_end; ++it)
+	Audio::AudioCollection::const_iterator it_end = m_sounds.end();
+	for (Audio::AudioCollection::const_iterator it = m_sounds.begin(); it != it_end; ++it)
 	{
 		count += (*it).GetActiveInstanceCount();
 	}
@@ -382,13 +383,13 @@ void AudioManager::TerminateExpiredObjectBindings(unsigned int verification_time
 {
 	// Partition the instance collection based on either (a) object is null, or (b) object 
 	// was not valid during the last verification
-	std::vector<AudioManager::AudioInstanceObjectBinding>::const_iterator it = std::partition(m_object_bindings.begin(), m_object_bindings.end(), 
-		[verification_time](const AudioManager::AudioInstanceObjectBinding & binding) {
+	std::vector<AudioInstanceObjectBinding>::const_iterator it = std::partition(m_object_bindings.begin(), m_object_bindings.end(), 
+		[verification_time](const AudioInstanceObjectBinding & binding) {
 		return (binding.GetObj() != NULL && binding.GetLastValid() == verification_time);
 	});
 	
 	// Terminate any instances that are no longer required and then remove the bindings
-	std::vector<AudioManager::AudioInstanceObjectBinding>::const_iterator it_end = m_object_bindings.end();
+	std::vector<AudioInstanceObjectBinding>::const_iterator it_end = m_object_bindings.end();
 	if (it != it_end)
 	{
 		for (; it != it_end; ++it)
@@ -439,7 +440,7 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 	for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
 		// Ignore any objects without ambient audio (which will be most of them)
-		AudioItem::AudioID audio_id = (*it)->GetAmbientAudio();
+		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
 
 		// Binary search for the object binding
@@ -450,7 +451,7 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
 		{
 			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
-			AudioInstance::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
+			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
 			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, max_dist_sq));
 		}
 	}
@@ -471,7 +472,7 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 	for (std::vector<iObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
 		// Ignore any objects without ambient audio (which will be most of them)
-		AudioItem::AudioID audio_id = (*it)->GetAmbientAudio();
+		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
 
 		// Binary search for the object binding
@@ -482,7 +483,7 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
 		{
 			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
-			AudioInstance::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
+			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
 			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, max_dist_sq));
 		}
 	}
@@ -521,7 +522,7 @@ void AudioManager::UpdateObjectAudioBindings(unsigned int verification_time)
 }
 
 // Move assignment for object audio bindings with a noexcept guarantee to ensure it is used by STL containers
-AudioManager::AudioInstanceObjectBinding & AudioManager::AudioInstanceObjectBinding::operator=(const AudioManager::AudioInstanceObjectBinding && other) noexcept
+AudioInstanceObjectBinding & AudioInstanceObjectBinding::operator=(const AudioInstanceObjectBinding && other) noexcept
 {
 	m_object = other.m_object;
 	m_obj_id = other.m_obj_id;
@@ -535,7 +536,7 @@ AudioManager::AudioInstanceObjectBinding & AudioManager::AudioInstanceObjectBind
 
 // Release the specified audio resource.  Audio item is preserved, but resource must be
 // re-loaded before it can be used again
-void AudioManager::ReleaseAudioResource(AudioItem::AudioID id)
+void AudioManager::ReleaseAudioResource(Audio::AudioID id)
 {
 	if (!IsValidID(id)) return;
 	m_sounds[id].ReleaseResources();
@@ -546,7 +547,7 @@ void AudioManager::ReleaseAudioResource(AudioItem::AudioID id)
 void AudioManager::ReleaseAllAudioResources(void)
 {
 	// Process every item, excluding the NULL_AUDIO item at id == 0
-	for (AudioItem::AudioID id = 1U; id < m_audio_count; ++id)
+	for (Audio::AudioID id = 1U; id < m_audio_count; ++id)
 	{
 		ReleaseAudioResource(id);
 	}

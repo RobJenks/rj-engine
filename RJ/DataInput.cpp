@@ -495,7 +495,12 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
 	else if (hash == HashedStrings::H_CollisionMode)				object->SetCollisionMode(Game::TranslateCollisionModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_CollisionOBB)					LoadCollisionOBB(object, node, object->CollisionOBB, true);
-	else if (hash == HashedStrings::H_AmbientAudio)					object->SetAmbientAudio(node->GetText());
+	else if (hash == HashedStrings::H_AmbientAudio)
+	{
+		const char *audio_name = node->Attribute("name");
+		const char *audio_volume = node->Attribute("volume");
+		if (audio_name) object->SetAmbientAudio(audio_name, (audio_volume ? (float)atof(audio_volume) : -1.0f));
+	}
 
 	// Otherwise check against any superclasses
 	else if (LoadDamageableEntityData(node, hash, object))			return true;
