@@ -42,6 +42,7 @@
 *.ipch
 *.log
 *.tlog
+*.nativecodeanalysis.xml
 
 # Exclude debug, release & any other intermediate build directories
 /.vs/*
