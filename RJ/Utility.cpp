@@ -172,7 +172,7 @@ INTVECTOR3 DirectionUnitOffset(Direction direction)
 // Rotates a bitstring representing directional data
 bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation)
 {
-	bitstring newb;
+	bitstring newb = 0U;
 	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Left_BS, rotation), CheckBit_All(b, DirectionBS::Left_BS)); 
 	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Up_BS, rotation), CheckBit_All(b, DirectionBS::Up_BS));
 	SetBitState(newb, GetRotatedBSDirection(DirectionBS::Down_BS, rotation), CheckBit_All(b, DirectionBS::Down_BS));

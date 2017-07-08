@@ -41,7 +41,7 @@ ComplexShipElement::ComplexShipElement(void)
 
 	// No connections or adjacency info by default
 	m_connections = 0U;
-	memset(m_adj, 0, sizeof(ComplexShipElement*) * Direction::_Count);
+	memset(m_adj, 0, sizeof(int) * Direction::_Count);
 
 	// No nav node positions or connections are specified by default
 	m_navnodepositions = NULL; m_navnodeconnections = NULL;

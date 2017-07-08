@@ -24,6 +24,8 @@ namespace ErrorCodes {
 	const Result		CouldNotDetermineAbsoluteDataPath				= 11;
 	const Result		AbsoluteDataPathIsNotValid						= 12;
 	const Result		ImageResourcePathIsNotValid						= 13;
+	const Result		CouldNotAllocateSpaceForMathLookupData			= 14;
+	const Result		CouldNotSetCOMInitialisationMethod				= 15;
 
 	// DirectX error codes												(1000-1999)
 	const Result		CannotCreateDirect3DDevice						= 1000;
@@ -576,6 +578,7 @@ namespace ErrorCodes {
 	const Result		CouldNotInitialiseSDSectionView					= 4404;
 	const Result		CouldNotInitialiseSDCorridorView				= 4405;
 	const Result		CouldNotInitialiseSDTileView					= 4406;
+	const Result		CannotLocateShipDesignerRenderGroupData			= 4407;
 
 	// Errors with core game data structures and processes				(4600-4799)
 	const Result		CouldNotInitialiseSpatialPartitioningTree		= 4600;

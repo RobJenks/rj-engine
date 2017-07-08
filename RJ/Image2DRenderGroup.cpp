@@ -72,7 +72,6 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
 	HRESULT result;
-	int i;
 
 	// If we already have memory allocated (e.g. if we are here performing a full mid-render refresh) then deallocate it first
 	if (m_vertices) { delete[] m_vertices; m_vertices = NULL; }
@@ -107,7 +106,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	// Load the vertex array with constant data, e.g. texture coords, that we do not need to set each frame
 	int vertexindex = 0;
 	float umax = 1.0f, vmax = 1.0f;
-	for (int i=0; i<instancecount; i++)
+	for (int i = 0; i < instancecount; ++i)
 	{
 		// Calculate max texture coordinates based on the current texture mode
 		if (m_texturemode == Texture::APPLY_MODE::Repeat) {
@@ -129,7 +128,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	}
 
 	// Load the index array with data.
-	for(i=0; i<m_indexCount; i++) indices[i] = i;
+	for(int i = 0; i < m_indexCount; ++i) indices[i] = i;
 
 	// Record the new size of the vertex buffers
 	m_bufferinstances = instancecount;

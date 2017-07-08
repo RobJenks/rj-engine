@@ -389,8 +389,9 @@ Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, s
 	// Make sure we have a constant matching this texture key
 	if (!render || !render->HaveConstant(texturekey) || !render->HaveConstant(zkey))
 	{
-		filename = "";
-		z = 0.0f;
+		//filename = "";
+		//z = 0.0f;
+		return ErrorCodes::CannotLocateShipDesignerRenderGroupData;
 	}
 	else
 	{

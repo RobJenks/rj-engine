@@ -103,6 +103,7 @@ void OverlayRenderer::InitialiseCachedMatrices()
 
 	/* Array of matrices for a default element-sized box */
 	m_matrix_boxtransforms = new AXMMATRIX_P[12];												// 12 edges to a box
+	memset(m_matrix_boxtransforms, 0, sizeof(AXMMATRIX_P) * 12);
 	
 	// Bottom edges
 	m_matrix_boxtransforms[0].value = ID_MATRIX;												// [0] = fwd from origin

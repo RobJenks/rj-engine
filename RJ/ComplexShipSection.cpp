@@ -23,6 +23,7 @@ ComplexShipSection::ComplexShipSection(void)
 	m_sectionupdated = false;
 	m_elementlocation = NULL_INTVECTOR3;
 	m_elementsize = NULL_INTVECTOR3;
+	INTVECTOR3 *addr = &(m_elementsize);
 	DefaultElementState = ElementStateDefinition(ElementStateFilters::SECTION_PROPERTIES);
 	m_rotation = Rotation90Degree::Rotate0;
 	m_relativepos = NULL_VECTOR;

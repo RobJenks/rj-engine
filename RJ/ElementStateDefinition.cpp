@@ -6,6 +6,7 @@ ElementStateDefinition::ElementStateDefinition()
 	m_size = m_size_transposed = NULL_INTVECTOR3;
 	m_count = 0;
 	m_filter = ElementStateFilters::ALL_PROPERTIES;
+	for (int i = 0; i < 4; ++i) m_state[i] = std::vector<ElementState>();
 }
 
 // Constructor with specific state type specified
@@ -14,6 +15,7 @@ ElementStateDefinition::ElementStateDefinition(ElementStateFilters::ElementState
 	m_size = m_size_transposed = NULL_INTVECTOR3;
 	m_count = 0;
 	m_filter = state_filter;
+	for (int i = 0; i < 4; ++i) m_state[i] = std::vector<ElementState>();
 }
 
 // Copy constructor

@@ -33,11 +33,11 @@ void Damage::ApplyDamageResistance(const DamageResistanceSet & dr)
 		if ((*it).Type == Type)
 		{
 			// We have resistance to this type.  First, if it is below our damage threshold then we can simply ignore the damage
-			const DamageResistance & dr = (*it);
-			if (Amount <= dr.Threshold) { Amount = 0.0f; return; }
+			const DamageResistance & item = (*it);
+			if (Amount <= item.Threshold) { Amount = 0.0f; return; }
 
 			// If not, we can at least scale the damage based on our resistance
-			Amount *= dr.Modifier;
+			Amount *= item.Modifier;
 
 			// There is only one DR entry per damage type, so we can stop searching here
 			break;

@@ -801,8 +801,6 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 
 	if (b[DIK_I]) {
-		
-		static int tmpi = 0;
 
 		if (b[DIK_LSHIFT])
 		{
@@ -1127,13 +1125,14 @@ void RJMain::Quit(void)
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
-MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::VerifyOnEveryOperation);
+//MemDebug::SetHeapIntegrityVerificationState(MemDebug::HeapValidationState::VerifyOnEveryOperation);
 	// Store the HINSTANCE and window procedures provided, for initialisation of the main application window
 	m_hinstance = hinstance;
 	m_wndproc = wndproc;
 
 	// Set COM initialisation method for the current thread
-	CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	HRESULT com_result = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
+	if (FAILED(com_result)) return ErrorCodes::CouldNotSetCOMInitialisationMethod;
 
 	// Record the name of and path to the current executable (TODO: Windows only)
 	RetrieveExecutableData();

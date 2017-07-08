@@ -9,6 +9,7 @@
 
 #include "GameVarsExtern.h"
 #include "CompilerSettings.h"
+#include "ErrorCodes.h"
 
 extern const float PI;
 extern const float PIBY180;
@@ -112,7 +113,7 @@ extern const AXMVECTOR VCTRL_1111;
 
 #define TRIG_TABLE_SIZE 360
 
-void				InitialiseMathFunctions();
+Result				InitialiseMathFunctions();
 void				TerminateMathFunctions();
 
 XMVECTOR			ScaleVector3ToMagnitude(FXMVECTOR vec, float magnitude);

@@ -48,7 +48,7 @@ Equipment *CompoundLoadoutMap::GetEquipment(void) const
 	{
 		if (r <= cprob[i])
 		{
-			delete cprob;
+			SafeDeleteArray(cprob);
 			return this->Items.at(i)->Equip;
 		}
 	}

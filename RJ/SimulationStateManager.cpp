@@ -222,11 +222,11 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	{
 		// Iterate over each simulation hub in turn
 		iSpaceObject *spacehub;
-		std::vector<iSpaceObject*>::iterator it_end = spacehubs.end();
-		for (std::vector<iSpaceObject*>::iterator it = spacehubs.begin(); it != it_end; ++it)
+		std::vector<iSpaceObject*>::iterator it2_end = spacehubs.end();
+		for (std::vector<iSpaceObject*>::iterator it2 = spacehubs.begin(); it2 != it2_end; ++it2)
 		{
 			// Make sure the simulation hub is valid
-			spacehub = (*it); if (!spacehub) continue;
+			spacehub = (*it2); if (!spacehub) continue;
 
 			// The simulation hub itself should always be fully-simulated; if it is an environment, so should its contents
 			spacehub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -239,11 +239,11 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			// Get all objects within the simulation hub radius from this object and iterate through them
 			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(spacehub, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
 																			   Game::ObjectSearchOptions::NoSearchOptions);
-			std::vector<iObject*>::iterator it2_end = objects.end();
-			for (std::vector<iObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
+			std::vector<iObject*>::iterator it3_end = objects.end();
+			for (std::vector<iObject*>::iterator it3 = objects.begin(); it3 != it3_end; ++it3)
 			{
 				// Make sure the object is valid
-				spaceobject = (iSpaceObject*)(*it2); if (!spaceobject) continue;
+				spaceobject = (iSpaceObject*)(*it3); if (!spaceobject) continue;
 
 				// We want to fully simulate this object since it is close to a space simulation hub
 				spaceobject->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
@@ -268,11 +268,11 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 	{
 		// Iterate through all interior hubs in turn
 		iEnvironmentObject *envhub;
-		std::vector<iEnvironmentObject*>::iterator it_end = envhubs.end();
-		for (std::vector<iEnvironmentObject*>::iterator it = envhubs.begin(); it != it_end; ++it)
+		std::vector<iEnvironmentObject*>::iterator it4_end = envhubs.end();
+		for (std::vector<iEnvironmentObject*>::iterator it4 = envhubs.begin(); it4 != it4_end; ++it4)
 		{
 			// The simulation hub itself should always be fully-simulated 
-			envhub = (*it); if (!envhub) continue;
+			envhub = (*it4); if (!envhub) continue;
 			envhub->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 
 			// Make sure this interior hub has an environment; if not (and this shouldn't happen) there is nothing more to do
@@ -286,11 +286,11 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			// We also want to update any space objects within range of this hub's environment
 			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
 																		Game::ObjectSearchOptions::NoSearchOptions);
-			std::vector<iObject*>::iterator it2_end = objects.end();
-			for (std::vector<iObject*>::iterator it2 = objects.begin(); it2 != it2_end; ++it2)
+			std::vector<iObject*>::iterator it5_end = objects.end();
+			for (std::vector<iObject*>::iterator it5 = objects.begin(); it5 != it5_end; ++it5)
 			{
 				// Make sure the object is valid
-				spaceobject = (iSpaceObject*)(*it2); if (!spaceobject) continue;
+				spaceobject = (iSpaceObject*)(*it5); if (!spaceobject) continue;
 
 				// The object itself should be fully simulated since it is near this hub's environment
 				spaceobject->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);

@@ -176,7 +176,7 @@ float sqrt_cache[SQRT_CACHE_SIZE + 1];
 float element_bound_cache[ELEMENT_BOUND_CACHE_SIZE + 1];
 
 
-void InitialiseMathFunctions()
+Result InitialiseMathFunctions()
 {
 	float f;
 
@@ -187,6 +187,7 @@ void InitialiseMathFunctions()
 	sintable = (float *)malloc(sizeof(float) * TRIG_TABLE_SIZE);
 	costable = (float *)malloc(sizeof(float) * TRIG_TABLE_SIZE);
 	tantable = (float *)malloc(sizeof(float) * TRIG_TABLE_SIZE);
+	if (!sintable || !costable || !tantable) return ErrorCodes::CouldNotAllocateSpaceForMathLookupData;
 
 	// Now calculate each element in turn
 	for (int i=0; i<TRIG_TABLE_SIZE; ++i) {
@@ -214,6 +215,8 @@ void InitialiseMathFunctions()
 
 	// Seed the normal distribution random number generator
 	norm_reng.seed((unsigned long)time(NULL));
+
+	return ErrorCodes::NoError;
 }
 
 float _sin(const int theta) { return sintable[theta % TRIG_TABLE_SIZE]; }

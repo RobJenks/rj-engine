@@ -127,6 +127,7 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 
 				layoutindex = NAV_LAYOUT_INDEX(x, y, z, node_layout_size); 
 				node_layout[layoutindex] = new NavNode*[elementnavcount]; // (NavNode**)malloc(sizeof(NavNode*) * elementnavcount);
+				memset(node_layout[layoutindex], 0, sizeof(NavNode*) * elementnavcount);
 								
 			} // z
 		} // y

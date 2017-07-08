@@ -342,11 +342,15 @@ Result Model::InitialiseBuffers(void)
 {
 	// Create the vertex array.
 	Vertex_Inst_TexNormMatLit *vertices = new Vertex_Inst_TexNormMatLit[m_vertexCount];
-	if(!vertices) return ErrorCodes::CouldNotAllocateModelVertexArray;
+	if (!vertices) return ErrorCodes::CouldNotAllocateModelVertexArray;
 
 	// Create the index array.
 	INDEXFORMAT *indices = new INDEXFORMAT[m_indexCount];
-	if(!indices) return ErrorCodes::CouldNotAllocateModelIndexArray;
+	if (!indices) 
+	{
+		if (vertices) SafeDeleteArray(vertices);
+		return ErrorCodes::CouldNotAllocateModelIndexArray;
+	}
 
 	// Load the vertex array and index array with data.
 	for (unsigned int i = 0; i < m_vertexCount; ++i)

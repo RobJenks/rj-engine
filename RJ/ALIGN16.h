@@ -7,7 +7,7 @@
 #include <malloc.h>
 
 // Debug option to log all allocation and deallocations performed through this interface
-//#define RJ_LOG_ALIGN_ALLOCS
+#define RJ_LOG_ALIGN_ALLOCS
 
 // Define an include block to force the use of aligned allocation functions in multiple-inheritance
 // situations, where the compiler cannot otherwise determine which allocation/deallocation functions to use

@@ -68,7 +68,7 @@ protected:
 
 	// Expands the disposition matrix to account for a new faction being added.  Unlikely to be required
 	// but can be used in case e.g. a new faction forms from an existing one during a game
-	void									ExpandDispositionMatrixForNewFaction(void);
+	Result									ExpandDispositionMatrixForNewFaction(void);
 
 	// Deallocates the faction disposition matrix, which holds the disposition of every faction to every other
 	void									ShutdownDispositionMatrix(void);

@@ -27,7 +27,7 @@ public:
 	void CalculateTravelPath(void);
 
 	// Default destructor
-	~Order_ActorTravelToPosition(void) { }
+	~Order_ActorTravelToPosition(void);
 
 
 public:

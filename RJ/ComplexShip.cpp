@@ -513,11 +513,11 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 
 		// Otherwise, also discount it if it is in another node that we already have a beacon for
 		bool found = false;
-		vector<Octree<iObject*>*>::const_iterator it_end = m_activeperimeternodes.end();
-		for (vector<Octree<iObject*>*>::const_iterator it = m_activeperimeternodes.begin(); it != it_end; ++it)
+		vector<Octree<iObject*>*>::const_iterator it2_end = m_activeperimeternodes.end();
+		for (vector<Octree<iObject*>*>::const_iterator it2 = m_activeperimeternodes.begin(); it2 != it2_end; ++it2)
 		{
 			// Get a reference to the node
-			node = (*it); if (!node) continue;
+			node = (*it2); if (!node) continue;
 
 			// If the beacon pos is within this node then we already have it covered, so mark as found and stop searching
 			if (node->ContainsPoint(pos)) { found = true; break; }

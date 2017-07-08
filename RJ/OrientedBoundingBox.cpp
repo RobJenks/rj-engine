@@ -330,12 +330,15 @@ void OrientedBoundingBox::CloneOBBHierarchy(const OrientedBoundingBox & source, 
 	{
 		// Allocate new memory and zero it
 		dest.AllocateChildren(dest.ChildCount);
-		memset(dest.Children, 0, sizeof(OrientedBoundingBox*) * dest.ChildCount);
-		
-		// Recursively clone each child in turn
-		for (int i = 0; i < dest.ChildCount; ++i)
+		if (dest.Children)
 		{
-			OrientedBoundingBox::CloneOBBHierarchy(source.Children[i], dest.Children[i], new_parent);
+			memset(dest.Children, 0, sizeof(OrientedBoundingBox*) * dest.ChildCount);
+
+			// Recursively clone each child in turn
+			for (int i = 0; i < dest.ChildCount; ++i)
+			{
+				OrientedBoundingBox::CloneOBBHierarchy(source.Children[i], dest.Children[i], new_parent);
+			}
 		}
 	}
 

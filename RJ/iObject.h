@@ -324,7 +324,7 @@ public:
 	CMPINLINE void							SetVisibilityTestingMode(VisibilityTestingModeType mode)	{ m_visibilitytestingmode = mode; }
 
 	// Ambient audio for the object, or 0 if none
-	CMPINLINE Audio::AudioID			GetAmbientAudio(void) const									{ return m_audio_id; }
+	CMPINLINE Audio::AudioID				GetAmbientAudio(void) const									{ return m_audio_id; }
 	CMPINLINE bool							HasAmbientAudio(void) const									{ return (m_audio_id != 0U); }
 	void									SetAmbientAudio(Audio::AudioID audio_id, float volume);
 	void									SetAmbientAudio(const std::string & audio_name, float volume);

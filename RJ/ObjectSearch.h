@@ -798,10 +798,12 @@ namespace Game
 					if (obj->GetObjectType() == iObject::ObjectType::CapitalShipPerimeterBeaconObject)
 					{
 						obj = (T*)((CapitalShipPerimeterBeacon*)obj)->GetParentShip();
+						if (!obj) continue;
 					}
 					else if (obj->GetObjectType() == iObject::ObjectType::ComplexShipSectionObject)
 					{
 						obj = (T*)(((ComplexShipSection*)obj)->GetParent());
+						if (!obj) continue;
 					}
 
 					// Method 1 - Large objects: if this is a large object, avoid multiple-counting the objects based on any

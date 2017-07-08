@@ -1060,8 +1060,8 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 			}
 
 			// Make sure the connection ID is valid
-			int id = atoi(cid); 
-			if (id < 0 || id >= el.GetNavPointConnectionCount()) continue;
+			int conn_id = atoi(cid); 
+			if (conn_id < 0 || conn_id >= el.GetNavPointConnectionCount()) continue;
 
 			// Attempt to retrieve the connection cost, if it has been specified
 			int cost = 0;
@@ -1082,13 +1082,13 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 			if (cost <= 0) continue;
 
 			// We have all the data we need so store the connection
-			el.GetNavPointConnectionData()[id].Source = src;
-			el.GetNavPointConnectionData()[id].IsDirection = isdir;
-			el.GetNavPointConnectionData()[id].Cost = cost;
+			el.GetNavPointConnectionData()[conn_id].Source = src;
+			el.GetNavPointConnectionData()[conn_id].IsDirection = isdir;
+			el.GetNavPointConnectionData()[conn_id].Cost = cost;
 			if (isdir)
-				el.GetNavPointConnectionData()[id].Target = (int)dir;
+				el.GetNavPointConnectionData()[conn_id].Target = (int)dir;
 			else
-				el.GetNavPointConnectionData()[id].Target = tgt;
+				el.GetNavPointConnectionData()[conn_id].Target = tgt;
 		}
 	}
 	
@@ -2586,7 +2586,7 @@ Result IO::Data::LoadEngine(TiXmlElement *node)
 // Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBoundingBox & obb, bool isroot)
 {
-	std::string key, val; HashVal hash;
+	std::string key; HashVal hash;
 
 	// Parameter check
 	if (!object || !node) return;
@@ -3452,12 +3452,15 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 	}
 
 	// Post-processing step: attempt to resolve all event components to the UI components themselves
-	Render2DGroup::MouseEventCollection::const_iterator it_end = group->Components.MouseEvents.Items()->end();
-	for (Render2DGroup::MouseEventCollection::const_iterator it = group->Components.MouseEvents.Items()->begin(); it != it_end; ++it)
-		it->second->ResolveAllComponents(group->Components.Image2D.Items());
+	if (group)
+	{
+		Render2DGroup::MouseEventCollection::const_iterator it_end = group->Components.MouseEvents.Items()->end();
+		for (Render2DGroup::MouseEventCollection::const_iterator it = group->Components.MouseEvents.Items()->begin(); it != it_end; ++it)
+			it->second->ResolveAllComponents(group->Components.Image2D.Items());
 
-	// Final post-processing step; disable rendering of the group by default, which also updates all components to a consistent initial state
-	group->SetRenderActive(false);
+		// Final post-processing step; disable rendering of the group by default, which also updates all components to a consistent initial state
+		group->SetRenderActive(false);
+	}
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -3941,11 +3944,11 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 			const char *cparent = child->Attribute("parent");	if (!cparent) continue;
 			const char *cchild = child->Attribute("child");		if (!cchild) continue;
 			const char *ctag = child->Attribute("tag");			if (!ctag) continue;
-			int parent = atoi(cparent); int child = atoi(cchild);
+			int parent_index = atoi(cparent); int child_index = atoi(cchild);
 			std::string tag = ctag;
 
 			// Store the new tag; model will perform validation before creating the tag
-			model->AddConstraintTag(parent, child, tag);
+			model->AddConstraintTag(parent_index, child_index, tag);
 		}
 		else if (hash == HashedStrings::H_ComponentTag)
 		{

@@ -317,7 +317,7 @@ ModelBuffer * VolLineShader::CreateLineModel(Texture *render_texture)
 	if (render_texture)
 	{
 		result = buffer->SetTexture(render_texture->Clone());
-		if (result != ErrorCodes::NoError) { delete(v); delete(i); delete(buffer); return NULL; }
+		if (result != ErrorCodes::NoError) { SafeDeleteArray(v); SafeDeleteArray(i); SafeDelete(buffer); return NULL; }
 	}
 
 	// Deallocate the model vertex and index data

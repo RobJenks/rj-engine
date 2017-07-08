@@ -60,6 +60,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_nocollision_count = 0;
 	m_hardness = 1.0f;
 	m_audio_id = AudioManager::NULL_INSTANCE_IDENTIFIER;
+	m_audio_volume = AudioManager::DEFAULT_VOLUME;
 
 	// Initialise this object with a unique ID
 	AssignNewUniqueID();

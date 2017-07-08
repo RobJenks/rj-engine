@@ -42,7 +42,11 @@ Faction::F_ID FactionManagerObject::AddFaction(Faction *faction)
 	// then we need to perform a delta update of the various internal matrices
 	if (m_initialised)
 	{
-		ExpandDispositionMatrixForNewFaction();
+		if (ExpandDispositionMatrixForNewFaction() != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_ERROR << "Failed to allocate new space for expansion of faction disposition matrix";
+			return Faction::NullFaction;
+		}
 	}
 
 	// Return the ID assigned to the new faction
@@ -109,6 +113,7 @@ Result FactionManagerObject::InitialiseDispositionMatrix(void)
 	{
 		// Allocate memory for all factions
 		m_dispmatrix[i] = (Faction::FactionDisposition*)malloc(sizeof(Faction::FactionDisposition) * m_factioncount);
+		if (!m_dispmatrix[i]) return ErrorCodes::CouldNotAllocateMemoryForFactionDispMatrix;
 
 		// Initialise all relations to neutral
 		for (int j = 0; j < m_factioncount; ++j) m_dispmatrix[i][j] = Faction::FactionDisposition::Neutral;
@@ -123,24 +128,30 @@ Result FactionManagerObject::InitialiseDispositionMatrix(void)
 
 // Expands the disposition matrix to account for a new faction being added.  Unlikely to be required
 // but can be used in case e.g. a new faction forms from an existing one during a game
-void FactionManagerObject::ExpandDispositionMatrixForNewFaction(void)
+Result FactionManagerObject::ExpandDispositionMatrixForNewFaction(void)
 {
 	// We are expanding the number of faction by one; append a new row & column to the matrix
 	int oldcount = (m_factioncount - 1);
 	for (int i = 0; i < oldcount; ++i)
 	{
 		// Reallocate memory to add a new column on this row, and set it to neutral by default
-		m_dispmatrix[i] = (Faction::FactionDisposition*)realloc(m_dispmatrix, sizeof(Faction::FactionDisposition) * m_factioncount);
+		Faction::FactionDisposition *reallocated = (Faction::FactionDisposition*)realloc(m_dispmatrix, sizeof(Faction::FactionDisposition) * m_factioncount);
+		if (!reallocated) return ErrorCodes::CouldNotAllocateMemoryForFactionDispMatrix;
+		m_dispmatrix[i] = reallocated;
 		m_dispmatrix[i][m_factioncount - 1] = Faction::FactionDisposition::Neutral;
 	}
 
 	// We want to add an entirely new row on the end for the new faction
-	m_dispmatrix = (Faction::FactionDisposition**)realloc(m_dispmatrix, sizeof(Faction::FactionDisposition*) * m_factioncount);
+	Faction::FactionDisposition **reallocated = (Faction::FactionDisposition**)realloc(m_dispmatrix, sizeof(Faction::FactionDisposition*) * m_factioncount);
+	if (!reallocated) return ErrorCodes::CouldNotAllocateMemoryForFactionDispMatrix;
+	m_dispmatrix = reallocated;
 	m_dispmatrix[m_factioncount - 1] = (Faction::FactionDisposition*)malloc(sizeof(Faction::FactionDisposition) * m_factioncount);
 
 	// Default the new row to neutral, except the last element which is on the diagonal & friendly
 	for (int i = 0; i < oldcount; ++i) m_dispmatrix[oldcount][i] = Faction::FactionDisposition::Neutral;
 	m_dispmatrix[oldcount][oldcount] = Faction::FactionDisposition::Friendly;
+
+	return ErrorCodes::NoError;
 }
 
 // Deallocates the faction disposition matrix, which holds the disposition of every faction to every other

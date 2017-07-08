@@ -618,10 +618,11 @@ void iSpaceObjectEnvironment::RemoveHardpointsFromTile(ComplexShipTile *tile)
 	std::vector<std::string>::const_iterator it_end = tile->GetHardpointReferences().end();
 	for (std::vector<std::string>::const_iterator it = tile->GetHardpointReferences().begin(); it != it_end; ++it)
 	{
+		
 		Hardpoint *hp = GetHardpoints().Get(*it);
 		if (!hp)
 		{
-			Game::Log << LOG_WARN << concat("Attempted to remove hardpoint \"")(hp->Code)("\" during removal of tile \"")(tile->GetCode())
+			Game::Log << LOG_WARN << concat("Attempted to remove hardpoint \"")(*it)("\" during removal of tile \"")(tile->GetCode())
 				("\" from environment \"")(m_instancecode)("\" but hardpoint could not be located\n").str();
 			continue;
 		}

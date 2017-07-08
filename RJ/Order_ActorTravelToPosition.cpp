@@ -42,6 +42,9 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 	// then terminate on its first execution
 	if (!start || !end) return;
 
+	// We shouldn't have any existing path data, but check and deallocate in case to avoid potential memory leaks
+	if (PathNodes) SafeDeleteArray(PathNodes);
+
 	// Create a vector to hold the output nodes and request a path from the nav network
 	std::vector<NavNode*> revpath;
 	Result result = env->GetNavNetwork()->FindPath(start, end, revpath);
@@ -51,7 +54,7 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 
 	// Allocate space for the path.  There will be one additional position: the end point, which is likely different to navnode[n]
 	PathLength = (int)revpath.size() + 1;
-	PathNodes = (INTVECTOR3*)malloc(sizeof(INTVECTOR3) * PathLength);
+	PathNodes = new INTVECTOR3[PathLength];
 
 	// Add each point on the path in turn, using the reverse iterator to retrieve path nodes in turn
 	PathIndex = 0;
@@ -69,4 +72,12 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 
 	// Reset the path index so that the actor will begin at the first node 
 	PathIndex = 0;
+}
+
+
+// Default destructor
+Order_ActorTravelToPosition::~Order_ActorTravelToPosition(void)
+{ 
+	// Deallocate any memory currently owned by this object
+	if (PathNodes) SafeDeleteArray(PathNodes);
 }
