@@ -722,7 +722,7 @@ Result UI_ShipDesigner::SaveShip(string code)
 	PrepareShipForOperation(m_ship, code);
 
 	// Determine the SD offset based on blueprint bounds and store the value within the ship details for saving
-	m_ship->SetSDOffset(m_ship->GetShipMinimumBounds());
+	//m_ship->SetSDOffset(m_ship->GetShipMinimumBounds());
 
 	// Make a copy of this ship to be saved
 	ComplexShip *ship = ComplexShip::Create(m_ship);
@@ -734,7 +734,7 @@ Result UI_ShipDesigner::SaveShip(string code)
 	// since the SD will expand the ship size to cover everything from 0,0 in the SD grid.  Removing the SD offset will adjust 
 	// the location value of elements/tiles/sections, however element size cannot also be offset since that would prevent the 
 	// ship saving method from iterating through the full range of elements
-	ship->FlagShipAsDirectlyGeneratedFromShipDesigner(true);
+	//ship->FlagShipAsDirectlyGeneratedFromShipDesigner(true);
 
 	// Stream the new ship data to file; for now, generate a temporary path based on the code
 	string filename = concat(D::DATA)(ship->DetermineXMLDataPath()).str();
@@ -809,7 +809,7 @@ void UI_ShipDesigner::ApplySDOffset(ComplexShip *ship)
 	if (!ship) return;
 
 	// By default we apply the SD offset stored in the ship details object
-	ApplySDOffsetExplicit(ship, ship->GetSDOffset());
+	//ApplySDOffsetExplicit(ship, ship->GetSDOffset());
 }
 
 // Removes the SD offset parameter from a ship object, for setting the origin to (0,0,0) before publishing to the global collection
@@ -819,7 +819,7 @@ void UI_ShipDesigner::RemoveSDOffset(ComplexShip *ship)
 	if (!ship) return;
 
 	// Simply apply a negation to remove the SD offset effect
-	ApplySDOffsetExplicit(ship, (ship->GetSDOffset() * -1));
+	//ApplySDOffsetExplicit(ship, (ship->GetSDOffset() * -1));
 }
 
 

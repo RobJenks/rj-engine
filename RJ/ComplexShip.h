@@ -72,14 +72,6 @@ public:
 	INTVECTOR3									GetShipMinimumBounds(void);
 	INTVECTOR3									GetShipMaximumBounds(void);
 
-	// Methods to get and set the ship designer offset, determining where the ship will appear within the SD
-	INTVECTOR3									GetSDOffset(void) { return m_sdoffset; }
-	void										SetSDOffset(INTVECTOR3 offset) { m_sdoffset = offset; }
-
-	// Methods to set and check the flag that determines whether a ship has been directly generated from the SD
-	bool										HasBeenDirectlyGeneratedFromSD(void)				{ return m_directlygeneratedfromSD; }
-	void										FlagShipAsDirectlyGeneratedFromShipDesigner(bool b)	{ m_directlygeneratedfromSD = b; }
-	
 	// Fade the ship to the specified alpha level
 	void										FadeToAlpha(float time, float alpha, bool ignore_pause);
 	CMPINLINE void								FadeToAlpha(float time, float alpha)						{ FadeToAlpha(time, alpha, false); }
@@ -173,10 +165,6 @@ protected:
 	bool										m_forcerenderinterior;	// Flag that determines whether the ship interior should always be rendered, regardless of the criteria
 
 	bool										m_suspendupdates;		// Flag that suspends all updates in response to changes, until updates are resumed again
-
-	// Ship designer-related fields 
-	INTVECTOR3									m_sdoffset;					// Offset determines where the ship will appear when loaded into the SD
-	bool										m_directlygeneratedfromSD;	// Flag that indicates the ship was directly generated from the SD
 
 	// Recalculates any perimeter beacons required to maintain spatial position in the world
 	void										UpdatePerimeterBeacons(void);

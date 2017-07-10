@@ -220,9 +220,6 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 	// Parameter check
 	if (!parent || !object) return ErrorCodes::CannotSaveComplexShipWithNullReferences;
 
-	// Vector of external files that should be included as part of this complex ship definition
-	std::vector<TiXmlElement*> includefiles;
-
 	// Create the top-level ship node
 	TiXmlElement *node = new TiXmlElement(D::NODE_ComplexShip);
 
@@ -236,21 +233,6 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 	{
 		// Record the instance of this ship section that is present in the ship
 		IO::Data::SaveComplexShipSectionInstance(node, (*s_it));
-
-		// If this is a standard section then it will exist in the central collection so we don't need to save any further 
-		// details; if not, we need to save the section separately and add an 'include' reference in this file
-		// NOTE: We now do not need to do this.  Sections are all generic and so we will always be referencing
-		// a section that exists in the global collection
-		/*if ((*s_it)->IsStandardObject() == false)
-		{
-			// Save the section to an external file
-			SaveComplexShipSection(NULL, (*s_it));		// 'Null' parameter for parent node means that the method will store data in a new file
-
-			// Create a new node to include this external data in the CS definition
-			TiXmlElement *incl = new TiXmlElement("include");
-			incl->SetAttribute("file", (*s_it)->DetermineXMLDataFullFilename().c_str());
-			includefiles.push_back(incl);
-		}*/	
 	}
 
 	// Save all tile data for the ship
@@ -260,16 +242,6 @@ Result IO::Data::SaveComplexShip(TiXmlElement *parent, ComplexShip *object)
 	{
 		tile = (*t_it).value->GenerateXML();
 		if (tile) node->LinkEndChild(tile);
-	}
-
-	// Now save any other data that is specific to this class
-	IO::Data::LinkIntVector3AttrXMLElement("SDOffset", object->GetSDOffset(), node);
-
-	// We want to first link any include files to the parent node, so that dependent data is always loaded first
-	std::vector<TiXmlElement*>::const_iterator it_end = includefiles.end();
-	for (std::vector<TiXmlElement*>::const_iterator it = includefiles.begin(); it != it_end; ++it)
-	{
-		node->LinkEndChild(*it);
 	}
 
 	// Finally, link the ship data itself to the parent node and return success

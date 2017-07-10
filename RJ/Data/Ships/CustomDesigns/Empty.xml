@@ -1,0 +1,26 @@
+<gamedata>
+    <complexship>
+        <Code>Empty</Code>
+        <Name>Empty template ship</Name>
+        <StandardObject>True</StandardObject>
+        <Mass>50000.000000</Mass>
+        <VelocityLimit>100.000000</VelocityLimit>
+        <AngularVelocityLimit>0.400000</AngularVelocityLimit>
+        <BrakeFactor>0.100000</BrakeFactor>
+        <TurnAngle>0.500000</TurnAngle>
+        <TurnRate>0.500000</TurnRate>
+        <BankRate>0.400000</BankRate>
+        <BankExtent x="0.087266" y="0.087266" z="0.017453" />
+        <DefaultLoadout></DefaultLoadout>
+        <VisibilityTestingMode>useboundingsphere</VisibilityTestingMode>
+        <ElementSize x="10" y="24" z="2" />
+
+        <complexshipsectioninstance>
+            <Code>testfrigate12_section_0</Code>
+            <Position x="150.000000" y="225.000000" z="100.000000" />
+            <ElementLocation x="0" y="0" z="0" />
+            <Rotation>0</Rotation>
+        </complexshipsectioninstance>
+
+    </complexship>
+</gamedata>

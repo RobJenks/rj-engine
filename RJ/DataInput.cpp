@@ -735,9 +735,8 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 		// Test for fields directly within this class
 		else
 		{
-			// Compare the hash against all SimpleShip-related fieldsB
-			if		(hash == HashedStrings::H_SDOffset)						object->SetSDOffset(IO::GetInt3CoordinatesFromAttr(node));
-			else if (hash == HashedStrings::H_ComplexShipSectionInstance)	result = LoadComplexShipSectionInstance(node, object);
+			// Compare the hash against all ComplexShip-related fields
+			if (hash == HashedStrings::H_ComplexShipSectionInstance)	result = LoadComplexShipSectionInstance(node, object);
 			else if (hash == HashedStrings::H_ComplexShipTile)
 			{
 				result = LoadComplexShipTile(node, &tile);

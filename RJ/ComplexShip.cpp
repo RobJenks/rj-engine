@@ -38,8 +38,6 @@ ComplexShip::ComplexShip(void)
 	m_activebeacons = 0;
 	m_forcerenderinterior = false;
 	m_suspendupdates = false;
-	m_sdoffset = INTVECTOR3(0, 0, 0);
-	m_directlygeneratedfromSD = false;
 
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	SetCollisionMode(Game::CollisionMode::FullCollision);
@@ -1306,7 +1304,6 @@ void ComplexShip::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetShipSectionContainingElement, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 	REGISTER_DEBUG_ACCESSOR_FN(GetShipMinimumBounds)
 	REGISTER_DEBUG_ACCESSOR_FN(GetShipMaximumBounds)
-	REGISTER_DEBUG_ACCESSOR_FN(GetSDOffset)
 	REGISTER_DEBUG_ACCESSOR_FN(InteriorShouldAlwaysBeRendered)
 	REGISTER_DEBUG_ACCESSOR_FN(DebugOutputPerimeterBeacons)
 
