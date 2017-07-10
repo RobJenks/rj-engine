@@ -810,10 +810,10 @@ void RJMain::ProcessKeyboardInput(void)
 			XMFLOAT3 fpos;
 			XMStoreFloat3(&fpos, pos);
 
-			Game::Engine->GetAudioManager()->Create3DInstance("test1", s2()->GetPositionF(), 1.0f);
+			Game::Engine->GetAudioManager()->Create3DInstance("test1", s2()->GetPositionF(), 1.0f, 1.0f);
 		}
 		else
-			Game::Engine->GetAudioManager()->CreateInstance("test1");
+			Game::Engine->GetAudioManager()->CreateInstance("test1", 1.0f, 1.0f);
 			
 
 		Game::Keyboard.LockKey(DIK_I);
@@ -2398,7 +2398,6 @@ void RJMain::DEBUGDisplayInfo(void)
 
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
-
 
 
 

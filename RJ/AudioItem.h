@@ -33,12 +33,12 @@ public:
 
 
 	// Return key parameters
-	CMPINLINE Audio::AudioID									GetID(void) const							{ return m_id; }
+	CMPINLINE Audio::AudioID							GetID(void) const							{ return m_id; }
 	CMPINLINE std::string								GetName(void) const							{ return m_name; }
 	CMPINLINE AudioType									GetType(void) const							{ return m_type; }
 	CMPINLINE std::string								GetFilename(void) const						{ return m_filename; }
 	CMPINLINE unsigned int								GetDuration(void) const						{ return m_duration; }
-	CMPINLINE Audio::AudioInstanceID			GetInstanceLimit(void) const				{ return m_instance_limit; }
+	CMPINLINE Audio::AudioInstanceID					GetInstanceLimit(void) const				{ return m_instance_limit; }
 
 	// Return a reference to the sound effect object
 	CMPINLINE DirectX::SoundEffect *					GetEffect(void)								{ return m_effect.get(); }
@@ -63,21 +63,21 @@ public:
 
 	// Create a new instance of this audio item, if posssible.  Returns identifier for the new
 	// instance, or NULL_INSTANCE if one could not be created
-	Audio::AudioInstanceIdentifier				CreateInstance(bool loop, float base_volume, float volume_modifier = 1.0f); 
-	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(float base_volume, float volume_modifier) { 
+	Audio::AudioInstanceIdentifier						CreateInstance(bool loop, float base_volume, float volume_modifier);
+	CMPINLINE Audio::AudioInstanceIdentifier			CreateInstance(float base_volume, float volume_modifier) {
 		return CreateInstance(m_default_loop, base_volume, volume_modifier);
 	}
-	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(float volume_modifier) {
+	CMPINLINE Audio::AudioInstanceIdentifier			CreateInstance(float volume_modifier) {
 		return CreateInstance(m_default_loop, m_default_base_volume, volume_modifier);
 	}
 
 	// Create a new 3D instance of this audio item, if possible.  Returns identifier for the new
 	// instance, or NULL_INSTANCE if one could not be created
-	Audio::AudioInstanceIdentifier				Create3DInstance(bool loop, const XMFLOAT3 & position, float base_volume, float volume_modifier = 1.0f);
-	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float base_volume, float volume_modifier) { 
+	Audio::AudioInstanceIdentifier						Create3DInstance(bool loop, const XMFLOAT3 & position, float base_volume, float volume_modifier);
+	CMPINLINE Audio::AudioInstanceIdentifier			Create3DInstance(const XMFLOAT3 & position, float base_volume, float volume_modifier) {
 		return Create3DInstance(m_default_loop, position, base_volume, volume_modifier); 
 	}
-	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(const XMFLOAT3 & position, float volume_modifier) {
+	CMPINLINE Audio::AudioInstanceIdentifier			Create3DInstance(const XMFLOAT3 & position, float volume_modifier) {
 		return Create3DInstance(m_default_loop, position, m_default_base_volume, volume_modifier);
 	}
 
@@ -101,14 +101,14 @@ public:
 
 	// Returns the number of instances that are currently active, i.e. which have not yet reached their 
 	// termination time, or those which are looping indefinitely
-	Audio::AudioInstanceID						GetActiveInstanceCount(void) const;
+	Audio::AudioInstanceID								GetActiveInstanceCount(void) const;
 
 	// Ensures that at least one instance slot is available within this item, by terminating existing audio
 	// instances if necessary
 	void												MakeInstanceAvailable(bool requires_3d_support);
 
 	// Allocates a new slot in the instance vector
-	Audio::AudioInstanceID						AllocateNewInstanceSlot(bool requires_3d_support);
+	Audio::AudioInstanceID								AllocateNewInstanceSlot(bool requires_3d_support);
 
 	// Overrides the maximum instance count for this specific audio item.  Will be constrained to the 
 	// range [1 AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO].  It MUST be possible for audio items to 
@@ -145,11 +145,11 @@ private:
 	UINT32												m_channel_count;
 
 	// List of instances for this audio resource
-	Audio::AudioInstanceCollection				m_instances;
+	Audio::AudioInstanceCollection						m_instances;
 
 	// Maximum allowed instances of this audio item.  Defaults to AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT
 	// unless a value is manually-specified
-	Audio::AudioInstanceID						m_instance_limit;
+	Audio::AudioInstanceID								m_instance_limit;
 
 	// Indicates whether this item is currently allowed to extend the instance collection, if no suitable
 	// inactive slot can be found.  This extension still observes the instance limit.  The purpose of this
@@ -165,7 +165,7 @@ private:
 	// terminating an existing instance.  In this case, the oldest instance will be selected for termination
 	// Flag indicates whether the slot must support 3D audio; may result in a new resource instance being
 	// created if no suitable slots are available
-	Audio::AudioInstanceID						GetAvailableInstanceSlot(bool requires_3d_support);
+	Audio::AudioInstanceID								GetAvailableInstanceSlot(bool requires_3d_support);
 
 	// Generates a new effect instance from the base audio resource
 	std::unique_ptr<SoundEffectInstance>				CreateNewEffectInstance(bool include_3d_support);

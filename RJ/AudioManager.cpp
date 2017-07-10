@@ -25,6 +25,7 @@ const Audio::AudioInstanceIdentifier AudioManager::NULL_INSTANCE_IDENTIFIER = 0U
 const Audio::AudioInstanceID AudioManager::GLOBAL_AUDIO_INSTANCE_LIMIT = 400U;
 const Audio::AudioInstanceID AudioManager::DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT = 20U;
 const Audio::AudioInstanceID AudioManager::HARD_INSTANCE_LIMIT_PER_AUDIO = 50U;
+const float	AudioManager::MAXIMUM_VOLUME = 50.0f;
 const float AudioManager::DEFAULT_VOLUME = 1.0f;
 const float AudioManager::DEFAULT_PITCH_SHIFT = 0.0f;
 const float AudioManager::DEFAULT_PAN = 0.0f;
@@ -47,6 +48,11 @@ const float	AudioManager::ENV_AUDIO_INNER_RANGE_SQ = AudioManager::ENV_AUDIO_INN
 const float	AudioManager::ENV_SPACE_AUDIO_MAX_RANGE_SQ = AudioManager::ENV_SPACE_AUDIO_MAX_RANGE * AudioManager::ENV_SPACE_AUDIO_MAX_RANGE;
 const float	AudioManager::ENV_SPACE_AUDIO_INNER_RANGE_SQ = AudioManager::ENV_SPACE_AUDIO_INNER_RANGE * AudioManager::ENV_SPACE_AUDIO_INNER_RANGE;
 
+const float AudioManager::AUDIBLE_DISTANCE_AT_DEFAULT_VOLUME = 400.0f;		// Max audible distance for 3D audio instance at volume = 1.0
+const float AudioManager::MAXIMUM_AUDIBLE_DISTANCE = 20000.0f;				// Limit on audible distance, regardless of volume.  Is currently
+																			// identical to (distance at default volume * max distance), which is 
+																			// neat but not necessary in future
+
 // Initialise the counter used to assign new audio instance identifiers
 Audio::AudioInstanceIdentifier AudioManager::AUDIO_INSTANCE_COUNTER = 0U;
 
@@ -61,6 +67,10 @@ AudioManager::AudioManager(void)
 	m_player_listener_position(NULL_FLOAT3), 
 	m_next_audit_time(0U), m_object_bindings_last_valid(0U)
 {
+	// Default volume modifiers for each audio type
+	for (int i = 0; i < (int)AudioItem::AudioType::_COUNT; ++i)
+		SetBaseTypeVolumeModifier((AudioItem::AudioType)i, 1.0f);
+
 	// Initialise the static player audio listener to a default state
 	PLAYER_AUDIO_LISTENER.SetPosition(NULL_FLOAT3);
 	PLAYER_AUDIO_LISTENER.SetOrientation(FORWARD_VECTOR_F, UP_VECTOR_F);
@@ -290,24 +300,42 @@ void AudioManager::EnsureInstanceIsAvailable(Audio::AudioID id, bool requires_3d
 
 // Create a new instance of an audio item, if posssible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
 // fails for any reason, otherwise returns the identifier of the newly-created instance
-Audio::AudioInstanceIdentifier AudioManager::CreateInstance(Audio::AudioID id, float volume_modifier)
+Audio::AudioInstanceIdentifier AudioManager::CreateInstance(Audio::AudioID id, float base_volume, float volume_modifier)
 {
 	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
 	EnsureInstanceIsAvailable(id, false);
 	RecordNewInstanceCreation();
-	return m_sounds[id].CreateInstance(volume_modifier);
+	return m_sounds[id].CreateInstance(base_volume, volume_modifier);
 }
 
 // Create a new 3D instance of an audio item, if possible.  Returns NULL_INSTANCE_IDENTIFIER if instantiation
 // fails for any reason, otherwise returns the identifier of the newly-created instance
-Audio::AudioInstanceIdentifier AudioManager::Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float volume_modifier)
+Audio::AudioInstanceIdentifier AudioManager::Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float base_volume, float volume_modifier)
 {
 	if (!IsValidID(id)) return NULL_INSTANCE_IDENTIFIER;
 	
 	EnsureInstanceIsAvailable(id, true);
 	RecordNewInstanceCreation(); 
-	return m_sounds[id].Create3DInstance(position, volume_modifier);
+	return m_sounds[id].Create3DInstance(position, base_volume, volume_modifier);
+}
+
+// Determines the maximum audible distance for a 3D audio instance, based on all relevant // Calculates the final volume level of an instance based on all relevant parameters
+// Final volume = (base_volume_modifier * volume_modifier * base_volume)
+// base_volume_modifier = base modifier based on audio type (effect vs music vs ...)
+// volume_modifier = instance-specific modifier (e.g. for interior vs exterior sounds)
+// base_volume = desired base volume before any modification
+float AudioManager::DetermineVolume(float base_volume, float volume_modifier, float base_volume_modifier)
+{
+	float volume = (base_volume * volume_modifier * base_volume_modifier);
+	return clamp(volume, 0.0f, AudioManager::MAXIMUM_VOLUME);
+}
+
+// Determines the maximum audible distance for a 3D audio instance, based upon its defined volume
+float AudioManager::DetermineMaximumAudibleDistance(float instance_volume)
+{
+	float distance = (instance_volume * AudioManager::AUDIBLE_DISTANCE_AT_DEFAULT_VOLUME);
+	return clamp(distance, 0.0f, AudioManager::MAXIMUM_AUDIBLE_DISTANCE);
 }
 
 // Update the player audio listener to the current player position and orientation
@@ -382,16 +410,16 @@ void AudioManager::TerminateExpiredObjectBindings(unsigned int verification_time
 {
 	// Partition the instance collection based on either (a) object is null, or (b) object 
 	// was not valid during the last verification
-	std::vector<AudioInstanceObjectBinding>::const_iterator it = std::partition(m_object_bindings.begin(), m_object_bindings.end(), 
+	std::vector<AudioInstanceObjectBinding>::const_iterator it_start = std::partition(m_object_bindings.begin(), m_object_bindings.end(), 
 		[verification_time](const AudioInstanceObjectBinding & binding) {
 		return (binding.GetObj() != NULL && binding.GetLastValid() == verification_time);
 	});
 	
 	// Terminate any instances that are no longer required and then remove the bindings
 	std::vector<AudioInstanceObjectBinding>::const_iterator it_end = m_object_bindings.end();
-	if (it != it_end)
+	if (it_start != it_end)
 	{
-		for (; it != it_end; ++it)
+		for (std::vector<AudioInstanceObjectBinding>::const_iterator it = it_start; it != it_end; ++it)
 		{
 			if (!m_sounds[(*it).GetAudioItemID()].TerminateInstanceByIdentifier((*it).GetInstanceIdentifier()))
 			{
@@ -399,7 +427,7 @@ void AudioManager::TerminateExpiredObjectBindings(unsigned int verification_time
 			}
 		}
 
-		m_object_bindings.erase(it, it_end);
+		m_object_bindings.erase(it_start, it_end);
 	}
 }
 
@@ -419,7 +447,7 @@ void AudioManager::GenerateNewObjectBindings(void)
 	else
 	{
 		GenerateNewSpaceObjectBindings(Game::CurrentPlayer->GetPlayerShip(), AudioManager::ENV_SPACE_AUDIO_INNER_RANGE, 
-			AudioManager::ENV_SPACE_AUDIO_MAX_RANGE, AudioManager::ENV_SPACE_VOLUME_MODIFIER);
+			AudioManager::ENV_SPACE_AUDIO_MAX_RANGE, 1.0f);
 	}
 }
 
@@ -428,7 +456,7 @@ void AudioManager::GenerateNewObjectBindings(void)
 void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment *env, iEnvironmentObject *listener, float audio_inner_range, 
 														float audio_outer_range, float volume_modifier)
 {
-	float max_dist_sq = (audio_outer_range * audio_outer_range);
+	XMVECTOR listener_pos = listener->GetPosition();
 
 	// Get all objects within range.  We do not support audio sources from terrain objects
 	std::vector<iEnvironmentObject*> objects;
@@ -441,6 +469,16 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 		// Ignore any objects without ambient audio (which will be most of them)
 		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
+		float audio_base_volume = (*it)->GetAmbientAudioVolume();
+
+		// Test whether this particular audio instance would be audible at its current distance
+		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract((*it)->GetPosition(), listener_pos)));
+		float audible_dist_sq = AudioManager::DetermineMaximumAudibleDistance(					// Get max audible distance
+			AudioManager::DetermineVolume(audio_base_volume, volume_modifier,					// Based on volume & volume modifier
+				GetBaseTypeVolumeModifier(GetAudioItem(audio_id)->GetType()))					// and base volume modifier for audio type
+		);
+		audible_dist_sq *= audible_dist_sq;
+		if (distsq > audible_dist_sq) continue;
 
 		// Binary search for the object binding
 		std::vector<AudioInstanceObjectBinding>::const_iterator entry =
@@ -450,8 +488,8 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
 		{
 			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
-			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
-			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, max_dist_sq));
+			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), audio_base_volume, volume_modifier);
+			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, audible_dist_sq));
 		}
 	}
 }
@@ -460,7 +498,7 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 // within audio_inner_range of the player
 void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio_inner_range, float audio_outer_range, float volume_modifier)
 {
-	float max_dist_sq = (audio_outer_range * audio_outer_range);
+	XMVECTOR listener_pos = listener->GetPosition();
 
 	// Get all objects within range
 	std::vector<iObject*> objects;
@@ -473,6 +511,16 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 		// Ignore any objects without ambient audio (which will be most of them)
 		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
+		float audio_base_volume = (*it)->GetAmbientAudioVolume();
+
+		// Test whether this particular audio instance would be audible at its current distance
+		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract((*it)->GetPosition(), listener_pos)));
+		float audible_dist_sq = AudioManager::DetermineMaximumAudibleDistance(					// Get max audible distance
+			AudioManager::DetermineVolume(audio_base_volume, volume_modifier,					// Based on volume & volume modifier
+				GetBaseTypeVolumeModifier(GetAudioItem(audio_id)->GetType()))					// and base volume modifier for audio type
+		);
+		audible_dist_sq *= audible_dist_sq;
+		if (distsq > audible_dist_sq) continue;
 
 		// Binary search for the object binding
 		std::vector<AudioInstanceObjectBinding>::const_iterator entry =
@@ -482,8 +530,8 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 		if (entry == m_object_bindings.end() || (*entry).GetObjectID() != (*it)->GetID())
 		{
 			// We need to create a binding.  The first object >= us is also != us, so therefore we are not in the vector
-			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), volume_modifier);
-			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, max_dist_sq));
+			Audio::AudioInstanceIdentifier identifier = Create3DInstance(audio_id, (*it)->GetPositionF(), audio_base_volume, volume_modifier);
+			m_object_bindings.insert(entry, AudioInstanceObjectBinding((*it), audio_id, identifier, audible_dist_sq));
 		}
 	}
 }

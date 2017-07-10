@@ -61,12 +61,13 @@ public:
 	// Sets all volume-related parameters for this instance
 	void											SetVolumeParameters(float base_volume, float volume_modifier = 1.0f, float base_volume_modifier = 1.0f);
 
-	// Update the instance volume.  Calculates as final volume = (base_modifier * volume_modifier * base_volume)
-	void											UpdateVolume(void);
-
 	// Updates the 3D position of a 3D audio instance.   Should only be called after the 
 	// initial call to Set3DPosition
 	void											UpdatePosition(const FXMVECTOR position, float time_delta);
+
+	// Returns the effective maximum distance (SQ), beyond which this instance is considered
+	// inaudible and will be terminated
+	CMPINLINE float									GetMaximumAudibleDistanceSq(void) const { return m_max_audible_distance_sq; }
 
 	// Assigns a new unique identifier to this instance, which is unique across all audio items
 	void											AssignNewIdentifier(void);
@@ -103,9 +104,16 @@ private:
 	float											m_volume_modifier;		// Modifier to instance volume (e.g. interior/exterior) applied per-instance
 	float											m_base_volume_modifier;	// Base modifier, based on audio item type (interior vs exterior vs ...)
 
+	// Effective maximum distance (SQ), beyond which this instance should be considered
+	// inaudible and will be terminated
+	float											m_max_audible_distance_sq;
+
 	// Applicable to 3D sounds only
 	bool											m_is3d;	
 	DirectX::AudioEmitter							m_emitter;
+
+	// Recalculate audio instance parameters based on a change to the instance data
+	void											RecalculateAudioParameters(void);
 
 };
 

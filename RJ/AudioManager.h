@@ -19,6 +19,7 @@ public:
 	static const Audio::AudioInstanceID				GLOBAL_AUDIO_INSTANCE_LIMIT;			// Max instances across all audio items
 	static const Audio::AudioInstanceID				DEFAULT_AUDIO_ITEM_INSTANCE_LIMIT;		// Default max instances per audio item
 	static const Audio::AudioInstanceID				HARD_INSTANCE_LIMIT_PER_AUDIO;			// Hard limit for instance count per audio, cannot be overridden
+	static const float								MAXIMUM_VOLUME;							// Maximum possible volume for any audio instance
 	static const float								DEFAULT_VOLUME;
 	static const float								DEFAULT_PITCH_SHIFT;
 	static const float								DEFAULT_PAN;
@@ -32,6 +33,9 @@ public:
 	static const float								ENV_SPACE_AUDIO_MAX_RANGE;	 // Max distance for audio, beyond which audio sources will not be audible (space events, when in env)
 	static const float								ENV_SPACE_AUDIO_INNER_RANGE; // Inner range, % of max range, within which audio sources will become audible
 	static const float								ENV_SPACE_VOLUME_MODIFIER;	 // Modifier to space event volume when in an environment
+
+	static const float								AUDIBLE_DISTANCE_AT_DEFAULT_VOLUME;		// Max audible distance for 3D audio instance at volume = 1.0
+	static const float								MAXIMUM_AUDIBLE_DISTANCE;				// Limit on audible distance, regardless of volume
 
 	// Default constructor
 	AudioManager(void);
@@ -96,15 +100,15 @@ public:
 	void								EnsureInstanceIsAvailable(Audio::AudioID id, bool requires_3d_support);
 
 	// Create a new instance of an audio item, if posssible.  Returns non-zero if instantiation fails
-	Audio::AudioInstanceIdentifier				CreateInstance(Audio::AudioID id, float volume_modifier = 1.0f);
-	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(const std::string & name, float volume_modifier = 1.0f) { 
-		return CreateInstance(GetAudioID(name), volume_modifier); 
+	Audio::AudioInstanceIdentifier				CreateInstance(Audio::AudioID id, float base_volume, float volume_modifier);
+	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(const std::string & name, float base_volume, float volume_modifier) {
+		return CreateInstance(GetAudioID(name), base_volume, volume_modifier); 
 	}
 
 	// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
-	Audio::AudioInstanceIdentifier				Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float volume_modifier = 1.0f);
-	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position, float volume_modifier = 1.0f) { 
-		return Create3DInstance(GetAudioID(name), position, volume_modifier); 
+	Audio::AudioInstanceIdentifier				Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float base_volume, float volume_modifier);
+	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position, float base_volume, float volume_modifier) {
+		return Create3DInstance(GetAudioID(name), position, base_volume, volume_modifier); 
 	}
 
 	// Return the base type volume modifier for a specific audio item type
@@ -116,6 +120,16 @@ public:
 	// Set the base type volume modifier for all audio item types, and update all audio items & instances accordingly
 	void												SetBaseTypeVolumeModifiers(float const(&type_modifiers)[AudioItem::AudioType::_COUNT]);
 
+	// Calculates the final volume level of an instance based on all relevant parameters
+	// Final volume = (base_volume_modifier * volume_modifier * base_volume)
+	// base_volume_modifier = base modifier based on audio type (effect vs music vs ...)
+	// volume_modifier = instance-specific modifier (e.g. for interior vs exterior sounds)
+	// base_volume = desired base volume before any modification
+	static float										DetermineVolume(float base_volume, float volume_modifier, float base_volume_modifier);
+
+	// Determines the maximum audible distance for a 3D audio instance, based upon its defined volume
+	static float										DetermineMaximumAudibleDistance(float instance_volume);
+
 	// Update the player audio listener to the current player position and orientation
 	void								UpdatePlayerAudioListener(void);
 
@@ -125,11 +139,11 @@ public:
 	// Iterates through all audio items to get an accurate count of active audio instances.  This is required since
 	// during per-frame operation the audio manager will only approximate this count based on incrementing for new 
 	// instances created.  It will not search for completed instances per-frame for efficiency
-	Audio::AudioInstanceID		DetermineExactAudioInstanceCount(void);
+	Audio::AudioInstanceID				DetermineExactAudioInstanceCount(void);
 
 	// Returns the number of active instances being maintained by this audio manager, across all audio items.  This is
 	// an upper-bound approximation that is periodically corrected downwards if necessary by the audit process
-	CMPINLINE Audio::AudioInstanceID GetTotalAudioInstanceCount(void) const { return m_instance_count; }
+	CMPINLINE Audio::AudioInstanceID	GetTotalAudioInstanceCount(void) const { return m_instance_count; }
 
 	// Generates a new instance identifier, which is unique across all audio items
 	CMPINLINE static Audio::AudioInstanceIdentifier GetNewInstanceIdentifier(void) { return ++AUDIO_INSTANCE_COUNTER; }

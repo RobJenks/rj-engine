@@ -10,6 +10,7 @@ AudioInstance::AudioInstance(std::unique_ptr<SoundEffectInstance> effect_instanc
 	m_identifier(0U), m_starttime(0U), m_terminates(0U), m_is3d(false), 
 	m_channel_count(1U), 
 	m_base_volume_modifier(AudioManager::DEFAULT_VOLUME), m_volume_modifier(AudioManager::DEFAULT_VOLUME), m_base_volume(AudioManager::DEFAULT_VOLUME), 
+	m_max_audible_distance_sq(0.0f), 
 	m_instance(std::move(effect_instance))
 {
 }
@@ -21,6 +22,7 @@ AudioInstance::AudioInstance(AudioInstance && other) noexcept
 	m_starttime(other.m_starttime), m_terminates(other.m_terminates), m_is3d(other.m_is3d), 
 	m_identifier(0U), m_channel_count(other.m_channel_count), 
 	m_base_volume_modifier(other.m_base_volume_modifier), m_volume_modifier(other.m_volume_modifier), m_base_volume(other.m_base_volume), 
+	m_max_audible_distance_sq(other.m_max_audible_distance_sq), 
 	m_emitter(std::move(other.m_emitter))
 {
 }
@@ -43,7 +45,7 @@ void AudioInstance::Start(unsigned int duration, bool loop)
 	if (m_instance.get())
 	{
 		m_instance.get()->Stop();
-		UpdateVolume();
+		RecalculateAudioParameters();
 		m_instance.get()->Play(loop);
 	}
 
@@ -81,21 +83,21 @@ void AudioInstance::UpdatePosition(const FXMVECTOR position, float time_delta)
 void AudioInstance::SetBaseVolumeModifier(float base_volume_modifier)
 {
 	m_base_volume_modifier = clamp(base_volume_modifier, 0.0f, 1.0f);
-	UpdateVolume();
+	RecalculateAudioParameters();
 }
 
 // Sets the volume modifier for this instance.  Restricted to the range [0.0 1.0]
 void AudioInstance::SetVolumeModifier(float volume_modifier) 
 { 
 	m_volume_modifier = clamp(volume_modifier, 0.0f, 1.0f);
-	UpdateVolume();
+	RecalculateAudioParameters();
 }
 
 // Sets the desired base volume for this audio instance
 void AudioInstance::SetVolume(float volume) 
 { 
 	m_base_volume = max(0.0f, volume); 
-	UpdateVolume();
+	RecalculateAudioParameters();
 }
 
 // Sets all volume-related parameters for this instance
@@ -104,20 +106,27 @@ void AudioInstance::SetVolumeParameters(float base_volume, float volume_modifier
 	m_base_volume = base_volume;
 	m_volume_modifier = volume_modifier;
 	m_base_volume_modifier = base_volume_modifier;
-	UpdateVolume();
+	RecalculateAudioParameters();
 }
 
-// Update the instance volume.  Accepts a base volume modifier (based on audio item type) as input and
-// calculates as final volume = (base_modifier * volume_modifier * base_volume)
-void AudioInstance::UpdateVolume(void)
+// Recalculate audio instance parameters based on a change to the instance data
+void AudioInstance::RecalculateAudioParameters(void)
 {
 	if (m_instance.get())
 	{
+		// Final volume = (m_base_volume_modifier * m_volume_modifier * m_base_volume)
 		// m_base_volume_modifier = base modifier based on audio type (effect vs music vs ...)
 		// m_volume_modifier = instance-specific modifier (e.g. for interior vs exterior sounds)
 		// m_base_volume = desired base volume before any modification
-		float volume = (m_base_volume_modifier * m_volume_modifier * m_base_volume);
-		m_instance.get()->SetVolume(max(0.0f, volume));
+		float volume = AudioManager::DetermineVolume(m_base_volume, m_volume_modifier, m_base_volume_modifier);
+		m_instance.get()->SetVolume(volume);
+
+		// Determine the effective maximum range of this instance based upon its volume.  Only required for 3D instances
+		if (m_is3d)
+		{
+			m_max_audible_distance_sq = AudioManager::DetermineMaximumAudibleDistance(volume);
+			m_max_audible_distance_sq *= m_max_audible_distance_sq;
+		}
 	}
 }
 

@@ -72,7 +72,7 @@ Audio::AudioInstanceIdentifier AudioItem::CreateInstance(bool loop, float base_v
 	// Populate the instance with required details and start playback
 	m_instances[id].SetVolumeParameters(base_volume, volume_modifier, m_type_volume_modifier);
 	m_instances[id].Start(m_duration, loop);
-
+	
 	// Return success
 	return m_instances[id].GetIdentifier();
 }
