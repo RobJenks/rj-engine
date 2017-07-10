@@ -349,7 +349,7 @@ Result IO::Data::SaveComplexShipElement(TiXmlElement *parent, const ComplexShipE
 	IO::Data::LinkIntVector3AttrXMLElement("elementlocation", e.GetLocation(), node);
 	IO::Data::LinkIntegerXMLElement("properties", e.GetProperties(), node);
 	IO::Data::LinkDoubleXMLElement("health", e.GetHealth(), node);
-	IO::Data::LinkDoubleXMLElement("connections", e.GetConnectionState(), node);
+	IO::Data::LinkIntegerXMLElement("connections", e.GetConnectionState(), node);
 
 	// Add all attach point data
 	TiXmlElement *attach;
