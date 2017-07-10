@@ -847,7 +847,7 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 {
 	// Look at each node element in turn, storing required values for now
 	std::string key; HashVal hash; 
-	std::string a_code = ""; XMVECTOR a_pos = NULL_VECTOR; INTVECTOR3 a_elpos = NULL_INTVECTOR3; 
+	std::string a_code = ""; INTVECTOR3 a_elpos = NULL_INTVECTOR3; 
 	Rotation90Degree a_rot = Rotation90Degree::Rotate0;
 	TiXmlElement *node = root->FirstChildElement();
 	for (node; node; node = node->NextSiblingElement())
@@ -858,7 +858,6 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 
 		// Test for each required field
 		if		(hash == HashedStrings::H_Code)				a_code = node->GetText();
-		else if (hash == HashedStrings::H_Position)			a_pos = IO::GetVector3FromAttr(node);
 		else if (hash == HashedStrings::H_ElementLocation)	a_elpos = IO::GetInt3CoordinatesFromAttr(node);
 		else if (hash == HashedStrings::H_Rotation)			a_rot = TranslateRotation90Degree(node->GetText());
 	}
@@ -896,7 +895,6 @@ Result IO::Data::LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip 
 	if (!sec) return ErrorCodes::UnknownErrorInstantiatingCSSection;
 
 	// This is a a valid section, so set the details now 
-	sec->SetRelativePosition(a_pos);
 	sec->SetElementLocation(a_elpos);
 	sec->RotateSection(a_rot);
 

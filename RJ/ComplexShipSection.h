@@ -64,9 +64,8 @@ public:
 	CMPINLINE void								SetSectionUpdateFlag(void)		{ m_sectionupdated = true; }
 	CMPINLINE void								ClearSectionUpdateFlag(void)	{ m_sectionupdated = false; }
 
-	// Methods to retrieve and change the section position relative to its parent
+	// Returns the position of this section relative to its parent, in world coordinates
 	CMPINLINE XMVECTOR							GetRelativePosition(void) const	{ return m_relativepos; }
-	void										SetRelativePosition(const FXMVECTOR relativepos);
 
 	// Update the section based on a change to the parent ship's position or orientation
 	void										UpdatePositionFromParent(void);
@@ -76,7 +75,7 @@ public:
 	CMPINLINE void								RefreshPositionImmediate(void) { }
 
 	CMPINLINE INTVECTOR3 						GetElementLocation(void) const				{ return m_elementlocation; }
-	CMPINLINE void								SetElementLocation(const INTVECTOR3 & loc)	{ m_elementlocation = loc; } 
+	void										SetElementLocation(const INTVECTOR3 & loc);
 	CMPINLINE INTVECTOR3 						GetElementSize(void) const					{ return m_elementsize; }
 	CMPINLINE Rotation90Degree					GetRotation(void) const						{ return m_rotation; }
 

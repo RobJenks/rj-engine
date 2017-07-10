@@ -101,11 +101,13 @@ void ComplexShipSection::InitialiseCopiedObject(ComplexShipSection *source)
 	}
 }
 
-// Sets the section position relative to its parent ship, recalculating required data at the same time
-void ComplexShipSection::SetRelativePosition(const FXMVECTOR relativepos)
+void ComplexShipSection::SetElementLocation(const INTVECTOR3 & loc) 
 {
-	// Store the new relative position
-	m_relativepos = relativepos;
+	// Store the new relative location
+	m_elementlocation = loc; 
+
+	// Also calculate the relative position in world coordinates
+	m_relativepos = Game::ElementLocationToPhysicalPosition(m_elementlocation);
 }
 
 
@@ -380,7 +382,6 @@ void ComplexShipSection::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(ResumeUpdates)
 	REGISTER_DEBUG_FN(SetSectionUpdateFlag)
 	REGISTER_DEBUG_FN(ClearSectionUpdateFlag)
-	REGISTER_DEBUG_FN(SetRelativePosition, XMVectorSet(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4), 0.0f))
 	REGISTER_DEBUG_FN(UpdatePositionFromParent)
 	REGISTER_DEBUG_FN(RefreshPositionImmediate)
 	REGISTER_DEBUG_FN(SetElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
