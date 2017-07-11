@@ -22,11 +22,8 @@ LightSource * LightSource::Create(const LightData & data)
 LightSource * LightSource::Create(const Light & light)
 {
 	// Create a new light source object
-	LightSource *ls = new LightSource();
+	LightSource *ls = new LightSource(light);
 	if (!ls) return NULL;
-
-	// Apply supplied lighting data to the source
-	ls->SetLight(light);
 
 	// Set an initial simulation state.  This will likely be overridden in the next frame, but will
 	// ensure that the object is registered upon construction
@@ -38,7 +35,7 @@ LightSource * LightSource::Create(const Light & light)
 
 
 // Default constructor
-LightSource::LightSource(void)
+LightSource::LightSource(const Light & data)
 	:
 	m_priority(0), 
 	m_relativelightorient(ID_QUATERNION)
@@ -46,23 +43,27 @@ LightSource::LightSource(void)
 	// Set the object type
 	SetObjectType(iObject::ObjectType::LightSourceObject);
 
-	// Light sources will not collide with anything (although their collision radii are used for illumination tests)
-	SetCollisionMode(Game::CollisionMode::NoCollision);
-	SetCollisionSphereRadius(1.0f);
-
-	// Light sources do perform a post-simulation update to reposition their internal light component
-	SetPostSimulationUpdateFlag(true);
-}
-
-
-// Set the lighting data for this light source
-void LightSource::SetLight(const Light & data)
-{
 	// Store the lighting data
 	m_light = data;
 
 	// Set light range directly, which will perform validation and update object properties accordingly
 	SetRange(data.Data.Range);
+
+	// Light sources will not collide with anything (although their collision radii are used for illumination tests)
+	SetCollisionMode(Game::CollisionMode::NoCollision);
+	SetCollisionSphereRadius(1.0f);
+
+	// Determine an object code for the light based on its properties
+	DetermineObjectCode();
+
+	// Light sources do perform a post-simulation update to reposition their internal light component
+	SetPostSimulationUpdateFlag(true);
+}
+
+// Determine an object code for the light based on its properties
+void LightSource::DetermineObjectCode(void)
+{
+	SetCode(concat("LightSource-")(Light::TranslateLightTypeToString((Light::LightType)m_light.GetType())).str());
 }
 
 // Set the range of this light source

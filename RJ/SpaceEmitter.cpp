@@ -53,6 +53,9 @@ void SpaceEmitter::SetEmitter(ParticleEmitter *emitter)
 	// Store the emitter, and also the unique code of the emitter for later deallocation
 	m_emitter = emitter; 
 	m_emittercode = emitter->GetCode();
+
+	// Set an object code based on the underlying emitter definition
+	SetCode(concat("SpaceEmitter-")(m_emittercode).str());
 }
 
 

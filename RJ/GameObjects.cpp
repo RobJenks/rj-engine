@@ -137,9 +137,9 @@ namespace Game
 			iObject *obj = entry->second.Object;
 
 			// Set the object to inactive and remove the pointer, so no further processes can access it
-			OBJ_REGISTER_LOG(concat("Unregistering object ")(id)(" (\"")(obj->GetInstanceCode())("\"); now Refcount=")(entry->second.RefCount)(", Active=")(entry->second.Active ? "true" : "false")("\n").str().c_str());
 			entry->second.Active = false;
 			entry->second.Object = NULL;
+			OBJ_REGISTER_LOG(concat("Unregistering object ")(id)(" (\"")(obj->GetInstanceCode())("\"); Refcount=")(entry->second.RefCount)(", Active=")(entry->second.Active ? "true" : "false")("\n").str().c_str());
 
 			// If there are no current references to this object we can also remove the entire entry from the register at the same time
 			if (entry->second.RefCount <= 0) Game::RemoveObjectRegisterEntry(id);

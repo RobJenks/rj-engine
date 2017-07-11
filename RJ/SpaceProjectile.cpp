@@ -14,35 +14,27 @@ SpaceProjectile::SpaceProjectile(void)
 	// Set the object type
 	this->SetObjectType(iObject::ObjectType::ProjectileObject);
 
+	// Set a generic object code since we don't have a definition available on construction
+	SetCode("SpaceProjectile");
+
 	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
 	this->SetCollisionMode(Game::CollisionMode::FullCollision);
 }
 
 // Constructor accepting the projectile definition as an initialisation parameter
-//#ifdef RJ_CPP11_SUPPORT
-	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : SpaceProjectile()
-//#else
-//	Perform full construction if C++11 constructor delegation not supported
-//	SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : 		
-//		m_owner(NULL), m_lifetime(1.0f), m_degrade_lv(true), m_degrade_av(false), m_degrade_lv_pc(0.01f),
-//		m_degrade_av_pc(0.0f), m_orient_change(false), m_orient_change_amount(ID_QUATERNION), 
-//		m_detach_time(0U), m_detached_from_owner(false)
-//#endif
+SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : SpaceProjectile()
 {
-	// Set the object type
-//	this->SetObjectType(iObject::ObjectType::ProjectileObject);
-
-	// This class of space object will perform full collision detection by default (iSpaceObject default = no collision)
-//	this->SetCollisionMode(Game::CollisionMode::FullCollision);
-
 	// Store and pull data from the definition, if a valid pointer was provided
 	m_definition = definition;
 	if (m_definition)
 	{
+		// Set an object code based upon the projectile definition
+		SetCode(concat("SpaceProjectile-")(m_definition->GetCode()).str());
+		
 		this->SetModel(m_definition->GetModel());
 		this->SetMass(m_definition->GetMass());
 		this->SetLifetime(m_definition->GetDefaultLifetime());
-		
+	
 		// Projectile size is derived from the projectile model
 		if (m_model)
 		{
