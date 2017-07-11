@@ -55,8 +55,8 @@ public:
 
 		// Assignment operator
 		ObjectPhysicsState& operator=(const ObjectPhysicsState&);
-		
-		// Detructor
+
+		// Destructor
 		CMPINLINE ~ObjectPhysicsState(void) { }
 
 	} PhysicsState;
@@ -173,6 +173,10 @@ public:
 		// in F.  Recalculates world momentum in the process
 		AddLocalMomentum(localforcevector);
 	}
+
+	// Moves the object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+	// to perform in-place swaps of objects
+	void									MoveToObjectPosition(const iActiveObject *target_object);
 
 	// Accessor methods for key data in the PhysicsState structure
 	CMPINLINE XMVECTOR						GetAcceleration(void) const					{ return PhysicsState.Acceleration; }

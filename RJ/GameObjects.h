@@ -99,6 +99,11 @@ namespace Game
 			PerformRegisterEntryRemoval(id);
 		}
 	}
+
+	// Perform an in-place swap of two object register entries.  Only executed if both IDs are valid
+	// and refer to active objects in the register.  This is a debug method which bypasses the standard
+	// object register controls and should be used infrequently, if at all
+	void										SwapObjectRegisterEntries(Game::ID_TYPE object0, Game::ID_TYPE object1);
 	
 	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
 	void										UpdateGlobalObjectCollection(void);

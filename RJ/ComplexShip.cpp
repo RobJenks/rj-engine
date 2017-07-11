@@ -394,7 +394,6 @@ void ComplexShip::Shutdown(bool IncludeStandardObjects, bool ShutdownSections, b
 				if (!m_sections[i]->IsStandardObject() || IncludeStandardObjects)
 				{
 					m_sections[i]->Shutdown();
-					SafeDelete(m_sections[i]);
 				}
 			}
 		}

@@ -158,6 +158,29 @@ namespace Game
 		}
 	}
 
+	// Perform an in-place swap of two object register entries.  Only executed if both IDs are valid
+	// and refer to active objects in the register.  This is a debug method which bypasses the standard
+	// object register controls and should be used infrequently, if at all
+	void SwapObjectRegisterEntries(Game::ID_TYPE object0, Game::ID_TYPE object1)
+	{
+		// Make sure both objects exist
+		iObject *obj0 = GetObjectByID(object0);
+		iObject *obj1 = GetObjectByID(object1);
+		if (!obj0 || !obj1) return;
+
+		// Update the ID of each object
+		obj0->ForceOverrideUniqueID(object1, false);
+		obj1->ForceOverrideUniqueID(object0, false);
+
+		// Swap object entries in the primary register
+		Game::Objects[object0].Object = obj1;
+		Game::Objects[object1].Object = obj0;
+
+		// Also swap entries in the secondary register.  We have not updated the object
+		// instance codes so there is no need to remove/replace entries; just to repoint them
+		Game::ObjectsByCode[obj0->GetInstanceCode()] = &(Game::Objects[object1]);
+		Game::ObjectsByCode[obj1->GetInstanceCode()] = &(Game::Objects[object0]);
+	}
 
 	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
 	void UpdateGlobalObjectCollection(void)

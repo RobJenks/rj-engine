@@ -41,6 +41,10 @@ public:
 	// Further derived classes (e.g. ships) can implement this method and then call iSpaceObject::SimulationStateChanged() to maintain the chain
 	void									SimulationStateChanged(ObjectSimulationState prevstate, ObjectSimulationState newstate);
 
+	// Moves the space object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+	// to perform in-place swaps of objects
+	void									MoveToObjectPosition(const iSpaceObject *target_object);
+
 	// Shutdown method to remove the space object from simulation
 	void									Shutdown(void);
 

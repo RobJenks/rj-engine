@@ -73,6 +73,23 @@ void iSpaceObject::RemoveFromEnvironment(void)
 	}
 }
 
+// Moves the space object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+// to perform in-place swaps of objects
+void iSpaceObject::MoveToObjectPosition(const iSpaceObject *target_object)
+{
+	// Make sure the target object exists
+	if (!target_object) return;
+
+	// If we are not already in the same space environment as the target, we need to move there now
+	if (target_object->GetSpaceEnvironment() != NULL && m_spaceenvironment != target_object->GetSpaceEnvironment())
+	{
+		MoveIntoSpaceEnvironment(target_object->GetSpaceEnvironment());
+	}
+
+	// Pass control back up the hierarchy
+	iActiveObject::MoveToObjectPosition(static_cast<const iActiveObject*>(target_object));
+}
+
 // Shutdown method to remove the space object from simulation
 void iSpaceObject::Shutdown(void)
 {

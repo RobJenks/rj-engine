@@ -114,6 +114,8 @@ void UI_ShipBuilder::Activate(void)
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
 
+	// Display the mouse cursor // TODO: use custom, not system cursor in future
+	Game::Engine->SetSystemCursorVisibility(true);
 
 	// Set default starting editor mode
 	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
@@ -367,6 +369,9 @@ void UI_ShipBuilder::Deactivate(void)
 
 	// TODO: For now, return to general mode since this mode does not use any fade/transparency effects
 	SetEditorMode(UI_ShipBuilder::EditorMode::GeneralMode);
+
+	// Hide the system cursor again when leaving the ship builder UI
+	Game::Engine->SetSystemCursorVisibility(false);
 
 	// Remove any reference to the target ship
 	m_ship = NULL;
@@ -1364,7 +1369,7 @@ Result UI_ShipBuilder::PerformSave(void)
 	// Get and normalise the ship name
 	std::string name = nameinput->GetText();
 	std::string code = NormaliseString(name);
-	if (code == "") return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
+	if (code == NullString) return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
 
 	// Make sure the custom ship directory exists
 	string path = concat(D::DATA)(UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY).str();
@@ -1408,13 +1413,68 @@ Result UI_ShipBuilder::PerformSave(void)
 // Load the specified ship design
 void UI_ShipBuilder::LoadShip(void)
 {
-	// TODO: Implement
+	Result result = PerformLoad();
+	if (result == ErrorCodes::NoError && m_ship)
+	{
+		SetStatusMessage("Ship loaded successfully");
+	}
+	else
+	{
+		// Special case: report a general error, unless this is a 'not found' error.  In that
+		// case the error has already been reported
+		if (result != ErrorCodes::ShipBuilderCannotLocateShipDesign)
+		{
+			SetStatusMessage(concat("Error loading ship design (")(result)(")").str().c_str());
+		}
+	}
 }
 
 // Attempt to load the specified ship and return a status code indicating the result 
 Result UI_ShipBuilder::PerformLoad(void)
 {
-	// TODO: Implement
+	// Parameter checks
+	if (m_mode != EditorMode::GeneralMode) return ErrorCodes::ShipBuilderMissingMandatoryLoadParameters;
+	if (!m_ship) return ErrorCodes::ShipBuilderMissingMandatoryLoadParameters;
+	UITextBox *nameinput = m_render->Components.TextBoxes.GetItem("txt_shipname");
+	if (!nameinput) return ErrorCodes::ShipBuilderCannotLoadShipWithInvalidCode;
+
+	// Get and normalise the ship name
+	std::string name = nameinput->GetText();
+	std::string code = NormaliseString(name);
+	if (code == NullString) return ErrorCodes::ShipBuilderCannotLoadShipWithInvalidCode;
+	std::string lc_code = StrLower(code);
+
+	// Attempt to locate this ship definition in the global collection
+	ComplexShip *ship_template = D::ComplexShips.Get(lc_code);
+	if (!ship_template)
+	{
+		// Special case; set the status message directly within this method, so we can report the 
+		// ship definition name that was not found.  LoadShip() method will not set its own status 
+		// message if it receives this error code
+		SetStatusMessage(concat("Error: ship design \"")(code)("\" does not exist (")(ErrorCodes::ShipBuilderCannotLocateShipDesign)(")").str());
+		return ErrorCodes::ShipBuilderCannotLocateShipDesign;
+	}
+
+	// Terminate the existing ship and replace it with the new one.  Note: this could cause all kind
+	// of bad side effects.  However this is only a debug function; in normal use the user will 
+	// only be able to modify their existing ship design
+
+	// Unlock object registers so that all changes take place immediately
+	Game::UnlockObjectRegisters();
+
+	// Instantiate a new ship and move to the current ship location
+	ComplexShip *old_ship = m_ship;
+	m_ship = ComplexShip::Create(ship_template);
+	m_ship->MoveToObjectPosition(old_ship);
+
+	// Have the object register perform an in-place swap of the existing and new register entries
+	Game::SwapObjectRegisterEntries(old_ship->GetID(), m_ship->GetID());
+
+	// Now shut down the old ship and re-lock the object registers
+	old_ship->Shutdown(false, true, true, true);
+	Game::LockObjectRegisters();
+	
+	// Report success
 	return ErrorCodes::NoError;
 }
 

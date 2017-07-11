@@ -165,6 +165,21 @@ void iActiveObject::RecalculateInertiaTensor(void)
 	PhysicsState.InverseInertiaTensor = XMMatrixInverse(NULL, PhysicsState.InertiaTensor);
 }
 
+// Moves the object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+// to perform in-place swaps of objects
+void iActiveObject::MoveToObjectPosition(const iActiveObject *target_object)
+{
+	// Make sure the target object exists
+	if (!target_object) return;
+
+	// Copy physics-related properties of the target object.  For simplicity, just copy the 
+	// entire PhysicsState block
+	PhysicsState = target_object->PhysicsState;
+
+	// Pass control back up the hierarchy
+	iObject::MoveToObjectPosition(static_cast<const iObject*>(target_object));
+}
+
 // Virtual method, called when this object collides with another
 void iActiveObject::CollisionWithObject(iActiveObject *object, const GamePhysicsEngine::ImpactData & impact)
 {

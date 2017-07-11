@@ -103,6 +103,13 @@ void iObject::AssignNewUniqueID(void)
 	DetermineInstanceCode();
 }
 
+// Override the unique ID of this object.  Not advisable unless done in a controlled manner
+void iObject::ForceOverrideUniqueID(Game::ID_TYPE new_id, bool derive_new_instance_code)
+{
+	m_id = new_id;
+	if (derive_new_instance_code) DetermineInstanceCode();
+}
+
 // Sets the object code
 void iObject::SetCode(const std::string & code)
 {
@@ -678,6 +685,17 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, const GamePhysicsEn
 	OutputDebugString(concat("OBB: ")(impact.OBB->ToString())("\n").str().c_str());
 	OutputDebugString(concat("Pos: ")(Vector3ToString(impact.CollisionPoint))("\n").str().c_str());
 	ApplyDamage(proj.Definition->GetProjectileDamage(), impact);
+}
+
+// Moves the object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+// to perform in-place swaps of objects
+void iObject::MoveToObjectPosition(const iObject *target_object)
+{
+	// Make sure the target object exists
+	if (!target_object) return;
+
+	// Copy basic spatial information from the target object
+	SetPositionAndOrientation(target_object->GetPosition(), target_object->GetOrientation());
 }
 
 // Custom debug string function which determines the subclass of this object and calls that subclass method directly.  

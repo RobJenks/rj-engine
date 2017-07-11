@@ -635,6 +635,10 @@ namespace ErrorCodes {
 	const Result		ShipBuilderCannotGenerateSaveDirectory			= 6201;
 	const Result		ShipBuilderMissingMandatorySaveParameters		= 6202;
 	const Result		ShipBuilderCouldNotInstantiateSaveObject		= 6203;
+	const Result		ShipBuilderMissingMandatoryLoadParameters		= 6204;
+	const Result		ShipBuilderCannotLoadShipWithInvalidCode		= 6205;
+	const Result		ShipBuilderCannotLocateLoadDirectory			= 6206;
+	const Result		ShipBuilderCannotLocateShipDesign				= 6207;
 
 	// Audio errors														(6500-6799)
 	const Result		CannotCreateAudioManager						= 6500;

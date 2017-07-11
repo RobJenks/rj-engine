@@ -101,6 +101,9 @@ public:
 	bool									OverrideInstanceCode(const std::string & icode);
 	bool									TestForOverrideOfInstanceCode(void) const;
 
+	// Override the unique ID of this object.  Not advisable unless done in a controlled manner
+	void									ForceOverrideUniqueID(Game::ID_TYPE new_id, bool derive_new_instance_code);
+
 	// Flag indicating whether this is a 'standard', centrally-maintained template object
 	CMPINLINE bool							IsStandardObject(void) const			{ return m_standardobject; }
 	CMPINLINE void							SetIsStandardObject(bool standard)		{ m_standardobject = standard; }
@@ -460,6 +463,10 @@ public:
 	{
 		return iObject::SimStateRelations[state1][state2];
 	}
+
+	// Moves the object to the same location, orientation, velocity etc. as the specified object.  Primarily used 
+	// to perform in-place swaps of objects
+	void										MoveToObjectPosition(const iObject *target_object);
 
 	// Output debug data on the object.  Acts from this point in the hierarchy downwards
 	//std::string									DebugOutput(void) const;
