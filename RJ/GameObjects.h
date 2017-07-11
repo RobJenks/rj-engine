@@ -8,6 +8,18 @@
 #include "GameVarsExtern.h"
 #include "iObject.h"
 
+// Flag which determines whether object register interactions will be logged in debug mode
+#define	DEBUG_LOG_OBJECT_REGISTER_OPERATIONS
+
+// Logs an object register interaction to the debug output, in debug mode only
+#	if defined(_DEBUG) && defined(DEBUG_LOG_OBJECT_REGISTER_OPERATIONS)
+#		define OBJ_REGISTER_LOG(cstr) OutputDebugString(cstr)
+#	else 
+#		define OBJ_REGISTER_LOG(cstr)
+#	endif
+
+
+
 // This file contains no objects with special alignment requirements
 namespace Game
 {
@@ -30,10 +42,26 @@ namespace Game
 		ObjectRegisterEntry(Game::ID_TYPE id, iObject *object, bool active, int refcount) : ID(id), Object(object), Active(active), RefCount(refcount) { }
 
 		// Record a new reference to this entry
-		CMPINLINE void			ReferenceAdded(void)		{ ++RefCount; }
+		CMPINLINE void			ReferenceAdded(void)		
+		{ 
+			++RefCount; 
+			//OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+		}
 
 		// Record the removal of a reference to this entry
-		CMPINLINE void			ReferenceRemoved(void)		{ if (--RefCount <= 0 && !Active) Game::RemoveObjectRegisterEntry(ID); }
+		CMPINLINE void			ReferenceRemoved(void)		
+		{ 
+			if (--RefCount <= 0 && !Active)
+			{
+				OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+				OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str().c_str());
+				Game::RemoveObjectRegisterEntry(ID);
+			}
+			else
+			{
+				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+			}
+		}
 	};
 
 	// Type definitions for primary object register collection
@@ -70,14 +98,17 @@ namespace Game
 	// Register an object with the global collection
 	CMPINLINE void								RegisterObject(iObject *obj)
 	{
+		OBJ_REGISTER_LOG(concat("Registering object ")(obj ? obj->GetID() : 0)(" (\"")(obj ? obj->GetInstanceCode() : "<null>")("\")...").str().c_str());
 		if (m_registers_locked)
 		{
 			// If registers are locked, add to the registration list for addition to the global collection in the next cycle
+			OBJ_REGISTER_LOG("Adding to registration list\n");
 			Game::RegisterList.push_back(obj);
 		}
 		else
 		{
 			// If registers are unlocked we can add the object immediately
+			OBJ_REGISTER_LOG("Registering immediately\n");
 			PerformObjectRegistration(obj);
 		}
 	}
@@ -88,14 +119,17 @@ namespace Game
 	// Remove the entire entry from the object register; performed when active == false and refcount == 0
 	CMPINLINE void								RemoveObjectRegisterEntry(Game::ID_TYPE id)
 	{
+		OBJ_REGISTER_LOG(concat("Removing object ")(id)(" register entry...").str().c_str());
 		if (m_registers_locked)
 		{
 			// If registers are locked, add to the removal vector which is processed at the end of each frame
+			OBJ_REGISTER_LOG("Adding to register removal list\n");
 			Game::RegisterRemovalList.push_back(id);
 		}
 		else
 		{
 			// If registers are unlocked we can remove the entry immediately
+			OBJ_REGISTER_LOG("Removing immediately\n");
 			PerformRegisterEntryRemoval(id);
 		}
 	}

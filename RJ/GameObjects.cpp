@@ -54,6 +54,7 @@ namespace Game
 			ObjectRegisterEntry & entry = object_vector.at(i);
 			if (entry.Active && entry.Object)
 			{
+				OBJ_REGISTER_LOG(concat("Terminating object register...shutting down active object #")(i)(" (ID: ")(entry.Object->GetID())(", InstanceCode: ")(entry.Object->GetInstanceCode())(")\n").str().c_str());
 				entry.Object->Shutdown();
 			}
 		}
@@ -65,6 +66,7 @@ namespace Game
 
 		// Deallocate the null object register entry
 		SafeDelete(Game::NullObjectReference);
+		OBJ_REGISTER_LOG("Object register fully deallocated\n");
 	}
 
 	// Unregister an object from the global collection
@@ -82,9 +84,11 @@ namespace Game
 			// Remove based on object ID.  Use the ID rather than the object itself since this unregistering 
 			// could be requested as part of object shutdown, and when the unregister list is next processed 
 			// the object may no longer be valid.  Either remove immediately or add to the list, depending on lock state
+			OBJ_REGISTER_LOG(concat("Unregistering object ")(obj ? obj->GetID() : 0)(" (\"")(obj ? obj->GetInstanceCode() : "<null>")("\")...").str().c_str());
 			if (m_registers_locked)
 			{
 				// If registers are locked, add to the list for removal at the end of the frame
+				OBJ_REGISTER_LOG("Adding to unregistration list\n");
 				Game::UnregisterList.push_back(obj->GetID());
 
 				// Flag the object as inactive in the meantime to avoid processing it in the upcoming frame
@@ -93,6 +97,7 @@ namespace Game
 			else
 			{
 				// If registers are unlocked we can unregister the object immediately
+				OBJ_REGISTER_LOG("Unregistering immediately\n");
 				PerformObjectUnregistration(obj->GetID());
 			}
 
@@ -105,7 +110,11 @@ namespace Game
 		// Make sure the object is valid and meets all criteria for e.g. uniqueness
 		if (!object ||																// Ignore this object if it is NULL
 			object->GetInstanceCode() == NullString ||								// Ignore this object if it has no instance code
-			ObjectExists(object->GetInstanceCode())) return;						// Ignore this object if it does not have a unique instance code
+			ObjectExists(object->GetInstanceCode()))								// Ignore this object if it does not have a unique instance code
+		{
+			OBJ_REGISTER_LOG(concat("Aborting registration for object ")(object ? object->GetID() : 0)(" (\"")(object ? object->GetInstanceCode() : "<null>")("\") [ ")(!object ? "ObjectIsNull " : "")(object->GetInstanceCode() == NullString ? "InstanceCodeIsNull " : "")(ObjectExists(object->GetInstanceCode()) ? "InstanceCodeAlreadyRegistered " : "")("]\n").str().c_str());
+			return;
+		}
 
 		// Register with the global collection
 		Game::Objects[object->GetID()] = Game::ObjectRegisterEntry(object);
@@ -113,6 +122,7 @@ namespace Game
 		// Register with secondary collections
 		Game::ObjectRegisterEntry *primary_entry = &(Game::Objects[object->GetID()]);
 		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;				// We know the code is unique after the test above
+		OBJ_REGISTER_LOG(concat("Registered object ")(object->GetID())(" (\"")(object->GetInstanceCode())("\") with global collection [primary=")(Objects.size())(", secondary=")(ObjectsByCode.size())("]\n").str().c_str());
 		VERIFY_OBJECT_REGISTER_INTEGRITY();
 	}
 
@@ -127,6 +137,7 @@ namespace Game
 			iObject *obj = entry->second.Object;
 
 			// Set the object to inactive and remove the pointer, so no further processes can access it
+			OBJ_REGISTER_LOG(concat("Unregistering object ")(id)(" (\"")(obj->GetInstanceCode())("\"); now Refcount=")(entry->second.RefCount)(", Active=")(entry->second.Active ? "true" : "false")("\n").str().c_str());
 			entry->second.Active = false;
 			entry->second.Object = NULL;
 
@@ -138,6 +149,7 @@ namespace Game
 			// in the primary collection.  If we erase from a secondary collection the relevant retrieval methods will simply return null, correctly
 			Game::ObjectRegisterByInstanceCode::iterator code_entry = Game::ObjectsByCode.find(obj->GetInstanceCode());
 			if (code_entry != Game::ObjectsByCode.end()) Game::ObjectsByCode.erase(obj->GetInstanceCode());
+			OBJ_REGISTER_LOG(concat("Removed object ")(id)(" (\"")(obj->GetInstanceCode())("\") from secondary collection [primary=")(Objects.size())(", secondary=")(ObjectsByCode.size())("]\n").str().c_str());
 
 			// Finally call the destructor for this object to deallocate all resources
 			delete obj;
@@ -155,6 +167,7 @@ namespace Game
 			// Assuming we found the entry, erase it now to remove all record from the register
 			entry->second.Object = NULL;
 			Game::Objects.erase(entry);
+			OBJ_REGISTER_LOG(concat("Removed register entry for object ")(id)(" [primary=")(Objects.size())(", secondary=")(ObjectsByCode.size())("]\n").str().c_str());
 		}
 	}
 
@@ -167,6 +180,7 @@ namespace Game
 		iObject *obj0 = GetObjectByID(object0);
 		iObject *obj1 = GetObjectByID(object1);
 		if (!obj0 || !obj1) return;
+		OBJ_REGISTER_LOG(concat("Performing in-place swap of register entries for objects ")(object0)(" (\"")(obj0->GetInstanceCode())("\") and ")(object1)(" (\"")(obj1->GetInstanceCode())("\")\n").str().c_str());
 
 		// Update the ID of each object
 		obj0->ForceOverrideUniqueID(object1, false);
@@ -190,6 +204,7 @@ namespace Game
 		if (nU != 0)
 		{
 			// Process each request in turn
+			OBJ_REGISTER_LOG(concat("Processing ")(nU)(" pending unregistration entries\n").str().c_str());
 			for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nU; ++i)
 			{
 				// Unregister the object
@@ -205,6 +220,7 @@ namespace Game
 		if (nE != 0)
 		{
 			// Process each request in turn
+			OBJ_REGISTER_LOG(concat("Processing ")(nE)(" pending register removal entries\n").str().c_str());
 			for (std::vector<Game::ID_TYPE>::size_type i = 0; i < nE; ++i)
 			{
 				// Remove the entry from the central register
@@ -220,6 +236,7 @@ namespace Game
 		if (nR != 0)
 		{
 			// Process each request in turn
+			OBJ_REGISTER_LOG(concat("Processing ")(nR)(" pending registration entries\n").str().c_str());
 			for (std::vector<iObject*>::size_type i = 0; i < nR; ++i)
 			{
 				// Register this object with the central register
@@ -252,6 +269,7 @@ namespace Game
 
 		// Add a new secondary register entry for the new code
 		Game::ObjectsByCode[object->GetInstanceCode()] = primary_entry;
+		OBJ_REGISTER_LOG(concat("Processed change in object ")(object->GetID())(" instance code from \"")(old_code)("\" to \"")(object->GetInstanceCode())("\" [primary=")(Objects.size())(", secondary=")(ObjectsByCode.size())("]\n").str().c_str());
 	}
 
 	// Verifies the integrity of each object register to ensure no data gets out of sync.  Enabled during debug only
