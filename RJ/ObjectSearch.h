@@ -69,18 +69,18 @@ namespace Game
 			float								DistanceSquared;
 
 			// Constructor; noexcept for STL move semantics
-			CachedSearchResult(Game::ID_TYPE obj_id, float distsq) noexcept : Object(obj_id), DistanceSquared(distsq) { OutputDebugString("Constructor\n"); }
+			CachedSearchResult(Game::ID_TYPE obj_id, float distsq) noexcept : Object(obj_id), DistanceSquared(distsq) { }
 
 			// Copy constructor & assignment
-			CMPINLINE CachedSearchResult(const CachedSearchResult & other) noexcept : Object(other.Object), DistanceSquared(other.DistanceSquared) { OutputDebugString("CopyCons\n"); }
-			CMPINLINE CachedSearchResult & operator=(const CachedSearchResult & other) noexcept { Object = other.Object(); DistanceSquared = other.DistanceSquared; OutputDebugString("CopyAssign\n") }
+			CMPINLINE CachedSearchResult(const CachedSearchResult & other) noexcept : Object(other.Object), DistanceSquared(other.DistanceSquared) { }
+			CMPINLINE CachedSearchResult & operator=(const CachedSearchResult & other) noexcept { Object = other.Object(); DistanceSquared = other.DistanceSquared; }
 
 			// Move constructor and assignment; noexcept for STL move semantics
-			CMPINLINE CachedSearchResult(CachedSearchResult && other) noexcept : Object(std::move(other.Object)), DistanceSquared(other.DistanceSquared) { OutputDebugString("MOVECons\n"); }
-			CMPINLINE CachedSearchResult & operator=(CachedSearchResult && other) noexcept { Object = std::move(other.Object); DistanceSquared = other.DistanceSquared; OutputDebugString("MOVEAssign\n") }
+			CMPINLINE CachedSearchResult(CachedSearchResult && other) noexcept : Object(std::move(other.Object)), DistanceSquared(other.DistanceSquared) { }
+			CMPINLINE CachedSearchResult & operator=(CachedSearchResult && other) noexcept { Object = std::move(other.Object); DistanceSquared = other.DistanceSquared; }
 
 			// Default destructor; noexcept for STL move semantics
-			CMPINLINE ~CachedSearchResult(void) noexcept { OutputDebugString("Destructor\n"); }
+			CMPINLINE ~CachedSearchResult(void) noexcept { }
 		};
 
 		// Structure holding cached object search information

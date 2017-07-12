@@ -9,7 +9,7 @@
 #include "iObject.h"
 
 // Flag which determines whether object register interactions will be logged in debug mode
-#define	DEBUG_LOG_OBJECT_REGISTER_OPERATIONS
+//#define	DEBUG_LOG_OBJECT_REGISTER_OPERATIONS
 
 // Logs an object register interaction to the debug output, in debug mode only
 #	if defined(_DEBUG) && defined(DEBUG_LOG_OBJECT_REGISTER_OPERATIONS)
