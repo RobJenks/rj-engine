@@ -1861,9 +1861,9 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			// Get a reference to the model
 			const ComplexShipTile::TileModel & item = (*it).value;
 			
-			// Apply a transformation of (ModelRotation * CurrentWorldMatrix * ModelTranslation)
-			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.rotmatrix, world), XMMatrixTranslationFromVector(item.offset));
-
+			// Apply a transformation of (ModelRotation * ModelTranslation * CurrentWorldMatrix)
+			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.rotmatrix, XMMatrixTranslationFromVector(item.offset)), world);
+			
 			// Submit the tile model for rendering using this adjusted world matrix
 			if (fade)
 			{

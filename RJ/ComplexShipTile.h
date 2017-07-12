@@ -71,15 +71,18 @@ public:
 			offset = Game::ElementLocationToPhysicalPosition(elementpos);
 
 			// Derive a rotation matrix for this part of the model
-			if (rotation == Rotation90Degree::Rotate0 || !model)		
+			if (rotation == Rotation90Degree::Rotate0 || !model)
+			{
 				rotmatrix = ID_MATRIX;
+			}
 			else
 			{
 				// Calculate temporary translation matrices to translate the model to its centre, so we can then rotate, and then translate back
-				XMVECTOR halfsize = XMVectorMultiply(Game::ElementLocationToPhysicalPosition(model->GetElementSize()), HALF_VECTOR);
-				XMMATRIX off = XMMatrixTranslationFromVector(XMVectorNegate(halfsize));
-				XMMATRIX invoff = XMMatrixTranslationFromVector(halfsize);
-
+				// Most tile models will be zero-centred, so this offset does nothing, however this also accomodates cases with a non-zero centre
+				XMVECTOR centrepoint = XMLoadFloat3(&model->GetModelCentre());
+				XMMATRIX off = XMMatrixTranslationFromVector(XMVectorNegate(centrepoint));
+				XMMATRIX invoff = XMMatrixTranslationFromVector(centrepoint);
+				
 				// Derive and store the rotation matrix for this model
 				rotmatrix = XMMatrixMultiply(XMMatrixMultiply(off, GetRotationMatrix(rotation)), invoff);
 			}
