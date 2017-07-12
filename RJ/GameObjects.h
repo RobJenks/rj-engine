@@ -45,13 +45,13 @@ namespace Game
 		CMPINLINE void			ReferenceAdded(void)		
 		{ 
 			++RefCount; 
-			//OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+			OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
 		}
 
 		// Record the removal of a reference to this entry
 		CMPINLINE void			ReferenceRemoved(void)		
 		{ 
-			if (--RefCount <= 0 && !Active)
+			if (--RefCount <= 0 && !Active)		// NOTE: Order is important to avoid --Refcount being skipped via short-circuiting
 			{
 				OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
 				OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str().c_str());
@@ -59,7 +59,7 @@ namespace Game
 			}
 			else
 			{
-				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+				OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
 			}
 		}
 	};
@@ -141,6 +141,9 @@ namespace Game
 	
 	// Method which processes all pending register/unregister requests to update the global collection.  Executed once per frame
 	void										UpdateGlobalObjectCollection(void);
+
+	// Resets the null object reference every frame so that its reference count never goes out of bounds
+	void										ResetNullObjectReference(void);
 
 	// Initialises all object register data on application startup
 	void										InitialiseObjectRegisters(void);

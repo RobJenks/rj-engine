@@ -53,6 +53,9 @@ void Game::Logic::SimulateAllObjects(void)
 
 	// Process any pending object register/deregister requests
 	Game::UpdateGlobalObjectCollection();
+
+	// Reset the null object reference every frame so that its reference count never goes out of bounds
+	Game::ResetNullObjectReference();
 }
 
 // Updates the current ship vector based upon mouse input data

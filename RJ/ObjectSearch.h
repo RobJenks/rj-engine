@@ -68,7 +68,19 @@ namespace Game
 			ObjectReference<T>					Object;
 			float								DistanceSquared;
 
-			CachedSearchResult(Game::ID_TYPE obj_id, float distsq) : Object(obj_id), DistanceSquared(distsq) { }
+			// Constructor; noexcept for STL move semantics
+			CachedSearchResult(Game::ID_TYPE obj_id, float distsq) noexcept : Object(obj_id), DistanceSquared(distsq) { OutputDebugString("Constructor\n"); }
+
+			// Copy constructor & assignment
+			CMPINLINE CachedSearchResult(const CachedSearchResult & other) noexcept : Object(other.Object), DistanceSquared(other.DistanceSquared) { OutputDebugString("CopyCons\n"); }
+			CMPINLINE CachedSearchResult & operator=(const CachedSearchResult & other) noexcept { Object = other.Object(); DistanceSquared = other.DistanceSquared; OutputDebugString("CopyAssign\n") }
+
+			// Move constructor and assignment; noexcept for STL move semantics
+			CMPINLINE CachedSearchResult(CachedSearchResult && other) noexcept : Object(std::move(other.Object)), DistanceSquared(other.DistanceSquared) { OutputDebugString("MOVECons\n"); }
+			CMPINLINE CachedSearchResult & operator=(CachedSearchResult && other) noexcept { Object = std::move(other.Object); DistanceSquared = other.DistanceSquared; OutputDebugString("MOVEAssign\n") }
+
+			// Default destructor; noexcept for STL move semantics
+			CMPINLINE ~CachedSearchResult(void) noexcept { OutputDebugString("Destructor\n"); }
 		};
 
 		// Structure holding cached object search information
@@ -834,9 +846,10 @@ namespace Game
 						obj_dist_sq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition())));
 
 						// Add the object to the search cache before culling items in the exact search range
-						cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
+						//cache.Results.push_back(std::move(CachedSearchResult(obj->GetID(), obj_dist_sq)));
+						cache.Results.emplace_back(obj->GetID(), obj_dist_sq);
 
-						// The object is invalid if it is outside (distsq + collisionradiussq) of the position
+						// The object is invalid if it is outside (distq + collisionradiussq) of the position
 						// Use vector2 comparison since values are replicated anyway
 						if (obj_dist_sq > (distsq + obj->GetCollisionSphereRadiusSq())) continue;
 					}
@@ -848,7 +861,7 @@ namespace Game
 						obj_dist_sq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition())));
 
 						// Add the object to the search cache before culling items in the exact search range
-						cache.Results.push_back(CachedSearchResult(obj->GetID(), obj_dist_sq));
+						cache.Results.emplace_back(obj->GetID(), obj_dist_sq);
 
 						// Test object validity based upon its squared distance to the target position.  Optionally ignore 
 						// the target object collision radius as well.  Use vector2 comparison since all components are replicated

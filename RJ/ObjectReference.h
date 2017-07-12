@@ -13,10 +13,10 @@ struct ObjectReference
 public:
 
 	// Default constructor; establishes a link to the null object register entry
-	CMPINLINE ObjectReference(void) : m_entry(Game::NullObjectReference) { }
+	CMPINLINE ObjectReference(void) noexcept: m_entry(Game::NullObjectReference) { }
 
 	// Constructor; establishes a reference to the object with the specified ID
-	CMPINLINE ObjectReference(Game::ID_TYPE id)
+	CMPINLINE ObjectReference(Game::ID_TYPE id) noexcept
 	{
 		// Get a reference to the relevant object register entry
 		Game::ObjectRegister::iterator entry = Game::Objects.find(id);
@@ -35,8 +35,8 @@ public:
 	// Constructor; establishes a reference to the specified object
 	CMPINLINE ObjectReference(iObject *object) : ObjectReference(object ? object->GetID() : 0) { }
 
-	// Custom assignment operator; assigns one reference to another, incrementing reference counts accordingly
-	CMPINLINE void operator=(const ObjectReference & rhs)
+	// Custom copy assignment operator; assigns one reference to another, incrementing reference counts accordingly
+	CMPINLINE ObjectReference & operator=(const ObjectReference & rhs) noexcept
 	{
 		// Remove our current reference
 		m_entry->ReferenceRemoved();
@@ -46,28 +46,32 @@ public:
 
 		// Increment the reference count since we are now also referencing this object
 		m_entry->ReferenceAdded();
+
+		return *this;
 	}
 	
-	// Custom assignment operator; creates a new reference to wrap the specified object 
-	CMPINLINE void operator=(iObject *object)			
+	// Custom copy assignment operator; creates a new reference to wrap the specified object 
+	CMPINLINE ObjectReference & operator=(iObject *object) noexcept 
 	{  
 		// Remove our current reference
 		m_entry->ReferenceRemoved();
 
 		// Parameter check; if target is null, point at the null object reference
-		if (!object) { m_entry = Game::NullObjectReference; m_entry->ReferenceAdded(); return; }
+		if (!object) { m_entry = Game::NullObjectReference; m_entry->ReferenceAdded(); return *this; }
 
 		// Attempt to locate the new object in the register; if not found, point at the null object reference
 		Game::ObjectRegister::iterator entry = Game::Objects.find(object->GetID());
-		if (entry == Game::Objects.end()) { m_entry = Game::NullObjectReference; m_entry->ReferenceAdded(); return; }
+		if (entry == Game::Objects.end()) { m_entry = Game::NullObjectReference; m_entry->ReferenceAdded(); return *this; }
 
 		// Store the new reference and increment its reference count
 		m_entry = &(entry->second);
 		m_entry->ReferenceAdded();
+
+		return *this;
 	}
 
 	// Custom copy constructor
-	CMPINLINE ObjectReference(const ObjectReference & source)
+	CMPINLINE ObjectReference(const ObjectReference & source) noexcept 
 	{
 		// Copy the reference from our source object
 		m_entry = source.m_entry;
@@ -76,8 +80,30 @@ public:
 		m_entry->ReferenceAdded();
 	}
 
+	// Custom move constructor
+	CMPINLINE ObjectReference(ObjectReference && other) noexcept : m_entry(std::move(other.m_entry))
+	{
+		// Assign the null object reference to the source object, since it no longer owns this reference
+		other.m_entry = Game::NullObjectReference;
+	}
+
+	// Custom move assignment operator
+	CMPINLINE ObjectReference & operator=(ObjectReference && other) noexcept
+	{
+		// Release any existing reference that we have
+		m_entry->ReferenceRemoved();
+
+		// Take the new object reference
+		m_entry = std::move(other.m_entry);
+
+		// Assign the null object reference to the source object, since it no longer owns this reference
+		other.m_entry = Game::NullObjectReference;
+
+		return *this;
+	}
+
 	// Destructor; remove reference to the object, triggering deallocation of the object register entry if necessary
-	CMPINLINE ~ObjectReference(void)
+	CMPINLINE ~ObjectReference(void) noexcept
 	{
 		// Decrement entry reference count.  This will cause a deallocation of the register entry if appropriate
 		m_entry->ReferenceRemoved();

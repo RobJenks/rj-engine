@@ -248,6 +248,12 @@ namespace Game
 		}
 	}
 
+	// Resets the null object reference every frame so that its reference count never goes out of bounds
+	void ResetNullObjectReference(void)
+	{
+		Game::NullObjectReference->RefCount = 0;
+	}
+
 	// Notifies the central object collection that the code of the specified object has changed.  Ensures that
 	// correct references are maintained in the central object collection
 	void NotifyChangeOfObjectInstanceCode(iObject *object, const std::string & old_code)
