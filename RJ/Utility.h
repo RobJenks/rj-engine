@@ -576,13 +576,13 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 
 
 // Convenience macros used to invoke debug functions on objects
-#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = command.Parameter(1); if (false) { } 
+#	define INIT_DEBUG_FN_TESTING(command)		std::string fn = StrLower(command.Parameter(1)); if (false) { } 
 #	define REGISTER_DEBUG_FN(fn_name, ...)										\
-						else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
-			command.SetSuccessOutput(concat("Function \"")(command.Parameter(1))("\" executed on object \"")(command.Parameter(0))("\"").str()); } 
+						else if (fn == StrLower(#fn_name)) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
+			command.SetSuccessOutput(concat("Function \"")(#fn_name)("\" executed on object \"")(command.Parameter(0))("\"").str()); } 
 #	define REGISTER_DEBUG_ACCESSOR_FN(fn_name, ...)										\
-						else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
-			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(command.Parameter(1))("(...) == ")(tmp_output_##fn_name).str()); } 
+						else if (fn == StrLower(#fn_name)) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
+			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); } 
 
 // Redirects debug processing based on the specified trigger command
 #	define REGISTER_DEBUG_FN_REDIRECT(trigger, redirect_to)										\
@@ -594,13 +594,13 @@ CMPINLINE void DbgValue(std::ostringstream & ss, const std::string & name, const
 
 
 // Convenience macros used to invoke debug functions on tiles
-#	define INIT_DEBUG_TILE_FN_TESTING(command)		std::string fn = command.Parameter(3); if (false) { } 
+#	define INIT_DEBUG_TILE_FN_TESTING(command)		std::string fn = StrLower(command.Parameter(3)); if (false) { } 
 #	define REGISTER_DEBUG_TILE_FN(fn_name, ...)										\
-						else if (fn == #fn_name) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
-			command.SetSuccessOutput(concat("Function \"")(command.Parameter(3))("\" executed on object \"")(command.Parameter(0))("\", tile ")(command.Parameter(2)).str()); } 
+						else if (fn == StrLower(#fn_name)) { fn_name(SINGLE_ARG(__VA_ARGS__));		\
+			command.SetSuccessOutput(concat("Function \"")(#fn_name)("\" executed on object \"")(command.Parameter(0))("\", tile ")(command.Parameter(2)).str()); } 
 #	define REGISTER_DEBUG_TILE_ACCESSOR_FN(fn_name, ...)										\
-						else if (fn == #fn_name) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
-			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").Tile(")(command.Parameter(2))(").")(command.Parameter(3))("(...) == ")(tmp_output_##fn_name).str()); } 
+						else if (fn == StrLower(#fn_name)) { std::string tmp_output_##fn_name = concat(StringValue(fn_name(SINGLE_ARG(__VA_ARGS__)))).str();		\
+			command.SetSuccessOutput(concat("Obj(")(command.Parameter(0))(").Tile(")(command.Parameter(2))(").")(#fn_name)("(...) == ")(tmp_output_##fn_name).str()); } 
 
 
 
