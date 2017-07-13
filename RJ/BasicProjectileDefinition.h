@@ -6,6 +6,7 @@
 #include "ErrorCodes.h"
 #include "VolumetricLine.h"
 #include "Damage.h"
+#include "AudioParameters.h"
 class Texture;
 class ModelBuffer;
 
@@ -35,7 +36,7 @@ public:
 	// Set the projectile speed
 	void									SetProjectileSpeed(float speed);
 
-	/// Set the projectile beam length that trails the projectile point
+	// Set the projectile beam length that trails the projectile point
 	void									SetProjectileBeamLength(float beam);
 
 	// Set or retrieve the projectile colour
@@ -45,6 +46,10 @@ public:
 	// Set or retrieve the projectile beam radius
 	CMPINLINE float							GetProjectileBeamRadius(void) const				{ return VolumetricLineData.GetLineRadius(); }
 	CMPINLINE void							SetProjectileBeamRadius(float radius)			{ VolumetricLineData.SetLineRadius(radius); }
+
+	// Audio item played when this projectile is launched
+	CMPINLINE AudioParameters				GetLaunchAudio(void) const						{ return m_launch_audio; }
+	CMPINLINE void							SetLaunchAudio(AudioParameters audio)			{ m_launch_audio = audio; }
 
 	// Add a new form of damage applied by this projectile
 	CMPINLINE void							AddDamageType(const Damage & damage)			{ m_damage.push_back(damage); }
@@ -90,6 +95,7 @@ protected:
 
 	DamageSet								m_damage;
 
+	AudioParameters							m_launch_audio;
 };
 
 

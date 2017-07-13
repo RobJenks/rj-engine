@@ -13,6 +13,7 @@ BasicProjectileDefinition::BasicProjectileDefinition(void)
 	SetProjectileColour(ONE_FLOAT4);
 	SetProjectileLifetime(3000U);
 	SetTexture(NULL);
+	SetLaunchAudio(AudioParameters::Null);
 }
 
 
@@ -26,7 +27,7 @@ void BasicProjectileDefinition::SetProjectileSpeed(float speed)
 	ProjectileBeamLengthMultiplier = (ProjectileBeamLength / Speed);
 }
 
-/// Set the projectile beam length that trails the projectile point
+// Set the projectile beam length that trails the projectile point
 void BasicProjectileDefinition::SetProjectileBeamLength(float beam)
 {
 	// Store the new desired beam length

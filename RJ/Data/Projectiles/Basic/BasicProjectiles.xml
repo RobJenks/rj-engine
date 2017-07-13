@@ -12,6 +12,7 @@
     <DamageSet>
       <Damage type="LASER" amount="2.0" />
     </DamageSet>
+    <LaunchAudio name="laser02" volume="1.0" />
   </BasicProjectileDefinition>
   
 </gamedata>

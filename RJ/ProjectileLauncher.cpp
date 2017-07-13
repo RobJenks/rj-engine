@@ -5,6 +5,8 @@
 #include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 #include "Ship.h"
+#include "CoreEngine.h"
+#include "AudioManager.h"
 
 #include "ProjectileLauncher.h"
 
@@ -99,7 +101,14 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		m_parent->GetSpaceEnvironment()->Projectiles.AddProjectile(m_basicprojdef, m_parent->GetID(), pos, orient, m_parent->PhysicsState.WorldMomentum);
 
 		// Play any relevant audio effect
-		
+		if (m_basicprojdef->GetLaunchAudio().Exists())
+		{
+			// TODO: Need a better way to apply volume_modifier.  E.g. if this projectile is being launched in space, and we are 
+			// in an environment, we should be using the AudioManager::ENV_SPACE_VOLUME_MODIFIER modifier in place of 1.0f
+			XMFLOAT3 pos_f;
+			XMStoreFloat3(&pos_f, pos);
+			Game::Engine->GetAudioManager()->Create3DInstance(m_basicprojdef->GetLaunchAudio().AudioId, pos_f, m_basicprojdef->GetLaunchAudio().Volume, 1.0f);
+		}
 
 		// We do not return a reference to basic projectiles since they are transient
 		return NULL;
@@ -144,7 +153,14 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		m_parent->AddCollisionExclusion(proj->GetID());
 
 		// Play any relevant audio effect
-
+		if (m_projectiledef->GetLaunchAudio().Exists())
+		{
+			// TODO: Need a better way to apply volume_modifier.  E.g. if this projectile is being launched in space, and we are 
+			// in an environment, we should be using the AudioManager::ENV_SPACE_VOLUME_MODIFIER modifier in place of 1.0f
+			XMFLOAT3 pos_f;
+			XMStoreFloat3(&pos_f, pos);
+			Game::Engine->GetAudioManager()->Create3DInstance(m_projectiledef->GetLaunchAudio().AudioId, pos_f, m_projectiledef->GetLaunchAudio().Volume, 1.0f);
+		}
 
 		// Move into the world, set full simulation state and return a pointer to the new projectile
 		proj->SetSimulationState(iObject::ObjectSimulationState::FullSimulation); 

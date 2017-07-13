@@ -20,6 +20,9 @@ public:
 	void											SetAudioId(Audio::AudioID audio_id);
 	void											SetVolume(float volume);
 
+	// Indicates whether the audio parameters reference a valid audio item
+	bool											Exists(void) const;
+
 	// Null audio 
 	static const AudioParameters					Null;
 };

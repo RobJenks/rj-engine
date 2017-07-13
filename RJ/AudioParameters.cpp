@@ -5,7 +5,7 @@
 
 
 // Initialise static variables
-const AudioParameters AudioParameters::Null(AudioManager::NULL_AUDIO, 0.0f);
+const AudioParameters AudioParameters::Null = AudioParameters();
 
 // Constructor
 AudioParameters::AudioParameters(Audio::AudioID audio_id, float volume) noexcept
@@ -38,6 +38,12 @@ void AudioParameters::SetAudioId(Audio::AudioID audio_id)
 // Set the volume for an AudioParameters object, including validation
 void AudioParameters::SetVolume(float volume)
 {
-	volume = clamp(volume, 0.0f, AudioManager::MAXIMUM_VOLUME);
+	Volume = clamp(volume, 0.0f, AudioManager::MAXIMUM_VOLUME);
+}
+
+// Indicates whether the audio parameters reference a valid audio item
+bool AudioParameters::Exists(void) const 
+{ 
+	return (AudioId != AudioManager::NULL_AUDIO); 
 }
 

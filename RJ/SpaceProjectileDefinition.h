@@ -5,6 +5,7 @@
 
 #include <string>
 #include "CompilerSettings.h"
+#include "AudioParameters.h"
 class SpaceProjectile;
 class Model;
 
@@ -51,6 +52,10 @@ public:
 	CMPINLINE float						GetDefaultLifetime(void) const				{ return m_defaultlifetime; }
 	CMPINLINE void						SetDefaultLifetime(float L)					{ m_defaultlifetime = L; }
 
+	// Audio item played when this projectile is launched
+	CMPINLINE AudioParameters			GetLaunchAudio(void) const					{ return m_launch_audio; }
+	CMPINLINE void						SetLaunchAudio(AudioParameters audio)		{ m_launch_audio = audio; }
+
 	// Creates and returns a new projectile based upon this definition
 	SpaceProjectile *					CreateProjectile(void) const;
 
@@ -75,6 +80,8 @@ protected:
 	ProjectileType								m_projtype;							// Type of projectile
 	float										m_defaultlifetime;					// The default lifetime (secs) for this projectile type to exist
 	LifetimeEndAction							m_lifeendaction;					// The action taken once projectile lifetime is exceeded
+
+	AudioParameters								m_launch_audio;						// Audio item to be played when this projectile is launched
 
 };
 

@@ -104,11 +104,17 @@ public:
 	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(const std::string & name, float base_volume, float volume_modifier) {
 		return CreateInstance(GetAudioID(name), base_volume, volume_modifier); 
 	}
+	CMPINLINE Audio::AudioInstanceIdentifier	CreateInstance(AudioParameters audio, float volume_modifier) {
+		return CreateInstance(audio.AudioId, audio.Volume, volume_modifier);
+	}
 
 	// Create a new 3D instance of an audio item, if possible.  Returns non-zero if instantiation fails
 	Audio::AudioInstanceIdentifier				Create3DInstance(Audio::AudioID id, const XMFLOAT3 & position, float base_volume, float volume_modifier);
 	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(const std::string & name, const XMFLOAT3 & position, float base_volume, float volume_modifier) {
 		return Create3DInstance(GetAudioID(name), position, base_volume, volume_modifier); 
+	}
+	CMPINLINE Audio::AudioInstanceIdentifier	Create3DInstance(AudioParameters audio, const XMFLOAT3 & position, float volume_modifier) {
+		return Create3DInstance(audio.AudioId, position, audio.Volume, volume_modifier);
 	}
 
 	// Return the base type volume modifier for a specific audio item type

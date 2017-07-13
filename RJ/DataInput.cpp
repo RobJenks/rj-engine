@@ -2098,6 +2098,10 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 		{
 			LoadDamageSet(child, proj->ProjectileDamageSet());
 		}
+		else if (hash == HashedStrings::H_LaunchAudio)
+		{
+			proj->SetLaunchAudio(LoadAudioParameters(child));
+		}
 	}
 
 	// Make sure we have all required fields
@@ -2169,6 +2173,10 @@ Result IO::Data::LoadSpaceProjectileDefinition(TiXmlElement *node)
 		{
 			val = child->GetText();
 			proj->SetLifetimeEndAction(SpaceProjectileDefinition::TranslateLifetimeEndActionFromString(val));
+		}
+		else if (hash == HashedStrings::H_LaunchAudio)
+		{
+			proj->SetLaunchAudio(LoadAudioParameters(child));
 		}
 	}
 
