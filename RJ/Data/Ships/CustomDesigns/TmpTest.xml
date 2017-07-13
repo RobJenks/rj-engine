@@ -3861,8 +3861,8 @@
         </complexshipsectioninstance>
         <complexshiptile code="lifesupport_huge_01">
             <basetiledata>
-                <Location x="5" y="5" z="0" />
-                <Size x="4" y="4" z="1" />
+                <Location x="5" y="5" z="1" />
+                <Size x="4" y="4" z="0" />
                 <Rotation>0</Rotation>
                 <CanConnect type="0" x="0" y="0" z="0" state="15" />
             </basetiledata>

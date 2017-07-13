@@ -728,7 +728,7 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keys[DIK_4])		{ SetEditorMode(UI_ShipBuilder::EditorMode::ObjectMode);			keyboard->LockKey(DIK_4); }
 	else if (keys[DIK_9])		{ SetEditorMode(UI_ShipBuilder::EditorMode::StructuralTestMode);	keyboard->LockKey(DIK_9); }
 
-	// Adjust which deck of the ship is being modified
+	// Adjust which level of the ship is being modified
 	if (keys[DIK_O])			{ MoveUpLevel();													keyboard->LockKey(DIK_O); }
 	else if (keys[DIK_L])		{ MoveDownLevel();													keyboard->LockKey(DIK_L); }
 
@@ -970,7 +970,7 @@ void UI_ShipBuilder::RenderEditorGrid(void)
 	const INTVECTOR3 &elsize = m_ship->GetElementSize();
 	
 	// Determine the local/world start and end positions
-	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_ship->GetDeckIndex(m_level)));
+	XMVECTOR local_start_pos = Game::ElementLocationToPhysicalPosition(INTVECTOR3(-EXTEND_GRID, -EXTEND_GRID, m_level));
 	XMVECTOR start_pos = XMVector3TransformCoord(local_start_pos, m_ship->GetZeroPointWorldMatrix());
 	XMVECTOR end_pos = XMVectorAdd(start_pos, XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 
 		Game::ElementLocationToPhysicalPosition(elsize.y + EXTEND_GRID + EXTEND_GRID)), m_ship->GetOrientationMatrix()));
