@@ -65,6 +65,7 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_gravityupdaterequired = true;
 	m_powerupdaterequired = true;
 	m_oxygenupdaterequired = true;
+	m_gravity_override = -1.0f;
 }
 
 
@@ -180,6 +181,17 @@ void iSpaceObjectEnvironment::PerformGravityUpdate(void)
 
 	// Reset the update flag now we are performing an update
 	m_gravityupdaterequired = false;
+
+	// If we have an override in place, simply apply it now and early-exit
+	if (m_gravity_override >= 0.0f)
+	{
+		ComplexShipElement *el = m_elements;
+		for (int i = 0; i < m_elementcount; ++i, ++el)
+		{
+			el->ChangeGravityStrength(m_gravity_override);
+		}
+		return;
+	}
 
 	// First, reset the gravity strength at every element to zero
 	ComplexShipElement *el = m_elements;
@@ -2774,6 +2786,8 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(TriggerElementDestruction, command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(BuildAllEnvironmentMaps)
 	REGISTER_DEBUG_FN(RevalidateEnvironmentMaps)
+	REGISTER_DEBUG_FN(OverrideLocalGravity, command.ParameterAsFloat(2))
+	REGISTER_DEBUG_FN(RemoveLocalGravityOverride)
 
 
 

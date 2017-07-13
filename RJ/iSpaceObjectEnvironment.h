@@ -565,6 +565,14 @@ protected:
 	void							PerformPowerUpdate(void);
 	void							PerformOxygenUpdate(void);
 
+	// Override that can be applied to the gravity level throughout the environment
+	CMPINLINE void					OverrideLocalGravity(float gravity) { m_gravity_override = clamp(gravity, 0.0f, 1000000.0f); UpdateGravity(); }
+	CMPINLINE void					RemoveLocalGravityOverride(void)	{ m_gravity_override = -1.0f; UpdateGravity(); }
+
+	// Override values for certain ship properties, useful mostly for debugging
+	// TODO: Remove at some point?
+	float							m_gravity_override;
+
 	// The set of all active collision events
 	std::vector<EnvironmentCollision>	m_collision_events;
 
