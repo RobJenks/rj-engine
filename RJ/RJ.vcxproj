@@ -361,6 +361,7 @@
     <ClCompile Include="ArticulatedModel.cpp" />
     <ClCompile Include="ArticulatedModelComponent.cpp" />
     <ClCompile Include="Attachment.cpp" />
+    <ClCompile Include="AudioParameters.cpp" />
     <ClCompile Include="AudioInstance.cpp" />
     <ClCompile Include="AudioInstanceObjectBinding.cpp" />
     <ClCompile Include="AudioItem.cpp" />
@@ -594,6 +595,7 @@
     <ClInclude Include="AudioInstanceObjectBinding.h" />
     <ClInclude Include="AudioItem.h" />
     <ClInclude Include="AudioManager.h" />
+    <ClInclude Include="AudioParameters.h" />
     <ClInclude Include="BasicColourDefinition.h" />
     <ClInclude Include="BasicProjectile.h" />
     <ClInclude Include="BasicProjectileDefinition.h" />

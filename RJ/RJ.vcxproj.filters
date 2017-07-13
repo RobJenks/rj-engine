@@ -664,6 +664,9 @@
     <ClCompile Include="AudioInstanceObjectBinding.cpp">
       <Filter>Engine\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="AudioParameters.cpp">
+      <Filter>Engine\Audio</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1538,6 +1541,9 @@
       <Filter>Engine\Audio</Filter>
     </ClInclude>
     <ClInclude Include="AudioInstanceObjectBinding.h">
+      <Filter>Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioParameters.h">
       <Filter>Engine\Audio</Filter>
     </ClInclude>
   </ItemGroup>

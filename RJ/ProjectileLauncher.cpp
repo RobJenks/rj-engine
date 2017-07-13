@@ -98,6 +98,9 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		if (!m_basicprojdef) return NULL;
 		m_parent->GetSpaceEnvironment()->Projectiles.AddProjectile(m_basicprojdef, m_parent->GetID(), pos, orient, m_parent->PhysicsState.WorldMomentum);
 
+		// Play any relevant audio effect
+		
+
 		// We do not return a reference to basic projectiles since they are transient
 		return NULL;
 	}
@@ -139,6 +142,9 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 		// Set collision exclusions with the "owner" object, which will then be removed a short time after launch
 		proj->AddCollisionExclusion(m_parent->GetID());
 		m_parent->AddCollisionExclusion(proj->GetID());
+
+		// Play any relevant audio effect
+
 
 		// Move into the world, set full simulation state and return a pointer to the new projectile
 		proj->SetSimulationState(iObject::ObjectSimulationState::FullSimulation); 

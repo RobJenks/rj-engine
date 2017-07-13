@@ -467,9 +467,9 @@ void AudioManager::GenerateNewEnvironmentObjectBindings(iSpaceObjectEnvironment 
 	for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
 		// Ignore any objects without ambient audio (which will be most of them)
-		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
+		Audio::AudioID audio_id = (*it)->GetAmbientAudio().AudioId;
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
-		float audio_base_volume = (*it)->GetAmbientAudioVolume();
+		float audio_base_volume = (*it)->GetAmbientAudio().Volume;
 
 		// Test whether this particular audio instance would be audible at its current distance
 		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract((*it)->GetPosition(), listener_pos)));
@@ -509,9 +509,9 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 	for (std::vector<iObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
 	{
 		// Ignore any objects without ambient audio (which will be most of them)
-		Audio::AudioID audio_id = (*it)->GetAmbientAudio();
+		Audio::AudioID audio_id = (*it)->GetAmbientAudio().AudioId;
 		if (audio_id == AudioManager::NULL_AUDIO) continue;
-		float audio_base_volume = (*it)->GetAmbientAudioVolume();
+		float audio_base_volume = (*it)->GetAmbientAudio().Volume;
 
 		// Test whether this particular audio instance would be audible at its current distance
 		float distsq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract((*it)->GetPosition(), listener_pos)));

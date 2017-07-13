@@ -20,6 +20,7 @@
 #include "HighlightEffect.h"
 #include "Faction.h"
 #include "AudioItem.h"
+#include "AudioParameters.h"
 #include "GameConsoleCommand.h"
 class Model;
 class ArticulatedModel;
@@ -326,14 +327,11 @@ public:
 	CMPINLINE VisibilityTestingModeType		GetVisibilityTestingMode(void) const						{ return m_visibilitytestingmode; }
 	CMPINLINE void							SetVisibilityTestingMode(VisibilityTestingModeType mode)	{ m_visibilitytestingmode = mode; }
 
-	// Ambient audio for the object, or 0 if none
-	CMPINLINE Audio::AudioID				GetAmbientAudio(void) const									{ return m_audio_id; }
-	CMPINLINE bool							HasAmbientAudio(void) const									{ return (m_audio_id != 0U); }
-	void									SetAmbientAudio(Audio::AudioID audio_id, float volume);
-	void									SetAmbientAudio(const std::string & audio_name, float volume);
+	// Ambient audio for the object
+	CMPINLINE AudioParameters				GetAmbientAudio(void) const									{ return m_ambient_audio; }
+	CMPINLINE bool							HasAmbientAudio(void) const									{ return (m_ambient_audio.AudioId != 0U); }
+	void									SetAmbientAudio(AudioParameters audio);
 
-	// Ambient audio properties
-	CMPINLINE float							GetAmbientAudioVolume(void) const { return m_audio_volume; }
 
 	// Methods to retrieve/update attachment details; first, attachments to a parent object, where we are the child
 	CMPINLINE iObject *							GetParentObject(void) const									{ return m_parentobject; }
@@ -579,9 +577,8 @@ protected:
 
 	VisibilityTestingModeType			m_visibilitytestingmode;		// The method used to test visibility of this object
 
-	Audio::AudioID					m_audio_id;						// Ambient audio for this object, or 0 if none
-	float								m_audio_volume;					// Base volume for the object ambient audio
-
+	AudioParameters						m_ambient_audio;				// Ambient audio for this object
+	
 	AttachmentSet						m_childobjects;					// Vector of any attachments from this object to child objects
 	int									m_childcount;					// The number of child attachments, if any)
 	iObject *							m_parentobject;					// A reference to our parent attachment, if any

@@ -59,8 +59,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_orientchanges = 0;
 	m_nocollision_count = 0;
 	m_hardness = 1.0f;
-	m_audio_id = AudioManager::NULL_INSTANCE_IDENTIFIER;
-	m_audio_volume = AudioManager::DEFAULT_VOLUME;
+	m_ambient_audio = AudioParameters::Null;
 
 	// Initialise this object with a unique ID
 	AssignNewUniqueID();
@@ -415,32 +414,10 @@ void iObject::SetCollisionSphereRadiusSq(float radius_sq)
 	m_collisionspheremarginradius = (m_collisionsphereradius * iObject::COLLISION_SPHERE_MARGIN);
 }
 
-// Set the ambient audio item for this object, or 0 for none
-void iObject::SetAmbientAudio(Audio::AudioID audio_id, float volume)
+// Set the ambient audio item for this object
+void iObject::SetAmbientAudio(AudioParameters audio)
 {
-	if (Game::Engine->GetAudioManager()->IsValidID(audio_id))
-	{
-		m_audio_id = audio_id;
-		if (volume >= 0.0f)
-		{
-			m_audio_volume = volume;
-		}
-		else
-		{
-			m_audio_volume = Game::Engine->GetAudioManager()->GetAudioItem(audio_id)->GetDefaultBaseVolume();
-		}
-	}
-	else
-	{
-		m_audio_id = AudioManager::NULL_AUDIO;
-		m_audio_volume = 0.0f;
-	}
-}
-
-// Set the ambient audio item for this object, or 0 if the specified audio item could not be located
-void iObject::SetAmbientAudio(const std::string & audio_name, float volume)
-{
-	SetAmbientAudio(Game::Engine->GetAudioManager()->GetAudioID(audio_name), volume);
+	m_ambient_audio = audio;
 }
 
 // Sets the object instance code.  Protected to ensure that data is kept in sync.  Will handle any notification of 

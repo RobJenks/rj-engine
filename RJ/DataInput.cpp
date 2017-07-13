@@ -495,12 +495,8 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
 	else if (hash == HashedStrings::H_CollisionMode)				object->SetCollisionMode(Game::TranslateCollisionModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_CollisionOBB)					LoadCollisionOBB(object, node, object->CollisionOBB, true);
-	else if (hash == HashedStrings::H_AmbientAudio)
-	{
-		const char *audio_name = node->Attribute("name");
-		const char *audio_volume = node->Attribute("volume");
-		if (audio_name) object->SetAmbientAudio(audio_name, (audio_volume ? (float)atof(audio_volume) : -1.0f));
-	}
+	else if (hash == HashedStrings::H_AmbientAudio)					object->SetAmbientAudio(LoadAudioParameters(node));
+
 
 	// Otherwise check against any superclasses
 	else if (LoadDamageableEntityData(node, hash, object))			return true;
@@ -4123,6 +4119,17 @@ Result IO::Data::LoadAudioItem(TiXmlElement *node)
 	return Game::Engine->GetAudioManager()->RegisterSound(name, type, filename, loop, default_volume, false);
 }
 
+// Load a set of audio parameters.  Will return AudioParameters::Null if any required data is missing or invalid
+AudioParameters IO::Data::LoadAudioParameters(TiXmlElement *node)
+{
+	if (!node) return AudioParameters::Null;
+
+	const char *audio_name = node->Attribute("name");
+	const char *audio_volume = node->Attribute("volume");
+	if (!audio_name) return AudioParameters::Null;
+		
+	return AudioParameters(audio_name, (audio_volume ? (float)atof(audio_volume) : 0.0f));
+}
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)
