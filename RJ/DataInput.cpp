@@ -649,6 +649,12 @@ bool IO::Data::LoadShipData(TiXmlElement *node, HashVal hash, Ship *object)
 
 }
 
+// Loads data for an object implementing iContainsTurrets
+bool IO::Data::LoadHardpointContainerData(TiXmlElement *node, HashVal hash, iContainsHardpoints *object)
+{
+	return false;
+}
+
 Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 {
 	// Create a new SimpleShip instance to hold the data
@@ -2388,12 +2394,10 @@ Hardpoint *IO::Data::LoadHardpoint(TiXmlElement *node)
 	for (child; child; child=child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == "position") {				
-			// Read position data from this node
+		if (key == "position") {			
 			hp->Position = IO::GetVector3FromAttr(child);
 		}
 		else if (key == "orientation") {
-			// Read the orientation D3DXQUATERNION from this node
 			hp->Orientation = IO::GetQuaternionFromAttr(child);
 		}
 	}

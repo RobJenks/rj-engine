@@ -11,7 +11,6 @@
 #include "ObjectReference.h"
 #include "EntityAI.h"
 #include "iContainsHardpoints.h"
-#include "iContainsTurrets.h"
 #include "Equip.h"
 #include <vector>
 class Hardpoint;
@@ -34,7 +33,7 @@ public:
 // Main ship class
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class Ship : public ALIGN16<Ship>, public iSpaceObject, public EntityAI, public iContainsHardpoints, public iContainsTurrets
+class Ship : public ALIGN16<Ship>, public iSpaceObject, public EntityAI, public iContainsHardpoints
 {
 public:
 

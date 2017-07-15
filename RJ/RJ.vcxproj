@@ -456,7 +456,6 @@
     <ClCompile Include="iActiveObject.cpp" />
     <ClCompile Include="EntityAI.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
-    <ClCompile Include="iContainsTurrets.cpp" />
     <ClCompile Include="InputLayoutDesc.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
@@ -736,7 +735,6 @@
     <ClInclude Include="iAcceptsConsoleCommands.h" />
     <ClInclude Include="iActiveObject.h" />
     <ClInclude Include="EntityAI.h" />
-    <ClInclude Include="iContainsTurrets.h" />
     <ClInclude Include="InputLayoutDesc.h" />
     <ClInclude Include="iSpaceObjectEnvironment.h" />
     <ClInclude Include="iContainsComplexShipTiles.h" />

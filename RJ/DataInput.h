@@ -20,6 +20,7 @@ class iStaticObject;
 class iActiveObject;
 class iSpaceObject;
 class iEnvironmentObject;
+class iContainsHardpoints;
 class Model;
 class ArticulatedModel;
 class Hardpoint;
@@ -61,6 +62,7 @@ namespace IO { namespace Data {
 	bool LoadEnvironmentObjectData(TiXmlElement *node, HashVal hash, iEnvironmentObject *object);			// Loads iEnvironmentObject class data
 	bool LoadSpaceObjectEnvironmentData(TiXmlElement *node, HashVal hash, iSpaceObjectEnvironment *object);	// Loads iSpaceObjectEnvironment data
 	bool LoadShipData(TiXmlElement *node, HashVal hash, Ship *object);										// Loads base ship class data
+	bool LoadHardpointContainerData(TiXmlElement *node, HashVal hash, iContainsHardpoints *object);			// Load iContainsHardpoints class data
 
 	// Load final class data, for non-inherited classes
 	Result LoadSimpleShip(TiXmlElement *root);																// Loads simple ship data

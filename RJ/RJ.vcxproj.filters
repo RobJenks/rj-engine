@@ -478,9 +478,6 @@
     <ClCompile Include="iContainsHardpoints.cpp">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClCompile>
-    <ClCompile Include="iContainsTurrets.cpp">
-      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
-    </ClCompile>
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
@@ -1258,9 +1255,6 @@
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="iContainsHardpoints.h">
-      <Filter>Objects\Object Hierarchy\Interfaces</Filter>
-    </ClInclude>
-    <ClInclude Include="iContainsTurrets.h">
       <Filter>Objects\Object Hierarchy\Interfaces</Filter>
     </ClInclude>
     <ClInclude Include="ShaderManager.h">

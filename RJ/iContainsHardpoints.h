@@ -6,6 +6,7 @@
 class Hardpoint;
 #include "Hardpoints.h"
 #include "CompilerSettings.h"
+#include "TurretController.h"
 
 // Class has no special alignment requirements
 class iContainsHardpoints
@@ -30,6 +31,8 @@ public:
 	// if a more general update based on all hardpoints is required (e.g. after first-time initialisation)
 	virtual void					HardpointChanged(Hardpoint *hp)				= 0;
 
+	// This object contains a turret controller to manage simulation and AI of all its turrets
+	TurretController				TurretController;
 
 	// Default destructor
 	~iContainsHardpoints(void);
