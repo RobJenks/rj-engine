@@ -184,9 +184,6 @@
     <ClCompile Include="HpTorpedoLauncher.cpp">
       <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
     </ClCompile>
-    <ClCompile Include="HpWeapon.cpp">
-      <Filter>Equipment\Equipment classes\Weapon</Filter>
-    </ClCompile>
     <ClCompile Include="iActiveObject.cpp">
       <Filter>Objects\Object Hierarchy</Filter>
     </ClCompile>
@@ -664,6 +661,9 @@
     <ClCompile Include="AudioParameters.cpp">
       <Filter>Engine\Audio</Filter>
     </ClCompile>
+    <ClCompile Include="HpTurret.cpp">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -884,9 +884,6 @@
     </ClInclude>
     <ClInclude Include="HpTorpedoLauncher.h">
       <Filter>Equipment\Equipment classes\Torpedo Launcher</Filter>
-    </ClInclude>
-    <ClInclude Include="HpWeapon.h">
-      <Filter>Equipment\Equipment classes\Weapon</Filter>
     </ClInclude>
     <ClInclude Include="iAcceptsConsoleCommands.h">
       <Filter>Console</Filter>
@@ -1539,6 +1536,9 @@
     </ClInclude>
     <ClInclude Include="AudioParameters.h">
       <Filter>Engine\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="HpTurret.h">
+      <Filter>Equipment\Equipment classes\Weapon</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

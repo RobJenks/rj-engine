@@ -8,15 +8,15 @@
 #include "HpMissileLauncher.h"
 #include "HpShield.h"
 #include "HpTorpedoLauncher.h"
-#include "HpWeapon.h"
+#include "HpTurret.h"
 
 using namespace std;
 
 Equip::Class Hp::GetType(const string &typestring)
 {
 	const string s = StrLower(typestring);
-	if (s == "weapon")
-		return Equip::Class::Weapon;
+	if (s == "turret")
+		return Equip::Class::Turret;
 	else if (s == "engine")
 		return Equip::Class::Engine;
 	else if (s == "missilelauncher")
@@ -38,7 +38,7 @@ std::string Hp::ToString(const Equip::Class cls)
 		case Equip::Class::MissileLauncher:			return "missilelauncher";
 		case Equip::Class::Shield:					return "shield";
 		case Equip::Class::TorpedoLauncher:			return "torpedolauncher";
-		case Equip::Class::Weapon:					return "weapon";
+		case Equip::Class::Turret:					return "turret";
 		default:									return "";
 	}
 }
@@ -58,8 +58,8 @@ Hardpoint *Hp::Create(Equip::Class type)
 		case Equip::Class::TorpedoLauncher:
 			return (new HpTorpedoLauncher());
 			break;
-		case Equip::Class::Weapon:
-			return (new HpWeapon());
+		case Equip::Class::Turret:
+			return (new HpTurret());
 			break;
 		default:
 			return NULL;

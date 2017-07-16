@@ -452,7 +452,7 @@
     <ClCompile Include="HpMissileLauncher.cpp" />
     <ClCompile Include="HpShield.cpp" />
     <ClCompile Include="HpTorpedoLauncher.cpp" />
-    <ClCompile Include="HpWeapon.cpp" />
+    <ClCompile Include="HpTurret.cpp" />
     <ClCompile Include="iActiveObject.cpp" />
     <ClCompile Include="EntityAI.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
@@ -731,7 +731,7 @@
     <ClInclude Include="HpMissileLauncher.h" />
     <ClInclude Include="HpShield.h" />
     <ClInclude Include="HpTorpedoLauncher.h" />
-    <ClInclude Include="HpWeapon.h" />
+    <ClInclude Include="HpTurret.h" />
     <ClInclude Include="iAcceptsConsoleCommands.h" />
     <ClInclude Include="iActiveObject.h" />
     <ClInclude Include="EntityAI.h" />

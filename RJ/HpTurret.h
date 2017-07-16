@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __HpWeaponH__
-#define __HpWeaponH__
+#ifndef __HpTurretH__
+#define __HpTurretH__
 
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
@@ -11,15 +11,15 @@ class Weapon;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class HpWeapon : public ALIGN16<HpWeapon>, public Hardpoint
+class HpTurret : public ALIGN16<HpTurret>, public Hardpoint
 {
 public:
 
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
-	USE_ALIGN16_ALLOCATORS(HpWeapon)
+	USE_ALIGN16_ALLOCATORS(HpTurret)
 
 	// Returns the type of this hardpoint subclass
-	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Weapon; }
+	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Turret; }
 
 	void							RecalculateHardpointData(void);	// Recalculates hardpoint stats based on mounted equipment
 	
@@ -27,9 +27,9 @@ public:
 	void							MountWeapon(Weapon *weapon);	// Mounts a new missile launcher on this hardpoint
 
 	// Virtual override method to clone the subclass when called through the base class
-	virtual HpWeapon*				Clone() const 
+	virtual HpTurret *				Clone() const 
 	{
-		HpWeapon *hp = new HpWeapon(*this);				// Clone the hardpoint and all fields
+		HpTurret *hp = new HpTurret(*this);				// Clone the hardpoint and all fields
 		hp->MountEquipment(NULL);						// Remove any reference to mounted equipment; we only clone the HP, not the equipment on it
 		return hp;
 	}
@@ -45,15 +45,15 @@ public:
 	virtual Result					ReadFromXML(TiXmlElement *node, HashVal hashed_key);
 
 
-	HpWeapon(void);
-	~HpWeapon(void);
+	HpTurret(void);
+	~HpTurret(void);
 
 private:
 	Weapon *			m_Weapon;				// Pointer to the currently-mounted missile launcher
 
 };
 
-CMPINLINE Weapon *HpWeapon::GetWeapon() { return m_Weapon; }
+CMPINLINE Weapon *HpTurret::GetWeapon() { return m_Weapon; }
 
 
 #endif

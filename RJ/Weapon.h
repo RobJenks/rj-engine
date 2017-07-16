@@ -14,7 +14,7 @@ class Weapon : public Equipment
 {
 public:
 	// Returns the type of this equipment subclass
-	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Weapon; }
+	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Turret; }
 
 	Weapon(void);
 	~Weapon(void);

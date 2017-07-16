@@ -2,24 +2,24 @@
 #include "Hardpoint.h"
 #include "Weapon.h"
 
-#include "HpWeapon.h"
+#include "HpTurret.h"
 
 
-HpWeapon::HpWeapon(void)
+HpTurret::HpTurret(void)
 {
 }
 
-void HpWeapon::RecalculateHardpointData()
+void HpTurret::RecalculateHardpointData()
 {
 }
 
 // Virtual method to allow mounting of class-specific equipment by a call to the base class instance
-void HpWeapon::MountEquipment(Equipment *e) 
+void HpTurret::MountEquipment(Equipment *e) 
 { 
-	if (!e || (e && e->GetType() == Equip::Class::Weapon)) this->MountWeapon((Weapon*)e); 
+	if (!e || (e && e->GetType() == Equip::Class::Turret)) this->MountWeapon((Weapon*)e); 
 }
 
-void HpWeapon::MountWeapon(Weapon *weapon)
+void HpTurret::MountWeapon(Weapon *weapon)
 {
 	// Mount the equipment even if it is NULL; mounting a NULL item is essentially unmounting the equiment
 	m_Weapon = weapon;
@@ -30,7 +30,7 @@ void HpWeapon::MountWeapon(Weapon *weapon)
 
 // Read hardpoint content in from XML; must be implemented by child classes.  Accepts the hashed item key as a parameter
 // to avoid duplication of effort.  All children should fall back to Hardpoint::ReadBaseHardpointXML if they cannot process an item themselves
-Result HpWeapon::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
+Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 {
 	if (!node) return ErrorCodes::CannotLoadHardpointDataFromNullResources;
 
@@ -48,6 +48,6 @@ Result HpWeapon::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 }
 
 
-HpWeapon::~HpWeapon(void)
+HpTurret::~HpTurret(void)
 {
 }
