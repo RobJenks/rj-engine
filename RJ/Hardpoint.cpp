@@ -3,6 +3,7 @@
 #include "iContainsHardpoints.h"
 #include "Hardpoints.h"
 #include "CompilerSettings.h"
+#include "FileInput.h"
 
 #include "Hardpoint.h"
 
@@ -67,3 +68,23 @@ iContainsHardpoints *Hardpoint::GetParentHPObject(void)
 	Hardpoints *hp = this->GetParent();
 	return (hp ? hp->GetHPParent() : NULL);
 }
+
+// Load an item of common hardpoint data from XML.  Accepts the hashed item key as a parameter
+// to avoid duplication of effort.  Returns a result indicating whether the data was accepted
+Result Hardpoint::ReadBaseHardpointXML(TiXmlElement *node, HashVal hashed_key)
+{
+	if (!node) return ErrorCodes::CannotLoadHardpointDataFromNullResources;
+	
+	// Test against all base class properties
+	if (hashed_key == HashedStrings::H_Position)			Position = IO::GetVector3FromAttr(node);
+	else if (hashed_key == HashedStrings::H_Orientation)	Orientation = IO::GetQuaternionFromAttr(node);
+	
+	else return ErrorCodes::CouldNotLoadUnrecognisedHardpointProperty;
+
+	// If we reach this point we DID successfully process the element
+	return ErrorCodes::NoError;
+}
+
+
+
+

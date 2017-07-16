@@ -425,6 +425,8 @@ namespace ErrorCodes {
 	const Result		InvalidDataEncounteredInDRSet					= 2688;
 	const Result		CannotLoadElementStateDefinitionFromNullData	= 2689;
 	const Result		CouldNotAllocateMemoryForFactionDispMatrix		= 2690;
+	const Result		CannotLoadHardpointDataFromNullResources		= 2691;
+	const Result		CouldNotLoadUnrecognisedHardpointProperty		= 2692;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

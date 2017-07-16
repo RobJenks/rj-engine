@@ -2,6 +2,7 @@
 #ifndef __HPH__
 #define __HPH__
 
+#include "ErrorCodes.h"
 #include "Equip.h"
 #include <string>
 using namespace std;

@@ -3,6 +3,7 @@
 #include "math.h"
 #include "FastMath.h"
 #include "Utility.h"
+#include "Logging.h"
 #include "iContainsHardpoints.h"
 #include "Engine.h"
 #include "SpaceEmitter.h"
@@ -308,6 +309,23 @@ void HpEngine::DecrementTargetThrust(void)
 	SetTargetThrust(this->TargetThrust - increment);
 }
 
+// Read hardpoint content in from XML; must be implemented by child classes.  Accepts the hashed item key as a parameter
+// to avoid duplication of effort.  All children should fall back to Hardpoint::ReadBaseHardpointXML if they cannot process an item themselves
+Result HpEngine::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
+{
+	if (!node) return ErrorCodes::CannotLoadHardpointDataFromNullResources;
 
+	// Process any class-specific properties
+	if (false) ; /* None to be processed */
+
+	// Otherwise pass back to the base class
+	else
+	{
+		return ReadBaseHardpointXML(node, hashed_key);
+	}
+
+	// We processed this element in the subclass logic above
+	return ErrorCodes::NoError;
+}
 
 

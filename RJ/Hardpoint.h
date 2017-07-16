@@ -48,6 +48,9 @@ public:
 	iObject * 						GetParentObject(void);
 	iContainsHardpoints  *			GetParentHPObject(void);
 
+	// Read hardpoint content in from XML; must be implemented by child classes.  Accepts the hashed item key as a parameter
+	// to avoid duplication of effort.  All children should fall back to Hardpoint::ReadBaseHardpointXML if they cannot process an item themselves
+	virtual Result					ReadFromXML(TiXmlElement *node, HashVal hashed_key) = 0;
 
 	// Default constructor / copy constructor / assignment operator / destructor
 	Hardpoint(void);
@@ -57,6 +60,10 @@ public:
 
 
 protected:
+
+	// Load an item of common hardpoint data from XML.  Accepts the hashed item key as a parameter
+	// to avoid duplication of effort with the child hardpoint class.  Returns a result indicating whether the data was accepted
+	Result 							ReadBaseHardpointXML(TiXmlElement *node, HashVal hashed_key);
 
 	// The parent hardpoints collection
 	Hardpoints *					m_parent;

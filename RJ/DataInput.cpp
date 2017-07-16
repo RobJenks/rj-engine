@@ -2389,16 +2389,19 @@ Hardpoint *IO::Data::LoadHardpoint(TiXmlElement *node)
 	hp->Code = c_code;
 
 	// * If we have got this far then we know that the required code + type attributes exist, so process child nodes
-	string key, val;
+	string key; HashVal hash; Result result;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == "position") {			
-			hp->Position = IO::GetVector3FromAttr(child);
-		}
-		else if (key == "orientation") {
-			hp->Orientation = IO::GetQuaternionFromAttr(child);
+		hash = HashString(key);
+
+		result = hp->ReadFromXML(child, hash);
+		if (result != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_WARN << "Error encountered when loading hardpoint \"" << c_code << "\"";
+			if (result == ErrorCodes::CouldNotLoadUnrecognisedHardpointProperty) Game::Log << "; ignoring unrecognised property \"" << child->Value() << "\"";
+			Game::Log << " (" << result << ")\n";
 		}
 	}
 

@@ -68,6 +68,10 @@ public:
 	// Virtual override method to mount equipment on this hardpoint, if called from the base class
 	virtual void					MountEquipment(Equipment *e);
 
+	// Read hardpoint content in from XML; must be implemented by child classes.  Accepts the hashed item key as a parameter
+	// to avoid duplication of effort.  All children should fall back to Hardpoint::ReadBaseHardpointXML if they cannot process an item themselves
+	virtual Result					ReadFromXML(TiXmlElement *node, HashVal hashed_key);
+
 	HpEngine(void);
 	~HpEngine(void);
 	HpEngine(const HpEngine &H);
