@@ -6,6 +6,8 @@
 
 
 HpTurret::HpTurret(void)
+	:
+	m_yaw_limited(false), m_yawmin(-0.15f), m_yawmax(+0.15f), m_pitchmin(-0.15f), m_pitchmax(+0.15f)
 {
 }
 
@@ -28,6 +30,23 @@ void HpTurret::MountWeapon(Weapon *weapon)
 	RecalculateHardpointData();
 }
 
+// Set the hardpoint yaw limit
+void HpTurret::SetYawLimit(float yaw_min, float yaw_max)
+{
+	m_yaw_limited = true;
+	if (yaw_min > yaw_max) std::swap(yaw_min, yaw_max);
+	m_yawmin = yaw_min;
+	m_yawmax = yaw_max;
+}
+
+// Set the hardpoint pitch limit
+void HpTurret::SetPitchLimit(float pitch_min, float pitch_max)
+{
+	if (pitch_min > pitch_max) std::swap(pitch_min, pitch_max);
+	m_pitchmin = pitch_min;
+	m_pitchmax = pitch_max;
+}
+
 // Read hardpoint content in from XML; must be implemented by child classes.  Accepts the hashed item key as a parameter
 // to avoid duplication of effort.  All children should fall back to Hardpoint::ReadBaseHardpointXML if they cannot process an item themselves
 Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
@@ -35,7 +54,20 @@ Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 	if (!node) return ErrorCodes::CannotLoadHardpointDataFromNullResources;
 
 	// Process any class-specific properties
-	if (false); /* None to be processed */
+	if (hashed_key == HashedStrings::H_YawLimit) {
+		const char *cmin = node->Attribute("min");
+		const char *cmax = node->Attribute("max");
+		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
+		
+		SetYawLimit(atof(cmin), atof(cmax));
+	}
+	else if (hashed_key == HashedStrings::H_PitchLimit) {
+		const char *cmin = node->Attribute("min");
+		const char *cmax = node->Attribute("max");
+		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
+
+		SetPitchLimit(atof(cmin), atof(cmax));
+	}
 
 	// Otherwise pass back to the base class
 	else

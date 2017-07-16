@@ -44,6 +44,7 @@
     <Hardpoint code="hpweapon01" type="Weapon">
       <Position x="-2.5000000" y="0.000000" z="1.000000" />
       <Orientation w="0.000000" x="0.000000" y="0.000000" z="1.000000" />
+      <PitchLimit min="-0.2" max="0.2" />
     </Hardpoint>
 
     <DefaultLoadout>TESTSHIP_LOADOUT1</DefaultLoadout>

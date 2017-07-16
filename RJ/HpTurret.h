@@ -26,6 +26,20 @@ public:
 	CMPINLINE Weapon*				GetWeapon(void);				// Returns a pointer to the currently-mounted missile launcher (if there is one)
 	void							MountWeapon(Weapon *weapon);	// Mounts a new missile launcher on this hardpoint
 
+	// Pitch and yaw limits imposed by the hardpoint
+	CMPINLINE bool					IsYawLimited(void) const { return m_yaw_limited; }
+	CMPINLINE float					GetMinYawLimit(void) const { return m_yawmin; }
+	CMPINLINE float					GetMaxYawLimit(void) const { return m_yawmax; }
+	CMPINLINE float					GetMinPitchLimit(void) const { return m_yawmin; }
+	CMPINLINE float					GetMaxPitchLimit(void) const { return m_yawmax; }
+
+	// Set or remove the hardpoint yaw limit
+	void							SetYawLimit(float yaw_min, float yaw_max);
+	CMPINLINE void					RemoveYawLimit(void) { m_yaw_limited = false; }
+
+	// Set the hardpoint pitch limit
+	void							SetPitchLimit(float pitch_min, float pitch_max);
+
 	// Virtual override method to clone the subclass when called through the base class
 	virtual HpTurret *				Clone() const 
 	{
@@ -49,7 +63,15 @@ public:
 	~HpTurret(void);
 
 private:
-	Weapon *			m_Weapon;				// Pointer to the currently-mounted missile launcher
+	Weapon *			m_Weapon;				// Pointer to the currently-mounted weapon
+
+
+	// Turret hardpoints may impose spatial restrictions, in addition to those defined by the turret itself
+	// In these cases the most restrictive intersection of the constraints is used
+	bool				m_yaw_limited;
+	float				m_yawmin, m_yawmax;
+	float				m_pitchmin, m_pitchmax;
+
 
 };
 

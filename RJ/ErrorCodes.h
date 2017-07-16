@@ -427,6 +427,7 @@ namespace ErrorCodes {
 	const Result		CouldNotAllocateMemoryForFactionDispMatrix		= 2690;
 	const Result		CannotLoadHardpointDataFromNullResources		= 2691;
 	const Result		CouldNotLoadUnrecognisedHardpointProperty		= 2692;
+	const Result		HardpointElementMissingRequiredAttributes		= 2693;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

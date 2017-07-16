@@ -225,6 +225,8 @@ namespace HashedStrings
 	DefineHash(H_ComponentTag, "componenttag");
 	DefineHash(H_Yaw, "yaw");
 	DefineHash(H_Pitch, "pitch");
+	DefineHash(H_YawLimit, "yawlimit");
+	DefineHash(H_PitchLimit, "pitchlimit");
 	DefineHash(H_Range, "range");
 	DefineHash(H_ProjectileLauncher, "projectilelauncher");
 	DefineHash(H_Projectile, "projectile");
