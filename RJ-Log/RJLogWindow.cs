@@ -8,11 +8,17 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace RJ_Log
 {
     public partial class RJLogWindow : Form
     {
+        [DllImport("user32.dll")] static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")] static extern IntPtr SetActiveWindow(IntPtr hWnd);
+        [DllImport("user32.dll")] static extern IntPtr SetFocus(IntPtr hWnd);
+        [DllImport("user32.dll")] static extern IntPtr FindWindow(string sClass, string sWindow);
+
         private static readonly String LOG_FILENAME = "log.txt";
         private static readonly int WINDOW_HEIGHT = 320;
         private static readonly int REMOVE_WINDOW_MARGIN = 10;
@@ -26,15 +32,19 @@ namespace RJ_Log
         private FileSystemWatcher watcher = null;
         private String logDirectory = null;
         private String logFile = null;
+        private String parentWindowClass = null;
+        private String parentWindowName = null;
         private bool updateRequired = false;
         private long updateCount = 0L;
 
-        public RJLogWindow(String logDirectory)
+        public RJLogWindow(Program.ArgumentData argumentData)
         {
             InitializeComponent();
 
-            this.logDirectory = logDirectory;
+            this.logDirectory = argumentData.logDirectory;
             this.logFile = (logDirectory + "\\" + LOG_FILENAME);
+            this.parentWindowClass = argumentData.parentWindowClass;
+            this.parentWindowName = argumentData.parentWindowName;
         }
 
         private void RJLogWindow_Load(object sender, EventArgs e)
@@ -57,7 +67,18 @@ namespace RJ_Log
             this.Height = WINDOW_HEIGHT;
             this.Top = (workingArea.Height - this.Height) + REMOVE_WINDOW_MARGIN;
 
-
+            // If we have a valid parent hwnd, focus that window now so it is on top of us
+            if (parentWindowClass != null && parentWindowClass != String.Empty && 
+                parentWindowName != null && parentWindowName != String.Empty)
+            {
+                IntPtr hwnd = FindWindow(parentWindowClass, parentWindowName);
+                if (hwnd != null && hwnd != IntPtr.Zero)
+                {
+                    SetFocus(hwnd);
+                    SetActiveWindow(hwnd);
+                    SetForegroundWindow(hwnd);
+                }
+            }
         }
 
         private void InitialiseFilesystemListeners()

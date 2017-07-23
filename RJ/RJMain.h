@@ -24,6 +24,10 @@ class RJMain
 
 public:
 
+	// Application window properties
+	static const char *	APPLICATION_WINDOW_CLASSNAME;
+	static const char *	APPLICATION_WINDOW_WINDOWNAME;
+
 	// Default constructor
 	RJMain(void);
 
@@ -32,6 +36,7 @@ public:
 
 	// Creates the main application window
 	HWND				CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc);
+	void				FocusApplication(void);
 
 	// Retrieve data on the executable and working directory
 	Result				RetrieveExecutableData(void);

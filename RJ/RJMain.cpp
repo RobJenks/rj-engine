@@ -140,6 +140,10 @@
 #include "RJMain.h"
 
 
+// Application window properties
+const char * RJMain::APPLICATION_WINDOW_CLASSNAME = "RJ-D3D11-Main";
+const char * RJMain::APPLICATION_WINDOW_WINDOWNAME = "RJ-D3D11-Main";
+
 // Default constructor
 RJMain::RJMain(void)
 {
@@ -1082,7 +1086,7 @@ HWND RJMain::CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc)
 	wc.hCursor = LoadCursor(0, IDC_ARROW);
 	wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wc.lpszMenuName = 0;
-	wc.lpszClassName = TEXT("RJ-D3D11-Main");
+	wc.lpszClassName = TEXT(APPLICATION_WINDOW_CLASSNAME);
 	wc.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 
 	if (!RegisterClassEx(&wc))
@@ -1093,7 +1097,7 @@ HWND RJMain::CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc)
 	}
 
 	HWND hwnd = 0;
-	hwnd = ::CreateWindowEx(m_wndstyleex, TEXT("RJ-D3D11-Main"), TEXT("RJ-D3D11-Main"),
+	hwnd = ::CreateWindowEx(m_wndstyleex, TEXT(APPLICATION_WINDOW_CLASSNAME), TEXT(APPLICATION_WINDOW_WINDOWNAME),
 		m_wndstyle, 0, 0, Game::FullWindowSize.x, Game::FullWindowSize.y,
 		0 /*parent hwnd*/, 0 /* menu */, hInstance, 0 /*extra*/);
 
@@ -1284,6 +1288,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	Game::Log.FlushAllStreams();
 	Game::Log.DisableFlushAfterEveryOperation();
 
+	// Bring the application window into focus now that we have initialised
+	FocusApplication();
+
 	return ErrorCodes::NoError;
 }
 
@@ -1344,12 +1351,6 @@ Result RJMain::InitialiseWindow()
 	// Attempt to create the main window with these parameters
 	m_hwnd = CreateMainWindow(m_hinstance, m_wndproc);
 	if (!m_hwnd) return ErrorCodes::CouldNotInitialiseWindow;
-	
-	// Bring the application window into focus, if it isn't already
-	// TODO: Windows only
-	SetFocus(m_hwnd);
-	SetActiveWindow(m_hwnd);
-	SetForegroundWindow(m_hwnd);
 
 	// Return success
 	Game::Log << LOG_INFO << "Game window initialised successfully\n";
@@ -1545,6 +1546,15 @@ void RJMain::UpdateRegions(void)
 {
 	// Re-centre the immediate region on the player
 	D::Regions::Immediate->RegionCentreMoved(Game::CurrentPlayer->GetPosition());
+}
+
+void RJMain::FocusApplication(void)
+{
+	// Bring the application window into focus, if it isn't already
+	// TODO: Windows only
+	SetFocus(m_hwnd);
+	SetActiveWindow(m_hwnd);
+	SetForegroundWindow(m_hwnd);
 }
 
 // Terminate all key game data structures (e.g. the space object Octree)

@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "TestApplication.h"
+#include "RJMain.h"
 
 #include "RJ.h"
 
@@ -124,8 +125,11 @@ int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )
 		std::string base_path = "C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ";
 		std::string process_name = concat(base_path)("\\RJ-Log\\bin\\Release\\RJ-Log.exe").str();
 		std::string process_args = concat
-			("\"")(process_name)("\" ")					// args[0] == process name
-			("\"")(base_path)("\\RJ\"").str();			// args[1] == location of log directory
+			("\"")(process_name)("\" ")												// args[0] == process name
+			("-logDirectory \"")(base_path)("\\RJ\" ")								// args[1..2] == location of log directory
+			("-parentWindowClass \"")(RJMain::APPLICATION_WINDOW_CLASSNAME)("\" ")	// args[3..4] == parent window classname
+			("-parentWindowName \"")(RJMain::APPLICATION_WINDOW_WINDOWNAME)("\" ")	// args[5..6] == parent window name
+			.str();
 
 		if (CreateProcess(process_name.c_str(), (LPSTR)process_args.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &debug_log_startup_info, &debug_log_process_info) == TRUE)
 		{
