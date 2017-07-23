@@ -14,6 +14,7 @@ namespace RJ_Log
     public partial class RJLogWindow : Form
     {
         private static readonly String LOG_FILENAME = "log.txt";
+        private static readonly int WINDOW_HEIGHT = 320;
 
         private static readonly Color COLOUR_ERROR = Color.Red;
         private static readonly Color COLOUR_WARNING = Color.Yellow;
@@ -37,10 +38,22 @@ namespace RJ_Log
 
         private void RJLogWindow_Load(object sender, EventArgs e)
         {
+            InitialiseWindow();
             InitialiseFilesystemListeners();
             InitialiseLogWatcherComponents();
             ScrollToEnd();
             SetUpdateRequired();
+        }
+
+        private void InitialiseWindow()
+        {
+            Rectangle workingArea = Screen.GetWorkingArea(this);
+
+            this.Left = 0;
+            this.Width = workingArea.Width;
+
+            this.Height = WINDOW_HEIGHT;
+            this.Top = (workingArea.Height - this.Height);
         }
 
         private void InitialiseFilesystemListeners()
@@ -69,12 +82,8 @@ namespace RJ_Log
 
         private void PerformUpdate()
         {
-            bool scrollToEnd = false;
             updateRequired = false;
-
-            // Avoid any issues with LogData.lines.length == 0
-            if (LogData.TextLength == 0) LogData.AppendText(" ");
-
+            
             // We are always appending, so determine the change since last update
             string[] lines;
             try
@@ -96,36 +105,56 @@ namespace RJ_Log
 
             // See if we can do an incremental update
             bool incremental = true;
-            if (lines.Length < LogData.Lines.Length) incremental = false;
-            for (int i = 0; i < lines.Length; ++i)
+            int startLine = LogData.Lines.Length;
+            if (lines.Length < LogData.Lines.Length)
             {
-                if (LogData.Lines[i] != lines[i])
-                {
-                    incremental = false;
-                    break;
-                }
-            }
-
-            // Determine whether we are scrolling to end of the textbox before making any modifications
-            int lineIndex = LogData.GetLineFromCharIndex(LogData.SelectionStart);
-            scrollToEnd = (LogData.Text.Trim().Length == 0 || (lineIndex == (LogData.Lines.Length - 1)));
-
-            // Now perform the update
-            int startLine = 0;
-            if (!incremental)
-            {
-                LogData.Clear();
+                incremental = false;
                 startLine = 0;
             }
             else
             {
-                startLine = LogData.Lines.Length;
+                for (int i = 0; i < LogData.Lines.Length; ++i)
+                {
+                    if (LogData.Lines[i] != lines[i])
+                    {
+                        // This line is different.  However if it is the final line, and was previously empty, then still perform an incremental update
+                        if (i == (LogData.Lines.Length - 1) && LogData.Lines[i].Trim() == "")
+                        {
+                            incremental = true;
+                            startLine = LogData.Lines.Length - 1;
+                            break;
+                        }
+
+                        // This is a difference in the file that prevents us from doing an incremental update
+                        incremental = false;
+                        startLine = 0;
+                        break;
+                    }
+                }
             }
 
+            // Determine current position and whether we are scrolling to end of the textbox before making any modifications
+            int currentPosition = LogData.SelectionStart;
+            int lineIndex = LogData.GetLineFromCharIndex(currentPosition);
+            bool scrollToEnd = (LogData.Text.Trim().Length == 0 || (lineIndex == (LogData.Lines.Length - 1)));
+
+            Console.Out.Write(incremental ? "Incremental\n" : "Full refresh\n");
+
+            // Only clear the output if we are not performing an incremental update
+            if (!incremental)
+            {
+                LogData.Clear();
+            }
+            
+            // Add all new log lines to the output
             for (int i = startLine; i < lines.Length; ++i)
             {
                 AddLogLine(lines[i]);
             }
+
+            // Attempt to restore the selection point, if it remains on the same line as before the update
+            int newline = LogData.GetLineFromCharIndex(currentPosition);
+            if (newline == lineIndex) LogData.SelectionStart = currentPosition;
 
             // Scroll to the new end point if we are at the end of the text box, otherwise stay in the same position
             if (scrollToEnd)
