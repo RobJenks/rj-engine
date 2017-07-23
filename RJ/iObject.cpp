@@ -687,6 +687,7 @@ std::string iObject::DebugSubclassString(void) const
 // Show a debug visualisation of a ray intersection test with this object
 void iObject::DebugRenderRayIntersectionTest(const BasicRay & world_ray)
 {
+#ifdef _DEBUG
 	OrientedBoundingBox *closest = NULL;
 	std::vector<OrientedBoundingBox*> branches, leaves;
 	bool intersection = Game::PhysicsEngine.DetermineLineVectorVsOBBHierarchyIntersection_Debug(world_ray.Origin, world_ray.Direction, CollisionOBB,
@@ -706,6 +707,7 @@ void iObject::DebugRenderRayIntersectionTest(const BasicRay & world_ray)
 
 	Game::Engine->RenderVolumetricLine(VolumetricLine(world_ray.Origin, XMVectorAdd(world_ray.Origin, world_ray.Direction), 
 		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"))));
+#endif
 }
 
 // Static method to translate from an object simulation state to its string representation

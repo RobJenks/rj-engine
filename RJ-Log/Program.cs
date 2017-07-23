@@ -14,6 +14,7 @@ namespace RJ_Log
         [STAThread]
         static void Main()
         {
+            MessageBox.Show("HI " + Environment.GetCommandLineArgs().Length);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 

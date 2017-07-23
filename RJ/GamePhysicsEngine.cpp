@@ -54,8 +54,10 @@ GamePhysicsEngine::GamePhysicsEngine(void)
 	m_flag_handle_diverging_collisions = false;
 
 	// Debug flags and data
+#ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 	m_physics_debug_entity_id = 0U;
 	m_debug_collision_break[0] = m_debug_collision_break[1] = 0U;
+#endif
 }
 
 // Primary method to simulate all physics in the world.  Uses semi-fixed time step to maintain reasonably frame-rate 
@@ -2460,6 +2462,7 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 	/* Enable physics debugging on the specified entity */
 	if (command.InputCommand == "enable_physics_debug")
 	{
+#ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 		iObject *object = NULL;
 		if (command.Parameter(0) == "") {
 			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
@@ -2483,15 +2486,18 @@ bool GamePhysicsEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 
 		command.SetSuccessOutput(concat("Enabling physics debug (")(m_physics_debug_type)(") for entity \"")(command.Parameter(0))("\"").str());
 		return true;
+#endif
 	}
 
 	/* Disable physics debugging */
 	else if (command.InputCommand == "disable_physics_debug")
 	{
+#ifdef RJ_ENABLE_ENTITY_PHYSICS_DEBUGGING
 		ClearPhysicsDebugEntity();
 		ClearPhysicsDebugOptions();
 		command.SetSuccessOutput("Disabling entity phsyics debugging");
 		return true;
+#endif
 	}
 
 	/* Enable collision handling debug */

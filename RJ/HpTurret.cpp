@@ -59,14 +59,14 @@ Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 		const char *cmax = node->Attribute("max");
 		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
 		
-		SetYawLimit(atof(cmin), atof(cmax));
+		SetYawLimit((float)atof(cmin), (float)atof(cmax));
 	}
 	else if (hashed_key == HashedStrings::H_PitchLimit) {
 		const char *cmin = node->Attribute("min");
 		const char *cmax = node->Attribute("max");
 		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
 
-		SetPitchLimit(atof(cmin), atof(cmax));
+		SetPitchLimit((float)atof(cmin), (float)atof(cmax));
 	}
 
 	// Otherwise pass back to the base class

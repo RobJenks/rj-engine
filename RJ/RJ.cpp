@@ -4,6 +4,17 @@
 #include "RJ.h"
 
 
+// Determines whether the debug log application will be invoked upon application start
+#define RJ_SHOW_DEBUG_LOG
+
+// Conditionally-included headers
+#if defined(_DEBUG) && defined(RJ_SHOW_DEBUG_LOG)
+#	include <windows.h>
+#endif
+
+// Forward declarations
+HANDLE CreateDebugLogWindow(void);
+void TerminateDebugLogWindow(HANDLE process);
 
 //
 // WndProc
@@ -32,6 +43,11 @@ int WINAPI WinMain(HINSTANCE hinstance,
 				   PSTR cmdLine,
 				   int showCmd)
 {
+	// Open the debug log application if we are in debug mode, and if we have it enabled
+#	if defined(_DEBUG) && defined(RJ_SHOW_DEBUG_LOG)
+		HANDLE debug_log_handle = CreateDebugLogWindow();
+		OutputDebugString(concat("Attempting to create debug log window; process handle: ")(debug_log_handle)("\n").str().c_str());
+#	endif
 
 	// Initialise the application, and enter the main message loop if we are successful
 	Result result = Game::Application.Initialise(hinstance, WndProc);
@@ -58,6 +74,12 @@ int WINAPI WinMain(HINSTANCE hinstance,
 
 	// Terminate the application when execution completes, or if initialisation failed
 	Game::Application.TerminateApplication();
+
+	// Terminate the debug log process as well, if it was active
+#	if defined(_DEBUG) && defined(RJ_SHOW_DEBUG_LOG)
+		OutputDebugString(concat("Attempting to termiante debug log window with window handle ")(debug_log_handle)("\n").str().c_str());
+		TerminateDebugLogWindow(debug_log_handle);
+#	endif
 
 	// TODO: Return the eventual ErrorCode here, either 0 for no error or the specific error that caused a failure (e.g. return value from Initialise())
 }
@@ -87,3 +109,38 @@ int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )
 }
 
 
+#if defined(_DEBUG) && defined(RJ_SHOW_DEBUG_LOG)
+
+	HANDLE CreateDebugLogWindow(void)
+	{
+		//std::string process_string = concat("\"\"")(base_path)("\\RJ-Log\\bin\\Release\\RJ-Log.exe\" \"")(base_path)("\\RJ\"\"").str();
+		STARTUPINFO debug_log_startup_info;
+		PROCESS_INFORMATION debug_log_process_info;
+
+		ZeroMemory(&debug_log_process_info, sizeof(debug_log_process_info));
+		ZeroMemory(&debug_log_startup_info, sizeof(debug_log_startup_info));
+		debug_log_startup_info.cb = sizeof(debug_log_startup_info);
+
+		std::string base_path = "C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ";
+		std::string process_name = concat(base_path)("\\RJ-Log\\bin\\Release\\RJ-Log.exe").str();
+		std::string process_args = concat
+			("\"")(process_name)("\" ")					// args[0] == process name
+			("\"")(base_path)("\\RJ\"").str();			// args[1] == location of log directory
+
+		if (CreateProcess(process_name.c_str(), (LPSTR)process_args.c_str(), NULL, NULL, FALSE, 0, NULL, NULL, &debug_log_startup_info, &debug_log_process_info) == TRUE)
+		{
+			return debug_log_process_info.hProcess;
+		}
+
+		return (HANDLE)0;
+	}
+
+	void TerminateDebugLogWindow(HANDLE process)
+	{
+		if (process == (HANDLE)0) return;
+
+		TerminateProcess(process, 0U);
+	}
+
+
+#endif

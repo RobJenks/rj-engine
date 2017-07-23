@@ -1,6 +1,8 @@
 #include "MemDebug.h"
 #include "MemDebugCheck.h"
 
+// This functionality is only relevant in debug mode
+#ifdef _DEBUG
 
 // Constructor; begins heap verification on every operation
 MemDebugCheck::MemDebugCheck(void)
@@ -20,3 +22,4 @@ MemDebugCheck::~MemDebugCheck(void)
 	MemDebug::RestoreCRTHeapDebugState();
 }
 
+#endif
