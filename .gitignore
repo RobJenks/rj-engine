@@ -53,6 +53,7 @@
 /RJ-VS10/RJ-VS10/Debug/*
 /RJ-VS10/RJ-VS10/Release/*
 /RJ-VS10/ipch/*
+/RJ-Log/obj/*
 
 # Exclude binary/output folders for DirectX supporting projects
 /RJ/DirectXTK/Bin/*
