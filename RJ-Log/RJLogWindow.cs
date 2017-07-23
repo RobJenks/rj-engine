@@ -15,6 +15,7 @@ namespace RJ_Log
     {
         private static readonly String LOG_FILENAME = "log.txt";
         private static readonly int WINDOW_HEIGHT = 320;
+        private static readonly int REMOVE_WINDOW_MARGIN = 10;
 
         private static readonly Color COLOUR_ERROR = Color.Red;
         private static readonly Color COLOUR_WARNING = Color.Yellow;
@@ -47,13 +48,16 @@ namespace RJ_Log
 
         private void InitialiseWindow()
         {
+            
             Rectangle workingArea = Screen.GetWorkingArea(this);
 
-            this.Left = 0;
-            this.Width = workingArea.Width;
+            this.Left = 0 - REMOVE_WINDOW_MARGIN;
+            this.Width = workingArea.Width + (2 * REMOVE_WINDOW_MARGIN);
 
             this.Height = WINDOW_HEIGHT;
-            this.Top = (workingArea.Height - this.Height);
+            this.Top = (workingArea.Height - this.Height) + REMOVE_WINDOW_MARGIN;
+
+
         }
 
         private void InitialiseFilesystemListeners()
@@ -83,13 +87,23 @@ namespace RJ_Log
         private void PerformUpdate()
         {
             updateRequired = false;
-            
+
             // We are always appending, so determine the change since last update
-            string[] lines;
+            String line = String.Empty;
+            List<String> lines = new List<String>();
             try
             {
                 ++updateCount;
-                lines = File.ReadAllLines(logFile);
+
+                FileStream stream = File.Open(logFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                StreamReader streamReader = new StreamReader(stream);
+                
+                while ((line = streamReader.ReadLine()) != null)
+                {
+                    lines.Add(line);
+                }
+
+                streamReader.Close();
             }
             catch (Exception ex)
             {
@@ -98,15 +112,15 @@ namespace RJ_Log
             }
 
             // Shouldn't happen, but check to make sure something was added
-            if (lines.Length == LogData.Lines.Length)
+            if (lines.Count == LogData.Lines.Length)
             {
                 SetStatus("Didn't find any changes");
             }
-
+            
             // See if we can do an incremental update
             bool incremental = true;
             int startLine = LogData.Lines.Length;
-            if (lines.Length < LogData.Lines.Length)
+            if (lines.Count < LogData.Lines.Length)
             {
                 incremental = false;
                 startLine = 0;
@@ -118,7 +132,7 @@ namespace RJ_Log
                     if (LogData.Lines[i] != lines[i])
                     {
                         // This line is different.  However if it is the final line, and was previously empty, then still perform an incremental update
-                        if (i == (LogData.Lines.Length - 1) && LogData.Lines[i].Trim() == "")
+                        if (i == (LogData.Lines.Length - 1) && LogData.Lines[i].Trim() == String.Empty)
                         {
                             incremental = true;
                             startLine = LogData.Lines.Length - 1;
@@ -147,7 +161,7 @@ namespace RJ_Log
             }
             
             // Add all new log lines to the output
-            for (int i = startLine; i < lines.Length; ++i)
+            for (int i = startLine; i < lines.Count; ++i)
             {
                 AddLogLine(lines[i]);
             }

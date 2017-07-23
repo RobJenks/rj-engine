@@ -3,14 +3,19 @@
 // Default constructor
 LogManager::LogManager(void)
 {
+	// Remove any existing log files on startup, so that we can avoid using std::ofstream::trunc access and 
+	// thereby allow shared read access from other processes
+	if (0 != std::remove("log.txt")) OutputDebugString("ERROR: COULD NOT INITIALISE LOG FILE");
+	if (0 != std::remove("profiling.txt")) OutputDebugString("ERROR: COULD NOT INITIALISE PROFILING LOG FILE");
+
 	// Create the primary game log
-	m_stream = std::ofstream("log.txt", std::ofstream::out | std::ofstream::trunc);
+	m_stream = std::ofstream("log.txt", std::ofstream::out | std::ofstream::app);
 	
 	// No file-open error handling for now, add later
 
 	// Create the profiling log, if relevant
 	#ifdef RJ_PROFILER_ACTIVE
-		m_profilingstream = std::ofstream("profiling.txt", std::ofstream::out | std::ofstream::trunc);
+		m_profilingstream = std::ofstream("profiling.txt", std::ofstream::out | std::ofstream::app);
 		m_profilingstream << "Clock time(ms), Profiling group ID, Profiling group, Total clocks (ms), Iterations, Clocks per iteration (ms)\n";
 		m_profilingstream.flush();
 	#endif

@@ -14,7 +14,6 @@ namespace RJ_Log
         [STAThread]
         static void Main()
         {
-            MessageBox.Show("HI " + Environment.GetCommandLineArgs().Length);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -22,7 +21,7 @@ namespace RJ_Log
             if (logDirectory == null)
             {
                 MessageBox.Show("Log directory must be passed to application as a commandline argument");
-                Application.Exit();
+                return;
             }
 
             Application.Run(new RJLogWindow(logDirectory));
@@ -32,7 +31,7 @@ namespace RJ_Log
         {
             if (args == null || args.Length < 2) return null;
 
-            return args[1].Trim();
+            return (args[1] != null ? args[1].Trim() : null);
         }
     }
 }

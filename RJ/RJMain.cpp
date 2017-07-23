@@ -1345,6 +1345,12 @@ Result RJMain::InitialiseWindow()
 	m_hwnd = CreateMainWindow(m_hinstance, m_wndproc);
 	if (!m_hwnd) return ErrorCodes::CouldNotInitialiseWindow;
 	
+	// Bring the application window into focus, if it isn't already
+	// TODO: Windows only
+	SetFocus(m_hwnd);
+	SetActiveWindow(m_hwnd);
+	SetForegroundWindow(m_hwnd);
+
 	// Return success
 	Game::Log << LOG_INFO << "Game window initialised successfully\n";
 	return ErrorCodes::NoError;
