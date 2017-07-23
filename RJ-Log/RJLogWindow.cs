@@ -28,13 +28,12 @@ namespace RJ_Log
         private static readonly Color COLOUR_INFO = Color.White;
         private static readonly Color COLOUR_DEBUG = Color.LightBlue;
         private static readonly Color COLOUR_DEFAULT = COLOUR_INFO;
-
-        private FileSystemWatcher watcher = null;
+        
         private String logDirectory = null;
         private String logFile = null;
         private String parentWindowClass = null;
         private String parentWindowName = null;
-        private bool updateRequired = false;
+        private long logSize = 0L;
         private long updateCount = 0L;
 
         public RJLogWindow(Program.ArgumentData argumentData)
@@ -50,10 +49,8 @@ namespace RJ_Log
         private void RJLogWindow_Load(object sender, EventArgs e)
         {
             InitialiseWindow();
-            InitialiseFilesystemListeners();
             InitialiseLogWatcherComponents();
             ScrollToEnd();
-            SetUpdateRequired();
         }
 
         private void InitialiseWindow()
@@ -80,35 +77,14 @@ namespace RJ_Log
                 }
             }
         }
-
-        private void InitialiseFilesystemListeners()
-        {
-            watcher = new FileSystemWatcher(logDirectory, LOG_FILENAME);
-            watcher.Changed += Watcher_Changed;
-            watcher.NotifyFilter = NotifyFilters.Size;
-            watcher.EnableRaisingEvents = true;
-            watcher.SynchronizingObject = this;
-        }
-
+        
         private void InitialiseLogWatcherComponents()
         {
             updateTimer.Start();
         }
 
-        private void SetUpdateRequired()
-        {
-            updateRequired = true;
-        }
-
-        private void Watcher_Changed(object sender, FileSystemEventArgs e)
-        {
-            SetUpdateRequired();
-        }
-
         private void PerformUpdate()
         {
-            updateRequired = false;
-
             // We are always appending, so determine the change since last update
             String line = String.Empty;
             List<String> lines = new List<String>();
@@ -171,9 +147,9 @@ namespace RJ_Log
             // Determine current position and whether we are scrolling to end of the textbox before making any modifications
             int currentPosition = LogData.SelectionStart;
             int lineIndex = LogData.GetLineFromCharIndex(currentPosition);
-            bool scrollToEnd = (LogData.Text.Trim().Length == 0 || (lineIndex == (LogData.Lines.Length - 1)));
+            bool scrollToEnd = (LogData.Text.Trim().Length == 0 || (lineIndex >= (LogData.Lines.Length - 1)));
 
-            Console.Out.Write(incremental ? "Incremental\n" : "Full refresh\n");
+            Console.Out.Write(incremental ? ("Incremental " + (scrollToEnd ? "TO-END" : "Normal")) + "\n" : "Full refresh\n");
 
             // Only clear the output if we are not performing an incremental update
             if (!incremental)
@@ -245,7 +221,21 @@ namespace RJ_Log
 
         private void updateTimer_Tick(object sender, EventArgs e)
         {
-            if (updateRequired) PerformUpdate();
+            try
+            {
+                FileInfo info = new FileInfo(logFile);
+                if (info.Length != logSize)
+                {
+                    logSize = info.Length;
+                    updateTimer.Enabled = false;
+                    PerformUpdate();
+                    updateTimer.Enabled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                SetStatus("Exception while attempting to check for updates [" + ex.Message + "]");
+            }
         }
     }
 }

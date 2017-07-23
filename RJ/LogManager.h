@@ -17,7 +17,7 @@
 #define LOG_INFO "INFO: " << LOG_PREFIX_BODY
 #define LOG_WARN "WARNING: " << LOG_PREFIX_BODY
 #define LOG_ERROR "ERROR: " << LOG_PREFIX_BODY
-
+#define LOG_DEBUG "DEBUG: " << LOG_PREFIX_BODY
 
 // This class has no special alignment requirements
 class LogManager : public ScheduledObject

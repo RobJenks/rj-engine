@@ -48,7 +48,7 @@
             // 
             // updateTimer
             // 
-            this.updateTimer.Interval = 200;
+            this.updateTimer.Interval = 500;
             this.updateTimer.Tick += new System.EventHandler(this.updateTimer_Tick);
             // 
             // RJLogWindow

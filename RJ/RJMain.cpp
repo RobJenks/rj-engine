@@ -530,36 +530,11 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		Actor *a = D::Actors.Get("human_soldier_basic")->CreateInstance();
-		if (a && cs())
-		{
-			a->MoveIntoEnvironment(cs());
-			unsigned int ix = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
-			if (ix >= 0 && ix < cs()->GetTilesOfType(D::TileClass::Corridor).size())
-			{
-				ComplexShipTile *t = cs()->GetTilesOfType(D::TileClass::Corridor).at(ix).value;
-				t = cs()->GetElement(5, 4, 0)->GetTile();
-				XMVECTOR actorpos = XMVectorAdd(t->GetElementPosition(), XMVectorScale(t->GetWorldSize(), 0.5f));
-				a->SetEnvironmentPositionAndOrientation(actorpos, ID_QUATERNION);
-
-				XMVECTOR lastpos = actorpos;
-				Order::ID_TYPE lastorder = 0;
-				for (int i = 0; i < 50; ++i)
-				{
-					unsigned int tx = (unsigned int)frand_lh(0, cs()->GetTilesOfType(D::TileClass::Corridor).size() - 1);
-					ComplexShipTile *ttile = cs()->GetTilesOfType(D::TileClass::Corridor).at(tx).value;
-					if (ttile)
-					{
-						XMVECTOR targetpos = XMVectorAdd(ttile->GetElementPosition(), XMVectorScale(ttile->GetWorldSize(), 0.5f));
-						Order_ActorTravelToPosition *order = new Order_ActorTravelToPosition(cs(), lastpos, targetpos, 6.0f, 6.0f, true);
-						order->Dependency = lastorder;
-						lastorder = a->AssignNewOrder(order);
-						lastpos = targetpos;
-					}
-				}
-			}
-			a1 = a;
-		}
+		float rnd = frand_h(4.0f);
+		if (rnd < 1.0f) Game::Log << LOG_ERROR << "Time is " << Game::ClockMs << "\n";
+		else if (rnd < 2.0f) Game::Log << LOG_WARN << "Time is " << Game::ClockMs << "\n";
+		else if (rnd < 3.0f) Game::Log << LOG_INFO << "Time is " << Game::ClockMs << "\n";
+		else if (rnd < 4.0f) Game::Log << LOG_DEBUG << "Time is " << Game::ClockMs << "\n";
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
@@ -1098,7 +1073,7 @@ HWND RJMain::CreateMainWindow(HINSTANCE hInstance, WNDPROC wndproc)
 
 	HWND hwnd = 0;
 	hwnd = ::CreateWindowEx(m_wndstyleex, TEXT(APPLICATION_WINDOW_CLASSNAME), TEXT(APPLICATION_WINDOW_WINDOWNAME),
-		m_wndstyle, 0, 0, Game::FullWindowSize.x, Game::FullWindowSize.y,
+		m_wndstyle, 250, 0, Game::FullWindowSize.x, Game::FullWindowSize.y,
 		0 /*parent hwnd*/, 0 /* menu */, hInstance, 0 /*extra*/);
 
 	if (!hwnd)
