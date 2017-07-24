@@ -79,6 +79,10 @@ private:
 	void							MountWeapon(Weapon *weapon);	// Mounts a new weapon on this hardpoint
 	void							UnmountCurrentWeapon(void);		// Unmount any equipment that we currently have mounted
 
+	// Create the turret instance that will be associated with this hardpoint.  Returns NULL if the 
+	// turret cannot be created for any reason
+	SpaceTurret *					CreateHardpointTurret(Weapon *weapon);
+
 };
 
 

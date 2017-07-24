@@ -49,7 +49,7 @@ void HpTurret::MountWeapon(Weapon *weapon)
 	if (weapon != NULL)
 	{
 		// Attempt to create a new turret corresponding to this weapon
-		SpaceTurret *turret = SpaceTurret::Create(weapon->GetTurretCode());
+		SpaceTurret *turret = CreateHardpointTurret(weapon);
 		if (!turret)
 		{
 			Game::Log << LOG_WARN << "Attempted to create turret \"" << weapon->GetTurretCode() << "\" when mounting hardpoint \"" << Code << "\" equipment but could not create turret object\n";
@@ -98,6 +98,39 @@ void HpTurret::UnmountCurrentWeapon(void)
 		// TODO: we do not deallocate the equipment, for now.  Fix this via smart ptr or something similar
 		m_equipment = NULL;
 	}
+}
+
+// Create the turret instance that will be associated with this hardpoint.  Returns NULL if the 
+// turret cannot be created for any reason
+SpaceTurret * HpTurret::CreateHardpointTurret(Weapon *weapon)
+{
+	// Parameter check
+	if (!weapon) return NULL;
+
+	// Attempt to instantiate the turret based on our defined turret code
+	SpaceTurret *turret = SpaceTurret::Create(weapon->GetTurretCode());
+	if (!turret) return NULL;
+
+	// Set relative position and orientation based on hardpoint properties
+	turret->SetRelativePosition(Position);
+	turret->SetBaseRelativeOrientation(Orientation);
+	
+	// Update pitch limit to the more restrictive of { turret limits, hardpoint limits }
+	turret->SetPitchLimits(max(turret->GetMinPitchLimit(), m_pitchmin), min(turret->GetMaxPitchLimit(), m_pitchmax));
+
+	// Update yaw limit to the more restrictive of { turret limits, hardpoint limits }
+	// Only need to consider yaw limits if this hardpoint is actually limited; otherwise we just retain any turret limit
+	if (m_yaw_limited)
+	{
+		float yawmin = (turret->IsYawLimited() ? max(turret->GetMinYawLimit(), m_yawmin) : m_yawmin);
+		float yawmax = (turret->IsYawLimited() ? max(turret->GetMaxYawLimit(), m_yawmax) : m_yawmax);
+
+		turret->SetYawLimitFlag(true);
+		turret->SetYawLimits(yawmin, yawmax);
+	}
+	
+	// Return a reference to the new pointer
+	return turret;
 }
 
 // Set the hardpoint yaw limit
@@ -153,3 +186,5 @@ Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 HpTurret::~HpTurret(void)
 {
 }
+
+

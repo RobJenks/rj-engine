@@ -531,9 +531,13 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		Weapon *weapon = new Weapon();
-		weapon->SetTurretCode("turret_basic01");
-		ss()->GetHardpoints().Get("hpweapon01")->MountEquipment(weapon);
+		Weapon *weapon1 = new Weapon();
+		weapon1->SetTurretCode("turret_basic01");
+		ss()->GetHardpoints().Get("hpweapon01")->MountEquipment(weapon1);
+
+		Weapon *weapon2 = new Weapon();
+		weapon2->SetTurretCode("turret_basic01");
+		ss()->GetHardpoints().Get("hpweapon02")->MountEquipment(weapon2);
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
