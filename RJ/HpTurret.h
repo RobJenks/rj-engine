@@ -21,10 +21,11 @@ public:
 	// Returns the type of this hardpoint subclass
 	virtual CMPINLINE Equip::Class	GetType() const { return Equip::Class::Turret; }
 
-	void							RecalculateHardpointData(void);	// Recalculates hardpoint stats based on mounted equipment
-	
-	CMPINLINE Weapon*				GetWeapon(void);				// Returns a pointer to the currently-mounted missile launcher (if there is one)
-	void							MountWeapon(Weapon *weapon);	// Mounts a new missile launcher on this hardpoint
+	// Recalculate any properties of this turret hardpoint based on the mounted equipment (or lack thereof)
+	void							RecalculateHardpointData(void);	
+
+	// ID of the turret that this hardpoint is associated with
+	CMPINLINE SpaceTurret::TurretID	GetTurretID(void) const { return m_turret_id; }
 
 	// Pitch and yaw limits imposed by the hardpoint
 	CMPINLINE bool					IsYawLimited(void) const { return m_yaw_limited; }
@@ -63,19 +64,22 @@ public:
 	~HpTurret(void);
 
 private:
-	Weapon *			m_Weapon;				// Pointer to the currently-mounted weapon
 
+	// ID of the turret that this hardpoint is associated with (or SpaceTurret::NULL_TURRET if no attachment)
+	SpaceTurret::TurretID			m_turret_id;
 
 	// Turret hardpoints may impose spatial restrictions, in addition to those defined by the turret itself
 	// In these cases the most restrictive intersection of the constraints is used
-	bool				m_yaw_limited;
-	float				m_yawmin, m_yawmax;
-	float				m_pitchmin, m_pitchmax;
+	bool							m_yaw_limited;
+	float							m_yawmin, m_yawmax;
+	float							m_pitchmin, m_pitchmax;
 
+
+	// Methods to update the hardpoint attachment.  Internal and called by MountEquipment
+	void							MountWeapon(Weapon *weapon);	// Mounts a new weapon on this hardpoint
+	void							UnmountCurrentWeapon(void);		// Unmount any equipment that we currently have mounted
 
 };
-
-CMPINLINE Weapon *HpTurret::GetWeapon() { return m_Weapon; }
 
 
 #endif

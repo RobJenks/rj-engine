@@ -1,9 +1,13 @@
+#include <unordered_map>
 #include <algorithm>
+#include "Logging.h"
 #include "Ship.h"
+#include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
 #include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 #include "TurretController.h"
+
 
 // Default constructor
 TurretController::TurretController(void)
@@ -64,10 +68,16 @@ void TurretController::SetParent(Ship *parent)
 bool TurretController::AddTurret(SpaceTurret *turret)
 {
 	// Parameter check, and make sure this turret is not already in the collection
-	if (!turret || HaveTurret(turret)) return false;
+	if (!turret) return false;
+	if (HaveTurret(turret) || HaveTurretByID(turret->GetTurretID()))
+	{
+		Game::Log << LOG_WARN << "Attempted to add turret " << turret->GetTurretID() << " to turret controller, but it already exists\n";
+		return false;
+	}
 
-	// Add to the turret collection
+	// Add to the turret collection and the indexed collection
 	m_turrets.push_back(turret);
+	m_indexed_turrets[turret->GetTurretID()] = turret;
 
 	// Notify the turret of its parent object
 	turret->SetParent(m_parent);
@@ -82,13 +92,20 @@ bool TurretController::AddTurret(SpaceTurret *turret)
 // Remove the specified turret from the collection, if it exists
 bool TurretController::RemoveTurret(SpaceTurret *turret)
 {
-	// Parameter check
+	return (turret && RemoveTurretByID(turret->GetTurretID()));
+}
+
+// Remove a turret based on its unique turret ID
+bool TurretController::RemoveTurretByID(SpaceTurret::TurretID id)
+{
+	// Attempt to locate in the indexed collection
+	SpaceTurret *turret = GetTurretByID(id);
 	if (!turret) return false;
 
-	// Attempt to locate the turret
+	// Also attempt to locate the turret in the main collection
 	for (TurretCollection::size_type i = 0; i < m_turretcount; ++i)
 	{
-		if (m_turrets[i] == turret)
+		if (m_turrets[i]->GetTurretID() == id)
 		{
 			// Remove the item
 			RemoveFromVectorAtIndex<SpaceTurret*>(m_turrets, i);
@@ -104,9 +121,14 @@ bool TurretController::RemoveTurret(SpaceTurret *turret)
 		}
 	}
 
+	// Note: if we got this far, the turret DID exist in the indexed collection but not in 
+	// the turret vector.  Raise a warning because something is obviously wrong
+	Game::Log << LOG_WARN << "Attmepted to remove turret " << id << " from turret controller; located in indexed collection but NOT found in turret vector\n";
+
 	// We did not find the turret in this collection
 	return false;
 }
+
 
 // Remove all turrets from the collection
 void TurretController::RemoveAllTurrets(void)
@@ -117,8 +139,9 @@ void TurretController::RemoveAllTurrets(void)
 		if (m_turrets[i]) m_turrets[i]->SetParent(NULL);
 	}
 
-	// Clear the turret collection
+	// Clear the turret collections
 	m_turrets.clear();
+	m_indexed_turrets.clear();
 	
 	// Update turret collection status
 	RefreshTurretCollection();
@@ -128,12 +151,7 @@ void TurretController::RemoveAllTurrets(void)
 // Test whether the specified turret exists in this collection
 bool TurretController::HaveTurret(SpaceTurret *turret)
 {
-	TurretCollection::const_iterator it_end = m_turrets.end();
-	for (TurretCollection::const_iterator it = m_turrets.begin(); it != it_end; ++it)
-	{
-		if ((*it) == turret) return true;
-	}
-	return false;
+	return (turret != NULL && m_indexed_turrets.count(turret->GetTurretID()) != 0);
 }
 
 // Refreshes the turret controller status following a change to internal (e.g. turret removed) or external (e.g.
@@ -227,6 +245,7 @@ void TurretController::ForceClearContents(void)
 {
 	// Simply remove all turret pointers and refresh the internal collection state
 	m_turrets.clear();
+	m_indexed_turrets.clear();
 	RefreshTurretCollection();
 }
 

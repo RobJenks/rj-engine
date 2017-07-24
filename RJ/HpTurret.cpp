@@ -1,33 +1,103 @@
 #include "Equip.h"
+#include "Logging.h"
 #include "Hardpoint.h"
 #include "Weapon.h"
+#include "SpaceTurret.h"
 
 #include "HpTurret.h"
 
 
 HpTurret::HpTurret(void)
 	:
-	m_yaw_limited(false), m_yawmin(-0.15f), m_yawmax(+0.15f), m_pitchmin(-0.15f), m_pitchmax(+0.15f)
+	m_turret_id(SpaceTurret::NULL_TURRET), m_yaw_limited(false), m_yawmin(-0.15f), m_yawmax(+0.15f), m_pitchmin(-0.15f), m_pitchmax(+0.15f)
 {
 }
 
+// Recalculate any properties of this turret hardpoint based on the mounted equipment (or lack thereof)
 void HpTurret::RecalculateHardpointData()
 {
+
+
 }
 
 // Virtual method to allow mounting of class-specific equipment by a call to the base class instance
-void HpTurret::MountEquipment(Equipment *e) 
+void HpTurret::MountEquipment(Equipment *equipment) 
 { 
-	if (!e || (e && e->GetType() == Equip::Class::Turret)) this->MountWeapon((Weapon*)e); 
+	// Remove any existing weapon attached to this hardpoint
+	UnmountCurrentWeapon();
+
+	// Make sure the supplied equipment is valid
+	if (equipment && equipment->GetType() == Equip::Class::Turret)
+	{
+		MountWeapon((Weapon*)equipment);
+	}
+	else
+	{
+		// Otherwise mount NULL, which signifies nothing is mounted
+		MountWeapon(NULL);
+	}
 }
 
 void HpTurret::MountWeapon(Weapon *weapon)
 {
-	// Mount the equipment even if it is NULL; mounting a NULL item is essentially unmounting the equiment
-	m_Weapon = weapon;
+	// Get a reference to our parent
+	if (!m_parent) return;
+	iContainsHardpoints *parent = m_parent->GetHPParent();
+	if (!parent) return;
+
+	// Process the new equipment
+	if (weapon != NULL)
+	{
+		// Attempt to create a new turret corresponding to this weapon
+		SpaceTurret *turret = SpaceTurret::Create(weapon->GetTurretCode());
+		if (!turret)
+		{
+			Game::Log << LOG_WARN << "Attempted to create turret \"" << weapon->GetTurretCode() << "\" when mounting hardpoint \"" << Code << "\" equipment but could not create turret object\n";
+			m_equipment = NULL;
+		}
+
+		// We are now associated with this turret
+		m_turret_id = turret->GetTurretID();
+
+		// Mount the equipment
+		m_equipment = weapon;
+
+		// Update the parent and add this new turret
+		parent->TurretController.AddTurret(turret);
+	}
+	else
+	{
+		// We are mounting a null weapon which is effectively leaving the hardpoint empty
+		m_equipment = NULL;
+	}
 
 	// Recalculate hardpoint data
 	RecalculateHardpointData();
+}
+
+// Unmount any equipment that we currently have mounted
+void HpTurret::UnmountCurrentWeapon(void)
+{
+	if (m_equipment)
+	{
+		// Get a reference to our parent
+		if (!m_parent) return;
+		iContainsHardpoints *parent = m_parent->GetHPParent();
+		if (!parent) return;
+
+		// Tell our parent to remove the turret associated with this weapon
+		Weapon *weapon = (Weapon*)m_equipment;
+		if (!parent->TurretController.RemoveTurretByID(GetTurretID()))
+		{
+			Game::Log << LOG_WARN << "Attempted to unmount current weapon with turret ID " << GetTurretID() << " but could not remove corresponding turret object\n";
+		}
+
+		// We are no longer associated with any turret
+		m_turret_id = SpaceTurret::NULL_TURRET;
+
+		// TODO: we do not deallocate the equipment, for now.  Fix this via smart ptr or something similar
+		m_equipment = NULL;
+	}
 }
 
 // Set the hardpoint yaw limit

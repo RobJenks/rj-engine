@@ -10,6 +10,11 @@
 
 #include "SpaceTurret.h"
 
+
+// Initialise static data
+const SpaceTurret::TurretID SpaceTurret::NULL_TURRET = 0U;
+SpaceTurret::TurretID SpaceTurret::TurretIDCounter = 0U;
+
 // Default constructor
 SpaceTurret::SpaceTurret(void)
 {
@@ -43,6 +48,16 @@ SpaceTurret::SpaceTurret(void)
 	m_firing_region_threshold = Game::C_DEFAULT_FIRING_REGION_THRESHOLD;
 	m_constraint_yaw = m_constraint_pitch = m_component_cannon = 0;
 	m_firedelay = 0U;
+}
+
+// Static factory method to create new turret objects
+SpaceTurret *SpaceTurret::Create(void)
+{
+	// Invoke the spawn function using a template ship corresponding to this definition (if one exists)
+	// We need to assign a new unique ID directly since it is normally assigned via SpaceTurret::Copy()
+	SpaceTurret *turret = new SpaceTurret();
+	turret->AssignNewUniqueTurretID();
+	return turret;
 }
 
 // Static factory method to create new turret objects
@@ -657,6 +672,9 @@ SpaceTurret * SpaceTurret::Copy(void)
 {
 	// Create an initial shallow copy using the default copy constructor
 	SpaceTurret *t = new SpaceTurret(*this);
+
+	// Assign a new unique ID to this turret
+	t->AssignNewUniqueTurretID();
 
 	// Remove all launcher references and deep-copy the data instead
 	t->ClearLauncherReferences();

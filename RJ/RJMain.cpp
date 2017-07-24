@@ -113,6 +113,7 @@
 #include "EnvironmentMap.h"					// DBG
 #include "EnvironmentMapBlendMode.h"		// DBG
 #include "EnvironmentPowerMap.h"			// DBG
+#include "Weapon.h"							// DBG
 #include "ViewFrustrum.h"
 #include "Fonts.h"
 
@@ -530,11 +531,9 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		float rnd = frand_h(4.0f);
-		if (rnd < 1.0f) Game::Log << LOG_ERROR << "Time is " << Game::ClockMs << "\n";
-		else if (rnd < 2.0f) Game::Log << LOG_WARN << "Time is " << Game::ClockMs << "\n";
-		else if (rnd < 3.0f) Game::Log << LOG_INFO << "Time is " << Game::ClockMs << "\n";
-		else if (rnd < 4.0f) Game::Log << LOG_DEBUG << "Time is " << Game::ClockMs << "\n";
+		Weapon *weapon = new Weapon();
+		weapon->SetTurretCode("turret_basic01");
+		ss()->GetHardpoints().Get("hpweapon01")->MountEquipment(weapon);
 
 		Game::Keyboard.LockKey(DIK_U);
 	}

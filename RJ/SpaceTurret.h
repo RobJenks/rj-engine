@@ -16,6 +16,11 @@ class SpaceTurret : public ALIGN16<SpaceTurret>
 {
 public:
 
+	// Index used to assign a unique incrementing ID to each new turret
+	typedef unsigned long			TurretID;
+	static TurretID					TurretIDCounter;
+	static const TurretID			NULL_TURRET;
+
 	// Define the possible turret control modes
 	enum ControlMode				{ ManualControl = 0, AutomaticControl };
 
@@ -23,12 +28,19 @@ public:
 	enum TurretStatus				{ Idle = 0, UnderManualControl, TrackingTarget, EngagingTarget, ReturningToIdle };
 
 	// Static factory method to create new turret objects
+	static SpaceTurret *			Create(void);
 	static SpaceTurret *			Create(const std::string & code);
 	static SpaceTurret *			Create(SpaceTurret *template_turret);
 
 	// Default constructor
 	SpaceTurret(void);
 	
+	// Return the unique turret ID for this instance
+	CMPINLINE TurretID				GetTurretID(void) const									{ return m_turret_id; }
+
+	// Assigns a new unique turret ID to this object
+	CMPINLINE void					AssignNewUniqueTurretID(void)							{ m_turret_id = (++SpaceTurret::TurretIDCounter); }
+
 	// Get/set the string name or code of this turret object
 	CMPINLINE const std::string &	GetCode(void) const										{ return m_code; }
 	CMPINLINE void					SetCode(const std::string & code)						{ m_code = code; }
@@ -245,7 +257,10 @@ public:
 
 protected:
 
-	// Unique string code, and descriptive string name
+	// Unique turret ID, unique across every space turret instance
+	TurretID						m_turret_id;
+
+	// Class-unique string code, and descriptive string name
 	std::string						m_code;
 	std::string						m_name;
 
