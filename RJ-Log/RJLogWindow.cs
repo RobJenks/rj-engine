@@ -23,6 +23,9 @@ namespace RJ_Log
         private static readonly int WINDOW_HEIGHT = 320;
         private static readonly int REMOVE_WINDOW_MARGIN = 10;
 
+        private static readonly int UPDATE_TIMER_INTERVAL = 500;    // ms
+        private static readonly int TERMINATION_CHECK_CYCLES = 5;   // # of update timer ticks between termination checks
+
         private static readonly Color COLOUR_ERROR = Color.Red;
         private static readonly Color COLOUR_WARNING = Color.Yellow;
         private static readonly Color COLOUR_INFO = Color.White;
@@ -35,6 +38,7 @@ namespace RJ_Log
         private String parentWindowName = null;
         private long logSize = 0L;
         private long updateCount = 0L;
+        private int terminationCheckCounter = 0;
 
         public RJLogWindow(Program.ArgumentData argumentData)
         {
@@ -80,6 +84,7 @@ namespace RJ_Log
         
         private void InitialiseLogWatcherComponents()
         {
+            updateTimer.Interval = UPDATE_TIMER_INTERVAL;
             updateTimer.Start();
         }
 
@@ -221,6 +226,7 @@ namespace RJ_Log
 
         private void updateTimer_Tick(object sender, EventArgs e)
         {
+            // Test for changes to the target file and update if necessary
             try
             {
                 FileInfo info = new FileInfo(logFile);
@@ -235,6 +241,30 @@ namespace RJ_Log
             catch (Exception ex)
             {
                 SetStatus("Exception while attempting to check for updates [" + ex.Message + "]");
+            }
+
+            // Also check on a periodic basis whether our parent process has terminated, to ensure we can account
+            // for e.g. force-termination or crashes in the IDE
+            if (++terminationCheckCounter > TERMINATION_CHECK_CYCLES)
+            {
+                terminationCheckCounter = 0;
+                PerformTerminationCheck();
+            }
+        }
+
+        // Check whether our parent process has terminated, to ensure we can account
+        // for e.g. force-termination or crashes in the IDE
+        private void PerformTerminationCheck()
+        {
+            // Only check for our parent if we have a valid reference
+            if (parentWindowClass == null || parentWindowClass == String.Empty ||
+                parentWindowName == null || parentWindowName == String.Empty) return;
+
+            // Make sure we can still locate the window
+            IntPtr hwnd = FindWindow(parentWindowClass, parentWindowName);
+            if (hwnd == null || hwnd == IntPtr.Zero)
+            {
+                Application.Exit();
             }
         }
     }
