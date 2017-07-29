@@ -233,6 +233,7 @@ namespace HashedStrings
 	DefineHash(H_Spread, "spread");
 	DefineHash(H_Launch, "launch");
 	DefineHash(H_LaunchInterval, "launchinterval");
+	DefineHash(H_LaunchIntervalVariance, "launchintervalvariance");
 	DefineHash(H_LaunchAngularVelocity, "launchangularvelocity");
 	DefineHash(H_DegradeLinearVelocity, "degradelinearvelocity");
 	DefineHash(H_DegradeAngularVelocity, "degradeangularvelocity");

@@ -6,6 +6,7 @@
     <Projectile>projectile_basic01</Projectile>
     <Spread radians="0.1" />
     <LaunchInterval ms="2000" />
+    <LaunchIntervalVariance pc="0.1" />
     <Launch type="SetVelocityDirect" impulse="1000" />
     <LaunchAngularVelocity x="0.0" y="0.0" z="1.5" />
     <DegradeLinearVelocity rate="0.05" />
@@ -18,6 +19,7 @@
     <Projectile>basiclaser01</Projectile>
     <Spread radians="0.04" />
     <LaunchInterval ms="200" />
+    <LaunchIntervalVariance pc="0.25" />
   </ProjectileLauncher>
   
 </GameData>

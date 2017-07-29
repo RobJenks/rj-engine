@@ -72,7 +72,6 @@ public:
 	CMPINLINE float						GetProjectileSpread(void) const								{ return m_spread; }
 	CMPINLINE XMVECTOR					GetProjectileSpreadDelta(void) const						{ return m_spread_delta; }
 
-	CMPINLINE unsigned int				GetLaunchInterval(void) const								{ return m_launchinterval; }
 	CMPINLINE unsigned int				NextAvailableLaunch(void) const								{ return m_nextlaunch; }
 	CMPINLINE void						SetNextAvailableLaunch(unsigned int launchtime)				{ m_nextlaunch = launchtime; }
 
@@ -130,8 +129,13 @@ public:
 	// Measured from origin, so 'spread' is the radius of deviation in radians from actual orientation
 	void								SetProjectileSpread(float s);
 	
-	// Sets the minimum launch interval (ms) for projectiles from this launcher
+	// The defined launch interval (ms) for projectiles from this launcher
+	CMPINLINE unsigned int				GetLaunchInterval(void) const								{ return m_launchinterval; }
 	void								SetLaunchInterval(unsigned int interval_ms);
+
+	// The possible launch interval variance, as a percentage of the defined interval.  Half-open range [0.0-...]
+	CMPINLINE float						GetLaunchIntervalVariance(void) const						{ return m_launchinterval_variance; }
+	void								SetLaunchIntervalVariance(float variance);
 
 	// Determines a new delta trajectory for the next projectile, based upon projectile spread properties
 	void								DetermineNextProjectileSpreadDelta(void);
@@ -156,6 +160,18 @@ public:
 
 protected:
 
+	// Recalculate launch interval parameters after a change to the launcher properties
+	void								RecalculateLaunchIntervalParameters(void);
+
+	// Returns the clock time at which this launcher is next eligible to fire
+	CMPINLINE unsigned int				CalculateNextLaunchTime(void) const 
+	{ 
+		return (Game::ClockMs + (m_launchinterval_min == m_launchinterval_max ? m_launchinterval_min :
+			(unsigned int)irand_lh(m_launchinterval_min, m_launchinterval_max)));
+	}
+
+protected:
+
 	std::string							m_code;							// Unique string code for this launcher type
 	std::string							m_name;							// Descriptive string name for this launcher type
 
@@ -175,6 +191,10 @@ protected:
 
 	unsigned int						m_launchinterval;				// The minimum interval (ms) between projectile launches
 	unsigned int						m_nextlaunch;					// The clock timestamp (ms) at which this turret will be able to fire again
+
+	float								m_launchinterval_variance;		// The possible variance in fire interval per launch, as a percentage of the defined interval
+	unsigned int						m_launchinterval_min;			// Precalculated launch interval range, to avoid
+	unsigned int						m_launchinterval_max;			// recalculating on every launch
 
 	ProjectileLaunchMethod				m_launchmethod;					// The method used to give projectiles their initial trajectory
 	float								m_launchimpulse;				// The velocity OR force (depending on launch method) applied to objects at launch

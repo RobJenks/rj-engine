@@ -1977,6 +1977,12 @@ Result IO::Data::LoadProjectileLauncher(TiXmlElement *node)
 			int ms = atoi(cms); ms = clamp(ms, 1, 1000000);
 			launcher->SetLaunchInterval((unsigned int)ms);
 		}
+		else if (hash == HashedStrings::H_LaunchIntervalVariance)
+		{
+			const char *cpc = child->Attribute("pc"); if (!cpc) continue;
+			float pc = (float)atof(cpc);
+			launcher->SetLaunchIntervalVariance(pc);
+		}
 		else if (hash == HashedStrings::H_Launch)
 		{
 			const char *ctype = child->Attribute("type");

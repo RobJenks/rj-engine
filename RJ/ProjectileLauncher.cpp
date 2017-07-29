@@ -19,7 +19,8 @@ ProjectileLauncher::ProjectileLauncher(void) :
 	m_linveldegradation(0.1f), m_launchwithangvel(false), m_launchangularvelocity(NULL_VECTOR), 
 	m_degradeangularvelocity(false), m_angveldegradation(0.0f), m_launchwithorientchange(false), 
 	m_projectileorientchange(ID_QUATERNION), m_spread(0.0f), m_spread_delta(ID_QUATERNION), m_spread_divisor(1.0f),
-	m_launchinterval(1000U), m_nextlaunch(0U), m_launch_velocity(1.0f)
+	m_launchinterval(1000U), m_nextlaunch(0U), m_launch_velocity(1.0f), 
+	m_launchinterval_variance(0.0f), m_launchinterval_min(1000U), m_launchinterval_max(1000U)
 {
 	
 }
@@ -90,8 +91,7 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 	}
 
 	// Update the timestamp at which we will be ready to launch our next projectile
-	m_nextlaunch = (Game::ClockMs + m_launchinterval);
-
+	m_nextlaunch = CalculateNextLaunchTime();
 
 	// Take different action depending on whether we are launching a basic or full projectile
 	if (m_projectiletype == Projectile::ProjectileType::BasicProjectile)
@@ -196,6 +196,32 @@ void ProjectileLauncher::SetLaunchInterval(unsigned int interval_ms)
 	// Ensure there is always a minimum of 1ms interval, otherwise projectiles could be 
 	// launched every cycle and overwhelm the simulation
 	m_launchinterval = max(1U, interval_ms);
+
+	// Recalculate launch interval parameters after a change to the launcher properties
+	RecalculateLaunchIntervalParameters();
+}
+
+// Sets the possible launch interval variance, as a percentage of the defined interval.  Half-open range [0.0-...]
+void ProjectileLauncher::SetLaunchIntervalVariance(float variance)
+{
+	// Validate and store the parameter
+	m_launchinterval_variance = max(0.0f, variance);
+
+	// Recalculate launch interval parameters after a change to the launcher properties
+	RecalculateLaunchIntervalParameters();
+}
+
+// Recalculate launch interval parameters after a change to the launcher properties
+void ProjectileLauncher::RecalculateLaunchIntervalParameters(void)
+{
+	// Calculate min & max possible launch interval based on the defined variance
+	unsigned int delta = (unsigned int)(m_launchinterval_variance * (float)m_launchinterval);
+	m_launchinterval_min = (m_launchinterval - delta);
+	m_launchinterval_max = (m_launchinterval + delta);
+
+	// Ensure the range is valid
+	m_launchinterval_min = max(1U, m_launchinterval_min);
+	m_launchinterval_max = max(1U, m_launchinterval_max);
 }
 
 // Determines a new delta trajectory for the next projectile, based upon projectile spread properties
@@ -266,6 +292,7 @@ void ProjectileLauncher::CopyFrom(const ProjectileLauncher *source)
 	SetLaunchMethod(source->GetLaunchMethod());
 	SetProjectileSpread(source->GetProjectileSpread());
 	SetLaunchInterval(source->GetLaunchInterval());
+	SetLaunchIntervalVariance(source->GetLaunchIntervalVariance());
 	SetLaunchImpulse(source->GetLaunchImpulse());
 	SetProjectileOrientationChange(source->GetProjectileOrientationChange());
 	SetLaunchAngularVelocity(source->GetLaunchAngularVelocity());
