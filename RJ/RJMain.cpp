@@ -2142,7 +2142,7 @@ void RJMain::__CreateDebugScenario(void)
 		css[0] = NULL; css[1] = NULL;
 		for (int c = 0; c < create_count; ++c)
 		{
-			css[c] = ComplexShip::Create(true ? "tmptest" : "lscorridortest");
+			css[c] = ComplexShip::Create(false ? "tmptest" : "lscorridortest");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
 			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));

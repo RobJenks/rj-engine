@@ -10,6 +10,7 @@
 #include "Order_MoveToPosition.h"
 #include "RJMain.h"
 #include "UserInterface.h"
+#include "Logging.h"
 
 // Debug command handler needs to include the full object & tile hierarchies to support per-object command handling
 #include "Actor.h"
@@ -212,6 +213,30 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 	{
 		Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION = (unsigned int)command.ParameterAsInt(0);
 		command.SetSuccessOutput(concat("Set oxygen simulation interval (full sim) to ")(Oxygen::OXYGEN_UPDATE_INTERVAL_FULL_SIMULATION)("ms").str().c_str());
+		return true;
+	}
+
+	/* Allow direct logging via the console */
+	else if (command.InputCommand == "log")
+	{
+		if (command.ParameterCount() == 1)
+		{
+			Game::Log << LOG_INFO << command.Parameter(0) << "\n";
+			command.SetSuccessOutput("Logged data to game log");
+		}
+		else if (command.ParameterCount() >= 2)
+		{
+			std::string type = command.Parameter(0); StrLowerC(type);
+			if (type == "warn" || type == "warning")	Game::Log << LOG_WARN << command.Parameter(1) << "\n";
+			else if (type == "error")					Game::Log << LOG_ERROR << command.Parameter(1) << "\n";
+			else if (type == "debug")					Game::Log << LOG_DEBUG << command.Parameter(1) << "\n";
+			else										Game::Log << LOG_INFO << command.Parameter(1) << "\n";
+
+			command.SetSuccessOutput("Logged data to game log");
+		}
+		else {
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters, "Method requires data to be logged");
+		}
 		return true;
 	}
 
