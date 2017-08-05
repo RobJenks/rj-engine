@@ -456,7 +456,7 @@ void UI_ShipBuilder::EditorModeDeactivated(EditorMode mode, EditorMode next_mode
 	{
 		case EditorMode::GeneralMode:			DeactivateGeneralMode(next_mode);			break;
 		case EditorMode::ShipSectionMode:		/*DeactivateSectionMode(next_mode);*/		break;
-		case EditorMode::TileMode:				/*DeactivateTileMode(next_mode);*/			break;
+		case EditorMode::TileMode:				DeactivateTileMode(next_mode);				break;
 		case EditorMode::ObjectMode:			/*DeactivateObjectMode(next_mode);*/		break;
 		case EditorMode::StructuralTestMode:	DeactivateStructuralTestMode(next_mode);	break;
 		default:
@@ -554,6 +554,13 @@ void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
 void UI_ShipBuilder::DeactivateGeneralMode(EditorMode previous_mode)
 {
 	
+}
+
+// Deactivate the specified editor mode
+void UI_ShipBuilder::DeactivateTileMode(EditorMode previous_mode)
+{
+	// Remove any tile that was in the process of being placed
+	SetTileBeingPlaced(NullString);
 }
 
 // Deactivate the specified editor mode

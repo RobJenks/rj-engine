@@ -196,6 +196,7 @@ protected:
 
 	// Deactivate the specified editor mode
 	void										DeactivateGeneralMode(EditorMode previous_mode);
+	void										DeactivateTileMode(EditorMode previous_mode);
 	void										DeactivateStructuralTestMode(EditorMode previous_mode);
 
 	// Activates the UI component group for the given mode, deactivating all others
