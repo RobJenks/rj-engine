@@ -1064,15 +1064,14 @@ INTVECTOR3 iSpaceObjectEnvironment::DetermineElementAtOBBLocation(const Oriented
 	// Parameter check
 	if (!IsValidElementID(obb.Index)) return NULL_INTVECTOR3;
 
-	// Determine the (clamped) element location within this OBB; add OBB extent to make this bottom-corner-relative
-	INTVECTOR3 loc = ClampElementLocationToEnvironment(Game::PhysicalPositionToElementLocation(
-		XMVectorAdd(obb_local_pos, obb.ConstData().ExtentV)));
+	// Determine the element location within this OBB; add OBB extent to make this bottom-corner-relative
+	INTVECTOR3 loc = Game::PhysicalPositionToElementLocation(XMVectorAdd(obb_local_pos, obb.ConstData().ExtentV));
 
 	// Position of the OBB bottom-left corner is recorded in the OBB index
 	INTVECTOR3 obb_loc = GetElementDirect(obb.Index).GetLocation();
-	OutputDebugString(concat("OBB = ")(obb_loc.ToString())(", Loc within OBB = ")(loc.ToString())("\n").str().c_str());
-	// Return the combined location; OBB location + location within OBB
-	return (loc + obb_loc);
+	
+	// Return the combined location; OBB location + location within OBB.  Clamp to ensure it is within the environment bounds
+	return ClampElementLocationToEnvironment(loc + obb_loc);
 }
 
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
@@ -2058,6 +2057,7 @@ void iSpaceObjectEnvironment::SetElementSize(const INTVECTOR3 & size)
 
 	// Cache intermediate values based on this element size for efficiency at runtime
 	m_elementcount = (size.x * size.y * size.z);
+	m_elementbounds = (m_elementsize - ONE_INTVECTOR3);
 	m_xy_size = (m_elementsize.x * m_elementsize.y);
 	m_yz_size = (m_elementsize.y * m_elementsize.z);
 }

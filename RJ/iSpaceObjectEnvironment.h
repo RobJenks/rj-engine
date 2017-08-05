@@ -409,7 +409,7 @@ public:
 	// Clamps an element location to the bounds of this environment
 	CMPINLINE INTVECTOR3			ClampElementLocationToEnvironment(const INTVECTOR3 & loc) const
 	{
-		return IntVector3Clamp(loc, NULL_INTVECTOR3, m_elementsize);
+		return INTVECTOR3(clamp(loc.x, 0, m_elementbounds.x), clamp(loc.y, 0, m_elementbounds.y), clamp(loc.z, 0, m_elementbounds.z));
 	}
 
 	// Returns the element location containing the specified position.  Unbounded, so can return an element
@@ -518,6 +518,7 @@ protected:
 
 	// Precalculated values for efficiency
 	int								m_elementcount;				// Total element count
+	INTVECTOR3						m_elementbounds;			// Upper bounds of the element size; always (elementsize - [1,1,1])
 	int								m_xy_size;					// Precalculated (element_size.x * element_size.y)
 	int								m_yz_size;					// Precalculated (element_size.y * element_size.z)
 

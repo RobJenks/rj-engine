@@ -659,8 +659,6 @@ void iObject::HandleProjectileImpact(BasicProjectile & proj, const GamePhysicsEn
 	// Render an appropriate impact effect
 	
 	// Apply damage from the impact
-	OutputDebugString(concat("OBB: ")(impact.OBB->ToString())("\n").str().c_str());
-	OutputDebugString(concat("Pos: ")(Vector3ToString(impact.CollisionPoint))("\n").str().c_str());
 	ApplyDamage(proj.Definition->GetProjectileDamage(), impact);
 }
 

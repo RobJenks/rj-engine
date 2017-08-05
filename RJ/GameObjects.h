@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include "GameVarsExtern.h"
+#include "Logging.h"
 #include "iObject.h"
 
 // Flag which determines whether object register interactions will be logged in debug mode
@@ -13,7 +14,7 @@
 
 // Logs an object register interaction to the debug output, in debug mode only
 #	if defined(_DEBUG) && defined(DEBUG_LOG_OBJECT_REGISTER_OPERATIONS)
-#		define OBJ_REGISTER_LOG(cstr) OutputDebugString(cstr)
+#		define OBJ_REGISTER_LOG(cstr) Game::Log << LOG_DEBUG << cstr << "\n"
 #	else 
 #		define OBJ_REGISTER_LOG(cstr)
 #	endif
@@ -45,7 +46,7 @@ namespace Game
 		CMPINLINE void			ReferenceAdded(void)		
 		{ 
 			++RefCount; 
-			OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+			//OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
 		}
 
 		// Record the removal of a reference to this entry
@@ -53,13 +54,13 @@ namespace Game
 		{ 
 			if (--RefCount <= 0 && !Active)		// NOTE: Order is important to avoid --Refcount being skipped via short-circuiting
 			{
-				OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
-				OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str().c_str());
+				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+				//OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str().c_str());
 				Game::RemoveObjectRegisterEntry(ID);
 			}
 			else
 			{
-				OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
 			}
 		}
 	};
