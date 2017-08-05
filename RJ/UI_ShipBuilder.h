@@ -240,6 +240,9 @@ protected:
 	void										PerformTileModeRendering(void);
 	void										PerformStructuralTestModeRendering(void);
 
+	// Populate tile mode controls with relevant data from the tile data collections
+	void										InitialiseTileData(void);
+
 	// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
 	void										MovePlacementTile(const INTVECTOR3 & location);
 
@@ -310,6 +313,10 @@ protected:
 	AXMVECTOR									m_rmb_down_start_centre;	// Centre point of the camera when the RMB was first depressed; used for panning
 	float										m_zoom_increment_amount;	// Zoom increment that is currently being applied
 	float										m_zoom_increment_end;		// Time at which the current zoom increment will end
+
+	// References to key editor controls
+	UIComboBox *								m_tileclass_selector;
+	UIComboBox *								m_tiledef_selector;
 
 	// Fields related to selection of ship elements
 	bool										m_mouse_is_over_element;			// Indicates whether the mouse is currently over a ship element

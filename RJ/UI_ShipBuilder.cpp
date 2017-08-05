@@ -13,6 +13,8 @@
 #include "OverlayRenderer.h"
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
+#include "ComplexShipTileClass.h"
+#include "ComplexShipTileDefinition.h"
 #include "TileAdjacency.h"
 #include "UserInterface.h"
 #include "Render2DGroup.h"
@@ -25,6 +27,7 @@
 #include "LightSource.h"
 #include "GameUniverse.h"
 #include "UIComponentGroup.h"
+#include "UIComboBox.h"
 #include "UIButton.h"
 #include "TextBlock.h"
 #include "XMLGenerator.h"
@@ -56,6 +59,8 @@ const char * UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY = "/Ships/CustomDesigns";
 
 // Default constructor
 UI_ShipBuilder::UI_ShipBuilder(void)
+	:
+	m_tileclass_selector(NULL), m_tiledef_selector(NULL)
 {
 	// Most initialisation takes place per-activation in the Activate() method
 }
@@ -66,7 +71,8 @@ Result UI_ShipBuilder::InitialiseController(Render2DGroup *render, UserInterface
 	// Retrieve references to the key UI controls
 	if (m_render)
 	{
-		// m_xxx = m_render->Components.<ComponentType>.GetItem("xxx");
+		m_tileclass_selector = m_render->Components.ComboBoxes.GetItem("tileclass_selector");
+		m_tiledef_selector = m_render->Components.ComboBoxes.GetItem("tiledef_selector");
 	}
 
 	// Return success
@@ -113,6 +119,9 @@ void UI_ShipBuilder::Activate(void)
 
 	// Initialise any editor-specific render data
 	InitialiseRenderData();
+
+	// Populate controls with relevant game data
+	InitialiseTileData();
 
 	// Display the mouse cursor // TODO: use custom, not system cursor in future
 	Game::Engine->SetSystemCursorVisibility(true);
@@ -1239,6 +1248,27 @@ void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
 
 	// Clear the currently-selected marker
 	m_selected_intersection_marker = NULL;
+}
+
+// Populate tile mode controls with relevant data from the tile data collections
+void UI_ShipBuilder::InitialiseTileData(void)
+{
+	// Make sure the controls exist
+	if (!m_tileclass_selector || !m_tiledef_selector)
+	{
+		Game::Log << LOG_ERROR << "Failed to obtain reference to tile controls; UI definition may be invalid\n";
+		return;
+	}
+
+	// Populate the class selector with all available tile classes
+	m_tileclass_selector->Clear();
+	auto it_end = D::ComplexShipTileClasses.Data.end();
+	for (auto it = D::ComplexShipTileClasses.Data.begin(); it != it_end; ++it)
+	{
+		// Add the friendly class name, with the unique tile class code stored as a tag for later lookup
+		std::string name = it->second->GetCode();
+		m_tileclass_selector->AddItem(name, it->second->GetCode());
+	}
 }
 
 
