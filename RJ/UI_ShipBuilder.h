@@ -250,6 +250,9 @@ protected:
 	// Update the tile definition selector to show only tiles of the specified class, or ALL tiles if a NULL pointer is passed
 	void										UpdateTileDefinitionSelector(ComplexShipTileClass *tileclass);
 
+	// Sets the tile currently being placed in the environment, or no tile if a null string is provided
+	void										SetTileBeingPlaced(const std::string & code);
+
 	// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
 	void										MovePlacementTile(const INTVECTOR3 & location);
 

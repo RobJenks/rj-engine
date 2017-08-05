@@ -356,6 +356,7 @@ void UI_ShipBuilder::PlaceTile(void)
 {
 	// We can only place a tile if we have one selected and over the ship
 	if (!m_tile_being_placed || !m_mouse_is_over_element) return;
+	std::string code = m_tile_being_placed->GetCode();
 
 	// Perform another, final test of the tile placement to make sure it is valid before placement
 	m_tile_placement_issues.clear();
@@ -367,6 +368,9 @@ void UI_ShipBuilder::PlaceTile(void)
 
 	// Clear the tile pointer, since this tile is now a member of the ship
 	m_tile_being_placed = NULL;
+
+	// Prepare another tile of the same type for placement
+	SetTileBeingPlaced(code);
 }
 
 
@@ -513,6 +517,9 @@ void UI_ShipBuilder::ActivateTileMode(EditorMode previous_mode)
 	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
 	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
 	m_ship->ForceRenderingOfInterior(true);
+
+	// Select the first tile class by default, which will also prepare a tile for placement in the editor
+	if (m_tileclass_selector) m_tileclass_selector->SelectItem(0U);
 }
 
 // Activate the specified editor mode
@@ -1250,30 +1257,6 @@ void UI_ShipBuilder::HandleStructuralModeMouseUp(void)
 	m_selected_intersection_marker = NULL;
 }
 
-// Populate tile mode controls with relevant data from the tile data collections
-void UI_ShipBuilder::InitialiseTileData(void)
-{
-	// Make sure the controls exist
-	if (!m_tileclass_selector || !m_tiledef_selector)
-	{
-		Game::Log << LOG_ERROR << "Failed to obtain reference to tile controls; UI definition may be invalid\n";
-		return;
-	}
-
-	// Populate the class selector with all available tile classes
-	m_tileclass_selector->Clear();
-	auto it_end = D::ComplexShipTileClasses.Data.end();
-	for (auto it = D::ComplexShipTileClasses.Data.begin(); it != it_end; ++it)
-	{
-		// Add the friendly class name, with the unique tile class code stored as a tag for later lookup
-		m_tileclass_selector->AddItem(it->second->GetName(), it->second->GetCode());
-	}
-
-	// Select the first item in the list by default
-	m_tileclass_selector->SelectItem(0U);
-}
-
-
 // Event is triggered whenever a mouse click event occurs on a managed control, e.g. a button
 void UI_ShipBuilder::ProcessControlClickEvent(iUIControl *control)
 {
@@ -1331,6 +1314,32 @@ void UI_ShipBuilder::ComboBox_SelectedIndexChanged(UIComboBox *control, int sele
 		TileDefinitionSelectionChanged(selectedindex);
 }
 
+// Populate tile mode controls with relevant data from the tile data collections
+void UI_ShipBuilder::InitialiseTileData(void)
+{
+	// Make sure the controls exist
+	if (!m_tileclass_selector || !m_tiledef_selector)
+	{
+		Game::Log << LOG_ERROR << "Failed to obtain reference to tile controls; UI definition may be invalid\n";
+		return;
+	}
+
+	// Populate the class selector with all available tile classes
+	m_tileclass_selector->Clear();
+	m_tileclass_selector->SuspendControlLayoutUpdates();
+
+	auto it_end = D::ComplexShipTileClasses.Data.end();
+	for (auto it = D::ComplexShipTileClasses.Data.begin(); it != it_end; ++it)
+	{
+		// Add the friendly class name, with the unique tile class code stored as a tag for later lookup
+		m_tileclass_selector->AddItem(it->second->GetName(), it->second->GetCode());
+	}
+
+	// Select the first item in the list by default
+	m_tileclass_selector->ReleaseHoldOnControlUpdates();
+	m_tileclass_selector->SelectItem(0U);
+}
+
 // Handle changes to tile class selection
 void UI_ShipBuilder::TileClassSelectionChanged(int selected_index)
 {
@@ -1352,6 +1361,7 @@ void UI_ShipBuilder::TileClassSelectionChanged(int selected_index)
 void UI_ShipBuilder::UpdateTileDefinitionSelector(ComplexShipTileClass *tileclass)
 {
 	m_tiledef_selector->Clear();
+	m_tiledef_selector->SuspendControlLayoutUpdates();
 
 	D::TileClass classtype = (tileclass ? tileclass->GetClassType() : D::TileClass::_COUNT);
 	auto it_end = D::ComplexShipTiles.Data.end();
@@ -1363,13 +1373,58 @@ void UI_ShipBuilder::UpdateTileDefinitionSelector(ComplexShipTileClass *tileclas
 		}
 	}
 
+	m_tiledef_selector->ReleaseHoldOnControlUpdates();
 	m_tiledef_selector->SelectItem(0U);
 }
 
 // Handle changes to tile definition selection
 void UI_ShipBuilder::TileDefinitionSelectionChanged(int selected_index)
 {
+	// We only want to select a tile if we're in tile mode
+	if (GetEditorMode() != EditorMode::TileMode)
+	{
+		SetTileBeingPlaced(NullString);
+		return;
+	}
 
+	// Update the tile that is currently being placed
+	std::string code = m_tiledef_selector->GetSelectedItemTag();
+	SetTileBeingPlaced(code);
+}
+
+// Sets the tile currently being placed in the environment, or no tile if a null string is provided
+void UI_ShipBuilder::SetTileBeingPlaced(const std::string & code)
+{
+	// Deselect the tile if we are passed a null string 
+	if (code == NullString)
+	{
+		SafeDelete(m_tile_being_placed);
+		return;
+	}
+
+	// Make sure we can locate a valid definition for the code
+	ComplexShipTileDefinition *definition = D::ComplexShipTiles.Get(code);
+	if (!definition)
+	{
+		Game::Log << LOG_ERROR << "Failed to locate tile definition for code \"" << code << "\"\n";
+		SafeDelete(m_tile_being_placed);
+		return;
+	}
+
+	// Create a new tile instance based on this code
+	m_tile_being_placed = definition->CreateTile();
+	if (!m_tile_being_placed)
+	{
+		Game::Log << LOG_ERROR << "Could not instantiate new placement tile from definition \"" << definition->GetCode() << "\"\n";
+		return;
+	}
+
+	// Compile the tile instance so it is ready for placement
+	Result result = m_tile_being_placed->CompileAndValidateTile();
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_WARN << "Placement tile \"" << definition->GetCode() << "\" failed compilation and validaton with error code " << result << "\n";
+	}
 }
 
 // Updates the parameters used in the intersection test based on user interface input
