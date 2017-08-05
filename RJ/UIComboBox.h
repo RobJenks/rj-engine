@@ -125,6 +125,7 @@ public:
 	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item)					{ SetItem(index, item, ""); }
 	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item, string tag);
 	void						RemoveItem(std::vector<ComboBoxItem>::size_type index);
+	void						Clear(void);
 
 	// Returns the index of the item currently shown at the top of the combo box expand list
 	CMPINLINE std::vector<ComboBoxItem>::size_type	GetScrollPosition(void) { return m_scrollposition; }

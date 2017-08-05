@@ -472,18 +472,31 @@ void UIComboBox::RemoveItem(std::vector<ComboBoxItem>::size_type index)
 	if (index >= size) return;
 
 	// If we are attempting to remove the last item then simply pop it from the end of the vector now
-	if (index == (size - 1)) { m_items.pop_back(); return; }
+	if (index == (size - 1)) 
+	{ 
+		m_items.pop_back(); 
+	}
+	else
+	{
+		// Otherwise we want to copy the extent of vector past 'index' back by one element, to overwrite the removed item
+		memmove(&(m_items[index]), &(m_items[index + 1]), sizeof(ComboBoxItem) * (size - index - 1));
 
-	// Otherwise we want to copy the extent of vector past 'index' back by one element, to overwrite the removed item
-	memmove(&(m_items[index]), &(m_items[index + 1]), sizeof(ComboBoxItem) * (size - index - 1));
+		// Remove the item at the end of the vector which is now redundant
+		m_items.pop_back();
 
-	// Remove the item at the end of the vector which is now redundant
-	m_items.pop_back();
-
-	// If our currently-selected item is after this index, adjust the selected item to compensate for the indices moving by one
-	if (m_selectedindex >= index) --m_selectedindex;
+		// If our currently-selected item is after this index, adjust the selected item to compensate for the indices moving by one
+		if (m_selectedindex >= index) --m_selectedindex;
+	}
 
 	// Perform an update of the control, as long as we are not holding the refresh as part of a mass update
+	if (!m_suspendupdates) UpdateControl(true);
+}
+
+// Clear all items from the combobox
+void UIComboBox::Clear(void)
+{
+	// Simply clear the item vector and refresh the control
+	m_items.clear();
 	if (!m_suspendupdates) UpdateControl(true);
 }
 
