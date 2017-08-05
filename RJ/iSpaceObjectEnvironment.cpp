@@ -2428,11 +2428,11 @@ void iSpaceObjectEnvironment::DebugRenderElementHealth(int start, int end)
 	for (int i = start; i <= end; ++i, ++data_index)
 	{
 		if (m_elements[i].IsDestroyed())
-			data[data_index] = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.85f);
+			data[data_index] = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.85f);		// Gray
 		else
 		{
 			float x = m_elements[i].GetHealth();
-			data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);
+			data[data_index] = XMFLOAT4(1.0f - x, x, 0.0f, 0.75f);		// Green -> Red based on health
 		}
 	}
 

@@ -10,13 +10,13 @@
 #include "iObject.h"
 
 // Flag which determines whether object register interactions will be logged in debug mode
-//#define	DEBUG_LOG_OBJECT_REGISTER_OPERATIONS
+// #define	DEBUG_LOG_OBJECT_REGISTER_OPERATIONS
 
 // Logs an object register interaction to the debug output, in debug mode only
 #	if defined(_DEBUG) && defined(DEBUG_LOG_OBJECT_REGISTER_OPERATIONS)
-#		define OBJ_REGISTER_LOG(cstr) Game::Log << LOG_DEBUG << cstr << "\n"
+#		define OBJ_REGISTER_LOG(str) Game::Log << LOG_DEBUG << str << "\n"
 #	else 
-#		define OBJ_REGISTER_LOG(cstr)
+#		define OBJ_REGISTER_LOG(str)
 #	endif
 
 
@@ -46,7 +46,7 @@ namespace Game
 		CMPINLINE void			ReferenceAdded(void)		
 		{ 
 			++RefCount; 
-			//OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+			//OBJ_REGISTER_LOG(concat("New reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false").str());
 		}
 
 		// Record the removal of a reference to this entry
@@ -54,13 +54,13 @@ namespace Game
 		{ 
 			if (--RefCount <= 0 && !Active)		// NOTE: Order is important to avoid --Refcount being skipped via short-circuiting
 			{
-				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
-				//OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str().c_str());
+				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false").str());
+				//OBJ_REGISTER_LOG(concat("REMOVING OBJECT REGISTER ENTRY FOR OBJECT ")(ID).str());
 				Game::RemoveObjectRegisterEntry(ID);
 			}
 			else
 			{
-				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false")("\n").str().c_str());
+				//OBJ_REGISTER_LOG(concat("Removing reference to object ")(ID)(" (\"")(Object ? Object->GetInstanceCode() : "<null>")("\"), refcount is now ")(RefCount)(", Active = ")(Active ? "true" : "false").str());
 			}
 		}
 	};
@@ -99,17 +99,16 @@ namespace Game
 	// Register an object with the global collection
 	CMPINLINE void								RegisterObject(iObject *obj)
 	{
-		OBJ_REGISTER_LOG(concat("Registering object ")(obj ? obj->GetID() : 0)(" (\"")(obj ? obj->GetInstanceCode() : "<null>")("\")...").str().c_str());
 		if (m_registers_locked)
 		{
 			// If registers are locked, add to the registration list for addition to the global collection in the next cycle
-			OBJ_REGISTER_LOG("Adding to registration list\n");
+			OBJ_REGISTER_LOG(concat("Registering object ")(obj ? obj->GetID() : 0)(" (\"")(obj ? obj->GetInstanceCode() : "<null>")("\")...Adding to registration list").str());
 			Game::RegisterList.push_back(obj);
 		}
 		else
 		{
 			// If registers are unlocked we can add the object immediately
-			OBJ_REGISTER_LOG("Registering immediately\n");
+			OBJ_REGISTER_LOG(concat("Registering object ")(obj ? obj->GetID() : 0)(" (\"")(obj ? obj->GetInstanceCode() : "<null>")("\")...Registering immediately").str());
 			PerformObjectRegistration(obj);
 		}
 	}
@@ -120,17 +119,16 @@ namespace Game
 	// Remove the entire entry from the object register; performed when active == false and refcount == 0
 	CMPINLINE void								RemoveObjectRegisterEntry(Game::ID_TYPE id)
 	{
-		OBJ_REGISTER_LOG(concat("Removing object ")(id)(" register entry...").str().c_str());
 		if (m_registers_locked)
 		{
 			// If registers are locked, add to the removal vector which is processed at the end of each frame
-			OBJ_REGISTER_LOG("Adding to register removal list\n");
+			OBJ_REGISTER_LOG(concat("Removing object ")(id)(" register entry...Adding to register removal list").str());
 			Game::RegisterRemovalList.push_back(id);
 		}
 		else
 		{
 			// If registers are unlocked we can remove the entry immediately
-			OBJ_REGISTER_LOG("Removing immediately\n");
+			OBJ_REGISTER_LOG(concat("Removing object ")(id)(" register entry...Removing immediately").str());
 			PerformRegisterEntryRemoval(id);
 		}
 	}

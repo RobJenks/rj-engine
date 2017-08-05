@@ -15,7 +15,7 @@ class AudioItem
 public:
 
 	// Debug logging flag that can be set if required
-#	define ENABLE_AUDIO_ITEM_DEBUG_LOGGING
+	// #define ENABLE_AUDIO_ITEM_DEBUG_LOGGING
 
 	// Enumeration of possible audio types.  Default = Effect
 	enum AudioType { Effect = 0, Music, Voice, _COUNT };
@@ -172,7 +172,7 @@ private:
 
 	// Generate macros based on debug logging flag
 #	if defined(_DEBUG) && defined(ENABLE_AUDIO_ITEM_DEBUG_LOGGING)
-#		define AUDIO_ITEM_DEBUG_LOG(str) OutputDebugString(str)
+#		define AUDIO_ITEM_DEBUG_LOG(str) Game::Log << LOG_DEBUG << str << "\n";
 #	else
 #		define AUDIO_ITEM_DEBUG_LOG(str) 
 #	endif

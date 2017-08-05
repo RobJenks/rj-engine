@@ -151,7 +151,7 @@ Audio::AudioInstanceID AudioItem::GetAvailableInstanceSlot(bool requires_3d_supp
 		{
 			if (m_instances[i].Is3DAudio() == requires_3d_support)
 			{
-				AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using inactive slot ")(i)("\n").str().c_str());
+				AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using inactive slot ")(i).str().c_str());
 				return i;
 			}
 			else inactive_but_incompatible_properties = i;
@@ -171,7 +171,7 @@ Audio::AudioInstanceID AudioItem::GetAvailableInstanceSlot(bool requires_3d_supp
 	{
 		Audio::AudioInstanceID new_id = AllocateNewInstanceSlot(requires_3d_support);
 
-		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(new_id)("\n").str().c_str());
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No existing inactive slots; extending to new slot ")(new_id).str().c_str());
 		return new_id;
 	}
 
@@ -183,17 +183,17 @@ Audio::AudioInstanceID AudioItem::GetAvailableInstanceSlot(bool requires_3d_supp
 		m_instances[inactive_but_incompatible_properties].AssignResource(
 			std::move(CreateNewEffectInstance(requires_3d_support)));
 
-		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using existing slot ")(inactive_but_incompatible_properties)(", but had to override properties to [3d=")(requires_3d_support)("]\n").str().c_str());
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Using existing slot ")(inactive_but_incompatible_properties)(", but had to override properties to [3d=")(requires_3d_support)("]").str().c_str());
 		return inactive_but_incompatible_properties;
 	}
 
 	// There are no inactive slots at all, and we cannot extend the instance collection.  We need to replace
 	// the oldest instance.  Update it to make properties compatible first if required.  Note this is 
 	// guaranteed to always make a slot available, so we can always return a slot here as a last resort
-	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No other option; had to terminate and reuse active slot ")(oldest_instance)("\n").str().c_str());
+	AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: No other option; had to terminate and reuse active slot ")(oldest_instance).str().c_str());
 	if (m_instances[oldest_instance].Is3DAudio() != requires_3d_support)
 	{
-		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Resource also had to be overridden with properties [3d=")(requires_3d_support)("]\n").str().c_str());
+		AUDIO_ITEM_DEBUG_LOG(concat("AudioItem ")(m_id)(" [\"")(m_name)("\"]: Resource also had to be overridden with properties [3d=")(requires_3d_support)("]").str().c_str());
 		m_instances[oldest_instance].Set3DSupportFlag(requires_3d_support);
 		m_instances[oldest_instance].AssignResource(
 			std::move(CreateNewEffectInstance(requires_3d_support)));
