@@ -1127,6 +1127,9 @@ Result IO::Data::LoadComplexShipTileClass(TiXmlElement *node)
 				return ErrorCodes::CouldNotLoadTileClassWithInvalidClassType;
 			}
 		}
+		else if (hash == HashedStrings::H_Name) {
+			cls->SetName(child->GetText());
+		}
 		else if (hash == HashedStrings::H_PrimaryTile) {
 			val = child->GetText(); StrLowerC(val);
 			cls->SetPrimaryTile( (val == "true") );

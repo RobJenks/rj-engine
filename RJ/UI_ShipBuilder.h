@@ -156,7 +156,7 @@ public:
 	void ProcessMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, bool lmb, bool rmb) { }
 
 	// Methods to process specific events raised from individual controls, and routed through the UserInterface
-	void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex) { }
+	void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex);
 
 	// Methods to accept other managed control events
 	void ProcessTextboxChangedEvent(iUIControl *control);
@@ -242,6 +242,13 @@ protected:
 
 	// Populate tile mode controls with relevant data from the tile data collections
 	void										InitialiseTileData(void);
+
+	// Handle changes to tile class or definition selection
+	void										TileClassSelectionChanged(int selected_index);
+	void										TileDefinitionSelectionChanged(int selected_index);
+
+	// Update the tile definition selector to show only tiles of the specified class, or ALL tiles if a NULL pointer is passed
+	void										UpdateTileDefinitionSelector(ComplexShipTileClass *tileclass);
 
 	// Moves the 'temporary' tile being placed to a new location in the environment, recalculating data as required
 	void										MovePlacementTile(const INTVECTOR3 & location);

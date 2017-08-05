@@ -1266,9 +1266,11 @@ void UI_ShipBuilder::InitialiseTileData(void)
 	for (auto it = D::ComplexShipTileClasses.Data.begin(); it != it_end; ++it)
 	{
 		// Add the friendly class name, with the unique tile class code stored as a tag for later lookup
-		std::string name = it->second->GetCode();
-		m_tileclass_selector->AddItem(name, it->second->GetCode());
+		m_tileclass_selector->AddItem(it->second->GetName(), it->second->GetCode());
 	}
+
+	// Select the first item in the list by default
+	m_tileclass_selector->SelectItem(0U);
 }
 
 
@@ -1316,6 +1318,58 @@ void UI_ShipBuilder::ProcessTextboxChangedEvent(iUIControl *control)
 			PerformIntersectionTest();
 		}
 	}
+}
+
+// Handle selection change events within any combo box controls
+void UI_ShipBuilder::ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex)
+{
+	if (!control) return;
+
+	if (control->GetCode() == "tileclass_selector")
+		TileClassSelectionChanged(selectedindex);
+	else if (control->GetCode() == "tiledef_selector")
+		TileDefinitionSelectionChanged(selectedindex);
+}
+
+// Handle changes to tile class selection
+void UI_ShipBuilder::TileClassSelectionChanged(int selected_index)
+{
+	// Get the class corresponding to this selection
+	std::string code = m_tileclass_selector->GetSelectedItemTag();
+	ComplexShipTileClass *tileclass = D::ComplexShipTileClasses.Get(code);
+	if (!tileclass || code == NullString)
+	{
+		Game::Log << LOG_ERROR << "Failed to locate tile class for selection at [" << m_tileclass_selector->GetSelectedIndex() << "/" << selected_index << "]\n";
+		Game::Log << LOG_ERROR << "Derived class code which failed lookup was \"" << code << "\"\n";
+		return;
+	}
+
+	// Now update the tile definition selector to show only tiles of this class
+	UpdateTileDefinitionSelector(tileclass);
+}
+
+// Update the tile definition selector to show only tiles of the specified class, or ALL tiles if a NULL pointer is passed
+void UI_ShipBuilder::UpdateTileDefinitionSelector(ComplexShipTileClass *tileclass)
+{
+	m_tiledef_selector->Clear();
+
+	D::TileClass classtype = (tileclass ? tileclass->GetClassType() : D::TileClass::_COUNT);
+	auto it_end = D::ComplexShipTiles.Data.end();
+	for (auto it = D::ComplexShipTiles.Data.begin(); it != it_end; ++it)
+	{
+		if (it->second->GetClass() == classtype || classtype == D::TileClass::_COUNT)
+		{
+			m_tiledef_selector->AddItem(it->second->GetName(), it->second->GetCode());
+		}
+	}
+
+	m_tiledef_selector->SelectItem(0U);
+}
+
+// Handle changes to tile definition selection
+void UI_ShipBuilder::TileDefinitionSelectionChanged(int selected_index)
+{
+
 }
 
 // Updates the parameters used in the intersection test based on user interface input

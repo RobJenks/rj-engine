@@ -5,16 +5,15 @@
 
 
 ComplexShipTileClass::ComplexShipTileClass(void)
+	:
+	m_code(NullString), m_name(NullString), m_classtype(D::TileClass::Unknown), m_primarytile(false)
 {
-	// Initialise with default values
-	m_code = "";
-	m_classtype = D::TileClass::Unknown;
-	m_primarytile = false;
+	
 }
 
 
 // Set the code of this class, and attempt to derive the class type at the same time
-Result ComplexShipTileClass::SetCode(string code)
+Result ComplexShipTileClass::SetCode(const std::string & code)
 {
 	// Set the string code of this class
 	m_code = code;
@@ -89,7 +88,7 @@ ComplexShipTileClass::~ComplexShipTileClass(void)
 
 
 // Translates a tile class to its string representation
-string ComplexShipTileClass::TranslateTypeToString(D::TileClass type)
+std::string ComplexShipTileClass::TranslateTypeToString(D::TileClass type)
 {
 	switch (type) 
 	{
@@ -104,10 +103,10 @@ string ComplexShipTileClass::TranslateTypeToString(D::TileClass type)
 }
 
 // Translates the string representation of a tile class to the class itself
-D::TileClass ComplexShipTileClass::TranslateStringToType(string type)
+D::TileClass ComplexShipTileClass::TranslateStringToType(const std::string & type)
 {
 	// Comparisons are case-insensitive
-	string val = type;
+	std::string val = type;
 	StrLowerC(val);
 
 	// Compare against each string representation in turn
