@@ -90,8 +90,6 @@ void CameraClass::CalculateViewMatrix(void)
 		// Error case; revert the camera to normal
 		m_camerastate = CameraClass::CameraState::NormalCamera;
 	}
-
-	Game::Log << LOG_DEBUG << "Camera pos = " << Vector3ToString(m_position) << ", orient = " << QuaternionToString(m_orientation) << "\n";
 }
 
 void CameraClass::CalculateViewMatrixFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix)
@@ -178,8 +176,6 @@ void CameraClass::FixCamera(const FXMVECTOR position, const FXMVECTOR orientatio
 	m_fixedposition = position;
 	m_fixedorientation = orientation;
 
-	Game::Log << LOG_DEBUG << "Fixing camera at pos = " << Vector3ToString(m_fixedposition) << ", orient = " << QuaternionToString(m_fixedorientation) << "\n";
-
 	// Change the camera state
 	m_camerastate = CameraClass::CameraState::FixedCamera;
 }
@@ -187,8 +183,6 @@ void CameraClass::FixCamera(const FXMVECTOR position, const FXMVECTOR orientatio
 // Starts the camera travelling along a pre-constructed path
 void CameraClass::StartCameraPath(CameraPath *path)
 {
-	Game::Log << LOG_DEBUG << "Starting camera path " << path << "\n";
-
 	// Check whether we are currently following a path; if so, dispose of the path first
 	if (m_camerastate == CameraClass::CameraState::PathCamera && m_camerapath)
 	{
@@ -214,8 +208,6 @@ void CameraClass::StartCameraPath(CameraPath *path)
 // Method that is called following completion of a camera path, that will put the camera into the desired post-path state
 void CameraClass::HandleEndOfCameraPath(void)
 {
-	Game::Log << LOG_DEBUG << "Camera path ended\n";
-
 	// Parameter check; make sure we actually have a path defined and are following it
 	if (m_camerastate != CameraClass::CameraState::PathCamera || m_camerapath == NULL)
 	{

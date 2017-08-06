@@ -156,10 +156,6 @@ bool CameraPath::Advance(float timefactor)
 	// We can now interpolate between the two relevant path nodes to get the current camera state
 	m_camerapos = XMVectorLerp(sourcepos, targetpos, pc);
 	m_cameraorient = XMQuaternionSlerp(sourceorient, targetorient, pc);
-	
-	std::string msg = concat("Advancing path ")(this)(" by pc ")(pc)(" from index ")(previndex)(" to ")(m_index)("; set pos = ")
-		(Vector3ToString(m_camerapos))(", orient = ")(QuaternionToString(m_cameraorient))("\n").str();
-	Game::Log << LOG_DEBUG << msg;
 
 	// Return false to indicate that the path is still running
 	return false;

@@ -664,6 +664,18 @@
     <ClCompile Include="HpTurret.cpp">
       <Filter>Equipment\Equipment classes\Weapon</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentOverlay.cpp">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentHealthOverlay.cpp">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentOxygenOverlay.cpp">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClCompile>
+    <ClCompile Include="EnvironmentPowerOverlay.cpp">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1540,6 +1552,18 @@
     <ClInclude Include="HpTurret.h">
       <Filter>Equipment\Equipment classes\Weapon</Filter>
     </ClInclude>
+    <ClInclude Include="EnvironmentOverlay.h">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentHealthOverlay.h">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentOxygenOverlay.h">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentPowerOverlay.h">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1817,6 +1841,12 @@
     </Filter>
     <Filter Include="Engine\Audio">
       <UniqueIdentifier>{20b82122-ed31-4117-a20d-527e8fd2413a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments\EnvironmentOverlays">
+      <UniqueIdentifier>{5778f1da-bc66-461c-a66a-0df8a29f5bc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Ships\Environments\EnvironmentOverlays\Base">
+      <UniqueIdentifier>{0ce5683c-44e9-4fd4-be6f-4d4ff94a9941}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

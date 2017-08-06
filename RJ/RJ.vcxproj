@@ -334,6 +334,7 @@
       <ShowIncludes>false</ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -410,6 +411,9 @@
     <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="EnvironmentHealthOverlay.cpp" />
+    <ClCompile Include="EnvironmentOxygenOverlay.cpp" />
+    <ClCompile Include="EnvironmentPowerOverlay.cpp" />
     <ClCompile Include="ElementStateFilters.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="EnvironmentCollision.cpp" />
@@ -417,6 +421,7 @@
     <ClCompile Include="EnvironmentHullBreaches.cpp" />
     <ClCompile Include="EnvironmentMapTests.cpp" />
     <ClCompile Include="EnvironmentOBBRegion.cpp" />
+    <ClCompile Include="EnvironmentOverlay.cpp" />
     <ClCompile Include="EnvironmentOxygenMap.cpp" />
     <ClCompile Include="EnvironmentPowerMap.cpp" />
     <ClCompile Include="EnvironmentTree.cpp" />
@@ -649,7 +654,10 @@
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="Direction.h" />
     <ClInclude Include="DynamicTileSet.h" />
+    <ClInclude Include="EnvironmentHealthOverlay.h" />
     <ClInclude Include="ElementIntersection.h" />
+    <ClInclude Include="EnvironmentOxygenOverlay.h" />
+    <ClInclude Include="EnvironmentPowerOverlay.h" />
     <ClInclude Include="ElementStateFilters.h" />
     <ClInclude Include="EntityAIStates.h" />
     <ClInclude Include="EnvironmentCollision.h" />
@@ -661,6 +669,7 @@
     <ClInclude Include="EnvironmentMapFalloffMethod.h" />
     <ClInclude Include="EnvironmentMapTests.h" />
     <ClInclude Include="EnvironmentOBBRegion.h" />
+    <ClInclude Include="EnvironmentOverlay.h" />
     <ClInclude Include="EnvironmentOxygenMap.h" />
     <ClInclude Include="EnvironmentPowerMap.h" />
     <ClInclude Include="EnvironmentTree.h" />

@@ -531,13 +531,14 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		//Game::Engine->GetCamera()->ZoomToOverheadShipView(ss(), CameraClass::ZoomToOverheadCompletionAction::FixOverShipAfterOverheadZoom,
-	//		100.0f, Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
+		if (b[DIK_LSHIFT]) cs()->RenderEnvironmentHealthOverlay(10, cs()->GetElementCount() - 1);
+		else if (b[DIK_LCONTROL]) cs()->RenderEnvironmentOxygenOverlay(20, cs()->GetElementCount() - 12);
+		else cs()->RenderEnvironmentPowerOverlay(104, 396);
 
-		static float rot = PIOVER2;
+		/*static float rot = PIOVER2;
 		if (b[DIK_LSHIFT]) rot += (Game::TimeFactor * PI * 0.25f);
 		if (b[DIK_LCONTROL]) rot = PIOVER2;
-		cs()->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, rot));
+		cs()->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, rot));*/
 
 		//Game::Keyboard.LockKey(DIK_U);
 	}
@@ -565,7 +566,7 @@ void RJMain::ProcessKeyboardInput(void)
 	{
 		if (!b[DIK_LSHIFT])
 		{
-			cs()->DebugRenderOxygenLevels();
+			cs()->RenderEnvironmentOxygenOverlay();
 		}
 		else
 		{
@@ -578,7 +579,7 @@ void RJMain::ProcessKeyboardInput(void)
 	{
 		if (b[DIK_LSHIFT])			((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(1.0f);
 		else if (b[DIK_LCONTROL])	((CSPowerGeneratorTile*)cs()->GetTilesOfType(D::TileClass::PowerGenerator).at(0).value)->SetPowerOutputTargetPc(0.0f);
-		else						cs()->DebugRenderPowerLevels();
+		else						cs()->RenderEnvironmentPowerOverlay();
 	}
 
 	if (b[DIK_9])
@@ -719,9 +720,9 @@ void RJMain::ProcessKeyboardInput(void)
 		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
 
 		if (b[DIK_LSHIFT])
-			cs()->DebugRenderElementHealth(dbg_z);
+			cs()->RenderEnvironmentHealthOverlay(dbg_z);
 		else
-			cs()->DebugRenderElementHealth();
+			cs()->RenderEnvironmentHealthOverlay();
 	}
 
 	static SentenceType **dbg_b_sentences = NULL;

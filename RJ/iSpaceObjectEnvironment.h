@@ -15,6 +15,12 @@
 #include "EnvironmentOxygenMap.h"
 #include "EnvironmentPowerMap.h"
 #include "EnvironmentHullBreaches.h"
+
+// Environment overlays
+#include "EnvironmentHealthOverlay.h"
+#include "EnvironmentOxygenOverlay.h"
+#include "EnvironmentPowerOverlay.h"
+
 class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
@@ -467,16 +473,40 @@ public:
 	// Static data used when simulating environment collisions (rather than actually applying them)
 	static SimulatedEnvironmentCollision		EnvironmentCollisionSimulationResults;
 
-	// Renders a 3D overlay showing the health of each element in the environment
-	void							DebugRenderElementHealth(void);
-	void							DebugRenderElementHealth(int z_index);
-	void							DebugRenderElementHealth(int start, int end);
-	void							DebugRenderOxygenLevels(void);
-	void							DebugRenderOxygenLevels(int z_index);
-	void							DebugRenderOxygenLevels(int start, int end);
-	void							DebugRenderPowerLevels(void);
-	void							DebugRenderPowerLevels(int z_index);
-	void							DebugRenderPowerLevels(int start, int end);
+
+	// Render an environment overlay for the entire environment
+	template <class TOverlay>
+	CMPINLINE void					RenderEnvironmentOverlay(void) { RenderEnvironmentOverlay<TOverlay>(0U, m_elementcount - 1); }
+
+	// Render an environment overlay for the entire z-level of the environment
+	template <class TOverlay>
+	CMPINLINE void					RenderEnvironmentOverlay(int z_index) 
+	{
+		if (z_index >= 0 && z_index < m_elementsize.z)
+		{
+			INTVECTOR2 range = GetElementRange(z_index);
+			RenderEnvironmentOverlay<TOverlay>(range.x, range.y);
+		}
+	}
+
+	// Render an environment overlay for the specific contiguous range of elements in the environment
+	template <class TOverlay>
+	CMPINLINE void					RenderEnvironmentOverlay(int start, int end) { TOverlay::Render(*this, start, end); }
+
+	// Compile-time definition of available render overlay
+#	define DEFINE_RENDERING_OVERLAY(OverlayClass) \
+		friend class OverlayClass; \
+		CMPINLINE void Render##OverlayClass(int start, int end)		{ RenderEnvironmentOverlay<OverlayClass>(start, end); } \
+		CMPINLINE void Render##OverlayClass(int z_level)			{ RenderEnvironmentOverlay<OverlayClass>(z_level); } \
+		CMPINLINE void Render##OverlayClass(void)					{ RenderEnvironmentOverlay<OverlayClass>(); } 
+
+
+	// Define all available environment rendering overlays
+	DEFINE_RENDERING_OVERLAY(EnvironmentHealthOverlay)
+	DEFINE_RENDERING_OVERLAY(EnvironmentOxygenOverlay)
+	DEFINE_RENDERING_OVERLAY(EnvironmentPowerOverlay)
+		
+
 
 	// Renders a 3D overlay showing the properties of each element in the environment.  If the reference 'outLegend' is provided
 	// it will be populated with a mapping from overlay colours to the corresponding property state definitions.  The render process
