@@ -50,6 +50,9 @@ void CameraPath::StartPath(bool reverse)
 		m_camerapos = m_nodes[m_index].Position;
 		m_cameraorient = m_nodes[m_index].Orientation;
 	}
+
+	// Advance the path by a miniscule amount to enable calculation of derived spatial fields in Advance()
+	Advance(Game::C_EPSILON);
 }
 
 // Advances the path along its route.  Returns a flag indicating whether the path has now completed
@@ -154,6 +157,10 @@ bool CameraPath::Advance(float timefactor)
 	m_camerapos = XMVectorLerp(sourcepos, targetpos, pc);
 	m_cameraorient = XMQuaternionSlerp(sourceorient, targetorient, pc);
 	
+	std::string msg = concat("Advancing path ")(this)(" by pc ")(pc)(" from index ")(previndex)(" to ")(m_index)("; set pos = ")
+		(Vector3ToString(m_camerapos))(", orient = ")(QuaternionToString(m_cameraorient))("\n").str();
+	Game::Log << LOG_DEBUG << msg;
+
 	// Return false to indicate that the path is still running
 	return false;
 }

@@ -218,6 +218,9 @@ protected:
 	// Perform any updates of the camera required since the previous frame
 	void										PerformCameraUpdate(void);
 
+	// Return the default, base camera rotation
+	XMVECTOR									GetDefaultCameraRotation(void) const;
+
 	// Zooms the view by the specified amount
 	void										PerformZoom(float zoom);
 	void										PerformZoomIncrement(float increment);

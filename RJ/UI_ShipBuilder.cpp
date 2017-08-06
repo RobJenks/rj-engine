@@ -663,6 +663,13 @@ void UI_ShipBuilder::RevertCamera(void)
 	m_reverttimeremaining = UI_ShipBuilder::CAMERA_REVERT_TIME;
 }
 
+// Return the default, base camera rotation
+XMVECTOR UI_ShipBuilder::GetDefaultCameraRotation(void) const
+{
+	if (!m_ship) return UI_ShipBuilder::DEFAULT_CAMERA_ROTATION;
+	return XMQuaternionMultiply(UI_ShipBuilder::DEFAULT_CAMERA_ROTATION, m_ship->GetOrientation());
+}
+
 // Perform any updates of the camera required since the previous frame
 void UI_ShipBuilder::PerformCameraUpdate(void)
 {
@@ -677,7 +684,8 @@ void UI_ShipBuilder::PerformCameraUpdate(void)
 		revert_pc = clamp(revert_pc, 0.0f, 1.0f);
 
 		// Get the quaternion between our current orientation and the default orientation, and interpolate based on revert %
-		m_camera_rotate = XMQuaternionSlerp(m_reverting_from, UI_ShipBuilder::DEFAULT_CAMERA_ROTATION, revert_pc);
+		XMVECTOR default_camera_rotation = GetDefaultCameraRotation();
+		m_camera_rotate = XMQuaternionSlerp(m_reverting_from, default_camera_rotation, revert_pc);
 
 		// Perform linear interpolation from the current centre point back to the origin
 		m_centre = XMVectorLerp(m_revert_centre_from, NULL_VECTOR, revert_pc);
@@ -691,7 +699,7 @@ void UI_ShipBuilder::PerformCameraUpdate(void)
 		{
 			m_reverting_camera = false;
 			m_reverttimeremaining = 0.0f;
-			m_camera_rotate = DEFAULT_CAMERA_ROTATION;
+			m_camera_rotate = default_camera_rotation;
 			m_centre = NULL_VECTOR;
 			SetZoom(GetDefaultZoomLevel());
 		}
@@ -707,12 +715,26 @@ void UI_ShipBuilder::PerformCameraUpdate(void)
 		}
 
 		// The camera position will be a vector (0,0,zoomlevel) transformed by the yaw/pitch about (0,0,0), translated by the centre point
+		// TODO: Not currently working when target ship has non-ID orientation
 		XMVECTOR ship_centre = XMVectorAdd(m_ship->GetPosition(), m_centre);
 		XMVECTOR base_pos = XMVectorSetZ(NULL_VECTOR, m_zoomlevel);
-		XMVECTOR cam_pos = XMVectorAdd(XMVector3Rotate(base_pos, m_camera_rotate), ship_centre);
+		XMVECTOR rotated_base_pos = XMVector3Rotate(base_pos, m_camera_rotate);
+		rotated_base_pos = XMVector3Rotate(rotated_base_pos, m_ship->GetOrientation());
+		XMVECTOR cam_pos = XMVectorAdd(rotated_base_pos, ship_centre);
 		
 		// Set the camera orientation to face the centre point
-		XMVECTOR cam_orient = QuaternionBetweenVectors(FORWARD_VECTOR, XMVector3NormalizeEst(XMVectorSubtract(ship_centre, cam_pos)));
+		XMVECTOR orient_adjustment = QuaternionBetweenVectors(
+			UI_ShipBuilder::DEFAULT_CAMERA_ROTATION, 
+			XMQuaternionMultiply(UI_ShipBuilder::DEFAULT_CAMERA_ROTATION, m_ship->GetOrientation())
+		);
+
+		XMVECTOR cam_orient = ///XMVectorMultiply( 
+			///XMQuaternionMultiply(m_ship->GetOrientation(), UI_ShipBuilder::DEFAULT_CAMERA_ROTATION), 
+			XMQuaternionMultiply(
+				QuaternionBetweenVectors(FORWARD_VECTOR, XMVector3NormalizeEst(XMVectorSubtract(ship_centre, cam_pos))), 
+				orient_adjustment
+			);
+		///);
 		
 		// Set the camera position and orientation
 		Game::Engine->GetCamera()->FixCamera(cam_pos, cam_orient);

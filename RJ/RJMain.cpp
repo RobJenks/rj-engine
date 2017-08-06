@@ -531,15 +531,15 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		Weapon *weapon1 = new Weapon();
-		weapon1->SetTurretCode("turret_basic01");
-		ss()->GetHardpoints().Get("hpweapon01")->MountEquipment(weapon1);
+		//Game::Engine->GetCamera()->ZoomToOverheadShipView(ss(), CameraClass::ZoomToOverheadCompletionAction::FixOverShipAfterOverheadZoom,
+	//		100.0f, Game::C_DEFAULT_ZOOM_TO_SHIP_SPEED);
 
-		Weapon *weapon2 = new Weapon();
-		weapon2->SetTurretCode("turret_basic01");
-		ss()->GetHardpoints().Get("hpweapon02")->MountEquipment(weapon2);
+		static float rot = PIOVER2;
+		if (b[DIK_LSHIFT]) rot += (Game::TimeFactor * PI * 0.25f);
+		if (b[DIK_LCONTROL]) rot = PIOVER2;
+		cs()->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, rot));
 
-		Game::Keyboard.LockKey(DIK_U);
+		//Game::Keyboard.LockKey(DIK_U);
 	}
 	if (b[DIK_5])
 	{
@@ -2133,7 +2133,7 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create two complex ships in this scenario
 	if (true) {
 		ComplexShip *css[2];
-		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_prc"), Game::FactionManager.GetFactionIDByCode("faction_us") };
+		Faction::F_ID factions[2] = { Game::FactionManager.GetFactionIDByCode("faction_us"), Game::FactionManager.GetFactionIDByCode("faction_us") };
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { true, false };
