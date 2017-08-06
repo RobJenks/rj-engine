@@ -431,6 +431,13 @@ public:
 	// Returns the number of elements with the specified property
 	CMPINLINE int					ElementsWithProperty(ComplexShipElement::PROPERTY prop) { return m_element_property_count[(int)prop]; }
 
+	// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
+	// element, any tile that is present, plus all objects and terrain within the element
+	float							DetermineTotalElementImpactStrength(const ComplexShipElement & el);
+	float							DetermineTotalElementImpactStrength(int element_id);
+	float							DetermineTotalElementImpactStrength(const INTVECTOR3 & element_location);
+	float							DetermineTotalElementImpactStrengthAtLocation(const INTVECTOR3 & element_location);
+
 	// Determines and applies the effect of a collision with trajectory through the environment
 	// Returns a flag indicating whether a collision has occured, and data on all the collision events via "outResults"
 	bool							CalculateCollisionThroughEnvironment(	iActiveObject *object, const GamePhysicsEngine::ImpactData & impact, 

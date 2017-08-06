@@ -1382,6 +1382,78 @@ bool iSpaceObjectEnvironment::DetermineElementPathIntersectedByRay(const Ray & r
 	return true;
 }
 
+// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
+// element, any tile that is present, plus all objects and terrain within the element
+float iSpaceObjectEnvironment::DetermineTotalElementImpactStrength(const INTVECTOR3 & element_location)
+{
+	return DetermineTotalElementImpactStrength(GetElementIndex(element_location));
+}
+
+// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
+// element, any tile that is present, plus all objects and terrain within the element
+float iSpaceObjectEnvironment::DetermineTotalElementImpactStrengthAtLocation(const INTVECTOR3 & element_location)
+{
+	return DetermineTotalElementImpactStrength(element_location);
+}
+
+// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
+// element, any tile that is present, plus all objects and terrain within the element
+float iSpaceObjectEnvironment::DetermineTotalElementImpactStrength(int element_id)
+{
+	if (!IsValidElementID(element_id)) return 0.0f;
+	return DetermineTotalElementImpactStrength(GetElementDirect(element_id));
+}
+
+// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
+// element, any tile that is present, plus all objects and terrain within the element
+float iSpaceObjectEnvironment::DetermineTotalElementImpactStrength(const ComplexShipElement & el)
+{
+	if (el.IsDestroyed()) return 0.0f;
+	float tile_strength = 0.0f, objects_strength = 0.0f, terrain_strength = 0.0f;
+	
+	ComplexShipTile *tile = el.GetTile();
+	std::vector<iEnvironmentObject*> objects;
+	std::vector<StaticTerrain*> terrain;
+
+	// First, the inherent strength of the element.  This is scaled by the current element health to simulate
+	// the loss of structural integrity as the hull takes more damage
+	float el_strength = el.GetImpactResistance();
+
+	// Next, the tile currently in this element (if any).  This is also scaled by the health of the underlying element
+	if (tile)
+	{
+		tile_strength = tile->GetImpactResistance(el);
+	}
+
+	// Next, any objects or terrain in the element
+	if (this->SpatialPartitioningTree)
+	{
+		INTVECTOR3 el_loc = el.GetLocation();
+		EnvironmentTree *node = this->SpatialPartitioningTree->GetNodeContainingElement(el_loc);
+		if (node)
+		{
+			// Get all the objects & terrain in this tree node
+			node->GetAllItems(objects, terrain);
+
+			// Add the contribution from all objects in the element
+			std::vector<iEnvironmentObject*>::const_iterator it_end = objects.end();
+			for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
+			{
+				if (*it && (*it)->GetElementLocation() == el_loc) objects_strength += (*it)->GetImpactResistance();
+			}
+
+			// Also add the contribution from all terrain in the element
+			std::vector<StaticTerrain*>::const_iterator it2_end = terrain.end();
+			for (std::vector<StaticTerrain*>::const_iterator it2 = terrain.begin(); it2 != it2_end; ++it2)
+			{
+				if (*it2 && (*it2)->GetElementLocation() == el_loc) terrain_strength += (*it2)->GetImpactResistance();
+			}
+		}
+	}
+
+	// Sum and return the total impact resistance 
+	return (el_strength + tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
+}
 
 // Registers a new collision with this environment, calculates the effect and begins to apply the effects
 // Returns a flag indicating whether the event was registered (there are several validations that may prevent this)
@@ -1605,50 +1677,12 @@ void iSpaceObjectEnvironment::ExecuteElementCollision(const EnvironmentCollision
 		return;
 	}
 
-	// Get the aggregate stopping power of the element based on its properties, parent tile, and the actual contents of the element
-	ComplexShipTile *tile = el.GetTile();
-	float tile_strength = 0.0f, objects_strength = 0.0f, terrain_strength = 0.0f;
-	std::vector<iEnvironmentObject*> objects;
-	std::vector<StaticTerrain*> terrain;
+	// Get the aggregate stopping power of the element based on its properties, parent tile, and the actual contents 
+	// of the element.   Will always be >= 1.0f.
+	float total_strength = DetermineTotalElementImpactStrength(el);
 
-	// First, the inherent strength of the element.  This is scaled by the current element health to simulate
-	// the loss of structural integrity as the hull takes more damage
-	float el_strength = el.GetImpactResistance();
-
-	// Next, the tile currently in this element (if any).  This is also scaled by the health of the underlying element
-	if (tile)
-	{
-		tile_strength = tile->GetImpactResistance(el);
-	}
-	
-	// Next, any objects or terrain in the element
-	if (this->SpatialPartitioningTree)
-	{
-		EnvironmentTree *node = this->SpatialPartitioningTree->GetNodeContainingElement(el.GetLocation());
-		if (node)
-		{
-			// Get all the objects & terrain in this tree node
-			node->GetAllItems(objects, terrain);
-			
-			// Add the contribution from all objects in the element
-			std::vector<iEnvironmentObject*>::const_iterator it_end = objects.end();
-			for (std::vector<iEnvironmentObject*>::const_iterator it = objects.begin(); it != it_end; ++it)
-			{
-				if (*it && (*it)->GetElementLocation() == el_loc) objects_strength += (*it)->GetImpactResistance();
-			}
-
-			// Also add the contribution from all terrain in the element
-			std::vector<StaticTerrain*>::const_iterator it2_end = terrain.end();
-			for (std::vector<StaticTerrain*>::const_iterator it2 = terrain.begin(); it2 != it2_end; ++it2)
-			{
-				if (*it2 && (*it2)->GetElementLocation() == el_loc) terrain_strength += (*it2)->GetImpactResistance();
-			}
-		}
-	}
-
-	// Sum the total impact resistance and compare to the incoming object force.  The percentage of force
+	// Compare this total element strength to the incoming object force.  The percentage of force
 	// transferred to this impacted hull is scaled by the degree of impact (Param1)
-	float total_strength = (el_strength + tile_strength + objects_strength + terrain_strength + 1.0f);	// Add 1.0f to ensure this is always >0.0
 	float damage_pc = (obj_force / total_strength) * ev.Param1;
 
 	// The final damage value (in the range 0.0-1.0) can be derived from this damage_pc and any relevant damage 
@@ -2765,6 +2799,8 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetPowerLevelAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElement, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(DetermineTotalElementImpactStrength, command.ParameterAsInt(2))
+	REGISTER_DEBUG_ACCESSOR_FN(DetermineTotalElementImpactStrengthAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(BuildSpatialPartitioningTree)
