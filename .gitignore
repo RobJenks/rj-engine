@@ -43,6 +43,7 @@
 *.log
 *.tlog
 *.nativecodeanalysis.xml
+*.lastcodeanalysissucceeded
 *.GenerateResource.Cache
 
 # Exclude debug, release & any other intermediate build directories
