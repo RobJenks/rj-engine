@@ -160,14 +160,14 @@ Result HpTurret::ReadFromXML(TiXmlElement *node, HashVal hashed_key)
 	if (hashed_key == HashedStrings::H_YawLimit) {
 		const char *cmin = node->Attribute("min");
 		const char *cmax = node->Attribute("max");
-		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
+		if (!cmin || !cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
 		
 		SetYawLimit((float)atof(cmin), (float)atof(cmax));
 	}
 	else if (hashed_key == HashedStrings::H_PitchLimit) {
 		const char *cmin = node->Attribute("min");
 		const char *cmax = node->Attribute("max");
-		if (!cmin && cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
+		if (!cmin || !cmax) return ErrorCodes::HardpointElementMissingRequiredAttributes;
 
 		SetPitchLimit((float)atof(cmin), (float)atof(cmax));
 	}

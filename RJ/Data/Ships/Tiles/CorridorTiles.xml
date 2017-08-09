@@ -6,6 +6,7 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_ns_model</Model>
     <Size x="1" y="1" z="1" />
+    <Mass>500</Mass>
     
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />

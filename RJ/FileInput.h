@@ -82,6 +82,12 @@ namespace IO
 		if (___tmp_loading_cchar) return (float)atof(___tmp_loading_cchar); else return 0.0f;
 	}
 
+	CMPINLINE float	GetFloatValue(TiXmlElement *node, float default_value)
+	{
+		___tmp_loading_cchar = node->GetText();
+		if (___tmp_loading_cchar) return (float)atof(___tmp_loading_cchar); else return default_value;
+	}
+
 	CMPINLINE int GetIntValue(TiXmlElement *node)
 	{
 		___tmp_loading_cchar = node->GetText();

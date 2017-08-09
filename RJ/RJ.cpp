@@ -138,7 +138,7 @@ int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )
 
 		return (HANDLE)0;
 	}
-
+	
 	void TerminateDebugLogWindow(HANDLE process)
 	{
 		if (process == (HANDLE)0) return;

@@ -995,6 +995,9 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 		else if (hash == HashedStrings::H_Health) {
 			el.SetHealth(IO::GetFloatValue(child));
 		}
+		else if (hash == HashedStrings::H_Strength) {
+			el.SetStrength(IO::GetFloatValue(child));
+		}
 		else if (hash == HashedStrings::H_Connections) {
 			el.SetConnectionState(IO::GetIntValue(child));
 		}
@@ -1256,6 +1259,12 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			if (val == NullString)				tiledef->SetTileLevel(1);
 			else								tiledef->SetTileLevel(atoi(val.c_str()));
 			if (tiledef->GetTileLevel() < 1)	tiledef->SetTileLevel(1);
+		}
+		else if (hash == HashedStrings::H_Mass) {
+			tiledef->SetMass(IO::GetFloatValue(child, 1.0f));
+		}
+		else if (hash == HashedStrings::H_Hardness) {
+			tiledef->SetHardness(IO::GetFloatValue(child, 1.0f));
 		}
 		else if (hash == HashedStrings::H_Hardpoint) {
 			Hardpoint *h = LoadHardpoint(child);

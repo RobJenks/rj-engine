@@ -6,6 +6,7 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="-1" y="-1" z="-1" />
     <Level>2</Level>
+    <Mass>1500</Mass>
 
     <CompoundTileModelData>
       <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>

@@ -91,8 +91,16 @@ public:
 	virtual void			ReadClassSpecificXMLData(TiXmlElement *node) = 0;
 
 	// Get and set the numeric tile level, that indicates how advanced a tile this is in the tech tree
-	CMPINLINE int			GetTileLevel(void) const						{ return m_level; }
-	CMPINLINE void			SetTileLevel(int level)							{ m_level = level; }
+	CMPINLINE int			GetTileLevel(void) const								{ return m_level; }
+	CMPINLINE void			SetTileLevel(int level)									{ m_level = level; }
+
+	// Mass of the tile, excluding any contents
+	CMPINLINE float			GetMass(void) const										{ return m_mass; }
+	CMPINLINE void			SetMass(float mass)										{ m_mass = mass; }
+
+	// Hardness multiplier for the tile, roughly approximating 'density' in impact calculations
+	CMPINLINE float			GetHardness(void) const									{ return m_hardness; }
+	CMPINLINE void			SetHardness(float hardness)								{ m_hardness = hardness; }
 
 	// Vector of all terrain objects which are contained within this tile definition
 	std::vector<StaticTerrain*>							TerrainObjects;
@@ -206,6 +214,10 @@ protected:
 	// The numeric level of this tile, indicating how advanced it is in the tech tree
 	int							m_level;
 	
+	// Physical properties of the tile
+	float						m_mass;
+	float						m_hardness;
+
 	// The geometry associated with this ship tile, if it uses only a single model
 	Model *						m_model;
 

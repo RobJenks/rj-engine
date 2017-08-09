@@ -6,6 +6,8 @@
     <PrimaryTile>True</PrimaryTile>
     <Size x="1" y="1" z="1" />
     <Level>1</Level>
+    <Mass>2000</Mass>
+    <Hardness>1.5</Hardness>
 <!--
     <CompoundTileModelData>
       <Model type="interior" code="powergenerator_basic01_interior_model" prob="1.0"/>

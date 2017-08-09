@@ -82,6 +82,8 @@ namespace HashedStrings
 	DefineHash(H_CameraRotation, "camerarotation");
 	DefineHash(H_CameraElasticity, "cameraelasticity");
 	DefineHash(H_Mass, "mass");
+	DefineHash(H_Hardness, "hardness");
+	DefineHash(H_Strength, "strength");
 	DefineHash(H_VelocityLimit, "velocitylimit");
 	DefineHash(H_AngularVelocityLimit, "angularvelocitylimit");
 	DefineHash(H_BrakeFactor, "brakefactor");
