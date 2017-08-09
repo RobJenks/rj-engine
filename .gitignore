@@ -50,6 +50,9 @@
 /RJ/Debug/*
 /RJ/Release/*
 /RJ/Test/*
+/RJ/x64/Debug/*
+/RJ/x64/Release/*
+/RJ/x64/Test/*
 /RJ-VS10/RJ-VS10/Debug/*
 /RJ-VS10/RJ-VS10/Release/*
 /RJ-VS10/ipch/*
