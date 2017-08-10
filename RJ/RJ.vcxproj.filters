@@ -676,6 +676,12 @@
     <ClCompile Include="EnvironmentPowerOverlay.cpp">
       <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
     </ClCompile>
+    <ClCompile Include="CSArmourTile.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
+    <ClCompile Include="CSArmourTileDefinition.cpp">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1563,6 +1569,12 @@
     </ClInclude>
     <ClInclude Include="EnvironmentPowerOverlay.h">
       <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClInclude>
+    <ClInclude Include="CSArmourTile.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="CSArmourTileDefinition.h">
+      <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

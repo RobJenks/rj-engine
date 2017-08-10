@@ -391,6 +391,8 @@
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CoreEngine.cpp" />
     <ClCompile Include="Crew.cpp" />
+    <ClCompile Include="CSArmourTile.cpp" />
+    <ClCompile Include="CSArmourTileDefinition.cpp" />
     <ClCompile Include="CSCorridorTile.cpp" />
     <ClCompile Include="CSEngineRoomTile.cpp" />
     <ClCompile Include="CSEngineRoomTileDefinition.cpp" />
@@ -631,6 +633,8 @@
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="Crew.h" />
     <ClInclude Include="CrewClassRequirement.h" />
+    <ClInclude Include="CSArmourTile.h" />
+    <ClInclude Include="CSArmourTileDefinition.h" />
     <ClInclude Include="CSCorridorTile.h" />
     <ClInclude Include="CSCorridorTileDefinition.h" />
     <ClInclude Include="CSEngineRoomTile.h" />

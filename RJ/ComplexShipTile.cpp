@@ -20,6 +20,7 @@
 #include "CSLifeSupportTile.h"
 #include "CSPowerGeneratorTile.h"
 #include "CSEngineRoomTile.h"
+#include "CSArmourTile.h"
 #include "ComplexShipTile.h"
 #include "Damage.h"
 #include "ProductionProgress.h"
@@ -885,6 +886,7 @@ ComplexShipTile * ComplexShipTile::New(D::TileClass cls)
 		case D::TileClass::LifeSupport:			return new CSLifeSupportTile();
 		case D::TileClass::PowerGenerator:		return new CSPowerGeneratorTile();
 		case D::TileClass::EngineRoom:			return new CSEngineRoomTile();
+		case D::TileClass::Armour:				return new CSArmourTile();
 
 		default:								return NULL;
 	}

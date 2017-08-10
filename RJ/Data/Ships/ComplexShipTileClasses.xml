@@ -41,6 +41,12 @@
     <InfrastructureRequirement class="Power" />
   </ComplexShipTileClass>
 
+  <ComplexShipTileClass>
+    <Code>Armour</Code>
+    <Name>Armour</Name>
+    <PrimaryTile>True</PrimaryTile>
+    <MinimumSize x="1" y="1" z="1" />
+  </ComplexShipTileClass>
 
 </GameData>
 

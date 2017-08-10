@@ -15,6 +15,7 @@
 #include "CSLifeSupportTileDefinition.h"
 #include "CSPowerGeneratorTileDefinition.h"
 #include "CSEngineRoomTileDefinition.h"
+#include "CSArmourTileDefinition.h"
 
 #include "ComplexShipTileDefinition.h"
 
@@ -61,6 +62,7 @@ ComplexShipTileDefinition *	ComplexShipTileDefinition::Create(D::TileClass cls)
 		case D::TileClass::LifeSupport:		def = new CSLifeSupportTileDefinition();	break;
 		case D::TileClass::PowerGenerator:	def = new CSPowerGeneratorTileDefinition();	break;
 		case D::TileClass::EngineRoom:		def = new CSEngineRoomTileDefinition();		break; 
+		case D::TileClass::Armour:			def = new CSArmourTileDefinition();			break;
 
 		// Return error if the class is unknown
 		default:							return NULL;

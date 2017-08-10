@@ -70,6 +70,7 @@ namespace D {
 		LifeSupport, 
 		EngineRoom,
 		Coolant,
+		Armour, 
 		_COUNT 
 	};
 
