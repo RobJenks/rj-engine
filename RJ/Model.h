@@ -75,7 +75,7 @@ class Model
 		CMPINLINE void				SetModelClass(ModelClass modelclass) { m_modelclass = modelclass; }
 		CMPINLINE string			GetTextureFilename(void) { return m_texturefilename; }
 		CMPINLINE void				SetTextureFilename(string filename) { m_texturefilename = filename; }
-		CMPINLINE bool				IsGeometryLoaded(void) { return m_geometryloaded; }
+		CMPINLINE bool				IsGeometryLoaded(void) const { return m_geometryloaded; }
 		CMPINLINE void				SetGeometryLoaded(bool loaded) { m_geometryloaded = loaded; }
 		CMPINLINE bool				IsStandardModel(void) { return m_standardmodel; }
 		CMPINLINE void				SetStandardModel(bool standard) { m_standardmodel = standard; }

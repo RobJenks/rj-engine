@@ -95,6 +95,8 @@
 
 
 std::vector<ComplexShipSection*> IO::Data::__TemporaryCSSLoadingBuffer;
+IO::Data::compound_models_pending_postprocessing_T IO::Data::CompoundModelsPendingPostProcessing;
+
 
 TiXmlDocument *IO::Data::LoadXMLDocument(const string &filename)
 {
@@ -742,7 +744,11 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 			else if (hash == HashedStrings::H_ComplexShipTile)
 			{
 				result = LoadComplexShipTile(node, &tile);
-				if (tile && result == ErrorCodes::NoError) object->AddTile(&tile);
+				if (tile && (result == ErrorCodes::NoError || result == ErrorCodes::TileCompiledWithoutGeometryDataLoaded))
+				{
+					// "TileCompiledWithoutGeometryDataLoaded" is an expected case and should still be treated as success
+					object->AddTile(&tile);
+				}
 			}
 		}
 	}
@@ -1374,7 +1380,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 
 Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutShipTile)
 {
-	Result result;
+	Result compilation_result;
 	string key, val;
 	ComplexShipTile *tile = NULL; 
 	
@@ -1398,15 +1404,77 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 	ComplexShipTile::ReadBaseClassXML(node, tile);
 
 	// Now attempt to compile and validate the tile based on the data that was loaded from XML
-	result = def->CompileAndValidateTile(tile);
-	if (result != ErrorCodes::NoError)
+	compilation_result = def->CompileAndValidateTile(tile);
+	if (compilation_result != ErrorCodes::NoError && compilation_result != ErrorCodes::TileCompiledWithoutGeometryDataLoaded)
 	{
-		delete tile; tile = NULL;
-		return result;
+		// In case of any error OTHER THAN geometry data being required (which we will fix during 
+		// post-processing), delete the partially-constructed tile and return the error code
+		SafeDelete(tile);
+		return compilation_result;
 	}
 	
+	// From this point onwards we will return a valid tile object.  We can therefore register the tile
+	// for post-processing if it was required
+	if (compilation_result == ErrorCodes::TileCompiledWithoutGeometryDataLoaded)
+	{
+		// If the tile was compiled based on any model data that does not have its geometry data
+		// loaded, it may require recalculation once the geometry data is available
+		RegisterCompoundModelRequiringGeometryCalculation(tile);
+	}
+
 	// Set a pointer to the new tile and return success to indicate that the tile was created successfully
 	(*pOutShipTile) = tile;
+	return compilation_result;
+}
+
+// Adds an object to the queue for post-processing of its compound model data, once model geometry 
+// has been loaded.  Method defined for each type of object that can contain compound models
+void IO::Data::RegisterCompoundModelRequiringGeometryCalculation(ComplexShipTile *tile)
+{
+	if (tile && tile->HasCompoundModel())
+		IO::Data::CompoundModelsPendingPostProcessing.tiles.push_back(tile);
+}
+
+// Post-process all compound model objects that did not have full geometry data available upon compilation
+// Must be called after LoadAllModelGeometry() and PostProcessAllModelGeometry() in the load sequence
+// to ensure all required geometry data is available
+Result IO::Data::PostProcessCompoundModelData(void)
+{
+	Result result, overallresult = ErrorCodes::NoError;
+
+	// Tile objects
+	result = PostProcessTileCompoundModelData();
+	if (result != ErrorCodes::NoError) overallresult = result;
+
+	// (Other object types...)
+
+
+	// Return the overall result from post-processing of all object types
+	return overallresult;
+}
+
+// Post-process all compound model objects that did not have full geometry data available upon compilation
+Result IO::Data::PostProcessTileCompoundModelData(void)
+{
+	// Process every tile that was registered for post-processing
+	std::vector<ComplexShipTile*>::size_type processed = 0U;
+	auto it_end = IO::Data::CompoundModelsPendingPostProcessing.tiles.end();
+	for (auto it = IO::Data::CompoundModelsPendingPostProcessing.tiles.begin(); it != it_end; ++it)
+	{
+		ComplexShipTile *tile = (*it);
+		if (tile && tile->HasCompoundModel())
+		{
+			tile->RecalculateCompoundModelData();
+			tile->RecalculateWorldMatrix();
+			++processed;
+		}
+	}
+
+	// Log the result and clear the list of pending objects since these have all now been processed
+	Game::Log << LOG_INFO << "Post-processed " << IO::Data::CompoundModelsPendingPostProcessing.tiles.size() << " compound tile models (" <<
+		processed << " of " << IO::Data::CompoundModelsPendingPostProcessing.tiles.size() << " succeeded)\n";
+
+	IO::Data::CompoundModelsPendingPostProcessing.tiles.clear();
 	return ErrorCodes::NoError;
 }
 

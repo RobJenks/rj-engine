@@ -1662,6 +1662,11 @@ Result RJMain::InitialiseLoadedGameData(void)
 	if (res != ErrorCodes::NoError) failures = true;
 	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
 
+	// Update any compound model components that need to be recalculated based on model geometry data (now it has been loaded)
+	res = IO::Data::PostProcessCompoundModelData();
+	if (res != ErrorCodes::NoError) failures = true;
+	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of compound model geometry data completed\n" : "ERRORS encountered during post-processing of compound model geometry\n");
+
 	// Load all audio resources.  TODO: in future, we may not want to load everything on startup
 	Game::Log << LOG_INFO << "Beginning load of all audio resource data\n";
 	res = Game::Engine->GetAudioManager()->LoadAllAudioResources();

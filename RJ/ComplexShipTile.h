@@ -290,7 +290,7 @@ public:
 			Models.push_back(TileModel(model, location, rot, type));
 
 			// Test whether the compound model bounds have changed based on the addition of this one item
-			RecalculateBounds(model, location);
+			RecalculateBounds();
 		}
 
 		// Gets the model at the specified location
@@ -377,27 +377,6 @@ public:
 			RecalculateBounds();
 		}
 
-		void RecalculateBounds(Model *model, const INTVECTOR3 & elementlocation)
-		{
-			// Parameter check
-			if (!model) return;
-
-			// Check whether the min or max bounds for this model would push out the overall bounds
-			// Swap y and z coordinates since we are moving from element to world space
-			// pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(elementlocation.x), _z_, _y_);
-			const INTVECTOR3 & elsize = model->GetElementSize();
-			XMVECTOR pos = XMVectorAdd(	Game::ElementLocationToPhysicalPosition(elementlocation),
-										XMVectorMultiply(VectorFromIntVector3SwizzleYZ(elsize), Game::C_CS_ELEMENT_MIDPOINT_V));
-
-			// Update the model bounds if required
-			MinBounds = XMVectorMin(MinBounds, XMVectorSubtract(pos, XMLoadFloat3(&model->GetModelMinBounds())));
-			MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(pos, XMLoadFloat3(&model->GetModelMaxBounds())));
-
-			// Recalculate the model size and centre point based on these values
-			CompoundModelSize = XMVectorSubtract(MaxBounds, MinBounds);
-			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
-		}
-
 		void RecalculateBounds(void)
 		{
 			// Initialise the min and max bounds before starting
@@ -417,14 +396,11 @@ public:
 				// Check whether the min or max bounds for this model would push out the overall bounds
 				// Swap y and z coordinates since we are moving from element to world space
 				// D3DXVECTOR3 pos = D3DXVECTOR3(((float)elsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(location.x), _z_, _y_);
-				const INTVECTOR3 & elsize = model->GetElementSize();
-				const INTVECTOR3 & location = Models[i].value.elementpos;
-				XMVECTOR pos = XMVectorAdd(	Game::ElementLocationToPhysicalPosition(location),
-											XMVectorMultiply(VectorFromIntVector3SwizzleYZ(elsize), Game::C_CS_ELEMENT_MIDPOINT_V));
+				XMVECTOR position = XMVectorAdd(Game::ElementLocationToPhysicalPosition(Models[i].value.elementpos), Game::C_CS_ELEMENT_MIDPOINT_V);
 
 				// Update the model bounds if required
-				MinBounds = XMVectorMin(MinBounds, XMVectorSubtract(pos, XMLoadFloat3(&model->GetModelMinBounds())));
-				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(pos, XMLoadFloat3(&model->GetModelMaxBounds())));
+				MinBounds = XMVectorMin(MinBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMinBounds())));	// MinBounds are usually -ve.  Add rather than subtract
+				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMaxBounds())));
 				updated = true;
 			}
 			
@@ -437,6 +413,17 @@ public:
 			// Recalculate the model size and centre point based on these values
 			CompoundModelSize = XMVectorSubtract(MaxBounds, MinBounds);
 			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
+		}
+
+		// Indicates whether this compound model was built using any pre-geometry-loading models.  If this is 
+		// the case it will be post-processed after geometry is loaded in the load sequence
+		CMPINLINE bool RequiresPostProcessing(void) const
+		{
+			auto it_end = Models.end();
+			for (auto it = Models.begin(); it != it_end; ++it)
+				if ((*it).value.model && (*it).value.model->IsGeometryLoaded() == false) return true;
+
+			return false;
 		}
 	};
 		
@@ -566,6 +553,12 @@ public:
 	CMPINLINE void						SetHasCompoundModel(bool compound)	{ m_multiplemodels = compound; }
 	CMPINLINE TileCompoundModelSet *	GetCompoundModelSet(void)			{ return &m_models; }
 	CMPINLINE const TileCompoundModelSet *	GetCompoundModelSet(void) const	{ return &m_models; }
+
+	// Indicates whether this tile has compound model data requiring post-processing with full model geometry
+	bool								RequiresCompoundModelPostProcessing(void) const;
+
+	// Recalculate compound model data, including geometry-dependent calculations that are performed during the post-processing load sequence
+	void								RecalculateCompoundModelData(void);
 
 	// Gets or sets the rotation of this tile; contents are already rotated, this is mainly for geometry rendering & the SD
 	CMPINLINE Rotation90Degree			GetRotation(void) const { return m_rotation; }

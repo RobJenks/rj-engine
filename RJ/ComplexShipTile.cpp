@@ -823,26 +823,6 @@ ComplexShipTile * ComplexShipTile::Create(string code)
 	return D::ComplexShipTiles.Get(code)->CreateTile();
 }
 
-// Compiles the tile based on its definition
-Result ComplexShipTile::CompileTile(void)
-{
-	// Assuming we have a tile definition, compile against it and return the result
-	if (m_definition) return m_definition->CompileTile(this);
-	
-	// If no definition exists then simply return success
-	return ErrorCodes::NoError;
-}
-
-// Validates the tile against its hard-stop requirements and returns the result
-Result ComplexShipTile::ValidateHardStopRequirements(void)
-{
-	// Assuming we have an associated tile definition, pass control back to that component to perform validation
-	if (m_definition) return m_definition->ValidateTileHardStop(this);
-	
-	// If we have no definition to validate against then pass by default
-	return ErrorCodes::NoError;
-}
-
 // Compiles and validates the tile based on its definition, class & associated hard-stop criteria
 Result ComplexShipTile::CompileAndValidateTile(void)
 {
@@ -862,6 +842,28 @@ Result ComplexShipTile::GenerateGeometry(void)
 
 	// If we have no definition to validate against then simply return success
 	return ErrorCodes::NoError;
+}
+
+// Indicates whether this tile has compound model data requiring post-processing with full model geometry
+bool ComplexShipTile::RequiresCompoundModelPostProcessing() const
+{
+	if (m_multiplemodels)
+	{
+		return m_models.RequiresPostProcessing();
+	}
+
+	return false;
+}
+
+// Recalculate compound model data, including geometry-dependent calculations that are performed 
+// during the post-processing load sequence
+void ComplexShipTile::RecalculateCompoundModelData(void)
+{
+	// Make sure this tile does have compound model data
+	if (m_multiplemodels)
+	{
+		m_models.RecalculateBounds();
+	}
 }
 
 // Determines the code that should be assigned to a hardpoint owned by this tile
@@ -962,9 +964,8 @@ void ComplexShipTile::ProcessDebugTileCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_TILE_FN(ConstructionComplete)
 	REGISTER_DEBUG_TILE_FN(RecalculateTileData)
 	REGISTER_DEBUG_TILE_FN(RecalculateBoundingVolume)
+	REGISTER_DEBUG_TILE_FN(RecalculateCompoundModelData)
 	REGISTER_DEBUG_TILE_FN(RecalculateWorldMatrix)
-	REGISTER_DEBUG_TILE_FN(CompileTile)
-	REGISTER_DEBUG_TILE_FN(ValidateHardStopRequirements)
 	REGISTER_DEBUG_TILE_FN(CompileAndValidateTile)
 	REGISTER_DEBUG_TILE_FN(GenerateGeometry)
 	REGISTER_DEBUG_TILE_FN(FixConnections, command.ParameterAsBool(4))

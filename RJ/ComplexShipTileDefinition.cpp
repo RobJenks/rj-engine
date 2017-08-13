@@ -118,8 +118,15 @@ Result ComplexShipTileDefinition::CompileAndValidateTile(ComplexShipTile *tile) 
 	res = ValidateTileHardStop(tile);
 	if (res != ErrorCodes::NoError) return res;
 
-	// Return success
-	return ErrorCodes::NoError;
+	// If this tile has a compound model, validate whether it requires post-processing with full geometry data
+	if (tile->RequiresCompoundModelPostProcessing())
+	{
+		return ErrorCodes::TileCompiledWithoutGeometryDataLoaded;
+	}
+	else
+	{
+		return ErrorCodes::NoError;
+	}
 }
 
 // Builds a tile based on this definition, and the data loaded into the tile object by the GenerateTile method

@@ -164,12 +164,6 @@ public:
 	// Generates the geometry for this tile.  Typically called during tile compilation
 	Result							GenerateGeometry(ComplexShipTile *tile) const;
 
-	// Builds a tile based on this definition, and the data already loaded into the tile object
-	Result							CompileTile(ComplexShipTile *tile) const;
-
-	// Validates a tile based on its hard stop requirements
-	Result							ValidateTileHardStop(ComplexShipTile *tile) const;
-
 	// Attempts to compile *and validate* a tile based on the parameters that have been set
 	Result							CompileAndValidateTile(ComplexShipTile *tile) const;
 	
@@ -250,6 +244,12 @@ protected:
 		if (m_models.count(category) > 0)	return &(m_models.at(category)); 
 		else								return NULL; 
 	}
+
+	// Builds a tile based on this definition, and the data already loaded into the tile object
+	Result							CompileTile(ComplexShipTile *tile) const;
+
+	// Validates a tile based on its hard stop requirements
+	Result							ValidateTileHardStop(ComplexShipTile *tile) const;
 
 };
 
