@@ -682,6 +682,9 @@
     <ClCompile Include="CSArmourTileDefinition.cpp">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClCompile>
+    <ClCompile Include="EnvironmentElementStrengthOverlay.cpp">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1575,6 +1578,9 @@
     </ClInclude>
     <ClInclude Include="CSArmourTileDefinition.h">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
+    </ClInclude>
+    <ClInclude Include="EnvironmentElementStrengthOverlay.h">
+      <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

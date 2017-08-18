@@ -531,14 +531,7 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		if (b[DIK_LSHIFT]) cs()->RenderEnvironmentHealthOverlay(10, cs()->GetElementCount() - 1);
-		else if (b[DIK_LCONTROL]) cs()->RenderEnvironmentOxygenOverlay(20, cs()->GetElementCount() - 12);
-		else cs()->RenderEnvironmentPowerOverlay(104, 396);
-
-		/*static float rot = PIOVER2;
-		if (b[DIK_LSHIFT]) rot += (Game::TimeFactor * PI * 0.25f);
-		if (b[DIK_LCONTROL]) rot = PIOVER2;
-		cs()->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, rot));*/
+		cs()->RenderEnvironmentElementStrengthOverlay();
 
 		//Game::Keyboard.LockKey(DIK_U);
 	}

@@ -20,6 +20,7 @@
 #include "EnvironmentHealthOverlay.h"
 #include "EnvironmentOxygenOverlay.h"
 #include "EnvironmentPowerOverlay.h"
+#include "EnvironmentElementStrengthOverlay.h"
 
 class iEnvironmentObject;
 class StaticTerrain;
@@ -505,7 +506,7 @@ public:
 	DEFINE_RENDERING_OVERLAY(EnvironmentHealthOverlay)
 	DEFINE_RENDERING_OVERLAY(EnvironmentOxygenOverlay)
 	DEFINE_RENDERING_OVERLAY(EnvironmentPowerOverlay)
-		
+	DEFINE_RENDERING_OVERLAY(EnvironmentElementStrengthOverlay)	
 
 
 	// Renders a 3D overlay showing the properties of each element in the environment.  If the reference 'outLegend' is provided

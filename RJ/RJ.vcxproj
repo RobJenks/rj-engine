@@ -413,6 +413,7 @@
     <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
+    <ClCompile Include="EnvironmentElementStrengthOverlay.cpp" />
     <ClCompile Include="EnvironmentHealthOverlay.cpp" />
     <ClCompile Include="EnvironmentOxygenOverlay.cpp" />
     <ClCompile Include="EnvironmentPowerOverlay.cpp" />
@@ -658,6 +659,7 @@
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="Direction.h" />
     <ClInclude Include="DynamicTileSet.h" />
+    <ClInclude Include="EnvironmentElementStrengthOverlay.h" />
     <ClInclude Include="EnvironmentHealthOverlay.h" />
     <ClInclude Include="ElementIntersection.h" />
     <ClInclude Include="EnvironmentOxygenOverlay.h" />
