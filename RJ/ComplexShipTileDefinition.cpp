@@ -31,23 +31,11 @@ const ComplexShipTileDefinition::CornerAdjacencyData ComplexShipTileDefinition::
 };
 
 ComplexShipTileDefinition::ComplexShipTileDefinition(void)
+	: m_code(NullString), m_name(NullString), m_classtype(D::TileClass::Unknown), m_class(NULL), m_level(0), m_powerrequirement(0),
+	  m_haveclassspecificdata(false), m_model(NULL), m_multiplemodels(false), m_elementsize(NULL_INTVECTOR3), m_boundingbox(NULL), 
+	  m_mass(1.0f), m_hardness(1.0f), m_productioncost(NULL), m_member_of_dynamic_tileset(false), m_dynamic_tileset(NullString), 
+	  DefaultElementState(ElementStateFilters::TILE_PROPERTIES)
 {
-	// Set default field parameters
-	m_code = "";
-	m_name = "";
-	m_class = NULL;
-	m_level = 0;
-	m_powerrequirement = 0;
-	m_classtype = D::TileClass::Unknown;
-	m_haveclassspecificdata = false;
-	m_model = NULL;
-	m_multiplemodels = false;
-	m_elementsize = NULL_INTVECTOR3;
-	m_boundingbox = NULL;
-	m_productioncost = NULL;
-	m_member_of_dynamic_tileset = false;
-	m_dynamic_tileset = NullString;
-	DefaultElementState = ElementStateDefinition(ElementStateFilters::TILE_PROPERTIES);
 }
 
 // Static method to create definition objects of the desired subclass type
