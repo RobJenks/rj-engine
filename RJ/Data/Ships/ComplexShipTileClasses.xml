@@ -12,7 +12,7 @@
     <Code>Quarters</Code>
     <Name>Crew Quarters</Name>
     <PrimaryTile>True</PrimaryTile>
-    <MinimumSize x="2" y="2" z="1" />
+    <MinimumSize x="1" y="1" z="1" />
     <InfrastructureRequirement class="Power" />
     <ObjectRequirement class="Bed" min="1" />
   </ComplexShipTileClass>

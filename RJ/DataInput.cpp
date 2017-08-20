@@ -1409,6 +1409,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 	{
 		// In case of any error OTHER THAN geometry data being required (which we will fix during 
 		// post-processing), delete the partially-constructed tile and return the error code
+		Game::Log << LOG_WARN << "Tile " << tile->GetID() << " of type \"" << def->GetCode() << "\" failed load-time validation and will not be instantiated (" << compilation_result << ")\n";
 		SafeDelete(tile);
 		return compilation_result;
 	}
