@@ -138,7 +138,7 @@ public:
 
 	// Methods to accept generic mouse click events at the specified location
 	void ProcessMouseClickAtLocation(INTVECTOR2 location);
-	void ProcessRightMouseClickAtLocation(INTVECTOR2 location) { }
+	void ProcessRightMouseClickAtLocation(INTVECTOR2 location);
 
 	// Methods to accept the processed mouse click events for particular components
 	void ProcessMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
@@ -266,6 +266,9 @@ protected:
 	// Place the selected tile at its current location, assuming the placement is valid
 	void										PlaceTile(void);
 
+	// Delete the tile at the specified location within the environment, assuming there is one
+	void										DeleteTile(const INTVECTOR3 & location);
+
 	// Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
 	// a list of errors to the supplied output vector, if any exist
 	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location, 
@@ -289,13 +292,13 @@ protected:
 	// Clear any stored intersection test results
 	void										ClearIntersectionTestResults(void);
 
-	// Handles the LMB first-down event in structural test mode
+	// Handle mouse events in tile mode 
+	void										HandleTileModeMouseClick(const INTVECTOR2 & location);
+	void										HandleTileModeRightMouseClick(const INTVECTOR2 & location);
+
+	// Handle mouse events in structural test mode
 	void										HandleStructuralModeMouseFirstDown(void);
-
-	// Handles the mouse move event while in structural testing mode
 	void										HandleStructuralModeMouseMove(void);
-
-	// Handles the mouse up event while in structural testing mode
 	void										HandleStructuralModeMouseUp(void);
 
 	// Internal methods to get the current position/orientation of the game camera

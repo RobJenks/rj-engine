@@ -373,6 +373,19 @@ void UI_ShipBuilder::PlaceTile(void)
 	SetTileBeingPlaced(code);
 }
 
+// Delete the tile at the specified location within the environment, assuming there is one
+void UI_ShipBuilder::DeleteTile(const INTVECTOR3 & location)
+{
+	// Check whether a tile actually exists at this element location
+	ComplexShipElement *el = m_ship->GetElement(location);
+	if (!el) return;
+
+	ComplexShipTile *tile = el->GetTile();
+	if (!tile) return;
+
+	// Delete this tile from the environment
+	m_ship->RemoveTile(tile);
+}
 
 // Method that is called when the UI controller is deactivated
 void UI_ShipBuilder::Deactivate(void)
@@ -937,9 +950,22 @@ void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2
 // Methods to accept generic mouse click events at the specified location
 void UI_ShipBuilder::ProcessMouseClickAtLocation(INTVECTOR2 location)
 {
-	// If we have a tile selected, attempt to place it now.  No need to check the location since this
-	// is updated each frame for tile placement.  The PlaceTile() method will validate location before placing
-	if (m_tile_being_placed) PlaceTile();
+	// Take different action depending on the editor mode
+	if (m_mode == EditorMode::TileMode)
+	{
+		HandleTileModeMouseClick(location);
+	}
+}
+
+// Process right mouse clicks in the editor
+void UI_ShipBuilder::ProcessRightMouseClickAtLocation(INTVECTOR2 location)
+{
+	// Take different action depending on the editor mode
+	if (m_mode == EditorMode::TileMode)
+	{
+		HandleTileModeRightMouseClick(location);
+	}
+
 }
 
 // Method to handle the mouse move event
@@ -960,6 +986,21 @@ void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlo
 	{
 		HandleStructuralModeMouseUp();
 	}
+}
+
+// Handle mouse events in tile mode 
+void UI_ShipBuilder::HandleTileModeMouseClick(const INTVECTOR2 & location)
+{
+	// If we have a tile selected, attempt to place it now.  No need to check the location since this
+	// is updated each frame for tile placement.  The PlaceTile() method will validate location before placing
+	if (m_tile_being_placed) PlaceTile();
+}
+
+// Handle mouse events in tile mode 
+void UI_ShipBuilder::HandleTileModeRightMouseClick(const INTVECTOR2 & location)
+{
+	// If the mouse is currently over an element, we want to delete it
+	if (m_mouse_is_over_element) DeleteTile(m_mouse_over_element);
 }
 
 // Determines the correct positioning for the camera based on current mouse events
