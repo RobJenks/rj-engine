@@ -1353,6 +1353,9 @@ void UI_ShipBuilder::ProcessButtonClickEvent(UIButton *button)
 	else if (button->GetCode() == "btn_load") {
 		LoadShip();
 	}
+	else if (button->GetCode() == "btn_reset") {
+		ResetShip();
+	}
 	
 }
 
@@ -1685,6 +1688,15 @@ Result UI_ShipBuilder::PerformLoad(void)
 	
 	// Report success
 	return ErrorCodes::NoError;
+}
+
+// Reset the contents of the current ship.  Ship sections are (currently) retained
+void UI_ShipBuilder::ResetShip(void)
+{
+	if (!m_ship) return;
+
+	m_ship->RemoveAllTiles();
+	SetStatusMessage("Environment reset");
 }
 
 // Update the status message text

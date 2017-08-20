@@ -556,6 +556,32 @@ void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile)
 	UpdateEnvironment();
 }
 
+// Removes all tiles from the environment
+void iSpaceObjectEnvironment::RemoveAllTiles(void)
+{
+	// Suspend environment updates until all changes have been made
+	SuspendEnvironmentUpdates(); 
+	SuspendTileRecalculation();
+
+	// Take this longer approach rather than just while (!empty) in case there is any issue preventing a tile 
+	// from being removed from the collection
+	int count = GetTileCount();
+	while (--count >= 0)
+	{
+		RemoveTile(GetTile(0));
+	}
+
+	// If any tiles remain we have an issue
+	if (HasTiles())
+	{
+		Game::Log << LOG_ERROR << "Failed to remove all tiles from environment \"" << m_instancecode << "\"; " << GetTileCount() << " tiles remain\n";
+	}
+
+	// Resume updates following all changes
+	ReactivateTileRecalculation();
+	ResumeEnvironmentUpdates();
+}
+
 
 // Adds all terrain objects associated with a tile to the environment
 void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)

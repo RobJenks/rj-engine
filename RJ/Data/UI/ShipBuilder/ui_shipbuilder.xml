@@ -27,10 +27,12 @@
     <Image2DGroup code="button1_up" texture="UI\Common\Content\button1.dds" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="btn_save_up" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_up" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_reset_up" x="1160" y="128" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
     <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
       <Instance code="btn_save_down" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_down" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_reset_down" x="1160" y="128" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
 
     <!-- =============================== -->
@@ -51,7 +53,11 @@
     <!-- Load button -->
     <TextBlock code="btn_load_text" text="Load" render="true" capacity="8" size="1.000000" />
     <Button code="btn_load" up="button1_up" up_key="btn_load_up" down="button1_down" down_key="btn_load_down" text="btn_load_text" render="true"/>
-    
+
+    <!-- Reset button -->
+    <TextBlock code="btn_reset_text" text="Reset" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_reset" up="button1_up" up_key="btn_reset_up" down="button1_down" down_key="btn_reset_down" text="btn_reset_text" render="true"/>
+
     <!-- General mode status message -->
     <TextBlock code="txt_status" text=" " x="1000" y="176" render="true" capacity="512" size="1.000000" />
     
@@ -100,6 +106,7 @@
       <include code="txt_shipname_label" />
       <include code="btn_save" />
       <include code="btn_load" />
+      <include code="btn_reset" />
       <include code="txt_status" />
     </ComponentGroup>
 

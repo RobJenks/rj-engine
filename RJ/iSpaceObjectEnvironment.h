@@ -302,6 +302,9 @@ public:
 	// Remove a tile from the environment
 	void							RemoveTile(ComplexShipTile *tile);
 
+	// Removes all tiles from the environment
+	void							RemoveAllTiles(void);
+
 	// Events that are generated pre- and post-tile removal.  Exposed for use by subclasses as required
 	virtual void					BeforeTileRemoved(ComplexShipTile *tile);
 	virtual void					TileRemoved(ComplexShipTile *tile);

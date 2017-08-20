@@ -119,6 +119,9 @@ public:
 	// Load the specified ship design
 	void												LoadShip(void);
 	
+	// Reset the contents of the current ship.  Ship sections are (currently) retained
+	void												ResetShip(void);
+
 	// Update the status message text
 	void												SetStatusMessage(const std::string & msg);
 
