@@ -858,59 +858,11 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Keyboard.LockKey(DIK_3);
 	}
 	if (b[DIK_4]) {
-		Actor *ac = Game::CurrentPlayer->GetActor();
+		
+		cs()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
 
-		if (b[DIK_LCONTROL])
-		{
-			if (b[DIK_LSHIFT])
-				ac->Turn(-PIOVER2 * Game::TimeFactor);
-			else
-				ac->Turn(PIOVER2 * Game::TimeFactor);
-
-			ac->CollisionOBB.UpdateFromObject(*ac);
-			ac->CollisionOBB.RecalculateData();
-
-			AXMVECTOR_P v[8];
-			ac->CollisionOBB.DetermineVertices(v);
-			return;
-		}
-		else
-		{
-			Game::Console.ProcessRawCommand(GameConsoleCommand("hull_render 0"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
-			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
-
-			if (b[DIK_LSHIFT])
-			{
-				Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
-				Game::Engine->GetCamera()->SetDebugCameraPosition(XMVectorAdd(ac->GetPosition(), XMVectorSet(0.0f, 0.0f, -10.0f, 0.0f)));
-				Game::Engine->GetCamera()->SetDebugCameraOrientation(ID_QUATERNION);
-			}
-
-			StaticTerrain *t = cs()->TerrainObjects.at(0);
-			t->SetDefinition(D::StaticTerrainDefinitions.Get("tmp_terrain_box"));
-			t->SetExtent(XMVectorSet(50.0f, 2.5f, 50.0f, 0.0f));
-			t->SetPosition(XMVectorSet(10.0f, 6.0f, 10.0f, 0.0f));
-			t->RecalculatePositionalData();
-
-			ac->SetEnvironmentPosition(XMVectorSet(35.0f, 16.0f, 35.0f, 0.0f));
-
-			size_t n = cs()->TerrainObjects.size();
-			for (size_t i = 1U; i < n; ++i)
-			{
-				cs()->TerrainObjects.at(i)->SetPosition(XMVectorReplicate(1000.0f));
-				cs()->TerrainObjects.at(i)->SetExtent(XMVectorReplicate(0.1f));
-				cs()->TerrainObjects.at(i)->RecalculatePositionalData();
-			}
-			int nT = cs()->GetTileCount();
-			for (int i = 0; i < nT; ++i)
-			{
-				cs()->GetTile(i)->Fade.FadeToAlpha(1.0f + ((float)i / (float)nT), 0.1f);
-			}
-
-			Game::Keyboard.LockKey(DIK_4);
-		}		
+		Game::Keyboard.LockKey(DIK_4);
+		
 	}
 }
 

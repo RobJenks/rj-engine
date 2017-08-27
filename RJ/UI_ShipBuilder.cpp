@@ -741,13 +741,11 @@ void UI_ShipBuilder::PerformCameraUpdate(void)
 			XMQuaternionMultiply(UI_ShipBuilder::DEFAULT_CAMERA_ROTATION, m_ship->GetOrientation())
 		);
 
-		XMVECTOR cam_orient = ///XMVectorMultiply( 
-			///XMQuaternionMultiply(m_ship->GetOrientation(), UI_ShipBuilder::DEFAULT_CAMERA_ROTATION), 
+		XMVECTOR cam_orient = 
 			XMQuaternionMultiply(
 				QuaternionBetweenVectors(FORWARD_VECTOR, XMVector3NormalizeEst(XMVectorSubtract(ship_centre, cam_pos))), 
 				orient_adjustment
 			);
-		///);
 		
 		// Set the camera position and orientation
 		Game::Engine->GetCamera()->FixCamera(cam_pos, cam_orient);
