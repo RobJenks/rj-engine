@@ -216,11 +216,7 @@ void iEnvironmentObject::SimulateObjectPhysics(void)
 	if (!IsZeroVector3(PhysicsState.WorldMomentum))
 	{
 		// Move the object based on its external momentum, relative to the environment
-		SetEnvironmentPosition(XMVectorAdd(	m_envposition,
-											XMVectorScale(
-												(parent ? XMVector3TransformCoord(PhysicsState.WorldMomentum, m_parent()->GetOrientationMatrix())
-														: PhysicsState.WorldMomentum),
-													Game::TimeFactor)));
+		SetEnvironmentPosition(XMVectorAdd(	m_envposition, XMVectorScale(PhysicsState.WorldMomentum, Game::TimeFactor)));
 	}
 }
 

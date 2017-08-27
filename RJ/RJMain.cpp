@@ -535,6 +535,19 @@ void RJMain::ProcessKeyboardInput(void)
 
 		//Game::Keyboard.LockKey(DIK_U);
 	}
+	if (b[DIK_J])
+	{
+		if (b[DIK_LSHIFT]) cs()->TurnShip(-PI / 8.0f, 0.0f, false);
+		else if (b[DIK_LCONTROL]) cs()->TurnShip(PI / 8.0f, 0.0f, false);
+		else
+		{
+			Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand("enter_ship_env cs1"));
+			Game::CurrentPlayer->GetActor()->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, 20.0f));
+			Game::Keyboard.LockKey(DIK_J);
+		}
+
+	}
 	if (b[DIK_5])
 	{
 		iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
@@ -564,6 +577,7 @@ void RJMain::ProcessKeyboardInput(void)
 		else
 		{
 			cs()->UpdateEnvironment();
+			Game::Keyboard.LockKey(DIK_7);
 		}
 		//Game::Keyboard.LockKey(DIK_7);
 	}
@@ -2380,8 +2394,10 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		Audio::AudioInstanceID current = Game::Engine->GetAudioManager()->GetTotalAudioInstanceCount();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Audio instances: %d, Object count: %zd, Object map count: %zd", (int)current, Game::Objects.size(), Game::ObjectsByCode.size());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Env: %s / %s, World: %s / %s, Parent: %s / %s",
+			Vector3ToString(Game::CurrentPlayer->GetEnvironmentPosition()).c_str(), QuaternionToString(Game::CurrentPlayer->GetEnvironmentOrientation()).c_str(),
+			Vector3ToString(Game::CurrentPlayer->GetPosition()).c_str(), QuaternionToString(Game::CurrentPlayer->GetOrientation()).c_str(),
+			Vector3ToString(cs()->GetPosition()).c_str(), QuaternionToString(cs()->GetOrientation()).c_str());
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
@@ -2392,5 +2408,3 @@ void RJMain::DEBUGDisplayInfo(void)
 
 //*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
 //	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
-
-

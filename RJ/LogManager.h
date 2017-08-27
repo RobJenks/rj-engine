@@ -49,6 +49,10 @@ public:
 		return manip(*this);
 	}
 
+	// Custom stream operators for specific types
+	CMPINLINE LogManager & operator<<(const FXMVECTOR data) { return operator<<(Vector4ToString(data)); }
+	CMPINLINE LogManager & operator<<(const FXMMATRIX data) { return operator<<(MatrixToString(data)); }
+
 	// Custom function to force a flush of log data during streaming
 	static LogManager& flush(LogManager& stream)
 	{

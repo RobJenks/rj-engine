@@ -49,7 +49,7 @@ public:
 	};*/
 
 	// Enumeration of possible object simulation states
-	enum ObjectSimulationState					{ NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
+	enum ObjectSimulationState { NoSimulation = 0, StrategicSimulation, TacticalSimulation, FullSimulation };
 
 	// Define a standard type for the collection of all attachments from this object to others
 	typedef std::vector<Attachment<iObject*>, AlignedAllocator<Attachment<iObject*>, 16>>	AttachmentSet;
@@ -59,17 +59,19 @@ public:
 	static const float							COLLISION_SPHERE_MARGIN;
 
 	// Enumeration of all object types
-	enum ObjectType {	Unknown = 0, ShipObject, SimpleShipObject, ComplexShipObject, ComplexShipSectionObject, 
-						SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject, ProjectileObject, LightSourceObject };
+	enum ObjectType {
+		Unknown = 0, ShipObject, SimpleShipObject, ComplexShipObject, ComplexShipSectionObject,
+		SpaceEmitterObject, ActorObject, CapitalShipPerimeterBeaconObject, ProjectileObject, LightSourceObject
+	};
 
 	// Enumeration of object classes
 	enum ObjectClass { UnknownObjectClass = 0, SpaceObjectClass, EnvironmentObjectClass };
-	
+
 	// Constructor
 	iObject(void);
 
 	// Method to return the unique ID of this object, or to request a new ID (e.g. when copying objects)
-	CMPINLINE Game::ID_TYPE					GetID(void)	const				{ return m_id; }
+	CMPINLINE Game::ID_TYPE					GetID(void)	const						{ return m_id; }
 	void									AssignNewUniqueID(void);
 
 	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
@@ -112,9 +114,9 @@ public:
 	// Position and orientation; all objects exist somewhere in the world
 	CMPINLINE XMVECTOR 						GetPosition(void) const					{ return m_position; }
 	CMPINLINE XMFLOAT3						GetPositionF(void) const				{ return m_positionf; }
-	CMPINLINE void							SetPosition(const FXMVECTOR pos)					
-	{ 
-		m_position = pos; 
+	CMPINLINE void							SetPosition(const FXMVECTOR pos)
+	{
+		m_position = pos;
 		XMStoreFloat3(&m_positionf, m_position);
 
 		m_spatialdatachanged = true;
@@ -128,19 +130,19 @@ public:
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
-	CMPINLINE void							AddDeltaPosition(const FXMVECTOR delta)		
-	{ 
+	CMPINLINE void							AddDeltaPosition(const FXMVECTOR delta)
+	{
 		SetPosition(XMVectorAdd(m_position, delta));
 	}
 
-	CMPINLINE const XMVECTOR				GetOrientation(void) const						{ return m_orientation; }
-	CMPINLINE void							SetOrientation(const FXMVECTOR orient)			
-	{ 
-		m_orientation = orient; 
+	CMPINLINE const XMVECTOR				GetOrientation(void) const				{ return m_orientation; }
+	CMPINLINE void							SetOrientation(const FXMVECTOR orient)
+	{
+		m_orientation = orient;
 		m_spatialdatachanged = true;
 		CollisionOBB.Invalidate();
 	}
-	CMPINLINE void							SetOrientation(const XMFLOAT4 & orient)			{ SetOrientation(XMLoadFloat4(&orient)); }
+	CMPINLINE void							SetOrientation(const XMFLOAT4 & orient) { SetOrientation(XMLoadFloat4(&orient)); }
 
 
 	CMPINLINE void							SetPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
@@ -168,21 +170,21 @@ public:
 		SetOrientation(XMVectorAdd(m_orientation, dq));
 	}
 
-	CMPINLINE void							ChangeOrientation(const XMFLOAT4 & rot)			{ ChangeOrientation(XMLoadFloat4(&rot)); }
-	CMPINLINE void							AddDeltaOrientation(const XMFLOAT4 & dq)		{ AddDeltaOrientation(XMLoadFloat4(&dq)); }
+	CMPINLINE void							ChangeOrientation(const XMFLOAT4 & rot)	{ ChangeOrientation(XMLoadFloat4(&rot)); }
+	CMPINLINE void							AddDeltaOrientation(const XMFLOAT4 & dq) { AddDeltaOrientation(XMLoadFloat4(&dq)); }
 
 	// Rotate the object about one of its axes
-	CMPINLINE void							RotateAboutX(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, rad)); }
-	CMPINLINE void							RotateAboutY(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(UP_VECTOR, rad)); }
-	CMPINLINE void							RotateAboutZ(float rad)			{ ChangeOrientation(XMQuaternionRotationAxis(FORWARD_VECTOR, rad)); }
+	CMPINLINE void							RotateAboutX(float rad) { ChangeOrientation(XMQuaternionRotationAxis(RIGHT_VECTOR, rad)); }
+	CMPINLINE void							RotateAboutY(float rad) { ChangeOrientation(XMQuaternionRotationAxis(UP_VECTOR, rad)); }
+	CMPINLINE void							RotateAboutZ(float rad) { ChangeOrientation(XMQuaternionRotationAxis(FORWARD_VECTOR, rad)); }
 
 	// Methods to retrieve the (automatically-maintained) orientation matrix and its inverse
-	CMPINLINE const XMMATRIX				GetOrientationMatrix(void) const		{ return m_orientationmatrix; }
-	CMPINLINE const XMMATRIX				GetInverseOrientationMatrix(void) const	{ return m_inverseorientationmatrix; }
+	CMPINLINE const XMMATRIX				GetOrientationMatrix(void) const { return m_orientationmatrix; }
+	CMPINLINE const XMMATRIX				GetInverseOrientationMatrix(void) const { return m_inverseorientationmatrix; }
 
 	// The world matrix of this object
-	CMPINLINE XMMATRIX						GetWorldMatrix(void) const			{ return m_worldmatrix; }
-	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const	{ return m_inverseworld; }
+	CMPINLINE XMMATRIX						GetWorldMatrix(void) const { return m_worldmatrix; }
+	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const { return m_inverseworld; }
 	CMPINLINE void XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
@@ -194,6 +196,10 @@ public:
 
 	// Derives a new object world matrix
 	CMPINLINE void							DeriveNewWorldMatrix(void);
+
+	// Indicates whether we should skip world matrix derivation for this object, because it will be derived elsewhere
+	// For example, for environment objects which have their world-space data calculated by their parent
+	CMPINLINE bool							OverridesWorldMatrixDerivation(void) const { return m_overrides_world_derivation; }
 
 	// Method to force an immediate recalculation of player position/orientation, for circumstances where we cannot wait until the
 	// end of the frame (e.g. for use in further calculations within the same frame that require the updated data)
@@ -568,7 +574,9 @@ protected:
 	
 	AXMMATRIX							m_worldmatrix;					// World matrix used for rendering this object
 	AXMMATRIX							m_inverseworld;					// The inverse world matrix, precalculated for rendering efficiency
-	
+	bool								m_overrides_world_derivation;	// Flag indicating whether the object subclass will handle world matrix derivation
+																		// instead of via the base object-level logic
+
 	Game::CollisionMode					m_collisionmode;				// Value indicating how/whether this object collides with others
 	float								m_collisionsphereradius;		// Radius of the object collision sphere
 	float								m_collisionsphereradiussq;		// Squared radius of the collision sphere for runtime efficiency
@@ -597,6 +605,8 @@ protected:
 // Derives a new object world matrix
 CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 {
+	if (OverridesWorldMatrixDerivation()) return;
+
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
 	SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));

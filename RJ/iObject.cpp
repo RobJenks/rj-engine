@@ -54,6 +54,7 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	m_orientation = ID_QUATERNION;
 	m_orientationmatrix = m_inverseorientationmatrix = ID_MATRIX;
 	m_worldmatrix = m_inverseworld = ID_MATRIX;
+	m_overrides_world_derivation = false;
 	m_treenode = NULL;
 	m_centreoffset = NULL_VECTOR;
 	m_orientchanges = 0;
@@ -239,6 +240,9 @@ void iObject::SetObjectType(iObject::ObjectType type)
 
 	// Derive and store the object class
 	m_objectclass = iObject::DetermineObjectClass(*this);
+
+	// Determine whether this object type will override properties of the base object, based on its object class
+	m_overrides_world_derivation = (m_objectclass == iObject::ObjectClass::EnvironmentObjectClass);
 }
 
 // Core iObject method to simulate any object.  Passes control down the hierarchy to virtual SimulateObject() method during execution

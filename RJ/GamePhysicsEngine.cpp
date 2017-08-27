@@ -671,8 +671,8 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		{
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat("Applying momentum of ")(XMVectorGetX(mom_n))(" along response vector ")(Vector3ToString(response))
-					("; world momentum change from ")(Vector3ToString(object->PhysicsState.WorldMomentum)).str().c_str());
+					Game::Log << LOG_DEBUG << "Applying momentum of " << XMVectorGetX(mom_n) << " along response vector " << response <<
+					"; momentum change from W" << object->PhysicsState.WorldMomentum << "/L" << object->PhysicsState.LocalMomentum;
 #			endif
 
 			// Apply a direct force (i.e. no division through by mass) in the object local frame, to nullify current momentum along the response vector
@@ -692,8 +692,8 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 			
 #			ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 				if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-					OutputDebugString(concat(" to ")(Vector3ToString(object->PhysicsState.WorldMomentum))("{ ")
-					(m_collisiontest.SATResult.Object0Axis)("|")(m_collisiontest.SATResult.Object1Axis)("}\n").str().c_str());
+					Game::Log << " to W" << object->PhysicsState.WorldMomentum << "/L" << object->PhysicsState.LocalMomentum << " { " << 
+					m_collisiontest.SATResult.Object0Axis << "|" << m_collisiontest.SATResult.Object1Axis << " }\n";
 #			endif
 		}
 
@@ -701,10 +701,8 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 		// of that distance, out of the collision) to determine the collision response
 #		ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 			if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-				OutputDebugString(concat("Adjusting position by penentration of ")(m_collisiontest.Penetration)(" along response vector (")
-				(XMVectorGetX(response))(",")(XMVectorGetY(response))(",")(XMVectorGetZ(response))("); position change from ")
-					("(")(XMVectorGetX(object->GetEnvironmentPosition()))(",")(XMVectorGetY(object->GetEnvironmentPosition()))
-					(",")(XMVectorGetZ(object->GetEnvironmentPosition()))(")").str().c_str());
+				Game::Log << LOG_DEBUG << "Adjusting position by penentration of " << m_collisiontest.Penetration << " along response vector " <<
+				response << "; position change from " << object->GetEnvironmentPosition();
 #		endif
 
 		// Scale the response vector
@@ -715,15 +713,14 @@ bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *e
 
 #		ifdef RJ_LOG_PLAYER_TERRAIN_COLLISION_DETAILS
 			if (Game::CurrentPlayer && Game::CurrentPlayer->GetActor() && object->GetID() == Game::CurrentPlayer->GetActor()->GetID())
-				OutputDebugString(concat(" to (")(XMVectorGetX(object->GetEnvironmentPosition()))(",")(XMVectorGetY(object->GetEnvironmentPosition()))
-				(",")(XMVectorGetZ(object->GetEnvironmentPosition()))(")\n").str().c_str());
+				Game::Log << " to " << object->GetEnvironmentPosition() << "\n";
 #		endif
 
 		// Force an immediate refresh so that the collision volume remains in sync for the remainder of this frame
 		// Efficiency measure: the terrain collision is only adjusting the object position (not its axes).  If the 
 		// object has a compound OBB then we will need to recalculate the world matrix & traverse it recursively.  
 		// However if it is a single OBB we can directly set the position and wait until the next frame to recalc everything
-		if (false || !object->CollisionOBB.HasChildren()) // TODO: DEBUG: 
+		if (false && !object->CollisionOBB.HasChildren()) // TODO: DEBUG: 
 			object_obb.Centre = object->GetPosition();
 		else
 			object->RefreshPositionImmediate();

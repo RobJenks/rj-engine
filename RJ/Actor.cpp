@@ -370,7 +370,6 @@ void Actor::Move(Direction direction, bool run)
 
 	// Create a vector for this movement, dependent on travel direction
 	XMVECTOR delta;
-
 	float lmZ = XMVectorGetZ(PhysicsState.LocalMomentum);
 	if (direction == Direction::Up && lmZ < Attributes[ActorAttr::A_RunSpeed].Value)										// Forward movement
 		delta = XMVectorSetZ(NULL_VECTOR, 
@@ -397,14 +396,7 @@ void Actor::Move(Direction direction, bool run)
 	}
 
 	// Apply this delta vector as a direct change in local object momentum
-	/*OutputDebugString(concat(">> Actor \"")(m_id)("\" with lm of {")(Vector3ToString(PhysicsState.LocalMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.LocalMomentum)))("] / ")
-		(Vector3ToString(PhysicsState.WorldMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.WorldMomentum)))("]} moving by ")
-		(Vector3ToString(delta))("[")(XMVectorGetX(XMVector3Length(delta)))("], now ").str().c_str());*/
 	ApplyLocalLinearForceDirect(delta);
-
-	/*OutputDebugString(concat("{")(Vector3ToString(PhysicsState.LocalMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.LocalMomentum)))("] / ")
-		(Vector3ToString(PhysicsState.WorldMomentum))("[")(XMVectorGetX(XMVector3Length(PhysicsState.WorldMomentum)))("\n").str().c_str());*/
-
 }
 
 
