@@ -605,7 +605,7 @@ public:
 		// Compute the z-value as the distance squared from this object to the camera
 		int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
-		// Add to the z-sorted vector with this z-value as the sorting key2
+		// Add to the z-sorted vector with this z-value as the sorting key
 		m_renderqueueshaders[(int)shader].SortedInstances.push_back(
 			RM_ZSortedInstance(z, model->GetModelBuffer(), transform, LightingManager.GetActiveLightingConfiguration(), params));
 	}

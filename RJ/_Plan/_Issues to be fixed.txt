@@ -1,0 +1,2 @@
+* Game will crash with NPE if player is killed, since AudioManager is targeting all audio instances around GetPlayerShip() without checking first
+

@@ -39,7 +39,7 @@
 				FrameProfiler::ActivateProfiler = false; \
 				FrameProfiler::FrameStart = FrameProfiler::LastCheckpoint = Timers::GetHRClockTime(); \
 				FrameProfiler::CheckpointNumber = 0; \
-				OutputDebugString("### BEGIN FRAME PROFILING ###\n"); \
+				Game::Log << LOG_DEBUG << ("### BEGIN FRAME PROFILING ###\n"); \
 			} 
 
 		// Called at the end of each frame
@@ -47,8 +47,8 @@
 			if (FrameProfiler::ProfilerActive) \
 			{ \
 				FrameProfiler::ProfilerActive = false; \
-				OutputDebugString(concat("-- Total frame time: ")(Timers::GetMillisecondDuration(FrameProfiler::FrameStart, Timers::GetHRClockTime()))("ms\n").str().c_str()); \
-				OutputDebugString("### END FRAME PROFILING ###\n"); \
+				Game::Log << LOG_DEBUG << (concat("-- Total frame time: ")(Timers::GetMillisecondDuration(FrameProfiler::FrameStart, Timers::GetHRClockTime()))("ms\n").str().c_str()); \
+				Game::Log << LOG_DEBUG << ("### END FRAME PROFILING ###\n"); \
 			} 
 
 		// Executes an expression if the per-frame profiler is running this frame
@@ -57,7 +57,7 @@
 
 		// Outputs an expression if the per-frame profiler is running this frame
 #		define RJ_FRAME_PROFILER_OUTPUT(...) \
-			if (FrameProfiler::ProfilerActive) { OutputDebugString(__VA_ARGS__); }
+			if (FrameProfiler::ProfilerActive) { Game::Log << LOG_DEBUG << __VA_ARGS__; }
 
 		// Outputs a frame time checkpoint with the specified label
 #		define RJ_FRAME_PROFILER_CHECKPOINT(text) \
@@ -67,8 +67,8 @@
 				Timers::HRClockDuration event_time = Timers::GetMillisecondDuration(FrameProfiler::FrameStart, time_now); \
 				Timers::HRClockDuration last_event_duration = Timers::GetMillisecondDuration(FrameProfiler::LastCheckpoint, time_now); \
 				FrameProfiler::LastCheckpoint = time_now; \
-				if (FrameProfiler::CheckpointNumber != 0) OutputDebugString(concat("-- CP-")(FrameProfiler::CheckpointNumber)(" completed in ")(last_event_duration)("ms\n").str().c_str()); \
-				OutputDebugString(concat("-- CP-")(++FrameProfiler::CheckpointNumber)(" [")(event_time)("ms]: ")(text)("\n").str().c_str()); \
+				if (FrameProfiler::CheckpointNumber != 0) Game::Log << LOG_DEBUG << (concat("-- CP-")(FrameProfiler::CheckpointNumber)(" completed in ")(last_event_duration)("ms\n").str().c_str()); \
+				Game::Log << LOG_DEBUG << (concat("-- CP-")(++FrameProfiler::CheckpointNumber)(" [")(event_time)("ms]: ")(text)("\n").str().c_str()); \
 			}
 
 	}

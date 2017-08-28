@@ -1312,10 +1312,11 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		{
 			// Store a reference to the model buffer currently being rendered
 			m_current_modelbuffer = mi->first;
-
+			
 			// Get the number of instances to be rendered
 			instancecount = (int)mi->second.InstanceData.size();
 			RJ_FRAME_PROFILER_OUTPUT(concat("Activating model \"")(mi->first->GetCode())("\" (")(&(mi->first))(") [")(instancecount)(" instances]\n").str().c_str())
+				
 			if (instancecount == 0) continue;
 
 			// Loop through the instances in batches, if the total count is larger than our limit
