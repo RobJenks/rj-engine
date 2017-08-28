@@ -2308,9 +2308,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 2 - engine rendering info
 	if (m_debuginfo_renderinfo)
 	{
-		const CoreEngine::EngineRenderInfoData & renderinfo = Game::Engine->GetRenderInfo();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: %d Draw Calls [%s %s %s %s %s %s ]",
-			renderinfo.DrawCalls,
+		CoreEngine::EngineRenderInfoData renderinfo = Game::Engine->GetRenderInfo();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: Draw Calls: %zu, Instances: %zu, ZSortedInstances: %zu, SkinnedInstances: %zu [%s %s %s %s %s %s ]",
+			renderinfo.DrawCalls, renderinfo.InstanceCount, renderinfo.InstanceCountZSorted, renderinfo.InstanceCountSkinnedModel, 
 			(renderinfo.ShipRenderCount == 0 ? "" : concat(" S.Ship = ")(renderinfo.ShipRenderCount).str().c_str()),
 			(renderinfo.ComplexShipRenderCount == 0 ? "" : concat(" C.Ship = ")(renderinfo.ComplexShipRenderCount).str().c_str()),
 			(renderinfo.ComplexShipSectionRenderCount == 0 ? "" : concat(" CS.Sec = ")(renderinfo.ComplexShipSectionRenderCount).str().c_str()),
@@ -2346,10 +2346,9 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Env: %s / %s, World: %s / %s, Parent: %s / %s",
-			Vector3ToString(Game::CurrentPlayer->GetEnvironmentPosition()).c_str(), QuaternionToString(Game::CurrentPlayer->GetEnvironmentOrientation()).c_str(),
-			Vector3ToString(Game::CurrentPlayer->GetPosition()).c_str(), QuaternionToString(Game::CurrentPlayer->GetOrientation()).c_str(),
-			Vector3ToString(cs()->GetPosition()).c_str(), QuaternionToString(cs()->GetOrientation()).c_str());
+		CoreEngine::EngineRenderInfoData render_info = Game::Engine->GetRenderInfo();
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Instances: %zu, ZSorted-Instances: %zu, Skinned-Instances: %zu",
+			render_info.InstanceCount, render_info.InstanceCountZSorted, render_info.InstanceCountSkinnedModel);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

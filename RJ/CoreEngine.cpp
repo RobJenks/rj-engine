@@ -1273,6 +1273,10 @@ void CoreEngine::Render(void)
 // Submit a model buffer to the render queue manager for rendering this frame
 void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
 {
+	// Exclude any null-geometry objects
+	if (model->VertexBuffer == NULL) return;
+
+	// Retrieve the most appropriate render slot and move this instance into it
 	size_t render_slot = model->GetAssignedRenderSlot(shader);
 	if (render_slot == ModelBuffer::NO_RENDER_SLOT)
 	{
@@ -1287,6 +1291,9 @@ void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelB
 // objects.  Performance overhead; should be used only where specifically required
 void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position)
 {
+	// Exclude any null-geometry objects
+	if (model->VertexBuffer == NULL) return;
+
 	// Compute the z-value as the distance squared from this object to the camera
 	int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
 
@@ -1377,6 +1384,9 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 					("\"] = ")(Timers::GetMillisecondDuration(render_time, Timers::GetHRClockTime()))("ms\n").str().c_str())
 			}
 			
+			// Update the total count of instances that have been processed
+			m_renderinfo.InstanceCount += instancecount;
+
 			// Finally, clear the instance data for this shader/model now that we have fully processed it
 			m_renderqueue[i].UnregisterModelBuffer(i, mi);
 		}
@@ -1468,6 +1478,9 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 
 				// Increment the count of draw calls that have been processed
 				++m_renderinfo.DrawCalls;
+
+				// Update the actual number of instances that have been processed
+				m_renderinfo.InstanceCountZSorted += n;
 			}
 			
 			// Clear the render buffer now that it has been rendered
@@ -2204,8 +2217,11 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	m_D3D->EnableRasteriserCulling();
 
 	// Increase the count of actors we processed; we can count every item that was in the queue, since they 
-	// were validated before being placed in the queue so should all render
-	m_renderinfo.ActorRenderCount += (int)m_queuedactors.size();
+	// were validated before being placed in the queue so should all render.  Also updated the skinned model
+	// instance count since, for now, this is identical to the actor count
+	size_t count = m_queuedactors.size();
+	m_renderinfo.ActorRenderCount += count;
+	m_renderinfo.ActorRenderCount += count;
 
 	// Reset the queue now that it has been processed, so we are ready for adding new items in the next frame
 	m_queuedactors.clear();

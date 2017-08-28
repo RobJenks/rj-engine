@@ -321,13 +321,17 @@ public:
 	// Structure keeping track of render info per frame
 	struct EngineRenderInfoData
 	{
-		int DrawCalls;
-		int ShipRenderCount;
-		int ComplexShipRenderCount;
-		int ComplexShipSectionRenderCount;
-		int ComplexShipTileRenderCount;
-		int ActorRenderCount;
-		int TerrainRenderCount;
+		size_t DrawCalls;
+		size_t ShipRenderCount;
+		size_t ComplexShipRenderCount;
+		size_t ComplexShipSectionRenderCount;
+		size_t ComplexShipTileRenderCount;
+		size_t ActorRenderCount;
+		size_t TerrainRenderCount;
+
+		size_t InstanceCount;
+		size_t InstanceCountZSorted;
+		size_t InstanceCountSkinnedModel;
 	};
 
 	// Function to return the per-frame render info
@@ -578,23 +582,6 @@ private:
 	{
 		SubmitForRendering(shader, model, std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params)));
 	}
-
-	// Method to submit for rendering where the instance is directly specified.  Will submit directly to
-	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	/*CMPINLINE void				SubmitForRendering(RenderQueueShader shader, Model *model, const RM_Instance & instance)
-	{
-		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model->GetModelBuffer()]).InstanceData.push_back(instance);
-	}
-
-	// Method to submit for rendering where the instance is directly specified.  Will submit directly to
-	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void				SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const RM_Instance & instance)
-	{
-		// No sorting required, so push directly onto the vector of instances, to be applied for the specified model & shader
-		((m_renderqueue[shader])[model]).InstanceData.push_back(instance);
-	}*/
-
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
