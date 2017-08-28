@@ -4,7 +4,9 @@
 
 #include "RenderQueueOptimiser.h"
 
-#include "Model.h"//DBG
+
+// TODO: Re-enable optimiser based on new render queue logic
+
 // Default constructor
 RenderQueueOptimiser::RenderQueueOptimiser(RM_RenderQueue & renderqueue)
 	: 
@@ -56,7 +58,7 @@ void RenderQueueOptimiser::Run(void)
 void RenderQueueOptimiser::CheckRenderQueue(void)
 {
 	// Iterate through each shader, and each model queued for each shader
-	RM_ModelInstanceData::iterator it, it_end;
+	/*RM_ModelInstanceData::iterator it, it_end;
 	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
 		it_end = m_renderqueue[i].end();
@@ -69,7 +71,7 @@ void RenderQueueOptimiser::CheckRenderQueue(void)
 				++it->second.TimeoutCounter;
 			}
 		}
-	}
+	}*/
 
 	// Increase the counter that tracks the number of checks performed before optimisation
 	++m_checksperformed;
@@ -82,7 +84,7 @@ void RenderQueueOptimiser::OptimiseRenderQueue(void)
 	// Make sure we have had the chance to check a reasonable number of times,
 	// to avoid any issues with delays (e.g. debug breakpoints, or on startup
 	// initialisation) making us optimise the queue when it has not been checked first
-	if (m_checksperformed == 0) { m_lastoptimised = Game::ClockMs; return; }
+	/*if (m_checksperformed == 0) { m_lastoptimised = Game::ClockMs; return; }
 
 	// Iterate through each shader, and each model queued for each shader
 	RM_ModelInstanceData::iterator it, it_end;
@@ -115,7 +117,7 @@ void RenderQueueOptimiser::OptimiseRenderQueue(void)
 	m_checksperformed = 0;
 	
 	// Update the last-optimised time ready for the next cycle
-	m_lastoptimised = Game::ClockMs;
+	m_lastoptimised = Game::ClockMs;*/
 }
 
 

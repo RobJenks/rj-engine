@@ -8,82 +8,17 @@
 #include "DX11_Core.h"
 #include "D3DMain.h"
 #include "GameVarsExtern.h"
+#include "RM_ModelDataCollection.h"
+#include "RM_Instance.h"
+#include "RM_ZSortedInstance.h"
 class iShader;
 class Model;
 class ModelBuffer;
 
-/* This header contains all structure and type definitions for the render queue maintained within the core engine */
-
-// Structure of a single instance in the instancing model.  No special alignement requirements
-struct					RM_InstanceStructure
-{
-	XMFLOAT4X4						World;								// World matrix to transform into the world
-	XMFLOAT4						Params;								// Float-4 of parameters that can be passed for each instance
-	Game::LIGHT_CONFIG				LightConfig;						// Configuration of lights that should be used to render this instance
-	XMFLOAT3						padding;							// (Padding - brings total size to 96, 96 % 16 == 0)
-
-	// Constructor where only the world transform and lighting data are required; other params will be unitialised (for efficiency) and should not be used
-	RM_InstanceStructure(const XMFLOAT4X4 & world, Game::LIGHT_CONFIG lighting) : World(world), LightConfig(lighting) { }
-
-	// Constructor where only the world transform and lighting data are required; other params will be unitialised (for efficiency) and should not be used
-	RM_InstanceStructure(const CXMMATRIX world, Game::LIGHT_CONFIG lighting) 
-		: 
-		LightConfig(lighting)
-	{
-		XMStoreFloat4x4(&World, world);
-	}
-
-	// Constructor including additional per-instance parameters
-	RM_InstanceStructure(const XMFLOAT4X4 world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) : World(world), LightConfig(lighting), Params(params) { }
-
-	// Constructor including additional per-instance parameters
-	RM_InstanceStructure(const CXMMATRIX world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) 
-		: 
-		LightConfig(lighting), Params(params) 
-	{
-		XMStoreFloat4x4(&World, world);
-	}
-
-	// Empty constructor
-	RM_InstanceStructure(void) { }
-};													
-
-// Single instance to be rendered; includes the instance-specific data such as transform & params
-typedef						RM_InstanceStructure								RM_Instance;
-
-// Instance collection & supporting data for a particular model
-typedef struct				InstanceDataStruct {
-	std::vector<RM_Instance>	InstanceData;
-	int							TimeoutCounter;
-	InstanceDataStruct(void) :	TimeoutCounter(0) { }
-}																				RM_InstanceData;
-
-// Collection holding a map of instances to be rendered using each model
-typedef						std::unordered_map<	ModelBuffer*, RM_InstanceData >	RM_ModelInstanceData;
+/* This header contains or includes all structure and type definitions for the render queue maintained within the core engine */
 
 // Set of model/instance data applicable to each shader; the render queue
-typedef						std::vector<RM_ModelInstanceData>					RM_RenderQueue;
-
-
-
-// Structure to hold z-sorted instance data, used where objects must be sorted before processing the render queue
-struct							RM_ZSortedInstance
-{
-	int							Key;
-	ModelBuffer *				ModelPtr;
-	RM_Instance					Item;
-
-	bool operator<(const RM_ZSortedInstance & val) const	{ return (Key < val.Key); }
-
-	RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world, Game::LIGHT_CONFIG lighting) :
-		Key(key), ModelPtr(model), Item(RM_Instance(world, lighting)) { }
-
-	RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) : 
-		Key(key), ModelPtr(model), Item(RM_Instance(world, lighting, params)) { }
-
-	RM_ZSortedInstance(int key, ModelBuffer *model, const RM_Instance & instance) :
-		Key(key), ModelPtr(model), Item(instance) { }
-};
+typedef							std::vector<RM_ModelDataCollection>					RM_RenderQueue;
 
 
 // Details on a shader used in the render queue

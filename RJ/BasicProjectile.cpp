@@ -1,5 +1,8 @@
 #include "FastMath.h"
+#include "GameVarsExtern.h"
 #include "BasicProjectileDefinition.h"
+#include "CoreEngine.h"
+#include "LightingManagerObject.h"
 
 #include "BasicProjectile.h"
 
@@ -43,7 +46,7 @@ BasicProjectile::BasicProjectile(const BasicProjectileDefinition * definition, G
 }
 
 // Generate a render instance for this projectile, using data from this instance and the projectile definition
-void BasicProjectile::GenerateRenderInstance(RM_Instance & outInstance)
+RM_Instance BasicProjectile::GenerateRenderInstance(void)
 {
 	// Volumetric line endpoints are embedded within the first two rows of the instance matrix 
 	// P1 will be scaled so that the beam grows from zero to its full length during the 
@@ -58,10 +61,9 @@ void BasicProjectile::GenerateRenderInstance(RM_Instance & outInstance)
 	const XMFLOAT4 &col = Definition->VolumetricLineData.Colour;
 
  	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
-	outInstance.World = XMFLOAT4X4(start.x, start.y, start.z, 1.0f, end.x, end.y, end.z, 1.0f, col.x, col.y, col.z, col.w, 0.0f, 0.0f, 0.0f, 0.0f);
-
 	// Additional parameters (e.g. beam radius) are stored within the instance parameter vector
-	outInstance.Params = Definition->VolumetricLineData.Params;
+	return RM_Instance(XMFLOAT4X4(start.x, start.y, start.z, 1.0f, end.x, end.y, end.z, 1.0f, col.x, col.y, col.z, col.w, 0.0f, 0.0f, 0.0f, 0.0f),
+		Game::Engine->LightingManager.GetActiveLightingConfiguration(), Definition->VolumetricLineData.Params);
 }
 
 

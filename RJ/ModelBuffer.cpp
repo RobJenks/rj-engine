@@ -3,6 +3,8 @@
 #include "Material.h"
 #include "ModelBuffer.h"
 
+// Indicates that the model buffer does not currently have an assigned per-frame render slot
+const size_t ModelBuffer::NO_RENDER_SLOT = ((size_t)0U - (size_t)1U);
 
 // Default constructor
 ModelBuffer::ModelBuffer(void)
@@ -15,6 +17,8 @@ ModelBuffer::ModelBuffer(void)
 	m_vertexsize = m_indexsize = 0U;
 	m_materials = NULL;
 	m_material_count = 0U;
+	
+	ClearAllRenderSlots();
 }
 
 // Initialise the buffers based on the supplied model data

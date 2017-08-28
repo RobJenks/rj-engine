@@ -8,11 +8,15 @@
 #include "DX11_Core.h"
 #include "Texture.h"
 #include "Material.h"
+#include "RenderQueue.h"
 
 // This class has no special alignment requirements
 class ModelBuffer
 {
 public:
+
+	// Indicates that the model buffer does not currently have an assigned per-frame render slot
+	static const size_t				NO_RENDER_SLOT;
 
 	// Default constructor
 	ModelBuffer(void);
@@ -58,6 +62,16 @@ public:
 	// Set details for the specified material
 	void							SetMaterial(unsigned int index, const Material & material);
 
+	// Render queue slot assigned to this buffer for the current frame, or (0U-1) if none
+	CMPINLINE size_t				GetAssignedRenderSlot(size_t shader) const		{ return m_render_slot[shader]; }
+	CMPINLINE bool					HasAssignedRenderSlot(size_t shader) const		{ return (m_render_slot[shader] != ModelBuffer::NO_RENDER_SLOT); }
+	CMPINLINE void					AssignRenderSlot(size_t shader, size_t slot)	{ m_render_slot[shader] = slot; }
+	CMPINLINE void					ClearRenderSlot(size_t shader)					{ m_render_slot[shader] = ModelBuffer::NO_RENDER_SLOT; }
+	CMPINLINE void					ClearAllRenderSlots(void) 
+	{
+		for (size_t shader = 0U; shader < (size_t)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++shader) m_render_slot[shader] = ModelBuffer::NO_RENDER_SLOT;
+	}
+
 	// Releases buffer resources (VB, IB) and initialises back to initial state.  Not required in normal use since this will be
 	// handled automatically when the object is deallocated
 	void							ReleaseModelBufferResources(void);
@@ -85,6 +99,9 @@ protected:
 
 	Material *				m_materials;
 	unsigned int			m_material_count;
+
+	// Render queue slot assigned to this buffer for the current frame, or (0U-1) if none
+	size_t					m_render_slot[RenderQueueShader::RM_RENDERQUEUESHADERCOUNT];		
 };
 
 

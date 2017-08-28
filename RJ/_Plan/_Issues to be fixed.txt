@@ -1,2 +1,4 @@
+* Reject models at SubmitForRendering() stage if the model has no buffer data (i.e. null model)
+
 * Game will crash with NPE if player is killed, since AudioManager is targeting all audio instances around GetPlayerShip() without checking first
 

@@ -36,7 +36,7 @@ public:
 					const FXMVECTOR orientation, const FXMVECTOR base_world_velocity);
 
 	// Generate a render instance for this projectile, using data from this instance and the projectile definition
-	void GenerateRenderInstance(RM_Instance & outInstance);
+	RM_Instance GenerateRenderInstance(void);
 };
 
 

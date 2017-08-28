@@ -927,11 +927,8 @@ void CoreEngine::ShutdownDirect3D(void)
 
 void CoreEngine::ShutdownRenderQueue(void)
 {
-	// Clear the render queue
-	if (m_renderqueue.size() > 0)
-	{
-		ClearRenderingQueue();
-	}
+	// Release any resources currently reserved by the render queue
+	DeallocateRenderingQueue();
 
 	// Free all resources held by the instance buffer
 	if ( m_instancebuffer )
@@ -1273,12 +1270,35 @@ void CoreEngine::Render(void)
 	LightingManager.EndFrame();
 }
 
+// Submit a model buffer to the render queue manager for rendering this frame
+void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
+{
+	size_t render_slot = model->GetAssignedRenderSlot(shader);
+	if (render_slot == ModelBuffer::NO_RENDER_SLOT)
+	{
+		render_slot = m_renderqueue[shader].NewRenderSlot();
+		m_renderqueue[shader].RegisterModelBuffer(shader, render_slot, model);
+	}
+
+	m_renderqueue[shader].ModelData[render_slot].NewInstance(std::move(instance));
+}
+
+// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
+// objects.  Performance overhead; should be used only where specifically required
+void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position)
+{
+	// Compute the z-value as the distance squared from this object to the camera
+	int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
+
+	// Add to the z-sorted vector with this z-value as the sorting key
+	m_renderqueueshaders[shader].SortedInstances.push_back(std::move(RM_ZSortedInstance(z, model, std::move(instance))));
+}
+
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
 RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 {
-	RM_ModelInstanceData::iterator mi, mi_end;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
-	int instancecount, inst, n;
+	std::vector<RM_Instance>::size_type instancecount, inst, n;
 #	ifdef RJ_ENABLE_FRAME_PROFILER
 	Timers::HRClockTime render_time;
 #	endif
@@ -1287,15 +1307,16 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 	RJ_FRAME_PROFILER_EXECUTE(DebugOutputRenderQueueContents();)
 
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
 		// Get a reference to this specific render queue 
 		RM_InstancedShaderDetails & rq_shader = m_renderqueueshaders[i];
 		RJ_FRAME_PROFILER_OUTPUT(concat("Activating shader ")(i)(" [")
 			((rq_shader.RequiresZSorting ? rq_shader.SortedInstances.size() : m_renderqueue[i].size()))(" models]\n").str().c_str())
-			
+
 		// Skip this shader immediately if there are no models/instances to be rendered by it (different check depending on whether this is a z-sorted shader)
-		if (rq_shader.RequiresZSorting == false)	{ if (m_renderqueue[i].empty()) continue; }
+		auto model_count = m_renderqueue[i].CurrentSlotCount;
+		if (rq_shader.RequiresZSorting == false)	{ if (model_count == 0U) continue; }
 		else										{ if (rq_shader.SortedInstances.empty()) continue; }
 
 		// Set any engine properties required by this specific shader
@@ -1307,20 +1328,17 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		if (rq_shader.RequiresZSorting) { PerformZSortedRenderQueueProcessing(rq_shader); continue; }
 
 		// Iterate through each model queued for rendering by this shader
-		mi_end = m_renderqueue[i].end();
-		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
+		for (auto mi = 0U; mi < model_count; ++mi)
 		{
 			// Store a reference to the model buffer currently being rendered
-			m_current_modelbuffer = mi->first;
+			m_current_modelbuffer = m_renderqueue[i].ModelData[mi].ModelBufferInstance;
 			
 			// Get the number of instances to be rendered
-			instancecount = (int)mi->second.InstanceData.size();
-			RJ_FRAME_PROFILER_OUTPUT(concat("Activating model \"")(mi->first->GetCode())("\" (")(&(mi->first))(") [")(instancecount)(" instances]\n").str().c_str())
-				
-			if (instancecount == 0) continue;
+			instancecount = m_renderqueue[i].ModelData[mi].CurrentInstanceCount;
+			RJ_FRAME_PROFILER_OUTPUT(concat("Activating model \"")(m_current_modelbuffer->GetCode())("\" (")(&(m_current_modelbuffer))(") [")(instancecount)(" instances]\n").str().c_str())
 
 			// Loop through the instances in batches, if the total count is larger than our limit
-			for (inst = 0; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
+			for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
 			{
 				// Record render time if profiling is enabled
 				RJ_FRAME_PROFILER_EXECUTE(render_time = Timers::GetHRClockTime();)
@@ -1331,7 +1349,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				// Update the instance buffer by mapping, updating and unmapping the memory
 				memset(&mappedres, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
 				r_devicecontext->Map(m_instancebuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedres);
-				memcpy(mappedres.pData, &(mi->second.InstanceData[inst]), sizeof(RM_Instance) * n);
+				memcpy(mappedres.pData, &(m_renderqueue[i].ModelData[mi].InstanceData[inst]), sizeof(RM_Instance) * n);
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
@@ -1348,7 +1366,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 
 				// Now process all instanced / indexed vertex data through this shader
 				rq_shader.Shader->Render(	r_devicecontext, m_current_modelbuffer->GetIndexCount(),
-											m_current_modelbuffer->GetIndexCount(), n,
+											m_current_modelbuffer->GetIndexCount(), (UINT)n,
 											r_view, r_projection, m_current_modelbuffer->GetTextureResource());
 
 				// Increment the count of draw calls that have been processed
@@ -1359,10 +1377,14 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 					("\"] = ")(Timers::GetMillisecondDuration(render_time, Timers::GetHRClockTime()))("ms\n").str().c_str())
 			}
 			
-			// Finally, clear the instance vector for this shader/model now that we have fully processed it
-			mi->second.InstanceData.clear();
+			// Finally, clear the instance data for this shader/model now that we have fully processed it
+			m_renderqueue[i].UnregisterModelBuffer(i, mi);
 		}
+
+		// Reset this render queue shader ready for the next frame
+		m_renderqueue[i].CurrentSlotCount = 0U;
 	}	
+
 
 	// Return any render parameters to their default if required, to avoid any downstream impact
 	if (m_D3D->GetAlphaBlendState() != D3DMain::AlphaBlendState::AlphaBlendDisabled) m_D3D->SetAlphaBlendModeDisabled();
@@ -1372,7 +1394,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
-	int n;
+	unsigned int n;
 	vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 #	ifdef RJ_ENABLE_FRAME_PROFILER
@@ -1399,7 +1421,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 		// add another element to the render buffer
 		if (i != -1 && shader.SortedInstances[i].ModelPtr == m_current_modelbuffer)
 		{
-			renderbuffer.push_back(shader.SortedInstances[i].Item);
+			renderbuffer.emplace_back(std::move(shader.SortedInstances[i].Item));
 		}
 
 		// If this is an instance of a different model, or is the dummy end-element, we want to render the buffer that has been accumulated so far
@@ -1407,7 +1429,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 		{
 			// We are at this point because (a) we are at the end of the vector, or (b) the model has changed for a valid reason
 			// We therefore want to render the buffer now.  Make sure that the buffer actually contains items 
-			n = (int)renderbuffer.size();
+			n = (unsigned int)renderbuffer.size();
 			if (n > 0)
 			{
 				// Record the render time if profiling is enabled this frame
@@ -1456,7 +1478,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 			if (i != -1)
 			{
 				m_current_modelbuffer = shader.SortedInstances[i].ModelPtr;
-				renderbuffer.push_back(shader.SortedInstances[i].Item);
+				renderbuffer.emplace_back(std::move(shader.SortedInstances[i].Item));
 			}
 		}
 	}
@@ -2003,18 +2025,14 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 	if (!projectiles.Active) return;
 
 	// Iterate through each element of the projectile set
-	RM_Instance instance;
 	for (std::vector<BasicProjectile>::size_type i = 0; i <= projectiles.LiveIndex; ++i)
 	{
 		// Test visibility; we will only render projectiles within the viewing frustum
 		BasicProjectile & proj = projectiles.Items[i];
 		if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
-		
-		// Update the render instance using data from this projectile
-		proj.GenerateRenderInstance(instance);
 
-		// Submit directly for rendering using this instance data and the cached model/texture data in the projectile definition
-		SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, instance, proj.Position);
+		// Submit directly for rendering using an instance generated from this projectile and the cached model/texture data in the projectile definition
+		SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, std::move(proj.GenerateRenderInstance()), proj.Position);
 	}
 }
 
@@ -2039,7 +2057,7 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	m.Params = line.Params;
 	
 	// Submit to the render queue
-	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), m, line.P1);
+	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), std::move(m), line.P1);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
@@ -2193,21 +2211,30 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	m_queuedactors.clear();
 }
 
-void CoreEngine::ClearRenderingQueue(void)
+// Resets the queue to a state before any rendering has taken place.  Deallocates reserved memory.  
+// Should generally only be called during application shutdown to ensure all resources are released
+void CoreEngine::DeallocateRenderingQueue(void)
 {
-	RM_ModelInstanceData::iterator mi, mi_end;
-
 	// Iterate through each shader in the render queue
-	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		// Iterate through each model queued for rendering by this shader
-		mi_end = m_renderqueue[i].end();
-		for (mi = m_renderqueue[i].begin(); mi != mi_end; ++mi)
+		// Iterate through each model currently registered with the shader
+		auto model_count = m_renderqueue[i].CurrentSlotCount;
+		for (auto mi = 0U; mi < model_count; ++mi)
 		{
-			// Clear all instance data from the associated vector
-			mi->second.InstanceData.clear();
+			m_renderqueue[i].ModelData[mi].InstanceData.clear();
+			m_renderqueue[i].ModelData[mi].InstanceData.shrink_to_fit();
+
+			if (m_renderqueue[i].ModelData[mi].ModelBufferInstance != NULL)
+			{
+				m_renderqueue[i].UnregisterModelBuffer(i, mi);
+			}
 		}
+		m_renderqueue[i].ModelData.clear();
+		m_renderqueue[i].ModelData.shrink_to_fit();
 	}
+	m_renderqueue.clear();
+	m_renderqueue.shrink_to_fit();
 }
 
 // Performs rendering of debug/special data

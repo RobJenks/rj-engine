@@ -498,8 +498,11 @@
     <ClCompile Include="Oxygen.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="RenderQueue.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
+    <ClCompile Include="RM_InstanceData.cpp" />
+    <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
@@ -772,6 +775,10 @@
     <ClInclude Include="Projectile.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
+    <ClInclude Include="RM_Instance.h" />
+    <ClInclude Include="RM_InstanceData.h" />
+    <ClInclude Include="RM_ModelDataCollection.h" />
+    <ClInclude Include="RM_ZSortedInstance.h" />
     <ClInclude Include="SentenceType.h" />
     <ClInclude Include="SequenceGenerationTests.h" />
     <ClInclude Include="ShaderManager.h" />
