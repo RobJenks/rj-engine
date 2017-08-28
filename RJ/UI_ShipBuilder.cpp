@@ -503,8 +503,7 @@ void UI_ShipBuilder::ActivateGeneralMode(EditorMode previous_mode)
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
 
 	// Remove any fade effect from the ship or its contents when in the default 'general' mode
-	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
-	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->FadeEntireShipToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
 	m_ship->ForceRenderingOfInterior(false);
 }
 
@@ -515,8 +514,7 @@ void UI_ShipBuilder::ActivateSectionMode(EditorMode previous_mode)
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
 
 	// Remove any fade effect from the ship or its contents when building entire ship sections
-	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
-	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
+	m_ship->FadeEntireShipToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
 	m_ship->ForceRenderingOfInterior(false);
 }
 
@@ -527,7 +525,7 @@ void UI_ShipBuilder::ActivateTileMode(EditorMode previous_mode)
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
 
 	// Fade out the ship exterior, leaving all tiles at full alpha
-	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeHullToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
 	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
 	m_ship->ForceRenderingOfInterior(true);
 
@@ -542,11 +540,9 @@ void UI_ShipBuilder::ActivateObjectMode(EditorMode previous_mode)
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
 
 	// Fade out the ship exterior and tile exteriors
-	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
-	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeEntireShipToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
 	m_ship->ForceRenderingOfInterior(true);
 }
-
 
 // Activate the specified editor mode
 void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
@@ -555,7 +551,7 @@ void UI_ShipBuilder::ActivateStructuralTestMode(EditorMode previous_mode)
 	if (!m_ship || !m_ship->GetSpaceEnvironment()) return;
 
 	// Fade out the ship exterior so we can show damage per element
-	m_ship->FadeToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
+	m_ship->FadeHullToAlpha(UI_ShipBuilder::COMPONENT_FADE_TIME, UI_ShipBuilder::COMPONENT_FADE_OUT_ALPHA, true);
 	m_ship->FadeAllTiles(UI_ShipBuilder::COMPONENT_FADE_TIME, 1.0f, true);
 	m_ship->ForceRenderingOfInterior(true);
 	

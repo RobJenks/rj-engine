@@ -1180,16 +1180,30 @@ ComplexShipSection *ComplexShip::GetShipSectionContainingElement(INTVECTOR3 loca
 }
 
 // Apply a fade effect to all ship tiles in this environment
-void ComplexShip::FadeToAlpha(float time, float alpha, bool ignore_pause)
+void ComplexShip::FadeHullToAlpha(float time, float alpha, bool ignore_pause)
 {
+	// Parameter checks
+	time = clamp(time, 0.0f, (1000.0f * 60.0f * 60.0f * 12.0f));	// 0 secs to 12hrs, for sanity
+	alpha = clamp(alpha, 0.0f, 1.0f);
+
 	// Iterate through all sections in the collection and apply this fade value
-	ComplexShipSection *s;
 	ComplexShipSectionCollection::const_iterator it_end = m_sections.end();
 	for (ComplexShipSectionCollection::const_iterator it = m_sections.begin(); it != it_end; ++it)
 	{
-		s = (*it); if (!s) continue;
-		s->Fade.FadeToAlpha(time, alpha, ignore_pause);
+		(*it)->Fade.FadeToAlpha(time, alpha, ignore_pause);
 	}
+}
+
+// Fades the entire ship (hull & interior) to the specified alpha level
+void ComplexShip::FadeEntireShipToAlpha(float time, float alpha, bool ignore_pause)
+{
+	// Parameter checks
+	time = clamp(time, 0.0f, (1000.0f * 60.0f * 60.0f * 12.0f));	// 0 secs to 12hrs, for sanity
+	alpha = clamp(alpha, 0.0f, 1.0f);
+
+	// Fade both the hull and interior of the ship
+	FadeHullToAlpha(time, alpha, ignore_pause);
+	FadeAllTiles(time, alpha, ignore_pause);
 }
 
 // Removes the 'standard' flag from this ship's definition and it's sections.  Used following a copy from a standard template ship
@@ -1308,7 +1322,8 @@ void ComplexShip::ProcessDebugCommand(GameConsoleCommand & command)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(BuildHardpointCollection)
-	REGISTER_DEBUG_FN(FadeToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
+	REGISTER_DEBUG_FN(FadeHullToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
+	REGISTER_DEBUG_FN(FadeEntireShipToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
 	REGISTER_DEBUG_FN(SuspendUpdates)
 	REGISTER_DEBUG_FN(ResumeUpdates)
 	REGISTER_DEBUG_FN(GenerateCapitalShipPerimeterBeacons)

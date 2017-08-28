@@ -2003,18 +2003,6 @@ void iSpaceObjectEnvironment::CopyTerrainDataFromObject(iSpaceObjectEnvironment 
 	}
 }
 
-// Fades the environment and its contents out to the specified alpha, within the given time period
-void iSpaceObjectEnvironment::FadeEnvironmentToAlpha(float timeperiod, float alpha, bool ignore_pause)
-{
-	// Parameter checks
-	timeperiod = clamp(timeperiod, 0.0f, (1000.0f * 60.0f * 60.0f * 12.0f));	// 0 secs to 12hrs, for sanity
-	alpha = clamp(alpha, 0.0f, 1.0f);
-
-	// Fade the environment object itself, along with all relevant contents
-	Fade.FadeToAlpha(timeperiod, alpha, ignore_pause);
-	FadeAllTiles(timeperiod, alpha, ignore_pause);
-}
-
 // Shutdown method to deallocate the contents of the environment
 //    unlink_tiles - will generally be set to 'true'.  May be set to 'false' in case of application shutdown where
 //                   we do not need to do a controlled unlinking, and where parent objects may be deallocated in 
@@ -2719,7 +2707,6 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(RevalidateEnvironmentMaps)
 	REGISTER_DEBUG_FN(OverrideLocalGravity, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(RemoveLocalGravityOverride)
-	REGISTER_DEBUG_FN(FadeEnvironmentToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsBool(4))
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iContainsComplexShipTiles::ProcessDebugCommand(command);

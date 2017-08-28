@@ -353,10 +353,6 @@ public:
 	// whether any intersection does take place
 	bool							DetermineElementPathIntersectedByRay(const Ray & ray, float ray_radius, ElementIntersectionData & outElements);
 
-	// Fades the environment and its contents out to the specified alpha, within the given time period
-	void							FadeEnvironmentToAlpha(float timeperiod, float alpha, bool ignore_pause);
-	CMPINLINE void					FadeEnvironmentToAlpha(float timeperiod, float alpha) { FadeEnvironmentToAlpha(timeperiod, alpha, false); }
-
 	// Collection of any hull breaches in this environment
 	EnvironmentHullBreaches			HullBreaches;
 

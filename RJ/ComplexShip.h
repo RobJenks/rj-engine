@@ -72,9 +72,14 @@ public:
 	INTVECTOR3									GetShipMinimumBounds(void);
 	INTVECTOR3									GetShipMaximumBounds(void);
 
-	// Fade the ship to the specified alpha level
-	void										FadeToAlpha(float time, float alpha, bool ignore_pause);
-	CMPINLINE void								FadeToAlpha(float time, float alpha)						{ FadeToAlpha(time, alpha, false); }
+	// Fade the ship to the specified alpha level.  Required instead of directly using iObject::Fade since (at 
+	// least for now) all geometry of complex ships is actually in the sections
+	void										FadeHullToAlpha(float time, float alpha, bool ignore_pause);
+	CMPINLINE void								FadeHullToAlpha(float time, float alpha)						{ FadeHullToAlpha(time, alpha, false); }
+
+	// Fades the entire ship (hull & interior) to the specified alpha level
+	void										FadeEntireShipToAlpha(float time, float alpha, bool ignore_pause);
+	CMPINLINE void								FadeEntireShipToAlpha(float time, float alpha)					{ FadeEntireShipToAlpha(time, alpha, false); }
 
 	// Suspend or resume updates based on changes to the ship.  This relates to structural changes, e.g. the addition
 	// or removal of ship sections.  Likely only required during first-time initialisation of the object
