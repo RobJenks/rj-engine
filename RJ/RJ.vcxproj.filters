@@ -697,6 +697,9 @@
     <ClCompile Include="RenderQueue.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
+    <ClCompile Include="RM_Instance.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

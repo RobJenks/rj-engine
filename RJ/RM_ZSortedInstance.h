@@ -17,10 +17,10 @@ struct RM_ZSortedInstance
 
 	// Constructors
 	CMPINLINE RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world, Game::LIGHT_CONFIG lighting) noexcept :
-		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, lighting))) { }
+		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, lighting, RM_Instance::CalculateSortKey((float)key)))) { }
 
 	CMPINLINE RM_ZSortedInstance(int key, ModelBuffer *model, const CXMMATRIX world, Game::LIGHT_CONFIG lighting, const XMFLOAT4 & params) noexcept :
-		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, lighting, params))) { }
+		Key(key), ModelPtr(model), Item(std::move(RM_Instance(world, lighting, params, RM_Instance::CalculateSortKey((float)key)))) { }
 
 	CMPINLINE RM_ZSortedInstance(int key, ModelBuffer *model, RM_Instance && instance) noexcept :
 		Key(key), ModelPtr(model), Item(std::move(instance)) { }

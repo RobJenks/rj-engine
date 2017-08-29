@@ -56,6 +56,11 @@ struct RM_InstanceData
 	// Add a new instance for rendering
 	void								NewInstance(RM_Instance && instance);
 
+	// Sort instances based on their sort key, in preparation for rendering
+	// TODO: Can test whether maintaining a separate sorted index vector {sortkey, instance_index} 
+	// and lower_bound inserting into it with each instance is faster than one post-sort.  For now
+	// stick with the post-sort since the number of instances should always be relatively low
+	void								SortInstances(void);
 
 	// Copy constructor & assignment are disallowed
 	CMPINLINE							RM_InstanceData(const RM_InstanceData & other) = delete;

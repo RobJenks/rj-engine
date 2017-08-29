@@ -502,6 +502,7 @@
     <ClCompile Include="RenderQueueShaders.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
+    <ClCompile Include="RM_Instance.cpp" />
     <ClCompile Include="RM_InstanceData.cpp" />
     <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />

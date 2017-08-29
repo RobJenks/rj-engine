@@ -63,7 +63,8 @@ RM_Instance BasicProjectile::GenerateRenderInstance(void)
  	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
 	// Additional parameters (e.g. beam radius) are stored within the instance parameter vector
 	return RM_Instance(XMFLOAT4X4(start.x, start.y, start.z, 1.0f, end.x, end.y, end.z, 1.0f, col.x, col.y, col.z, col.w, 0.0f, 0.0f, 0.0f, 0.0f),
-		Game::Engine->LightingManager.GetActiveLightingConfiguration(), Definition->VolumetricLineData.Params);
+		Game::Engine->LightingManager.GetActiveLightingConfiguration(), Definition->VolumetricLineData.Params, 
+		RM_Instance::SORT_KEY_RENDER_LAST);
 }
 
 

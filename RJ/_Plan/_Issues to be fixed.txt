@@ -1,2 +1,3 @@
 * Game will crash with NPE if player is killed, since AudioManager is targeting all audio instances around GetPlayerShip() without checking first
 
+* Test whether terrain->GetPosition() is in world space.  If not, need to change CoreEngine.cpp:1841 to either transform pos into world space, or pass in an environment-local viewer position that is calculated in the parent RenderEnvironment method
