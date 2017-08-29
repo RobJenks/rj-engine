@@ -405,15 +405,15 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;
 
 	// Initialise the render queue with a blank map for each shader in scope
-	m_renderqueue = RM_RenderQueue(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
+	m_renderqueue = RenderQueue(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
 	m_renderqueueshaders = RM_ShaderCollection(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
 
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
+		RM_InstancedShaderDetails((iShader*)m_lightshader, true, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, true, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
 		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
 		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
@@ -1273,6 +1273,8 @@ void CoreEngine::Render(void)
 // Submit a model buffer to the render queue manager for rendering this frame
 void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
 {
+	SubmitForZSortedRendering(shader, model, std::move(instance), XMVectorReplicate(frand_lh(10.0f, 1000.0f))); return;
+
 	// Exclude any null-geometry objects
 	if (model->VertexBuffer == NULL) return;
 
@@ -1281,7 +1283,7 @@ void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelB
 	if (render_slot == ModelBuffer::NO_RENDER_SLOT)
 	{
 		render_slot = m_renderqueue[shader].NewRenderSlot();
-		m_renderqueue[shader].RegisterModelBuffer(shader, render_slot, model);
+		m_renderqueue.RegisterModelBuffer(shader, render_slot, model);
 	}
 
 	m_renderqueue[shader].ModelData[render_slot].NewInstance(std::move(instance));
@@ -1388,7 +1390,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 			m_renderinfo.InstanceCount += instancecount;
 
 			// Finally, clear the instance data for this shader/model now that we have fully processed it
-			m_renderqueue[i].UnregisterModelBuffer(i, mi);
+			m_renderqueue.UnregisterModelBuffer(i, mi);
 		}
 
 		// Reset this render queue shader ready for the next frame
@@ -2243,7 +2245,7 @@ void CoreEngine::DeallocateRenderingQueue(void)
 
 			if (m_renderqueue[i].ModelData[mi].ModelBufferInstance != NULL)
 			{
-				m_renderqueue[i].UnregisterModelBuffer(i, mi);
+				m_renderqueue.UnregisterModelBuffer(i, mi);
 			}
 		}
 		m_renderqueue[i].ModelData.clear();

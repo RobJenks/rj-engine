@@ -685,13 +685,16 @@
     <ClCompile Include="EnvironmentElementStrengthOverlay.cpp">
       <Filter>Objects\Ships\Environments\EnvironmentOverlays</Filter>
     </ClCompile>
-    <ClCompile Include="RenderQueue.cpp">
-      <Filter>Engine\Render Queue</Filter>
-    </ClCompile>
     <ClCompile Include="RM_ModelDataCollection.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
     <ClCompile Include="RM_InstanceData.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderQueueShaders.cpp">
+      <Filter>Engine\Render Queue</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderQueue.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1263,9 +1266,6 @@
     <ClInclude Include="Constraint.h">
       <Filter>Objects\Attachments</Filter>
     </ClInclude>
-    <ClInclude Include="RenderQueue.h">
-      <Filter>Engine\Render Queue</Filter>
-    </ClInclude>
     <ClInclude Include="RenderQueueOptimiser.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
@@ -1601,6 +1601,12 @@
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
     <ClInclude Include="RM_ZSortedInstance.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderQueueShaders.h">
+      <Filter>Engine\Render Queue</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderQueue.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
   </ItemGroup>

@@ -499,6 +499,7 @@
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueue.cpp" />
+    <ClCompile Include="RenderQueueShaders.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="RM_InstanceData.cpp" />
@@ -707,6 +708,7 @@
     <ClInclude Include="Oxygen.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
+    <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
@@ -773,7 +775,7 @@
     <ClInclude Include="MultiLineTextBlock.h" />
     <ClInclude Include="Order_AttackBasic.h" />
     <ClInclude Include="Projectile.h" />
-    <ClInclude Include="RenderQueue.h" />
+    <ClInclude Include="RenderQueueShaders.h" />
     <ClInclude Include="RenderQueueOptimiser.h" />
     <ClInclude Include="RM_Instance.h" />
     <ClInclude Include="RM_InstanceData.h" />

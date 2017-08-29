@@ -8,7 +8,7 @@
 // TODO: Re-enable optimiser based on new render queue logic
 
 // Default constructor
-RenderQueueOptimiser::RenderQueueOptimiser(RM_RenderQueue & renderqueue)
+RenderQueueOptimiser::RenderQueueOptimiser(RenderQueue & renderqueue)
 	: 
 	m_renderqueue(renderqueue)
 {

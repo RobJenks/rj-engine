@@ -4,7 +4,7 @@
 #define __BasicProjectileH__
 
 #include "DX11_Core.h"
-#include "RenderQueue.h"
+#include "RM_Instance.h"
 class BasicProjectileDefinition;
 
 // Class is 16-bit aligned to allow use of SIMD member variables

@@ -8,7 +8,7 @@
 #include "DX11_Core.h"
 #include "Texture.h"
 #include "Material.h"
-#include "RenderQueue.h"
+#include "RenderQueueShaders.h"
 
 // This class has no special alignment requirements
 class ModelBuffer

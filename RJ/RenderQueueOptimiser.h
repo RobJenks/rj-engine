@@ -12,7 +12,7 @@ class RenderQueueOptimiser : public ScheduledObject
 public:
 
 	// Default constructor
-	RenderQueueOptimiser(RM_RenderQueue & renderqueue);
+	RenderQueueOptimiser(RenderQueue & renderqueue);
 
 	// Object does not perform any frequent updates
 	void						Update(void)					{ }
@@ -48,7 +48,7 @@ public:
 protected:
 
 	// Reference to the render queue being maintained
-	RM_RenderQueue &						m_renderqueue;
+	RenderQueue &							m_renderqueue;
 
 	// Interval at which the render queue will be checked, prior to optimisation
 	unsigned int							m_checkinterval;

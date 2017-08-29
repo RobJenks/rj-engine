@@ -55,14 +55,6 @@ struct RM_ModelDataCollection
 		return (CurrentSlotCount++);
 	}
 
-
-	// Assign this instance to the given model buffer
-	void										RegisterModelBuffer(size_t shader, size_t slot, ModelBuffer *model);
-
-	// Clears the specified model data following a successful render, unregistering any 
-	// relevant model buffer data and returning to a state ready for next frame
-	void										UnregisterModelBuffer(size_t shader, size_t slot);
-
 	// Indicates whether the data collection contains any data
 	CMPINLINE bool								Empty(void) const { return (CurrentSlotCount == 0U); }
 

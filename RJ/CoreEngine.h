@@ -15,6 +15,7 @@
 #include "CameraClass.h"
 #include "iAcceptsConsoleCommands.h"
 #include "RenderQueue.h"
+#include "RenderQueueShaders.h"
 #include "RenderQueueOptimiser.h"
 #include "LightingManagerObject.h"
 #include "ShaderManager.h"
@@ -532,7 +533,7 @@ private:
 
 
 	ID3D11Buffer *				m_instancebuffer;
-	RM_RenderQueue				m_renderqueue;
+	RenderQueue					m_renderqueue;
 	RM_ShaderCollection			m_renderqueueshaders;
 	ID3D11Buffer *				m_instancedbuffers[2];
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
