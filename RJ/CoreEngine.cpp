@@ -1743,6 +1743,10 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 	// Precalculate the environment (0,0,0) point in world space, from which we can calculate element/tile/object positions.  
 	m_cache_zeropoint = XMVector3TransformCoord(NULL_VECTOR, environment->GetZeroPointWorldMatrix());
 
+	// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
+	// certain activities entirely in environment-local space
+	XMVECTOR env_local_viewer = XMVector3TransformCoord(Game::Engine->GetCamera()->GetPosition(), environment->GetInverseZeroPointWorldMatrix());
+
 	// Also calculate a set of effective 'basis' vectors, that indicate the change in world space 
 	// required to move in +x, +y and +z directions
 	m_cache_el_inc[0].value = XMVector3TransformCoord(m_cache_el_inc_base[0].value, environment->GetOrientationMatrix());
@@ -1798,13 +1802,13 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 		else
 		{
 			// This is a leaf node; render all objects within the node
-			RenderObjectEnvironmentNodeContents(environment, node);
+			RenderObjectEnvironmentNodeContents(environment, node, env_local_viewer);
 		}
 	}
 }
 
 // Renders the entire contents of an environment tree node.  Internal method; no parameter checking
-void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node)
+void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node, const FXMVECTOR environment_relative_viewer_position)
 {
 	// Render all objects within this node
 	iEnvironmentObject *object;
@@ -1838,7 +1842,8 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 		// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
 		SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
 			XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-			RM_Instance::CalculateSortKey(terrain->GetPosition()));
+			RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
+		));
 		++m_renderinfo.TerrainRenderCount;
 	}
 }

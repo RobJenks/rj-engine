@@ -611,7 +611,7 @@ private:
 	void                    RenderObjectWithArticulatedModel(iObject *object);
 
 	// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
-	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node);
+	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node, const FXMVECTOR environment_relative_viewer_position);
 
 	// Lighting configuration is stored within the core engine and set for each object being rendered
 
