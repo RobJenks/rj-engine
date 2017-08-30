@@ -122,7 +122,7 @@ int EnterMsgLoop( bool (RJMain::*ptr_display)(void) )
 		ZeroMemory(&debug_log_startup_info, sizeof(debug_log_startup_info));
 		debug_log_startup_info.cb = sizeof(debug_log_startup_info);
 
-		std::string base_path = "C:\\Users\\robje\\Documents\\Visual Studio 2013\\Projects\\RJ";
+		std::string base_path = "C:\\Users\\robje\\Documents\\Visual Studio 2017\\Projects\\RJ";
 		std::string process_name = concat(base_path)("\\RJ-Log\\bin\\Release\\RJ-Log.exe").str();
 		std::string process_args = concat
 			("\"")(process_name)("\" ")												// args[0] == process name
