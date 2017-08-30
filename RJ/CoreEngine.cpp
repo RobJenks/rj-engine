@@ -1204,7 +1204,7 @@ void CoreEngine::Render(void)
 
 	// Determine which system we are currently rendering
 	SpaceSystem & system = Game::Universe->GetCurrentSystem();
-
+	
 	// Initialise the lighting manager for this frame
 	RJ_FRAME_PROFILER_CHECKPOINT("Render: Analysing frame lighting");
 	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
@@ -1319,7 +1319,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		// Get a reference to this specific render queue 
 		RM_InstancedShaderDetails & rq_shader = m_renderqueueshaders[i];
 		RJ_FRAME_PROFILER_OUTPUT(concat("Activating shader ")(i)(" [")
-			((rq_shader.RequiresZSorting ? rq_shader.SortedInstances.size() : m_renderqueue[i].size()))(" models]\n").str().c_str())
+			((rq_shader.RequiresZSorting ? rq_shader.SortedInstances.size() : m_renderqueue[i].CurrentSlotCount))(" models]\n").str().c_str())
 
 		// Skip this shader immediately if there are no models/instances to be rendered by it (different check depending on whether this is a z-sorted shader)
 		auto model_count = m_renderqueue[i].CurrentSlotCount;
@@ -1356,7 +1356,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 
 				// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
 				n = min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT);
-
+				
 				// Update the instance buffer by mapping, updating and unmapping the memory
 				memset(&mappedres, 0, sizeof(D3D11_MAPPED_SUBRESOURCE));
 				r_devicecontext->Map(m_instancebuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedres);
@@ -1384,8 +1384,8 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				++m_renderinfo.DrawCalls;
 
 				// Record profiling information if enabled this frame
-				RJ_FRAME_PROFILER_OUTPUT(concat("> Rendering batch ")(inst)(" to ")(n - inst)(" [Shader=")(i)(", Model=\"")(mi->first->GetCode())
-					("\"] = ")(Timers::GetMillisecondDuration(render_time, Timers::GetHRClockTime()))("ms\n").str().c_str())
+				RJ_FRAME_PROFILER_OUTPUT(concat("> Rendering batch ")(inst)(" to ")(n - inst)(" [Shader=")(i)(", Model=\"")
+					(m_current_modelbuffer ? m_current_modelbuffer->GetCode() : "NULL")("\"] = ")(Timers::GetMillisecondDuration(render_time, Timers::GetHRClockTime()))("ms\n").str().c_str())
 			}
 			
 			// Update the total count of instances that have been processed
@@ -1399,6 +1399,8 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 		m_renderqueue[i].CurrentSlotCount = 0U;
 	}	
 
+	// Reset the render queue itself ready for the next frame
+	m_current_modelbuffer = NULL;
 
 	// Return any render parameters to their default if required, to avoid any downstream impact
 	if (m_D3D->GetAlphaBlendState() != D3DMain::AlphaBlendState::AlphaBlendDisabled) m_D3D->SetAlphaBlendModeDisabled();
@@ -1512,25 +1514,28 @@ void CoreEngine::RenderObject(iObject *object)
 	// Test whether this object is within the viewing frustrum; if not, no need to render it
 	if (!m_frustrum->TestObjectVisibility(object)) return;
 
-	// Mark the object as visible
-	Game::MarkObjectAsVisible(object);
-
-	// We are rendering this object, so call its pre-render update method
-	object->PerformRenderUpdate();
-
-	// Set the lighting configuration to be used for rendering this object
-	LightingManager.SetActiveLightingConfigurationForObject(object);
-
-    // Render either articulated or static model depending on object properties
-	if (object->GetArticulatedModel())
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered object \"")(object ? object->GetInstanceCode() : "<NULL>")("\"").str(),
 	{
-		RenderObjectWithArticulatedModel(object);
-	}
-	else
-	{
-		RenderObjectWithStaticModel(object);
-	}
+		// Mark the object as visible
+		Game::MarkObjectAsVisible(object);
 
+		// We are rendering this object, so call its pre-render update method
+		object->PerformRenderUpdate();
+
+		// Set the lighting configuration to be used for rendering this object
+		LightingManager.SetActiveLightingConfigurationForObject(object);
+
+		// Render either articulated or static model depending on object properties
+		if (object->GetArticulatedModel())
+		{
+			RenderObjectWithArticulatedModel(object);
+		}
+		else
+		{
+			RenderObjectWithStaticModel(object);
+		}
+
+	});
 }
 
 // Render an object with a static model.  Protected; called only from RenderObject()
@@ -1668,67 +1673,73 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 	// Make sure we have valid parameters
 	if (!ship) return;
 
-	// Check whether this ship is, or contains, a simulation hub
-	bool is_hub = (ship->IsSimulationHub() || ship->ContainsSimulationHubs());
-
-	// Perform a visibility test on each section and render it if it falls within the viewing frustrum
-	// First get a reference to the collection of ship sections, then iterate over it & test visibility one section at a time
-	ComplexShip::ComplexShipSectionCollection::const_iterator it_end = ship->GetSections()->end();
-	for (ComplexShip::ComplexShipSectionCollection::const_iterator it = ship->GetSections()->begin(); it != it_end; ++it)
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Processed complex ship \"")(ship->GetInstanceCode())("\"").str(), 
 	{
-		// Get a reference to this ship section
-		sec = (*it); if (!sec) continue;
+		// Check whether this ship is, or contains, a simulation hub
+		bool is_hub = (ship->IsSimulationHub() || ship->ContainsSimulationHubs());
 
-		// If this ship is or contains a hub then we automatically render it.  Otherwise, perform a 
-		// visibility test to see whether the section should be rendered.
-		if (is_hub || m_frustrum->TestObjectVisibility(sec))
+		// Perform a visibility test on each section and render it if it falls within the viewing frustrum
+		// First get a reference to the collection of ship sections, then iterate over it & test visibility one section at a time
+		ComplexShip::ComplexShipSectionCollection::const_iterator it_end = ship->GetSections()->end();
+		for (ComplexShip::ComplexShipSectionCollection::const_iterator it = ship->GetSections()->begin(); it != it_end; ++it)
 		{
-			// Otherwise, perform an actual visibility test on the section to see if it should be rendered
-			render = shiprendered = true;
-		}
-		else
-		{
-			render = false;
-		}
+			// Get a reference to this ship section
+			sec = (*it); if (!sec) continue;
 
-		// If any bounding object passed the render test then render this ship section now
-		if (render) RenderComplexShipSection(ship, sec);
-	}
+			// If this ship is or contains a hub then we automatically render it.  Otherwise, perform a 
+			// visibility test to see whether the section should be rendered.
+			if (is_hub || m_frustrum->TestObjectVisibility(sec))
+			{
+				// Otherwise, perform an actual visibility test on the section to see if it should be rendered
+				render = shiprendered = true;
+			}
+			else
+			{
+				render = false;
+			}
 
-	// We only need to render the ship & its contents if at least one ship section was rendered
-	if (shiprendered)
-	{
-		// Set one active lighting configuration for the entire ship (rather than by turret) for efficiency
-		LightingManager.SetActiveLightingConfigurationForObject(ship);
-
-		// Render any turret objects on the exterior of the ship, if applicable
-		if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);
-
-		// Pass control to the environment-rendering logic to render all visible objects within the environment, if applicable.
-		// Criteria are that either (a)it was requested, (b) the ship is or contains a simulation hub, or (c) the flag is set 
-		// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
-		if (renderinterior || is_hub || ship->InteriorShouldAlwaysBeRendered())
-		{
-			RenderObjectEnvironment(ship);
+			// If any bounding object passed the render test then render this ship section now
+			if (render) RenderComplexShipSection(ship, sec);
 		}
 
-		// Mark the ship to indicate that it was visible this frame
-		Game::MarkObjectAsVisible(ship);
+		// We only need to render the ship & its contents if at least one ship section was rendered
+		if (shiprendered)
+		{
+			// Set one active lighting configuration for the entire ship (rather than by turret) for efficiency
+			LightingManager.SetActiveLightingConfigurationForObject(ship);
 
-		// Increment the complex ship render count if any of its sections were rendered this frame
-		++m_renderinfo.ComplexShipRenderCount;
-	}
+			// Render any turret objects on the exterior of the ship, if applicable
+			if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);
+
+			// Pass control to the environment-rendering logic to render all visible objects within the environment, if applicable.
+			// Criteria are that either (a)it was requested, (b) the ship is or contains a simulation hub, or (c) the flag is set 
+			// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
+			if (renderinterior || is_hub || ship->InteriorShouldAlwaysBeRendered())
+			{
+				RenderObjectEnvironment(ship);
+			}
+
+			// Mark the ship to indicate that it was visible this frame
+			Game::MarkObjectAsVisible(ship);
+
+			// Increment the complex ship render count if any of its sections were rendered this frame
+			++m_renderinfo.ComplexShipRenderCount;
+		}
+	});
 }
 	
 // Render a complex ship section to the space environment, as part of the rendering of the complex ship itself
 void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec)
 {
-	// Render the exterior of the ship, unless we have the relevant render flag set
-	if (!m_renderflags[CoreEngine::RenderFlag::DisableHullRendering])
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Processed complex ship section \"")(sec->GetInstanceCode())("\"").str(),
 	{
-		// Simply pass control to the main object rendering method
-		RenderObject(sec);
-	}
+		// Render the exterior of the ship, unless we have the relevant render flag set
+		if (!m_renderflags[CoreEngine::RenderFlag::DisableHullRendering])
+		{
+			// Simply pass control to the main object rendering method
+			RenderObject(sec);
+		}
+	});
 
 	// Increment the render count
 	++m_renderinfo.ComplexShipSectionRenderCount;
@@ -1740,112 +1751,125 @@ RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *e
 	// Parameter check
 	if (!environment) return;
 
-	// Precalculate the environment (0,0,0) point in world space, from which we can calculate element/tile/object positions.  
-	m_cache_zeropoint = XMVector3TransformCoord(NULL_VECTOR, environment->GetZeroPointWorldMatrix());
-
-	// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
-	// certain activities entirely in environment-local space
-	XMVECTOR env_local_viewer = XMVector3TransformCoord(Game::Engine->GetCamera()->GetPosition(), environment->GetInverseZeroPointWorldMatrix());
-
-	// Also calculate a set of effective 'basis' vectors, that indicate the change in world space 
-	// required to move in +x, +y and +z directions
-	m_cache_el_inc[0].value = XMVector3TransformCoord(m_cache_el_inc_base[0].value, environment->GetOrientationMatrix());
-	m_cache_el_inc[1].value = XMVector3TransformCoord(m_cache_el_inc_base[1].value, environment->GetOrientationMatrix());
-	m_cache_el_inc[2].value = XMVector3TransformCoord(m_cache_el_inc_base[2].value, environment->GetOrientationMatrix());
-	
-	// Render all visible tiles
-	ComplexShipTile *tile;
-	iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_end = environment->GetTiles().end();
-	for (iContainsComplexShipTiles::ComplexShipTileCollection::iterator it = environment->GetTiles().begin(); it != it_end; ++it)
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Rendered environment \"")(environment->GetInstanceCode())("\"").str(),
 	{
-		// Get a reference to this tile
-		tile = (*it).value; if (!tile) continue;
+		// Precalculate the environment (0,0,0) point in world space, from which we can calculate element/tile/object positions.  
+		m_cache_zeropoint = XMVector3TransformCoord(NULL_VECTOR, environment->GetZeroPointWorldMatrix());
 
-		// Make sure the tile is visible
-		if (!m_frustrum->CheckSphere(XMVector3TransformCoord(NULL_VECTOR,
-			XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix())),
-			tile->GetBoundingSphereRadius())) continue;
+		// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
+		// certain activities entirely in environment-local space
+		XMVECTOR env_local_viewer = XMVector3TransformCoord(Game::Engine->GetCamera()->GetPosition(), environment->GetInverseZeroPointWorldMatrix());
 
-		// Render the tile
-		RenderComplexShipTile(tile, environment);
-	}
+		// Also calculate a set of effective 'basis' vectors, that indicate the change in world space 
+		// required to move in +x, +y and +z directions
+		m_cache_el_inc[0].value = XMVector3TransformCoord(m_cache_el_inc_base[0].value, environment->GetOrientationMatrix());
+		m_cache_el_inc[1].value = XMVector3TransformCoord(m_cache_el_inc_base[1].value, environment->GetOrientationMatrix());
+		m_cache_el_inc[2].value = XMVector3TransformCoord(m_cache_el_inc_base[2].value, environment->GetOrientationMatrix());
 
-	// We perform a non-recursive vector traversal of the environment tree, and render the contents of any leaf nodes 
-	// that are visible to the user
-	EnvironmentTree *node;
-	m_tmp_envnodes.clear();
-	m_tmp_envnodes.push_back(environment->SpatialPartitioningTree);
-	while (!m_tmp_envnodes.empty())
-	{
-		// Get the next node to be processed
-		node = m_tmp_envnodes.back(); 
-		m_tmp_envnodes.pop_back();
-		if (!node) continue;
+		// Render all visible tiles
+		RJ_FRAME_PROFILER_EXPR(int tiles_rendered = 0;)
+		RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Processed ")(environment->GetTileCount())(" tiles in environment").str(),
+		{ 
+			ComplexShipTile *tile;
+			iContainsComplexShipTiles::ComplexShipTileCollection::iterator it_end = environment->GetTiles().end();
+			for (iContainsComplexShipTiles::ComplexShipTileCollection::iterator it = environment->GetTiles().begin(); it != it_end; ++it)
+			{
+				// Get a reference to this tile
+				tile = (*it).value; if (!tile) continue;
 
-		// Determine the centre point of this node in world space
-		//XMFLOAT3 fcentre = Game::ElementLocationToPhysicalPositionF(node->GetElementCentre());
-		/*XMFLOAT3 fcentre = node->GetElementCentre().ToFloat3();
-		XMVECTOR centre = XMVectorAdd(XMVectorAdd(XMVectorAdd(
-			m_cache_zeropoint, XMVectorScale(m_cache_el_inc[0].value, fcentre.x)),
-			XMVectorScale(m_cache_el_inc[1].value, fcentre.y)), XMVectorScale(m_cache_el_inc[2].value, fcentre.z));*/
-		XMVECTOR centre = XMVector3TransformCoord(node->GetActualCentrePoint(), environment->GetZeroPointWorldMatrix());
+				// Make sure the tile is visible
+				if (!m_frustrum->CheckSphere(XMVector3TransformCoord(NULL_VECTOR,
+					XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix())),
+					tile->GetBoundingSphereRadius())) continue;
 
-		// We only continue with this node (and any possible children) if it is visible
-		if (!m_frustrum->CheckSphere(centre, node->GetBoundingSphereRadius())) continue;
+				// Render the tile
+				RJ_FRAME_PROFILER_EXECUTE(++tiles_rendered;)
+				RenderComplexShipTile(tile, environment);
+			}
+		});
+		RJ_FRAME_PROFILER_OUTPUT(concat(tiles_rendered)(" of ")(environment->GetTileCount())(" tiles rendered\n").str());
 
-		// Test whether this is a branch or a leaf
-		if (node->GetChildCount() != 0)
+		// We perform a non-recursive vector traversal of the environment tree, and render the contents of any leaf nodes 
+		// that are visible to the user
+		RJ_FRAME_PROFILER_EXPR(int sectors_rendered = 0;)
+		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered environment sectors",
 		{
-			// This is a visible branch node, so add all its children to the search vector
-			m_tmp_envnodes.insert(m_tmp_envnodes.end(), node->GetActiveChildNodes().begin(), node->GetActiveChildNodes().end());
-		}
-		else
-		{
-			// This is a leaf node; render all objects within the node
-			RenderObjectEnvironmentNodeContents(environment, node, env_local_viewer);
-		}
-	}
+			EnvironmentTree *node;
+			m_tmp_envnodes.clear();
+			m_tmp_envnodes.push_back(environment->SpatialPartitioningTree);
+			while (!m_tmp_envnodes.empty())
+			{
+				// Get the next node to be processed
+				node = m_tmp_envnodes.back();
+				m_tmp_envnodes.pop_back();
+				if (!node) continue;
+
+				XMVECTOR centre = XMVector3TransformCoord(node->GetActualCentrePoint(), environment->GetZeroPointWorldMatrix());
+
+				// We only continue with this node (and any possible children) if it is visible
+				if (!m_frustrum->CheckSphere(centre, node->GetBoundingSphereRadius())) continue;
+
+				// Test whether this is a branch or a leaf
+				if (node->GetChildCount() != 0)
+				{
+					// This is a visible branch node, so add all its children to the search vector
+					m_tmp_envnodes.insert(m_tmp_envnodes.end(), node->GetActiveChildNodes().begin(), node->GetActiveChildNodes().end());
+				}
+				else
+				{
+					// This is a leaf node; render all objects within the node
+					RJ_FRAME_PROFILER_EXECUTE(++sectors_rendered;)
+					RenderObjectEnvironmentNodeContents(environment, node, env_local_viewer);
+				}
+			}
+		});
+		RJ_FRAME_PROFILER_OUTPUT(concat(sectors_rendered)(" environment sectors rendered\n").str());
+	});
 }
 
 // Renders the entire contents of an environment tree node.  Internal method; no parameter checking
 void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node, const FXMVECTOR environment_relative_viewer_position)
 {
-	// Render all objects within this node
-	iEnvironmentObject *object;
-	std::vector<iEnvironmentObject*>::const_iterator o_it_end = node->GetNodeObjects().end();
-	for (std::vector<iEnvironmentObject*>::const_iterator o_it = node->GetNodeObjects().begin(); o_it != o_it_end; ++o_it)
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered environment sector containing ")(node->GetNodeObjects().size())(" objects, ")(node->GetTerrainCount())(" terrain objects (")
+		(node->GetElementMin().ToString())(" to ")(node->GetElementMax().ToString())(")").str(), 
 	{
-		// Get a reference to the object and make sure it is valid
-		object = (*o_it); if (!object) continue;
-
-		// Pass to different methods depending on the type of object
-		switch (object->GetObjectType())
+		// Render all objects within this node
+		iEnvironmentObject *object;
+		std::vector<iEnvironmentObject*>::const_iterator o_it_end = node->GetNodeObjects().end();
+		for (std::vector<iEnvironmentObject*>::const_iterator o_it = node->GetNodeObjects().begin(); o_it != o_it_end; ++o_it)
 		{
-			case iObject::ActorObject:
-				QueueActorRendering((Actor*)object);				break;
+			// Get a reference to the object and make sure it is valid
+			object = (*o_it); if (!object) continue;
+
+			// Pass to different methods depending on the type of object
+			switch (object->GetObjectType())
+			{
+				case iObject::ActorObject:
+					QueueActorRendering((Actor*)object);				break;
+			}
 		}
-	}
 
-	// Render all terrain within the node
-	StaticTerrain *terrain;
-	std::vector<StaticTerrain*>::const_iterator t_it_end = node->GetNodeTerrain().end();
-	for (std::vector<StaticTerrain*>::const_iterator t_it = node->GetNodeTerrain().begin(); t_it != t_it_end; ++t_it)
-	{
-		// Get a reference to the object and make sure it is valid, has a model etc.
-		terrain = (*t_it);
-		if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
+		// Render all terrain within the node
+		StaticTerrain *terrain;
+		std::vector<StaticTerrain*>::const_iterator t_it_end = node->GetNodeTerrain().end();
+		for (std::vector<StaticTerrain*>::const_iterator t_it = node->GetNodeTerrain().begin(); t_it != t_it_end; ++t_it)
+		{
+			// Get a reference to the object and make sure it is valid, has a model etc.
+			terrain = (*t_it);
+			if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
 
-		// We should not render anything if the object has been destroyed
-		if (terrain->IsDestroyed()) continue;
+			// We should not render anything if the object has been destroyed
+			if (terrain->IsDestroyed()) continue;
 
-		// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-		// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-		SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
-			XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-			RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
-		));
-		++m_renderinfo.TerrainRenderCount;
-	}
+			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
+				XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+				RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
+			));
+			++m_renderinfo.TerrainRenderCount;
+		}
+	});
 }
 
 // Render a complex ship tile to the space environment, relative to its parent ship object
@@ -1937,14 +1961,18 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 // Render a simple ship to the space environment
 RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 {
-	// Simply pass control to the main object rendering method
-	RenderObject(s);
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Processed simple ship \"")(s ? s->GetInstanceCode() : "<NULL>")("\"").str(), 
+	{
+		// Simply pass control to the main object rendering method
+		RenderObject(s);
 
-	// Render any turret objects on the exterior of the ship, if applicable
-	if (s->TurretController.IsActive()) RenderTurrets(s->TurretController);
+		// Render any turret objects on the exterior of the ship, if applicable
+		if (s->TurretController.IsActive()) RenderTurrets(s->TurretController);
 
-	// Increment the render count
-	++m_renderinfo.ShipRenderCount;
+		// Increment the render count
+		++m_renderinfo.ShipRenderCount;
+
+	});
 }
 
 // Renders a collection of turrets that have already been updated by their turret controller
@@ -1964,86 +1992,92 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		if (alpha < Game::C_EPSILON) return;
 		m_instanceparams.x = alpha;
 
-		// Iterate through each turret in turn
-		TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
-		for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
+		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects (with alpha)", 
 		{
-			// Get a reference to the model for this turret
-			turret = (*it);
-			model = turret->GetArticulatedModel(); if (!model) continue; 
-			n = model->GetComponentCount();
-
-			// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
-			turret->DetermineWorldMatrix();
-
-			// Update the position of all model components before rendering
-			model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
-
-			// Submit each component for rendering in turn
-			component = model->GetComponents();
-			for (int i = 0; i < n; ++i, ++component)
+			// Iterate through each turret in turn
+			TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+			for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 			{
-				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(),
-					m_instanceparams, (*component)->GetPosition());
+				// Get a reference to the model for this turret
+				turret = (*it);
+				model = turret->GetArticulatedModel(); if (!model) continue;
+				n = model->GetComponentCount();
+
+				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+				turret->DetermineWorldMatrix();
+
+				// Update the position of all model components before rendering
+				model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+				// Submit each component for rendering in turn
+				component = model->GetComponents();
+				for (int i = 0; i < n; ++i, ++component)
+				{
+					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(),
+						m_instanceparams, (*component)->GetPosition());
+				}
 			}
-		}
+		});
 	}
 	else
 	{
-		if (parent->Highlight.IsActive())
+		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects",
 		{
-			m_instanceparams = parent->Highlight.GetColour();
-
-			// Iterate through each turret in turn
-			TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
-			for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
+			if (parent->Highlight.IsActive())
 			{
-				// Get a reference to the model for this turret
-				turret = (*it);
-				model = turret->GetArticulatedModel(); if (!model) continue;
-				n = model->GetComponentCount();
+				m_instanceparams = parent->Highlight.GetColour();
 
-				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
-				turret->DetermineWorldMatrix();
-
-				// Update the position of all model components before rendering
-				model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
-
-				// Submit each component for rendering in turn
-				component = model->GetComponents();
-				for (int i = 0; i < n; ++i, ++component)
+				// Iterate through each turret in turn
+				TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+				for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams, 
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					// Get a reference to the model for this turret
+					turret = (*it);
+					model = turret->GetArticulatedModel(); if (!model) continue;
+					n = model->GetComponentCount();
+
+					// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+					turret->DetermineWorldMatrix();
+
+					// Update the position of all model components before rendering
+					model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+					// Submit each component for rendering in turn
+					component = model->GetComponents();
+					for (int i = 0; i < n; ++i, ++component)
+					{
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams,
+							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					}
 				}
 			}
-		}
-		else
-		{
-			// Iterate through each turret in turn
-			TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
-			for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
+			else
 			{
-				// Get a reference to the model for this turret
-				turret = (*it);
-				model = turret->GetArticulatedModel(); if (!model) continue;
-				n = model->GetComponentCount();
-
-				// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
-				turret->DetermineWorldMatrix();
-
-				// Update the position of all model components before rendering
-				model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
-
-				// Submit each component for rendering in turn
-				component = model->GetComponents();
-				for (int i = 0; i < n; ++i, ++component)
+				// Iterate through each turret in turn
+				TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
+				for (TurretController::TurretCollection::iterator it = controller.Turrets().begin(); it != it_end; ++it)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					// Get a reference to the model for this turret
+					turret = (*it);
+					model = turret->GetArticulatedModel(); if (!model) continue;
+					n = model->GetComponentCount();
+
+					// Derive the turret world matrix since it is required for rendering (and we don't otherwise need it)
+					turret->DetermineWorldMatrix();
+
+					// Update the position of all model components before rendering
+					model->Update(turret->GetPosition(), turret->GetOrientation(), turret->GetWorldMatrix());
+
+					// Submit each component for rendering in turn
+					component = model->GetComponents();
+					for (int i = 0; i < n; ++i, ++component)
+					{
+						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
+							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					}
 				}
 			}
-		}
+		});
 	}
 }
 
@@ -2054,16 +2088,19 @@ void CoreEngine::RenderProjectileSet(BasicProjectileSet & projectiles)
 	// Make sure the collection is active (which guarantees that it contains >0 projectiles)
 	if (!projectiles.Active) return;
 
-	// Iterate through each element of the projectile set
-	for (std::vector<BasicProjectile>::size_type i = 0; i <= projectiles.LiveIndex; ++i)
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered projectile set [")(projectiles.GetActiveProjectileCount())("]").str(), 
 	{
-		// Test visibility; we will only render projectiles within the viewing frustum
-		BasicProjectile & proj = projectiles.Items[i];
-		if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
+		// Iterate through each element of the projectile set
+		for (std::vector<BasicProjectile>::size_type i = 0; i <= projectiles.LiveIndex; ++i)
+		{
+			// Test visibility; we will only render projectiles within the viewing frustum
+			BasicProjectile & proj = projectiles.Items[i];
+			if (m_frustrum->CheckSphere(proj.Position, proj.Speed) == false) continue;
 
-		// Submit directly for rendering using an instance generated from this projectile and the cached model/texture data in the projectile definition
-		SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, std::move(proj.GenerateRenderInstance()), proj.Position);
-	}
+			// Submit directly for rendering using an instance generated from this projectile and the cached model/texture data in the projectile definition
+			SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, proj.Definition->Buffer, std::move(proj.GenerateRenderInstance()), proj.Position);
+		}
+	});
 }
 
 // Rendering method for skinned models
@@ -2219,15 +2256,18 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	std::vector<Actor*>::iterator it_end = m_queuedactors.end();
 	for (std::vector<Actor*>::iterator it = m_queuedactors.begin(); it != it_end; ++it)
 	{
-		// Calculate new transforms for the bones & mesh of this actor
 		actor = (*it);
-		actor->UpdateForRendering(Game::TimeFactor);
+		RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered skinned actor \"")(actor->GetInstanceCode())("\"").str(),
+		{
+			// Calculate new transforms for the bones & mesh of this actor
+			actor->UpdateForRendering(Game::TimeFactor);
 
-		// Determine a lighting configuration for this actor
-		LightingManager.SetActiveLightingConfigurationForObject(actor);
+			// Determine a lighting configuration for this actor
+			LightingManager.SetActiveLightingConfigurationForObject(actor);
 
-		// Render using the skinned model shader
-		m_skinnedshader->Render(r_devicecontext, (*it)->GetModel(), campos, r_view_f, r_projection_f);
+			// Render using the skinned model shader
+			m_skinnedshader->Render(r_devicecontext, (*it)->GetModel(), campos, r_view_f, r_projection_f);
+		});
 	}
 
 	// Enable rasteriser culling again once all actors have been rendered

@@ -19,6 +19,9 @@
 
 		// Index of the current checkpoint
 		int						CheckpointNumber = 0;
+
+		// Internal index used for ad-hoc block profiling
+		size_t					_INTERNAL_BLOCK_ID = 0U;
 	}
 
 

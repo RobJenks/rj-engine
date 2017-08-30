@@ -52,6 +52,8 @@ public:
 	// Custom stream operators for specific types
 	CMPINLINE LogManager & operator<<(const FXMVECTOR data) { return operator<<(Vector4ToString(data)); }
 	CMPINLINE LogManager & operator<<(const FXMMATRIX data) { return operator<<(MatrixToString(data)); }
+	CMPINLINE LogManager & operator<<(const INTVECTOR2 & data) { return operator<<(data.ToString()); }
+	CMPINLINE LogManager & operator<<(const INTVECTOR3 & data) { return operator<<(data.ToString()); }
 
 	// Custom function to force a flush of log data during streaming
 	static LogManager& flush(LogManager& stream)
@@ -89,13 +91,6 @@ public:
 
 	// Default destructor
 	~LogManager(void);
-
-	// Streaming operators for custom types
-	CMPINLINE LogManager & operator<<(const INTVECTOR2 & rhs) {
-		m_stream << "(" << rhs.x << ", " << rhs.y << ")";
-		if (m_alwaysflush) m_stream.flush();
-		return (*this); 
-	}
 
 	// Streaming operator to handle the std::endl manipulator function
 	CMPINLINE friend LogManager & operator<<(LogManager & ostr, std::ostream & (*manip)(std::ostream &)) {

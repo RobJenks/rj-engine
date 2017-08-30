@@ -258,7 +258,7 @@ Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
 
 	// Copy all lighting data into the buffer
 	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
-	
+
 	// Copy all material data into the buffer
 	if (Game::Engine->GetCurrentModelBuffer())
 	{

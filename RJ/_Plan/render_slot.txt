@@ -1,0 +1,45 @@
+
+Add render_slot UInt to ModelBuffer
+
+[shader] vector entries are 
+	struct { 
+		vector::size_type current_slot_count; 
+		vector< struct { ModelBuffer* , InstanceData vector } >
+	}
+
+At start of each frame, iterate (=0 to <current_slot_count) in [shader] vector and 
+ - for all structs, set modelbuffer*->render_slot = UINT_MAX and clear instance vector (without removing reserve() amount)
+ - set current_slot_index = 0
+
+In SubmitForRendering, 
+ - check if ModelBuffer.render_slot != UINT_MAX)
+   - if no, 
+     - render_slot = ([shader].current_slot_count)++
+     - if (render_slot == [shader].size()) extend [shader] vector by one, set buffer pointer, reserve() some space
+
+ - push into vector at this render_slot within the [shader] vector
+
+
+-----
+
+Also, check why dynamic tile models (i.e. quarters_corner model) are being added to render queue so many times; 300-400 seems much higher than number of tiles using the model
+
+-----
+
+RQ = vector<shaderstruct>
+
+shaderstruct = 
+{
+	uint 				currentslot;
+	vector<modelstruct>		modeldata;
+}
+
+modeldata = 
+{
+	ModelBuffer * 			model;
+	vector<instancestruct>		instances;
+	int 				timeoutcounter;
+}
+
+
+ 

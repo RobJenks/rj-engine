@@ -550,14 +550,32 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_5])
 	{
-		iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
-		for (iObject::AttachmentSet::iterator it = a1()->GetChildObjects().begin(); it != it_end; ++it)
+		if (b[DIK_LSHIFT])
 		{
-			if ((*it).Child && (*it).Child->GetObjectType() == iObject::ObjectType::LightSourceObject)
+			// System light
+			const auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
+			auto it_end = objects.end();
+			for (auto it = objects.begin(); it != it_end; ++it)
 			{
-				Light & light = ((LightSource*)(*it).Child)->LightObject();
-				light.SetIsActive(!light.IsActive());
-				break; 
+				if ((*it)() && (*it)()->GetObjectType() == iObject::ObjectType::LightSourceObject)
+				{
+					LightSource *ls = (LightSource*)(*it)();
+					ls->LightObject().SetIsActive(!ls->GetLight().IsActive());
+				}
+			}
+		}
+		else 
+		{
+			// Actor-attached light
+			iObject::AttachmentSet::iterator it_end = a1()->GetChildObjects().end();
+			for (iObject::AttachmentSet::iterator it = a1()->GetChildObjects().begin(); it != it_end; ++it)
+			{
+				if ((*it).Child && (*it).Child->GetObjectType() == iObject::ObjectType::LightSourceObject)
+				{
+					Light & light = ((LightSource*)(*it).Child)->LightObject();
+					light.SetIsActive(!light.IsActive());
+					break;
+				}
 			}
 		}
 
