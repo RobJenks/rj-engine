@@ -12,8 +12,6 @@
 class FontData;
 class FontShader;
 
-using namespace std;
-
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -38,7 +36,7 @@ public:
 	Result XM_CALLCONV Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
-	Result InitializeFont(string name, const char *fontdata, const char *fonttexture, int &fontID);
+	Result InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID);
 
 	// Creates a new sentence object, allocating memory and building a vertex buffer
 	SentenceType *CreateSentence(int fontID, int maxlength);
@@ -71,8 +69,8 @@ private:
 	Result XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
 
 private:
-	vector<FontData*> m_fonts;
-	vector<SentenceType*> m_sentences;
+	std::vector<FontData*> m_fonts;
+	std::vector<SentenceType*> m_sentences;
 
 	ID3D11Device *m_device;
 	ID3D11DeviceContext *m_devicecontext;

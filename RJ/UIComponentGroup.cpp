@@ -2,7 +2,6 @@
 #include "iUIComponent.h"
 
 #include "UIComponentGroup.h"
-using namespace std;
 
 
 UIComponentGroup::UIComponentGroup(void)
@@ -46,7 +45,7 @@ void UIComponentGroup::EnableGroupRendering(bool ignore_previous_state)
 }
 
 // Returns the index of an item in the collection if it exists, or -1 if it does not
-int UIComponentGroup::FindItem(string code)
+int UIComponentGroup::FindItem(std::string code)
 {
 	// Loop through the collection and try to locate the item
 	ComponentGroupItems::size_type n = m_items.size();

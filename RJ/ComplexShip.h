@@ -127,7 +127,7 @@ public:
 															bool UnlinkTiles, bool ShutdownBeacons);
 
 	// Static methods to create a complex ship from the supplied ship code
-	static ComplexShip *						Create(const string & code);
+	static ComplexShip *						Create(const std::string & code);
 	static ComplexShip *						Create(ComplexShip *template_ship);
 
 	// Methods called when this object collides with another.  Virtual inheritance from iSpaceObject.  Overriden method providing a section
@@ -140,7 +140,7 @@ public:
 	void										RemoveStandardComponentFlags(void);
 
 	// Performs a text output of perimeter beacon data for debug purposes
-	string										DebugOutputPerimeterBeacons(void);
+	std::string									DebugOutputPerimeterBeacons(void);
 
 	// Methods to return the standard path / filename where this ship data should be stored, if it is following the standard convention
 	std::string									DetermineXMLDataPath(void);
@@ -165,7 +165,7 @@ protected:
 
 	PerimeterBeaconCollection					m_perimeterbeacons;		// Collection of capital ship perimeter beacons for this ship
 	int											m_activebeacons;		// The number of active beacons for this ship
-	vector<Octree<iObject*>*>					m_activeperimeternodes;	// The nodes currently holding our ship (excluding the main m_treenode)
+	std::vector<Octree<iObject*>*>				m_activeperimeternodes;	// The nodes currently holding our ship (excluding the main m_treenode)
 
 	bool										m_forcerenderinterior;	// Flag that determines whether the ship interior should always be rendered, regardless of the criteria
 

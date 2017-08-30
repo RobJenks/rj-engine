@@ -267,8 +267,8 @@ public:
 										ComplexShipElement *neighbourelement);
 
 	// Methods to translate between the attachment enumerations and their string representations
-	static string							AttachTypeToString(AttachType type);
-	static AttachType						AttachTypeFromString(string type);
+	static std::string						AttachTypeToString(AttachType type);
+	static AttachType						AttachTypeFromString(std::string type);
 
 	// Compares the equality of two elements
 	CMPINLINE friend bool operator== (const ComplexShipElement &e1, ComplexShipElement &e2) 
@@ -288,8 +288,8 @@ public:
 	static void								CopyData(ComplexShipElement *src, ComplexShipElement *dest);
 
 	// Static methods to convert between element properties and their string name representation
-	static ComplexShipElement::PROPERTY		TranslatePropertyFromName(string name);
-	static string							TranslatePropertyToName(ComplexShipElement::PROPERTY prop);
+	static ComplexShipElement::PROPERTY		TranslatePropertyFromName(std::string name);
+	static std::string						TranslatePropertyToName(ComplexShipElement::PROPERTY prop);
 
 	// Static method to parse a property string and determine the final element state
 	static ComplexShipElement::PROPERTY		ParsePropertyString(const std::string & prop_string);

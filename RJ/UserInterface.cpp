@@ -19,17 +19,16 @@
 #include "UI_ShipBuilder.h"
 #include "SentenceType.h"
 class GameInputDevice;
-using namespace std;
 
 #include "UserInterface.h"
 
 // Constant string IDs of the primary UI layouts
-const string		UserInterface::UI_INFLIGHT					= "UI_INFLIGHT";
-const string		UserInterface::UI_MAINMENU					= "UI_MAINMENU";
-const string		UserInterface::UI_CONSOLE					= "UI_CONSOLE";
-const string		UserInterface::UI_SHIPDESIGNER				= "UI_SHIPDESIGNER";
-const string		UserInterface::UI_MODELBUILDER				= "UI_MODELBUILDER";
-const string		UserInterface::UI_SHIPBUILDER				= "UI_SHIPBUILDER";
+const std::string		UserInterface::UI_INFLIGHT					= "UI_INFLIGHT";
+const std::string		UserInterface::UI_MAINMENU					= "UI_MAINMENU";
+const std::string		UserInterface::UI_CONSOLE					= "UI_CONSOLE";
+const std::string		UserInterface::UI_SHIPDESIGNER				= "UI_SHIPDESIGNER";
+const std::string		UserInterface::UI_MODELBUILDER				= "UI_MODELBUILDER";
+const std::string		UserInterface::UI_SHIPBUILDER				= "UI_SHIPBUILDER";
 
 // Default constructor
 UserInterface::UserInterface(void)
@@ -134,7 +133,7 @@ Result UserInterface::InitialiseUITextComponents(void)
 }
 
 // Initialises a text block.  These are the managed wrapper objects for manipulating text strings in the interface
-TextBlock *UserInterface::CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
+TextBlock *UserInterface::CreateTextBlock(std::string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render)
 {
 	Result result;
 	SentenceType *sentence;
@@ -286,7 +285,7 @@ std::string UserInterface::GetActiveUIControllerCode(void) const
 	else				return NullString;
 }
 
-Image2D *UserInterface::NewComponent(string code, const char *filename, int x, int y, float z, int width, int height)
+Image2D *UserInterface::NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height)
 {
 	// Create a new component and initialise with the supplied data
 	Image2D *item = new Image2D();
@@ -366,7 +365,7 @@ void UserInterface::DeactivateConsole(void)
 
 
 // Returns a pointer to the primary UI layout corresponding to this state, or NULL if not applicable
-iUIController *UserInterface::GetUIController(string state)
+iUIController *UserInterface::GetUIController(std::string state)
 {
 	// Attempt to locate a controller matching the desired state code
 	std::vector<iUIController**>::iterator it_end = m_ui_controllers.end();
@@ -728,7 +727,7 @@ void UserInterface::WriteDebugOutput(int line, const char *text)
 }
 
 // Writes a string to the debug output
-void UserInterface::WriteDebugOutput(int line, string text)
+void UserInterface::WriteDebugOutput(int line, std::string text)
 {
 	const char *c = text.c_str();
 	WriteDebugOutput(line, c);

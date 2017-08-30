@@ -5,7 +5,6 @@
 
 #include <string>
 #include "Utility.h"
-using namespace std;
 
 
 // This file contains no objects with special alignment requirements
@@ -40,10 +39,10 @@ public:
 	// TODO: Longer-term, replace all string comparisons to use hash values for greater efficiency?
 	// Could create arrays at startup of {Hash value, Actual enum value, [printable string value?]} and then just loop & compare the numeric hash.
 	// OR use a hash table component within C++ (~ std::hash_map) ?
-	static CrewClass TranslateCrewClassFromString(const string & name)
+	static CrewClass TranslateCrewClassFromString(const std::string & name)
 	{
 		// Case-insensitive string comparison
-		string val = StrLower(name);
+		std::string val = StrLower(name);
 
 		// Test for each crew class in turn
 		if (val == "admiral")					return CrewClass::Admiral; 
@@ -55,7 +54,7 @@ public:
 		else									return CrewClass::UnknownCrewClass;
 	}
 
-	static string TranslateCrewClassToString(CrewClass cls)
+	static std::string TranslateCrewClassToString(CrewClass cls)
 	{
 		// Consider each crew class in turn
 		switch (cls)

@@ -18,8 +18,6 @@ class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
 class BoundingObject;
-using namespace std;
-
 
 
 // This class does not have any special alignment requirements
@@ -38,7 +36,7 @@ protected:
 	// Struct maintaining a collection of probability-weighted models
 	struct ProbabilityWeightedModelCollection
 	{
-		vector<ProbabilityWeightedModel> models;
+		std::vector<ProbabilityWeightedModel> models;
 		float totalprob;
 
 		ProbabilityWeightedModelCollection(void) { totalprob = 0.0f; }
@@ -63,8 +61,8 @@ protected:
 public:
 
 	// Methods to add and retrieve probability-weighted models for contructing tiles
-	typedef unordered_map<string, ProbabilityWeightedModelCollection> TileModelSet;
-	void AddModelToSet(string category, Model *model, float probability);
+	typedef std::unordered_map<std::string, ProbabilityWeightedModelCollection> TileModelSet;
+	void AddModelToSet(std::string category, Model *model, float probability);
 	Model *GetModelFromSet(const ProbabilityWeightedModelCollection *models) const;
 	
 	// Static method to create definition objects of the desired subclass type
@@ -77,10 +75,10 @@ public:
 	CMPINLINE ComplexShipTileClass *	GetClassObject(void) const { return m_class; }
 
 	// Methods to get and set key properties
-	CMPINLINE string		GetCode(void) const										{ return m_code; }
-	CMPINLINE void			SetCode(const string & code)							{ m_code = code; }
-	CMPINLINE string		GetName(void) const										{ return m_name; }
-	CMPINLINE void			SetName(const string & name)							{ m_name = name; }
+	CMPINLINE std::string	GetCode(void) const										{ return m_code; }
+	CMPINLINE void			SetCode(const std::string & code)						{ m_code = code; }
+	CMPINLINE std::string	GetName(void) const										{ return m_name; }
+	CMPINLINE void			SetName(const std::string & name)						{ m_name = name; }
 	CMPINLINE INTVECTOR3	GetElementSize(void) const								{ return m_elementsize; }
 	void					SetElementSize(const INTVECTOR3 & size);
 	
@@ -149,7 +147,7 @@ public:
 	std::string					GetDynamicTileSet(void) const;
 
 	// Inline method to return a model from a set based on category name; simply calls overloaded function after looking up that category
-	CMPINLINE Model *ComplexShipTileDefinition::GetModelFromSet(string category) const
+	CMPINLINE Model *ComplexShipTileDefinition::GetModelFromSet(std::string category) const
 	{
 		if (category == NullString || m_models.count(category) == 0)	return NULL; 
 		else															return GetModelFromSet(&(m_models.at(category)));
@@ -182,7 +180,7 @@ public:
 	~ComplexShipTileDefinition(void);
 
 	// Adds a new model to the tile model set
-	CMPINLINE bool AddItemToCompoundModelCollection(string type, string code, float prob)
+	CMPINLINE bool AddItemToCompoundModelCollection(std::string type, std::string code, float prob)
 	{
 		// Parameter check
 		if (type == NullString || code == NullString || prob < Game::C_EPSILON) return false;
@@ -195,8 +193,8 @@ public:
 
 protected:
 	// String code and name of the tile
-	string						m_code;
-	string						m_name;
+	std::string					m_code;
+	std::string					m_name;
 
 	// The class of this tile
 	D::TileClass				m_classtype;
@@ -239,7 +237,7 @@ protected:
 	BoundingObject *			m_boundingbox;
 
 	// Returns the model set for the specified category of element, or NULL if no model set exists
-	CMPINLINE const ProbabilityWeightedModelCollection *	GetModelSet(const string &category) const
+	CMPINLINE const ProbabilityWeightedModelCollection *	GetModelSet(const std::string &category) const
 	{ 
 		if (m_models.count(category) > 0)	return &(m_models.at(category)); 
 		else								return NULL; 

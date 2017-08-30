@@ -51,7 +51,7 @@ Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
 	m_backdrop = new Texture();
 	if (m_backdroplocation != NullString) 
 	{
-		string filename = BuildStrFilename(D::IMAGE_DATA, m_backdroplocation);
+		std::string filename = BuildStrFilename(D::IMAGE_DATA, m_backdroplocation);
 		if (FileSystem::FileExists(filename.c_str()))
 		{
 			m_backdrop->Initialise(filename.c_str());

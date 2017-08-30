@@ -10,11 +10,9 @@
 #include "HpTorpedoLauncher.h"
 #include "HpTurret.h"
 
-using namespace std;
-
-Equip::Class Hp::GetType(const string &typestring)
+Equip::Class Hp::GetType(const std::string &typestring)
 {
-	const string s = StrLower(typestring);
+	const std::string s = StrLower(typestring);
 	if (s == "turret")
 		return Equip::Class::Turret;
 	else if (s == "engine")

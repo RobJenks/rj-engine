@@ -240,7 +240,7 @@ void ComplexShipElement::DeallocateNavPointConnectionData(void)
 	m_numnavnodeconnections = 0;
 }
 
-string ComplexShipElement::AttachTypeToString(ComplexShipElement::AttachType type)
+std::string ComplexShipElement::AttachTypeToString(ComplexShipElement::AttachType type)
 {
 	switch (type) {
 		case ComplexShipElement::AttachType::Standard:				return "Standard";
@@ -248,17 +248,17 @@ string ComplexShipElement::AttachTypeToString(ComplexShipElement::AttachType typ
 		default:													return "Disallowed";
 	}
 }
-ComplexShipElement::AttachType ComplexShipElement::AttachTypeFromString(string type)
+ComplexShipElement::AttachType ComplexShipElement::AttachTypeFromString(std::string type)
 {
 	// All comparisons are case-insensitive
-	string s = StrLower(type);
+	std::string s = StrLower(type);
 	if		(s == "standard")	return ComplexShipElement::AttachType::Standard;
 	else if	(s == "turret")		return ComplexShipElement::AttachType::TurretModule;
 	else						return ComplexShipElement::AttachType::_AttachTypeCount;
 }
 
 // Static method to convert from a string property name to the property itself
-string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY prop)
+std::string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY prop)
 {
 	switch (prop)
 	{
@@ -274,10 +274,10 @@ string ComplexShipElement::TranslatePropertyToName(ComplexShipElement::PROPERTY 
 }
 
 // Static method to convert from element properties to their string name representation
-ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(string name)
+ComplexShipElement::PROPERTY ComplexShipElement::TranslatePropertyFromName(std::string name)
 {
 	// All comparisons are case-insensitive
-	string s = StrLower(name);
+	std::string s = StrLower(name);
 
 	if		(s == "active")				return ComplexShipElement::PROPERTY::PROP_ACTIVE;	
 	else if (s == "buildable")			return ComplexShipElement::PROPERTY::PROP_BUILDABLE;

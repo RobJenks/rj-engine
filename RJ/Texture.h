@@ -44,10 +44,10 @@ public:
 	CMPINLINE void						SetTextureSize(INTVECTOR2 size) { m_size = size; }
 
 	static INTVECTOR2 DetermineTextureSize(ID3D11ShaderResourceView *texture);
-	static APPLY_MODE TranslateTextureMode(const string mode);
+	static APPLY_MODE TranslateTextureMode(const std::string mode);
 
 	// Creates a shader resource view object directly, rather than initialising a texture object
-	static ID3D11ShaderResourceView *Texture::CreateSRV(const string & filename);
+	static ID3D11ShaderResourceView *Texture::CreateSRV(const std::string & filename);
 
 	// Static method that deallocates all textures in the central texture dictionary
 	static void							ShutdownAllTextureData(void);
@@ -63,14 +63,14 @@ protected:
 	static TextureResourceRepository											TextureResources;
 
 	// Retrieves a texture resource from the static collection, if a matching resource exists
-	CMPINLINE static ID3D11ShaderResourceView *				Get(const string & filename)
+	CMPINLINE static ID3D11ShaderResourceView *				Get(const std::string & filename)
 	{
 		if (Texture::TextureResources.count(filename) > 0)	return Texture::TextureResources[filename];
 		else												return NULL;
 	}
 
 	// Stores a resource in the static texture collection, assuming it is a valid reference and not a duplicate
-	CMPINLINE static void									Store(const string & filename, ID3D11ShaderResourceView *tex)
+	CMPINLINE static void									Store(const std::string & filename, ID3D11ShaderResourceView *tex)
 	{
 		if (filename != NullString && tex != NULL && Texture::TextureResources.count(filename) == 0)
 			Texture::TextureResources[filename] = tex;

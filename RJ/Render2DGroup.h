@@ -19,8 +19,6 @@ class GameInputDevice;
 class Render2DManager;
 class RenderMouseEvent;
 class UIComponentGroup;
-using namespace std;
-
 
 
 // This class has no special alignment requirements
@@ -39,7 +37,7 @@ public:
 		RenderComponentGroup<UITextBox*>				TextBoxes;
 		RenderComponentGroup<UIComboBox*>				ComboBoxes;
 
-		RenderComponentGroup<string>					RenderConstants;
+		RenderComponentGroup<std::string>				RenderConstants;
 		RenderComponentGroup<UIComponentGroup*>			ComponentGroups;
 		RenderComponentGroup<RenderMouseEvent*>			MouseEvents;
 
@@ -47,20 +45,20 @@ public:
 
 public:
 
-	typedef unordered_map<std::string, Image2D*> Image2DCollection;
-	typedef unordered_map<std::string, Image2DRenderGroup*> Image2DRenderGroupCollection;
-	typedef unordered_map<std::string, RenderMouseEvent*> MouseEventCollection;
-	typedef unordered_map<std::string, TextBlock*> TextBlockCollection;
-	typedef unordered_map<std::string, MultiLineTextBlock*> MultiLineTextBlockCollection;
-	typedef unordered_map<std::string, UIButton*> ButtonCollection;
-	typedef unordered_map<std::string, UITextBox*> TextBoxCollection;
-	typedef unordered_map<std::string, UIComboBox*> ComboBoxCollection;
+	typedef std::unordered_map<std::string, Image2D*> Image2DCollection;
+	typedef std::unordered_map<std::string, Image2DRenderGroup*> Image2DRenderGroupCollection;
+	typedef std::unordered_map<std::string, RenderMouseEvent*> MouseEventCollection;
+	typedef std::unordered_map<std::string, TextBlock*> TextBlockCollection;
+	typedef std::unordered_map<std::string, MultiLineTextBlock*> MultiLineTextBlockCollection;
+	typedef std::unordered_map<std::string, UIButton*> ButtonCollection;
+	typedef std::unordered_map<std::string, UITextBox*> TextBoxCollection;
+	typedef std::unordered_map<std::string, UIComboBox*> ComboBoxCollection;
 
 
-	typedef unordered_map<std::string, std::string> RenderConstantCollection;
-	typedef unordered_map<std::string, UIComponentGroup*> ComponentGroup;
+	typedef std::unordered_map<std::string, std::string> RenderConstantCollection;
+	typedef std::unordered_map<std::string, UIComponentGroup*> ComponentGroup;
 
-	typedef vector<iUIComponentRenderable*> RenderQueueCollection;
+	typedef std::vector<iUIComponentRenderable*> RenderQueueCollection;
 
 public:
 	Render2DGroup(void);
@@ -75,22 +73,22 @@ public:
 	void SetRenderManager(Render2DManager *rm);
 
 	// String description of this 2D rendering group
-	CMPINLINE string GetDescription(void) { return m_description; }
-	CMPINLINE void SetDescription(string text) { m_description = text; }
+	CMPINLINE std::string GetDescription(void) { return m_description; }
+	CMPINLINE void SetDescription(std::string text) { m_description = text; }
 
 	// Methods to retrieve components or instances at a specific location
 	Image2DRenderGroup::InstanceReference GetComponentInstanceAtLocation(INTVECTOR2 location, bool only_components_which_accept_mouse_input);
 
 	// Shortcut methods to find and return a render constant with the specified key
-	CMPINLINE bool HaveConstant(string key) { return (m_constants.count(key) > 0); }
-	CMPINLINE string GetConstant(string key) { if (m_constants.count(key) != 0) return m_constants[key]; else return ""; }
+	CMPINLINE bool HaveConstant(std::string key) { return (m_constants.count(key) > 0); }
+	CMPINLINE std::string GetConstant(std::string key) { if (m_constants.count(key) != 0) return m_constants[key]; else return ""; }
 
 	// Methods to execute the control-specific render method for each managed control in the render group, i.e. any more
 	// complex rendering not already handled by the Render2DManager etc.
 	void PerformManagedControlRendering(iUIControl *focuscontrol);
 
 	// Method to search for a component by code, across all iUIComponent-derived component classes
-	iUIComponent *FindUIComponent(string code, string key);
+	iUIComponent *FindUIComponent(std::string code, std::string key);
 
 	// Render function, which will process each registered renderable component in turn
 	void XM_CALLCONV Render(const FXMMATRIX baseviewmatrix);
@@ -113,7 +111,7 @@ private:
 	Render2DManager *				m_rendermanager;
 
 	bool							m_render;
-	string							m_description;
+	std::string						m_description;
 
 	Image2DCollection				m_components;
 	Image2DRenderGroupCollection	m_componentgroups;

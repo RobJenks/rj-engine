@@ -21,10 +21,10 @@ Result EffectBase::LoadTexture(Texture **texture, const char *filename)
 }
 
 // Derives the effect model type from a string identifier.  Used for loading in from game XML data
-EffectBase::EffectModelType EffectBase::DeriveEffectModel(const string modelname)
+EffectBase::EffectModelType EffectBase::DeriveEffectModel(const std::string modelname)
 {
 	// Convert to lowercase for case-insensitive comparison
-	string s = StrLower(modelname);
+	std::string s = StrLower(modelname);
 	
 	// Now determine the effect model type this string is referring to
 	if (s == "unit_cone")

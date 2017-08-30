@@ -26,7 +26,7 @@ Result XM_CALLCONV TextManager::Initialize(ID3D11Device* device, ID3D11DeviceCon
 	return ErrorCodes::NoError;
 }
 
-Result TextManager::InitializeFont(string name, const char *fontdata, const char *fonttexture, int &fontID)
+Result TextManager::InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID)
 {
 	Result result;
 

@@ -60,9 +60,6 @@ struct GameConsoleCommand;
 struct VolumetricLine;
 struct SentenceType;
 
-using namespace std;
-
-
 // Constant engine rendering values
 const float SCREEN_DEPTH = 5000.0f;
 const float SCREEN_NEAR = 0.1f;

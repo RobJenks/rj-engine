@@ -5,7 +5,6 @@
 #include "ErrorCodes.h"
 #include "Equip.h"
 #include <string>
-using namespace std;
 
 class Hardpoint;
 
@@ -13,7 +12,7 @@ class Hardpoint;
 class Hp
 {
 public:
-	static Equip::Class			GetType(const string &typestring);
+	static Equip::Class			GetType(const std::string &typestring);
 	static std::string			ToString(const Equip::Class cls);
 
 	static Hardpoint *			Create(Equip::Class type);

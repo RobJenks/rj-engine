@@ -22,8 +22,8 @@ public:
 	// via overriding function in the Equipment vftable
 	virtual CMPINLINE Equip::Class	GetType() const = 0;
 
-	string					Name;					// The string name of this equipment
-	string					Code;					// The internal string code for this equipment
+	std::string					Name;					// The string name of this equipment
+	std::string					Code;					// The internal string code for this equipment
 	
 	CMPINLINE std::string	GetCode(void) const		{ return Code; }
 

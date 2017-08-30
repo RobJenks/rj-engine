@@ -73,8 +73,6 @@
 
 #include "CoreEngine.h"
 
-using namespace std;
-
 
 // Default constructor
 CoreEngine::CoreEngine(void)
@@ -1411,7 +1409,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
 	unsigned int n;
-	vector<RM_Instance> renderbuffer;
+	std::vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 #	ifdef RJ_ENABLE_FRAME_PROFILER
 	Timers::HRClockTime render_time;

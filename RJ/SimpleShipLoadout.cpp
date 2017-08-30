@@ -15,7 +15,7 @@ Result SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(SimpleShip *s)
 	if (!s) return ErrorCodes::CannotAssignLoadoutToNullShip;
 
 	// Get the default ship loadout
-	string c_loadout = s->GetDefaultLoadout();
+	std::string c_loadout = s->GetDefaultLoadout();
 	if (c_loadout == NullString) return ErrorCodes::ShipHasNoDefaultLoadoutSpecified;
 
 	// Look up this loadout code in the global collection
@@ -65,7 +65,7 @@ Result SimpleShipLoadout::AssignLoadoutToSimpleShip(SimpleShip *s, SimpleShipLoa
 void SimpleShipLoadout::ApplyLoadoutMap(SimpleShip *s, iLoadoutMap *map)
 {
 	// Get hardpoint code from the map and make sure it is non-NULL
-	string c_hp = map->GetHardpoint();
+	std::string c_hp = map->GetHardpoint();
 	if (c_hp == NullString) return;
 	
 	// Get a pointer to the relevant hardpoint (assuming it exists)
@@ -89,7 +89,7 @@ SimpleShipLoadout::SimpleShipLoadout(void) : Code(""), Ship("")
 {
 }
 
-void SimpleShipLoadout::AddMap(string hp, Equipment *equip)
+void SimpleShipLoadout::AddMap(std::string hp, Equipment *equip)
 {
 	// Test whether a map to this hardpoint already exists
 	if (hp == NullString) return;
@@ -100,7 +100,7 @@ void SimpleShipLoadout::AddMap(string hp, Equipment *equip)
 	this->Maps[hp] = new LoadoutMap(hp, equip);
 }
 
-void SimpleShipLoadout::AddCompoundMap(string hp, CompoundLoadoutMap *map)
+void SimpleShipLoadout::AddCompoundMap(std::string hp, CompoundLoadoutMap *map)
 {
 	// Test whether a map to this hardpoint already exists
 	if (hp == NullString) return;

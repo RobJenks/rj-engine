@@ -98,7 +98,7 @@ Result Texture::Initialise(const std::string & filename)
 }
 
 // Creates a shader resource view object directly, rather than initialising a texture object
-ID3D11ShaderResourceView *Texture::CreateSRV(const string & filename)
+ID3D11ShaderResourceView *Texture::CreateSRV(const std::string & filename)
 {
 	// Check whether we have already loaded this resource
 	ID3D11ShaderResourceView *res = Texture::Get(filename);
@@ -178,10 +178,10 @@ INTVECTOR2 Texture::DetermineTextureSize(ID3D11ShaderResourceView *texture)
 	return INTVECTOR2((int)desc.Width, (int)desc.Height);
 }
 
-Texture::APPLY_MODE Texture::TranslateTextureMode(const string mode)
+Texture::APPLY_MODE Texture::TranslateTextureMode(const std::string mode)
 {
 	// All comparisons are case-insensitive
-	string compare = StrLower(mode);
+	std::string compare = StrLower(mode);
 
 	if (compare == "repeat")
 		return Texture::APPLY_MODE::Repeat;

@@ -60,8 +60,8 @@ public:
 	ParticleEmitter				*CreateClone(void);
 
 	// Methods to get & set the unique string key for this emitter
-	CMPINLINE string			GetCode(void) { return m_code; }
-	CMPINLINE void				SetCode(string code) { m_code = code; }
+	CMPINLINE std::string		GetCode(void) { return m_code; }
+	CMPINLINE void				SetCode(std::string code) { m_code = code; }
 
 	// Accessor functions for emitter location properties
 	CMPINLINE XMVECTOR			GetPosition(void) const { return m_position; }
@@ -122,8 +122,8 @@ public:
 	CMPINLINE bool				IsEmitting(void) { return m_emitting; }
 	CMPINLINE void				SetEmitting(bool emitting) { m_emitting = emitting; }
 	CMPINLINE void				Activate(void) { m_exists = true; m_emitting = true; }
-	CMPINLINE string			GetTypeCode(void) { return m_typecode; }
-	CMPINLINE void				SetTypeCode(string typecode) { m_typecode = typecode; }
+	CMPINLINE std::string		GetTypeCode(void) { return m_typecode; }
+	CMPINLINE void				SetTypeCode(std::string typecode) { m_typecode = typecode; }
 	CMPINLINE void				SetParticleLimit(int limit) { m_particlelimit = limit; m_vertexlimit = m_particlelimit * 6; }
 	CMPINLINE int				GetParticleLimit(void) { return m_particlelimit; }
 	CMPINLINE int				GetVertexLimit(void) { return m_vertexlimit; }
@@ -170,8 +170,8 @@ private:
 	ID3D11Buffer				*m_vertexbuffer, *m_indexbuffer;	// Vertex and index buffers for rendering the particle data
 
 	// Emitter properties
-	string						m_code;								// String key of the unique emitter object
-	string						m_typecode;							// String key of the prototype, or the prototye this instance is based on
+	std::string					m_code;								// String key of the unique emitter object
+	std::string					m_typecode;							// String key of the prototype, or the prototye this instance is based on
 	AXMVECTOR					m_position;							// Position of this emitter
 	AXMVECTOR					m_orientation;						// Orientation of this emitter
 	AXMMATRIX					m_worldmatrix;						// World matrix for this emitter calculated from pos+orient whenever changed

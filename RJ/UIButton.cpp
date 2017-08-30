@@ -4,13 +4,12 @@
 #include "TextManager.h"
 #include "TextBlock.h"
 #include "UIButton.h"
-using namespace std;
 
-UIButton::UIButton(	string code,
-									Image2DRenderGroup::InstanceReference upcomponent, 
-									Image2DRenderGroup::InstanceReference downcomponent, 
-									TextBlock *textcomponent, 
-									INTVECTOR2 pos, INTVECTOR2 size, bool render)
+UIButton::UIButton(std::string code,
+					Image2DRenderGroup::InstanceReference upcomponent, 
+					Image2DRenderGroup::InstanceReference downcomponent, 
+					TextBlock *textcomponent, 
+					INTVECTOR2 pos, INTVECTOR2 size, bool render)
 {
 	// Store references to these objects; 
 	m_code = code;

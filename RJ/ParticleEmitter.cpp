@@ -42,8 +42,8 @@ Result ParticleEmitter::InitialiseParticles(void)
 	int tex = 0;
 
 	// Attempt to initialise storage for the particle and vertex data
-	m_particles = new (nothrow) Particle		[m_particlelimit];
-	m_vertices	= new (nothrow) ParticleVertex	[m_vertexlimit];
+	m_particles = new (std::nothrow) Particle		[m_particlelimit];
+	m_vertices	= new (std::nothrow) ParticleVertex	[m_vertexlimit];
 
 	// If either allocation failed then attempt to recover the memory and return; no change will have been made
 	if (!m_particles)		{ if (m_vertices) delete[] m_vertices; return ErrorCodes::CouldNotAllocateParticleDataMemory; }

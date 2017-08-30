@@ -3,6 +3,7 @@
 #ifndef __ComplexShipTileH__
 #define __ComplexShipTileH__
 
+#include <new>
 #include <vector>
 #include "DX11_Core.h"
 
@@ -28,7 +29,6 @@ class Hardpoint;
 class BoundingObject;
 class Resource;
 class ProductionCost;
-using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
@@ -232,20 +232,20 @@ public:
 			if (Size.x < 1 || Size.y < 1 || Size.z < 1) return false;
 
 			// Allocate the x dimension first
-			ModelLayout = new (nothrow) ModelLinkedList***[Size.x];
+			ModelLayout = new (std::nothrow) ModelLinkedList***[Size.x];
 			if (!ModelLayout) return false;
 
 			// Now allocate the y dimension within each x dimension
 			for (int x=0; x<Size.x; x++)
 			{
-				ModelLayout[x] = new (nothrow) ModelLinkedList**[Size.y];
+				ModelLayout[x] = new (std::nothrow) ModelLinkedList**[Size.y];
 				if (!ModelLayout[x]) return false;
 
 				// Finally allocate the z dimension within each y dimension
 				for (int y=0; y<Size.y; y++)
 				{
 					// Allocate space
-					ModelLayout[x][y] = new (nothrow) ModelLinkedList*[Size.z];
+					ModelLayout[x][y] = new (std::nothrow) ModelLinkedList*[Size.z];
 					if (!ModelLayout[x][y]) return false;
 
 					// Also initialise all elements to NULL
@@ -522,12 +522,12 @@ public:
 	CMPINLINE XMVECTOR					GetWorldSize(void) const { return m_worldsize; }
 	
 	// Methods to get and set the string code of this tile
-	CMPINLINE string					GetCode(void) const { return m_code; }
-	CMPINLINE void						SetCode(string code) { m_code = code; }
+	CMPINLINE std::string				GetCode(void) const { return m_code; }
+	CMPINLINE void						SetCode(std::string code) { m_code = code; }
 
 	// Methods to get and set the string name of this tile
-	CMPINLINE string					GetName(void) const { return m_code; }
-	CMPINLINE void						SetName(string name) { m_name = name; }
+	CMPINLINE std::string				GetName(void) const { return m_code; }
+	CMPINLINE void						SetName(std::string name) { m_name = name; }
 
 	// Methods to set or retrieve the flag determining whether this is a standard tile, or just an instance within some parent entity
 	CMPINLINE bool						IsStandardTile(void) const { return m_standardtile; }
@@ -677,7 +677,7 @@ public:
 	Result								GenerateGeometry(void);
 
 	// Static method to look up a tile definition and create a new tile based upon it
-	static ComplexShipTile *			Create(string code);
+	static ComplexShipTile *			Create(std::string code);
 
 	// Static method to create a new instance of the specified class of tile.  Creates the object only, no initialisation
 	static ComplexShipTile *			New(D::TileClass cls);
@@ -774,8 +774,8 @@ protected:
 	Game::ID_TYPE				m_id;
 
 	// String code and name of the tile
-	string						m_code;
-	string						m_name;
+	std::string					m_code;
+	std::string					m_name;
 
 	// Pointer back to the tile definition
 	const ComplexShipTileDefinition * m_definition;

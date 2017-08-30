@@ -25,7 +25,7 @@ class TileConnections;
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
 
-	Result SaveXMLDocument(TiXmlElement *root, const string &filename);
+	Result SaveXMLDocument(TiXmlElement *root, const std::string &filename);
 
 	// Common methods to save intermediate class data
 	bool SaveObjectData(TiXmlElement *node, iObject *object);									// Saves iObject class data

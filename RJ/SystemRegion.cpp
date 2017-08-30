@@ -10,14 +10,13 @@
 #include "Utility.h"
 #include "Model.h"
 #include "GameDataExtern.h"
-using namespace std;
 
 Result SystemRegion::Initialise(ID3D11Device *device)
 {
 	Result result;
 
 	// Create a new model to represent the space skybox
-	string skybox_filename = BuildStrFilename(D::DATA, "Models\\Misc\\skybox.rjm");
+	std::string skybox_filename = BuildStrFilename(D::DATA, "Models\\Misc\\skybox.rjm");
 	m_skybox = new Model();
 
 	// Initialise the skybox model

@@ -94,8 +94,8 @@ Result UI_ShipDesigner::InitialiseController(Render2DGroup *render, UserInterfac
 {
 	Result result;
 	int gx, gy, gw, gh, gsz;
-	string str;
-	string gtexture, stexfile, shlfile;
+	std::string str;
+	std::string gtexture, stexfile, shlfile;
 		
 	// Build an image instance collection for each ship section, for use in building & rendering ships under construction
 	BuildShipSectionImageMap();
@@ -181,10 +181,10 @@ Result UI_ShipDesigner::InitialiseController(Render2DGroup *render, UserInterfac
 	// Read the ship section preview window data from render constants
 	if (m_render->HaveConstant("shipsecprev.x") && m_render->HaveConstant("shipsecprev.y") && 
 		m_render->HaveConstant("shipsecprev.w") && m_render->HaveConstant("shipsecprev.h")) {
-			string cx = m_render->GetConstant("shipsecprev.x");
-			string cy = m_render->GetConstant("shipsecprev.y");
-			string cw = m_render->GetConstant("shipsecprev.w");
-			string ch = m_render->GetConstant("shipsecprev.h");
+			std::string cx = m_render->GetConstant("shipsecprev.x");
+			std::string cy = m_render->GetConstant("shipsecprev.y");
+			std::string cw = m_render->GetConstant("shipsecprev.w");
+			std::string ch = m_render->GetConstant("shipsecprev.h");
 			m_consview_preview_pos = INTVECTOR2(atoi(cx.c_str()), atoi(cy.c_str()));
 			m_consview_preview_size = INTVECTOR2(atoi(cw.c_str()), atoi(ch.c_str()));
 			if (m_consview_preview_size.x == 0 || m_consview_preview_size.y == 0) { m_consview_preview_size = INTVECTOR2(128, 128); }
@@ -375,16 +375,16 @@ Result UI_ShipDesigner::InitialiseRenderGroups(Render2DGroup *render, UserInterf
 	return ErrorCodes::NoError;
 }
 
-Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, string key, string itemkey, Render2DGroup *render)
+Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, std::string key, std::string itemkey, Render2DGroup *render)
 {
 	Result result;
-	string texname, texfname;
+	std::string texname, texfname;
 	const char *filename;
 	float z;
 
 	// Derive property keys from this item key
-	string texturekey = concat(itemkey)(".texture").str();
-	string zkey = concat(itemkey)(".z").str();
+	std::string texturekey = concat(itemkey)(".texture").str();
+	std::string zkey = concat(itemkey)(".z").str();
 
 	// Make sure we have a constant matching this texture key
 	if (!render || !render->HaveConstant(texturekey) || !render->HaveConstant(zkey))
@@ -401,7 +401,7 @@ Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, s
 		filename = texfname.c_str();	
 
 		// Retrieve the component z order
-		string zstring = render->GetConstant(zkey);
+		std::string zstring = render->GetConstant(zkey);
 		const char *zcs = zstring.c_str();
 		if (zcs) z = (float)atof(zcs); else z = 0.0f;
 	}
@@ -657,7 +657,7 @@ void UI_ShipDesigner::ShutdownSDShip(void)
 }
 
 // Prepares a new ship for saving to the global collection, by updating e.g. unique codes to avoid conflict
-Result UI_ShipDesigner::PrepareShipForOperation(ComplexShip *s, string code)
+Result UI_ShipDesigner::PrepareShipForOperation(ComplexShip *s, std::string code)
 {
 	// Set the unique code of the main ship to the code provided
 	s->SetCode(code);
@@ -686,7 +686,7 @@ Result UI_ShipDesigner::PrepareShipForOperation(ComplexShip *s, string code)
 }
 
 // Load a ship into the ship designer, creating a copy that can be worked upon
-Result UI_ShipDesigner::LoadShip(string code)
+Result UI_ShipDesigner::LoadShip(std::string code)
 {
 	// Validate the ship code exists
 	StrLowerC(code);
@@ -711,7 +711,7 @@ Result UI_ShipDesigner::LoadShip(string code)
 
 // Save this ship to the global collection, and also stream to file.  For now, we ignore things like 
 // confirmation to overwrite existing ship details
-Result UI_ShipDesigner::SaveShip(string code)
+Result UI_ShipDesigner::SaveShip(std::string code)
 {
 	Result result;
 
@@ -737,7 +737,7 @@ Result UI_ShipDesigner::SaveShip(string code)
 	//ship->FlagShipAsDirectlyGeneratedFromShipDesigner(true);
 
 	// Stream the new ship data to file; for now, generate a temporary path based on the code
-	string filename = concat(D::DATA)(ship->DetermineXMLDataPath()).str();
+	std::string filename = concat(D::DATA)(ship->DetermineXMLDataPath()).str();
 	if (CreateDirectory(filename.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
 		return ErrorCodes::ShipDesignerCannotCreateShipDataDirectory;
 
@@ -767,7 +767,7 @@ Result UI_ShipDesigner::SaveShip(string code)
 		if (result != ErrorCodes::NoError) return result;
 
 		// Make sure the target directory exists
-		string sectionfilename = concat(D::DATA)(sec->DetermineXMLDataPath()).str();
+		std::string sectionfilename = concat(D::DATA)(sec->DetermineXMLDataPath()).str();
 		if (CreateDirectory(sectionfilename.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
 		return ErrorCodes::ShipDesignerCannotCreateShipDataDirectory;
 
@@ -780,7 +780,7 @@ Result UI_ShipDesigner::SaveShip(string code)
 	   the ship.  This will independently load each of the sections from disk as part of the process */
 
 	// Determine the filename of the ship to be loaded
-	string loadfile = ship->DetermineXMLDataFullFilename();
+	std::string loadfile = ship->DetermineXMLDataFullFilename();
 
 	// Make sure the ship doesn't already exist, and remove it if it does
 	if (D::ComplexShips.Exists(code))
@@ -1037,7 +1037,7 @@ void UI_ShipDesigner::ProcessControlRightClickEvent(iUIControl *control)
 void UI_ShipDesigner::ProcessButtonClickEvent(UIButton *button)
 {
 	// Retrieve the code of the button being clicked
-	string code = button->GetCode();
+	std::string code = button->GetCode();
 
 	// Pass control to the applicable method
 	if (button->GetUpComponent()->rendergroup->GetCode() == "panel_tab_inactive") {		// If this is a control panel tab button
@@ -1057,7 +1057,7 @@ void UI_ShipDesigner::ProcessButtonClickEvent(UIButton *button)
 }
 
 // Returns the name of the blueprint we are currently working on, as specified in the blueprint name textbox
-string UI_ShipDesigner::GetBlueprintName(void)
+std::string UI_ShipDesigner::GetBlueprintName(void)
 {
 	UITextBox *tb = m_render->Components.TextBoxes.GetItem("txt_bpname");
 	if (tb) 
@@ -1070,7 +1070,7 @@ string UI_ShipDesigner::GetBlueprintName(void)
 void UI_ShipDesigner::ControlPanelTabClicked(UIButton *button)
 {
 	// Take action depending on the tab that has been clicked; derive the index that we are trying to activate
-	string code = button->GetCode();
+	std::string code = button->GetCode();
 	int index = (code.at(code.size()-1)) - ('0');
 	if (index < 0 || index >= CONTROL_PANEL_TAB_COUNT) return;
 	
@@ -1109,7 +1109,7 @@ void UI_ShipDesigner::ShipSectionSelector_SelectedIndexChanged(UIComboBox *contr
 	if (!control) return;
 
 	// Get the code (combobox tag) of the ship section from the combo box
-	string code = control->GetSelectedItemTag();
+	std::string code = control->GetSelectedItemTag();
 	if (code == NullString) return;
 
 	// Attempt to select the ship section with this unique string code
@@ -1117,7 +1117,7 @@ void UI_ShipDesigner::ShipSectionSelector_SelectedIndexChanged(UIComboBox *contr
 }
 
 // Called whenever the user selects a ship section in the construction view
-void UI_ShipDesigner::ShipSectionSelectedInConstructionView(string code)
+void UI_ShipDesigner::ShipSectionSelectedInConstructionView(std::string code)
 {
 	// Validate that the parameter corresponds to a valid ship section
 	if (code == NullString || D::ComplexShipSections.Exists(code) == false)
@@ -1246,7 +1246,7 @@ void UI_ShipDesigner::CorridorSelector_SelectedIndexChanged(UIComboBox *control,
 	if (!control) return;
 
 	// Get the tag of the selected item
-	string tag = control->GetSelectedItemTag();
+	std::string tag = control->GetSelectedItemTag();
 	if (tag == NullString) return;
 
 	// Determine the state of the corridor view based on this value
@@ -1277,7 +1277,7 @@ void UI_ShipDesigner::SetCorridorViewMode(CorridorViewMode mode)
 void UI_ShipDesigner::TileSelector_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex)
 {
 	// Attempt to retrieve a pointer to the tile definition that was selected
-	string code = control->GetSelectedItemTag(); StrLowerC(code);
+	std::string code = control->GetSelectedItemTag(); StrLowerC(code);
 	m_selectedtiletype = D::ComplexShipTiles.Get(code);
 }
 
@@ -1625,7 +1625,7 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 			rg = m_css_images[sec->GetPreviewImage()];
 
 		// Generate a key for this section instance
-		string key = concat("sd_section_")(i).str();
+		std::string key = concat("sd_section_")(i).str();
 
 		// Add a new instance to the render group and store a mapping to it.  Position is not important
 		// at this point since it will be set during the next update method
@@ -1853,7 +1853,7 @@ void UI_ShipDesigner::PlaceShipSection(void)
 	m_ship->AddShipSection(section);
 
 	// Reset the SD state back to normal, by simulating another selection of the same ship section
-	string scode = m_consview_selected_code; m_consview_selected_code = "";
+	std::string scode = m_consview_selected_code; m_consview_selected_code = "";
 	ShipSectionSelectedInConstructionView(scode);
 
 	// Perform a full refresh since the ship blueprint has been modified
@@ -2098,10 +2098,10 @@ void UI_ShipDesigner::Terminate(void)
 }
 
 // Calculates the set of elements covered by a path from a start to an end grid square
-vector<INTVECTOR2> UI_ShipDesigner::CalculateGridPath(INTVECTOR2 start, INTVECTOR2 end)
+std::vector<INTVECTOR2> UI_ShipDesigner::CalculateGridPath(INTVECTOR2 start, INTVECTOR2 end)
 {
 	int incr;
-	vector<INTVECTOR2> path;
+	std::vector<INTVECTOR2> path;
 
 	// If start or end location are not within valid bounds then stop here
 	if (start.x < 0 || start.y < 0 || end.x < 0 || end.y < 0 || start.x >= m_numgx || start.y >= m_numgy || end.x >= m_numgx || end.y >= m_numgy)
@@ -2126,9 +2126,9 @@ vector<INTVECTOR2> UI_ShipDesigner::CalculateGridPath(INTVECTOR2 start, INTVECTO
 }
 
 // Returns the set of elements covered by a rectangular extent from a start to an end grid square
-vector<INTVECTOR2> UI_ShipDesigner::CalculateGridExtent(INTVECTOR2 start, INTVECTOR2 end)
+std::vector<INTVECTOR2> UI_ShipDesigner::CalculateGridExtent(INTVECTOR2 start, INTVECTOR2 end)
 {
-	vector<INTVECTOR2> extent;
+	std::vector<INTVECTOR2> extent;
 
 	// If start or end location are not within valid bounds then stop here
 	if (start.x < 0 || start.y < 0 || end.x < 0 || end.y < 0 || start.x >= m_numgx || start.y >= m_numgy || end.x >= m_numgx || end.y >= m_numgy)
@@ -2153,13 +2153,13 @@ vector<INTVECTOR2> UI_ShipDesigner::CalculateGridExtent(INTVECTOR2 start, INTVEC
 }
 
 // Tests a set of tile placement options to determine whether they are valid.  Overloaded version that assumes z = the current SD z position 
-bool UI_ShipDesigner::TestTileSetPlacement(vector<INTVECTOR2> gridsquares, D::TileClass tileclass, bool showpreview)
+bool UI_ShipDesigner::TestTileSetPlacement(std::vector<INTVECTOR2> gridsquares, D::TileClass tileclass, bool showpreview)
 {
 	return TestTileSetPlacement(gridsquares, m_gridzpos, tileclass, showpreview);
 }
 
 // Tests a set of tile placement options to determine whether they are valid; optionally also shows visually on the SD grid
-bool UI_ShipDesigner::TestTileSetPlacement(vector<INTVECTOR2> gridsquares, int zpos, D::TileClass tileclass, bool showpreview)
+bool UI_ShipDesigner::TestTileSetPlacement(std::vector<INTVECTOR2> gridsquares, int zpos, D::TileClass tileclass, bool showpreview)
 {
 	bool valid = true;
 	float zbp = 0.0f, zconflict = 0.0f;
@@ -2177,8 +2177,8 @@ bool UI_ShipDesigner::TestTileSetPlacement(vector<INTVECTOR2> gridsquares, int z
 	}
 
 	// Iterate over the set of potential tile placements
-	vector<INTVECTOR2>::const_iterator it_end = gridsquares.end();
-	for (vector<INTVECTOR2>::const_iterator it = gridsquares.begin(); it != it_end; ++it)
+	std::vector<INTVECTOR2>::const_iterator it_end = gridsquares.end();
+	for (std::vector<INTVECTOR2>::const_iterator it = gridsquares.begin(); it != it_end; ++it)
 	{
 		// Calculate the position of the element 
 		INTVECTOR3 elpos = GetElementAtGridSquare(*it);
@@ -2269,7 +2269,7 @@ void UI_ShipDesigner::PlaceTile(ComplexShipTileDefinition *tile, INTVECTOR2 star
 	for (int z = elstart.z; z <= elend.z; z++)
 	{
 		// Get the region of tiles in this range
-		vector<INTVECTOR2> extent = CalculateGridExtent(INTVECTOR2(elstart.x, elstart.y), INTVECTOR2(elend.x, elend.y));
+		std::vector<INTVECTOR2> extent = CalculateGridExtent(INTVECTOR2(elstart.x, elstart.y), INTVECTOR2(elend.x, elend.y));
 
 		// Test the placement of this tile across that range
 		bool valid = TestTileSetPlacement(extent, z, tile->GetClass(), false);
@@ -2452,15 +2452,15 @@ void UI_ShipDesigner::DeployCorridorTiles(INTVECTOR2 start, INTVECTOR2 end)
 		return;
 
 	// Calculate the path of grid squares to be traversed by this stretch of corridor
-	vector<INTVECTOR2> path = CalculateGridPath(start, end);
+	std::vector<INTVECTOR2> path = CalculateGridPath(start, end);
 
 	// Now test the placement of this path on the SD grid, to make sure they can all be deployed successfully
 	bool valid = TestTileSetPlacement(path, D::TileClass::Corridor, false);
 	if (!valid) return;
 
 	// The path is valid so create a tile for each item in the stretch of corridor
-	vector<INTVECTOR2>::iterator it_end = path.end();
-	for (vector<INTVECTOR2>::iterator it = path.begin(); it != it_end; ++it)
+	std::vector<INTVECTOR2>::iterator it_end = path.end();
+	for (std::vector<INTVECTOR2>::iterator it = path.begin(); it != it_end; ++it)
 	{
 		DeployCorridorTile(*it);
 	}
@@ -2738,7 +2738,7 @@ void UI_ShipDesigner::UpdateCorridorDragPreview(INTVECTOR2 location)
 	m_lastgriddragsquare = dragpos;
 
 	// Calculate the path of grid squares to be traversed by this stretch of corridor
-	vector<INTVECTOR2> path = CalculateGridPath(m_griddragstart, dragpos);
+	std::vector<INTVECTOR2> path = CalculateGridPath(m_griddragstart, dragpos);
 
 	// Now test the placement of this path on the SD grid, showing the preview at the same time
 	TestTileSetPlacement(path, D::TileClass::Corridor, true);
@@ -2764,7 +2764,7 @@ void UI_ShipDesigner::UpdateTileDragPreview(INTVECTOR2 location)
 	dragpos = GetExactTilePlacementExtent(m_griddragstart, dragpos);
 
 	// Retrieve the extend of cells between these points
-	vector<INTVECTOR2> extent = CalculateGridExtent(m_griddragstart, dragpos);
+	std::vector<INTVECTOR2> extent = CalculateGridExtent(m_griddragstart, dragpos);
 	if (extent.size() == 0) return;
 
 	// Test the tile placement over this extent, including display of a preview of any conflicts on the SD grid
@@ -2890,7 +2890,7 @@ UI_ShipDesigner::~UI_ShipDesigner(void)
 }
 
 // Static method to translate from a corridor view mode's string representation to the mode itself
-UI_ShipDesigner::CorridorViewMode UI_ShipDesigner::TranslateCorridorViewModeFromString(string code)
+UI_ShipDesigner::CorridorViewMode UI_ShipDesigner::TranslateCorridorViewModeFromString(std::string code)
 {
 	if (code == "SINGLE_CORRIDOR")
 		return UI_ShipDesigner::CorridorViewMode::SingleCorridor;
@@ -2900,7 +2900,7 @@ UI_ShipDesigner::CorridorViewMode UI_ShipDesigner::TranslateCorridorViewModeFrom
 }
 
 // Static method to translate a corridor view mode into its string code representation
-string UI_ShipDesigner::TranslateCorridorViewModeToString(CorridorViewMode mode)
+std::string UI_ShipDesigner::TranslateCorridorViewModeToString(CorridorViewMode mode)
 {
 	switch (mode) 
 	{

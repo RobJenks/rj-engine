@@ -7,7 +7,6 @@
 #include "CompilerSettings.h"
 #include "Render2DGroup.h"
 #include "iUIComponent.h"
-using namespace std;
 
 class RenderMouseEvent : public iUIComponent
 {
@@ -16,11 +15,11 @@ public:
 	enum MOUSE_EVENT_TYPE { None = 0, Default, Hover, Down };
 
 	// Constructor; initialises all components to null
-	RenderMouseEvent	(string code);
+	RenderMouseEvent	(std::string code);
 
 	// Constructor; the string ID of event components can be passed in as parameters.  If a pointer to the component
 	// index is provided it will also seek to derive the object references at the same time
-	RenderMouseEvent	(string code, string mouse_default, string mouse_hover, string mouse_down, 
+	RenderMouseEvent	(std::string code, std::string mouse_default, std::string mouse_hover, std::string mouse_down,
 						 Render2DGroup::Image2DCollection *componentindex);
 	
 	// Returns the current state of this mouse event
@@ -34,16 +33,16 @@ public:
 
 	// Methods to set each specific component pointer.  If a pointer to the component index is provided it will also seek
 	// to derive the objects references at the same time
-	void				SetMouseComponent(MOUSE_EVENT_TYPE type, string component, Render2DGroup::Image2DCollection *componentindex);
-	void				SetMouseDefault(string component, Render2DGroup::Image2DCollection *componentindex);
-	void				SetMouseHover(string component, Render2DGroup::Image2DCollection *componentindex);
-	void				SetMouseDown(string component, Render2DGroup::Image2DCollection *componentindex);
+	void				SetMouseComponent(MOUSE_EVENT_TYPE type, std::string component, Render2DGroup::Image2DCollection *componentindex);
+	void				SetMouseDefault(std::string component, Render2DGroup::Image2DCollection *componentindex);
+	void				SetMouseHover(std::string component, Render2DGroup::Image2DCollection *componentindex);
+	void				SetMouseDown(std::string component, Render2DGroup::Image2DCollection *componentindex);
 
 	// Method that attempts to locate all component IDs in the supplied index, and populates the component references if found
 	void				ResolveAllComponents(Render2DGroup::Image2DCollection *componentindex);
 
 	// Method that attempts to locate the specified component ID in the supplied index and returns it if found
-	Image2D *			ResolveComponentID(string component, Render2DGroup::Image2DCollection &componentindex);
+	Image2D *			ResolveComponentID(std::string component, Render2DGroup::Image2DCollection &componentindex);
 
 	
 	// Methods for accessing/modifying whether or not this event is active
@@ -63,10 +62,10 @@ public:
 	void				SetBounds(int x, int y, int width, int height);
 
 	// Accessor methods for all key properties
-	CMPINLINE string	GetMouseComponentID(MOUSE_EVENT_TYPE type);
-	CMPINLINE string	GetMouseDefaultComponentID(void) { return m_mousedefaultid; }
-	CMPINLINE string	GetMouseHoverComponentID(void) { return m_mousehoverid; }
-	CMPINLINE string	GetMouseDownComponentID(void) { return m_mousedownid; }
+	CMPINLINE std::string	GetMouseComponentID(MOUSE_EVENT_TYPE type);
+	CMPINLINE std::string	GetMouseDefaultComponentID(void) { return m_mousedefaultid; }
+	CMPINLINE std::string	GetMouseHoverComponentID(void) { return m_mousehoverid; }
+	CMPINLINE std::string	GetMouseDownComponentID(void) { return m_mousedownid; }
 	
 	CMPINLINE Image2D*	GetMouseComponent(MOUSE_EVENT_TYPE type);
 	CMPINLINE Image2D*	GetMouseDefault(void) { return m_mousedefault; } 
@@ -82,7 +81,7 @@ public:
 private:
 	
 	// Method that attempts to locate the specified component ID in the supplied index and returns it if found
-	Image2D *			ResolveComponentID(string component, Render2DGroup::Image2DCollection *componentindex);
+	Image2D *			ResolveComponentID(std::string component, Render2DGroup::Image2DCollection *componentindex);
 
 	// Current event state of this item
 	MOUSE_EVENT_TYPE	m_state;
@@ -94,7 +93,7 @@ private:
 	bool				m_render;
 
 	// Local instance variables storing component IDs and references
-	string				m_mousedefaultid, m_mousehoverid, m_mousedownid;
+	std::string			m_mousedefaultid, m_mousehoverid, m_mousedownid;
 	Image2D 			*m_mousedefault, *m_mousehover, *m_mousedown;
 
 

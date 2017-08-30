@@ -19,7 +19,6 @@ class ComplexShip;
 class ComplexShipSection;
 class ComplexShipTileDefinition;
 class CSCorridorTile;
-using namespace std;
 
 // This class has no special alignment requirements
 class UI_ShipDesigner : public iUIController
@@ -61,8 +60,8 @@ public:
 
 	// Stores the consolidated result following evaluation of ship section placemnet
 	struct SectionPlacementResult {
-		vector<SectionPlacementIssue>::size_type	IssueCount;
-		vector<SectionPlacementIssue>				Issues;
+		std::vector<SectionPlacementIssue>::size_type	IssueCount;
+		std::vector<SectionPlacementIssue>				Issues;
 	};
 
 	// Struct holding the mapping between ship sections and the images rendered to screen in the SD
@@ -73,7 +72,7 @@ public:
 		SDShipSection() : Section(NULL) { RenderInstance = Image2DRenderGroup::InstanceReference(); }
 		SDShipSection(ComplexShipSection *sec, Image2DRenderGroup::InstanceReference ref) : Section(sec), RenderInstance(ref) { }
 	};
-	typedef vector<SDShipSection> SDShipSectionCollection;
+	typedef std::vector<SDShipSection> SDShipSectionCollection;
 
 	// Enumeration of possible corridor view modes
 	enum CorridorViewMode {
@@ -96,7 +95,7 @@ public:
 	// Initialise the ship designer
 	Result								InitialiseController(Render2DGroup *render, UserInterface *ui);
 	Result								InitialiseRenderGroups(Render2DGroup *render, UserInterface *ui);
-	Result								Initialise2DRenderingGroup(Image2DRenderGroup **group, string key, string itemkey, Render2DGroup *render);
+	Result								Initialise2DRenderingGroup(Image2DRenderGroup **group, std::string key, std::string itemkey, Render2DGroup *render);
 	Result								InitialiseRenderingConstants(void);
 	
 	// Methods to initialise each key view in turn
@@ -114,14 +113,14 @@ public:
 	void								ShutdownSDShip(void);
 
 	// Performs final preparation on the ship to make it ready for use in the game
-	Result								PrepareShipForOperation(ComplexShip *s, string code);
+	Result								PrepareShipForOperation(ComplexShip *s, std::string code);
 
 	// Retrieves the name of the blueprint we are working on
-	string								GetBlueprintName(void);
+	std::string							GetBlueprintName(void);
 
 	// Methods to load and save ships in the ship designer
-	Result								LoadShip(string code);
-	Result								SaveShip(string code);
+	Result								LoadShip(std::string code);
+	Result								SaveShip(std::string code);
 
 	// Scrolls the grid by the specified amount
 	void								ScrollGrid(float x, float y);
@@ -211,7 +210,7 @@ public:
 	void								TileSelector_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex);
 
 	// Called whenever the user selects a ship section in the construction view
-	void								ShipSectionSelectedInConstructionView(string code);	
+	void								ShipSectionSelectedInConstructionView(std::string code);
 
 	// Changes the corridor view mode based on the supplied parameter
 	void								SetCorridorViewMode(CorridorViewMode mode);
@@ -267,8 +266,8 @@ public:
 	bool								TestTilePlacement(INTVECTOR2 location, D::TileClass tileclass);
 
 	// Tests a set of tile placement options to determine whether they are valid; optionally also shows visually on the SD grid
-	bool								TestTileSetPlacement(vector<INTVECTOR2> gridsquares, int zpos, D::TileClass tileclass, bool showpreview);
-	bool								TestTileSetPlacement(vector<INTVECTOR2> gridsquares, D::TileClass tileclass, bool showpreview);
+	bool								TestTileSetPlacement(std::vector<INTVECTOR2> gridsquares, int zpos, D::TileClass tileclass, bool showpreview);
+	bool								TestTileSetPlacement(std::vector<INTVECTOR2> gridsquares, D::TileClass tileclass, bool showpreview);
 
 	// Updates the preview generated on the SD grid while we are dragging out a corridor section
 	void								UpdateCorridorDragPreview(INTVECTOR2 location);
@@ -323,8 +322,8 @@ public:
 	Image2DRenderGroup *				GetTileRenderGroup(D::TileClass tileclass);
 	
 	// Static methods to translate between corridor view modes and their string tag representation
-	static CorridorViewMode				TranslateCorridorViewModeFromString(string code);
-	static string						TranslateCorridorViewModeToString(CorridorViewMode mode);
+	static CorridorViewMode				TranslateCorridorViewModeFromString(std::string code);
+	static std::string					TranslateCorridorViewModeToString(CorridorViewMode mode);
 
 	// Returns the SD grid square at the specified location
 	CMPINLINE INTVECTOR2				GetGridElementAtLocation(INTVECTOR2 location)
@@ -343,10 +342,10 @@ public:
 										{ return INTVECTOR3(m_gridstart.x + gridsquare.x, m_gridstart.y + gridsquare.y, m_gridzpos); }
 
 	// Calculates the set of elements covered by a path from a start to an end grid square
-	vector<INTVECTOR2>					CalculateGridPath(INTVECTOR2 start, INTVECTOR2 end);
+	std::vector<INTVECTOR2>				CalculateGridPath(INTVECTOR2 start, INTVECTOR2 end);
 
 	// Returns the set of elements covered by a rectangular extent from a start to an end grid square
-	vector<INTVECTOR2>					CalculateGridExtent(INTVECTOR2 start, INTVECTOR2 end);
+	std::vector<INTVECTOR2>				CalculateGridExtent(INTVECTOR2 start, INTVECTOR2 end);
 
 	// Termination method to deallocate all resources
 	void								Terminate(void);
@@ -401,14 +400,14 @@ private:
 	UIButton *					m_panel_tabs[8];	
 
 	// Set of image data collections for rendering each type of complex ship section; maps from the ship image to the I2DRG that covers it
-	typedef unordered_map<const Texture*, Image2DRenderGroup*> CSSectionImageCollection;
+	typedef std::unordered_map<const Texture*, Image2DRenderGroup*> CSSectionImageCollection;
 	CSSectionImageCollection	m_css_images;
 	
 	// Set of references that link ship sections to image instances for rendering in the SD
 	SDShipSectionCollection		m_sdshipsections;
 
 	// The ship section currently selected in the construction view
-	string									m_consview_selected_code;
+	std::string								m_consview_selected_code;
 	ComplexShipSection *					m_consview_selected;
 	Image2DRenderGroup::InstanceReference 	m_consview_selected_image;
 

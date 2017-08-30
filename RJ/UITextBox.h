@@ -9,7 +9,6 @@
 #include "Image2DRenderGroup.h"
 class TextBlock;
 class GameInputDevice;
-using namespace std;
 
 
 class UITextBox : public iUIControl
@@ -23,7 +22,7 @@ public:
 	static const int TEXTBOX_RIGHT_MARGIN = 24;
 
 	// Constructor
-	UITextBox(	string code, 
+	UITextBox(std::string code,
 				Image2DRenderGroup::InstanceReference framecomponent, 
 				Image2DRenderGroup::InstanceReference framefocuscomponent, 
 				TextBlock * textcomponent,
@@ -107,7 +106,7 @@ private:
 	TextBlock *									m_caretcomponent;
 
 	// Collection in which to store the component pointers, for more efficient parsing of all constituent components
-	vector<iUIComponent*>						m_components;
+	std::vector<iUIComponent*>					m_components;
 
 	// Text box properties
 	INTVECTOR2									m_position;

@@ -11,8 +11,6 @@
 #include "GameVarsExtern.h"
 #include <tchar.h>
 
-using namespace std;
-
 #include "ImmediateRegion.h"
 
 // Initialisation method

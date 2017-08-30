@@ -7,11 +7,8 @@
 #include "Engine.h"
 #include "iSpaceObject.h"
 #include "Utility.h"
-
 #include "Actor.h" // DBG
-
 #include "MovementLogic.h"
-using namespace std;
 
 void Game::Logic::BeginSimulationCycle(void)
 {

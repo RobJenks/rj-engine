@@ -4,8 +4,6 @@
 #include "GameVarsExtern.h"
 
 #include "Equipment.h"
-using namespace std;
-
 
 /* Constructor */
 Equipment::Equipment(void)

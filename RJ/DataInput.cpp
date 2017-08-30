@@ -98,7 +98,7 @@ std::vector<ComplexShipSection*> IO::Data::__TemporaryCSSLoadingBuffer;
 IO::Data::compound_models_pending_postprocessing_T IO::Data::CompoundModelsPendingPostProcessing;
 
 
-TiXmlDocument *IO::Data::LoadXMLDocument(const string &filename)
+TiXmlDocument *IO::Data::LoadXMLDocument(const std::string &filename)
 {
 	// Initialise and open the document
 	TiXmlDocument *doc = new TiXmlDocument(filename.c_str());
@@ -112,9 +112,9 @@ TiXmlDocument *IO::Data::LoadXMLDocument(const string &filename)
 	}
 }
 
-Result IO::Data::LoadGameDataFile(const string &filename) { return LoadGameDataFile(filename, true); }
+Result IO::Data::LoadGameDataFile(const std::string &filename) { return LoadGameDataFile(filename, true); }
 
-Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
+Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 {
 	// Record the time taken to process this file; store the start time before beginning
 	unsigned int processtime = (unsigned int)timeGetTime();
@@ -158,11 +158,11 @@ Result IO::Data::LoadGameDataFile(const string &file, bool follow_indices)
 		if (root == NULL) { delete doc; return ErrorCodes::CannotFindXMLRoot; }
 
 		// Make sure the root name is valid
-		string rname = root->Value(); StrLowerC(rname);
+		std::string rname = root->Value(); StrLowerC(rname);
 		if (!(rname == D::NODE_GameData)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
 
 		// Now iterate through each child element in turn; these elements at level one should denote the type of object
-		string name = "";
+		std::string name = "";
 		TiXmlElement *child = root->FirstChildElement();
 		for (child; child; child = child->NextSiblingElement())
 		{
@@ -260,7 +260,7 @@ Result IO::Data::LoadXMLFileIndex(TiXmlElement *node)
 {
 	// Maintain an invocation counter to catch infinite circular links between data files
 	static int _INVOKE_COUNT = 0;
-	string name; Result res;
+	std::string name; Result res;
 
 	// If we have hit the invocation limit we are most likely in an infinite circular loop
 	if (++_INVOKE_COUNT > Game::C_DATA_LOAD_RECURSION_LIMIT) 
@@ -293,7 +293,7 @@ Result IO::Data::LoadXMLFileIndex(TiXmlElement *node)
 }
 
 // Load a configuration file
-Result IO::Data::LoadConfigFile(const string &filename)
+Result IO::Data::LoadConfigFile(const std::string &filename)
 {
 	// Maintain a recursion counter to prevent infinite loops when loading configuration
 	static int RECURSION_DEPTH = 0;
@@ -311,7 +311,7 @@ Result IO::Data::LoadConfigFile(const string &filename)
 	if (root == NULL) { delete doc; return ErrorCodes::CannotFindXMLRoot; }
 
 	// Make sure the root name is valid
-	string rname = root->Value(); StrLowerC(rname);
+	std::string rname = root->Value(); StrLowerC(rname);
 	if (!(rname == D::NODE_Config)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
 
 	// The file is valid; increment the recursion counter to track the processing, and make sure we aren't in an infinite loop
@@ -322,7 +322,7 @@ Result IO::Data::LoadConfigFile(const string &filename)
 	}
 
 	// Now iterate through each child element in turn and pull the relevant configuration
-	string name = "";
+	std::string name = "";
 	TiXmlElement *child = root->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
@@ -379,7 +379,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 {
 	Model *model;
 	Model::ModelClass mclass;
-	string key, code, type, fname, tex, val;
+	std::string key, code, type, fname, tex, val;
 	XMFLOAT3 acteffsize, effsize;
 	INTVECTOR3 elsize; bool no_centre = false;
 	HashVal hash;
@@ -440,8 +440,8 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	if (model != NULL) return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
 	
 	// Construct full filenames from the info specified
-	string filename = BuildStrFilename(D::DATA, fname);
-	string texture = BuildStrFilename(D::IMAGE_DATA, tex);
+	std::string filename = BuildStrFilename(D::DATA, fname);
+	std::string texture = BuildStrFilename(D::IMAGE_DATA, tex);
 
 	// Otherwise create a new model here
 	model = new Model();
@@ -928,7 +928,7 @@ void IO::Data::LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds
 	// Get the type of bounding object that this node defines
 	const char *c_type = node->Attribute("type");
 	if (!c_type) return;
-	string type = c_type;
+	std::string type = c_type;
 
 	// Based on the type, load the other parameters and create the object
 	if (type == "point")
@@ -967,7 +967,7 @@ void IO::Data::LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds
 Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironment *parent)
 {
 	const char *cval;
-	string key, val;
+	std::string key, val;
 	HashVal hash;
 	
 	// Make sure we have a valid section of document to work on
@@ -1106,7 +1106,7 @@ Result IO::Data::LoadComplexShipElement(TiXmlElement *node, iSpaceObjectEnvironm
 
 Result IO::Data::LoadComplexShipTileClass(TiXmlElement *node)
 {
-	string key, val;
+	std::string key, val;
 	const char *c_attr = NULL;
 	HashVal hash;
 
@@ -1211,7 +1211,7 @@ Result IO::Data::LoadComplexShipTileClass(TiXmlElement *node)
 
 Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 {
-	string key, val;
+	std::string key, val;
 	HashVal hash;
 	ComplexShipTileDefinition *tiledef;
 	bool modeldataloaded = false;
@@ -1325,7 +1325,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			// We supply one special attribute for tile production; whether these are per-element or overall requirements.  Store it now
 			bool perelement = true;										// We assume production cost is per-element unless specified
 			const char *ctype = child->Attribute("type");
-			if (ctype) { string stype = ctype; StrLowerC(stype); perelement = !(stype == "total"); }
+			if (ctype) { std::string stype = ctype; StrLowerC(stype); perelement = !(stype == "total"); }
 			
 			// Load the per-element production cost data from file
 			ProductionCost *pcost = IO::Data::LoadProductionCostData(child);
@@ -1381,7 +1381,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutShipTile)
 {
 	Result compilation_result;
-	string key, val;
+	std::string key, val;
 	ComplexShipTile *tile = NULL; 
 	
 	// Make sure we have a valid section of document to work on
@@ -1392,7 +1392,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 	if (!ctcode) return ErrorCodes::CannotLoadTileWithoutCodeSpecified;
 
 	// Attempt to get the tile definition corresponding to this code
-	string stcode = ctcode; StrLowerC(stcode);
+	std::string stcode = ctcode; StrLowerC(stcode);
 	ComplexShipTileDefinition *def = D::ComplexShipTiles.Get(stcode);
 	if (!def) return ErrorCodes::CannotLoadTileWithInvalidDefinitionCode;
 
@@ -1482,7 +1482,7 @@ Result IO::Data::PostProcessTileCompoundModelData(void)
 Result IO::Data::LoadComplexShipTileCompoundModel(TiXmlElement *node, ComplexShipTileDefinition *tiledef)
 {
 	const char *c_attr;
-	string key, mtype, mcode;
+	std::string key, mtype, mcode;
 	float prob = 0.0f;
 
 	// Parameter check
@@ -2298,7 +2298,7 @@ ProductionCost *IO::Data::LoadProductionCostData(TiXmlElement *node)
 
 	// Parse the contents of this node to populate the tile definition details
 	const char *cstr = NULL;
-	string key, val1, val2, val3, val4;
+	std::string key, val1, val2, val3, val4;
 	HashVal hash;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
@@ -2360,7 +2360,7 @@ Result IO::Data::LoadResource(TiXmlElement *node)
 	Resource *res = new Resource();
 
 	// Process each child node in turn
-	string key, val;
+	std::string key, val;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
@@ -2461,7 +2461,7 @@ Hardpoint *IO::Data::LoadHardpoint(TiXmlElement *node)
 	// Get type and create appropriate item
 	const char *c_type = node->Attribute("type");
 	if (!c_type) return NULL;
-	string type = c_type;
+	std::string type = c_type;
 
 	// Compare and determine the correct type of hardpoint
 	Equip::Class t = Hp::GetType(type);
@@ -2476,7 +2476,7 @@ Hardpoint *IO::Data::LoadHardpoint(TiXmlElement *node)
 	hp->Code = c_code;
 
 	// * If we have got this far then we know that the required code + type attributes exist, so process child nodes
-	string key; HashVal hash; Result result;
+	std::string key; HashVal hash; Result result;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
@@ -2502,7 +2502,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 	SimpleShipLoadout *L = new SimpleShipLoadout();
 
 	// Now look at each child element in turn and pull data from them
-	string key; SimpleShip *ship = NULL;
+	std::string key; SimpleShip *ship = NULL;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
@@ -2514,7 +2514,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 		else if (key == "ship" && !ship) {				// Don't allow a change in ship definition if we have already linked to one
 			const char *val = child->GetText();
 			if (!val) return ErrorCodes::NoShipSpecifiedForLoadout;
-			string cval = val; StrLowerC(cval);			// Make lowercase, non-const std::string copy
+			std::string cval = val; StrLowerC(cval);			// Make lowercase, non-const std::string copy
 			
 			// Attempt to locate this ship; if it cannot be found then return an error now
 			ship = D::SimpleShips.Get(cval);
@@ -2530,7 +2530,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 			if (cc_hp) 
 			{
 				// Validate the ship has a hardpoint with this code, otherwise don't add the map
-				string c_hp = cc_hp;
+				std::string c_hp = cc_hp;
 				if (c_hp != NullString) 
 				{
 					Hardpoint *hp = ship->GetHardpoints().Get(c_hp);
@@ -2540,7 +2540,7 @@ Result IO::Data::LoadSimpleShipLoadout(TiXmlElement *node)
 						const char *cc_eq = child->Attribute("equip");
 						if (cc_eq)
 						{
-							string c_eq = cc_eq;
+							std::string c_eq = cc_eq;
 							if (c_eq != NullString)
 							{
 								// Add a map to this loadout;  no (equip!=NULL) check since NULL is valid, to set an empty HP
@@ -2579,7 +2579,7 @@ CompoundLoadoutMap *IO::Data::LoadCompoundLoadoutMap(TiXmlElement *node, SimpleS
 
 	// The hardpoint name should be specified as an attribute of this top-level element
 	const char *cc_hp = node->Attribute("hp"); if (!cc_hp) return NULL;
-	string c_hp = cc_hp;
+	std::string c_hp = cc_hp;
 
 	// Attempt to match the hardpoint to one on this ship; if it does not exist, go no further
 	Hardpoint *hp = targetshiptype->GetHardpoints().Get(c_hp);
@@ -2590,7 +2590,7 @@ CompoundLoadoutMap *IO::Data::LoadCompoundLoadoutMap(TiXmlElement *node, SimpleS
 	map->HP = c_hp;
 
 	// Now look at each child element in turn and pull data from them
-	string key, val;
+	std::string key, val;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
@@ -2604,7 +2604,7 @@ CompoundLoadoutMap *IO::Data::LoadCompoundLoadoutMap(TiXmlElement *node, SimpleS
 			{
 				// Convert to required data types
 				float prob = (float)atof(cc_prb);
-				string c_eqp = cc_eqp; StrLowerC(c_eqp);
+				std::string c_eqp = cc_eqp; StrLowerC(c_eqp);
 
 				// Make sure we have equipment specified, and a prob of >~0 (else no point)
 				if (c_eqp != NullString && prob > Game::C_EPSILON)
@@ -2628,7 +2628,7 @@ Result IO::Data::LoadEngine(TiXmlElement *node)
 	Engine *e = new Engine();
 	
 	// Local variables for extracting data
-	string key;
+	std::string key;
 	const char *c_val = NULL;
 	double dval = 0.0f;
 
@@ -2897,8 +2897,8 @@ Result IO::Data::PostProcessResources(void)
 	ProductionCost *pcost;
 
 	// Create a temporary vector of resource pointers for linear processing reasons
-	vector<Resource*> resources; 
-	VectorFromUnorderedMap<string, Resource*>(D::Resources.Data, resources);
+	std::vector<Resource*> resources;
+	VectorFromUnorderedMap<std::string, Resource*>(D::Resources.Data, resources);
 
 	// First, we need to build the set of dependencies between resources based on their respective production costs
 	std::vector<Resource*>::size_type n = resources.size();
@@ -2947,12 +2947,12 @@ Result IO::Data::PostProcessComplexShipTileData(void)
 	ComplexShipTileDefinition *tile;
 	
 	// Create a temporary vector of tile definition pointers for linear processing reasons
-	vector<ComplexShipTileDefinition*> tiles;
-	VectorFromUnorderedMap<string, ComplexShipTileDefinition*>(D::ComplexShipTiles.Data, tiles);
+	std::vector<ComplexShipTileDefinition*> tiles;
+	VectorFromUnorderedMap<std::string, ComplexShipTileDefinition*>(D::ComplexShipTiles.Data, tiles);
 
 	// We need to run post-processing on the tile production requirements, to link to resources/other tile dependencies
-	vector<ComplexShipTileDefinition*>::size_type n = tiles.size();
-	for (vector<ComplexShipTileDefinition*>::size_type i = 0; i < n; ++i)
+	std::vector<ComplexShipTileDefinition*>::size_type n = tiles.size();
+	for (std::vector<ComplexShipTileDefinition*>::size_type i = 0; i < n; ++i)
 	{
 		// Run post-processing on the production cost data
 		tile = tiles[i];								if (!tile) continue;						// Skip this if the tile doesn't exist
@@ -2970,7 +2970,7 @@ Result IO::Data::LoadSystem(TiXmlElement *node)
 	SpaceSystem *s = new SpaceSystem();
 	
 	// Local variables for extracting data
-	string key, val;
+	std::string key, val;
 
 	// Now look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -3016,7 +3016,7 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 	FireEffect *e = new FireEffect();
 	
 	// Local variables for extracting data
-	string key, val;
+	std::string key, val;
 
 	// Now look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -3031,15 +3031,15 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 			e->SetEffectModel(child->GetText());							// The underlying effect model used for rendering
 		}
 		else if (key == "firetexture") {
-			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
+			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
 			e->SetFireTexture(filename.c_str());				
 		}
 		else if (key ==	"noisetexture") { 
-			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
+			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
 			e->SetNoiseTexture(filename.c_str());				
 		}
 		else if (key == "alphatexture") {
-			string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
+			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
 			e->SetAlphaTexture(filename.c_str());				
 		}
 		else if (key == "noisescrollspeed") {
@@ -3084,7 +3084,7 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 	ParticleEmitter *e = new ParticleEmitter();
 	
 	// Local variables for extracting data
-	string key, val;
+	std::string key, val;
 
 	// Now look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -3173,7 +3173,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 	// Local variables for extracting data
 	Result result;
 	Render2DGroup *group;
-	string key, val;
+	std::string key, val;
 
 	// Render group should start as NULL and be created when the relevant code is provided
 	group = NULL;
@@ -3199,19 +3199,19 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		else if (key == "image2d") 
 		{
 			// Attempt to retrieve all the required data for an Image2D component
-			string code = child->Attribute("code");
-			string texture = child->Attribute("texture");
+			std::string code = child->Attribute("code");
+			std::string texture = child->Attribute("texture");
 			XMFLOAT3 pos = IO::GetFloat3FromAttr(child);
 			const char *cwidth = child->Attribute("width");
 			const char *cheight = child->Attribute("height");
-			string brender = child->Attribute("render");
+			std::string brender = child->Attribute("render");
 
 			// Make sure we were able to retrieve all required information
 			if (code == NullString || texture == NullString || !cwidth || !cheight) continue;
 
 			// Process relevant fields to get the correct format
 			StrLowerC(code); 
-			string texfile = BuildStrFilename(D::IMAGE_DATA, texture);
+			std::string texfile = BuildStrFilename(D::IMAGE_DATA, texture);
 			int width = (int)floor(atof(cwidth));
 			int height = (int)floor(atof(cheight));
 
@@ -3236,8 +3236,8 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		else if (key == "constant")
 		{
 			// Pull the required fields for a rendering constant
-			string code = child->Attribute("code");
-			string value = child->Attribute("value");
+			std::string code = child->Attribute("code");
+			std::string value = child->Attribute("value");
 
 			// Add the constant if we have the required info
 			if (code != NullString && value != NullString)
@@ -3266,7 +3266,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			
 			// Set default values for anything not specified
 			int maxlength;
-			string srender; bool render;
+			std::string srender; bool render;
 			XMFLOAT4 col;
 			
 			// Default position
@@ -3275,7 +3275,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			if (y) iy = atoi(y); else iy = 0;
 
 			// Default text
-			string stext = (text ? text : "");			
+			std::string stext = (text ? text : "");			
 			const char *textbuffer = stext.c_str();
 
 			// Default font
@@ -3403,9 +3403,9 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			ev->SetBounds(x, y, width, height);
 
 			// Now look for the optional fields for each event condition
-			string edefault = child->Attribute("default");
-			string ehover = child->Attribute("hover");
-			string edown = child->Attribute("down");
+			std::string edefault = child->Attribute("default");
+			std::string ehover = child->Attribute("hover");
+			std::string edown = child->Attribute("down");
 
 			// Assign event codes based on these parameters
 			if (edefault != NullString) ev->SetMouseDefault(edefault, NULL);
@@ -3525,7 +3525,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			int expandsize = UIComboBox::DEFAULT_EXPAND_SIZE; if (sexpandsize) expandsize = atoi(sexpandsize);
 
 			// Make sure this is a valid definition 
-			string sdef = cdef;
+			std::string sdef = cdef;
 			if (!D::UI->HaveManagedControlDefinition(sdef)) continue;
 
 			// Retrieve the control definition
@@ -3564,7 +3564,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 // Loads a 2D image group and, if successful, registers with the specified render group
 Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 {
-	string key;
+	std::string key;
 	Result result;
 
 	// Parameter check 
@@ -3582,10 +3582,10 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 	if (!code || !texture || !tmode) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
 
 	// Process the parameters and convert as required
-	string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
+	std::string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
 	const char *texfile = stexfile.c_str();
-	string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
-	string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
+	std::string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
+	std::string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
 
 	// Create the new 2D image group object and attempt to initialise it
 	Image2DRenderGroup *igroup = new Image2DRenderGroup();
@@ -3625,8 +3625,8 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 			if (!cwidth || !cheight) continue;
 
 			// Convert data if required
-			string srender = (instrender ? instrender : "");
-			string srotate = (rotate ? rotate : "");
+			std::string srender = (instrender ? instrender : "");
+			std::string srotate = (rotate ? rotate : "");
 			INTVECTOR2 size = INTVECTOR2( atoi(cwidth), atoi(cheight) );
 			float zorder = (cz ? (float)atof(cz) : 0.0f);
 			Rotation90Degree rot = TranslateRotation90Degree(srotate);
@@ -3651,9 +3651,9 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 // Loads a component grouping into a UI layout
 Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 {
-	string key;
+	std::string key;
 	const char *citemcode, *citemkey;
-	string itemcode, itemkey;
+	std::string itemcode, itemkey;
 
 	// Parameter check 
 	if (!node || !group) return ErrorCodes::CannotLoadUIComponentGroupWithNullParameters;
@@ -3702,9 +3702,9 @@ Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 // Loads a managed control definition, that specifies all the components within a particular type of managed control
 Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 {
-	string key;
+	std::string key;
 	const char *citemkey, *citemval;
-	string itemkey, itemval;
+	std::string itemkey, itemval;
 
 	// Parameter check 
 	if (!node) return ErrorCodes::CannotLoadManagedUIControlDefWithoutParameters;
@@ -3723,7 +3723,7 @@ Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 			def->SetCode(child->GetText());
 		}
 		else if (key == "class") {
-			string sclass = child->GetText();
+			std::string sclass = child->GetText();
 			def->SetClass(iUIControl::DeriveType(sclass));
 		}
 		else if (key == "component")
@@ -3737,7 +3737,7 @@ Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 			if (!citemval) continue; else itemval = citemval;
 
 			// Build a complete filename from the relative path supplied
-			string filename = BuildStrFilename(D::DATA, itemval);
+			std::string filename = BuildStrFilename(D::DATA, itemval);
 
 			// Add this mapping to the collection
 			def->AddComponent(itemkey, filename);
@@ -3758,7 +3758,7 @@ Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 
 Result IO::Data::LoadSkinnedModel(TiXmlElement *node)
 {
-	string key = "", code = "", fname = "", texdir = "", val = "";
+	std::string key = "", code = "", fname = "", texdir = "", val = "";
 
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadSkinnedModelWithNullParameters;
@@ -3845,7 +3845,7 @@ Result IO::Data::LoadActorAttributeGenerationData(TiXmlElement *node)
 
 Result IO::Data::LoadActor(TiXmlElement *node)
 {
-	string key, val;
+	std::string key, val;
 
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadActorWithNullParameters;
@@ -3905,7 +3905,7 @@ Result IO::Data::LoadActor(TiXmlElement *node)
 			else
 			{
 				if (!cderive || !cgen_min || !cgen_max) continue;
-				string sderive = cderive; 
+				std::string sderive = cderive; 
 				attr.DerivationType = TranslateAttributeDerivationTypeFromString(sderive);
 				attr.GenerateMin = (float)atof(cgen_min);
 				attr.GenerateMax = (float)atof(cgen_max);

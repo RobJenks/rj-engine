@@ -1,7 +1,7 @@
 #include "RenderMouseEvent.h"
 
 // Constructor; initialises all components to null
-RenderMouseEvent::RenderMouseEvent(string code)
+RenderMouseEvent::RenderMouseEvent(std::string code)
 {
 	m_code = code;
 	m_render = true;
@@ -18,7 +18,7 @@ RenderMouseEvent::RenderMouseEvent(string code)
 
 // Constructor; the string ID of event components can be passed in as parameters.  If a pointer to the component
 // index is provided it will also seek to derive the object references at the same time
-RenderMouseEvent::RenderMouseEvent(string code, string mouse_default, string mouse_hover, string mouse_down, 
+RenderMouseEvent::RenderMouseEvent(std::string code, std::string mouse_default, std::string mouse_hover, std::string mouse_down,
 								   Render2DGroup::Image2DCollection *componentindex)
 {
 	// Set properties based on supplied parameters
@@ -85,7 +85,7 @@ void RenderMouseEvent::ActivateMouseDownEvent(void)
 
 
 // Sets the component for the specified mouse event condition
-void RenderMouseEvent::SetMouseComponent(MOUSE_EVENT_TYPE type, string component, Render2DGroup::Image2DCollection *componentindex)
+void RenderMouseEvent::SetMouseComponent(MOUSE_EVENT_TYPE type, std::string component, Render2DGroup::Image2DCollection *componentindex)
 {
 	switch (type)
 	{
@@ -100,7 +100,7 @@ void RenderMouseEvent::SetMouseComponent(MOUSE_EVENT_TYPE type, string component
 
 // Methods to set each specific component pointer.  If a pointer to the component index is provided it will also seek
 // to derive the objects references at the same time
-void RenderMouseEvent::SetMouseDefault(string component, Render2DGroup::Image2DCollection *componentindex)
+void RenderMouseEvent::SetMouseDefault(std::string component, Render2DGroup::Image2DCollection *componentindex)
 {
 	// Set the component ID
 	m_mousedefaultid = component;
@@ -108,7 +108,7 @@ void RenderMouseEvent::SetMouseDefault(string component, Render2DGroup::Image2DC
 	// If we have been provided an index then also attempt to resolve the component here
 	if (componentindex && m_mousedefaultid != NullString) m_mousedefault = ResolveComponentID(m_mousedefaultid, componentindex);
 }
-void RenderMouseEvent::SetMouseHover(string component, Render2DGroup::Image2DCollection *componentindex)
+void RenderMouseEvent::SetMouseHover(std::string component, Render2DGroup::Image2DCollection *componentindex)
 {
 	// Set the component ID
 	m_mousehoverid = component;
@@ -116,7 +116,7 @@ void RenderMouseEvent::SetMouseHover(string component, Render2DGroup::Image2DCol
 	// If we have been provided an index then also attempt to resolve the component here
 	if (componentindex && m_mousehoverid != NullString) m_mousehover = ResolveComponentID(m_mousehoverid, componentindex);
 }
-void RenderMouseEvent::SetMouseDown(string component, Render2DGroup::Image2DCollection *componentindex)
+void RenderMouseEvent::SetMouseDown(std::string component, Render2DGroup::Image2DCollection *componentindex)
 {
 	// Set the component ID
 	m_mousedownid = component;
@@ -136,7 +136,7 @@ void RenderMouseEvent::ResolveAllComponents(Render2DGroup::Image2DCollection *co
 
 
 // Method that attempts to locate the specified component ID in the supplied index and returns it if found
-Image2D *RenderMouseEvent::ResolveComponentID(string component, Render2DGroup::Image2DCollection *componentindex)
+Image2D *RenderMouseEvent::ResolveComponentID(std::string component, Render2DGroup::Image2DCollection *componentindex)
 {
 	// Attempt to retrieve this component from the collection
 	if (componentindex && component != NullString)
@@ -163,7 +163,7 @@ void RenderMouseEvent::SetBounds(int x, int y, int width, int height)
 	SetHeight(height);
 }
 
-string RenderMouseEvent::GetMouseComponentID(MOUSE_EVENT_TYPE type)
+std::string RenderMouseEvent::GetMouseComponentID(MOUSE_EVENT_TYPE type)
 {
 	switch (type)
 	{

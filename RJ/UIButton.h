@@ -9,7 +9,6 @@
 #include "Image2DRenderGroup.h"
 class TextBlock;
 class GameInputDevice;
-using namespace std;
 
 
 // This class has no special alignment requirements
@@ -22,7 +21,7 @@ public:
 	CMPINLINE static bool						PerformsManagedRendering(void) { return false; }
 
 	// Constructor
-	UIButton(string code,
+	UIButton(std::string code,
 					 Image2DRenderGroup::InstanceReference upcomponent, 
 					 Image2DRenderGroup::InstanceReference downcomponent, 
 					 TextBlock *textcomponent,
@@ -102,7 +101,7 @@ private:
 	TextBlock *									m_textcomponent;
 
 	// Collection in which to store the component pointers, for more efficient parsing of all constituent components
-	vector<iUIComponent*>						m_components;
+	std::vector<iUIComponent*>					m_components;
 
 	// Button properties
 	INTVECTOR2									m_position;

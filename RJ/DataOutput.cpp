@@ -26,7 +26,7 @@
 #include "DataOutput.h"
 
 
-Result IO::Data::SaveXMLDocument(TiXmlElement *root, const string &filename)
+Result IO::Data::SaveXMLDocument(TiXmlElement *root, const std::string &filename)
 {
 	// Make sure we have received all required information
 	if (!root) return ErrorCodes::NullPointerToRootXMLElement;

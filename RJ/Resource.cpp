@@ -4,7 +4,6 @@
 #include "ResourceAmount.h"
 #include "ProductionCost.h"
 #include "Resource.h"
-using namespace std;
 
 Resource::Resource(void)
 {

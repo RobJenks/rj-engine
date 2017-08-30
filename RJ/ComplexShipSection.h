@@ -96,7 +96,7 @@ public:
 	CMPINLINE void								SimulateObject(void) { }
 
 	// Static methods to create a new instance of the specified complex ship section
-	static ComplexShipSection *					Create(const string & code);
+	static ComplexShipSection *					Create(const std::string & code);
 	static ComplexShipSection *					Create(ComplexShipSection *template_sec);
 
 

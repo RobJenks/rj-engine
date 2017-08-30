@@ -12,8 +12,6 @@
 
 class TextureShader;
 class GameInputDevice;
-using namespace std;
-
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -21,22 +19,22 @@ __declspec(align(16))
 class Render2DManager : public ALIGN16<Render2DManager>
 {
 public:
-	typedef unordered_map<string, Render2DGroup*> RenderGroupCollection; 
+	typedef std::unordered_map<std::string, Render2DGroup*> RenderGroupCollection;
 
 	Render2DManager(void);
 	~Render2DManager(void);
 
 	CMPINLINE RenderGroupCollection *RenderGroups(void) { return &m_rendergroups; }
-	Render2DGroup *CreateRenderGroup(string code);
+	Render2DGroup *CreateRenderGroup(std::string code);
 
-	CMPINLINE Render2DGroup *GetRenderGroup(string code) 
+	CMPINLINE Render2DGroup *GetRenderGroup(std::string code)
 	{ 
 		if (m_rendergroups.count(code) > 0)					return m_rendergroups[code];
 		else												return NULL;
 	}
 
-	void ActivateGroup(string code);
-	void DeactivateGroup(string code);
+	void ActivateGroup(std::string code);
+	void DeactivateGroup(std::string code);
 	void DeactivateAllGroups(void);
 
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);

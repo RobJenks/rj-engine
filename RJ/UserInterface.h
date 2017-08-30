@@ -22,7 +22,7 @@ class UI_Console;
 class UI_ShipDesigner;
 class UI_ModelBuilder;
 class UI_ShipBuilder;
-using namespace std;
+
 
 // This class has no special alignment requirements
 class UserInterface  : public iAcceptsConsoleCommands 
@@ -63,14 +63,14 @@ public:
 	Result					InitialiseUITextComponents(void);
 
 	// Initialises a new text block.  These are the wrapper classes used for manipulation of string data in the interface
-	TextBlock *				CreateTextBlock(string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render);
+	TextBlock *				CreateTextBlock(std::string code, const char *text, int maxlength, int font, INTVECTOR2 pos, float size, const XMFLOAT4 & col, bool render);
 
 	// Initialises a UI text string.  TextBuffer is an optional parameter which will also be initialised to 0 if set
 	Result					InitialiseTextString(TextManager *tm, SentenceType **sentence, char *textbuffer, int fontID, 
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
 
 	// Creates a new component, for addition to one of the UI component sets
-	Image2D *				NewComponent(string code, const char *filename, int x, int y, float z, int width, int height);
+	Image2D *				NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height);
 
 	// Initialise the different components sets used for rendering the UI in different scenarios
 	Result					InitialiseUIComponentSets(void);
@@ -111,7 +111,7 @@ public:
 	bool					ProcessConsoleCommand(GameConsoleCommand & command);
 
 	// Returns a pointer to the UI controller responsible for the specified state, if one exists
-	iUIController *			GetUIController(string state);
+	iUIController *			GetUIController(std::string state);
 
 	// Processes user interface events from the main game loop
 	void					ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
@@ -127,12 +127,12 @@ public:
 	CMPINLINE bool			IsFPSCounterDisplayed(void) { return TextStrings.S_DBG_FPSCOUNTER->render; }
 
 	// Methods for handling the set of managed control definitions
-	CMPINLINE bool							HaveManagedControlDefinition(string key) 
+	CMPINLINE bool							HaveManagedControlDefinition(std::string key)
 											{ return (m_managedcontroldefs.count(key) > 0 && m_managedcontroldefs[key] != NULL); }
-	CMPINLINE UIManagedControlDefinition*	GetManagedControlDefinition(string key) { return m_managedcontroldefs[key]; }
-	CMPINLINE void							AddManagedControlDefinition(string key, UIManagedControlDefinition *def) 
+	CMPINLINE UIManagedControlDefinition*	GetManagedControlDefinition(std::string key) { return m_managedcontroldefs[key]; }
+	CMPINLINE void							AddManagedControlDefinition(std::string key, UIManagedControlDefinition *def)
 											{ m_managedcontroldefs[key] = def; }
-	CMPINLINE void							RemoveManagedControlDefinition(string key) { m_managedcontroldefs[key] = NULL; }
+	CMPINLINE void							RemoveManagedControlDefinition(std::string key) { m_managedcontroldefs[key] = NULL; }
 
 	// Determines whether debug flight information is displayed on screen
 	void					SetDebugFlightInfoDisplay(bool display);
@@ -144,7 +144,7 @@ public:
 
 	// Debug output options
 	void					WriteDebugOutput(int line, const char *text);
-	void					WriteDebugOutput(int line, string text);
+	void					WriteDebugOutput(int line, std::string text);
 
 private:
 
@@ -173,17 +173,17 @@ private:
 	Image2DRenderGroup::InstanceReference		m_mousecurrenthovercomponent;
 
 	// Collection of managed control definitions
-	typedef unordered_map<string, UIManagedControlDefinition*> ManagedControlDefinitionCollection;
+	typedef std::unordered_map<std::string, UIManagedControlDefinition*> ManagedControlDefinitionCollection;
 	ManagedControlDefinitionCollection			m_managedcontroldefs;
 
 public:
 	// String keys for the primary UI layouts 
-	static const string		UI_INFLIGHT;					
-	static const string		UI_MAINMENU;					
-	static const string		UI_CONSOLE;
-	static const string		UI_SHIPDESIGNER;				
-	static const string		UI_MODELBUILDER;
-	static const string		UI_SHIPBUILDER;
+	static const std::string		UI_INFLIGHT;
+	static const std::string		UI_MAINMENU;
+	static const std::string		UI_CONSOLE;
+	static const std::string		UI_SHIPDESIGNER;
+	static const std::string		UI_MODELBUILDER;
+	static const std::string		UI_SHIPBUILDER;
 
 
 private:

@@ -352,7 +352,7 @@ std::string ComplexShipTileDefinition::GetDynamicTileSet(void) const
 
 
 // Adds a model to the probability-weighted model collection for this tile type
-void ComplexShipTileDefinition::AddModelToSet(string category, Model *model, float probability)
+void ComplexShipTileDefinition::AddModelToSet(std::string category, Model *model, float probability)
 {
 	// Parameter check
 	if (category == NullString || !model || probability < Game::C_EPSILON) return;
@@ -372,8 +372,8 @@ Model *ComplexShipTileDefinition::GetModelFromSet(const ProbabilityWeightedModel
 
 	// Otherwise choose a random number between 0 and the maximum probability value
 	float r = frand_h(modelset->totalprob); float totalr = 0.0f;
-	vector<ComplexShipTileDefinition::ProbabilityWeightedModel>::const_iterator it_end = modelset->models.end();
-	for (vector<ComplexShipTileDefinition::ProbabilityWeightedModel>::const_iterator it = modelset->models.begin(); it != it_end; ++it)
+	std::vector<ComplexShipTileDefinition::ProbabilityWeightedModel>::const_iterator it_end = modelset->models.end();
+	for (std::vector<ComplexShipTileDefinition::ProbabilityWeightedModel>::const_iterator it = modelset->models.begin(); it != it_end; ++it)
 	{
 		// If this model is >= the selected probability then we will return this one
 		totalr += it->probability;

@@ -15,8 +15,6 @@
 #include "BasicProjectileSet.h"
 #include "LightSource.h"
 
-using namespace std;
-
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -49,10 +47,10 @@ public:
 	void						TerminateSystem(void);
 
 	// Methods to get and set the unique string code, and descriptive string name, for this system
-	CMPINLINE string			GetName(void) const				{ return m_name; }
-	CMPINLINE string			GetCode(void) const				{ return m_code; }
-	CMPINLINE void				SetName(const string & name)	{ m_name = name; }
-	CMPINLINE void				SetCode(const string & code)	{ m_code = code; }
+	CMPINLINE std::string		GetName(void) const					{ return m_name; }
+	CMPINLINE std::string		GetCode(void) const					{ return m_code; }
+	CMPINLINE void				SetName(const std::string & name)	{ m_name = name; }
+	CMPINLINE void				SetCode(const std::string & code)	{ m_code = code; }
 
 	// Returns the size of the system; should not be changed following system initialisation, and will have no effect if it is
 	CMPINLINE XMVECTOR			GetSize(void) const				{ return m_size; }
@@ -76,8 +74,8 @@ public:
 	CMPINLINE std::vector<ObjectReference<iSpaceObject>> * 	GetObjects(void)					{ return &Objects; }
 
 	// Methods to get or change the system backdrop texture
-	CMPINLINE string						GetBackdropLocation(void) { return m_backdroplocation; }
-	CMPINLINE void							SetBackdropLocation(string loc) { m_backdroplocation = loc; }
+	CMPINLINE std::string					GetBackdropLocation(void) { return m_backdroplocation; }
+	CMPINLINE void							SetBackdropLocation(std::string loc) { m_backdroplocation = loc; }
 	CMPINLINE ID3D11ShaderResourceView *	GetBackdropTextureResource(void) { return m_backdrop->GetTexture(); }
 
 	// Returns a short debug string representation of the system
@@ -88,8 +86,8 @@ public:
 
 protected:
 
-	string						m_name;
-	string						m_code;
+	std::string					m_name;
+	std::string					m_code;
 	bool						m_initialised;			// Flag indicating whether the system has been initialised
 
 	AXMVECTOR					m_size;					// Size of the system; size of X --> will extend from -X/2 to +X/2 in each dimension
@@ -101,7 +99,7 @@ protected:
 	XMFLOAT3					m_maxboundsf;			// Local float representation
 
 	// Space backdrop texture
-	string						m_backdroplocation;
+	std::string					m_backdroplocation;
 	Texture						*m_backdrop;
 
 	// Set of directional lights in this system

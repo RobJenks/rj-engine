@@ -3,7 +3,6 @@
 //#define __QuaternionC__
 //
 //#include <string>
-//using namespace std;
 //
 //#include "Utility.h"
 //

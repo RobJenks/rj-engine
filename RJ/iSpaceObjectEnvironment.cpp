@@ -2057,7 +2057,7 @@ Result iSpaceObjectEnvironment::InitialiseElements(INTVECTOR3 size, const Comple
 	if (allocate_new)
 	{
 		// Allocate a new element space of the specified size
-		el = new (nothrow)ComplexShipElement[ecount];
+		el = new (std::nothrow)ComplexShipElement[ecount];
 		if (!el)
 		{
 			DeallocateElementSpace();
@@ -2376,7 +2376,7 @@ Result iSpaceObjectEnvironment::RotateElementSpace(Rotation90Degree rotation)
 	if (rotation == Rotation90Degree::Rotate0) return ErrorCodes::NoError;
 
 	// Allocate a new element space (of the same size)
-	ComplexShipElement *elements = new (nothrow)ComplexShipElement[m_elementcount];
+	ComplexShipElement *elements = new (std::nothrow)ComplexShipElement[m_elementcount];
 	if (!elements) return ErrorCodes::CannotAllocateElementSpaceForRotation;
 
 	// Determine new element space dimensions

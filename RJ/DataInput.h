@@ -12,10 +12,6 @@
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
 #include "HashFunctions.h"
-
-using namespace std;
-
-
 class iStaticObject;
 class iActiveObject;
 class iSpaceObject;
@@ -46,11 +42,11 @@ namespace IO { namespace Data {
 
 	Result LoadModelData(TiXmlElement *node);
 
-	TiXmlDocument *LoadXMLDocument(const string &filename);
-	Result LoadGameDataFile(const string &filename, bool follow_indices);
-	Result LoadGameDataFile(const string &filename);
+	TiXmlDocument *LoadXMLDocument(const std::string &filename);
+	Result LoadGameDataFile(const std::string &filename, bool follow_indices);
+	Result LoadGameDataFile(const std::string &filename);
 	Result LoadXMLFileIndex(TiXmlElement *node);
-	Result LoadConfigFile(const string &filename);
+	Result LoadConfigFile(const std::string &filename);
 
 	
 	// Common methods to load intermediate class data

@@ -7,7 +7,6 @@
 #include <string>
 #include "CompilerSettings.h"
 #include "iUIComponent.h"
-using namespace std;
 
 
 class UIComponentGroup : public iUIComponent
@@ -23,7 +22,7 @@ public:
 		Item(void) { component = NULL; previousrenderstate = true; }
 		Item(iUIComponent *item) { component = item; previousrenderstate = true; }
 	};
-	typedef vector<UIComponentGroup::Item> ComponentGroupItems;
+	typedef std::vector<UIComponentGroup::Item> ComponentGroupItems;
 
 
 public:
@@ -32,7 +31,7 @@ public:
 	void						AddItem(iUIComponent *item);
 	void						RemoveItem(int index);
 	void						RemoveItem(iUIComponent *item);
-	int							FindItem(string code);
+	int							FindItem(std::string code);
 	int							FindItem(iUIComponent *item);
 	iUIComponent *				GetItem(int index);
 	ComponentGroupItems *		GetItems(void);

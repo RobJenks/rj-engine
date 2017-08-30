@@ -492,7 +492,7 @@ void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 	m_instances.pop_back();
 }
 
-Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(string code)
+Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();
@@ -505,7 +505,7 @@ Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(string code
 	return NULL;
 }
 
-Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceByCode(string code)
+Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();

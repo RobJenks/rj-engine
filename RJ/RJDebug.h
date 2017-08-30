@@ -56,7 +56,7 @@ public:
 	{
 		// Allocate a temporary destination buffer
 		const size_t max_length = 1024U;
-		char *output = new (nothrow) char[1024];
+		char *output = new (std::nothrow) char[1024];
 		if (!output) return;
 
 		// Use the (outdated) variadic arguments functionality to wrap sprintf

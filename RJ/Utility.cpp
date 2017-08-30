@@ -62,33 +62,33 @@ char *BuildFilename(const char *path, const char *filename)
 	return r;
 }
 
-string BuildStrFilename(const string &path, const string &filename)
+std::string BuildStrFilename(const std::string &path, const std::string &filename)
 {
-	string result = path + "\\" + filename;
+	std::string result = path + "\\" + filename;
 	return result;
 }
 
-void StrLowerC(string &str)
+void StrLowerC(std::string &str)
 {
 	int length = (int)str.length();
 	for (int i=0; i<length; i++)
 		if (str[i] >= 0x41 && str[i] <= 0x5A) str[i] += 0x20;
 }
 
-void StrUpperC(string &str)
+void StrUpperC(std::string &str)
 {
 	int length = (int)str.length();
 	for (int i=0; i<length; i++)
 		if (str[i] >= 0x61 && str[i] <= 0x7A) str[i] -= 0x20;
 }
 
-string StrLower(std::string str)
+std::string StrLower(std::string str)
 {
 	StrLowerC(str);
 	return str;
 }
 
-string StrUpper(std::string str)
+std::string StrUpper(std::string str)
 {
 	StrUpperC(str);
 	return str;
@@ -184,7 +184,7 @@ bitstring RotateDirectionBitString(bitstring b, Rotation90Degree rotation)
 	return newb;
 }
 
-string DirectionToString(Direction edge)
+std::string DirectionToString(Direction edge)
 {
 	switch (edge) 
 	{
@@ -201,10 +201,10 @@ string DirectionToString(Direction edge)
 		default:					return NullString;
 	}
 }
-Direction DirectionFromString(string edge)
+Direction DirectionFromString(std::string edge)
 {
 	// All comparisons are case-insensitive
-	string s = StrLower(edge);
+	std::string s = StrLower(edge);
 	if		(s == "left")			return Direction::Left;
 	else if (s == "up")				return Direction::Up;
 	else if (s == "right")			return Direction::Right;

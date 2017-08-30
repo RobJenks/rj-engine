@@ -5,8 +5,8 @@
 
 
 // Initialises an image component of this control using default parameters
-Result iUIControl::InitialiseImageComponentDefault(UIManagedControlDefinition *def, Image2DRenderGroup **component,
-	string componentname, int instancecount, float zorder)
+Result iUIControl::InitialiseImageComponentDefault(	UIManagedControlDefinition *def, Image2DRenderGroup **component,
+													std::string componentname, int instancecount, float zorder)
 {
 	// Create a new component object and set the unique code
 	(*component) = new Image2DRenderGroup();
@@ -34,10 +34,10 @@ Result iUIControl::InitialiseImageComponentDefault(UIManagedControlDefinition *d
 }
 
 
-iUIControl::Type iUIControl::DeriveType(string typestring)
+iUIControl::Type iUIControl::DeriveType(std::string typestring)
 {
 	// Derive a control type based on a case-insensitive string comparison
-	string s = StrLower(typestring);
+	std::string s = StrLower(typestring);
 
 	if (s == "button")						return iUIControl::Type::Button;
 	else if (s == "textbox")				return iUIControl::Type::Textbox;

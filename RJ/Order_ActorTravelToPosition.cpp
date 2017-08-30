@@ -58,8 +58,8 @@ void Order_ActorTravelToPosition::CalculateTravelPath(void)
 
 	// Add each point on the path in turn, using the reverse iterator to retrieve path nodes in turn
 	PathIndex = 0;
-	vector<NavNode*>::const_reverse_iterator it_end = revpath.rend();
-	for (vector<NavNode*>::const_reverse_iterator it = revpath.rbegin(); it != it_end; ++it)
+	std::vector<NavNode*>::const_reverse_iterator it_end = revpath.rend();
+	for (std::vector<NavNode*>::const_reverse_iterator it = revpath.rbegin(); it != it_end; ++it)
 	{
 		PathNodes[PathIndex] = (*it)->Position;
 		++PathIndex;

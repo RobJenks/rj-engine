@@ -22,7 +22,7 @@ public:
 	enum ScrollState { None = 0, ScrollUp, ScrollDown, ScrollLeft, ScrollRight };
 
 	// Standard collection of components that make up a control
-	typedef vector<iUIComponent*> ControlComponentCollection;
+	typedef std::vector<iUIComponent*> ControlComponentCollection;
 
 	virtual bool WithinControlBounds(INTVECTOR2 point) = 0;
 

@@ -7,7 +7,6 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 class ProductionCost;
-using namespace std;
 
 // This class has no special alignment requirements
 class Resource
@@ -18,11 +17,11 @@ public:
 	Resource(void);
 
 	// Get/set methods for key fields
-	CMPINLINE const string &				GetCode(void) const							{ return m_code; }
-	CMPINLINE void							SetCode(const string & code)				{ m_code = code; }
+	CMPINLINE const std::string &			GetCode(void) const							{ return m_code; }
+	CMPINLINE void							SetCode(const std::string & code)			{ m_code = code; }
 
-	CMPINLINE const string &				GetName(void) const							{ return m_name; }
-	CMPINLINE void							SetName(const string & name)				{ m_name = name; }
+	CMPINLINE const std::string &			GetName(void) const							{ return m_name; }
+	CMPINLINE void							SetName(const std::string & name)			{ m_name = name; }
 
 	CMPINLINE float							GetValue(void) const						{ return m_value; }
 	CMPINLINE void							SetValue(float value)						
@@ -58,8 +57,8 @@ public:
 
 
 protected:
-	string					m_code;						// String code for this resource
-	string					m_name;						// Readable string name of this resource
+	std::string				m_code;						// String code for this resource
+	std::string				m_name;						// Readable string name of this resource
 
 	float					m_value;					// Indicates how valuable the resource is in general.  Used to derive prices, and also for
 														// population of the resource in the universe.  Driven by things like rarity, trends, ...

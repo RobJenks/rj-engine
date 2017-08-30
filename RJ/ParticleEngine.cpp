@@ -30,7 +30,7 @@ Result ParticleEngine::LinkParticleShader(ParticleShader *pshader)
 	return ErrorCodes::NoError;
 }
 
-Result ParticleEngine::AddEmitterPrototype(string key, ParticleEmitter *prototype)
+Result ParticleEngine::AddEmitterPrototype(std::string key, ParticleEmitter *prototype)
 {
 	// Check parameters
 	if (!prototype || key == NullString) return ErrorCodes::ReceivedNullParticleEmitterKey;
@@ -43,7 +43,7 @@ Result ParticleEngine::AddEmitterPrototype(string key, ParticleEmitter *prototyp
 	return ErrorCodes::NoError;
 }
 
-Result ParticleEngine::RemoveEmitterPrototype(string key)
+Result ParticleEngine::RemoveEmitterPrototype(std::string key)
 {
 	// Parameter check
 	if (key == NullString) return ErrorCodes::ReceivedNullParticleEmitterKey;
@@ -64,7 +64,7 @@ Result ParticleEngine::RemoveEmitterPrototype(string key)
 	return ErrorCodes::NoError;
 }
 
-ParticleEmitter *ParticleEngine::CreateNewParticleEmitter(string key, string prototype)
+ParticleEmitter *ParticleEngine::CreateNewParticleEmitter(std::string key, std::string prototype)
 {
 	// Parameter check
 	if (key == NullString || prototype == NullString) return NULL;
@@ -89,7 +89,7 @@ ParticleEmitter *ParticleEngine::CreateNewParticleEmitter(string key, string pro
 }
 
 // Shuts down a specific emitter and releases all resources
-void ParticleEngine::ShutdownParticleEmitter(string key)
+void ParticleEngine::ShutdownParticleEmitter(std::string key)
 {
 	// Make sure this is a valid object
 	if (m_emitters.count(key) == 0) return;

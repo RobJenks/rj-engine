@@ -15,8 +15,6 @@
 #include "iUIComponent.h"
 #include "iUIComponentRenderable.h"
 class iUIControl;
-using namespace std;
-
 
 // This class has no special alignment requirements
 class Image2DRenderGroup : public iUIComponentRenderable
@@ -36,7 +34,7 @@ public:
 	{
 	public:
 
-		string				code;				// Used to identify an instance
+		std::string			code;				// Used to identify an instance
 		iUIControl *		control;			// Pointer to a control that this instance is part of, if applicable
 
 		bool				render;
@@ -79,15 +77,15 @@ public:
 		}
 
 		// Standard methods to satisfy the iUIComponent interface
-		string GetCode(void) { return code; }
-		void SetCode(string _code) { code = _code; }
+		std::string GetCode(void) { return code; }
+		void SetCode(std::string _code) { code = _code; }
 		bool GetRenderActive(void) const { return render; }
 		void SetRenderActive(bool _render) { render = _render; }
 
 		// Shutdown method to satisfy the interface requirement
 		void Shutdown(void) { }
 	};
-	typedef deque<Instance> InstanceCollection;
+	typedef std::deque<Instance> InstanceCollection;
 
 	// Stores a reference to a particular instance, in a way that allows retrieval via several alternative methods
 	struct InstanceReference
@@ -95,11 +93,11 @@ public:
 		Instance *				instance;
 		Image2DRenderGroup *	rendergroup;
 		int						index;
-		string					code;
+		std::string				code;
 	
 		InstanceReference(void) { instance = NULL; rendergroup = NULL; index = -1; code = ""; }
 
-		InstanceReference(Instance *_instance, Image2DRenderGroup *_rendergroup, int _index, string _code) {
+		InstanceReference(Instance *_instance, Image2DRenderGroup *_rendergroup, int _index, std::string _code) {
 			instance = _instance; rendergroup = _rendergroup; index = _index; code = _code;
 		}
 	};
@@ -107,8 +105,8 @@ public:
 	// Methods to add/remove/change instances
 	CMPINLINE InstanceCollection *			GetInstances(void) { return &m_instances; }
 	CMPINLINE Instance *					GetInstanceDirect(InstanceCollection::size_type index) { return &(m_instances[index]); }
-	Image2DRenderGroup::Instance *			GetInstanceByCode(string code);
-	Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(string code);
+	Image2DRenderGroup::Instance *			GetInstanceByCode(std::string code);
+	Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(std::string code);
 	Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
 	void									RemoveInstance(Instance *instance);
 	void									RemoveInstance(InstanceCollection::size_type index);

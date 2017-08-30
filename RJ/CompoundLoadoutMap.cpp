@@ -11,7 +11,7 @@ CompoundLoadoutMap::CompoundLoadoutMap(void)
 	this->HP = ""; 
 }
 
-CompoundLoadoutMap::CompoundLoadoutMap(string hp)
+CompoundLoadoutMap::CompoundLoadoutMap(std::string hp)
 {
 	this->HP = hp;
 }
@@ -31,7 +31,7 @@ Equipment *CompoundLoadoutMap::GetEquipment(void) const
 	if (n == 0) return NULL;
 
 	// Generate a cumulative probability array
-	register float pval = 0.0f;
+	float pval = 0.0f;
 	float *cprob = new float[n];
 	for (CompoundLoadoutItems::size_type i = 0; i < n; ++i)
 	{

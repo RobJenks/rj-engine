@@ -4,12 +4,8 @@
 #define __FontShaderH__
 
 #include "DX11_Core.h"
-
-
 #include <fstream>
 #include "iShader.h"
-
-using namespace std;
 
 // This class has no special alignment requirements
 class FontShader 

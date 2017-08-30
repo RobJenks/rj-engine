@@ -9,7 +9,7 @@
 #include "iUIController.h"
 #include "UITextBox.h"
 
-UITextBox::UITextBox(	string code, 
+UITextBox::UITextBox(std::string code,
 						Image2DRenderGroup::InstanceReference framecomponent, 
 						Image2DRenderGroup::InstanceReference framefocuscomponent, 
 						TextBlock *textcomponent,
@@ -208,7 +208,7 @@ void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 		if (m_textcomponent->GetTextWidth() < (float)(m_size.x - m_textoffset.x - UITextBox::TEXTBOX_RIGHT_MARGIN))
 		{
 			// Add to the textbox string
-			string newtext = m_textcomponent->GetText();
+			std::string newtext = m_textcomponent->GetText();
 			newtext.push_back(key.keychar);
 			SetText( newtext );
 		}
@@ -219,7 +219,7 @@ void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keyboard->GetKeys()[DIK_BACKSPACE])
 	{
 		// Also process backspace for deletion of chars in the string
-		string newtext = m_textcomponent->GetText();
+		std::string newtext = m_textcomponent->GetText();
 		if (newtext.size() > 0) 
 		{
 			// Reduce the text by one character

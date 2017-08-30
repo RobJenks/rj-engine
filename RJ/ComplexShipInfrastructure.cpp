@@ -1,6 +1,5 @@
 #include <string>
 #include "Utility.h"
-using namespace std;
 
 #include "ComplexShipInfrastructure.h"
 
@@ -14,7 +13,7 @@ ComplexShipInfrastructure::~ComplexShipInfrastructure(void)
 
 
 // Static method to translate from infrastructure class to the string representation of that classes
-string ComplexShipInfrastructure::TranslateTypeToString(ComplexShipInfrastructure::InfrastructureClass type)
+std::string ComplexShipInfrastructure::TranslateTypeToString(ComplexShipInfrastructure::InfrastructureClass type)
 {
 	switch (type)
 	{
@@ -32,10 +31,10 @@ string ComplexShipInfrastructure::TranslateTypeToString(ComplexShipInfrastructur
 }
 
 // Static method to translate from the string representation of an infrastructure class to the class itself
-ComplexShipInfrastructure::InfrastructureClass ComplexShipInfrastructure::TranslateStringToType(string type)
+ComplexShipInfrastructure::InfrastructureClass ComplexShipInfrastructure::TranslateStringToType(std::string type)
 {
 	// Convert to lower case for comparison
-	string val = type;
+	std::string val = type;
 	StrLowerC(type);
 
 	// Test against each infrastructure type

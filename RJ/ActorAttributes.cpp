@@ -14,7 +14,7 @@ std::vector<ActorAttributeEffect> ActorAttributeGeneration::ActorAttributeEffect
 
 AttributeDerivationType TranslateAttributeDerivationTypeFromString(const std::string & name)
 {
-	string lcase = StrLower(name);
+	std::string lcase = StrLower(name);
 	if (name == "normal")				return AttributeDerivationType::NormalDistribution;
 	else								return AttributeDerivationType::Uniform;
 }
@@ -47,7 +47,7 @@ void ActorAttributeGeneration::InitialiseActorAttributeData(void)
 // Loads attribute generation data from file
 Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 {
-	string key, val;
+	std::string key, val;
 
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadAttributeGenerationDataWithNullData;
@@ -68,7 +68,7 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 			if (!cname || !cmin || !cbase || !cmax) continue;
 
 			// Attempt to convert to the relevant in-game attribute
-			string sname = cname;
+			std::string sname = cname;
 			ActorAttr a = TranslateActorAttributeFromString(sname);
 			if (a == ActorAttr::A_COUNT) continue;
 
@@ -93,7 +93,7 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 			if (!csrc || !ctgt || !atmin || !atmax) continue;
 			if (!atbase) atbase = "0.0";
 			if (!cmodifier) cmodifier = "0";
-			string modifier = cmodifier;
+			std::string modifier = cmodifier;
 
 			// Attempt to translate both the source and target attributes to in-game values
 			ActorAttr asrc = TranslateActorAttributeFromString(csrc);
@@ -111,7 +111,7 @@ Result ActorAttributeGeneration::LoadAttributeGenerationData(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
-CMPINLINE ActorAttr TranslateActorAttributeFromString(const string & name)
+CMPINLINE ActorAttr TranslateActorAttributeFromString(const std::string & name)
 {
 	std::string lookup = StrLower(name);
 	if (_ActorAttr_lookup.count(lookup) == 0) return ActorAttr::A_COUNT;

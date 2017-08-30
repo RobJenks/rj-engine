@@ -224,7 +224,7 @@ void SimpleShip::CalculateEngineStatistics()
 	this->EngineAngularAcceleration.Value = accel;
 }
 
-SimpleShip *SimpleShip::Create(const string & code)
+SimpleShip *SimpleShip::Create(const std::string & code)
 {
 	// Invoke the spawn function using a template ship corresponding to this definition (if one exists)
 	return (SimpleShip::Create(D::SimpleShips.Get(code)));
@@ -256,7 +256,7 @@ Result SimpleShip::AddLoadout(SimpleShip *s)
 	return (SimpleShip::AddLoadout(s, l));
 }
 
-Result SimpleShip::AddLoadout(SimpleShip *s, const string &loadout)
+Result SimpleShip::AddLoadout(SimpleShip *s, const std::string &loadout)
 {
 	// Assigns a loadout with the specified code
 	

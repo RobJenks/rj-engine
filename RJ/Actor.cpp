@@ -68,8 +68,8 @@ void Actor::RecalculateAttributes(void)
 	}
 
 	// Now apply all direct effects from one attribute to another
-	vector<ActorAttributeGeneration::ActorAttributeEffect>::const_iterator it_end = ActorAttributeGeneration::ActorAttributeEffects.end();
-	for (vector<ActorAttributeGeneration::ActorAttributeEffect>::const_iterator it = ActorAttributeGeneration::ActorAttributeEffects.begin(); it != it_end; ++it)
+	std::vector<ActorAttributeGeneration::ActorAttributeEffect>::const_iterator it_end = ActorAttributeGeneration::ActorAttributeEffects.end();
+	for (std::vector<ActorAttributeGeneration::ActorAttributeEffect>::const_iterator it = ActorAttributeGeneration::ActorAttributeEffects.begin(); it != it_end; ++it)
 	{
 		// Determine the position of the current value within the range of values for this attribute
 		attr = (int)it->source;

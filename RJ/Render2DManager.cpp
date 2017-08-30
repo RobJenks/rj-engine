@@ -9,8 +9,6 @@
 #include "TextureShader.h"
 #include "Render2DManager.h"
 class GameInputDevice;
-using namespace std;
-
 
 
 Render2DManager::Render2DManager(void)
@@ -40,7 +38,7 @@ Result XM_CALLCONV Render2DManager::Initialise(ID3D11Device* device, ID3D11Devic
 	return ErrorCodes::NoError;
 }
 
-Render2DGroup *Render2DManager::CreateRenderGroup(string code)
+Render2DGroup *Render2DManager::CreateRenderGroup(std::string code)
 {
 	// Make sure a valid code has been provided
 	if (code == NullString) return NULL;
@@ -117,7 +115,7 @@ void Render2DManager::Shutdown(void)
 	}
 }
 
-void Render2DManager::ActivateGroup(string code)
+void Render2DManager::ActivateGroup(std::string code)
 {
 	if (code != NullString && m_rendergroups.count(code) > 0 && m_rendergroups[code] != NULL)
 	{
@@ -127,7 +125,7 @@ void Render2DManager::ActivateGroup(string code)
 	
 }
 
-void Render2DManager::DeactivateGroup(string code)
+void Render2DManager::DeactivateGroup(std::string code)
 {
 	if (code != NullString)
 		if (m_rendergroups.count(code) > 0)

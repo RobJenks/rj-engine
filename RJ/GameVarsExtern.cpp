@@ -15,8 +15,6 @@
 #include "DebugCommandHandler.h"
 class CoreEngine;
 class Player;
-using namespace std;
-
 
 #include "GameVarsExtern.h"
 

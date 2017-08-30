@@ -8,7 +8,6 @@
 #include "EntityAIStates.h"
 #include "Order.h"
 #include "GameConsoleCommand.h"
-using namespace std;
 
 // This class does not have any special alignment requirements
 class EntityAI
@@ -16,7 +15,7 @@ class EntityAI
 public:
 
 	// Queue of orders currently assigned to this entity
-	typedef vector<Order*>					OrderQueue;
+	typedef std::vector<Order*>				OrderQueue;
 	OrderQueue								Orders;
 
 	// Initialise a newly-copied entity AI object to a default starting state
@@ -148,7 +147,7 @@ protected:
 	};
 
 	// Vector of dependency structs, used for efficienctly evaluating dependencies in the queue
-	typedef vector<DependencyInfo>			DependencyInfoStruct;
+	typedef std::vector<DependencyInfo>		DependencyInfoStruct;
 	static DependencyInfoStruct				m_dependencycheck;
 
 	// The frequency of order queue maintenance, and time since the queue was last checked

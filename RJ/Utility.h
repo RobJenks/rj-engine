@@ -19,8 +19,6 @@
 #include "IntVector.h"
 #include "Direction.h"
 class iObject;
-using namespace std;
-
 
 
 // Define memory tracking macros for use in the application
@@ -106,13 +104,13 @@ void cupper(char *);			// Converts a string to uppercase in-place
 char *lower(const char *);		// Converts a string to lowercase as a new string
 char *upper(const char *);		// Converts a string to uppercase as a new string
 
-void StrLowerC(string &);				// Converts a std::string to lowercase in-place
-void StrUpperC(string &);				// Converts a std::string to uppercase in-place
-string StrLower(std::string);		// Converts a std::string to lowercase as a new string
-string StrUpper(std::string);		// Converts a std::string to uppercase as a new string
+void StrLowerC(std::string &);				// Converts a std::string to lowercase in-place
+void StrUpperC(std::string &);				// Converts a std::string to uppercase in-place
+std::string StrLower(std::string);		// Converts a std::string to lowercase as a new string
+std::string StrUpper(std::string);		// Converts a std::string to uppercase as a new string
 
 char *BuildFilename(const char *, const char *);
-string BuildStrFilename(const string &, const string &);
+std::string BuildStrFilename(const std::string &, const std::string &);
 
 // Enumeration of possible comparison results
 enum ComparisonResult { Equal = 0, LessThan, GreaterThan };
@@ -255,21 +253,21 @@ void StreamToDebugOutput(T obj)
 	OutputDebugString(s.str().c_str());
 }
 
-CMPINLINE string IntVectorToString(INTVECTOR2 *v) { return v->ToString(); }
-CMPINLINE string IntVectorToString(INTVECTOR3 *v) { return v->ToString(); }
-CMPINLINE string IntVectorToString(INTVECTOR2 & v) { return v.ToString(); }
-CMPINLINE string IntVectorToString(INTVECTOR3 & v) { return v.ToString(); }
-CMPINLINE string Vector2ToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
-CMPINLINE string Vector3ToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
-CMPINLINE string Vector4ToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
-CMPINLINE string QuaternionToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
-CMPINLINE string Vector2ToString(const FXMVECTOR v) { XMFLOAT2 vf; XMStoreFloat2(&vf, v); return Vector2ToString(vf); }
-CMPINLINE string Vector3ToString(const FXMVECTOR v) { XMFLOAT3 vf; XMStoreFloat3(&vf, v); return Vector3ToString(vf); }
-CMPINLINE string Vector4ToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
-CMPINLINE string QuaternionToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
-CMPINLINE string VectorToString(const XMFLOAT2 & v) { return Vector2ToString(v); }
-CMPINLINE string VectorToString(const XMFLOAT3 & v) { return Vector3ToString(v); }
-CMPINLINE string VectorToString(const XMFLOAT4 & v) { return Vector4ToString(v); }
+CMPINLINE std::string IntVectorToString(INTVECTOR2 *v) { return v->ToString(); }
+CMPINLINE std::string IntVectorToString(INTVECTOR3 *v) { return v->ToString(); }
+CMPINLINE std::string IntVectorToString(INTVECTOR2 & v) { return v.ToString(); }
+CMPINLINE std::string IntVectorToString(INTVECTOR3 & v) { return v.ToString(); }
+CMPINLINE std::string Vector2ToString(const XMFLOAT2 & v) { return (concat("(")(v.x)(", ")(v.y)(")").str()); }
+CMPINLINE std::string Vector3ToString(const XMFLOAT3 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(")").str()); }
+CMPINLINE std::string Vector4ToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
+CMPINLINE std::string QuaternionToString(const XMFLOAT4 & v) { return (concat("(")(v.x)(", ")(v.y)(", ")(v.z)(", ")(v.w)(")").str()); }
+CMPINLINE std::string Vector2ToString(const FXMVECTOR v) { XMFLOAT2 vf; XMStoreFloat2(&vf, v); return Vector2ToString(vf); }
+CMPINLINE std::string Vector3ToString(const FXMVECTOR v) { XMFLOAT3 vf; XMStoreFloat3(&vf, v); return Vector3ToString(vf); }
+CMPINLINE std::string Vector4ToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
+CMPINLINE std::string QuaternionToString(const FXMVECTOR v) { XMFLOAT4 vf; XMStoreFloat4(&vf, v); return Vector4ToString(vf); }
+CMPINLINE std::string VectorToString(const XMFLOAT2 & v) { return Vector2ToString(v); }
+CMPINLINE std::string VectorToString(const XMFLOAT3 & v) { return Vector3ToString(v); }
+CMPINLINE std::string VectorToString(const XMFLOAT4 & v) { return Vector4ToString(v); }
 
 void MatrixToCharStream(const XMFLOAT4X4 *m, char *out);
 void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
@@ -307,11 +305,11 @@ struct D3DXFINITEPLANE
 
 
 template <typename TKey, typename TVal>
-void VectorFromUnorderedMap(unordered_map<TKey, TVal> &map, vector<TVal> & pOutVector)
+void VectorFromUnorderedMap(std::unordered_map<TKey, TVal> &map, std::vector<TVal> & pOutVector)
 {
 	// Iterate through the map in a linear fashion and copy items to the vector
-	unordered_map<TKey,TVal>::iterator it_end = map.end();
-	for (unordered_map<TKey, TVal>::iterator it = map.begin(); it != it_end; ++it)
+	std::unordered_map<TKey,TVal>::iterator it_end = map.end();
+	for (std::unordered_map<TKey, TVal>::iterator it = map.begin(); it != it_end; ++it)
 	{
 		pOutVector.push_back(it->second);
 	}
@@ -465,7 +463,7 @@ int FindIndexInVector(Tvec &vec, Tobj obj)
 // which use it.  Can't use size_type for FindInVector since size_type is unsigned.  Better solution to avoid casting and
 // allow use of full size_type value range?
 template <typename T>
-CMPINLINE void RemoveFromVector(vector<T> &vec, T obj)
+CMPINLINE void RemoveFromVector(std::vector<T> &vec, T obj)
 {
 	typename std::vector<T>::const_iterator it = FindInVector(vec, obj);
 	if (it != vec.end()) vec.erase(it);

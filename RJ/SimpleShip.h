@@ -40,12 +40,12 @@ public:
 	void				RecalculateShipDataFromCurrentState(void);
 
 	// Methods to create a new ship based on the specified template details
-	static SimpleShip *SimpleShip::Create(const string &code);
+	static SimpleShip *SimpleShip::Create(const std::string &code);
 	static SimpleShip *SimpleShip::Create(SimpleShip *template_ship);
 
 	// Methods to apply loadouts to a ship
 	Result SimpleShip::AddLoadout(SimpleShip *s);
-	Result SimpleShip::AddLoadout(SimpleShip *s, const string &loadout);
+	Result SimpleShip::AddLoadout(SimpleShip *s, const std::string &loadout);
 	Result SimpleShip::AddLoadout(SimpleShip *s, SimpleShipLoadout *loadout);
 
 	// Derive a camera matrix from the ship position/orientation, for use in player flying and tracking of ships

@@ -139,7 +139,7 @@ public:
 	CMPINLINE bool					IsBranchNode(void) const			{ return (m_children[0] != NULL); }
 
 	// Debug method to generate a string output of an Octree and its recursively-defined children
-	string							DebugOutput(void);
+	std::string						DebugOutput(void);
 
 	// Default destructor
 	~Octree(void);
@@ -525,7 +525,7 @@ Octree<T>::~Octree(void)
 
 // Debug method to generate a string output of an Octree and its recursively-defined children
 template <typename T> 
-string Octree<T>::DebugOutput(void)
+std::string Octree<T>::DebugOutput(void)
 {
 	// Add details on this node to the output string
 	std::ostringstream s;

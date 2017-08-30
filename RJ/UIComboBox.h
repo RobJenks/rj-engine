@@ -13,7 +13,6 @@ class Image2DRenderGroup;
 class TextBlock;
 class UIManagedControlDefinition;
 class GameInputDevice;
-using namespace std;
 
 
 // This class has no special alignment requirements
@@ -22,10 +21,10 @@ class UIComboBox : public iUIControl
 public:
 	// Custom struct for the data stored per item in the combobox
 	struct ComboBoxItem { 
-		string Value; string Tag; 
-		ComboBoxItem()							{ Value = ""; Tag = ""; }
-		ComboBoxItem(string value)				{ Value = value; Tag = ""; }
-		ComboBoxItem(string value, string tag)	{ Value = value; Tag = tag; }
+		std::string Value; std::string Tag;
+		ComboBoxItem()										{ Value = ""; Tag = ""; }
+		ComboBoxItem(std::string value)						{ Value = value; Tag = ""; }
+		ComboBoxItem(std::string value, std::string tag)	{ Value = value; Tag = tag; }
 	};
 
 	// Constants determining defaults values and display parameters
@@ -53,7 +52,7 @@ public:
 	UIComboBox(void);
 
 	// Initialises the control from a supplied control definition
-	Result Initialise(UIManagedControlDefinition *def, string code, int expandsize, int x, int y, float z, int width, int height, bool render);
+	Result Initialise(UIManagedControlDefinition *def, std::string code, int expandsize, int x, int y, float z, int width, int height, bool render);
 
 	// Inline methods to get aspects of the control positioning
 	INTVECTOR2			GetPosition(void)			{ return m_location; }
@@ -102,28 +101,28 @@ public:
 	CMPINLINE std::vector<ComboBoxItem>::size_type			GetItemCount(void) { return m_items.size(); }
 
 	// Returns a reference to a specific item, or to the item collection itself
-	CMPINLINE vector<ComboBoxItem>*	GetItems(void) { return &m_items; }
-	CMPINLINE string				GetItem(std::vector<ComboBoxItem>::size_type index) const		
+	CMPINLINE std::vector<ComboBoxItem>*	GetItems(void) { return &m_items; }
+	CMPINLINE std::string					GetItem(std::vector<ComboBoxItem>::size_type index) const
 	{ 
 		if (index >= m_items.size()) return ""; else return m_items[index].Value; 
 	}
-	CMPINLINE string				GetItemTag(std::vector<ComboBoxItem>::size_type index) const
+	CMPINLINE std::string					GetItemTag(std::vector<ComboBoxItem>::size_type index) const
 	{
 		if (index >= m_items.size()) return ""; else return m_items[index].Tag;
 	}
 	
 	// Returns the currently-selected item in the combo box
-	CMPINLINE std::vector<ComboBoxItem>::size_type	GetSelectedIndex(void) const	{ return m_selectedindex; }
-	CMPINLINE string								GetSelectedItem(void) const		{ return GetItem(m_selectedindex); }
-	CMPINLINE string								GetSelectedItemTag(void) const	{ return GetItemTag(m_selectedindex); }
+	CMPINLINE std::vector<ComboBoxItem>::size_type		GetSelectedIndex(void) const	{ return m_selectedindex; }
+	CMPINLINE std::string								GetSelectedItem(void) const		{ return GetItem(m_selectedindex); }
+	CMPINLINE std::string								GetSelectedItemTag(void) const	{ return GetItemTag(m_selectedindex); }
 
 	// Methods to add, modify or remove an item
-	CMPINLINE void				AddItem(string item)							{ AddItem(item, ""); }
-	void						AddItem(string item, string tag);
-	CMPINLINE void				InsertItem(std::vector<ComboBoxItem>::size_type index, string item)					{ InsertItem(index, item, ""); }
-	void						InsertItem(std::vector<ComboBoxItem>::size_type index, string item, string tag);
-	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item)					{ SetItem(index, item, ""); }
-	void						SetItem(std::vector<ComboBoxItem>::size_type index, string item, string tag);
+	CMPINLINE void				AddItem(std::string item)							{ AddItem(item, ""); }
+	void						AddItem(std::string item, std::string tag);
+	CMPINLINE void				InsertItem(std::vector<ComboBoxItem>::size_type index, std::string item)					{ InsertItem(index, item, ""); }
+	void						InsertItem(std::vector<ComboBoxItem>::size_type index, std::string item, std::string tag);
+	void						SetItem(std::vector<ComboBoxItem>::size_type index, std::string item)						{ SetItem(index, item, ""); }
+	void						SetItem(std::vector<ComboBoxItem>::size_type index, std::string item, std::string tag);
 	void						RemoveItem(std::vector<ComboBoxItem>::size_type index);
 	void						Clear(void);
 
@@ -188,7 +187,7 @@ private:
 	Render2DGroup *												m_rendergroup;
 
 	// Vector storing the contents of this combobox
-	vector<ComboBoxItem>										m_items;
+	std::vector<ComboBoxItem>									m_items;
 
 	// Currently selected index within the combobox
 	std::vector<ComboBoxItem>::size_type						m_selectedindex;
@@ -206,7 +205,7 @@ private:
 	
 	// The additional controls shown when the control is expanded (but no scrolling required)
 	Image2DRenderGroup *										m_expandback;
-	vector<TextBlock*>											m_expandtext;
+	std::vector<TextBlock*>										m_expandtext;
 
 	// The additional controls shown when control is expanded and also requires scrolling to view all items
 	Image2DRenderGroup *										m_scrollbarback;
@@ -214,7 +213,7 @@ private:
 	Image2DRenderGroup *										m_scrollbarhandle;
 
 	// Collection in which to store the component pointers, for more efficient parsing of all constituent components
-	vector<iUIComponent*>										m_components;
+	std::vector<iUIComponent*>									m_components;
 
 	// Current state of the control (part of the iUIControl interface)
 	iUIControl::ControlState									m_state;

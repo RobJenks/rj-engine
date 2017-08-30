@@ -510,8 +510,8 @@ void ComplexShip::UpdatePerimeterBeacons(void)
 
 		// Otherwise, also discount it if it is in another node that we already have a beacon for
 		bool found = false;
-		vector<Octree<iObject*>*>::const_iterator it2_end = m_activeperimeternodes.end();
-		for (vector<Octree<iObject*>*>::const_iterator it2 = m_activeperimeternodes.begin(); it2 != it2_end; ++it2)
+		std::vector<Octree<iObject*>*>::const_iterator it2_end = m_activeperimeternodes.end();
+		for (std::vector<Octree<iObject*>*>::const_iterator it2 = m_activeperimeternodes.begin(); it2 != it2_end; ++it2)
 		{
 			// Get a reference to the node
 			node = (*it2); if (!node) continue;
@@ -1034,7 +1034,7 @@ void ComplexShip::CalculateEngineStatistics()
 	this->EngineAngularAcceleration.Value = accel;
 }
 
-ComplexShip *ComplexShip::Create(const string & code)
+ComplexShip *ComplexShip::Create(const std::string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
 	ComplexShip *template_ship = D::ComplexShips.Get(code);
@@ -1242,7 +1242,7 @@ std::string ComplexShip::DebugOutputPerimeterBeacons(void)
 {
 	CapitalShipPerimeterBeacon *beacon;
 	Octree<iObject*> *node;
-	string s = "";
+	std::string s = "";
 
 	// Iterate over each beacon attached to the ship
 	ComplexShip::PerimeterBeaconCollection::const_iterator it_end = m_perimeterbeacons.end();
@@ -1285,17 +1285,17 @@ std::string	ComplexShip::DebugString(void) const
 
 
 // Returns the file path where XML data relating to this ship should be stored
-string ComplexShip::DetermineXMLDataPath(void)
+std::string ComplexShip::DetermineXMLDataPath(void)
 {
 	return concat("\\Ships\\ShipData\\")(m_code).str();
 }
 // Returns the name of the XML file to be generated for this ship
-string ComplexShip::DetermineXMLDataFilename(void)
+std::string ComplexShip::DetermineXMLDataFilename(void)
 {
 	return concat(m_code)(".xml").str();
 }
 // Returns the full expected filename for the XML data relating to this ship
-string ComplexShip::DetermineXMLDataFullFilename(void)
+std::string ComplexShip::DetermineXMLDataFullFilename(void)
 {
 	return concat(DetermineXMLDataPath())("\\")(DetermineXMLDataFilename()).str();
 }

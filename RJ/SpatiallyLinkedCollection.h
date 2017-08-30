@@ -11,7 +11,6 @@
 
 #include <cstdlib>
 #include <vector>
-using namespace std;
 
 // This class has no special alignment requirements
 template <typename T> class SpatiallyLinkedCollection

@@ -8,7 +8,6 @@
 #include "iUIComponent.h"
 class TextManager;
 struct SentenceType;
-using namespace std;
 
 #define DEBUG_LOGINSTANCECREATION
 
@@ -21,11 +20,11 @@ public:
 	~TextBlock(void);
 
 	// Initialises the text block object
-	Result Initialise(string code, TextManager *tm, SentenceType *sentence, int maxlength);
+	Result Initialise(std::string code, TextManager *tm, SentenceType *sentence, int maxlength);
 
 	// Methods to set the text block contents
-	void SetText(string text);
-	void SetText(string text, float size);
+	void SetText(std::string text);
+	void SetText(std::string text, float size);
 	void SetText(const char *text);
 	void SetText(const char *text, float size);
 

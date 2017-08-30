@@ -13,7 +13,7 @@ UIManagedControlDefinition::UIManagedControlDefinition(void)
 
 bool UIManagedControlDefinition::ValidateDefinition(void)
 {
-	string val;
+	std::string val;
 
 	// Make sure we have a valid code and control class
 	if (m_code == NullString || m_class == iUIControl::Type::Unknown) return false;

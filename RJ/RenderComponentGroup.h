@@ -6,20 +6,18 @@
 #include <string>
 #include <unordered_map>
 #include "CompilerSettings.h"
-using namespace std;
-
 
 
 template <typename T> class RenderComponentGroup
 {
 public:
-	typedef unordered_map<string, T> ItemCollection;
+	typedef std::unordered_map<std::string, T> ItemCollection;
 
 	// Public methods to manipulate the component collection
 	CMPINLINE ItemCollection *Items(void) { return m_collection; }
-	CMPINLINE T GetItem(string key) { return __GetItem(*m_collection, key); }
-	CMPINLINE void RemoveItem(string key) { __RemoveItem(*m_collection, key); }
-	CMPINLINE void AddItem(string key, T item) { __AddItem(*m_collection, key, item); }
+	CMPINLINE T GetItem(std::string key) { return __GetItem(*m_collection, key); }
+	CMPINLINE void RemoveItem(std::string key) { __RemoveItem(*m_collection, key); }
+	CMPINLINE void AddItem(std::string key, T item) { __AddItem(*m_collection, key, item); }
 
 	// Links this component manager to a component collection in the render group
 	void LinkToCollection(ItemCollection *items) { m_collection = items; }
@@ -76,17 +74,17 @@ private:
 	ItemCollection *					m_collection;
 	
 	// Private method to return an item from the collection (via reference indirection)
-	CMPINLINE T __GetItem(ItemCollection &__collection, string key) { 
+	CMPINLINE T __GetItem(ItemCollection &__collection, std::string key) {
 		if (__collection.count(key) != 0) return __collection[key]; else return NULL; 
 	}
 
 	// Private method to remove an item from the collection (via reference indirection)
-	CMPINLINE void __RemoveItem(ItemCollection &__collection, string key) { 
+	CMPINLINE void __RemoveItem(ItemCollection &__collection, std::string key) {
 		if (__collection.count(key) != 0) __collection[key] = NULL; 
 	}
 
 	// Private method to add an item to the collection (via reference indirection)
-	CMPINLINE void __AddItem(ItemCollection &__collection, string key, T item) {
+	CMPINLINE void __AddItem(ItemCollection &__collection, std::string key, T item) {
 		if (__collection.count(key) == 0) 
 			__collection[key] = item;		// Add to the collection
 	}

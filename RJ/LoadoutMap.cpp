@@ -10,7 +10,7 @@ LoadoutMap::LoadoutMap(void)
 	this->HP = ""; this->Equip = NULL;
 }
 
-LoadoutMap::LoadoutMap(string hp, Equipment *equip)
+LoadoutMap::LoadoutMap(std::string hp, Equipment *equip)
 {
 	this->HP = hp; this->Equip = equip;
 }

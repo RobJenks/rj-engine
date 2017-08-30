@@ -3,7 +3,6 @@
 
 #include "TextBlock.h"
 #include "SentenceType.h"
-using namespace std;
 
 #if defined(_DEBUG) && defined(DEBUG_LOGINSTANCECREATION) 
 	long TextBlock::inst_con = 0;
@@ -11,7 +10,7 @@ using namespace std;
 #endif
 
 
-Result TextBlock::Initialise(string code, TextManager *tm, SentenceType *sentence, int maxlength)
+Result TextBlock::Initialise(std::string code, TextManager *tm, SentenceType *sentence, int maxlength)
 {
 	// Parameter check
 	if (code.empty() || !tm || !sentence) return ErrorCodes::CannotInitialiseTextBlockWithInvalidParameters;
@@ -26,7 +25,7 @@ Result TextBlock::Initialise(string code, TextManager *tm, SentenceType *sentenc
 	m_render = m_parentrender = true;
 
 	// Allocate space for the text buffer
-	m_textbuffer = new (nothrow) char[m_maxlength+1];		// Always allow +1 char for the null-terminator
+	m_textbuffer = new (std::nothrow) char[m_maxlength+1];		// Always allow +1 char for the null-terminator
 	if (!m_textbuffer) return ErrorCodes::CouldNotAllocateSpaceForTextBlockBuffer;
 	memset(m_textbuffer, 0, sizeof(char) * (m_maxlength + 1));
 
@@ -35,13 +34,13 @@ Result TextBlock::Initialise(string code, TextManager *tm, SentenceType *sentenc
 }
 
 // Sets the text block based on a std::string input.  Calls one overloaded method (that also calls another) to complete default params
-void TextBlock::SetText(string text)
+void TextBlock::SetText(std::string text)
 {
 	SetText(text, m_size);
 }
 
 // Sets the text block based on a std::string input.  Calls the overloaded method with a cstring
-void TextBlock::SetText(string text, float size)
+void TextBlock::SetText(std::string text, float size)
 {
 	// Convert to a c-string and call the overloaded method
 	const char *c = text.c_str();

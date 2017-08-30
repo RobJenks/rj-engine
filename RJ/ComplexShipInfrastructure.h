@@ -4,7 +4,6 @@
 #define __ComplexShipInfrastructureH__
 
 #include <string>
-using namespace std;
 
 class ComplexShipInfrastructure
 {
@@ -21,8 +20,8 @@ public:
 	~ComplexShipInfrastructure(void);
 
 	// Static methods to translate between infrastructure classes and the string representation of those classes
-	static string						TranslateTypeToString(InfrastructureClass type);
-	static InfrastructureClass			TranslateStringToType(string type);
+	static std::string					TranslateTypeToString(InfrastructureClass type);
+	static InfrastructureClass			TranslateStringToType(std::string type);
 };
 
 

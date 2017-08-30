@@ -1578,7 +1578,7 @@ Result UI_ShipBuilder::PerformSave(void)
 	if (code == NullString) return ErrorCodes::ShipBuilderCannotSaveShipWithInvalidCode;
 
 	// Make sure the custom ship directory exists
-	string path = concat(D::DATA)(UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY).str();
+	std::string path = concat(D::DATA)(UI_ShipBuilder::CUSTOM_SHIP_DIRECTORY).str();
 	if (CreateDirectory(path.c_str(), NULL) == false && GetLastError() != ERROR_ALREADY_EXISTS)
 		return ErrorCodes::ShipBuilderCannotGenerateSaveDirectory;
 

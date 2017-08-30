@@ -10,8 +10,6 @@
 #include "CompilerSettings.h"
 class Texture;
 
-using namespace std;
-
 // This class has no special alignment requirements
 class EffectBase
 {
@@ -23,23 +21,23 @@ public:
 	Result					LoadTexture(Texture **texture, const char *filename);
 
 	// Returns/sets the uniquely identifying code for this effect
-	CMPINLINE string GetCode(void) { return m_code; }
-	CMPINLINE void SetCode(string code) { m_code = code; }
+	CMPINLINE std::string GetCode(void) { return m_code; }
+	CMPINLINE void SetCode(std::string code) { m_code = code; }
 
 	// Returns/sets the effect model used in rendering this effect
 	CMPINLINE EffectModelType GetEffectModel(void) { return m_effectmodel; }
 	CMPINLINE void SetEffectModel(EffectModelType model) { m_effectmodel = model; }
-	CMPINLINE void SetEffectModel(string modelname) { m_effectmodel = DeriveEffectModel(modelname); }
+	CMPINLINE void SetEffectModel(std::string modelname) { m_effectmodel = DeriveEffectModel(modelname); }
 	
 	// Derives the effect model type from a supplied string name
-	EffectBase::EffectModelType DeriveEffectModel(string modelname);
+	EffectBase::EffectModelType DeriveEffectModel(std::string modelname);
 
 	// Constructors/destructors
 	EffectBase(void);
 	~EffectBase(void);
 
 protected:
-	string m_code;							// String ID that uniquely identifies the effect
+	std::string m_code;						// String ID that uniquely identifies the effect
 	EffectModelType m_effectmodel;			// Determines the underlying effect model used to render this effect
 	
 };

@@ -1,9 +1,8 @@
 #include <string>
 #include "ErrorCodes.h"
 #include "FontData.h"
-using namespace std;
 
-Result FontData::Initialize(ID3D11Device* device, string name, const char *fontFilename, const char *textureFilename)
+Result FontData::Initialize(ID3D11Device* device, std::string name, const char *fontFilename, const char *textureFilename)
 {
 	Result result;
 
@@ -44,7 +43,7 @@ void FontData::Shutdown()
 
 Result FontData::LoadFontData(const char *filename)
 {
-	ifstream fin;
+	std::ifstream fin;
 	int i;
 	char temp;
 

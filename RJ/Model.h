@@ -12,15 +12,13 @@
 #include "ModelBuffer.h"
 #include "Texture.h"
 
-using namespace std;
-
 
 // This class has no special alignment requirements
 class Model
 {
 	public:
 		// Model data is stored in static unordered_map collections & indexed by unique string code
-		typedef unordered_map<std::string, Model*> ModelCollection;
+		typedef std::unordered_map<std::string, Model*> ModelCollection;
 
 		// Enumeration of the different supported model classes
 		enum ModelClass { Unknown = 0, Ship, ComplexShipSection, Tile, Terrain };
@@ -67,14 +65,14 @@ class Model
 		// Public accessor/modifer methods for key variables
 		CMPINLINE int				GetID(void) { return m_id; }
 		CMPINLINE void				SetID(int id) { m_id = id; }
-		CMPINLINE string			GetCode(void) { return m_buffer.GetCode(); }
-		CMPINLINE void				SetCode(string code) { m_buffer.SetCode(code); }
-		CMPINLINE string			GetFilename(void) { return m_filename; }
-		CMPINLINE void				SetFilename(string filename) { m_filename = filename; }
+		CMPINLINE std::string		GetCode(void) { return m_buffer.GetCode(); }
+		CMPINLINE void				SetCode(std::string code) { m_buffer.SetCode(code); }
+		CMPINLINE std::string		GetFilename(void) { return m_filename; }
+		CMPINLINE void				SetFilename(std::string filename) { m_filename = filename; }
 		CMPINLINE ModelClass		GetModelClass(void) { return m_modelclass; }
 		CMPINLINE void				SetModelClass(ModelClass modelclass) { m_modelclass = modelclass; }
-		CMPINLINE string			GetTextureFilename(void) { return m_texturefilename; }
-		CMPINLINE void				SetTextureFilename(string filename) { m_texturefilename = filename; }
+		CMPINLINE std::string		GetTextureFilename(void) { return m_texturefilename; }
+		CMPINLINE void				SetTextureFilename(std::string filename) { m_texturefilename = filename; }
 		CMPINLINE bool				IsGeometryLoaded(void) const { return m_geometryloaded; }
 		CMPINLINE void				SetGeometryLoaded(bool loaded) { m_geometryloaded = loaded; }
 		CMPINLINE bool				IsStandardModel(void) { return m_standardmodel; }
@@ -127,7 +125,7 @@ class Model
 		static void TerminateAllModelData(void);
 
 		// Identifies the class of model based on its string description
-		static ModelClass DetermineModelClass(const string s);
+		static ModelClass DetermineModelClass(const std::string s);
 
 	public:
 
@@ -154,9 +152,9 @@ class Model
 
 		// Private variables for other, supporting model information
 		int						m_id;
-		string					m_filename;
+		std::string				m_filename;
 		ModelClass				m_modelclass;
-		string					m_texturefilename;
+		std::string				m_texturefilename;
 		bool					m_geometryloaded;
 		bool					m_standardmodel;
 		bool					m_origin_centred;
@@ -172,7 +170,7 @@ class Model
 			Model *model; XMFLOAT3 offset; 
 			CompoundModelComponent(Model *_model, XMFLOAT3 _offset) { model = _model; offset = _offset; }
 		};
-		typedef											vector<CompoundModelComponent> CompoundModelComponentCollection;
+		typedef											std::vector<CompoundModelComponent> CompoundModelComponentCollection;
 		bool											m_iscompound;
 		CompoundModelComponentCollection				m_compoundmodels;
 		CompoundModelComponentCollection::size_type		m_compoundmodelcount;

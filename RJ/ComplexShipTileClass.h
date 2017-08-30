@@ -32,7 +32,7 @@ public:
 		InfrastructureRequirement(void) { Class = ComplexShipInfrastructure::InfrastructureClass::Unknown; }
 		InfrastructureRequirement(ComplexShipInfrastructure::InfrastructureClass cls) { Class = cls; }
 	};
-	typedef vector<InfrastructureRequirement>				InfrastructureRequirementCollection;
+	typedef std::vector<InfrastructureRequirement>			InfrastructureRequirementCollection;
 
 	// Defines a requirement that the tile of this class contain specific object(s)
 	struct ObjectRequirement
@@ -44,7 +44,7 @@ public:
 		ObjectRequirement(void) { Class = NULL; Minimum = 0; Maximum = 0; }
 		ObjectRequirement(ComplexShipObjectClass *obj, int mincount, int maxcount) { Class = obj; Minimum = mincount; Maximum = maxcount; } 
 	};
-	typedef vector<ObjectRequirement>						ObjectRequirementCollection;
+	typedef std::vector<ObjectRequirement>					ObjectRequirementCollection;
 
 	// Defines a size requirements for the tile class
 	struct SizeRequirement
@@ -55,7 +55,7 @@ public:
 
 		SizeRequirement(void) { MinimumSize = NULL_INTVECTOR3; MaximumSize = NULL_INTVECTOR3; InterchangeableXY = false; }
 	};
-	typedef vector<SizeRequirement>							SizeRequirementCollection;
+	typedef std::vector<SizeRequirement>					SizeRequirementCollection;
 	
 	// Uniquely-identifying string code for the class
 	CMPINLINE std::string									GetCode(void) const					{ return m_code; }

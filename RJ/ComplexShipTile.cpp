@@ -745,7 +745,7 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 // Static base class method to read XML data for the base class portion of any tile
 void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile)
 {
-	string skey, key, val;
+	std::string skey, key, val;
 	HashVal hash;
 
 	// Parameter check
@@ -814,7 +814,7 @@ void ComplexShipTile::CopyBaseClassData(ComplexShipTile *source, ComplexShipTile
 }
 
 // Static method to look up a tile definition and create a new tile based upon it
-ComplexShipTile * ComplexShipTile::Create(string code)
+ComplexShipTile * ComplexShipTile::Create(std::string code)
 {
 	// See whether we have a definition matching this code
 	if (code == NullString || D::ComplexShipTiles.Exists(code) == false) return NULL;

@@ -56,7 +56,7 @@ UIComboBox::UIComboBox(void)
 	m_scrollbarhandle = NULL;
 }
 
-Result UIComboBox::Initialise(UIManagedControlDefinition *def, string code, int expandsize, int x, int y, float z, int width, int height, bool render)
+Result UIComboBox::Initialise(UIManagedControlDefinition *def, std::string code, int expandsize, int x, int y, float z, int width, int height, bool render)
 {
 	Result result;
 
@@ -417,7 +417,7 @@ void UIComboBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 }
 
 // Adds a new item to the control
-void UIComboBox::AddItem(string item, string tag)
+void UIComboBox::AddItem(std::string item, std::string tag)
 {
 	// Add a new item
 	m_items.push_back(ComboBoxItem(item, tag));
@@ -427,7 +427,7 @@ void UIComboBox::AddItem(string item, string tag)
 }
 
 // Inserts a new item to the control at the specified index
-void UIComboBox::InsertItem(std::vector<ComboBoxItem>::size_type index, string item, string tag)
+void UIComboBox::InsertItem(std::vector<ComboBoxItem>::size_type index, std::string item, std::string tag)
 {
 	// If the index provided is not valid then simply push onto the items vector
 	if (index >= m_items.size() || m_items.size() == 0) 
@@ -453,7 +453,7 @@ void UIComboBox::InsertItem(std::vector<ComboBoxItem>::size_type index, string i
 		
 }
 
-void UIComboBox::SetItem(std::vector<ComboBoxItem>::size_type index, string item, string tag)
+void UIComboBox::SetItem(std::vector<ComboBoxItem>::size_type index, std::string item, std::string tag)
 {
 	// Make sure the index is valid
 	if (index >= m_items.size()) return;

@@ -8,7 +8,6 @@
 #include "CrewClassRequirement.h"
 #include "ShipTileRequirement.h"
 class ComplexShipTileClass;
-using namespace std;
 
 
 ProductionCost::ProductionCost(void)
@@ -27,8 +26,8 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	ComplexShipTileDefinition *tile;
 
 	// Iterate through each string representation of a resource requirement
-	vector<tmpstring_resreq>::const_iterator it_end = m_tmpstring_resourcerequirements.end();
-	for (vector<tmpstring_resreq>::const_iterator it = m_tmpstring_resourcerequirements.begin(); it != it_end; ++it)
+	std::vector<tmpstring_resreq>::const_iterator it_end = m_tmpstring_resourcerequirements.end();
+	for (std::vector<tmpstring_resreq>::const_iterator it = m_tmpstring_resourcerequirements.begin(); it != it_end; ++it)
 	{
 		// Attempt to resolve the resource code specified in this requirement
 		resource = D::Resources.Get(it->res);
@@ -36,8 +35,8 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	}
 
 	// Iterate through each string representation of a ship tile requirement
-	vector<tmpstring_shiptilereq>::const_iterator it2_end = m_tmpstring_shiptilerequirements.end();
-	for (vector<tmpstring_shiptilereq>::const_iterator it2 = m_tmpstring_shiptilerequirements.begin(); it2 != it2_end; ++it2)
+	std::vector<tmpstring_shiptilereq>::const_iterator it2_end = m_tmpstring_shiptilerequirements.end();
+	for (std::vector<tmpstring_shiptilereq>::const_iterator it2 = m_tmpstring_shiptilerequirements.begin(); it2 != it2_end; ++it2)
 	{
 		// Attempt to resolve the class and definition specified in this requirement
 		cls = D::ComplexShipTileClasses.Get(it2->tilecls);
@@ -46,15 +45,15 @@ void ProductionCost::PerformPostLoadInitialisation(void)
 	}
 
 	// Iterate through each string code linking this production to an "owner"
-	vector<string>::const_iterator it3_end = m_tmpstring_constructedby.end();
-	for (vector<string>::const_iterator it3 = m_tmpstring_constructedby.begin(); it3 != it3_end; ++it3)
+	std::vector<std::string>::const_iterator it3_end = m_tmpstring_constructedby.end();
+	for (std::vector<std::string>::const_iterator it3 = m_tmpstring_constructedby.begin(); it3 != it3_end; ++it3)
 	{
 		// Attempt to get a reference to the tile with this code
 		tile = D::ComplexShipTiles.Get(*it3);
 		if (tile) ConstructedBy.push_back(tile);
 	}
 
-	// Clear the temporary vectors now that we have resolved all links
+	// Clear the temporary std::vectors now that we have resolved all links
 	m_tmpstring_resourcerequirements.clear();
 	m_tmpstring_shiptilerequirements.clear();
 	m_tmpstring_constructedby.clear();
@@ -69,8 +68,8 @@ float ProductionCost::AddProgress(const Resource *resource, float amountavailabl
 	if (!resource || amountavailable <= 0 || m_complete) return 0.0f;
 
 	// Iterate through each resource in turn to look for the item being added
-	vector<ProductionProgress>::iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::iterator it = ResourceRequirements.begin(); it != it_end; ++it)
+	std::vector<ProductionProgress>::iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// Test whether this is the resource we are incrementing
 		if (it->Requirement.Type == resource)
@@ -102,8 +101,8 @@ float ProductionCost::RemoveProgress(const Resource *resource, float amount, flo
 	if (!resource || amount <= 0.0f) return 0.0f;
 
 	// Iterate through each resource in turn to look for the item being removed
-	vector<ProductionProgress>::iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::iterator it = ResourceRequirements.begin(); it != it_end; ++it)
+	std::vector<ProductionProgress>::iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// Test whether this is the resource we are removing
 		if (it->Requirement.Type == resource)
@@ -131,8 +130,8 @@ float ProductionCost::RemoveProgress(const Resource *resource, float amount, flo
 float ProductionCost::GetProgress(const Resource *resource)
 {
 	// Iterate through each resource in turn 
-	vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)	
+	std::vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// If this is the resource in question then return the progress value now
 		if (it->Requirement.Type == resource) return it->Progress;
@@ -146,8 +145,8 @@ float ProductionCost::GetProgress(const Resource *resource)
 float ProductionCost::GetProgressPc(const Resource *resource)
 {
 	// Iterate through each resource in turn 
-	vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)	
+	std::vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// If this is the resource in question then return the progress percentage now
 		if (it->Requirement.Type == resource && it->Requirement.Amount > 0.0f) return (it->Progress / it->Requirement.Amount);
@@ -163,8 +162,8 @@ float ProductionCost::GetProgress(void)
 	float prog = 0.0f;
 
 	// Iterate through each resource in turn 
-	vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)	
+	std::vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// Store the progress this resource
 		prog += it->Progress;
@@ -181,8 +180,8 @@ float ProductionCost::GetProgressPc(void)
 	float prog = 0.0f;
 
 	// Iterate through each resource in turn 
-	vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)	
+	std::vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// Store the requirement and progress for this resource
 		total += it->Requirement.Amount;
@@ -199,8 +198,8 @@ float ProductionCost::GetProgressPc(void)
 bool ProductionCost::CheckIfComplete(void)
 {
 	// Iterate through each resource in turn to check whether it is complete
-	vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
+	std::vector<ProductionProgress>::const_iterator it_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it = ResourceRequirements.begin(); it != it_end; ++it)
 	{
 		// If this resource is not complete then the overall construction also cannot be complete
 		if (it->Complete == false) { m_complete = false; return false; }
@@ -242,39 +241,39 @@ void ProductionCost::ResetTo100PcProgress(void)
 	m_complete = true;
 }
 
-void ProductionCost::AddResourceRequirement(const string & resource, float amount)
+void ProductionCost::AddResourceRequirement(const std::string & resource, float amount)
 { 
-	// Store in a string vector; this is a property that will be resolved during post-load initialisation
+	// Store in a string std::vector; this is a property that will be resolved during post-load initialisation
 	if (resource != NullString) 
 	{
-		string res = StrLower(resource);
+		std::string res = StrLower(resource);
 		m_tmpstring_resourcerequirements.push_back(tmpstring_resreq(res, amount));
 	}
 }
-void ProductionCost::AddCrewClassRequirement(const string & cls, int count)
+void ProductionCost::AddCrewClassRequirement(const std::string & cls, int count)
 { 
 	// Crew classes are stored in an enumeration, not loaded from file, so we can resolve these dependencies directly on load
 	if (cls != NullString) 
 	{
-		string str = StrLower(cls);
+		std::string str = StrLower(cls);
 		Crew::CrewClass cc = Crew::TranslateCrewClassFromString(str);
 		if (cc != Crew::CrewClass::UnknownCrewClass) CrewClassRequirements.push_back(CrewClassRequirement(cc, count));
 	}
 }
-void ProductionCost::AddShipTileRequirement(const string & tilecls, const string & tiledef, int level, int count)	
+void ProductionCost::AddShipTileRequirement(const std::string & tilecls, const std::string & tiledef, int level, int count)
 { 
-	// Store in a string vector; this is a property that will be resolved during post-load initialisation
+	// Store in a string std::vector; this is a property that will be resolved during post-load initialisation
 	// Note that the ship class or definition can be null
-	string cls = StrLower(tilecls);
-	string def = StrLower(tiledef);
+	std::string cls = StrLower(tilecls);
+	std::string def = StrLower(tiledef);
 	m_tmpstring_shiptilerequirements.push_back(tmpstring_shiptilereq(cls, def, level, count));
 }
-void ProductionCost::AddConstructionOwner(const string & owner)	
+void ProductionCost::AddConstructionOwner(const std::string & owner)
 { 
-	// Store in a string vector; this is a property that will be resolved during post-load initialisation
+	// Store in a string std::vector; this is a property that will be resolved during post-load initialisation
 	if (owner != NullString) 
 	{
-		string str = StrLower(owner);
+		std::string str = StrLower(owner);
 		m_tmpstring_constructedby.push_back(str); 
 	}
 }
@@ -287,8 +286,8 @@ ProductionCost * ProductionCost::CreateClone(float scaleresourcereq) const
 	ProductionCost *pc = new ProductionCost();
 
 	// Copy the resource requirements one at a time
-	vector<ProductionProgress>::const_iterator it_res_end = ResourceRequirements.end();
-	for (vector<ProductionProgress>::const_iterator it_res = ResourceRequirements.begin(); it_res != it_res_end; ++it_res)
+	std::vector<ProductionProgress>::const_iterator it_res_end = ResourceRequirements.end();
+	for (std::vector<ProductionProgress>::const_iterator it_res = ResourceRequirements.begin(); it_res != it_res_end; ++it_res)
 	{
 		// Copy this requirement to the new object, scaling if necessary
 		pc->ResourceRequirements.push_back(ProductionProgress(ResourceAmount(it_res->Requirement.Type, 
@@ -300,16 +299,16 @@ ProductionCost * ProductionCost::CreateClone(float scaleresourcereq) const
 	pc->SetTimeRequirement(m_timereq * scaleresourcereq);
 
 	// Copy each crew requirement in turn
-	vector<CrewClassRequirement>::const_iterator it_crew_end = CrewClassRequirements.end();
-	for (vector<CrewClassRequirement>::const_iterator it_crew = CrewClassRequirements.begin(); it_crew != it_crew_end; ++it_crew)
+	std::vector<CrewClassRequirement>::const_iterator it_crew_end = CrewClassRequirements.end();
+	for (std::vector<CrewClassRequirement>::const_iterator it_crew = CrewClassRequirements.begin(); it_crew != it_crew_end; ++it_crew)
 	{
 		// Copy this crew requirement to the new object
 		pc->CrewClassRequirements.push_back(*it_crew);
 	}
 
 	// Copy each ship tile requirement in turn
-	vector<ShipTileRequirement>::const_iterator it_tile_end = ShipTileRequirements.end();
-	for (vector<ShipTileRequirement>::const_iterator it_tile = ShipTileRequirements.begin(); it_tile != it_tile_end; ++it_tile)
+	std::vector<ShipTileRequirement>::const_iterator it_tile_end = ShipTileRequirements.end();
+	for (std::vector<ShipTileRequirement>::const_iterator it_tile = ShipTileRequirements.begin(); it_tile != it_tile_end; ++it_tile)
 	{
 		// Copy this tile requirement to the new object
 		pc->ShipTileRequirements.push_back(*it_tile);

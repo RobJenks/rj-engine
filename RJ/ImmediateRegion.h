@@ -11,8 +11,6 @@
 #include "Texture.h"
 class ParticleShader;
 
-using namespace std;
-
 #include "RegionBase.h"
 
 

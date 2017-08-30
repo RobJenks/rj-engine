@@ -44,7 +44,7 @@ ComplexShipSection::ComplexShipSection(void)
 	this->SetCollisionMode(Game::CollisionMode::NoCollision);
 }
 
-ComplexShipSection *ComplexShipSection::Create(const string & code)
+ComplexShipSection *ComplexShipSection::Create(const std::string & code)
 {
 	// Attempt to get the ship template matching this code; if it doesn't exist then return NULL
 	ComplexShipSection *template_sec = D::ComplexShipSections.Get(code);

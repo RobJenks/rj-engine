@@ -5,7 +5,6 @@
 
 #include <vector>
 #include "Utility.h"
-using namespace std;
 
 // Struct holding information on an element connection point within a complex ship
 struct ElementConnection
@@ -18,7 +17,7 @@ struct ElementConnection
 };
 
 // Standard collection of element connection objects
-typedef vector<ElementConnection> ElementConnectionSet;
+typedef std::vector<ElementConnection> ElementConnectionSet;
 
 
 #endif

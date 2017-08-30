@@ -12,7 +12,6 @@
 #include "ProductionProgress.h"
 #include "CrewClassRequirement.h"
 #include "ShipTileRequirement.h"
-using namespace std;
 
 // This class has no special alignment requirements
 class ProductionCost
@@ -20,21 +19,21 @@ class ProductionCost
 public:
 
 	// Vector of resource requirements for this production
-	typedef vector<ProductionProgress>					ResourceRequirementCollection;
-	ResourceRequirementCollection 						ResourceRequirements;
-	CMPINLINE ResourceRequirementCollection::size_type	GetResourceRequirementCount(void)	{ return ResourceRequirements.size(); }
+	typedef std::vector<ProductionProgress>					ResourceRequirementCollection;
+	ResourceRequirementCollection 							ResourceRequirements;
+	CMPINLINE ResourceRequirementCollection::size_type		GetResourceRequirementCount(void)	{ return ResourceRequirements.size(); }
 
 	// Vector of crew class/level requirements for this production (e.g. ship must have an active Engineer of level >5 to build this)
-	typedef vector<CrewClassRequirement>		CrewClassRequirementCollection;
-	CrewClassRequirementCollection				CrewClassRequirements;
+	typedef std::vector<CrewClassRequirement>				CrewClassRequirementCollection;
+	CrewClassRequirementCollection							CrewClassRequirements;
 	
 	// Vector of ship tile class/definition requirements for production (e.g. ship must have 1x advanced engineering to build this)
-	typedef vector<ShipTileRequirement>			ShipTileRequirementCollection;
-	ShipTileRequirementCollection				ShipTileRequirements;
+	typedef std::vector<ShipTileRequirement>				ShipTileRequirementCollection;
+	ShipTileRequirementCollection							ShipTileRequirements;
 
 	// Vector of tiles that can construct this object
-	typedef vector<const ComplexShipTileDefinition*>	ConstructedByCollection;
-	ConstructedByCollection								ConstructedBy;
+	typedef std::vector<const ComplexShipTileDefinition*>	ConstructedByCollection;
+	ConstructedByCollection									ConstructedBy;
 
 	// Time requirement for the whole construction.  Used to calculate the amount of resouce that can be added per sec
 	CMPINLINE float								GetTimeRequirement(void)			{ return m_timereq; }
@@ -66,10 +65,10 @@ public:
 	ProductionCost *							CreateClone(float scaleresourcereq) const;
 
 	// Adds a new object.  In some cases this is via its string code, to be resolved later during post-load initialisation
-	void										AddResourceRequirement(const string & resource, float amount);
-	void										AddCrewClassRequirement(const string & cls, int count);
-	void										AddShipTileRequirement(const string & tilecls, const string & tiledef,  int level, int count);
-	void										AddConstructionOwner(const string & owner);
+	void										AddResourceRequirement(const std::string & resource, float amount);
+	void										AddCrewClassRequirement(const std::string & cls, int count);
+	void										AddShipTileRequirement(const std::string & tilecls, const std::string & tiledef,  int level, int count);
+	void										AddConstructionOwner(const std::string & owner);
 
 	// Method to perform post-load initialisation; this will resolve any links that were previously stored via only their string code
 	void										PerformPostLoadInitialisation(void);
@@ -88,19 +87,19 @@ protected:
 	
 	// Structs to hold temporary pre-initialisation data
 	struct tmpstring_resreq {
-		string res; float amt; 
-		tmpstring_resreq(const string & _res, float _amt) { res = _res; amt = _amt; }
+		std::string res; float amt;
+		tmpstring_resreq(const std::string & _res, float _amt) { res = _res; amt = _amt; }
 	};
 	struct tmpstring_shiptilereq { 
-		string tilecls; string tiledef; int level; int count;
-		tmpstring_shiptilereq(const string & _cls, const string & _def, int _level, int _count) 
+		std::string tilecls; std::string tiledef; int level; int count;
+		tmpstring_shiptilereq(const std::string & _cls, const std::string & _def, int _level, int _count)
 			{ tilecls = _cls; tiledef = _def; level = _level; count = _count; }
 	};
 
 	// Temporary storage for loaded data before initialisation, e.g. the code of certain objects before they are resolved and linked
-	vector<tmpstring_resreq>			m_tmpstring_resourcerequirements;
-	vector<tmpstring_shiptilereq>		m_tmpstring_shiptilerequirements;
-	vector<string>						m_tmpstring_constructedby;
+	std::vector<tmpstring_resreq>			m_tmpstring_resourcerequirements;
+	std::vector<tmpstring_shiptilereq>		m_tmpstring_shiptilerequirements;
+	std::vector<std::string>				m_tmpstring_constructedby;
 
 };
 

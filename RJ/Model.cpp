@@ -1,7 +1,5 @@
 #include <fstream>
 #include <string>
-using namespace std;
-
 #include "GameDataExtern.h"
 #include "FastMath.h"
 #include "Utility.h"
@@ -401,7 +399,7 @@ void Model::RenderBuffers(void)
 
 Result Model::LoadModel(const char *filename)
 {
-	ifstream fin;
+	std::ifstream fin;
 	char input;
 
 	// Initialise min and max bounds before we start loading the model
@@ -596,9 +594,9 @@ void Model::TerminateAllModelData(void)
 }
 
 // Determines the class of model based upon its string description
-Model::ModelClass Model::DetermineModelClass(const string s)
+Model::ModelClass Model::DetermineModelClass(const std::string s)
 {
-	string type = StrLower(s);
+	std::string type = StrLower(s);
 	
 	if			(type == "ship")					return ModelClass::Ship;
 	else if		(type == "complexshipsection")		return ModelClass::ComplexShipSection;

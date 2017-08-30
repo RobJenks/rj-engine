@@ -71,7 +71,7 @@ void Render2DGroup::PerformManagedControlRenderingOnControlClass(iUIControl *foc
 
 // Searches the render group for the item identified by 'code' (and potentially indexed by 'key'), 
 // across all iUIComponent-derived classes
-iUIComponent *Render2DGroup::FindUIComponent(string code, string key)
+iUIComponent *Render2DGroup::FindUIComponent(std::string code, std::string key)
 {
 	iUIComponent *item;
 

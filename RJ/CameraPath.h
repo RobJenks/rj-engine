@@ -78,8 +78,8 @@ public:
 	void							RemoveNode(int index);
 	void							ClearNodes(void);
 	CMPINLINE int					GetNodeCount(void)									{ return m_nodecount; }
-	CMPINLINE vector<CameraPathNode>::const_iterator	GetNodeIteratorStart(void)		{ return m_nodes.begin(); }
-	CMPINLINE vector<CameraPathNode>::const_iterator	GetNodeIteratorEnd(void)		{ return m_nodes.end(); }
+	CMPINLINE std::vector<CameraPathNode>::const_iterator	GetNodeIteratorStart(void)	{ return m_nodes.begin(); }
+	CMPINLINE std::vector<CameraPathNode>::const_iterator	GetNodeIteratorEnd(void)	{ return m_nodes.end(); }
 
 	// Static method to generate a "tracking path" that will simply maintain the camera position & orientation
 	// relative to the target object
@@ -95,7 +95,7 @@ private:
 
 	CameraPathMode					m_pathmode;				// The mode that this path will run in
 
-	vector<CameraPathNode>			m_nodes;				// Vector of nodes in the camera path
+	std::vector<CameraPathNode>		m_nodes;				// Vector of nodes in the camera path
 	int								m_nodecount;			// Count of the number of nodes in the path
 
 	int								m_index;				// Index of the node we are currently travelling towards

@@ -21,8 +21,8 @@ public:
 	CMPINLINE void					SetRenderGroup(Image2DRenderGroup *rg) { m_rendergroup = rg; }
 	
 	// Methods to get and set the string index into the render group for this instance
-	CMPINLINE string				GetKey(void) { return m_key; }	
-	CMPINLINE void					SetKey(string key) { m_key = key; }
+	CMPINLINE std::string			GetKey(void) { return m_key; }
+	CMPINLINE void					SetKey(std::string key) { m_key = key; }
 
 	// Method to test the render active flag for this instance
 	CMPINLINE bool					GetRenderActive(void) const
@@ -40,7 +40,7 @@ public:
 
 private:
 	Image2DRenderGroup *		m_rendergroup;
-	string						m_key;
+	std::string					m_key;
 
 };
 

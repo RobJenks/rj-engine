@@ -46,7 +46,7 @@ private:
 	float						m_effecttimer;					// Current effect timer (secs), wraps at 1000.0
 
 	// Effect collections
-	vector<FireEffect*>			m_fireeffects;
+	std::vector<FireEffect*>	m_fireeffects;
 
 	// References to all required shader objects
 	FireShader					*m_fireshader;

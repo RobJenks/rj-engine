@@ -292,8 +292,8 @@ Result NavNetwork::InitialiseNavNetwork(iSpaceObjectEnvironment *parent)
 	} // x
 
 	/* 4. Finally, we can create the validated nav connections and populate them in the pre-allocated space within each node */
-	vector<tmpconndata>::const_iterator it_end = conn_data.end();
-	for (vector<tmpconndata>::const_iterator it = conn_data.begin(); it != it_end; ++it)
+	std::vector<tmpconndata>::const_iterator it_end = conn_data.end();
+	for (std::vector<tmpconndata>::const_iterator it = conn_data.begin(); it != it_end; ++it)
 	{
 		it->src->Connections[it->src->NumConnections].Target = it->tgt;
 		it->src->Connections[it->src->NumConnections].ConnectionCost = it->cost;

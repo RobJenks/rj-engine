@@ -397,7 +397,7 @@ MultiLineTextBlock::~MultiLineTextBlock(void)
 MultiLineTextBlock::OperationMode MultiLineTextBlock::TranslateOperationModeFromString(const std::string & mode)
 {
 	// Comparisons are case-insensitive
-	string s = mode; StrLowerC(s);
+	std::string s = mode; StrLowerC(s);
 
 	if (s == "wordwrap")				return MultiLineTextBlock::OperationMode::WordWrap;
 
