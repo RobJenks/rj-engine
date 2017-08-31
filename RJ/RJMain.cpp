@@ -114,6 +114,7 @@
 #include "EnvironmentMapBlendMode.h"		// DBG
 #include "EnvironmentPowerMap.h"			// DBG
 #include "Weapon.h"							// DBG
+#include "Frustum.h"						// DBG
 #include "ViewFrustrum.h"
 #include "Fonts.h"
 
@@ -731,23 +732,7 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_G])
 	{
-		static int dbg_z = 0;
-		static BOOL ctrl_g_down = FALSE;
-		if (b[DIK_LCONTROL] && !ctrl_g_down)
-		{
-			if (++dbg_z >= cs()->GetElementSize().z) dbg_z = 0;
-		}
-		ctrl_g_down = b[DIK_LCONTROL];
-
-		cs()->Fade.SetFadeAlpha(0.1f);
-		cs()->Fade.FadeIn(1.0f);
-		cs()->SetWorldMomentum(NULL_VECTOR);
-		cs()->PhysicsState.AngularVelocity = NULL_VECTOR;
-
-		if (b[DIK_LSHIFT])
-			cs()->RenderEnvironmentHealthOverlay(dbg_z);
-		else
-			cs()->RenderEnvironmentHealthOverlay();
+		
 	}
 
 	static SentenceType **dbg_b_sentences = NULL;
@@ -2364,9 +2349,76 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		CoreEngine::EngineRenderInfoData render_info = Game::Engine->GetRenderInfo();
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Instances: %zu, ZSorted-Instances: %zu, Skinned-Instances: %zu",
-			render_info.InstanceCount, render_info.InstanceCountZSorted, render_info.InstanceCountSkinnedModel);
+		Frustum *f = new Frustum(4U, Game::Engine->GetViewFrustrum()->GetNearPlane(), Game::Engine->GetViewFrustrum()->GetFarPlane());
+		
+		XMVECTOR viewpos = ss()->GetPosition();
+		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-50, +50, 400, 0), ss()->GetWorldMatrix());
+		XMVECTOR p1 = XMVector3TransformCoord(XMVectorSet(+50, +50, 400, 0), ss()->GetWorldMatrix());
+		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+50, -50, 400, 0), ss()->GetWorldMatrix());
+		XMVECTOR p3 = XMVector3TransformCoord(XMVectorSet(-50, -50, 400, 0), ss()->GetWorldMatrix());
+		XMVECTOR p[4] = { p0, p1, p2, p3 };
+			
+		for (size_t i = 0U; i < 4U; ++i)
+		{
+			if (i < 2U)  
+				f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[i], p[((i + 1) % 4)]);
+			else
+				f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
+		}
+
+		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));
+		s2()->Highlight.Activate();
+		XMVECTOR obj = s2()->GetPosition();
+		float radius = s2()->GetCollisionSphereRadius();
+
+		bool intersects = f->CheckSphere(obj, radius);
+		OverlayRenderer::RenderColour colour = (intersects ? OverlayRenderer::RenderColour::RC_Green : OverlayRenderer::RenderColour::RC_Red);
+
+		for (size_t i = 0U; i < 4U; ++i)
+		{
+			Game::Engine->GetOverlayRenderer()->RenderLine(viewpos, p[i], colour, 1.0f, -1.0f);
+			Game::Engine->GetOverlayRenderer()->RenderLine(p[i], p[((i + 1) % 4)], colour, 1.0f, -1.0f);
+		}
+
+		std::string result = (intersects ? "INTERSECTS: " : "No intersection: ");
+		for (size_t i = 0U; i < f->GetPlaneCount(); ++i)
+		{
+			XMVECTOR plane_val = XMPlaneDotCoord(f->GetPlanes()[i], obj);
+			bool outside_plane = (XMVector2Less(plane_val, XMVectorReplicate(-radius)));
+			float rounded_val = ((int)(XMVectorGetX(plane_val) * 10)) * 0.1f;
+
+			result = concat(result)(outside_plane ? "OUT (" : "IN (")(rounded_val)(") ").str();
+		}
+		result = concat(result)("\n").str();
+
+		float spacing = 10.0f;
+		float node_size = 3.0f;
+		float node_radius = sqrtf(3.0f * pow(node_size * 0.5f, 2.0f)); // sqrt((n/2)^2 + (n/2)^2 + (n/2)^2)
+		int total = 0, success = 0;
+		for (int x = -5; x <= 5; ++x)
+		{
+			for (int y = -5; y <= 5; ++y)
+			{
+				for (int z = -5; z <= 5; ++z)
+				{
+					if (x == 0 && y == 0 && z == 0) continue;
+
+					XMVECTOR pos = XMVectorAdd(ss()->GetPosition(), XMVectorSet(x * spacing, y * spacing, z * spacing, 1.0f));
+					bool cell_result = f->CheckSphere(pos, node_radius);
+					
+					++total;
+					if (cell_result) ++success;
+
+					Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
+						(cell_result ? XMFLOAT4(0,1,0,1) : XMFLOAT4(1, 0, 0, 1)));
+				}
+			}
+		}
+		SafeDelete(f);
+
+
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Nodes: %d of %d    |   Result: %s ",
+			success, total, result.c_str());
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

@@ -703,6 +703,9 @@
     <ClCompile Include="ViewPortal.cpp">
       <Filter>Engine\Culling\Portal Culling</Filter>
     </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>Engine\Frustum</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1617,6 +1620,9 @@
     </ClInclude>
     <ClInclude Include="ViewPortal.h">
       <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>Engine\Frustum</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
