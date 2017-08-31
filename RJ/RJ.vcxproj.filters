@@ -700,6 +700,9 @@
     <ClCompile Include="RM_Instance.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
+    <ClCompile Include="ViewPortal.cpp">
+      <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1612,6 +1615,9 @@
     <ClInclude Include="RenderQueue.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
+    <ClInclude Include="ViewPortal.h">
+      <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1895,6 +1901,12 @@
     </Filter>
     <Filter Include="Objects\Ships\Environments\EnvironmentOverlays\Base">
       <UniqueIdentifier>{0ce5683c-44e9-4fd4-be6f-4d4ff94a9941}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Culling">
+      <UniqueIdentifier>{caa5acdb-5bd6-49d6-8aca-f649a86cc171}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Culling\Portal Culling">
+      <UniqueIdentifier>{4c727b7c-10c0-4797-8b43-6e6aca455d6b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

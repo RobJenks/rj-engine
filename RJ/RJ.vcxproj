@@ -580,6 +580,7 @@
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="ViewFrustrum.cpp" />
+    <ClCompile Include="ViewPortal.cpp" />
     <ClCompile Include="VolLineShader.cpp" />
     <ClCompile Include="VolumetricLine.cpp" />
     <ClCompile Include="Weapon.cpp" />
@@ -892,6 +893,7 @@
     <ClInclude Include="Utility\chrono_io.h" />
     <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="ViewFrustrum.h" />
+    <ClInclude Include="ViewPortal.h" />
     <ClInclude Include="VolLineShader.h" />
     <ClInclude Include="VolumetricLine.h" />
     <ClInclude Include="Weapon.h" />

@@ -1,0 +1,2 @@
+- Can apply a sphere (enclosing the frustum) - sphere (bounding sphere of object) pre-frustum test, since a sphere/sphere test is much cheaper than testing against planes of the frustum.  Info here: www.flipcode.com/archives/Frustum_Culling.shtml
+
