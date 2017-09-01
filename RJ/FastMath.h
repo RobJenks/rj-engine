@@ -520,6 +520,12 @@ XMFLOAT2 DetermineYawAndPitchToTarget(const FXMVECTOR position, const FXMVECTOR 
 // test in local object coordinate space.  Both output values are [0.0-1.0] turn percentages
 XMFLOAT2 DetermineYawAndPitchToWorldVector(const FXMVECTOR target_vector, const FXMVECTOR object_inv_orient);
 
+// Constructs a plane from three points which lie on the plane.  DX uses clockwise winding order for plane facing
+// Info here: https://www.flipcode.com/archives/Building_a_3D_Portal_Engine-Issue_06_Hidden_Surface_Removal.shtml and 
+// at MSDN XMPlaneFromPoints documentation page
+XMVECTOR ConstructPlaneFromPoints(const FXMVECTOR p0, const FXMVECTOR p1, const FXMVECTOR p2);
+
+
 // Builds and returns a set of n random integral sequences, with values in the range [low high].  All sequences will be of length (high-low).
 // If 'distinct' is set the sequences will contain each value in the range exactly once, otherwise this is not guaranteed
 int **PrecalculateRandomSequences(int n, int low, int high, bool distinct);

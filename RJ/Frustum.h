@@ -46,7 +46,5 @@ private:
 	AXMVECTOR *							m_planes;
 	size_t								m_planecount;
 
-	// Constant control vector for combining ABC and D components of each plane
-	static const AXMVECTOR				PLANE_CONTROL_VECTOR;
 
 };

@@ -789,5 +789,33 @@ XMVECTOR OrientationFromPitchYawRollVector(const FXMVECTOR vec)
 	));
 }
 
+// Constructs a plane from three points which lie on the plane.  DX uses clockwise winding order for plane facing
+// Info here: https://www.flipcode.com/archives/Building_a_3D_Portal_Engine-Issue_06_Hidden_Surface_Removal.shtml and 
+// at MSDN XMPlaneFromPoints documentation page
+XMVECTOR ConstructPlaneFromPoints(const FXMVECTOR p0, const FXMVECTOR p1, const FXMVECTOR p2)
+{
+	// double rx1 = c2->x - c1->x; double ry1 = c2->y - c1->y; double rz1 = c2->z - c1->z;
+	// double rx2 = c3->x - c1->x; double ry2 = c3->y - c1->y; double rz2 = c3->z - c1->z;
+	XMVECTOR r1 = XMVectorSubtract(p0, p1);
+	XMVECTOR r2 = XMVectorSubtract(p0, p2);
+
+	// A = ry1*rz2 - ry2*rz1;
+	// B = rz1*rx2 - rz2*rx1;
+	// C = rx1*ry2 - rx2*ry1;
+	// Take the cross product
+	XMVECTOR ABC = XMVector3Cross(r1, r2);
+
+	// double len=sqrt(A*A+B*B+C*C);
+	// A = A / len; B = B / len; C = C / len;
+	// Normalise.  TODO: use NormalizeEst in future if loss of precision is acceptable
+	ABC = XMVector3Normalize(ABC);
+
+	// Substitute one point into the equation to derive D (which will need to be summed from each component)
+	XMVECTOR D = XMPlaneDotNormal(ABC, p0);
+
+	// Return the composed vector
+	return XMVectorSelect(ABC, XMVectorNegate(D), VCTRL_0001);
+}
+
 
 #endif

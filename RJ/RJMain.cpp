@@ -2360,9 +2360,9 @@ void RJMain::DEBUGDisplayInfo(void)
 			
 		for (size_t i = 0U; i < 4U; ++i)
 		{
-			if (i < 2U)  
-				f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[i], p[((i + 1) % 4)]);
-			else
+			//if (i < 2U)  
+			//	f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[i], p[((i + 1) % 4)]);
+			//else
 				f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
 		}
 
@@ -2391,8 +2391,8 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 		result = concat(result)("\n").str();
 
-		float spacing = 10.0f;
-		float node_size = 3.0f;
+		float spacing = 20.0f;
+		float node_size = 5.0f;
 		float node_radius = sqrtf(3.0f * pow(node_size * 0.5f, 2.0f)); // sqrt((n/2)^2 + (n/2)^2 + (n/2)^2)
 		int total = 0, success = 0;
 		for (int x = -5; x <= 5; ++x)
@@ -2409,7 +2409,7 @@ void RJMain::DEBUGDisplayInfo(void)
 					++total;
 					if (cell_result) ++success;
 
-					Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
+					if (false) Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
 						(cell_result ? XMFLOAT4(0,1,0,1) : XMFLOAT4(1, 0, 0, 1)));
 				}
 			}
