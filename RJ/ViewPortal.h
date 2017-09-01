@@ -26,7 +26,7 @@ public:
 	// Recalculates internal data within the portal following a change to the vertex layout
 	void										RecalculateData(void);
 
-	// Destructor; deallocates all storage owned by the ob=bject
+	// Destructor; deallocates all storage owned by the object
 	~ViewPortal(void);
 
 

@@ -23,6 +23,7 @@
 #include "FireShader.h"
 #include "Light.h"
 #include "ViewFrustrum.h"
+#include "Frustum.h"
 #include "BoundingObject.h"
 #include "FontShader.h"
 #include "AudioManager.h"
@@ -1744,12 +1745,68 @@ void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection 
 }
 
 // Method to render the interior of an object environment, including any tiles, 
-RJ_PROFILED(void CoreEngine::RenderObjectEnvironment, iSpaceObjectEnvironment *environment)
+RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
+{
+	// Environment rendering has the potential to define constraints on the global view frustum
+	Frustum *new_frustum = NULL;
+
+	// Use different rendering methods depending on the type of environment
+	if (environment->SupportsPortalBasedRendering())
+	{
+		Result render_result = RenderPortalEnvironment(environment, &new_frustum);
+		if (render_result == ErrorCodes::PortalRenderingNotPossibleInEnvironment)
+		{
+			RenderNonPortalEnvironment(environment, &new_frustum);
+		}
+	}
+	else
+	{
+		RenderNonPortalEnvironment(environment, &new_frustum);
+	}
+
+	// Return any new (more restrictive) global visibility frustum that could be calculated during
+	// environment rendering, or NULL to signify that no frustum change should be made
+	(*pOutGlobalFrustum) = new_frustum;
+}
+
+/* Method to render the interior of an object environment including any tiles, for an environment
+   which supports portal rendering
+      - environment:		The environment to be rendered
+	  - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the 
+							caller if rendering of the environment resulted in a more restrictive 
+							global visibility frustum
+      - Returns				A result code indicating whether the environment could be rendered
+							via environment portal rendering
+*/
+Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
+{
+	// The viewer must be located in a potentially portal-containing cell in order to proceed with portal rendering
+	// TODO: define non-tile cell type for e.g. viewer outside the environment or in interstitial space, looking in
+	if (!environment) return ErrorCodes::CannotRenderNullEnvironment;
+	if (Game::CurrentPlayer->GetParentEnvironment() != environment) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
+
+	INTVECTOR3 viewer_location = Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation();
+	ComplexShipElement *el = environment->GetElement(viewer_location);
+	if (el == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
+	ComplexShipTile *current_cell = el->GetTile();
+	if (current_cell == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
+
+
+}
+
+/* Method to render the interior of an object environment including any tiles, for an environment
+   which does not support portal rendering or where the viewer state does not permit it
+      - environment:		The environment to be rendered
+      - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the
+							caller if rendering of the environment resulted in a more restrictive
+							global visibility frustum
+*/
+void CoreEngine::RenderNonPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
 {
 	// Parameter check
 	if (!environment) return;
 
-	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Rendered environment \"")(environment->GetInstanceCode())("\"").str(),
+	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Rendered environment \"")(environment->GetInstanceCode())("\" (without portal rendering support)").str(),
 	{
 		// Precalculate the environment (0,0,0) point in world space, from which we can calculate element/tile/object positions.  
 		m_cache_zeropoint = XMVector3TransformCoord(NULL_VECTOR, environment->GetZeroPointWorldMatrix());

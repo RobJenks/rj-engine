@@ -1624,6 +1624,9 @@
     <ClInclude Include="Frustum.h">
       <Filter>Engine\Frustum</Filter>
     </ClInclude>
+    <ClInclude Include="PortalRenderingSupport.h">
+      <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

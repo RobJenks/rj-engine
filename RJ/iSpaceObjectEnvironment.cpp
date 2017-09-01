@@ -26,6 +26,7 @@
 #include "ElementIntersection.h"
 #include "EnvironmentCollision.h"
 #include "SimulatedEnvironmentCollision.h"
+#include "PortalRenderingSupport.h"
 
 #include "iSpaceObjectEnvironment.h"
 
@@ -66,6 +67,8 @@ iSpaceObjectEnvironment::iSpaceObjectEnvironment(void)
 	m_powerupdaterequired = true;
 	m_oxygenupdaterequired = true;
 	m_gravity_override = -1.0f;
+	m_portalrenderingsupported = false;
+	m_overrideportalrenderingsupport = PortalRenderingSupport::DetermineAutomatically;
 }
 
 
@@ -783,6 +786,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
+
+	// Determine support for portal-based rendering based on the environment or any overrides
+	DeterminePortalRenderingSupport();
 }
 
 // Updates the ship navigation network based on the set of elements and their properties
@@ -1100,6 +1106,7 @@ INTVECTOR3 iSpaceObjectEnvironment::DetermineElementAtOBBLocation(const Oriented
 	return ClampElementLocationToEnvironment(loc + obb_loc);
 }
 
+// Shuts down and deallocates any nav network that currently exists for the environment
 void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 {
 	if (m_navnetwork)
@@ -1107,6 +1114,45 @@ void iSpaceObjectEnvironment::ShutdownNavNetwork(void)
 		m_navnetwork->Shutdown();
 		SafeDelete(m_navnetwork);
 	}
+}
+
+// Determine support for portal-based rendering based on the environment or any overrides
+void iSpaceObjectEnvironment::DeterminePortalRenderingSupport(void)
+{
+	// If any override is in place then simply use it and return
+	if (m_overrideportalrenderingsupport != PortalRenderingSupport::DetermineAutomatically)
+	{
+		m_portalrenderingsupported = (m_overrideportalrenderingsupport == PortalRenderingSupport::ForceEnabled);
+		return;
+	}
+
+	// Otherwise, we define an environment as supporting portal rendering if it contains cells that 
+	// expose at least one portal
+	auto it_end = m_tiles[0].end();
+	for (auto it = m_tiles[0].begin(); it != it_end; ++it)
+	{
+		if ((*it).value->GetPortalCount() != 0U)
+		{
+			// We have at least one portal; enable portal rendering and early-out
+			m_portalrenderingsupported = true;
+			return;
+		}
+	}
+
+	// We do not have any portals in the environment, so disable portal rendering
+	m_portalrenderingsupported = false;
+}
+
+// Applies an override to automatic determination of portal-based rendering support
+void iSpaceObjectEnvironment::OverridePortalBasedRenderingSupport(bool supported)
+{
+	m_overrideportalrenderingsupport = (supported ? PortalRenderingSupport::ForceEnabled : PortalRenderingSupport::ForceDisabled);
+}
+
+// Removes any override on automatic determination of portal-based rendering support
+void iSpaceObjectEnvironment::RemoveOverrideOfPortalBasedRenderingSupport(void)
+{
+	m_overrideportalrenderingsupport = PortalRenderingSupport::DetermineAutomatically;
 }
 
 // Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer

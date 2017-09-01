@@ -710,6 +710,7 @@
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
+    <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
     <ClInclude Include="RenderQueue.h" />

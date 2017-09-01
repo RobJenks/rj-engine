@@ -15,6 +15,7 @@
 #include "EnvironmentOxygenMap.h"
 #include "EnvironmentPowerMap.h"
 #include "EnvironmentHullBreaches.h"
+#include "PortalRenderingSupport.h"
 
 // Environment overlays
 #include "EnvironmentHealthOverlay.h"
@@ -225,6 +226,17 @@ public:
 		m_updatesuspended = false;
 		UpdateEnvironment();
 	}
+
+	// Indicates whether the environment supports portal-based environment rendering, which enables much more efficient
+	// occlusion culling for large environments
+	CMPINLINE bool					SupportsPortalBasedRendering(void) const { return m_portalrenderingsupported; }
+
+	// Determine support for portal-based rendering based on the environment or any overrides
+	void							DeterminePortalRenderingSupport(void);
+
+	// Applies or removes an override on automatic determination of portal-based rendering support
+	void							OverridePortalBasedRenderingSupport(bool supported);
+	void							RemoveOverrideOfPortalBasedRenderingSupport(void);
 
 	// Identify the elements that make up this environment's outer hull
 	void							BuildOuterHullModel(void);
@@ -580,6 +592,11 @@ protected:
 
 	// The navigation network that actors will use to move around this environment
 	NavNetwork *					m_navnetwork;
+
+	// Indicates whether portal-based rendering is supported for this environment.  If override != Automatic then 
+	// it is applied to the flag rather than deriving this from environment contents
+	bool							m_portalrenderingsupported;
+	PortalRenderingSupport			m_overrideportalrenderingsupport;
 	
 	// Flags used to indicate whether certain ship properties need to be recalculated
 	bool							m_gravityupdaterequired;

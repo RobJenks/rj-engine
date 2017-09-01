@@ -22,6 +22,7 @@
 #include "HighlightEffect.h"
 #include "Power.h"
 #include "GameConsoleCommand.h"
+#include "ViewPortal.h"
 class TiXmlElement;
 class ComplexShip;
 class ComplexShipSection;
@@ -656,6 +657,8 @@ public:
 	// The set of connections that are possible from this tile
 	TileConnections								PossibleConnections;
 
+	// Portals owned by this tile
+	CMPINLINE std::vector<ViewPortal>::size_type	GetPortalCount(void) const { return m_portalcount; }
 
 	// Events generated when the tile is added/removed from an environment
 	void										BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment);
@@ -834,6 +837,10 @@ protected:
 
 	// Vector of hardpoint references, corresponding to the hardpoints in our environment that this tile owns
 	std::vector<std::string>	m_hardpoint_refs;
+
+	// Collection of portals from this tile
+	std::vector<ViewPortal>					m_portals;
+	std::vector<ViewPortal>::size_type		m_portalcount;
 
 	// Power requirement for the tile to be functional
 	Power::Type					m_powerrequirement;

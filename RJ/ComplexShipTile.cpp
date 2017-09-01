@@ -75,6 +75,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_constructedstate_previousallocatedsize = NULL_INTVECTOR3;
 	m_connections_fixed = false;
 	m_powerlevel = m_powerrequirement = (Power::Type)0;
+	m_portalcount = 0U;
 	
 	// By default, tiles will not be simulated
 	m_requiressimulation = false;
@@ -143,6 +144,10 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	// Copy the connection data for this tile 
 	Connections.SetConnectionState(C.Connections);
 	PossibleConnections.SetConnectionState(C.PossibleConnections);
+
+	// Replicate any portal data for this tile
+	m_portals = C.m_portals;
+	m_portalcount = C.m_portalcount;
 
 	// Recalculate tile data, relative position and world matrix based on this new data
 	RecalculateTileData();

@@ -291,6 +291,11 @@ namespace ErrorCodes {
 	const Result		ErrorCreatingLightFHFShaderConstBuffersPS		= 1346;
 	const Result		ErrorCreatingLightFHFShaderSamplerPS			= 1347;
 	const Result		CouldNotAllocateMemoryForRenderQueue			= 1348;
+	const Result		CouldNotCreateEffectManager						= 1349;
+	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1350;
+
+	const Result		CannotRenderNullEnvironment						= 1375;
+	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;
 
 	const Result		CannotCreateParticleVertexBuffers				= 1500;
 	const Result		CannotRemoveParticlesWithInvalidParameters		= 1501;
@@ -306,8 +311,6 @@ namespace ErrorCodes {
 	const Result		CouldNotCreateParticleEngine					= 1511;
 	const Result		CannotLinkAllRequiredShadersToParticleEngine	= 1512;
 	
-	const Result		CouldNotCreateEffectManager						= 1600;
-	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1601;
 	
 
 	// External data read/write errors									(2000-2199)
