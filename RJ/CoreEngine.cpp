@@ -1715,7 +1715,14 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 			// that forces the interior to always be rendered.  In addition, we must have actually rendered some part of the ship.
 			if (renderinterior || is_hub || ship->InteriorShouldAlwaysBeRendered())
 			{
-				RenderObjectEnvironment(ship);
+				// Render the environment.  If we are also able to determine a more restrictive global view frustum
+				// as part of this rendering then apply it here
+				const Frustum *new_frustum = NULL;
+				RenderEnvironment(ship, &new_frustum);
+				if (new_frustum)
+				{
+					// TODO: Account for the new frustum
+				}
 			}
 
 			// Mark the ship to indicate that it was visible this frame
@@ -1748,7 +1755,7 @@ void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection 
 RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
 {
 	// Environment rendering has the potential to define constraints on the global view frustum
-	Frustum *new_frustum = NULL;
+	const Frustum *new_frustum = NULL;
 
 	// Use different rendering methods depending on the type of environment
 	if (environment->SupportsPortalBasedRendering())
@@ -1791,7 +1798,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	ComplexShipTile *current_cell = el->GetTile();
 	if (current_cell == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
 
-
+	return 0;
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment

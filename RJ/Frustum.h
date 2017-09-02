@@ -2,7 +2,8 @@
 
 #include "DX11_Core.h"
 #include "FastMath.h"
-
+class iObject;
+class OrientedBoundingBox;
 
 class Frustum
 {
@@ -26,14 +27,29 @@ public:
 	void								SetPlane(size_t plane, const FXMVECTOR plane_coeff);
 
 	// Retrieve data on the planes that make up this frustum
-	CMPINLINE size_t					GetPlaneCount(void) const { return m_planecount; }
-	CMPINLINE const XMVECTOR *			GetPlanes(void) const { return m_planes; }
-	CMPINLINE const XMVECTOR &			GetNearPlane(void) const { return m_planes[Frustum::NEAR_PLANE]; }
-	CMPINLINE const XMVECTOR &			GetFarPlane(void) const { return m_planes[Frustum::FAR_PLANE]; }
+	CMPINLINE size_t					GetPlaneCount(void) const		{ return m_planecount; }
+	CMPINLINE const XMVECTOR *			GetPlanes(void) const			{ return m_planes; }
+	CMPINLINE const XMVECTOR &			GetPlane(size_t plane)			{ return m_planes[plane]; }
+	CMPINLINE const XMVECTOR &			GetNearPlane(void) const		{ return m_planes[Frustum::NEAR_PLANE]; }
+	CMPINLINE const XMVECTOR &			GetFarPlane(void) const			{ return m_planes[Frustum::FAR_PLANE]; }
+
+
+	/*** Intersection testing methods ***/
 
 	// Test whether the given bounding sphere lies within the frustum
 	bool								CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius);
 
+	// Check whether a point lies within the frustum
+	bool								CheckPoint(const FXMVECTOR pt);
+
+	// Check whether an object lies within the frustum, based upon its collision sphere
+	bool								TestObjectVisibility(const iObject *obj);
+
+	// Check whether the given cuboid lies within the frustum
+	bool								CheckCuboid(const FXMVECTOR centre, const FXMVECTOR size);
+	
+	// Check whether the given OBB lies within the frustum
+	bool								CheckOBB(const OrientedBoundingBox & obb);
 
 	// Destructor
 	~Frustum(void);
@@ -46,5 +62,11 @@ private:
 	AXMVECTOR *							m_planes;
 	size_t								m_planecount;
 
+	// Checks for the intersection of a centre point and negative-vectorised-radius with
+	// the frustum.  Internal method used as the basis for many public method above
+	bool								CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v);
+
+	// Temporary storage for construction of cuboid vertices during visibility testing
+	static AXMVECTOR_P					m_working_cuboidvertices[8];
 
 };

@@ -213,26 +213,6 @@ public:
 		void, RenderEnvironment, SINGLE_ARG(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum), 
 								 SINGLE_ARG(environment, pOutGlobalFrustum))
 
-	/* Method to render the interior of an object environment including any tiles, for an environment
-	   which supports portal rendering
-	      - environment:		The environment to be rendered
-	      - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the
-								caller if rendering of the environment resulted in a more restrictive
-								global visibility frustum
-		- Returns				A result code indicating whether the environment could be rendered
-								via environment portal rendering
-	*/
-	Result					RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
-
-	/* Method to render the interior of an object environment including any tiles, for an environment
-       which does not support portal rendering or where the viewer state does not permit it
-	      - environment:		The environment to be rendered
-	      - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the
-								caller if rendering of the environment resulted in a more restrictive
-								global visibility frustum
-	*/
-	void					RenderNonPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
-
 	// Actor-rendering methods; actors are queued for rendering in one batch, after other objects are processed, to avoid
 	// multiple engine state changes per frame
 	void					QueueActorRendering(Actor *actor);

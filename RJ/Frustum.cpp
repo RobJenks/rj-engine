@@ -1,4 +1,6 @@
 #include "DX11_Core.h"
+#include "FastMath.h"
+#include "iObject.h"
 #include "Frustum.h"
 using namespace DirectX;
 
@@ -6,6 +8,10 @@ using namespace DirectX;
 const size_t Frustum::NEAR_PLANE = 0U;						// Index into the plane collection
 const size_t Frustum::FAR_PLANE = 1U;						// Index into the plane collection
 const size_t Frustum::FIRST_SIDE = 2U;						// Index into the plane collection
+
+// Temporary storage for construction of cuboid vertices during visibility testing
+AXMVECTOR_P Frustum::m_working_cuboidvertices[8];
+
 
 // Construct a new frustum with the specified number of sides (not including the near- & far-planes)
 // Pass the near- and far-planes in during construction since they do not need to be calculated again
@@ -50,19 +56,81 @@ void Frustum::SetPlane(size_t plane, const FXMVECTOR plane_coeff)
 	m_planes[plane] = plane_coeff;
 }
 
-// Test whether the given bounding sphere lies within the frustum
-bool Frustum::CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius)
+// Checks for the intersection of a centre point and negative-vectorised-radius with
+// the frustum.  Internal method used as the basis for many public method above
+bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v)
 {
 	// If the sphere is 'behind' any plane of the view frustum then return false immediately
-	XMVECTOR radius = XMVectorReplicate(-sphere_radius);
-	
-	for (size_t i = 0U; i < m_planecount; ++i)
+	if (XMVector2Less(XMPlaneDotCoord(m_planes[Frustum::NEAR_PLANE], centre_point), negated_radius_v)) return false;
+	if (XMVector2Less(XMPlaneDotCoord(m_planes[Frustum::FAR_PLANE], centre_point), negated_radius_v)) return false;
+	for (size_t i = Frustum::FIRST_SIDE; i < m_planecount; ++i)
 	{
-		if (XMVector2Less(XMPlaneDotCoord(m_planes[i], sphere_centre), radius)) return false;
+		if (XMVector2Less(XMPlaneDotCoord(m_planes[i], centre_point), negated_radius_v)) return false;
 	}
 
 	// The object was not behind any planes in the frustum so return true
 	return true;
+}
+
+// Test whether the given bounding sphere lies within the frustum
+bool Frustum::CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius)
+{
+	// Simply call the internal method with correctly negated & vectorised radius
+	XMVECTOR radius = XMVectorReplicate(-sphere_radius);
+	return CheckSphereInternal(sphere_centre, radius);
+}
+
+// Check whether a point lies within the frustum
+bool Frustum::CheckPoint(const FXMVECTOR pt)
+{
+	// This is idential to the sphere intersection test with radius == 0
+	return CheckSphereInternal(pt, NULL_VECTOR);
+}
+
+// Check whether an object lies within the frustum, based upon its collision sphere
+bool Frustum::TestObjectVisibility(const iObject *obj)
+{
+	// Call the internal method with collision sphere data from the object
+	if (!obj) return false;
+	return CheckSphereInternal(obj->GetPosition(), XMVectorReplicate(-(obj->GetCollisionSphereRadius())));
+}
+
+// Check whether the given cuboid lies within the frustum
+bool Frustum::CheckCuboid(const FXMVECTOR centre, const FXMVECTOR size)
+{
+	XMVECTOR neg_size = XMVectorNegate(size);
+
+	// The cuboid intersects this frustum if any vertex is visible
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_0000)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_1000)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_0100)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_0010)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_1100)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_1010)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_0110)))) return true;
+	if (CheckPoint(XMVectorAdd(centre, XMVectorSelect(size, neg_size, VCTRL_1110)))) return true;
+
+	// No vertices are visible
+	return false;
+}
+
+// Check whether the given OBB lies within the frustum
+bool Frustum::CheckOBB(const OrientedBoundingBox & obb)
+{
+	obb.DetermineVertices(Frustum::m_working_cuboidvertices);
+
+	// If any vertex intersects this frustum then the OBB is visible
+	if (CheckPoint(Frustum::m_working_cuboidvertices[0].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[1].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[2].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[3].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[4].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[5].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[6].value)) return true;
+	if (CheckPoint(Frustum::m_working_cuboidvertices[7].value)) return true;
+
+	// No vertex is visible
+	return false;
 }
 
 
