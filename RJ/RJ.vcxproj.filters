@@ -1633,6 +1633,9 @@
     <ClInclude Include="PortalRenderingStep.h">
       <Filter>Engine\Culling\Portal Culling</Filter>
     </ClInclude>
+    <ClInclude Include="FrameFlag.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

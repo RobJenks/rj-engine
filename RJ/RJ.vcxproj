@@ -688,6 +688,7 @@
     <ClInclude Include="EnvironmentPowerMap.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="FrameFlag.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObjects.h" />

@@ -78,8 +78,8 @@ iObject::iObject(void) :	m_objecttype(iObject::ObjectType::Unknown),
 	SetColliderType(Game::ColliderType::ActiveCollider);
 	SetVisibilityTestingMode(VisibilityTestingModeType::UseBoundingSphere);
 
-	// Set all flags to default values
-	m_simulated = m_posupdated = m_spatialdatachanged = m_currentlyvisible = false;
+	// Set all bool flags to default values
+	m_spatialdatachanged = false;
 
 	// Subclass will set this value if it implements a PerformPostSimulationUpdate() method
 	m_canperformpostsimulationupdate = false;
@@ -249,7 +249,7 @@ void iObject::SetObjectType(iObject::ObjectType type)
 void iObject::Simulate(void)
 {
 	// Only simulate the object if it has not already been simulated
-	if (m_simulated == false)
+	if (!Simulated())
 	{
 		// Call the virtual subclass function to fully simulate the object
 		Game::ID_TYPE id = m_id;
@@ -259,7 +259,7 @@ void iObject::Simulate(void)
 		if (Game::ObjectExists(id) == false) return;
 
 		// Set the "simulated" flag for this frame
-		m_simulated = true;
+		SetSimulatedFlag();
 
 		// Update the position of any child objects, if we have any (checking count!=0 here, instead of in function, avoids unnecessary function calls)
 		if (m_childcount != 0) UpdatePositionOfChildObjects();
@@ -267,7 +267,7 @@ void iObject::Simulate(void)
 
 	// If the object position changed during this frame (regardless of whether it was simulated) then 
 	// recalculate any derived data (e.g. world matrices)
-	if (m_spatialdatachanged)
+	if (SpatialDataChanged())
 	{
 		// Perform base object updates required when the object moves, e.g. ensuring quaternions are normalised,
 		// and deriving a new world transform for the object
@@ -281,7 +281,7 @@ void iObject::Simulate(void)
 		if (IsPostSimulationUpdateRequired()) PerformPostSimulationUpdate();
 
 		// Clear the flag that indicates spatial data was changed, since we have now responded to it
-		m_spatialdatachanged = false;
+		ClearSpatialChangeFlag();
 	}
 }
 
@@ -497,7 +497,7 @@ void iObject::UpdatePositionOfChildObjects(void)
 			attach.Apply();
 
 			// Set the child update flag
-			attach.Child->SetPositionUpdated(true);
+			attach.Child->SetPositionUpdated();
 
 			// Update all children of this child
 			// TODO: This could lead to infinite loops if Parent >AttachedTo> Child >AttachedTo> Parent
@@ -882,8 +882,10 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetVisibilityTestingMode, (VisibilityTestingModeType)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(UpdatePositionOfChildObjects)
 	REGISTER_DEBUG_FN(ReleaseAllAttachments)
-	REGISTER_DEBUG_FN(SetSimulatedFlag, command.ParameterAsBool(2))
-	REGISTER_DEBUG_FN(SetPositionUpdated, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(SetSimulatedFlag)
+	REGISTER_DEBUG_FN(ClearSimulatedFlag)
+	REGISTER_DEBUG_FN(SetPositionUpdated)
+	REGISTER_DEBUG_FN(ClearPositionUpdatedFlag)
 	REGISTER_DEBUG_FN(FlagSpatialDataChange)
 	REGISTER_DEBUG_FN(ClearSpatialChangeFlag)
 	REGISTER_DEBUG_FN(AddCollisionExclusion, (Game::ID_TYPE)command.ParameterAsInt(2))
@@ -891,7 +893,6 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(MarkAsVisible)
 	REGISTER_DEBUG_FN(RemoveCurrentVisibilityFlag)
 	REGISTER_DEBUG_FN(RenormaliseSpatialData)
-	REGISTER_DEBUG_FN(ResetSimulationFlags)
 	REGISTER_DEBUG_FN(FadeToAlpha, command.ParameterAsFloat(2), command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetFadeAlpha, command.ParameterAsFloat(2))
 

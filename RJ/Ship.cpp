@@ -503,7 +503,7 @@ void Ship::SimulateObject(void)
 		//DeriveNewWorldMatrix();
 
 		// Set the update flag to indicate that this object has now been simulated
-		SetPositionUpdated(true);
+		SetPositionUpdated();
 	}
 	
 	// Simulate all ship turrets if applicable (TODO: need to pass contacts array)

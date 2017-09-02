@@ -30,6 +30,7 @@ PortalRenderingStep & PortalRenderingStep::operator=(PortalRenderingStep && othe
 	Cell = other.Cell;
 	VisibilityFrustum = other.VisibilityFrustum;
 	TraversalCount = other.TraversalCount;
+	return *this;
 }
 
 // Destructor

@@ -12,12 +12,7 @@
 
 void Game::Logic::BeginSimulationCycle(void)
 {
-	// Set the update flag of all space objects to false for this cycle
-	Game::ObjectRegister::iterator it_end = Game::Objects.end();
-	for (Game::ObjectRegister::iterator it = Game::Objects.begin(); it != it_end; ++it)
-	{
-		if (it->second.Active && it->second.Object) ((iObject*)(it->second.Object))->ResetSimulationFlags();
-	}
+
 }
 
 void Game::Logic::SimulateAllObjects(void)

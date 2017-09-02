@@ -1807,7 +1807,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	// Start with the current cell and proceed (vectorised) recursively
 	std::vector<PortalRenderingStep> cells;
 	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum)));
-
+return 0;
 	while (!cells.empty())
 	{
 		// Get the next cell to be processed

@@ -12,6 +12,7 @@
 #include "AlignedAllocator.h"
 #include "HashFunctions.h"
 #include "Octree.h"
+#include "FrameFlag.h"
 #include "iTakesDamage.h"
 #include "Attachment.h"
 #include "OrientedBoundingBox.h"
@@ -119,7 +120,7 @@ public:
 		m_position = pos;
 		XMStoreFloat3(&m_positionf, m_position);
 
-		m_spatialdatachanged = true;
+		FlagSpatialDataChange();
 		CollisionOBB.Invalidate();
 	}
 	CMPINLINE void							SetPosition(const XMFLOAT3 & pos)
@@ -127,7 +128,7 @@ public:
 		m_positionf = pos;
 		m_position = XMLoadFloat3(&m_positionf);
 
-		m_spatialdatachanged = true;
+		FlagSpatialDataChange();
 		CollisionOBB.Invalidate();
 	}
 	CMPINLINE void							AddDeltaPosition(const FXMVECTOR delta)
@@ -139,7 +140,7 @@ public:
 	CMPINLINE void							SetOrientation(const FXMVECTOR orient)
 	{
 		m_orientation = orient;
-		m_spatialdatachanged = true;
+		FlagSpatialDataChange();
 		CollisionOBB.Invalidate();
 	}
 	CMPINLINE void							SetOrientation(const XMFLOAT4 & orient) { SetOrientation(XMLoadFloat4(&orient)); }
@@ -148,13 +149,13 @@ public:
 	CMPINLINE void							SetPositionAndOrientation(const FXMVECTOR pos, const FXMVECTOR orient)
 	{
 		m_position = pos; m_orientation = orient;
-		m_spatialdatachanged = true;
+		FlagSpatialDataChange();
 		CollisionOBB.Invalidate();
 	}
 	CMPINLINE void							SetPositionAndOrientation_NoInvalidation(const FXMVECTOR pos, const FXMVECTOR orient)
 	{
 		m_position = pos; m_orientation = orient;
-		m_spatialdatachanged = true;
+		FlagSpatialDataChange();
 		CollisionOBB.Invalidate();
 	}
 
@@ -365,8 +366,9 @@ public:
 	void										ReleaseAllAttachments(void);
 
 	// Methods for setting and testing the object update flag
-	CMPINLINE bool								Simulated(void) const			{ return m_simulated; }
-	CMPINLINE void								SetSimulatedFlag(bool flag)		{ m_simulated = flag; }
+	CMPINLINE bool								Simulated(void) const			{ return m_simulated.IsSet(); }
+	CMPINLINE void								SetSimulatedFlag(void)			{ m_simulated.Set(); }
+	CMPINLINE void								ClearSimulatedFlag(void)		{ m_simulated.Clear(); }
 
 	// Returns a flag indicating whether this object is allowed to simulate its own movement this simulation cycle
 	// It may not be if, for example, it is attached to some other parent object
@@ -376,10 +378,13 @@ public:
 	}
 
 	// Methods for setting and testing the position update flag
-	CMPINLINE bool								PositionUpdated(void) const		{ return m_posupdated; }
-	CMPINLINE void								SetPositionUpdated(bool flag)	{ m_posupdated = flag; }
+	CMPINLINE bool								PositionUpdated(void) const		{ return m_posupdated.IsSet(); }
+	CMPINLINE void								SetPositionUpdated(void)		{ m_posupdated.Set(); }
+	CMPINLINE void								ClearPositionUpdatedFlag(void)	{ m_posupdated.Clear(); }
+
 
 	// Methods for setting and testing the flag that indicates whether spatial data (pos or orient) has changed since the last frame
+	// NOTE: this must remain as bool, rather than using a FrameFlag, since the flag may persist across frames until the next time it is tested
 	CMPINLINE bool								SpatialDataChanged(void) const	{ return m_spatialdatachanged; }
 	CMPINLINE void								FlagSpatialDataChange(void)		{ m_spatialdatachanged = true; }
 	CMPINLINE void								ClearSpatialChangeFlag(void)	{ m_spatialdatachanged = false; }
@@ -392,17 +397,17 @@ public:
 	
 	// Flag that indicates whether the object is currently visible.  Set by the core engine each render pass, so the flag
 	// will always relate to object visibility LAST frame
-	CMPINLINE bool								IsCurrentlyVisible(void) const			{ return m_currentlyvisible; }
-	CMPINLINE void								MarkAsVisible(void)						{ m_currentlyvisible = true; }
-	CMPINLINE void								RemoveCurrentVisibilityFlag(void)		{ m_currentlyvisible = false; }
-	CMPINLINE void								SetCurrentVisibilityFlag(bool v)		{ m_currentlyvisible = v; }
+	CMPINLINE bool								IsCurrentlyVisible(void) const			{ return m_currentlyvisible.IsSet(); }
+	CMPINLINE void								MarkAsVisible(void)						{ m_currentlyvisible.Set(); }
+	CMPINLINE void								RemoveCurrentVisibilityFlag(void)		{ m_currentlyvisible.Clear(); }
+	//CMPINLINE void							SetCurrentVisibilityFlag(bool v)		{ m_currentlyvisible = v; }
 
 	// Renormalise any object spatial data, following a change to the object position/orientation
 	CMPINLINE void								RenormaliseSpatialData(void)
 	{
 		// Normalise every frame if the object is visible, or every *_FULLSIM changes when the object is being fully-simulated
 		// but is not currently visible.  Aside from that, we do not bother renormalising to save cycles
-		if (m_currentlyvisible)
+		if (IsCurrentlyVisible())
 		{
 			m_orientation = XMQuaternionNormalizeEst(m_orientation);
 		}
@@ -432,12 +437,6 @@ public:
 	CMPINLINE float								GetHardness(void) const				{ return m_hardness; }
 	CMPINLINE void								SetHardness(float h)				{ m_hardness = h; }
 
-	// Resets the simulation flags; called at the start of a simulation cycle in which this object is being simulated
-	// TODO: set all at once via one bitwise call once flags are swtiched to the bitwise method?
-	CMPINLINE void								ResetSimulationFlags(void)		
-	{ 
-		m_simulated = m_posupdated /*= m_spatialdatachanged */= false; 
-	}
 
 	// Passthrough methods to the FadeEffect component to allow invocation via console command
 	CMPINLINE void								FadeToAlpha(float timeperiod, float alpha)		{ Fade.FadeToAlpha(timeperiod, alpha); }
@@ -557,11 +556,11 @@ protected:
 	ObjectSimulationState				m_nextsimulationstate;			// Any change to simulation state is stored here and takes effect on the next simulation cycle
 	bool								m_visible;						// Flag indicating whether the object is rendered (may still be simulated)
 	bool								m_simulationhub;				// Flag indicating whether this object forms a simulation hub
+	bool								m_spatialdatachanged;			// Flag indicating whether the object position or orientation has changed this frame
 
-	bool								m_simulated;					// Flag indicating whether the object has been simulated (may not include position update, if it is attached to something)
-	bool								m_posupdated;					// Flag indicating whether the object position has been updated (may not have been simulated, if it was moved via attachment)
-	bool								m_spatialdatachanged;			// Flag indicating whether the object position or orientation has changed since the previous frame
-	bool								m_currentlyvisible;				// Flag indicating whether the object is visible (last frame); use to avoid render-related updates when object is not visible
+	FrameFlag							m_simulated;					// Flag indicating whether the object was simulated this frame (may not include position update, if it is attached to something)
+	FrameFlag							m_posupdated;					// Flag indicating whether the object position has been updated this frame (may not have been simulated, if it was moved via attachment)
+	FrameFlag							m_currentlyvisible;				// Flag indicating whether the object is visible (prior frame); use to avoid render-related updates when object is not visible
 	
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;
