@@ -90,6 +90,10 @@ public:
 	CMPINLINE Game::ID_TYPE							GetParentTileID(void) const						{ return m_parenttile; }
 	CMPINLINE void									SetParentTileID(Game::ID_TYPE ID)				{ m_parenttile = ID; }
 
+	// Flag indicating whether the terrain object has been rendered this frame
+	CMPINLINE bool									IsRendered(void) const							{ return m_rendered.IsSet(); }
+	CMPINLINE void									MarkAsRendered(void)							{ m_rendered.Set(); }
+
 	// Retrieve or modify the health of this terrain object
 	CMPINLINE float									GetHealth(void) const							{ return m_health; }
 	void											SetHealth(float h)								{ m_health = h; }
@@ -159,6 +163,8 @@ protected:
 	INTVECTOR3								m_element_location;					// Location of the terrain centre in element space
 	INTVECTOR3								m_element_min, m_element_max;		// Store the range of elements that this terrain object spans
 	bool									m_multielement;						// Flag indicating whether we span >1 element, for render-time efficiency
+
+	FrameFlag								m_rendered;							// Flag indicating whether the terrain object has been rendered this frame
 
 	EnvironmentTree *						m_env_treenode;						// Pointer to the environment tree node holding this object
 

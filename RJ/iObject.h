@@ -269,6 +269,10 @@ public:
 	void									SetAsSimulationHub(void);
 	void									RemoveSimulationHub(void);
 
+	// Flag indicating whether the object has been rendered this frame
+	CMPINLINE bool							IsRendered(void) const				{ return m_rendered.IsSet(); }
+	CMPINLINE void							MarkAsRendered(void)				{ m_rendered.Set(); }
+
 	// Virtual shutdown method that must be implemented by all objects
 	virtual void							Shutdown(void);
 
@@ -561,6 +565,7 @@ protected:
 	FrameFlag							m_simulated;					// Flag indicating whether the object was simulated this frame (may not include position update, if it is attached to something)
 	FrameFlag							m_posupdated;					// Flag indicating whether the object position has been updated this frame (may not have been simulated, if it was moved via attachment)
 	FrameFlag							m_currentlyvisible;				// Flag indicating whether the object is visible (prior frame); use to avoid render-related updates when object is not visible
+	FrameFlag							m_rendered;						// Flag indicating whether the object was rendered this frame
 	
 	// Populated by the subclass; indicates whether any post-simulation update is implemented by the class
 	bool								m_canperformpostsimulationupdate;

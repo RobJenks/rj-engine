@@ -186,8 +186,9 @@ public:
 	// Renders all objects in the specified system, based on simulation state and visibility testing
 	void					RenderAllSystemObjects(SpaceSystem & system);
 
-    // Generic iObject rendering method; used by subclasses wherever possible
-	void                    RenderObject(iObject *object);
+    // Generic iObject rendering method; used by subclasses wherever possible.  Returns a flag indicating whether
+	// anything was rendered
+	bool                    RenderObject(iObject *object);
 
 	// Simple ship-rendering method
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SimpleShips,
@@ -198,7 +199,7 @@ public:
 		void, RenderComplexShip, SINGLE_ARG(ComplexShip *ship, bool renderinterior), SINGLE_ARG(ship, renderinterior))
 
 	// Methods to render parts of a complex ship
-	void					RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec);
+	bool					RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec);
 	void					RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnvironment *environment);
 
 	// Renders a collection of turrets that have already been updated by their turret controller

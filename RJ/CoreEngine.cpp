@@ -1506,13 +1506,16 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 	shader.SortedInstances.clear();
 }
 
-// Generic iObject rendering method; used by subclasses wherever possible
-void CoreEngine::RenderObject(iObject *object)
+// Generic iObject rendering method; used by subclasses wherever possible.  Returns a flag indicating whether
+// anything was rendered
+bool CoreEngine::RenderObject(iObject *object)
 {
-	if (!object) return;
+	// Quit immediately if the object does not exist, or if we have already rendered it
+	if (!object || object->IsRendered()) return false;
 
 	// Test whether this object is within the viewing frustrum; if not, no need to render it
-	if (!m_frustrum->TestObjectVisibility(object)) return;
+	// TODO: Need to move this out of the method
+	if (!m_frustrum->TestObjectVisibility(object)) return false;
 
 	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered object \"")(object ? object->GetInstanceCode() : "<NULL>")("\"").str(),
 	{
@@ -1535,7 +1538,11 @@ void CoreEngine::RenderObject(iObject *object)
 			RenderObjectWithStaticModel(object);
 		}
 
+		// Mark the object as having been rendered
+		object->MarkAsRendered();
 	});
+
+	return true;
 }
 
 // Render an object with a static model.  Protected; called only from RenderObject()
@@ -1690,16 +1697,9 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 			// visibility test to see whether the section should be rendered.
 			if (is_hub || m_frustrum->TestObjectVisibility(sec))
 			{
-				// Otherwise, perform an actual visibility test on the section to see if it should be rendered
-				render = shiprendered = true;
+				// We want to attempt to render this ship section (keep track of whether at least one section was rendered)
+				shiprendered |= RenderComplexShipSection(ship, sec);
 			}
-			else
-			{
-				render = false;
-			}
-
-			// If any bounding object passed the render test then render this ship section now
-			if (render) RenderComplexShipSection(ship, sec);
 		}
 
 		// We only need to render the ship & its contents if at least one ship section was rendered
@@ -1726,8 +1726,9 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 				}
 			}
 
-			// Mark the ship to indicate that it was visible this frame
+			// Mark the ship to indicate that it was visible and rendered this frame
 			Game::MarkObjectAsVisible(ship);
+			ship->MarkAsRendered();
 
 			// Increment the complex ship render count if any of its sections were rendered this frame
 			++m_renderinfo.ComplexShipRenderCount;
@@ -1736,20 +1737,24 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 }
 	
 // Render a complex ship section to the space environment, as part of the rendering of the complex ship itself
-void CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec)
+// Returns a flag indicating whether the section was rendered
+bool CoreEngine::RenderComplexShipSection(ComplexShip *ship, ComplexShipSection *sec)
 {
+	bool rendered = false;
 	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Processed complex ship section \"")(sec->GetInstanceCode())("\"").str(),
 	{
 		// Render the exterior of the ship, unless we have the relevant render flag set
 		if (!m_renderflags[CoreEngine::RenderFlag::DisableHullRendering])
 		{
 			// Simply pass control to the main object rendering method
-			RenderObject(sec);
+			rendered = RenderObject(sec);
+
+			// Increment the render count
+			if (rendered) ++m_renderinfo.ComplexShipSectionRenderCount;
 		}
 	});
 
-	// Increment the render count
-	++m_renderinfo.ComplexShipSectionRenderCount;
+	return rendered;
 }
 
 // Method to render the interior of an object environment, including any tiles, 
@@ -1945,7 +1950,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 		{
 			// Get a reference to the object and make sure it is valid, has a model etc.
 			terrain = (*t_it);
-			if (!terrain || !terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
+			if (!terrain) continue;
+			if (terrain->IsRendered()) continue;
+			if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
 
 			// We should not render anything if the object has been destroyed
 			if (terrain->IsDestroyed()) continue;
@@ -1956,6 +1963,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 				RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
 			));
+
+			// This terrain object has been rendered
+			terrain->MarkAsRendered();
 			++m_renderinfo.TerrainRenderCount;
 		}
 	});
@@ -1967,12 +1977,18 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 	// Parameter check
 	if (!tile) return;
 
+	// Do not render anything if the tile has already been rendered this frame
+	if (tile->IsRendered()) return;
+
 	// Do not render anything if the tile has been destroyed (TODO: in future, render "destroyed" representation
 	// of the tile and its contents instead
 	if (tile->IsDestroyed()) return;
 
 	// Calculate the absolute world matrix for this tile as (WM = Child * Parent)
 	XMMATRIX world = XMMatrixMultiply(tile->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
+
+	// From this point onwards we consider the tile to have been rendered
+	tile->MarkAsRendered();
 
 	// We are rendering this object, so call its pre-render update method
 	tile->PerformRenderUpdate();
@@ -2053,14 +2069,14 @@ RJ_PROFILED(void CoreEngine::RenderSimpleShip, SimpleShip *s)
 	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("-> Processed simple ship \"")(s ? s->GetInstanceCode() : "<NULL>")("\"").str(), 
 	{
 		// Simply pass control to the main object rendering method
-		RenderObject(s);
+		if (RenderObject(s) == true)
+		{
+			// Render any turret objects on the exterior of the ship, if applicable
+			if (s->TurretController.IsActive()) RenderTurrets(s->TurretController);
 
-		// Render any turret objects on the exterior of the ship, if applicable
-		if (s->TurretController.IsActive()) RenderTurrets(s->TurretController);
-
-		// Increment the render count
-		++m_renderinfo.ShipRenderCount;
-
+			// Increment the render count
+			++m_renderinfo.ShipRenderCount;
+		}
 	});
 }
 

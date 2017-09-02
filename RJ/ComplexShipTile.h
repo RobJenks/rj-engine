@@ -481,6 +481,10 @@ public:
 	// Virtual method for tile subclasses to perform simulation.  Differs depending on the current simulation state of the tile
 	virtual void						PerformTileSimulation(unsigned int delta_ms)			= 0;
 
+	// Flag indicating whether the tile has been rendered this frame
+	CMPINLINE bool						IsRendered(void) const { return m_rendered.IsSet(); }
+	CMPINLINE void						MarkAsRendered(void) { m_rendered.Set(); }
+
 	// Applies the effects of this tile on the underlying elements
 	void								ApplyTile(void);
 
@@ -805,6 +809,9 @@ protected:
 	bool						m_multiplemodels;
 	Model *						m_model;
 	TileCompoundModelSet		m_models;
+
+	// Flag indicating whether the tile has been rendered this frame
+	FrameFlag					m_rendered;
 
 	// Bounding box encompassing this tile; used for more efficient visibility & collision testing
 	BoundingObject *			m_boundingbox;
