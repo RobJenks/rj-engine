@@ -69,6 +69,7 @@
 #include "NavNetwork.h"
 #include "NavNode.h"
 #include "SentenceType.h"
+#include "PortalRenderingStep.h"
 #include <tchar.h>
 #include <unordered_map>
 
@@ -1798,7 +1799,33 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	ComplexShipTile *current_cell = el->GetTile();
 	if (current_cell == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
 
-	return 0;
+	// We will start with the current global visibility frustum, and potentially construct a more restrictive 
+	// version during rendering
+	Frustum *current_frustum = static_cast<Frustum*>(Game::Engine->GetViewFrustrum());
+	Frustum *new_global_frustum = NULL;
+
+	// Start with the current cell and proceed (vectorised) recursively
+	std::vector<PortalRenderingStep> cells;
+	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum)));
+
+	while (!cells.empty())
+	{
+		// Get the next cell to be processed
+		PortalRenderingStep step = std::move(cells.back());
+		cells.pop_back();
+
+		// Render the tile itself
+		ComplexShipTile *cell = step.Cell;
+		if (cell)
+		{
+			RenderComplexShipTile(cell, environment);
+		}
+		
+		// (*** CONTINUE ***)
+	}
+
+
+
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment

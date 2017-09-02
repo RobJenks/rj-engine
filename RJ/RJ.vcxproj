@@ -497,6 +497,7 @@
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
     <ClCompile Include="Oxygen.cpp" />
+    <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueue.cpp" />
@@ -710,6 +711,7 @@
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
+    <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />

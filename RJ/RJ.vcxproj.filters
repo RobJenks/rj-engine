@@ -706,6 +706,9 @@
     <ClCompile Include="Frustum.cpp">
       <Filter>Engine\Frustum</Filter>
     </ClCompile>
+    <ClCompile Include="PortalRenderingStep.cpp">
+      <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1625,6 +1628,9 @@
       <Filter>Engine\Frustum</Filter>
     </ClInclude>
     <ClInclude Include="PortalRenderingSupport.h">
+      <Filter>Engine\Culling\Portal Culling</Filter>
+    </ClInclude>
+    <ClInclude Include="PortalRenderingStep.h">
       <Filter>Engine\Culling\Portal Culling</Filter>
     </ClInclude>
   </ItemGroup>
