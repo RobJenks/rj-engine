@@ -662,6 +662,7 @@ public:
 	TileConnections								PossibleConnections;
 
 	// Portals owned by this tile
+	CMPINLINE const std::vector<ViewPortal> &		GetPortals(void) const { return m_portals; }
 	CMPINLINE std::vector<ViewPortal>::size_type	GetPortalCount(void) const { return m_portalcount; }
 
 	// Events generated when the tile is added/removed from an environment
@@ -846,8 +847,8 @@ protected:
 	std::vector<std::string>	m_hardpoint_refs;
 
 	// Collection of portals from this tile
-	std::vector<ViewPortal>					m_portals;
-	std::vector<ViewPortal>::size_type		m_portalcount;
+	std::vector<ViewPortal>				m_portals;
+	std::vector<ViewPortal>::size_type	m_portalcount;
 
 	// Power requirement for the tile to be functional
 	Power::Type					m_powerrequirement;

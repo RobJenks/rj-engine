@@ -2360,10 +2360,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			
 		for (size_t i = 0U; i < 4U; ++i)
 		{
-			//if (i < 2U)  
-			//	f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[i], p[((i + 1) % 4)]);
-			//else
-				f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
+			f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
 		}
 
 		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));

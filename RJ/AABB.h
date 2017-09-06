@@ -24,37 +24,74 @@ public:
 	CMPINLINE void						SetMax(const FXMVECTOR v)		{ P1 = v; }
 
 	// Default constructor
-	CMPINLINE AABB(void) { }
+	CMPINLINE AABB(void) noexcept { }
 
 	// Constructor that builds an AABB based upon its minimum and maximum points
-	CMPINLINE AABB(const FXMVECTOR vmin, const FXMVECTOR vmax)
+	CMPINLINE AABB(const FXMVECTOR vmin, const FXMVECTOR vmax) noexcept
 		:  P0(vmin), P1(vmax)
 	{
 	}
 
 	// Constructor to build an AABB from an OBB.  Generates an AABB centred about (0,0,0) in the LOCAL
 	// OBJECT SPACE.  This does NOT create an AABB oriented in world space.
-	CMPINLINE AABB(const OrientedBoundingBox & obb)
+	CMPINLINE AABB(const OrientedBoundingBox & obb) noexcept
+		:
+		P1(obb.ConstData().ExtentV),
+		P0(XMVectorNegate(P1))
 	{
-		P1 = obb.ConstData().ExtentV;
-		P0 = XMVectorNegate(P1);
 	}
 
 	// Constructor to build an AABB from OBB core data.  Generates an AABB centred about (0,0,0) in the LOCAL
 	// OBJECT SPACE.  This does NOT create an AABB oriented in world space.
-	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb)
+	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb) noexcept
+		:
+		P1(obb.ExtentV),
+		P0(XMVectorNegate(P1))	
 	{
-		P1 = obb.ExtentV;
-		P0 = XMVectorNegate(P1);
 	}
 
 	// Constructor to build an AABB from OBB core data.  Accepts a parameter used to expand/contract the AABB 
 	// bounds (centre-to-edge, i.e. half of overall size) by a specified amount on construction
-	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR bounds_adjustment)
+	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR bounds_adjustment) noexcept
+		:
+		P1(XMVectorAdd(obb.ExtentV, bounds_adjustment)), 
+		P0(XMVectorNegate(P1))
 	{
-		P1 = XMVectorAdd(obb.ExtentV, bounds_adjustment);
-		P0 = XMVectorNegate(P1);
 	}
+
+	// Copy constructor
+	CMPINLINE AABB(const AABB & other) noexcept
+		:
+		P0(other.P0), P1(other.P1)
+	{
+	}
+
+	// Copy assignment
+	CMPINLINE AABB & operator=(const AABB & other) noexcept
+	{
+		P0 = other.P0; 
+		P1 = other.P1;
+		return *this;
+	}
+
+	// Move constructor
+	CMPINLINE AABB(AABB && other) noexcept
+		:
+		P0(other.P0), P1(other.P1)
+	{
+	}
+
+	// Move assignment
+	CMPINLINE AABB & operator=(AABB && other) noexcept
+	{
+		P0 = other.P0;
+		P1 = other.P1;
+		return *this;
+	}
+
+	// Destructor
+	CMPINLINE ~AABB(void) noexcept { }
+
 
 	// String representation of the AABB
 	CMPINLINE std::string str(void) const

@@ -1850,9 +1850,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			for (std::vector<StaticTerrain*>::const_iterator t_it = m_tmp_terrain.begin(); t_it != t_it_end; ++t_it)
 			{
 				terrain = (*t_it);
-				if (!terrain) return;
-				if (terrain->IsRendered()) return;
-				if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) return;
+				if (!terrain) continue;
+				if (terrain->IsRendered()) continue;
+				if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
 
 				// We should not render anything if the object has been destroyed
 				if (terrain->IsDestroyed()) continue;
@@ -1871,13 +1871,32 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		}
 		
 		// Now process any portals in the current cell
-		
+		auto it_end = cell->GetPortals().end();
+		for (auto it = cell->GetPortals().begin(); it != it_end; ++it)
+		{
+			// Perform a basic sphere visibility test to quickly discard portals that are out of view
+			const ViewPortal & portal = (*it);
+			if (m_tmp_frustums[current_frustum]->CheckSphere(portal.GetCentrePoint(), portal.GetBoundingSphereRadius()) == false) continue;
 
-
+			// Construct a new frustum by clipping against the portal bounds 
+			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal);
+			delete new_frustum;
+		}
 	}
+	return 0;
 
 
+}
 
+// Create a new view frustum by clipping the current frustum against the bounds of a view portal
+Frustum * CoreEngine::CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal)
+{
+	// By constraining view portals to an AABB we can guarantee clipped view frustums are always four-sided
+	Frustum *frustum = new Frustum(4U, current_frustum.GetNearPlane(), current_frustum.GetFarPlane());
+
+	// Bottom-left point = portal.P0, Top-right point = portal.P1.  Calculate the other two points
+	//XMVECTOR TL = XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VC)
+	return NULL;
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment

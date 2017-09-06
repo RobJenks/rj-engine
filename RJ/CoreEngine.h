@@ -21,6 +21,8 @@
 #include "ShaderManager.h"
 #include "Model.h"
 #include "ModelBuffer.h"
+#include "Frustum.h"
+#include "ViewPortal.h"
 #include "BasicColourDefinition.h"
 class iShader;
 class ModelBuffer;
@@ -36,7 +38,6 @@ class FireShader;
 class SkinnedNormalMapShader;
 class Light;
 class ViewFrustrum;
-class Frustum;
 class LightingManager;
 class FontShader;
 class AudioManager;
@@ -622,6 +623,9 @@ private:
 								global visibility frustum
 	*/
 	void					RenderNonPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
+
+	// Create a new view frustum by clipping the current frustum against the bounds of a view portal
+	Frustum *				CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal);
 
 	// Render an object with a static model.  Protected; called only from RenderObject()
 	void                    RenderObjectWithStaticModel(iObject *object);
