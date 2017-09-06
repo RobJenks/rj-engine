@@ -1805,28 +1805,75 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	if (current_cell == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
 
 	// We will start with the current global visibility frustum, and potentially construct a more restrictive 
-	// version during rendering
-	Frustum *current_frustum = static_cast<Frustum*>(Game::Engine->GetViewFrustrum());
+	// version during rendering.  The global view frustum exists in vector[0], and all >0 are temporary
+	// frustums created during portal rendering that will be deallocated at the end of the method
 	Frustum *new_global_frustum = NULL;
+	m_tmp_frustums.clear();
+	m_tmp_frustums.push_back(static_cast<Frustum*>(Game::Engine->GetViewFrustrum()));
+	std::vector<Frustum*>::size_type current_frustum = 0U;
+
+	// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
+	// certain activities entirely in environment-local space
+	XMVECTOR env_local_viewer = XMVector3TransformCoord(Game::Engine->GetCamera()->GetPosition(), environment->GetInverseZeroPointWorldMatrix());
 
 	// Start with the current cell and proceed (vectorised) recursively
 	std::vector<PortalRenderingStep> cells;
 	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum)));
-return 0;
+
 	while (!cells.empty())
 	{
 		// Get the next cell to be processed
 		PortalRenderingStep step = std::move(cells.back());
 		cells.pop_back();
 
-		// Render the tile itself
 		ComplexShipTile *cell = step.Cell;
 		if (cell)
 		{
+			// Render the tile itself
 			RenderComplexShipTile(cell, environment);
+
+			// Get all objects within this tile area, which are visible based upon the current view frustum
+			m_tmp_envobjects.clear(); m_tmp_terrain.clear();
+			environment->GetAllVisibleObjectsWithinDistance(environment->SpatialPartitioningTree, cell->GetRelativePosition(),
+				cell->GetBoundingSphereRadius(), m_tmp_frustums[current_frustum], &m_tmp_envobjects, &m_tmp_terrain);
+
+			// Render all visible objects in the cell
+			std::vector<iEnvironmentObject*>::const_iterator o_it_end = m_tmp_envobjects.end();
+			for (std::vector<iEnvironmentObject*>::const_iterator o_it = m_tmp_envobjects.begin(); o_it != o_it_end; ++o_it)
+			{ 
+				RenderEnvironmentObject(*o_it);
+			}
+
+			// Render all visible terrain in the cell
+			StaticTerrain *terrain;
+			std::vector<StaticTerrain*>::const_iterator t_it_end = m_tmp_terrain.end();
+			for (std::vector<StaticTerrain*>::const_iterator t_it = m_tmp_terrain.begin(); t_it != t_it_end; ++t_it)
+			{
+				terrain = (*t_it);
+				if (!terrain) return;
+				if (terrain->IsRendered()) return;
+				if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) return;
+
+				// We should not render anything if the object has been destroyed
+				if (terrain->IsDestroyed()) continue;
+
+				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
+					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
+				));
+
+				// This terrain object has been rendered
+				terrain->MarkAsRendered();
+				++m_renderinfo.TerrainRenderCount;
+			}
 		}
 		
-		// (*** CONTINUE ***)
+		// Now process any portals in the current cell
+		
+
+
 	}
 
 
@@ -1969,6 +2016,20 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			++m_renderinfo.TerrainRenderCount;
 		}
 	});
+}
+
+// Renders an object within a particular environment
+void CoreEngine::RenderEnvironmentObject(iEnvironmentObject *object)
+{
+	// Parameter check
+	if (!object) return;
+
+	// Pass to different methods depending on the type of object
+	switch (object->GetObjectType())
+	{
+		case iObject::ActorObject:
+			QueueActorRendering((Actor*)object);				break;
+	}
 }
 
 // Render a complex ship tile to the space environment, relative to its parent ship object

@@ -12,6 +12,7 @@ template <class EnvironmentTree> class MemoryPool;
 class iSpaceObjectEnvironment;
 class iEnvironmentObject;
 class StaticTerrain;
+using namespace DirectX;
 
 // The index into child node pointers for each of the eight possible subdivision directions
 #define ENVTREE_NW_UP		0
@@ -95,6 +96,32 @@ public:
 	CMPINLINE bool								ContainsPoint(const FXMVECTOR point) const
 	{
 		return (XMVector3GreaterOrEqual(point, m_min) && XMVector3Less(point, m_max));
+	}
+
+	// Determines whether the node contains the specified area; node is treated as half-open range [min max) as per default behaviour
+	CMPINLINE bool								ContainsArea(const FXMVECTOR area_min, const FXMVECTOR area_max)
+	{
+		return (XMVector3GreaterOrEqual(area_min, m_min) && XMVector3Less(area_max, m_max));
+	}
+
+	// Determines whether the node contains the specified area, with node treated as fully-open range [min max] as special casee
+	CMPINLINE bool								ContainsAreaFullyInclusive(const FXMVECTOR area_min, const FXMVECTOR area_max)
+	{
+		return (XMVector3GreaterOrEqual(area_min, m_min) && XMVector3LessOrEqual(area_max, m_max));
+	}
+
+	// Determines whether the node intersects the specified area at all; node is treated as half-open range [min max) as per default behaviour
+	CMPINLINE bool								IntersectsArea(const FXMVECTOR area_min, const FXMVECTOR area_max)
+	{
+		// Min < node-max && Max >= node-min
+		return (XMVector3Less(area_min, m_max) && XMVector3GreaterOrEqual(area_max, m_min));
+	}
+
+	// Determines whether the node intersects the specified area at all; with node treated as fully -open range [min max) as special case
+	CMPINLINE bool								IntersectsAreaFullyInclusive(const FXMVECTOR area_min, const FXMVECTOR area_max)
+	{
+		// Min < node-max && Max >= node-min
+		return (XMVector3LessOrEqual(area_min, m_max) && XMVector3GreaterOrEqual(area_max, m_min));
 	}
 
 	// Determines whether the node contains the specified element

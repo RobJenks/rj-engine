@@ -5,12 +5,12 @@
 // Constructor
 PortalRenderingStep::PortalRenderingStep(void) noexcept
 	:
-	Cell(NULL), VisibilityFrustum(NULL), TraversalCount(0U)
+	Cell(NULL), VisibilityFrustum(0U), TraversalCount(0U)
 {
 }
 
 // Constructor
-PortalRenderingStep::PortalRenderingStep(ComplexShipTile *cell, Frustum *visibility_frustum) noexcept
+PortalRenderingStep::PortalRenderingStep(ComplexShipTile *cell, std::vector<Frustum*>::size_type visibility_frustum) noexcept
 	:
 	Cell(cell), VisibilityFrustum(visibility_frustum), TraversalCount(0U)
 {

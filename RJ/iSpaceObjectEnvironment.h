@@ -27,6 +27,7 @@ class iEnvironmentObject;
 class StaticTerrain;
 class NavNetwork;
 class EnvironmentTree;
+class Frustum;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -546,6 +547,16 @@ public:
 	// which supplies a focal object, since the relevant node has to be determined based on the position
 	void							GetAllObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float distance,
 																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+
+	// Finds all visible objects within a given distance of the specified location, with visibility determined
+	// by the given frustum object
+	void							GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, const FXMVECTOR search_radius, const Frustum *frustum,
+																		std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+	CMPINLINE void					GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float search_radius, const Frustum *frustum,
+																		std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+	{
+		GetAllVisibleObjectsWithinDistance(spatial_tree, position, XMVectorReplicate(search_radius), frustum, outObjects, outTerrain);
+	}
 
 	// Returns debug string information on the environment
 	CMPINLINE std::string			DebugEnvironmentString(void) const

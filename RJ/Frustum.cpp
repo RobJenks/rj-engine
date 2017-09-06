@@ -58,7 +58,7 @@ void Frustum::SetPlane(size_t plane, const FXMVECTOR plane_coeff)
 
 // Checks for the intersection of a centre point and negative-vectorised-radius with
 // the frustum.  Internal method used as the basis for many public method above
-bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v)
+bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v) const
 {
 	// If the sphere is 'behind' any plane of the view frustum then return false immediately
 	if (XMVector2Less(XMPlaneDotCoord(m_planes[Frustum::NEAR_PLANE], centre_point), negated_radius_v)) return false;
@@ -73,7 +73,7 @@ bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR 
 }
 
 // Test whether the given bounding sphere lies within the frustum
-bool Frustum::CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius)
+bool Frustum::CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius) const
 {
 	// Simply call the internal method with correctly negated & vectorised radius
 	XMVECTOR radius = XMVectorReplicate(-sphere_radius);
@@ -81,14 +81,14 @@ bool Frustum::CheckSphere(const FXMVECTOR sphere_centre, float sphere_radius)
 }
 
 // Check whether a point lies within the frustum
-bool Frustum::CheckPoint(const FXMVECTOR pt)
+bool Frustum::CheckPoint(const FXMVECTOR pt) const
 {
 	// This is idential to the sphere intersection test with radius == 0
 	return CheckSphereInternal(pt, NULL_VECTOR);
 }
 
 // Check whether an object lies within the frustum, based upon its collision sphere
-bool Frustum::TestObjectVisibility(const iObject *obj)
+bool Frustum::TestObjectVisibility(const iObject *obj) const
 {
 	// Call the internal method with collision sphere data from the object
 	if (!obj) return false;
@@ -96,7 +96,7 @@ bool Frustum::TestObjectVisibility(const iObject *obj)
 }
 
 // Check whether the given cuboid lies within the frustum
-bool Frustum::CheckCuboid(const FXMVECTOR centre, const FXMVECTOR size)
+bool Frustum::CheckCuboid(const FXMVECTOR centre, const FXMVECTOR size) const
 {
 	XMVECTOR neg_size = XMVectorNegate(size);
 
@@ -115,7 +115,7 @@ bool Frustum::CheckCuboid(const FXMVECTOR centre, const FXMVECTOR size)
 }
 
 // Check whether the given OBB lies within the frustum
-bool Frustum::CheckOBB(const OrientedBoundingBox & obb)
+bool Frustum::CheckOBB(const OrientedBoundingBox & obb) const
 {
 	obb.DetermineVertices(Frustum::m_working_cuboidvertices);
 

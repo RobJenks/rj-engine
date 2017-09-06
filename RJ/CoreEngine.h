@@ -632,6 +632,9 @@ private:
 	// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
 	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node, const FXMVECTOR environment_relative_viewer_position);
 
+	// Renders an object within a particular environment
+	void					RenderEnvironmentObject(iEnvironmentObject *object);
+
 	// Lighting configuration is stored within the core engine and set for each object being rendered
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
@@ -660,7 +663,11 @@ private:
 	AXMVECTOR					m_cache_zeropoint;								// World position of the (0,0,0) element, i.e. corner of the environment
 	AXMVECTOR_P					m_cache_el_inc[3];								// World position delta to move +1 element in each local dimension
 	AXMVECTOR_P					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
-	std::vector<EnvironmentTree*> m_tmp_envnodes;								// Temporary vector of environment tree nodes being processed for rendering
+	std::vector<EnvironmentTree*>		m_tmp_envnodes;							// Temporary vector of environment tree nodes being processed for rendering
+	std::vector<iEnvironmentObject*>	m_tmp_envobjects;						// Temporary vector of environment objects to be rendered
+	std::vector<StaticTerrain*>			m_tmp_terrain;							// Temporary vector of static terrain objects to be rendered
+	std::vector<Frustum*>		m_tmp_frustums;									// Temporary vector of frustums maintained during portal rendering, to avoid repeated allocations
+
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedobjects;							// Temporary vector of object IDs that have been rendered this cycle
 	std::vector<Game::ID_TYPE>	m_tmp_renderedterrain;							// Temporary vector of terrain IDs that have been rendered this cycle

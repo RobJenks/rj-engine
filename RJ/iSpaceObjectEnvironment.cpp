@@ -26,6 +26,7 @@
 #include "ElementIntersection.h"
 #include "EnvironmentCollision.h"
 #include "SimulatedEnvironmentCollision.h"
+#include "Frustum.h"
 #include "PortalRenderingSupport.h"
 
 #include "iSpaceObjectEnvironment.h"
@@ -2678,6 +2679,92 @@ void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(EnvironmentTree *spati
 	{
 		// Determine the relevant tree node and pass to the primary search function
 		_GetAllObjectsWithinDistance(spatial_tree->GetNodeContainingPoint(position), position, distance, outObjects, outTerrain);
+	}
+}
+
+// Finds all visible objects within a given distance of the specified location, with visibility determined
+// by the given frustum object
+void iSpaceObjectEnvironment::GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, const FXMVECTOR search_radius, const Frustum *frustum,
+																 std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+{
+	// Parameter check
+	if (!spatial_tree || !frustum) return;
+
+	// Determine the relevant tree node that covers the search area
+	XMVECTOR pos_min = XMVectorMax(NULL_VECTOR, XMVectorSubtract(position, search_radius));
+	XMVECTOR pos_max = XMVectorMin(m_size, XMVectorAdd(position, search_radius));
+	XMVECTOR threshold_dist;
+
+	EnvironmentTree *node = spatial_tree->GetNodeContainingPoint(position);
+	while (!node->ContainsAreaFullyInclusive(pos_min, pos_max) && node->GetParent())
+	{
+		node = node->GetParent();
+	}
+
+	// The node now contains the entire search area; push it into the search vector and begin searching
+	m_search_nodes.clear();
+	m_search_nodes.push_back(node);
+
+	EnvironmentTree *child;
+	while (!m_search_nodes.empty())
+	{
+		// Retrieve the next node and pop it from the search vector
+		node = m_search_nodes.back();
+		m_search_nodes.pop_back();
+		if (!node) continue;
+
+		// If the node is a branch, add any of its children to the search vector that are
+		// within the search area
+		if (node->IsBranchNode())
+		{
+			int n = node->GetChildCount();
+			for (int i = 0; i < n; ++i)
+			{
+				// Only add the node if it contains part of our search area
+				child = node->GetActiveChildNode(i);
+				if (child->IntersectsAreaFullyInclusive(pos_min, pos_max)) m_search_nodes.push_back(child);
+			}
+		}
+		else
+		{
+			// This is a leaf node; process all items and return any that are within the search distance
+			if (outObjects)
+			{
+				iEnvironmentObject *obj;
+				std::vector<iEnvironmentObject*>::const_iterator it_end = node->GetNodeObjects().end();
+				for (std::vector<iEnvironmentObject*>::const_iterator it = node->GetNodeObjects().begin(); it != it_end; ++it)
+				{
+					// Object must exist and be within the search radius
+					obj = (*it); if (!obj) continue;
+					threshold_dist = XMVectorAdd(search_radius, XMVectorReplicate(obj->GetCollisionSphereRadius()));
+					if (XMVector2Greater(XMVector3LengthSq(XMVectorSubtract(obj->GetEnvironmentPosition(), position)),
+										 XMVectorMultiply(threshold_dist, threshold_dist))) continue;
+
+					// If the object also lies within our view frustum then return it
+					if (frustum->CheckSphere(obj->GetEnvironmentPosition(), obj->GetCollisionSphereRadius()))
+						outObjects->push_back(obj);
+				}
+			}
+
+			// Also process any terrain objects
+			if (outTerrain)
+			{
+				StaticTerrain *obj;
+				std::vector<StaticTerrain*>::const_iterator it_end = node->GetNodeTerrain().end();
+				for (std::vector<StaticTerrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
+				{
+					// Terrain object must exist and be within the search radius
+					obj = (*it); if (!obj) continue;
+					threshold_dist = XMVectorAdd(search_radius, XMVectorReplicate(obj->GetCollisionRadius()));
+					if (XMVector2Greater(XMVector3LengthSq(XMVectorSubtract(obj->GetEnvironmentPosition(), position)),
+						XMVectorMultiply(threshold_dist, threshold_dist))) continue;
+
+					// If the terrain object also lies within our view frustum then return it
+					if (frustum->CheckSphere(obj->GetEnvironmentPosition(), obj->GetCollisionRadius()))
+						outTerrain->push_back(obj);
+				}
+			}
+		}
 	}
 }
 

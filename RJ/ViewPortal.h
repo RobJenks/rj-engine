@@ -9,6 +9,9 @@ class ViewPortal
 {
 public:
 
+	// TODO: Could define more optimised version for four-vertex portals, which will cover some key scenarios.  Also perform
+	// similar optimisation to Frustum with four planes
+
 	// Constructor must pass in at least the portal vertex count to allow allocation at construct-time
 	ViewPortal(size_t vertex_count);
 	
