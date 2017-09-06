@@ -2363,6 +2363,10 @@ void RJMain::DEBUGDisplayInfo(void)
 			f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
 		}
 
+		XMMATRIX rotate = XMMatrixRotationAxis(UP_VECTOR, ((float)(Game::ClockMs % 5000U) / 5000.0f) * TWOPI);
+		f->Transform(rotate);
+		
+
 		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));
 		s2()->Highlight.Activate();
 		XMVECTOR obj = s2()->GetPosition();
@@ -2373,8 +2377,12 @@ void RJMain::DEBUGDisplayInfo(void)
 
 		for (size_t i = 0U; i < 4U; ++i)
 		{
-			Game::Engine->GetOverlayRenderer()->RenderLine(viewpos, p[i], colour, 1.0f, -1.0f);
-			Game::Engine->GetOverlayRenderer()->RenderLine(p[i], p[((i + 1) % 4)], colour, 1.0f, -1.0f);
+		//	Game::Engine->GetOverlayRenderer()->RenderLine(viewpos, p[i], colour, 1.0f, -1.0f);
+		//	Game::Engine->GetOverlayRenderer()->RenderLine(p[i], p[((i + 1) % 4)], colour, 1.0f, -1.0f);
+
+			XMVECTOR p0 = XMVectorSetW(XMVectorMultiply(f->GetPlane(Frustum::FIRST_SIDE + i), XMVectorReplicate(-100.0f)), 1.0f);
+			XMVECTOR p1 = XMVectorSetW(XMVectorMultiply(f->GetPlane(Frustum::FIRST_SIDE + i), XMVectorReplicate(+100.0f)), 1.0f);
+			Game::Engine->GetOverlayRenderer()->RenderLine(XMVector3TransformCoord(p0, ss()->GetWorldMatrix()), XMVector3TransformCoord(p1, ss()->GetWorldMatrix()), colour, 1.0f, -1.0f);
 		}
 
 		std::string result = (intersects ? "INTERSECTS: " : "No intersection: ");

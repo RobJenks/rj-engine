@@ -56,6 +56,15 @@ void Frustum::SetPlane(size_t plane, const FXMVECTOR plane_coeff)
 	m_planes[plane] = plane_coeff;
 }
 
+// Transform the frustum by the given matrix
+void Frustum::Transform(const FXMMATRIX transform)
+{
+	for (size_t i = 0U; i < m_planecount; ++i)
+	{
+		m_planes[i] = XMPlaneTransform(m_planes[i], transform);
+	}
+}
+
 // Checks for the intersection of a centre point and negative-vectorised-radius with
 // the frustum.  Internal method used as the basis for many public method above
 bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v) const

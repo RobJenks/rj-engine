@@ -33,6 +33,10 @@ public:
 	CMPINLINE const XMVECTOR &			GetNearPlane(void) const		{ return m_planes[Frustum::NEAR_PLANE]; }
 	CMPINLINE const XMVECTOR &			GetFarPlane(void) const			{ return m_planes[Frustum::FAR_PLANE]; }
 
+	
+	// Transform the frustum by the given matrix
+	void								Transform(const FXMMATRIX transform);
+
 
 	/*** Intersection testing methods ***/
 
