@@ -10,9 +10,9 @@ PortalRenderingStep::PortalRenderingStep(void) noexcept
 }
 
 // Constructor
-PortalRenderingStep::PortalRenderingStep(ComplexShipTile *cell, std::vector<Frustum*>::size_type visibility_frustum) noexcept
+PortalRenderingStep::PortalRenderingStep(ComplexShipTile *cell, std::vector<Frustum*>::size_type visibility_frustum, size_t traversal_count) noexcept
 	:
-	Cell(cell), VisibilityFrustum(visibility_frustum), TraversalCount(0U)
+	Cell(cell), VisibilityFrustum(visibility_frustum), TraversalCount(traversal_count)
 {
 }
 

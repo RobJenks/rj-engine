@@ -3,9 +3,9 @@
 #include "ViewPortal.h"
 
 // Constructor for a new view portal.  Vertices are specified in parent-local (generally tile-local) coordinates
-ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point) noexcept
+ViewPortal::ViewPortal(int location, const FXMVECTOR min_point, const FXMVECTOR max_point, int target_location) noexcept
 	:
-	Bounds(min_point, max_point)
+	Bounds(min_point, max_point), m_location(location), m_target(target_location)
 {
 	RecalculateData();
 }
@@ -13,7 +13,8 @@ ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point) noe
 // Copy constructor
 ViewPortal::ViewPortal(const ViewPortal & other) noexcept
 	:
-	Bounds(other.Bounds), m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
+	Bounds(other.Bounds), m_location(other.m_location), m_target(other.m_target), 
+	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
 {
 }
 
@@ -21,6 +22,8 @@ ViewPortal::ViewPortal(const ViewPortal & other) noexcept
 ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 {
 	Bounds = other.Bounds;
+	m_location = other.m_location;
+	m_target = other.m_target;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
 	return *this;
@@ -29,7 +32,8 @@ ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 // Move constructor
 ViewPortal::ViewPortal(ViewPortal && other) noexcept
 	:
-	Bounds(std::move(other.Bounds)), m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
+	Bounds(std::move(other.Bounds)), m_location(other.m_location), m_target(other.m_target), 
+	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
 {
 }
 
@@ -37,6 +41,8 @@ ViewPortal::ViewPortal(ViewPortal && other) noexcept
 ViewPortal & ViewPortal::operator=(ViewPortal && other) noexcept
 {
 	Bounds = std::move(other.Bounds);
+	m_location = other.m_location;
+	m_target = other.m_target;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
 	return *this;

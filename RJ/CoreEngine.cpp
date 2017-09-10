@@ -1819,7 +1819,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 	// Start with the current cell and proceed (vectorised) recursively
 	std::vector<PortalRenderingStep> cells;
-	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum)));
+	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum, 0U)));
 
 	while (!cells.empty())
 	{
@@ -1882,13 +1882,24 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
 
 			// Construct a new frustum by clipping against the portal bounds 
+			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
 			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal, view_position, cell_world);
-			delete new_frustum;
+			++current_frustum;
+			m_tmp_frustums[current_frustum] = new_frustum;
+
+			// Make sure the portal has a valid destination
+			int target_element = portal.GetTargetLocation();
+			ComplexShipElement *target_el = environment->GetElement(target_element);
+			if (!target_el) continue;	// TODO: need to handle NULL destination in future, for e.g. interstitial space or portals to the outside
+			ComplexShipTile *target_cell = el->GetTile();
+			if (!target_cell) continue;	// TODO: need to handle NULL destination in future, for e.g. interstitial space or portals to the outside
+
+			// Use the new frustum to generate further steps in the portal traversal
+			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
 		}
 	}
-	return 0;
-
-
+	
+	return NULL; // TODO
 }
 
 // Create a new view frustum by clipping the current frustum against the bounds of a view portal

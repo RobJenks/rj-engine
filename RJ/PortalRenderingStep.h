@@ -20,7 +20,7 @@ struct PortalRenderingStep
 
 	// Constructor
 	PortalRenderingStep(void) noexcept;
-	PortalRenderingStep(ComplexShipTile *cell, std::vector<Frustum*>::size_type visibility_frustum) noexcept;
+	PortalRenderingStep(ComplexShipTile *cell, std::vector<Frustum*>::size_type visibility_frustum, size_t traversal_count) noexcept;
 
 	// Copy constructor and copy assignment are deleted
 	CMPINLINE PortalRenderingStep(const PortalRenderingStep & other) = delete;

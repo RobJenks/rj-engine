@@ -125,6 +125,7 @@ namespace Game {
 	const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL = 1000U;		// Time (ms) between pre-optimisation checks of the render queue
 	const unsigned int C_DEFAULT_RENDERQUEUE_OPTIMISE_INTERVAL = 10000U;	// Time (ms) between optimisation passes on the render queue
 	const float C_LIGHT_RENDER_DISTANCE = 10000.0f;			// The maximum distance at which lights are considered during rendering
+	const size_t C_MAX_PORTAL_RENDERING_DEPTH = 16U;		// Maximum number of cell traversals we allow in any particular portal rendering branch
 
 	// Physics constants
 	const float C_EPSILON = 1e-6f;
