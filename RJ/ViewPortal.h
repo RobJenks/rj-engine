@@ -13,11 +13,10 @@ public:
 	// Portals are represented as an AABB which encloses the potentially-arbitrary number of vertices making
 	// up the actual opening.  We do this for efficiency since a small amount of overdraw is acceptable
 	// Portals are one-way only, i.e. P0 is always top-top-left and vice versa for P1
-	//const AABB									LocalBounds;		// Tile-local bounds
-	AABB									Bounds;				// World-space bounds
+	AABB										Bounds;				// Parent-local bounds (generally tile-local)
 	
 	// Constructor for a new view portal.  Vertices are specified in world coordinates
-	ViewPortal(const FXMVECTOR world_min_point, const FXMVECTOR world_max_point) noexcept;
+	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point) noexcept;
 
 	// Copy constructor
 	ViewPortal(const ViewPortal & other) noexcept;
@@ -30,11 +29,8 @@ public:
 
 	// Move assignment
 	ViewPortal & operator=(ViewPortal && other) noexcept;
-
-	// Constructor for a new view portal.  Vertices are specified in local coordinates, with a 
-	//ViewPortal(const FXMVECTOR local_min_point, const FXMVECTOR local_max_point, const FXMMATRIX world_matrix);
 	
-	// Centre point and bounding radius in world space
+	// Centre point and bounding radius in parent-local space (generally tile-local)
 	CMPINLINE const AXMVECTOR					GetCentrePoint(void) const { return m_centre; }
 	CMPINLINE float								GetBoundingSphereRadius(void) const { return m_bounding_sphere_radius; }
 

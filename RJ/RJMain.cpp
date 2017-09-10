@@ -2349,23 +2349,32 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{		
-		Frustum *f = new Frustum(4U, Game::Engine->GetViewFrustrum()->GetNearPlane(), Game::Engine->GetViewFrustrum()->GetFarPlane());
-		
-		XMVECTOR viewpos = ss()->GetPosition();
-		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-50, +50, 400, 0), ss()->GetWorldMatrix());
-		XMVECTOR p1 = XMVector3TransformCoord(XMVectorSet(+50, +50, 400, 0), ss()->GetWorldMatrix());
-		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+50, -50, 400, 0), ss()->GetWorldMatrix());
-		XMVECTOR p3 = XMVector3TransformCoord(XMVectorSet(-50, -50, 400, 0), ss()->GetWorldMatrix());
-		XMVECTOR p[4] = { p0, p1, p2, p3 };
-			
-		for (size_t i = 0U; i < 4U; ++i)
-		{
-			f->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
-		}
+		static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
+		if (Game::Keyboard.GetKey(DIK_F)) extent.x += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
+		if (Game::Keyboard.GetKey(DIK_G)) extent.y += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 
-		XMMATRIX rotate = XMMatrixRotationAxis(UP_VECTOR, ((float)(Game::ClockMs % 5000U) / 5000.0f) * TWOPI);
-		f->Transform(rotate);
+
+		XMVECTOR viewpos = ss()->GetPosition();
+		XMVECTOR portal_min = XMVectorSet(-extent.x, -extent.x, 400, 0);
+		XMVECTOR portal_max = XMVectorSet(+extent.x, +extent.y, 400, 0);
+			
+		ViewPortal portal = ViewPortal(portal_min, portal_max);
+		Frustum *f = Game::Engine->CreateClippedFrustum(*(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, viewpos, ss()->GetWorldMatrix());
+
+		XMVECTOR p1local = XMVectorSet(+extent.x, +extent.y, 400, 0);
+		XMVECTOR p3local = XMVectorSet(-extent.y, -extent.y, 400, 0);
+		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TL
+		XMVECTOR p1 = XMVector3TransformCoord(p1local, ss()->GetWorldMatrix());										// TR
+		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BR
+		XMVECTOR p3 = XMVector3TransformCoord(p3local, ss()->GetWorldMatrix());										// BL
+		XMVECTOR p[4] = { p0, p1, p2, p3 };
+		Frustum *manual = new Frustum(4U, Game::Engine->GetViewFrustrum()->GetNearPlane(), Game::Engine->GetViewFrustrum()->GetFarPlane());
+		for (size_t i = 0U; i < 4U; ++i)	// v/tr/tl   v/br/tr   v/bl/br   v/tl/bl
+		{
+			manual->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
+		}
 		
+		//std::swap(f, manual);
 
 		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));
 		s2()->Highlight.Activate();
@@ -2394,7 +2403,6 @@ void RJMain::DEBUGDisplayInfo(void)
 
 			result = concat(result)(outside_plane ? "OUT (" : "IN (")(rounded_val)(") ").str();
 		}
-		result = concat(result)("\n").str();
 
 		float spacing = 20.0f;
 		float node_size = 5.0f;
@@ -2414,16 +2422,16 @@ void RJMain::DEBUGDisplayInfo(void)
 					++total;
 					if (cell_result) ++success;
 
-					if (false) Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
+					if (true) Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
 						(cell_result ? XMFLOAT4(0,1,0,1) : XMFLOAT4(1, 0, 0, 1)));
 				}
 			}
 		}
 		SafeDelete(f);
+		SafeDelete(manual);
 
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Nodes: %d of %d    |   Result: %s ",
-			success, total, result.c_str());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Nodes: %d of %d    |   Extent: %s   |   Result: %s ",
+			success, total, Vector2ToString(extent).c_str(), result.c_str());
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

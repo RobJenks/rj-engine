@@ -1814,7 +1814,8 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 	// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
 	// certain activities entirely in environment-local space
-	XMVECTOR env_local_viewer = XMVector3TransformCoord(Game::Engine->GetCamera()->GetPosition(), environment->GetInverseZeroPointWorldMatrix());
+	XMVECTOR view_position = Game::Engine->GetCamera()->GetPosition();
+	XMVECTOR env_local_viewer = XMVector3TransformCoord(view_position, environment->GetInverseZeroPointWorldMatrix());
 
 	// Start with the current cell and proceed (vectorised) recursively
 	std::vector<PortalRenderingStep> cells;
@@ -1871,15 +1872,17 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		}
 		
 		// Now process any portals in the current cell
+		XMMATRIX cell_world = XMMatrixMultiply(cell->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
 		auto it_end = cell->GetPortals().end();
 		for (auto it = cell->GetPortals().begin(); it != it_end; ++it)
 		{
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
 			const ViewPortal & portal = (*it);
-			if (m_tmp_frustums[current_frustum]->CheckSphere(portal.GetCentrePoint(), portal.GetBoundingSphereRadius()) == false) continue;
+			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
+			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
 
 			// Construct a new frustum by clipping against the portal bounds 
-			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal);
+			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal, view_position, cell_world);
 			delete new_frustum;
 		}
 	}
@@ -1889,14 +1892,29 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 }
 
 // Create a new view frustum by clipping the current frustum against the bounds of a view portal
-Frustum * CoreEngine::CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal)
+// Portal is defined in cell-local space, and frustum is required in world space, so also accepts a cell-to-world transform
+Frustum * CoreEngine::CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal, const FXMVECTOR view_position, const FXMMATRIX world_transform)
 {
 	// By constraining view portals to an AABB we can guarantee clipped view frustums are always four-sided
 	Frustum *frustum = new Frustum(4U, current_frustum.GetNearPlane(), current_frustum.GetFarPlane());
 
 	// Bottom-left point = portal.P0, Top-right point = portal.P1.  Calculate the other two points
-	//XMVECTOR TL = XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VC)
-	return NULL;
+	// Transform all points to world space at this point, before construction of the frustum
+	XMVECTOR BL = XMVector3TransformCoord(portal.Bounds.P0, world_transform);
+	XMVECTOR TR = XMVector3TransformCoord(portal.Bounds.P1, world_transform);
+	XMVECTOR TL = XMVector3TransformCoord(XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VCTRL_0100), world_transform);
+	XMVECTOR BR = XMVector3TransformCoord(XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VCTRL_1000), world_transform);
+
+	// Clip each of the four frustum sides to the portal vertices. Each plane can be defined by three
+	// points { view_pos, portal_vertex_0, portal_vertex_1 }.  Vertices must follow specific widing so
+	// plane normals correctly face inwards
+	frustum->SetPlane(Frustum::FIRST_SIDE + 0U, view_position, TR, TL);		// View-TR-TL
+	frustum->SetPlane(Frustum::FIRST_SIDE + 1U, view_position, BR, TR);		// View-BR-TR
+	frustum->SetPlane(Frustum::FIRST_SIDE + 2U, view_position, BL, BR);		// View-BL-BR
+	frustum->SetPlane(Frustum::FIRST_SIDE + 3U, view_position, TL, BL);		// View-TL-BL
+
+	// Return the new frustum.  It is the responsibility of the calling method to dispose of it afterwards
+	return frustum;
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment

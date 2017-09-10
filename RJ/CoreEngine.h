@@ -623,10 +623,10 @@ private:
 								global visibility frustum
 	*/
 	void					RenderNonPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
-
+	public:
 	// Create a new view frustum by clipping the current frustum against the bounds of a view portal
-	Frustum *				CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal);
-
+	Frustum *				CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal, const FXMVECTOR view_position, const FXMMATRIX world_transform);
+	private:
 	// Render an object with a static model.  Protected; called only from RenderObject()
 	void                    RenderObjectWithStaticModel(iObject *object);
 

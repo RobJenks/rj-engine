@@ -2,10 +2,10 @@
 #include "DX11_Core.h"
 #include "ViewPortal.h"
 
-// Constructor for a new view portal.  Vertices are specified in world coordinates
-ViewPortal::ViewPortal(const FXMVECTOR world_min_point, const FXMVECTOR world_max_point) noexcept
+// Constructor for a new view portal.  Vertices are specified in parent-local (generally tile-local) coordinates
+ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point) noexcept
 	:
-	Bounds(world_min_point, world_max_point)
+	Bounds(min_point, max_point)
 {
 	RecalculateData();
 }
@@ -45,7 +45,7 @@ ViewPortal & ViewPortal::operator=(ViewPortal && other) noexcept
 // Recalculates internal data within the portal following a change to the vertex layout
 void ViewPortal::RecalculateData(void)
 {
-	// Determine an approximate world-space midpoint and bounding radius for the portal
+	// Determine an approximate local-space midpoint and bounding radius for the portal
 	m_centre = XMVectorMultiply(XMVectorAdd(Bounds.P0, Bounds.P1), HALF_VECTOR);
 	m_bounding_sphere_radius = XMVectorGetX(XMVectorScale(XMVector3LengthEst(
 		XMVectorSubtract(Bounds.P0, Bounds.P1)), 0.5f));
