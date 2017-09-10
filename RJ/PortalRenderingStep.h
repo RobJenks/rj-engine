@@ -32,6 +32,9 @@ struct PortalRenderingStep
 	// Move assignment
 	PortalRenderingStep & operator=(PortalRenderingStep && other);
 
+	// Debug string output
+	std::string DebugString(void) const;
+
 	// Destructor
 	~PortalRenderingStep(void);
 

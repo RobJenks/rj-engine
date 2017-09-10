@@ -57,6 +57,13 @@ void ViewPortal::RecalculateData(void)
 		XMVectorSubtract(Bounds.P0, Bounds.P1)), 0.5f));
 }
 
+// Debug string representation of the portal
+std::string ViewPortal::DebugString(void) const
+{
+	return concat("ViewPortal [Location=")(m_location)(", target=")(m_target)(", bounds=")(Vector3ToString(Bounds.MinPoint()))("-")(Vector3ToString(Bounds.MaxPoint()))
+		(", centre=")(Vector3ToString(m_centre))(", bounding_radius=")(m_bounding_sphere_radius)("]").str();
+}
+
 // Destructor; deallocates all storage owned by the object
 ViewPortal::~ViewPortal(void)
 {

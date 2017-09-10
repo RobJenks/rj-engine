@@ -66,6 +66,9 @@ struct SentenceType;
 const float SCREEN_DEPTH = 5000.0f;
 const float SCREEN_NEAR = 0.1f;
 
+// Debug rendering compiler flags
+#define ENABLE_PORTAL_RENDERING_DEBUG_MODE
+
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
 class CoreEngine : public ALIGN16<CoreEngine>, public iAcceptsConsoleCommands
@@ -306,6 +309,7 @@ public:
 	void DebugRenderEnvironmentTree(void);
 	void DebugRenderEnvironmentNavNetwork(void);
 	void DebugRenderObjectIdentifiers(void);
+	void DebugRenderPortalTraversal(void);
 
 	// Gets or sets the environment that is the subject of debug rendering
 	CMPINLINE Game::ID_TYPE GetDebugTerrainRenderEnvironment(void) const { return m_debug_renderenvboxes; }
@@ -318,6 +322,8 @@ public:
 	CMPINLINE void SetDebugObjectIdentifierRenderTargetObject(Game::ID_TYPE id) { m_debug_renderobjid_object = id; }
 	CMPINLINE float GetDebugObjectIdentifierRenderingDistance(void) const { return m_debug_renderobjid_distance; }
 	CMPINLINE void SetDebugObjectIdentifierRenderingDistance(float dist) { m_debug_renderobjid_distance = clamp(dist, 1.0f, 100000.0f); }
+	CMPINLINE Game::ID_TYPE GetDebugPortalTraversalRenderingTarget(void) const { return m_debug_renderportaltraversal; }
+	CMPINLINE void SetDebugPortalRenderingTargetForFrame(Game::ID_TYPE environment_id) { m_debug_renderportaltraversal = environment_id; }
 
 	
 	// Structure keeping track of render info per frame
@@ -680,6 +686,7 @@ private:
 	Game::ID_TYPE 				m_debug_renderenvboxes;
 	Game::ID_TYPE				m_debug_renderenvtree;
 	Game::ID_TYPE				m_debug_renderenvnetwork;
+	Game::ID_TYPE				m_debug_renderportaltraversal;
 	Game::ID_TYPE				m_debug_renderobjid_object;						// Specific object for which we should render IDs (generally an environment)
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
@@ -699,6 +706,17 @@ private:
 
 	// Debug terrain rendering mode
 	DebugTerrainRenderMode		m_debug_terrain_render_mode;
+
+	// Debug rendering of environment portal traversal
+#	if defined(_DEBUG) && defined(ENABLE_PORTAL_RENDERING_DEBUG_MODE)
+#		define DEBUG_PORTAL_TRAVERSAL(environment, expr) \
+			if (m_debug_renderportaltraversal == environment->GetID()) { expr; }
+#		define DEBUG_PORTAL_TRAVERSAL_LOG(environment, text) \
+			if (m_debug_renderportaltraversal == environment->GetID()) { Game::Log << LOG_DEBUG << text; }
+#	else
+#		define DEBUG_PORTAL_TRAVERSAL(environment, expr) 
+#		define DEBUG_PORTAL_TRAVERSAL_LOG(environment, text)
+#	endif
 
 };
 

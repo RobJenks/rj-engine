@@ -1,6 +1,6 @@
 #include <cstddef>
 #include "PortalRenderingStep.h"
-
+#include "ComplexShipTile.h"
 
 // Constructor
 PortalRenderingStep::PortalRenderingStep(void) noexcept
@@ -31,6 +31,14 @@ PortalRenderingStep & PortalRenderingStep::operator=(PortalRenderingStep && othe
 	VisibilityFrustum = other.VisibilityFrustum;
 	TraversalCount = other.TraversalCount;
 	return *this;
+}
+
+// Debug string output
+std::string PortalRenderingStep::DebugString(void) const
+{
+	return concat("PortalRenderingStep [Cell=")(Cell ?
+		concat(Cell->GetID())("\"")(Cell->GetCode())("\" at ")(Cell->GetElementLocation().ToString()).str().c_str() : "<NULL>")
+		(", TraversalCount=")(TraversalCount)("]").str();
 }
 
 // Destructor

@@ -1148,12 +1148,14 @@ void iSpaceObjectEnvironment::DeterminePortalRenderingSupport(void)
 void iSpaceObjectEnvironment::OverridePortalBasedRenderingSupport(bool supported)
 {
 	m_overrideportalrenderingsupport = (supported ? PortalRenderingSupport::ForceEnabled : PortalRenderingSupport::ForceDisabled);
+	DeterminePortalRenderingSupport();
 }
 
 // Removes any override on automatic determination of portal-based rendering support
 void iSpaceObjectEnvironment::RemoveOverrideOfPortalBasedRenderingSupport(void)
 {
 	m_overrideportalrenderingsupport = PortalRenderingSupport::DetermineAutomatically;
+	DeterminePortalRenderingSupport();
 }
 
 // Updates a tile following a change to its connection state, i.e. where it now connects to new or fewer
@@ -2817,6 +2819,7 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetTileAtElementLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
 	REGISTER_DEBUG_ACCESSOR_FN(DetermineTotalElementImpactStrength, command.ParameterAsInt(2))
 	REGISTER_DEBUG_ACCESSOR_FN(DetermineTotalElementImpactStrengthAtLocation, INTVECTOR3(command.ParameterAsInt(2), command.ParameterAsInt(3), command.ParameterAsInt(4)))
+	REGISTER_DEBUG_ACCESSOR_FN(SupportsPortalBasedRendering)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(BuildSpatialPartitioningTree)
@@ -2840,6 +2843,9 @@ void iSpaceObjectEnvironment::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(RevalidateEnvironmentMaps)
 	REGISTER_DEBUG_FN(OverrideLocalGravity, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(RemoveLocalGravityOverride)
+	REGISTER_DEBUG_FN(DeterminePortalRenderingSupport)
+	REGISTER_DEBUG_FN(OverridePortalBasedRenderingSupport, command.ParameterAsBool(2))
+	REGISTER_DEBUG_FN(RemoveOverrideOfPortalBasedRenderingSupport)
 
 	// Pass processing back to any base classes, if applicable, if we could not execute the function
 	if (command.OutputStatus == GameConsoleCommand::CommandResult::NotExecuted)		iContainsComplexShipTiles::ProcessDebugCommand(command);

@@ -102,7 +102,7 @@ CoreEngine::CoreEngine(void)
 	m_render2d = NULL;
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
-	m_debug_renderenvboxes = m_debug_renderenvtree = 0;
+	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
 	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
@@ -1818,6 +1818,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	XMVECTOR env_local_viewer = XMVector3TransformCoord(view_position, environment->GetInverseZeroPointWorldMatrix());
 
 	// Start with the current cell and proceed (vectorised) recursively
+	DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Starting portal rendering cycle for environment \"")(environment->GetInstanceCode())("\"\n").str());
 	std::vector<PortalRenderingStep> cells;
 	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum, 0U)));
 
@@ -1826,11 +1827,13 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		// Get the next cell to be processed
 		PortalRenderingStep step = std::move(cells.back());
 		cells.pop_back();
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("New cycle: ")(step.DebugString())("\n").str());
 
 		ComplexShipTile *cell = step.Cell;
 		if (cell)
 		{
 			// Render the tile itself
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, "   Rendering tile model\n");
 			RenderComplexShipTile(cell, environment);
 
 			// Get all objects within this tile area, which are visible based upon the current view frustum
@@ -1839,6 +1842,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				cell->GetBoundingSphereRadius(), m_tmp_frustums[current_frustum], &m_tmp_envobjects, &m_tmp_terrain);
 
 			// Render all visible objects in the cell
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_envobjects.empty() ? "   Found no visible environment objects to render in cell\n" : concat("   Rendering ")(m_tmp_envobjects.size())(" visibile environment objects in cell\n").str().c_str()));
 			std::vector<iEnvironmentObject*>::const_iterator o_it_end = m_tmp_envobjects.end();
 			for (std::vector<iEnvironmentObject*>::const_iterator o_it = m_tmp_envobjects.begin(); o_it != o_it_end; ++o_it)
 			{ 
@@ -1846,6 +1850,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			}
 
 			// Render all visible terrain in the cell
+			size_t terrain_count_rendered; DEBUG_PORTAL_TRAVERSAL(environment, terrain_count_rendered = m_renderinfo.TerrainRenderCount);
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_terrain.empty() ? "   Found no visible terrain objects to render in cell\n" : concat("   Processing ")(m_tmp_terrain.size())(" visibile terrain objects in cell\n").str().c_str()));
+
 			StaticTerrain *terrain;
 			std::vector<StaticTerrain*>::const_iterator t_it_end = m_tmp_terrain.end();
 			for (std::vector<StaticTerrain*>::const_iterator t_it = m_tmp_terrain.begin(); t_it != t_it_end; ++t_it)
@@ -1869,15 +1876,18 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				terrain->MarkAsRendered();
 				++m_renderinfo.TerrainRenderCount;
 			}
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
 		}
 		
 		// Now process any portals in the current cell
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
 		XMMATRIX cell_world = XMMatrixMultiply(cell->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
 		auto it_end = cell->GetPortals().end();
 		for (auto it = cell->GetPortals().begin(); it != it_end; ++it)
 		{
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
 			const ViewPortal & portal = (*it);
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
 
@@ -1896,8 +1906,13 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 			// Use the new frustum to generate further steps in the portal traversal
 			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Generating new traversal step for portal: ")(cells.back().DebugString())("\n").str());
 		}
 	}
+	
+	// If we are debug logging this render cycle, reset the debug ID so that we only log single frames on request
+	DEBUG_PORTAL_TRAVERSAL(environment, m_debug_renderportaltraversal = 0U);
+	DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Portal rendering complete for environment \"")(environment->GetInstanceCode())("\"\n").str());
 	
 	return NULL; // TODO
 }

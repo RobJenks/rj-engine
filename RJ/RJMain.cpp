@@ -621,15 +621,12 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_MINUS])
 	{
-		std::vector<Hardpoint*> hps = cs()->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine);
-		for (int i = 0; i < hps.size(); ++i)
-		{
-			if (hps[i]->HasEquipment()) continue;
-			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
-			hps[i]->MountEquipment(eng);
-		}
+		if (b[DIK_LSHIFT])			cs()->OverridePortalBasedRenderingSupport(true);
+		else if (b[DIK_LCONTROL])	cs()->RemoveOverrideOfPortalBasedRenderingSupport();
 
-		Game::Keyboard.LockKey(DIK_MINUS);
+		else						Game::Engine->SetDebugPortalRenderingTargetForFrame(cs()->GetID());
+		
+		//Game::Keyboard.LockKey(DIK_MINUS);
 	}
 
 	if (b[DIK_EQUALS])
@@ -2358,7 +2355,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		XMVECTOR portal_min = XMVectorSet(-extent.x, -extent.x, 400, 0);
 		XMVECTOR portal_max = XMVectorSet(+extent.x, +extent.y, 400, 0);
 			
-		ViewPortal portal = ViewPortal(portal_min, portal_max);
+		ViewPortal portal = ViewPortal(0U, portal_min, portal_max, 1U);
 		Frustum *f = Game::Engine->CreateClippedFrustum(*(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, viewpos, ss()->GetWorldMatrix());
 
 		XMVECTOR p1local = XMVectorSet(+extent.x, +extent.y, 400, 0);
