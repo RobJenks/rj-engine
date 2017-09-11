@@ -787,6 +787,9 @@ void iSpaceObjectEnvironment::UpdateEnvironment(void)
 
 	// Update the environment navigation network given that connectivity may have changed
 	UpdateNavigationNetwork();
+	
+	// Update the view portal configuration of all tiles in the environment
+	UpdateViewPortalConfiguration();
 
 	// Determine support for portal-based rendering based on the environment or any overrides
 	DeterminePortalRenderingSupport();
@@ -802,6 +805,38 @@ void iSpaceObjectEnvironment::UpdateNavigationNetwork(void)
 	m_navnetwork->InitialiseNavNetwork(this);
 
 	// TODO: Find any actors currently following a path provided by the previous network, and have them recalculate their paths
+}
+
+// Update the view portal configuration of all tiles in the environment
+void iSpaceObjectEnvironment::UpdateViewPortalConfiguration(void)
+{
+	// Process all tiles
+	ComplexShipTileCollection::const_iterator it_end = m_tiles[0].end();
+	for (ComplexShipTileCollection::const_iterator it = m_tiles[0].begin(); it != it_end; ++it)
+	{
+		ComplexShipTile *tile = (*it).value;
+		XMVECTOR tile_centre = XMVectorAdd(tile->GetElementPosition(), tile->GetCentrePoint());
+
+		// Process every portal in each tile
+		for (auto & portal : tile->GetPortals())
+		{
+			// Determine the location of this portal within the environment.  We already know that it fits
+			// entirely within the tile area (based on validation in the tile definition) so we can safely
+			// determine the location based solely on our position
+			XMVECTOR portal_centre = XMVectorAdd(tile_centre, portal.GetCentrePoint());
+			INTVECTOR3 portal_location = Game::PhysicalPositionToElementLocation(portal_centre);
+			assert(portal_location >= NULL_INTVECTOR3 && portal_location < m_elementsize);
+			
+			int portal_element = ElementLocationToIndex(portal_location);
+			int target_element = ElementLocationToIndex(portal_location + DirectionUnitOffset(portal.GetTargetDirection()));
+			assert(IsValidElementID(portal_element) && IsValidElementID(target_element));
+			assert(portal_element != target_element);
+
+			// Set the portal location and target based on this data
+			portal.SetLocation(portal_element);
+			portal.SetTargetLocation(target_element);			
+		}
+	}
 }
 
 // Build all environment maps (power, data, oxygen, munitions, ...)

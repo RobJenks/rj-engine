@@ -431,6 +431,7 @@ namespace ErrorCodes {
 	const Result		CannotLoadHardpointDataFromNullResources		= 2691;
 	const Result		CouldNotLoadUnrecognisedHardpointProperty		= 2692;
 	const Result		HardpointElementMissingRequiredAttributes		= 2693;
+	const Result		CannotLoadPortalDataFromNullElement				= 2694;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;
@@ -445,6 +446,7 @@ namespace ErrorCodes {
 	const Result		CannotSaveOBBWithNullReferences					= 2810;
 	const Result		CannotSaveTerrainWithNullReferences				= 2811;
 	const Result		CannotSaveNullTileConnectionData				= 2812;
+	const Result		CannotSavePortalDataWithNullReferences			= 2813;
 
 	// Generic object errors											(3000-3199)
 	const Result		ObjectHasNoInternalCode							= 3000;

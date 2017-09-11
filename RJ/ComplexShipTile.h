@@ -575,6 +575,9 @@ public:
 	// Rotates all terrain objects associated with this tile by the specified angle
 	void								RotateAllTerrainObjects(Rotation90Degree rotation);
 
+	// Transform all view portals by the same rotation
+	void								RotateAllViewPortals(Rotation90Degree rot_delta);
+
 	// Mass of the tile
 	CMPINLINE float						GetMass(void) const									{ return m_mass; }
 	CMPINLINE void						SetMass(float m)									{ m_mass = m; }
@@ -632,6 +635,9 @@ public:
 	CMPINLINE int						SetElementSizeY(int y)			{ m_elementsize.y = y; RecalculateTileData(); }
 	CMPINLINE int						SetElementSizeZ(int z)			{ m_elementsize.z = z; RecalculateTileData(); }
 
+	// Return the (local) centre point of the tile in world coordinates (e.g. for a 1x1x1 element tile, centre = [5.0,5.0,5.0]
+	CMPINLINE XMVECTOR					GetCentrePoint(void) const		{ return m_centre_point; }
+
 	// Recalculates the state of the tile following a change to its position/size etc.  Includes recalc of the world matrix and bounding volume
 	void								RecalculateTileData(void);
 
@@ -662,8 +668,11 @@ public:
 	TileConnections								PossibleConnections;
 
 	// Portals owned by this tile
-	CMPINLINE const std::vector<ViewPortal> &		GetPortals(void) const { return m_portals; }
-	CMPINLINE std::vector<ViewPortal>::size_type	GetPortalCount(void) const { return m_portalcount; }
+	CMPINLINE std::vector<ViewPortal> &				GetPortals(void)				{ return m_portals; }
+	CMPINLINE std::vector<ViewPortal>::size_type	GetPortalCount(void) const		{ return m_portalcount; }
+	void											RecalculatePortalData(void);
+	void											AddPortal(const ViewPortal & portal);
+	void											AddPortal(ViewPortal && portal);
 
 	// Events generated when the tile is added/removed from an environment
 	void										BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment);

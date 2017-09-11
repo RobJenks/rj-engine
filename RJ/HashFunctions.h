@@ -273,6 +273,7 @@ namespace HashedStrings
 	DefineHash(H_Voice, "voice");
 	DefineHash(H_AmbientAudio, "ambientaudio");
 	DefineHash(H_LaunchAudio, "launchaudio");
+	DefineHash(H_Portal, "portal");
 }
 
 

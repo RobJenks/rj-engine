@@ -2355,7 +2355,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		XMVECTOR portal_min = XMVectorSet(-extent.x, -extent.x, 400, 0);
 		XMVECTOR portal_max = XMVectorSet(+extent.x, +extent.y, 400, 0);
 			
-		ViewPortal portal = ViewPortal(0U, portal_min, portal_max, 1U);
+		ViewPortal portal = ViewPortal(portal_min, portal_max, Direction::Up);
 		Frustum *f = Game::Engine->CreateClippedFrustum(*(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, viewpos, ss()->GetWorldMatrix());
 
 		XMVECTOR p1local = XMVectorSet(+extent.x, +extent.y, 400, 0);
@@ -2437,5 +2437,5 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-//*** Note: outer hull determination needs to account for scenario where a destroyed element completely surrounded by 
-//	intact elements is not the "outside", and surrounding elements are not outer hull.  Should work, but check ***
+*** PORTAL LOADING, ADDING TO ENVIRONMENT AND MANIPULATION HAS BEEN IMPLEMENTED; START TESTING BY ADDING A PORTAL TO ***
+*** CORRIDOR TILES AND SEE WHAT HAPPENS ***

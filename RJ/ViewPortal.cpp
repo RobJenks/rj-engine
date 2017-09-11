@@ -2,10 +2,14 @@
 #include "DX11_Core.h"
 #include "ViewPortal.h"
 
-// Constructor for a new view portal.  Vertices are specified in parent-local (generally tile-local) coordinates
-ViewPortal::ViewPortal(int location, const FXMVECTOR min_point, const FXMVECTOR max_point, int target_location) noexcept
+
+// Constructor for a new view portal, providing only its position in parent-local space and direction
+// of the portal target.  Used at load-time when we do not have any details of the parent object and 
+// therefore where the portal is currently located in the environment
+ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, Direction target_direction) noexcept
 	:
-	Bounds(min_point, max_point), m_location(location), m_target(target_location)
+	Bounds(min_point, max_point), m_target_direction(target_direction), 
+	m_location(0U), m_target(0U)
 {
 	RecalculateData();
 }
@@ -13,7 +17,7 @@ ViewPortal::ViewPortal(int location, const FXMVECTOR min_point, const FXMVECTOR 
 // Copy constructor
 ViewPortal::ViewPortal(const ViewPortal & other) noexcept
 	:
-	Bounds(other.Bounds), m_location(other.m_location), m_target(other.m_target), 
+	Bounds(other.Bounds), m_location(other.m_location), m_target(other.m_target), m_target_direction(other.m_target_direction), 
 	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
 {
 }
@@ -24,6 +28,7 @@ ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 	Bounds = other.Bounds;
 	m_location = other.m_location;
 	m_target = other.m_target;
+	m_target_direction = other.m_target_direction;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
 	return *this;
@@ -32,7 +37,7 @@ ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 // Move constructor
 ViewPortal::ViewPortal(ViewPortal && other) noexcept
 	:
-	Bounds(std::move(other.Bounds)), m_location(other.m_location), m_target(other.m_target), 
+	Bounds(std::move(other.Bounds)), m_location(other.m_location), m_target(other.m_target), m_target_direction(other.m_target_direction), 
 	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
 {
 }
@@ -43,6 +48,7 @@ ViewPortal & ViewPortal::operator=(ViewPortal && other) noexcept
 	Bounds = std::move(other.Bounds);
 	m_location = other.m_location;
 	m_target = other.m_target;
+	m_target_direction = other.m_target_direction;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
 	return *this;

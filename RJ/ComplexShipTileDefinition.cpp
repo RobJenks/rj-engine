@@ -83,6 +83,9 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 
 	// Copy all connectivity data into the new tile
 	tile->PossibleConnections = Connectivity;
+
+	// Copy all portal definitions into the tile
+	for (const auto & portal : m_portals) tile->AddPortal(portal);
 	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
 	if (TileDefinitionHasClassSpecificData()) this->ApplyClassSpecificDefinition(tile);
@@ -326,6 +329,19 @@ void ComplexShipTileDefinition::AddHardpoint(Hardpoint *hardpoint)
 	if (it != m_hardpoints.end()) return;
 
 	m_hardpoints.push_back(hardpoint);
+}
+
+// Add a new portal to this definition.  Portal will only be accepted if it lies fully within
+// the bounds of this tile
+void ComplexShipTileDefinition::AddPortal(const ViewPortal & portal)
+{
+	// Make sure the portal bounds lie within the area of this tile, otherwise reject it
+	XMVECTOR size = Game::ElementLocationToPhysicalPosition(m_elementsize);
+	if (XMVector3GreaterOrEqual(portal.Bounds.MinPoint(), NULL_VECTOR) && XMVector3Less(portal.Bounds.MaxPoint(), size))
+	{
+		// Add the portal to our collection
+		m_portals.push_back(portal);
+	}
 }
 
 // Adds a link to a dynamic tileset

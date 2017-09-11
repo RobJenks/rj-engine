@@ -48,6 +48,7 @@ namespace IO { namespace Data {
 	Result SaveBoundingObject(TiXmlElement *parent, BoundingObject *bound, int id);
 
 	Result SaveTileConnectionState(TiXmlElement *parent, const std::string & element_name, TileConnections *connection_data);
+	Result SaveViewPortal(TiXmlElement *parent, const std::string & element_name, const ViewPortal & portal);
 
 	Result SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain);
 

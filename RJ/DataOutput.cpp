@@ -472,6 +472,20 @@ Result IO::Data::SaveTileConnectionState(TiXmlElement *parent, const std::string
 	return ErrorCodes::NoError;
 }
 
+Result IO::Data::SaveViewPortal(TiXmlElement *parent, const std::string & element_name, const ViewPortal & portal)
+{
+	// Parameter check
+	if (!parent) return ErrorCodes::CannotSavePortalDataWithNullReferences;
+
+	TiXmlElement *node = new TiXmlElement(HashedStrings::H_Portal.Text.c_str());
+	IO::Data::LinkVector3AttrXMLElement("min", portal.Bounds.MinPoint(), node);
+	IO::Data::LinkVector3AttrXMLElement("max", portal.Bounds.MaxPoint(), node);
+	IO::Data::LinkIntegerXMLElement("target", portal.GetTargetLocation(), node);
+	parent->LinkEndChild(node);
+
+	return ErrorCodes::NoError;
+}
+
 Result IO::Data::SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain)
 {
 	// Parameter check

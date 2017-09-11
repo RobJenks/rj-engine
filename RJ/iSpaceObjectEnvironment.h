@@ -263,6 +263,9 @@ public:
 	// with the new environment structure
 	Result							RevalidateEnvironmentMaps(void);
 
+	// Update the view portal configuration of all tiles in the environment
+	void							UpdateViewPortalConfiguration(void);
+
 	// Adds a new object to this environment
 	void							ObjectEnteringEnvironment(iEnvironmentObject *obj);
 

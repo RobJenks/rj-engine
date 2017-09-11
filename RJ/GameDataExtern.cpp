@@ -98,6 +98,7 @@ namespace D {
 	const char *NODE_SkinnedModel = "skinnedmodel";
 	const char *NODE_ActorAttributeGeneration = "actorattributegeneration";
 	const char *NODE_ActorBase = "actorbase";
+	const char *NODE_Portal = "portal";
 	const char *NODE_StaticTerrain = "staticterrain";
 	const char *NODE_StaticTerrainDefinition = "staticterraindefinition";
 	const char *NODE_Faction = "faction";

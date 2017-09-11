@@ -15,10 +15,13 @@ public:
 	// Portals are one-way only, i.e. P0 is always top-top-left and vice versa for P1
 	AABB										Bounds;				// Parent-local bounds (generally tile-local)
 	
-	// Constructor for a new view portal.  Vertices are specified in parent-local (usually tile-local) 
-	// coordinates.  Location and target location are element indices (which can then easily be translated
-	// to the relevant parent cell/tile)
-	ViewPortal(int location, const FXMVECTOR min_point, const FXMVECTOR max_point, int target_location) noexcept;
+	// Constructor for a new view portal, providing only its position in parent-local space and direction
+	// of the portal target.  Used at creation-time when we do not have any details of the parent object and 
+	// therefore where the portal is currently located in the environment
+	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, Direction target_direction) noexcept;
+
+	// Default constructor; not used
+	ViewPortal(void) noexcept { };
 
 	// Copy constructor
 	ViewPortal(const ViewPortal & other) noexcept;
@@ -32,15 +35,21 @@ public:
 	// Move assignment
 	ViewPortal & operator=(ViewPortal && other) noexcept;
 	
-	// Return the element index of the portal parent
-	CMPINLINE int								GetLocation(void) const { return m_location; }
+	// Element index of the portal parent
+	CMPINLINE int								GetLocation(void) const						{ return m_location; }
+	CMPINLINE void								SetLocation(int location)					{ m_location = location; }
 
-	// Returns the element index of the target element
-	CMPINLINE int								GetTargetLocation(void) const { return m_target; }
+	// Target element direction
+	CMPINLINE Direction							GetTargetDirection(void) const				{ return m_target_direction; }
+	CMPINLINE void								SetTargetDirection(Direction direction)		{ m_target = direction; }
+
+	// Target element location
+	CMPINLINE int								GetTargetLocation(void) const				{ return m_target; }
+	CMPINLINE void								SetTargetLocation(int target_location)		{ m_target = target_location; }
 
 	// Centre point and bounding radius in parent-local space (generally tile-local)
-	CMPINLINE const AXMVECTOR					GetCentrePoint(void) const { return m_centre; }
-	CMPINLINE float								GetBoundingSphereRadius(void) const { return m_bounding_sphere_radius; }
+	CMPINLINE const AXMVECTOR					GetCentrePoint(void) const					{ return m_centre; }
+	CMPINLINE float								GetBoundingSphereRadius(void) const			{ return m_bounding_sphere_radius; }
 
 	// Recalculates internal data within the portal following a change to the vertex layout
 	void										RecalculateData(void);
@@ -55,9 +64,11 @@ public:
 private:
 
 	// Location of the view portal and its destination, both specified as an element index (which
-	// can then easily be translated to a tile reference)
+	// can then easily be translated to a tile reference).  Also store the direction of the portal
+	// target so that the portal target can be recalculated whenever added to a parent
 	int							m_location;
 	int							m_target;
+	Direction					m_target_direction;
 
 	// We also store the centre point of the portal and a very upper-bound conservative
 	// bounding sphere radius (i.e. to the radius of oru maximum extents) for

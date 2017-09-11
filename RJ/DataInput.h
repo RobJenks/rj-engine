@@ -134,6 +134,8 @@ namespace IO { namespace Data {
 	Result LoadStaticTerrainDefinition(TiXmlElement *node);
 	StaticTerrain *LoadStaticTerrain(TiXmlElement *node);
 
+	Result LoadViewPortal(TiXmlElement *node, ViewPortal & outPortal);
+
 	Result LoadResource(TiXmlElement *node);
 	ProductionCost * LoadProductionCostData(TiXmlElement *node);
 

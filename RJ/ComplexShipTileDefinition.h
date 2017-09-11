@@ -14,6 +14,7 @@
 #include "ElementStateDefinition.h"
 #include "Power.h"
 #include "Hardpoints.h"
+#include "ViewPortal.h"
 class TiXmlElement;
 class ComplexShipTile;
 class ComplexShipTileClass;
@@ -168,6 +169,10 @@ public:
 	// Defines the connectivity for tiles created from this definition
 	TileConnections					Connectivity;
 	
+	// Portals owned by this tile
+	CMPINLINE const std::vector<ViewPortal> &		GetPortals(void) const							{ return m_portals; }
+	void											AddPortal(const ViewPortal & portal);
+
 	// Indicates whether the tile definition contains class-specific data
 	CMPINLINE bool					TileDefinitionHasClassSpecificData(void) const					{ return m_haveclassspecificdata; }
 	CMPINLINE void					RegisterClassSpecificDataForTileDefinition(void)				{ m_haveclassspecificdata = true; }
@@ -223,6 +228,9 @@ protected:
 
 	// Collection of any hardpoints that are instantiated along with tiles
 	Hardpoints::HardpointCollection		m_hardpoints;
+
+	// Collection of portals from this tile
+	std::vector<ViewPortal>		m_portals;
 
 	// Size of the model.  If set to -1/-1/-1 then the tile is stretchable to user-defined size; if not, it maintains the size specified
 	INTVECTOR3					m_elementsize;

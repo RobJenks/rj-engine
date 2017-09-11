@@ -166,8 +166,11 @@ void ComplexShipTile::SetRotation(Rotation90Degree rot)
 	// No action is required if this will not involve a rotation (e.g. going from 360d to 0d)
 	if (rot_delta == Rotation90Degree::Rotate0) return;
 
-	// Transform all terrain objects associate with this tile by the relevant rotation
+	// Transform all terrain objects associated with this tile by the relevant rotation
 	RotateAllTerrainObjects(rot_delta);
+
+	// Transform all view portals by the same rotation
+	RotateAllViewPortals(rot_delta);
 
 	// Recalculate all derived data for the tile
 	RecalculateTileData();
@@ -212,6 +215,21 @@ void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
 		// Also adjust the terrain object orientation about its local centre
 		t->ChangeOrientation(rotation_quat);
 	}
+}
+
+// Transform all view portals by the same rotation
+void ComplexShipTile::RotateAllViewPortals(Rotation90Degree rot_delta)
+{
+	// Portal positions are all defined relative to the tile centre point.  We therefore simply
+	// need to apply a rotation about the origin to the portal bounds
+	XMMATRIX rot_matrix = GetRotationMatrixInstance(rot_delta);
+	for (auto & portal : m_portals)
+	{
+		portal.Bounds.P0 = XMVector3TransformCoord(portal.Bounds.P0, rot_matrix);
+		portal.Bounds.P1 = XMVector3TransformCoord(portal.Bounds.P1, rot_matrix);
+		portal.RecalculateData();
+	}
+
 }
 
 // Recalculates the state of the tile following a change to its position/size etc.  Includes recalc of the world matrix and bounding volume
@@ -455,6 +473,26 @@ float ComplexShipTile::GetImpactResistance(const ComplexShipElement & at_element
 		return ((m_mass * m_hardness) * at_element.GetHealth());
 	else
 		return (((m_mass * m_hardness) / (float)m_elementcount) * at_element.GetHealth());
+}
+
+// Add a new portal to this tile
+void ComplexShipTile::AddPortal(const ViewPortal & portal)
+{
+	m_portals.push_back(portal);
+	RecalculatePortalData();
+}
+
+// Add a new portal to this tile
+void ComplexShipTile::AddPortal(ViewPortal && portal)
+{
+	m_portals.push_back(std::move(portal));
+	RecalculatePortalData();
+}
+
+// Recalculate all portal-related data following a change to the collection
+void ComplexShipTile::RecalculatePortalData(void)
+{
+	m_portalcount = m_portals.size();
 }
 
 // Deallocates any existing per-element construction progress for this tile
@@ -734,14 +772,16 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 	// Add nodes for each key attribute of the base class
 	//IO::Data::LinkStringXMLElement("Code", tile->GetCode(), node);
 	//IO::Data::LinkStringXMLElement("Name", tile->GetName(), node);
-	IO::Data::LinkIntVector3AttrXMLElement("Location", tile->GetElementLocation(), node);
-	IO::Data::LinkIntVector3AttrXMLElement("Size", tile->GetElementSize(), node);
-	//if (tile->GetModel()) IO::Data::LinkStringXMLElement("Model", tile->GetModel()->GetCode(), node);
-	IO::Data::LinkIntegerXMLElement("Rotation", (int)tile->GetRotation(), node);
+	IO::Data::LinkIntVector3AttrXMLElement(HashedStrings::H_Location.Text, tile->GetElementLocation(), node);
+	IO::Data::LinkIntVector3AttrXMLElement(HashedStrings::H_Size.Text, tile->GetElementSize(), node);
+	IO::Data::LinkIntegerXMLElement(HashedStrings::H_Rotation.Text, (int)tile->GetRotation(), node);
 
 	// Add entries for each connection point, and possible connection, from this tile
-	IO::Data::SaveTileConnectionState(node, "CanConnect", &(tile->PossibleConnections));
-	IO::Data::SaveTileConnectionState(node, "Connection", &(tile->Connections));
+	IO::Data::SaveTileConnectionState(node, HashedStrings::H_CanConnect.Text, &(tile->PossibleConnections));
+	IO::Data::SaveTileConnectionState(node, HashedStrings::H_Connection.Text, &(tile->Connections));
+
+	// Add entries for any view portals owned by this tile
+	for (const auto & portal : tile->GetPortals()) IO::Data::SaveViewPortal(node, HashedStrings::H_Portal.Text, portal);
 
 	// Return the node containing all data on this base class
 	return node;
@@ -793,6 +833,11 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 				}
 				else if (hash == HashedStrings::H_PowerRequirement) {
 					tile->SetPowerRequirement(IO::GetIntValue(child));
+				}
+				else if (hash == HashedStrings::H_Portal) {
+					ViewPortal portal;
+					IO::Data::LoadViewPortal(child, portal);
+					tile->AddPortal(std::move(portal));
 				}
 			}
 		}
