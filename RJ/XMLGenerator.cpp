@@ -119,57 +119,57 @@ TiXmlElement *IO::Data::NewIntVector3AttrXMLElement(const std::string &name, con
 
 void IO::Data::LinkFloatXMLElement(const std::string &name, float f, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewFloatXMLElement(name, f);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewFloatXMLElement(name, f));
 }
 
 void IO::Data::LinkDoubleXMLElement(const std::string &name, double d, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewDoubleXMLElement(name, d);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewDoubleXMLElement(name, d));
 }
 
 void IO::Data::LinkIntegerXMLElement(const std::string &name, int i, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewIntegerXMLElement(name, i);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewIntegerXMLElement(name, i));
 }
 
 void IO::Data::LinkStringXMLElement(const std::string &name, const std::string &s, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewStringXMLElement(name, s);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewStringXMLElement(name, s));
 }
 
 void IO::Data::LinkBoolXMLElement(const std::string &name, bool b, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewBoolXMLElement(name, b);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewBoolXMLElement(name, b));
 }
 
 void IO::Data::LinkVector2AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewVector2AttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewVector2AttrXMLElement(name, v));
 }
 void IO::Data::LinkVector3AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewVector3AttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewVector3AttrXMLElement(name, v));
 }
 void IO::Data::LinkVector4AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewVector4AttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewVector4AttrXMLElement(name, v));
 }
 
 void IO::Data::LinkIntVector2AttrXMLElement(const std::string &name, const INTVECTOR2 & v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewIntVector2AttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewIntVector2AttrXMLElement(name, v));
 }
 void IO::Data::LinkIntVector3AttrXMLElement(const std::string &name, const INTVECTOR3 & v, TiXmlElement *parent)
 {
-	TiXmlElement *el = NewIntVector3AttrXMLElement(name, v);
-	if (parent) parent->LinkEndChild(el);
+	if (!parent) return;
+	parent->LinkEndChild(NewIntVector3AttrXMLElement(name, v));
 }
