@@ -1,4 +1,5 @@
 #include <string>
+#include "HashFunctions.h"
 #include "Direction.h"
 
 
@@ -33,3 +34,75 @@ Rotation90Degree Rotation90BetweenValues(Rotation90Degree start_rotation, Rotati
 	// Convert back to a 90-degree rotation value and return
 	return (Rotation90Degree)rot_value;
 }
+
+std::string DirectionToString(Direction edge)
+{
+	switch (edge)
+	{
+		case Direction::Left:		return "left";
+		case Direction::Up:			return "up";
+		case Direction::Right:		return "right";
+		case Direction::Down:		return "down";
+		case Direction::UpLeft:		return "upleft";
+		case Direction::UpRight:	return "upright";
+		case Direction::DownRight:	return "downright";
+		case Direction::DownLeft:	return "downleft";
+		case Direction::ZUp:		return "zup";
+		case Direction::ZDown:		return "zdown";
+		default:					return NullString;
+	}
+}
+Direction DirectionFromString(std::string edge)
+{
+	// All comparisons are case-insensitive
+	StrLowerC(edge);
+	
+	if (edge == "left")				return Direction::Left;
+	else if (edge == "up")			return Direction::Up;
+	else if (edge == "right")		return Direction::Right;
+	else if (edge == "down")		return Direction::Down;
+	else if (edge == "upleft")		return Direction::UpLeft;
+	else if (edge == "upright")		return Direction::UpRight;
+	else if (edge == "downright")	return Direction::DownRight;
+	else if (edge == "downleft")	return Direction::DownLeft;
+	else if (edge == "zup")			return Direction::ZUp;
+	else if (edge == "zdown")		return Direction::ZDown;
+	else							return Direction::_Count;
+}
+
+Direction GetOppositeDirection(Direction dir)
+{
+	switch (dir)
+	{
+		case Direction::Left:		return Direction::Right;
+		case Direction::Up:			return Direction::Down;
+		case Direction::Right:		return Direction::Left;
+		case Direction::Down:		return Direction::Up;
+		case Direction::UpLeft:		return Direction::DownRight;
+		case Direction::UpRight:	return Direction::DownLeft;
+		case Direction::DownRight:	return Direction::UpLeft;
+		case Direction::DownLeft:	return Direction::UpRight;
+		case Direction::ZUp:		return Direction::ZDown;
+		case Direction::ZDown:		return Direction::ZUp;
+		default:					return Direction::_Count;
+	}
+}
+
+DirectionBS GetOppositeDirectionBS(DirectionBS dir)
+{
+	switch (dir)
+	{
+		case DirectionBS::Left_BS:		return DirectionBS::Right_BS;
+		case DirectionBS::Up_BS:		return DirectionBS::Down_BS;
+		case DirectionBS::Right_BS:		return DirectionBS::Left_BS;
+		case DirectionBS::Down_BS:		return DirectionBS::Up_BS;
+		case DirectionBS::UpLeft_BS:	return DirectionBS::DownRight_BS;
+		case DirectionBS::UpRight_BS:	return DirectionBS::DownLeft_BS;
+		case DirectionBS::DownRight_BS:	return DirectionBS::UpLeft_BS;
+		case DirectionBS::DownLeft_BS:	return DirectionBS::UpRight_BS;
+		case DirectionBS::ZUp_BS:		return DirectionBS::ZDown_BS;
+		case DirectionBS::ZDown_BS:		return DirectionBS::ZUp_BS;
+		default:						return DirectionBS::None_BS;
+	}
+}
+
