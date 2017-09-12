@@ -1278,8 +1278,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_Portal) {
 			ViewPortal portal;
-			LoadViewPortal(child, portal);
-			tiledef->AddPortal(std::move(portal));
+			if (LoadViewPortal(child, portal) == ErrorCodes::NoError) tiledef->AddPortal(std::move(portal));
 		}
 		else if (hash == HashedStrings::H_Model && !modeldataloaded) {
 			// Link this tile to its standard model, which should have been loaded prior to loading dependent objects
@@ -1781,17 +1780,19 @@ Result IO::Data::LoadViewPortal(TiXmlElement *node, ViewPortal & outPortal)
 
 	// Process the xml data
 	std::string key, val;
+	XMVECTOR vmin = NULL_VECTOR, vmax = NULL_VECTOR; Direction dir = Direction::_Count;
 	for (TiXmlElement *child = node->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
 	{
 		// All key comparisons are case-insensitive
 		key = child->Value(); StrLowerC(key);
 		
-		if (key == "min")			outPortal.Bounds.SetMin(IO::GetVector3FromAttr(child));
-		else if (key == "max")		outPortal.Bounds.SetMax(IO::GetVector3FromAttr(child));
-		else if (key == "target")	outPortal.SetTargetDirection(IO::GetDirectionAttribute(child, HashedStrings::H_Direction.CStr()));
+		if (key == "min")			vmin = IO::GetVector3FromAttr(child);
+		else if (key == "max")		vmax = IO::GetVector3FromAttr(child);
+		else if (key == "target")	dir = IO::GetDirectionAttribute(child, HashedStrings::H_Direction.CStr());
 	}
 
-	// Return success
+	// Create the portal and return success
+	outPortal = ViewPortal(vmin, vmax, dir);
 	return ErrorCodes::NoError;
 }
 

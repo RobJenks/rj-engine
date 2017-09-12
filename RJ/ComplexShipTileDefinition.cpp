@@ -336,8 +336,8 @@ void ComplexShipTileDefinition::AddHardpoint(Hardpoint *hardpoint)
 void ComplexShipTileDefinition::AddPortal(const ViewPortal & portal)
 {
 	// Make sure the portal bounds lie within the area of this tile, otherwise reject it
-	XMVECTOR size = Game::ElementLocationToPhysicalPosition(m_elementsize);
-	if (XMVector3GreaterOrEqual(portal.Bounds.MinPoint(), NULL_VECTOR) && XMVector3Less(portal.Bounds.MaxPoint(), size))
+	XMVECTOR extent = XMVectorMultiply(Game::ElementLocationToPhysicalPosition(m_elementsize), HALF_VECTOR_P);
+	if (XMVector3LessOrEqual(portal.Bounds.MaxPoint(), extent) && XMVector3GreaterOrEqual(portal.Bounds.MinPoint(), XMVectorNegate(extent)))
 	{
 		// Add the portal to our collection
 		m_portals.push_back(portal);

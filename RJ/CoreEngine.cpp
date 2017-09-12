@@ -1891,12 +1891,6 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
 
-			// Construct a new frustum by clipping against the portal bounds 
-			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal, view_position, cell_world);
-			++current_frustum;
-			m_tmp_frustums[current_frustum] = new_frustum;
-
 			// Make sure the portal has a valid destination
 			int target_element = portal.GetTargetLocation();
 			ComplexShipElement *target_el = environment->GetElement(target_element);
@@ -1904,11 +1898,22 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			ComplexShipTile *target_cell = el->GetTile();
 			if (!target_cell) continue;	// TODO: need to handle NULL destination in future, for e.g. interstitial space or portals to the outside
 
+			// Construct a new frustum by clipping against the portal bounds 
+			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
+			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal, view_position, cell_world);
+			++current_frustum;
+			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
+
 			// Use the new frustum to generate further steps in the portal traversal
 			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Generating new traversal step for portal: ")(cells.back().DebugString())("\n").str());
 		}
 	}
+
+	// Rendering is complete; deallocate all interim view frustums that were created.  This is all frustums
+	// except for [0], which is the global view frustum
+	for (int i = 1; i <= current_frustum; ++i) delete m_tmp_frustums[i];
+	m_tmp_frustums.clear();
 	
 	// If we are debug logging this render cycle, reset the debug ID so that we only log single frames on request
 	DEBUG_PORTAL_TRAVERSAL(environment, m_debug_renderportaltraversal = 0U);

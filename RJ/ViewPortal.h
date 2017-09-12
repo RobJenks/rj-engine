@@ -21,7 +21,7 @@ public:
 	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, Direction target_direction) noexcept;
 
 	// Default constructor; not used
-	ViewPortal(void) noexcept { };
+	CMPINLINE ViewPortal(void) noexcept { };
 
 	// Copy constructor
 	ViewPortal(const ViewPortal & other) noexcept;
@@ -41,7 +41,7 @@ public:
 
 	// Target element direction
 	CMPINLINE Direction							GetTargetDirection(void) const				{ return m_target_direction; }
-	CMPINLINE void								SetTargetDirection(Direction direction)		{ m_target = direction; }
+	CMPINLINE void								SetTargetDirection(Direction direction)		{ m_target_direction = direction; }
 
 	// Target element location
 	CMPINLINE int								GetTargetLocation(void) const				{ return m_target; }

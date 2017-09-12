@@ -836,8 +836,7 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 				}
 				else if (hash == HashedStrings::H_Portal) {
 					ViewPortal portal;
-					IO::Data::LoadViewPortal(child, portal);
-					tile->AddPortal(std::move(portal));
+					if (IO::Data::LoadViewPortal(child, portal) == ErrorCodes::NoError) tile->AddPortal(std::move(portal));
 				}
 			}
 		}
