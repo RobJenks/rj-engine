@@ -478,9 +478,9 @@ Result IO::Data::SaveViewPortal(TiXmlElement *parent, const std::string & elemen
 	if (!parent) return ErrorCodes::CannotSavePortalDataWithNullReferences;
 
 	TiXmlElement *node = new TiXmlElement(HashedStrings::H_Portal.Text.c_str());
-	IO::Data::LinkVector3AttrXMLElement("min", portal.Bounds.MinPoint(), node);
-	IO::Data::LinkVector3AttrXMLElement("max", portal.Bounds.MaxPoint(), node);
-	IO::Data::LinkIntegerXMLElement("target", portal.GetTargetLocation(), node);
+	IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Min.Text, portal.Bounds.MinPoint(), node);
+	IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Max.Text, portal.Bounds.MaxPoint(), node);
+	IO::Data::LinkStringAttributeElement(HashedStrings::H_Target.Text, HashedStrings::H_Direction.Text, DirectionToString(portal.GetTargetDirection()), node);
 	parent->LinkEndChild(node);
 
 	return ErrorCodes::NoError;

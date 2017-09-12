@@ -2436,6 +2436,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
-
-*** PORTAL LOADING, ADDING TO ENVIRONMENT AND MANIPULATION HAS BEEN IMPLEMENTED; START TESTING BY ADDING A PORTAL TO ***
-*** CORRIDOR TILES AND SEE WHAT HAPPENS ***

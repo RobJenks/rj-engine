@@ -20,6 +20,9 @@ namespace IO { namespace Data {
 	TiXmlElement *				NewVector2AttrXMLElement(const std::string &name, const FXMVECTOR v);
 	TiXmlElement *				NewVector3AttrXMLElement(const std::string &name, const FXMVECTOR v);
 	TiXmlElement *				NewVector4AttrXMLElement(const std::string &name, const FXMVECTOR v);
+	TiXmlElement *				NewIntAttributeElement(const std::string & name, const std::string & attribute_name, int v);
+	TiXmlElement *				NewFloatAttributeElement(const std::string & name, const std::string & attribute_name, float v);
+	TiXmlElement *				NewStringAttributeElement(const std::string & name, const std::string & attribute_name, const std::string & v);
 	TiXmlElement *				NewIntVector2AttrXMLElement(const std::string &name, const INTVECTOR2 & v);
 	TiXmlElement *				NewIntVector3AttrXMLElement(const std::string &name, const INTVECTOR3 & v);
 	TiXmlElement *				NewFloat2AttrXMLElement(const std::string &name, const XMFLOAT2 & v);
@@ -39,6 +42,9 @@ namespace IO { namespace Data {
 	void						LinkVector2AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent);
 	void						LinkVector3AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent);
 	void						LinkVector4AttrXMLElement(const std::string &name, const FXMVECTOR v, TiXmlElement *parent);
+	void						LinkIntAttributeElement(const std::string &name, const std::string & attribute_name, int v, TiXmlElement *parent);
+	void						LinkFloatAttributeElement(const std::string &name, const std::string & attribute_name, float v, TiXmlElement *parent);
+	void						LinkStringAttributeElement(const std::string &name, const std::string & attribute_name, std::string & v, TiXmlElement *parent);
 	void						LinkIntVector2AttrXMLElement(const std::string &name, const INTVECTOR2 &v, TiXmlElement *parent);
 	void						LinkIntVector3AttrXMLElement(const std::string &name, const INTVECTOR3 &v, TiXmlElement *parent);
 	CMPINLINE void				LinkQuaternionAttrXMLElement(const std::string &name, const FXMVECTOR q, TiXmlElement *parent) 

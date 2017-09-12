@@ -1788,7 +1788,7 @@ Result IO::Data::LoadViewPortal(TiXmlElement *node, ViewPortal & outPortal)
 		
 		if (key == "min")			outPortal.Bounds.SetMin(IO::GetVector3FromAttr(child));
 		else if (key == "max")		outPortal.Bounds.SetMax(IO::GetVector3FromAttr(child));
-		else if (key == "target")	outPortal.SetTargetDirection((Direction)IO::GetIntValue(child));
+		else if (key == "target")	outPortal.SetTargetDirection(IO::GetDirectionAttribute(child, HashedStrings::H_Direction.CStr()));
 	}
 
 	// Return success

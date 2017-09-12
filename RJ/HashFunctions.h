@@ -274,6 +274,10 @@ namespace HashedStrings
 	DefineHash(H_AmbientAudio, "ambientaudio");
 	DefineHash(H_LaunchAudio, "launchaudio");
 	DefineHash(H_Portal, "portal");
+	DefineHash(H_Direction, "direction");
+	DefineHash(H_Min, "min");
+	DefineHash(H_Max, "max");
+	DefineHash(H_Target, "target");
 }
 
 

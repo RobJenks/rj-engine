@@ -76,6 +76,9 @@ namespace IO
 	// "node" must exist or exception is thrown
 	Result			TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue, int & outValue);
 
+	// Read a Direction attribute, which will either be the string name of the direction (preferred) or the integer index (secondary)
+	Direction		GetDirectionAttribute(TiXmlElement *node, const char *attribute);
+
 	CMPINLINE float	GetFloatValue(TiXmlElement *node) 
 	{ 
 		___tmp_loading_cchar = node->GetText();  

@@ -98,6 +98,29 @@ TiXmlElement *IO::Data::NewVector4AttrXMLElement(const std::string &name, const 
 	return el;
 }
 
+TiXmlElement *IO::Data::NewIntAttributeElement(const std::string & name, const std::string & attribute_name, int v)
+{
+	TiXmlElement *el = new TiXmlElement(name.c_str());
+	el->SetAttribute(attribute_name.c_str(), v);
+
+	return el;
+}
+
+TiXmlElement *IO::Data::NewFloatAttributeElement(const std::string & name, const std::string & attribute_name, float v)
+{
+	TiXmlElement *el = new TiXmlElement(name.c_str());
+	el->SetDoubleAttribute(attribute_name.c_str(), (double)v);
+
+	return el;
+}
+
+TiXmlElement *IO::Data::NewStringAttributeElement(const std::string & name, const std::string & attribute_name, const std::string & v)
+{
+	TiXmlElement *el = new TiXmlElement(name.c_str());
+	el->SetAttribute(attribute_name.c_str(), v.c_str());
+
+	return el;
+}
 
 TiXmlElement *IO::Data::NewIntVector2AttrXMLElement(const std::string &name, const INTVECTOR2 & v)
 {
@@ -161,6 +184,21 @@ void IO::Data::LinkVector4AttrXMLElement(const std::string &name, const FXMVECTO
 {
 	if (!parent) return;
 	parent->LinkEndChild(NewVector4AttrXMLElement(name, v));
+}
+void IO::Data::LinkIntAttributeElement(const std::string &name, const std::string & attribute_name, int v, TiXmlElement *parent)
+{
+	if (!parent) return;
+	parent->LinkEndChild(NewIntAttributeElement(name, attribute_name, v));
+}
+void IO::Data::LinkFloatAttributeElement(const std::string &name, const std::string & attribute_name, float v, TiXmlElement *parent)
+{
+	if (!parent) return;
+	parent->LinkEndChild(NewFloatAttributeElement(name, attribute_name, v));
+}
+void IO::Data::LinkStringAttributeElement(const std::string &name, const std::string & attribute_name, std::string & v, TiXmlElement *parent)
+{
+	if (!parent) return;
+	parent->LinkEndChild(NewStringAttributeElement(name, attribute_name, v));
 }
 
 void IO::Data::LinkIntVector2AttrXMLElement(const std::string &name, const INTVECTOR2 & v, TiXmlElement *parent)

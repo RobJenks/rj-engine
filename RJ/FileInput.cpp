@@ -446,6 +446,26 @@ Result IO::TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int
 	return ErrorCodes::NoError;
 }
 
+// Read a Direction attribute, which will either be the string name of the direction (preferred) or the integer index (secondary)
+Direction IO::GetDirectionAttribute(TiXmlElement *node, const char *attribute)
+{
+	const char *cdir = node->GetText();
+	if (!cdir || !attribute) return Direction::_Count;
+
+	// Attempt to parse a string direction value first
+	std::string lc = cdir; StrLowerC(lc);
+	Direction direction = DirectionFromString(lc);
+	if (direction != Direction::_Count) return direction;
+	
+	// If we could not match a string direction name, attempt to parse as an integer index instead
+	int direction_index;
+	if (node->QueryIntAttribute(attribute, &direction_index) == TIXML_SUCCESS)
+	{
+		if (direction_index >= 0 && direction_index < Direction::_Count) return (Direction)direction_index;
+	}
+
+	return Direction::_Count;
+}
 
 
 
