@@ -2356,7 +2356,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 	// Debug info line 4 - temporary debug data as required
 	if (true)
-	{		
+	{	
 		static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
 		if (Game::Keyboard.GetKey(DIK_F)) extent.x += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 		if (Game::Keyboard.GetKey(DIK_G)) extent.y += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);

@@ -55,6 +55,10 @@ public:
 	const CMPINLINE XMFLOAT3			GetViewRightBasisVectorF(void) const	{ return m_vrightf; }
 	const CMPINLINE XMFLOAT3			GetViewForwardBasisVectorF(void) const	{ return m_vforwardf; }
 
+	// Returns the camera heading
+	const CMPINLINE XMVECTOR			GetCameraHeading(void) const			{ return GetViewForwardBasisVector(); }
+	const CMPINLINE XMFLOAT3			GetCameraHeadingF(void) const			{ return GetViewForwardBasisVectorF(); }
+
 	// Returns the yaw and pitch values derived from orientation of basis vectors against the axes
 	CMPINLINE float						GetCameraYaw(void) const		{ return m_yaw; }
 	CMPINLINE float						GetCameraPitch(void) const		{ return m_pitch; }

@@ -1793,12 +1793,18 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 */
 Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
 {
-	// The viewer must be located in a potentially portal-containing cell in order to proceed with portal rendering
-	// TODO: define non-tile cell type for e.g. viewer outside the environment or in interstitial space, looking in
+	// Parameter check
 	if (!environment) return ErrorCodes::CannotRenderNullEnvironment;
-	if (Game::CurrentPlayer->GetParentEnvironment() != environment) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
 
-	INTVECTOR3 viewer_location = Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation();
+	// Precalculate the position of the viewer relative to the environment zero-point, so we can perform 
+	// certain activities entirely in environment-local space
+	XMVECTOR view_position = Game::Engine->GetCamera()->GetPosition();
+	XMVECTOR env_local_viewer = XMVector3TransformCoord(view_position, environment->GetInverseZeroPointWorldMatrix());
+	XMVECTOR env_local_viewer_heading = XMVector3Rotate(Game::Engine->GetCamera()->GetCameraHeading(), environment->GetOrientation());
+
+	// View position must be located within a valid element, that is itself within a cell
+	// TODO: define non-tile cell type for e.g. viewer outside the environment or in interstitial space, looking in
+	INTVECTOR3 viewer_location = environment->GetElementContainingPositionUnbounded(env_local_viewer);
 	ComplexShipElement *el = environment->GetElement(viewer_location);
 	if (el == NULL) return ErrorCodes::PortalRenderingNotPossibleInEnvironment;
 	ComplexShipTile *current_cell = el->GetTile();
@@ -1811,11 +1817,6 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	m_tmp_frustums.clear();
 	m_tmp_frustums.push_back(static_cast<Frustum*>(Game::Engine->GetViewFrustrum()));
 	std::vector<Frustum*>::size_type current_frustum = 0U;
-
-	// Also precalculate the position of the viewer relative to the environment zero-point, so we can perform 
-	// certain activities entirely in environment-local space
-	XMVECTOR view_position = Game::Engine->GetCamera()->GetPosition();
-	XMVECTOR env_local_viewer = XMVector3TransformCoord(view_position, environment->GetInverseZeroPointWorldMatrix());
 
 	// Start with the current cell and proceed (vectorised) recursively
 	DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Starting portal rendering cycle for environment \"")(environment->GetInstanceCode())("\"\n").str());
@@ -1884,6 +1885,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
+
+			// Make sure that the viewer is facing towards the portal (i.e. dot(viewer_heading, portal_normal) must be < 0)
+			if (XMVector3GreaterOrEqual(XMVector3Dot(env_local_viewer_heading, portal.GetNormal()), NULL_VECTOR)) continue;
 
 			// Make sure the portal has a valid destination
 			int target_element = portal.GetTargetLocation();
