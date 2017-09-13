@@ -1829,64 +1829,58 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		cells.pop_back();
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("New cycle: ")(step.DebugString())("\n").str());
 
+		// Make sure the target cell exists
+		// TODO: in future, may need to support transition into e.g. interstitial space or outside the environment, where cell == NULL
 		ComplexShipTile *cell = step.Cell;
-		if (cell)
-		{
-			// Render the tile itself
-			DEBUG_PORTAL_TRAVERSAL_LOG(environment, "   Rendering tile model\n");
-			RenderComplexShipTile(cell, environment);
+		if (!cell) continue;
+		
+		// Render the tile itself
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, "   Rendering tile model\n");
+		RenderComplexShipTile(cell, environment);
 
-			// Get all objects within this tile area, which are visible based upon the current view frustum
-			m_tmp_envobjects.clear(); m_tmp_terrain.clear();
-			environment->GetAllVisibleObjectsWithinDistance(environment->SpatialPartitioningTree, cell->GetRelativePosition(),
-				cell->GetBoundingSphereRadius(), m_tmp_frustums[current_frustum], &m_tmp_envobjects, &m_tmp_terrain);
+		// Get all objects within this tile area, which are visible based upon the current view frustum
+		m_tmp_envobjects.clear(); m_tmp_terrain.clear();
+		environment->GetAllVisibleObjectsWithinDistance(environment->SpatialPartitioningTree, cell->GetRelativePosition(),
+			cell->GetBoundingSphereRadius(), m_tmp_frustums[current_frustum], &m_tmp_envobjects, &m_tmp_terrain);
 
-			// Render all visible objects in the cell
-			DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_envobjects.empty() ? "   Found no visible environment objects to render in cell\n" : concat("   Rendering ")(m_tmp_envobjects.size())(" visibile environment objects in cell\n").str().c_str()));
-			std::vector<iEnvironmentObject*>::const_iterator o_it_end = m_tmp_envobjects.end();
-			for (std::vector<iEnvironmentObject*>::const_iterator o_it = m_tmp_envobjects.begin(); o_it != o_it_end; ++o_it)
-			{ 
-				RenderEnvironmentObject(*o_it);
-			}
-
-			// Render all visible terrain in the cell
-			size_t terrain_count_rendered; DEBUG_PORTAL_TRAVERSAL(environment, terrain_count_rendered = m_renderinfo.TerrainRenderCount);
-			DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_terrain.empty() ? "   Found no visible terrain objects to render in cell\n" : concat("   Processing ")(m_tmp_terrain.size())(" visibile terrain objects in cell\n").str().c_str()));
-
-			StaticTerrain *terrain;
-			std::vector<StaticTerrain*>::const_iterator t_it_end = m_tmp_terrain.end();
-			for (std::vector<StaticTerrain*>::const_iterator t_it = m_tmp_terrain.begin(); t_it != t_it_end; ++t_it)
-			{
-				terrain = (*t_it);
-				if (!terrain) continue;
-				if (terrain->IsRendered()) continue;
-				if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
-
-				// We should not render anything if the object has been destroyed
-				if (terrain->IsDestroyed()) continue;
-
-				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
-					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
-				));
-
-				// This terrain object has been rendered
-				terrain->MarkAsRendered();
-				++m_renderinfo.TerrainRenderCount;
-			}
-			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
+		// Render all visible objects in the cell
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_envobjects.empty() ? "   Found no visible environment objects to render in cell\n" : concat("   Rendering ")(m_tmp_envobjects.size())(" visibile environment objects in cell\n").str().c_str()));
+		for (auto *obj : m_tmp_envobjects)
+		{ 
+			RenderEnvironmentObject(obj);
 		}
+
+		// Render all visible terrain in the cell
+		size_t terrain_count_rendered; DEBUG_PORTAL_TRAVERSAL(environment, terrain_count_rendered = m_renderinfo.TerrainRenderCount);
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_terrain.empty() ? "   Found no visible terrain objects to render in cell\n" : concat("   Processing ")(m_tmp_terrain.size())(" visibile terrain objects in cell\n").str().c_str()));
+		for (auto *terrain : m_tmp_terrain)
+		{
+			if (!terrain) continue;
+			if (terrain->IsRendered()) continue;
+			if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
+
+			// We should not render anything if the object has been destroyed
+			if (terrain->IsDestroyed()) continue;
+
+			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
+				XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+				RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
+			));
+
+			// This terrain object has been rendered
+			terrain->MarkAsRendered();
+			++m_renderinfo.TerrainRenderCount;
+		}
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
 		
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
 		XMMATRIX cell_world = XMMatrixMultiply(cell->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
-		auto it_end = cell->GetPortals().end();
-		for (auto it = cell->GetPortals().begin(); it != it_end; ++it)
+		for (const auto & portal : cell->GetPortals())
 		{
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
-			const ViewPortal & portal = (*it);
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;

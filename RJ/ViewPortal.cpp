@@ -18,7 +18,7 @@ ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, Dir
 ViewPortal::ViewPortal(const ViewPortal & other) noexcept
 	:
 	Bounds(other.Bounds), m_location(other.m_location), m_target(other.m_target), m_target_direction(other.m_target_direction), 
-	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
+	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius), m_normal(other.m_normal)
 {
 }
 
@@ -31,6 +31,7 @@ ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 	m_target_direction = other.m_target_direction;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
+	m_normal = other.m_normal;
 	return *this;
 }
 
@@ -38,7 +39,7 @@ ViewPortal & ViewPortal::operator=(const ViewPortal & other) noexcept
 ViewPortal::ViewPortal(ViewPortal && other) noexcept
 	:
 	Bounds(std::move(other.Bounds)), m_location(other.m_location), m_target(other.m_target), m_target_direction(other.m_target_direction), 
-	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius)
+	m_centre(other.m_centre), m_bounding_sphere_radius(other.m_bounding_sphere_radius), m_normal(other.m_normal)
 {
 }
 
@@ -51,6 +52,7 @@ ViewPortal & ViewPortal::operator=(ViewPortal && other) noexcept
 	m_target_direction = other.m_target_direction;
 	m_centre = other.m_centre;
 	m_bounding_sphere_radius = other.m_bounding_sphere_radius;
+	m_normal = other.m_normal;
 	return *this;
 }
 
@@ -61,6 +63,9 @@ void ViewPortal::RecalculateData(void)
 	m_centre = XMVectorMultiply(XMVectorAdd(Bounds.P0, Bounds.P1), HALF_VECTOR);
 	m_bounding_sphere_radius = XMVectorGetX(XMVectorScale(XMVector3LengthEst(
 		XMVectorSubtract(Bounds.P0, Bounds.P1)), 0.5f));
+
+	// Calculate the normal vector 
+	
 }
 
 // Debug string representation of the portal

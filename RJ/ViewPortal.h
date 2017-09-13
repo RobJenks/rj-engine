@@ -51,6 +51,9 @@ public:
 	CMPINLINE const AXMVECTOR					GetCentrePoint(void) const					{ return m_centre; }
 	CMPINLINE float								GetBoundingSphereRadius(void) const			{ return m_bounding_sphere_radius; }
 
+	// Normal vector in local space
+	CMPINLINE XMVECTOR							GetNormal(void) const						{ return m_normal; }
+
 	// Recalculates internal data within the portal following a change to the vertex layout
 	void										RecalculateData(void);
 
@@ -73,8 +76,11 @@ private:
 	// We also store the centre point of the portal and a very upper-bound conservative
 	// bounding sphere radius (i.e. to the radius of oru maximum extents) for
 	// cheap initial intersection tests with the current frustum
+	float						m_bounding_sphere_radius; 
 	AXMVECTOR					m_centre;
-	float						m_bounding_sphere_radius;
+
+	// Store the portal normal vector to allow fast testing of forward/back-facing
+	AXMVECTOR					m_normal;
 
 };
 
