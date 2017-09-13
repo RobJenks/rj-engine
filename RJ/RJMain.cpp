@@ -2363,10 +2363,12 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		XMVECTOR viewpos = ss()->GetPosition();
-		XMVECTOR portal_min = XMVectorSet(-extent.x, -extent.x, 400, 0);
-		XMVECTOR portal_max = XMVectorSet(+extent.x, +extent.y, 400, 0);
+		XMFLOAT3 portal_bl = XMFLOAT3(-extent.x, -extent.x, 400);
+		XMFLOAT3 portal_tl = XMFLOAT3(-extent.x, +extent.y, 400);
+		XMFLOAT3 portal_tr = XMFLOAT3(+extent.x, +extent.y, 400);
+		std::vector<XMFLOAT3> portal_vertices({ portal_bl, portal_tl, portal_tr });
 			
-		ViewPortal portal = ViewPortal(portal_min, portal_max, Direction::Up);
+		ViewPortal portal = ViewPortal(portal_vertices);
 		Frustum *f = Game::Engine->CreateClippedFrustum(*(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, viewpos, ss()->GetWorldMatrix());
 
 		XMVECTOR p1local = XMVectorSet(+extent.x, +extent.y, 400, 0);

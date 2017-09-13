@@ -13,12 +13,17 @@ public:
 	// Portals are represented as an AABB which encloses the potentially-arbitrary number of vertices making
 	// up the actual opening.  We do this for efficiency since a small amount of overdraw is acceptable
 	// Portals are one-way only, i.e. P0 is always top-top-left and vice versa for P1
-	AABB										Bounds;				// Parent-local bounds (generally tile-local)
+	AABB Bounds;				// Parent-local bounds (generally tile-local)
 	
-	// Constructor for a new view portal, providing only its position in parent-local space and direction
-	// of the portal target.  Used at creation-time when we do not have any details of the parent object and 
-	// therefore where the portal is currently located in the environment
-	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, Direction target_direction) noexcept;
+	// Constructor for a new view portal, providing the vertices of the portal in parent-local (generally tile-
+	// local) space.  Portal properties are derived based on vertices; portal uses clockwise winding order
+	// to determine facing and target element
+	ViewPortal(const std::vector<XMFLOAT3> & vertices) noexcept;
+
+	// Constructor for a new view portal, providing only its bounds in parent-local space and normal vector
+	// Element location etc. not provided on construction, since at creation-time we do not have any details 
+	// of the parent object and therefore where the portal is currently located in the environment
+	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, const FXMVECTOR normal) noexcept;
 
 	// Default constructor; not used
 	CMPINLINE ViewPortal(void) noexcept { };
@@ -54,8 +59,8 @@ public:
 	// Normal vector in local space
 	CMPINLINE XMVECTOR							GetNormal(void) const						{ return m_normal; }
 
-	// Recalculates internal data within the portal following a change to the vertex layout
-	void										RecalculateData(void);
+	// Transform the portal by the given transformation matrix
+	void										Transform(const FXMMATRIX transform);
 
 	// Debug string representation of the portal
 	std::string									DebugString(void) const;
@@ -63,6 +68,9 @@ public:
 	// Destructor; deallocates all storage owned by the object
 	~ViewPortal(void);
 
+	// Static instance representing a null portal that will have no effect; returned when supplied data
+	// is incorrect or insufficient to construct a valid portal
+	static const ViewPortal						NullPortal;
 
 private:
 
@@ -81,6 +89,9 @@ private:
 
 	// Store the portal normal vector to allow fast testing of forward/back-facing
 	AXMVECTOR					m_normal;
+
+	// Recalculates internal data within the portal following a change to the vertex layout
+	void						RecalculateData(void);
 
 };
 

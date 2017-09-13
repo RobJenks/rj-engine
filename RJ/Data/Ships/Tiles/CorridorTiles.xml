@@ -21,9 +21,9 @@
     </Portal>
 
     <Portal>
-      <min x="-5.0" y="-5.0" z="5.0" />
-      <max x="5.0" y="5.0" z="5.0" />
-      <target direction="down" />
+      <vertex x="-5.0" y="-5.0" z="5.0" />
+      <vertex x="-5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
     </Portal>
     
     <CollisionOBB skip="true" numchildren="0" />

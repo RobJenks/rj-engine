@@ -1277,8 +1277,7 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			if (h) tiledef->AddHardpoint(h);
 		}
 		else if (hash == HashedStrings::H_Portal) {
-			ViewPortal portal;
-			if (LoadViewPortal(child, portal) == ErrorCodes::NoError) tiledef->AddPortal(std::move(portal));
+			tiledef->AddPortal(std::move(LoadViewPortal(child)));
 		}
 		else if (hash == HashedStrings::H_Model && !modeldataloaded) {
 			// Link this tile to its standard model, which should have been loaded prior to loading dependent objects
@@ -1774,26 +1773,39 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 }
 
 // Load a single view portal definition and return it
-Result IO::Data::LoadViewPortal(TiXmlElement *node, ViewPortal & outPortal)
+ViewPortal IO::Data::LoadViewPortal(TiXmlElement *node)
 {
-	if (!node) return ErrorCodes::CannotLoadPortalDataFromNullElement;
+	// Portals may be specified as either a set of vertices, or as the min/max bounds and a normal vector
+	std::vector<XMFLOAT3> vertices;
+	XMVECTOR vmin = NULL_VECTOR, vmax = NULL_VECTOR, vnormal = FORWARD_VECTOR;
 
 	// Process the xml data
-	std::string key, val;
-	XMVECTOR vmin = NULL_VECTOR, vmax = NULL_VECTOR; Direction dir = Direction::_Count;
+	std::string key;
 	for (TiXmlElement *child = node->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
 	{
 		// All key comparisons are case-insensitive
 		key = child->Value(); StrLowerC(key);
+		HashVal hash = HashString(key);
 		
-		if (key == "min")			vmin = IO::GetVector3FromAttr(child);
-		else if (key == "max")		vmax = IO::GetVector3FromAttr(child);
-		else if (key == "target")	dir = IO::GetDirectionAttribute(child, HashedStrings::H_Direction.CStr());
+		if (hash == HashedStrings::H_Vertex)		vertices.push_back(IO::GetFloat3FromAttr(child));
+		else if (hash == HashedStrings::H_Min)		vmin = IO::GetVector3FromAttr(child);
+		else if (hash == HashedStrings::H_Max)		vmax = IO::GetVector3FromAttr(child);
+		else if (hash == HashedStrings::H_Normal)	vnormal = IO::GetVector3FromAttr(child);
 	}
 
-	// Create the portal and return success
-	outPortal = ViewPortal(vmin, vmax, dir);
-	return ErrorCodes::NoError;
+	// If any vertices were specified then we take the option to construct from a vertex set
+	if (!vertices.empty())
+	{
+		// Create the portal from all supplied vertices.  If fewer than three vertices were provided
+		// then a null portal will be returned that has no area and does not have any effect
+		return ViewPortal(vertices);
+	}
+	else
+	{
+		// Create the portal from directly-supplied bounds and normal vector
+		return ViewPortal(vmin, vmax, vnormal);
+	}
+	
 }
 
 // Load an element state definition from external XML.  Accepts an element_size parameter for initialisation of the

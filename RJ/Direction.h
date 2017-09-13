@@ -2,6 +2,7 @@
 
 #include <string>
 #include "CompilerSettings.h"
+#include "DX11_Core.h"
 
 // Enumeration of possible directions
 enum Direction { Left = 0, Up, Right, Down, UpLeft, UpRight, DownRight, DownLeft, ZUp, ZDown, _Count };
@@ -135,3 +136,20 @@ Direction DirectionFromString(std::string direction);
 Direction GetOppositeDirection(Direction dir);
 DirectionBS GetOppositeDirectionBS(DirectionBS dir);
 
+// Structure that holds a series of vectors corresponding to unit movement in each Direction 
+const AXMVECTOR DirectionVectors[Direction::_Count] =
+{
+	XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f),		// Left
+	XMVectorSet(0.0f, 0.0f, +1.0f, 0.0f),		// Up
+	XMVectorSet(+1.0f, 0.0f, 0.0f, 0.0f),		// Right
+	XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f),		// Down
+	XMVectorSet(-1.0f, 0.0f, +1.0f, 0.0f),		// Up-Left
+	XMVectorSet(+1.0f, 0.0f, +1.0f, 0.0f),		// Up-Right
+	XMVectorSet(+1.0f, 0.0f, -1.0f, 0.0f),		// Down-Right
+	XMVectorSet(-1.0f, 0.0f, -1.0f, 0.0f),		// Down-Left
+	XMVectorSet(0.0f, +1.0f, 0.0f, 0.0f),		// ZUp
+	XMVectorSet(0.0f, -1.0f, 0.0f, 0.0f)		// ZDown
+};
+
+// Return the closest Direction value to the given heading vector
+Direction DetermineClosestDirectionToVector(const FXMVECTOR v);

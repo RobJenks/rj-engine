@@ -225,11 +225,8 @@ void ComplexShipTile::RotateAllViewPortals(Rotation90Degree rot_delta)
 	XMMATRIX rot_matrix = GetRotationMatrixInstance(rot_delta);
 	for (auto & portal : m_portals)
 	{
-		portal.Bounds.P0 = XMVector3TransformCoord(portal.Bounds.P0, rot_matrix);
-		portal.Bounds.P1 = XMVector3TransformCoord(portal.Bounds.P1, rot_matrix);
-		portal.RecalculateData();
+		portal.Transform(rot_matrix);
 	}
-
 }
 
 // Recalculates the state of the tile following a change to its position/size etc.  Includes recalc of the world matrix and bounding volume
@@ -835,8 +832,7 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 					tile->SetPowerRequirement(IO::GetIntValue(child));
 				}
 				else if (hash == HashedStrings::H_Portal) {
-					ViewPortal portal;
-					if (IO::Data::LoadViewPortal(child, portal) == ErrorCodes::NoError) tile->AddPortal(std::move(portal));
+					tile->AddPortal(std::move(IO::Data::LoadViewPortal(child)));
 				}
 			}
 		}

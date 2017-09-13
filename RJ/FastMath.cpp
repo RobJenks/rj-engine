@@ -48,6 +48,8 @@ const XMVECTOR ONE_VECTOR = ONE_VECTOR_P;
 const XMVECTOR LARGE_VECTOR_P = XMVectorReplicate(1e15f);
 const XMVECTOR LARGE_VECTOR_N = XMVectorReplicate(-1e15f);
 const XMVECTOR RAND_MAX_V = XMVectorReplicate(RAND_MAX);
+const XMVECTOR TRUE_VECTOR = XMVectorTrueInt();
+const XMVECTOR FALSE_VECTOR = XMVectorFalseInt();
 
 const XMFLOAT2 NULL_FLOAT2 = XMFLOAT2(0.0f, 0.0f);
 const XMFLOAT3 NULL_FLOAT3 = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -434,6 +436,12 @@ float DetermineCubeBoundingSphereRadius(float cube_length)
 float DetermineElementBoundingSphereRadius(int n_elements)
 {
 	return DetermineCubeBoundingSphereRadius(((float)n_elements) * Game::C_CS_ELEMENT_SCALE);
+}
+
+// Determines a vector normal based on three ordered vertices of a face.  Front faces observe clockwise winding order
+XMVECTOR DetermineVectorNormal(const FXMVECTOR v0, const FXMVECTOR v1, const FXMVECTOR v2)
+{
+	return XMVector3Cross(XMVectorSubtract(v1, v0), XMVectorSubtract(v2, v1));
 }
 
 XMVECTOR QuaternionBetweenVectors(const FXMVECTOR v1, const FXMVECTOR v2)

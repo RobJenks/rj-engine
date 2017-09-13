@@ -59,6 +59,28 @@ public:
 	{
 	}
 
+	// Constructor to build an AABB from a set of vertices.  Generates an AABB that encloses all vertices
+	CMPINLINE AABB(const std::vector<XMFLOAT3> & vertices)
+	{
+		if (vertices.empty()) { P0 = P1 = NULL_VECTOR; return; }
+
+		P0 = P1 = XMLoadFloat3(&(vertices[0]));
+		size_t n = vertices.size();
+		for (size_t i = 1U; i < n; ++i)
+		{
+			XMVECTOR v = XMLoadFloat3(&(vertices[i]));
+			P0 = XMVectorMin(P0, v);
+			P1 = XMVectorMax(P1, v);
+		}
+	}
+
+	// Transform the AABB by the given transformation matrix
+	CMPINLINE void Transform(const FXMMATRIX transform)
+	{
+		P0 = XMVector3TransformCoord(P0, transform);
+		P1 = XMVector3TransformCoord(P1, transform);
+	}
+
 	// Copy constructor
 	CMPINLINE AABB(const AABB & other) noexcept
 		:

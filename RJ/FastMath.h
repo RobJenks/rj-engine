@@ -55,6 +55,8 @@ extern const XMVECTOR ONE_VECTOR;
 extern const XMVECTOR LARGE_VECTOR_P;
 extern const XMVECTOR LARGE_VECTOR_N;
 extern const XMVECTOR RAND_MAX_V;
+extern const XMVECTOR TRUE_VECTOR;
+extern const XMVECTOR FALSE_VECTOR;
 
 extern const XMFLOAT2 NULL_FLOAT2;
 extern const XMFLOAT3 NULL_FLOAT3;
@@ -454,6 +456,9 @@ CMPINLINE XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax)
 {
 	return XMVectorAdd(vmin, XMVectorDivide(Vector4Random(), XMVectorDivide(RAND_MAX_V, XMVectorSubtract(vmax, vmin))));
 }
+
+// Determines a vector normal based on three ordered vertices of a face.  Front faces observe clockwise winding order
+XMVECTOR					DetermineVectorNormal(const FXMVECTOR v0, const FXMVECTOR v1, const FXMVECTOR v2);
 
 // Determines which side of a line a given point lies on, where both line and plane lie on the plane with normal 'plane_normal'.
 // The return value will be false for one side of the line and true for the other side.  

@@ -1,5 +1,6 @@
 #include <string>
 #include "HashFunctions.h"
+#include "FastMath.h"
 #include "Direction.h"
 
 
@@ -105,4 +106,28 @@ DirectionBS GetOppositeDirectionBS(DirectionBS dir)
 		default:						return DirectionBS::None_BS;
 	}
 }
+
+// Return the closest Direction value to the given heading vector
+Direction DetermineClosestDirectionToVector(const FXMVECTOR v)
+{
+	// Take the dot product (v . unit-vectors[...]) and return the index (== Direction) closest to 1.0
+	int best_index = 0;
+	XMVECTOR dp = XMVector3Dot(v, DirectionVectors[0]);
+
+	for (int i = 1; i < Direction::_Count; ++i)
+	{
+		// The dot product of two completely parallel vectors with same direction is 1.0, so 
+		// we want to select the direction vector closest to this ideal
+		XMVECTOR diff = XMVectorAbs(XMVectorSubtract(ONE_VECTOR, XMVector3Dot(v, DirectionVectors[i])));
+		if (XMVector3Less(diff, dp))
+		{
+			dp = diff;
+			best_index = i;
+		}
+	}
+
+	return (Direction)best_index;
+}
+
+
 

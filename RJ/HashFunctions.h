@@ -276,6 +276,8 @@ namespace HashedStrings
 	DefineHash(H_Portal, "portal");
 	DefineHash(H_Min, "min");
 	DefineHash(H_Max, "max");
+	DefineHash(H_Vertex, "vertex");
+	DefineHash(H_Normal, "normal");
 	DefineHash(H_Target, "target");
 	DefineHash(H_Direction, "direction");
 	DefineHash(H_Left, "left");
