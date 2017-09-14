@@ -15,9 +15,9 @@
     <CanConnect type="0" x="0" y="0" z="0" state="15" />
 
     <Portal>
-      <min x="-5.0" y="-5.0" z="-5.0" />
-      <max x="5.0" y="5.0" z="-5.0" />
-      <target direction="down" />
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
     </Portal>
 
     <Portal>

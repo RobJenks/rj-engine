@@ -22,11 +22,11 @@ ViewPortal::ViewPortal(const std::vector<XMFLOAT3> & vertices) noexcept
 	}
 	else
 	{
-		m_normal = DetermineVectorNormal(XMLoadFloat3(&(vertices[0U])), XMLoadFloat3(&(vertices[1U])), XMLoadFloat3(&(vertices[2U])));
+		m_normal = XMVector3NormalizeEst(DetermineVectorNormal(XMLoadFloat3(&(vertices[0U])), XMLoadFloat3(&(vertices[1U])), XMLoadFloat3(&(vertices[2U]))));
 	}
 
 	// Portal target direction can be determined based on the vector normal
-	m_target_direction = DetermineClosestDirectionToVector(m_normal);
+	m_target_direction = DeterminePortalTargetDirection(m_normal);
 
 	// Current and target location are not known at construction-time
 	m_location = m_target = 0U;
@@ -41,7 +41,7 @@ ViewPortal::ViewPortal(const std::vector<XMFLOAT3> & vertices) noexcept
 ViewPortal::ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, const FXMVECTOR normal) noexcept
 	:
 	Bounds(min_point, max_point), m_normal(normal),
-	m_target_direction(DetermineClosestDirectionToVector(normal)),
+	m_target_direction(DeterminePortalTargetDirection(normal)),
 	m_location(0U), m_target(0U)
 {
 	RecalculateData();
@@ -98,13 +98,22 @@ void ViewPortal::RecalculateData(void)
 		XMVectorSubtract(Bounds.P0, Bounds.P1)), 0.5f));
 }
 
+// Determines the adjacent element direction that this portal connects to, based upon the portal normal vector
+Direction ViewPortal::DeterminePortalTargetDirection(const FXMVECTOR normal_vector)
+{
+	// Get the direction most closely aligned to our normal vector, then take the opposite
+	// since portals face inwards.  A portal facing down (0, 0, -1) is providing a window
+	// on the element above the current cell (i.e. 0, 0, +1)
+	return GetOppositeDirection(DetermineClosestDirectionToVector(m_normal));
+}
+
 // Transform the portal by the given transformation matrix
 void ViewPortal::Transform(const FXMMATRIX transform)
 {
 	// Transform the portal bounds and normal vector by the given transformation
 	Bounds.Transform(transform);
 	m_normal = XMVector3TransformCoord(m_normal, transform);
-	m_target_direction = DetermineClosestDirectionToVector(m_normal);
+	m_target_direction = DeterminePortalTargetDirection(m_normal);
 
 	// Recalculate all dependent data
 	RecalculateData();

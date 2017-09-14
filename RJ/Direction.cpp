@@ -112,7 +112,7 @@ Direction DetermineClosestDirectionToVector(const FXMVECTOR v)
 {
 	// Take the dot product (v . unit-vectors[...]) and return the index (== Direction) closest to 1.0
 	int best_index = 0;
-	XMVECTOR dp = XMVector3Dot(v, DirectionVectors[0]);
+	XMVECTOR dp = XMVectorAbs(XMVectorSubtract(ONE_VECTOR, XMVector3Dot(v, DirectionVectors[0])));
 
 	for (int i = 1; i < Direction::_Count; ++i)
 	{

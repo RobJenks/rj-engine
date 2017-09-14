@@ -1893,8 +1893,11 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			int target_element = portal.GetTargetLocation();
 			ComplexShipElement *target_el = environment->GetElement(target_element);
 			if (!target_el) continue;	// TODO: need to handle NULL destination in future, for e.g. interstitial space or portals to the outside
-			ComplexShipTile *target_cell = el->GetTile();
+			ComplexShipTile *target_cell = target_el->GetTile();
 			if (!target_cell) continue;	// TODO: need to handle NULL destination in future, for e.g. interstitial space or portals to the outside
+
+			// Make sure we aren't transitioning to the same cell (e.g. due to an error in portal placement)
+			if (target_cell == cell) continue;
 
 			// Construct a new frustum by clipping against the portal bounds 
 			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control

@@ -90,6 +90,9 @@ private:
 	// Store the portal normal vector to allow fast testing of forward/back-facing
 	AXMVECTOR					m_normal;
 
+	// Determines the adjacent element direction that this portal connects to, based upon the portal normal vector
+	Direction					DeterminePortalTargetDirection(const FXMVECTOR normal_vector);
+
 	// Recalculates internal data within the portal following a change to the vertex layout
 	void						RecalculateData(void);
 
