@@ -37,7 +37,7 @@ PortalRenderingStep & PortalRenderingStep::operator=(PortalRenderingStep && othe
 std::string PortalRenderingStep::DebugString(void) const
 {
 	return concat("PortalRenderingStep [Cell=")(Cell ?
-		concat(Cell->GetID())("\"")(Cell->GetCode())("\" at ")(Cell->GetElementLocation().ToString()).str().c_str() : "<NULL>")
+		concat(Cell->GetID())(" \"")(Cell->GetCode())("\" at ")(Cell->GetElementLocation().ToString()).str().c_str() : "<NULL>")
 		(", TraversalCount=")(TraversalCount)("]").str();
 }
 

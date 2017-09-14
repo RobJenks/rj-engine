@@ -1828,7 +1828,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		// Get the next cell to be processed
 		PortalRenderingStep step = std::move(cells.back());
 		cells.pop_back();
-		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("New cycle: ")(step.DebugString())("\n").str());
+		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat(" New cycle: ")(step.DebugString())("\n").str());
 
 		// Make sure the target cell exists
 		// TODO: in future, may need to support transition into e.g. interstitial space or outside the environment, where cell == NULL
@@ -1882,7 +1882,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		for (const auto & portal : cell->GetPortals())
 		{
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
-			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Processing ")(portal.DebugString())("\n").str());
+			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
 

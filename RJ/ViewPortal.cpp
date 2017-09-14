@@ -122,7 +122,7 @@ void ViewPortal::Transform(const FXMMATRIX transform)
 // Debug string representation of the portal
 std::string ViewPortal::DebugString(void) const
 {
-	return concat("ViewPortal [Location=")(m_location)(", target=")(m_target)(", bounds=")(Vector3ToString(Bounds.MinPoint()))("-")(Vector3ToString(Bounds.MaxPoint()))
+	return concat("ViewPortal [Location=")(m_location)(", target_dir=")(m_target_direction)(", target=")(m_target)(", bounds=")(Vector3ToString(Bounds.MinPoint()))("-")(Vector3ToString(Bounds.MaxPoint()))
 		(", normal=")(Vector3ToString(m_normal))(", centre=")(Vector3ToString(m_centre))(", bounding_radius=")(m_bounding_sphere_radius)("]").str();
 }
 
