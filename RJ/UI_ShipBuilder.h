@@ -277,6 +277,10 @@ protected:
 	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location, 
 																	std::vector<TilePlacementIssue> & outPlacementIssues);
 
+	// Replaces all existing tiles with a new version generated from the underlying definition.  Useful to revert tile-specific
+	// changes or where the tile behaviour has changed during development
+	void										RevertAllTilesToBaseDefinitions(void);
+
 	// Reset the position of the intersection test markers and the test parameters
 	void										ResetStructuralTestParameters(void);
 

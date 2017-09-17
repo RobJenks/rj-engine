@@ -28,11 +28,13 @@
       <Instance code="btn_save_up" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_up" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_reset_up" x="1160" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_tile_revert_up" x="1192" y="186" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
     <Image2DGroup code="button1_down" texture="UI\Common\Content\button1_down.dds" texturemode="Normal" render="true">
       <Instance code="btn_save_down" x="1000" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_load_down" x="1080" y="128" z="0.01" width="64" height="32" render="true" />
       <Instance code="btn_reset_down" x="1160" y="128" z="0.01" width="64" height="32" render="true" />
+      <Instance code="btn_tile_revert_down" x="1192" y="186" z="0.01" width="64" height="32" render="true" />
     </Image2DGroup>
 
     <!-- =============================== -->
@@ -71,7 +73,12 @@
     <!-- Tile definition selection box -->
     <TextBlock code="txt_tiledef" text="Tile Definition:" x="916" y="90" render="true" capacity="24" size="1.000000" />
     <ComboBox definition="UI_CONTROL_COMBOBOX1" code="tiledef_selector" x="1000" y="80" z="0.01" width="256" height="32" render="true" expandsize="8" />
-    
+
+    <!-- Revert to base tile definitions button -->
+    <TextBlock code="txt_tile_revert_label" text="Revert to base tile defs:" x="1048" y="196" render="true" capacity="48" size="1.000000" />
+    <TextBlock code="btn_tile_revert_text" text="Revert" render="true" capacity="8" size="1.000000" />
+    <Button code="btn_tile_revert" up="button1_up" up_key="btn_tile_revert_up" down="button1_down" down_key="btn_tile_revert_down" text="btn_tile_revert_text" render="true"/>
+
 
     <!-- === Structural testing mode === -->
     
@@ -116,6 +123,8 @@
       <include code="txt_tiledef" />
       <include code="tileclass_selector" />
       <include code="tiledef_selector" />
+      <include code="txt_tile_revert_label" />
+      <include code="btn_tile_revert" />
     </ComponentGroup>"
     
     <!-- Structural testing mode -->

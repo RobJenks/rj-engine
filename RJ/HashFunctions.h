@@ -290,6 +290,7 @@ namespace HashedStrings
 	DefineHash(H_DownLeft, "downleft");
 	DefineHash(H_ZUp, "zup");
 	DefineHash(H_ZDown, "zdown");
+	DefineHash(H_Volume, "volume");
 }
 
 

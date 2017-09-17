@@ -446,6 +446,8 @@ namespace ErrorCodes {
 	const Result		CannotSaveTerrainWithNullReferences				= 2811;
 	const Result		CannotSaveNullTileConnectionData				= 2812;
 	const Result		CannotSavePortalDataWithNullReferences			= 2813;
+	const Result		CannotSaveAudioParametersWithNullReferences		= 2814;
+	const Result		CannotSaveUnknownAudioItemParameters			= 2815;
 
 	// Generic object errors											(3000-3199)
 	const Result		ObjectHasNoInternalCode							= 3000;
@@ -577,6 +579,7 @@ namespace ErrorCodes {
 	const Result		CannotEvaluateEnvironmentMapWithoutElementRef	= 4035;
 	const Result		InvalidTileClass								= 4036;
 	const Result		TileCompiledWithoutGeometryDataLoaded			= 4037;
+	const Result		CannotRevertInvalidTileToBaseDefinition			= 4038;
 
 	// Ship designer errors												(4400-4599)
 	const Result		ShipDesignerCannotLoadInvalidShipCode			= 4400;

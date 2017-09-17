@@ -316,10 +316,15 @@ public:
 	virtual void					TileAdded(ComplexShipTile *tile);
 
 	// Remove a tile from the environment
-	void							RemoveTile(ComplexShipTile *tile);
+	void							RemoveTile(ComplexShipTile *tile, bool deallocate);
+	CMPINLINE void					RemoveTile(ComplexShipTile *tile) { RemoveTile(tile, true); }
 
 	// Removes all tiles from the environment
-	void							RemoveAllTiles(void);
+	void							RemoveAllTiles(bool deallocate);
+	CMPINLINE void					RemoveAllTiles(void) { RemoveAllTiles(true); }
+
+	// Revert a tile to its base definition.  Can modify the contents and order of the tile collection
+	Result							RevertTileToBaseDefinition(int tile_index);
 
 	// Events that are generated pre- and post-tile removal.  Exposed for use by subclasses as required
 	virtual void					BeforeTileRemoved(ComplexShipTile *tile);

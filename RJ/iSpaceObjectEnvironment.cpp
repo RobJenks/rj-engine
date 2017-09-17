@@ -536,7 +536,7 @@ void iSpaceObjectEnvironment::AddTile(ComplexShipTile **ppTile)
 }
 
 // Remove a tile from the environment
-void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile)
+void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile, bool deallocate)
 {
 	// Parameter check
 	if (!tile) return;
@@ -558,10 +558,13 @@ void iSpaceObjectEnvironment::RemoveTile(ComplexShipTile *tile)
 
 	// Update the environment
 	UpdateEnvironment();
+
+	// Deallocate the tile if it has been requested
+	if (deallocate) SafeDelete(tile);
 }
 
 // Removes all tiles from the environment
-void iSpaceObjectEnvironment::RemoveAllTiles(void)
+void iSpaceObjectEnvironment::RemoveAllTiles(bool deallocate)
 {
 	// Suspend environment updates until all changes have been made
 	SuspendEnvironmentUpdates(); 
@@ -572,7 +575,7 @@ void iSpaceObjectEnvironment::RemoveAllTiles(void)
 	int count = GetTileCount();
 	while (--count >= 0)
 	{
-		RemoveTile(GetTile(0));
+		RemoveTile(GetTile(0), deallocate);
 	}
 
 	// If any tiles remain we have an issue
@@ -586,6 +589,37 @@ void iSpaceObjectEnvironment::RemoveAllTiles(void)
 	ResumeEnvironmentUpdates();
 }
 
+// Revert a tile to its base definition.  Can modify the contents and order of the tile collection
+Result iSpaceObjectEnvironment::RevertTileToBaseDefinition(int tile_index)
+{
+	if (tile_index < 0 || tile_index >= GetTileCount()) return ErrorCodes::CannotRevertInvalidTileToBaseDefinition;
+	ComplexShipTile *current_tile = GetTile(tile_index);
+	if (!current_tile) return ErrorCodes::CannotRevertInvalidTileToBaseDefinition;
+
+	// Remove the current tile, but keep it alive for now so we can replicate it
+	RemoveTile(current_tile, false);
+
+	// Create a new tile based on the definition and replicate required parameters
+	Result result = ErrorCodes::NoError;
+	const ComplexShipTileDefinition *def = current_tile->GetTileDefinition();
+	if (def)
+	{
+		ComplexShipTile *tile = def->CreateTile();
+		tile->SetElementLocation(current_tile->GetElementLocation());
+		tile->SetElementSize(current_tile->GetElementSize());
+		tile->SetRotation(current_tile->GetRotation());
+
+		result = tile->CompileAndValidateTile();
+		if (result == ErrorCodes::NoError)
+		{
+			AddTile(&tile);
+		}
+	}
+
+	// Deallocate the old tile now that we have replicated it
+	SafeDelete(current_tile);
+	return result;
+}
 
 // Adds all terrain objects associated with a tile to the environment
 void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)
@@ -1274,7 +1308,7 @@ void iSpaceObjectEnvironment::ReplaceTile(ComplexShipTile *old_tile, ComplexShip
 	SuspendTileRecalculation();
 
 	// Remove the old tile from the environment
-	RemoveTile(old_tile);
+	RemoveTile(old_tile, false);
 
 	// We now want to add the new tile, assuming it exists
 	if (new_tile)

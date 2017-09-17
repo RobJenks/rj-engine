@@ -4265,8 +4265,8 @@ AudioParameters IO::Data::LoadAudioParameters(TiXmlElement *node)
 {
 	if (!node) return AudioParameters::Null;
 
-	const char *audio_name = node->Attribute("name");
-	const char *audio_volume = node->Attribute("volume");
+	const char *audio_name = node->Attribute(HashedStrings::H_Name.CStr());
+	const char *audio_volume = node->Attribute(HashedStrings::H_Volume.CStr());
 	if (!audio_name) return AudioParameters::Null;
 		
 	return AudioParameters(audio_name, (audio_volume ? (float)atof(audio_volume) : 0.0f));

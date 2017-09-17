@@ -8,6 +8,8 @@
 #include "Utility.h"
 #include "XMLGenerator.h"
 
+#include "CoreEngine.h"
+#include "AudioManager.h"
 #include "BoundingObject.h"
 #include "Model.h"
 #include "SimpleShip.h"
@@ -57,6 +59,7 @@ bool IO::Data::SaveObjectData(TiXmlElement *node, iObject *object)
 	IO::Data::LinkStringXMLElement("Name", object->GetName(), node);
 	IO::Data::LinkBoolXMLElement("StandardObject", object->IsStandardObject(), node);
 	if (object->GetModel()) IO::Data::LinkStringXMLElement("Model", object->GetModel()->GetCode(), node);
+	if (object->HasAmbientAudio()) IO::Data::SaveAudioParameters(node, HashedStrings::H_AmbientAudio.Text, object->GetAmbientAudio());
 
 	// Some fields are applicable to instance (non-archetype) objects only
 	if (!object->IsStandardObject())
@@ -515,6 +518,25 @@ Result IO::Data::SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain)
 
 	// Link this new node to its parent and return success
 	parent->LinkEndChild(node);
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::SaveAudioParameters(TiXmlElement *parent, const std::string & key, const AudioParameters & audio_params)
+{
+	// Parameter check
+	if (!parent || key.empty()) return ErrorCodes::CannotSaveAudioParametersWithNullReferences;
+
+	// We need to resolve the audio ID into its string name
+	const AudioItem *audio = Game::Engine->GetAudioManager()->GetAudioItem(audio_params.AudioId);
+	if (!audio) return ErrorCodes::CannotSaveUnknownAudioItemParameters;
+
+	// Create and link the node
+	TiXmlElement *node = new TiXmlElement(key.c_str());
+	node->SetAttribute(HashedStrings::H_Name.CStr(), audio->GetName().c_str());
+	node->SetDoubleAttribute(HashedStrings::H_Volume.CStr(), audio_params.Volume);
+	parent->LinkEndChild(node);
+
+	// Return success
 	return ErrorCodes::NoError;
 }
 

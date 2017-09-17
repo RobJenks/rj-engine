@@ -384,7 +384,36 @@ void UI_ShipBuilder::DeleteTile(const INTVECTOR3 & location)
 	if (!tile) return;
 
 	// Delete this tile from the environment
-	m_ship->RemoveTile(tile);
+	m_ship->RemoveTile(tile, true);
+}
+
+// Replaces all existing tiles with a new version generated from the underlying definition.  Useful to revert tile-specific
+// changes or where the tile behaviour has changed during development
+void UI_ShipBuilder::RevertAllTilesToBaseDefinitions(void)
+{
+	if (!m_ship) return;
+
+	// All tiles will be updated; suspend any updates until all replacements are completed
+	m_ship->SuspendTileRecalculation();
+	m_ship->SuspendEnvironmentUpdates();
+	m_ship->SuspendUpdates();
+
+	// Relies on the fact that tiles are stored in a sequential vector, and so if we process
+	// the collection in reverse the indices of remaining tiles will not be affected by any changes
+	int tilecount = m_ship->GetTileCount();
+	for (int i = 0; i < tilecount; ++i)
+	{
+		Result result = m_ship->RevertTileToBaseDefinition(i);
+		if (result != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_WARN << "Could not revert tile with index " << i << " to base definition; error code " << result << "\n";
+		}
+	}
+
+	// Re-enable environment updates following the changes
+	m_ship->ReactivateTileRecalculation();
+	m_ship->ResumeEnvironmentUpdates();
+	m_ship->ResumeUpdates();
 }
 
 // Method that is called when the UI controller is deactivated
@@ -1350,6 +1379,9 @@ void UI_ShipBuilder::ProcessButtonClickEvent(UIButton *button)
 	else if (button->GetCode() == "btn_reset") {
 		ResetShip();
 	}
+	else if (button->GetCode() == "btn_tile_revert") {
+		RevertAllTilesToBaseDefinitions();
+	}
 	
 }
 
@@ -1689,7 +1721,7 @@ void UI_ShipBuilder::ResetShip(void)
 {
 	if (!m_ship) return;
 
-	m_ship->RemoveAllTiles();
+	m_ship->RemoveAllTiles(true);
 	SetStatusMessage("Environment reset");
 }
 
