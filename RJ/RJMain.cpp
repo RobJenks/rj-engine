@@ -2357,7 +2357,7 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-		static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
+/*		static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
 		if (Game::Keyboard.GetKey(DIK_F)) extent.x += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 		if (Game::Keyboard.GetKey(DIK_G)) extent.y += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 
@@ -2439,9 +2439,9 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 		SafeDelete(f);
 		SafeDelete(manual);
-
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Nodes: %d of %d    |   Extent: %s   |   Result: %s ",
-			success, total, Vector2ToString(extent).c_str(), result.c_str());
+		*/
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
+			"");
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
@@ -2449,3 +2449,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
+

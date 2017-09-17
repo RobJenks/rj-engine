@@ -1,0 +1,23 @@
+float spacing = 20.0f;
+		float node_size = 5.0f;
+		float node_radius = sqrtf(3.0f * pow(node_size * 0.5f, 2.0f)); // sqrt((n/2)^2 + (n/2)^2 + (n/2)^2)
+		int total = 0, success = 0;
+		for (int x = -5; x <= 5; ++x)
+		{
+			for (int y = -5; y <= 5; ++y)
+			{
+				for (int z = -5; z <= 5; ++z)
+				{
+					if (x == 0 && y == 0 && z == 0) continue;
+
+					XMVECTOR pos = XMVectorAdd(ss()->GetPosition(), XMVectorSet(x * spacing, y * spacing, z * spacing, 1.0f));
+					bool cell_result = f->CheckSphere(pos, node_radius);
+					
+					++total;
+					if (cell_result) ++success;
+
+					if (true) Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
+						(cell_result ? XMFLOAT4(0,1,0,1) : XMFLOAT4(1, 0, 0, 1)));
+				}
+			}
+		}

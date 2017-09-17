@@ -67,6 +67,24 @@
     <Model>corridor_nse_model</Model>
     <Size x="1" y="1" z="1" />
 
+    <Portal>
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="-5.0" y="-5.0" z="5.0" />
+      <vertex x="-5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="5.0" y="-5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="-5.0" />
+    </Portal>
+ 
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />
     </ElementStateDefinition>
@@ -93,7 +111,31 @@
     <StandardTile>True</StandardTile>
     <Model>corridor_nsew_model</Model>
     <Size x="1" y="1" z="1" />
-    
+
+    <Portal>
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="-5.0" y="-5.0" z="5.0" />
+      <vertex x="-5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="5.0" y="-5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="-5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="5.0" />
+    </Portal>
+
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />
     </ElementStateDefinition>
@@ -113,7 +155,7 @@
     <staticterrain px="-3.225000" py="0.139999" pz="4.065002" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.365000" ey="2.555001" ez="1.074999" />
     <staticterrain px="-3.795001" py="0.105001" pz="3.320001" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
     <staticterrain px="-3.580001" py="-0.085000" pz="-3.265000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="0.764999" ey="2.380000" ez="0.390002" />
-    
+
   </ComplexShipTileDefinition>
 
 </GameData>
