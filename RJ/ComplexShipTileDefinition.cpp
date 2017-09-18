@@ -85,7 +85,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 	tile->PossibleConnections = Connectivity;
 
 	// Copy all portal definitions into the tile
-	for (const auto & portal : m_portals) tile->AddPortal(portal);
+	for (const auto & portal : m_portals) tile->AddPortal(ViewPortal(portal));
 	
 	// Finally, perform any class-specific initialisation (if required) via the subclass virtual method
 	if (TileDefinitionHasClassSpecificData()) this->ApplyClassSpecificDefinition(tile);
@@ -337,11 +337,14 @@ void ComplexShipTileDefinition::AddPortal(const ViewPortal & portal)
 {
 	// Make sure the portal bounds lie within the area of this tile, otherwise reject it
 	XMVECTOR extent = XMVectorMultiply(Game::ElementLocationToPhysicalPosition(m_elementsize), HALF_VECTOR_P);
-	if (XMVector3LessOrEqual(portal.Bounds.MaxPoint(), extent) && XMVector3GreaterOrEqual(portal.Bounds.MinPoint(), XMVectorNegate(extent)))
+	for (int i = 0; i < 4; ++i)
 	{
-		// Add the portal to our collection
-		m_portals.push_back(portal);
+		// Reject the portal if any vertex lies outside the tile bounds
+		if (XMVector3Greater(portal.Vertices[i], extent) || XMVector3Less(portal.Vertices[i], XMVectorNegate(extent))) return;
 	}
+
+	// Add the portal to our collection
+	m_portals.push_back(portal);
 }
 
 // Adds a link to a dynamic tileset

@@ -18,12 +18,14 @@
       <vertex x="5.0" y="5.0" z="-5.0" />
       <vertex x="-5.0" y="5.0" z="-5.0" />
       <vertex x="-5.0" y="-5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
     </Portal>
 
     <Portal>
       <vertex x="-5.0" y="-5.0" z="5.0" />
       <vertex x="-5.0" y="5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="-5.0" z="5.0" />
     </Portal>
     
     <CollisionOBB skip="true" numchildren="0" />
@@ -41,6 +43,20 @@
     <Model>corridor_se_model</Model>
     <Size x="1" y="1" z="1" />
 
+    <Portal>
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="5.0" y="-5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
+    </Portal>
+    
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />
     </ElementStateDefinition>
@@ -68,23 +84,26 @@
     <Size x="1" y="1" z="1" />
 
     <Portal>
-      <vertex x="5.0" y="5.0" z="-5.0" />
-      <vertex x="-5.0" y="5.0" z="-5.0" />
-      <vertex x="-5.0" y="-5.0" z="-5.0" />
-    </Portal>
-
-    <Portal>
       <vertex x="-5.0" y="-5.0" z="5.0" />
       <vertex x="-5.0" y="5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="-5.0" z="5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
     </Portal>
 
     <Portal>
       <vertex x="5.0" y="-5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
     </Portal>
- 
+
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />
     </ElementStateDefinition>
@@ -113,27 +132,31 @@
     <Size x="1" y="1" z="1" />
 
     <Portal>
-      <vertex x="5.0" y="5.0" z="-5.0" />
-      <vertex x="-5.0" y="5.0" z="-5.0" />
-      <vertex x="-5.0" y="-5.0" z="-5.0" />
-    </Portal>
-
-    <Portal>
       <vertex x="-5.0" y="-5.0" z="5.0" />
       <vertex x="-5.0" y="5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="5.0" />
+      <vertex x="5.0" y="-5.0" z="5.0" />
+    </Portal>
+
+    <Portal>
+      <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="5.0" z="-5.0" />
+      <vertex x="-5.0" y="-5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
     </Portal>
 
     <Portal>
       <vertex x="5.0" y="-5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="5.0" />
       <vertex x="5.0" y="5.0" z="-5.0" />
+      <vertex x="5.0" y="-5.0" z="-5.0" />
     </Portal>
 
     <Portal>
       <vertex x="-5.0" y="-5.0" z="-5.0" />
       <vertex x="-5.0" y="5.0" z="-5.0" />
       <vertex x="-5.0" y="5.0" z="5.0" />
+      <vertex x="-5.0" y="-5.0" z="5.0" />
     </Portal>
 
     <ElementStateDefinition>

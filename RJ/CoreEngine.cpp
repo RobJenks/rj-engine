@@ -103,6 +103,7 @@ CoreEngine::CoreEngine(void)
 	m_overlayrenderer = NULL;
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
+	m_debug_portal_debugrender = m_debug_portal_debuglog = false;
 	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
@@ -1884,10 +1885,16 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
-			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) continue;
+			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) {
+				DEBUG_PORTAL_RENDER(portal, cell_world, false);
+				continue;
+			}
 
 			// Make sure that the viewer is facing towards the portal (i.e. dot(viewer_heading, portal_normal) must be < 0)
-			if (XMVector3GreaterOrEqual(XMVector3Dot(env_local_viewer_heading, portal.GetNormal()), NULL_VECTOR)) continue;
+			if (XMVector3GreaterOrEqual(XMVector3Dot(env_local_viewer_heading, portal.GetNormal()), NULL_VECTOR)) {
+				DEBUG_PORTAL_RENDER(portal, cell_world, false);
+				continue;
+			}
 
 			// Make sure the portal has a valid destination
 			int target_element = portal.GetTargetLocation();
@@ -1901,12 +1908,13 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 			// Construct a new frustum by clipping against the portal bounds 
 			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(*(m_tmp_frustums[current_frustum]), portal, view_position, cell_world);
+			Frustum *new_frustum = CreateClippedFrustum(*(Game::Engine->GetCamera()), *(m_tmp_frustums[current_frustum]), portal, cell_world);
 			++current_frustum;
 			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
 
 			// Use the new frustum to generate further steps in the portal traversal
 			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
+			DEBUG_PORTAL_RENDER(portal, cell_world, true);
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Generating new traversal step for portal: ")(cells.back().DebugString())("\n").str());
 		}
 	}
@@ -1916,30 +1924,65 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	for (int i = 1; i <= current_frustum; ++i) delete m_tmp_frustums[i];
 	m_tmp_frustums.clear();
 	
-	// If we are debug logging this render cycle, reset the debug ID so that we only log single frames on request
-	DEBUG_PORTAL_TRAVERSAL(environment, m_debug_renderportaltraversal = 0U);
+	// If we are debug-rendering the portal data, also render all portals in tiles which were not processed
+	DEBUG_PORTAL_TRAVERSAL(environment, { for (auto tile : environment->GetTiles()) {
+		if (tile.value && !tile.value->IsRendered()) {
+			XMMATRIX cell_world = XMMatrixMultiply(tile.value->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
+			for (auto portal : tile.value->GetPortals()) DEBUG_PORTAL_RENDER(portal, cell_world, false); 
+		}
+	}});
+
+
 	DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Portal rendering complete for environment \"")(environment->GetInstanceCode())("\"\n").str());
-	
 	return NULL; // TODO
+}
+
+// Calculates the bounds of a portal in world space, by transforming into view space and determining the
+// portal extents and then transforming those points back into world space
+void CoreEngine::CalculateViewPortalBounds(const ViewPortal & portal, const FXMMATRIX portal_world_transform, const CameraClass & camera, AXMVECTOR(&pOutVertices)[4]) const
+{
+	// Transform the portal bounds to world and then view space
+	/*AXMVECTOR world[4]; AXMVECTOR view[4];
+	const XMMATRIX viewmatrix = camera.GetViewMatrix();
+	for (int i = 0; i < 4; ++i)
+	{
+		world[i] = XMVector3TransformCoord(portal.Vertices[i], portal_world_transform);
+		view[i] = XMVector3TransformCoord(world[i], viewmatrix);
+	}
+
+	// Determine the minimum and maximum extents of the portal in view space
+	XMVECTOR view_min = XMVectorMin(XMVectorMin(view[0], view[1]), XMVectorMin(view[2], view[3]));
+	XMVECTOR view_max = XMVectorMax(XMVectorMax(view[0], view[1]), XMVectorMax(view[2], view[3]));
+
+	// 
+
+	// World-space portal bounds can therefore be derived from the min/max extents in the view-space XY plane
+	const XMMATRIX invview = camera.GetInverseViewMatrix();
+	pOutVertices[0] = XMVector3TransformCoord(BL_view, invview);											// BL
+	pOutVertices[1] = XMVector3TransformCoord(XMVectorSelect(BL_view, TR_view, VCTRL_0100), invview);		// TL
+	pOutVertices[2] = XMVector3TransformCoord(XMVectorSelect(BL_view, TR_view, ))
+
+		*/
+
 }
 
 // Create a new view frustum by clipping the current frustum against the bounds of a view portal
 // Portal is defined in cell-local space, and frustum is required in world space, so also accepts a cell-to-world transform
-Frustum * CoreEngine::CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal, const FXMVECTOR view_position, const FXMMATRIX world_transform)
+Frustum * CoreEngine::CreateClippedFrustum(const CameraClass & camera, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform)
 {
-	// By constraining view portals to an AABB we can guarantee clipped view frustums are always four-sided
+	// By constraining view portals to four vertices we can guarantee clipped view frustums are always four-sided
 	Frustum *frustum = new Frustum(4U, current_frustum.GetNearPlane(), current_frustum.GetFarPlane());
 
-	// Bottom-left point = portal.P0, Top-right point = portal.P1.  Calculate the other two points
-	// Transform all points to world space at this point, before construction of the frustum
-	XMVECTOR BL = XMVector3TransformCoord(portal.Bounds.P0, world_transform);
-	XMVECTOR TR = XMVector3TransformCoord(portal.Bounds.P1, world_transform);
-	XMVECTOR TL = XMVector3TransformCoord(XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VCTRL_0100), world_transform);
-	XMVECTOR BR = XMVector3TransformCoord(XMVectorSelect(portal.Bounds.P0, portal.Bounds.P1, VCTRL_1000), world_transform);
+	// Transform all portal vertices to world space
+	XMVECTOR BL = XMVector2TransformCoord(portal.Vertices[0], world_transform);
+	XMVECTOR TL = XMVector2TransformCoord(portal.Vertices[1], world_transform);
+	XMVECTOR TR = XMVector2TransformCoord(portal.Vertices[2], world_transform);
+	XMVECTOR BR = XMVector2TransformCoord(portal.Vertices[3], world_transform);
 
 	// Clip each of the four frustum sides to the portal vertices. Each plane can be defined by three
 	// points { view_pos, portal_vertex_0, portal_vertex_1 }.  Vertices must follow specific widing so
 	// plane normals correctly face inwards
+	const XMVECTOR view_position = camera.GetPosition();
 	frustum->SetPlane(Frustum::FIRST_SIDE + 0U, view_position, TR, TL);		// View-TR-TL
 	frustum->SetPlane(Frustum::FIRST_SIDE + 1U, view_position, BR, TR);		// View-BR-TR
 	frustum->SetPlane(Frustum::FIRST_SIDE + 2U, view_position, BL, BR);		// View-BL-BR
@@ -1947,6 +1990,35 @@ Frustum * CoreEngine::CreateClippedFrustum(const Frustum & current_frustum, cons
 
 	// Return the new frustum.  It is the responsibility of the calling method to dispose of it afterwards
 	return frustum;
+}
+
+// Debug-render an environment portal based on the given definition and world transform
+void CoreEngine::DebugRenderPortal(const ViewPortal & portal, const FXMMATRIX world_matrix, bool is_active)
+{
+	// Transform all portal vertices to world space
+	XMVECTOR BL = XMVector2TransformCoord(portal.Vertices[0], world_matrix);
+	XMVECTOR TL = XMVector2TransformCoord(portal.Vertices[1], world_matrix);
+	XMVECTOR TR = XMVector2TransformCoord(portal.Vertices[2], world_matrix);
+	XMVECTOR BR = XMVector2TransformCoord(portal.Vertices[3], world_matrix);
+	OverlayRenderer::RenderColour colour = (is_active ? OverlayRenderer::RenderColour::RC_Green : OverlayRenderer::RenderColour::RC_Red);
+
+	// Render bounds of the portal
+	Game::Engine->GetOverlayRenderer()->RenderLine(BL, TL, colour, 0.25f, -1.0f);
+	Game::Engine->GetOverlayRenderer()->RenderLine(TL, TR, colour, 0.25f, -1.0f);
+	Game::Engine->GetOverlayRenderer()->RenderLine(TR, BR, colour, 0.25f, -1.0f);
+	Game::Engine->GetOverlayRenderer()->RenderLine(BR, BL, colour, 0.25f, -1.0f);
+
+	// Also render the portal normal vector
+	XMVECTOR centre = XMVector3TransformCoord(portal.GetCentrePoint(), world_matrix);
+	XMVECTOR normal_pt = XMVectorMultiplyAdd(portal.GetNormal(), XMVectorReplicate(3.0f), centre);	// = (centre + (scalar * unit_normal))
+	Game::Engine->GetOverlayRenderer()->RenderLine(centre, normal_pt, colour, 0.5f, -1.0f);
+}
+
+// Set the debug level for portal rendering, if it has been enabled for a specific environment
+void CoreEngine::SetDebugPortalRenderingConfiguration(bool debug_render, bool debug_log)
+{
+	m_debug_portal_debugrender = debug_render;
+	m_debug_portal_debuglog = debug_log;
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment
@@ -3129,6 +3201,29 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 		SetDebugObjectIdentifierRenderTargetObject(target ? target->GetID() : 0);
 
 		command.SetSuccessOutput(concat((b ? "Enabling" : "Disabling"))(" render of object identifiers").str());
+		return true;
+	}
+	else if (command.InputCommand == "portal_render")
+	{
+		iObject *obj = command.ParameterAsObject(0);
+		if (!obj || !obj->IsEnvironment()) {
+			SetDebugPortalRenderingTarget(0U);
+			SetDebugPortalRenderingConfiguration(false, false);
+			command.SetSuccessOutput("Disabling portal debug rendering (usage = \"portal_render <obj-id> <debug-render> <debug-log>\"; obj-id == 0 to disable)");
+			return true;
+		}
+
+		bool debug_render = command.ParameterAsBool(1);
+		bool debug_log = command.ParameterAsBool(2);
+		if (!(debug_render || debug_log)) {
+			command.SetSuccessOutput("Disabling portal debug rendering (usage = \"portal_render <obj-id> <debug-render> <debug-log>\"; obj-id == 0 to disable)");
+			return true;
+		}
+
+		SetDebugPortalRenderingTarget(obj->GetID());
+		SetDebugPortalRenderingConfiguration(debug_render, debug_log);
+		command.SetSuccessOutput(concat("Debug portal rendering enabled for \"")(obj->GetInstanceCode())("\" (")(obj->GetID())("); rendering ")
+			(debug_render ? "enabled" : "disabled")(", logging ")(debug_log ? "enabled" : "disabled").str());
 		return true;
 	}
 

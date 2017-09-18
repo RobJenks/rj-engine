@@ -481,9 +481,10 @@ Result IO::Data::SaveViewPortal(TiXmlElement *parent, const std::string & elemen
 	if (!parent) return ErrorCodes::CannotSavePortalDataWithNullReferences;
 
 	TiXmlElement *node = new TiXmlElement(HashedStrings::H_Portal.Text.c_str());
-	IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Min.Text, portal.Bounds.MinPoint(), node);
-	IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Max.Text, portal.Bounds.MaxPoint(), node);
-	IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Normal.Text, portal.GetNormal(), node);
+	for (int i = 0; i < 4; ++i)
+	{
+		IO::Data::LinkVector3AttrXMLElement(HashedStrings::H_Vertex.Text, portal.Vertices[i], node);
+	}
 	parent->LinkEndChild(node);
 
 	return ErrorCodes::NoError;

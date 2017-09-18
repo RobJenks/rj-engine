@@ -777,9 +777,6 @@ TiXmlElement * ComplexShipTile::GenerateBaseClassXML(ComplexShipTile *tile)
 	IO::Data::SaveTileConnectionState(node, HashedStrings::H_CanConnect.Text, &(tile->PossibleConnections));
 	IO::Data::SaveTileConnectionState(node, HashedStrings::H_Connection.Text, &(tile->Connections));
 
-	// Add entries for any view portals owned by this tile
-	for (const auto & portal : tile->GetPortals()) IO::Data::SaveViewPortal(node, HashedStrings::H_Portal.Text, portal);
-
 	// Return the node containing all data on this base class
 	return node;
 }
@@ -830,9 +827,6 @@ void ComplexShipTile::ReadBaseClassXML(TiXmlElement *node, ComplexShipTile *tile
 				}
 				else if (hash == HashedStrings::H_PowerRequirement) {
 					tile->SetPowerRequirement(IO::GetIntValue(child));
-				}
-				else if (hash == HashedStrings::H_Portal) {
-					tile->AddPortal(std::move(IO::Data::LoadViewPortal(child)));
 				}
 			}
 		}

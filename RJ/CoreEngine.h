@@ -322,8 +322,8 @@ public:
 	CMPINLINE void SetDebugObjectIdentifierRenderTargetObject(Game::ID_TYPE id) { m_debug_renderobjid_object = id; }
 	CMPINLINE float GetDebugObjectIdentifierRenderingDistance(void) const { return m_debug_renderobjid_distance; }
 	CMPINLINE void SetDebugObjectIdentifierRenderingDistance(float dist) { m_debug_renderobjid_distance = clamp(dist, 1.0f, 100000.0f); }
-	CMPINLINE Game::ID_TYPE GetDebugPortalTraversalRenderingTarget(void) const { return m_debug_renderportaltraversal; }
-	CMPINLINE void SetDebugPortalRenderingTargetForFrame(Game::ID_TYPE environment_id) { m_debug_renderportaltraversal = environment_id; }
+	CMPINLINE Game::ID_TYPE GetDebugPortalRenderingTarget(void) const { return m_debug_renderportaltraversal; }
+	CMPINLINE void SetDebugPortalRenderingTarget(Game::ID_TYPE environment_id) { m_debug_renderportaltraversal = environment_id; }
 
 	
 	// Structure keeping track of render info per frame
@@ -629,10 +629,20 @@ private:
 								global visibility frustum
 	*/
 	void					RenderNonPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
-	public:
+	
+	// Calculates the bounds of a portal in world space, by transforming into view space and determining the
+	// portal extents and then transforming those points back into world space
+	void					CalculateViewPortalBounds(const ViewPortal & portal, const FXMMATRIX portal_world_transform, const CameraClass & camera, AXMVECTOR(&pOutVertices)[4]) const;
+
 	// Create a new view frustum by clipping the current frustum against the bounds of a view portal
-	Frustum *				CreateClippedFrustum(const Frustum & current_frustum, const ViewPortal & portal, const FXMVECTOR view_position, const FXMMATRIX world_transform);
-	private:
+	Frustum *				CreateClippedFrustum(const CameraClass & camera, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform);
+	
+	// Debug-render an environment portal based on the given definition and world transform
+	void					DebugRenderPortal(const ViewPortal & portal, const FXMMATRIX world_matrix, bool is_active);
+
+	// Set the debug level for portal rendering, if it has been enabled for a specific environment
+	void					SetDebugPortalRenderingConfiguration(bool debug_render, bool debug_log);
+
 	// Render an object with a static model.  Protected; called only from RenderObject()
 	void                    RenderObjectWithStaticModel(iObject *object);
 
@@ -687,6 +697,8 @@ private:
 	Game::ID_TYPE				m_debug_renderenvtree;
 	Game::ID_TYPE				m_debug_renderenvnetwork;
 	Game::ID_TYPE				m_debug_renderportaltraversal;
+	bool						m_debug_portal_debugrender;
+	bool						m_debug_portal_debuglog;
 	Game::ID_TYPE				m_debug_renderobjid_object;						// Specific object for which we should render IDs (generally an environment)
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
@@ -712,10 +724,13 @@ private:
 #		define DEBUG_PORTAL_TRAVERSAL(environment, expr) \
 			if (m_debug_renderportaltraversal == environment->GetID()) { expr; }
 #		define DEBUG_PORTAL_TRAVERSAL_LOG(environment, text) \
-			if (m_debug_renderportaltraversal == environment->GetID()) { Game::Log << LOG_DEBUG << text; }
+			if (m_debug_portal_debuglog && m_debug_renderportaltraversal == environment->GetID()) { Game::Log << LOG_DEBUG << text; }
+#		define DEBUG_PORTAL_RENDER(portal, world_matrix, is_active) \
+			if (m_debug_portal_debugrender && m_debug_renderportaltraversal == environment->GetID()) { DebugRenderPortal(portal, world_matrix, is_active); }
 #	else
 #		define DEBUG_PORTAL_TRAVERSAL(environment, expr) 
 #		define DEBUG_PORTAL_TRAVERSAL_LOG(environment, text)
+#		define DEBUG_PORTAL_RENDER(portal, world_matrix, is_active)
 #	endif
 
 };

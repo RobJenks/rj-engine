@@ -635,7 +635,7 @@ void RJMain::ProcessKeyboardInput(void)
 		if (b[DIK_LSHIFT])			cs()->OverridePortalBasedRenderingSupport(true);
 		else if (b[DIK_LCONTROL])	cs()->RemoveOverrideOfPortalBasedRenderingSupport();
 
-		else						Game::Engine->SetDebugPortalRenderingTargetForFrame(cs()->GetID());
+		else						Game::Engine->SetDebugPortalRenderingTarget(cs()->GetID());
 		
 		//Game::Keyboard.LockKey(DIK_MINUS);
 	}
@@ -2450,4 +2450,5 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
+*** TEST PORTAL RENDERING AND DEBUG SPECIFIC CASES ***
 

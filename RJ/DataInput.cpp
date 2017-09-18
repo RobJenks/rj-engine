@@ -1775,9 +1775,8 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 // Load a single view portal definition and return it
 ViewPortal IO::Data::LoadViewPortal(TiXmlElement *node)
 {
-	// Portals may be specified as either a set of vertices, or as the min/max bounds and a normal vector
-	std::vector<XMFLOAT3> vertices;
-	XMVECTOR vmin = NULL_VECTOR, vmax = NULL_VECTOR, vnormal = FORWARD_VECTOR;
+	// Portals should be provided as a set of four vertices
+	AXMVECTOR vertices[4]; int current_vertex = 0;
 
 	// Process the xml data
 	std::string key;
@@ -1787,25 +1786,14 @@ ViewPortal IO::Data::LoadViewPortal(TiXmlElement *node)
 		key = child->Value(); StrLowerC(key);
 		HashVal hash = HashString(key);
 		
-		if (hash == HashedStrings::H_Vertex)		vertices.push_back(IO::GetFloat3FromAttr(child));
-		else if (hash == HashedStrings::H_Min)		vmin = IO::GetVector3FromAttr(child);
-		else if (hash == HashedStrings::H_Max)		vmax = IO::GetVector3FromAttr(child);
-		else if (hash == HashedStrings::H_Normal)	vnormal = IO::GetVector3FromAttr(child);
+		if (hash == HashedStrings::H_Vertex && current_vertex < 4)	vertices[current_vertex++] = IO::GetVector3FromAttr(child);
 	}
 
-	// If any vertices were specified then we take the option to construct from a vertex set
-	if (!vertices.empty())
-	{
-		// Create the portal from all supplied vertices.  If fewer than three vertices were provided
-		// then a null portal will be returned that has no area and does not have any effect
-		return ViewPortal(vertices);
-	}
-	else
-	{
-		// Create the portal from directly-supplied bounds and normal vector
-		return ViewPortal(vmin, vmax, vnormal);
-	}
-	
+	// Any unspecified vertices will be defaulted to null
+	for (int i = current_vertex; i < 4; ++i) vertices[i] = NULL_VECTOR;
+
+	// Create the portal from all supplied vertices
+	return ViewPortal(vertices);
 }
 
 // Load an element state definition from external XML.  Accepts an element_size parameter for initialisation of the

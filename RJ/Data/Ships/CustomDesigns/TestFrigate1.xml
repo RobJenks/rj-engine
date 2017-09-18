@@ -299,7 +299,7 @@
             <elementlocation x="5" y="3" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>4</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -307,7 +307,7 @@
             <elementlocation x="6" y="3" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>3</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -387,7 +387,7 @@
             <elementlocation x="6" y="4" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>10</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -467,7 +467,7 @@
             <elementlocation x="6" y="5" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>10</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -547,7 +547,7 @@
             <elementlocation x="6" y="6" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>10</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -627,7 +627,7 @@
             <elementlocation x="6" y="7" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>8</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -763,7 +763,7 @@
             <elementlocation x="3" y="9" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>2</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -787,7 +787,7 @@
             <elementlocation x="6" y="9" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>2</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -843,7 +843,7 @@
             <elementlocation x="3" y="10" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>8</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -867,7 +867,7 @@
             <elementlocation x="6" y="10" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>8</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1163,7 +1163,7 @@
             <elementlocation x="3" y="14" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>2</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1243,7 +1243,7 @@
             <elementlocation x="3" y="15" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>8</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1731,7 +1731,7 @@
             <elementlocation x="4" y="21" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>4</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1739,7 +1739,7 @@
             <elementlocation x="5" y="21" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>5</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1747,7 +1747,7 @@
             <elementlocation x="6" y="21" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>1</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -3862,49 +3862,7 @@
         </complexshipsectioninstance>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="1" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="4" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="6" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="9" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="2" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="1" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -3918,49 +3876,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="0" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="0" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="13" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="17" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -3974,49 +3890,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="0" y="21" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="2" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="5" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="6" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="8" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="22" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4030,49 +3904,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="9" y="17" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="9" y="12" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="8" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="6" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4086,49 +3918,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="3" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="5" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="6" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="9" y="1" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="3" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="4" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="6" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4142,49 +3932,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="9" y="10" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="12" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="14" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="9" y="16" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="18" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="20" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="22" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4198,49 +3946,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="6" y="23" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="4" y="23" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="2" y="23" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="0" y="23" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="21" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="19" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="17" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4254,49 +3960,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="0" y="13" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="11" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="9" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="0" y="7" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="5" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="3" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="1" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4308,50 +3972,6 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="power_generator_basic_01">
-            <basetiledata>
-                <location x="7" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="2" y="1" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="4" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
                 <location x="3" y="5" z="0" />
@@ -4359,63 +3979,6 @@
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
                 <connection type="0" x="0" y="0" z="0" state="2" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="4" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="6" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="3" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="5" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4424,73 +3987,6 @@
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="2" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="12" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="2" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="8" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4499,70 +3995,6 @@
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4571,73 +4003,6 @@
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="2" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="8" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4647,87 +4012,11 @@
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
                 <connection type="0" x="0" y="0" z="0" state="8" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="8" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="8" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="2" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="quarters_dorm_01">
             <basetiledata>
                 <location x="2" y="8" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="2" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="7" y="8" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="7" y="15" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4741,98 +4030,10 @@
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="3" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="4" y="21" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="4" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="21" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
                 <location x="6" y="21" z="0" />
                 <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
+                <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="1" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="4" y="22" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="8" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="1" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
@@ -4842,73 +4043,9 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="lifesupport_basic_01">
-            <basetiledata>
-                <location x="4" y="5" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="1" y="2" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
                 <location x="0" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="5" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="1" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="5" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4922,49 +4059,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="0" y="8" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="12" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="0" y="20" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="1" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="4" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="23" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -4978,49 +4073,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="9" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="1" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="7" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="5" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5034,27 +4087,6 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="9" y="13" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="17" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="21" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="7" y="23" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
@@ -5062,49 +4094,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="3" y="23" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="22" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="18" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="0" y="14" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="10" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="6" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="2" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5118,167 +4108,14 @@
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="4" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="4" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="7" y="2" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
                 <location x="3" y="7" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="13" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
                 <location x="6" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="4" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="2" y="15" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5290,104 +4127,16 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="7" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="power_generator_basic_01">
-            <basetiledata>
-                <location x="5" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="3" y="21" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
                 <location x="6" y="19" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="1" y="4" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="3" y="22" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="2" y="2" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
                 <location x="3" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="4" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="5" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="14" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5401,49 +4150,7 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="7" y="23" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="4" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="2" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="11" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="19" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5455,27 +4162,6 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="20" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="12" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="4" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="power_generator_basic_01">
             <basetiledata>
                 <location x="4" y="18" z="0" />
@@ -5483,129 +4169,16 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="6" y="2" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>3</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="17" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
                 <location x="6" y="8" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="7" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="20" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
                 <location x="8" y="4" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="lifesupport_basic_01">
-            <basetiledata>
-                <location x="4" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="8" y="0" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="10" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5619,71 +4192,9 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="9" y="13" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="8" y="0" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="9" y="15" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
                 <location x="1" y="23" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="8" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="7" y="1" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -5691,37 +4202,6 @@
                 <location x="4" y="6" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>1</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="-5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.999832" y="0.000000" z="0.000000" />
-                </portal>
-                <portal>
-                    <min x="5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="-0.999832" y="0.000000" z="0.000000" />
-                </portal>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="quarters_dorm_01">
-            <basetiledata>
-                <location x="7" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="5" y="22" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="3" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
@@ -5731,40 +4211,191 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
+        <complexshiptile code="quarters_dorm_01">
             <basetiledata>
-                <location x="9" y="7" z="1" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="reinforced_hull_basic01">
-            <basetiledata>
-                <location x="0" y="16" z="1" />
+                <location x="2" y="13" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="3" y="8" z="0" />
+                <location x="6" y="20" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="1" y="0" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="6" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="21" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="17" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="3" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="10" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="6" y="23" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="13" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="power_generator_basic_01">
+            <basetiledata>
+                <location x="7" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="12" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="9" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="quarters_dorm_01">
             <basetiledata>
-                <location x="2" y="13" z="0" />
+                <location x="2" y="7" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="4" y="22" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="5" y="0" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="1" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="7" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="3" y="23" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="4" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="5" y="6" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="1" y="4" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="7" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="20" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="5" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="13" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="7" y="14" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5778,7 +4409,497 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
+                <location x="6" y="0" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="2" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="6" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="2" y="23" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="5" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="6" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="1" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="18" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="2" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="9" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="20" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="1" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="6" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="5" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="2" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="19" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="8" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="22" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="16" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="17" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="1" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="16" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="6" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="4" y="0" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="7" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="16" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="5" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="12" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="4" y="23" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="11" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="2" y="1" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="14" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="7" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="7" y="8" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="8" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="1" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="4" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="22" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="4" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="4" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="3" y="22" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="18" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="12" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="7" y="9" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="8" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="5" y="22" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
                 <location x="0" y="0" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="2" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="6" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="3" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="21" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="4" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="lifesupport_basic_01">
+            <basetiledata>
+                <location x="4" y="5" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="10" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="7" y="7" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="2" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="lifesupport_basic_01">
+            <basetiledata>
+                <location x="4" y="16" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="7" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="9" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="14" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="5" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <location x="7" y="2" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="4" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
@@ -5790,21 +4911,179 @@
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="corridor_ns">
+        <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="6" y="20" z="0" />
+                <location x="0" y="17" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="7" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="14" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="13" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="5" y="21" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="8" y="23" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="4" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="19" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="3" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="1" y="2" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="11" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="6" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="power_generator_basic_01">
+            <basetiledata>
+                <location x="5" y="18" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="11" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="8" y="0" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="16" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="13" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="18" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="18" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="8" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="13" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <location x="6" y="2" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>3</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
@@ -5816,26 +5095,226 @@
         </complexshiptile>
         <complexshiptile code="reinforced_hull_basic01">
             <basetiledata>
-                <location x="0" y="19" z="0" />
+                <location x="0" y="9" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="5" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="15" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="2" y="14" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="17" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="21" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="20" z="1" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="6" y="13" z="0" />
+                <location x="6" y="16" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="-5.000000" />
-                    <max x="5.000000" y="5.000000" z="-5.000000" />
-                    <normal x="0.000000" y="0.000000" z="0.999832" />
-                </portal>
-                <portal>
-                    <min x="-5.000000" y="-5.000000" z="5.000000" />
-                    <max x="5.000000" y="5.000000" z="5.000000" />
-                    <normal x="0.000000" y="0.000000" z="-0.999832" />
-                </portal>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="12" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="18" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="11" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="19" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="5" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="13" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="8" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="quarters_dorm_01">
+            <basetiledata>
+                <location x="7" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="22" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="6" y="15" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="8" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="4" y="21" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="5" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="10" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="4" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_nse">
+            <basetiledata>
+                <location x="2" y="2" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="14" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="17" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="3" y="19" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_se">
+            <basetiledata>
+                <location x="3" y="21" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="7" y="1" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="0" y="3" z="1" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="reinforced_hull_basic01">
+            <basetiledata>
+                <location x="9" y="14" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>0</rotation>
             </basetiledata>
         </complexshiptile>
     </complexship>

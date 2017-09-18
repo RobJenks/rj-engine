@@ -10,20 +10,16 @@ class ViewPortal
 {
 public:
 
-	// Portals are represented as an AABB which encloses the potentially-arbitrary number of vertices making
-	// up the actual opening.  We do this for efficiency since a small amount of overdraw is acceptable
-	// Portals are one-way only, i.e. P0 is always top-top-left and vice versa for P1
-	AABB Bounds;				// Parent-local bounds (generally tile-local)
+	// Portals are represented by exactly four vertices that define a finite 2D plane completely enclosing 
+	// the actual opening.  We do this for efficiency since a small amount of overdraw is acceptable
+	// Portals are one-way only with facing determined by clockwise winding order
+	AXMVECTOR Vertices[4];				// Parent-local portal vertices (generally tile-local)
 	
 	// Constructor for a new view portal, providing the vertices of the portal in parent-local (generally tile-
 	// local) space.  Portal properties are derived based on vertices; portal uses clockwise winding order
 	// to determine facing and target element
-	ViewPortal(const std::vector<XMFLOAT3> & vertices) noexcept;
-
-	// Constructor for a new view portal, providing only its bounds in parent-local space and normal vector
-	// Element location etc. not provided on construction, since at creation-time we do not have any details 
-	// of the parent object and therefore where the portal is currently located in the environment
-	ViewPortal(const FXMVECTOR min_point, const FXMVECTOR max_point, const FXMVECTOR normal) noexcept;
+	ViewPortal(const AXMVECTOR(&vertices)[4]) noexcept;
+	ViewPortal(const FXMVECTOR p0, const FXMVECTOR p1, const FXMVECTOR p2, const FXMVECTOR p3);
 
 	// Default constructor; not used
 	CMPINLINE ViewPortal(void) noexcept { };

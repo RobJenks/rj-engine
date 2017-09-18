@@ -36,10 +36,12 @@ public:
 
 	// Returns the calculated view matrix
 	CMPINLINE XMMATRIX *				GetViewMatrix(void) { return &m_view; }
+	CMPINLINE const XMMATRIX &			GetViewMatrix(void) const { return m_view; }
 	CMPINLINE void						GetViewMatrix(XMMATRIX &view) { view = m_view; }
 
 	// Returns the inverse view matrix
 	CMPINLINE XMMATRIX *				GetInverseViewMatrix(void) { return &m_invview; }
+	CMPINLINE const XMMATRIX &			GetInverseViewMatrix(void) const { return m_invview; }
 	CMPINLINE void						GetInverseViewMatrix(XMMATRIX &invview) const { invview = m_invview; }
 
 	// Decomposes the view matrix into each component, which can be used by other methods for rendering
