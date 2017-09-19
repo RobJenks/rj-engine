@@ -859,6 +859,11 @@ void iSpaceObjectEnvironment::UpdateViewPortalConfiguration(void)
 			// determine the location based solely on our position
 			XMVECTOR portal_centre = XMVectorAdd(tile_centre, portal.GetCentrePoint());
 			INTVECTOR3 portal_location = Game::PhysicalPositionToElementLocation(portal_centre);
+
+			// Clamp the portal element location to ensure it lies within an element owned by the tile.  We
+			// need to do this to avoid (literal) edge cases where the portal is exactly on the outer bound
+			// of the tile
+			portal_location = IntVector3Clamp(portal_location, tile->GetElementLocation(), (tile->GetElementLocation() + tile->GetElementSize() - ONE_INTVECTOR3));
 			assert(portal_location >= NULL_INTVECTOR3 && portal_location < m_elementsize);
 			
 			int portal_element = ElementLocationToIndex(portal_location);

@@ -635,8 +635,9 @@ private:
 	void					CalculateViewPortalBounds(const ViewPortal & portal, const FXMMATRIX portal_world_transform, const CameraClass & camera, AXMVECTOR(&pOutVertices)[4]) const;
 
 	// Create a new view frustum by clipping the current frustum against the bounds of a view portal
-	Frustum *				CreateClippedFrustum(const CameraClass & camera, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform);
-	
+	public:
+	Frustum *				CreateClippedFrustum(const FXMVECTOR view_position, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform);
+	private:
 	// Debug-render an environment portal based on the given definition and world transform
 	void					DebugRenderPortal(const ViewPortal & portal, const FXMMATRIX world_matrix, bool is_active);
 

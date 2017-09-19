@@ -2357,26 +2357,27 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-/*		static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
+		/*static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
 		if (Game::Keyboard.GetKey(DIK_F)) extent.x += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 		if (Game::Keyboard.GetKey(DIK_G)) extent.y += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
 
-
 		XMVECTOR viewpos = ss()->GetPosition();
-		XMFLOAT3 portal_bl = XMFLOAT3(-extent.x, -extent.x, 400);
-		XMFLOAT3 portal_tl = XMFLOAT3(-extent.x, +extent.y, 400);
-		XMFLOAT3 portal_tr = XMFLOAT3(+extent.x, +extent.y, 400);
-		std::vector<XMFLOAT3> portal_vertices({ portal_bl, portal_tl, portal_tr });
+		XMVECTOR portal_bl = XMVectorSet(-extent.x, -extent.x, 400, 0);
+		XMVECTOR portal_tl = XMVectorSet(-extent.x, +extent.y, 400, 0);
+		XMVECTOR portal_tr = XMVectorSet(+extent.x, +extent.y, 400, 0);
+		XMVECTOR portal_br = XMVectorSet(+extent.x, -extent.y, 400, 0);
 			
-		ViewPortal portal = ViewPortal(portal_vertices);
-		Frustum *f = Game::Engine->CreateClippedFrustum(*(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, viewpos, ss()->GetWorldMatrix());
+		ViewPortal portal = ViewPortal(portal_bl, portal_tl, portal_tr, portal_br);
 
-		XMVECTOR p1local = XMVectorSet(+extent.x, +extent.y, 400, 0);
-		XMVECTOR p3local = XMVectorSet(-extent.y, -extent.y, 400, 0);
-		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TL
-		XMVECTOR p1 = XMVector3TransformCoord(p1local, ss()->GetWorldMatrix());										// TR
-		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BR
-		XMVECTOR p3 = XMVector3TransformCoord(p3local, ss()->GetWorldMatrix());										// BL
+		Game::Engine->GetCamera()->ActivateDebugCamera();
+		Game::Engine->GetCamera()->SetDebugCameraPosition(ss()->GetPosition());
+		Frustum *f = Game::Engine->CreateClippedFrustum(viewpos, *(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, ss()->GetWorldMatrix());
+		Game::Engine->GetCamera()->DeactivateDebugCamera();
+
+		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BL
+		XMVECTOR p1 = XMVector3TransformCoord(XMVectorSet(-extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TL
+		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TR
+		XMVECTOR p3 = XMVector3TransformCoord(XMVectorSet(+extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BR
 		XMVECTOR p[4] = { p0, p1, p2, p3 };
 		Frustum *manual = new Frustum(4U, Game::Engine->GetViewFrustrum()->GetNearPlane(), Game::Engine->GetViewFrustrum()->GetFarPlane());
 		for (size_t i = 0U; i < 4U; ++i)	// v/tr/tl   v/br/tr   v/bl/br   v/tl/bl
@@ -2384,7 +2385,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			manual->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
 		}
 		
-		//std::swap(f, manual);
+		if (Game::Keyboard.GetKey(DIK_LSHIFT)) std::swap(f, manual);
 
 		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));
 		s2()->Highlight.Activate();
@@ -2449,6 +2450,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
-
-*** TEST PORTAL RENDERING AND DEBUG SPECIFIC CASES ***
-

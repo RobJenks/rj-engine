@@ -1877,6 +1877,11 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		}
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
 		
+		if (cell->GetElementLocation() == Game::CurrentPlayer->GetActor()->GetElementLocation())
+		{
+			int a = 1;
+		}
+
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
 		XMMATRIX cell_world = XMMatrixMultiply(cell->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
@@ -1908,7 +1913,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 			// Construct a new frustum by clipping against the portal bounds 
 			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(*(Game::Engine->GetCamera()), *(m_tmp_frustums[current_frustum]), portal, cell_world);
+			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[current_frustum]), portal, cell_world);
 			++current_frustum;
 			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
 
@@ -1968,21 +1973,25 @@ void CoreEngine::CalculateViewPortalBounds(const ViewPortal & portal, const FXMM
 
 // Create a new view frustum by clipping the current frustum against the bounds of a view portal
 // Portal is defined in cell-local space, and frustum is required in world space, so also accepts a cell-to-world transform
-Frustum * CoreEngine::CreateClippedFrustum(const CameraClass & camera, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform)
+Frustum * CoreEngine::CreateClippedFrustum(const FXMVECTOR view_position, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform)
 {
 	// By constraining view portals to four vertices we can guarantee clipped view frustums are always four-sided
 	Frustum *frustum = new Frustum(4U, current_frustum.GetNearPlane(), current_frustum.GetFarPlane());
 
 	// Transform all portal vertices to world space
-	XMVECTOR BL = XMVector2TransformCoord(portal.Vertices[0], world_transform);
-	XMVECTOR TL = XMVector2TransformCoord(portal.Vertices[1], world_transform);
-	XMVECTOR TR = XMVector2TransformCoord(portal.Vertices[2], world_transform);
-	XMVECTOR BR = XMVector2TransformCoord(portal.Vertices[3], world_transform);
+	XMVECTOR BL = XMVector3TransformCoord(portal.Vertices[0], world_transform);
+	XMVECTOR TL = XMVector3TransformCoord(portal.Vertices[1], world_transform);
+	XMVECTOR TR = XMVector3TransformCoord(portal.Vertices[2], world_transform);
+	XMVECTOR BR = XMVector3TransformCoord(portal.Vertices[3], world_transform);
+
+	OutputDebugString(concat("BL: ")(Vector3ToString(BL))("\n").str().c_str());
+	OutputDebugString(concat("TL: ")(Vector3ToString(TL))("\n").str().c_str());
+	OutputDebugString(concat("TR: ")(Vector3ToString(TR))("\n").str().c_str());
+	OutputDebugString(concat("BR: ")(Vector3ToString(BR))("\n").str().c_str());
 
 	// Clip each of the four frustum sides to the portal vertices. Each plane can be defined by three
 	// points { view_pos, portal_vertex_0, portal_vertex_1 }.  Vertices must follow specific widing so
 	// plane normals correctly face inwards
-	const XMVECTOR view_position = camera.GetPosition();
 	frustum->SetPlane(Frustum::FIRST_SIDE + 0U, view_position, TR, TL);		// View-TR-TL
 	frustum->SetPlane(Frustum::FIRST_SIDE + 1U, view_position, BR, TR);		// View-BR-TR
 	frustum->SetPlane(Frustum::FIRST_SIDE + 2U, view_position, BL, BR);		// View-BL-BR
