@@ -1843,7 +1843,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		// Get all objects within this tile area, which are visible based upon the current view frustum
 		m_tmp_envobjects.clear(); m_tmp_terrain.clear();
 		environment->GetAllVisibleObjectsWithinDistance(environment->SpatialPartitioningTree, cell->GetRelativePosition(),
-			cell->GetBoundingSphereRadius(), m_tmp_frustums[current_frustum], &m_tmp_envobjects, &m_tmp_terrain);
+			cell->GetBoundingSphereRadius(), m_tmp_frustums[step.VisibilityFrustum], &m_tmp_envobjects, &m_tmp_terrain);
 
 		// Render all visible objects in the cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, (m_tmp_envobjects.empty() ? "   Found no visible environment objects to render in cell\n" : concat("   Rendering ")(m_tmp_envobjects.size())(" visibile environment objects in cell\n").str().c_str()));
@@ -1881,6 +1881,11 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		// is already rotated to the rotation state of the parent tile for evaluation-time efficiency
 		XMMATRIX cell_transform = XMMatrixMultiply(cell->GetRelativePositionMatrix(), environment->GetZeroPointWorldMatrix());
 
+		if (cell->GetElementLocation() == Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation())
+		{
+			int a = 1;
+		}
+
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
 		for (const auto & portal : cell->GetPortals())
@@ -1888,13 +1893,14 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Processing ")(portal.DebugString())("\n").str());
 			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_transform);
-			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) {
+			if (m_tmp_frustums[step.VisibilityFrustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) {
 				DEBUG_PORTAL_RENDER(portal, cell_transform, false);
 				continue;
 			}
 
-			// Make sure that the viewer is facing towards the portal (i.e. dot(viewer_heading, portal_normal) must be < 0)
-			if (XMVector3GreaterOrEqual(XMVector3Dot(env_local_viewer_heading, portal.GetNormal()), NULL_VECTOR)) {
+			// Make sure that the portal is facing the viewer (i.e. dot(portal_to_viewer, portal_normal) must be > 0)
+			// Perform comparison in world coordinates since we have both vectors already transformed into this space
+			if (XMVector3LessOrEqual(XMVector3Dot(XMVectorSubtract(view_position, portal_centre), portal.GetNormal()), NULL_VECTOR)) {
 				DEBUG_PORTAL_RENDER(portal, cell_transform, false);
 				continue;
 			}
@@ -1911,9 +1917,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 			// Construct a new frustum by clipping against the portal bounds 
 			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[current_frustum]), portal, cell_transform);
+			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[step.VisibilityFrustum]), portal, cell_transform);
 			++current_frustum;
 			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
+			assert(m_tmp_frustums.size() == (current_frustum+1));
 
 			// Use the new frustum to generate further steps in the portal traversal
 			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
