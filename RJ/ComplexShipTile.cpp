@@ -64,6 +64,7 @@ ComplexShipTile::ComplexShipTile(void)
 	m_bounding_radius = 1.0f;
 	m_boundingbox = new BoundingObject();
 	m_relativeposition = NULL_VECTOR;
+	m_relativepositionmatrix = ID_MATRIX;
 	m_worldmatrix = ID_MATRIX;
 	m_definition = NULL;
 	m_classtype = D::TileClass::Unknown;
@@ -248,6 +249,7 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	if ((!m_multiplemodels && !m_model) || (m_multiplemodels && !m_models.AllocationPerformed()))
 	{
 		m_relativeposition = NULL_VECTOR;
+		m_relativepositionmatrix = ID_MATRIX;
 		m_worldmatrix = ID_MATRIX;
 		return;
 	}
@@ -259,13 +261,14 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	// Will switch y and z coordinates since we are moving from element to world space
 	// m_relativeposition = D3DXVECTOR3((float)(m_elementsize.x * Game::C_CS_ELEMENT_MIDPOINT) + Game::ElementLocationToPhysicalPosition(m_elementlocation.x), ...
 	m_relativeposition = XMVectorAdd(XMVectorMultiply(m_worldsize, HALF_VECTOR), m_elementposition);
+	m_relativepositionmatrix = XMMatrixTranslationFromVector(m_relativeposition);
 
 	// Multiply the matrices together to determine the final tile world matrix
 	// World = (CentreTrans * Rotation * ElementPosTranslation)
 	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(
 		XMMatrixTranslationFromVector(XMVectorNegate(centrepoint)),		// Translate to centre point
 		GetRotationMatrix(m_rotation)),									// Rotate about centre
-		XMMatrixTranslationFromVector(m_relativeposition));				// Translate centre point to centre point of element location
+		m_relativepositionmatrix);										// Translate centre point to centre point of element location
 }
 
 // Recalculates the bounding volume for this tile based on the element size in world space

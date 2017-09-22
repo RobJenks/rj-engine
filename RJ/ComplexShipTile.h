@@ -650,8 +650,9 @@ public:
 	CMPINLINE float						GetBoundingSphereRadius(void) const			{ return m_bounding_radius; }
 
 	// Retrieve or recalculate the position and transform matrix for this tile relative to its parent ship object
-	CMPINLINE XMVECTOR					GetRelativePosition(void)					{ return m_relativeposition; }
-	CMPINLINE const XMMATRIX 			GetWorldMatrix(void)						{ return m_worldmatrix; }
+	CMPINLINE const XMVECTOR			GetRelativePosition(void) const				{ return m_relativeposition; }
+	CMPINLINE const XMMATRIX			GetRelativePositionMatrix(void) const		{ return m_relativepositionmatrix; }
+	CMPINLINE const XMMATRIX 			GetWorldMatrix(void) const					{ return m_worldmatrix; }
 	void								RecalculateWorldMatrix(void);
 
 	// Return pointer to the parent object that owns this tile
@@ -810,6 +811,7 @@ protected:
 
 	// Position and transform matrix relative to the parent complex ship object, plus the child world matrix
 	AXMVECTOR					m_relativeposition;
+	AXMMATRIX					m_relativepositionmatrix;
 	AXMMATRIX					m_worldmatrix;
 
 	// Pointers to the various parents of this tile

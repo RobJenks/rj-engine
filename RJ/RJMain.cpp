@@ -549,16 +549,27 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_J])
 	{
-		if (b[DIK_LSHIFT]) cs()->TurnShip(-PI / 8.0f, 0.0f, false);
-		else if (b[DIK_LCONTROL]) cs()->TurnShip(PI / 8.0f, 0.0f, false);
-		else
-		{
-			Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
-			Game::Console.ProcessRawCommand(GameConsoleCommand("enter_ship_env cs1"));
-			Game::CurrentPlayer->GetActor()->ApplyLocalLinearForceDirect(XMVectorSetZ(NULL_VECTOR, 20.0f));
-			Game::Keyboard.LockKey(DIK_J);
+		ComplexShipTile *tile = NULL;
+		for (auto t : cs()->GetTiles()) {
+			if (t.value->GetCode() == "corridor_se") { tile = t.value; break; }
 		}
 
+		auto id = tile->GetID();
+		OutputDebugString(concat("Before: Tile \"")(tile->GetCode())("\" (")(tile->GetID())("), ")("rotation = ")(tile->GetRotation())(", ")(tile->GetPortalCount())(" portals:\n").str().c_str());
+		for (const auto & p : tile->GetPortals()) OutputDebugString(concat("   ")(p.DebugString())("\n").str().c_str());
+
+		tile->Rotate(Rotation90Degree::Rotate90);
+		cs()->UpdateEnvironment();
+
+		tile = NULL;
+		for (auto t : cs()->GetTiles()) {
+			if (t.value->GetID() == id) { tile = t.value; break; }
+		}
+
+		OutputDebugString(concat("After: Tile \"")(tile->GetCode())("\" (")(tile->GetID())("), ")("rotation = ")(tile->GetRotation())(", ")(tile->GetPortalCount())(" portals:\n").str().c_str());
+		for (const auto & p : tile->GetPortals()) OutputDebugString(concat("   ")(p.DebugString())("\n").str().c_str());
+
+		Game::Keyboard.LockKey(DIK_J);
 	}
 	if (b[DIK_5])
 	{
@@ -840,6 +851,7 @@ void RJMain::ProcessKeyboardInput(void)
 		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
 		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
 		
+		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 		Game::Keyboard.LockKey(DIK_2);
 	}

@@ -1876,28 +1876,26 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			++m_renderinfo.TerrainRenderCount;
 		}
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
-		
-		if (cell->GetElementLocation() == Game::CurrentPlayer->GetActor()->GetElementLocation())
-		{
-			int a = 1;
-		}
+
+		// Cell transform matrix is transformation from local coordinates to UN-rotated tile centre point, since portal data
+		// is already rotated to the rotation state of the parent tile for evaluation-time efficiency
+		XMMATRIX cell_transform = XMMatrixMultiply(cell->GetRelativePositionMatrix(), environment->GetZeroPointWorldMatrix());
 
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
-		XMMATRIX cell_world = XMMatrixMultiply(cell->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
 		for (const auto & portal : cell->GetPortals())
 		{
 			// Perform a basic sphere visibility test to quickly discard portals that are out of view
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Processing ")(portal.DebugString())("\n").str());
-			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_world);
+			const XMVECTOR portal_centre = XMVector3TransformCoord(portal.GetCentrePoint(), cell_transform);
 			if (m_tmp_frustums[current_frustum]->CheckSphere(portal_centre, portal.GetBoundingSphereRadius()) == false) {
-				DEBUG_PORTAL_RENDER(portal, cell_world, false);
+				DEBUG_PORTAL_RENDER(portal, cell_transform, false);
 				continue;
 			}
 
 			// Make sure that the viewer is facing towards the portal (i.e. dot(viewer_heading, portal_normal) must be < 0)
 			if (XMVector3GreaterOrEqual(XMVector3Dot(env_local_viewer_heading, portal.GetNormal()), NULL_VECTOR)) {
-				DEBUG_PORTAL_RENDER(portal, cell_world, false);
+				DEBUG_PORTAL_RENDER(portal, cell_transform, false);
 				continue;
 			}
 
@@ -1913,13 +1911,13 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 			// Construct a new frustum by clipping against the portal bounds 
 			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[current_frustum]), portal, cell_world);
+			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[current_frustum]), portal, cell_transform);
 			++current_frustum;
 			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
 
 			// Use the new frustum to generate further steps in the portal traversal
 			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
-			DEBUG_PORTAL_RENDER(portal, cell_world, true);
+			DEBUG_PORTAL_RENDER(portal, cell_transform, true);
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Generating new traversal step for portal: ")(cells.back().DebugString())("\n").str());
 		}
 	}
@@ -1984,11 +1982,6 @@ Frustum * CoreEngine::CreateClippedFrustum(const FXMVECTOR view_position, const 
 	XMVECTOR TR = XMVector3TransformCoord(portal.Vertices[2], world_transform);
 	XMVECTOR BR = XMVector3TransformCoord(portal.Vertices[3], world_transform);
 
-	OutputDebugString(concat("BL: ")(Vector3ToString(BL))("\n").str().c_str());
-	OutputDebugString(concat("TL: ")(Vector3ToString(TL))("\n").str().c_str());
-	OutputDebugString(concat("TR: ")(Vector3ToString(TR))("\n").str().c_str());
-	OutputDebugString(concat("BR: ")(Vector3ToString(BR))("\n").str().c_str());
-
 	// Clip each of the four frustum sides to the portal vertices. Each plane can be defined by three
 	// points { view_pos, portal_vertex_0, portal_vertex_1 }.  Vertices must follow specific widing so
 	// plane normals correctly face inwards
@@ -2017,10 +2010,13 @@ void CoreEngine::DebugRenderPortal(const ViewPortal & portal, const FXMMATRIX wo
 	Game::Engine->GetOverlayRenderer()->RenderLine(TR, BR, colour, 0.25f, -1.0f);
 	Game::Engine->GetOverlayRenderer()->RenderLine(BR, BL, colour, 0.25f, -1.0f);
 
-	// Also render the portal normal vector
-	XMVECTOR centre = XMVector3TransformCoord(portal.GetCentrePoint(), world_matrix);
-	XMVECTOR normal_pt = XMVectorMultiplyAdd(portal.GetNormal(), XMVectorReplicate(3.0f), centre);	// = (centre + (scalar * unit_normal))
-	Game::Engine->GetOverlayRenderer()->RenderLine(centre, normal_pt, colour, 0.5f, -1.0f);
+	// Also render the portal normal vector, slightly offset from centre so we can render opposing portals separately
+	static const float RENDER_NORMAL_LENGTH = 3.0f;
+	static const float RENDER_NORMAL_BREADTH = 0.25f;
+	static const XMVECTOR RENDER_NORMAL_OFFSET = XMVectorSetX(NULL_VECTOR, RENDER_NORMAL_BREADTH * 0.5f);
+	XMVECTOR centre = XMVector3TransformCoord(XMVectorAdd(portal.GetCentrePoint(), RENDER_NORMAL_OFFSET), world_matrix);
+	XMVECTOR normal_pt = XMVectorMultiplyAdd(portal.GetNormal(), XMVectorReplicate(RENDER_NORMAL_LENGTH), centre);	// = (centre + (scalar * unit_normal))
+	Game::Engine->GetOverlayRenderer()->RenderLine(centre, normal_pt, colour, RENDER_NORMAL_BREADTH, -1.0f);
 }
 
 // Set the debug level for portal rendering, if it has been enabled for a specific environment
