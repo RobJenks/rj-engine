@@ -612,14 +612,16 @@ private:
 
 	/* Method to render the interior of an object environment including any tiles, for an environment
 	   which supports portal rendering
-	      - environment:		The environment to be rendered
-	      - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the
-								caller if rendering of the environment resulted in a more restrictive
+	    - environment			The environment to be rendered
+		- view_position			Position of the viewer in world space
+		- initial_frustum		The initial view frustum, generally the global engine ViewFrustum
+		- pOutGlobalFrustum		Output parameter.  Passes a newly-constructed frustum object back to the 
+								caller if rendering of the environment resulted in a more restrictive 
 								global visibility frustum
-	      - Returns				A result code indicating whether the environment could be rendered
+		- Returns				A result code indicating whether the environment could be rendered
 								via environment portal rendering
 	*/
-	Result					RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum);
+	Result					RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const FXMVECTOR viewer_position, Frustum *initial_frustum, const Frustum **pOutGlobalFrustum);
 
 	/* Method to render the interior of an object environment including any tiles, for an environment
 	   which does not support portal rendering or where the viewer state does not permit it

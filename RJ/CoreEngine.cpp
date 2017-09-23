@@ -1767,7 +1767,7 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 	// Use different rendering methods depending on the type of environment
 	if (environment->SupportsPortalBasedRendering())
 	{
-		Result render_result = RenderPortalEnvironment(environment, &new_frustum);
+		Result render_result = RenderPortalEnvironment(environment, Game::Engine->GetCamera()->GetPosition(), static_cast<Frustum*>(Game::Engine->GetViewFrustrum()), &new_frustum);
 		if (render_result == ErrorCodes::PortalRenderingNotPossibleInEnvironment)
 		{
 			RenderNonPortalEnvironment(environment, &new_frustum);
@@ -1785,23 +1785,23 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 
 /* Method to render the interior of an object environment including any tiles, for an environment
    which supports portal rendering
-      - environment:		The environment to be rendered
-	  - pOutGlobalFrustum:	Output parameter.  Passes a newly-constructed frustum object back to the 
+      - environment			The environment to be rendered
+	  - view_position		Position of the viewer in world space
+	  - initial_frustum		The initial view frustum, generally the global engine ViewFrustum
+	  - pOutGlobalFrustum	Output parameter.  Passes a newly-constructed frustum object back to the 
 							caller if rendering of the environment resulted in a more restrictive 
 							global visibility frustum
       - Returns				A result code indicating whether the environment could be rendered
 							via environment portal rendering
 */
-Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const Frustum **pOutGlobalFrustum)
+Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const FXMVECTOR view_position, Frustum *initial_frustum, const Frustum **pOutGlobalFrustum)
 {
 	// Parameter check
 	if (!environment) return ErrorCodes::CannotRenderNullEnvironment;
 
 	// Precalculate the position of the viewer relative to the environment zero-point, so we can perform 
 	// certain activities entirely in environment-local space
-	XMVECTOR view_position = Game::Engine->GetCamera()->GetPosition();
 	XMVECTOR env_local_viewer = XMVector3TransformCoord(view_position, environment->GetInverseZeroPointWorldMatrix());
-	XMVECTOR env_local_viewer_heading = XMVector3Rotate(Game::Engine->GetCamera()->GetCameraHeading(), environment->GetOrientation());
 
 	// View position must be located within a valid element, that is itself within a cell
 	// TODO: define non-tile cell type for e.g. viewer outside the environment or in interstitial space, looking in
@@ -1816,13 +1816,13 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	// frustums created during portal rendering that will be deallocated at the end of the method
 	Frustum *new_global_frustum = NULL;
 	m_tmp_frustums.clear();
-	m_tmp_frustums.push_back(static_cast<Frustum*>(Game::Engine->GetViewFrustrum()));
-	std::vector<Frustum*>::size_type current_frustum = 0U;
+	m_tmp_frustums.push_back(initial_frustum);
+	std::vector<Frustum*>::size_type current_frustum_index = 0U;
 
 	// Start with the current cell and proceed (vectorised) recursively
 	DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("Starting portal rendering cycle for environment \"")(environment->GetInstanceCode())("\"\n").str());
 	std::vector<PortalRenderingStep> cells;
-	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum, 0U)));
+	cells.push_back(std::move(PortalRenderingStep(current_cell, current_frustum_index, 0U)));
 
 	while (!cells.empty())
 	{
@@ -1830,6 +1830,9 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		PortalRenderingStep step = std::move(cells.back());
 		cells.pop_back();
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat(" New cycle: ")(step.DebugString())("\n").str());
+
+		// Make sure we have not passed the recursion limit for any particular traversal
+		if (step.TraversalCount >= Game::C_MAX_PORTAL_RENDERING_DEPTH) continue;
 
 		// Make sure the target cell exists
 		// TODO: in future, may need to support transition into e.g. interstitial space or outside the environment, where cell == NULL
@@ -1884,7 +1887,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		if (cell->GetElementLocation() == Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation())
 		{
 			int a = 1;
-		}
+		} // TODO: REMOVE
 
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
@@ -1916,14 +1919,15 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			if (target_cell == cell) continue;
 
 			// Construct a new frustum by clipping against the portal bounds 
-			assert(current_frustum < 256U);		// Debug assertion; make sure this isn't getting out of control
-			Frustum *new_frustum = CreateClippedFrustum(Game::Engine->GetCamera()->GetPosition(), *(m_tmp_frustums[step.VisibilityFrustum]), portal, cell_transform);
-			++current_frustum;
-			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum
-			assert(m_tmp_frustums.size() == (current_frustum+1));
-
+			assert(!(current_frustum_index >= 256U));		// Debug assertion; make sure this isn't getting out of control
+			if (current_frustum_index >= 256U) continue;	// Make sure this isn't getting out of control
+			Frustum *new_frustum = CreateClippedFrustum(view_position, *(m_tmp_frustums[step.VisibilityFrustum]), portal, cell_transform);
+			++current_frustum_index;
+			m_tmp_frustums.push_back(std::move(new_frustum));	// New item is at index current_frustum_index
+			assert(m_tmp_frustums.size() == (current_frustum_index+1));
+			
 			// Use the new frustum to generate further steps in the portal traversal
-			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum, step.TraversalCount + 1)));
+			cells.push_back(std::move(PortalRenderingStep(target_cell, current_frustum_index, step.TraversalCount + 1)));
 			DEBUG_PORTAL_RENDER(portal, cell_transform, true);
 			DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Generating new traversal step for portal: ")(cells.back().DebugString())("\n").str());
 		}
@@ -1931,7 +1935,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 
 	// Rendering is complete; deallocate all interim view frustums that were created.  This is all frustums
 	// except for [0], which is the global view frustum
-	for (int i = 1; i <= current_frustum; ++i) delete m_tmp_frustums[i];
+	for (int i = 1; i <= current_frustum_index; ++i) delete m_tmp_frustums[i];
 	m_tmp_frustums.clear();
 	
 	// If we are debug-rendering the portal data, also render all portals in tiles which were not processed
