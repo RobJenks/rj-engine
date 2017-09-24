@@ -410,10 +410,11 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 
 	// Setup the projection matrix.
 	m_FOV = (float)PI / 4.0f;
+	m_halffovtan = tanf(m_FOV * 0.5f);
 	m_aspectratio = (float)screenWidth / (float)screenHeight;
 
 	// Create the projection matrix for 3D rendering.
-	m_projectionMatrix = XMMatrixPerspectiveFovLH(m_FOV, m_aspectratio, screenNear, screenDepth);
+	m_projectionMatrix = CreateProjectionMatrix(m_FOV, m_aspectratio, screenNear, screenDepth);
 
     // Initialise the world matrix to the identity matrix.
 	m_worldMatrix = ID_MATRIX;
@@ -502,6 +503,13 @@ Result D3DMain::Initialise(int screenWidth, int screenHeight, bool vsync, HWND h
 	// If all initialisation completed without returning an error code then return success
 	return ErrorCodes::NoError;
 }
+
+// Create a new projection matrix from the supplied parameters
+XMMATRIX D3DMain::CreateProjectionMatrix(float fov, float aspect_ratio, float screen_near, float screen_depth)
+{
+	return XMMatrixPerspectiveFovLH(fov, aspect_ratio, screen_near, screen_depth);
+}
+
 
 void D3DMain::SetFillMode(D3D11_FILL_MODE fillmode)
 {

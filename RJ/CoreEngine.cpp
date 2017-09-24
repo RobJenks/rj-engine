@@ -22,7 +22,6 @@
 #include "TexcubeShader.h"
 #include "FireShader.h"
 #include "Light.h"
-#include "ViewFrustrum.h"
 #include "Frustum.h"
 #include "BoundingObject.h"
 #include "FontShader.h"
@@ -621,11 +620,11 @@ Result CoreEngine::InitialiseTextureShader(void)
 Result CoreEngine::InitialiseFrustrum()
 {
 	// Attempt to create a new view frustrum
-	m_frustrum = new ViewFrustrum();
+	m_frustrum = new Frustum(4U);
 	if (!m_frustrum) return ErrorCodes::CannotCreateViewFrustrum;
 	
 	// Run the initialisation function with viewport/projection data that can be precaulcated
-	Result res = m_frustrum->Initialise(m_D3D->GetProjectionMatrix(), SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
+	Result res = m_frustrum->InitialiseAsViewFrustum(m_D3D->GetProjectionMatrix(), SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
 	if (res != ErrorCodes::NoError) return res;	
 
 	// Return success if the frustrum was created
@@ -1201,7 +1200,7 @@ void CoreEngine::Render(void)
 	if (!r_devicecontext) return;
 
 	// Construct the view frustrum for this frame so we can perform culling calculations
-	m_frustrum->ConstructFrustrum(r_view, r_invview);
+	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
 
 	// Determine which system we are currently rendering
 	SpaceSystem & system = Game::Universe->GetCurrentSystem();
@@ -1767,7 +1766,7 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 	// Use different rendering methods depending on the type of environment
 	if (environment->SupportsPortalBasedRendering())
 	{
-		Result render_result = RenderPortalEnvironment(environment, Game::Engine->GetCamera()->GetPosition(), static_cast<Frustum*>(Game::Engine->GetViewFrustrum()), &new_frustum);
+		Result render_result = RenderPortalEnvironment(environment, Game::Engine->GetCamera()->GetPosition(), Game::Engine->GetViewFrustrum(), &new_frustum);
 		if (render_result == ErrorCodes::PortalRenderingNotPossibleInEnvironment)
 		{
 			RenderNonPortalEnvironment(environment, &new_frustum);

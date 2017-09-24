@@ -36,8 +36,8 @@ class TextureShader;
 class TexcubeShader;
 class FireShader;
 class SkinnedNormalMapShader;
+class Frustum;
 class Light;
-class ViewFrustrum;
 class LightingManager;
 class FontShader;
 class AudioManager;
@@ -128,7 +128,7 @@ public:
 	// Accessor/modifier methods for key game engine components
 	CMPINLINE D3DMain		*GetDirect3D()				{ return m_D3D; }
 	CMPINLINE CameraClass	*GetCamera()				{ return m_camera; }
-	CMPINLINE ViewFrustrum	*GetViewFrustrum()			{ return m_frustrum; }
+	CMPINLINE Frustum		*GetViewFrustrum()			{ return m_frustrum; }
 	CMPINLINE TextManager	*GetTextManager()			{ return m_textmanager; }
 	CMPINLINE EffectManager *GetEffectManager()			{ return m_effectmanager; }
 	CMPINLINE ParticleEngine *GetParticleEngine()		{ return m_particleengine; }
@@ -502,7 +502,7 @@ private:
 	LightFlatHighlightFadeShader 	*m_lightflathighlightfadeshader;
 	ParticleShader					*m_particleshader;
 	TextureShader					*m_textureshader;
-	ViewFrustrum					*m_frustrum;
+	Frustum							*m_frustrum;
 	FontShader						*m_fontshader;
 	AudioManager					*m_audiomanager;
 	TextManager						*m_textmanager;

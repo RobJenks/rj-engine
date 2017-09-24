@@ -4,7 +4,6 @@
 #include "CubeMapTexture.h"
 #include "FastMath.h"
 #include "CameraClass.h"
-#include "ViewFrustrum.h"
 #include "ErrorCodes.h"
 #include "SystemRegion.h"
 #include "Utility.h"

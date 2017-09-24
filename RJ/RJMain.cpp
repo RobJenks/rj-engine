@@ -114,8 +114,7 @@
 #include "EnvironmentMapBlendMode.h"		// DBG
 #include "EnvironmentPowerMap.h"			// DBG
 #include "Weapon.h"							// DBG
-#include "Frustum.h"						// DBG
-#include "ViewFrustrum.h"
+#include "Frustum.h"						
 #include "Fonts.h"
 
 #include "Equipment.h"

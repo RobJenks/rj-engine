@@ -1,5 +1,4 @@
 #include "GameVarsExtern.h"
-#include "ViewFrustrum.h"
 #include "ObjectSearch.h"
 
 #include "BasicProjectileSet.h"

@@ -14,9 +14,25 @@ AXMVECTOR_P Frustum::m_working_cuboidvertices[8];
 
 
 // Construct a new frustum with the specified number of sides (not including the near- & far-planes)
+Frustum::Frustum(const size_t frustum_side_count)
+{
+	// Must have at least 3 sides.  Also impose a reasonable upper limit on complexity of the frustum
+	assert(frustum_side_count >= 3U);
+	assert(frustum_side_count < 36U);
+
+	// Allocate space for the data
+	m_planecount = frustum_side_count + 2U;			// +2 for the near- and far-planes
+	m_planes = new AXMVECTOR[m_planecount];
+
+	// Initialise all data
+	for (size_t i = 0U; i < m_planecount; ++i)
+	{
+		m_planes[i] = NULL_VECTOR;
+	}
+}
+
+// Construct a new frustum with the specified number of sides (not including the near- & far-planes)
 // Pass the near- and far-planes in during construction since they do not need to be calculated again
-// TODO: In future,  allow near/far planes to be derived as well so the frustum can be reused
-// for non-viewer frustum tests as well (e.g. other actors, or light/portal testing)
 Frustum::Frustum(const size_t frustum_side_count, const FXMVECTOR near_plane, const FXMVECTOR far_plane)
 {
 	// Must have at least 3 sides.  Also impose a reasonable upper limit on complexity of the frustum
@@ -34,6 +50,73 @@ Frustum::Frustum(const size_t frustum_side_count, const FXMVECTOR near_plane, co
 	{
 		m_planes[i] = NULL_VECTOR;
 	}
+}
+
+// Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
+// Generally only applicable for the primary view frustum
+Result XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, const float depth, const float FOV, const float aspect)
+{
+	// Use default near & far clip planes for now, until we need to do otherwise
+	m_clip_near = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
+	m_clip_far = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
+
+	// Calculate the minimum z distance in the frustrum and generate a frustrum-specific proj
+	XMFLOAT4X4 fproj;
+	XMStoreFloat4x4(&fproj, projection);
+		m_clip_far = depth;
+		m_clip_near = -fproj._43 / fproj._33;
+		float r = m_clip_far / (m_clip_far - m_clip_near);
+		fproj._33 = r;
+		fproj._43 = -r * m_clip_near;
+	m_frustrumproj = XMLoadFloat4x4(&fproj);
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
+// Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
+void XM_CALLCONV Frustum::ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
+{
+	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix
+	XMFLOAT4X4 matrix;
+	XMMATRIX fproj_view = XMMatrixMultiply(view, m_frustrumproj);
+	XMStoreFloat4x4(&matrix, fproj_view);
+
+	// Calculate near plane of frustum.
+	SetPlane(Frustum::NEAR_PLANE, XMPlaneNormalize(XMVectorSet(matrix._14 + matrix._13,
+		matrix._24 + matrix._23,
+		matrix._34 + matrix._33,
+		matrix._44 + matrix._43)));
+
+	// Calculate far plane of frustum.
+	SetPlane(Frustum::FAR_PLANE, XMPlaneNormalize(XMVectorSet(matrix._14 - matrix._13,
+		matrix._24 - matrix._23,
+		matrix._34 - matrix._33,
+		matrix._44 - matrix._43)));
+
+	// Calculate left plane of frustum.
+	SetPlane(2U, XMPlaneNormalize(XMVectorSet(matrix._14 + matrix._11,
+		matrix._24 + matrix._21,
+		matrix._34 + matrix._31,
+		matrix._44 + matrix._41)));
+
+	// Calculate right plane of frustum.
+	SetPlane(3U, XMPlaneNormalize(XMVectorSet(matrix._14 - matrix._11,
+		matrix._24 - matrix._21,
+		matrix._34 - matrix._31,
+		matrix._44 - matrix._41)));
+
+	// Calculate top plane of frustum.
+	SetPlane(4U, XMPlaneNormalize(XMVectorSet(matrix._14 - matrix._12,
+		matrix._24 - matrix._22,
+		matrix._34 - matrix._32,
+		matrix._44 - matrix._42)));
+
+	// Calculate bottom plane of frustum.
+	SetPlane(5U, XMPlaneNormalize(XMVectorSet(matrix._14 + matrix._12,
+		matrix._24 + matrix._22,
+		matrix._34 + matrix._32,
+		matrix._44 + matrix._42)));
 }
 
 // Add a new side to the frustum, based upon a viewer position and two further points in the world

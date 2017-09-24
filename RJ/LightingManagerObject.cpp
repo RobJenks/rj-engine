@@ -4,7 +4,6 @@
 #include "CoreEngine.h"
 #include "GameVarsExtern.h"
 #include "CameraClass.h"
-#include "ViewFrustrum.h"
 #include "ObjectSearch.h"
 #include "GameUniverse.h"
 #include "SpaceSystem.h"

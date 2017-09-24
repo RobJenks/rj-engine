@@ -14,9 +14,20 @@ public:
 	static const size_t					FAR_PLANE;						// Index into the plane collection
 	static const size_t					FIRST_SIDE;						// Index into the plane collection
 
+
+	// Construct a new frustum with the specified number of sides (not including the near- & far-planes)
+	Frustum(const size_t frustum_side_count);
+
 	// Construct a new frustum with the specified number of sides (not including the near- & far-planes)
 	// Pass the near- and far-planes in during construction since they do not need to be calculated again
 	Frustum(const size_t frustum_side_count, const FXMVECTOR near_plane, const FXMVECTOR far_plane);
+
+	// Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
+	// Generally only applicable for the primary view frustum
+	Result XM_CALLCONV					InitialiseAsViewFrustum(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
+
+	// Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
+	void XM_CALLCONV					ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview);
 
 	// Add a new side to the frustum, based upon a viewer position and two further points in the world
 	// Result will be a triangular plane from the viewer with far edge between the two world vertices, 
@@ -55,6 +66,11 @@ public:
 	// Check whether the given OBB lies within the frustum
 	bool								CheckOBB(const OrientedBoundingBox & obb) const;
 
+	// Return auxilliary data on the view frustum
+	CMPINLINE float						GetNearClipPlane(void) const { return m_clip_near; }
+	CMPINLINE float						GetFarClipPlane(void) const { return m_clip_far; }
+	CMPINLINE XMMATRIX					GetFrustumProjectionMatrix(void) const { return m_frustrumproj; }
+
 	// Destructor
 	~Frustum(void);
 
@@ -69,6 +85,10 @@ private:
 	// Checks for the intersection of a centre point and negative-vectorised-radius with
 	// the frustum.  Internal method used as the basis for many public method above
 	bool								CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v) const;
+
+	// Other auxilliary frustum data
+	float								m_clip_near, m_clip_far;
+	AXMMATRIX							m_frustrumproj;				// Frustrum-specific proj matrix, preacalculated at initialisation
 
 	// Temporary storage for construction of cuboid vertices during visibility testing
 	static AXMVECTOR_P					m_working_cuboidvertices[8];

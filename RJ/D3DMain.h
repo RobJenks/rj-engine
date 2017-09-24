@@ -42,6 +42,9 @@ public:
 	CMPINLINE XMMATRIX				GetWorldMatrix(void) const							{ return m_worldMatrix; }
 	CMPINLINE XMMATRIX				GetOrthoMatrix(void) const							{ return m_orthoMatrix; }
 
+	// Create a new projection matrix from the supplied parameters
+	XMMATRIX CreateProjectionMatrix(float fov, float aspect_ratio, float screen_near, float screen_depth);
+	
 	void							GetVideoCardInfo(char*, int&);
 
 	// Note: Must reinitialise all D3D components if we change the driver type; is used at creation of device/swap chain
@@ -58,8 +61,9 @@ public:
 	void							EnableRasteriserCulling(void);
 	void							DisableRasteriserCulling(void);
 
-	CMPINLINE float					GetDisplayFOV(void) { return m_FOV; }
-	CMPINLINE float					GetDisplayAspectRatio(void) { return m_aspectratio; }
+	CMPINLINE float					GetDisplayFOV(void) const { return m_FOV; }
+	CMPINLINE float					GetDisplayAspectRatio(void) const { return m_aspectratio; }
+	CMPINLINE float					GetTanOfHalfFOV(void) const { return m_halffovtan; }
 	
 	// Returns the current alpha blending state
 	CMPINLINE AlphaBlendState		GetAlphaBlendState(void) const { return m_alphablendstate; }
@@ -141,6 +145,7 @@ private:
 	ID3D11BlendState			*m_alphaEnableAdditiveBlendingState;
 	float						m_alphablendfactor[4];
 	float						m_FOV;
+	float						m_halffovtan;
 	float						m_aspectratio;
 	AlphaBlendState				m_alphablendstate;
 

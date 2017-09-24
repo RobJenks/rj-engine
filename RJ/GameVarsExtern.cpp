@@ -187,6 +187,8 @@ namespace Game {
 	const float C_ENVIRONMENT_OBJECT_SEARCH_DISTANCE_MARGIN = 25.0f;	// Additional threshold used when finding objects to be tested in proximity calculations
 
 	// Camera-related constants
+	float C_DEFAULT_CLIP_NEAR_DISTANCE = 1.0f;				// Default world-unit distance for the near clip plane
+	float C_DEFAULT_CLIP_FAR_DISTANCE = 1000.0f;			// Default world-unit distance for the far clip plane
 	float C_DEFAULT_ZOOM_TO_SHIP_SPEED = 1.75f;				// Default number of seconds to zoom the camera from its current location to a ship
 	float C_DEFAULT_ZOOM_TO_SHIP_OVERHEAD_DISTANCE = 75.0f;	// Default distance to place the camera above a ship, if it cannot be determined any other way
 	float C_DEBUG_CAMERA_SPEED = 500.0f;					// The movement speed of the debug camera

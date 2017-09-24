@@ -427,9 +427,6 @@
     <ClCompile Include="Weapon.cpp">
       <Filter>Equipment\Equipment classes\Weapon</Filter>
     </ClCompile>
-    <ClCompile Include="ViewFrustrum.cpp">
-      <Filter>Engine\Frustum</Filter>
-    </ClCompile>
     <ClCompile Include="XMLGenerator.cpp">
       <Filter>Data input/output</Filter>
     </ClCompile>
@@ -1223,9 +1220,6 @@
     </ClInclude>
     <ClInclude Include="Weapon.h">
       <Filter>Equipment\Equipment classes\Weapon</Filter>
-    </ClInclude>
-    <ClInclude Include="ViewFrustrum.h">
-      <Filter>Engine\Frustum</Filter>
     </ClInclude>
     <ClInclude Include="XMLGenerator.h">
       <Filter>Data input/output</Filter>

@@ -581,7 +581,6 @@
     <ClCompile Include="UI_ShipDesigner.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="Utility.cpp" />
-    <ClCompile Include="ViewFrustrum.cpp" />
     <ClCompile Include="ViewPortal.cpp" />
     <ClCompile Include="VolLineShader.cpp" />
     <ClCompile Include="VolumetricLine.cpp" />
@@ -898,7 +897,6 @@
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Utility\chrono_io.h" />
     <ClInclude Include="Utility\ratio_io.h" />
-    <ClInclude Include="ViewFrustrum.h" />
     <ClInclude Include="ViewPortal.h" />
     <ClInclude Include="VolLineShader.h" />
     <ClInclude Include="VolumetricLine.h" />
