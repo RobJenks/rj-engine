@@ -154,10 +154,17 @@ void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, OverlayRende
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line
-void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT3 & colour, float alpha)
+void XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour, alpha, world);
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour_alpha, world);
+}
+
+// Method to add a line for rendering.  Accepts a world matrix for the line
+void XM_CALLCONV OverlayRenderer::RenderLineFlat(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
+{
+	// Add a request to the core engine to render this line
+	Game::Engine->RenderModelFlat(m_models[RenderColour::RC_None]->GetModelBuffer(), position, colour_alpha, world);
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
@@ -177,6 +184,17 @@ void OverlayRenderer::RenderLine(const FXMVECTOR pt1, const FXMVECTOR pt2, Overl
 
 	// Now render the line based on this world matrix; use line midpoint as the approximate line position
 	RenderLine(world, colour);
+}
+
+// Method to add a line for rendering.  Does all calculation of required world matrix to generate the line between two points
+void OverlayRenderer::RenderLineFlat(const FXMVECTOR pt1, const FXMVECTOR pt2, const XMFLOAT4 & colour_alpha, float thickness, float length)
+{
+	// Derive the world matrix required to create a line from pt1 to pt2
+	XMMATRIX world;
+	DetermineLineWorldMatrix(world, pt1, pt2, thickness, length);
+
+	// Now render the line based on this world matrix; use line midpoint as the approximate line position
+	RenderLineFlat(world, XMVectorMultiply(XMVectorAdd(pt1, pt2), HALF_VECTOR_P), colour_alpha);
 }
 
 // Determines the world matrix required to transform a line model into the correct position, given only
@@ -276,7 +294,7 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, OverlayRender
 
 
 // Method to render a box at the specified location
-void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT3 & colour, float alpha, float thickness)
+void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT4 & colour_alpha, float thickness)
 {
 	XMMATRIX mfinal, scale, trans, scale_x_rot;
 
@@ -289,19 +307,19 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT
 	// Note: determine an approximate position for the box to aid in alpha testing
 	XMVECTOR pos = XMVector3TransformCoord(NULL_VECTOR, mfinal);
 
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetX(trans.r[3], size.x - thickness);			// x-translation
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 2: fwd, to right of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetY(trans.r[3], size.y - thickness);			// now has x- & y-translation
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 3: fwd, above and to the right of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetX(trans.r[3], 0.0f);						// now has only y-translation
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale, trans), world);	// > Edge 4: fwd, above origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	// Now handle edges in the right (X) direction
 	//D3DXMatrixScaling(&scale, thickness, thickness, size.x); | scale._33 = size.x;					
@@ -310,19 +328,19 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT
 
 	trans.r[3] = XMVectorSetZ(trans.r[3], thickness);						// translate forwards so in line
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 5: right, above origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetZ(trans.r[3], size.z);							// x-translation (in fwd direction)
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 6: right, above & in front of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetY(trans.r[3], 0.0f);							// remove y translation, now at fwd-Z
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 7: right, ahead of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetZ(trans.r[3], thickness);						// translate z-back to origin, minus thickness again
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 8: right, from origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	// Finally handle edges in the up (Y) direction
 	//D3DXMatrixScaling(&scale, thickness, thickness, size.y);
@@ -330,19 +348,19 @@ void XM_CALLCONV OverlayRenderer::RenderBox(const FXMMATRIX world, const XMFLOAT
 	scale_x_rot = XMMatrixMultiply(scale, m_matrix_xrotneg);
 
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 9: up, from origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetX(trans.r[3], size.x - thickness);				// translate to the right, minus thickness
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 10: up, to right of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetZ(trans.r[3], size.z);							// translate fwd, so at fwd+right
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 11: up, ahead & right of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 
 	trans.r[3] = XMVectorSetX(trans.r[3], 0.0f);
 	mfinal = XMMatrixMultiply(XMMatrixMultiply(scale_x_rot, trans), world);	// > Edge 12: up, ahead of origin
-	RenderLine(mfinal, pos, colour, alpha);
+	RenderLine(mfinal, pos, colour_alpha);
 }
 
 // Method to render a box around the specified element of a complex ship
@@ -362,7 +380,7 @@ void OverlayRenderer::RenderElementBox(iSpaceObjectEnvironment *ship, const INTV
 
 // Method to render a box around the specified element(s) of a complex ship
 void OverlayRenderer::RenderElementBox(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_location, const INTVECTOR3 & element_size, 
-										const XMFLOAT3 & colour, float alpha, float thickness)
+										const XMFLOAT4 & colour_alpha, float thickness)
 {
 	// Parameter check
 	if (ship)
@@ -375,7 +393,7 @@ void OverlayRenderer::RenderElementBox(	iSpaceObjectEnvironment *ship, const INT
 									(float)element_size.y * Game::C_CS_ELEMENT_SCALE);
 
 		// Render a box at the desired location by multiplying the ship zero-point world matrix by this transform
-		RenderBox(XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), size, colour, alpha, thickness);
+		RenderBox(XMMatrixMultiply(trans, ship->GetZeroPointWorldMatrix()), size, colour_alpha, thickness);
 	}
 }
 
@@ -508,7 +526,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 
 // Method to add a cuboid for rendering in a ship-relative element space location.
 void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_pos, const INTVECTOR3 & element_size, 
-															const XMFLOAT3 & colour, float alpha)
+															const XMFLOAT4 & colour_alpha)
 {
 	// Parameter check
 	if (ship)
@@ -524,7 +542,7 @@ void OverlayRenderer::RenderCuboidAtRelativeElementLocation(iSpaceObjectEnvironm
 		// Scale & translate the current world matrix before passing it to the engine rendering method
 		// Use the light highlight/fade shader to add the custom colour and alpha values
 		XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(scale, trans), ship->GetZeroPointWorldMatrix());
-		Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), ship->GetPosition(), colour, alpha, mworld);
+		Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), ship->GetPosition(), colour_alpha, mworld);
 
 		//OutputDebugString(concat("El: ")(element_pos.ToString())(" = ")(Vector3ToString(XMVector3TransformCoord(NULL_VECTOR, mworld)))("\n").str().c_str());
 	}
@@ -688,14 +706,7 @@ void OverlayRenderer::RenderOBB(const OrientedBoundingBox & obb, bool recursive,
 }
 
 // Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
-void XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, OverlayRenderer::RenderColour colour)
-{
-	RenderNode(XMMatrixTranslationFromVector(pos), colour);
-}
-
-
-// Method to add a node for rendering.  Accepts a world matrix for the cuboid position, plus size parameters.  Uses line model.  Spins in place.
-void XM_CALLCONV OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour)
+void XM_CALLCONV OverlayRenderer::RenderNode(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
 {
 	// Determine the rotation matrix to be used based on current clock time
 	XMMATRIX mrot = XMMatrixRotationY((Game::ClockMs % 1000) * m_nodespinradians);
@@ -705,8 +716,25 @@ void XM_CALLCONV OverlayRenderer::RenderNode(const FXMMATRIX world, OverlayRende
 		m_matrix_nodescale,
 		m_matrix_nodeorigin),
 		mrot),
-		world);
-	Game::Engine->RenderModel(m_models[(int)colour]->GetModelBuffer(), mworld, mworld.r[3]);
+		XMMatrixTranslationFromVector(pos));
+
+	Game::Engine->RenderModel(m_models[RenderColour::RC_None]->GetModelBuffer(), pos, colour_alpha, mworld);
+}
+
+// Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
+void XM_CALLCONV OverlayRenderer::RenderNodeFlat(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha)
+{
+	// Determine the rotation matrix to be used based on current clock time
+	XMMATRIX mrot = XMMatrixRotationY((Game::ClockMs % 1000) * m_nodespinradians);
+
+	// Scale, translate * rotate the node before moving it into world space and calling the engine rendering method
+	XMMATRIX mworld = XMMatrixMultiply(XMMatrixMultiply(XMMatrixMultiply(
+		m_matrix_nodescale,
+		m_matrix_nodeorigin),
+		mrot),
+		XMMatrixTranslationFromVector(pos));
+
+	Game::Engine->RenderModelFlat(m_models[RenderColour::RC_None]->GetModelBuffer(), pos, colour_alpha, mworld);
 }
 
 // Method to add a node for rendering in a ship-relative element space location.  Spins in place.

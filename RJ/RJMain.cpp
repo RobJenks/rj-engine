@@ -165,6 +165,8 @@ RJMain::RJMain(void)
 
 	// Debug fields and settings
 	m_debug_ccdspheretest = m_debug_ccdobbtest = false;
+	m_debug_portalrenderingtest = false;
+	m_debug_portalrenderingtest_subject = NULL;
 }
 
 // Retrieve data on the executable and working directory
@@ -545,9 +547,12 @@ void RJMain::ProcessKeyboardInput(void)
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
-	if (true || b[DIK_J])
+	if (b[DIK_J])
 	{
-		Game::Engine->DebugOverrideInitialPortalRenderingViewer(Game::CurrentPlayer->GetActor());
+		if (!b[DIK_LSHIFT])	ActivateDebugPortalRenderingTest(Game::CurrentPlayer->GetActor());
+		else				DeactivateDebugPortalRenderingTest();
+
+		Game::Keyboard.LockKey(DIK_J);
 	}
 
 	if (b[DIK_5])
@@ -2270,12 +2275,93 @@ void RJMain::__CreateDebugScenario(void)
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
 
+void RJMain::ActivateDebugPortalRenderingTest(const iObject *target)
+{
+	// Make sure this is a valid target environment object, that exists within some parent environment
+	if (!target ||
+		target->GetObjectClass() != iObject::ObjectClass::EnvironmentObjectClass ||
+		((iEnvironmentObject*)target)->GetParentEnvironment() == NULL || 
+		((iEnvironmentObject*)target)->GetParentEnvironment()->GetObjectType() != iObject::ObjectType::ComplexShipObject)
+	{
+		DeactivateDebugPortalRenderingTest();
+		return;
+	}
+
+	// Transition to an overhead view of the subject's parent environment and force rendering of the interior
+	iEnvironmentObject *target_eo = (iEnvironmentObject*)target;
+	ComplexShip *environment = (ComplexShip*)target_eo->GetParentEnvironment();
+	environment->ForceRenderingOfInterior(true);
+	environment->FadeHullToAlpha(1.5f, 0.2f);
+	environment->FadeAllTiles(2.5f, 0.3f);
+	Game::Engine->GetCamera()->ZoomToOverheadShipView(environment);
+
+	// Set the test subject and enable this debug mode
+	m_debug_portalrenderingtest_subject = target_eo;
+	m_debug_portalrenderingtest_environment = environment;
+	m_debug_portalrenderingtest = true;
+}
+
+void RJMain::DebugRunPortalRenderingTest(void)
+{
+	// Deactivate the debug mode if our test subject or its environment ceases to exist, or if the former leaves the latter
+	const iEnvironmentObject *target = m_debug_portalrenderingtest_subject();
+	ComplexShip *environment = m_debug_portalrenderingtest_environment();
+	if (!target || !environment || ((ComplexShip*)target->GetParentEnvironment()) != environment)
+	{
+		DeactivateDebugPortalRenderingTest();
+		return;
+	}
+
+	// Set the per-frame viewer override in the core engine
+	Game::Engine->DebugOverrideInitialPortalRenderingViewer(target);
+
+	// Render an overlay icon at the position of the test subject, and a projection along its heading vector
+	static const float heading_render_distance = 5.0f;
+	static const float heading_render_breadth = 1.0f;
+	XMVECTOR heading = XMVector3NormalizeEst(XMVector3Rotate(FORWARD_VECTOR, target->GetOrientation()));
+	XMVECTOR heading_vector = XMVectorAdd(target->GetPosition(), XMVectorScale(heading, heading_render_distance));
+	Game::Engine->GetOverlayRenderer()->RenderNodeFlat(target->GetPosition(), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
+	Game::Engine->GetOverlayRenderer()->RenderLineFlat(target->GetPosition(), heading_vector, XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), heading_render_breadth, -1.0f);
+
+	// Allow additional keyboard controls within this debug mode, IF the target is an actor object that we can control
+	if (target->GetObjectType() == iObject::ObjectType::ActorObject)
+	{
+		static const float yaw_rate = 1.0f;
+		Actor *actor = (Actor*)target;
+
+		if (Game::Keyboard.GetKey(DIK_Q)) actor->Turn(-yaw_rate * Game::TimeFactor);
+		else if (Game::Keyboard.GetKey(DIK_E)) actor->Turn(+yaw_rate * Game::TimeFactor);
+	}
+	
+}
+
+void RJMain::DeactivateDebugPortalRenderingTest(void)
+{
+	// Deactivate any modifications currently in place on the parent environment
+	ComplexShip *environment = m_debug_portalrenderingtest_environment();
+	if (environment)
+	{
+		environment->ForceRenderingOfInterior(false);
+		environment->FadeHullToAlpha(2.5f, 1.0f);
+		environment->FadeAllTiles(1.5f, 1.0f);
+	}
+
+	// Release the camera back to normal operation
+	Game::Engine->GetCamera()->ReleaseCamera();
+
+	// Reset any parameters and deactivate the debug mode
+	m_debug_portalrenderingtest = false;
+	m_debug_portalrenderingtest_subject = NULL;
+	m_debug_portalrenderingtest_environment = NULL;
+}
+
 
 void RJMain::DEBUGDisplayInfo(void)
 {
 	// In-engine tests - display the tests if they have been activated
 	if (m_debug_ccdspheretest) DebugCCDSphereTest();
 	if (m_debug_ccdobbtest) DebugFullCCDTest(); // DebugCCDOBBTest();
+	if (m_debug_portalrenderingtest) DebugRunPortalRenderingTest();
 
 	// Debug info line 1 - basic location data
 	if (m_debuginfo_flightstats)

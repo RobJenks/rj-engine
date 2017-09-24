@@ -1898,11 +1898,6 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		// is already rotated to the rotation state of the parent tile for evaluation-time efficiency
 		XMMATRIX cell_transform = XMMatrixMultiply(cell->GetRelativePositionMatrix(), environment->GetZeroPointWorldMatrix());
 
-		if (cell->GetElementLocation() == Game::CurrentPlayer->GetComplexShipEnvironmentElementLocation())
-		{
-			int a = 1;
-		} // TODO: REMOVE
-
 		// Now process any portals in the current cell
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Cell contains ")(cell->GetPortalCount())(" portals\n").str());
 		for (const auto & portal : cell->GetPortals())
@@ -2030,6 +2025,7 @@ void CoreEngine::DebugOverrideInitialPortalRenderingViewer(const iObject *viewer
 	{
 		m_debug_portal_render_initial_frustum = NULL;
 		m_debug_portal_render_viewer_position = NULL_VECTOR;
+		return;
 	}
 
 	// Override initial portal rendering frustum with one calculated for the given viewer
@@ -2810,7 +2806,7 @@ void CoreEngine::DebugRenderEnvironmentNavNetwork(void)
 		pos = XMVector3TransformCoord(VectorFromIntVector3SwizzleYZ(node.Position), envworld);
 		
 		// Render a marker at this location
-		m_overlayrenderer->RenderNode(pos, OverlayRenderer::RenderColour::RC_Red);
+		m_overlayrenderer->RenderNode(pos, XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f));
 
 		// Now we want to render connections to all connected nav nodes
 		int linkcount = node.NumConnections;

@@ -121,6 +121,9 @@ public:
 	void DebugFullCCDTest(void);
 	void DebugFireBasicProjectile(const BasicRay & trajectory) const;
 
+	void ActivateDebugPortalRenderingTest(const iObject *target);
+	void DebugRunPortalRenderingTest(void);
+	void DeactivateDebugPortalRenderingTest(void);
 
 	// Default destructor
 	~RJMain(void);
@@ -149,6 +152,9 @@ protected:
 	bool m_debug_ccdspheretest;
 	bool m_debug_ccdobbtest;
 
+	bool m_debug_portalrenderingtest;
+	ObjectReference<const iEnvironmentObject> m_debug_portalrenderingtest_subject;
+	ObjectReference<ComplexShip> m_debug_portalrenderingtest_environment;
 
 public:
 	// Debug objects for testing; delete after use

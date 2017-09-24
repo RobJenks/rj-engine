@@ -40,9 +40,9 @@ public:
 	static const float								CAMERA_REVERT_TIME;				// Time for the camera to revert to origin and ID orientation
 	static const float								COMPONENT_FADE_TIME;			// Time (secs) for components to fade in or out 
 	static const float								COMPONENT_FADE_OUT_ALPHA;		// Alpha value for components that have been faded out
-	static const XMFLOAT3							TILE_PLACEMENT_COLOUR_VALID;	// Selection outline for valid placement
-	static const XMFLOAT3							TILE_PLACEMENT_COLOUR_INVALID;	// Selection outline for invalid placement
-	static const XMFLOAT3							TILE_PLACEMENT_COLOUR_PLACEMENTERROR;	// For specific elements in error
+	static const XMFLOAT4							TILE_PLACEMENT_COLOUR_VALID;	// Selection outline for valid placement
+	static const XMFLOAT4							TILE_PLACEMENT_COLOUR_INVALID;	// Selection outline for invalid placement
+	static const XMFLOAT4							TILE_PLACEMENT_COLOUR_PLACEMENTERROR;	// For specific elements in error
 
 	// Location of the custom ship directory
 	static const char *								CUSTOM_SHIP_DIRECTORY;

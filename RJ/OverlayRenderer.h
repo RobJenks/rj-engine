@@ -45,7 +45,8 @@ public:
 
 	// Method to add a line for rendering.  Accepts a world matrix for the line
 	void XM_CALLCONV	RenderLine(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
-	void XM_CALLCONV	RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT3 & colour, float alpha);
+	void XM_CALLCONV	RenderLine(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha);
+	void XM_CALLCONV	RenderLineFlat(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha);
 
 	// Determines the world matrix required to transform a line model into the correct position, given only
 	// the coordinates of each line end point.  Also optionally accepts a line length parameter to avoid 
@@ -60,6 +61,7 @@ public:
 	// Method to add a line for rendering.  Does all calculation of required world matrix to generate the line between two points.  If 
 	// 'length' is given as <= 0 then the length will be calculated automatically (via a sqrt, so avoid if possible)
 	void				RenderLine(FXMVECTOR pt1, FXMVECTOR pt2, OverlayRenderer::RenderColour colour, float thickness, float length);
+	void				RenderLineFlat(FXMVECTOR pt1, FXMVECTOR pt2, const XMFLOAT4 & colour_alpha, float thickness, float length);
 
 	// Method to render a box at the specified location.  World matrix specifies transforming to the target location/orientation.  Size/thickness
 	// are used to derive the scaling matrix
@@ -72,12 +74,12 @@ public:
 	}
 
 	// Method to render a box at the specified location
-	void XM_CALLCONV	RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT3 & colour, float alpha, float thickness);
+	void XM_CALLCONV	RenderBox(const FXMMATRIX world, const XMFLOAT3 & size, const XMFLOAT4 & colour_alpha, float thickness);
 
 	// Methods to render a box around a specified element / element position / arbitrary position within a complex ship
 	void				RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element, OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderElementBox(iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_location, const INTVECTOR3 & element_size,
-										 const XMFLOAT3 & colour, float alpha, float thickness);
+										 const XMFLOAT4 & colour_alpha, float thickness);
 	void				RenderElementBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness);
 	void				RenderBoxAtRelativeElementLocation(iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, float thickness, float xSize, float ySize, float zSize);
 
@@ -92,7 +94,7 @@ public:
 	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & elementpos, OverlayRenderer::RenderColour colour, 
 																float xSize, float ySize, float zSize);
 	void				RenderCuboidAtRelativeElementLocation(	iSpaceObjectEnvironment *ship, const INTVECTOR3 & element_pos, const INTVECTOR3 & element_size,
-																const XMFLOAT3 & colour, float alpha);
+																const XMFLOAT4 & colour_alpha);
 	
 	// Methods to render a semi-transparent 2D overlay over the top of an element
 	void				RenderElementOverlay(iSpaceObjectEnvironment & ship, const INTVECTOR3 & element, const XMFLOAT4 & colour_alpha);
@@ -118,10 +120,8 @@ public:
 	}
 
 	// Method to add a node for rendering.  Uses line model.  Spins in place.
-	void XM_CALLCONV	RenderNode(const FXMMATRIX world, OverlayRenderer::RenderColour colour);
-	
-	// Overloaded method to render a node in world space.  Accepts a node position and constructs the required world matrix
-	void XM_CALLCONV	RenderNode(const FXMVECTOR pos, OverlayRenderer::RenderColour colour);
+	void XM_CALLCONV	RenderNode(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha);
+	void XM_CALLCONV	RenderNodeFlat(const FXMVECTOR pos, const XMFLOAT4 & colour_alpha);
 
 	// Render a node at the specified element within the given environment
 	void				RenderNodeAtRelativeElementLocation(iSpaceObjectEnvironment *ship, INTVECTOR3 elementpos, OverlayRenderer::RenderColour colour);
