@@ -74,7 +74,17 @@ Result XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, 
 	return ErrorCodes::NoError;
 }
 
+// Copies view frustum data from an existing frustum
+void Frustum::CopyViewFrustumData(const Frustum & view_frustum)
+{
+	m_clip_near = view_frustum.GetNearClipPlaneDistance();
+	m_clip_far = view_frustum.GetFarClipPlaneDistance();
+	m_frustrumproj = view_frustum.GetFrustumProjectionMatrix();
+}
+
 // Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
+// Note frustum must have either been initialised as a view frustum via InitialiseAsViewFrustum, or must have copied relevant data from 
+// a valid view frustum via CopyViewFrustumData, before it can construct a valid frustum from view data
 void XM_CALLCONV Frustum::ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview)
 {
 	// Calculate the frustrum matrix based on the current view matrix and precalculated adjusted projection matrix

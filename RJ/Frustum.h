@@ -26,7 +26,12 @@ public:
 	// Generally only applicable for the primary view frustum
 	Result XM_CALLCONV					InitialiseAsViewFrustum(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
 
+	// Copies view frustum data from an existing frustum
+	void								CopyViewFrustumData(const Frustum & view_frustum);
+
 	// Builds a new view frustrum based on the current view & inverse view matrices.  Generally only applicable for the primary view frustum
+	// Note frustum must have either been initialised as a view frustum via InitialiseAsViewFrustum, or must have copied relevant data from 
+	// a valid view frustum via CopyViewFrustumData, before it can construct a valid frustum from view data
 	void XM_CALLCONV					ConstructViewFrustrum(const FXMMATRIX view, const CXMMATRIX invview);
 
 	// Add a new side to the frustum, based upon a viewer position and two further points in the world
@@ -67,8 +72,8 @@ public:
 	bool								CheckOBB(const OrientedBoundingBox & obb) const;
 
 	// Return auxilliary data on the view frustum
-	CMPINLINE float						GetNearClipPlane(void) const { return m_clip_near; }
-	CMPINLINE float						GetFarClipPlane(void) const { return m_clip_far; }
+	CMPINLINE float						GetNearClipPlaneDistance(void) const { return m_clip_near; }
+	CMPINLINE float						GetFarClipPlaneDistance(void) const { return m_clip_far; }
 	CMPINLINE XMMATRIX					GetFrustumProjectionMatrix(void) const { return m_frustrumproj; }
 
 	// Destructor

@@ -823,7 +823,7 @@ Result CoreEngine::InitialiseVolLineShader(void)
 
 	// Now attempt to initialise the shader
 	result = m_vollineshader->Initialise(m_D3D->GetDevice(), XMFLOAT2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
-										 m_frustrum->GetNearClipPlane(), m_frustrum->GetFarClipPlane());
+										 m_frustrum->GetNearClipPlaneDistance(), m_frustrum->GetFarClipPlaneDistance());
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
