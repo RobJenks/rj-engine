@@ -501,18 +501,17 @@ void RJMain::ReadUserInput(void)
 
 void RJMain::ProcessKeyboardInput(void)
 {
-	// First, pass the keyboard state to the current player to update the player control (if we are in 'normal' camera mode)
-	if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::NormalCamera)
+	// Pass input to a different primary controller based upon the current user mode
+	if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::DebugCamera)
 	{
-		// Pass control to the current player
-		Game::CurrentPlayer->AcceptKeyboardInput(&Game::Keyboard);
-	}
-	else if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::DebugCamera)
-	{
-		// Otherwise if we are in debug camera mode, move the camera based upon keyboard input
+		// If we are in debug camera mode, intercept mouse commands for the debug camera
 		AcceptDebugCameraKeyboardInput();
 	}
-	
+	else /* if (Game::Engine->GetCamera()->GetCameraState() == CameraClass::CameraState::NormalCamera) */
+	{
+		// Otherwise, and by default, pass keyboard state to the current player to update the player control
+		Game::CurrentPlayer->AcceptKeyboardInput(&Game::Keyboard);
+	}
 
 	// Get a reference to the keyboard state 
 	BOOL *b = Game::Keyboard.GetKeys();
@@ -671,6 +670,8 @@ void RJMain::ProcessKeyboardInput(void)
 			cs()->GetSection(0)->Fade.FadeToAlpha(2.5f, 0.25f);
 			Game::Engine->GetCamera()->ZoomToOverheadShipView(cs());
 		}
+
+		Game::Keyboard.LockKey(DIK_SEMICOLON);
 	}
 	if (b[DIK_PERIOD])
 	{

@@ -49,21 +49,21 @@ void CameraClass::CalculateViewMatrix(void)
 
 			// Calculate the view matrix based on positional data & the additional offset matrix.  We can use the chase camera
 			// orientation which was calculated above based on the current ship movement
-			CalculateViewMatrixFromPositionData(ship->GetPosition(), 
-												ship->GetUnadjustedOrientation(), camoffset);
+			ConstructCameraFromPositionData(ship->GetPosition(),
+											ship->GetUnadjustedOrientation(), camoffset);
 		}
 		else
 		{
 			// Otherwise we apply no offset and simply calculate a position/orientation-based view matrix
-			CalculateViewMatrixFromPositionData(Game::CurrentPlayer->GetPosition(), 
-												Game::CurrentPlayer->GetOrientation(), 
-												Game::CurrentPlayer->GetViewOffsetMatrix());
+			ConstructCameraFromPositionData(Game::CurrentPlayer->GetPosition(),
+											Game::CurrentPlayer->GetOrientation(), 
+											Game::CurrentPlayer->GetViewOffsetMatrix());
 		}
 	}
 	else if (m_camerastate == CameraClass::CameraState::FixedCamera)
 	{
 		// If we are using a fixed camera then simply calculate the view matrix based on the fixed position/orientation
-		CalculateViewMatrixFromPositionData(m_fixedposition, m_fixedorientation, ID_MATRIX);
+		ConstructCameraFromPositionData(m_fixedposition, m_fixedorientation, ID_MATRIX);
 	}
 	else if (m_camerastate == CameraClass::CameraState::PathCamera)
 	{
@@ -76,14 +76,14 @@ void CameraClass::CalculateViewMatrix(void)
 		else
 		{
 			// Otherwise calculate the view matrix based upon the current camera path position & orientation
-			CalculateViewMatrixFromPositionData(m_camerapath->GetCurrentCameraPosition(), 
+			ConstructCameraFromPositionData(m_camerapath->GetCurrentCameraPosition(),
 												m_camerapath->GetCurrentCameraOrientation(), ID_MATRIX);
 		}
 	}
 	else if (m_camerastate == CameraClass::CameraState::DebugCamera)
 	{
 		// Calculate a view matrix based upon the debug camera position
-		CalculateViewMatrixFromPositionData(m_debugposition, m_debugorientation, ID_MATRIX);
+		ConstructCameraFromPositionData(m_debugposition, m_debugorientation, ID_MATRIX);
 	}
 	else
 	{
@@ -92,31 +92,40 @@ void CameraClass::CalculateViewMatrix(void)
 	}
 }
 
-void CameraClass::CalculateViewMatrixFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix)
+void CameraClass::ConstructCameraFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix)
 {
 	// Store location/orientation values for use throughout the frame
 	m_position = position;
 	m_orientation = orientation;
 	m_offsetmatrix = offsetmatrix;
 
-	// First convert the orientation D3DXQUATERNION into a rotation matrix
-	m_rot = XMMatrixRotationQuaternion(orientation);
-			
-	// Generate translation matrix for the position vector
-	m_trans = XMMatrixTranslationFromVector(m_position);
+	// Calculate view and inverse view matrices from this position data
+	CalculateViewMatrixFromPositionData(position, orientation, offsetmatrix, m_view, m_invview);
 
-	// Calculate the inverse view matrix by performing (translation[location] > rotation[orient] > translation [camoffset])
-	m_inter = XMMatrixMultiply(m_rot, m_trans);
-	m_invview = XMMatrixMultiply(offsetmatrix, m_inter);
-
-	// Invert since view matrix is transform from world space into the camera coordinate system, then we are done
-	m_view = XMMatrixInverse(NULL, m_invview);
-
-	// Decompose into components that other methods can use for rendering; more efficient to do once here
+	// Decompose the view matrix into components that other methods can use for rendering; more efficient to do once here
 	DecomposeViewMatrix();
 
 	// Also store key data in other structures for runtime efficiency
 	XMStoreFloat3(&m_positionf, m_position);
+}
+
+void CameraClass::CalculateViewMatrixFromPositionData(	const FXMVECTOR position, const FXMVECTOR orientation, 
+														XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const
+{
+	// Inverse view matrix = (rot_matrix * trans_matrix)
+	// View matrix = (inv_view_matrix)^-1
+	outInverseViewMatrix = XMMatrixMultiply(XMMatrixRotationQuaternion(orientation), XMMatrixTranslationFromVector(position));
+	outViewMatrix = XMMatrixInverse(NULL, outInverseViewMatrix);
+}
+
+void CameraClass::CalculateViewMatrixFromPositionData(	const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offset_matrix,
+														XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const 
+{
+	// Inverse view matrix = (cam_offset_matrix * rot_matrix * trans_matrix)
+	// View matrix = (inv_view_matrix)^-1
+	outInverseViewMatrix = XMMatrixMultiply(offset_matrix, XMMatrixMultiply(
+		XMMatrixRotationQuaternion(orientation), XMMatrixTranslationFromVector(position)));
+	outViewMatrix = XMMatrixInverse(NULL, outInverseViewMatrix);
 }
 
 void CameraClass::DecomposeViewMatrix(void)

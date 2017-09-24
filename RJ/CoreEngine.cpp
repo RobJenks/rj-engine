@@ -452,9 +452,9 @@ Result CoreEngine::InitialiseCamera(void)
 	}
 
 	// Use the camera rendering functions to generate a temporary view matrix for all 2D text rendering (from a position of [0,0,-1])
-	m_camera->CalculateViewMatrixFromPositionData(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), ID_QUATERNION, ID_MATRIX);
-	m_camera->GetViewMatrix(m_baseviewmatrix);
-
+	XMMATRIX not_required;
+	m_camera->CalculateViewMatrixFromPositionData(XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f), ID_QUATERNION, m_baseviewmatrix, not_required);
+	
 	// Return success
 	return ErrorCodes::NoError;
 

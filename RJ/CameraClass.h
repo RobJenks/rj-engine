@@ -30,9 +30,8 @@ public:
 	// Calculates a view matrix, dependent on parameters and the current player state
 	void								CalculateViewMatrix(void);
 	
-	// Calculates the camera view matrix from supplied positonal data
-	void CalculateViewMatrixFromPositionData
-		(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix);
+	// Calculates the camera view matrix and other camera configuration from supplied positonal data
+	void								ConstructCameraFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offsetmatrix);
 
 	// Returns the calculated view matrix
 	CMPINLINE XMMATRIX *				GetViewMatrix(void) { return &m_view; }
@@ -43,6 +42,12 @@ public:
 	CMPINLINE XMMATRIX *				GetInverseViewMatrix(void) { return &m_invview; }
 	CMPINLINE const XMMATRIX &			GetInverseViewMatrix(void) const { return m_invview; }
 	CMPINLINE void						GetInverseViewMatrix(XMMATRIX &invview) const { invview = m_invview; }
+
+	// Calculates a view matrix and its inverse from supplied positional data
+	void								CalculateViewMatrixFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation, const CXMMATRIX offset_matrix,
+																			XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const;
+	void								CalculateViewMatrixFromPositionData(const FXMVECTOR position, const FXMVECTOR orientation,
+																			XMMATRIX & outViewMatrix, XMMATRIX & outInverseViewMatrix) const;
 
 	// Decomposes the view matrix into each component, which can be used by other methods for rendering
 	void								DecomposeViewMatrix(void);
@@ -147,8 +152,6 @@ private:
 	bool								m_pathcomplete;					// Flag indicating when the current path has completed
 
 	float								m_yaw, m_pitch;					// Current camera yaw & pitch
-
-	AXMMATRIX							m_rot, m_trans, m_inter;		// Interim calculation matrices
 
 	XMFLOAT3							m_positionf;					// Key data replicated in other structures for runtime efficiency
 
