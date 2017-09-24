@@ -54,16 +54,12 @@ Frustum::Frustum(const size_t frustum_side_count, const FXMVECTOR near_plane, co
 
 // Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
 // Generally only applicable for the primary view frustum
-Result XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, const float depth, const float FOV, const float aspect)
+Result XM_CALLCONV Frustum::InitialiseAsViewFrustum(const FXMMATRIX projection, const float far_plane_distance, const float FOV, const float aspect)
 {
-	// Use default near & far clip planes for now, until we need to do otherwise
-	m_clip_near = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
-	m_clip_far = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
-
 	// Calculate the minimum z distance in the frustrum and generate a frustrum-specific proj
 	XMFLOAT4X4 fproj;
 	XMStoreFloat4x4(&fproj, projection);
-		m_clip_far = depth;
+		m_clip_far = far_plane_distance;
 		m_clip_near = -fproj._43 / fproj._33;
 		float r = m_clip_far / (m_clip_far - m_clip_near);
 		fproj._33 = r;

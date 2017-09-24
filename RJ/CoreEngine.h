@@ -423,6 +423,10 @@ public:
 	// Outputs the contents of the render queue to debug-out
 	void					DebugOutputRenderQueueContents(void);
 
+	// Override the initial portal rendering frustum; relevant in debug builds only.  Override frustum will be deallocated by the
+	// engine at the end of the frame
+	void					DebugOverrideInitialPortalRenderingViewer(const iObject *viewer); 
+
 	// Static constant collection of basic colours, for ease of use in e.g. simple debug overlays
 	static const std::array<BasicColourDefinition, 8> BASIC_COLOURS;
 
@@ -637,9 +641,9 @@ private:
 	void					CalculateViewPortalBounds(const ViewPortal & portal, const FXMMATRIX portal_world_transform, const CameraClass & camera, AXMVECTOR(&pOutVertices)[4]) const;
 
 	// Create a new view frustum by clipping the current frustum against the bounds of a view portal
-	public:
+	
 	Frustum *				CreateClippedFrustum(const FXMVECTOR view_position, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform);
-	private:
+	
 	// Debug-render an environment portal based on the given definition and world transform
 	void					DebugRenderPortal(const ViewPortal & portal, const FXMMATRIX world_matrix, bool is_active);
 
@@ -657,6 +661,10 @@ private:
 
 	// Renders an object within a particular environment
 	void					RenderEnvironmentObject(iEnvironmentObject *object);
+
+	// Pre- and post-render debug processes; only active in debug builds
+	void					RunPreRenderDebugProcesses(void);
+	void					RunPostRenderDebugProcesses(void);
 
 	// Lighting configuration is stored within the core engine and set for each object being rendered
 
@@ -702,6 +710,8 @@ private:
 	Game::ID_TYPE				m_debug_renderportaltraversal;
 	bool						m_debug_portal_debugrender;
 	bool						m_debug_portal_debuglog;
+	AXMVECTOR					m_debug_portal_render_viewer_position;			// Override that can be applied to act as the initial viewer position in portal rendering (rather than the camera position)
+	Frustum *					m_debug_portal_render_initial_frustum;			// Override that can be applied to act as the initial frustum in portal rendering (rather than the standard view frustum)
 	Game::ID_TYPE				m_debug_renderobjid_object;						// Specific object for which we should render IDs (generally an environment)
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
@@ -730,10 +740,16 @@ private:
 			if (m_debug_portal_debuglog && m_debug_renderportaltraversal == environment->GetID()) { Game::Log << LOG_DEBUG << text; }
 #		define DEBUG_PORTAL_RENDER(portal, world_matrix, is_active) \
 			if (m_debug_portal_debugrender && m_debug_renderportaltraversal == environment->GetID()) { DebugRenderPortal(portal, world_matrix, is_active); }
+#		define INITIAL_PORTAL_RENDERING_FRUSTUM \
+			(m_debug_portal_render_initial_frustum ? m_debug_portal_render_initial_frustum : GetViewFrustrum())
+#		define INITIAL_PORTAL_RENDERING_VIEWER_POSITION \
+			(m_debug_portal_render_initial_frustum ? m_debug_portal_render_viewer_position : GetCamera()->GetPosition())
 #	else
 #		define DEBUG_PORTAL_TRAVERSAL(environment, expr) 
 #		define DEBUG_PORTAL_TRAVERSAL_LOG(environment, text)
 #		define DEBUG_PORTAL_RENDER(portal, world_matrix, is_active)
+#		define INITIAL_PORTAL_RENDERING_FRUSTUM GetViewFrustrum()
+#		define INITIAL_PORTAL_RENDERING_VIEWER_POSITION GetCamera()->GetPosition()
 #	endif
 
 };

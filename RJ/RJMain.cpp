@@ -545,30 +545,11 @@ void RJMain::ProcessKeyboardInput(void)
 
 		Game::Keyboard.LockKey(DIK_U);
 	}
-	if (b[DIK_J])
+	if (true || b[DIK_J])
 	{
-		ComplexShipTile *tile = NULL;
-		for (auto t : cs()->GetTiles()) {
-			if (t.value->GetCode() == "corridor_se") { tile = t.value; break; }
-		}
-
-		auto id = tile->GetID();
-		OutputDebugString(concat("Before: Tile \"")(tile->GetCode())("\" (")(tile->GetID())("), ")("rotation = ")(tile->GetRotation())(", ")(tile->GetPortalCount())(" portals:\n").str().c_str());
-		for (const auto & p : tile->GetPortals()) OutputDebugString(concat("   ")(p.DebugString())("\n").str().c_str());
-
-		tile->Rotate(Rotation90Degree::Rotate90);
-		cs()->UpdateEnvironment();
-
-		tile = NULL;
-		for (auto t : cs()->GetTiles()) {
-			if (t.value->GetID() == id) { tile = t.value; break; }
-		}
-
-		OutputDebugString(concat("After: Tile \"")(tile->GetCode())("\" (")(tile->GetID())("), ")("rotation = ")(tile->GetRotation())(", ")(tile->GetPortalCount())(" portals:\n").str().c_str());
-		for (const auto & p : tile->GetPortals()) OutputDebugString(concat("   ")(p.DebugString())("\n").str().c_str());
-
-		Game::Keyboard.LockKey(DIK_J);
+		Game::Engine->DebugOverrideInitialPortalRenderingViewer(Game::CurrentPlayer->GetActor());
 	}
+
 	if (b[DIK_5])
 	{
 		if (b[DIK_LSHIFT])

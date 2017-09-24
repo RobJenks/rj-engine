@@ -103,6 +103,7 @@ CoreEngine::CoreEngine(void)
 	m_instancebuffer = NULL;
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
 	m_debug_portal_debugrender = m_debug_portal_debuglog = false;
+	m_debug_portal_render_initial_frustum = NULL;
 	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
@@ -1199,6 +1200,11 @@ void CoreEngine::Render(void)
 	// Validate render cycle parameters before continuing with the render process
 	if (!r_devicecontext) return;
 
+	// Run any pre-render debug processes
+#	ifdef _DEBUG
+		RunPreRenderDebugProcesses();
+#	endif
+
 	// Construct the view frustrum for this frame so we can perform culling calculations
 	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
 
@@ -1264,6 +1270,11 @@ void CoreEngine::Render(void)
 	// high-volume items that can be moved to use instanced rendering the better
 	RJ_FRAME_PROFILER_CHECKPOINT("Render: Processing render queue");
 	ProcessRenderQueue();
+
+	// Run any post-render debug processes
+#	ifdef _DEBUG
+		RunPostRenderDebugProcesses();
+#	endif
 
 	// End the frame
 	RJ_FRAME_PROFILER_CHECKPOINT("Render: Ending frame");
@@ -1766,7 +1777,11 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 	// Use different rendering methods depending on the type of environment
 	if (environment->SupportsPortalBasedRendering())
 	{
-		Result render_result = RenderPortalEnvironment(environment, Game::Engine->GetCamera()->GetPosition(), Game::Engine->GetViewFrustrum(), &new_frustum);
+		Result render_result = RenderPortalEnvironment(environment, 
+			INITIAL_PORTAL_RENDERING_VIEWER_POSITION, 
+			INITIAL_PORTAL_RENDERING_FRUSTUM, 
+			&new_frustum);
+
 		if (render_result == ErrorCodes::PortalRenderingNotPossibleInEnvironment)
 		{
 			RenderNonPortalEnvironment(environment, &new_frustum);
@@ -1950,35 +1965,6 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	return NULL; // TODO
 }
 
-// Calculates the bounds of a portal in world space, by transforming into view space and determining the
-// portal extents and then transforming those points back into world space
-void CoreEngine::CalculateViewPortalBounds(const ViewPortal & portal, const FXMMATRIX portal_world_transform, const CameraClass & camera, AXMVECTOR(&pOutVertices)[4]) const
-{
-	// Transform the portal bounds to world and then view space
-	/*AXMVECTOR world[4]; AXMVECTOR view[4];
-	const XMMATRIX viewmatrix = camera.GetViewMatrix();
-	for (int i = 0; i < 4; ++i)
-	{
-		world[i] = XMVector3TransformCoord(portal.Vertices[i], portal_world_transform);
-		view[i] = XMVector3TransformCoord(world[i], viewmatrix);
-	}
-
-	// Determine the minimum and maximum extents of the portal in view space
-	XMVECTOR view_min = XMVectorMin(XMVectorMin(view[0], view[1]), XMVectorMin(view[2], view[3]));
-	XMVECTOR view_max = XMVectorMax(XMVectorMax(view[0], view[1]), XMVectorMax(view[2], view[3]));
-
-	// 
-
-	// World-space portal bounds can therefore be derived from the min/max extents in the view-space XY plane
-	const XMMATRIX invview = camera.GetInverseViewMatrix();
-	pOutVertices[0] = XMVector3TransformCoord(BL_view, invview);											// BL
-	pOutVertices[1] = XMVector3TransformCoord(XMVectorSelect(BL_view, TR_view, VCTRL_0100), invview);		// TL
-	pOutVertices[2] = XMVector3TransformCoord(XMVectorSelect(BL_view, TR_view, ))
-
-		*/
-
-}
-
 // Create a new view frustum by clipping the current frustum against the bounds of a view portal
 // Portal is defined in cell-local space, and frustum is required in world space, so also accepts a cell-to-world transform
 Frustum * CoreEngine::CreateClippedFrustum(const FXMVECTOR view_position, const Frustum & current_frustum, const ViewPortal & portal, const FXMMATRIX world_transform)
@@ -2034,6 +2020,29 @@ void CoreEngine::SetDebugPortalRenderingConfiguration(bool debug_render, bool de
 {
 	m_debug_portal_debugrender = debug_render;
 	m_debug_portal_debuglog = debug_log;
+}
+
+// Override the initial portal rendering frustum; relevant in debug builds only.  Override frustum will be deallocated by the
+// engine at the end of the frame
+void CoreEngine::DebugOverrideInitialPortalRenderingViewer(const iObject *viewer)
+{
+	if (!viewer)
+	{
+		m_debug_portal_render_initial_frustum = NULL;
+		m_debug_portal_render_viewer_position = NULL_VECTOR;
+	}
+
+	// Override initial portal rendering frustum with one calculated for the given viewer
+	XMMATRIX view, invview;
+	GetCamera()->CalculateViewMatrixFromPositionData(viewer->GetPosition(), viewer->GetOrientation(), view, invview);
+	
+	assert(m_debug_portal_render_initial_frustum == NULL);
+	m_debug_portal_render_initial_frustum = new Frustum(4U);
+	m_debug_portal_render_initial_frustum->InitialiseAsViewFrustum(	GetDirect3D()->GetProjectionMatrix(), Game::C_DEFAULT_CLIP_FAR_DISTANCE,
+																	GetDirect3D()->GetDisplayFOV(), GetDirect3D()->GetDisplayAspectRatio());
+
+	m_debug_portal_render_initial_frustum->ConstructViewFrustrum(view, invview);
+	m_debug_portal_render_viewer_position = viewer->GetPosition();
 }
 
 /* Method to render the interior of an object environment including any tiles, for an environment
@@ -2630,6 +2639,23 @@ void CoreEngine::DeallocateRenderingQueue(void)
 	}
 	m_renderqueue.clear();
 	m_renderqueue.shrink_to_fit();
+}
+
+// Pre-render debug processes; only active in debug builds
+void CoreEngine::RunPreRenderDebugProcesses(void)
+{
+
+}
+
+// Post-render debug processes; only active in debug builds
+void CoreEngine::RunPostRenderDebugProcesses(void)
+{
+	// Clear per-frame debug state
+	if (m_debug_portal_render_initial_frustum)
+	{
+		SafeDelete(m_debug_portal_render_initial_frustum);
+		m_debug_portal_render_viewer_position = NULL_VECTOR;
+	}
 }
 
 // Performs rendering of debug/special data

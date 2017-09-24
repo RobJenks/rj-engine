@@ -24,7 +24,8 @@ public:
 
 	// Should be run each time the projection/viewport settings change, to recalcuate cached information on the view frustrum
 	// Generally only applicable for the primary view frustum
-	Result XM_CALLCONV					InitialiseAsViewFrustum(const FXMMATRIX projection, const float depth, const float FOV, const float aspect);
+	Result XM_CALLCONV					InitialiseAsViewFrustum(const FXMMATRIX projection, const float far_plane_distance, 
+																const float FOV, const float aspect);
 
 	// Copies view frustum data from an existing frustum
 	void								CopyViewFrustumData(const Frustum & view_frustum);
