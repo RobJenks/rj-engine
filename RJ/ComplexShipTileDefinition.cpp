@@ -82,7 +82,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 		tile->SetElementSize(INTVECTOR3(1, 1, 1));
 
 	// Copy all connectivity data into the new tile
-	tile->PossibleConnections = Connectivity;
+	tile->PossibleConnections = TileConnections(Connectivity);
 
 	// Copy all portal definitions into the tile
 	for (const auto & portal : m_portals) tile->AddPortal(ViewPortal(portal));

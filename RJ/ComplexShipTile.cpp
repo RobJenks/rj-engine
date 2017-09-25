@@ -143,8 +143,8 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	SetSimulationState(C.GetSimulationState());
 
 	// Copy the connection data for this tile 
-	Connections.SetConnectionState(C.Connections);
-	PossibleConnections.SetConnectionState(C.PossibleConnections);
+	Connections = TileConnections(C.Connections);
+	PossibleConnections = TileConnections(C.PossibleConnections);
 
 	// Replicate any portal data for this tile
 	m_portals = C.m_portals;
@@ -439,8 +439,19 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 // Reallocate connection data to be appropriate for this new size
 void ComplexShipTile::InitialiseConnectionState()
 {
-	// Deallocate any connection data that has already been stored
-	PossibleConnections.Initialise(m_elementsize);
+	// Read the potential connection data from our tile definition, if possible	
+	if (m_definition)
+	{
+		// Copy all data from the definition.  This will deallocate any data that already exists
+		PossibleConnections = TileConnections(m_definition->Connectivity);
+	}
+	else
+	{
+		// Otherwise simply initialise to zero.  Initialisation will deallocate any connection data that has already been stored
+		PossibleConnections.Initialise(m_elementsize);
+	}
+
+	// Initialise the actual connection data to match the tile size
 	Connections.Initialise(m_elementsize);
 }
 
