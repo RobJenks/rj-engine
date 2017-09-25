@@ -129,9 +129,10 @@ void iEnvironmentObject::RecalculateEnvironmentOrientationData(void)
 		SetOrientation(m_envorientation);
 	}
 
-	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance
+	// Recalculate intermediate orientation matrices and other derived data based on our current state, for more efficient runtime performance
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);	// Cache the inverse orientation matrix, (also relative to the current environment)
+	PhysicsState.Heading = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
 }
 
 void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
@@ -169,6 +170,7 @@ void iEnvironmentObject::RecalculateEnvironmentPositionAndOrientationData(void)
 	// Recalculate intermediate orientation matrices based on our current state, for more efficient runtime performance
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_envorientation);			// Cache the (environment-relative) orientation matrix for this object
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);	// Cache the inverse orientation matrix, (also relative to the current environment)
+	PhysicsState.Heading = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
 }
 
 

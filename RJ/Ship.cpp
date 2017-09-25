@@ -1018,7 +1018,7 @@ void Ship::DetermineNewPosition(void)
 	}
 
 	// Derive a new heading for the ship based on its orientation quaternion
-	PhysicsState.Heading = XMVector3Rotate(BASIS_VECTOR, m_orientation);
+	PhysicsState.Heading = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
 
 	// For now, simply apply the world momentum vector to our current position to get a new position
 	// Weight momentum by the time factor to get a consistent momentum change per second

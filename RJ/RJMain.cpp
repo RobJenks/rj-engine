@@ -2318,7 +2318,7 @@ void RJMain::DebugRunPortalRenderingTest(void)
 	// Render an overlay icon at the position of the test subject, and a projection along its heading vector
 	static const float heading_render_distance = 5.0f;
 	static const float heading_render_breadth = 1.0f;
-	XMVECTOR heading = XMVector3NormalizeEst(XMVector3Rotate(FORWARD_VECTOR, target->GetOrientation()));
+	XMVECTOR heading = XMVector3NormalizeEst(target->GetHeading());
 	XMVECTOR heading_vector = XMVectorAdd(target->GetPosition(), XMVectorScale(heading, heading_render_distance));
 	Game::Engine->GetOverlayRenderer()->RenderNodeFlat(target->GetPosition(), XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f));
 	Game::Engine->GetOverlayRenderer()->RenderLineFlat(target->GetPosition(), heading_vector, XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), heading_render_breadth, -1.0f);
