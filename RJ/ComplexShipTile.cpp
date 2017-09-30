@@ -436,6 +436,14 @@ void ComplexShipTile::SetElementSize(const INTVECTOR3 & size)
 	StartConstruction();
 }
 
+// Copies the basic properties of a tile from the given source
+void ComplexShipTile::CopyBasicProperties(const ComplexShipTile & source)
+{
+	SetElementLocation(source.GetElementLocation());
+	SetElementSize(source.GetElementSize());
+	SetRotation(source.GetRotation());
+}
+
 // Reallocate connection data to be appropriate for this new size
 void ComplexShipTile::InitialiseConnectionState()
 {

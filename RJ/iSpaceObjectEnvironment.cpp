@@ -605,9 +605,7 @@ Result iSpaceObjectEnvironment::RevertTileToBaseDefinition(int tile_index)
 	if (def)
 	{
 		ComplexShipTile *tile = def->CreateTile();
-		tile->SetElementLocation(current_tile->GetElementLocation());
-		tile->SetElementSize(current_tile->GetElementSize());
-		tile->SetRotation(current_tile->GetRotation());
+		tile->CopyBasicProperties(*current_tile);
 
 		result = tile->CompileAndValidateTile();
 		if (result == ErrorCodes::NoError)

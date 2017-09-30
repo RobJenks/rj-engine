@@ -304,7 +304,7 @@ void UI_ShipBuilder::RenderTilePlacement(void)
 
 // Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
 // a list of errors to the supplied output vector, if any exist
-bool UI_ShipBuilder::TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location,
+bool UI_ShipBuilder::TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & tile_location, const INTVECTOR3 & tile_size, 
 										std::vector<TilePlacementIssue> & outPlacementIssues)
 {
 	// Parameter check
@@ -316,16 +316,16 @@ bool UI_ShipBuilder::TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 
 	// Derive some required data
 	INTVECTOR3 el;
 	const INTVECTOR3 & envsize = m_ship->GetElementSize();
-	INTVECTOR3 tile_far_el = (location + (tile->GetElementSize()) - ONE_INTVECTOR3);
+	INTVECTOR3 tile_far_el = (tile_location + tile_size - ONE_INTVECTOR3);
 	
 	// Tile is placed with its (0,0,0) element at the mouse position.  Iterate over the full space
 	// of elements to be covered by this tile and validate them
 	ComplexShipElement *element;
-	for (int x = location.x; x <= tile_far_el.x; ++x)
+	for (int x = tile_location.x; x <= tile_far_el.x; ++x)
 	{
-		for (int y = location.y; y <= tile_far_el.y; ++y)
+		for (int y = tile_location.y; y <= tile_far_el.y; ++y)
 		{
-			for (int z = location.z; z <= tile_far_el.z; ++z)
+			for (int z = tile_location.z; z <= tile_far_el.z; ++z)
 			{
 				// Test whether the element lies within the ship bounds
 				el = INTVECTOR3(x, y, z);
@@ -360,7 +360,7 @@ void UI_ShipBuilder::PlaceTile(void)
 
 	// Perform another, final test of the tile placement to make sure it is valid before placement
 	m_tile_placement_issues.clear();
-	bool valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
+	bool valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_being_placed->GetElementSize(), m_tile_placement_issues);
 	if (!valid || !m_tile_placement_issues.empty()) return;
 
 	// Tile placement is valid, so add it to the ship
@@ -385,6 +385,68 @@ void UI_ShipBuilder::DeleteTile(const INTVECTOR3 & location)
 
 	// Delete this tile from the environment
 	m_ship->RemoveTile(tile, true);
+}
+
+// Attempt to resize the specified tile.  Int3 specifies the direction of change, and the provided flag indicates whether to extend or shrink the tile bounds
+void UI_ShipBuilder::ResizeTile(ComplexShipTile *tile, INTVECTOR3 direction, bool extend)
+{
+	// Parameter check
+	if (!tile || direction.IsZeroVector() || tile->GetTileDefinition() == NULL) return;
+	if (tile->GetTileDefinition()->HasFixedSize()) return;
+
+	// Determine the potential new position and size of the tile
+	INTVECTOR3 abs_dir = direction.Abs(); 
+	INTVECTOR3 neg_dir = IntVector3Min(direction, NULL_INTVECTOR3);
+	INTVECTOR3 pos_dir = IntVector3Max(direction, NULL_INTVECTOR3);
+	if (!(neg_dir.IsZeroVector() || pos_dir.IsZeroVector())) return;		// Only one of pos_ or neg_dir can be non-zero
+	bool is_pos_dir = !(pos_dir.IsZeroVector());
+
+	INTVECTOR3 new_pos;
+	INTVECTOR3 new_size = (tile->GetElementSize() + (extend ? abs_dir : abs_dir * -1));
+	if (!(new_size > NULL_INTVECTOR3)) return;
+	
+	// The tile position only changes if we are adjusting size negatively in some dimension
+	new_pos = tile->GetElementLocation();
+	if (!is_pos_dir)
+	{
+		new_pos -= (extend ? abs_dir : (abs_dir * -1));
+	}
+
+	// Make sure the tile will still fit within the environment bounds
+	if (!(new_pos >= NULL_INTVECTOR3)) return;
+	if (!((new_pos + new_size - ONE_INTVECTOR3) < m_ship->GetElementSize())) return;
+
+	// Make sure every element of the proposed new tile location is valid, otherwise reject
+	std::vector<TilePlacementIssue> placement_issues;
+	if (TestTilePlacement(tile, new_pos, new_size, placement_issues) == false) 
+	{
+		// We will reject if there are any placement issues, EXCEPT the ones we may expect to receive that an 
+		// element within the current tile bounds is already occupied (by the current tile)
+		INTVECTOR3 old_tile_far_bound = (tile->GetElementLocation() + tile->GetElementSize() - ONE_INTVECTOR3);
+		for (const auto & issue : placement_issues)
+		{
+			if (issue.Type == TilePlacementIssueType::ElementAlreadyOccupied && IntVector3Between(issue.Element, tile->GetElementLocation(), old_tile_far_bound)) continue;
+			return;		// This is not an expected issue, so terminate here
+		}
+	}
+
+	// The new tile placement appears to be valid.  Remove the old tile and add a new one in its place
+	ComplexShipTile *new_tile = tile->GetTileDefinition()->CreateTile();
+	if (!new_tile) return;
+	new_tile->CopyBasicProperties(*tile);
+	new_tile->SetElementLocation(new_pos);
+	new_tile->SetElementSize(new_size);
+
+	Result compile_result = new_tile->CompileAndValidateTile();
+	if (compile_result != ErrorCodes::NoError)
+	{
+		SafeDelete(new_tile);
+		return;
+	}
+
+	// ReplaceTile() does not deallocate the old tile, so do so here following the replacement
+	m_ship->ReplaceTile(tile, new_tile);
+	SafeDelete(tile);
 }
 
 // Replaces all existing tiles with a new version generated from the underlying definition.  Useful to revert tile-specific
@@ -791,6 +853,9 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 {
 	BOOL *keys = keyboard->GetKeys();
 
+	// Dispatch for mode-specific keyboard handling first
+	ProcessKeyboardInputForEditorMode(GetEditorMode(), keyboard);
+
 	// Revert the camera to base position/orientation/zoom if the home key is pressed
 	if (keys[DIK_HOME])
 	{
@@ -816,17 +881,64 @@ void UI_ShipBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	// The user can quit the ship designer by pressing tab again
 	if (keys[DIK_TAB])			{ Shutdown();														keyboard->LockKey(DIK_TAB); }
 
-	// TODO: DEBUG
-	if (keys[DIK_T])			{ 
-		m_tile_being_placed = ComplexShipTile::Create("corridor_ns"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_T);
-	}
-	else if (keys[DIK_Y]) {
-		m_tile_being_placed = ComplexShipTile::Create(keys[DIK_LSHIFT] ? "lifesupport_huge_01" : "lifesupport_basic_01"); m_tile_being_placed->CompileAndValidateTile();	keyboard->LockKey(DIK_Y);
-	}
 
 	// Consume all keys within this UI so they are not passed down to the main application
 	keyboard->ConsumeAllKeys();
 }
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForEditorMode(EditorMode editormode, GameInputDevice *keyboard)
+{
+	switch (editormode)
+	{
+		case EditorMode::GeneralMode:			ProcessKeyboardInputForGeneralMode(keyboard);
+		case EditorMode::ShipSectionMode:		ProcessKeyboardInputForShipSectionMode(keyboard);
+		case EditorMode::TileMode:				ProcessKeyboardInputForTileMode(keyboard);
+		case EditorMode::ObjectMode:			ProcessKeyboardInputForObjectMode(keyboard);
+		case EditorMode::StructuralTestMode:	ProcessKeyboardInputForStructuralTestMode(keyboard);
+	}
+}
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForGeneralMode(GameInputDevice *keyboard) { }
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForShipSectionMode(GameInputDevice *keyboard) { }
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForTileMode(GameInputDevice *keyboard)
+{
+	// User can resize tiles using shift/control and WASDQZ keys
+	if (m_mouse_is_over_element && (keyboard->ShiftDown() || keyboard->CtrlDown()))
+	{
+		ComplexShipElement *el = m_ship->GetElement(m_mouse_over_element);
+		if (el && el->GetTile())
+		{
+			static const std::pair<int, INTVECTOR3> RESIZE_OPTIONS[] = { 
+				{ DIK_W, INTVECTOR3(0, +1, 0) }, { DIK_S, INTVECTOR3(0, -1, 0) }, 
+				{ DIK_A, INTVECTOR3(-1, 0, 0) }, { DIK_D, INTVECTOR3(+1, 0, 0) },
+				{ DIK_Q, INTVECTOR3(0, 0, +1) }, { DIK_Z, INTVECTOR3(0, 0, -1) },
+			};
+
+			for (int i = 0; i < 6; ++i)
+			{
+				if (keyboard->GetKey(RESIZE_OPTIONS[i].first))
+				{
+					bool expand = (keyboard->ShiftDown());
+					ResizeTile(el->GetTile(), (expand ? RESIZE_OPTIONS[i].second : (RESIZE_OPTIONS[i].second * -1)), expand);
+					keyboard->LockAndConsumeKey(RESIZE_OPTIONS[i].first);
+					break;
+				}
+			}
+		}
+	}
+}
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForObjectMode(GameInputDevice *keyboard) { }
+
+// Mode-specific keyboard event handling
+void UI_ShipBuilder::ProcessKeyboardInputForStructuralTestMode(GameInputDevice *keyboard) { }
 
 
 // Process all keyboard input to this UI controller
@@ -898,7 +1010,7 @@ void UI_ShipBuilder::UpdatePlacementTile(void)
 
 	// Test whether we are attempting to place the tile in a valid location.  
 	m_tile_placement_issues.clear();
-	m_tile_placement_is_valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_placement_issues);
+	m_tile_placement_is_valid = TestTilePlacement(m_tile_being_placed, m_mouse_over_element, m_tile_being_placed->GetElementSize(), m_tile_placement_issues);
 
 	// If the placement is valid, update it and its surroundings to show the effect of placing it here
 	if (m_tile_placement_is_valid)

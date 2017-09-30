@@ -578,6 +578,9 @@ public:
 	// Transform all view portals by the same rotation
 	void								RotateAllViewPortals(Rotation90Degree rot_delta);
 
+	// Copies the basic properties of a tile from the given source
+	void								CopyBasicProperties(const ComplexShipTile & source);
+
 	// Mass of the tile
 	CMPINLINE float						GetMass(void) const									{ return m_mass; }
 	CMPINLINE void						SetMass(float m)									{ m_mass = m; }

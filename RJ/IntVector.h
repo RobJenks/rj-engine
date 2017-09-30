@@ -15,6 +15,7 @@ struct INTVECTOR2
 	INTVECTOR2(const XMFLOAT2 & v) { x = (int)v.x; y = (int)v.y; }
 	INTVECTOR2(int _xy) { x = _xy; y = _xy; }						// For efficiency; allows setting both components to same value
 
+	INTVECTOR2 Abs(void) const { return INTVECTOR2(abs(x), abs(y)); }
 	bool IsZeroVector(void) { return (x == 0 && y == 0); }
 	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << "]"; return s.str(); }
 
@@ -41,6 +42,7 @@ struct INTVECTOR3
 	INTVECTOR3(const XMFLOAT3 & v) { x = (int)v.x; y = (int)v.y; z = (int)v.z; }
 	INTVECTOR3(int val) { x = y = z = val; }
 
+	INTVECTOR3 Abs(void) const { return INTVECTOR3(abs(x), abs(y), abs(z)); }
 	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
 
 	INTVECTOR3& operator +=(const INTVECTOR3& rhs) { this->x += rhs.x; this->y += rhs.y; this->z += rhs.z; return *this; }

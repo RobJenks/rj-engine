@@ -243,6 +243,14 @@ protected:
 	// Render the editor grid, depending on editor mode
 	void										RenderEditorGrid(void);
 
+	// Mode-specific keyboard event handling
+	void										ProcessKeyboardInputForEditorMode(EditorMode editormode, GameInputDevice *keyboard);
+	void										ProcessKeyboardInputForGeneralMode(GameInputDevice *keyboard);
+	void										ProcessKeyboardInputForShipSectionMode(GameInputDevice *keyboard);
+	void										ProcessKeyboardInputForTileMode(GameInputDevice *keyboard);
+	void										ProcessKeyboardInputForObjectMode(GameInputDevice *keyboard);
+	void										ProcessKeyboardInputForStructuralTestMode(GameInputDevice *keyboard);
+
 	// Perform editor-mode-specific rendering
 	void										PerformTileModeRendering(void);
 	void										PerformStructuralTestModeRendering(void);
@@ -272,9 +280,12 @@ protected:
 	// Delete the tile at the specified location within the environment, assuming there is one
 	void										DeleteTile(const INTVECTOR3 & location);
 
+	// Attempt to resize the specified tile.  Int3 specifies the direction of change, and the provided flag indicates whether to extend or shrink the tile bounds
+	void										ResizeTile(ComplexShipTile *tile, INTVECTOR3 direction, bool extend);
+
 	// Tests whether the proposed tile placement is valid.  Returns a flag indicating validity.  Also outputs
 	// a list of errors to the supplied output vector, if any exist
-	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & location, 
+	bool										TestTilePlacement(	ComplexShipTile *tile, const INTVECTOR3 & tile_location, const INTVECTOR3 & tile_size,
 																	std::vector<TilePlacementIssue> & outPlacementIssues);
 
 	// Replaces all existing tiles with a new version generated from the underlying definition.  Useful to revert tile-specific

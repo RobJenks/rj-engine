@@ -323,6 +323,10 @@ public:
 	void							RemoveAllTiles(bool deallocate);
 	CMPINLINE void					RemoveAllTiles(void) { RemoveAllTiles(true); }
 
+	// Replaces one tile in the environment with another.  The old tile is not 
+	// shut down or deallocated by this operation
+	void							ReplaceTile(ComplexShipTile *old_tile, ComplexShipTile *new_tile);
+
 	// Revert a tile to its base definition.  Can modify the contents and order of the tile collection
 	Result							RevertTileToBaseDefinition(int tile_index);
 
@@ -661,10 +665,6 @@ protected:
 	// neighbouring tiles.  Accepts the address of a tile pointer and will adjust that tile pointer if
 	// the tile is updated as part of the analysis.  TODO: May wish to replace with more general methods in future
 	Result							UpdateTileBasedOnConnectionData(ComplexShipTile **ppOutTile);
-
-	// Replaces one tile in the environment with another.  The old tile is not 
-	// shut down or deallocated by this operation
-	void							ReplaceTile(ComplexShipTile *old_tile, ComplexShipTile *new_tile);
 
 	// Sets the size of the element space within this environment.  Protected.  Only called by
 	// object methods which are handling the effects of the element space change
