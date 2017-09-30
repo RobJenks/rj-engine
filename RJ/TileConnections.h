@@ -98,6 +98,13 @@ public:
 	// Tests whether the data in this object is equivalent to the specified object
 	bool							Equals(const TileConnections & other) const;
 
+	// Translate a connection type to/from its string representation
+	std::string						TranslateConnectionTypeToString(TileConnectionType type) const;
+	TileConnectionType				TranslateConnectionTypeFromString(const std::string & type) const;
+
+	// Output a debug string representation of the connection state
+	std::string						DebugString(void) const;
+
 	// Default destructor
 	~TileConnections(void);
 
@@ -112,13 +119,8 @@ protected:
 
 
 
-	// Generates an index into the data collection based on x/y/z coordinates
-	// Optimise "x + (y*sx) + (z*sx*sy)" -> "x + sx(y + z*sy)"
-	// Removed: use global ELEMENT_INDEX now
-	//#define ELEMENT_INDEX(_x, _y, _z) (_x + m_elementsize.x * (_y + (_z * m_elementsize.y)))
-
 	// Raw data used to store the connection information
-	bitstring **					m_data;		// (data[el_index])[connection_type], where each bitstring specifies the directions
+	bitstring **					m_data;		// (data)[connection_type][el_index], where each bitstring specifies the directions
 
 	// Size of the area covered
 	INTVECTOR3						m_elementsize;

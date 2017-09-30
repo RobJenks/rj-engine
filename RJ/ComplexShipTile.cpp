@@ -447,8 +447,9 @@ void ComplexShipTile::CopyBasicProperties(const ComplexShipTile & source)
 // Reallocate connection data to be appropriate for this new size
 void ComplexShipTile::InitialiseConnectionState()
 {
-	// Read the potential connection data from our tile definition, if possible	
-	if (m_definition)
+	// Read the potential connection data from our tile definition, if possible, and only if this is
+	// a fixed-size definition that will therefore have per-element connection data already specified
+	if (m_definition && m_definition->HasFixedSize())
 	{
 		// Copy all data from the definition.  This will deallocate any data that already exists
 		PossibleConnections = TileConnections(m_definition->Connectivity);

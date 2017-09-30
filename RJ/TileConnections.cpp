@@ -249,9 +249,52 @@ bool TileConnections::Equals(const TileConnections & other) const
 	return true;
 }
 
+// Translate a connection type to its string representation
+std::string TileConnections::TranslateConnectionTypeToString(TileConnectionType type) const 
+{
+	switch (type)
+	{
+		case TileConnectionType::Walkable:		return "Walkable";
+		default:								return "Unknown";
+	}
+}
+
+// Translate a connection type from its string representation
+TileConnections::TileConnectionType TileConnections::TranslateConnectionTypeFromString(const std::string & type) const 
+{
+	std::string str = StrLower(type);
+	if (str == "walkable")						return TileConnectionType::Walkable;
+	else										return TileConnectionType::_COUNT;
+}
+
+// Output a debug string representation of the connection state
+std::string TileConnections::DebugString(void) const
+{
+	std::string str = "Connections { ";
+	for (int x = 0; x < m_elementsize.x; ++x) {
+		for (int y = 0; y < m_elementsize.y; ++y) {
+			for (int z = 0; z < m_elementsize.z; ++z)
+			{
+				int index = ELEMENT_INDEX_EX(x, y, z, m_elementsize);
+				for (int c = 0; c < (int)TileConnectionType::_COUNT; ++c)
+				{
+					bitstring conn = m_data[c][index];
+					if (conn != 0) str = concat(str)("[")(x)(",")(y)(",")(z)("|")
+						(TranslateConnectionTypeToString((TileConnectionType)c))("]=")(conn)("  ").str();
+				}
+			}
+		}
+	}
+
+	return concat(str)("}").str();
+}
+
 // Default destructor
 TileConnections::~TileConnections(void)
 {
 	// Deallocate all heap data before disposing of this object
 	DeallocateData();
 }
+
+
+
