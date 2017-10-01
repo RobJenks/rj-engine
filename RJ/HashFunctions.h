@@ -78,6 +78,7 @@ namespace HashedStrings
 	DefineHash(H_Y, "y");
 	DefineHash(H_Z, "z");
 	DefineHash(H_W, "w");
+	DefineHash(H_Loc, "loc");
 	DefineHash(H_CameraPosition, "cameraposition");
 	DefineHash(H_CameraRotation, "camerarotation");
 	DefineHash(H_CameraElasticity, "cameraelasticity");

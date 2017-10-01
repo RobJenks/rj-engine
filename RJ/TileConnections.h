@@ -82,10 +82,8 @@ public:
 		ReplicateConnectionState(ELEMENT_INDEX(source_element.x, source_element.y, source_element.z)); 
 	}
 
-	// Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
-	// input data before making any changes.  More appropriate for data read from external files.  Returns a flag
-	// indicating whether the data was valid and applied
-	bool							ValidateAndSetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state);
+	// Tests whether the set of connection state data provided is valid for this object
+	bool							ValidateConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state);
 
 	// Sets the complete connection state based on some other connection state object
 	void							SetConnectionState(const TileConnections & source);

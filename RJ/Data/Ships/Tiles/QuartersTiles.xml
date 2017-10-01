@@ -9,7 +9,7 @@
     <Mass>1500</Mass>
 
     <!-- Potential connection state will be replicated to all elements of a variable-sized tile -->
-    <CanConnect type="0" x="0" y="0" z="0" state="15" />
+    <CanConnect type="0" loc="all" state="15" />
 
     <CompoundTileModelData>
       <Model type="interior" code="quarters_dorm01_interior_model" prob="1.0"/>

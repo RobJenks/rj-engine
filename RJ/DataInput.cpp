@@ -1629,16 +1629,35 @@ Result IO::Data::LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnect
 	if (!node || !pOutConnections) return ErrorCodes::CannotLoadTileConnectionStateWithNullData;
 
 	// Read data out of the relevant attributes
-	INTVECTOR3 loc = INTVECTOR3(); int type, iState;
+	INTVECTOR3 loc = INTVECTOR3(); int type, iState; 
+	const char *loc_override = NULL;
 	node->Attribute(HashedStrings::H_Type.CStr(), &type);
 	node->Attribute(HashedStrings::H_X.CStr(), &loc.x);
 	node->Attribute(HashedStrings::H_Y.CStr(), &loc.y);
 	node->Attribute(HashedStrings::H_Z.CStr(), &loc.z);
 	node->Attribute(HashedStrings::H_State.CStr(), &iState);  
+	loc_override = node->Attribute(HashedStrings::H_Loc.CStr());
 
-	// Make sure the connection state is valid and then apply it directly
-	if (pOutConnections->ValidateAndSetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState))
+	// Take special action in case of a location override
+	if (loc_override)
 	{
+		std::string setloc = loc_override; StrLowerC(setloc);
+		if (setloc == "all")
+		{
+			// We want to apply this state to ALL elements in the connection set
+			if (pOutConnections->ValidateConnectionState((TileConnections::TileConnectionType)type, NULL_INTVECTOR3, (bitstring)iState) == false) 
+				return ErrorCodes::TileConnectionStateIsInvalid;;
+
+			pOutConnections->SetConnectionState((TileConnections::TileConnectionType)type, NULL_INTVECTOR3, (bitstring)iState);
+			pOutConnections->ReplicateConnectionState(0);
+			return ErrorCodes::NoError;
+		}
+	}
+
+	// No valid override has been specified, so apply the connection state as normal
+	if (pOutConnections->ValidateConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState))
+	{
+		pOutConnections->SetConnectionState((TileConnections::TileConnectionType)type, loc, (bitstring)iState);
 		return ErrorCodes::NoError;
 	}
 	else

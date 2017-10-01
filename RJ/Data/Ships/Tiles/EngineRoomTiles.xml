@@ -24,6 +24,7 @@
       <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
     </CompoundTileModelData>
 
+    <CanConnect type="0" loc="all" state="15" />
     
     <ElementStateDefinition>
       <DefaultState state="TransmitsPower" />

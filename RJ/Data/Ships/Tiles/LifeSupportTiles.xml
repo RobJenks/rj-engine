@@ -24,6 +24,7 @@
       <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
     </CompoundTileModelData>
 
+    <CanConnect type="0" loc="all" state="15" />
     
     <ElementStateDefinition>
       <DefaultState state="Walkable|TransmitsPower" />
@@ -73,6 +74,8 @@
       <Model type="connection" code="quarters_dorm01_connection_model" prob="1.0" />
     </CompoundTileModelData>
 
+    <CanConnect type="0" loc="all" state="15" />
+    
     <ElementStateDefinition>
       <DefaultState state="Walkable" />
       <State x="0" y="1" z="0" state="Walkable|TransmitsPower" />

@@ -157,20 +157,17 @@ void TileConnections::ReplicateConnectionState(int source_element)
 // Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
 // input data before making any changes.  More appropriate for data read from external files.  Returns a flag
 // indicating whether the data was valid and applied
-bool TileConnections::ValidateAndSetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state)
+bool TileConnections::ValidateConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state)
 {
 	// Validate our current state
 	if (!m_data) return false;
 
 	// Validate the input parameters
-	if (type < (TileConnectionType)0 || type >= TileConnectionType::_COUNT ||
-		!(location >= NULL_INTVECTOR3) || !(location < m_elementsize))
-	{
-		return false;
-	}
-
-	// Input parameters are valid, so set the connection state and return success
-	SetConnectionState(type, location, state);
+	if (type < (TileConnectionType)0 || type >= TileConnectionType::_COUNT) return false;
+	if (!(location >= NULL_INTVECTOR3)) return false;
+	if (!(location < m_elementsize)) return false;
+	
+	// Return success
 	return true;
 }
 
