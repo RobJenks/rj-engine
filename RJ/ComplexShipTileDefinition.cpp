@@ -202,13 +202,13 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 					// There is at least one connection; process each possible direction in turn
 					bitstring data = tile->Connections.GetConnectionState(type, location);
 					if (CheckBit_Any(data, DirectionBS::Up_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate270, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate90, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
 
 					if (CheckBit_Any(data, DirectionBS::Right_BS))
 						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate180, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
 
 					if (CheckBit_Any(data, DirectionBS::Down_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate90, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate270, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
 
 					if (CheckBit_Any(data, DirectionBS::Left_BS))
 						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate0, ComplexShipTile::TileModel::TileModelType::WallConnection, false);

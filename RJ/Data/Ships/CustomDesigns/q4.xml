@@ -1,7 +1,7 @@
 <gamedata>
     <complexship>
-        <Code>quarters2</Code>
-        <Name>quarters2</Name>
+        <Code>q4</Code>
+        <Name>q4</Name>
         <StandardObject>True</StandardObject>
         <ambientaudio name="test1" volume="1.000000" />
         <Mass>50000.000000</Mass>
@@ -497,7 +497,7 @@
         </complexshipelement>
         <complexshipelement id="60">
             <elementlocation x="0" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>6</connections>
             <attachpoint type="0">0</attachpoint>
@@ -505,7 +505,7 @@
         </complexshipelement>
         <complexshipelement id="61">
             <elementlocation x="1" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -513,7 +513,7 @@
         </complexshipelement>
         <complexshipelement id="62">
             <elementlocation x="2" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -521,7 +521,7 @@
         </complexshipelement>
         <complexshipelement id="63">
             <elementlocation x="3" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>7</connections>
             <attachpoint type="0">0</attachpoint>
@@ -529,7 +529,7 @@
         </complexshipelement>
         <complexshipelement id="64">
             <elementlocation x="4" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -537,7 +537,7 @@
         </complexshipelement>
         <complexshipelement id="65">
             <elementlocation x="5" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>7</connections>
             <attachpoint type="0">0</attachpoint>
@@ -545,7 +545,7 @@
         </complexshipelement>
         <complexshipelement id="66">
             <elementlocation x="6" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -553,7 +553,7 @@
         </complexshipelement>
         <complexshipelement id="67">
             <elementlocation x="7" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -561,7 +561,7 @@
         </complexshipelement>
         <complexshipelement id="68">
             <elementlocation x="8" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -569,7 +569,7 @@
         </complexshipelement>
         <complexshipelement id="69">
             <elementlocation x="9" y="6" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>3</connections>
             <attachpoint type="0">0</attachpoint>
@@ -577,7 +577,7 @@
         </complexshipelement>
         <complexshipelement id="70">
             <elementlocation x="0" y="7" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -601,7 +601,7 @@
         </complexshipelement>
         <complexshipelement id="73">
             <elementlocation x="3" y="7" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -617,7 +617,7 @@
         </complexshipelement>
         <complexshipelement id="75">
             <elementlocation x="5" y="7" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -649,7 +649,7 @@
         </complexshipelement>
         <complexshipelement id="79">
             <elementlocation x="9" y="7" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -657,7 +657,7 @@
         </complexshipelement>
         <complexshipelement id="80">
             <elementlocation x="0" y="8" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -691,7 +691,7 @@
             <elementlocation x="4" y="8" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>2</connections>
+            <connections>0</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -715,21 +715,21 @@
             <elementlocation x="7" y="8" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="88">
             <elementlocation x="8" y="8" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
-            <connections>4</connections>
+            <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="89">
             <elementlocation x="9" y="8" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
@@ -737,7 +737,7 @@
         </complexshipelement>
         <complexshipelement id="90">
             <elementlocation x="0" y="9" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -755,7 +755,7 @@
             <elementlocation x="2" y="9" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -763,15 +763,15 @@
             <elementlocation x="3" y="9" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="94">
             <elementlocation x="4" y="9" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>8</connections>
+            <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -785,9 +785,9 @@
         </complexshipelement>
         <complexshipelement id="96">
             <elementlocation x="6" y="9" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -809,7 +809,7 @@
         </complexshipelement>
         <complexshipelement id="99">
             <elementlocation x="9" y="9" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -817,7 +817,7 @@
         </complexshipelement>
         <complexshipelement id="100">
             <elementlocation x="0" y="10" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>14</connections>
             <attachpoint type="0">0</attachpoint>
@@ -825,9 +825,9 @@
         </complexshipelement>
         <complexshipelement id="101">
             <elementlocation x="1" y="10" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
-            <connections>1</connections>
+            <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -835,7 +835,7 @@
             <elementlocation x="2" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -843,7 +843,7 @@
             <elementlocation x="3" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>6</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -851,7 +851,7 @@
             <elementlocation x="4" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -859,7 +859,7 @@
             <elementlocation x="5" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -867,7 +867,7 @@
             <elementlocation x="6" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -875,21 +875,21 @@
             <elementlocation x="7" y="10" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="108">
             <elementlocation x="8" y="10" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
-            <connections>6</connections>
+            <connections>7</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="109">
             <elementlocation x="9" y="10" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
@@ -897,7 +897,7 @@
         </complexshipelement>
         <complexshipelement id="110">
             <elementlocation x="0" y="11" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -913,9 +913,9 @@
         </complexshipelement>
         <complexshipelement id="112">
             <elementlocation x="2" y="11" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -923,7 +923,7 @@
             <elementlocation x="3" y="11" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>13</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -931,7 +931,7 @@
             <elementlocation x="4" y="11" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>9</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -939,7 +939,7 @@
             <elementlocation x="5" y="11" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>8</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -947,7 +947,7 @@
             <elementlocation x="6" y="11" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>8</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -955,7 +955,7 @@
             <elementlocation x="7" y="11" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>12</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -963,13 +963,13 @@
             <elementlocation x="8" y="11" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>12</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="119">
             <elementlocation x="9" y="11" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
@@ -977,7 +977,7 @@
         </complexshipelement>
         <complexshipelement id="120">
             <elementlocation x="0" y="12" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -995,7 +995,7 @@
             <elementlocation x="2" y="12" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1003,7 +1003,7 @@
             <elementlocation x="3" y="12" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1011,7 +1011,7 @@
             <elementlocation x="4" y="12" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1049,7 +1049,7 @@
         </complexshipelement>
         <complexshipelement id="129">
             <elementlocation x="9" y="12" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1057,7 +1057,7 @@
         </complexshipelement>
         <complexshipelement id="130">
             <elementlocation x="0" y="13" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>14</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1065,17 +1065,17 @@
         </complexshipelement>
         <complexshipelement id="131">
             <elementlocation x="1" y="13" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
-            <connections>5</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="132">
             <elementlocation x="2" y="13" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>1</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1083,7 +1083,7 @@
             <elementlocation x="3" y="13" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1091,7 +1091,7 @@
             <elementlocation x="4" y="13" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1115,7 +1115,7 @@
             <elementlocation x="7" y="13" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1123,13 +1123,13 @@
             <elementlocation x="8" y="13" z="0" />
             <properties>55</properties>
             <health>1.000000</health>
-            <connections>4</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="139">
             <elementlocation x="9" y="13" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1137,7 +1137,7 @@
         </complexshipelement>
         <complexshipelement id="140">
             <elementlocation x="0" y="14" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1155,7 +1155,7 @@
             <elementlocation x="2" y="14" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1163,7 +1163,7 @@
             <elementlocation x="3" y="14" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1171,7 +1171,7 @@
             <elementlocation x="4" y="14" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>3</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1187,7 +1187,7 @@
             <elementlocation x="6" y="14" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1209,7 +1209,7 @@
         </complexshipelement>
         <complexshipelement id="149">
             <elementlocation x="9" y="14" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1217,7 +1217,7 @@
         </complexshipelement>
         <complexshipelement id="150">
             <elementlocation x="0" y="15" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1235,7 +1235,7 @@
             <elementlocation x="2" y="15" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1243,15 +1243,15 @@
             <elementlocation x="3" y="15" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipelement id="154">
             <elementlocation x="4" y="15" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>8</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1265,9 +1265,9 @@
         </complexshipelement>
         <complexshipelement id="156">
             <elementlocation x="6" y="15" z="0" />
-            <properties>7</properties>
+            <properties>55</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>8</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1281,7 +1281,7 @@
         </complexshipelement>
         <complexshipelement id="158">
             <elementlocation x="8" y="15" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1289,7 +1289,7 @@
         </complexshipelement>
         <complexshipelement id="159">
             <elementlocation x="9" y="15" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>11</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1297,7 +1297,7 @@
         </complexshipelement>
         <complexshipelement id="160">
             <elementlocation x="0" y="16" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>14</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1305,7 +1305,7 @@
         </complexshipelement>
         <complexshipelement id="161">
             <elementlocation x="1" y="16" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1315,7 +1315,7 @@
             <elementlocation x="2" y="16" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1323,7 +1323,7 @@
             <elementlocation x="3" y="16" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1369,7 +1369,7 @@
         </complexshipelement>
         <complexshipelement id="169">
             <elementlocation x="9" y="16" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1377,7 +1377,7 @@
         </complexshipelement>
         <complexshipelement id="170">
             <elementlocation x="0" y="17" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1395,7 +1395,7 @@
             <elementlocation x="2" y="17" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>4</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1403,7 +1403,7 @@
             <elementlocation x="3" y="17" z="0" />
             <properties>7</properties>
             <health>1.000000</health>
-            <connections>0</connections>
+            <connections>1</connections>
             <attachpoint type="0">0</attachpoint>
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
@@ -1449,7 +1449,7 @@
         </complexshipelement>
         <complexshipelement id="179">
             <elementlocation x="9" y="17" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1457,7 +1457,7 @@
         </complexshipelement>
         <complexshipelement id="180">
             <elementlocation x="0" y="18" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1481,7 +1481,7 @@
         </complexshipelement>
         <complexshipelement id="183">
             <elementlocation x="3" y="18" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1513,7 +1513,7 @@
         </complexshipelement>
         <complexshipelement id="187">
             <elementlocation x="7" y="18" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>2</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1529,7 +1529,7 @@
         </complexshipelement>
         <complexshipelement id="189">
             <elementlocation x="9" y="18" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>10</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1537,7 +1537,7 @@
         </complexshipelement>
         <complexshipelement id="190">
             <elementlocation x="0" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>12</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1545,7 +1545,7 @@
         </complexshipelement>
         <complexshipelement id="191">
             <elementlocation x="1" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1553,7 +1553,7 @@
         </complexshipelement>
         <complexshipelement id="192">
             <elementlocation x="2" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1561,7 +1561,7 @@
         </complexshipelement>
         <complexshipelement id="193">
             <elementlocation x="3" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>13</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1569,7 +1569,7 @@
         </complexshipelement>
         <complexshipelement id="194">
             <elementlocation x="4" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1577,7 +1577,7 @@
         </complexshipelement>
         <complexshipelement id="195">
             <elementlocation x="5" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1585,7 +1585,7 @@
         </complexshipelement>
         <complexshipelement id="196">
             <elementlocation x="6" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1593,7 +1593,7 @@
         </complexshipelement>
         <complexshipelement id="197">
             <elementlocation x="7" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>13</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1601,7 +1601,7 @@
         </complexshipelement>
         <complexshipelement id="198">
             <elementlocation x="8" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>5</connections>
             <attachpoint type="0">0</attachpoint>
@@ -1609,7 +1609,7 @@
         </complexshipelement>
         <complexshipelement id="199">
             <elementlocation x="9" y="19" z="0" />
-            <properties>55</properties>
+            <properties>7</properties>
             <health>1.000000</health>
             <connections>9</connections>
             <attachpoint type="0">0</attachpoint>
@@ -3860,404 +3860,117 @@
             <ElementLocation x="0" y="0" z="0" />
             <Rotation>0</Rotation>
         </complexshipsectioninstance>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="17" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="12" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="14" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="8" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="17" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="12" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="9" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
         <complexshiptile code="quarters_dorm_01">
             <basetiledata>
-                <location x="2" y="8" z="0" />
-                <size x="6" y="10" z="1" />
+                <location x="3" y="10" z="0" />
+                <size x="5" y="5" z="1" />
                 <rotation>0</rotation>
-                <connection type="0" x="0" y="5" z="0" state="1" />
-                <connection type="0" x="1" y="0" z="0" state="8" />
+                <canconnect type="0" x="0" y="0" z="0" state="15" />
+                <canconnect type="0" x="0" y="1" z="0" state="15" />
+                <canconnect type="0" x="0" y="2" z="0" state="15" />
+                <canconnect type="0" x="0" y="3" z="0" state="15" />
+                <canconnect type="0" x="0" y="4" z="0" state="15" />
+                <canconnect type="0" x="1" y="0" z="0" state="15" />
+                <canconnect type="0" x="1" y="1" z="0" state="15" />
+                <canconnect type="0" x="1" y="2" z="0" state="15" />
+                <canconnect type="0" x="1" y="3" z="0" state="15" />
+                <canconnect type="0" x="1" y="4" z="0" state="15" />
+                <canconnect type="0" x="2" y="0" z="0" state="15" />
+                <canconnect type="0" x="2" y="1" z="0" state="15" />
+                <canconnect type="0" x="2" y="2" z="0" state="15" />
+                <canconnect type="0" x="2" y="3" z="0" state="15" />
+                <canconnect type="0" x="2" y="4" z="0" state="15" />
+                <canconnect type="0" x="3" y="0" z="0" state="15" />
+                <canconnect type="0" x="3" y="1" z="0" state="15" />
+                <canconnect type="0" x="3" y="2" z="0" state="15" />
+                <canconnect type="0" x="3" y="3" z="0" state="15" />
+                <canconnect type="0" x="3" y="4" z="0" state="15" />
+                <canconnect type="0" x="4" y="0" z="0" state="15" />
+                <canconnect type="0" x="4" y="1" z="0" state="15" />
+                <canconnect type="0" x="4" y="2" z="0" state="15" />
+                <canconnect type="0" x="4" y="3" z="0" state="15" />
+                <canconnect type="0" x="4" y="4" z="0" state="15" />
+                <connection type="0" x="0" y="0" z="0" state="6" />
+                <connection type="0" x="0" y="1" z="0" state="13" />
+                <connection type="0" x="0" y="2" z="0" state="4" />
+                <connection type="0" x="0" y="3" z="0" state="5" />
+                <connection type="0" x="0" y="4" z="0" state="4" />
+                <connection type="0" x="1" y="0" z="0" state="11" />
+                <connection type="0" x="1" y="1" z="0" state="9" />
+                <connection type="0" x="1" y="2" z="0" state="1" />
+                <connection type="0" x="1" y="3" z="0" state="1" />
+                <connection type="0" x="1" y="4" z="0" state="3" />
                 <connection type="0" x="2" y="0" z="0" state="2" />
                 <connection type="0" x="2" y="1" z="0" state="8" />
-                <connection type="0" x="3" y="0" z="0" state="8" />
-                <connection type="0" x="5" y="7" z="0" state="4" />
+                <connection type="0" x="3" y="0" z="0" state="10" />
+                <connection type="0" x="3" y="1" z="0" state="8" />
+                <connection type="0" x="3" y="4" z="0" state="2" />
+                <connection type="0" x="4" y="0" z="0" state="2" />
+                <connection type="0" x="4" y="1" z="0" state="12" />
+                <connection type="0" x="4" y="3" z="0" state="4" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="0" y="18" z="0" />
+                <location x="4" y="15" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
+                <connection type="0" x="0" y="0" z="0" state="8" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="1" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="0" y="19" z="0" />
+                <location x="6" y="15" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="12" />
+                <connection type="0" x="0" y="0" z="0" state="8" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="2" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="4" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="8" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="9" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="9" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="9" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="8" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="9" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="3" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="7" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="6" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="4" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="2" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="1" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="0" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="0" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>3</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="6" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="3" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>3</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="7" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="5" y="7" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="5" y="6" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>3</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="7" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="8" y="8" z="0" />
+                <location x="2" y="13" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>1</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
                 <connection type="0" x="0" y="0" z="0" state="4" />
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="corridor_nse">
+        <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="9" y="8" z="0" />
+                <location x="2" y="11" z="0" />
                 <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
+                <rotation>1</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="11" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="9" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="11" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="8" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="12" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="9" y="11" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="11" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_se">
-            <basetiledata>
-                <location x="8" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>3</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="6" />
+                <connection type="0" x="0" y="0" z="0" state="4" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="9" y="14" z="0" />
+                <location x="4" y="9" z="0" />
                 <size x="1" y="1" z="1" />
                 <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="10" />
+                <connection type="0" x="0" y="0" z="0" state="2" />
             </basetiledata>
         </complexshiptile>
-        <complexshiptile code="corridor_nse">
+        <complexshiptile code="corridor_ns">
             <basetiledata>
-                <location x="9" y="13" z="0" />
+                <location x="6" y="9" z="0" />
                 <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
+                <rotation>0</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="11" />
+                <connection type="0" x="0" y="0" z="0" state="2" />
+            </basetiledata>
+        </complexshiptile>
+        <complexshiptile code="corridor_ns">
+            <basetiledata>
+                <location x="8" y="11" z="0" />
+                <size x="1" y="1" z="1" />
+                <rotation>1</rotation>
+                <canconnect type="0" x="0" y="0" z="0" state="15" />
+                <connection type="0" x="0" y="0" z="0" state="1" />
             </basetiledata>
         </complexshiptile>
         <complexshiptile code="corridor_ns">
@@ -4266,115 +3979,7 @@
                 <size x="1" y="1" z="1" />
                 <rotation>1</rotation>
                 <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="4" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="8" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="9" y="15" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>2</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="11" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="7" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="2" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="7" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="13" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="3" y="18" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="2" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="3" y="19" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="13" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="1" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
                 <connection type="0" x="0" y="0" z="0" state="1" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="0" y="16" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="14" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="1" y="13" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="5" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="0" y="13" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="14" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_ns">
-            <basetiledata>
-                <location x="1" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>1</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="1" />
-            </basetiledata>
-        </complexshiptile>
-        <complexshiptile code="corridor_nse">
-            <basetiledata>
-                <location x="0" y="10" z="0" />
-                <size x="1" y="1" z="1" />
-                <rotation>0</rotation>
-                <canconnect type="0" x="0" y="0" z="0" state="15" />
-                <connection type="0" x="0" y="0" z="0" state="14" />
             </basetiledata>
         </complexshiptile>
     </complexship>
