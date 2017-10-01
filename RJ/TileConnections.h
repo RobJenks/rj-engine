@@ -73,6 +73,14 @@ public:
 
 	// Sets the complete connection state for a particular element & connection type
 	void							SetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state);
+	void							SetConnectionState(TileConnectionType type, int element_index, bitstring state);
+
+	// Replicate the connection state of one element to all others in the object
+	void							ReplicateConnectionState(int source_element);
+	CMPINLINE void 					ReplicateConnectionState(const INTVECTOR3 & source_element) 
+	{ 
+		ReplicateConnectionState(ELEMENT_INDEX(source_element.x, source_element.y, source_element.z)); 
+	}
 
 	// Sets the complete connection state for a particular element & connection type.  Also performs validation on the 
 	// input data before making any changes.  More appropriate for data read from external files.  Returns a flag

@@ -131,7 +131,27 @@ bitstring TileConnections::GetConnectionState(TileConnectionType type, unsigned 
 // Sets the complete connection state for a particular element & connection type
 void TileConnections::SetConnectionState(TileConnectionType type, const INTVECTOR3 & location, bitstring state) 
 {
-	m_data[(int)type][ELEMENT_INDEX(location.x, location.y, location.z)] = state;
+	SetConnectionState(type, ELEMENT_INDEX_EX(location.x, location.y, location.z, m_elementsize), state);
+}
+
+// Sets the complete connection state for a particular element & connection type
+void TileConnections::SetConnectionState(TileConnectionType type, int element_index, bitstring state)
+{
+	m_data[(int)type][element_index] = state;
+}
+
+// Replicate the connection state of one element to all others in the object
+void TileConnections::ReplicateConnectionState(int source_element)
+{
+	if (source_element < 0 || source_element >= m_elementcount) return;
+	for (int i = 0; i < m_elementcount; ++i)
+	{
+		if (i == source_element) continue;
+		for (int c = 0; c < TileConnectionType::_COUNT; ++c)
+		{
+			m_data[c][i] = m_data[c][source_element];
+		}
+	}
 }
 
 // Sets the complete connection state for a particular element & connection type.  Also performs validation on the 

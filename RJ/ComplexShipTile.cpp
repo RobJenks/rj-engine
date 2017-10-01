@@ -456,8 +456,15 @@ void ComplexShipTile::InitialiseConnectionState()
 	}
 	else
 	{
-		// Otherwise simply initialise to zero.  Initialisation will deallocate any connection data that has already been stored
+		// Otherwise simply initialise to the correct size, and replicate all data from element 0 as
+		// per stanard behaviour for variable-sized tiles.  Initialisation will deallocate any 
+		// connection data that has already been stored
 		PossibleConnections.Initialise(m_elementsize);
+		for (int c = 0; c < (int)TileConnections::TileConnectionType::_COUNT; ++c)							// Copy all def data to [0]
+			PossibleConnections.SetConnectionState((TileConnections::TileConnectionType)c, 0,
+				m_definition->Connectivity.GetConnectionState((TileConnections::TileConnectionType)c, 0));
+		PossibleConnections.ReplicateConnectionState(0);													// Then replicate [0] to [*]
+		
 	}
 
 	// Initialise the actual connection data to match the tile size

@@ -446,8 +446,13 @@ void UI_ShipBuilder::ResizeTile(ComplexShipTile *tile, INTVECTOR3 direction, boo
 
 	// ReplaceTile() does not deallocate the old tile, so do so here following the replacement
 	m_ship->ReplaceTile(tile, new_tile);
+
+	OutputDebugString(concat("Old: Possible=")(tile->PossibleConnections.DebugString())(", Actual=")(tile->Connections.DebugString())("\n").str().c_str());
+	OutputDebugString(concat("New: Possible=")(new_tile->PossibleConnections.DebugString())(", Actual=")(new_tile->Connections.DebugString())("\n").str().c_str());
+
 	SafeDelete(tile);
 }
+
 
 // Replaces all existing tiles with a new version generated from the underlying definition.  Useful to revert tile-specific
 // changes or where the tile behaviour has changed during development
