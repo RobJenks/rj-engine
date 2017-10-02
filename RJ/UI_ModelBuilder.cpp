@@ -43,6 +43,7 @@ UI_ModelBuilder::UI_ModelBuilder(void)
 	m_playerviewpoint = NULL;
 	m_object = NULL;
 	m_nullenv = NULL;
+	m_lightsource = NULL;
 	m_rotatingmodel = false;
 	m_rotate_yaw = m_rotate_pitch = 0.0f;
 	m_revertingmodelrotation = false;
@@ -64,6 +65,9 @@ void UI_ModelBuilder::Activate(void)
 {
 	// Pause the game while the model builder is active
 	Game::Application.Pause();
+
+	// Display the mouse cursor // TODO: use custom, not system cursor in future
+	Game::Engine->SetSystemCursorVisibility(true);
 
 	// Store a reference to the null system, which this component will use for simulation
 	m_system = Game::Universe->GetSystem("NULLSYS");
@@ -100,6 +104,9 @@ void UI_ModelBuilder::Deactivate(void)
 	Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::RenderOBBs, m_restore_obbrender);
 	Game::Engine->SetRenderFlag(CoreEngine::RenderFlag::RenderTerrainBoxes, m_restore_terrainrender);
 	Game::Engine->SetDebugTerrainRenderEnvironment(m_restore_terrainenvironment);
+
+	// Display the mouse cursor // TODO: use custom, not system cursor in future
+	Game::Engine->SetSystemCursorVisibility(false);
 
 	// Unpause the game once the model builder is deactivated
 	Game::Application.Unpause();
@@ -389,6 +396,15 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 			m_nullenv->SetAsSimulationHub();
 		}
 	}
+
+	// Create a basic directional light for the editor
+	m_lightsource = LightSource::Create(LightData(Light::LightType::Directional, ONE_FLOAT3, 0.2f, 0.5f, 2.0f, FORWARD_VECTOR_F));
+	if (m_lightsource)
+	{
+		m_lightsource->SetPosition(NULL_VECTOR);
+		m_lightsource->LightObject().Activate();
+		m_lightsource->MoveIntoSpaceEnvironment(m_system);
+	}
 }
 
 // Shut down and deallocate the models/ships used in this scenario
@@ -434,6 +450,14 @@ void UI_ModelBuilder::ShutdownScenarioObjects(void)
 		// Shutdown and deallocate the environment
 		m_nullenv->Shutdown();
 		SafeDelete(m_nullenv);
+	}
+
+	// Remove the temporary editor lightsource
+	if (m_lightsource)
+	{
+		m_system->RemoveObjectFromSystem(m_lightsource);
+		m_lightsource->Shutdown();
+		SafeDelete(m_lightsource);
 	}
 }
 
@@ -672,6 +696,7 @@ void UI_ModelBuilder::RefreshAllCollisionGeometry(void)
 		// to actually delete the terrain objects like normal since they are mastered in the modelbuilder
 		//m_nullenv->ClearAllTerrainObjects();
 		m_nullenv->TerrainObjects.clear();
+		m_nullenv->BuildSpatialPartitioningTree();
 
 		// Now add all terrain objects to the environment
 		TerrainCollection::size_type n = m_terrain.size();

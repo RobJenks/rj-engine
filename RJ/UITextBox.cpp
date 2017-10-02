@@ -205,7 +205,8 @@ void UITextBox::ProcessKeyboardInput(GameInputDevice *keyboard)
 	if (key.keycode != 0)
 	{
 		// Make sure we are under the textbox width limit, otherwise do not add this character
-		if (m_textcomponent->GetTextWidth() < (float)(m_size.x - m_textoffset.x - UITextBox::TEXTBOX_RIGHT_MARGIN))
+		// TODO: Textbox should scroll content within available area, not just prevent new characters
+		// if (m_textcomponent->GetTextWidth() < (float)(m_size.x - m_textoffset.x - UITextBox::TEXTBOX_RIGHT_MARGIN))
 		{
 			// Add to the textbox string
 			std::string newtext = m_textcomponent->GetText();

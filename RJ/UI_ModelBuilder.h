@@ -198,9 +198,10 @@ protected:
 	// The (null) system that the viewer operates in
 	SpaceSystem *							m_system;
 
-	// Placeholder objects for the player view and for the null terrain-holding environment
+	// Placeholder objects for the player view and other editor-specific objects
 	SimpleShip *							m_playerviewpoint;
 	ComplexShip *							m_nullenv;
+	LightSource *							m_lightsource;
 
 	// A custom SimpleShip will be used to display the model
 	SimpleShip *							m_object;
