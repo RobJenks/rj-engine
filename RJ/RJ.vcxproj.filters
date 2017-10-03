@@ -1630,6 +1630,9 @@
     <ClInclude Include="FrameFlag.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="CollisionSpatialDataF.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

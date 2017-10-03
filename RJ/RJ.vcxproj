@@ -625,6 +625,7 @@
     <ClInclude Include="CentralScheduler.h" />
     <ClInclude Include="CollisionDetectionResultsStruct.h" />
     <ClInclude Include="CollisionGeometry.h" />
+    <ClInclude Include="CollisionSpatialDataF.h" />
     <ClInclude Include="CompilerSettings.h" />
     <ClInclude Include="ComplexShip.h" />
     <ClInclude Include="ComplexShipElement.h" />

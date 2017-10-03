@@ -12,6 +12,7 @@
 #include "ErrorCodes.h"
 #include "GameDataExtern.h"
 #include "HashFunctions.h"
+#include "CollisionSpatialDataF.h"
 class iStaticObject;
 class iActiveObject;
 class iSpaceObject;
@@ -88,6 +89,9 @@ namespace IO { namespace Data {
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 	// 'obb' is the node to be updated
 	void LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBoundingBox & obb, bool isroot);
+
+	// Load a set of collision spatial data.  Returns a flag indicating whether the data could be loaded
+	CollisionSpatialDataF LoadCollisionSpatialData(TiXmlElement *node);
 
 	Result LoadAllModelGeometry(void);								// Iterates through all model collections and loads models one-by-one
 	Result LoadModelGeometry(Model *model);							// Method to load geometry for a specific model

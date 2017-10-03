@@ -205,6 +205,7 @@ namespace HashedStrings
 	DefineHash(H_GravityRange, "gravityrange");
 	DefineHash(H_GravityFalloffDelay, "gravityfalloffdelay");
 	DefineHash(H_GravityExponent, "gravityexponent");
+	DefineHash(H_Collision, "collision");
 	DefineHash(H_CollisionMode, "collisionmode");
 	DefineHash(H_CollisionOBB, "collisionobb");
 	DefineHash(H_Px, "px");

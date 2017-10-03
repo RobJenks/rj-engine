@@ -11,6 +11,7 @@
 #include "CompilerSettings.h"
 #include "ModelBuffer.h"
 #include "Texture.h"
+#include "CollisionSpatialDataF.h"
 
 
 // This class has no special alignment requirements
@@ -115,6 +116,11 @@ class Model
 		CMPINLINE unsigned int		GetVertexMemorySize(void) const			{ return m_buffer.GetVertexSize(); }
 		CMPINLINE unsigned int		GetIndexMemorySize(void) const			{ return m_buffer.GetIndexSize(); }
 
+		// List of collision objects attached to this model
+		CMPINLINE std::vector<CollisionSpatialDataF> & CollisionData(void)	{ return m_collision; }
+		CMPINLINE void				SetCollisionData(const std::vector<CollisionSpatialDataF> & collision) { m_collision = collision; }
+		CMPINLINE void				SetCollisionData(std::vector<CollisionSpatialDataF> && collision) { m_collision = collision; }
+
 		// Central model storage methods
 		static bool					ModelExists(const std::string & code);
 		static Model *				GetModel(const std::string & code);
@@ -163,6 +169,9 @@ class Model
 
 		// Optional ability to specify size in game elements; if set, mesh will be scaled by load post-processing functions
 		INTVECTOR3				m_elementsize;
+
+		// List of collision objects attached to this model
+		std::vector<CollisionSpatialDataF> m_collision;
 
 		// Fields allowing generation of compound models
 		struct					CompoundModelComponent 

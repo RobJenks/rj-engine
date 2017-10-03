@@ -47,6 +47,7 @@
 #include "StaticTerrain.h"
 #include "StaticTerrainDefinition.h"
 #include "ElementStateDefinition.h"
+#include "CollisionSpatialDataF.h"
 
 #include "SpaceTurret.h"
 #include "ProjectileLauncher.h"
@@ -382,6 +383,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	std::string key, code, type, fname, tex, val;
 	XMFLOAT3 acteffsize, effsize;
 	INTVECTOR3 elsize; bool no_centre = false;
+	std::vector<CollisionSpatialDataF> collision;
 	HashVal hash;
 
 	// Set defaults before loading the model
@@ -427,6 +429,9 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 		else if (hash == HashedStrings::H_ElementSize) {					/* Mapping to element dimensions; optional, and used to scale to fit elements by load post-processing */
 			elsize = IO::GetInt3CoordinatesFromAttr(child);	
 		}
+		else if (hash == HashedStrings::H_Collision) {						/* List of collision objects attached to this model */
+			collision.push_back(IO::Data::LoadCollisionSpatialData(child));
+		}
 	}
 
 	// Make sure we have all mandatory fields 
@@ -452,6 +457,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	model->SetEffectiveModelSize(effsize);
 	model->SetElementSize(elsize);
 	model->SetCentredAboutOrigin(!no_centre);
+	model->SetCollisionData(std::move(collision));
 
 	// Mark as a 'standard' model, i.e. one that will be shared as a template
 	// between multiple entities for performance reasons.  The entity only acquires an individual model
@@ -2840,6 +2846,38 @@ void IO::Data::LoadCollisionOBB(iObject *object, TiXmlElement *node, OrientedBou
 	// back up to the root level.  In this case, call the update method to populate all other data for
 	// this node and all children below it
 	if (isroot) obb.UpdateFromObject(*object);
+}
+
+// Load a set of collision spatial data.  Returns a flag indicating whether the data could be loaded
+CollisionSpatialDataF IO::Data::LoadCollisionSpatialData(TiXmlElement *node)
+{
+	CollisionSpatialDataF data;
+	if (!node) return data;
+
+	// All details are fully-contained within the attributes of this one elemnet
+	std::string name; HashVal hash;
+	TiXmlAttribute *attr = node->FirstAttribute();
+	while (attr) 
+	{
+		name = attr->Name(); StrLowerC(name);
+		hash = HashString(name);
+
+		// Take different action depending on the attribute name
+		if (hash == HashedStrings::H_Px.Hash)	   data.Position.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Py.Hash) data.Position.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Pz.Hash) data.Position.z = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ox.Hash) data.Orientation.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Oy.Hash) data.Orientation.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Oz.Hash) data.Orientation.z = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ow.Hash) data.Orientation.w = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ex.Hash) data.Extent.x = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ey.Hash) data.Extent.y = (float)atof(attr->Value());
+		else if (hash == HashedStrings::H_Ez.Hash) data.Extent.z = (float)atof(attr->Value());
+
+		attr = attr->Next();
+	}
+
+	return data;
 }
 
 Result IO::Data::LoadAllModelGeometry(void)
