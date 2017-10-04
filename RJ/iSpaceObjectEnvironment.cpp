@@ -4,6 +4,7 @@
 #include "FastMath.h"
 #include "GameVarsExtern.h"
 #include "Logging.h"
+#include "Collections.h"
 #include "ComplexShipElement.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
@@ -717,9 +718,7 @@ void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile
 
 	// Remove any terrain objects in the environment that were owned by this tile
 	Game::ID_TYPE id = tile->GetID();
-	TerrainCollection::iterator it = std::partition(TerrainObjects.begin(), TerrainObjects.end(),
-		[&id](const StaticTerrain *element) { return (element->GetParentTileID() != id); });
-	delete_erase<TerrainCollection, StaticTerrain*>(TerrainObjects, it, TerrainObjects.end());
+	Collections::DeleteErase(TerrainObjects, [id](const StaticTerrain *terrain) { return (terrain->GetParentTileID() == id); });
 	
 	// Rebuild the spatial partitioning tree following this bulk change
 	BuildSpatialPartitioningTree();

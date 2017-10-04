@@ -1,4 +1,4 @@
-#include <algorithm>
+#include "Collections.h"
 #include "iContainsComplexShipTiles.h"
 #include "ComplexShipTile.h"
 
@@ -150,7 +150,7 @@ void iContainsComplexShipTiles::ShutdownAllTileData(bool deallocate)
 	if (deallocate)
 	{
 		// If we want to deallocate tiles, call the delete/erase iteration method across the whole primary collection
-		delete_erase_value<AComplexShipTile_P>(m_tiles[0], m_tiles[0].begin(), m_tiles[0].end());
+		Collections::DeleteEraseValue(m_tiles[0], m_tiles[0].begin(), m_tiles[0].end());
 	}
 
 	// Now clear every tile pointer collection (incl the primary collection) and reset tile counts

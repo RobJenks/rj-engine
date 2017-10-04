@@ -623,6 +623,7 @@
     <ClInclude Include="CapabilityTester.h" />
     <ClInclude Include="CapitalShipPerimeterBeacon.h" />
     <ClInclude Include="CentralScheduler.h" />
+    <ClInclude Include="Collections.h" />
     <ClInclude Include="CollisionDetectionResultsStruct.h" />
     <ClInclude Include="CollisionGeometry.h" />
     <ClInclude Include="CollisionSpatialDataF.h" />

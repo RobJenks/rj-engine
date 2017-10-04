@@ -336,7 +336,7 @@ void ComplexShipTile::UpdateCollisionDataFromModels()
 // Remove any collision-terrain objects that were added to the tile based on its model data
 void ComplexShipTile::RemoveAllCollisionDataFromModels()
 {
-	m_parent->RemoveTerrainObjectsFromTile(*** NEED VERSION FOR MODEL-SOURCED TERRAIN ***)
+	m_parent->RemoveTerrainObjectsFromTile(NULL/*** NEED VERSION FOR MODEL-SOURCED TERRAIN ***/);
 }
 
 // Handle the import of additional collision data from the models that comprise this tile
@@ -351,7 +351,7 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model)
 // and rotation offsets applied during calculation of the collision volumes
 void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
-	*** ADD A NEW TERRAIN OBJECT BASED ON THIS DATA, REMEMBERING TO ACCOUNT FOR THIS LOCAL ROTATION OFFSET + THE ROTATETILETERRAINOBJECT CASE (ABOUT TILE CENTRE) AS WELL ***
+	/*** ADD A NEW TERRAIN OBJECT BASED ON THIS DATA, REMEMBERING TO ACCOUNT FOR THIS LOCAL ROTATION OFFSET + THE ROTATETILETERRAINOBJECT CASE (ABOUT TILE CENTRE) AS WELL ***/
 }
 
 // Sets the power level of this tile, triggering updates if necessary

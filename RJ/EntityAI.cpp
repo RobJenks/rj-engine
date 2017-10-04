@@ -1,6 +1,7 @@
 #include <sstream>
 #include "GameVarsExtern.h"
 #include "Utility.h"
+#include "Collections.h"
 #include "EntityAIStates.h"
 #include "EntityAI.h"
 
@@ -128,7 +129,7 @@ EntityAI::OrderQueue::iterator EntityAI::GetOrderRef(Order::ID_TYPE id)
 void EntityAI::CancelOrder(OrderQueue::iterator order, bool perform_maintenance)
 {
 	// Erase the order at this iterator position
-	delete_erase<Order*>(Orders, order);
+	Collections::DeleteEraseElement(Orders, order);
 	
 	// If the maintenance flag is set, check the full order queue to see if this freed up any dependencies
 	if (perform_maintenance) MaintainOrderQueue();
@@ -165,15 +166,14 @@ void EntityAI::CancelOrderAtIndex(OrderQueue::size_type index, bool perform_main
 void EntityAI::CancelAllOrders(void)
 {
 	// Delete and erase the entire order queue
-	delete_erase<Order*>(Orders, Orders.begin(), Orders.end());
+	Collections::DeleteErase(Orders, Orders.begin(), Orders.end());
 }
 
 // Cancels all orders received from the specified source
 void EntityAI::CancelAllOrdersFromSource(Order::OrderSource source, bool perform_maintenance)
 {
-	OrderQueue::iterator it = std::partition(Orders.begin(), Orders.end(),
-		[&source](const Order *order) { return (order->Source != source); });
-	delete_erase<Order*>(Orders, it, Orders.end());
+	// Remove all orders from the specified source
+	Collections::DeleteErase(Orders, [source](const Order *order) { return (order->Source == source); });
 
 	// If the maintenance flag is set, check the full order queue to see if this freed up any dependencies
 	if (perform_maintenance) MaintainOrderQueue();
@@ -182,9 +182,8 @@ void EntityAI::CancelAllOrdersFromSource(Order::OrderSource source, bool perform
 // Cancels all orders of the specified type
 void EntityAI::CancelAllOrdersOfType(Order::OrderType type, bool perform_maintenance)
 {
-	OrderQueue::iterator it = std::partition(Orders.begin(), Orders.end(),
-		[&type](const Order *order) { return (order->GetType() != type); } );
-	delete_erase<Order*>(Orders, it, Orders.end());
+	// Remove all orders of the specified type
+	Collections::DeleteErase(Orders, [type](const Order *order) { return (order->GetType() == type); });
 
 	// If the maintenance flag is set, check the full order queue to see if this freed up any dependencies
 	if (perform_maintenance) MaintainOrderQueue();
@@ -194,9 +193,7 @@ void EntityAI::CancelAllOrdersOfType(Order::OrderType type, bool perform_mainten
 void EntityAI::CancelAllCombatOrders(bool perform_maintenance)
 {
 	// Remove any combat orders from the queue
-	OrderQueue::iterator it = std::partition(Orders.begin(), Orders.end(),
-		[](const Order *order) { return (!Order::IsCombatOrderType(order->GetType())); });
-	delete_erase<Order*>(Orders, it, Orders.end());
+	Collections::DeleteErase(Orders, [](const Order *order) { return (Order::IsCombatOrderType(order->GetType())); });
 
 	// The next maintenance cycle will remove any active orders that were children of the combat
 	// orders we removed.  This method should therefore ideally be called with perform_maintenance = true,

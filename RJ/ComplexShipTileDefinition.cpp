@@ -167,8 +167,8 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 
 	// Get a reference to the tile model collection and tile size for convenience
 	ComplexShipTile::TileCompoundModelSet *models = tile->GetCompoundModelSet();
-	assert(models->Size == m_elementsize);
-	const INTVECTOR3 & size = m_elementsize;
+	const INTVECTOR3 & size = tile->GetElementSize();
+	assert(models->Size == size);
 
 	// Get a pointer to each of the key model types for efficiency before looping.
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *medge = GetModelSet("wall_straight");
