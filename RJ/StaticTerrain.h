@@ -19,6 +19,13 @@ class StaticTerrain : public ALIGN16<StaticTerrain>, public iTakesDamage, public
 {
 public:
 
+	// Enuemration of possible sources that can generate terrain data
+	enum											TerrainSourceType
+	{
+		NoSource = 0,
+		SourcedFromModel
+	};
+
 	// Static record of the highest ID value in existence, for assigning to new tiles upon registration
 	static Game::ID_TYPE							InstanceCreationCount;
 
@@ -32,9 +39,6 @@ public:
 	CMPINLINE static StaticTerrain *				Create(void) { return StaticTerrain::Create(NULL); }
 	CMPINLINE static StaticTerrain *				Create(const std::string & def) { return StaticTerrain::Create(D::StaticTerrainDefinitions.Get(def)); }
 	static StaticTerrain *							Create(const StaticTerrainDefinition *def);
-
-	// Method to create a copy of a terrain object
-	StaticTerrain *									Clone(void);
 
 	// Get/set methods for key fields
 	CMPINLINE Game::ID_TYPE							GetID(void) const								{ return m_id; }
@@ -89,6 +93,11 @@ public:
 	// Return or set the link to a parent tile, if one exists.  An ID of zero indicates there is no link
 	CMPINLINE Game::ID_TYPE							GetParentTileID(void) const						{ return m_parenttile; }
 	CMPINLINE void									SetParentTileID(Game::ID_TYPE ID)				{ m_parenttile = ID; }
+
+	// Return or set types of terrain source
+	CMPINLINE TerrainSourceType						GetSourceType(void) const						{ return m_sourcetype; }
+	CMPINLINE void									SetSourceType(TerrainSourceType source_type)	{ m_sourcetype = source_type; }
+	
 
 	// Flag indicating whether the terrain object has been rendered this frame
 	CMPINLINE bool									IsRendered(void) const							{ return m_rendered.IsSet(); }
@@ -152,6 +161,7 @@ protected:
 	iSpaceObjectEnvironment *				m_parent;							// Parent environment that contains this terrain object
 	const StaticTerrainDefinition *			m_definition;						// Pointer to the definition of this terrain type, which includes model details etc.  
 																				// Can be null for collision regions that have no associated visible terrain
+	TerrainSourceType						m_sourcetype;						// The source that generated this terrain; default is no-owner
 
 	OrientedBoundingBox::CoreOBBData		m_data;								// Core OBB data, used for terrain collision.  Also contains object position (as 'Centre')
 	AXMVECTOR								m_orientation;						// Orientation relative to the environment
@@ -176,6 +186,7 @@ protected:
 
 	bool									m_postponeupdates;					// Flag indicating whether the terrain object should postpone updates until it is released again
 																				// Used to make multiple adjustments without recalculating derived data each time
+
 };
 
 

@@ -720,7 +720,7 @@ void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile
 	TerrainCollection::iterator it = std::partition(TerrainObjects.begin(), TerrainObjects.end(),
 		[&id](const StaticTerrain *element) { return (element->GetParentTileID() != id); });
 	delete_erase<TerrainCollection, StaticTerrain*>(TerrainObjects, it, TerrainObjects.end());
-
+	
 	// Rebuild the spatial partitioning tree following this bulk change
 	BuildSpatialPartitioningTree();
 }

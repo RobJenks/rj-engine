@@ -227,10 +227,12 @@ public:
 		// Default constructor
 		TileCompoundModelSet(void) { ModelLayout = NULL; Size = NULL_INTVECTOR3; MinBounds = MaxBounds = CompoundModelSize = CompoundModelCentre = NULL_VECTOR; }
 
-		// Allocate space based on the size parameter
-		bool Allocate(void)
+		// Allocate space for compound model data of the specified size
+		bool Allocate(const INTVECTOR3 & size)
 		{
-			if (Size.x < 1 || Size.y < 1 || Size.z < 1) return false;
+			// Store the new size, or reject entirely if it is not valid
+			if (size.x < 1 || size.y < 1 || size.z < 1) return false;
+			this->Size = size;
 
 			// Allocate the x dimension first
 			ModelLayout = new (std::nothrow) ModelLinkedList***[Size.x];
@@ -321,9 +323,8 @@ public:
 			if (!src) return;
 			ResetModelSet();
 
-			// Copy the size parameter and then allocate sufficient space
-			Size = src->Size;
-			Allocate();
+			// Allocate sufficient space to replicate the source data
+			Allocate(src->Size);
 
 			// Add each item in turn
 			const TileModel *m;
@@ -540,7 +541,13 @@ public:
 
 	// Methods to access and set the geometry of this ship tile
 	CMPINLINE Model *					GetModel(void) const { return m_model; }
-	CMPINLINE void						SetModel(Model *m) { m_model = m; }
+
+	// Set the tile to use a single (specified) tile model, and perform any dependent initialisation
+	void								SetSingleModel(Model *model);
+
+	// Set the tile to use a multiple & variable-sized tile geometry.  Will deallocate any existing geometry and allocate 
+	// sufficient space for geometry covering the tile element size
+	void								SetMultipleModels(void);
 
 	// Updates the object before it is rendered.  Called only when the object is processed in the render queue (i.e. not when it is out of view)
 	void								PerformRenderUpdate(void);
@@ -555,7 +562,6 @@ public:
 
 	// Methods to access compound model data
 	CMPINLINE bool						HasCompoundModel(void) const		{ return m_multiplemodels; }
-	CMPINLINE void						SetHasCompoundModel(bool compound)	{ m_multiplemodels = compound; }
 	CMPINLINE TileCompoundModelSet *	GetCompoundModelSet(void)			{ return &m_models; }
 	CMPINLINE const TileCompoundModelSet *	GetCompoundModelSet(void) const	{ return &m_models; }
 
@@ -574,6 +580,9 @@ public:
 
 	// Rotates all terrain objects associated with this tile by the specified angle
 	void								RotateAllTerrainObjects(Rotation90Degree rotation);
+
+	// Rotate a single terrain object owned by this tile by the given rotation, about the tile centre
+	void								RotateTileTerrainObject(StaticTerrain *terrain, Rotation90Degree rotation);
 
 	// Transform all view portals by the same rotation
 	void								RotateAllViewPortals(Rotation90Degree rot_delta);
@@ -649,6 +658,24 @@ public:
 	void								RecalculateBoundingVolume(void);
 	CMPINLINE BoundingObject *			GetBoundingObject(void) const				{ return m_boundingbox; }
 
+	// Handle the import of additional collision data from the models that comprise this tile
+	// Import any collision data from our tile models and store as collision-terrain objects
+	void								UpdateCollisionDataFromModels();
+	
+	// Handle the import of additional collision data from the models that comprise this tile
+	// Remove any collision-terrain objects that were added to the tile based on its model data
+	void								RemoveAllCollisionDataFromModels();
+
+	// Handle the import of additional collision data from the models that comprise this tile
+	// Import collision data from the single specified model, with no location or rotation offset required
+	void								AddCollisionDataFromModel(Model *model);
+
+	// Handle the import of additional collision data from the models that comprise this tile
+	// Import collision data from the single specified model, with the given element location
+	// and rotation offsets applied during calculation of the collision volumes
+	void								AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset);
+
+
 	// Get the approximate radius of a bounding sphere that encompasses this tile
 	CMPINLINE float						GetBoundingSphereRadius(void) const			{ return m_bounding_radius; }
 
@@ -715,6 +742,14 @@ public:
 
 	// Virtual method for implementation by subclasses, that will generate the XML necessary to represent the tile in full
 	virtual TiXmlElement *				GenerateXML(void) = 0;
+
+	// Set the single model data for this tile.  Should not be used directly by callers; model should be instantiated via either
+	// SetSingleModel() or SetMultipleModels()
+	CMPINLINE void						SetModel(Model *m) { m_model = m; }
+
+	// Set the flag indicating whether this tile uses a compound or single model set.  Should not be used directly by callers; model 
+	// should be instantiated via either SetSingleModel() or SetMultipleModels()
+	CMPINLINE void						SetHasCompoundModel(bool compound) { m_multiplemodels = compound; }
 
 	// Returns a value indicating whether or not this is a primary tile.  Based on the underlying tile class
 	bool								IsPrimaryTile(void);

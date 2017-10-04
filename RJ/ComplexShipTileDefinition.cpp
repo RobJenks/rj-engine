@@ -158,28 +158,23 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 	if (!m_multiplemodels)
 	{
 		// If this is a single tile, simply copy the model assigned to the tile definition
-		tile->SetModel(m_model);
-		tile->SetHasCompoundModel(false);
+		tile->SetSingleModel(m_model);
 		return ErrorCodes::NoError;
 	}
 
 	// Otherwise we need to construct a compound tile model based on the models specified in the tile definition
-	tile->SetHasCompoundModel(true);
+	tile->SetMultipleModels();
+
+	// Get a reference to the tile model collection and tile size for convenience
+	ComplexShipTile::TileCompoundModelSet *models = tile->GetCompoundModelSet();
+	assert(models->Size == m_elementsize);
+	const INTVECTOR3 & size = m_elementsize;
 
 	// Get a pointer to each of the key model types for efficiency before looping.
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *medge = GetModelSet("wall_straight");
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mcorner = GetModelSet("wall_corner");
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *minterior = GetModelSet("interior");
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *mconn = GetModelSet("connection");
-
-	// Get a reference to the tile model collection, and reset the contents if required
-	ComplexShipTile::TileCompoundModelSet *models = tile->GetCompoundModelSet();
-	models->ResetModelSet();
-
-	// Allocate new space in the model collection based on the tile size
-	const INTVECTOR3 & size = tile->GetElementSize();
-	models->Size = size;
-	if (!models->Allocate()) return ErrorCodes::CouldNotAllocateSpaceForCompoundTileModel;
 
 	// First, set any tiles with a connection
 	if (mconn)

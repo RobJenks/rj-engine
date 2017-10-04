@@ -18,9 +18,9 @@ Game::ID_TYPE StaticTerrain::InstanceCreationCount = 0;
 
 // Default constructor; initialise fields to default values
 StaticTerrain::StaticTerrain()
-	:	m_definition(NULL), m_parent(NULL), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), m_collisionradius(0.0f), m_collisionradiussq(0.0f),
-		m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), m_multielement(false), m_postponeupdates(false), 
-		m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f)
+	:	m_definition(NULL), m_parent(NULL), m_sourcetype(TerrainSourceType::NoSource), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), 
+		m_collisionradius(0.0f), m_collisionradiussq(0.0f), m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), 
+		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;

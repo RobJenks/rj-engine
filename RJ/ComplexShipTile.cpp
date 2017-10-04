@@ -190,12 +190,6 @@ void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
 	// Parameter check
 	if (!m_parent || rotation == Rotation90Degree::Rotate0) return;
 
-	// Precalculate some per-tile data
-	XMVECTOR tile_centre_pos = XMVectorAdd(m_elementposition, m_centre_point);
-	XMVECTOR tile_inverse_orient = XMQuaternionInverse(GetRotationQuaternion(m_rotation));
-	XMVECTOR rotation_quat = GetRotationQuaternion(rotation);
-	const XMMATRIX & rotation_matrix = GetRotationMatrix(rotation);
-
 	// Iterate through all terrain objects in our parent environment
 	StaticTerrain *t;
 	iSpaceObjectEnvironment::TerrainCollection::iterator it_end = m_parent->TerrainObjects.end();
@@ -207,15 +201,26 @@ void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
 		// We only care about terrain objects associated with this tile
 		if (t->GetParentTileID() != m_id) continue;
 
-		// This is a terrain object which we need to update.  Transform our environment-relative position
-		// into tile-relative space so we can transform relative to the tile, then return to environment space
-		XMVECTOR rel_pos = XMVectorSubtract(t->GetPosition(), tile_centre_pos);
-		rel_pos = XMVector3TransformCoord(rel_pos, rotation_matrix);
-		t->SetPosition(XMVectorAdd(rel_pos, tile_centre_pos));
-
-		// Also adjust the terrain object orientation about its local centre
-		t->ChangeOrientation(rotation_quat);
+		// This is a terrain object which we need to update
+		RotateTileTerrainObject(t, rotation);
 	}
+}
+
+// Rotate a single terrain object owned by this tile by the given rotation, about the tile centre
+void ComplexShipTile::RotateTileTerrainObject(StaticTerrain *terrain, Rotation90Degree rotation)
+{
+	// We can only rotate this terrain if it is valid and is owned by this tile
+	if (!terrain || terrain->GetParentTileID() != GetID()) return;
+
+	// Transform the terrain environment-relative position into tile-relative space so we can 
+	// transform relative to the tile, then return to environment space
+	XMVECTOR tile_centre_pos = XMVectorAdd(m_elementposition, m_centre_point);
+	XMVECTOR rel_pos = XMVectorSubtract(terrain->GetPosition(), tile_centre_pos);
+	rel_pos = XMVector3TransformCoord(rel_pos, GetRotationMatrix(rotation));
+	terrain->SetPosition(XMVectorAdd(rel_pos, tile_centre_pos));
+
+	// Also adjust the terrain object orientation about its local centre
+	terrain->ChangeOrientation(std::move(GetRotationQuaternion(rotation)));
 }
 
 // Transform all view portals by the same rotation
@@ -241,6 +246,10 @@ void ComplexShipTile::RecalculateTileData(void)
 
 	// Also recalculate the tile bounding box
 	RecalculateBoundingVolume();
+
+	// Import any collision data from our tile models and store as collision-terrain objects
+	UpdateCollisionDataFromModels();
+
 }
 
 void ComplexShipTile::RecalculateWorldMatrix(void)
@@ -295,6 +304,54 @@ void ComplexShipTile::PerformRenderUpdate(void)
 {
 	// Update any render effects that may be active on the object
 	Fade.Update();
+}
+
+// Handle the import of additional collision data from the models that comprise this tile
+// Import any collision data from our tile models and store as collision-terrain objects
+void ComplexShipTile::UpdateCollisionDataFromModels()
+{
+	// Remove any collision data that was previously imported from our geometry
+	RemoveAllCollisionDataFromModels();
+
+	// We either need to pull data from single or compound model data
+	if (!HasCompoundModel())
+	{
+		// The tile has only a single model
+		AddCollisionDataFromModel(GetModel());
+	}
+	else
+	{
+		// We have a compound model; add from each in turn
+		for (const auto & model_element : m_models.Models)
+		{
+			Model *model = model_element.value.model;
+			if (!model) continue;
+
+			AddCollisionDataFromModel(model, model_element.value.elementpos, model_element.value.rotation);
+		}
+	}
+}
+
+// Handle the import of additional collision data from the models that comprise this tile
+// Remove any collision-terrain objects that were added to the tile based on its model data
+void ComplexShipTile::RemoveAllCollisionDataFromModels()
+{
+	m_parent->RemoveTerrainObjectsFromTile(*** NEED VERSION FOR MODEL-SOURCED TERRAIN ***)
+}
+
+// Handle the import of additional collision data from the models that comprise this tile
+// Import collision data from the single specified model, with no location or rotation offset required
+void ComplexShipTile::AddCollisionDataFromModel(Model *model)
+{
+	AddCollisionDataFromModel(model, NULL_INTVECTOR3, Rotation90Degree::Rotate0);
+}
+
+// Handle the import of additional collision data from the models that comprise this tile
+// Import collision data from the single specified model, with the given element location
+// and rotation offsets applied during calculation of the collision volumes
+void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
+{
+	*** ADD A NEW TERRAIN OBJECT BASED ON THIS DATA, REMEMBERING TO ACCOUNT FOR THIS LOCAL ROTATION OFFSET + THE ROTATETILETERRAINOBJECT CASE (ABOUT TILE CENTRE) AS WELL ***
 }
 
 // Sets the power level of this tile, triggering updates if necessary
@@ -880,6 +937,36 @@ void ComplexShipTile::CopyBaseClassData(ComplexShipTile *source, ComplexShipTile
 	target->SetRotation(source->GetRotation());
 	target->Connections = TileConnections(source->Connections);
 	target->PossibleConnections = TileConnections(source->PossibleConnections);
+}
+
+// Set the tile to use a single (specified) tile model, and perform any dependent initialisation
+void ComplexShipTile::SetSingleModel(Model *model)
+{
+	// Shut down any compound-model data if it has previously been allocated, and set this tile to single-model mode
+	if (HasCompoundModel())
+	{
+		m_models.Shutdown();
+		SetHasCompoundModel(false);
+	}
+
+	// Store a reference to the model
+	SetModel(model);
+}
+
+// Set the tile to use a multiple & variable-sized tile geometry.  Will deallocate any existing geometry and allocate 
+// sufficient space for geometry covering the tile element size
+void ComplexShipTile::SetMultipleModels(void)
+{
+	// Remove any reference to single-model data and set this tile to compound model mode.  Don't bother testing whether we are
+	// already in this state; the branch is more costly than setting the data every time
+	SetModel(NULL);
+	SetHasCompoundModel(true);
+
+	// Reset and deallocate any existing compound model data
+	m_models.ResetModelSet();
+
+	// Allocate sufficient space for a compound model covering the entire tile area
+	m_models.Allocate(GetElementSize());
 }
 
 // Static method to look up a tile definition and create a new tile based upon it
