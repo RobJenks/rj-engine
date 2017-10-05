@@ -754,11 +754,6 @@ public:
 	// Returns a value indicating whether or not this is a primary tile.  Based on the underlying tile class
 	bool								IsPrimaryTile(void);
 
-	// Tiles maintain a vector of unique terrain IDs, corresponding to the terrain objects which are 'owned' by the tile
-	CMPINLINE std::vector<Game::ID_TYPE> &		GetTerrainObjectLinks(void)						{ return m_terrain_ids; }
-	void										AddTerrainObjectLink(Game::ID_TYPE ID);
-	void										ClearTerrainObjectLinks(void);
-
 	// Returns a value indicating whether this tile spans multiple elements
 	CMPINLINE bool						SpansMultipleElements(void) const						{ return m_multielement; }
 

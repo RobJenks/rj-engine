@@ -289,10 +289,6 @@ void StaticTerrain::DestroyObject(void)
 
 	// Apply any destruction effect
 
-	// Debug logging
-	OutputDebugString(concat("Destruction of Terrain (ID=")(m_id)(", Class=")
-		(m_definition ? m_definition->GetCode() : "<null>")(")\n").str().c_str());
-
 	// Now (repairably) destroy the object
 	MarkObjectAsDestroyed();
 }

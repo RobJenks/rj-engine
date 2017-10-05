@@ -453,6 +453,9 @@ void iSpaceObjectEnvironment::AddTerrainObjectFromTile(StaticTerrain *obj, Compl
 	// Resume updates following these changes
 	obj->ResumeUpdates();
 
+	// Add a reference from the terrain object to its parent tile object
+	obj->SetParentTileID(sourcetile->GetID());
+
 	// Finally call the main AddTerrainObject method, now that the terrain object has been transformed to environment-space
 	AddTerrainObject(obj);
 }
@@ -642,13 +645,6 @@ void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)
 			// Add this terrain object to the environment; method will determine the correct ship-relative position & orientation
 			// based on the tile-relative position & orientation currently stored in the terrain object
 			AddTerrainObjectFromTile(terrain, tile);
-
-			// Add a reference from the terrain object to its parent tile object
-			terrain->SetParentTileID(tile->GetID());
-
-			// Add a reference from the tile to the terrain being added.  The tile cleared and initialised its storage
-			// for terrain links at the point we began the tile assignment, so we can simply add the link here
-			tile->AddTerrainObjectLink(terrain->GetID());
 		}
 	}
 }
@@ -710,7 +706,7 @@ void iSpaceObjectEnvironment::RemoveHardpointsFromTile(ComplexShipTile *tile)
 	tile->ClearAllHardpointReferences();
 }
 
-// Adds all terrain objects associated with a tile to the environment
+// Removes all terrain objects associated with a tile from the environment
 void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile)
 {
 	// Parameter check
@@ -724,6 +720,22 @@ void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile
 	BuildSpatialPartitioningTree();
 }
 
+// Removes all collision terrain objects associated with geometry of a specific tile from the environment
+void iSpaceObjectEnvironment::RemoveCollisionTerrainFromTileGeometry(ComplexShipTile *tile)
+{
+	// Parameter check
+	if (!tile) return;
+
+	// Remove any terrain objects in the environment that were owned by this tile and which were generated from its collision geometry
+	Game::ID_TYPE id = tile->GetID();
+	Collections::DeleteErase(TerrainObjects, [id](const StaticTerrain *terrain) 
+	{ 
+		return (terrain->GetParentTileID() == id && terrain->GetSourceType() == StaticTerrain::TerrainSourceType::SourcedFromModel); 
+	});
+
+	// Rebuild the spatial partitioning tree following this bulk change
+	BuildSpatialPartitioningTree();
+}
 
 // Event triggered after addition of a tile to this environment.  Virtual, can be inherited by subclasses
 void iSpaceObjectEnvironment::BeforeTileAdded(ComplexShipTile *tile)
@@ -2053,24 +2065,15 @@ void iSpaceObjectEnvironment::SetTerrainDestructionState(Game::ID_TYPE id, bool 
 	if (it != TerrainObjects.end()) (*it)->SetObjectDestroyedState(is_destroyed);
 }
 
-// Set the destruction state of the specified terrain objects
-void iSpaceObjectEnvironment::SetTerrainDestructionState(const std::vector<Game::ID_TYPE> & ids, bool is_destroyed)
+// Set the destruction state of all terrain objects from the specified tile
+void iSpaceObjectEnvironment::SetTileTerrainDestructionState(Game::ID_TYPE tile_id, bool is_destroyed)
 {
-	// Partition the terrain collection based on a binary search of the supplied ID vector
-	TerrainCollection::iterator partition = std::partition(TerrainObjects.begin(), TerrainObjects.end(), 
-		[ids](const StaticTerrain *obj)
-	{
-		return (!std::binary_search(ids.begin(), ids.end(), obj->GetID()));
+	std::for_each(TerrainObjects.begin(), TerrainObjects.end(), [tile_id, is_destroyed](StaticTerrain *terrain) 
+	{ 
+		if (terrain && terrain->GetParentTileID() == tile_id) terrain->SetObjectDestroyedState(is_destroyed); 
 	});
-
-	// All elements after the partition point "it" are located in the "ids" collection, so apply
-	// the requested destruction state to each in turn
-	TerrainCollection::iterator it_end = TerrainObjects.end();
-	for (TerrainCollection::iterator it = partition; it != it_end; ++it)
-	{
-		(*it)->SetObjectDestroyedState(is_destroyed);
-	}
 }
+
 
 // Enable the ability to simulate environment collisions
 void iSpaceObjectEnvironment::EnableEnvironmentCollisionSimulationMode(const iSpaceObjectEnvironment *env)

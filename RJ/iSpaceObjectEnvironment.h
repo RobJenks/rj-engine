@@ -301,12 +301,12 @@ public:
 	}
 
 	// Destroy the specified terrain object(s)
-	CMPINLINE void					DestroyTerrain(Game::ID_TYPE id)						{ SetTerrainDestructionState(id, true); }
-	CMPINLINE void					DestroyTerrain(const std::vector<Game::ID_TYPE> & ids)	{ SetTerrainDestructionState(ids, true); }
+	CMPINLINE void					DestroyTerrain(Game::ID_TYPE id)					{ SetTerrainDestructionState(id, true); }
+	CMPINLINE void					DestroyTerrainFromTile(Game::ID_TYPE tile_id)		{ SetTileTerrainDestructionState(tile_id, true); }
 
 	// Repair the specified terrain object(s)
-	CMPINLINE void					RepairTerrain(Game::ID_TYPE id)							{ SetTerrainDestructionState(id, false); }
-	CMPINLINE void					RepairTerrain(const std::vector<Game::ID_TYPE> & ids)	{ SetTerrainDestructionState(ids, false); }
+	CMPINLINE void					RepairTerrain(Game::ID_TYPE id)						{ SetTerrainDestructionState(id, false); }
+	CMPINLINE void					RepairTerrainFromTile(Game::ID_TYPE tile_id)		{ SetTileTerrainDestructionState(tile_id, false); }
 
 	// Add a tile to the environment
 	void							AddTile(ComplexShipTile **ppTile);
@@ -344,6 +344,9 @@ public:
 	// Remove all terrain objects that were associated with a tile from this environment
 	// Adds all terrain objects associated with a tile to the environment
 	void							RemoveTerrainObjectsFromTile(ComplexShipTile *tile);
+
+	// Removes all collision terrain objects associated with geometry of a specific tile from the environment
+	void							RemoveCollisionTerrainFromTileGeometry(ComplexShipTile *tile);
 
 	// Instantiate any hardpoints that are associated with the given new tile
 	void							InstantiateHardpointsFromTile(ComplexShipTile *tile);
@@ -683,7 +686,7 @@ protected:
 
 	// Set the destruction state of the specified terrain object(s)
 	void							SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed);
-	void							SetTerrainDestructionState(const std::vector<Game::ID_TYPE> & ids, bool is_destroyed);
+	void							SetTileTerrainDestructionState(Game::ID_TYPE tile_id, bool is_destroyed);
 
 	// Deallocates the object element space
 	void							DeallocateElementSpace(void);

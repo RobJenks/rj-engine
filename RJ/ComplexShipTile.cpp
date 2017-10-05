@@ -116,6 +116,9 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_powerrequirement = C.GetPowerRequirement();
 	m_powerlevel = 0;
 
+	// Set parent pointer to NULL since the copied element will likely not share the same parent
+	m_parent = NULL;
+
 	// We will copy construction requirements; however construction progress is always reset to 0% or 100% (in clone method) depending on the parent
 	// Per-element construction state can therefore always be initialised to NULL
 	if (C.GetConstructedStateConst())
@@ -130,9 +133,6 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	// We always reset the 'standard' flag to false on copy, since only a small subset of tiles in the global collection
 	// should ever be flagged as standard
 	m_standardtile = false;
-
-	// Set parent pointer to NULL since the copied element will likely not share the same parent
-	m_parent = NULL;
 
 	// Copy the simulation parameters of our copy source, and treat the new object as having just been simulated
 	m_requiressimulation = C.SimulationIsActive();
@@ -336,7 +336,10 @@ void ComplexShipTile::UpdateCollisionDataFromModels()
 // Remove any collision-terrain objects that were added to the tile based on its model data
 void ComplexShipTile::RemoveAllCollisionDataFromModels()
 {
-	m_parent->RemoveTerrainObjectsFromTile(NULL/*** NEED VERSION FOR MODEL-SOURCED TERRAIN ***/);
+	if (m_parent)
+	{
+		m_parent->RemoveCollisionTerrainFromTileGeometry(this);
+	}
 }
 
 // Handle the import of additional collision data from the models that comprise this tile
@@ -351,7 +354,32 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model)
 // and rotation offsets applied during calculation of the collision volumes
 void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
-	/*** ADD A NEW TERRAIN OBJECT BASED ON THIS DATA, REMEMBERING TO ACCOUNT FOR THIS LOCAL ROTATION OFFSET + THE ROTATETILETERRAINOBJECT CASE (ABOUT TILE CENTRE) AS WELL ***/
+	if (!model || !m_parent) return;
+
+	// Offset of the model centre from the tile centre = (element_offset - (0.5 * tile_size)) - model_centre)
+	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = (20,10) - (15,15) - (0,0) = (5, -5).  Equals ((5,-5)+(15,15)) in non-tile-centred space = (20,10)
+	XMVECTOR model_centre = XMLoadFloat3(&model->GetModelCentre());
+	XMVECTOR pos_offset = XMVectorSubtract(XMVectorMultiplyAdd(GetWorldSize(), HALF_VECTOR_N, Game::ElementLocationToPhysicalPosition(element_offset)), model_centre);	
+
+	// Process every collision volume separately
+	for (const auto & collision : model->CollisionData())
+	{
+		XMVECTOR position = XMVectorAdd(XMLoadFloat3(&collision.Position), pos_offset);
+		XMVECTOR orient = XMLoadFloat4(&collision.Orientation);
+		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
+
+		StaticTerrain *terrain = StaticTerrain::Create();
+		terrain->PostponeUpdates();
+		{
+			terrain->SetPosition(position);
+			terrain->SetOrientation(orient);
+			terrain->SetExtent(extent);
+			terrain->SetParentTileID(GetID());
+		}
+		terrain->ResumeUpdates();
+		
+		m_parent->AddTerrainObjectFromTile(terrain, this);
+	}
 }
 
 // Sets the power level of this tile, triggering updates if necessary
@@ -369,10 +397,6 @@ void ComplexShipTile::SetPowerLevel(Power::Type power)
 // Event generated before the tile is added to an environment
 void ComplexShipTile::BeforeAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {
-	// Clear all terrain object links; terrain associated with this tile will be recreated
-	// and added to the environment when the tile is added
-	ClearTerrainObjectLinks();
-
 	// Store a pointer to the new environment (this may be NULL, if not being assigned anywhere)
 	m_parent = environment;
 }
@@ -526,26 +550,6 @@ void ComplexShipTile::InitialiseConnectionState()
 
 	// Initialise the actual connection data to match the tile size
 	Connections.Initialise(m_elementsize);
-}
-
-// Adds a new terrain object link to this tile
-void ComplexShipTile::AddTerrainObjectLink(Game::ID_TYPE ID)
-{
-	// We maintain a SORTED vector of terrain links
-	InsertIntoSortedVector<Game::ID_TYPE>(m_terrain_ids, ID);
-}
-
-// Clears all terrain object links.  If a tile definition exists for this tile, the method also reserves
-// space for the expected number of terrain objects that will be linked to the tile upon addition to an environment
-void ComplexShipTile::ClearTerrainObjectLinks(void)
-{
-	m_terrain_ids.clear();
-	if (m_definition)
-	{
-		// Reserve space for the number of terrain objects in our terrain definition, if applicable
-		std::vector<StaticTerrain*>::size_type n = m_definition->GetTerrainObjectCount();
-		if (n > 0) m_terrain_ids.reserve(n);
-	}
 }
 
 // Returns the impact resistance of this tile, i.e. the remaining force it can withstand from physical 
@@ -823,7 +827,7 @@ void ComplexShipTile::DestroyAllOwnedTerrain(void)
 	if (!m_parent) return;
 
 	// Tell our parent environment to destroy all items of terrain that we own	
-	m_parent->DestroyTerrain(m_terrain_ids);
+	m_parent->DestroyTerrainFromTile(GetID());
 }
 
 // Default destructor
