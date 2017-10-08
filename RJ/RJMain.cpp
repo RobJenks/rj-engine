@@ -849,6 +849,8 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_3]) {
 		
 		ComplexShipTile *q = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
+		cs()->UpdateTileConnectionState(&q);
+		q->CompileAndValidateTile();
 		q->RecalculateTileData();
 
 		Game::Keyboard.LockKey(DIK_3);

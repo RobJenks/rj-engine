@@ -419,7 +419,7 @@ public:
 	int								GetDeckIndex(int deck) const;
 
 	// Determines the set of connections from other tiles that surround this element
-	void							GetNeighbouringTiles(ComplexShipTile *tile, bool(&outConnects)[4], std::vector<TileAdjacency> & outNeighbours);
+	void							GetNeighbouringTiles(ComplexShipTile *tile, std::vector<TileAdjacency> & outNeighbours);
 
 	// Updates the connection state of the specified tile based on its neighbours.  Ensures a bi-directional
 	// connection is setup and that the adjacent tile is also updated

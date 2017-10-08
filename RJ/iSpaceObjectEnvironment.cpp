@@ -2276,20 +2276,18 @@ void iSpaceObjectEnvironment::BuildSpatialPartitioningTree(void)
 }
 
 // Determines the set of connections from other tiles that surround this element
-void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&outConnects)[4], std::vector<TileAdjacency> & outNeighbours)
+void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, std::vector<TileAdjacency> & outNeighbours)
 {
-	// Initialise all connection results to false by default
-	for (int i = 0; i < 4; ++i) outConnects[i] = false;
-
 	// Parameter check
 	if (!tile) return;
 	const INTVECTOR3 & location = tile->GetElementLocation();
 	const INTVECTOR3 & size = tile->GetElementSize();
 
 	// Check each direction in turn
+	static const Direction directions[4] = { Direction::Left, Direction::Up, Direction::Right, Direction::Down };
 	for (int i = 0; i < 4; ++i)
 	{
-		Direction dir = (Direction)i;
+		Direction dir = directions[i];
 
 		// Determine the range of elements on this 'face' of the tile.  This will always
 		// be the element size in two dimensions and 1 in the third
@@ -2317,11 +2315,11 @@ void iSpaceObjectEnvironment::GetNeighbouringTiles(ComplexShipTile *tile, bool(&
 					if (adj_index < 0 || adj_index >= m_elementcount) continue;
 					const ComplexShipElement & adj_el = m_elements[adj_index];
 
-					// Test whether this element contains a tile; if so, we want to record that fact
+					// Test whether this element contains a tile; if so, and assuming it is not another 
+					// part of the source tile, we want to record that fact
 					adj_tile = adj_el.GetTile();
-					if (adj_tile)
+					if (adj_tile && adj_tile != tile)
 					{
-						outConnects[i] = true;
 						outNeighbours.push_back(TileAdjacency(incr, dir, adj_el.GetLocation(), adj_tile));
 					}
 				}
@@ -2348,10 +2346,9 @@ void iSpaceObjectEnvironment::UpdateTileConnectionState(ComplexShipTile **ppTile
 	TileConnections old_state = TileConnections(tile->Connections);
 	tile->Connections.ResetConnectionState();
 
-	// Find all neighbours of this tile
-	bool neighbours[4]; 
+	// Find any tiles neighbouring this one 
 	std::vector<TileAdjacency> adjacent;
-	GetNeighbouringTiles(tile, neighbours, adjacent);
+	GetNeighbouringTiles(tile, adjacent);
 
 	// Check each adjacent tile in turn
 	std::vector<TileAdjacency>::iterator it_end = adjacent.end();
