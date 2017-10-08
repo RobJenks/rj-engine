@@ -365,7 +365,7 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 &
 	// Process every collision volume separately
 	for (const auto & collision : model->CollisionData())
 	{
-		XMVECTOR position = XMVectorAdd(XMLoadFloat3(&collision.Position), pos_offset);
+		XMVECTOR position = XMVectorAdd(XMVector3Rotate(XMLoadFloat3(&collision.Position), orient_offset), pos_offset);
 		XMVECTOR orient = XMQuaternionMultiply(XMLoadFloat4(&collision.Orientation), orient_offset);
 		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
 
