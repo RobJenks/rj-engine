@@ -839,30 +839,17 @@ void RJMain::ProcessKeyboardInput(void)
 		
 		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+
+		cs()->FadeHullToAlpha(1.0f, 0.1f);
+		cs()->FadeAllTiles(1.0f, 0.25f);
+		Game::Console.ProcessRawCommand(GameConsoleCommand("render_terrainboxes cs1 true"));
+
 		Game::Keyboard.LockKey(DIK_2);
 	}
 	if (b[DIK_3]) {
-		if (!ss() || !cs()) return;
-		cs()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
-		cs()->CancelAllOrders();
-		cs()->AssignNewOrder(new Order_MoveToTarget(ss(), 100.0f, true));
-
-		for (int i = 0; i < 6; ++i)
-		{
-			SimpleShip *s = SimpleShip::Create("testship1");
-			SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s);
-
-			s->SetName("DIK_3_SPAWNED_SHIP");
-			s->MoveIntoSpaceEnvironment(ss()->GetSpaceEnvironment());
-			s->SetPosition(XMVectorSetZ(ss()->GetPosition(), i * 1.2f * ss()->GetSizeF().z));
-			s->SetOrientation(ID_QUATERNION);
-			s->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
-
-			SpaceTurret *turret = ss()->TurretController.GetTurret(0)->Copy();
-			s->TurretController.AddTurret(turret);
-
-			s->AssignNewOrder(new Order_AttackBasic(s, cs()));
-		}
+		
+		ComplexShipTile *q = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
+		q->RecalculateTileData();
 
 		Game::Keyboard.LockKey(DIK_3);
 	}
@@ -2117,7 +2104,7 @@ void RJMain::__CreateDebugScenario(void)
 		css[0] = NULL; css[1] = NULL;
 		for (int c = 0; c < create_count; ++c)
 		{
-			css[c] = ComplexShip::Create(true ? "testfrigate2" : "testfrigate1");
+			css[c] = ComplexShip::Create(false ? "testfrigate2" : "collision1");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
 			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));

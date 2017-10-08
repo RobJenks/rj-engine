@@ -473,11 +473,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	// Attempt to set the actual model size; method will handle missing/incomplete parameters itself, so pass whatever we have (incl 0,0,0 as default)
 	model->SetActualModelSize(acteffsize);
 
-	// If a desired actual effective size has been set then apply it and scale accordingly, otherwise just use the current size
-	//if (acteffsize.x <= Game::C_EPSILON && acteffsize.y <= Game::C_EPSILON && acteffsize.z <= Game::C_EPSILON)
-	//	model->SetActualModelSize(acteffsize);
-	//else
-	//	model->SetActualModelSize(model->GetEffectiveModelSize());
+	// TODO: Potentially add option to load geometry immediately here
 
 	// Add this model to the relevant static collection and return success
 	Model::AddModel(model);
@@ -2924,6 +2920,9 @@ Result IO::Data::LoadAllModelGeometry(void)
 // Loads the geometry for the specified model
 Result IO::Data::LoadModelGeometry(Model *model)
 {
+	// Exit immediately if the geometry data has already been loaded
+	if (model->IsGeometryLoaded()) return ErrorCodes::NoError;
+
 	// Load the model geometry and textures
 	Result r = model->Initialise(model->GetFilename().c_str(), model->GetTextureFilename().c_str());
 

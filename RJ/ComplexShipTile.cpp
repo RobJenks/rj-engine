@@ -327,6 +327,11 @@ void ComplexShipTile::UpdateCollisionDataFromModels()
 			Model *model = model_element.value.model;
 			if (!model) continue;
 
+			if (model->GetCode() == "quarters_dorm01_connection_model")
+			{
+				int a = 1;
+			}
+
 			AddCollisionDataFromModel(model, model_element.value.elementpos, model_element.value.rotation);
 		}
 	}
@@ -356,10 +361,15 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 &
 {
 	if (!model || !m_parent) return;
 
-	// Offset of the model centre from the tile centre = (element_offset - (0.5 * tile_size)) - model_centre)
-	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = (20,10) - (15,15) - (0,0) = (5, -5).  Equals ((5,-5)+(15,15)) in non-tile-centred space = (20,10)
+	if (element_offset == INTVECTOR3(1, 0, 0))
+	{
+		int a = 1;
+	}
+
+	// Offset of the model centre from the tile centre = ((element_pos + 1/2element) - tilecentre - model_centre_point)
+	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = ((25,15)-(15,15)-(0,0)) = (10,0).  Equals ((10,0)+(15,15)) in non-tile-centred space = (25,15) = el[2,1].centre
 	XMVECTOR model_centre = XMLoadFloat3(&model->GetModelCentre());
-	XMVECTOR pos_offset = XMVectorSubtract(XMVectorMultiplyAdd(GetWorldSize(), HALF_VECTOR_N, Game::ElementLocationToPhysicalPosition(element_offset)), model_centre);	
+	XMVECTOR pos_offset = XMVectorSubtract(XMVectorSubtract(XMVectorAdd(Game::ElementLocationToPhysicalPosition(element_offset), Game::C_CS_ELEMENT_MIDPOINT_V), m_centre_point), model_centre);
 
 	// Process every collision volume separately
 	for (const auto & collision : model->CollisionData())
@@ -375,6 +385,7 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 &
 			terrain->SetOrientation(orient);
 			terrain->SetExtent(extent);
 			terrain->SetParentTileID(GetID());
+			terrain->SetSourceType(StaticTerrain::TerrainSourceType::SourcedFromModel);
 		}
 		terrain->ResumeUpdates();
 		
@@ -404,7 +415,13 @@ void ComplexShipTile::BeforeAddedToEnvironment(iSpaceObjectEnvironment *environm
 // Event generated after the tile is added to an environment
 void ComplexShipTile::AfterAddedToEnvironment(iSpaceObjectEnvironment *environment)
 {
+	if (m_definition->GetCode() == "quarters_dorm_01")
+	{
+		int a = 1;
+	}
+
 	// Recalculate internal tile data 
+	RecalculateTileData();
 }
 
 // Event generated before the tile is removed from an environment

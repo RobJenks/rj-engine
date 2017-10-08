@@ -74,7 +74,7 @@ ComplexShipTile * ComplexShipTileDefinition::CreateTile(void) const
 	tile->SetPowerRequirement(m_powerrequirement);
 	tile->SetMass(m_mass);
 	tile->SetHardness(m_hardness);
-	
+
 	// Set a default tile size; either the class-specified default, or 1x1x1 if it is a resizable tile
 	if (m_elementsize.x > 0 && m_elementsize.y > 0 && m_elementsize.z > 0)
 		tile->SetElementSize(m_elementsize);
