@@ -1307,6 +1307,9 @@ Result iSpaceObjectEnvironment::UpdateTileBasedOnConnectionData(ComplexShipTile 
 	result = (*ppOutTile)->GenerateGeometry();
 	if (result != ErrorCodes::NoError) return result;
 
+	// Recalculate the tile properties following this update to make sure everything is up-to-date
+	(*ppOutTile)->RecalculateTileData();
+
 	// Return success; the contents of ppOutTile will be the new or existing tile, depending on whether a change was made
 	return ErrorCodes::NoError;
 }
