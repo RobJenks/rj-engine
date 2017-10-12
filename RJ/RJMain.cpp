@@ -839,6 +839,7 @@ void RJMain::ProcessKeyboardInput(void)
 		
 		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
 
 		cs()->FadeHullToAlpha(1.0f, 0.1f);
 		cs()->FadeAllTiles(1.0f, 0.25f);
@@ -851,7 +852,7 @@ void RJMain::ProcessKeyboardInput(void)
 		ComplexShipTile *q = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
 		//cs()->UpdateTileConnectionState(&q);
 		q->CompileAndValidateTile();
-	//q->RecalculateTileData();
+		//q->RecalculateTileData();
 
 		Game::Keyboard.LockKey(DIK_3);
 	}
@@ -2518,4 +2519,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
 

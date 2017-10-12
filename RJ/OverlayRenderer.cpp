@@ -560,7 +560,6 @@ void OverlayRenderer::RenderCuboid(AXMVECTOR_P(&pVertices)[8], OverlayRenderer::
 	RenderLine(pVertices[3].value, pVertices[0].value, colour, thickness, -1.0f);
 	RenderLine(pVertices[4].value, pVertices[5].value, colour, thickness, -1.0f);		// These four lines connect face #2
 	RenderLine(pVertices[5].value, pVertices[6].value, colour, thickness, -1.0f);
-	RenderLine(pVertices[6].value, pVertices[7].value, RenderColour::RC_Green, thickness*2.0f, -1.0f); // TODO: DEBUG
 	RenderLine(pVertices[7].value, pVertices[4].value, colour, thickness, -1.0f);
 	RenderLine(pVertices[0].value, pVertices[4].value, colour, thickness, -1.0f);		// These four lines connect the two parallel faces
 	RenderLine(pVertices[1].value, pVertices[5].value, colour, thickness, -1.0f);
