@@ -706,6 +706,27 @@
     <ClCompile Include="PortalRenderingStep.cpp">
       <Filter>Engine\Culling\Portal Culling</Filter>
     </ClCompile>
+    <ClCompile Include="DataPort.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DataEnabledObject.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="iDataObjectEnvironment.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPorts.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DataPortTests.cpp">
+      <Filter>_Tests\DataPorts</Filter>
+    </ClCompile>
+    <ClCompile Include="DataEnabledStaticTerrain.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DataEnabledLoggingObject.cpp">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1636,6 +1657,30 @@
     <ClInclude Include="Collections.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="DataEnabledObject.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataEnabledStaticTerrain.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataEnabledEnvironmentObject.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPort.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPorts.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="iDataObjectEnvironment.h">
+      <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPortTests.h">
+      <Filter>_Tests\DataPorts</Filter>
+    </ClInclude>
+    <ClInclude Include="DataEnabledLoggingObject.h">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1925,6 +1970,15 @@
     </Filter>
     <Filter Include="Engine\Culling\Portal Culling">
       <UniqueIdentifier>{4c727b7c-10c0-4797-8b43-6e6aca455d6b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data">
+      <UniqueIdentifier>{9a400a65-dd95-4e7c-999b-c86601dbf90b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\DataPorts">
+      <UniqueIdentifier>{b4dbe7b0-035a-428b-8fcf-2466d126d16a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data\Objects">
+      <UniqueIdentifier>{bb1d96cf-1eef-4bfb-8c21-01f3c1ca5039}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

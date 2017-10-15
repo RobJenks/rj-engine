@@ -359,7 +359,7 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model)
 void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
 	if (!model || !m_parent || model->CollisionData().empty()) return;
-Game::Log << LOG_DEBUG << "Adding " << model->CollisionData().size() << " new collision objects from model \"" << model->GetCode() << "\", with element offset=" << element_offset.ToString() << " and rotation_offset=" << rotation_offset << "\n";
+
 	// Offset of the model centre from the tile centre = ((element_pos + 1/2element) - tilecentre - model_centre_point)
 	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = ((25,15)-(15,15)-(0,0)) = (10,0).  Equals ((10,0)+(15,15)) in non-tile-centred space = (25,15) = el[2,1].centre
 	XMVECTOR model_centre = XMLoadFloat3(&model->GetModelCentre());
@@ -372,7 +372,7 @@ Game::Log << LOG_DEBUG << "Adding " << model->CollisionData().size() << " new co
 		XMVECTOR position = XMVectorAdd(XMVector3Rotate(XMLoadFloat3(&collision.Position), orient_offset), pos_offset);
 		XMVECTOR orient = XMQuaternionMultiply(XMLoadFloat4(&collision.Orientation), orient_offset);
 		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
-Game::Log << LOG_DEBUG << "   Adding CO at " << position << " with orient " << orient << " and extent " << extent << "\n";
+
 		StaticTerrain *terrain = StaticTerrain::Create();
 		terrain->PostponeUpdates();
 		{
@@ -386,7 +386,6 @@ Game::Log << LOG_DEBUG << "   Adding CO at " << position << " with orient " << o
 		
 		m_parent->AddTerrainObjectFromTile(terrain, this);
 	}
-Game::Log << LOG_DEBUG << "All objects added\n";
 }
 
 // Sets the power level of this tile, triggering updates if necessary

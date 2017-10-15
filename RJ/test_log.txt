@@ -1,11 +1,11 @@
 
 === Test application initialised; executing tests ===
 
-Executed 2 tests:
-Test 0: 33 Passed, 2 Failed, 2 Messages:
-    ERROR: [463941596|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:173] Multi-cell averaged propogation failed ([2] != [1])
-    ERROR: [463941596|c:\users\robje\documents\visual studio 2013\projects\rj\rj\environmentmaptests.cpp:202] Multi-cell relative falloff propogation failed ([7.47183] != [9.125])
-Test 1: 9 Passed, 0 Failed
+Executed 3 tests:
+Test 0 (EnvironmentMapTests): 34 Passed, 1 Failed, 1 Messages:
+    ERROR: [93361055|EnvironmentMapTests.cpp:174] Multi-cell averaged propogation failed ([2] != [1])
+Test 1 (SequenceGenerationTests): 9 Passed, 0 Failed
+Test 2 (DataPortTests): 18 Passed, 0 Failed
 
 === Test execution completed ===
 

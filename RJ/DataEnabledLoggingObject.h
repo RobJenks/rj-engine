@@ -1,0 +1,30 @@
+#pragma once
+
+#include "DataEnabledStaticTerrain.h"
+
+
+class DataEnabledLoggingObject : public DataEnabledStaticTerrain
+{
+public:
+
+	// Default constructor
+	DataEnabledLoggingObject(void);
+
+	// Creates the new data-enabled object, including registration of all required data ports
+	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
+	static DataEnabledLoggingObject *	Create(const StaticTerrainDefinition *def);
+
+	// Initialise the data ports required for this object
+	void								InitialiseDataPorts(void);
+
+	// Method invoked when this object receives data through one of its public input ports
+	void								DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port);
+
+
+private:
+
+	// Maintain port indices for convenience
+	DataPorts::PortIndex				PORT_SEND;
+	DataPorts::PortIndex				PORT_RECEIVE;
+
+};

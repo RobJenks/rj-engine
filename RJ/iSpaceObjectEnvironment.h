@@ -6,6 +6,7 @@
 #include "Utility.h"
 #include "DX11_Core.h"
 #include "Ship.h"
+#include "iDataObjectEnvironment.h"
 #include "ComplexShipElement.h"
 #include "TileAdjacency.h"
 #include "EnvironmentCollision.h"
@@ -31,7 +32,7 @@ class Frustum;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class iSpaceObjectEnvironment : public ALIGN16<iSpaceObjectEnvironment>, public Ship, public iContainsComplexShipTiles
+class iSpaceObjectEnvironment : public ALIGN16<iSpaceObjectEnvironment>, public Ship, public iContainsComplexShipTiles, public iDataObjectEnvironment
 {
 
 

@@ -20,7 +20,7 @@ Game::ID_TYPE StaticTerrain::InstanceCreationCount = 0;
 StaticTerrain::StaticTerrain()
 	:	m_definition(NULL), m_parent(NULL), m_sourcetype(TerrainSourceType::NoSource), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), 
 		m_collisionradius(0.0f), m_collisionradiussq(0.0f), m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), 
-		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f)
+		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f), m_dataenabled(false)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;
@@ -211,21 +211,26 @@ StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
 	StaticTerrain *terrain = new StaticTerrain();
 	if (!terrain) return NULL;
 
+	// Initialise and return the terrain object
+	terrain->InitialiseNewTerrain(def);
+	return terrain;
+}
+
+// Initialise a newly-created terrain based on the given definition
+void StaticTerrain::InitialiseNewTerrain(const StaticTerrainDefinition *def)
+{
 	// Postpone any internal recalculation, set all properties and then resume calculations
-	terrain->PostponeUpdates();
+	PostponeUpdates();
 	{
 		// Set the terrain definition, plus default properties for other fields
-		terrain->SetDefinition(def);
-		terrain->SetPosition(NULL_VECTOR);
-		terrain->SetOrientation(ID_QUATERNION);
+		SetDefinition(def);
+		SetPosition(NULL_VECTOR);
+		SetOrientation(ID_QUATERNION);
 
 		// Assign a default non-zero extent if none is specified in the definition
-		if (IsZeroFloat3(terrain->GetExtentF())) terrain->SetExtent(ONE_VECTOR);
+		if (IsZeroFloat3(GetExtentF())) SetExtent(ONE_VECTOR);
 	}
-	terrain->ResumeUpdates();
-
-	// Return the new terrain object
-	return terrain;
+	ResumeUpdates();
 }
 
 // Applies a highlight/alpha effect to the terrain object
@@ -312,7 +317,7 @@ void StaticTerrain::Shutdown(void)
 	{
 		// This is an error.  Object must always be part of a parent environment, since the parent environment
 		// has ownership for its terrain and is responsible for deallocating it
-		OutputDebugString(concat("ERROR: Terrain object")(m_id)(" is being shut down but has no parent environment\n").str().c_str());
+		Game::Log << LOG_ERROR << "ERROR: Terrain object" << m_id << " is being shut down but has no parent environment\n";
 	}
 }
 

@@ -11,6 +11,14 @@
 #include "OverlayRenderer.h"
 
 
+// Default constructor; initialise fields to default values
+iEnvironmentObject::iEnvironmentObject(void) 
+	: 
+	m_parent(nullptr), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_within_env(false),
+	m_element_location(NULL_INTVECTOR3), m_orientchanges(0), m_onground(false), m_env_treenode(NULL), m_dataenabled(false)
+{
+}
+
 // Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
 // lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
 // their level of the implementation
@@ -231,6 +239,11 @@ void iEnvironmentObject::Shutdown(void)
 
 	// Pass control to the base class
 	iObject::Shutdown();
+}
+
+// Default destructor
+iEnvironmentObject::~iEnvironmentObject(void)
+{
 }
 
 // Custom debug string function

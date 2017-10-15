@@ -5,6 +5,7 @@
 
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
+#include "FastMath.h"
 class iObject;
 
 /* 

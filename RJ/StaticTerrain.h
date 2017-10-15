@@ -6,6 +6,7 @@
 #include "DX11_Core.h"
 #include "GameDataExtern.h"
 #include "Utility.h"
+#include "FrameFlag.h"
 #include "OrientedBoundingBox.h"
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
@@ -39,6 +40,9 @@ public:
 	CMPINLINE static StaticTerrain *				Create(void) { return StaticTerrain::Create(NULL); }
 	CMPINLINE static StaticTerrain *				Create(const std::string & def) { return StaticTerrain::Create(D::StaticTerrainDefinitions.Get(def)); }
 	static StaticTerrain *							Create(const StaticTerrainDefinition *def);
+
+	// Initialise a newly-created terrain based on the given definition
+	void											InitialiseNewTerrain(const StaticTerrainDefinition *def);
 
 	// Get/set methods for key fields
 	CMPINLINE Game::ID_TYPE							GetID(void) const								{ return m_id; }
@@ -85,6 +89,9 @@ public:
 	
 	// Returns a value indicating whether this terrain object overlaps the specified element
 	bool											OverlapsElement(const INTVECTOR3 & el) const;
+
+	// Indicates whether this terrain object is data-enabled
+	bool											IsDataEnabled(void) const						{ return m_dataenabled; }
 
 	// Pointer to the environment tree node this terrain object resides in
 	CMPINLINE EnvironmentTree *						GetEnvironmentTreeNode(void)					{ return m_env_treenode; }
@@ -173,6 +180,8 @@ protected:
 	INTVECTOR3								m_element_location;					// Location of the terrain centre in element space
 	INTVECTOR3								m_element_min, m_element_max;		// Store the range of elements that this terrain object spans
 	bool									m_multielement;						// Flag indicating whether we span >1 element, for render-time efficiency
+
+	bool									m_dataenabled;						// Flag which indicates whether the object is data-enabled (default: false)
 
 	FrameFlag								m_rendered;							// Flag indicating whether the terrain object has been rendered this frame
 

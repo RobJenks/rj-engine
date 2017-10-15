@@ -663,6 +663,16 @@ namespace ErrorCodes {
 	const Result		CannotCreateInstanceOfInvalidAudioItem			= 6508;
 	const Result		CannotReassignExistingAudioItemResource			= 6509;
 
+	// Data-object related errors										(6800-6999)
+	const Result		PortIndexIsNotValid								= 6800;
+	const Result		ObjectHasNoDataEnvironment						= 6801;
+	const Result		PortIDIsNotValid								= 6802;
+	const Result		TargetPortIDIsNotValid							= 6803;
+	const Result		CannotConnectDataPortToItself					= 6804;
+	const Result		DataPortObjectIsNotValid						= 6805;
+	const Result		PortTypesAreIncompatible						= 6806;
+	const Result		CannotDisconnectAnUnconnectedPort				= 6807;
+
 }
 
 #endif

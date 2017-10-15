@@ -1,0 +1,115 @@
+=== RenderPortalEnvironment(environment, pOutGlobalFrustum)
+
+// Verify viewer is within a tile of a portal-enabled environment
+
+current cell = current tile
+current frustum = view frustum
+global_frustum = <none>
+add <startcell, frustum, traversalcount=0> to cells collection
+
+while (!cells.empty)
+{
+	render tile
+
+	get all objects/terrain in cell
+	for each object/terrain
+	{
+		if (!intersects frustum) continue
+		render object/terrain
+	}
+
+	// Stop following portals if we exceed the threshold, to remove risk 
+	// of infinite loops between circularly-visible portals (possible?)
+	if (++traversalcount > THRESHOLD) continue;
+
+	get all portals in cell
+	for each portal in cell
+	{
+		if (!intersects frustum) continue
+
+		new_frustum = clip frustum to simplified bounding-box portal with accepted overdraw
+
+		if (portal.has_destination_cell)
+			cells.push(portal.destination_cell, new_frustum, traversal_count)
+		else
+			if (++external_views > THRESHOLD) 
+				global_frustum = view_frustum
+			else
+				global_frustum.expand_to_include(frustum)
+	}
+}
+
+if (global_frustum != <none>)
+{
+	use global_frustum for subsequent non-environment object rendering
+}
+else    use view frustum for subsequent non-environment object rendering
+
+
+-------------------------
+
+=== Render ===
+
+if (viewer is in environment)
+{
+	RenderComplexShip(environment, &new_frustum)
+	if (new_frustum) Game::Engine->ViewFrustum->OverrideGlobalViewFrustum(new_frustum)
+}
+
+for all objects
+{
+	if (simple)
+		render ss
+	else if (complex && !viewer-environment)
+		render cs(obj, new_frustum)
+		if (new_frustum) Game::Engine->ViewFrustum->OverrideGlobalViewFrustum(new_frustum)
+	else
+		render object
+}
+
+--------
+
+RenderComplexShip(ship, pOutGlobalFrustum)
+{
+	render parts of CS
+	
+	Frustum *frustum = NULL;
+	RenderEnvironment(ship, frustum);
+
+	if (pOutGlobalFrustum) { (*pOutGlobalFrustum) = frustum; }
+}
+
+
+--------
+
+
+RenderEnvironment(environment, pOutGlobalFrustum)
+{
+	Frustum *new_frustum = NULL;
+	if (portal-enabled)
+	{
+		if (viewer is in a tile)
+		{
+			RenderPortalEnvironment(environment, &new_frustum)
+		}
+		else
+		{
+			// TODO: Use "old" algorithm for now
+			RenderNonPortalEnvironment(environment, &new_frustum)
+		}
+	}	
+	else
+	{
+		// Render via "old" algorithm
+		RenderNonPortalEnvironment(environment, &new_frustum)
+	}
+
+	if (pOutGlobalFrustum) { (*pOutGlobalFrustum) = new_frustum; }
+}
+
+
+
+
+
+
+

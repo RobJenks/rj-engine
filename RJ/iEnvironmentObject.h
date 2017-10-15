@@ -19,11 +19,8 @@ public:
 	// Force the use of aligned allocators to distinguish between ambiguous allocation/deallocation functions in multiple base classes
 	USE_ALIGN16_ALLOCATORS(iEnvironmentObject)
 
-	// Default constructor; initialise fields to default values
-	iEnvironmentObject(void) :	m_parent(nullptr), m_envposition(NULL_VECTOR), m_envorientation(NULL_VECTOR), m_within_env(false),
-								m_element_location(NULL_INTVECTOR3), m_orientchanges(0), m_onground(false), m_env_treenode(NULL)
-	{ 
-	}
+	// Default constructor
+	iEnvironmentObject(void);
 
 	// Returns the environment that this object is currently located in
 	CMPINLINE iSpaceObjectEnvironment *			GetParentEnvironment(void) const			{ return m_parent(); }
@@ -92,6 +89,8 @@ public:
 	// Updates the command with its result if the command can be processed at this level
 	void										ProcessDebugCommand(GameConsoleCommand & command);
 
+	// Default destructor
+	~iEnvironmentObject(void);
 
 protected:
 
@@ -111,6 +110,9 @@ protected:
 	// Keep track of the element(s) this object is located in.  Large objects may span multiple elements; this is 
 	// the element containing the object's centre point
 	INTVECTOR3									m_element_location;
+
+	// Flag which indicates whether the object is data-enabled (default: false)
+	bool										m_dataenabled;
 
 	// Keep track of the number of orientation changes made before a re-normalisation is required
 	int											m_orientchanges;

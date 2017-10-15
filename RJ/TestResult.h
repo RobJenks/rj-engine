@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include "CompilerSettings.h"
-#include "LogManager.h"
+#include "Logging.h"
 #include "TestError.h"
 
 
@@ -11,10 +11,13 @@ class TestResult
 {
 public:
 
-	CMPINLINE TestResult(void) : m_passed(0), m_failed(0), m_failallcases(false) { }
-	CMPINLINE TestResult(int _passed, int _failed) : m_passed(_passed), m_failed(_failed), m_failallcases(false) { }
-	CMPINLINE TestResult(int _passed, int _failed, const std::vector<std::string> & _messages) : m_passed(_passed), m_failed(_failed), m_messages(_messages), m_failallcases(false) { }
+	CMPINLINE TestResult(void) : m_name(NullString), m_passed(0), m_failed(0), m_failallcases(false) { }
+	CMPINLINE TestResult(const std::string & name) : m_name(name), m_passed(0), m_failed(0), m_failallcases(false) { }
+	CMPINLINE TestResult(const std::string & name, int _passed, int _failed) : m_name(name), m_passed(_passed), m_failed(_failed), m_failallcases(false) { }
+	CMPINLINE TestResult(const std::string & name, int _passed, int _failed, const std::vector<std::string> & _messages) : m_name(name), m_passed(_passed), m_failed(_failed), m_messages(_messages), m_failallcases(false) { }
 
+	CMPINLINE std::string GetName(void) const { return m_name; }
+	CMPINLINE void SetName(const std::string & name) { m_name = name; }
 
 	CMPINLINE void TestPassed(void) { if (!m_failallcases) ++m_passed; else ++m_failed; }
 	CMPINLINE void TestFailed(void) { ++m_failed; }
@@ -56,7 +59,7 @@ public:
 			++m_failed;
 
 			std::string inequality = concat("[")(x0)("] != [")(x1)("]").str();
-			OutputDebugString(concat("Equality assertion failed; ")(inequality)("\n").str().c_str());
+			Game::Log << LOG_ERROR << "Equality assertion failed; " << inequality << "\n";
 
 			if (!failure_message().empty()) LogMessage(concat(failure_message())(" (")(inequality)(")").str());
 		}
@@ -74,9 +77,10 @@ public:
 
 private:
 
-	int m_passed, m_failed;
-	std::vector<std::string> m_messages;
-	bool m_failallcases;
+	std::string					m_name;
+	int							m_passed, m_failed;
+	std::vector<std::string>	m_messages;
+	bool						m_failallcases;
 
 };
 

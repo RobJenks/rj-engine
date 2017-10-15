@@ -404,8 +404,14 @@
     <ClCompile Include="CubeMapTexture.cpp" />
     <ClCompile Include="D3DMain.cpp" />
     <ClCompile Include="Damage.cpp" />
+    <ClCompile Include="DataEnabledLoggingObject.cpp" />
+    <ClCompile Include="DataEnabledObject.cpp" />
+    <ClCompile Include="DataEnabledStaticTerrain.cpp" />
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataOutput.cpp" />
+    <ClCompile Include="DataPort.cpp" />
+    <ClCompile Include="DataPorts.cpp" />
+    <ClCompile Include="DataPortTests.cpp" />
     <ClCompile Include="DebugCommandHandler.cpp" />
     <ClCompile Include="DebugInvocation.cpp" />
     <ClCompile Include="Direction.cpp" />
@@ -465,6 +471,7 @@
     <ClCompile Include="iActiveObject.cpp" />
     <ClCompile Include="EntityAI.cpp" />
     <ClCompile Include="iContainsHardpoints.cpp" />
+    <ClCompile Include="iDataObjectEnvironment.cpp" />
     <ClCompile Include="InputLayoutDesc.cpp" />
     <ClCompile Include="iSpaceObjectEnvironment.cpp" />
     <ClCompile Include="iContainsComplexShipTiles.cpp" />
@@ -658,8 +665,15 @@
     <ClInclude Include="CubeMapTexture.h" />
     <ClInclude Include="D3DMain.h" />
     <ClInclude Include="Damage.h" />
+    <ClInclude Include="DataEnabledEnvironmentObject.h" />
+    <ClInclude Include="DataEnabledLoggingObject.h" />
+    <ClInclude Include="DataEnabledObject.h" />
+    <ClInclude Include="DataEnabledStaticTerrain.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataOutput.h" />
+    <ClInclude Include="DataPort.h" />
+    <ClInclude Include="DataPorts.h" />
+    <ClInclude Include="DataPortTests.h" />
     <ClInclude Include="DataRegister.h" />
     <ClInclude Include="DebugCommandHandler.h" />
     <ClInclude Include="DebugGlobalField.h" />
@@ -694,6 +708,7 @@
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObjects.h" />
     <ClInclude Include="HashIndexedVector.h" />
+    <ClInclude Include="iDataObjectEnvironment.h" />
     <ClInclude Include="IntVector.h" />
     <ClInclude Include="iTakesDamage.h" />
     <ClInclude Include="iTakesDamageSimple.h" />

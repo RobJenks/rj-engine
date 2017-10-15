@@ -9,7 +9,7 @@ public:
 
 	CMPINLINE TestResult RunTests(void)
 	{
-		TestResult result = NewResult();
+		TestResult result = NewNamedResult(EnvironmentMapTests);
 
 		result += BasicInitialisationTests();
 		result += FalloffMethodTests();

@@ -10,9 +10,13 @@ public:
 
 	TestBase(void) : m_failallcases(false) { }
 
-	TestResult NewResult(void) const 
+#	define NewResult() CreateNewResult("")
+#	define NewNamedResult(Test) CreateNewResult(#Test)
+
+	TestResult CreateNewResult(const std::string & test) const 
 	{ 
 		TestResult result;
+		result.SetName(test);
 		if (m_failallcases) result.FailAllCases();
 		
 		return result;
