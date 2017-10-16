@@ -167,7 +167,7 @@ void BasicProjectileSet::SimulateProjectiles(Octree<iObject*> *sp_tree)
 		delta_pos = XMVectorMultiply(proj.Velocity, Game::TimeFactorV);
 
 		// Get all contacts potentially within the path of this object
-		int count = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
+		int count = Game::Search<iObject>().GetAllObjectsWithinDistance(proj.Position, leaf, proj.Speed,
 						contacts, Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Test each contact to see if it is actually intersected by the projectile path

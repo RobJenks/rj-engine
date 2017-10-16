@@ -59,13 +59,18 @@ namespace Game
 			}
 		}
 
+		/* Note that we are no longer clearing the collections below after deallocating all data, so that any 
+		   remaining references remain valid.  However we are also not calling the central shutdown method any 
+		   more - it is instead the responsibility of object reference owners to terminate on application 
+		   shutdown - so this is not so relevant any longer */
+
 		// Now clear both this temporary vector and the primary game object collections
-		object_vector.clear();
-		Game::Objects.clear();
-		Game::ObjectsByCode.clear();
+		//object_vector.clear();
+		//Game::Objects.clear();
+		//Game::ObjectsByCode.clear();
 
 		// Deallocate the null object register entry
-		SafeDelete(Game::NullObjectReference);
+		//SafeDelete(Game::NullObjectReference);
 		Game::Log << LOG_INFO << "Object register fully deallocated";
 	}
 

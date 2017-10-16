@@ -562,7 +562,7 @@ void Ship::AnalyseNearbyContacts(void)
 
 	// Locate all objects in the vicinity of this object, and maintain as the cache of nearby objects
 	std::vector<iObject*> objects;
-	Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, objects,
+	Game::Search<iObject>().GetAllObjectsWithinDistance(	this, Game::C_DEFAULT_SHIP_CONTACT_ANALYSIS_RANGE, objects,
 																Game::ObjectSearchOptions::NoSearchOptions);
 	
 	// Parse out any enemy contacts into the cached enemy contact vector.  Also ensure we have no NULLs in 

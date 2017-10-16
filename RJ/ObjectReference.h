@@ -46,7 +46,6 @@ public:
 
 		// Increment the reference count since we are now also referencing this object
 		m_entry->ReferenceAdded();
-
 		return *this;
 	}
 	
@@ -92,7 +91,7 @@ public:
 	{
 		// Release any existing reference that we have
 		m_entry->ReferenceRemoved();
-
+		
 		// Take the new object reference
 		m_entry = std::move(other.m_entry);
 
@@ -111,8 +110,9 @@ public:
 
 	// Operator (); returns the object being wrapped by this reference
 	// No longer need to test (entry.Active ? entry.object : NULL) since object is set to NULL on unregistering anyway
-	CMPINLINE T * operator()(void)				{ return (T*)(m_entry->Object); }
-	CMPINLINE T * operator()(void) const		{ return (T*)(m_entry->Object); }
+	CMPINLINE T * operator()(void) noexcept			{ return (T*)(m_entry->Object); }
+	CMPINLINE T * operator()(void) const noexcept	{ return (T*)(m_entry->Object); }
+
 
 protected:
 

@@ -61,7 +61,7 @@ namespace Game
 			Z_BOTH = (Z_NEG_SEG | Z_POS_SEG)
 		};
 
-		// Sturcture holding information on one cached search result
+		// Structure holding information on one cached search result
 		// Class has no special alignment requirements
 		struct CachedSearchResult
 		{
@@ -97,16 +97,19 @@ namespace Game
 
 		// Maximum accepted search cache size
 		static const typename std::vector<CachedSearchResults>::size_type	MAXIMUM_SEARCH_CACHE_SIZE = 32;
+		
+		// Initialise the object search component
+		void Initialise(void);
 
-		// Static initialisation method
-		static void Initialise(void);
+		// Initialise the object search component at the start of a frame
+		void InitialiseFrame(void);
 
-		// Initialises the object manager at the start of a frame
-		static void InitialiseFrame(void);
+		// Shuts down the object search component instance
+		void Shutdown(void);
 
 		// Searches for all items within the specified distance of an object.  Returns the number of items located
 		// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
-		CMPINLINE static int GetAllObjectsWithinDistance(const T *focalobject, float distance, std::vector<T*> & outResult, SearchOptions options)
+		CMPINLINE int GetAllObjectsWithinDistance(const T *focalobject, float distance, std::vector<T*> & outResult, SearchOptions options)
 		{
 			if (focalobject) return _GetAllObjectsWithinDistance(focalobject->GetSpatialTreeNode(), focalobject->GetPosition(),
 				(CheckBit_Single(options, ObjectSearchOptions::IgnoreFocalObjectBoundary) ? distance : distance + focalobject->GetCollisionSphereRadius()),
@@ -117,7 +120,7 @@ namespace Game
 		// Searches for all items within the specified distance of a position.  Returns the number of items located
 		// Allows use of certain flags to limit results during the search; more efficient that returning everything and then removing items later
 		// Requires us to locate the most relevant Octree node, so less efficient than the method that supplies a space object
-		CMPINLINE static int GetAllObjectsWithinDistance(const FXMVECTOR position, Octree<T*> *sp_tree, float distance,
+		CMPINLINE int GetAllObjectsWithinDistance(const FXMVECTOR position, Octree<T*> *sp_tree, float distance,
 			std::vector<T*> & outResult, SearchOptions options)
 		{
 			if (sp_tree) return _GetAllObjectsWithinDistance(sp_tree->GetNodeContainingPoint(position), position, distance, outResult, options);
@@ -126,7 +129,7 @@ namespace Game
 
 		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
 		template <typename UnaryPredicate>
-		CMPINLINE static int	CustomSearch(const T *focalobject, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
+		CMPINLINE int CustomSearch(const T *focalobject, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
 		{
 			if (focalobject)	return _CustomSearch<UnaryPredicate>(focalobject->GetSpatialTreeNode(), focalobject->GetPosition(), distance, outResult, Predicate);
 			else				return 0;
@@ -134,16 +137,16 @@ namespace Game
 
 		// Performs a custom (non-cached) search with a specified radius, based on the supplied predicate
 		template <typename UnaryPredicate>
-		CMPINLINE static int	CustomSearch(const FXMVECTOR position, Octree<T*> *sp_tree, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
+		CMPINLINE int CustomSearch(const FXMVECTOR position, Octree<T*> *sp_tree, float distance, std::vector<T*> & outResult, UnaryPredicate Predicate)
 		{
 			if (sp_tree)		return _CustomSearch<UnaryPredicate>(sp_tree->GetNodeContainingPoint(position), position, distance, outResult, Predicate);
 			else				return 0;
 		}
 
 		// Flag determining whether the object manager will maintain and return cached object search results where possible
-		CMPINLINE static bool						SearchCacheEnabled(void) 		{ return m_cache_enabled; }
-		CMPINLINE static void						DisableSearchCache(void)		{ m_cache_enabled = false; }
-		CMPINLINE static void						EnableSearchCache(void)
+		CMPINLINE bool						SearchCacheEnabled(void) 		{ return m_cache_enabled; }
+		CMPINLINE void						DisableSearchCache(void)		{ m_cache_enabled = false; }
+		CMPINLINE void						EnableSearchCache(void)
 		{
 			// Enable caching and clear any previously-cached data so we have a clean starting point
 			m_cache_enabled = true;
@@ -151,7 +154,7 @@ namespace Game
 		}
 
 		// Returns the current size of the search cache
-		CMPINLINE static typename std::vector<CachedSearchResults>::size_type GetCurrentCacheSize(void) { return m_cachesize; }
+		CMPINLINE typename std::vector<CachedSearchResults>::size_type GetCurrentCacheSize(void) { return m_cachesize; }
 
 		// Unary predicate for searching based on object type
 		class ObjectIsOfType
@@ -166,21 +169,21 @@ namespace Game
 
 		// Debug output of number cache hits/missed
 #	ifdef OBJMGR_DEBUG_MODE
-		static int CACHE_HITS, CACHE_MISSES;
+		int CACHE_HITS, CACHE_MISSES;
 #	endif
 
 	protected:
 
 		// Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
 		// appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
-		static int _GetAllObjectsWithinDistance(Octree<T*> *node, const FXMVECTOR position, float distance,
+		int _GetAllObjectsWithinDistance(Octree<T*> *node, const FXMVECTOR position, float distance,
 												std::vector<T*> & outResult, SearchOptions options);
 
 		// Primary custom search method.  Searches for all items within the specified distance of a position, using a custom
 		// predicate to select results.  Accepts the appropriate Octree node as an input; this is derived or supplied 
 		// by the various publicly-invoked methods
 		template <typename UnaryPredicate>
-		static int _CustomSearch(	Octree<T*> *node, const FXMVECTOR position, float distance,
+		int _CustomSearch(	Octree<T*> *node, const FXMVECTOR position, float distance,
 									std::vector<T*> & outResult, UnaryPredicate Predicate)
 		{
 			// We a pointer to the relevant spatial partitioning Octree to search for objects.  If we don't have one, return nothing immediately
@@ -227,8 +230,8 @@ namespace Game
 
 			// We know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
 			// of all items in its bounds.  Use a non-recursive vector substitute instead of normal recursive search for efficiency
-			search_candidate_nodes.clear();
-			search_candidate_nodes.push_back(node);
+			m_search_candidate_nodes.clear();
+			m_search_candidate_nodes.push_back(node);
 			T *obj;	XMFLOAT3 centre; int C; float obj_dist_sq;
 
 			// Search nodes from the left ("index"), and add new search candidates to the right.  Only node in place at the start
@@ -237,7 +240,7 @@ namespace Game
 			while (++index < count)
 			{
 				// Process the node.  Different action for branch vs leaf nodes
-				node = search_candidate_nodes[index]; if (!node) continue;
+				node = m_search_candidate_nodes[index]; if (!node) continue;
 				if (node->IsBranchNode())
 				{
 					// If this is a branch node, work out which of its children are actually relevant to us
@@ -254,115 +257,115 @@ namespace Game
 					switch (C)
 					{
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]); ++count; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]); ++count; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 4; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]); ++count; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 						count += 2; break;
 					case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]); ++count; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 4; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 4; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 						count += 8; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 						count += 4; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 						count += 2; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 						count += 4; break;
 					case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
 						count += 2; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]); ++count; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]); ++count; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 						count += 4; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 						count += 2; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]); ++count; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-						search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
 						count += 2; break;
 					case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-						search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]); ++count; break;
+						m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]); ++count; break;
 					}
 				}
 				else
@@ -394,22 +397,22 @@ namespace Game
 
 
 		// Data used in the process of searching for objects
-		static std::vector<Octree<T*>*>									search_candidate_nodes;
-		static typename std::vector<T*>::const_iterator					search_obj_end;
-		static typename std::vector<T*>::const_iterator					search_obj_it;
-		static std::vector<T*>											search_large_objects;
-		static T *														search_last_large_obj;
-		static bool														search_found_large_object;
+		std::vector<Octree<T*>*>										m_search_candidate_nodes;
+		typename std::vector<T*>::const_iterator						search_obj_end;
+		typename std::vector<T*>::const_iterator						search_obj_it;
+		std::vector<T*>													m_search_large_objects;
+		T *																m_search_last_large_obj;
+		bool															m_search_found_large_object;
 
 		// Flag determining whether search caching is enabled or not
-		static bool														m_cache_enabled;
+		bool															m_cache_enabled;
 
 		// Collection of cached search results
-		static std::vector<CachedSearchResults>							m_searchcache;
+		std::vector<CachedSearchResults>								m_searchcache;
 
 		// Index of the next cached search result to be added
-		typename static std::vector<CachedSearchResults>::size_type		m_nextcacheindex;
-		typename static std::vector<CachedSearchResults>::size_type		m_cachesize;
+		typename std::vector<CachedSearchResults>::size_type			m_nextcacheindex;
+		typename std::vector<CachedSearchResults>::size_type			m_cachesize;
 	};
 
 
@@ -419,45 +422,28 @@ namespace Game
 	template <class T> const float ObjectSearch<T>::MAXIMUM_SEARCH_DISTANCE = 100000.0f;	// Maximum search distance when increasing by the multiplier
 	template <class T> const AXMVECTOR	ObjectSearch<T>::SEARCH_DISTANCE_MULTIPLIER_V = XMVectorReplicate(ObjectSearch<T>::SEARCH_DISTANCE_MULTIPLIER);
 	template <class T> const AXMVECTOR	ObjectSearch<T>::MINIMUM_SEARCH_DISTANCE_V = XMVectorReplicate(ObjectSearch<T>::MINIMUM_SEARCH_DISTANCE);
-	template <class T> const AXMVECTOR	ObjectSearch<T>::MAXIMUM_SEARCH_DISTANCE_V = XMVectorReplicate(ObjectSearch<T>::MAXIMUM_SEARCH_DISTANCE);
+	template <class T> const AXMVECTOR	ObjectSearch<T>::MAXIMUM_SEARCH_DISTANCE_V = XMVectorReplicate(ObjectSearch<T>::MAXIMUM_SEARCH_DISTANCE);	
 
-	// Static debug constants
-#	ifdef OBJMGR_DEBUG_MODE
-	template <class T> int ObjectSearch<T>::CACHE_HITS = 0;
-	template <class T> int ObjectSearch<T>::CACHE_MISSES = 0;
-#	endif
-
-	// Static member initialisation
-	template <class T> std::vector<Octree<T*>*> ObjectSearch<T>::search_candidate_nodes;
-	template <class T> typename std::vector<T*>::const_iterator ObjectSearch<T>::search_obj_end;
-	template <class T> typename std::vector<T*>::const_iterator ObjectSearch<T>::search_obj_it;
-	template <class T> std::vector<T*> ObjectSearch<T>::search_large_objects = std::vector<T*>();
-	template <class T> T* ObjectSearch<T>::search_last_large_obj = NULL;
-	template <class T> bool ObjectSearch<T>::search_found_large_object = false;
-	template <class T> bool ObjectSearch<T>::m_cache_enabled = true;
-	template <class T> std::vector<typename ObjectSearch<T>::CachedSearchResults> ObjectSearch<T>::m_searchcache;
-	template <class T> typename std::vector<typename ObjectSearch<T>::CachedSearchResults>::size_type ObjectSearch<T>::m_nextcacheindex = 0;
-	template <class T> typename std::vector<typename ObjectSearch<T>::CachedSearchResults>::size_type ObjectSearch<T>::m_cachesize = 0;
-
-
-	// Static initialisation method
+	// Initialisation method
 	template <class T>
 	void ObjectSearch<T>::Initialise(void)
 	{
 		// Pre-allocate space for the frequently used internal vectors, for runtime efficiency
-		search_candidate_nodes.reserve(1024);
-		search_large_objects.reserve(64);
+		m_search_candidate_nodes.reserve(1024);
+		m_search_large_objects.reserve(64);
 
 		// Initialise the search cache and preallocate to the maximum size
 		m_cache_enabled = true;
 		m_searchcache = std::vector<CachedSearchResults>(MAXIMUM_SEARCH_CACHE_SIZE, CachedSearchResults());
 		m_nextcacheindex = 0;
 		m_cachesize = 0;
+		m_search_last_large_obj = NULL;
+		m_search_found_large_object = false;
 
 		// Initialise the cache hit / miss counters, if debug logging is enabled
-#	ifdef OBJMGR_DEBUG_MODE
-		CACHE_HITS = CACHE_MISSES = 0;
-#	endif
+#		ifdef OBJMGR_DEBUG_MODE
+			CACHE_HITS = CACHE_MISSES = 0;
+#		endif
 	}
 
 	// Initialises the object manager at the start of a frame
@@ -468,20 +454,36 @@ namespace Game
 		m_nextcacheindex = m_cachesize = 0;
 
 		// Reset the cache hit / miss counters for this frame, if debug logging is enabled
-#	ifdef OBJMGR_DEBUG_MODE
-		CACHE_HITS = CACHE_MISSES = 0;
+#		ifdef OBJMGR_DEBUG_MODE
+			CACHE_HITS = CACHE_MISSES = 0;
 
-#		ifdef OBJMGR_LOG_DEBUG_OUTPUT
-		OutputDebugString("\nObjMgr: Initialising cache for new frame\n");
+#			ifdef OBJMGR_LOG_DEBUG_OUTPUT
+				Game::Log << LOG_DEBUG << "ObjMgr: Initialising cache for new frame\n";
+#			endif
 #		endif
-#	endif
+	}
+
+	// Shuts down the object search component instance
+	template <class T>
+	void ObjectSearch<T>::Shutdown(void)
+	{
+		// Clear out all data.  It is important to clear the search cache vectors since they may otherwise remain
+		// holding on to object references that will become invalid during object register destruction, and may then
+		// result in access violation if this object is destructed after the object registers
+		m_cache_enabled = false;
+		m_cachesize = m_nextcacheindex = 0;
+		m_searchcache.clear();
+		m_search_candidate_nodes.clear();
+		m_search_large_objects.clear();
+		m_search_found_large_object = false;
+		m_search_last_large_obj = NULL;
 	}
 
 	// Primary internal object search method.  Searches for all items within the specified distance of a position.  Accepts the 
 	// appropriate Octree node as an input; this is derived or supplied by the various publicly-invoked methods
 	template <class T>
 	int ObjectSearch<T>::_GetAllObjectsWithinDistance(Octree<T*> *node, const FXMVECTOR position, float distance,
-		std::vector<T*> & outResult, int options)
+													  std::vector<T*> & outResult, int options)
 	{
 		/* For now, we wil take one of two approaches.  If the search distance fits entirely within this item's node (the very likely case)
 		we can efficiently iterate over the items in this node and return them.  If it does not, we will keep moving up the tree until
@@ -543,15 +545,15 @@ namespace Game
 					}
 
 					// Record this as a cache hit, if debug logging is enabled
-#				ifdef OBJMGR_DEBUG_MODE
-					++CACHE_HITS;
+#					ifdef OBJMGR_DEBUG_MODE
+						++CACHE_HITS;
 
-#					ifdef OBJMGR_LOG_DEBUG_OUTPUT
-					OutputDebugString(concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(XMVectorGetX(position))(",")(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)
-						(") met by cache ")(i)(" (")(m_searchcache[i].SearchDistance)(" of [")(XMVectorGetX(m_searchcache[i].Position))(",")
-						(XMVectorGetY(m_searchcache[i].Position))(",")(XMVectorGetZ(m_searchcache[i].Position))("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
+#						ifdef OBJMGR_LOG_DEBUG_OUTPUT
+						Game::Log << LOG_DEBUG << (concat("ObjMgr: CACHE HIT { Search(")(distance)(" of [")(XMVectorGetX(position))(",")(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)
+							(") met by cache ")(i)(" (")(m_searchcache[i].SearchDistance)(" of [")(XMVectorGetX(m_searchcache[i].Position))(",")
+							(XMVectorGetY(m_searchcache[i].Position))(",")(XMVectorGetZ(m_searchcache[i].Position))("], opt=")(m_searchcache[i].Options)(") }\n").str().c_str());
+#						endif
 #					endif
-#				endif
 
 					// Return the number of matches and quit
 					return matches;
@@ -562,14 +564,14 @@ namespace Game
 		/* We cannot use a cached search result so perform a proximity search */
 
 		// Record this as a cache miss, if debug logging is enabled
-#	ifdef OBJMGR_DEBUG_MODE
-		++CACHE_MISSES;
+#		ifdef OBJMGR_DEBUG_MODE
+			++CACHE_MISSES;
 
-#		ifdef OBJMGR_LOG_DEBUG_OUTPUT
-		OutputDebugString(concat("ObjMgr: Cache Miss { Search(")(distance)(" of [")(position)(",")(position)(",")(position)("], opt=")(options)
-			(") could not be met\n").str().c_str());
+#			ifdef OBJMGR_LOG_DEBUG_OUTPUT
+			Game::Log << LOG_DEBUG << (concat("ObjMgr: Cache Miss { Search(")(distance)(" of [")(position)(",")(position)(",")(position)("], opt=")(options)
+										(") could not be met\n").str().c_str());
+#			endif
 #		endif
-#	endif
 
 		// Increase actual search distance to enable more effective use of caching (distance *= SEARCH_DIST_MULTIPLIER)
 		// Use vector2 comparisons for efficiency since all components are replicated anyway
@@ -591,10 +593,10 @@ namespace Game
 		cache.Results.clear();
 
 		// Record the new cache that was created if in debug mode
-#	if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
-		OutputDebugString(concat("ObjMgr: Creating cache ")(m_nextcacheindex)(" (")(search_distance)(" of [")(XMVectorGetX(position))(",")
-			(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)("\n").str().c_str());
-#	endif
+#		if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
+			Game::Log << LOG_DEBUG << (concat("ObjMgr: Creating cache ")(m_nextcacheindex)(" (")(search_distance)(" of [")(XMVectorGetX(position))(",")
+				(XMVectorGetY(position))(",")(XMVectorGetZ(position))("], opt=")(options)("\n").str().c_str());
+#		endif
 
 		// Increment the cache counter for the next one that will be used
 		if (++m_nextcacheindex == ObjectSearch::MAXIMUM_SEARCH_CACHE_SIZE)
@@ -641,8 +643,8 @@ namespace Game
 
 		// We know that node contains our full search area (or is the root, i.e. all objects) so we want to get a vector 
 		// of all items in its bounds.  Use a non-recursive vector substitute instead of normal recursive search for efficiency
-		search_candidate_nodes.clear();
-		search_candidate_nodes.push_back(node);
+		m_search_candidate_nodes.clear();
+		m_search_candidate_nodes.push_back(node);
 
 		// Initialise the results vector before starting
 		int found = 0;
@@ -652,7 +654,7 @@ namespace Game
 		T *obj;
 		XMFLOAT3 centre;
 		float obj_dist_sq;
-		search_last_large_obj = NULL;
+		m_search_last_large_obj = NULL;
 		int C;
 
 		// Search nodes from the left ("index"), and add new search candidates to the right.  Only node in place at the start
@@ -661,7 +663,7 @@ namespace Game
 		while (++index < count)
 		{
 			// Process the node.  Different action for branch vs leaf nodes
-			node = search_candidate_nodes[index]; if (!node) continue;
+			node = m_search_candidate_nodes[index]; if (!node) continue;
 			if (node->IsBranchNode())
 			{
 				// If this is a branch node, work out which of its children are actually relevant to us
@@ -678,115 +680,115 @@ namespace Game
 				switch (C)
 				{
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]); ++count; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]); ++count; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 4; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]); ++count; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 					count += 2; break;
 				case (NodeSubdiv::X_NEG_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]); ++count; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 4; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 4; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_DOWN]);
 					count += 8; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 					count += 4; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 					count += 2; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SW_UP]);
 					count += 4; break;
 				case (NodeSubdiv::X_BOTH | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NW_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
 					count += 2; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]); ++count; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_NEG_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]); ++count; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_DOWN]);
 					count += 4; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_BOTH | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_DOWN]);
 					count += 2; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_NEG_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]); ++count; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_BOTH) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
-					search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]);
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_SE_UP]);
 					count += 2; break;
 				case (NodeSubdiv::X_POS_SEG | NodeSubdiv::Y_POS_SEG | NodeSubdiv::Z_POS_SEG) :
-					search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]); ++count; break;
+					m_search_candidate_nodes.push_back(node->m_children[OCTREE_NE_UP]); ++count; break;
 				}
 			}
 			else
@@ -825,22 +827,22 @@ namespace Game
 					{
 						// Check whether we have already found this object; continue to the next object if we have
 						// Also clear the static large object vector if this is the first time we are using it
-						if (search_last_large_obj == NULL)		search_large_objects.clear();
-						else if (search_last_large_obj == obj)	continue;
+						if (m_search_last_large_obj == NULL)		m_search_large_objects.clear();
+						else if (m_search_last_large_obj == obj)	continue;
 
 						// Check whether we have already recorded this object; ignore the final entry since this was "last_large_obj"
-						std::vector<T*>::size_type n = (search_large_objects.size());
+						std::vector<T*>::size_type n = (m_search_large_objects.size());
 						if (n >= 2)		// We don't need to check if n==0 (obviously) or n==1 (since we are ignoring the last item)
 						{
 							--n;		// Ignore the final item
-							search_found_large_object = false;
-							for (std::vector<T*>::size_type i = 0; i < n; ++i) if (search_large_objects[i] == obj) { search_found_large_object = true; break; }
-							if (search_found_large_object) continue;
+							m_search_found_large_object = false;
+							for (std::vector<T*>::size_type i = 0; i < n; ++i) if (m_search_large_objects[i] == obj) { m_search_found_large_object = true; break; }
+							if (m_search_found_large_object) continue;
 						}
 
 						// We have not recorded the object; add it to the list now
-						search_large_objects.push_back(obj);
-						search_last_large_obj = obj;
+						m_search_large_objects.push_back(obj);
+						m_search_last_large_obj = obj;
 
 						// Get the squared distance from our position to the object
 						obj_dist_sq = XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(position, obj->GetPosition())));
@@ -882,17 +884,24 @@ namespace Game
 		}
 
 		// If in debug logging mode, determine and record how many objects were added to the last cache
-#	if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
-		int debug_cache_i = (m_nextcacheindex - 1);
-		if (debug_cache_i < 0) debug_cache_i = (ObjectSearch::MAXIMUM_SEARCH_CACHE_SIZE - 1);
-		OutputDebugString(concat("ObjMgr: Cache ")(debug_cache_i)(" populated with ")(m_searchcache[debug_cache_i].Results.size())(" objects\n").str().c_str());
-#	endif
+#		if defined(OBJMGR_DEBUG_MODE) && defined(OBJMGR_LOG_DEBUG_OUTPUT)
+			int debug_cache_i = (m_nextcacheindex - 1);
+			if (debug_cache_i < 0) debug_cache_i = (ObjectSearch::MAXIMUM_SEARCH_CACHE_SIZE - 1);
+			Game::Log << LOG_DEBUG << (concat("ObjMgr: Cache ")(debug_cache_i)(" populated with ")(m_searchcache[debug_cache_i].Results.size())(" objects\n").str().c_str());
+#		endif
 
 		// Return the total number of items that were located
 		return ((int)outResult.size());
 	}
 
 
+	// Returns a reference to the singleton search instance for the given template type
+	template <class T>
+	ObjectSearch<T> & Search(void)
+	{
+		static ObjectSearch<T> instance;
+		return instance;
+	}
 
 
 	// Object search manager; coordinates the action of multiple ObjectSearch instances so that only one
@@ -903,39 +912,46 @@ namespace Game
 	public:
 
 		// Initialises object search capabilities
-		CMPINLINE static void				Initialise(void)
+		CMPINLINE static void Initialise(void)
 		{
 			// Update each search instance in turn
-			ObjectSearch<iObject>::Initialise();
+			Game::Search<iObject>().Initialise();
 		}
 
 		// Initialises object search instances at the start of a frame
-		CMPINLINE static void				InitialiseFrame(void)
+		CMPINLINE static void InitialiseFrame(void)
 		{
 			// Update each search instance in turn
-			ObjectSearch<iObject>::InitialiseFrame();
+			Game::Search<iObject>().InitialiseFrame();
 		}
 		
 		// Enables the search cache for all object search instances
-		CMPINLINE static void				EnableSearchCache(void)
+		CMPINLINE static void EnableSearchCache(void)
 		{
 			// Update each search instance in turn
-			ObjectSearch<iObject>::EnableSearchCache();
+			Game::Search<iObject>().EnableSearchCache();
 		}
 
 		// Disables the search cache for all object search instances
-		CMPINLINE static void				DisableSearchCache(void)
+		CMPINLINE static void DisableSearchCache(void)
 		{
 			// Update each search instance in turn
-			ObjectSearch<iObject>::DisableSearchCache();
+			Game::Search<iObject>().DisableSearchCache();
+		}
+
+		// Shuts down all object search components
+		CMPINLINE static void Shutdown(void)
+		{
+			// Update each search instance in turn
+			Game::Search<iObject>().Shutdown();
 		}
 
 		// Returns the current size of the search cache across all search instances
 		CMPINLINE static int DetermineTotalCurrentCacheSize(void) 
 		{ 
 			return (int)(
-				ObjectSearch<iObject>::GetCurrentCacheSize() /* +
-	   			ObjectSearch<...>::GetCurrentCacheSize() */
+				Game::Search<iObject>().GetCurrentCacheSize() /* +
+	   			Game::Search<...>().GetCurrentCacheSize() */
 			);
 		}
 
@@ -943,13 +959,13 @@ namespace Game
 		// Returns the current number of cache hits across all search instances
 		CMPINLINE static int DetermineTotalCurrentCacheHits(void)
 		{
-			return (ObjectSearch<iObject>::CACHE_HITS /* + ObjectSearch<...>::... */);
+			return (Game::Search<iObject>().CACHE_HITS /* + ObjectSearch<...>::... */);
 		}
 
 		// Returns the current size of the search cache across all search instances
 		CMPINLINE static int DetermineTotalCurrentCacheMisses(void)
 		{
-			return (ObjectSearch<iObject>::CACHE_MISSES /* + ObjectSearch<...>::... */);
+			return (Game::Search<iObject>().CACHE_MISSES /* + ObjectSearch<...>::... */);
 		}
 #endif
 

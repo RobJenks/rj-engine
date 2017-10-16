@@ -407,7 +407,7 @@ void RJMain::TerminateApplication()
 	Game::Log.FlushAllStreams();
 
 	// Terminate all objects in the game
-	Game::ShutdownObjectRegisters();
+	//Game::ShutdownObjectRegisters();
 
 	// Release all standard model/geometry data
 	Model::TerminateAllModelData();
@@ -420,6 +420,10 @@ void RJMain::TerminateApplication()
 
 	// Region termination functions
 	TerminateRegions();
+
+	// Shutdown all object search components and any associated cache data; must be performed 
+	// before the central object registers themselves are destructed (due to cache references into the registers)
+	TerminateObjectSearchManager();
 
 	// Terminate all key game data structures (e.g. the space object Octree)
 	TerminateCoreDataStructures();
@@ -1503,6 +1507,14 @@ void RJMain::TerminateCoreDataStructures(void)
 	Game::SpatialPartitioningTree = NULL;*/
 }
 
+// Shutdown all object search components and any associated cache data
+void RJMain::TerminateObjectSearchManager(void)
+{
+	// Shutdown all object search components and any associated cache data; must be performed 
+	// before the central object registers themselves are destructed (due to cache references into the registers)
+	Game::ObjectSearchManager::Shutdown();
+}
+
 // Terminate the simulation state manager and release any resources
 void RJMain::TerminateStateManager(void)
 {
@@ -1677,7 +1689,7 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects, 
+		count = 1 + Game::Search<iObject>().GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects, 
 																				Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the parent ship environmment(hence why we +1 to the count above)
@@ -1687,7 +1699,7 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects,
+		count = 1 + Game::Search<iObject>().GetAllObjectsWithinDistance(	Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects,
 																				Game::ObjectSearchOptions::OnlyCollidingObjects);
 
 		// Also include the player ship (hence why we +1 to the count above)
@@ -1732,7 +1744,6 @@ void RJMain::DebugRenderSpaceCollisionBoxes(void)
 // Default destructor
 RJMain::~RJMain(void)
 {
-
 }
 
 // Run the continuous collision detection (CCD) test in the main system environment

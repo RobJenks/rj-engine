@@ -220,7 +220,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 		// Perform a search outwards from the focal object to locate all objects within range.  Don't incorporate any object
 		// boundaries at this point since we are just doing a coarse search of nearby objects.  We only want to return
 		// active collider objects and can ignore anything else
-		numobjects = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(focalobject, radius, objects, 
+		numobjects = Game::Search<iObject>().GetAllObjectsWithinDistance(focalobject, radius, objects, 
 			(Game::ObjectSearchOptions::OnlyCollidingObjects | Game::ObjectSearchOptions::OnlyActiveColliders));
 
 		// Add the focal object (as long as it collides), since it will not be returned by the ObjectsWithinDistance method
@@ -258,7 +258,7 @@ void GamePhysicsEngine::PerformSpaceCollisionDetection(iSpaceObject *focalobject
 			
 			// Get any colliding objects within the current object's collision sphere radius; quit here if there are no objects nearby
 			candidates.clear();
-			numcandidates = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	object, object->GetCollisionSphereRadius(), candidates, 
+			numcandidates = Game::Search<iObject>().GetAllObjectsWithinDistance(	object, object->GetCollisionSphereRadius(), candidates, 
 																						Game::ObjectSearchOptions::OnlyCollidingObjects);
 			if (numcandidates == 0) continue;
 
@@ -387,7 +387,7 @@ iSpaceObject * GamePhysicsEngine::PerformContinuousSpaceCollisionDetection(iSpac
 	// Get all objects within a potential collision volume, based upon the current object velocity & with a buffer for ricochets
 	// Quit immediately if there are no other objects in range
 	std::vector<iObject*> candidates;
-	int numcandidates = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	object, GetCCDTestDistance(object), candidates,
+	int numcandidates = Game::Search<iObject>().GetAllObjectsWithinDistance(	object, GetCCDTestDistance(object), candidates,
 																					Game::ObjectSearchOptions::OnlyCollidingObjects);
 	if (numcandidates == 0) return NULL;
 

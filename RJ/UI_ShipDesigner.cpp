@@ -635,7 +635,7 @@ Result UI_ShipDesigner::CreateNewShip(void)
 	if (m_ship) ShutdownSDShip();
 
 	// Create a new ship details object
-	m_ship = new ComplexShip();
+	m_ship = ComplexShip::Create("null_environment");
 	m_ship->InitialiseElements(initialsize);
 	
 	// Update the view to show this new (blank) ship
@@ -1694,13 +1694,14 @@ UI_ShipDesigner::SectionPlacementResult *UI_ShipDesigner::EvaluateSectionPlaceme
 																					ComplexShipSection *section, 
 																					INTVECTOR2 gridpos, int gridzpos)
 {	
-	ComplexShipElement /*esec,*/ *eship;
+	ComplexShipElement *eship;
 	INTVECTOR3 shippos;
 	INTVECTOR2 gridelement;
 	int z;
 
 	// Create a new placement result object to hold the result of this evauation
 	UI_ShipDesigner::SectionPlacementResult *result = new UI_ShipDesigner::SectionPlacementResult();
+	if (!ship) return result;
 
 	// Calculate the element bounds for this ship section
 	INTVECTOR3 sectionsize = section->GetElementSize();
@@ -2084,7 +2085,8 @@ void UI_ShipDesigner::ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 s
 void UI_ShipDesigner::Terminate(void)
 {
 	// Delete the ship designer ship, which is not part of the global ship collection so must be terminated separately
-	ShutdownSDShip();
+	//ShutdownSDShip();
+	m_ship = NULL;
 
 	// Deallocate all memory assigned for the ship designer grid
 	for (int i=0; i<m_gridxmax; i++) delete[] m_grid[i];
@@ -2489,7 +2491,8 @@ void UI_ShipDesigner::DeployCorridorTile(INTVECTOR2 location)
 	tile->SetElementLocation(elpos);
 
 	// Link this tile to the relevant parent objects
-	m_ship->AddTile((ComplexShipTile**)&tile);
+	ComplexShipTile *pbase = static_cast<ComplexShipTile*>(tile);
+	m_ship->AddTile(&pbase);
 
 	// Now we want to perform an update of this tile, plus its neighbours, to see if the connections will change
 	UpdateTileAndNeighbours(tile);

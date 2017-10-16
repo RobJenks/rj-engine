@@ -94,6 +94,7 @@ public:
 	// Termination methods
 	void				TerminateApplication(void);
 	void				TerminateCoreDataStructures(void);
+	void				TerminateObjectSearchManager(void);
 	void				TerminateStateManager(void);
 	void				TerminateLogging(void);
 	void				TerminateRegions(void);

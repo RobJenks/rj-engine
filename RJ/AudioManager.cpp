@@ -502,7 +502,7 @@ void AudioManager::GenerateNewSpaceObjectBindings(iObject *listener, float audio
 
 	// Get all objects within range
 	std::vector<iObject*> objects;
-	Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(listener, audio_inner_range, objects, Game::ObjectSearchOptions::NoSearchOptions);
+	Game::Search<iObject>().GetAllObjectsWithinDistance(listener, audio_inner_range, objects, Game::ObjectSearchOptions::NoSearchOptions);
 
 	// Check all objects to see if they already have a binding
 	std::vector<iObject*>::const_iterator it_end = objects.end();

@@ -59,7 +59,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	{
 		// Now perform a search of the local area for all NON-DIRECTIONAL light sources
 		const SpaceSystem & system = Game::Universe->GetCurrentSystem();
-		Game::ObjectSearch<iObject>::CustomSearch(Game::Engine->GetCamera()->GetPosition(), system.SpatialPartitioningTree,
+		Game::Search<iObject>().CustomSearch(Game::Engine->GetCamera()->GetPosition(), system.SpatialPartitioningTree,
 			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(Light::LightType::Directional));
 
 		// Pre-register all directional system list sources since we know they will always be relevant, and they 

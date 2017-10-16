@@ -2695,7 +2695,7 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is on foot, so use a proximity test to the object currently considered their parent environment
 		if (Game::CurrentPlayer->GetParentEnvironment() == NULL) return;
-		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects,
+		count = 1 + Game::Search<iObject>().GetAllObjectsWithinDistance(Game::CurrentPlayer->GetParentEnvironment(), 10000.0f, objects,
 																			(Game::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Also include the parent ship environmment (hence why we +1 to the count above)
@@ -2705,7 +2705,7 @@ void CoreEngine::DebugRenderSpaceCollisionBoxes(void)
 	{
 		// Player is in a spaceobject ship, so use the proximity test on their ship
 		if (Game::CurrentPlayer->GetPlayerShip() == NULL) return;
-		count = 1 + Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects, 
+		count = 1 + Game::Search<iObject>().GetAllObjectsWithinDistance(Game::CurrentPlayer->GetPlayerShip(), 10000.0f, objects, 
 																			(Game::ObjectSearchOptions::OnlyCollidingObjects));
 
 		// Also include the player ship (hence why we +1 to the count above)
@@ -2866,7 +2866,7 @@ void CoreEngine::DebugRenderObjectIdentifiers(void)
 
 		// Get the set of all objects nearby
 		std::vector<iObject*> spaceobjects;
-		int n = Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(pos, node, m_debug_renderobjid_distance, spaceobjects, Game::ObjectSearchOptions::NoSearchOptions);
+		int n = Game::Search<iObject>().GetAllObjectsWithinDistance(pos, node, m_debug_renderobjid_distance, spaceobjects, Game::ObjectSearchOptions::NoSearchOptions);
 
 		// Store required data in the object array
 		for (int i = 0; i < n; ++i)

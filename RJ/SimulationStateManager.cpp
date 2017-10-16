@@ -237,7 +237,7 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			}
 
 			// Get all objects within the simulation hub radius from this object and iterate through them
-			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(spacehub, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
+			Game::Search<iObject>().GetAllObjectsWithinDistance(spacehub, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
 																			   Game::ObjectSearchOptions::NoSearchOptions);
 			std::vector<iObject*>::iterator it3_end = objects.end();
 			for (std::vector<iObject*>::iterator it3 = objects.begin(); it3 != it3_end; ++it3)
@@ -284,8 +284,8 @@ void SimulationStateManager::EvaluateSimulationStateInSystem(SpaceSystem * syste
 			env->SetSimulationStateOfEnvironmentContents(iObject::ObjectSimulationState::FullSimulation);
 
 			// We also want to update any space objects within range of this hub's environment
-			Game::ObjectSearch<iObject>::GetAllObjectsWithinDistance(	env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
-																		Game::ObjectSearchOptions::NoSearchOptions);
+			Game::Search<iObject>().GetAllObjectsWithinDistance(	env, Game::C_SPACE_SIMULATION_HUB_RADIUS, objects,
+																	Game::ObjectSearchOptions::NoSearchOptions);
 			std::vector<iObject*>::iterator it5_end = objects.end();
 			for (std::vector<iObject*>::iterator it5 = objects.begin(); it5 != it5_end; ++it5)
 			{
