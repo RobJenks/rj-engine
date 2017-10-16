@@ -3,11 +3,12 @@
 
 Executed 3 tests:
 Test 0 (EnvironmentMapTests): 32 Passed, 3 Failed, 3 Messages:
-    ERROR: [102882599|EnvironmentMapTests.cpp:145] Multi-cell multiplictive propogation failed ([31.5147] != [34])
-    ERROR: [102882603|EnvironmentMapTests.cpp:174] Multi-cell averaged propogation failed ([2] != [1])
-    ERROR: [102882607|EnvironmentMapTests.cpp:203] Multi-cell relative falloff propogation failed ([7.47183] != [9.125])
+    ERROR: [105404690|EnvironmentMapTests.cpp:145] Multi-cell multiplictive propogation failed ([31.5147] != [34])
+    ERROR: [105404694|EnvironmentMapTests.cpp:174] Multi-cell averaged propogation failed ([2] != [1])
+    ERROR: [105404697|EnvironmentMapTests.cpp:203] Multi-cell relative falloff propogation failed ([7.47183] != [9.125])
 Test 1 (SequenceGenerationTests): 9 Passed, 0 Failed
-Test 2 (DataPortTests): 47 Passed, 0 Failed
+Test 2 (DataPortTests): 76 Passed, 1 Failed, 1 Messages:
+    ERROR: [105404705|DataPortTests.cpp:135] Output port connection ID is not correct ([0] != [1])
 
 === Test execution completed ===
 

@@ -18,6 +18,9 @@ void iDataObjectEnvironment::RegisterDataEnabledObject(DataEnabledObject *object
 	// Parameter check
 	if (!object) return;
 
+	// Provide the object with a reference to this data environment
+	object->AssignToDataEnvironment(this);
+
 	// Add each port owned by the object in turn
 	for (auto & port : object->GetPorts())
 	{
@@ -35,6 +38,9 @@ void iDataObjectEnvironment::UnregisterDataEnabledObject(DataEnabledObject *obje
 {
 	// Parameter check
 	if (!object) return;
+
+	// Remove the object reference to this data environment
+	object->RemoveFromDataEnvironment();
 
 	// Remove each port owned by the object in turn
 	for (auto & port : object->GetPorts())

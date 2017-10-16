@@ -166,3 +166,17 @@ void DataEnabledObject::RemoveUniquePortID(DataPorts::PortIndex port_index)
 	m_dataports[port_index].RevokePortID();
 }
 
+// Assigns the object to the given data environment; called by the environment when registering objects
+void DataEnabledObject::AssignToDataEnvironment(iDataObjectEnvironment *env)
+{
+	m_data_environment = env;
+}
+
+// Removes the object reference to its data environment; called by the environment when unregistering objects
+void DataEnabledObject::RemoveFromDataEnvironment(void)
+{
+	m_data_environment = NULL;
+}
+
+
+

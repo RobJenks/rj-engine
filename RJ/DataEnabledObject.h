@@ -61,6 +61,12 @@ protected:
 	// Assigns a unique port ID to the given port in this object; called by the data environment when registering objects
 	void									AssignUniquePortID(DataPorts::PortIndex port_index, DataPorts::PortID port_id);
 
+	// Assigns the object to the given data environment; called by the environment when registering objects
+	void									AssignToDataEnvironment(iDataObjectEnvironment *env);
+
+	// Removes the object reference to its data environment; called by the environment when unregistering objects
+	void									RemoveFromDataEnvironment(void);
+
 	// Removes the unique port ID that was previously assigned to a port
 	void									RemoveUniquePortID(DataPorts::PortIndex port_index);
 	

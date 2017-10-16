@@ -20,6 +20,10 @@ public:
 	// Method invoked when this object receives data through one of its public input ports
 	void								DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port);
 
+	// Return port indices for the object
+	CMPINLINE DataPorts::PortIndex		InputPort(void) const { return PORT_RECEIVE; }
+	CMPINLINE DataPorts::PortIndex		OutputPort(void) const { return PORT_SEND; }
+
 
 private:
 

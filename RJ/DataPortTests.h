@@ -13,6 +13,7 @@ public:
 
 		result += BasicInitialisationTests();
 		result += BasicTerrainEnvironmentInitialisationTests();
+		result += BasicConnectonTests();
 
 
 		return result;
@@ -23,6 +24,7 @@ private:
 
 	TestResult BasicInitialisationTests();
 	TestResult BasicTerrainEnvironmentInitialisationTests();
+	TestResult BasicConnectonTests();
 
 };
 
