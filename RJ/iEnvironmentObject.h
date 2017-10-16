@@ -75,6 +75,9 @@ public:
 	CMPINLINE bool								IsOnGround(void) const					{ return m_onground; }
 	CMPINLINE void								SetGroundFlag(bool b)					{ m_onground = b; }
 
+	// Indicates whether this environment object is data-enabled
+	bool										IsDataEnabled(void) const				{ return m_dataenabled; }
+
 	// Event raised whenever the object has a significant collision with the terrain.  "Significant" denotes impacts greater than 
 	// a defined threshold, so excluding e.g. normal floor collisions
 	void										CollisionWithTerrain(const GamePhysicsEngine::TerrainImpactData & impact);

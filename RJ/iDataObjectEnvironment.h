@@ -15,6 +15,10 @@ public:
 		DataPorts::PortID			ID;
 		DataEnabledObject *			DataObject;
 		DataPorts::PortIndex		ObjectPortIndex;
+
+		DataPortReference(void)	{ }
+		DataPortReference(bool active, DataPorts::PortID id, DataEnabledObject *object, DataPorts::PortIndex object_port_index)
+			: IsActive(active), ID(id), DataObject(object), ObjectPortIndex(object_port_index) { }
 	};
 
 	// Default constructor
@@ -38,6 +42,9 @@ public:
 	// Checks the given port ID and verifies that it is correct and active
 	Result									VerifyPort(DataPorts::PortID port_id) const;
 
+	// Returns the number of ACTIVE ports in the environment
+	CMPINLINE DataPorts::PortIndex			GetActiveDataPortCount(void) const { return m_active_port_count; }
+
 	// Connects the two specified ports together, or returns an error code if the connection is not valid or possible
 	Result									ConnectPorts(DataPorts::PortID port_id_0, DataPorts::PortID port_id_1);
 
@@ -47,13 +54,30 @@ public:
 	// Transmit data between the two given ports
 	void									TransmitData(DataPorts::PortID source_port, DataPorts::PortID target_port, DataPorts::DataType data);
 
+	// Return a constant reference to the set of registered data ports (including those which are inactive)
+	CMPINLINE const std::vector<DataPortReference> & GetDataPorts(void) const { return m_data_ports; }
+
 	// Default destructor
 	~iDataObjectEnvironment(void);
+
 
 private:
 
 	// Collection of data ports registered in this environment
-	std::vector<DataPortReference>	m_data_ports;
+	std::vector<DataPortReference>			m_data_ports;
 
+	// Count of the number of ACTIVE ports in this environment (which will be <= the
+	// total number of ports in the collection, due to ports being set inactive when removed)
+	DataPorts::PortIndex					m_active_port_count;
+
+
+	// Return the next free data port ID; either the first inactive entry, or a new entry if all are currently active
+	DataPorts::PortID						GetNewDataPortID(void);
+
+	// Store a new data port reference at the given index
+	void									StoreNewDataPortReference(DataPorts::PortID port_id, DataEnabledObject *object, DataPorts::PortIndex object_port_index);
+
+	// Deactivate the data port reference with the given ID
+	void									DeactivateDataPortReference(DataPorts::PortID port_id);
 
 };

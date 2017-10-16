@@ -14,6 +14,12 @@ void DataPort::AssignPortID(DataPorts::PortID id)
 	m_id = id;
 }
 
+// Remove the unique ID registered to this port
+void DataPort::RevokePortID(void)
+{
+	m_id = DataPorts::NO_PORT_ID;
+}
+
 // Set the ID of the port that this connected to this one; either the source of our input, or 
 // the target for our output (or 0 if not connected)
 void DataPort::SetConnection(DataPorts::PortID port_id)

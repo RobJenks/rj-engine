@@ -12,6 +12,7 @@ public:
 		TestResult result = NewNamedResult(DataPortTests);
 
 		result += BasicInitialisationTests();
+		result += BasicTerrainEnvironmentInitialisationTests();
 
 
 		return result;
@@ -21,6 +22,7 @@ public:
 private:
 
 	TestResult BasicInitialisationTests();
+	TestResult BasicTerrainEnvironmentInitialisationTests();
 
 };
 

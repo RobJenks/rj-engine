@@ -37,6 +37,8 @@ public:
 
 
 	// Allow our parent data environment limited friend access to methods for creating/breaking connections
+	friend void iDataObjectEnvironment::RegisterDataEnabledObject(DataEnabledObject *object);
+	friend void iDataObjectEnvironment::UnregisterDataEnabledObject(DataEnabledObject *object);
 	friend Result iDataObjectEnvironment::ConnectPorts(DataPorts::PortID, DataPorts::PortID);
 	friend Result iDataObjectEnvironment::DisconnectPorts(DataPorts::PortID, DataPorts::PortID);
 
@@ -56,6 +58,12 @@ protected:
 	// environment once all validations are complete on both sides.  In order to request a disconnection, use DisconnectPort() instead
 	void									BreakConnection(DataPorts::PortIndex port_index);
 
+	// Assigns a unique port ID to the given port in this object; called by the data environment when registering objects
+	void									AssignUniquePortID(DataPorts::PortIndex port_index, DataPorts::PortID port_id);
+
+	// Removes the unique port ID that was previously assigned to a port
+	void									RemoveUniquePortID(DataPorts::PortIndex port_index);
+	
 	// Send data out of a port
 	void									SendData(DataPorts::PortIndex port_index, DataPorts::DataType data);
 

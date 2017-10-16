@@ -1,4 +1,5 @@
 #include <assert.h>
+#include "Logging.h"
 #include "DataEnabledObject.h"
 #include "iDataObjectEnvironment.h"
 
@@ -122,3 +123,46 @@ bool DataEnabledObject::HasDataPort(DataPorts::PortIndex port_index)
 {
 	return (port_index < m_dataportcount);
 }
+
+// Assigns a unique port ID to the given port in this object; called by the data environment when registering objects
+void DataEnabledObject::AssignUniquePortID(DataPorts::PortIndex port_index, DataPorts::PortID port_id)
+{
+	// Parameter check
+	if (!HasDataPort(port_index) || port_id == DataPorts::NO_PORT_ID)
+	{
+		Game::Log << LOG_ERROR << "Invalid attempt to assign unique port ID of " << port_id << " to object \"" << this << "\" port with index " << port_index << " (total object ports = " << m_dataports.size() << ")\n";
+		return;
+	}
+
+	// Make sure the port does not already have an ID assigned
+	if (m_dataports[port_index].GetPortID() != DataPorts::NO_PORT_ID)
+	{
+		Game::Log << LOG_ERROR << "Attempted to assign port ID " << port_id << " to object \"" << this << "\" port with index " << port_index << ", but port is already registered with ID " << m_dataports[port_index].GetPortID() << "\n";
+		return;
+	}
+
+	// All validations passed, to assign the ID and return
+	m_dataports[port_index].AssignPortID(port_id);
+}
+
+// Removes the unique port ID that was previously assigned to a port
+void DataEnabledObject::RemoveUniquePortID(DataPorts::PortIndex port_index)
+{
+	// Parameter check
+	if (!HasDataPort(port_index))
+	{
+		Game::Log << LOG_ERROR << "Invalid attempt to remove unique port ID from object \"" << this << "\" port with index " << port_index << " (total object ports = " << m_dataports.size() << ")\n";
+		return;
+	}
+
+	// Make sure the port does actually have an ID assigned
+	if (m_dataports[port_index].GetPortID() == DataPorts::NO_PORT_ID)
+	{
+		Game::Log << LOG_ERROR << "Attempted to remove port ID from object \"" << this << "\" port with index " << port_index << ", but port is not yet registered\n";
+		return;
+	}
+
+	// All validations passed, so remove the ID and return
+	m_dataports[port_index].RevokePortID();
+}
+

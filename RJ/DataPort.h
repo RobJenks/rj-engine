@@ -22,6 +22,9 @@ public:
 	// Set the uniquely-identifying ID of this port
 	void									AssignPortID(DataPorts::PortID id);
 
+	// Remove the unique ID registered to this port
+	void									RevokePortID(void);
+
 	// Set the ID of the port that this connected to this one; either the source of our input, or 
 	// the target for our output (or 0 if not connected)
 	void									SetConnection(DataPorts::PortID port_id);

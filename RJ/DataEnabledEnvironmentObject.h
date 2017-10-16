@@ -7,6 +7,9 @@ class DataEnabledEnvironmentObject : public iEnvironmentObject, public DataEnabl
 {
 public:
 
+	// Default constructor
+	DataEnabledEnvironmentObject(void);
+
 
 private:
 

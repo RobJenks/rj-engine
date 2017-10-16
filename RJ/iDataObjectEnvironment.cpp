@@ -1,20 +1,133 @@
 #include <algorithm>
 #include <assert.h>
+#include "Logging.h"
 #include "DataEnabledObject.h"
 #include "iDataObjectEnvironment.h"
 
 
 // Default constructor
 iDataObjectEnvironment::iDataObjectEnvironment(void)
+	:
+	m_active_port_count(0U)
 {
+}
 
+// Registers a new data-enabled object with this environment
+void iDataObjectEnvironment::RegisterDataEnabledObject(DataEnabledObject *object)
+{
+	// Parameter check
+	if (!object) return;
+
+	// Add each port owned by the object in turn
+	for (auto & port : object->GetPorts())
+	{
+		// Get a new port ID and store a reference to the port in this slot
+		DataPorts::PortID port_id = GetNewDataPortID();
+		StoreNewDataPortReference(port_id, object, port.GetPortIndex());
+
+		// Notify the port of its new unique ID
+		object->AssignUniquePortID(port.GetPortIndex(), port_id);
+	}
+}
+
+// Removes a data-enabled object from this environment
+void iDataObjectEnvironment::UnregisterDataEnabledObject(DataEnabledObject *object)
+{
+	// Parameter check
+	if (!object) return;
+
+	// Remove each port owned by the object in turn
+	for (auto & port : object->GetPorts())
+	{
+		// Attempt to locate this port in the collection
+		DataPorts::PortID port_id = GetPortID(object, port.GetPortIndex());
+		if (port_id == DataPorts::NO_PORT_ID || port_id != port.GetPortID())
+		{
+			Game::Log << LOG_ERROR << "Error when attempting to unregister object \"" << object << "\" port with index " << port.GetPortIndex() << "; environment reported port ID of " << port_id << " (0 == not found), port definition has ID = " << port.GetPortID() << "\n";
+			continue;
+		}
+
+		// Deactive the port in this collection and notify the object that its port is no longer active
+		DeactivateDataPortReference(port_id);
+		object->RemoveUniquePortID(port.GetPortIndex());
+	}
+}
+
+// Return the next free data port ID; either the first inactive entry, or a new entry if all are currently active
+DataPorts::PortID iDataObjectEnvironment::GetNewDataPortID(void)
+{
+	// Debug sanity validation; should always be true or something is very wrong
+	assert(m_active_port_count <= m_data_ports.size());	
+
+	// If all ports are currently active we simply need to add a new one
+	if (m_active_port_count == m_data_ports.size())
+	{
+		size_t id = m_data_ports.size();
+
+		m_data_ports.push_back(DataPortReference(false, id, NULL, 0U));
+		return id;
+	}
+
+	// Otherwise, find the next inactive element in the collection and return its index
+	size_t n = m_data_ports.size();
+	for (size_t i = 0; i < n; ++i)
+	{
+		if (!m_data_ports[i].IsActive) return i;
+	}
+
+	Game::Log << LOG_ERROR << "Data port collection for \"" << this << "\" found to be corrupt; active=" << m_active_port_count << ", total=" << m_data_ports.size() << ", but no inactive ports found\n";
+	return DataPorts::NO_PORT_ID;
+}
+
+// Store a new data port reference at the given index
+void iDataObjectEnvironment::StoreNewDataPortReference(DataPorts::PortID port_id, DataEnabledObject *object, DataPorts::PortIndex object_port_index)
+{
+	// Parameter check
+	if (port_id == DataPorts::NO_PORT_ID || !object)
+	{
+		Game::Log << LOG_ERROR << "Invalid request to store new data port reference at ID " << port_id << "\n";
+		return;
+	}
+
+	// Make sure this is not already an active port
+	if (m_data_ports[port_id].IsActive)
+	{
+		Game::Log << LOG_ERROR << "Attempted to store new data port reference at ID " << port_id << " but an active port is already present\n";
+		return;
+	}
+
+	// Store the new reference and increment the active port could
+	m_data_ports.emplace(m_data_ports.begin() + port_id, DataPortReference(true, port_id, object, object_port_index));
+	++m_active_port_count;
+}
+
+// Deactivate the data port reference with the given ID
+void iDataObjectEnvironment::DeactivateDataPortReference(DataPorts::PortID port_id)
+{
+	// Parameter check
+	if (port_id == DataPorts::NO_PORT_ID || port_id > m_data_ports.size())
+	{
+		Game::Log << LOG_ERROR << "Invalid request to deactivate port ID " << port_id << " (total size = " << m_data_ports.size() << ")\n";
+		return;
+	}
+
+	// Make sure this is actually an active port
+	if (!m_data_ports[port_id].IsActive)
+	{
+		Game::Log << LOG_ERROR << "Attempted to deactive data port ID " << port_id << " which is already inactive\n";
+		return;
+	}
+
+	// Set the port to inactive and decrement the active port count
+	m_data_ports[port_id].IsActive = false;
+	--m_active_port_count;
 }
 
 // Returns the ID of a port matching the given criteria, or NO_PORT_ID if no such port exists
 DataPorts::PortID iDataObjectEnvironment::GetPortID(const DataEnabledObject *object, DataPorts::PortIndex port_index) const 
 {
 	auto it = std::find_if(m_data_ports.begin(), m_data_ports.end(),
-		[&object, port_index](const DataPortReference & entry) { return (entry.DataObject == object && entry.ObjectPortIndex == port_index); });
+		[&object, port_index](const DataPortReference & entry) { return (entry.DataObject == object && entry.ObjectPortIndex == port_index && entry.IsActive); });
 
 	return (it == m_data_ports.end() ? DataPorts::NO_PORT_ID : (*it).ID);
 }

@@ -29,6 +29,8 @@
 #include "SimulatedEnvironmentCollision.h"
 #include "Frustum.h"
 #include "PortalRenderingSupport.h"
+#include "DataEnabledStaticTerrain.h"
+#include "DataEnabledEnvironmentObject.h"
 
 #include "iSpaceObjectEnvironment.h"
 
@@ -333,16 +335,19 @@ void iSpaceObjectEnvironment::ObjectEnteringEnvironment(iEnvironmentObject *obj)
 	// Make sure the object is valid
 	if (!obj) return;
 
-	// Add to the main collection of objects in this environment, assuming it does not already exist
-	if (Objects.end() == std::find_if(Objects.begin(), Objects.end(),
-		[&obj](const ObjectReference<iEnvironmentObject> & element) { return (element() == obj); }))
-	{
-		// Add to the objects collection
-		Objects.push_back(ObjectReference<iEnvironmentObject>(obj));
+	// Only add the object if it does not already exist
+	if (Objects.end() != std::find_if(Objects.begin(), Objects.end(),
+		[&obj](const ObjectReference<iEnvironmentObject> & element) { return (element() == obj); })) return;
+	
+	// Add to the objects collection
+	Objects.push_back(ObjectReference<iEnvironmentObject>(obj));
 
-		// Add to the spatial partitioning tree
-		if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<iEnvironmentObject*>(obj);
-	}
+	// Add to the spatial partitioning tree
+	if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<iEnvironmentObject*>(obj);
+
+	// Integrate this object into the data environment if it is data-enabled
+	if (obj->IsDataEnabled()) RegisterDataEnabledObject(static_cast<DataEnabledEnvironmentObject*>(obj));
+	
 }
 
 // Removes an object from this environment
@@ -360,6 +365,9 @@ void iSpaceObjectEnvironment::ObjectLeavingEnvironment(iEnvironmentObject *obj)
 
 		// Remove from the spatial parititiong tree
 		if (SpatialPartitioningTree) SpatialPartitioningTree->RemoveItem<iEnvironmentObject*>((*it)());
+
+		// Remove this object from the data environment if it is data-enabled
+		if (obj->IsDataEnabled()) UnregisterDataEnabledObject(static_cast<DataEnabledEnvironmentObject*>(obj));
 
 		// Remove from the collection
 		Objects.erase(it);
@@ -381,6 +389,9 @@ void iSpaceObjectEnvironment::AddTerrainObject(StaticTerrain *obj)
 
 	// Also add a reference in the spatial partitioning tree
 	if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<StaticTerrain*>(obj);
+
+	// Integrate this object into the data environment if it is data-enabled
+	if (obj->IsDataEnabled()) RegisterDataEnabledObject(static_cast<DataEnabledStaticTerrain*>(obj));
 }
 
 // Removes a terrain object from the environment.  Optionally takes a second parameter indicating the index of this 
@@ -400,6 +411,9 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
 
 	// Remove from the spatial partitioning tree
 	if (obj->GetEnvironmentTreeNode()) obj->GetEnvironmentTreeNode()->RemoveItem<StaticTerrain*>(obj);
+
+	// Remove this object from the data environment if it is data-enabled
+	if (obj->IsDataEnabled()) UnregisterDataEnabledObject(static_cast<DataEnabledStaticTerrain*>(obj));
 
 	// Finally, deallocate the terrain object
 	SafeDelete(obj);

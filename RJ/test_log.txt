@@ -2,10 +2,21 @@
 === Test application initialised; executing tests ===
 
 Executed 3 tests:
-Test 0 (EnvironmentMapTests): 34 Passed, 1 Failed, 1 Messages:
-    ERROR: [93361055|EnvironmentMapTests.cpp:174] Multi-cell averaged propogation failed ([2] != [1])
+Test 0 (EnvironmentMapTests): 32 Passed, 3 Failed, 3 Messages:
+    ERROR: [40314275|EnvironmentMapTests.cpp:145] Multi-cell multiplictive propogation failed ([31.5147] != [34])
+    ERROR: [40314288|EnvironmentMapTests.cpp:174] Multi-cell averaged propogation failed ([2] != [1])
+    ERROR: [40314299|EnvironmentMapTests.cpp:203] Multi-cell relative falloff propogation failed ([7.47183] != [9.125])
 Test 1 (SequenceGenerationTests): 9 Passed, 0 Failed
-Test 2 (DataPortTests): 18 Passed, 0 Failed
+Test 2 (DataPortTests): 21 Passed, 9 Failed, 9 Messages:
+    ERROR: [40314318|DataPortTests.cpp:57] Not all data ports registered correctly ([1] != [4])
+    ERROR: [40314319|DataPortTests.cpp:63] Data port 0/0 not registered correctly ([0] != [1])
+    ERROR: [40314320|DataPortTests.cpp:64] Data port 0/1 not registered correctly ([0] != [1])
+    ERROR: [40314320|DataPortTests.cpp:65] Data port 1/0 not registered correctly ([0] != [1])
+    ERROR: [40314321|DataPortTests.cpp:66] Data port 1/1 not registered correctly ([0] != [1])
+    ERROR: [40314322|DataPortTests.cpp:72] Data port ID is not valid in environment ([0] != [1])
+    ERROR: [40314322|DataPortTests.cpp:72] Data port ID is not valid in environment ([0] != [1])
+    ERROR: [40314323|DataPortTests.cpp:72] Data port ID is not valid in environment ([0] != [1])
+    ERROR: [40314324|DataPortTests.cpp:72] Data port ID is not valid in environment ([0] != [1])
 
 === Test execution completed ===
 

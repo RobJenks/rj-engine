@@ -727,6 +727,9 @@
     <ClCompile Include="DataEnabledLoggingObject.cpp">
       <Filter>Objects\Data\Objects</Filter>
     </ClCompile>
+    <ClCompile Include="DataEnabledEnvironmentObject.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
