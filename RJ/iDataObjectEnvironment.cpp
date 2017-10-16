@@ -97,7 +97,7 @@ void iDataObjectEnvironment::StoreNewDataPortReference(DataPorts::PortID port_id
 	}
 
 	// Store the new reference and increment the active port could
-	m_data_ports.emplace(m_data_ports.begin() + port_id, DataPortReference(true, port_id, object, object_port_index));
+	m_data_ports[port_id] = std::move(DataPortReference(true, port_id, object, object_port_index));
 	++m_active_port_count;
 }
 
@@ -133,9 +133,9 @@ DataPorts::PortID iDataObjectEnvironment::GetPortID(const DataEnabledObject *obj
 }
 
 // Returns details for the given port ID, or the null port reference at NO_PORT_ID if the given ID is not valid
-iDataObjectEnvironment::DataPortReference & iDataObjectEnvironment::GetPortDetails(DataPorts::PortID port_id)
+DataPortReference & iDataObjectEnvironment::GetPortDetails(DataPorts::PortID port_id)
 {
-	return m_data_ports[IsValidPortID(port_id) ? port_id : DataPorts::NO_PORT_ID];
+	return (IsValidPortID(port_id) ? m_data_ports[port_id] : DataPortReference::NULL_PORT);
 }
 
 // Indicates whether the specified port ID is valid and active

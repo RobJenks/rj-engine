@@ -55,6 +55,7 @@ TestResult DataPortTests::BasicTerrainEnvironmentInitialisationTests()
 	
 	// Make sure the object ports were registered correctly
 	result.AssertEqual(env->GetDataPorts().size(), (size_t)4U, ERR("Not all data ports registered correctly"));
+	result.AssertEqual(env->GetActiveDataPortCount(), env->GetDataPorts().size(), ERR("Not all data ports are correctly flagged as active"));
 	DataPorts::PortID id00 = env->GetPortID(obj0, (size_t)0U);
 	DataPorts::PortID id01 = env->GetPortID(obj0, (size_t)1U);
 	DataPorts::PortID id10 = env->GetPortID(obj1, (size_t)0U);
@@ -72,9 +73,9 @@ TestResult DataPortTests::BasicTerrainEnvironmentInitialisationTests()
 		result.AssertTrue(env->IsValidPortID(id[i]), ERR("Data port ID is not valid in environment"));
 		if (env->IsValidPortID(id[i]))
 		{
-			const iDataObjectEnvironment::DataPortReference & port = env->GetPortDetails(id[i]);
+			const DataPortReference & port = env->GetPortDetails(id[i]);
 			result.AssertEqual(port.IsActive, true, ERR("Port was registered but is inactive"));
-			result.AssertEqual(port.ID, id[4], ERR("Port was registered but has mismatched ID"));
+			result.AssertEqual(port.ID, id[i], ERR("Port was registered but has mismatched ID"));
 			result.AssertEqual(port.DataObject, (i < 2 ? (DataEnabledObject*)obj0 : (DataEnabledObject*)obj1), ERR("Port is not registered to correct object"));
 			result.AssertEqual(port.ObjectPortIndex, (size_t)(i % 2), ERR("Port was registered but does not have correct object index"));
 		}

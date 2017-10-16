@@ -730,6 +730,9 @@
     <ClCompile Include="DataEnabledEnvironmentObject.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
+    <ClCompile Include="DataPortReference.cpp">
+      <Filter>Objects\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1683,6 +1686,9 @@
     </ClInclude>
     <ClInclude Include="DataEnabledLoggingObject.h">
       <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DataPortReference.h">
+      <Filter>Objects\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

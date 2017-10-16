@@ -10,7 +10,7 @@ public:
 	typedef size_t							PortID;
 
 	// Indicates that the object has not yet been assigned a unique port ID
-	static const PortID						NO_PORT_ID = 0U;
+	static const PortID						NO_PORT_ID = ((PortID)0U - (PortID)1U);
 
 	// Index of a port within the scope of its parent object
 	typedef size_t							PortIndex;

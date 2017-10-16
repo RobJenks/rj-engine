@@ -411,6 +411,7 @@
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataOutput.cpp" />
     <ClCompile Include="DataPort.cpp" />
+    <ClCompile Include="DataPortReference.cpp" />
     <ClCompile Include="DataPorts.cpp" />
     <ClCompile Include="DataPortTests.cpp" />
     <ClCompile Include="DebugCommandHandler.cpp" />
@@ -673,6 +674,7 @@
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataOutput.h" />
     <ClInclude Include="DataPort.h" />
+    <ClInclude Include="DataPortReference.h" />
     <ClInclude Include="DataPorts.h" />
     <ClInclude Include="DataPortTests.h" />
     <ClInclude Include="DataRegister.h" />
