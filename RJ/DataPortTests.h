@@ -15,6 +15,7 @@ public:
 		result += BasicTerrainEnvironmentInitialisationTests();
 		result += BasicConnectonTests();
 		result += DataPortEnvironmentInteractionTests();
+		result += BasicDataTransmissionTests();
 
 
 		return result;
@@ -27,6 +28,7 @@ private:
 	TestResult BasicTerrainEnvironmentInitialisationTests();
 	TestResult BasicConnectonTests();
 	TestResult DataPortEnvironmentInteractionTests();
+	TestResult BasicDataTransmissionTests();
 
 };
 

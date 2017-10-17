@@ -1,4 +1,6 @@
 #include "DataObjectRelay.h"
+#include "DataObjectOutput.h"
+#include "DataObjectRegister.h"
 #include "ComplexShip.h"
 
 #include "DataPortTests.h"
@@ -210,4 +212,98 @@ TestResult DataPortTests::DataPortEnvironmentInteractionTests()
 }
 
 
+TestResult DataPortTests::BasicDataTransmissionTests()
+{
+	Result res;
+	TestResult result = NewResult();
+
+	// Create a new data environment
+	ComplexShip *env = ComplexShip::Create("null_environment");
+	result.Assert(env != NULL, ERR("Failed to instantiate data environment"));
+
+	// Create the data-enabled objects
+	static const unsigned int CHAIN_LENGTH = 8U;
+	static_assert(CHAIN_LENGTH > 6U);										// Required for some tests in the sequence below
+	DataObjectRegister4 *registers = DataObjectRegister4::Create(NULL); 
+	DataObjectOutput3 *single_output = DataObjectOutput3::Create(NULL);
+	DataObjectOutput1 *chain_start = DataObjectOutput1::Create(NULL);
+	DataObjectRelay *relay_chain[8];
+	env->AddTerrainObject(registers);
+	env->AddTerrainObject(single_output);
+	env->AddTerrainObject(chain_start);
+
+	// Connnect the relay array in a linear chain
+	for (int i = 0; i < CHAIN_LENGTH; ++i)
+	{
+		relay_chain[i] = DataObjectRelay::Create(NULL);
+		env->AddTerrainObject(relay_chain[i]);
+		if (i != 0)
+		{
+			res = relay_chain[i]->ConnectPort(relay_chain[i]->InputPort(), relay_chain[i - 1U], relay_chain[i - 1U]->OutputPort());
+			result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to connect elements in relay chain"));
+		}
+	}
+
+	// Make sure all objects and ports were added to the environment as expected
+	result.AssertEqual(env->TerrainObjects.size(), (size_t)(1U + 1U + 1U + CHAIN_LENGTH), ERR("Terrain objects were not added to environment correctly"));
+	result.AssertEqual(env->GetActiveDataPortCount(), (size_t)(registers->GetPortCount() + 3U + 1U + (CHAIN_LENGTH * 2U)), ERR("Object ports were not registered with environment correctly"));
+
+	// Add an output to the start of the relay chain, then connect both the single output and the end of the relay 
+	// chain to inputs in the register object.  Final structure looks like:
+	//		Output ------------------------> Registers[SINGLE_INPUT]
+	//		Output -> {Relay, ..., Relay} -> Registers[CHAIN_INPUT]
+	
+	const unsigned int SINGLE_OUTPUT = 1U;						// Value (not port) index for the output of the (output -> registers) connection
+	const unsigned int SINGLE_INPUT = 0U;						// Value (not port) index for the register input accepting (output -> registers) input
+	const unsigned int CHAIN_OUTPUT = 0U;						// Value (not port) index for the output of the (start_output -> {chain}) connection
+	const unsigned int CHAIN_INPUT = 2U;						// Value (not port) index for the register input accepting (relay -> registers) input
+	res = chain_start->ConnectPort(chain_start->OutputPort(CHAIN_OUTPUT), relay_chain[0], relay_chain[0]->InputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to connect single output to start of relay chain"));
+	res = registers->ConnectPort(registers->InputPort(SINGLE_INPUT), single_output, single_output->OutputPort(SINGLE_OUTPUT));
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to connect single output to register input"));
+	res = registers->ConnectPort(registers->InputPort(CHAIN_INPUT), relay_chain[CHAIN_LENGTH - 1U], relay_chain[CHAIN_LENGTH - 1U]->OutputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to connect relay chain to register input"));
+
+	// Send a value through the single relay and make sure it is transmmitted
+	const DataPorts::DataType ZERO_VALUE = DefaultValues<DataPorts::DataType>::NullValue();
+	result.AssertEqual(registers->GetValue(SINGLE_INPUT), ZERO_VALUE, ERR("Single relay register input not correctly initialised on creation"));
+	single_output->SendOutput(SINGLE_OUTPUT - 1U, 6.0f);		// Disconnected output
+	single_output->SendOutput(SINGLE_OUTPUT, 12.0f);			// Connected output - this value should be transmitted
+	single_output->SendOutput(SINGLE_OUTPUT + 1U, 24.0f);		// Disconnected output
+	single_output->SendOutput(SINGLE_OUTPUT + 2U, 48.0f);		// Non-existent output
+	result.AssertEqual(registers->GetValue(SINGLE_INPUT), 12.0f, ERR("Correct value not tranmitted to and stored in data register"));
+
+	// Send a value through the relay chain and make sure is transmitted all the way to the destination register
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT), ZERO_VALUE, ERR("Chain relay register input not correctly initialised on creation"));
+	chain_start->SendOutput(CHAIN_OUTPUT, 1024.0f);
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT), 1024.0f, ERR("Value not transmitted correctly through relay chain to destination register"));
+
+	// Break two links in the relay chain and make sure that data is no longer transmitted
+	unsigned int break_start = (CHAIN_LENGTH / 2);
+	res = relay_chain[break_start + 1U]->DisconnectPort(relay_chain[break_start + 1U]->InputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to break relay chain at input point"));
+	res = relay_chain[break_start + 1U]->DisconnectPort(relay_chain[break_start + 1U]->OutputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to break relay chain at output point"));
+	chain_start->SendOutput(CHAIN_OUTPUT, 2048.0f);
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT), 1024.0f, ERR("Data incorrectly transmitted across disconnected relay chain"));
+
+	// Reconnect the broken ends of the relay, skipping relay[break_start + 1U], and make sure it can once again transmit data
+	res = relay_chain[break_start + 0U]->ConnectPort(relay_chain[break_start + 0U]->OutputPort(), relay_chain[break_start + 2U], relay_chain[break_start + 2U]->InputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to reconnect relay chain at (break+0 -> break+2)"));
+	chain_start->SendOutput(CHAIN_OUTPUT, 4096.0f);
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT), 4096.0f, ERR("Value not transmitted correctly through re-connected relay chain to destination register"));
+
+	// Verify final state of unused data registers was not affected by any of the above activity
+	Game::Log << LOG_INFO << "Data transmission test results\n";
+	for (unsigned int i = 0U; i < 4U; ++i)
+	{
+		Game::Log << LOG_INFO << "   Final value of register " << i << ": " << registers->GetValue(i) << "\n";
+		if (i != SINGLE_INPUT && i != CHAIN_INPUT)
+		{
+			result.AssertEqual(registers->GetValue(i), ZERO_VALUE, ERR("Unused data register was impacted by data transfer to other registers"));
+		}
+	}
+
+	return result;
+}
 

@@ -26,7 +26,7 @@ public:
 	CMPINLINE static int NullValue(void) { return 0; }
 	CMPINLINE static int OneValue(void) { return 1; }
 	CMPINLINE static int EpsilonValue(void) { return 1; }
-	CMPINLINE static int InfiniteValue(void) { return INF_INT; }
+	CMPINLINE static int InfiniteValue(void) { return std::numeric_limits<int>::infinity(); }
 	CMPINLINE static int MinValue(void) { return std::numeric_limits<int>::lowest(); }
 	CMPINLINE static int MaxValue(void) { return (std::numeric_limits<int>::max)(); }
 };
@@ -38,7 +38,7 @@ public:
 	CMPINLINE static float NullValue(void) { return 0.0f; }
 	CMPINLINE static float OneValue(void) { return 1.0f; }
 	CMPINLINE static float EpsilonValue(void) { return Game::C_EPSILON; }
-	CMPINLINE static float InfiniteValue(void) { return INF_FLOAT; }
+	CMPINLINE static float InfiniteValue(void) { return std::numeric_limits<float>::infinity(); }
 	CMPINLINE static float MinValue(void) { return std::numeric_limits<float>::lowest(); }
 	CMPINLINE static float MaxValue(void) { return (std::numeric_limits<float>::max)(); }
 };
@@ -50,7 +50,7 @@ public:
 	CMPINLINE static short NullValue(void) { return 0; }
 	CMPINLINE static short OneValue(void) { return 1; }
 	CMPINLINE static short EpsilonValue(void) { return 1; }
-	CMPINLINE static short InfiniteValue(void) { return INF_SHORT; }
+	CMPINLINE static short InfiniteValue(void) { return std::numeric_limits<short>::infinity(); }
 	CMPINLINE static short MinValue(void) { return std::numeric_limits<short>::lowest(); }
 	CMPINLINE static short MaxValue(void) { return (std::numeric_limits<short>::max)(); }
 };
@@ -62,7 +62,7 @@ public:
 	CMPINLINE static long NullValue(void) { return 0L; }
 	CMPINLINE static long OneValue(void) { return 1L; }
 	CMPINLINE static long EpsilonValue(void) { return 1L; }
-	CMPINLINE static long InfiniteValue(void) { return INF_LONG; }
+	CMPINLINE static long InfiniteValue(void) { return std::numeric_limits<long>::infinity(); }
 	CMPINLINE static long MinValue(void) { return std::numeric_limits<long>::lowest(); }
 	CMPINLINE static long MaxValue(void) { return (std::numeric_limits<long>::max)(); }
 };
@@ -74,7 +74,7 @@ public:
 	CMPINLINE static double NullValue(void) { return 0.0; }
 	CMPINLINE static double OneValue(void) { return 1.0; }
 	CMPINLINE static double EpsilonValue(void) { return Game::C_EPSILON_DP; }
-	CMPINLINE static double InfiniteValue(void) { return INF_DOUBLE; }
+	CMPINLINE static double InfiniteValue(void) { return std::numeric_limits<double>::infinity(); }
 	CMPINLINE static double MinValue(void) { return std::numeric_limits<double>::lowest(); }
 	CMPINLINE static double MaxValue(void) { return (std::numeric_limits<double>::max)(); }
 };
@@ -86,9 +86,33 @@ public:
 	CMPINLINE static unsigned int NullValue(void) { return 0U; }
 	CMPINLINE static unsigned int OneValue(void) { return 1U; }
 	CMPINLINE static unsigned int EpsilonValue(void) { return 1U; }
-	CMPINLINE static unsigned int InfiniteValue(void) { return INF_UINT; }
+	CMPINLINE static unsigned int InfiniteValue(void) { return std::numeric_limits<unsigned int>::infinity(); }
 	CMPINLINE static unsigned int MinValue(void) { return std::numeric_limits<unsigned int>::lowest(); }
 	CMPINLINE static unsigned int MaxValue(void) { return (std::numeric_limits<unsigned int>::max)(); }
+};
+
+// Unsigned long
+template <> class DefaultValues<unsigned long>
+{
+public:
+	CMPINLINE static unsigned long NullValue(void) { return 0U; }
+	CMPINLINE static unsigned long OneValue(void) { return 1U; }
+	CMPINLINE static unsigned long EpsilonValue(void) { return 1U; }
+	CMPINLINE static unsigned long InfiniteValue(void) { return std::numeric_limits<unsigned long>::infinity(); }
+	CMPINLINE static unsigned long MinValue(void) { return std::numeric_limits<unsigned long>::lowest(); }
+	CMPINLINE static unsigned long MaxValue(void) { return (std::numeric_limits<unsigned long>::max)(); }
+};
+
+// Size_t
+template <> class DefaultValues<size_t>
+{
+public:
+	CMPINLINE static size_t NullValue(void) { return 0U; }
+	CMPINLINE static size_t OneValue(void) { return 1U; }
+	CMPINLINE static size_t EpsilonValue(void) { return 1U; }
+	CMPINLINE static size_t InfiniteValue(void) { return std::numeric_limits<size_t>::infinity(); }
+	CMPINLINE static size_t MinValue(void) { return std::numeric_limits<size_t>::lowest(); }
+	CMPINLINE static size_t MaxValue(void) { return (std::numeric_limits<size_t>::max)(); }
 };
 
 // Char

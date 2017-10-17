@@ -63,7 +63,10 @@ private:
 	CMPINLINE TestRunner Initialise(void)
 	{
 		m_testlog = new std::ofstream("test_log.txt", std::ofstream::out | std::ofstream::trunc);
-		Log("\n=== Test application initialised; executing tests ===\n\n");
+		Game::Log << "\n\n\n";
+		Log("=====================================================\n");
+		Log("=== Test application initialised; executing tests ===\n");
+		Log("=====================================================\n\n\n");
 
 		return TestRunner();
 	}
@@ -71,6 +74,11 @@ private:
 	CMPINLINE void Complete(TestRunner tester)
 	{
 		// Output test results
+		Game::Log << "\n\n\n";
+		Log("=====================================================\n");
+		Log("============= Test execution completed ==============\n");
+		Log("=====================================================\n\n\n");
+
 		size_t test_count = tester.ResultCount();
 		Log(concat("Executed ")(test_count)(" tests")(test_count != 0U ? ":\n" : "\n").str());
 		for (size_t i = 0U; i < test_count; ++i)

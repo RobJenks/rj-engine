@@ -409,7 +409,6 @@
     <ClCompile Include="DataEnabledObject.cpp" />
     <ClCompile Include="DataEnabledStaticTerrain.cpp" />
     <ClCompile Include="DataInput.cpp" />
-    <ClCompile Include="DataObjectRegisterN.cpp" />
     <ClCompile Include="DataObjectRelay.cpp" />
     <ClCompile Include="DataOutput.cpp" />
     <ClCompile Include="DataPort.cpp" />
@@ -674,8 +673,9 @@
     <ClInclude Include="DataEnabledObject.h" />
     <ClInclude Include="DataEnabledStaticTerrain.h" />
     <ClInclude Include="DataInput.h" />
-    <ClInclude Include="DataObjectRegisterN.h" />
+    <ClInclude Include="DataObjectRegister.h" />
     <ClInclude Include="DataObjectRelay.h" />
+    <ClInclude Include="DataObjectOutput.h" />
     <ClInclude Include="DataOutput.h" />
     <ClInclude Include="DataPort.h" />
     <ClInclude Include="DataPortReference.h" />

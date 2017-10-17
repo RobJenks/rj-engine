@@ -19,6 +19,8 @@ public:
 		result.SetName(test);
 		if (m_failallcases) result.FailAllCases();
 		
+		if (test != "") Game::Log << LOG_INFO << "Executing test set \"" << test << "\"\n";
+
 		return result;
 	}
 

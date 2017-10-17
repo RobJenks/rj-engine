@@ -733,9 +733,6 @@
     <ClCompile Include="DataObjectDebugLogger.cpp">
       <Filter>Objects\Data\Objects</Filter>
     </ClCompile>
-    <ClCompile Include="DataObjectRegisterN.cpp">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="DataObjectRelay.cpp">
       <Filter>Objects\Data\Objects</Filter>
     </ClCompile>
@@ -1696,10 +1693,13 @@
     <ClInclude Include="DataObjectDebugLogger.h">
       <Filter>Objects\Data\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="DataObjectRegisterN.h">
+    <ClInclude Include="DataObjectRelay.h">
       <Filter>Objects\Data\Objects</Filter>
     </ClInclude>
-    <ClInclude Include="DataObjectRelay.h">
+    <ClInclude Include="DataObjectOutput.h">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectRegister.h">
       <Filter>Objects\Data\Objects</Filter>
     </ClInclude>
   </ItemGroup>
