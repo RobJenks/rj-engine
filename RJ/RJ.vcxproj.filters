@@ -724,14 +724,20 @@
     <ClCompile Include="DataEnabledStaticTerrain.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
-    <ClCompile Include="DataEnabledLoggingObject.cpp">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="DataEnabledEnvironmentObject.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
     <ClCompile Include="DataPortReference.cpp">
       <Filter>Objects\Data</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectDebugLogger.cpp">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectRegisterN.cpp">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectRelay.cpp">
+      <Filter>Objects\Data\Objects</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1684,11 +1690,17 @@
     <ClInclude Include="DataPortTests.h">
       <Filter>_Tests\DataPorts</Filter>
     </ClInclude>
-    <ClInclude Include="DataEnabledLoggingObject.h">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="DataPortReference.h">
       <Filter>Objects\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectDebugLogger.h">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectRegisterN.h">
+      <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectRelay.h">
+      <Filter>Objects\Data\Objects</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

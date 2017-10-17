@@ -3,16 +3,16 @@
 #include "DataEnabledStaticTerrain.h"
 
 
-class DataEnabledLoggingObject : public DataEnabledStaticTerrain
+class DataObjectDebugLogger : public DataEnabledStaticTerrain
 {
 public:
 
 	// Default constructor
-	DataEnabledLoggingObject(void);
+	DataObjectDebugLogger(void);
 
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataEnabledLoggingObject *	Create(const StaticTerrainDefinition *def);
+	static DataObjectDebugLogger *		Create(const StaticTerrainDefinition *def);
 
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);

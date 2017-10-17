@@ -1,4 +1,4 @@
-#include "DataEnabledLoggingObject.h"
+#include "DataObjectRelay.h"
 #include "ComplexShip.h"
 
 #include "DataPortTests.h"
@@ -9,15 +9,15 @@ TestResult DataPortTests::BasicInitialisationTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataEnabledLoggingObject *obj0 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj1 = DataEnabledLoggingObject::Create(NULL);
+	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
 
 	// Verify that required ports exist
 	result.AssertEqual(obj0->GetPortCount(), (DataPorts::PortIndex)2U, ERR("Data object was not correctly initialised with two ports"));
 	result.AssertEqual(obj1->GetPortCount(), (DataPorts::PortIndex)2U, ERR("Data object was not correctly initialised with two ports"));
 
 	// Verify the contents of each port
-	DataEnabledLoggingObject *obj[2] = { obj0, obj1 };
+	DataObjectRelay *obj[2] = { obj0, obj1 };
 	for (size_t i = 0U; i < 2U; ++i)
 	{
 		for (DataPorts::PortIndex port_index = 0U; port_index < 2U; ++port_index)
@@ -42,8 +42,8 @@ TestResult DataPortTests::BasicTerrainEnvironmentInitialisationTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataEnabledLoggingObject *obj0 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj1 = DataEnabledLoggingObject::Create(NULL);
+	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
 	result.Assert(obj0 != NULL && obj1 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
@@ -91,9 +91,9 @@ TestResult DataPortTests::BasicConnectonTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataEnabledLoggingObject *obj0 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj1 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj2 = DataEnabledLoggingObject::Create(NULL);
+	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj2 = DataObjectRelay::Create(NULL);
 	result.Assert(obj0 != NULL && obj1 != NULL && obj2 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
@@ -162,9 +162,9 @@ TestResult DataPortTests::DataPortEnvironmentInteractionTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataEnabledLoggingObject *obj0 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj1 = DataEnabledLoggingObject::Create(NULL);
-	DataEnabledLoggingObject *obj2 = DataEnabledLoggingObject::Create(NULL);
+	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj2 = DataObjectRelay::Create(NULL);
 	result.Assert(obj0 != NULL && obj1 != NULL && obj2 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
