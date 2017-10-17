@@ -101,7 +101,8 @@ TestResult DataPortTests::BasicConnectonTests()
 	result.Assert(env != NULL, ERR("Failed to instantiate data environment"));
 	env->AddTerrainObject(obj0);
 	env->AddTerrainObject(obj1);
-	result.AssertEqual(env->TerrainObjects.size(), (size_t)2U, ERR("Terrain objects were not added to environment correctly"));
+	env->AddTerrainObject(obj2);
+	result.AssertEqual(env->TerrainObjects.size(), (size_t)3U, ERR("Terrain objects were not added to environment correctly"));
 
 	// Attempt to make an invalid connection from output -> output and input -> input ports; there should be no connections made
 	res = obj0->ConnectPort(obj0->OutputPort(), obj1, obj1->OutputPort());
@@ -154,6 +155,59 @@ TestResult DataPortTests::BasicConnectonTests()
 	return result;
 }
 
+
+TestResult DataPortTests::DataPortEnvironmentInteractionTests()
+{
+	Result res;
+	TestResult result = NewResult();
+
+	// Create two data-enabled objects
+	DataEnabledLoggingObject *obj0 = DataEnabledLoggingObject::Create(NULL);
+	DataEnabledLoggingObject *obj1 = DataEnabledLoggingObject::Create(NULL);
+	DataEnabledLoggingObject *obj2 = DataEnabledLoggingObject::Create(NULL);
+	result.Assert(obj0 != NULL && obj1 != NULL && obj2 != NULL, ERR("Instantiation of test data objects failed"));
+
+	// Create a new data environment and add the objects
+	ComplexShip *env = ComplexShip::Create("null_environment");
+	result.Assert(env != NULL, ERR("Failed to instantiate data environment"));
+	env->AddTerrainObject(obj0);
+	env->AddTerrainObject(obj1);
+	env->AddTerrainObject(obj2);
+	result.AssertEqual(env->TerrainObjects.size(), (size_t)3U, ERR("Terrain objects were not added to environment correctly"));
+
+	// Create connections from (obj0 -> obj1) and (obj1 -> obj2); one from output and one from input side as an added test
+	res = obj0->ConnectPort(obj0->OutputPort(), obj1, obj1->InputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR(concat("Data port connection attempt (0 -> 1) failed with error code ")(res).str().c_str()));
+	res = obj2->ConnectPort(obj2->InputPort(), obj1, obj1->OutputPort());
+	result.AssertEqual(res, ErrorCodes::NoError, ERR(concat("Data port connection attempt (2 <- 1) failed with error code ")(res).str().c_str()));
+
+	// Make sure both connections were made
+	result.AssertEqual(obj0->GetPort(obj0->OutputPort()).GetConnectedPort(), obj1->GetPort(obj1->InputPort()).GetPortID(), ERR("Connection (0 -> 1) not present on output side"));
+	result.AssertEqual(obj1->GetPort(obj1->InputPort()).GetConnectedPort(), obj0->GetPort(obj0->OutputPort()).GetPortID(), ERR("Connection (0 -> 1) not present on input side"));
+	result.AssertEqual(obj1->GetPort(obj1->OutputPort()).GetConnectedPort(), obj2->GetPort(obj2->InputPort()).GetPortID(), ERR("Connection (1 -> 2) not present on output side"));
+	result.AssertEqual(obj2->GetPort(obj2->InputPort()).GetConnectedPort(), obj1->GetPort(obj1->OutputPort()).GetPortID(), ERR("Connection (1 -> 2) not present on input side"));
+
+	// Now remove object 0 from the environment and make sure that the connection (0 -> 1) is correctly broken
+	DataPorts::PortID obj1_input = obj1->GetPort(obj1->InputPort()).GetPortID();
+	DataPorts::PortID obj1_output = obj1->GetPort(obj1->OutputPort()).GetPortID();
+	env->RemoveTerrainObject(obj0);
+	result.AssertEqual(env->TerrainObjects.size(), (size_t)2U, ERR("Terrain object 0 not removed from environment correctly"));
+	result.AssertEqual(env->GetActiveDataPortCount(), (size_t)4U, ERR("Environment active port count is incorrect following object 0 removal"));
+
+	result.Assert(obj1->HasDataEnvironment() == true, ERR("Object 1 was incorrectly removed from environment during removal of connected object "));
+	result.Assert(obj1->GetPort(obj1->InputPort()).IsConnected() == false, ERR("Object 1 input port not correctly disconnected upon removal of connected object from environment"));
+	result.AssertEqual(obj1->GetPort(obj1->InputPort()).GetPortID(), obj1_input, ERR("Object 1 input port ID has erroneously changed upon removal of connected object from environment"));
+	result.AssertEqual(obj1->GetPort(obj1->OutputPort()).GetPortID(), obj1_output, ERR("Object 1 output port ID has erroneously changed upon removal of connected object from environment"));
+
+	// Make sure the connection (1 -> 2) was unaffected by the removal of object 0 and the subsequent breaking of connection (0 -> 1)
+	result.Assert(obj1->GetPort(obj1->OutputPort()).IsConnected() == true, ERR("Object 1 output port was incorrectly disconnected during break of (0 -> 1) connection"));
+	result.Assert(obj2->GetPort(obj2->InputPort()).IsConnected() == true, ERR("Object 2 input port was incorrectly disconnected during break of (0 -> 1) connection"));
+	result.Assert(obj2->GetPort(obj2->OutputPort()).IsConnected() == false, ERR("Object 2 output port has unexpected connection following break of (0 -> 1) connection"));
+	result.AssertEqual(obj1->GetPort(obj1->OutputPort()).GetConnectedPort(), obj2->GetPort(obj2->InputPort()).GetPortID(), ERR("Connection (1 -> 2) incorrectly broken on output side following break of connection (0 -> 1)"));
+	result.AssertEqual(obj2->GetPort(obj2->InputPort()).GetConnectedPort(), obj1->GetPort(obj1->OutputPort()).GetPortID(), ERR("Connection (1 -> 2) incorrectly broken on input side following break of connection (0 -> 1)"));
+
+	return result;
+}
 
 
 

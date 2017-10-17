@@ -32,6 +32,9 @@ public:
 	// behaviour is undefined and probably very bad
 	CMPINLINE DataPort &					GetPort(DataPorts::PortIndex port_index)	{ return m_dataports[port_index]; }
 
+	// Indicates whether the object is integrated into a data environment
+	CMPINLINE bool							HasDataEnvironment(void) const				{ return (m_data_environment != NULL); }
+
 	// Method invoked when this object receives data through one of its public input ports
 	virtual void							DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port) = 0;
 

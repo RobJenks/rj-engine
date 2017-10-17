@@ -39,9 +39,6 @@ void iDataObjectEnvironment::UnregisterDataEnabledObject(DataEnabledObject *obje
 	// Parameter check
 	if (!object) return;
 
-	// Remove the object reference to this data environment
-	object->RemoveFromDataEnvironment();
-
 	// Remove each port owned by the object in turn
 	for (auto & port : object->GetPorts())
 	{
@@ -53,10 +50,16 @@ void iDataObjectEnvironment::UnregisterDataEnabledObject(DataEnabledObject *obje
 			continue;
 		}
 
+		// If the port is connected, break this connection now
+		if (port.IsConnected()) object->DisconnectPort(port.GetPortIndex());
+
 		// Deactive the port in this collection and notify the object that its port is no longer active
 		DeactivateDataPortReference(port_id);
 		object->RemoveUniquePortID(port.GetPortIndex());
 	}
+
+	// Finally remove the object reference to this data environment, now that we have broken all connections between the two
+	object->RemoveFromDataEnvironment();
 }
 
 // Return the next free data port ID; either the first inactive entry, or a new entry if all are currently active
@@ -125,6 +128,7 @@ void iDataObjectEnvironment::DeactivateDataPortReference(DataPorts::PortID port_
 	}
 
 	// Set the port to inactive and decrement the active port count
+	m_data_ports[port_id].DataObject = NULL;
 	m_data_ports[port_id].IsActive = false;
 	--m_active_port_count;
 }
