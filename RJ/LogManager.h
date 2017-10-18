@@ -9,6 +9,7 @@
 #include "ScheduledObject.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
+#include "DataPorts.h"
 
 // Common body of a log prefix
 #define LOG_PREFIX_BODY "[" << (unsigned int)timeGetTime() << "|" << __FILE__ << ":" << __LINE__ << "] "
@@ -54,7 +55,7 @@ public:
 	CMPINLINE LogManager & operator<<(const FXMMATRIX data) { return operator<<(MatrixToString(data)); }
 	CMPINLINE LogManager & operator<<(const INTVECTOR2 & data) { return operator<<(data.ToString()); }
 	CMPINLINE LogManager & operator<<(const INTVECTOR3 & data) { return operator<<(data.ToString()); }
-	
+
 
 	// Custom function to force a flush of log data during streaming
 	static LogManager& flush(LogManager& stream)

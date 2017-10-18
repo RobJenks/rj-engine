@@ -1,9 +1,12 @@
 #pragma once
 
+#include <string>
 #include <iostream>
-#include <ostream>
+#include <iomanip>
+#include <sstream>
 #include <vector>
 #include "CompilerSettings.h"
+#include "Logging.h"
 
 class DataPorts
 {
@@ -79,15 +82,14 @@ public:
 		CMPINLINE static DataType Zero(void) { return DataType(0U); }
 
 		// Custom string serialisation for data values
-		CMPINLINE friend std::ostream & operator<<(std::ostream & lhs, const DataType & rhs);
-	};
+		std::string str(void) const;
 
-	// Custom string serialisation for data values
-	CMPINLINE friend std::ostream & operator<<(std::ostream & lhs, const DataType & rhs) 
-	{
-		return lhs.operator<<(std::hex).operator<<(std::uppercase).operator<<(rhs.UIntValue).operator<<(std::nouppercase).operator<<(std::dec);
-	}
-	
+		// Overload for standard ostream output 
+		CMPINLINE friend std::ostream & operator<<(std::ostream & lhs, const DataType & rhs)
+		{
+			return lhs.operator<<(rhs.str().c_str());
+		}
+	};
 
 private:
 

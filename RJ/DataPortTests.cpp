@@ -296,13 +296,13 @@ TestResult DataPortTests::BasicDataTransmissionTests()
 	Game::Log << LOG_INFO << "Data transmission test results\n";
 	for (unsigned int i = 0U; i < 4U; ++i)
 	{
-		Game::Log << LOG_INFO << "   Final value of register " << i << ": " << registers->GetValue(i).UIntValue << "\n";
+		Game::Log << LOG_INFO << "   Final value of register " << i << ": " << registers->GetValue(i).str() << " (" << registers->GetValue(i).FloatValue << ")\n";
 		if (i != SINGLE_INPUT && i != CHAIN_INPUT)
 		{
 			result.AssertEqual(registers->GetValue(i), DataPorts::DataType::Zero(), ERR("Unused data register was impacted by data transfer to other registers"));
 		}
 	}
-	
+
 	return result;
 }
 
