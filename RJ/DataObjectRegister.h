@@ -58,7 +58,7 @@ DataObjectRegister<N>::DataObjectRegister(void)
 	for (unsigned int i = 0U; i < N; ++i)
 	{
 		m_port_indices[i] = DefaultValues<DataPorts::PortIndex>::NullValue();
-		m_registers[i] = DefaultValues<DataPorts::DataType>::NullValue();
+		m_registers[i] = DataPorts::DataType::Zero();
 	}
 }
 
@@ -119,7 +119,7 @@ template <unsigned int N>
 DataPorts::DataType DataObjectRegister<N>::GetValue(unsigned int register_index) const
 {
 	if (register_index < N) return m_registers[register_index];
-	return DefaultValues<DataPorts::DataType>::NullValue();
+	return DataPorts::DataType::Zero();
 }
 
 

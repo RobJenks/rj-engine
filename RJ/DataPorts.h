@@ -1,6 +1,9 @@
 #pragma once
 
+#include <iostream>
+#include <ostream>
 #include <vector>
+#include "CompilerSettings.h"
 
 class DataPorts
 {
@@ -22,12 +25,69 @@ public:
 											OutputPort
 	};
 
-	// The type of data transmitted by all data ports
-	typedef float							DataType;
-
 	// Indicates whether a connection can be made between the specified port types
 	static bool								PortTypesAreCompatible(PortType port0, PortType port1);
 
+	// The type of data transmitted by all data ports
+	struct									DataType
+	{
+		typedef float						TFloat;
+		typedef UINT32						TUInt;
+		typedef INT32						TInt;
+		typedef bool						TBool;
+
+		// The 4-byte payload can support UInt, Int or Float data types as standard
+		union
+		{
+			TFloat							FloatValue;
+			TUInt							UIntValue;
+			TInt							IntValue;
+		};
+
+		// We also define a boolean representation based upon the underlying UInt value
+		CMPINLINE bool						BoolValue(void) const { return (UIntValue != 0U); }
+
+		// Constructors
+		CMPINLINE DataType(void) noexcept				: UIntValue(0U) { }
+		CMPINLINE DataType(TFloat value) noexcept		: FloatValue(value) { }
+		CMPINLINE DataType(TUInt value) noexcept		: UIntValue(value) { }
+		CMPINLINE DataType(TInt value) noexcept			: IntValue(value) { }
+		CMPINLINE DataType(TBool value) noexcept		: UIntValue(value ? 1U : 0U) { }
+
+		// Non-const assignment operators
+		CMPINLINE DataType & DataType::operator=(TFloat value) { FloatValue = value; return *this; }
+		CMPINLINE DataType & DataType::operator=(TUInt value) { UIntValue = value; return *this; }
+		CMPINLINE DataType & DataType::operator=(TInt value) { IntValue = value; return *this; }
+		CMPINLINE DataType & DataType::operator=(TBool value) { UIntValue = (value ? 1U : 0U); return *this; }
+
+		// Non-const conversion operators
+		CMPINLINE operator TUInt&(void) { return UIntValue; }
+		CMPINLINE explicit operator TFloat&(void) { return FloatValue; }
+		CMPINLINE explicit operator TInt&(void) { return IntValue; }
+
+		// Const conversion operators
+		CMPINLINE operator const TUInt&(void) const { return UIntValue; }
+		CMPINLINE explicit operator const TFloat&(void) const { return FloatValue; }
+		CMPINLINE explicit operator const TInt&(void) const { return IntValue; }
+		CMPINLINE explicit operator const TBool&(void) const { return (UIntValue != 0U); }
+
+		// Equality comparisons
+		CMPINLINE bool operator==(const DataType &rhs) const { return (UIntValue == rhs.UIntValue); }
+		CMPINLINE bool operator!=(const DataType &rhs) const { return (UIntValue != rhs.UIntValue); }
+
+		// Returns a zero-valued data object
+		CMPINLINE static DataType Zero(void) { return DataType(0U); }
+
+		// Custom string serialisation for data values
+		CMPINLINE friend std::ostream & operator<<(std::ostream & lhs, const DataType & rhs);
+	};
+
+	// Custom string serialisation for data values
+	CMPINLINE friend std::ostream & operator<<(std::ostream & lhs, const DataType & rhs) 
+	{
+		return lhs.operator<<(std::hex).operator<<(std::uppercase).operator<<(rhs.UIntValue).operator<<(std::nouppercase).operator<<(std::dec);
+	}
+	
 
 private:
 

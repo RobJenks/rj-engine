@@ -24,6 +24,6 @@ void DataPort::RevokePortID(void)
 // the target for our output (or 0 if not connected)
 void DataPort::SetConnection(DataPorts::PortID port_id)
 {
-	m_connected_port = port_id;
+	m_connected_port = port_id; 
+	
 }
-
