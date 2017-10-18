@@ -32,7 +32,7 @@ class SimpleShipLoadout;
 class CompoundLoadoutMap;
 class Render2DGroup;
 class ProductionCost;
-class StaticTerrain;
+class Terrain;
 class EffectBase;
 class FireEffect;
 class TileConnections;
@@ -135,8 +135,8 @@ namespace IO { namespace Data {
 	Result LoadElementStateDefinition(TiXmlElement *node, ElementStateDefinition & outStateDefinition);
 	Result LoadElementStateDefinition(TiXmlElement *node, const INTVECTOR3 & element_size, ElementStateDefinition & outStateDefinition);
 
-	Result LoadStaticTerrainDefinition(TiXmlElement *node);
-	StaticTerrain *LoadStaticTerrain(TiXmlElement *node);
+	Result LoadTerrainDefinition(TiXmlElement *node);
+	Terrain *LoadTerrain(TiXmlElement *node);
 
 	ViewPortal LoadViewPortal(TiXmlElement *node);
 

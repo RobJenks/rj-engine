@@ -191,7 +191,7 @@ void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
 	if (!m_parent || rotation == Rotation90Degree::Rotate0) return;
 
 	// Iterate through all terrain objects in our parent environment
-	StaticTerrain *t;
+	Terrain *t;
 	iSpaceObjectEnvironment::TerrainCollection::iterator it_end = m_parent->TerrainObjects.end();
 	for (iSpaceObjectEnvironment::TerrainCollection::iterator it = m_parent->TerrainObjects.begin(); it != it_end; ++it)
 	{
@@ -207,7 +207,7 @@ void ComplexShipTile::RotateAllTerrainObjects(Rotation90Degree rotation)
 }
 
 // Rotate a single terrain object owned by this tile by the given rotation, about the tile centre
-void ComplexShipTile::RotateTileTerrainObject(StaticTerrain *terrain, Rotation90Degree rotation)
+void ComplexShipTile::RotateTileTerrainObject(Terrain *terrain, Rotation90Degree rotation)
 {
 	// We can only rotate this terrain if it is valid and is owned by this tile
 	if (!terrain || terrain->GetParentTileID() != GetID()) return;
@@ -373,14 +373,14 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 &
 		XMVECTOR orient = XMQuaternionMultiply(XMLoadFloat4(&collision.Orientation), orient_offset);
 		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
 
-		StaticTerrain *terrain = StaticTerrain::Create();
+		Terrain *terrain = Terrain::Create();
 		terrain->PostponeUpdates();
 		{
 			terrain->SetPosition(position);
 			terrain->SetOrientation(orient);
 			terrain->SetExtent(extent);
 			terrain->SetParentTileID(GetID());
-			terrain->SetSourceType(StaticTerrain::TerrainSourceType::SourcedFromModel);
+			terrain->SetSourceType(Terrain::TerrainSourceType::SourcedFromModel);
 		}
 		terrain->ResumeUpdates();
 		

@@ -703,8 +703,8 @@ void ComplexShip::RecalculateShipDataFromCurrentState()
 	}
 
 	// Recalculate all terrain object positions based on this potential change to the environment size
-	std::vector<StaticTerrain*>::iterator it2_end = TerrainObjects.end();
-	for (std::vector<StaticTerrain*>::iterator it2 = TerrainObjects.begin(); it2 != it2_end; ++it2)
+	std::vector<Terrain*>::iterator it2_end = TerrainObjects.end();
+	for (std::vector<Terrain*>::iterator it2 = TerrainObjects.begin(); it2 != it2_end; ++it2)
 	{
 		if ((*it2)) (*it2)->RecalculatePositionalData();
 	}

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "DataEnabledStaticTerrain.h"
+#include "DynamicTerrain.h"
 
 
 template <unsigned int N>
-class DataObjectOutput : public DataEnabledStaticTerrain
+class DataObjectOutput : public DynamicTerrain
 {
 	// Acceptable output count
 	static_assert(N <= 10U, "Not a valid data output size");
@@ -16,7 +16,7 @@ public:
 
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectOutput *			Create(const StaticTerrainDefinition *def);
+	static DataObjectOutput *			Create(const TerrainDefinition *def);
 
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);
@@ -54,7 +54,7 @@ DataObjectOutput<N>::DataObjectOutput(void)
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 template <unsigned int N>
-DataObjectOutput<N> * DataObjectOutput<N>::Create(const StaticTerrainDefinition *def)
+DataObjectOutput<N> * DataObjectOutput<N>::Create(const TerrainDefinition *def)
 {
 	// Create and initialise the underlying terrain object
 	DataObjectOutput<N> *object = new DataObjectOutput<N>();

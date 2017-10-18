@@ -11,7 +11,7 @@ DataObjectDebugLogger::DataObjectDebugLogger(void)
 
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-DataObjectDebugLogger * DataObjectDebugLogger::Create(const StaticTerrainDefinition *def)
+DataObjectDebugLogger * DataObjectDebugLogger::Create(const TerrainDefinition *def)
 {
 	// Create and initialise the underlying terrain object
 	DataObjectDebugLogger *object = new DataObjectDebugLogger();

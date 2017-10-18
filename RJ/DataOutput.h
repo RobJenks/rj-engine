@@ -49,7 +49,7 @@ namespace IO { namespace Data {
 
 	Result SaveTileConnectionState(TiXmlElement *parent, const std::string & element_name, TileConnections *connection_data);
 	Result SaveViewPortal(TiXmlElement *parent, const std::string & element_name, const ViewPortal & portal);
-	Result SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain);
+	Result SaveTerrain(TiXmlElement *parent, Terrain *terrain);
 	Result SaveAudioParameters(TiXmlElement *parent, const std::string & key, const AudioParameters & audio_params);
 
 	Result SaveEngine(TiXmlElement *parent, Engine *e);

@@ -355,9 +355,6 @@
     <ClCompile Include="SpaceSystem.cpp">
       <Filter>Universe</Filter>
     </ClCompile>
-    <ClCompile Include="StaticTerrain.cpp">
-      <Filter>Objects\Terrain</Filter>
-    </ClCompile>
     <ClCompile Include="SystemRegion.cpp">
       <Filter>Regions</Filter>
     </ClCompile>
@@ -721,9 +718,6 @@
     <ClCompile Include="DataPortTests.cpp">
       <Filter>_Tests\DataPorts</Filter>
     </ClCompile>
-    <ClCompile Include="DataEnabledStaticTerrain.cpp">
-      <Filter>Objects\Data</Filter>
-    </ClCompile>
     <ClCompile Include="DataEnabledEnvironmentObject.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
@@ -735,6 +729,12 @@
     </ClCompile>
     <ClCompile Include="DataObjectRelay.cpp">
       <Filter>Objects\Data\Objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Objects\Terrain</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicTerrain.cpp">
+      <Filter>Objects\Data</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1181,12 +1181,6 @@
     </ClInclude>
     <ClInclude Include="SpatiallyLinkedCollection.h">
       <Filter>Data structures</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticTerrain.h">
-      <Filter>Objects\Terrain</Filter>
-    </ClInclude>
-    <ClInclude Include="StaticTerrainDefinition.h">
-      <Filter>Objects\Terrain</Filter>
     </ClInclude>
     <ClInclude Include="SystemRegion.h">
       <Filter>Regions</Filter>
@@ -1669,9 +1663,6 @@
     <ClInclude Include="DataEnabledObject.h">
       <Filter>Objects\Data</Filter>
     </ClInclude>
-    <ClInclude Include="DataEnabledStaticTerrain.h">
-      <Filter>Objects\Data</Filter>
-    </ClInclude>
     <ClInclude Include="DataEnabledEnvironmentObject.h">
       <Filter>Objects\Data</Filter>
     </ClInclude>
@@ -1701,6 +1692,15 @@
     </ClInclude>
     <ClInclude Include="DataObjectRegister.h">
       <Filter>Objects\Data\Objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Objects\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainDefinition.h">
+      <Filter>Objects\Terrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrain.h">
+      <Filter>Objects\Data</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

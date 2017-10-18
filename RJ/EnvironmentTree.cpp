@@ -1,7 +1,7 @@
 #include "GameVarsExtern.h"
 #include "iSpaceObjectEnvironment.h"
 #include "iEnvironmentObject.h"
-#include "StaticTerrain.h"
+#include "Terrain.h"
 
 #include "EnvironmentTree.h"
 
@@ -11,9 +11,9 @@ MemoryPool<EnvironmentTree> * EnvironmentTree::_MemoryPool = new MemoryPool<Envi
 
 // Explicit instantiation of template methods
 template bool EnvironmentTree::RemoveItem<iEnvironmentObject*>(iEnvironmentObject*);
-template bool EnvironmentTree::RemoveItem<StaticTerrain*>(StaticTerrain*);
+template bool EnvironmentTree::RemoveItem<Terrain*>(Terrain*);
 template void EnvironmentTree::ItemMoved<iEnvironmentObject*>(iEnvironmentObject *item);
-template void EnvironmentTree::ItemMoved<StaticTerrain*>(StaticTerrain *item);
+template void EnvironmentTree::ItemMoved<Terrain*>(Terrain *item);
 
 // Constructor for the root node
 EnvironmentTree::EnvironmentTree(iSpaceObjectEnvironment *environment) 
@@ -268,7 +268,7 @@ void EnvironmentTree::GetItems(std::vector<T> & outResult)
 }
 
 // Returns the set of all types of item within scope of this node.  If this is not a leaf then it will progress recursively downwards
-void EnvironmentTree::GetAllItems(std::vector<iEnvironmentObject*> & outObjects, std::vector<StaticTerrain*> & outTerrain)
+void EnvironmentTree::GetAllItems(std::vector<iEnvironmentObject*> & outObjects, std::vector<Terrain*> & outTerrain)
 {
 	// If this is a leaf node, add all items that it contains
 	if (m_childcount == 0)
@@ -322,7 +322,7 @@ void EnvironmentTree::PerformPruningCheck(void)
 		// Iterate through our children and keep a note of any items that are found.  If we exceed the maximum
 		// that can be stored within one node then we can quit immediately, since we could not roll all the 
 		// child items up to be stored in this one
-		std::vector<iEnvironmentObject*> objects; std::vector<StaticTerrain*> terrain;
+		std::vector<iEnvironmentObject*> objects; std::vector<Terrain*> terrain;
 		for (int i = 0; i < m_childcount; ++i)
 		{
 			// Call the GetAllItems method to add this child's items to the vector.  We call on each child in turn (rather

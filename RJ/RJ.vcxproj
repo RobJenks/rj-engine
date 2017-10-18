@@ -407,7 +407,7 @@
     <ClCompile Include="DataEnabledEnvironmentObject.cpp" />
     <ClCompile Include="DataObjectDebugLogger.cpp" />
     <ClCompile Include="DataEnabledObject.cpp" />
-    <ClCompile Include="DataEnabledStaticTerrain.cpp" />
+    <ClCompile Include="DynamicTerrain.cpp" />
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataObjectRelay.cpp" />
     <ClCompile Include="DataOutput.cpp" />
@@ -532,7 +532,7 @@
     <ClCompile Include="UI_ModelBuilder.cpp" />
     <ClCompile Include="RJMain.cpp" />
     <ClCompile Include="SimulationStateManager.cpp" />
-    <ClCompile Include="StaticTerrain.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="iUIControl.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="LightFadeShader.cpp" />
@@ -671,7 +671,7 @@
     <ClInclude Include="DataEnabledEnvironmentObject.h" />
     <ClInclude Include="DataObjectDebugLogger.h" />
     <ClInclude Include="DataEnabledObject.h" />
-    <ClInclude Include="DataEnabledStaticTerrain.h" />
+    <ClInclude Include="DynamicTerrain.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataObjectRegister.h" />
     <ClInclude Include="DataObjectRelay.h" />
@@ -842,7 +842,7 @@
     <ClInclude Include="UI_ModelBuilder.h" />
     <ClInclude Include="RJMain.h" />
     <ClInclude Include="SimulationStateManager.h" />
-    <ClInclude Include="StaticTerrain.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="iUIComponent.h" />
     <ClInclude Include="iUIComponentRenderable.h" />
     <ClInclude Include="iUIControl.h" />
@@ -901,7 +901,7 @@
     <ClInclude Include="SpaceEmitter.h" />
     <ClInclude Include="SpaceSystem.h" />
     <ClInclude Include="SpatiallyLinkedCollection.h" />
-    <ClInclude Include="StaticTerrainDefinition.h" />
+    <ClInclude Include="TerrainDefinition.h" />
     <ClInclude Include="SystemRegion.h" />
     <ClInclude Include="TexcubeShader.h" />
     <ClInclude Include="TextBlock.h" />

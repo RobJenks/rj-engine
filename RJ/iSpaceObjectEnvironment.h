@@ -25,7 +25,7 @@
 #include "EnvironmentElementStrengthOverlay.h"
 
 class iEnvironmentObject;
-class StaticTerrain;
+class Terrain;
 class NavNetwork;
 class EnvironmentTree;
 class Frustum;
@@ -46,7 +46,7 @@ public:
 #	define DEBUG_OUTPUT_ENVIRONMENT_COLLISION_RESULT
 
 	// Environment terrain collection
-	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
+	typedef std::vector<Terrain*, AlignedAllocator<Terrain*, 16U>> TerrainCollection;
 
 	// Structure holding information on a particular deck of the environment
 	struct DeckInfo
@@ -284,21 +284,21 @@ public:
 	virtual void					SetBaseEnvironmentProperties(void) = 0;
 
 	// Methods to add, find or remove terrain objects in the environment
-	void							AddTerrainObject(StaticTerrain *obj);
-	void							RemoveTerrainObject(StaticTerrain *obj);
+	void							AddTerrainObject(Terrain *obj);
+	void							RemoveTerrainObject(Terrain *obj);
 	void							ClearAllTerrainObjects(void);
 
 	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found
-	TerrainCollection::const_iterator FindTerrainObject(StaticTerrain *obj)
+	TerrainCollection::const_iterator FindTerrainObject(Terrain *obj)
 	{ 
-		return FindInVector<TerrainCollection, StaticTerrain*>(TerrainObjects, obj);
+		return FindInVector<TerrainCollection, Terrain*>(TerrainObjects, obj);
 	}
 
 	// Returns an iterator to the specified terrain object, or TerrainObjects.end() if not found
 	TerrainCollection::const_iterator FindTerrainObject(Game::ID_TYPE id)
 	{
 		return (std::find_if(TerrainObjects.begin(), TerrainObjects.end(),
-			[&id](const StaticTerrain *element) { return (element && element->GetID() == id); }));
+			[&id](const Terrain *element) { return (element && element->GetID() == id); }));
 	}
 
 	// Destroy the specified terrain object(s)
@@ -340,7 +340,7 @@ public:
 
 	// Specialised method to add a new terrain object that is part of a tile.  Object will be transformed from tile-relative to
 	// environment-relative position & orientation and then added to the environment as normal
-	void							AddTerrainObjectFromTile(StaticTerrain *obj, ComplexShipTile *sourcetile);
+	void							AddTerrainObjectFromTile(Terrain *obj, ComplexShipTile *sourcetile);
 
 	// Remove all terrain objects that were associated with a tile from this environment
 	// Adds all terrain objects associated with a tile to the environment
@@ -554,22 +554,22 @@ public:
 	// Find all objects within a given distance of the specified object.  Object & Terrain output
 	// vectors will be populated if valid pointers are supplied
 	void							GetAllObjectsWithinDistance(iEnvironmentObject *focal_object, float distance,
-																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
-	void							GetAllObjectsWithinDistance(StaticTerrain *focal_object, float distance,
-																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+																std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain);
+	void							GetAllObjectsWithinDistance(Terrain *focal_object, float distance,
+																std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain);
 
 	// Find all objects within a given distance of the specified location.  Object & Terrain output
 	// vectors will be populated if valid pointers are supplied.  Less efficient than the method
 	// which supplies a focal object, since the relevant node has to be determined based on the position
 	void							GetAllObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float distance,
-																std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+																std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain);
 
 	// Finds all visible objects within a given distance of the specified location, with visibility determined
 	// by the given frustum object
 	void							GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, const FXMVECTOR search_radius, const Frustum *frustum,
-																		std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+																		std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain);
 	CMPINLINE void					GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float search_radius, const Frustum *frustum,
-																		std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+																		std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 	{
 		GetAllVisibleObjectsWithinDistance(spatial_tree, position, XMVectorReplicate(search_radius), frustum, outObjects, outTerrain);
 	}
@@ -708,7 +708,7 @@ protected:
 	// Internal method; get all objects within a given distaance of the specified position, within the 
 	// specified EnvironmentTree node
 	void							_GetAllObjectsWithinDistance(EnvironmentTree *tree_node, const FXMVECTOR position, float distance,
-									 							 std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain);
+									 							 std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain);
 
 	// Internal recursive method for building the environment OBB hierarchy.  Returns the number of child
 	// regions created below this node, in the range [0 - 8]

@@ -18,7 +18,7 @@ public:
 	USE_ALIGN16_ALLOCATORS(UI_ModelBuilder)
 
 	// Collection of terrain objects being added within the modelbuilder
-	typedef std::vector<StaticTerrain*, AlignedAllocator<StaticTerrain*, 16U>> TerrainCollection;
+	typedef std::vector<Terrain*, AlignedAllocator<Terrain*, 16U>> TerrainCollection;
 
 	// Enumeration of possible selection types
 	enum MVSelectionType { NothingSelected = 0, OBBSelected, TerrainSelected };
@@ -89,11 +89,11 @@ public:
 	int FindOBBChildIndex(OrientedBoundingBox *obb, OrientedBoundingBox *child);
 
 	// Finds a terrain object in the terrain vector and returns its index.  Returns -1 if the terrain does not exist
-	int FindTerrainIndex(StaticTerrain *terrain);
+	int FindTerrainIndex(Terrain *terrain);
 
 	// Select either an OBB or terrain object in the viewer
 	void SelectOBB(OrientedBoundingBox *obb);
-	void SelectTerrain(StaticTerrain *terrain);
+	void SelectTerrain(Terrain *terrain);
 
 	// Methods to add NEW objects, or remove existing objects, in the viewer
 	void AddNewOBB(void);
@@ -103,8 +103,8 @@ public:
 	// Adds or removes a terrain object from the model.  Called by AddNewTerrain() and RemoveSelectedObject(), 
 	// as well as e.g. the methods to load collision data from file.  Ensures terrain is added/removed correctly
 	// from the null environment as well as the model builder data collections
-	void AddTerrain(StaticTerrain *terrain);
-	void RemoveTerrain(StaticTerrain *terrain);
+	void AddTerrain(Terrain *terrain);
+	void RemoveTerrain(Terrain *terrain);
 
 	// Loads a model into the viewer
 	Result LoadModel(const std::string & code);
@@ -243,7 +243,7 @@ protected:
 	// Selection parameters
 	MVSelectionType							m_selection_type;
 	OrientedBoundingBox *					m_selected_obb;
-	StaticTerrain *							m_selected_terrain;
+	Terrain *							m_selected_terrain;
 	AXMMATRIX								m_selection_transform;
 
 	// Store the prior state of certain key variables, in order to restore them when the model viewer is closed

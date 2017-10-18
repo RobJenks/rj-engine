@@ -102,10 +102,10 @@ public:
 	CMPINLINE void			SetHardness(float hardness)								{ m_hardness = hardness; }
 
 	// Vector of all terrain objects which are contained within this tile definition
-	std::vector<StaticTerrain*>							TerrainObjects;
-	CMPINLINE void										AddTerrainObject(StaticTerrain *t)		{ TerrainObjects.push_back(t); }
-	CMPINLINE void										RemoveTerrainObject(StaticTerrain *t)	{ RemoveFromVector<StaticTerrain*>(TerrainObjects, t); }
-	CMPINLINE std::vector<StaticTerrain*>::size_type	GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
+	std::vector<Terrain*>							TerrainObjects;
+	CMPINLINE void										AddTerrainObject(Terrain *t)		{ TerrainObjects.push_back(t); }
+	CMPINLINE void										RemoveTerrainObject(Terrain *t)	{ RemoveFromVector<Terrain*>(TerrainObjects, t); }
+	CMPINLINE std::vector<Terrain*>::size_type	GetTerrainObjectCount(void) const		{ return TerrainObjects.size(); }
 
 	// Hardpoints which are instantiated along with instances of this tile
 	CMPINLINE const Hardpoints::HardpointCollection &	GetHardpoints(void) const				{ return m_hardpoints; }

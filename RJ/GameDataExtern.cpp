@@ -23,7 +23,7 @@
 #include "ProjectileLauncher.h"
 #include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
-#include "StaticTerrainDefinition.h"
+#include "TerrainDefinition.h"
 #include "DynamicTileSet.h"
 class ImmediateRegion;
 class SystemRegion;
@@ -43,7 +43,7 @@ namespace D {
 	DataRegister<ComplexShipTileClass>			ComplexShipTileClasses(false);		// The details of all complex ship tile classes in the game
 	DataRegister<DynamicTileSet>				DynamicTileSets(false);				// Details of all dynamic tile sets in the game
 	DataRegister<ComplexShipObjectClass>		ComplexShipObjectClasses(false);	// Details of all object classes in the game
-	DataRegister<StaticTerrainDefinition>		StaticTerrainDefinitions(false);	// Details of all static terrain classes in the game
+	DataRegister<TerrainDefinition>		TerrainDefinitions(false);	// Details of all static terrain classes in the game
 	DataRegister<Resource>						Resources(false);					// Details of all resources in the game
 	DataRegister<SpaceTurret>					Turrets(true);						// Details of all turret types in the game
 	DataRegister<ProjectileLauncher>			ProjectileLaunchers(false);			// Details of all projectile launcher types in the game
@@ -99,8 +99,8 @@ namespace D {
 	const char *NODE_ActorAttributeGeneration = "actorattributegeneration";
 	const char *NODE_ActorBase = "actorbase";
 	const char *NODE_Portal = "portal";
-	const char *NODE_StaticTerrain = "staticterrain";
-	const char *NODE_StaticTerrainDefinition = "staticterraindefinition";
+	const char *NODE_Terrain = "Terrain";
+	const char *NODE_TerrainDefinition = "TerrainDefinition";
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";
 	const char *NODE_ProjectileLauncher = "projectilelauncher";

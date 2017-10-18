@@ -11,7 +11,7 @@
 template <class EnvironmentTree> class MemoryPool;
 class iSpaceObjectEnvironment;
 class iEnvironmentObject;
-class StaticTerrain;
+class Terrain;
 using namespace DirectX;
 
 // The index into child node pointers for each of the eight possible subdivision directions
@@ -74,7 +74,7 @@ public:
 
 	// Returns the set of all types of item within scope of this node.  If this is not a leaf then it will progress recursively downwards
 	void										GetAllItems(std::vector<iEnvironmentObject*> & outObjects, 
-															std::vector<StaticTerrain*> & outTerrain);
+															std::vector<Terrain*> & outTerrain);
 
 	// Returns a pointer to the environment that this tree covers
 	iSpaceObjectEnvironment *					GetEnvironment(void) const		{ return m_environment; }
@@ -211,7 +211,7 @@ public:
 
 	// Returns a reference to the objects within this node
 	CMPINLINE const std::vector<iEnvironmentObject*> &		GetNodeObjects(void) const	{ return m_objects; }
-	CMPINLINE const std::vector<StaticTerrain*> &			GetNodeTerrain(void) const	{ return m_terrain; }
+	CMPINLINE const std::vector<Terrain*> &			GetNodeTerrain(void) const	{ return m_terrain; }
 
 	// Returns a reference to this node's ultimate parent, i.e. the root node at the top of its tree
 	EnvironmentTree *							GetUltimateParent(void);
@@ -238,7 +238,7 @@ protected:
 
 	// Items held within the node
 	std::vector<iEnvironmentObject*>			m_objects;
-	std::vector<StaticTerrain*>					m_terrain;
+	std::vector<Terrain*>					m_terrain;
 
 	// Item counts
 	int											m_objectcount, m_terraincount, m_totalitemcount;
@@ -289,15 +289,15 @@ protected:
 	// Internal methods to retrieve item count for a particular type
 	template <typename T> CMPINLINE int			ItemCount(void) const { throw "EnvironmentTree cannot support this object type"; }
 	template <> CMPINLINE int					ItemCount<iEnvironmentObject*>(void) const { return m_objectcount; }
-	template <> CMPINLINE int					ItemCount<StaticTerrain*>(void) const { return m_terraincount; }
+	template <> CMPINLINE int					ItemCount<Terrain*>(void) const { return m_terraincount; }
 
 	// Internal methods to return a reference to the item collection or its item counts
 	template <typename T> CMPINLINE std::vector<T> &			ItemCollectionReference(void) { throw "EnvironmentTree cannot support this object type"; }
 	template <> CMPINLINE std::vector<iEnvironmentObject*> &	ItemCollectionReference<iEnvironmentObject*>(void) { return m_objects; }
-	template <> CMPINLINE std::vector<StaticTerrain*> &			ItemCollectionReference<StaticTerrain*>(void) { return m_terrain; }
+	template <> CMPINLINE std::vector<Terrain*> &			ItemCollectionReference<Terrain*>(void) { return m_terrain; }
 	template <typename T> CMPINLINE int &						ItemCountReference(void) { throw "EnvironmentTree cannot support this object type"; }
 	template <> CMPINLINE int &									ItemCountReference<iEnvironmentObject*>(void) { return m_objectcount; }
-	template <> CMPINLINE int &									ItemCountReference<StaticTerrain*>(void) { return m_terraincount; }
+	template <> CMPINLINE int &									ItemCountReference<Terrain*>(void) { return m_terraincount; }
 
 	// Internal methods to add an item to the appropriate collection and recalculate derived statistics
 	template <typename T> void					AddItemToCollection(T item);

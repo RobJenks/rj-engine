@@ -19,7 +19,7 @@
 #include "Player.h"
 #include "iSpaceObjectEnvironment.h"
 #include "ComplexShipSection.h"
-#include "StaticTerrain.h"
+#include "Terrain.h"
 
 #include "GamePhysicsEngine.h"
 
@@ -511,9 +511,9 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 	env->GetAllObjectsWithinDistance(obj, /*obj->GetCollisionSphereRadius()*/ Game::C_CS_ELEMENT_SCALE * 5.0f, &_envobj, &_terrain);
 
 	// First check for collisions against terrain objects
-	StaticTerrain *terrain;
-	std::vector<StaticTerrain*>::iterator t_it_end = _terrain.end();
-	for (std::vector<StaticTerrain*>::iterator t_it = _terrain.begin(); t_it != t_it_end; ++t_it)
+	Terrain *terrain;
+	std::vector<Terrain*>::iterator t_it_end = _terrain.end();
+	for (std::vector<Terrain*>::iterator t_it = _terrain.begin(); t_it != t_it_end; ++t_it)
 	{
 		// Make sure this is a valid terrain object
 		terrain = (*t_it); if (!terrain) continue;
@@ -595,7 +595,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 
 // Performs full SAT collision testing between the object and terrain OBBs.  If a collision is detected, applies an appropriate response
 // to move the object out of the terrain collision box by the minimum separating axis
-bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *env, iEnvironmentObject *object, StaticTerrain *terrain)
+bool GamePhysicsEngine::TestAndHandleTerrainCollision(iSpaceObjectEnvironment *env, iEnvironmentObject *object, Terrain *terrain)
 {
 	// No parameter checks; this will only ever be called by the physics engine at the point it has already confirmed all are valid objects
 	
@@ -1124,7 +1124,7 @@ void GamePhysicsEngine::HandleCollision(iActiveObject *object0, iActiveObject *o
 // fact that the active object will always be small enough to approximate the contact point as its origin.  The collision response is always
 // an equal and opposite response to the active object's momentum along the contact normal, resulting in the active object stopping
 // immediately, and the terrain object remaining immobile.
-void GamePhysicsEngine::HandleTerrainCollision(iEnvironmentObject *object, StaticTerrain *terrain)
+void GamePhysicsEngine::HandleTerrainCollision(iEnvironmentObject *object, Terrain *terrain)
 {
 	// No parameter checks; this will only ever be called by the physics engine at the point it has already confirmed both are valid objects
 	return;

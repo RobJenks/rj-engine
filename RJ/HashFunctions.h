@@ -68,7 +68,7 @@ namespace HashedStrings
 	DefineHash(H_ComplexShipTile, "complexshiptile");
 	DefineHash(H_ComplexShipTileDefinition, "complexshiptiledefinition");
 	DefineHash(H_ComplexShipTileClass, "complexshiptileclass");
-	DefineHash(H_StaticTerrain, "staticterrain");
+	DefineHash(H_Terrain, "Terrain");
 
 	DefineHash(H_Code, "code"); 
 	DefineHash(H_Name, "name");

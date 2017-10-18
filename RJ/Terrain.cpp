@@ -3,21 +3,21 @@
 #include "Model.h"
 #include "iObject.h"
 #include "iSpaceObjectEnvironment.h"
-#include "StaticTerrainDefinition.h"
+#include "TerrainDefinition.h"
 #include "OrientedBoundingBox.h"
 #include "EnvironmentTree.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
 
-#include "StaticTerrain.h"
+#include "Terrain.h"
 
 
 // Static record of the current maximum ID for terrain objects; allows all terrain objects to be given a uniquely-identifying reference
-Game::ID_TYPE StaticTerrain::InstanceCreationCount = 0;
+Game::ID_TYPE Terrain::InstanceCreationCount = 0;
 
 
 // Default constructor; initialise fields to default values
-StaticTerrain::StaticTerrain()
+Terrain::Terrain()
 	:	m_definition(NULL), m_parent(NULL), m_sourcetype(TerrainSourceType::NoSource), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), 
 		m_collisionradius(0.0f), m_collisionradiussq(0.0f), m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), 
 		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f), m_dataenabled(false)
@@ -28,12 +28,12 @@ StaticTerrain::StaticTerrain()
 	m_data.Axis[0].value = UNIT_BASES[0]; m_data.Axis[1].value = UNIT_BASES[1]; m_data.Axis[2].value = UNIT_BASES[2];
 
 	// Assign a new unique ID for this terrain object
-	m_id = StaticTerrain::GenerateNewUniqueID();
+	m_id = Terrain::GenerateNewUniqueID();
 }
 
 
 // Sets the terrain definition for this object, updating other relevant fields in the process
-void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
+void Terrain::SetDefinition(const TerrainDefinition *d)
 {
 	// Store the new definition, which can be null (for non-renderable terrain such as pure collision boxes)
 	m_definition = d;
@@ -57,7 +57,7 @@ void StaticTerrain::SetDefinition(const StaticTerrainDefinition *d)
 }
 
 // Set the parent environment that contains this terrain object, or NULL if no environment
-void StaticTerrain::SetParentEnvironment(iSpaceObjectEnvironment *env)
+void Terrain::SetParentEnvironment(iSpaceObjectEnvironment *env)
 {
 	// Store a reference to the new environment (or NULL)
 	m_parent = env;
@@ -67,7 +67,7 @@ void StaticTerrain::SetParentEnvironment(iSpaceObjectEnvironment *env)
 }
 
 // Changes the position of this terrain object, recalculating derived fields in the process
-void StaticTerrain::SetPosition(const FXMVECTOR pos)
+void Terrain::SetPosition(const FXMVECTOR pos)
 {
 	// Store the new position value
 	m_data.Centre = pos;
@@ -77,7 +77,7 @@ void StaticTerrain::SetPosition(const FXMVECTOR pos)
 }
 
 // Changes the orientation of this terrain object, recalculating derived fields in the process
-void StaticTerrain::SetOrientation(const FXMVECTOR orient)
+void Terrain::SetOrientation(const FXMVECTOR orient)
 {
 	// Store the new orientation value
 	m_orientation = orient;
@@ -87,13 +87,13 @@ void StaticTerrain::SetOrientation(const FXMVECTOR orient)
 }
 
 // Adjusts the terrain orientation by the specified rotation value
-void StaticTerrain::ChangeOrientation(const FXMVECTOR delta)
+void Terrain::ChangeOrientation(const FXMVECTOR delta)
 {
 	SetOrientation(XMQuaternionMultiply(m_orientation, delta));
 }
 
 // Changes the extents of this terrain object, recalculating derived fields in the process
-void StaticTerrain::SetExtent(const FXMVECTOR e)
+void Terrain::SetExtent(const FXMVECTOR e)
 {
 	// Store the new extents; ensure no negative values
 	XMVECTOR ex = XMVectorSetW(XMVectorMax(e, NULL_VECTOR), 0.0f);
@@ -112,7 +112,7 @@ void StaticTerrain::SetExtent(const FXMVECTOR e)
 }
 
 // Recalculates the positional data for this terrain following a change to its primary pos/orient data
-void StaticTerrain::RecalculatePositionalData(void)
+void Terrain::RecalculatePositionalData(void)
 {
 	// We do not want to execute this method if updates are suspended
 	if (m_postponeupdates) return;
@@ -158,13 +158,13 @@ void StaticTerrain::RecalculatePositionalData(void)
 }
 
 // Returns a value indicating whether this terrain object overlaps the specified element
-bool StaticTerrain::OverlapsElement(const INTVECTOR3 & el) const
+bool Terrain::OverlapsElement(const INTVECTOR3 & el) const
 {
 	return (m_multielement ? (m_element_min <= el && m_element_max >= el) : m_element_location == el);
 }
 
 // Determines the vertices of the surrounding collision volume
-void StaticTerrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, AXMVECTOR_P(&pOutVertices)[8]) const
+void Terrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, AXMVECTOR_P(&pOutVertices)[8]) const
 {
 	// Determine the extent along each basis vector
 	static const int E_POS = 0; static const int E_NEG = 1;
@@ -205,10 +205,10 @@ void StaticTerrain::DetermineCollisionBoxVertices(iSpaceObjectEnvironment *paren
 	}
 }
 
-StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
+Terrain *Terrain::Create(const TerrainDefinition *def)
 {
 	// Create a new static terrain object with this definition (or NULL) and default parameters
-	StaticTerrain *terrain = new StaticTerrain();
+	Terrain *terrain = new Terrain();
 	if (!terrain) return NULL;
 
 	// Initialise and return the terrain object
@@ -217,7 +217,7 @@ StaticTerrain *StaticTerrain::Create(const StaticTerrainDefinition *def)
 }
 
 // Initialise a newly-created terrain based on the given definition
-void StaticTerrain::InitialiseNewTerrain(const StaticTerrainDefinition *def)
+void Terrain::InitialiseNewTerrain(const TerrainDefinition *def)
 {
 	// Postpone any internal recalculation, set all properties and then resume calculations
 	PostponeUpdates();
@@ -234,7 +234,7 @@ void StaticTerrain::InitialiseNewTerrain(const StaticTerrainDefinition *def)
 }
 
 // Applies a highlight/alpha effect to the terrain object
-void StaticTerrain::Highlight(const XMFLOAT3 & colour, float alpha) const
+void Terrain::Highlight(const XMFLOAT3 & colour, float alpha) const
 {
 	// Make sure we have all required data
 	if (!m_parent) return;
@@ -250,7 +250,7 @@ void StaticTerrain::Highlight(const XMFLOAT3 & colour, float alpha) const
 }
 
 // Applies a highlight effect to the terrain object.  No alpha blending is performed
-void StaticTerrain::Highlight(const XMFLOAT4 & colour) const
+void Terrain::Highlight(const XMFLOAT4 & colour) const
 {
 	// Make sure we have all required data
 	if (!m_parent) return;
@@ -266,18 +266,18 @@ void StaticTerrain::Highlight(const XMFLOAT4 & colour) const
 
 // Returns the impact resistance of this object, i.e. the remaining force it can withstand from physical 
 // impacts, with an impact point at the specified element
-float StaticTerrain::GetImpactResistance(void) const
+float Terrain::GetImpactResistance(void) const
 {
 	// Impact resistance is calculated as (mass * hardness)
 	return (m_mass * m_hardness);
 }
 
 // Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
-StaticTerrain * StaticTerrain::Copy(void) const
+Terrain * Terrain::Copy(void) const
 {
 	// Create a shallow copy of the object and assign a new unique ID
-	StaticTerrain *t = new StaticTerrain(*this);
-	t->SetID(StaticTerrain::GenerateNewUniqueID());
+	Terrain *t = new Terrain(*this);
+	t->SetID(Terrain::GenerateNewUniqueID());
 
 	// Alter the parent object references, since this object will start off unassigned
 	t->SetParentEnvironment(NULL);
@@ -287,7 +287,7 @@ StaticTerrain * StaticTerrain::Copy(void) const
 }
 
 // Event triggered upon destruction of the entity
-void StaticTerrain::DestroyObject(void)
+void Terrain::DestroyObject(void)
 {
 	// If we are already destroyed then take no further action
 	if (IsDestroyed()) return;
@@ -299,14 +299,14 @@ void StaticTerrain::DestroyObject(void)
 }
 
 // Custom debug string function
-std::string StaticTerrain::DebugString(void) const
+std::string Terrain::DebugString(void) const
 {
 	return concat("Terrain [ID=")(m_id)(", Type=")(m_definition ? m_definition->GetCode() : "<null>").str();
 }
 
 
 // Shutdown method to deallocate resources and remove the terrain object
-void StaticTerrain::Shutdown(void)
+void Terrain::Shutdown(void)
 {
 	// Remove this object from its parent environment, which will also deallocate this object
 	if (m_parent)
@@ -322,7 +322,7 @@ void StaticTerrain::Shutdown(void)
 }
 
 // Default destructor
-StaticTerrain::~StaticTerrain()
+Terrain::~Terrain()
 {
 }
 

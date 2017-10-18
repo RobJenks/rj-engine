@@ -1,7 +1,7 @@
-#include "DataEnabledStaticTerrain.h"
+#include "DynamicTerrain.h"
 
 // Default constructor
-DataEnabledStaticTerrain::DataEnabledStaticTerrain(void)
+DynamicTerrain::DynamicTerrain(void)
 {
 	// Set the data-enabled flag on this terrain object
 	m_dataenabled = true;

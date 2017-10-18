@@ -14,7 +14,7 @@
 #include "ComplexShipTile.h"
 #include "Hardpoint.h"
 #include "DynamicTileSet.h"
-#include "StaticTerrain.h"
+#include "Terrain.h"
 #include "Ship.h"
 #include "iContainsComplexShipTiles.h"
 #include "NavNetwork.h"
@@ -29,7 +29,7 @@
 #include "SimulatedEnvironmentCollision.h"
 #include "Frustum.h"
 #include "PortalRenderingSupport.h"
-#include "DataEnabledStaticTerrain.h"
+#include "DynamicTerrain.h"
 #include "DataEnabledEnvironmentObject.h"
 
 #include "iSpaceObjectEnvironment.h"
@@ -375,7 +375,7 @@ void iSpaceObjectEnvironment::ObjectLeavingEnvironment(iEnvironmentObject *obj)
 }
 
 // Adds a terrain object to the environment
-void iSpaceObjectEnvironment::AddTerrainObject(StaticTerrain *obj)
+void iSpaceObjectEnvironment::AddTerrainObject(Terrain *obj)
 {
 	// Make sure the terrain object is valid
 	if (!obj) return;
@@ -388,16 +388,16 @@ void iSpaceObjectEnvironment::AddTerrainObject(StaticTerrain *obj)
 	obj->SetParentEnvironment(this);
 
 	// Also add a reference in the spatial partitioning tree
-	if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<StaticTerrain*>(obj);
+	if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<Terrain*>(obj);
 
 	// Integrate this object into the data environment if it is data-enabled
-	if (obj->IsDataEnabled()) RegisterDataEnabledObject(static_cast<DataEnabledStaticTerrain*>(obj));
+	if (obj->IsDataEnabled()) RegisterDataEnabledObject(static_cast<DynamicTerrain*>(obj));
 }
 
 // Removes a terrain object from the environment.  Optionally takes a second parameter indicating the index of this 
 // object in the terrain collection; if set, and if the index is correct, it will be used rather than performing
 // a search of the collection for the object.  Deallocates the terrain object.
-void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
+void iSpaceObjectEnvironment::RemoveTerrainObject(Terrain *obj)
 {
 	// Make sure the terrain object is valid
 	if (!obj) return;
@@ -406,14 +406,14 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
 	obj->SetParentEnvironment(NULL);
 
 	// Remove from the terrain object collection
-	std::vector<StaticTerrain*>::iterator it = std::find(TerrainObjects.begin(), TerrainObjects.end(), obj);
+	std::vector<Terrain*>::iterator it = std::find(TerrainObjects.begin(), TerrainObjects.end(), obj);
 	if (it != TerrainObjects.end()) TerrainObjects.erase(it);
 
 	// Remove from the spatial partitioning tree
-	if (obj->GetEnvironmentTreeNode()) obj->GetEnvironmentTreeNode()->RemoveItem<StaticTerrain*>(obj);
+	if (obj->GetEnvironmentTreeNode()) obj->GetEnvironmentTreeNode()->RemoveItem<Terrain*>(obj);
 
 	// Remove this object from the data environment if it is data-enabled
-	if (obj->IsDataEnabled()) UnregisterDataEnabledObject(static_cast<DataEnabledStaticTerrain*>(obj));
+	if (obj->IsDataEnabled()) UnregisterDataEnabledObject(static_cast<DynamicTerrain*>(obj));
 
 	// Finally, deallocate the terrain object
 	SafeDelete(obj);
@@ -423,8 +423,8 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(StaticTerrain *obj)
 void iSpaceObjectEnvironment::ClearAllTerrainObjects(void)
 {
 	// Deallocate all terrain objects and then clear the collection
-	std::vector<StaticTerrain*>::iterator it_end = TerrainObjects.end();
-	for (std::vector<StaticTerrain*>::iterator it = TerrainObjects.begin(); it != it_end; ++it)
+	std::vector<Terrain*>::iterator it_end = TerrainObjects.end();
+	for (std::vector<Terrain*>::iterator it = TerrainObjects.begin(); it != it_end; ++it)
 	{
 		if (*it) (delete (*it));
 	}
@@ -436,7 +436,7 @@ void iSpaceObjectEnvironment::ClearAllTerrainObjects(void)
 
 // Specialised method to add a new terrain object that is part of a tile.  Object will be transformed from tile-relative to
 // environment-relative position & orientation and then added to the environment as normal
-void iSpaceObjectEnvironment::AddTerrainObjectFromTile(StaticTerrain *obj, ComplexShipTile *sourcetile)
+void iSpaceObjectEnvironment::AddTerrainObjectFromTile(Terrain *obj, ComplexShipTile *sourcetile)
 {
 	// Parameter check
 	if (!obj) return;
@@ -648,12 +648,12 @@ void iSpaceObjectEnvironment::AddTerrainObjectsFromTile(ComplexShipTile *tile)
 	// store references to the terrain instance IDs within the tile instance to maintain the link 
 	if (def)
 	{
-		std::vector<StaticTerrain*>::const_iterator it_end = def->TerrainObjects.end();
-		for (std::vector<StaticTerrain*>::const_iterator it = def->TerrainObjects.begin(); it != it_end; ++it)
+		std::vector<Terrain*>::const_iterator it_end = def->TerrainObjects.end();
+		for (std::vector<Terrain*>::const_iterator it = def->TerrainObjects.begin(); it != it_end; ++it)
 		{
 			// Create a copy of the terrain object, if it is valid
 			if (!(*it)) continue;
-			StaticTerrain *terrain = (*it)->Copy();
+			Terrain *terrain = (*it)->Copy();
 			if (!terrain) continue;
 
 			// Add this terrain object to the environment; method will determine the correct ship-relative position & orientation
@@ -728,7 +728,7 @@ void iSpaceObjectEnvironment::RemoveTerrainObjectsFromTile(ComplexShipTile *tile
 
 	// Remove any terrain objects in the environment that were owned by this tile
 	Game::ID_TYPE id = tile->GetID();
-	Collections::DeleteErase(TerrainObjects, [id](const StaticTerrain *terrain) { return (terrain->GetParentTileID() == id); });
+	Collections::DeleteErase(TerrainObjects, [id](const Terrain *terrain) { return (terrain->GetParentTileID() == id); });
 	
 	// Rebuild the spatial partitioning tree following this bulk change
 	BuildSpatialPartitioningTree();
@@ -742,9 +742,9 @@ void iSpaceObjectEnvironment::RemoveCollisionTerrainFromTileGeometry(ComplexShip
 
 	// Remove any terrain objects in the environment that were owned by this tile and which were generated from its collision geometry
 	Game::ID_TYPE id = tile->GetID();
-	Collections::DeleteErase(TerrainObjects, [id](const StaticTerrain *terrain) 
+	Collections::DeleteErase(TerrainObjects, [id](const Terrain *terrain) 
 	{ 
-		return (terrain->GetParentTileID() == id && terrain->GetSourceType() == StaticTerrain::TerrainSourceType::SourcedFromModel); 
+		return (terrain->GetParentTileID() == id && terrain->GetSourceType() == Terrain::TerrainSourceType::SourcedFromModel); 
 	});
 
 	// Rebuild the spatial partitioning tree following this bulk change
@@ -1588,7 +1588,7 @@ float iSpaceObjectEnvironment::DetermineTotalElementImpactStrength(const Complex
 	
 	ComplexShipTile *tile = el.GetTile();
 	std::vector<iEnvironmentObject*> objects;
-	std::vector<StaticTerrain*> terrain;
+	std::vector<Terrain*> terrain;
 
 	// First, the inherent strength of the element.  This is scaled by the current element health to simulate
 	// the loss of structural integrity as the hull takes more damage
@@ -1618,8 +1618,8 @@ float iSpaceObjectEnvironment::DetermineTotalElementImpactStrength(const Complex
 			}
 
 			// Also add the contribution from all terrain in the element
-			std::vector<StaticTerrain*>::const_iterator it2_end = terrain.end();
-			for (std::vector<StaticTerrain*>::const_iterator it2 = terrain.begin(); it2 != it2_end; ++it2)
+			std::vector<Terrain*>::const_iterator it2_end = terrain.end();
+			for (std::vector<Terrain*>::const_iterator it2 = terrain.begin(); it2 != it2_end; ++it2)
 			{
 				if (*it2 && (*it2)->GetElementLocation() == el_loc) terrain_strength += (*it2)->GetImpactResistance();
 			}
@@ -1993,7 +1993,7 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 		{
 			// Get all the objects & terrain in this tree node
 			std::vector<iEnvironmentObject*> objects; 
-			std::vector<StaticTerrain*> terrain;
+			std::vector<Terrain*> terrain;
 			node->GetAllItems(objects, terrain);
 
 			// Destroy all objects currently in the element
@@ -2004,8 +2004,8 @@ void iSpaceObjectEnvironment::TriggerElementDestruction(int element_id)
 			}
 
 			// Destroy all terrain currently in the element
-			std::vector<StaticTerrain*>::size_type n_ter = terrain.size();
-			for (std::vector<StaticTerrain*>::size_type i_ter = 0U; i_ter < n_ter; ++i_ter)
+			std::vector<Terrain*>::size_type n_ter = terrain.size();
+			for (std::vector<Terrain*>::size_type i_ter = 0U; i_ter < n_ter; ++i_ter)
 			{
 				if (terrain[i_ter] && !terrain[i_ter]->IsDestroyed() &&
 					terrain[i_ter]->OverlapsElement(el_loc))
@@ -2077,7 +2077,7 @@ EnvironmentCollision::ElementCollisionResult iSpaceObjectEnvironment::ApplyDamag
 void iSpaceObjectEnvironment::SetTerrainDestructionState(Game::ID_TYPE id, bool is_destroyed)
 {
 	TerrainCollection::iterator it = std::find_if(TerrainObjects.begin(), TerrainObjects.end(),
-		[id](const StaticTerrain* obj) { return (obj->GetID() == id); });
+		[id](const Terrain* obj) { return (obj->GetID() == id); });
 
 	if (it != TerrainObjects.end()) (*it)->SetObjectDestroyedState(is_destroyed);
 }
@@ -2085,7 +2085,7 @@ void iSpaceObjectEnvironment::SetTerrainDestructionState(Game::ID_TYPE id, bool 
 // Set the destruction state of all terrain objects from the specified tile
 void iSpaceObjectEnvironment::SetTileTerrainDestructionState(Game::ID_TYPE tile_id, bool is_destroyed)
 {
-	std::for_each(TerrainObjects.begin(), TerrainObjects.end(), [tile_id, is_destroyed](StaticTerrain *terrain) 
+	std::for_each(TerrainObjects.begin(), TerrainObjects.end(), [tile_id, is_destroyed](Terrain *terrain) 
 	{ 
 		if (terrain && terrain->GetParentTileID() == tile_id) terrain->SetObjectDestroyedState(is_destroyed); 
 	});
@@ -2135,8 +2135,8 @@ void iSpaceObjectEnvironment::CopyTerrainDataFromObject(iSpaceObjectEnvironment 
 	if (!source) return;
 
 	// Iterate through each terrain object in the source ship in turn
-	std::vector<StaticTerrain*>::const_iterator it_end = source->TerrainObjects.end();
-	for (std::vector<StaticTerrain*>::const_iterator it = source->TerrainObjects.begin(); it != it_end; ++it)
+	std::vector<Terrain*>::const_iterator it_end = source->TerrainObjects.end();
+	for (std::vector<Terrain*>::const_iterator it = source->TerrainObjects.begin(); it != it_end; ++it)
 	{
 		// Make a copy of the terrain object, then add it to this ship
 		AddTerrainObject((*it)->Copy());
@@ -2278,10 +2278,10 @@ void iSpaceObjectEnvironment::BuildSpatialPartitioningTree(void)
 	SpatialPartitioningTree->Initialise(this);
 
 	// Add all terrain objects to the tree
-	std::vector<StaticTerrain*>::iterator it_end = TerrainObjects.end();
-	for (std::vector<StaticTerrain*>::iterator it = TerrainObjects.begin(); it != it_end; ++it)
+	std::vector<Terrain*>::iterator it_end = TerrainObjects.end();
+	for (std::vector<Terrain*>::iterator it = TerrainObjects.begin(); it != it_end; ++it)
 	{
-		SpatialPartitioningTree->AddItem<StaticTerrain*>((*it));
+		SpatialPartitioningTree->AddItem<Terrain*>((*it));
 	}
 
 	// Also add all objects to the tree
@@ -2661,7 +2661,7 @@ void iSpaceObjectEnvironment::DebugRenderElementState(int start, int end, std::u
 // Internal method; get all objects within a given distance of the specified position, within the 
 // specified EnvironmentTree node
 void iSpaceObjectEnvironment::_GetAllObjectsWithinDistance(EnvironmentTree *tree_node, const FXMVECTOR position, float distance,
-	std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+	std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 {
 	// Parameter check
 	if (!tree_node) return;
@@ -2727,9 +2727,9 @@ void iSpaceObjectEnvironment::_GetAllObjectsWithinDistance(EnvironmentTree *tree
 			// Also process any terrain objects
 			if (outTerrain)
 			{
-				StaticTerrain *obj;
-				std::vector<StaticTerrain*>::const_iterator it_end = node->GetNodeTerrain().end();
-				for (std::vector<StaticTerrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
+				Terrain *obj;
+				std::vector<Terrain*>::const_iterator it_end = node->GetNodeTerrain().end();
+				for (std::vector<Terrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
 				{
 					obj = (*it);
 					if (obj && XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(obj->GetEnvironmentPosition(), position)), distsq))
@@ -2744,7 +2744,7 @@ void iSpaceObjectEnvironment::_GetAllObjectsWithinDistance(EnvironmentTree *tree
 // Find all objects within a given distance of the specified object.  Object & Terrain output
 // vectors will be populated if valid pointers are supplied
 void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(iEnvironmentObject *focal_object, float distance,
-	std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+	std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 {
 	if (focal_object) _GetAllObjectsWithinDistance(focal_object->GetEnvironmentTreeNode(),
 		focal_object->GetEnvironmentPosition(), distance, outObjects, outTerrain);
@@ -2752,8 +2752,8 @@ void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(iEnvironmentObject *fo
 
 // Find all objects within a given distance of the specified object.  Object & Terrain output
 // vectors will be populated if valid pointers are supplied
-void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(StaticTerrain *focal_object, float distance,
-	std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(Terrain *focal_object, float distance,
+	std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 {
 	if (focal_object) _GetAllObjectsWithinDistance(focal_object->GetEnvironmentTreeNode(),
 		focal_object->GetEnvironmentPosition(), distance, outObjects, outTerrain);
@@ -2763,7 +2763,7 @@ void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(StaticTerrain *focal_o
 // vectors will be populated if valid pointers are supplied.  Less efficient than the method
 // which supplies a focal object, since the relevant node has to be determined based on the position
 void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, float distance,
-	std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+	std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 {
 	if (spatial_tree)
 	{
@@ -2775,7 +2775,7 @@ void iSpaceObjectEnvironment::GetAllObjectsWithinDistance(EnvironmentTree *spati
 // Finds all visible objects within a given distance of the specified location, with visibility determined
 // by the given frustum object
 void iSpaceObjectEnvironment::GetAllVisibleObjectsWithinDistance(EnvironmentTree *spatial_tree, const FXMVECTOR position, const FXMVECTOR search_radius, const Frustum *frustum,
-																 std::vector<iEnvironmentObject*> *outObjects, std::vector<StaticTerrain*> *outTerrain)
+																 std::vector<iEnvironmentObject*> *outObjects, std::vector<Terrain*> *outTerrain)
 {
 	// Parameter check
 	if (!spatial_tree || !frustum) return;
@@ -2839,9 +2839,9 @@ void iSpaceObjectEnvironment::GetAllVisibleObjectsWithinDistance(EnvironmentTree
 			// Also process any terrain objects
 			if (outTerrain)
 			{
-				StaticTerrain *obj;
-				std::vector<StaticTerrain*>::const_iterator it_end = node->GetNodeTerrain().end();
-				for (std::vector<StaticTerrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
+				Terrain *obj;
+				std::vector<Terrain*>::const_iterator it_end = node->GetNodeTerrain().end();
+				for (std::vector<Terrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
 				{
 					// Terrain object must exist and be within the search radius
 					obj = (*it); if (!obj) continue;

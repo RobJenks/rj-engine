@@ -432,8 +432,8 @@ void ComplexShipTileDefinition::Shutdown(void)
 	delete m_productioncost;	m_productioncost = NULL;
 
 	// Deallocate all terrain objects stored within the definition
-	std::vector<StaticTerrain*>::size_type n = TerrainObjects.size();
-	for (std::vector<StaticTerrain*>::size_type i = 0; i < n; ++i)
+	std::vector<Terrain*>::size_type n = TerrainObjects.size();
+	for (std::vector<Terrain*>::size_type i = 0; i < n; ++i)
 	{
 		if (TerrainObjects[i]) SafeDelete(TerrainObjects[i]);
 	}

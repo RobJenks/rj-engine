@@ -14,7 +14,7 @@
 class iSpaceObject;
 class ComplexShipSection;
 class CapitalShipPerimeterBeacon;
-class StaticTerrain;
+class Terrain;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))

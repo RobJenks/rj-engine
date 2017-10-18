@@ -582,7 +582,7 @@ public:
 	void								RotateAllTerrainObjects(Rotation90Degree rotation);
 
 	// Rotate a single terrain object owned by this tile by the given rotation, about the tile centre
-	void								RotateTileTerrainObject(StaticTerrain *terrain, Rotation90Degree rotation);
+	void								RotateTileTerrainObject(Terrain *terrain, Rotation90Degree rotation);
 
 	// Transform all view portals by the same rotation
 	void								RotateAllViewPortals(Rotation90Degree rot_delta);

@@ -60,7 +60,7 @@
 #include "TurretController.h"
 #include "BasicProjectileSet.h"
 #include "BasicProjectileDefinition.h"
-#include "StaticTerrainDefinition.h"
+#include "TerrainDefinition.h"
 #include "Actor.h"
 #include "GameConsoleCommand.h"
 #include "VolumetricLine.h"
@@ -2152,9 +2152,9 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 		}
 
 		// Render all terrain within the node
-		StaticTerrain *terrain;
-		std::vector<StaticTerrain*>::const_iterator t_it_end = node->GetNodeTerrain().end();
-		for (std::vector<StaticTerrain*>::const_iterator t_it = node->GetNodeTerrain().begin(); t_it != t_it_end; ++t_it)
+		Terrain *terrain;
+		std::vector<Terrain*>::const_iterator t_it_end = node->GetNodeTerrain().end();
+		for (std::vector<Terrain*>::const_iterator t_it = node->GetNodeTerrain().begin(); t_it != t_it_end; ++t_it)
 		{
 			// Get a reference to the object and make sure it is valid, has a model etc.
 			terrain = (*t_it);
@@ -2740,7 +2740,7 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 {
 	// Parameter check
 	if (m_debug_renderenvboxes == 0 || Game::ObjectExists(m_debug_renderenvboxes) == false) return;
-	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; StaticTerrain *t_obj;
+	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; Terrain *t_obj;
 
 	// Get a reference to the environment object
 	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::GetObjectByID(m_debug_renderenvboxes);
@@ -2758,8 +2758,8 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 	}
 
 	// Iterate through all terrain objects within this parent environment
-	std::vector<StaticTerrain*>::iterator t_it_end = parent->TerrainObjects.end();
-	for (std::vector<StaticTerrain*>::iterator t_it = parent->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
+	std::vector<Terrain*>::iterator t_it_end = parent->TerrainObjects.end();
+	for (std::vector<Terrain*>::iterator t_it = parent->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
 	{
 		t_obj = (*t_it); if (!t_obj || t_obj->IsDestroyed()) continue;
 

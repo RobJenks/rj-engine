@@ -10,7 +10,7 @@
 #include "ErrorCodes.h"
 #include "FastMath.h"
 #include "iEnvironmentObject.h"
-#include "StaticTerrain.h"
+#include "Terrain.h"
 #include "Utility.h"
 #include "GameDataExtern.h"
 #include "iContainsComplexShipTiles.h"

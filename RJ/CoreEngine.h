@@ -696,7 +696,7 @@ private:
 	AXMVECTOR_P					m_cache_el_inc_base[3];							// Base world position delta to move +1 element in each local dimension (transformed each frame)
 	std::vector<EnvironmentTree*>		m_tmp_envnodes;							// Temporary vector of environment tree nodes being processed for rendering
 	std::vector<iEnvironmentObject*>	m_tmp_envobjects;						// Temporary vector of environment objects to be rendered
-	std::vector<StaticTerrain*>			m_tmp_terrain;							// Temporary vector of static terrain objects to be rendered
+	std::vector<Terrain*>			m_tmp_terrain;							// Temporary vector of static terrain objects to be rendered
 	std::vector<Frustum*>		m_tmp_frustums;									// Temporary vector of frustums maintained during portal rendering, to avoid repeated allocations
 
 	std::vector<Game::ID_TYPE>	m_tmp_renderedtiles;							// Temporary vector of tile IDs that have been rendered this cycle

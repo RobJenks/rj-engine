@@ -16,7 +16,7 @@ class iObject;
 class iActiveObject;
 class iSpaceObject;
 class iEnvironmentObject;
-class StaticTerrain;
+class Terrain;
 class iSpaceObjectEnvironment;
 class AABB;
 class Ray;
@@ -218,7 +218,7 @@ public:
 	__declspec(align(16))
 	struct TerrainImpactData : public ALIGN16<TerrainImpactData>
 	{
-		StaticTerrain *		Terrain;						// The terrain object that was impacted
+		Terrain *		Terrain;						// The terrain object that was impacted
 		AXMVECTOR			ResponseVector;					// The vector direction of the collision response
 		AXMVECTOR			ResponseVelocity;				// The resulting velocity along the collision response vector (vectorised single value)
 		AXMVECTOR			ImpactVelocity;					// The object velocity at point of impact  (vectorised single value)
@@ -500,13 +500,13 @@ protected:
 	// fact that the active object will always be small enough to approximate the contact point as its origin.  The collision response is always
 	// an equal and opposite response to the active object's momentum along the contact normal, resulting in the active object stopping
 	// immediately, and the terrain object remaining immobile.
-	void									HandleTerrainCollision(iEnvironmentObject *object, StaticTerrain *terrain);
+	void									HandleTerrainCollision(iEnvironmentObject *object, Terrain *terrain);
 	*/
 	// Performs full SAT collision testing between the object and terrain OBBs.  If a collision is detected, applies an appropriate response
 	// to move the object out of the terrain collision box by the minimum separating axis.  Returns a value indicating whether any
 	// collisions were detected
 	bool									TestAndHandleTerrainCollision(	iSpaceObjectEnvironment *env, iEnvironmentObject *object,
-																			StaticTerrain *terrain );
+																			Terrain *terrain );
 
 	// Virtual inherited method to accept a command from the console
 	bool									ProcessConsoleCommand(GameConsoleCommand & command);
@@ -556,7 +556,7 @@ protected:
 	OrientedBoundingBox::CoreOBBData		_obbdata;
 	std::vector<OrientedBoundingBox*>		_obb_vector;
 	std::vector<iEnvironmentObject*>			_envobj;
-	std::vector<StaticTerrain*>				_terrain;
+	std::vector<Terrain*>				_terrain;
 };
 
 // Executes a raycast amongst the given collection of objects and returns a reference to the closest object that was hit.  No spatial

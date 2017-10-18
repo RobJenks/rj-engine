@@ -16,8 +16,8 @@
 #include "SimpleShip.h"
 #include "ComplexShip.h"
 #include "SpaceSystem.h"
-#include "StaticTerrainDefinition.h"
-#include "StaticTerrain.h"
+#include "TerrainDefinition.h"
+#include "Terrain.h"
 #include "XMLGenerator.h"
 #include "DataInput.h"
 #include "DataOutput.h"
@@ -636,7 +636,7 @@ void UI_ModelBuilder::AddNewOBB(void)
 // Adds a terrain object to the model.  Called by AddNewTerrain() as well as e.g. the methods 
 // to load collision data from file.  Ensures terrain is added correctly to the null 
 // environment as well as the model builder data collections
-void UI_ModelBuilder::AddTerrain(StaticTerrain *terrain)
+void UI_ModelBuilder::AddTerrain(Terrain *terrain)
 {
 	// Make sure the terrain object and container environment are valid
 	if (!terrain || !m_nullenv) return;
@@ -658,7 +658,7 @@ void UI_ModelBuilder::AddTerrain(StaticTerrain *terrain)
 // Removes a terrain object from the model.  Called by RemovedSelectedObject() as well as e.g. methods 
 // to clear data.  Ensures terrain is removed correctly from the null environment as well as the 
 // model builder data collections
-void UI_ModelBuilder::RemoveTerrain(StaticTerrain *terrain)
+void UI_ModelBuilder::RemoveTerrain(Terrain *terrain)
 {
 	// Make sure the terrain object and container environment are valid
 	if (!terrain || !m_nullenv) return;
@@ -718,7 +718,7 @@ void UI_ModelBuilder::AddNewTerrain(void)
 	if (tb) code = tb->GetText();
 	
 	// Create a new static terrain object with this definition (or NULL) and default parameters
-	StaticTerrain *terrain = StaticTerrain::Create(code);
+	Terrain *terrain = Terrain::Create(code);
 
 	// Inherit the orientation of the selected terrain if appropriate
 	if (m_key_ctrl && m_selection_type == UI_ModelBuilder::MVSelectionType::TerrainSelected && m_selected_terrain != NULL)
@@ -827,7 +827,7 @@ void UI_ModelBuilder::CollisionData_Clicked(int line)
 		if (terrainindex < 0 || terrainindex >= terraincount) return;			// Sanity check; should never happen
 
 		// Highlight this terrain object in the viewer
-		StaticTerrain *terrain = m_terrain[terrainindex];
+		Terrain *terrain = m_terrain[terrainindex];
 		if (!terrain) return;
 
 		// Set this terrain object to be the selected item
@@ -856,7 +856,7 @@ void UI_ModelBuilder::SelectOBB(OrientedBoundingBox *obb)
 }
 
 // Select a terrain object in the viewer
-void UI_ModelBuilder::SelectTerrain(StaticTerrain *terrain)
+void UI_ModelBuilder::SelectTerrain(Terrain *terrain)
 {
 	// Terrain object can be NULL in order to deselect everything
 	if (!terrain)
@@ -1008,10 +1008,10 @@ int UI_ModelBuilder::FindOBBChildIndex(OrientedBoundingBox *obb, OrientedBoundin
 }
 
 // Finds a terrain object in the terrain vector and returns its index.  Returns -1 if the terrain does not exist
-int UI_ModelBuilder::FindTerrainIndex(StaticTerrain *terrain)
+int UI_ModelBuilder::FindTerrainIndex(Terrain *terrain)
 {
 	if (!terrain) return -1;
-	return FindIndexInVector<TerrainCollection, StaticTerrain*>(m_terrain, terrain);
+	return FindIndexInVector<TerrainCollection, Terrain*>(m_terrain, terrain);
 }
 
 // Private recursive method to traverse the OBB hierarchy
@@ -1161,7 +1161,7 @@ Result UI_ModelBuilder::SaveCollData_ButtonClicked(void)
 	{
 		if (m_terrain[i])
 		{
-			result = IO::Data::SaveStaticTerrain(root, m_terrain[i]);
+			result = IO::Data::SaveTerrain(root, m_terrain[i]);
 			if (result != ErrorCodes::NoError) return result;
 		}
 	}
@@ -1239,8 +1239,8 @@ Result UI_ModelBuilder::LoadCollisionData(const std::string & filename)
 		if (hash == HashedStrings::H_CollisionOBB) {
 			IO::Data::LoadCollisionOBB(m_object, child, m_object->CollisionOBB, true);
 		}
-		else if (hash == HashedStrings::H_StaticTerrain) {
-			StaticTerrain *t = IO::Data::LoadStaticTerrain(child);
+		else if (hash == HashedStrings::H_Terrain) {
+			Terrain *t = IO::Data::LoadTerrain(child);
 			if (!t) continue;
 
 			// Add the terrain object to the null environment container

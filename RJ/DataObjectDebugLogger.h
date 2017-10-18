@@ -1,9 +1,9 @@
 #pragma once
 
-#include "DataEnabledStaticTerrain.h"
+#include "DynamicTerrain.h"
 
 
-class DataObjectDebugLogger : public DataEnabledStaticTerrain
+class DataObjectDebugLogger : public DynamicTerrain
 {
 public:
 
@@ -12,7 +12,7 @@ public:
 
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectDebugLogger *		Create(const StaticTerrainDefinition *def);
+	static DataObjectDebugLogger *		Create(const TerrainDefinition *def);
 
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);

@@ -1,19 +1,19 @@
 #pragma once
 
-#ifndef __StaticTerrainDefinitionH__
-#define __StaticTerrainDefinitionH__
+#ifndef __TerrainDefinitionH__
+#define __TerrainDefinitionH__
 
 #include "CompilerSettings.h"
 class Model;
 
 // This class has no special alignment requirements
-class StaticTerrainDefinition
+class TerrainDefinition
 {
 
 public:
 
 	// Default construtor; initialises all fields to default values
-	StaticTerrainDefinition(void) : 
+	TerrainDefinition(void) : 
 		m_model(NULL), m_defaultextent(NULL_FLOAT3), m_destructible(false), m_maxhealth(1.0f), 
 		m_mass(1.0f), m_hardness(1.0f)
 	{
@@ -47,7 +47,7 @@ public:
 	CMPINLINE void Shutdown(void) { throw "Shutdown method not implemented for this class"; }
 
 	// Default destructor
-	~StaticTerrainDefinition(void) { }
+	~TerrainDefinition(void) { }
 
 protected:
 

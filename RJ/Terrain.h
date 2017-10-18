@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef __StaticTerrainH__
-#define __StaticTerrainH__
+#ifndef __TerrainH__
+#define __TerrainH__
 
 #include "DX11_Core.h"
 #include "GameDataExtern.h"
@@ -11,12 +11,12 @@
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
 class Model;
-class StaticTerrainDefinition;
+class TerrainDefinition;
 class EnvironmentTree;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
-class StaticTerrain : public ALIGN16<StaticTerrain>, public iTakesDamage, public RepairableObject
+class Terrain : public ALIGN16<Terrain>, public iTakesDamage, public RepairableObject
 {
 public:
 
@@ -34,22 +34,22 @@ public:
 	static Game::ID_TYPE							GenerateNewUniqueID(void)	{ return (++InstanceCreationCount); }
 
 	// Default constructor
-	StaticTerrain();
+	Terrain();
 
 	// Static method to create a new terrain object.  If no definition is provided, a null-model (pure collision volume) will be created
-	CMPINLINE static StaticTerrain *				Create(void) { return StaticTerrain::Create(NULL); }
-	CMPINLINE static StaticTerrain *				Create(const std::string & def) { return StaticTerrain::Create(D::StaticTerrainDefinitions.Get(def)); }
-	static StaticTerrain *							Create(const StaticTerrainDefinition *def);
+	CMPINLINE static Terrain *				Create(void) { return Terrain::Create(NULL); }
+	CMPINLINE static Terrain *				Create(const std::string & def) { return Terrain::Create(D::TerrainDefinitions.Get(def)); }
+	static Terrain *							Create(const TerrainDefinition *def);
 
 	// Initialise a newly-created terrain based on the given definition
-	void											InitialiseNewTerrain(const StaticTerrainDefinition *def);
+	void											InitialiseNewTerrain(const TerrainDefinition *def);
 
 	// Get/set methods for key fields
 	CMPINLINE Game::ID_TYPE							GetID(void) const								{ return m_id; }
 	CMPINLINE void									SetID(Game::ID_TYPE id)							{ m_id = id; }
 
-	CMPINLINE const StaticTerrainDefinition *		GetDefinition(void) const						{ return m_definition; }
-	void											SetDefinition(const StaticTerrainDefinition *d);
+	CMPINLINE const TerrainDefinition *		GetDefinition(void) const						{ return m_definition; }
+	void											SetDefinition(const TerrainDefinition *d);
 
 	CMPINLINE const iSpaceObjectEnvironment *		GetParentEnvironment(void) const				{ return m_parent; }
 	void											SetParentEnvironment(iSpaceObjectEnvironment *env);
@@ -157,16 +157,16 @@ public:
 	std::string										DebugString(void) const;
 
 	// Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
-	StaticTerrain *									Copy(void) const;
+	Terrain *									Copy(void) const;
 
 	// Default destructor
-	~StaticTerrain();
+	~Terrain();
 
 protected:
 
 	Game::ID_TYPE							m_id;								// Unique ID of the terrain object
 	iSpaceObjectEnvironment *				m_parent;							// Parent environment that contains this terrain object
-	const StaticTerrainDefinition *			m_definition;						// Pointer to the definition of this terrain type, which includes model details etc.  
+	const TerrainDefinition *			m_definition;						// Pointer to the definition of this terrain type, which includes model details etc.  
 																				// Can be null for collision regions that have no associated visible terrain
 	TerrainSourceType						m_sourcetype;						// The source that generated this terrain; default is no-owner
 

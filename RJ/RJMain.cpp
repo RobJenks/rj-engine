@@ -125,7 +125,7 @@
 #include "GameUniverse.h"
 #include "ImmediateRegion.h"
 #include "SystemRegion.h"
-#include "StaticTerrain.h"
+#include "Terrain.h"
 
 #include "TextBlock.h"
 

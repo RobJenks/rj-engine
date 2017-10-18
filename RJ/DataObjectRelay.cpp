@@ -10,7 +10,7 @@ DataObjectRelay::DataObjectRelay(void)
 
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-DataObjectRelay * DataObjectRelay::Create(const StaticTerrainDefinition *def)
+DataObjectRelay * DataObjectRelay::Create(const TerrainDefinition *def)
 {
 	// Create and initialise the underlying terrain object
 	DataObjectRelay *object = new DataObjectRelay();

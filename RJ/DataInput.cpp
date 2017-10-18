@@ -44,8 +44,8 @@
 #include "ComplexShipTile.h"
 #include "CSCorridorTile.h"
 #include "DynamicTileSet.h"
-#include "StaticTerrain.h"
-#include "StaticTerrainDefinition.h"
+#include "Terrain.h"
+#include "TerrainDefinition.h"
 #include "ElementStateDefinition.h"
 #include "CollisionSpatialDataF.h"
 
@@ -214,8 +214,8 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 				res = IO::Data::LoadActorAttributeGenerationData(child);
 			} else if (name == D::NODE_ActorBase) {
 				res = IO::Data::LoadActor(child);
-			} else if (name == D::NODE_StaticTerrainDefinition) {
-				res = IO::Data::LoadStaticTerrainDefinition(child);
+			} else if (name == D::NODE_TerrainDefinition) {
+				res = IO::Data::LoadTerrainDefinition(child);
 			} else if (name == D::NODE_Faction) {
 				res = IO::Data::LoadFaction(child);
 			} else if (name == D::NODE_Turret) {
@@ -612,9 +612,9 @@ bool IO::Data::LoadSpaceObjectEnvironmentData(TiXmlElement *node, HashVal hash, 
 		object->InitialiseElements(IO::GetInt3CoordinatesFromAttr(node), false);
 	}
 	else if (hash == HashedStrings::H_ComplexShipElement)			LoadComplexShipElement(node, object);
-	else if (hash == HashedStrings::H_StaticTerrain)
+	else if (hash == HashedStrings::H_Terrain)
 	{
-		StaticTerrain *t = LoadStaticTerrain(node);
+		Terrain *t = LoadTerrain(node);
 		if (t) object->AddTerrainObject(t);
 	}
 
@@ -1302,9 +1302,9 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			// Load no further model data
 			modeldataloaded = true;
 		}
-		else if (hash == HashedStrings::H_StaticTerrain) {
+		else if (hash == HashedStrings::H_Terrain) {
 			// An entry for a terrain object which is tied to this tile.  Attempt to load from the node
-			StaticTerrain *t = LoadStaticTerrain(child);
+			Terrain *t = LoadTerrain(child);
 			if (!t) continue;
 
 			// Add to the vector of terrain objects in the tile definition
@@ -1669,13 +1669,13 @@ Result IO::Data::LoadAndApplyTileConnectionState(TiXmlElement *node, TileConnect
 }
 
 // Loads a static terrain definition and stores it in the global collection
-Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
+Result IO::Data::LoadTerrainDefinition(TiXmlElement *node)
 {
 	// Parameter check
 	if (!node) return ErrorCodes::CannotLoadTerrainDefinitionWithInvalidParams;
 
 	// Create a new terrain definition object to store the data
-	StaticTerrainDefinition *def = new StaticTerrainDefinition();
+	TerrainDefinition *def = new TerrainDefinition();
 
 	// Parse the contents of this node to populate the tile definition details
 	std::string key, val;
@@ -1719,7 +1719,7 @@ Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
 	}
 
 	// Add to the central collection, assuming no terrain object exists with the same code already
-	if (D::StaticTerrainDefinitions.Exists(def->GetCode()))
+	if (D::TerrainDefinitions.Exists(def->GetCode()))
 	{
 		SafeDelete(def);
 		return ErrorCodes::CouldNotLoadDuplicateTerrainDefinition;
@@ -1727,16 +1727,16 @@ Result IO::Data::LoadStaticTerrainDefinition(TiXmlElement *node)
 	else
 	{
 		// Add to the collection and return success
-		D::StaticTerrainDefinitions.Store(def);
+		D::TerrainDefinitions.Store(def);
 		return ErrorCodes::NoError;
 	}
 }
 
 // Load an instance of static terrain
-StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
+Terrain *IO::Data::LoadTerrain(TiXmlElement *node)
 {
 	std::string name, val;
-	StaticTerrainDefinition *def;
+	TerrainDefinition *def;
 	XMFLOAT3 vpos, vextent;
 	XMFLOAT4 qorient;
 
@@ -1744,7 +1744,7 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 	if (!node) return NULL;
 
 	// Create a new terrain object to hold the data, and default placeholders to hold the data
-	StaticTerrain *obj = new StaticTerrain();
+	Terrain *obj = new Terrain();
 	def = NULL;
 	vpos = vextent = NULL_FLOAT3; 
 	qorient = ID_QUATERNIONF;
@@ -1759,7 +1759,7 @@ StaticTerrain *IO::Data::LoadStaticTerrain(TiXmlElement *node)
 		{
 			// Attempt to get the terrain definition with this code
 			val = attr->Value(); StrLowerC(val);
-			def = D::StaticTerrainDefinitions.Get(val);								// This can be null, for e.g. pure non-renderable collision volumes
+			def = D::TerrainDefinitions.Get(val);								// This can be null, for e.g. pure non-renderable collision volumes
 		}
 		else if (name == "px") vpos.x = (float)atof(attr->Value());
 		else if (name == "py") vpos.y = (float)atof(attr->Value());

@@ -18,8 +18,8 @@
 #include "ComplexShipElement.h"
 #include "iContainsComplexShipTiles.h"
 #include "ComplexShipTile.h"
-#include "StaticTerrainDefinition.h"
-#include "StaticTerrain.h"
+#include "TerrainDefinition.h"
+#include "Terrain.h"
 #include "CSCorridorTile.h"
 #include "Hardpoint.h"
 #include "Hp.h"
@@ -490,13 +490,13 @@ Result IO::Data::SaveViewPortal(TiXmlElement *parent, const std::string & elemen
 	return ErrorCodes::NoError;
 }
 
-Result IO::Data::SaveStaticTerrain(TiXmlElement *parent, StaticTerrain *terrain)
+Result IO::Data::SaveTerrain(TiXmlElement *parent, Terrain *terrain)
 {
 	// Parameter check
 	if (!parent || !terrain) return ErrorCodes::CannotSaveTerrainWithNullReferences;
 
 	// Create a new node to hold the terrain data
-	TiXmlElement *node = new TiXmlElement(D::NODE_StaticTerrain);
+	TiXmlElement *node = new TiXmlElement(D::NODE_Terrain);
 
 	// If the terrain is tied to a definition then store the definition code here
 	if (terrain->GetDefinition()) node->SetAttribute("code", terrain->GetDefinition()->GetCode().c_str());

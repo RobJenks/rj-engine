@@ -3,10 +3,10 @@
 #include <assert.h>
 #include "DefaultValues.h"
 #include "DataPorts.h"
-#include "DataEnabledStaticTerrain.h"
+#include "DynamicTerrain.h"
 
 template <unsigned int N>
-class DataObjectRegister: public DataEnabledStaticTerrain
+class DataObjectRegister: public DynamicTerrain
 {
 	// Acceptable register count
 	static_assert(N <= 10U, "Not a valid data register size");
@@ -18,7 +18,7 @@ public:
 
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectRegister *					Create(const StaticTerrainDefinition *def);
+	static DataObjectRegister *					Create(const TerrainDefinition *def);
 
 	// Initialise the data ports required for this object
 	void										InitialiseDataPorts(void);
@@ -66,7 +66,7 @@ DataObjectRegister<N>::DataObjectRegister(void)
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 template<unsigned int N>
-DataObjectRegister<N> * DataObjectRegister<N>::Create(const StaticTerrainDefinition *def)
+DataObjectRegister<N> * DataObjectRegister<N>::Create(const TerrainDefinition *def)
 {
 	// Create and initialise the underlying terrain object
 	DataObjectRegister *object = new DataObjectRegister();
