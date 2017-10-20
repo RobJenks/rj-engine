@@ -201,6 +201,7 @@ namespace Game {
 	extern const INTVECTOR3 C_ENVTREE_MIN_NODE_SIZE_V;					// Vectorised form; minimum acceptable node size, in elements
 	extern const int C_ENVTREE_MAX_NODE_ITEMS_PER_TYPE;					// Max node items per category (e.g. objects, terrain) 
 	extern const float C_ENVIRONMENT_OBJECT_SEARCH_DISTANCE_MARGIN;		// Additional threshold used when finding objects to be tested in proximity calculations
+	extern const unsigned int C_ENVIRONMENT_VISIBLE_TERRAIN_QUERY_VALIDITY_PERIOD;	// Period of time (ms) in which the result of an environment visible terrain query remain valid
 
 	// Camera-related constants
 	extern float C_DEFAULT_CLIP_NEAR_DISTANCE;				// Default world-unit distance for the near clip plane
@@ -214,12 +215,15 @@ namespace Game {
 	extern float C_DEBUG_CAMERA_ROLL_SPEED;					// The speed at which the debug camera will revert its roll component
 
 	// Player-related contants
-	extern float C_PLAYER_MOUSE_TURN_MODIFIER_YAW;		// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
-	extern float C_PLAYER_MOUSE_TURN_MODIFIER_PITCH;	// Modifier to pitch speed (about X) when using the mouse, i.e. the mouse sensitivity
-	extern float C_PLAYER_PITCH_MIN;		// Minimum possible pitch of the player view (i.e. furthest extent we can look down)
-	extern float C_PLAYER_PITCH_MAX;		// Maximum possible pitch of the player view (i.e. furthest extent we can look up)
-	extern float C_THRUST_INCREMENT_PC;		// Percentage of total thrust range that will be incremented/decremented by player throttle each second
-	extern float C_MOUSE_FLIGHT_MULTIPLIER;	// Multiplier to avoid mouse flight requiring the full screen bounds to achieve min/max turning
+	extern const float C_PLAYER_MOUSE_TURN_MODIFIER_YAW;	// Modifier to yaw speed (about Y) when using the mouse, i.e. the mouse sensitivity
+	extern const float C_PLAYER_MOUSE_TURN_MODIFIER_PITCH;	// Modifier to pitch speed (about X) when using the mouse, i.e. the mouse sensitivity
+	extern const float C_PLAYER_PITCH_MIN;					// Minimum possible pitch of the player view (i.e. furthest extent we can look down)
+	extern const float C_PLAYER_PITCH_MAX;					// Maximum possible pitch of the player view (i.e. furthest extent we can look up)
+	extern const float C_THRUST_INCREMENT_PC;				// Percentage of total thrust range that will be incremented/decremented by player throttle each second
+	extern const float C_MOUSE_FLIGHT_MULTIPLIER;			// Multiplier to avoid mouse flight requiring the full screen bounds to achieve min/max turning
+	extern const float C_PLAYER_USE_DISTANCE;				// Distance within which the player can activate a UsableObject
+	extern const float C_PLAYER_USE_DISTANCE_SQ;			// Squared distance within which the player can activate a UsableObject
+	extern const XMVECTOR C_PLAYER_USE_DISTANCE_SQ_V;		// Vectorised squared distance within which the player can activate a UsableObject
 
 	// Ship simulation, movement and manuevering constants
 	extern float C_AI_DEFAULT_TURN_MODIFIER_PEACEFUL;			// Default turn modifier for ships when not in combat.  Can be overidden per ship/pilot

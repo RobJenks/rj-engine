@@ -23,6 +23,16 @@ public:
 	{
 	}
 
+	// Transforms the ray by the given transformation matrix.  Accepts both an orientation transform
+	// matrix and the full world transform matrix to avoid rederivation within this method
+	void					Transform(const XMMATRIX & orient_transform, const XMMATRIX world_transform);
+
+
+	// Returns a ray resulting from transformation of the current ray by the given transformation matrix
+	// Accepts both an orientation transform matrix and the full world transform matrix to 
+	// avoid rederivation within this method
+	BasicRay				GetTransformedRay(const XMMATRIX & orient_transform, const XMMATRIX world_transform) const;
+
 	// Generates a string representation of the ray
 	std::string				str(void) const;
 

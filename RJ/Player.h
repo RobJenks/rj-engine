@@ -14,6 +14,8 @@ class ComplexShipSection;
 class ComplexShipElement;
 class SpaceSystem;
 class Actor;
+class Terrain;
+class DynamicTerrain;
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -113,14 +115,18 @@ public:
 	void							FireShipWeaponsAtVector(void);
 
 	// Returns the object currently selected by the player using the mouse
-	iObject *						GetMouseSelectedObject(void)				{ return m_mouse_over_object(); }
-	iObject *						GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }
+	CMPINLINE iObject *				GetMouseSelectedObject(void)				{ return m_mouse_over_object(); }
+	CMPINLINE iObject *				GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }
+	CMPINLINE Terrain *				GetMouseSelectedTerrain(void)				{ return m_mouse_over_terrain; }
+
+	// Attempts to interact with an object immediately at the player focal point
+	void							AttemptPlayerInteraction(void);
 
 	// Constructor / destructor
 	Player(void);
 	~Player(void);
 
-public:
+private:
 
 	// The actor representing this player
 	ObjectReference<Actor>						m_actor;
@@ -182,9 +188,22 @@ public:
 	ObjectReference<Ship>						m_overrideship;
 	ObjectReference<Ship>						m_overridepriorship;
 
-	// Record the object current selected by the player, for use throughout the frame
+	// Check for objects that the player is currently looking at or selecting with the mouse
+	void										PerformPlayerViewRaycastTesting(void);
+	std::tuple<iObject*, iObject*, iObject*, iObject*>				
+												PerformPlayerRaycastForObjects(void);
+	std::tuple<Terrain*, DynamicTerrain*, Terrain*, DynamicTerrain*>				
+												PerformPlayerRaycastForTerrain(iSpaceObjectEnvironment *environment);
+
+	// Record the object current selected or being looked at by the player, for use throughout the frame
 	ObjectReference<iObject>					m_mouse_over_object;			// Current mouse-selected object
 	ObjectReference<iObject>					m_mouse_over_obj_nonplayer;		// Current mouse-selected object, excluding the player entity
+	Terrain *									m_mouse_over_terrain;			// Current mouse-selected terrain object
+	DynamicTerrain *							m_mouse_over_usable_terrain;	// Current mouse-selected usable terrain object
+	ObjectReference<iObject>					m_view_target_obj_nonplayer;	// Current object directly along the camera view heading
+	ObjectReference<iObject>					m_view_target_obj;				// Current object directly along the camera view heading, excluding the player entity
+	Terrain *									m_view_target_terrain;			// Current terrain object directly along the camera view heading
+	DynamicTerrain *							m_view_target_usable_terrain;	// Current usable terrain object directly along the camera view heading
 
 };
 

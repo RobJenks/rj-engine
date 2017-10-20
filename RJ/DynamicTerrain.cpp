@@ -3,6 +3,8 @@
 // Default constructor
 DynamicTerrain::DynamicTerrain(void)
 {
-	// Set the data-enabled flag on this terrain object
+	// Enable relevant flags on this terrain object
+	m_isdynamic = true;
 	m_dataenabled = true;
+	m_usable = true;
 }

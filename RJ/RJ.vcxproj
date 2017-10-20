@@ -589,6 +589,7 @@
     <ClCompile Include="UITextBox.cpp" />
     <ClCompile Include="UI_ShipBuilder.cpp" />
     <ClCompile Include="UI_ShipDesigner.cpp" />
+    <ClCompile Include="UsableObject.cpp" />
     <ClCompile Include="UserInterface.cpp" />
     <ClCompile Include="Utility.cpp" />
     <ClCompile Include="ViewPortal.cpp" />
@@ -917,6 +918,7 @@
     <ClInclude Include="UITextBox.h" />
     <ClInclude Include="UI_ShipBuilder.h" />
     <ClInclude Include="UI_ShipDesigner.h" />
+    <ClInclude Include="UsableObject.h" />
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Utility\chrono_io.h" />

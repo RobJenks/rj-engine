@@ -66,6 +66,9 @@ public:
 	const CMPINLINE XMVECTOR			GetCameraHeading(void) const			{ return GetViewForwardBasisVector(); }
 	const CMPINLINE XMFLOAT3			GetCameraHeadingF(void) const			{ return GetViewForwardBasisVectorF(); }
 
+	// Returns a ray representing the current (unit) view vector of the camera in world space
+	BasicRay							GetCameraViewRay(void) const;
+
 	// Returns the yaw and pitch values derived from orientation of basis vectors against the axes
 	CMPINLINE float						GetCameraYaw(void) const		{ return m_yaw; }
 	CMPINLINE float						GetCameraPitch(void) const		{ return m_pitch; }

@@ -8,6 +8,7 @@
 #include "EnvironmentTree.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
+#include "DynamicTerrain.h"
 
 #include "Terrain.h"
 
@@ -20,7 +21,8 @@ Game::ID_TYPE Terrain::InstanceCreationCount = 0;
 Terrain::Terrain()
 	:	m_definition(NULL), m_parent(NULL), m_sourcetype(TerrainSourceType::NoSource), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), 
 		m_collisionradius(0.0f), m_collisionradiussq(0.0f), m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), 
-		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f), m_dataenabled(false)
+		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f), 
+		m_isdynamic(false), m_dataenabled(false), m_usable(false)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;
@@ -270,6 +272,25 @@ float Terrain::GetImpactResistance(void) const
 {
 	// Impact resistance is calculated as (mass * hardness)
 	return (m_mass * m_hardness);
+}
+
+// Called by objects that are attempting to interact with the object.  Returns a flag indicating whether any 
+// successful interaction was possible.  Forwards control to virtual subclass methods where terrain object is eligible
+bool Terrain::AttemptInteraction(iObject *interacting_object)
+{
+	// Only dynamic terrain objects can be interacted with
+	if (m_isdynamic)
+	{
+		// Only a subset of dynamic terrain may be explicitly marked as usable
+		if (m_usable)
+		{
+			// This appears to be an eligible terrain object, so promote and pass control
+			return ToDynamicTerrain()->OnUsed(interacting_object);
+		}
+	}
+
+	// The terrain object is not eligible for interaction, so return false immediately
+	return false;
 }
 
 // Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result

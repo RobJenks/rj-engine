@@ -258,6 +258,15 @@ void CameraClass::HandleEndOfCameraPath(void)
 	}
 }
 
+// Returns a ray representing the current (unit) view vector of the camera in world space
+BasicRay CameraClass::GetCameraViewRay(void) const
+{
+	return BasicRay(
+		Game::Engine->GetCamera()->GetPosition(),
+		Game::Engine->GetCamera()->GetCameraHeading()
+	);
+}
+
 // Activates the debug camera
 void CameraClass::ActivateDebugCamera(void)
 {

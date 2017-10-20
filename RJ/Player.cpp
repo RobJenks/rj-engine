@@ -1,5 +1,6 @@
 #include "Utility.h"
 #include "FastMath.h"
+#include "CoreEngine.h"
 #include "GameInput.h"
 #include "Ship.h"
 #include "GameDataExtern.h"
@@ -14,6 +15,7 @@
 #include "ObjectReference.h"
 #include "ObjectPicking.h"
 #include "GameUniverse.h"
+#include "DynamicTerrain.h"
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -51,6 +53,9 @@ Player::Player(void)
 	m_overrideposition = NULL_VECTOR;
 	m_overrideorientation = ID_QUATERNION;
 	m_overridepriorship = NULL;
+	m_mouse_over_object = NULL;
+	m_mouse_over_obj_nonplayer = NULL;
+	m_mouse_over_terrain = NULL;
 
 	// Initialise default player values that will in future be set from external sources
 	m_headbobmax = Game::C_ACTOR_DEFAULT_HEAD_BOB_AMOUNT;
@@ -86,32 +91,8 @@ void Player::UpdatePlayerState(void)
 	// will initiate any transition events if necessary
 	Game::Universe->SetCurrentSystem(GetPlayerSystem());
 
-	// Perform a raycast to determine whether the player currently has their mouse over an 
-	// object, and record it for use this frame
-	iObject *mouse_obj = ObjectPicking::GetObjectAtMouseLocation();
-	m_mouse_over_object = mouse_obj;
-
-	// We also want to record the non-player entity object being selected, if relevant, since this
-	// will allow selection of objects 'past' the player
-	iObject *exclude = (m_state == Player::StateType::ShipPilot ? (iObject*)m_playership() : (iObject*)m_actor());
-	if (mouse_obj != NULL && mouse_obj == exclude)
-	{
-		// Our player entity has been selected by the raycast, so derive a different result for the non-player result
-		std::vector<iObject*> objects;
-		std::vector<iObject*>::size_type n = Game::VisibleObjects.size();
-		objects.reserve(n);
-		for (std::vector<iObject*>::size_type i = 0; i < n; ++i)
-		{
-			if (Game::VisibleObjects[i] != exclude) objects.push_back(Game::VisibleObjects[i]);
-		}
-
-		m_mouse_over_obj_nonplayer = Game::PhysicsEngine.PerformRaycastFull(Game::Mouse.GetWorldSpaceMouseBasicRay(), objects);
-	}
-	else
-	{
-		// If the selected object is not the player entity, or is NULL, simply replicate for the non-player object
-		m_mouse_over_obj_nonplayer = mouse_obj;
-	}
+	// Check for objects that the player is currently looking at
+	PerformPlayerViewRaycastTesting();
 }
 
 void Player::UpdatePlayerShipState(void)
@@ -188,6 +169,7 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 		if (keys[DIK_A])			{ MovePlayerActor(Direction::Left, true); }
 		if (keys[DIK_S])			{ MovePlayerActor(Direction::Down, true); }
 		if (keys[DIK_D])			{ MovePlayerActor(Direction::Right, true); }
+		if (keys[DIK_E])			{ AttemptPlayerInteraction(); }
 		if (keys[DIK_SPACE])		{ ActorJump(); }
 	}
 	else if (m_state == StateType::ShipPilot)
@@ -519,6 +501,116 @@ void Player::SetOrientation(const FXMVECTOR orient)
 	UpdatePlayerState();
 }
 
+// Determine whether the player is currently focused on any objects this frame, and keep a record of them 
+// for use by other processes
+void Player::PerformPlayerViewRaycastTesting(void)
+{
+	// Test for objects that the player is focusing on or selecting with the mouse.  We combine
+	// into one method to allow reuse of the filtered visibility data during testing
+	auto[view_obj, view_non_player_obj, mouse_obj, mouse_non_player_obj] = PerformPlayerRaycastForObjects();
+	m_view_target_obj = view_obj;
+	m_view_target_obj_nonplayer = view_non_player_obj;
+	m_mouse_over_object = mouse_obj;
+	m_mouse_over_obj_nonplayer = mouse_non_player_obj;
+	
+	// Perform a similar test for mouse- and view-selected terrain within the current 
+	// environment, if applicable.  We combine both into one method to allow reuse of
+	// the required terrain visibility queries
+	iSpaceObjectEnvironment *environment = (GetState() == Player::StateType::OnFoot ? GetParentEnvironment() : NULL);
+	auto [view_terrain, view_usable_terrain, mouse_terrain, mouse_usable_terrain] = PerformPlayerRaycastForTerrain(environment);
+	m_view_target_terrain = view_terrain;
+	m_view_target_usable_terrain = view_usable_terrain;
+	m_mouse_over_terrain = mouse_terrain;
+	m_mouse_over_usable_terrain = mouse_usable_terrain;
+}
+
+// Check whether the player is currently selecting any objects with the mouse, and 
+// maintain a reference to the closest for other processes to make use of 
+// Returns: { Closest object, Closest non-player object }
+std::tuple<iObject*, iObject*, iObject*, iObject*> Player::PerformPlayerRaycastForObjects(void)
+{
+	// We will test intersection against both a view-aligned and a mouse-aligned world-space ray
+	BasicRay view_ray = Game::Engine->GetCamera()->GetCameraViewRay();
+	BasicRay mouse_ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
+	
+	// Perform a raycast along both rays to determine whether we intersect any valid objects
+	iObject *view_closest = Game::PhysicsEngine.PerformRaycastFull(view_ray, Game::VisibleObjects);
+	iObject *mouse_closest = Game::PhysicsEngine.PerformRaycastFull(mouse_ray, Game::VisibleObjects);
+
+	// Make an initial assumption that the result objects are NOT player entities
+	iObject *view_closest_nonplayer = view_closest;
+	iObject *mouse_closest_nonplayer = mouse_closest;
+
+	// Now test whether we need to recast any tests to exclude the player entity
+	iObject *exclude = GetActivePlayerObject();
+	if (exclude && (view_closest == exclude || mouse_closest == exclude))
+	{
+		// Create the subset collection
+		std::vector<iObject*> objects;
+		objects.reserve(Game::VisibleObjects.size());
+		for (iObject *obj : Game::VisibleObjects)
+		{
+			if (obj != exclude) objects.push_back(obj);
+		}
+
+		// Now recast either or both tests as required
+		if (view_closest == exclude)	view_closest_nonplayer = Game::PhysicsEngine.PerformRaycastFull(view_ray, objects);
+		if (mouse_closest == exclude)	mouse_closest_nonplayer = Game::PhysicsEngine.PerformRaycastFull(mouse_ray, objects);
+	}
+
+	// Return the full set of results
+	return { view_closest, view_closest_nonplayer, mouse_closest, mouse_closest_nonplayer };
+}
+
+// Check whether the player is currently focusing on or mouse-selecting any terrain objects in the 
+// given environment, and maintains a reference to the closest if this is the case
+// Returns: { Closest view-focused terrain, Closest view-focused usable terrain, Closest mouse-selected terrain, Closest mouse-selected usable terrain }
+std::tuple<Terrain*, DynamicTerrain*, Terrain*, DynamicTerrain*> Player::PerformPlayerRaycastForTerrain(iSpaceObjectEnvironment *environment)
+{
+	// Parameter check
+	if (!environment) return { NULL, NULL, NULL, NULL };
+
+	// Determine the set of visible terrain in this environment.  If it is empty the player either cannot see
+	// anything or the query results are no longer valid; in either case, we can quit immediately
+	std::vector<Terrain*> terrain;
+	environment->DetermineVisibleTerrain(terrain);
+	if (terrain.empty()) return { NULL, NULL, NULL, NULL };
+
+	// We also want to identify the subset of terrain objects which are usable
+	std::vector<DynamicTerrain*> usable_terrain;
+	for (Terrain *t : terrain)
+	{
+		// Usable should always mean dynamic, since only dynamic terrain is usable, but check both here to be sure the cast is allowable
+		if (t && t->IsUsable() && t->IsDynamic())
+		{
+			usable_terrain.push_back(t->ToDynamicTerrain());
+		}
+	}
+
+	// First calculate the player view vector; it will be transformed into environment-local space for all visibility testing
+	BasicRay view_ray = Game::Engine->GetCamera()->GetCameraViewRay();
+	view_ray.Transform(environment->GetInverseOrientationMatrix(), environment->GetInverseZeroPointWorldMatrix());
+
+	// Also get the mouse selection vector and perform a similar transformation into environment-local space
+	BasicRay mouse_ray = Game::Mouse.GetWorldSpaceMouseBasicRay();
+	mouse_ray.Transform(environment->GetInverseOrientationMatrix(), environment->GetInverseZeroPointWorldMatrix());
+
+	// We can now perform the required raycasts based on this calculated data
+	// TODO: RESULTS OF MOUSE METHODS ARE UNTESTED; ADDED FOR COMPLETENESS WHEN IMPLEMENTING OTHER METHODS
+	Terrain *view_terrain = Game::PhysicsEngine.PerformRaycastFull(view_ray, terrain);
+	Terrain *mouse_terrain = Game::PhysicsEngine.PerformRaycastFull(mouse_ray, terrain);
+	
+	DynamicTerrain *view_usable_terrain = NULL, *mouse_usable_terrain = NULL;
+	if (!usable_terrain.empty())
+	{
+		view_usable_terrain = Game::PhysicsEngine.PerformRaycastFull(view_ray, usable_terrain);
+		mouse_usable_terrain = Game::PhysicsEngine.PerformRaycastFull(mouse_ray, usable_terrain);
+	}
+		
+	// Return the full set of intersection results	
+	return { view_terrain, view_usable_terrain, mouse_terrain, mouse_usable_terrain };
+}
+
 // Method to force-set the player environment , without the player entity needing to be there.  Used for e.g.
 // rendering scenes within the null system.  Will revert to normal once released.  Game should generally be paused first.
 void Player::OverridePlayerEnvironment(SpaceSystem *system, Ship *playership, const FXMVECTOR position, const FXMVECTOR orientation)
@@ -590,7 +682,52 @@ void Player::ExecuteOverrideOfPlayerEnvironment(void)
 	if (m_overrideship()) m_playership = m_overrideship();
 }
 
+// Attempts to interact with an object immediately at the player focal point
+void Player::AttemptPlayerInteraction(void)
+{
+	bool successful = false;
+
+	iObject *player = Game::CurrentPlayer->GetActivePlayerObject();
+	XMVECTOR player_pos = player->GetPosition();
+
+	// Preferentially check for object interaction	
+	iObject *target_obj = m_view_target_obj_nonplayer();
+	if (target_obj != NULL && 
+		XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(target_obj->GetPosition(), player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+	{
+		Game::Log << LOG_DEBUG << "Usable object interaction not yet implemented\n";
+	}
+	else
+	{
+		// Otherwise check for dynamic terrain interaction
+		DynamicTerrain *target_terrain = m_view_target_usable_terrain;
+		if (target_terrain && target_terrain->GetParentEnvironment())
+		{
+			XMVECTOR world_pos = XMVector3TransformCoord(target_terrain->GetEnvironmentPosition(),
+				target_terrain->GetParentEnvironment()->GetZeroPointWorldMatrix());
+			if (XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(world_pos, player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+			{
+				successful = target_terrain->AttemptInteraction(player);
+			}
+		}
+	}
+	
+	// Provide feedback based on whether the interaction was successful
+	if (successful)
+	{
+		Game::Log << LOG_INFO << "SUCCESS!\n";
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "No effect\n";
+	}
+	
+
+}
+
 // Default destructor
 Player::~Player(void)
 {
 }
+
+

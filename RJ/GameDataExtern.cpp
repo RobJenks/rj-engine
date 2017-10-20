@@ -99,8 +99,8 @@ namespace D {
 	const char *NODE_ActorAttributeGeneration = "actorattributegeneration";
 	const char *NODE_ActorBase = "actorbase";
 	const char *NODE_Portal = "portal";
-	const char *NODE_Terrain = "Terrain";
-	const char *NODE_TerrainDefinition = "TerrainDefinition";
+	const char *NODE_Terrain = "terrain";
+	const char *NODE_TerrainDefinition = "terraindefinition";
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";
 	const char *NODE_ProjectileLauncher = "projectilelauncher";

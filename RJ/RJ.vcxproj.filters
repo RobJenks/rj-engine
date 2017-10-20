@@ -736,6 +736,9 @@
     <ClCompile Include="DynamicTerrain.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
+    <ClCompile Include="UsableObject.cpp">
+      <Filter>Objects\Usable</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1702,6 +1705,9 @@
     <ClInclude Include="DynamicTerrain.h">
       <Filter>Objects\Data</Filter>
     </ClInclude>
+    <ClInclude Include="UsableObject.h">
+      <Filter>Objects\Usable</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2000,6 +2006,9 @@
     </Filter>
     <Filter Include="Objects\Data\Objects">
       <UniqueIdentifier>{bb1d96cf-1eef-4bfb-8c21-01f3c1ca5039}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Usable">
+      <UniqueIdentifier>{3a8ea482-a7e0-4a3f-8e2c-4a73f5586e83}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

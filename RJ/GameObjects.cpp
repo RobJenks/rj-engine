@@ -7,7 +7,7 @@ namespace Game
 	// Global object collection (TODO: in future, maintain only local objects in a collection so we don't run unnecessary simulation)
 	Game::ObjectRegister					Objects(0);
 
-	// Collection of all visible objects, recreated each frame
+	// Collection of all visible objects and terrain, recreated each frame
 	std::vector<iObject*>					VisibleObjects(0);
 
 	// Secondary object collections

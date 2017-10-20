@@ -373,6 +373,11 @@ public:
 		return TestRayVsOBBIntersection(ray, obb, FLT_MAX);		// By default, do not limit the extent of the ray
 	}*/
 
+	// Tests for the narrowphase intersection of a ray with an object.  Makes calls to the more fundamental Ray/X intersection
+	// methods based on the properties of the object being tested
+	bool									PerformNarrowphaseRayIntersectionTest(const Ray & ray, iObject & object);
+	bool									PerformNarrowphaseRayIntersectionTest(const Ray & ray, Terrain & object);
+
 	// Tests for the intersection of a ray with an OBB, by transforming the ray into OBB-space so that the OBB can be treated
 	// as an AABB centred on the origin and we can test via a ray-AABB comparison.  Results will be populated with min/max intersection 
 	// points if an intersection took place.  If min<max then we have an intersection.  Returns a flag indicating whether the 
@@ -631,16 +636,16 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 	Ray full_ray = Ray(ray);
 
 	// Loop through each object in turn
-	int n = (int)objects.size();
-	for (int i = 0; i < n; ++i)
+	for (T *obj : objects)
 	{
+		if (!obj) continue;
+
 		// Here we will expand out the ray/sphere intersection test to avoid function calls, and to avoid duplicating
 		// calculations (e.g. difference vector from ray origin to sphere) which are required here & the ray/sphere test
 
 		// The sphere is (X-C)^T*(X-C)-1 = 0 and the line is X = P+t*D. Substitute the line equation into the sphere 
 		// equation to obtain a quadratic equation Q(t) = t^2 + 2*a1*t + a0 = 0, where a1 = D^T*(P-C), and a0 = (P-C)^T*(P-C)-1.
-		T *obj = objects[i];
-
+		
 		// Get the difference vector from ray origin to sphere centre.  We can early-exit here if it is further away 
 		// than our current closest intersection
 		diff = XMVectorSubtract(ray.Origin, obj->GetPosition());
@@ -665,8 +670,7 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 			{
 				// We have a new best intersection bassed on broadphase testing.  Now also perform narrowphase
 				// on the candidate (if appropriate) before recording the result
-				if (obj->GetCollisionMode() == Game::CollisionMode::FullCollision &&
-					DetermineRayVsOBBIntersection(full_ray, obj->CollisionOBB.Data()) == false) continue;
+				if (PerformNarrowphaseRayIntersectionTest(ray, *obj) == false) continue;
 
 				// The object has passed narrowphase collision detection and is closest, so record it
 				closest = obj;

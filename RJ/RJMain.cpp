@@ -114,6 +114,7 @@
 #include "EnvironmentMapBlendMode.h"		// DBG
 #include "EnvironmentPowerMap.h"			// DBG
 #include "Weapon.h"							// DBG
+#include "TerrainDefinition.h"				// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -839,24 +840,32 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_2]) {
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
 		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" 1").str()));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 		
 		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-		cs()->FadeHullToAlpha(1.0f, 0.1f);
-		cs()->FadeAllTiles(1.0f, 0.25f);
-		Game::Console.ProcessRawCommand(GameConsoleCommand("render_terrainboxes cs1 true"));
+		Terrain *t1 = Terrain::Create("tmp_terrain_box");
+		t1->SetPosition(XMVectorAdd(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), XMVectorSet(2.0f, 1.0f, 3.0f, 0.0f)));
+		Terrain *t2 = Terrain::Create("tmp_terrain_cone");
+		t2->SetPosition(XMVectorAdd(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), XMVectorSet(-1.0f, 0.0f, 2.0f, 0.0f)));
+		//cs()->AddTerrainObject(t1);
+		//cs()->AddTerrainObject(t2);
 
 		Game::Keyboard.LockKey(DIK_2);
 	}
 	if (b[DIK_3]) {
 		
-		ComplexShipTile *q = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
-		//cs()->UpdateTileConnectionState(&q);
-		q->CompileAndValidateTile();
-		//q->RecalculateTileData();
+		if (b[DIK_LSHIFT])
+		{
+			int a = 1;
+		}
+		else
+		{
+			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 1"));
+		}
 
 		Game::Keyboard.LockKey(DIK_3);
 	}
@@ -2118,7 +2127,7 @@ void RJMain::__CreateDebugScenario(void)
 		css[0] = NULL; css[1] = NULL;
 		for (int c = 0; c < create_count; ++c)
 		{
-			css[c] = ComplexShip::Create(false ? "testfrigate2" : "collision1");
+			css[c] = ComplexShip::Create(true ? "testfrigate2" : "collision1");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
 			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
@@ -2521,8 +2530,15 @@ void RJMain::DEBUGDisplayInfo(void)
 		SafeDelete(f);
 		SafeDelete(manual);
 		*/
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s",
-			"");
+		Terrain *selected = Game::CurrentPlayer->GetMouseSelectedTerrain();
+		std::vector<Terrain*> visible_terrain;
+		cs()->DetermineVisibleTerrain(visible_terrain);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Selected terrain: \"%s\" (%d)   |   Total terrain: %d   |   Visible terrain: %d",
+			(!selected ? "<null>" : (!selected->GetDefinition() ? "<no-def>" : selected->GetDefinition()->GetCode().c_str())),
+			(!selected ? -1 : selected->GetID()),
+			(int)cs()->TerrainObjects.size(),
+			(int)visible_terrain.size()
+		);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

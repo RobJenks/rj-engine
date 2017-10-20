@@ -76,7 +76,7 @@ namespace Game
 	extern Game::ObjectRegister					Objects;
 	extern Game::ObjectRegisterByInstanceCode	ObjectsByCode;
 
-	// Collection of all visible objects, recreated each frame
+	// Collection of all visible objects and terrain, recreated each frame
 	extern std::vector<iObject*>				VisibleObjects;
 
 	// Short-term lists of objects waiting to be registered or unregistered with the global collection; actioned each frame
@@ -163,7 +163,10 @@ namespace Game
 	}
 
 	// Clears the visible object collection ready for the next frame
-	CMPINLINE void								ClearVisibleObjectCollection(void)	{ Game::VisibleObjects.clear(); }
+	CMPINLINE void								ClearVisibleObjectCollection(void)	
+	{ 
+		Game::VisibleObjects.clear();
+	}
 
 
 	// Test whether an object exists with the specified ID

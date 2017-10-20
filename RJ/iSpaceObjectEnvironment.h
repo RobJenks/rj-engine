@@ -470,6 +470,11 @@ public:
 	// Returns the number of elements with the specified property
 	CMPINLINE int					ElementsWithProperty(ComplexShipElement::PROPERTY prop) { return m_element_property_count[(int)prop]; }
 
+	// Determines the set of visible terrain objects, based upon a calculation of visible terrain objects during rendering that 
+	// if recalculated each frame that the environment is rendered.  Visibility results are available for a short validity period 
+	// before being expired.  Object pointers should be considered valid for the current frame only
+	void							DetermineVisibleTerrain(std::vector<Terrain*> & outTerrain);
+	
 	// Determine the total strength of an element within this environment.  Incorporates inherent strength of the 
 	// element, any tile that is present, plus all objects and terrain within the element
 	float							DetermineTotalElementImpactStrength(const ComplexShipElement & el);

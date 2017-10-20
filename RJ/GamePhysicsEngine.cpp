@@ -2234,6 +2234,24 @@ bool GamePhysicsEngine::TestRaySphereIntersection(const BasicRay & ray, const FX
 	return XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), NULL_VECTOR);
 }
 
+// Tests for the narrowphase intersection of a ray with an object.  Makes calls to the more fundamental Ray/X intersection
+// methods based on the properties of the object being tested
+bool GamePhysicsEngine::PerformNarrowphaseRayIntersectionTest(const Ray & ray, iObject & object)
+{
+	// Object must either not require full collision testing, or it must pass the full intersection test
+	return (object.GetCollisionMode() != Game::CollisionMode::FullCollision ||
+		DetermineRayVsOBBIntersection(ray, object.CollisionOBB.Data()) == true);
+}
+
+// Tests for the narrowphase intersection of a ray with an object.  Makes calls to the more fundamental Ray/X intersection
+// methods based on the properties of the object being tested
+bool GamePhysicsEngine::PerformNarrowphaseRayIntersectionTest(const Ray & ray, Terrain & object)
+{
+	// Test directly against the underlying terrain data.  Assumes ray is in the correct 
+	// environment-local coordinate frame
+	return DetermineRayVsOBBIntersection(ray, object.GetOBBData());
+}
+
 
 
 // Perform a continuous collision test between two moving spheres.  Populates the collision result data with details on the collision

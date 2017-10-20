@@ -2594,6 +2594,19 @@ int iSpaceObjectEnvironment::GetTileAtElementLocation(const INTVECTOR3 & locatio
 	return (tile ? tile->GetID() : -1);
 }
 
+// Determines the set of visible terrain objects, based upon a calculation of visible terrain objects during rendering that 
+// if recalculated each frame that the environment is rendered.  Visibility results are available for a short validity period 
+// before being expired.  Object pointers should be considered valid for the current frame only
+void iSpaceObjectEnvironment::DetermineVisibleTerrain(std::vector<Terrain*> & outTerrain)
+{
+	// Check every terrain object in turn
+	for (Terrain *terrain : TerrainObjects)
+	{
+		// If the object was rendered during this or the previous frame we consider it visible and return it
+		if (terrain->WasRenderedSincePriorFrame()) outTerrain.push_back(terrain);
+	}
+}
+
 // Renders a 3D overlay showing the properties of each element in the environment
 void iSpaceObjectEnvironment::DebugRenderElementState(void)
 {
