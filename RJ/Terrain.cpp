@@ -99,6 +99,7 @@ void Terrain::SetExtent(const FXMVECTOR e)
 {
 	// Store the new extents; ensure no negative values
 	XMVECTOR ex = XMVectorSetW(XMVectorMax(e, NULL_VECTOR), 0.0f);
+	m_data.ExtentV = ex;
 	XMStoreFloat3(&m_data.ExtentF, ex);
 	m_data.Extent[0].value = XMVectorReplicate(m_data.ExtentF.x);
 	m_data.Extent[1].value = XMVectorReplicate(m_data.ExtentF.y);

@@ -501,6 +501,36 @@ void Player::SetOrientation(const FXMVECTOR orient)
 	UpdatePlayerState();
 }
 
+// Change the current player position and orientation.  More efficient than setting each
+// individually.  Takes different action depending on whether the player is on foot or in a ship
+void Player::SetPositionAndOrientation(const FXMVECTOR position, const FXMVECTOR orientation)
+{
+	// Take different action depending on the current player environment
+	if (m_state == Player::StateType::ShipPilot)
+	{
+		// If the player is currently piloting a ship
+		iObject *playership = m_playership();
+		if (playership)
+		{
+			playership->SetPosition(position);
+			playership->SetOrientation(orientation);
+		}
+	}
+	else if (m_state == Player::StateType::OnFoot)
+	{
+		// If the player is currently on foot
+		Actor *actor = m_actor();
+		if (actor)
+		{
+			actor->SetEnvironmentPosition(position);
+			actor->SetEnvironmentOrientation(orientation);
+		}
+	}
+
+	// Update the player state following this change
+	UpdatePlayerState();
+}
+
 // Determine whether the player is currently focused on any objects this frame, and keep a record of them 
 // for use by other processes
 void Player::PerformPlayerViewRaycastTesting(void)

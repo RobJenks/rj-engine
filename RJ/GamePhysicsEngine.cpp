@@ -508,7 +508,7 @@ void GamePhysicsEngine::PerformEnvironmentCollisionDetection(iEnvironmentObject 
 
 	// Search for all terrain and active objects around the focal object
 	_envobj.clear(); _terrain.clear();
-	env->GetAllObjectsWithinDistance(obj, /*obj->GetCollisionSphereRadius()*/ Game::C_CS_ELEMENT_SCALE * 5.0f, &_envobj, &_terrain);
+	env->GetAllObjectsWithinDistance(obj, /*obj->GetCollisionSphereRadius()*/ Game::C_CS_ELEMENT_SCALE * 2.0f, &_envobj, &_terrain);
 
 	// First check for collisions against terrain objects
 	Terrain *terrain;

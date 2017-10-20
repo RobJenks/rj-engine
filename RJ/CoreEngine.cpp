@@ -2740,39 +2740,43 @@ void CoreEngine::DebugRenderEnvironmentCollisionBoxes(void)
 {
 	// Parameter check
 	if (m_debug_renderenvboxes == 0 || Game::ObjectExists(m_debug_renderenvboxes) == false) return;
-	AXMVECTOR_P v[8]; iEnvironmentObject *a_obj; Terrain *t_obj;
+	AXMVECTOR_P v[8];
 
 	// Get a reference to the environment object
 	iSpaceObjectEnvironment *parent = (iSpaceObjectEnvironment*)Game::GetObjectByID(m_debug_renderenvboxes);
 	if (!parent) return;
 
+	// Get a reference to all objects within a radius of the camera
+	std::vector<iEnvironmentObject*> objects; 
+	std::vector<Terrain*> terrain;
+	XMVECTOR cam_pos = XMVector3TransformCoord(GetCamera()->GetPosition(), parent->GetInverseZeroPointWorldMatrix());
+	parent->GetAllObjectsWithinDistance(parent->SpatialPartitioningTree, cam_pos, Game::C_DEBUG_RENDER_ENVIRONMENT_COLLISION_BOX_RADIUS, &objects, &terrain);
+
 	// Iterate through all active objects within this parent environment
-	std::vector<ObjectReference<iEnvironmentObject>>::iterator a_it_end = parent->Objects.end();
-	for (std::vector<ObjectReference<iEnvironmentObject>>::iterator a_it = parent->Objects.begin(); a_it != a_it_end; ++a_it)
+	for (iEnvironmentObject *obj : objects)
 	{
-		a_obj = (*a_it)(); if (!a_obj) continue;
+		if (!obj) continue;
 
 		// Determine the location of all vertices for each bounding volume and render using the overlay renderer
-		a_obj->CollisionOBB.DetermineVertices(v);
+		obj->CollisionOBB.DetermineVertices(v);
 		Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_LightBlue, 0.1f);
 	}
 
 	// Iterate through all terrain objects within this parent environment
-	std::vector<Terrain*>::iterator t_it_end = parent->TerrainObjects.end();
-	for (std::vector<Terrain*>::iterator t_it = parent->TerrainObjects.begin(); t_it != t_it_end; ++t_it)
+	for (Terrain *tobj : terrain)
 	{
-		t_obj = (*t_it); if (!t_obj || t_obj->IsDestroyed()) continue;
+		if (!tobj || tobj->IsDestroyed()) continue;
 
 		if (m_debug_terrain_render_mode == DebugTerrainRenderMode::Solid)
 		{
 			// Perform solid rendering
-			Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixMultiply(t_obj->GetWorldMatrix(), parent->GetZeroPointWorldMatrix()),
-				OverlayRenderer::RenderColour::RC_Red, XMVectorScale(XMLoadFloat3(&(t_obj->GetExtentF())), 2.0f));
+			Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixMultiply(tobj->GetWorldMatrix(), parent->GetZeroPointWorldMatrix()),
+				OverlayRenderer::RenderColour::RC_Red, XMVectorScale(XMLoadFloat3(&(tobj->GetExtentF())), 2.0f));
 		}
 		else
 		{
 			// Determine the location of all vertices for each bounding volume and render wireframe using the overlay renderer
-			t_obj->DetermineCollisionBoxVertices(parent, v);
+			tobj->DetermineCollisionBoxVertices(parent, v);
 			Game::Engine->GetOverlayRenderer()->RenderCuboid(v, OverlayRenderer::RenderColour::RC_Red, 0.1f);
 		}
 	}

@@ -289,6 +289,9 @@ namespace Game {
 	float C_DEFAULT_FIRING_REGION_THRESHOLD = 0.05f;								// Deviation in pitch/yaw within which a turret will start firing at the target
 	float C_DEFAULT_FIRING_SPREAD_THRESHOLD = 5.0f;									// Default multiple on weapon spread within which a turret will begin firing
 	
+	// Debug constants
+	const float C_DEBUG_RENDER_ENVIRONMENT_COLLISION_BOX_RADIUS = 20.0f;			// Radius within which debug collision boxes are rendered
+
 	// Default tile simulation values
 	unsigned int C_TILE_LIFESUPPORT_SIMULATION_INTERVAL = 250U;						// Life support tiles will be simulated with this interval, when active
 	unsigned int C_TILE_POWERGENERATOR_SIMULATION_INTERVAL = 250U;					// Power generator tiles will be simulated with this interval, when active

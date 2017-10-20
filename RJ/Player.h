@@ -63,6 +63,7 @@ public:
 	// Change the current player position/orientation.  Takes different action depending on whether the player is on foot or in a ship
 	void							SetPosition(const FXMVECTOR pos);
 	void							SetOrientation(const FXMVECTOR orient);
+	void							SetPositionAndOrientation(const FXMVECTOR position, const FXMVECTOR orientation);
 
 	// Offset of the camera from the player position & orientation.  Only required for on-foot camera (otherwise is taking from ship camera details)
 	CMPINLINE XMVECTOR				GetViewPositionOffset(void)		{ return m_viewpositionoffset; }
