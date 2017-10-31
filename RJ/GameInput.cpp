@@ -76,6 +76,7 @@ GameInputDevice::GameInputDevice()
 	memset(m_firstdown, 0, sizeof(BOOL) * 4);
 	memset(m_firstup, 0, sizeof(BOOL) * 4);
 	memset(m_startpos, 0, sizeof(INTVECTOR2) * 4);
+	m_captured_mouse = m_captured_keyboard = false;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -150,11 +151,12 @@ Summary: Get the current device state.
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 void GameInputDevice::Read()
 {
-    if ( !m_pDevice )
-    {
-        return;
-    }
+    if ( !m_pDevice ) return;
     
+	// Determine whether we should capture input this cycle
+	m_captured_mouse = (Game::HasFocus || Game::CaptureMouseWithoutFocus);
+	m_captured_keyboard = (Game::HasFocus || Game::CaptureKeyboardWithoutFocus);
+
     // Grab the data 
     if ( m_type == DIT_MOUSE )
     {
@@ -170,20 +172,23 @@ void GameInputDevice::Read()
         }
         
 		// Store cursor position in client (default) and screen coordinates
-		POINT pos;
-        GetCursorPos( &pos );
-		m_screencursor.x = pos.x;
-		m_screencursor.y = pos.y;
-		ScreenToClient(m_hWnd, &pos); 
-		m_cursor.x = m_x = pos.x;
-		m_cursor.y = m_y = pos.y;
-		
+		if (m_captured_mouse)
+		{
+			POINT pos;
+			GetCursorPos(&pos);
+			m_screencursor.x = pos.x;
+			m_screencursor.y = pos.y;
+			ScreenToClient(m_hWnd, &pos);
+			m_cursor.x = m_x = pos.x;
+			m_cursor.y = m_y = pos.y;
+		}
+
         // Get pressed buttons
         for ( int i = 0; i < 4; i++ )
         {
-            if ( m_mouseState.rgbButtons[i] & 0x80 )
+            if ( m_captured_mouse && (m_mouseState.rgbButtons[i] & 0x80) )
             {
-				// Record whether the button is down, and whether this is the first press of the button
+				// Record that the button is down, and whether this is the first press of the button
                 m_pressedButtons[i] = TRUE;
 				m_firstdown[i] = !m_isdown[i];
 
@@ -193,7 +198,7 @@ void GameInputDevice::Read()
 					m_startpos[i] = m_cursor;
 				}
             }
-            else
+            else	// If the button is not down, or if we are not capturing mouse input this cycle
             {
 				// If the button has been held down to this point then we have a mouse up event
 				if (m_isdown[i]) m_firstup[i] = TRUE; else m_firstup[i] = FALSE;
@@ -234,15 +239,16 @@ void GameInputDevice::Read()
         // Get pressed keys and release locks on key up
         for ( int i = 0; i < 256; i++ )
         {
-            if ( !(m_keyboardState[i] & 0x80) )
+			// If the key is not down, or we are not capturing keyboard input this cycle, then mark it as released here
+            if ( !m_captured_keyboard || !(m_keyboardState[i] & 0x80) )
             {
-                // Key is up so release lock
+                // Mark as not pressed, and release lock if it was present
                 m_keyLock[i] = FALSE;
                 m_pressedKeys[i] = FALSE;
             }
             else
             {
-                // Key is pressed if it isn't locked
+                // Otherwise, the key is pressed if it isn't locked
                 m_pressedKeys[i] = !(m_keyLock[i]);
             }
         }

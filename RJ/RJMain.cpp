@@ -195,6 +195,42 @@ Result RJMain::RetrieveExecutableData(void)
 	return ErrorCodes::NoError;
 }
 
+// Perform any application updates with respect to the OS, e.g. testing whether the application is currently in focus
+void RJMain::PerformApplicationOSUpdates()
+{
+	// Check whether this window is now in focus.  GetFGW may return NULL temporarily during context switches so we also treat
+	// this as out of focus.  
+	// TODO [Awareness]: MSDN documentation for GetFocus, which is similar to GetFGW, implies that the
+	// HWND will only be returned if the currently-focused window is within the current thread's message queue.  If this is the case
+	// it may encounter issues when multithreaded.  However defaulting NULL -> FALSE may automatically handle this
+	// TODO [XPlatform]: Windows-specific
+	HWND fgw = GetForegroundWindow();
+	bool had_focus = Game::HasFocus;
+	Game::HasFocus = (fgw != NULL && fgw == m_hwnd);
+
+	if (Game::HasFocus)
+	{
+		if (!had_focus) ApplicationGainedFocus();
+	}
+	else
+	{
+		if (had_focus) ApplicationLostFocus();
+	}
+
+}
+
+// Event raised when the application loses focus
+void RJMain::ApplicationLostFocus(void)
+{
+	if (Game::PauseOnLoseFocus) Pause();
+}
+
+// Event raised when the application gains focus
+void RJMain::ApplicationGainedFocus(void)
+{
+	
+}
+
 // Begins a new internal cycle, calculating frame deltas and the new internal clock values
 void RJMain::RunInternalClockCycle(void)
 {
@@ -270,6 +306,9 @@ bool RJMain::Display(void)
 	// Initial validation: the engine must be operational in order to begin rendering
 	if (Game::Engine->Operational())
 	{
+		// Perform any application updates with respect to the OS, e.g. testing whether the application is currently in focus
+		PerformApplicationOSUpdates();
+
 		// Calculate time modifiers in ms/secs based on time delta since last frame, then store them globally for use in all methods
 		RunInternalClockCycle();
 
@@ -824,18 +863,21 @@ void RJMain::ProcessKeyboardInput(void)
 
 	if (b[DIK_TAB]) {
 
-		if (D::UI->GetActiveUIControllerCode() == UserInterface::UI_SHIPBUILDER)
+		if (!Game::Keyboard.AltDown())		// Don't capture Alt-Tab
 		{
-			D::UI->DeactivateAllUIComponents();
-		}
-		else
-		{
-			D::UI->DeactivateAllUIComponents();
-			D::UI->ActivateUIState(UserInterface::UI_SHIPBUILDER);
-			D::UI->ShipBuilderUI()->SetShip(cs());
-		}
+			if (D::UI->GetActiveUIControllerCode() == UserInterface::UI_SHIPBUILDER)
+			{
+				D::UI->DeactivateAllUIComponents();
+			}
+			else
+			{
+				D::UI->DeactivateAllUIComponents();
+				D::UI->ActivateUIState(UserInterface::UI_SHIPBUILDER);
+				D::UI->ShipBuilderUI()->SetShip(cs());
+			}
 
-		Game::Keyboard.LockKey(DIK_TAB);
+			Game::Keyboard.LockKey(DIK_TAB);
+		}
 	}
 	if (b[DIK_2]) {
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
@@ -847,12 +889,22 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-		Terrain *t1 = Terrain::Create("tmp_terrain_box");
-		t1->SetPosition(XMVectorAdd(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), XMVectorSet(2.0f, 1.0f, 3.0f, 0.0f)));
-		Terrain *t2 = Terrain::Create("tmp_terrain_cone");
-		t2->SetPosition(XMVectorAdd(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), XMVectorSet(-1.0f, 0.0f, 2.0f, 0.0f)));
-		//cs()->AddTerrainObject(t1);
-		//cs()->AddTerrainObject(t2);
+		if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
+		{
+			ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
+			XMVECTOR centre = tile->GetRelativePosition();
+
+			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+
+			Terrain *t1 = Terrain::Create("tmp_terrain_box");
+			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
+			Terrain *t2 = Terrain::Create("tmp_terrain_cone");
+			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -2.0f, 0.0f)));
+			cs()->AddTerrainObject(t1);
+			cs()->AddTerrainObject(t2);
+
+			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+		}
 
 		Game::Keyboard.LockKey(DIK_2);
 	}
@@ -2127,7 +2179,7 @@ void RJMain::__CreateDebugScenario(void)
 		css[0] = NULL; css[1] = NULL;
 		for (int c = 0; c < create_count; ++c)
 		{
-			css[c] = ComplexShip::Create(true ? "testfrigate2" : "collision1");
+			css[c] = ComplexShip::Create(false ? "testfrigate2" : "objtest");
 			css[c]->SetName(concat("Test frigate cs ")(c + 1).str().c_str());
 			css[c]->OverrideInstanceCode(concat("cs")(c + 1).str());
 			css[c]->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
@@ -2530,14 +2582,25 @@ void RJMain::DEBUGDisplayInfo(void)
 		SafeDelete(f);
 		SafeDelete(manual);
 		*/
+		XMVECTOR pos = XMVectorReplicate(-1.0f);
+		for (const auto *t : cs()->TerrainObjects)
+		{
+			if (t->GetDefinition() && t->GetDefinition()->GetCode() == "tmp_terrain_cone")
+			{
+				pos = t->GetEnvironmentPosition();
+				break;
+			}
+		}
+
 		Terrain *selected = Game::CurrentPlayer->GetMouseSelectedTerrain();
 		std::vector<Terrain*> visible_terrain;
 		cs()->DetermineVisibleTerrain(visible_terrain);
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Selected terrain: \"%s\" (%d)   |   Total terrain: %d   |   Visible terrain: %d",
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Selected: \"%s\" (%d) | Total: %d | Visible: %d | Cone: %s",
 			(!selected ? "<null>" : (!selected->GetDefinition() ? "<no-def>" : selected->GetDefinition()->GetCode().c_str())),
 			(!selected ? -1 : selected->GetID()),
 			(int)cs()->TerrainObjects.size(),
-			(int)visible_terrain.size()
+			(int)visible_terrain.size(), 
+			Vector3ToString(pos).c_str()
 		);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
@@ -2546,3 +2609,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
+

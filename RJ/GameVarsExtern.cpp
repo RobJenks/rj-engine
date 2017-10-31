@@ -108,6 +108,12 @@ namespace Game {
 	// Global flag indicating whether the application is paused
 	bool							Paused = false;
 
+	// Global flags indicating whether the application has focus this frame, and the actions to take on focus change
+	bool							HasFocus = false;
+	bool							PauseOnLoseFocus = false;
+	bool							CaptureKeyboardWithoutFocus = false;
+	bool							CaptureMouseWithoutFocus = false;
+
 	// System constants
 	const clock_t C_SECONDS_PER_CLOCK = (const clock_t)1.0 / (const clock_t)CLOCKS_PER_SEC;
 

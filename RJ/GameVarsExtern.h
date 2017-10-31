@@ -115,6 +115,12 @@ namespace Game {
 	// Global flag indicating whether the application is paused
 	extern bool Paused;
 
+	// Global flags indicating whether the application has focus this frame, and the actions to take on focus change
+	extern bool	HasFocus;
+	extern bool PauseOnLoseFocus;
+	extern bool CaptureKeyboardWithoutFocus;
+	extern bool CaptureMouseWithoutFocus;
+
 	// Enumeration of possible object collision modes
 	enum CollisionMode { FullCollision = 0, BroadphaseCollisionOnly, NoCollision };
 	extern CollisionMode TranslateCollisionModeFromString(const std::string & mode);

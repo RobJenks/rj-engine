@@ -81,6 +81,9 @@ public:
 	void				ProcessKeyboardInput(void);
 	void				ProcessMouseInput(void);
 
+	// Indicates whether the application currently has focus
+	CMPINLINE bool		HasFocus(void) const { return Game::HasFocus; }
+
 	// Accept keyboard and mouse input for the debug camera
 	void				AcceptDebugCameraKeyboardInput(void);
 	void				AcceptDebugCameraMouseInput(void);
@@ -156,6 +159,13 @@ protected:
 	bool m_debug_portalrenderingtest;
 	ObjectReference<const iEnvironmentObject> m_debug_portalrenderingtest_subject;
 	ObjectReference<ComplexShip> m_debug_portalrenderingtest_environment;
+
+	// Perform any application updates with respect to the OS, e.g. testing whether the application is currently in focus
+	void PerformApplicationOSUpdates(void);
+
+	// Events raised when the application gains or loses focus
+	void ApplicationLostFocus(void);
+	void ApplicationGainedFocus(void);
 
 public:
 	// Debug objects for testing; delete after use

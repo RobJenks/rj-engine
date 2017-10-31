@@ -118,6 +118,8 @@ private:
 	long				  m_lastmouse_z;			// Mouse z-position last frame
 	BasicRay			  m_mouse_world_basicray;	// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
 	Ray					  m_mouse_world_ray;		// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
+	bool				  m_captured_mouse;			// Indicates whether we captured mouse input this cycle (we may not, e.g. if the window does not have focus)
+	bool				  m_captured_keyboard;		// Indicates whether we captured keyboard input this cycle (we may not, e.g. if the window does not have focus)
 
 public:
 	struct ALPHANUM_KEY_DATA
