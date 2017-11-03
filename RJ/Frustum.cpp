@@ -154,6 +154,23 @@ void Frustum::Transform(const FXMMATRIX transform)
 	}
 }
 
+// Sets this frustum to a transformed version of the given frustum.  This can only 
+// be performed between frustums of the same cardinatlity
+void Frustum::SetTransformed(const Frustum & frustum, const FXMMATRIX transform)
+{
+	// This can only be performed between frustums of the same cardinatlity
+	bool equal_size = (frustum.GetPlaneCount() == GetPlaneCount());
+	assert(equal_size);
+	if (!equal_size) return;
+
+	// Transform each plane into this frustum
+	const FXMVECTOR *planes = frustum.GetPlanes();
+	for (size_t i = 0U; i < m_planecount; ++i)
+	{
+		m_planes[i] = XMPlaneTransform(planes[i], transform);
+	}
+}
+
 // Checks for the intersection of a centre point and negative-vectorised-radius with
 // the frustum.  Internal method used as the basis for many public method above
 bool Frustum::CheckSphereInternal(const FXMVECTOR centre_point, const FXMVECTOR negated_radius_v) const

@@ -1811,7 +1811,7 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const FXMVECTOR view_position, Frustum *initial_frustum, const Frustum **pOutGlobalFrustum)
 {
 	// Parameter check
-	if (!environment) return ErrorCodes::CannotRenderNullEnvironment;
+	if (!environment || !initial_frustum) return ErrorCodes::CannotRenderNullEnvironment;
 
 	// Precalculate the position of the viewer relative to the environment zero-point, so we can perform 
 	// certain activities entirely in environment-local space

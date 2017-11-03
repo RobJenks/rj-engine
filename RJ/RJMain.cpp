@@ -887,7 +887,7 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
 		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
+		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
 		if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
 		{
@@ -899,7 +899,7 @@ void RJMain::ProcessKeyboardInput(void)
 			Terrain *t1 = Terrain::Create("tmp_terrain_box");
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
 			Terrain *t2 = Terrain::Create("tmp_terrain_cone");
-			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -2.0f, 0.0f)));
+			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(t1);
 			cs()->AddTerrainObject(t2);
 

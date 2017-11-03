@@ -26,6 +26,7 @@ public:
 	// Returns or sets a reference to the renderable model associated with this terrain
 	CMPINLINE Model *						GetModel(void) const				{ return m_model; }
 	CMPINLINE void							SetModel(Model *m)					{ m_model = m; }
+	CMPINLINE bool							HasModel(void) const				{ return (m_model != NULL); }
 
 	// Returns or sets the default extent for a terrain object of this type
 	CMPINLINE XMFLOAT3						GetDefaultExtent(void) const		{ return m_defaultextent; }

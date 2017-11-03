@@ -45,6 +45,7 @@ public:
 
 	// Retrieve data on the planes that make up this frustum
 	CMPINLINE size_t					GetPlaneCount(void) const		{ return m_planecount; }
+	CMPINLINE size_t					GetSideCount(void) const		{ return (m_planecount - 2U); }
 	CMPINLINE const XMVECTOR *			GetPlanes(void) const			{ return m_planes; }
 	CMPINLINE const XMVECTOR &			GetPlane(size_t plane) const	{ return m_planes[plane]; }
 	CMPINLINE const XMVECTOR &			GetNearPlane(void) const		{ return m_planes[Frustum::NEAR_PLANE]; }
@@ -54,6 +55,9 @@ public:
 	// Transform the frustum by the given matrix
 	void								Transform(const FXMMATRIX transform);
 
+	// Sets this frustum to a transformed version of the given frustum.  This can only 
+	// be performed between frustums of the same cardinatlity
+	void								SetTransformed(const Frustum & frustum, const FXMMATRIX transform);
 
 	/*** Intersection testing methods ***/
 
