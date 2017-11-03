@@ -63,12 +63,12 @@ GameInputDevice::GameInputDevice()
     m_pDevice = NULL;
 	m_hWnd = 0;
 	m_type = DIRECTINPUTTYPE::DIT_KEYBOARD;
-    m_x = m_y = 0;
+    m_x = m_y = 0L;
+	m_xdelta = m_ydelta = m_zdelta = 0L;
 	m_cursor = m_screencursor = INTVECTOR2(0, 0);
 	m_mousepos_norm = m_mousedelta_norm = XMFLOAT2(0.0f, 0.0f);
 	m_mousedelta_z = m_lastmouse_z = 0L;
     memset(m_keyLock, 0, sizeof( BOOL ) * 256 );
-	memset(&m_mouseState, 0, sizeof(DIMOUSESTATE));
 	memset(m_keyboardState, 0 , sizeof(char) * 256);
     memset(m_pressedKeys, 0, sizeof(BOOL) * 256 );
 	memset(m_pressedButtons, 0, sizeof(BOOL) * 4);
@@ -160,7 +160,8 @@ void GameInputDevice::Read()
     // Grab the data 
     if ( m_type == DIT_MOUSE )
     {
-        HRESULT hr = m_pDevice->GetDeviceState( sizeof( DIMOUSESTATE ), (LPVOID)&m_mouseState );
+		DIMOUSESTATE mouse_state;
+        HRESULT hr = m_pDevice->GetDeviceState( sizeof( DIMOUSESTATE ), (LPVOID)&mouse_state);
         if ( FAILED( hr )  )
         {
             if ( hr == DIERR_INPUTLOST || hr == DIERR_NOTACQUIRED )
@@ -172,6 +173,7 @@ void GameInputDevice::Read()
         }
         
 		// Store cursor position in client (default) and screen coordinates
+		m_xdelta = m_ydelta = m_zdelta = 0L;
 		if (m_captured_mouse)
 		{
 			POINT pos;
@@ -181,12 +183,15 @@ void GameInputDevice::Read()
 			ScreenToClient(m_hWnd, &pos);
 			m_cursor.x = m_x = pos.x;
 			m_cursor.y = m_y = pos.y;
+			m_xdelta = mouse_state.lX;
+			m_ydelta = mouse_state.lY;
+			m_zdelta = mouse_state.lZ;
 		}
 
         // Get pressed buttons
         for ( int i = 0; i < 4; i++ )
         {
-            if ( m_captured_mouse && (m_mouseState.rgbButtons[i] & 0x80) )
+            if ( m_captured_mouse && (mouse_state.rgbButtons[i] & 0x80) )
             {
 				// Record that the button is down, and whether this is the first press of the button
                 m_pressedButtons[i] = TRUE;
@@ -211,12 +216,12 @@ void GameInputDevice::Read()
 		// Calculate some derived data that will be used elsewhere in the application
 		m_mousepos_norm.x = (float)(m_x - Game::ScreenCentre.x) / (float)Game::ScreenCentre.x;
 		m_mousepos_norm.y = (float)(m_y - Game::ScreenCentre.y) / (float)Game::ScreenCentre.y;
-		m_mousedelta_norm.x = ((float)m_mouseState.lX / (float)Game::ScreenWidth);
-		m_mousedelta_norm.y = ((float)m_mouseState.lY / (float)Game::ScreenHeight);
+		m_mousedelta_norm.x = ((float)m_xdelta / (float)Game::ScreenWidth);
+		m_mousedelta_norm.y = ((float)m_zdelta / (float)Game::ScreenHeight);
 
 		// Mouse z delta should be calculated to account for DX differences in mouse wheel vs touchpad handling
-		long lastz = m_mouseState.lZ;
-		m_mousedelta_z = (m_mouseState.lZ != 0L ? (m_mouseState.lZ - m_lastmouse_z) : 0L);
+		long lastz = m_zdelta;
+		m_mousedelta_z = (m_zdelta != 0L ? (m_zdelta - m_lastmouse_z) : 0L);
 		m_lastmouse_z = lastz;
 
 		// Determine a world-space ray based on the camera and mouse position.  Will be used for e.g. mouse picking

@@ -54,9 +54,9 @@ public:
 	CMPINLINE long GetX() { return m_x; }
 	CMPINLINE long GetY() { return m_y; }
 	CMPINLINE INTVECTOR2 GetCursor() { return m_cursor; }
-	CMPINLINE long GetXDelta()    { return m_mouseState.lX; }
-	CMPINLINE long GetYDelta()    { return m_mouseState.lY; }
-	CMPINLINE long GetZDelta()    { return m_mousedelta_z; }
+	CMPINLINE long GetXDelta()    { return m_xdelta; }
+	CMPINLINE long GetYDelta()    { return m_ydelta; }
+	CMPINLINE long GetZDelta()    { return m_zdelta; }
     
 	CMPINLINE XMFLOAT2 GetNormalisedMousePos(void) const { return m_mousepos_norm; }
 	CMPINLINE const XMFLOAT2 & GetNormalisedMousePositionRef(void) const { return m_mousepos_norm; }
@@ -102,24 +102,24 @@ private:
     DIRECTINPUTTYPE       m_type;
     char                  m_keyboardState[256];
     BOOL                  m_pressedKeys[256];
-    DIMOUSESTATE          m_mouseState;
     BOOL                  m_keyLock[256];
-	BOOL                  m_pressedButtons[4];		// Mouse buttons that are currently pressed
-    long                  m_x, m_y;					// Cursor position	
-	INTVECTOR2			  m_cursor;					// Cursor position
-	INTVECTOR2			  m_screencursor;			// Cursor position in global screen coordinates
-	BOOL				  m_isdown[4];				// Identifies whether each mouse button is being held down
-	BOOL				  m_firstdown[4];			// Identifies whether this is the first press of each mouse button
-	BOOL				  m_firstup[4];				// Identifies whether this is the first release of each mouse button
-	INTVECTOR2			  m_startpos[4];			// Stores the starting position of each mouse down event
-	XMFLOAT2			  m_mousepos_norm;			// Normalised position of the mouse, in the range [-1.0 +1.0] with (0,0) in the screen centre
-	XMFLOAT2			  m_mousedelta_norm;		// Normalised delta movement of the mouse this cycle, as a percentage of total screen bounds (range [0.0 1.0])
-	long				  m_mousedelta_z;			// Current mouse z-delta, i.e. any scrolling of the mouse wheel / touchpad
-	long				  m_lastmouse_z;			// Mouse z-position last frame
-	BasicRay			  m_mouse_world_basicray;	// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
-	Ray					  m_mouse_world_ray;		// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
-	bool				  m_captured_mouse;			// Indicates whether we captured mouse input this cycle (we may not, e.g. if the window does not have focus)
-	bool				  m_captured_keyboard;		// Indicates whether we captured keyboard input this cycle (we may not, e.g. if the window does not have focus)
+	BOOL                  m_pressedButtons[4];			// Mouse buttons that are currently pressed
+    long                  m_x, m_y;						// Cursor position	
+	long				  m_xdelta, m_ydelta, m_zdelta;	// Delta mouse movement this cycle
+	INTVECTOR2			  m_cursor;						// Cursor position
+	INTVECTOR2			  m_screencursor;				// Cursor position in global screen coordinates
+	BOOL				  m_isdown[4];					// Identifies whether each mouse button is being held down
+	BOOL				  m_firstdown[4];				// Identifies whether this is the first press of each mouse button
+	BOOL				  m_firstup[4];					// Identifies whether this is the first release of each mouse button
+	INTVECTOR2			  m_startpos[4];				// Stores the starting position of each mouse down event
+	XMFLOAT2			  m_mousepos_norm;				// Normalised position of the mouse, in the range [-1.0 +1.0] with (0,0) in the screen centre
+	XMFLOAT2			  m_mousedelta_norm;			// Normalised delta movement of the mouse this cycle, as a percentage of total screen bounds (range [0.0 1.0])
+	long				  m_mousedelta_z;				// Current mouse z-delta, i.e. any scrolling of the mouse wheel / touchpad
+	long				  m_lastmouse_z;				// Mouse z-position last frame
+	BasicRay			  m_mouse_world_basicray;		// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
+	Ray					  m_mouse_world_ray;			// World-space ray pointing out of the camera and through the mouse position; used primarily for object picking.  Calc 1/frame
+	bool				  m_captured_mouse;				// Indicates whether we captured mouse input this cycle (we may not, e.g. if the window does not have focus)
+	bool				  m_captured_keyboard;			// Indicates whether we captured keyboard input this cycle (we may not, e.g. if the window does not have focus)
 
 public:
 	struct ALPHANUM_KEY_DATA
