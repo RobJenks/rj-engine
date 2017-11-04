@@ -165,12 +165,12 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 	if (m_state == StateType::OnFoot)
 	{
 		// If we are on foot then use the keyboard input to update player actor state
-		if (keys[DIK_W])			{ MovePlayerActor(Direction::Up, true); }
-		if (keys[DIK_A])			{ MovePlayerActor(Direction::Left, true); }
-		if (keys[DIK_S])			{ MovePlayerActor(Direction::Down, true); }
-		if (keys[DIK_D])			{ MovePlayerActor(Direction::Right, true); }
-		if (keys[DIK_E])			{ AttemptPlayerInteraction(); }
-		if (keys[DIK_SPACE])		{ ActorJump(); }
+		if (keys[DIK_W])				{ MovePlayerActor(Direction::Up, true); }
+		if (keys[DIK_A])				{ MovePlayerActor(Direction::Left, true); }
+		if (keys[DIK_S])				{ MovePlayerActor(Direction::Down, true); }
+		if (keys[DIK_D])				{ MovePlayerActor(Direction::Right, true); }
+		if (keys[DIK_E])				{ AttemptPlayerInteraction();								keyboard->LockKey(DIK_E); }
+		if (keys[DIK_SPACE])			{ ActorJump();												keyboard->LockKey(DIK_SPACE); }
 	}
 	else if (m_state == StateType::ShipPilot)
 	{
@@ -733,9 +733,17 @@ void Player::AttemptPlayerInteraction(void)
 		DynamicTerrain *target_terrain = m_view_target_usable_terrain;
 		if (target_terrain && target_terrain->GetParentEnvironment())
 		{
-			XMVECTOR world_pos = XMVector3TransformCoord(target_terrain->GetEnvironmentPosition(),
-				target_terrain->GetParentEnvironment()->GetZeroPointWorldMatrix());
-			if (XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(world_pos, player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+			// Transform the object positions into other reference frames as required to perform a comparison
+			XMVECTOR player_local = XMVector3TransformCoord(player_pos, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
+			XMVECTOR terrain_world = XMVector3TransformCoord(target_terrain->GetEnvironmentPosition(), target_terrain->GetParentEnvironment()->GetZeroPointWorldMatrix());
+
+			// Now get the closest point on the player bounding box to the target, and on the target bounding box to the player
+			XMVECTOR player_pt_world = Game::PhysicsEngine.ClosestPointOnOBB(player->CollisionOBB.Data(), terrain_world);		// OBB = world-space, so perform world-space comparison
+			XMVECTOR terrain_pt_local = Game::PhysicsEngine.ClosestPointOnOBB(target_terrain->GetOBBData(), player_local);		// OBB = local space, so perform local-space comparison
+			XMVECTOR player_pt_local = XMVector3TransformCoord(player_pt_world, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
+
+			// Test whether the distance between these points is within the use distance threshold
+			if (XMVector3LessOrEqual(XMVector3LengthSq(XMVectorSubtract(player_pt_local, terrain_pt_local)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
 			{
 				successful = target_terrain->AttemptInteraction(player);
 			}

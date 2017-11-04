@@ -13,9 +13,6 @@ class DataObjectRegister: public DynamicTerrain
 
 public:
 
-	// Default constructor
-	DataObjectRegister(void);
-
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 	static DataObjectRegister *					Create(const TerrainDefinition *def);
@@ -32,12 +29,14 @@ public:
 	// Returns the port index of the given register, or zero if the given register number is invalid
 	DataPorts::PortIndex						InputPort(unsigned int register_index) const;
 
-	// Returns the port index for a single-value register only
-//	typename std::enable_if<std::is_same<N, 1>,
-	//	DataPorts::PortIndex>					InputPort(void) const;
-
 	// Returns the value in a particular register, or zero if the given register index is invalid
 	DataPorts::DataType							GetValue(unsigned int register_index) const;
+
+
+protected:
+
+	// Default constructor
+	DataObjectRegister(void);
 
 
 private:

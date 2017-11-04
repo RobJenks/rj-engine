@@ -8,11 +8,14 @@ class DynamicTerrain : public Terrain, public DataEnabledObject, public UsableOb
 {
 public:
 
+	// Event raised when an entity tries to interact with this object
+	virtual bool OnUsed(iObject *user);
+
+
+protected:
+
 	// Default constructor
 	DynamicTerrain(void);
-
-
-private:
 
 
 };

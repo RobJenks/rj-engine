@@ -11,9 +11,6 @@ class DataObjectOutput : public DynamicTerrain
 
 public:
 
-	// Default constructor
-	DataObjectOutput(void);
-
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 	static DataObjectOutput *			Create(const TerrainDefinition *def);
@@ -30,6 +27,12 @@ public:
 
 	// Output a value from the commponent through the given output
 	void								SendOutput(unsigned int output_index, DataPorts::DataType value);
+
+
+protected:
+
+	// Default constructor
+	DataObjectOutput(void);
 
 
 private:

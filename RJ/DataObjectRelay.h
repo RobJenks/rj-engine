@@ -7,9 +7,6 @@ class DataObjectRelay : public DynamicTerrain
 {
 public:
 
-	// Default constructor
-	DataObjectRelay(void);
-
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 	static DataObjectRelay *			Create(const TerrainDefinition *def);
@@ -23,6 +20,13 @@ public:
 	// Return port indices for the object
 	CMPINLINE DataPorts::PortIndex		InputPort(void) const { return PORT_RECEIVE; }
 	CMPINLINE DataPorts::PortIndex		OutputPort(void) const { return PORT_SEND; }
+
+
+protected:
+
+	// Default constructor
+	DataObjectRelay(void);
+
 
 
 private:

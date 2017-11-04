@@ -228,6 +228,7 @@ namespace Game {
 	extern const float C_THRUST_INCREMENT_PC;				// Percentage of total thrust range that will be incremented/decremented by player throttle each second
 	extern const float C_MOUSE_FLIGHT_MULTIPLIER;			// Multiplier to avoid mouse flight requiring the full screen bounds to achieve min/max turning
 	extern const float C_PLAYER_USE_DISTANCE;				// Distance within which the player can activate a UsableObject
+	extern const XMVECTOR C_PLAYER_USE_DISTANCE_V;			// Vectorised distance within which the player can activate a UsableObject
 	extern const float C_PLAYER_USE_DISTANCE_SQ;			// Squared distance within which the player can activate a UsableObject
 	extern const XMVECTOR C_PLAYER_USE_DISTANCE_SQ_V;		// Vectorised squared distance within which the player can activate a UsableObject
 

@@ -212,6 +212,8 @@ namespace Game {
 	const float C_THRUST_INCREMENT_PC = 0.2f;				// Percentage of total thrust range that will be incremented/decremented by player throttle each second
 	const float C_MOUSE_FLIGHT_MULTIPLIER = 1.0f;			// Multiplier to avoid mouse flight requiring the full screen bounds to achieve min/max turning
 	const float C_PLAYER_USE_DISTANCE = 2.0f;				// Distance within which the player can activate a UsableObject
+	const XMVECTOR C_PLAYER_USE_DISTANCE_V
+		= XMVectorReplicate(C_PLAYER_USE_DISTANCE);			// Vectorised distance within which the player can activate a UsableObject
 	const float C_PLAYER_USE_DISTANCE_SQ 
 		= C_PLAYER_USE_DISTANCE * C_PLAYER_USE_DISTANCE;	// Squared distance within which the player can activate a UsableObject
 	const XMVECTOR C_PLAYER_USE_DISTANCE_SQ_V 

@@ -115,6 +115,7 @@
 #include "EnvironmentPowerMap.h"			// DBG
 #include "Weapon.h"							// DBG
 #include "TerrainDefinition.h"				// DBG
+#include "DataObjectRelay.h"				// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -898,7 +899,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Terrain *t1 = Terrain::Create("tmp_terrain_box");
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
-			Terrain *t2 = Terrain::Create("tmp_terrain_cone");
+			Terrain *t2 = DataObjectRelay::Create(D::TerrainDefinitions.Get("tmp_terrain_cone"));
 			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(t1);
 			cs()->AddTerrainObject(t2);
