@@ -4,8 +4,8 @@
 
 
 template <unsigned int N>
-class DataObjectOutput : public DynamicTerrain
-{
+DYNAMIC_TERRAIN_ABSTRACT_SUPERCLASS(DataObjectOutput)
+//{
 	// Acceptable output count
 	static_assert(N <= 10U, "Not a valid data output size");
 
@@ -14,7 +14,8 @@ public:
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 	static DataObjectOutput *			Create(const TerrainDefinition *def);
-
+	static DataObjectOutput *			Create(const TerrainDefinition *def, DataObjectOutput<N> *instance);
+	
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);
 
@@ -53,14 +54,28 @@ DataObjectOutput<N>::DataObjectOutput(void)
 	}
 }
 
-
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 template <unsigned int N>
 DataObjectOutput<N> * DataObjectOutput<N>::Create(const TerrainDefinition *def)
 {
-	// Create and initialise the underlying terrain object
-	DataObjectOutput<N> *object = new DataObjectOutput<N>();
+	return Create(def, NULL);
+}
+
+// Creates the new data-enabled object, including registration of all required data ports
+// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
+// This is a version of the Create() method that supports subclassing by other dynamic terrain types; it 
+// will use 'instance' as the new object to be initialised if it is provided, otherwise a new object
+// will be created as normal
+template <unsigned int N>
+DataObjectOutput<N> * DataObjectOutput<N>::Create(const TerrainDefinition *def, DataObjectOutput<N> *instance)
+{
+	// Create the underlying terrain object, if applicable
+	DataObjectOutput *	object = NULL;
+	if (instance)		object = static_cast<DataObjectOutput*>(instance);
+	else				object = new DataObjectOutput();
+
+	// Initialise the new terrain object based on the provided definition
 	object->InitialiseNewTerrain(def);
 
 	// Initialise the data ports required for this object
@@ -88,16 +103,15 @@ void DataObjectOutput<N>::SendOutput(unsigned int output_index, DataPorts::DataT
 }
 
 
-// Define aliases for small-sized value outputs
-typedef DataObjectOutput<1>				DataObjectOutput1;
-typedef DataObjectOutput<2>				DataObjectOutput2;
-typedef DataObjectOutput<3>				DataObjectOutput3;
-typedef DataObjectOutput<4>				DataObjectOutput4;
-typedef DataObjectOutput<5>				DataObjectOutput5;
-typedef DataObjectOutput<6>				DataObjectOutput6;
-typedef DataObjectOutput<7>				DataObjectOutput7;
-typedef DataObjectOutput<8>				DataObjectOutput8;
-typedef DataObjectOutput<9>				DataObjectOutput9;
-typedef DataObjectOutput<10>			DataObjectOutput10;
-
+// Define concrete output component types based on total port count
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput1, DataObjectOutput<1U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput2, DataObjectOutput<2U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput3, DataObjectOutput<3U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput4, DataObjectOutput<4U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput5, DataObjectOutput<5U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput6, DataObjectOutput<6U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput7, DataObjectOutput<7U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput8, DataObjectOutput<8U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput9, DataObjectOutput<9U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput10, DataObjectOutput<10U>);
 

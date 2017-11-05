@@ -24,6 +24,9 @@
   
   <!-- Load terrain objects -->
   <include file="Terrain\Terrain.xml" />
+
+  <!-- Load all dynamic terrain definitions.  Must be loaded after basic terrain -->
+  <include file="DynamicTerrain\DynamicTerrain.xml" />
   
   <!-- Load simple ship data -->
 	<include file="Ships\SimpleShips.xml" />

@@ -1,0 +1,9 @@
+<gamedata>
+
+  <!-- Include all types of basic circuitry component -->
+  <include file="DynamicTerrain\Circuitry\BasicCircuitry.xml" />
+  <include file="DynamicTerrain\Circuitry\DataRegisters.xml" />
+  <include file="DynamicTerrain\Circuitry\DataOutputs.xml" />
+  
+
+</gamedata>

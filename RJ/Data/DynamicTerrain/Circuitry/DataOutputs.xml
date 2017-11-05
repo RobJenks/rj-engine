@@ -1,0 +1,44 @@
+<gamedata>
+
+  <!-- 
+    Name: Data output
+    Description: Outputs a given value through one of its output ports when triggered.  Components
+                 with 1 to 10 outputs currently defined as concrete component classes
+    Inputs: 0
+    Outputs: [1 - 10]
+  -->
+  
+  <DynamicTerrainDefinition code="DataObjectOutput1" class="DataObjectOutput1" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+  
+  <DynamicTerrainDefinition code="DataObjectOutput2" class="DataObjectOutput2" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput3" class="DataObjectOutput3" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput4" class="DataObjectOutput4" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput5" class="DataObjectOutput5" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput6" class="DataObjectOutput6" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput7" class="DataObjectOutput7" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput8" class="DataObjectOutput8" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput9" class="DataObjectOutput9" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectOutput10" class="DataObjectOutput10" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+
+
+
+</gamedata>

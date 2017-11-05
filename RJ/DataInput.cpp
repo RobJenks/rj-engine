@@ -46,6 +46,8 @@
 #include "DynamicTileSet.h"
 #include "Terrain.h"
 #include "TerrainDefinition.h"
+#include "DynamicTerrain.h"
+#include "DynamicTerrainClass.h"
 #include "ElementStateDefinition.h"
 #include "CollisionSpatialDataF.h"
 
@@ -216,6 +218,8 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 				res = IO::Data::LoadActor(child);
 			} else if (name == D::NODE_TerrainDefinition) {
 				res = IO::Data::LoadTerrainDefinition(child);
+			} else if (name == D::NODE_DynamicTerrainDefinition) { 
+				res = IO::Data::LoadDynamicTerrainDefinition(child);
 			} else if (name == D::NODE_Faction) {
 				res = IO::Data::LoadFaction(child);
 			} else if (name == D::NODE_Turret) {
@@ -1791,6 +1795,67 @@ Terrain *IO::Data::LoadTerrain(TiXmlElement *node)
 
 	// Return a reference to the new terrain object
 	return obj;
+}
+
+// Loads a dynamic terrain definition and stores it in the global collection
+Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadDynamicTerrainDefWithInvalidParams;
+
+	// Attempt to get any parameters of the top-level node
+	const char *c_code = node->Attribute("code");		// Mandatory
+	const char *c_class = node->Attribute("class");		// Mandatory
+	const char *c_def = node->Attribute("def");			// Optional; default NULL
+	if (!c_code) return ErrorCodes::CannotLoadDynamicTerrainWithoutUniqueCode;
+	if (!c_class) return ErrorCodes::CannotLoadDynamicTerrainWithoutClassName;
+
+	// Code must be unique
+	std::string code = std::string(c_code);
+	if (D::DynamicTerrainDefinitions.Exists(code)) return ErrorCodes::CannotLoadDuplicateDynamicTerrainDefinition;
+
+	// Resolve the provided terrain definition, if applicable
+	const TerrainDefinition *def = NULL;
+	if (c_def != NULL)
+	{
+		def = D::TerrainDefinitions.Get(std::string(c_def));
+		if (def == NULL)
+		{
+			Game::Log << LOG_WARN << "Could not assign terrain-def \"" << c_def << "\" to dynamic terrain definition object \"" << code << "\"; terrain-def is not valid\n";
+		}
+	}
+
+	// Attempt to instantiate the given class by its string code
+	DynamicTerrain *terrain = DynamicTerrainClass::Create(c_class, def);
+	if (!terrain)
+	{
+		Game::Log << LOG_ERROR << "Cannot instantiate dynamic terrain definition class \"" << c_class << "\"; not a valid class name\n";
+		return ErrorCodes::CannotInstantiateDynamicTerrainClass;
+	}
+
+	// Assign the unique string code to this prototype
+	terrain->SetCode(code);
+
+	// Object was successfully instantiated; process all remaining data in the definition
+	std::string key, val;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+
+		if (key == "property")
+		{
+			const char *key = child->Attribute("key");
+			const char *value = child->Attribute("value");
+			if (key && value) terrain->SetProperty(std::string(key), std::string(value));
+		}
+
+	}
+
+	// Add this prototype definition to the global collection and return success
+	D::DynamicTerrainDefinitions.Store(terrain);
+	return ErrorCodes::NoError;
 }
 
 // Load a single view portal definition and return it

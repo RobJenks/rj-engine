@@ -1,0 +1,24 @@
+<gamedata>
+
+  <!-- 
+    Name: Data relay 
+    Description: Simply passes input signals to its output port without modification
+    Inputs: 1
+    Outputs: 1
+  -->
+  <DynamicTerrainDefinition code="DataObjectRelay" class="DataObjectRelay" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  
+  <!-- 
+    Name: Debug output component
+    Description: Raises a debug message for each signal received at the component input
+    Inputs: 1
+    Outputs: 0
+  -->
+  <DynamicTerrainDefinition code="DataObjectDebugLogger" class="DataObjectDebugLogger" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  
+
+</gamedata>

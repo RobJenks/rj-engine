@@ -419,6 +419,7 @@
     <ClCompile Include="DebugInvocation.cpp" />
     <ClCompile Include="Direction.cpp" />
     <ClCompile Include="DustParticle.cpp" />
+    <ClCompile Include="DynamicTerrainClass.cpp" />
     <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
@@ -689,6 +690,8 @@
     <ClInclude Include="DebugTest.h" />
     <ClInclude Include="DefaultValues.h" />
     <ClInclude Include="Direction.h" />
+    <ClInclude Include="DynamicTerrainClass.h" />
+    <ClInclude Include="DynamicTerrainClassData.h" />
     <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="EnvironmentElementStrengthOverlay.h" />
     <ClInclude Include="EnvironmentHealthOverlay.h" />

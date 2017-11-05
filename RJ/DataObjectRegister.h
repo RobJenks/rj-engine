@@ -6,8 +6,8 @@
 #include "DynamicTerrain.h"
 
 template <unsigned int N>
-class DataObjectRegister: public DynamicTerrain
-{
+DYNAMIC_TERRAIN_ABSTRACT_SUPERCLASS(DataObjectRegister)
+//{
 	// Acceptable register count
 	static_assert(N <= 10U, "Not a valid data register size");
 
@@ -16,6 +16,7 @@ public:
 	// Creates the new data-enabled object, including registration of all required data ports
 	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 	static DataObjectRegister *					Create(const TerrainDefinition *def);
+	static DataObjectRegister *					Create(const TerrainDefinition *def, DataObjectRegister *instance);
 
 	// Initialise the data ports required for this object
 	void										InitialiseDataPorts(void);
@@ -61,14 +62,28 @@ DataObjectRegister<N>::DataObjectRegister(void)
 	}
 }
 
-
 // Creates the new data-enabled object, including registration of all required data ports
 // Accepsts a terrain definition for the underlying object, which can be null for an object without any model
 template<unsigned int N>
 DataObjectRegister<N> * DataObjectRegister<N>::Create(const TerrainDefinition *def)
 {
-	// Create and initialise the underlying terrain object
-	DataObjectRegister *object = new DataObjectRegister();
+	return Create(def, NULL);
+}
+
+// Creates the new data-enabled object, including registration of all required data ports
+// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
+// This is a version of the Create() method that supports subclassing by other dynamic terrain types; it 
+// will use 'instance' as the new object to be initialised if it is provided, otherwise a new object
+// will be created as normal
+template<unsigned int N>
+DataObjectRegister<N> * DataObjectRegister<N>::Create(const TerrainDefinition *def, DataObjectRegister<N> *instance)
+{
+	// Create the underlying terrain object, if applicable
+	DataObjectRegister *object = NULL;
+	if (instance)		object = static_cast<DataObjectRegister*>(instance);
+	else				object = new DataObjectRegister();
+
+	// Initialise the new terrain object based on the provided definition
 	object->InitialiseNewTerrain(def);
 
 	// Initialise the data ports required for this object
@@ -123,13 +138,15 @@ DataPorts::DataType DataObjectRegister<N>::GetValue(unsigned int register_index)
 
 
 // Define concrete register types based on the internal register count
-typedef DataObjectRegister<1U>					DataObjectRegister1;
-typedef DataObjectRegister<2U>	   				DataObjectRegister2;
-typedef DataObjectRegister<3U>		  			DataObjectRegister3;
-typedef DataObjectRegister<4U>   				DataObjectRegister4;
-typedef DataObjectRegister<5U>   				DataObjectRegister5;
-typedef DataObjectRegister<6U>					DataObjectRegister6;
-typedef DataObjectRegister<7U>   				DataObjectRegister7;
-typedef DataObjectRegister<8U>   				DataObjectRegister8;
-typedef DataObjectRegister<9U>   				DataObjectRegister9;
-typedef DataObjectRegister<10U>   				DataObjectRegister10;
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister1, DataObjectRegister<1U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister2, DataObjectRegister<2U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister3, DataObjectRegister<3U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister4, DataObjectRegister<4U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister5, DataObjectRegister<5U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister6, DataObjectRegister<6U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister7, DataObjectRegister<7U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister8, DataObjectRegister<8U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister9, DataObjectRegister<9U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister10, DataObjectRegister<10U>);
+
+

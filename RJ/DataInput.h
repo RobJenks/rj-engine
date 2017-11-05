@@ -138,6 +138,8 @@ namespace IO { namespace Data {
 	Result LoadTerrainDefinition(TiXmlElement *node);
 	Terrain *LoadTerrain(TiXmlElement *node);
 
+	Result LoadDynamicTerrainDefinition(TiXmlElement *node);
+
 	ViewPortal LoadViewPortal(TiXmlElement *node);
 
 	Result LoadResource(TiXmlElement *node);

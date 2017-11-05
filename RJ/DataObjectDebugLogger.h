@@ -3,8 +3,8 @@
 #include "DynamicTerrain.h"
 
 
-class DataObjectDebugLogger : public DynamicTerrain
-{
+DYNAMIC_TERRAIN_CLASS(DataObjectDebugLogger)
+//{
 public:
 
 	// Creates the new data-enabled object, including registration of all required data ports
@@ -19,7 +19,6 @@ public:
 
 	// Return port indices for the object
 	CMPINLINE DataPorts::PortIndex		InputPort(void) const { return PORT_RECEIVE; }
-	CMPINLINE DataPorts::PortIndex		OutputPort(void) const { return PORT_SEND; }
 
 
 protected:
@@ -31,7 +30,6 @@ protected:
 private:
 
 	// Maintain port indices for convenience
-	DataPorts::PortIndex				PORT_SEND;
 	DataPorts::PortIndex				PORT_RECEIVE;
 
 };

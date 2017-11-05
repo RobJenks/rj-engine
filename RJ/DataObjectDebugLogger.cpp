@@ -4,7 +4,7 @@
 // Default constructor
 DataObjectDebugLogger::DataObjectDebugLogger(void)
 	:
-	PORT_SEND(DataPorts::NO_PORT_ID), PORT_RECEIVE(DataPorts::NO_PORT_ID)
+	PORT_RECEIVE(DataPorts::NO_PORT_ID)
 {
 }
 
@@ -28,7 +28,6 @@ DataObjectDebugLogger * DataObjectDebugLogger::Create(const TerrainDefinition *d
 void DataObjectDebugLogger::InitialiseDataPorts(void)
 {
 	PORT_RECEIVE = RegisterNewPort(DataPorts::PortType::InputPort);
-	PORT_SEND = RegisterNewPort(DataPorts::PortType::OutputPort);
 }
 
 

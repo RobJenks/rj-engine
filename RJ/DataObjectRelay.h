@@ -3,8 +3,8 @@
 #include "DynamicTerrain.h"
 
 
-class DataObjectRelay : public DynamicTerrain
-{
+DYNAMIC_TERRAIN_CLASS(DataObjectRelay)
+//{
 public:
 
 	// Creates the new data-enabled object, including registration of all required data ports

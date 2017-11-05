@@ -3,8 +3,9 @@ class iObject;
 
 // Default constructor
 UsableObject::UsableObject(void)
+	:
+	m_successful_interaction_audio(), m_failed_interaction_audio()
 {
-	
 }
 
 // Event raised when a usable object is used; virtual method to be implemented by subclasses, does nothing if not implemented

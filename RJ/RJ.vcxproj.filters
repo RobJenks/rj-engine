@@ -733,11 +733,14 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Objects\Terrain</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicTerrain.cpp">
-      <Filter>Objects\Data</Filter>
-    </ClCompile>
     <ClCompile Include="UsableObject.cpp">
       <Filter>Objects\Usable</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicTerrain.cpp">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicTerrainClass.cpp">
+      <Filter>Objects\DynamicTerrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1702,11 +1705,17 @@
     <ClInclude Include="TerrainDefinition.h">
       <Filter>Objects\Terrain</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicTerrain.h">
-      <Filter>Objects\Data</Filter>
-    </ClInclude>
     <ClInclude Include="UsableObject.h">
       <Filter>Objects\Usable</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrain.h">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrainClassData.h">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrainClass.h">
+      <Filter>Objects\DynamicTerrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2009,6 +2018,9 @@
     </Filter>
     <Filter Include="Objects\Usable">
       <UniqueIdentifier>{3a8ea482-a7e0-4a3f-8e2c-4a73f5586e83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\DynamicTerrain">
+      <UniqueIdentifier>{b51792a4-6237-41c8-9531-5d2c3b79e8ce}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

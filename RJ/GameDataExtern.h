@@ -23,6 +23,7 @@ class ComplexShipTileDefinition;
 class ComplexShipTileClass;
 class ComplexShipObjectClass;
 class TerrainDefinition;
+class DynamicTerrain;
 class Resource;
 class SpaceTurret;
 class ProjectileLauncher;
@@ -47,7 +48,8 @@ namespace D {
 	extern DataRegister<DynamicTileSet>					DynamicTileSets;			// Details of all dynamic tile sets in the game
 	extern DataRegister<ComplexShipObjectClass>			ComplexShipObjectClasses;	// The details of all object classes in the game
 
-	extern DataRegister<TerrainDefinition>		TerrainDefinitions;	// The details of all static terrain classes in the game
+	extern DataRegister<TerrainDefinition>				TerrainDefinitions;			// The details of all static terrain classes in the game
+	extern DataRegister<DynamicTerrain>					DynamicTerrainDefinitions;	// The details of all dynamic terrain classes in the game
 
 	extern DataRegister<Resource>						Resources;					// The details of each resource in the game
 
@@ -121,6 +123,7 @@ namespace D {
 	extern const char *NODE_ActorBase;
 	extern const char *NODE_Terrain;
 	extern const char *NODE_TerrainDefinition;
+	extern const char *NODE_DynamicTerrainDefinition;
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;
 	extern const char *NODE_ProjectileLauncher;

@@ -1,0 +1,44 @@
+<gamedata>
+
+  <!-- 
+    Name: Data register
+    Description: Stores the values received at each of its input ports in a corresponding register.  Components
+                 with 1 to 10 registers currently defined as concrete component classes
+    Inputs: [1 - 10]
+    Outputs: 0
+  -->
+  
+  <DynamicTerrainDefinition code="DataObjectRegister1" class="DataObjectRegister1" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+  
+  <DynamicTerrainDefinition code="DataObjectRegister2" class="DataObjectRegister2" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister3" class="DataObjectRegister3" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister4" class="DataObjectRegister4" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister5" class="DataObjectRegister5" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister6" class="DataObjectRegister6" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister7" class="DataObjectRegister7" def="tmp_terrain_cone">    
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister8" class="DataObjectRegister8" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister9" class="DataObjectRegister9" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+  <DynamicTerrainDefinition code="DataObjectRegister10" class="DataObjectRegister10" def="tmp_terrain_cone">
+  </DynamicTerrainDefinition>
+
+
+
+
+</gamedata>

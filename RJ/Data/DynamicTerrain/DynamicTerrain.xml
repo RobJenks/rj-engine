@@ -1,0 +1,7 @@
+<gamedata>
+
+  <!-- Include all classes of dynamic terrain object -->
+  <include file="DynamicTerrain\Circuitry\Circuitry.xml" />
+  
+
+</gamedata>

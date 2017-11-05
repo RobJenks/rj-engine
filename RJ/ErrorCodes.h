@@ -663,7 +663,7 @@ namespace ErrorCodes {
 	const Result		CannotCreateInstanceOfInvalidAudioItem			= 6508;
 	const Result		CannotReassignExistingAudioItemResource			= 6509;
 
-	// Data-object related errors										(6800-6999)
+	// Dynamic terrain & data-enabled object errors						(6800-7099)
 	const Result		PortIndexIsNotValid								= 6800;
 	const Result		ObjectHasNoDataEnvironment						= 6801;
 	const Result		PortIDIsNotValid								= 6802;
@@ -672,6 +672,12 @@ namespace ErrorCodes {
 	const Result		DataPortObjectIsNotValid						= 6805;
 	const Result		PortTypesAreIncompatible						= 6806;
 	const Result		CannotDisconnectAnUnconnectedPort				= 6807;
+	const Result		CannotLoadDynamicTerrainDefWithInvalidParams	= 2694;
+	const Result		CannotLoadDynamicTerrainWithoutUniqueCode		= 2695;
+	const Result		CannotLoadDynamicTerrainWithoutClassName		= 2696;
+	const Result		CannotLoadDuplicateDynamicTerrainDefinition		= 2697;
+	const Result		CannotInstantiateDynamicTerrainClass			= 2698;
+
 
 }
 

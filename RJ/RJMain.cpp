@@ -897,9 +897,9 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			Terrain *t1 = Terrain::Create("tmp_terrain_box");
+			Terrain *t1 = DynamicTerrain::Create("DataObjectRegister4");
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
-			Terrain *t2 = DataObjectRelay::Create(D::TerrainDefinitions.Get("tmp_terrain_cone"));
+			Terrain *t2 = DynamicTerrain::Create("DataObjectRelay");
 			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(t1);
 			cs()->AddTerrainObject(t2);
