@@ -1,5 +1,5 @@
 <gamedata>
 
-  <include file="Audio\Effects\Weapons\WeaponSounds.xml" />
+  <include file="Audio\Effects\Weapons\WeaponAudio.xml" />
   
 </gamedata>

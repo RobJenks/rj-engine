@@ -107,7 +107,7 @@ SpaceProjectile *ProjectileLauncher::LaunchProjectile(const FXMVECTOR launchpoin
 			// in an environment, we should be using the AudioManager::ENV_SPACE_VOLUME_MODIFIER modifier in place of 1.0f
 			XMFLOAT3 pos_f;
 			XMStoreFloat3(&pos_f, pos);
-			Game::Engine->GetAudioManager()->Create3DInstance(m_basicprojdef->GetLaunchAudio().AudioId, pos_f, m_basicprojdef->GetLaunchAudio().Volume, 1.0f);
+			Game::Engine->GetAudioManager()->Create3DInstance(m_basicprojdef->GetLaunchAudio(), pos_f, 1.0f);
 		}
 
 		// We do not return a reference to basic projectiles since they are transient

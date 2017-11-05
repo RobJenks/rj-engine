@@ -1836,26 +1836,52 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 	// Assign the unique string code to this prototype
 	terrain->SetCode(code);
 
+	if (code == "DataObjectRelay")
+	{
+		int a = 1;
+	}
+
 	// Object was successfully instantiated; process all remaining data in the definition
-	std::string key, val;
+	std::string key, val; HashVal hash;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child = child->NextSiblingElement())
 	{
 		// All key comparisons are case-insensitive
 		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
 
-		if (key == "property")
+		/* Check each primary proprty of the dynamic terrain class */
+		if (hash == HashedStrings::H_Property)
 		{
 			const char *key = child->Attribute("key");
 			const char *value = child->Attribute("value");
 			if (key && value) terrain->SetProperty(std::string(key), std::string(value));
 		}
 
+		/* Now pass to each direct superclass if we didn't match any field in this class */
+		else if (LoadUsableObjectData(child, hash, static_cast<UsableObject*>(terrain)))				continue;
+
+
 	}
 
 	// Add this prototype definition to the global collection and return success
 	D::DynamicTerrainDefinitions.Store(terrain);
 	return ErrorCodes::NoError;
+}
+
+// Load properties of a usable object
+bool IO::Data::LoadUsableObjectData(TiXmlElement *node, HashVal key, UsableObject *object)
+{
+	if (!node || !object) return false;
+
+	if (key == HashedStrings::H_DefaultSuccessfulInteractionAudio)	object->SetSuccessfulInteractionAudio(LoadAudioParameters(node));
+	else if (key == HashedStrings::H_DefaultFailedInteractionAudio)	object->SetFailedInteractionAudio(LoadAudioParameters(node));
+
+	else
+		return false;
+
+	// If we did not hit the 'else' clause we must have matched one of the other conditions, so return success
+	return true;
 }
 
 // Load a single view portal definition and return it

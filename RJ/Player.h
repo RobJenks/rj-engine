@@ -206,6 +206,10 @@ private:
 	Terrain *									m_view_target_terrain;			// Current terrain object directly along the camera view heading
 	DynamicTerrain *							m_view_target_usable_terrain;	// Current usable terrain object directly along the camera view heading
 
+	// Constant audio parameters for player actions
+	// TODO: Should be loaded as part of player data xml in future
+	static const std::string					AUDIO_INTERACTION_FAIL;
+
 };
 
 

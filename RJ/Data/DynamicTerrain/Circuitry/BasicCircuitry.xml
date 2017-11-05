@@ -7,6 +7,8 @@
     Outputs: 1
   -->
   <DynamicTerrainDefinition code="DataObjectRelay" class="DataObjectRelay" def="tmp_terrain_cone">
+    <DefaultSuccessfulInteractionAudio name="electronic_switch_use" volume="1.0" />
+    <DefaultFailedInteractionAudio name="electronic_switch_fail_to_use" volume="1.0" />
   </DynamicTerrainDefinition>
 
   

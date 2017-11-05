@@ -1,0 +1,6 @@
+<gamedata>
+
+  <!-- Player interaction audio -->
+  <Audio name="player_interact_fail" type="effect" file="Audio\Player\player_interact_fail.wav" volume="1.0" />
+  
+</gamedata>

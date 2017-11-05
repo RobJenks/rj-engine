@@ -1,5 +1,7 @@
 <gamedata>
   
   <include file="Audio\Effects\Effects.xml" />
+  <include file="Audio\Player\PlayerAudio.xml" />
+  <include file="Audio\UsableObjects\UsableObjectAudio.xml" />
   
 </gamedata>

@@ -33,6 +33,8 @@ class CompoundLoadoutMap;
 class Render2DGroup;
 class ProductionCost;
 class Terrain;
+class DynamicTerrain;
+class UsableObject;
 class EffectBase;
 class FireEffect;
 class TileConnections;
@@ -139,6 +141,7 @@ namespace IO { namespace Data {
 	Terrain *LoadTerrain(TiXmlElement *node);
 
 	Result LoadDynamicTerrainDefinition(TiXmlElement *node);
+	bool LoadUsableObjectData(TiXmlElement *node, HashVal key, UsableObject *object);
 
 	ViewPortal LoadViewPortal(TiXmlElement *node);
 

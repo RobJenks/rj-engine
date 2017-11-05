@@ -1,0 +1,7 @@
+<gamedata>
+
+  <!-- Switch components -->
+  <Audio name="electronic_switch_use" type="effect" file="Audio\UsableObjects\electronic_switch_use.wav" volume="2.0" />
+  <Audio name="electronic_switch_fail_to_use" type="effect" file="Audio\UsableObjects\electronic_switch_fail_to_use.wav" volume="2.0" />
+  
+</gamedata>

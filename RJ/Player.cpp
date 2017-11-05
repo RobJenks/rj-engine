@@ -1,6 +1,7 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "CoreEngine.h"
+#include "AudioManager.h"
 #include "GameInput.h"
 #include "Ship.h"
 #include "GameDataExtern.h"
@@ -20,6 +21,9 @@ class ComplexShipElement;
 class ComplexShipSection;
 
 #include "Player.h"
+
+// Initialise static data
+const std::string Player::AUDIO_INTERACTION_FAIL = "player_interact_fail";
 
 
 Player::Player(void)
@@ -716,6 +720,7 @@ void Player::ExecuteOverrideOfPlayerEnvironment(void)
 void Player::AttemptPlayerInteraction(void)
 {
 	bool successful = false;
+	UsableObject *usable_object = NULL;
 
 	iObject *player = Game::CurrentPlayer->GetActivePlayerObject();
 	XMVECTOR player_pos = player->GetPosition();
@@ -725,6 +730,7 @@ void Player::AttemptPlayerInteraction(void)
 	if (target_obj != NULL && 
 		XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(target_obj->GetPosition(), player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
 	{
+		// usable_object = ...
 		Game::Log << LOG_DEBUG << "Usable object interaction not yet implemented\n";
 	}
 	else
@@ -745,21 +751,38 @@ void Player::AttemptPlayerInteraction(void)
 			// Test whether the distance between these points is within the use distance threshold
 			if (XMVector3LessOrEqual(XMVector3LengthSq(XMVectorSubtract(player_pt_local, terrain_pt_local)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
 			{
+				usable_object = static_cast<UsableObject*>(target_terrain);
 				successful = target_terrain->AttemptInteraction(player);
 			}
 		}
 	}
 	
 	// Provide feedback based on whether the interaction was successful
-	if (successful)
+	if (usable_object != NULL)
 	{
-		Game::Log << LOG_INFO << "SUCCESS!\n";
+		// We did interact with some object
+		if (successful)
+		{
+			// We successfully interacted with the object; play default success audio, if it is defined
+			if (usable_object->HasDefinedSuccessfulInteractionAudio())
+			{
+				Game::Engine->GetAudioManager()->CreateInstance(usable_object->GetSuccessfulInteractionAudio(), 1.0f);
+			}
+		}
+		else
+		{
+			// We tried to interact with the object but failed for some reason
+			if (usable_object->HasDefinedFailedInteractionAudio())
+			{
+				Game::Engine->GetAudioManager()->CreateInstance(usable_object->GetFailedInteractionAudio(), 1.0f);
+			}
+		}
 	}
 	else
 	{
-		Game::Log << LOG_INFO << "No effect\n";
+		// We did not interact with any object
+		Game::Engine->GetAudioManager()->CreateInstance(AUDIO_INTERACTION_FAIL, 1.0f, 1.0f);
 	}
-	
 
 }
 

@@ -126,6 +126,7 @@ namespace HashedStrings
 	DefineHash(H_Image, "image");
 	DefineHash(H_Buildable, "buildable");
 	DefineHash(H_AttachPoint, "attachpoint");
+	DefineHash(H_Property, "property");
 	DefineHash(H_Properties, "properties");
 	DefineHash(H_DefaultProperty, "defaultproperty");
 	DefineHash(H_DefaultProperties, "defaultproperties");
@@ -293,6 +294,9 @@ namespace HashedStrings
 	DefineHash(H_ZUp, "zup");
 	DefineHash(H_ZDown, "zdown");
 	DefineHash(H_Volume, "volume");
+	DefineHash(H_DefaultSuccessfulInteractionAudio, "defaultsuccessfulinteractionaudio");
+	DefineHash(H_DefaultFailedInteractionAudio, "defaultfailedinteractionaudio");
+
 }
 
 
