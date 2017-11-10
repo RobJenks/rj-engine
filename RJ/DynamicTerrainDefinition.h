@@ -28,9 +28,20 @@ public:
 	// Assign a new state definition to this terrain 
 	Result									AssignStateDefinition(const DynamicTerrainState & state_definition);
 
+	// Default state for the terrain object (if applicable)
+	CMPINLINE std::string					GetDefaultState(void) const { return m_default_state; }
+	CMPINLINE void							SetDefaultState(const std::string & default_state) { m_default_state = default_state; }
+
 	// Return details for the given state, or NULL if no such state is defined.  Pointer is valid only
 	// at the current time and should not be retained for future use
 	const DynamicTerrainState *				GetStateDefinition(const std::string & state) const;
+
+	// Add a default state transition that can be applied by the object
+	void									AddDefaultStateTransition(const std::string & state, const std::string next_state);
+	
+	// Return the default state transition for an object of this type, given the specified current state.  Returns 
+	// an empty string if no transition is defined (the empty string is not a valid code for a state definition)
+	std::string								GetDefaultStateTransition(const std::string & current_state) const;
 
 	// Explicit shutdown method is not required for definition objects; all deallocation is performed in the destructor
 	CMPINLINE void							Shutdown(void) { }
@@ -48,5 +59,11 @@ protected:
 
 	// Set of states that the dynamic terrain object can be in, with associated changes to the terrain object itself
 	std::unordered_map<std::string, DynamicTerrainState> m_states;
+
+	// Default state associated with the terrain (if applicable)
+	std::string											m_default_state;
+
+	// Set of default state transitions that can be applied by the object
+	std::unordered_map<std::string, std::string>		m_default_state_transitions;
 
 };

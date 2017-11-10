@@ -4,17 +4,17 @@
 // Default constructor
 DynamicTerrainState::DynamicTerrainState(void)
 	:
-	m_state_code(NullString), 
-	m_model_code(NullString), m_sets_model(false)
+	m_state_code(NullString), m_state_id(0), 
+	m_static_terrain_def(NullString), m_sets_static_terrain_def(false)
 {
 }
 
 
 // Assign a model to this state definition
-void DynamicTerrainState::AssignStateModel(const std::string & model)
+void DynamicTerrainState::AssignStateStaticTerrain(const std::string & static_terrain_definition)
 {
-	m_model_code = model;
-	m_sets_model = true;
+	m_static_terrain_def = static_terrain_definition;
+	m_sets_static_terrain_def = true;
 }
 
 

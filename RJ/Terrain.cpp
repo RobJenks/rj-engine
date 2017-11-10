@@ -33,6 +33,13 @@ Terrain::Terrain()
 	m_id = Terrain::GenerateNewUniqueID();
 }
 
+// Sets the terrain definition for this object, updating other relevant fields in the process.  Will attempt to 
+// look up a terrain definition with the given code, but if not found it will proceed with a null (i.e. no
+// model or data) terrain definition
+void Terrain::SetDefinition(const std::string & def)
+{
+	SetDefinition( D::TerrainDefinitions.Get(def) );
+}
 
 // Sets the terrain definition for this object, updating other relevant fields in the process
 void Terrain::SetDefinition(const TerrainDefinition *d)

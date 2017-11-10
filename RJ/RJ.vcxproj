@@ -407,6 +407,7 @@
     <ClCompile Include="DataEnabledEnvironmentObject.cpp" />
     <ClCompile Include="DataObjectDebugLogger.cpp" />
     <ClCompile Include="DataEnabledObject.cpp" />
+    <ClCompile Include="DataObjectSwitch.cpp" />
     <ClCompile Include="DynamicTerrain.cpp" />
     <ClCompile Include="DataInput.cpp" />
     <ClCompile Include="DataObjectRelay.cpp" />
@@ -675,6 +676,7 @@
     <ClInclude Include="DataEnabledEnvironmentObject.h" />
     <ClInclude Include="DataObjectDebugLogger.h" />
     <ClInclude Include="DataEnabledObject.h" />
+    <ClInclude Include="DataObjectSwitch.h" />
     <ClInclude Include="DynamicTerrain.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataObjectRegister.h" />

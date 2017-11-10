@@ -4,7 +4,7 @@
 // Default constructor
 DataObjectDebugLogger::DataObjectDebugLogger(void)
 	:
-	PORT_RECEIVE(DataPorts::NO_PORT_ID)
+	PORT_RECEIVE(DataPorts::NO_PORT_INDEX)
 {
 }
 

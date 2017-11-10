@@ -1872,13 +1872,22 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 				Game::Log << LOG_WARN << "Failed to load dynamic terrain state definition \"" << state.GetStateCode() << "\" [" << result << "]\n";
 			}
 		}
+		else if (hash == HashedStrings::H_DefaultState)
+		{
+			def->SetDefaultState(child->GetText());
+		}
+		else if (hash == HashedStrings::H_DefaultStateTransition)
+		{
+			const char *state = child->Attribute("state");
+			const char *next_state = child->Attribute("next_state");
+			if (state && next_state) def->AddDefaultStateTransition(std::string(state), std::string(next_state));
+		}
 
 		/* Now pass to each direct superclass if we didn't match any field in this class */
 		else if (LoadUsableObjectData(child, hash, static_cast<UsableObject*>(terrain)))				continue;
 
 	}
 
-	
 
 	// Add this dynamic terrain definition to the global collection and return success
 	D::DynamicTerrainDefinitions.Store(def);
@@ -1921,10 +1930,10 @@ Result IO::Data::LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTe
 		key = child->Value(); StrLowerC(key);
 
 		/* Check each primary proprty of the dynamic terrain class */
-		if (key == "model")
+		if (key == "staticterrain")
 		{
 			val = child->GetText();
-			outStateDefinition.AssignStateModel(val);
+			outStateDefinition.AssignStateStaticTerrain(val);
 		}
 	}
 

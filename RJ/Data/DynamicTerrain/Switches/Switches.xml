@@ -1,0 +1,32 @@
+<gamedata>
+  
+  <!-- 
+    Name: Basic electronic switch
+    Description: Digital switch; can be in 'on' (1) or 'off' (0) states; off by default.  Outputs
+                 the ID of its new state when activated
+    States: 2 ["on", "off"]
+    Inputs: 0
+    Outputs: 1
+  -->
+  <DynamicTerrainDefinition code="BasicElectronicSwitch" class="DataObjectSwitch" def="tmp_terrain_cone">
+    <DefaultSuccessfulInteractionAudio name="electronic_switch_use" volume="1.0" />
+    <DefaultFailedInteractionAudio name="electronic_switch_fail_to_use" volume="1.0" />
+
+    <State code="off">
+      <ID>0</ID>
+      <StaticTerrain>tmp_terrain_cone</StaticTerrain>
+    </State>
+
+    <State code="on">
+      <ID>1</ID>
+      <StaticTerrain>tmp_terrain_cube</StaticTerrain>
+    </State>
+
+    <DefaultState>off</DefaultState>
+
+    <DefaultStateTransition state="off" next_state="on" />
+    <DefaultStateTransition state="on" next_state="off" />
+    
+  </DynamicTerrainDefinition>
+
+</gamedata>

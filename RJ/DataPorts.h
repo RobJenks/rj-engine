@@ -21,6 +21,9 @@ public:
 	// Index of a port within the scope of its parent object
 	typedef size_t							PortIndex;
 
+	// Indicates that the object has not yet been assigned a port index within its parent object
+	static const PortIndex					NO_PORT_INDEX = ((PortIndex)0U - (PortIndex)1U);
+
 	// Available port types
 	enum									PortType
 	{

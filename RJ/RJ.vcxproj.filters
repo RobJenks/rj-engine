@@ -724,12 +724,6 @@
     <ClCompile Include="DataPortReference.cpp">
       <Filter>Objects\Data</Filter>
     </ClCompile>
-    <ClCompile Include="DataObjectDebugLogger.cpp">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClCompile>
-    <ClCompile Include="DataObjectRelay.cpp">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClCompile>
     <ClCompile Include="Terrain.cpp">
       <Filter>Objects\Terrain</Filter>
     </ClCompile>
@@ -747,6 +741,15 @@
     </ClCompile>
     <ClCompile Include="DynamicTerrainState.cpp">
       <Filter>Objects\DynamicTerrain</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectRelay.cpp">
+      <Filter>Objects\Data\Objects\Circuitry</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectDebugLogger.cpp">
+      <Filter>Objects\Data\Objects\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="DataObjectSwitch.cpp">
+      <Filter>Objects\Data\Objects\Switches</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1693,18 +1696,6 @@
     <ClInclude Include="DataPortReference.h">
       <Filter>Objects\Data</Filter>
     </ClInclude>
-    <ClInclude Include="DataObjectDebugLogger.h">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="DataObjectRelay.h">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="DataObjectOutput.h">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClInclude>
-    <ClInclude Include="DataObjectRegister.h">
-      <Filter>Objects\Data\Objects</Filter>
-    </ClInclude>
     <ClInclude Include="Terrain.h">
       <Filter>Objects\Terrain</Filter>
     </ClInclude>
@@ -1728,6 +1719,21 @@
     </ClInclude>
     <ClInclude Include="DynamicTerrainState.h">
       <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectOutput.h">
+      <Filter>Objects\Data\Objects\Circuitry</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectRegister.h">
+      <Filter>Objects\Data\Objects\Circuitry</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectRelay.h">
+      <Filter>Objects\Data\Objects\Circuitry</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectDebugLogger.h">
+      <Filter>Objects\Data\Objects\Debug</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectSwitch.h">
+      <Filter>Objects\Data\Objects\Switches</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2033,6 +2039,15 @@
     </Filter>
     <Filter Include="Objects\DynamicTerrain">
       <UniqueIdentifier>{b51792a4-6237-41c8-9531-5d2c3b79e8ce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data\Objects\Circuitry">
+      <UniqueIdentifier>{f19f0d37-1850-46ee-adde-b887e82e3de6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data\Objects\Debug">
+      <UniqueIdentifier>{585e4c13-4a9a-435b-afe5-a15c0d69fda8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data\Objects\Switches">
+      <UniqueIdentifier>{13095842-5c3d-4381-ac86-075a2e96539a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

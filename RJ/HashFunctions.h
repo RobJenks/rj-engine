@@ -266,6 +266,7 @@ namespace HashedStrings
 	DefineHash(H_ElementStateDefinition, "elementstatedefinition");
 	DefineHash(H_State, "state");
 	DefineHash(H_DefaultState, "defaultstate");
+	DefineHash(H_DefaultStateTransition, "defaultstatetransition");
 	DefineHash(H_StateFilter, "statefilter");
 	DefineHash(H_MaxPowerOutput, "maxpoweroutput");
 	DefineHash(H_PowerLevelChangeRate, "powerlevelchangerate");

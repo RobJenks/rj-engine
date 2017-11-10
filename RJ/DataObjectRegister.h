@@ -57,7 +57,7 @@ DataObjectRegister<N>::DataObjectRegister(void)
 {
 	for (unsigned int i = 0U; i < N; ++i)
 	{
-		m_port_indices[i] = DefaultValues<DataPorts::PortIndex>::NullValue();
+		m_port_indices[i] = DataPorts::NO_PORT_INDEX;
 		m_registers[i] = DataPorts::DataType::Zero();
 	}
 }
@@ -111,12 +111,12 @@ void DataObjectRegister<N>::DataReceieved(DataPorts::PortIndex port_index, DataP
 	m_registers[port_index] = data;
 }
 
-// Returns the port index of the given register, or zero if the given register number is invalid
+// Returns the port index of the given register, or NO_PORT_INDEX if the given register number is invalid
 template <unsigned int N>
 DataPorts::PortIndex DataObjectRegister<N>::InputPort(unsigned int register_index) const
 {
 	if (register_index < N) return m_port_indices[register_index];
-	return DefaultValues<DataPorts::PortIndex>::NullValue();
+	return DataPorts::NO_PORT_INDEX;
 }
 
 // Returns the port index for a single-value register only

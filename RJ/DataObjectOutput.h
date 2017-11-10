@@ -50,7 +50,7 @@ DataObjectOutput<N>::DataObjectOutput(void)
 {
 	for (unsigned int i = 0U; i < N; ++i)
 	{
-		m_port_indices[i] = DefaultValues<DataPorts::PortIndex>::NullValue();
+		m_port_indices[i] = DataPorts::NO_PORT_INDEX;
 	}
 }
 

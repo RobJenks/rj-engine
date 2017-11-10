@@ -4,6 +4,7 @@
 #include "DataObjectDebugLogger.h"
 #include "DataObjectRegister.h"
 #include "DataObjectOutput.h"
+#include "DataObjectSwitch.h"
 
 // Macro used to register dynamic terrain classes with this factory class
 #define REGISTER_DYNAMIC_TERRAIN_CLASS(DTClass) \
@@ -46,7 +47,11 @@ DynamicTerrain * DynamicTerrainClass::Create(const char *class_name, const Terra
 	REGISTER_DYNAMIC_TERRAIN_CLASS(DataObjectOutput9);
 	REGISTER_DYNAMIC_TERRAIN_CLASS(DataObjectOutput10);
 
+	// Switch components
+	REGISTER_DYNAMIC_TERRAIN_CLASS(DataObjectSwitch);
 
+
+	// Class could not be found
 	return NULL;
 }
 

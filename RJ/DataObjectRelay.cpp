@@ -3,7 +3,7 @@
 // Default constructor
 DataObjectRelay::DataObjectRelay(void)
 	:
-	PORT_SEND(DataPorts::NO_PORT_ID), PORT_RECEIVE(DataPorts::NO_PORT_ID)
+	PORT_SEND(DataPorts::NO_PORT_INDEX), PORT_RECEIVE(DataPorts::NO_PORT_INDEX)
 {
 }
 

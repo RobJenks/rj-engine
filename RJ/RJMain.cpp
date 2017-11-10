@@ -897,9 +897,9 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			Terrain *t1 = DynamicTerrain::Create("DataObjectRegister4");
+			Terrain *t1 = DynamicTerrain::Create("BasicElectronicSwitch");
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
-			Terrain *t2 = DynamicTerrain::Create("DataObjectRelay");
+			Terrain *t2 = DynamicTerrain::Create("BasicElectronicSwitch");
 			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(t1);
 			cs()->AddTerrainObject(t2);
@@ -2610,4 +2610,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
 

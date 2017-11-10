@@ -4,7 +4,7 @@
 // Default constructor
 DynamicTerrainDefinition::DynamicTerrainDefinition(void)
 	:
-	m_code(NullString), m_prototype(NULL)
+	m_code(NullString), m_prototype(NULL), m_default_state(NullString)
 {
 }
 
@@ -17,7 +17,8 @@ DynamicTerrain * DynamicTerrainDefinition::Create(void) const
 	// Create a new instance based upon our prototype
 	DynamicTerrain *instance = m_prototype->Clone();
 
-	// Apply other post-instantiation changes as required
+	// If the terrain has a default starting state then apply it now
+	instance->ReturnToDefaultState();
 
 	// Return the new instance
 	return instance;
@@ -47,6 +48,33 @@ const DynamicTerrainState * DynamicTerrainDefinition::GetStateDefinition(const s
 	auto it = m_states.find(state);
 	return (it != m_states.end() ? &((*it).second) : NULL);
 }
+
+// Add a default state transition that can be applied by the object
+void DynamicTerrainDefinition::AddDefaultStateTransition(const std::string & state, const std::string next_state)
+{
+	// We record the state transition whether or not we have matching states, since the transitions
+	// may be loaded before the states themselves.  We instead validate when looking up a transition
+	// We should however make sure there are no duplicate transitions defined; every state must have
+	// at most one default transition defined from it
+	if (m_default_state_transitions.find(state) == m_default_state_transitions.end())
+	{
+		m_default_state_transitions[state] = next_state;
+	}
+}
+
+// Return the default state transition for an object of this type, given the specified current state.  Returns 
+// an empty string if no transition is defined (the empty string is not a valid code for a state definition)
+std::string DynamicTerrainDefinition::GetDefaultStateTransition(const std::string & current_state) const
+{
+	// Make sure this is actually a valid state (whether or not we have a transition defined)
+	if (m_states.find(current_state) == m_states.end()) return NullString;
+
+	// Attempt to find a matching transition
+	auto it = m_default_state_transitions.find(current_state);
+	return (it != m_default_state_transitions.end() ? it->second : NullString);
+}
+
+
 
 
 // Default destructor
