@@ -742,6 +742,9 @@
     <ClCompile Include="DynamicTerrainClass.cpp">
       <Filter>Objects\DynamicTerrain</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicTerrainDefinition.cpp">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1715,6 +1718,9 @@
       <Filter>Objects\DynamicTerrain</Filter>
     </ClInclude>
     <ClInclude Include="DynamicTerrainClass.h">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrainDefinition.h">
       <Filter>Objects\DynamicTerrain</Filter>
     </ClInclude>
   </ItemGroup>

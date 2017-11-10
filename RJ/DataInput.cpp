@@ -47,6 +47,7 @@
 #include "Terrain.h"
 #include "TerrainDefinition.h"
 #include "DynamicTerrain.h"
+#include "DynamicTerrainDefinition.h"
 #include "DynamicTerrainClass.h"
 #include "ElementStateDefinition.h"
 #include "CollisionSpatialDataF.h"
@@ -1815,33 +1816,26 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 	if (D::DynamicTerrainDefinitions.Exists(code)) return ErrorCodes::CannotLoadDuplicateDynamicTerrainDefinition;
 
 	// Resolve the provided terrain definition, if applicable
-	const TerrainDefinition *def = NULL;
+	const TerrainDefinition *static_def = NULL;
 	if (c_def != NULL)
 	{
-		def = D::TerrainDefinitions.Get(std::string(c_def));
-		if (def == NULL)
+		static_def = D::TerrainDefinitions.Get(std::string(c_def));
+		if (static_def == NULL)
 		{
 			Game::Log << LOG_WARN << "Could not assign terrain-def \"" << c_def << "\" to dynamic terrain definition object \"" << code << "\"; terrain-def is not valid\n";
 		}
 	}
 
-	// Attempt to instantiate the given class by its string code
-	DynamicTerrain *terrain = DynamicTerrainClass::Create(c_class, def);
+	// Attempt to instantiate an instance of the given class by its string code; this will become the prototype
+	DynamicTerrain *terrain = DynamicTerrainClass::Create(c_class, static_def);
 	if (!terrain)
 	{
 		Game::Log << LOG_ERROR << "Cannot instantiate dynamic terrain definition class \"" << c_class << "\"; not a valid class name\n";
 		return ErrorCodes::CannotInstantiateDynamicTerrainClass;
 	}
 
-	// Assign the unique string code to this prototype
-	terrain->SetCode(code);
-
-	if (code == "DataObjectRelay")
-	{
-		int a = 1;
-	}
-
-	// Object was successfully instantiated; process all remaining data in the definition
+	// Prototype has been successfully instantiated; process all remaining data in the 
+	// node and update the prototype accordingly
 	std::string key, val; HashVal hash;
 	TiXmlElement *child = node->FirstChildElement();
 	for (child; child; child = child->NextSiblingElement())
@@ -1861,11 +1855,18 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 		/* Now pass to each direct superclass if we didn't match any field in this class */
 		else if (LoadUsableObjectData(child, hash, static_cast<UsableObject*>(terrain)))				continue;
 
-
 	}
 
-	// Add this prototype definition to the global collection and return success
-	D::DynamicTerrainDefinitions.Store(terrain);
+	// Create the new definition wrapper object and assign all required data
+	DynamicTerrainDefinition *def = new DynamicTerrainDefinition();
+	def->SetCode(code);
+	def->SetPrototype(terrain);
+
+	// Assign a pointer from the prototype back to its definition, which will be reflected in all new instances
+	terrain->SetDynamicTerrainDefinition(def);
+
+	// Add this dynamic terrain definition to the global collection and return success
+	D::DynamicTerrainDefinitions.Store(def);
 	return ErrorCodes::NoError;
 }
 

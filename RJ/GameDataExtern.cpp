@@ -24,7 +24,7 @@
 #include "BasicProjectileDefinition.h"
 #include "SpaceProjectileDefinition.h"
 #include "TerrainDefinition.h"
-#include "DynamicTerrain.h"
+#include "DynamicTerrainDefinition.h"
 #include "DynamicTileSet.h"
 class ImmediateRegion;
 class SystemRegion;
@@ -45,7 +45,7 @@ namespace D {
 	DataRegister<DynamicTileSet>				DynamicTileSets(false);				// Details of all dynamic tile sets in the game
 	DataRegister<ComplexShipObjectClass>		ComplexShipObjectClasses(false);	// Details of all object classes in the game
 	DataRegister<TerrainDefinition>				TerrainDefinitions(false);			// Details of all static terrain classes in the game
-	DataRegister<DynamicTerrain>				DynamicTerrainDefinitions(false);	// Details of all dynamic terrain classes in the game
+	DataRegister<DynamicTerrainDefinition>		DynamicTerrainDefinitions(false);	// Details of all dynamic terrain classes in the game
 	DataRegister<Resource>						Resources(false);					// Details of all resources in the game
 	DataRegister<SpaceTurret>					Turrets(true);						// Details of all turret types in the game
 	DataRegister<ProjectileLauncher>			ProjectileLaunchers(false);			// Details of all projectile launcher types in the game

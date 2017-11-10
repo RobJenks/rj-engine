@@ -23,7 +23,7 @@ class ComplexShipTileDefinition;
 class ComplexShipTileClass;
 class ComplexShipObjectClass;
 class TerrainDefinition;
-class DynamicTerrain;
+class DynamicTerrainDefinition;
 class Resource;
 class SpaceTurret;
 class ProjectileLauncher;
@@ -49,7 +49,7 @@ namespace D {
 	extern DataRegister<ComplexShipObjectClass>			ComplexShipObjectClasses;	// The details of all object classes in the game
 
 	extern DataRegister<TerrainDefinition>				TerrainDefinitions;			// The details of all static terrain classes in the game
-	extern DataRegister<DynamicTerrain>					DynamicTerrainDefinitions;	// The details of all dynamic terrain classes in the game
+	extern DataRegister<DynamicTerrainDefinition>		DynamicTerrainDefinitions;	// The details of all dynamic terrain classes in the game
 
 	extern DataRegister<Resource>						Resources;					// The details of each resource in the game
 

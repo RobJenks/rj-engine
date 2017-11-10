@@ -2611,5 +2611,3 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-
-

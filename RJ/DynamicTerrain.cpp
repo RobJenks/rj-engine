@@ -1,10 +1,11 @@
+#include "DynamicTerrainDefinition.h"
 #include "DynamicTerrain.h"
 
 
 // Default constructor
 DynamicTerrain::DynamicTerrain(void)
-	:
-	m_dynamic_terrain_code(NullString)
+	: 
+	m_dynamic_terrain_def(NULL)
 {
 	// Enable relevant flags on this terrain object
 	m_isdynamic = true;
@@ -12,10 +13,17 @@ DynamicTerrain::DynamicTerrain(void)
 	m_usable = true;
 }
 
-// Static method to instantiate a new dynamic terrain object based upon its string code
+// Static method to instantiate a new dynamic terrain object based upon its string definition code.  Shortcut
+// to avoid calling through the definition object itself
 DynamicTerrain * DynamicTerrain::Create(const std::string & code)
 {
-	return D::DynamicTerrainDefinitions.Get(code);
+	const DynamicTerrainDefinition *def = D::DynamicTerrainDefinitions.Get(code);
+	if (def != NULL)
+	{
+		return def->Create();
+	}
+
+	return NULL;
 }
 
 
