@@ -1834,6 +1834,14 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 		return ErrorCodes::CannotInstantiateDynamicTerrainClass;
 	}
 
+	// Create the new definition wrapper object and assign all required data
+	DynamicTerrainDefinition *def = new DynamicTerrainDefinition();
+	def->SetCode(code);
+	def->SetPrototype(terrain);
+
+	// Assign a pointer from the prototype back to its definition, which will be reflected in all new instances
+	terrain->SetDynamicTerrainDefinition(def);
+
 	// Prototype has been successfully instantiated; process all remaining data in the 
 	// node and update the prototype accordingly
 	std::string key, val; HashVal hash;
@@ -1851,19 +1859,26 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 			const char *value = child->Attribute("value");
 			if (key && value) terrain->SetProperty(std::string(key), std::string(value));
 		}
+		else if (hash == HashedStrings::H_State)
+		{
+			DynamicTerrainState state;
+			Result result = LoadDynamicTerrainStateDefinition(child, state);
+			if (result == ErrorCodes::NoError)
+			{
+				result = def->AssignStateDefinition(state);
+				if (result != ErrorCodes::NoError) Game::Log << LOG_WARN << "Failed to assign dynamic terrain state definition \"" << state.GetStateCode() << "\" [" << result << "]\n";
+			}
+			else {
+				Game::Log << LOG_WARN << "Failed to load dynamic terrain state definition \"" << state.GetStateCode() << "\" [" << result << "]\n";
+			}
+		}
 
 		/* Now pass to each direct superclass if we didn't match any field in this class */
 		else if (LoadUsableObjectData(child, hash, static_cast<UsableObject*>(terrain)))				continue;
 
 	}
 
-	// Create the new definition wrapper object and assign all required data
-	DynamicTerrainDefinition *def = new DynamicTerrainDefinition();
-	def->SetCode(code);
-	def->SetPrototype(terrain);
-
-	// Assign a pointer from the prototype back to its definition, which will be reflected in all new instances
-	terrain->SetDynamicTerrainDefinition(def);
+	
 
 	// Add this dynamic terrain definition to the global collection and return success
 	D::DynamicTerrainDefinitions.Store(def);
@@ -1883,6 +1898,38 @@ bool IO::Data::LoadUsableObjectData(TiXmlElement *node, HashVal key, UsableObjec
 
 	// If we did not hit the 'else' clause we must have matched one of the other conditions, so return success
 	return true;
+}
+
+Result IO::Data::LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTerrainState & outStateDefinition)
+{
+	// Parameter check
+	if (!node) return ErrorCodes::CannotLoadDynamicTerrainStateDefWithNullData;
+
+	// Attempt to get any parameters of the top-level node
+	const char *c_code = node->Attribute("code");
+	if (!c_code) return ErrorCodes::CannotLoadDynamicTerrainStateDefWithoutKeyData;
+
+	// Assign top-level data
+	outStateDefinition.SetStateCode(std::string(c_code));
+
+	// Now process all remaining data in the node and update the state definition accordingly
+	std::string key, val;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+
+		/* Check each primary proprty of the dynamic terrain class */
+		if (key == "model")
+		{
+			val = child->GetText();
+			outStateDefinition.AssignStateModel(val);
+		}
+	}
+
+	// Return success if we have loaded all data
+	return ErrorCodes::NoError;
 }
 
 // Load a single view portal definition and return it

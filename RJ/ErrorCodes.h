@@ -672,12 +672,15 @@ namespace ErrorCodes {
 	const Result		DataPortObjectIsNotValid						= 6805;
 	const Result		PortTypesAreIncompatible						= 6806;
 	const Result		CannotDisconnectAnUnconnectedPort				= 6807;
-	const Result		CannotLoadDynamicTerrainDefWithInvalidParams	= 2694;
-	const Result		CannotLoadDynamicTerrainWithoutUniqueCode		= 2695;
-	const Result		CannotLoadDynamicTerrainWithoutClassName		= 2696;
-	const Result		CannotLoadDuplicateDynamicTerrainDefinition		= 2697;
-	const Result		CannotInstantiateDynamicTerrainClass			= 2698;
-
+	const Result		CannotLoadDynamicTerrainDefWithInvalidParams	= 6808;
+	const Result		CannotLoadDynamicTerrainWithoutUniqueCode		= 6809;
+	const Result		CannotLoadDynamicTerrainWithoutClassName		= 6810;
+	const Result		CannotLoadDuplicateDynamicTerrainDefinition		= 6811;
+	const Result		CannotInstantiateDynamicTerrainClass			= 6812;
+	const Result		CannotAssignDynamicTerrainStateWithNoCode		= 6813;
+	const Result		CannotAssignDuplicateStateDefToDynamicTerrain	= 6814;
+	const Result		CannotLoadDynamicTerrainStateDefWithNullData	= 6815;
+	const Result		CannotLoadDynamicTerrainStateDefWithoutKeyData	= 6816;
 
 }
 

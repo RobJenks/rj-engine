@@ -34,6 +34,7 @@ class Render2DGroup;
 class ProductionCost;
 class Terrain;
 class DynamicTerrain;
+struct DynamicTerrainState;
 class UsableObject;
 class EffectBase;
 class FireEffect;
@@ -141,6 +142,7 @@ namespace IO { namespace Data {
 	Terrain *LoadTerrain(TiXmlElement *node);
 
 	Result LoadDynamicTerrainDefinition(TiXmlElement *node);
+	Result LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTerrainState & outStateDefinition);
 	bool LoadUsableObjectData(TiXmlElement *node, HashVal key, UsableObject *object);
 
 	ViewPortal LoadViewPortal(TiXmlElement *node);

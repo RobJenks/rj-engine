@@ -23,6 +23,32 @@ DynamicTerrain * DynamicTerrainDefinition::Create(void) const
 	return instance;
 }
 
+// Assign a new state definition to this terrain 
+Result DynamicTerrainDefinition::AssignStateDefinition(const DynamicTerrainState & state_definition)
+{
+	// Validate parameter
+	if (state_definition.GetStateCode().empty()) return ErrorCodes::CannotAssignDynamicTerrainStateWithNoCode;
+
+	// Make sure a definition has not already been provided for this state
+	if (m_states.find(state_definition.GetStateCode()) != m_states.end())
+	{
+		return ErrorCodes::CannotAssignDuplicateStateDefToDynamicTerrain;
+	}
+
+	// Store the new state definition and return success
+	m_states[state_definition.GetStateCode()] = state_definition;
+	return ErrorCodes::NoError;
+}
+
+// Return details for the given state, or NULL if no such state is defined.  Pointer is valid only
+// at the current time and should not be retained for future use
+const DynamicTerrainState * DynamicTerrainDefinition::GetStateDefinition(const std::string & state) const
+{
+	auto it = m_states.find(state);
+	return (it != m_states.end() ? &((*it).second) : NULL);
+}
+
+
 // Default destructor
 DynamicTerrainDefinition::~DynamicTerrainDefinition(void)
 {
