@@ -123,6 +123,7 @@ namespace D {
 	extern const char *NODE_ActorBase;
 	extern const char *NODE_Terrain;
 	extern const char *NODE_TerrainDefinition;
+	extern const char *NODE_DynamicTerrain;
 	extern const char *NODE_DynamicTerrainDefinition;
 	extern const char *NODE_Faction;
 	extern const char *NODE_Turret;

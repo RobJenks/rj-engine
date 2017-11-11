@@ -17,8 +17,6 @@ DynamicTerrain * DynamicTerrainDefinition::Create(void) const
 	// Create a new instance based upon our prototype
 	DynamicTerrain *instance = m_prototype->Clone();
 
-	
-
 	// If the terrain has a default starting state then apply it now
 	instance->ReturnToDefaultState();
 

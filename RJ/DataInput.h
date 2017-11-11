@@ -144,6 +144,7 @@ namespace IO { namespace Data {
 	Result LoadDynamicTerrainDefinition(TiXmlElement *node);
 	Result LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTerrainState & outStateDefinition);
 	bool LoadUsableObjectData(TiXmlElement *node, HashVal key, UsableObject *object);
+	DynamicTerrain *LoadDynamicTerrain(TiXmlElement *node);
 
 	ViewPortal LoadViewPortal(TiXmlElement *node);
 

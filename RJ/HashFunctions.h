@@ -69,7 +69,7 @@ namespace HashedStrings
 	DefineHash(H_ComplexShipTileDefinition, "complexshiptiledefinition");
 	DefineHash(H_ComplexShipTileClass, "complexshiptileclass");
 	DefineHash(H_Terrain, "terrain");
-
+	DefineHash(H_DynamicTerrain, "dynamicterrain");
 	DefineHash(H_Code, "code"); 
 	DefineHash(H_Name, "name");
 	DefineHash(H_Model, "model");
@@ -98,6 +98,7 @@ namespace HashedStrings
 	DefineHash(H_Position, "position");
 	DefineHash(H_Orientation, "orientation");
 	DefineHash(H_Size, "size");
+	DefineHash(H_Extent, "extent");
 	DefineHash(H_DefaultLoadout, "defaultloadout");
 	DefineHash(H_Ship, "ship");
 	DefineHash(H_Class, "class");

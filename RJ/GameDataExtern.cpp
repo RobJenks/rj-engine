@@ -103,6 +103,7 @@ namespace D {
 	const char *NODE_Portal = "portal";
 	const char *NODE_Terrain = "terrain";
 	const char *NODE_TerrainDefinition = "terraindefinition";
+	const char *NODE_DynamicTerrain = "dynamicterrain";
 	const char *NODE_DynamicTerrainDefinition = "dynamicterraindefinition";
 	const char *NODE_Faction = "faction";
 	const char *NODE_Turret = "turret";

@@ -622,6 +622,11 @@ bool IO::Data::LoadSpaceObjectEnvironmentData(TiXmlElement *node, HashVal hash, 
 		Terrain *t = LoadTerrain(node);
 		if (t) object->AddTerrainObject(t);
 	}
+	else if (hash == HashedStrings::H_DynamicTerrain)
+	{
+		DynamicTerrain *t = LoadDynamicTerrain(node);
+		if (t) object->AddTerrainObject(t);
+	}
 
 	/* Now pass to each direct superclass if we didn't match any field in this class */
 	// (No direct superclasses for the element container class)
@@ -1307,13 +1312,18 @@ Result IO::Data::LoadComplexShipTileDefinition(TiXmlElement *node)
 			// Load no further model data
 			modeldataloaded = true;
 		}
-		else if (hash == HashedStrings::H_Terrain) {
-			// An entry for a terrain object which is tied to this tile.  Attempt to load from the node
+		else if (hash == HashedStrings::H_Terrain) 
+		{
+			// An entry for a terrain object which is tied to this tile.  Attempt to load and add to the tile
 			Terrain *t = LoadTerrain(child);
-			if (!t) continue;
+			if (t) tiledef->AddTerrainObject(t);
 
-			// Add to the vector of terrain objects in the tile definition
-			tiledef->AddTerrainObject(t);
+		}
+		else if (hash == HashedStrings::H_DynamicTerrain) 
+		{
+			// An entry for a dynamic terrain object which is tied to this tile.  Attempt to load and add to the tile
+			DynamicTerrain *t = LoadDynamicTerrain(child);
+			if (t) tiledef->AddTerrainObject(t);
 		}
 		else if (hash == HashedStrings::H_ElementStateDefinition) {
 			// NOTE: Definition should be set AFTER the tile element size has been defined, since it is passed
@@ -1798,6 +1808,52 @@ Terrain *IO::Data::LoadTerrain(TiXmlElement *node)
 	return obj;
 }
 
+// Loads a dynamic terrain instance and return it, or null if the object cannot be loaded
+DynamicTerrain * IO::Data::LoadDynamicTerrain(TiXmlElement *node)
+{
+	if (!node) return NULL;
+
+	// Attempt to get any parameters of the top-level node
+	const char *c_def = node->Attribute("definition");		
+	if (!c_def) return NULL; 
+
+	// Attempt to instantiate a new dynamic terrain instance based on this definition code
+	DynamicTerrain *terrain = DynamicTerrain::Create(std::string(c_def));
+	if (!terrain) return NULL;
+
+	// Process all child nodes of this instance definition
+	std::string key, val; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		/* Check each primary proprty of the dynamic terrain class */
+		if (hash == HashedStrings::H_Position)
+		{
+			terrain->SetPosition(IO::GetVector3FromAttr(child));
+		}
+		else if (hash == HashedStrings::H_Orientation)
+		{
+			terrain->SetOrientation(IO::GetVector4FromAttr(child));
+		}
+		else if (hash == HashedStrings::H_Extent)
+		{
+			terrain->SetExtent(IO::GetVector3FromAttr(child));
+		}
+		else if (hash == HashedStrings::H_State)
+		{
+			terrain->SetState(child->GetText());
+		}
+	}
+	
+	// Return the new dynamic terrain object
+	return terrain;
+
+}
+
 // Loads a dynamic terrain definition and stores it in the global collection
 Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 {
@@ -1840,7 +1896,7 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 	def->SetPrototype(terrain);
 
 	// Assign a pointer from the prototype back to its definitions, which will be reflected in all new instances
-	terrain->SetDefinition(static_def);
+	terrain->InitialiseNewTerrain(static_def);
 	terrain->SetDynamicTerrainDefinition(def);
 
 	// Prototype has been successfully instantiated; process all remaining data in the 
