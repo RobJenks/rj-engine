@@ -7,9 +7,12 @@ DYNAMIC_TERRAIN_CLASS(DataObjectSwitch)
 //{
 public:
 
-	// Creates the new data-enabled object, including registration of all required data ports
-	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectSwitch *					Create(const TerrainDefinition *def);
+	// Default constructor
+	DataObjectSwitch(void);
+
+	// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+	// as registering new port assignments; all general data should be retained through clone copy-construction
+	void										InitialiseDynamicTerrain(void);
 
 	// Initialise the data ports required for this object
 	void										InitialiseDataPorts(void);
@@ -28,9 +31,6 @@ public:
 
 
 protected:
-
-	// Default constructor
-	DataObjectSwitch(void);
 
 	// Maintain port indices for convenience
 	DataPorts::PortIndex						PORT_SEND;

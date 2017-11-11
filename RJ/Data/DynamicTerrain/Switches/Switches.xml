@@ -19,7 +19,7 @@
 
     <State code="on">
       <ID>1</ID>
-      <StaticTerrain>tmp_terrain_cube</StaticTerrain>
+      <StaticTerrain>tmp_terrain_cone_alt</StaticTerrain>
     </State>
 
     <DefaultState>off</DefaultState>

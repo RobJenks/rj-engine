@@ -8,20 +8,12 @@ DataObjectDebugLogger::DataObjectDebugLogger(void)
 {
 }
 
-
-// Creates the new data-enabled object, including registration of all required data ports
-// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-DataObjectDebugLogger * DataObjectDebugLogger::Create(const TerrainDefinition *def)
+// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+// as registering new port assignments; all general data should be retained through clone copy-construction
+void DataObjectDebugLogger::InitialiseDynamicTerrain(void)
 {
-	// Create and initialise the underlying terrain object
-	DataObjectDebugLogger *object = new DataObjectDebugLogger();
-	object->InitialiseNewTerrain(def);
-
 	// Initialise the data ports required for this object
-	object->InitialiseDataPorts();
-
-	// Return the new object
-	return object;
+	InitialiseDataPorts();
 }
 
 // Initialise the data ports required for this object
@@ -34,7 +26,7 @@ void DataObjectDebugLogger::InitialiseDataPorts(void)
 // Method invoked when this object receives data through one of its public input ports
 void DataObjectDebugLogger::DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port)
 {
-	Game::Log << LOG_DEBUG << "Data logging object \"" << this << "\" receieved data \"" << data << "\" at port " << port_index << " (received from p-id " << source_port << ")\n";
+	Game::Log << LOG_DEBUG << "Data logging object \"" << this << "\" receieved data \"" << data.str() << "\" at port index " << port_index << " (received from p-id " << source_port << ")\n";
 	
 	if (port_index != PORT_RECEIVE)
 	{

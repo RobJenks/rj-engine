@@ -12,6 +12,6 @@ public:
 
 	// Returns a new instance of the specified dynamic terrain class, or null if the 
 	// given class name is invalid
-	static DynamicTerrain *Create(const char *class_name, const TerrainDefinition *terrain_definition_override);
+	static DynamicTerrain *Create(const char *class_name);
 
 };

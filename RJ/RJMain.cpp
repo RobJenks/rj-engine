@@ -116,6 +116,8 @@
 #include "Weapon.h"							// DBG
 #include "TerrainDefinition.h"				// DBG
 #include "DataObjectRelay.h"				// DBG
+#include "DataObjectSwitch.h"				// DBG
+#include "DataObjectDebugLogger.h"			// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -897,12 +899,16 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			Terrain *t1 = DynamicTerrain::Create("BasicElectronicSwitch");
-			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(5.0f, 3.0f, 7.0f, 0.0f)));
-			Terrain *t2 = DynamicTerrain::Create("BasicElectronicSwitch");
-			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
-			cs()->AddTerrainObject(t1);
-			cs()->AddTerrainObject(t2);
+			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("BasicElectronicSwitch");
+			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
+
+			DataObjectDebugLogger *tlog = (DataObjectDebugLogger*) DynamicTerrain::Create("DataObjectDebugLogger");
+			tlog->SetPosition(XMVectorAdd(centre, XMVectorSet(8.0f, 0.0f, -20.0f, 0.0f)));
+			cs()->AddTerrainObject(static_cast<Terrain*>(tlog));
+
+			Game::Log << LOG_DEBUG << "Connecting ports: " << 
+			t1->ConnectPort(t1->OutputPort(), tlog, tlog->InputPort()) << "\n";
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 		}

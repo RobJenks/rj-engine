@@ -1827,7 +1827,7 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 	}
 
 	// Attempt to instantiate an instance of the given class by its string code; this will become the prototype
-	DynamicTerrain *terrain = DynamicTerrainClass::Create(c_class, static_def);
+	DynamicTerrain *terrain = DynamicTerrainClass::Create(c_class);
 	if (!terrain)
 	{
 		Game::Log << LOG_ERROR << "Cannot instantiate dynamic terrain definition class \"" << c_class << "\"; not a valid class name\n";
@@ -1839,7 +1839,8 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 	def->SetCode(code);
 	def->SetPrototype(terrain);
 
-	// Assign a pointer from the prototype back to its definition, which will be reflected in all new instances
+	// Assign a pointer from the prototype back to its definitions, which will be reflected in all new instances
+	terrain->SetDefinition(static_def);
 	terrain->SetDynamicTerrainDefinition(def);
 
 	// Prototype has been successfully instantiated; process all remaining data in the 
@@ -1930,7 +1931,12 @@ Result IO::Data::LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTe
 		key = child->Value(); StrLowerC(key);
 
 		/* Check each primary proprty of the dynamic terrain class */
-		if (key == "staticterrain")
+		if (key == "id")
+		{
+			int id = atoi(child->GetText());
+			outStateDefinition.SetStateID(id);
+		}
+		else if (key == "staticterrain")
 		{
 			val = child->GetText();
 			outStateDefinition.AssignStateStaticTerrain(val);

@@ -26,12 +26,26 @@ DynamicTerrain * DynamicTerrain::Create(const std::string & code)
 	return NULL;
 }
 
+// Initialise base class properties of a newly-created dynamic terrain object.  Primarily responsible
+// for initialising per-instance data; general data should all be replicated via the clone copy construction
+void DynamicTerrain::InitialiseDynamicTerrainBase(void)
+{
+	// Assign a new unique ID to this object, given that it will otherwise still have the ID of its clone-source
+	SetID(Terrain::GenerateNewUniqueID());
+
+	// Revert the terrain object to its default state, if one if defined
+	ReturnToDefaultState();
+}
+
 // Set the state of this dynamic terrain object
 void DynamicTerrain::SetState(const std::string & state)
 {
 	// Attempt to locate this state; quit immediately if it is not valid
 	const DynamicTerrainDefinition *def = GetDynamicTerrainDefinition();	if (!def) return;
 	const DynamicTerrainState *state_def = def->GetStateDefinition(state);	if (!state_def) return;
+
+	// Store the new state code
+	m_state = state;
 
 	// Apply the effects of this state on the terrain object
 	ApplyState(state_def);

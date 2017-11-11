@@ -7,9 +7,12 @@ DYNAMIC_TERRAIN_CLASS(DataObjectDebugLogger)
 //{
 public:
 
-	// Creates the new data-enabled object, including registration of all required data ports
-	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectDebugLogger *		Create(const TerrainDefinition *def);
+	// Default constructor
+	DataObjectDebugLogger(void);
+
+	// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+	// as registering new port assignments; all general data should be retained through clone copy-construction
+	void								InitialiseDynamicTerrain(void);
 
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);
@@ -19,12 +22,6 @@ public:
 
 	// Return port indices for the object
 	CMPINLINE DataPorts::PortIndex		InputPort(void) const { return PORT_RECEIVE; }
-
-
-protected:
-
-	// Default constructor
-	DataObjectDebugLogger(void);
 
 
 private:

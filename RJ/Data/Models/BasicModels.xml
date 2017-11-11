@@ -16,6 +16,14 @@
     <ActualEffectiveSize y="10.000000"/>
   </Model>
 
+  <Model>
+    <Code>unit_cone_model_alt</Code>
+    <Type>Terrain</Type>
+    <Filename>Models\Misc\unit_cone.rjm</Filename>
+    <Texture>Rendering\grad1.dds</Texture>
+    <ActualEffectiveSize y="10.000000"/>
+  </Model>
+
    <Model>
     <Code>unit_line_model_green</Code>
     <Type>Other</Type>

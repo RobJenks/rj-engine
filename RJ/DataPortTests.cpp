@@ -11,8 +11,9 @@ TestResult DataPortTests::BasicInitialisationTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj0 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj1 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	result.Assert(obj0 != NULL && obj1 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Verify that required ports exist
 	result.AssertEqual(obj0->GetPortCount(), (DataPorts::PortIndex)2U, ERR("Data object was not correctly initialised with two ports"));
@@ -44,8 +45,8 @@ TestResult DataPortTests::BasicTerrainEnvironmentInitialisationTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj0 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj1 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
 	result.Assert(obj0 != NULL && obj1 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
@@ -93,9 +94,9 @@ TestResult DataPortTests::BasicConnectonTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj2 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj0 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj1 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj2 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
 	result.Assert(obj0 != NULL && obj1 != NULL && obj2 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
@@ -164,9 +165,9 @@ TestResult DataPortTests::DataPortEnvironmentInteractionTests()
 	TestResult result = NewResult();
 
 	// Create two data-enabled objects
-	DataObjectRelay *obj0 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj1 = DataObjectRelay::Create(NULL);
-	DataObjectRelay *obj2 = DataObjectRelay::Create(NULL);
+	DataObjectRelay *obj0 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj1 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
+	DataObjectRelay *obj2 = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
 	result.Assert(obj0 != NULL && obj1 != NULL && obj2 != NULL, ERR("Instantiation of test data objects failed"));
 
 	// Create a new data environment and add the objects
@@ -224,9 +225,12 @@ TestResult DataPortTests::BasicDataTransmissionTests()
 	// Create the data-enabled objects
 	static const unsigned int CHAIN_LENGTH = 8U;
 	static_assert(CHAIN_LENGTH > 6U);										// Required for some tests in the sequence below
-	DataObjectRegister4 *registers = DataObjectRegister4::Create(NULL); 
-	DataObjectOutput3 *single_output = DataObjectOutput3::Create(NULL);
-	DataObjectOutput1 *chain_start = DataObjectOutput1::Create(NULL);
+
+	DataObjectRegister4 *registers = (DataObjectRegister4*)DynamicTerrain::Create("DataObjectRegister4");
+	DataObjectOutput3 *single_output = (DataObjectOutput3*)DynamicTerrain::Create("DataObjectOutput3");
+	DataObjectOutput1 *chain_start = (DataObjectOutput1*)DynamicTerrain::Create("DataObjectOutput1");
+	result.Assert(registers != NULL && single_output != NULL && chain_start != NULL, ERR("Instantiation of test data objects failed"));
+
 	DataObjectRelay *relay_chain[8];
 	env->AddTerrainObject(registers);
 	env->AddTerrainObject(single_output);
@@ -235,7 +239,7 @@ TestResult DataPortTests::BasicDataTransmissionTests()
 	// Connnect the relay array in a linear chain
 	for (int i = 0; i < CHAIN_LENGTH; ++i)
 	{
-		relay_chain[i] = DataObjectRelay::Create(NULL);
+		relay_chain[i] = (DataObjectRelay*)DynamicTerrain::Create("DataObjectRelay");
 		env->AddTerrainObject(relay_chain[i]);
 		if (i != 0)
 		{

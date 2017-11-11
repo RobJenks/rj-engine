@@ -16,6 +16,9 @@ public:
 	// Static method to instantiate a new dynamic terrain object based upon its string definition code
 	static DynamicTerrain *						Create(const std::string & code);
 
+	// Initialise base class properties of a newly-created dynamic terrain object.  Primarily responsible
+	// for initialising per-instance data; general data should all be replicated via the clone copy construction
+	void										InitialiseDynamicTerrainBase(void);
 
 	// The dynamic terrain definition associated with this instance
 	CMPINLINE const DynamicTerrainDefinition *	GetDynamicTerrainDefinition(void) const { return m_dynamic_terrain_def; }

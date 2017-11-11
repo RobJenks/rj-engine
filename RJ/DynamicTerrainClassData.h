@@ -1,5 +1,15 @@
 #pragma once
 
+// Clone method for dynamic terrain subclasses
+#define DYNAMIC_TERRAIN_CLONE_METHOD(ClassName) \
+	__forceinline virtual DynamicTerrain * Clone(void) const \
+	{ \
+		ClassName *instance = new ClassName(*this); \
+		instance->InitialiseDynamicTerrainBase(); \
+		instance->InitialiseDynamicTerrain(); \
+		return static_cast<DynamicTerrain*>(instance); \
+	}
+
 // Macro used to define new dynamic terrain types, and register required data at the same time
 #define DYNAMIC_TERRAIN_CLASS(ClassName) \
 \
@@ -7,8 +17,8 @@ class ClassName : public DynamicTerrain \
 { \
 public: \
 \
-	static const char *						DynamicTerrainClassName(void) { return #ClassName; } \
-	__forceinline virtual DynamicTerrain *	Clone(void) const { return static_cast<DynamicTerrain*>(new ClassName(*this)); }
+	static const char *	DynamicTerrainClassName(void) { return #ClassName; } \
+	DYNAMIC_TERRAIN_CLONE_METHOD(ClassName)
 
 
 
@@ -20,8 +30,8 @@ class ClassName : public DynamicTerrain \
 { \
 public: \
 \
-	static const char *						DynamicTerrainClassName(void) { return #ClassName; } \
-	__forceinline virtual DynamicTerrain *	Clone(void) const { return static_cast<DynamicTerrain*>(new ClassName(*this)); }
+	static const char *	DynamicTerrainClassName(void) { return #ClassName; } \
+	DYNAMIC_TERRAIN_CLONE_METHOD(ClassName)
 
 
 
@@ -31,9 +41,8 @@ public: \
 class ClassName : public SuperClass \
 { \
 public: \
-	static const char *						DynamicTerrainClassName(void) { return #ClassName; } \
-	static ClassName *						Create(const TerrainDefinition *def) { return static_cast<ClassName*>(SuperClass::Create(def, new ClassName())); } \
-	__forceinline virtual DynamicTerrain *	Clone(void) const { return static_cast<DynamicTerrain*>(new ClassName(*this)); } \
+	static const char *	DynamicTerrainClassName(void) { return #ClassName; } \
+	DYNAMIC_TERRAIN_CLONE_METHOD(ClassName) \
 };
 
 

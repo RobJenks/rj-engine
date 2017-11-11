@@ -9,13 +9,13 @@
 // Macro used to register dynamic terrain classes with this factory class
 #define REGISTER_DYNAMIC_TERRAIN_CLASS(DTClass) \
 \
-if(strcmp(class_name, DTClass::DynamicTerrainClassName()) == 0) return (DTClass::Create(terrain_definition_override))
+if(strcmp(class_name, DTClass::DynamicTerrainClassName()) == 0) return (new DTClass())
 
 
 
 // Returns a new instance of the specified dynamic terrain class, or null if the 
 // given class name is invalid
-DynamicTerrain * DynamicTerrainClass::Create(const char *class_name, const TerrainDefinition *terrain_definition_override)
+DynamicTerrain * DynamicTerrainClass::Create(const char *class_name)
 {
 	if (class_name == NULL) return NULL;
 

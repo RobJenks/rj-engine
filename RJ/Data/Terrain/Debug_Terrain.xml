@@ -16,4 +16,12 @@
     <maxhealth>100.0</maxhealth>
   </TerrainDefinition>
 
+  <TerrainDefinition>
+    <code>tmp_terrain_cone_alt</code>
+    <model>unit_cone_model_alt</model>
+    <defaultextent x="10.0" y="10.0" z="10.0" />
+    <destructible>false</destructible>
+    <maxhealth>100.0</maxhealth>
+  </TerrainDefinition>
+
 </GameData>

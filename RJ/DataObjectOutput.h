@@ -11,11 +11,13 @@ DYNAMIC_TERRAIN_ABSTRACT_SUPERCLASS(DataObjectOutput)
 
 public:
 
-	// Creates the new data-enabled object, including registration of all required data ports
-	// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-	static DataObjectOutput *			Create(const TerrainDefinition *def);
-	static DataObjectOutput *			Create(const TerrainDefinition *def, DataObjectOutput<N> *instance);
-	
+	// Default constructor
+	DataObjectOutput(void);
+
+	// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+	// as registering new port assignments; all general data should be retained through clone copy-construction
+	void								InitialiseDynamicTerrain(void);
+
 	// Initialise the data ports required for this object
 	void								InitialiseDataPorts(void);
 
@@ -28,12 +30,6 @@ public:
 
 	// Output a value from the commponent through the given output
 	void								SendOutput(unsigned int output_index, DataPorts::DataType value);
-
-
-protected:
-
-	// Default constructor
-	DataObjectOutput(void);
 
 
 private:
@@ -54,35 +50,13 @@ DataObjectOutput<N>::DataObjectOutput(void)
 	}
 }
 
-// Creates the new data-enabled object, including registration of all required data ports
-// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
+// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+// as registering new port assignments; all general data should be retained through clone copy-construction
 template <unsigned int N>
-DataObjectOutput<N> * DataObjectOutput<N>::Create(const TerrainDefinition *def)
+void DataObjectOutput<N>::InitialiseDynamicTerrain(void)
 {
-	return Create(def, NULL);
-}
-
-// Creates the new data-enabled object, including registration of all required data ports
-// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-// This is a version of the Create() method that supports subclassing by other dynamic terrain types; it 
-// will use 'instance' as the new object to be initialised if it is provided, otherwise a new object
-// will be created as normal
-template <unsigned int N>
-DataObjectOutput<N> * DataObjectOutput<N>::Create(const TerrainDefinition *def, DataObjectOutput<N> *instance)
-{
-	// Create the underlying terrain object, if applicable
-	DataObjectOutput *	object = NULL;
-	if (instance)		object = static_cast<DataObjectOutput*>(instance);
-	else				object = new DataObjectOutput();
-
-	// Initialise the new terrain object based on the provided definition
-	object->InitialiseNewTerrain(def);
-
 	// Initialise the data ports required for this object
-	object->InitialiseDataPorts();
-
-	// Return the new object
-	return object;
+	InitialiseDataPorts();
 }
 
 // Initialise the data ports required for this object

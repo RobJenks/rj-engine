@@ -8,19 +8,12 @@ DataObjectRelay::DataObjectRelay(void)
 }
 
 
-// Creates the new data-enabled object, including registration of all required data ports
-// Accepsts a terrain definition for the underlying object, which can be null for an object without any model
-DataObjectRelay * DataObjectRelay::Create(const TerrainDefinition *def)
+// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
+// as registering new port assignments; all general data should be retained through clone copy-construction
+void DataObjectRelay::InitialiseDynamicTerrain(void)
 {
-	// Create and initialise the underlying terrain object
-	DataObjectRelay *object = new DataObjectRelay();
-	object->InitialiseNewTerrain(def);
-
 	// Initialise the data ports required for this object
-	object->InitialiseDataPorts();
-
-	// Return the new object
-	return object;
+	InitialiseDataPorts();
 }
 
 // Initialise the data ports required for this object
