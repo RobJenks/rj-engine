@@ -1735,6 +1735,12 @@
     <ClInclude Include="DataObjectSwitch.h">
       <Filter>Objects\Data\Objects\Switches</Filter>
     </ClInclude>
+    <ClInclude Include="DataObjectInput.h">
+      <Filter>Objects\Data\Objects\Circuitry</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineThrustController.h">
+      <Filter>Objects\Data\Objects\Engines</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2048,6 +2054,9 @@
     </Filter>
     <Filter Include="Objects\Data\Objects\Switches">
       <UniqueIdentifier>{13095842-5c3d-4381-ac86-075a2e96539a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\Data\Objects\Engines">
+      <UniqueIdentifier>{0aaa3089-0f5a-4e5a-8bc6-cb9ff41781eb}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

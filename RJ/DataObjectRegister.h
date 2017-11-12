@@ -6,7 +6,7 @@
 #include "DynamicTerrain.h"
 
 template <unsigned int N>
-DYNAMIC_TERRAIN_ABSTRACT_SUPERCLASS(DataObjectRegister)
+DYNAMIC_TERRAIN_CLASS(DataObjectRegister)
 //{
 	// Acceptable register count
 	static_assert(N <= 10U, "Not a valid data register size");
@@ -112,15 +112,15 @@ DataPorts::DataType DataObjectRegister<N>::GetValue(unsigned int register_index)
 
 
 // Define concrete register types based on the internal register count
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister1, DataObjectRegister<1U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister2, DataObjectRegister<2U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister3, DataObjectRegister<3U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister4, DataObjectRegister<4U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister5, DataObjectRegister<5U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister6, DataObjectRegister<6U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister7, DataObjectRegister<7U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister8, DataObjectRegister<8U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister9, DataObjectRegister<9U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectRegister10, DataObjectRegister<10U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister1, DataObjectRegister<1U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister2, DataObjectRegister<2U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister3, DataObjectRegister<3U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister4, DataObjectRegister<4U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister5, DataObjectRegister<5U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister6, DataObjectRegister<6U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister7, DataObjectRegister<7U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister8, DataObjectRegister<8U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister9, DataObjectRegister<9U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectRegister10, DataObjectRegister<10U>);
 
 

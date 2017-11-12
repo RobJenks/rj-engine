@@ -903,13 +903,24 @@ void RJMain::ProcessKeyboardInput(void)
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
 
-			DataObjectDebugLogger *tlog = (DataObjectDebugLogger*) DynamicTerrain::Create("DataObjectDebugLogger");
+			/*DataObjectDebugLogger *tlog = (DataObjectDebugLogger*) DynamicTerrain::Create("DataObjectDebugLogger");
 			tlog->SetPosition(XMVectorAdd(centre, XMVectorSet(8.0f, 0.0f, -20.0f, 0.0f)));
-			cs()->AddTerrainObject(static_cast<Terrain*>(tlog));
+			cs()->AddTerrainObject(static_cast<Terrain*>(tlog));*/
+
+			DynamicTerrain *target = NULL;
+			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
+			for (auto terrain : cs()->TerrainObjects)
+			{
+				if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
+				{
+					target = terrain->ToDynamicTerrain();
+					break;
+				}
+			}		
 
 			Game::Log << LOG_DEBUG << "Connecting ports: " << 
-			t1->ConnectPort(t1->OutputPort(), tlog, tlog->InputPort()) << "\n";
-
+			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectDebugLogger*)target)->InputPort()) << "\n";
+			
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 		}
 

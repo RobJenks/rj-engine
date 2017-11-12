@@ -676,6 +676,7 @@
     <ClInclude Include="DataEnabledEnvironmentObject.h" />
     <ClInclude Include="DataObjectDebugLogger.h" />
     <ClInclude Include="DataEnabledObject.h" />
+    <ClInclude Include="DataObjectInput.h" />
     <ClInclude Include="DataObjectSwitch.h" />
     <ClInclude Include="DynamicTerrain.h" />
     <ClInclude Include="DataInput.h" />
@@ -699,6 +700,7 @@
     <ClInclude Include="DynamicTerrainDefinition.h" />
     <ClInclude Include="DynamicTerrainState.h" />
     <ClInclude Include="DynamicTileSet.h" />
+    <ClInclude Include="EngineThrustController.h" />
     <ClInclude Include="EnvironmentElementStrengthOverlay.h" />
     <ClInclude Include="EnvironmentHealthOverlay.h" />
     <ClInclude Include="ElementIntersection.h" />

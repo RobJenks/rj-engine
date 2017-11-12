@@ -4,7 +4,7 @@
 
 
 template <unsigned int N>
-DYNAMIC_TERRAIN_ABSTRACT_SUPERCLASS(DataObjectOutput)
+DYNAMIC_TERRAIN_CLASS(DataObjectOutput)
 //{
 	// Acceptable output count
 	static_assert(N <= 10U, "Not a valid data output size");
@@ -78,14 +78,14 @@ void DataObjectOutput<N>::SendOutput(unsigned int output_index, DataPorts::DataT
 
 
 // Define concrete output component types based on total port count
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput1, DataObjectOutput<1U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput2, DataObjectOutput<2U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput3, DataObjectOutput<3U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput4, DataObjectOutput<4U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput5, DataObjectOutput<5U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput6, DataObjectOutput<6U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput7, DataObjectOutput<7U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput8, DataObjectOutput<8U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput9, DataObjectOutput<9U>);
-DYNAMIC_TERRAIN_DERIVED_CLASS(DataObjectOutput10, DataObjectOutput<10U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput1, DataObjectOutput<1U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput2, DataObjectOutput<2U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput3, DataObjectOutput<3U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput4, DataObjectOutput<4U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput5, DataObjectOutput<5U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput6, DataObjectOutput<6U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput7, DataObjectOutput<7U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput8, DataObjectOutput<8U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput9, DataObjectOutput<9U>);
+DYNAMIC_TERRAIN_DERIVED_CLASS_COMPLETE(DataObjectOutput10, DataObjectOutput<10U>);
 

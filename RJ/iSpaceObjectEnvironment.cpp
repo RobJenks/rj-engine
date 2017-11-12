@@ -470,11 +470,7 @@ void iSpaceObjectEnvironment::AddTerrainObjectFromTile(Terrain *obj, ComplexShip
 
 	// Add a reference from the terrain object to its parent tile object
 	obj->SetParentTileID(sourcetile->GetID());
-	if (obj->GetDefinition())
-	{
-		Game::Log << LOG_DEBUG << "Added object " << obj->GetID() << " from tile \"" << sourcetile->GetCode() << "\"\n";
-	}
-
+	
 	// Finally call the main AddTerrainObject method, now that the terrain object has been transformed to environment-space
 	AddTerrainObject(obj);
 }
