@@ -33,6 +33,9 @@ void DynamicTerrain::InitialiseDynamicTerrainBase(void)
 	// Assign a new unique ID to this object, given that it will otherwise still have the ID of its clone-source
 	SetID(Terrain::GenerateNewUniqueID());
 
+	// Revert the parent environment of this object since it is not initially assigned to any parent
+	SetParentEnvironment(NULL);
+
 	// Revert the terrain object to its default state, if one if defined
 	ReturnToDefaultState();
 }

@@ -304,15 +304,39 @@ bool Terrain::AttemptInteraction(iObject *interacting_object)
 // Creates a copy of the terrain object and returns a pointer.  Uses default copy constructor and modifies result
 Terrain * Terrain::Copy(void) const
 {
-	// Create a shallow copy of the object and assign a new unique ID
-	Terrain *t = new Terrain(*this);
-	t->SetID(Terrain::GenerateNewUniqueID());
+	// Take different action depending on whether this is a static or dynamic terrain object
+	Terrain *terrain = NULL; 
+	if (IsDynamic())
+	{
+		// This is a dynamic terrain object, so call the virtual clone constructor to create a new instance
+		const DynamicTerrain *source = this->ToDynamicTerrain();
+		terrain = static_cast<Terrain*>(source->Clone());
+	}
+	else
+	{
+		// This is a static terrain object, so use the base Terrain clone method to construct a new instance
+		terrain = this->Clone();
+	}
+	
+	// Return the new instance (which may be null if the instantiation failed)
+	return terrain;
+}
 
-	// Alter the parent object references, since this object will start off unassigned
-	t->SetParentEnvironment(NULL);
+// Clone method for regular static terrain objects; not applicable for dynamic terrain otherwise dynamic terrain data will be lost
+Terrain * Terrain::Clone(void) const
+{
+	// Debug assert that this is not a dynamic terrain type, otherwise we will end up losing data
+	assert(!IsDynamic());
 
-	// Return the new terrain object
-	return t;
+	// Perform a shallow copy of the terrain object via its copy constructor
+	Terrain *terrain = new Terrain(*this);
+
+	// Assign a new unique ID to the object, and remove its parent pointer since it does not initially belong to any environment
+	terrain->SetID(Terrain::GenerateNewUniqueID());
+	terrain->SetParentEnvironment(NULL);
+
+	// Return the new terrain instance
+	return terrain;
 }
 
 // Event triggered upon destruction of the entity

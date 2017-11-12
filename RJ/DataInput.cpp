@@ -1814,7 +1814,7 @@ DynamicTerrain * IO::Data::LoadDynamicTerrain(TiXmlElement *node)
 	if (!node) return NULL;
 
 	// Attempt to get any parameters of the top-level node
-	const char *c_def = node->Attribute("definition");		
+	const char *c_def = node->Attribute("code");		
 	if (!c_def) return NULL; 
 
 	// Attempt to instantiate a new dynamic terrain instance based on this definition code

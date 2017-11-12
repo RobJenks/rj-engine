@@ -96,6 +96,7 @@ public:
 	// If this is a dynamic terrain object it can be promoted to access greater functionality
 	CMPINLINE bool									IsDynamic(void) const							{ return m_isdynamic; }
 	CMPINLINE DynamicTerrain *						ToDynamicTerrain(void)							{ return (DynamicTerrain*)this; }
+	CMPINLINE const DynamicTerrain *				ToDynamicTerrain(void) const					{ return (const DynamicTerrain*)this; }
 
 	// Indicates whether this terrain object is data-enabled
 	CMPINLINE bool									IsDataEnabled(void) const						{ return m_dataenabled; }
@@ -218,6 +219,9 @@ protected:
 
 	bool									m_postponeupdates;					// Flag indicating whether the terrain object should postpone updates until it is released again
 																				// Used to make multiple adjustments without recalculating derived data each time
+
+																				
+	Terrain *								Clone(void) const;					// Clone method for regular static terrain objects; not applicable for dynamic terrain otherwise dynamic terrain data will be lost
 
 };
 
