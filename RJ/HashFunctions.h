@@ -266,6 +266,7 @@ namespace HashedStrings
 	DefineHash(H_DamageResistanceSet, "damageresistanceset");
 	DefineHash(H_ElementStateDefinition, "elementstatedefinition");
 	DefineHash(H_State, "state");
+	DefineHash(H_StateDefinition, "statedefinition");
 	DefineHash(H_DefaultState, "defaultstate");
 	DefineHash(H_DefaultStateTransition, "defaultstatetransition");
 	DefineHash(H_StateFilter, "statefilter");

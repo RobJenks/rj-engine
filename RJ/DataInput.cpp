@@ -1830,28 +1830,51 @@ DynamicTerrain * IO::Data::LoadDynamicTerrain(TiXmlElement *node)
 		key = child->Value(); StrLowerC(key);
 		hash = HashString(key);
 
-		/* Check each primary proprty of the dynamic terrain class */
-		if (hash == HashedStrings::H_Position)
-		{
-			terrain->SetPosition(IO::GetVector3FromAttr(child));
-		}
-		else if (hash == HashedStrings::H_Orientation)
-		{
-			terrain->SetOrientation(IO::GetVector4FromAttr(child));
-		}
-		else if (hash == HashedStrings::H_Extent)
-		{
-			terrain->SetExtent(IO::GetVector3FromAttr(child));
-		}
-		else if (hash == HashedStrings::H_State)
-		{
-			terrain->SetState(child->GetText());
-		}
+		// Simply pass to the instance data processing method
+		LoadDynamicTerrainInstanceData(child, hash, terrain);
 	}
 	
 	// Return the new dynamic terrain object
 	return terrain;
 
+}
+
+// Attempts to load data for a dynamic terrain instance, and returns a flag indicating whether the 
+// given data items was applicable & loaded for the object
+bool IO::Data::LoadDynamicTerrainInstanceData(TiXmlElement *node, HashVal hash, DynamicTerrain *terrain)
+{
+	// Compare the hash against all DynamicTerrain-related fields
+	if (hash == HashedStrings::H_Position)
+	{
+		terrain->SetPosition(IO::GetVector3FromAttr(node));
+	}
+	else if (hash == HashedStrings::H_Orientation)
+	{
+		terrain->SetOrientation(IO::GetVector4FromAttr(node));
+	}
+	else if (hash == HashedStrings::H_Extent)
+	{
+		terrain->SetExtent(IO::GetVector3FromAttr(node));
+	}
+	else if (hash == HashedStrings::H_State)
+	{
+		terrain->SetState(node->GetText());
+	}
+	else if (hash == HashedStrings::H_Property)
+	{
+		const char *key = node->Attribute("key");
+		const char *value = node->Attribute("value");
+		if (key && value) terrain->SetProperty(std::string(key), std::string(value));
+	}
+
+	// Now pass to each direct superclass if we didn't match any field in this class 
+	else if (LoadUsableObjectData(node, hash, static_cast<UsableObject*>(terrain))) return true;
+
+	// 'Else' case - none of the fields matched this hash, so return false now
+	else return false;
+
+	// If we didn't hit the "else" clause, and return false, we must have matched one of the direct class fields.  So return true here.
+	return true;
 }
 
 // Loads a dynamic terrain definition and stores it in the global collection
@@ -1909,14 +1932,8 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 		key = child->Value(); StrLowerC(key);
 		hash = HashString(key);
 
-		/* Check each primary proprty of the dynamic terrain class */
-		if (hash == HashedStrings::H_Property)
-		{
-			const char *key = child->Attribute("key");
-			const char *value = child->Attribute("value");
-			if (key && value) terrain->SetProperty(std::string(key), std::string(value));
-		}
-		else if (hash == HashedStrings::H_State)
+		/* Check each primary proprty of the dynamic terrain definition class */
+		if (hash == HashedStrings::H_StateDefinition)
 		{
 			DynamicTerrainState state;
 			Result result = LoadDynamicTerrainStateDefinition(child, state);
@@ -1940,8 +1957,8 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 			if (state && next_state) def->AddDefaultStateTransition(std::string(state), std::string(next_state));
 		}
 
-		/* Now pass to each direct superclass if we didn't match any field in this class */
-		else if (LoadUsableObjectData(child, hash, static_cast<UsableObject*>(terrain)))				continue;
+		/* Also check whether this is a property of the prototype instance, and assign it here instead if so */
+		else if (LoadDynamicTerrainInstanceData(child, hash, terrain)) continue;
 
 	}
 

@@ -7,6 +7,7 @@
 		ClassName *instance = new ClassName(*this); \
 		instance->InitialiseDynamicTerrainBase(); \
 		instance->InitialiseDynamicTerrain(); \
+		this->ClonePropertiesToTarget(instance); \
 		return static_cast<DynamicTerrain*>(instance); \
 	}
 

@@ -88,6 +88,31 @@ void DynamicTerrain::ExecuteDefaultStateTransition(void)
 	if (next_state != NullString) SetState(next_state);
 }
 
+// Set a property of this dynamic terrain object
+void DynamicTerrain::SetProperty(const std::string & key, const std::string & value)
+{
+	// Store the property; overwrite any equivalent key if it already exists
+	m_properties[key] = value;
+
+	// Invoke the virtual subclass method, so that derived classes can respond to the new property if required
+	SetDynamicTerrainProperty(key, value);
+}
+
+// Clone the properties of this instance to another, specified instance
+void DynamicTerrain::ClonePropertiesToTarget(DynamicTerrain *target) const 
+{
+	if (!target) return;
+
+	// Clear all properties that may have been shallow-copied into the target during cloning
+	target->ClearDynamicTerrainProperties();
+
+	// Clone each property of the object in turn
+	for (const auto & prop : m_properties)
+	{
+		target->SetProperty(prop.first, prop.second);
+	}
+}
+
 // Event raised when an entity tries to interact with this object
 bool DynamicTerrain::OnUsed(iObject *user)
 {

@@ -118,6 +118,7 @@
 #include "DataObjectRelay.h"				// DBG
 #include "DataObjectSwitch.h"				// DBG
 #include "DataObjectDebugLogger.h"			// DBG
+#include "DataObjectEngineThrustController.h"	// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -917,6 +918,7 @@ void RJMain::ProcessKeyboardInput(void)
 					break;
 				}
 			}		
+			DataObjectEngineThrustController *tc = new DataObjectEngineThrustController();
 
 			Game::Log << LOG_DEBUG << "Connecting ports: " << 
 			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectDebugLogger*)target)->InputPort()) << "\n";

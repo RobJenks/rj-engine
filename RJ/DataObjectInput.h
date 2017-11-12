@@ -29,7 +29,7 @@ public:
 	CMPINLINE DataPorts::PortIndex		InputPort(unsigned int input_index) const { return m_port_indices[input_index]; }
 
 
-private:
+protected:
 
 	// Maintain port indices for convenience
 	DataPorts::PortIndex				m_port_indices[N];

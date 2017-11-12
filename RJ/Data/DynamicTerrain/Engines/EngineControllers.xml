@@ -1,0 +1,17 @@
+<gamedata>
+
+  <!-- 
+    Name: Basic engine thrust controller
+    Description: Controls the target thrust levels of a particular engine hardpoint based on the signals
+                 received.  Can either control absolute or percentage target thrust levels
+    Property: "Engine" - code of the engine hardpoint that this controller is associated with
+    Inputs: 2 [AbsoluteThrustLevel, PercentageThrustLevel]
+    Outputs: 0
+  -->
+  <DynamicTerrainDefinition code="BasicEngineThrustController" class="DataObjectEngineThrustController" def="tmp_terrain_cone">
+
+    <Property key="Engine" value="N/A - set per instance, not in definition" />
+   
+  </DynamicTerrainDefinition>
+
+</gamedata>

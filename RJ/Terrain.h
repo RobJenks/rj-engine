@@ -53,6 +53,7 @@ public:
 	void											SetDefinition(const TerrainDefinition *d);
 	void											SetDefinition(const std::string & def);
 
+	CMPINLINE iSpaceObjectEnvironment *				GetParentEnvironment(void)						{ return m_parent; }
 	CMPINLINE const iSpaceObjectEnvironment *		GetParentEnvironment(void) const				{ return m_parent; }
 	void											SetParentEnvironment(iSpaceObjectEnvironment *env);
 	

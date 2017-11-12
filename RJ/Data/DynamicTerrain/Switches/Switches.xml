@@ -12,15 +12,15 @@
     <DefaultSuccessfulInteractionAudio name="electronic_switch_use" volume="1.0" />
     <DefaultFailedInteractionAudio name="electronic_switch_fail_to_use" volume="1.0" />
 
-    <State code="off">
+    <StateDefinition code="off">
       <ID>0</ID>
       <StaticTerrain>tmp_terrain_cone</StaticTerrain>
-    </State>
+    </StateDefinition>
 
-    <State code="on">
+    <StateDefinition code="on">
       <ID>1</ID>
       <StaticTerrain>tmp_terrain_cone_alt</StaticTerrain>
-    </State>
+    </StateDefinition>
 
     <DefaultState>off</DefaultState>
 

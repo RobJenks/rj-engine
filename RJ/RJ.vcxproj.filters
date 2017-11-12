@@ -751,6 +751,9 @@
     <ClCompile Include="DataObjectSwitch.cpp">
       <Filter>Objects\Data\Objects\Switches</Filter>
     </ClCompile>
+    <ClCompile Include="DataObjectEngineThrustController.cpp">
+      <Filter>Objects\Data\Objects\Engines</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1738,7 +1741,7 @@
     <ClInclude Include="DataObjectInput.h">
       <Filter>Objects\Data\Objects\Circuitry</Filter>
     </ClInclude>
-    <ClInclude Include="EngineThrustController.h">
+    <ClInclude Include="DataObjectEngineThrustController.h">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClInclude>
   </ItemGroup>
