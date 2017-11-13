@@ -76,6 +76,10 @@ protected:
 	// Send data out of a port
 	void									SendData(DataPorts::PortIndex port_index, DataPorts::DataType data);
 
+	// Clears all data from the port data collection, without raising any disconnect events or informing other parties.  Should only
+	// be used where the data is not valid, e.g. where the object has been cloned from another and we need to remove the copy-constructed data
+	void									ClearAllDataPortDataSilently(void);
+
 
 
 protected:

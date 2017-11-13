@@ -1034,10 +1034,16 @@ void ComplexShipTile::RecalculateCompoundModelData(void)
 }
 
 // Determines the code that should be assigned to a hardpoint owned by this tile
-std::string ComplexShipTile::DetermineTileHardpointCode(Hardpoint *hardpoint)
+std::string ComplexShipTile::DetermineTileHardpointCode(Hardpoint *hardpoint) const
 {
 	if (!hardpoint) return NullString;
-	return concat(m_code)("_")(m_id)("_")(hardpoint->Code).str();
+	return DetermineTileHardpointCode(hardpoint->Code);
+}
+
+// Determines the code that should be assigned to a hardpoint owned by this tile
+std::string ComplexShipTile::DetermineTileHardpointCode(const std::string & hardpoint_code) const
+{
+	return concat(m_code)("_")(m_id)("_")(hardpoint_code).str();
 }
 
 // Methods to retrieve and set the definition associated with this tile

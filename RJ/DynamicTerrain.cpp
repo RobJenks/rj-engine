@@ -36,6 +36,11 @@ void DynamicTerrain::InitialiseDynamicTerrainBase(void)
 	// Revert the parent environment of this object since it is not initially assigned to any parent
 	SetParentEnvironment(NULL);
 
+	// Clear all port data since it has been cloned from the source and is not valid within this object.  We do 
+	// so silently since the data is not valid within this object, and we do not want to start raising disconnection
+	// events within the parent environment that could break existing valid connections
+	ClearAllDataPortDataSilently();
+
 	// Revert the terrain object to its default state, if one if defined
 	ReturnToDefaultState();
 }
@@ -98,6 +103,16 @@ void DynamicTerrain::SetProperty(const std::string & key, const std::string & va
 	SetDynamicTerrainProperty(key, value);
 }
 
+// Reapply all properties of this dynamic terrain object
+void DynamicTerrain::ApplyProperties(void)
+{
+	// Reapply each property in turn
+	for (const auto & prop : m_properties)
+	{
+		SetProperty(prop.first, prop.second);
+	}
+}
+
 // Clone the properties of this instance to another, specified instance
 void DynamicTerrain::ClonePropertiesToTarget(DynamicTerrain *target) const 
 {
@@ -112,6 +127,28 @@ void DynamicTerrain::ClonePropertiesToTarget(DynamicTerrain *target) const
 		target->SetProperty(prop.first, prop.second);
 	}
 }
+
+// Clear all properties that have been set on this object
+void DynamicTerrain::ClearDynamicTerrainProperties(void)
+{
+	m_properties.clear();
+}
+
+// Event raised after the dynamic terrain object is added to a new environment
+void DynamicTerrain::AddedToEnvironment(iSpaceObjectEnvironment *environment)
+{
+	// Apply all terrain properties now we have been added to a new context
+	ApplyProperties();
+
+}
+
+// Event raised after the dynamic terrain object is removed from an environment
+void DynamicTerrain::RemovedFromEnvironment(iSpaceObjectEnvironment *environment)
+{
+
+}
+
+
 
 // Event raised when an entity tries to interact with this object
 bool DynamicTerrain::OnUsed(iObject *user)

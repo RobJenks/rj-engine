@@ -11,6 +11,11 @@ public:
 
 	// Default constructor
 	iDataObjectEnvironment(void);
+	
+	// Method to initialise fields back to defaults on a copied object.  Called by all classes in the object hierarchy, from
+	// lowest subclass up to the iObject root level.  Objects are only responsible for initialising fields specifically within
+	// their level of the implementation
+	void									InitialiseCopiedObject(iDataObjectEnvironment *source);
 
 	// Registers a new data-enabled object with this environment
 	void									RegisterDataEnabledObject(DataEnabledObject *object);
@@ -67,5 +72,11 @@ private:
 
 	// Deactivate the data port reference with the given ID
 	void									DeactivateDataPortReference(DataPorts::PortID port_id);
+
+	// Clear all data object data in the environment, without notifying the relevant objects or raising any associated
+	// events.  Clearing the data silently in this way should only be performed in very specific circumstances, for 
+	// example if the object has been cloned from another and contains copy-constructed data that is not valid in the 
+	// object, and could trigger erroneous disconnections in the source environment if events were allowed to fire
+	void									ClearAllDataObjectEnvironmentDataSilently(void);
 
 };

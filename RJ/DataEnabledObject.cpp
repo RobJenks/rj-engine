@@ -178,5 +178,16 @@ void DataEnabledObject::RemoveFromDataEnvironment(void)
 	m_data_environment = NULL;
 }
 
+// Clears all data from the port data collection, without raising any disconnect events or informing other parties.  Should only
+// be used where the data is not valid, e.g. where the object has been cloned from another and we need to remove the copy-constructed data
+void DataEnabledObject::ClearAllDataPortDataSilently(void)
+{
+	// Remove any link to a parent data environment
+	m_data_environment = NULL;
+	
+	// Clear all port data without notifying connected objects or the environment
+	m_dataports.clear();
+	m_dataportcount = 0U;
+}
 
 

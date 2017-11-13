@@ -60,9 +60,13 @@ public:
 	// Attempts to locate a tile that spans the specified location.  Returns the first matching tile found
 	ComplexShipTile *						FindTileAtLocation(const INTVECTOR3 & element_location);
 
-	// Attempts to locate a tile with the specified unique ID
-	ComplexShipTile *						FindTileWithUniqueId(Game::ID_TYPE unique_id);
+	// Return a tile based on its unique ID, or NULL if no such tile exists
+	ComplexShipTile *						FindTileByID(Game::ID_TYPE tile_id);
 
+	// Return a tile based on its unique ID, or NULL if no such tile exists.  Searches only within the subset of 
+	// tiles with the given type, allowing for a more efficient search
+	ComplexShipTile *						FindTileByID(Game::ID_TYPE tile_id, D::TileClass type);
+	
 	// Apply a fade effect to all ship tiles in this environment
 	void									FadeAllTiles(float time, float alpha, bool ignore_pause);
 	CMPINLINE void							FadeAllTiles(float time, float alpha)						{ FadeAllTiles(time, alpha, false); }

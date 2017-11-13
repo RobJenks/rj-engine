@@ -5,9 +5,7 @@ iContainsHardpoints::iContainsHardpoints(void)
 {
 	// Set default values
 
-
 }
-
 
 // Default destructor
 iContainsHardpoints::~iContainsHardpoints(void)

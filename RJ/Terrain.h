@@ -112,6 +112,7 @@ public:
 	// Return or set the link to a parent tile, if one exists.  An ID of zero indicates there is no link
 	CMPINLINE Game::ID_TYPE							GetParentTileID(void) const						{ return m_parenttile; }
 	CMPINLINE void									SetParentTileID(Game::ID_TYPE ID)				{ m_parenttile = ID; }
+	CMPINLINE bool									HasParentTile(void) const						{ return (m_parenttile != 0L); }
 
 	// Return or set types of terrain source
 	CMPINLINE TerrainSourceType						GetSourceType(void) const						{ return m_sourcetype; }

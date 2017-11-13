@@ -59,14 +59,26 @@ ComplexShipTile * iContainsComplexShipTiles::FindTileAtLocation(const INTVECTOR3
 	return NULL;
 }
 
-// Attempts to locate a tile with the specified unique ID
-ComplexShipTile * iContainsComplexShipTiles::FindTileWithUniqueId(Game::ID_TYPE unique_id)
+// Return a tile based on its unique ID, or NULL if no such tile exists
+ComplexShipTile * iContainsComplexShipTiles::FindTileByID(Game::ID_TYPE tile_id)
 {
-	ComplexShipTileCollection::const_iterator it = std::find_if(m_tiles[0].begin(), m_tiles[0].end(),
-		[&unique_id](const AComplexShipTile_P & element) {
-		return (element.value && element.value->GetID() == unique_id); });
+	// Searching with a tile class of 'unknown' will search the full tile collection, as intended
+	return FindTileByID(tile_id, D::TileClass::Unknown);
+}
 
-	return ((it != m_tiles[0].end()) ? (*it).value : NULL);
+// Return a tile based on its unique ID, or NULL if no such tile exists.  Searches only within the subset of 
+// tiles with the given type, allowing for a more efficient search
+ComplexShipTile * iContainsComplexShipTiles::FindTileByID(Game::ID_TYPE tile_id, D::TileClass type)
+{
+	int type_index = (int)type;
+	if (type_index < 0 || type_index >= (int)D::TileClass::_COUNT) return NULL;
+
+	const auto & tiles = m_tiles[type_index];
+	const auto it = std::find_if(tiles.begin(), tiles.end(), [tile_id](const AComplexShipTile_P & element) {
+		return (element.value && element.value->GetID() == tile_id); 
+	});
+
+	return ((it != tiles.end()) ? (*it).value : NULL);
 }
 
 // Links a new ship tile to this object

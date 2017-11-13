@@ -46,8 +46,17 @@ public:
 	// Invoke the default state transition from our current state, if one is defined
 	void											ExecuteDefaultStateTransition(void);
 
+	// Reapply all properties of this dynamic terrain object
+	void											ApplyProperties(void);
+
 	// Clear all properties that have been set on this object
 	void											ClearDynamicTerrainProperties(void);
+
+	// Event raised after the dynamic terrain object is added to a new environment
+	void											AddedToEnvironment(iSpaceObjectEnvironment *environment);
+
+	// Event raised after the dynamic terrain object is removed from an environment
+	void											RemovedFromEnvironment(iSpaceObjectEnvironment *environment);
 
 	// Pure virtual clone method for this object type; automatically implemented for subclasses
 	// by the DYNAMIC_TERRAIN_CLASS macro

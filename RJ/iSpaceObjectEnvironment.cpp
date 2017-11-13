@@ -31,6 +31,7 @@
 #include "Frustum.h"
 #include "PortalRenderingSupport.h"
 #include "DynamicTerrain.h"
+#include "DynamicTerrainDefinition.h"
 #include "DataEnabledEnvironmentObject.h"
 
 #include "iSpaceObjectEnvironment.h"
@@ -85,6 +86,7 @@ void iSpaceObjectEnvironment::InitialiseCopiedObject(iSpaceObjectEnvironment *so
 	// Pass control to all base classes
 	Ship::InitialiseCopiedObject(source);
 	iContainsComplexShipTiles::InitialiseCopiedObject(source);
+	iDataObjectEnvironment::InitialiseCopiedObject(source);
 
 	/* Now perform all iSpaceObjectEnvironment-related initialisation here */
 
@@ -382,7 +384,7 @@ void iSpaceObjectEnvironment::AddTerrainObject(Terrain *obj)
 	if (!obj) return;
 
 	// Make sure the terrain object does not already exist in this environment
-	if (std::find(TerrainObjects.begin(), TerrainObjects.end(), obj) != TerrainObjects.end()) return;
+	if (Collections::Contains(TerrainObjects, obj)) return;
 
 	// Add to the terrain collection, and set the reverse terrain pointer to this environment
 	TerrainObjects.push_back(obj);
@@ -391,8 +393,16 @@ void iSpaceObjectEnvironment::AddTerrainObject(Terrain *obj)
 	// Also add a reference in the spatial partitioning tree
 	if (SpatialPartitioningTree) SpatialPartitioningTree->AddItem<Terrain*>(obj);
 
-	// Integrate this object into the data environment if it is data-enabled
-	if (obj->IsDataEnabled()) RegisterDataEnabledObject(static_cast<DynamicTerrain*>(obj));
+	// Additional actions for dynamic terrain objects
+	if (obj->IsDynamic())
+	{
+		// Raise the post-addition event if this is a dynamic terrain object
+		DynamicTerrain *dynamic_terrain = obj->ToDynamicTerrain();
+		dynamic_terrain->AddedToEnvironment(this);
+
+		// Integrate this object into the data environment if it is data-enabled
+		if (dynamic_terrain->IsDataEnabled()) RegisterDataEnabledObject(dynamic_terrain);
+	}
 }
 
 // Removes a terrain object from the environment.  Optionally takes a second parameter indicating the index of this 
@@ -415,6 +425,9 @@ void iSpaceObjectEnvironment::RemoveTerrainObject(Terrain *obj)
 
 	// Remove this object from the data environment if it is data-enabled
 	if (obj->IsDataEnabled()) UnregisterDataEnabledObject(static_cast<DynamicTerrain*>(obj));
+
+	// Raise the post-removal event if this is a dynamic terrain object
+	if (obj->IsDynamic()) obj->ToDynamicTerrain()->RemovedFromEnvironment(this);
 
 	// Finally, deallocate the terrain object
 	SafeDelete(obj);

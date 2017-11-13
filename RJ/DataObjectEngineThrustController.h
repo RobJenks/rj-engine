@@ -17,6 +17,9 @@ public:
 	// Superclass of this data component
 	typedef DataObjectInput2			SUPERCLASS_T;
 
+	// Default constructor
+	DataObjectEngineThrustController(void);
+
 	// Initialises a new instance after it has been created.  Primarily respsonsible for per-instance data such
 	// as registering new port assignments; all general data should be retained through clone copy-construction
 	void								InitialiseDynamicTerrain(void);
@@ -38,7 +41,14 @@ private:
 	// Properties applicable to this object
 	static const std::string			PROPERTY_ENGINE_HARDPOINT;
 
+	// Linked engine hardpoint that is controlled by this component
+	std::string							m_engine_hardpoint;
+	bool								m_is_linked_to_engine;
+
 	// Assign this controller to an engine hardpoint, based upon its string code
 	void								AssignControllerToEngine(const std::string & hardpoint);
+
+	// Stores the string code of the hardpoint that this controller is associated with, or removes any links if the supplied code is a null string
+	void								SetLinkedHardpointCode(const std::string & engine_hardpoint_code);
 
 };

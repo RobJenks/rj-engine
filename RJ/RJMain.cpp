@@ -918,10 +918,9 @@ void RJMain::ProcessKeyboardInput(void)
 					break;
 				}
 			}		
-			DataObjectEngineThrustController *tc = new DataObjectEngineThrustController();
-
+			
 			Game::Log << LOG_DEBUG << "Connecting ports: " << 
-			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectDebugLogger*)target)->InputPort()) << "\n";
+			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->InputPort(0)) << "\n";
 			
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 		}

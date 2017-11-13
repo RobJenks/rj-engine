@@ -108,5 +108,36 @@ public:
 		collection.erase(begin, end);
 	}
 
+	// 
+	// Test whether a collection contains the given object
+	// 
+	template <template <typename, typename> class TCollection,
+		typename TElement,
+		typename TAllocator = std::allocator<TElement>>
+
+		static bool Contains(const typename TCollection<TElement, TAllocator> & collection, const typename TElement & object)
+	{
+		return (std::find(collection.begin(), collection.end(), object) != collection.end());
+	}
+
+	// 
+	// Test whether a collection contains an element matching the given predicate
+	// 
+	template <template <typename, typename> class TCollection,
+		typename TElement,
+		typename TAllocator = std::allocator<TElement>,
+		typename _Pred>
+
+	static bool Contains(const typename TCollection<TElement, TAllocator> & collection, _Pred pred)
+	{
+		return (std::find_if(collection.begin(), collection.end(), pred) != collection.end());
+	}
+
 
 };
+
+
+
+
+
+

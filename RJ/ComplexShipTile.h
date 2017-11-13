@@ -799,7 +799,8 @@ public:
 	CMPINLINE const std::vector<std::string> &		GetHardpointReferences(void) { return m_hardpoint_refs; }
 
 	// Determines the code that should be assigned to a hardpoint owned by this tile
-	std::string							DetermineTileHardpointCode(Hardpoint *hardpoint);
+	std::string							DetermineTileHardpointCode(Hardpoint *hardpoint) const;
+	std::string							DetermineTileHardpointCode(const std::string & hardpoint_code) const;
 
 	// Return a debug string representation of the tile
 	CMPINLINE std::string				DebugString(void)  const		{ return concat("Tile (ID=")(m_id)(", Type=")(m_code)(")").str(); }

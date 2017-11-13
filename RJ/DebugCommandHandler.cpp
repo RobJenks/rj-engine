@@ -298,7 +298,7 @@ void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameC
 	// Get the target tile ID and attempt to identify it within the environment
 	int id = command.ParameterAsInt(2);
 	iSpaceObjectEnvironment *env = (iSpaceObjectEnvironment*)object;
-	ComplexShipTile *tile = env->FindTileWithUniqueId(id);
+	ComplexShipTile *tile = env->FindTileByID(id);
 	if (!tile) {
 		command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::ObjectDoesNotExist,
 			concat("Failed to execute debug command; no tile with ID ")(id)(" in environment").str().c_str()); return;

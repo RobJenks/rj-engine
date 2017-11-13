@@ -3,7 +3,7 @@
   <!-- Include all classes of dynamic terrain object -->
   <include file="DynamicTerrain\Circuitry\Circuitry.xml" />
   <include file="DynamicTerrain\Switches\Switches.xml" />
-  <include file="Engines\EngineControllers.xml" />
+  <include file="DynamicTerrain\Engines\EngineControllers.xml" />
   
   
 </gamedata>
