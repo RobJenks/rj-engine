@@ -3,6 +3,7 @@
 #include "ComplexShipTile.h"
 #include "Hardpoint.h"
 #include "Hardpoints.h"
+#include "HpEngine.h"
 #include "DataObjectEngineThrustController.h"
 
 // Properties applicable to this object
@@ -25,8 +26,8 @@ void DataObjectEngineThrustController::InitialiseDynamicTerrain(void)
 
 	// Assign input ports to each engine controller function
 	assert(GetPortCount() == 2);
-	PORT_ABSOLUTE_THRUST_INPUT = InputPort(0U);
-	PORT_PERCENTAGE_THRUST_INPUT = InputPort(1U);
+	Ports.PORT_ABSOLUTE_THRUST_INPUT = InputPort(0U);
+	Ports.PORT_PERCENTAGE_THRUST_INPUT = InputPort(1U);
 }
 
 // Set a property of this dynamic terrain object
@@ -70,7 +71,7 @@ void DataObjectEngineThrustController::AssignControllerToEngine(const std::strin
 	}
 
 	// Test whether we were able to locate a hardpoint within the scope of our parent tile
-	if (engine_hardpoint == NullString)
+	if (engine_hardpoint.empty())
 	{
 		// We could not, so attempt to match a hardpoint in the environment based on the 'unqualified' name
 		Hardpoint *hp = environment->GetHardpoints().Get(hardpoint);
@@ -97,4 +98,53 @@ void DataObjectEngineThrustController::DataReceieved(DataPorts::PortIndex port_i
 {
 	Game::Log << LOG_ERROR << "Engine controller received input of [" << data.str() << " / " << data.IntValue() << " / " << data.UIntValue() << " / " << 
 		data.FloatValue() << " / " << data.BoolValue() << "] at port index " << port_index << " from source port " << source_port << "\n";
+
+	if (port_index == Ports.PORT_ABSOLUTE_THRUST_INPUT)
+	{
+		SetEngineAbsoluteThrust(data);
+	}
+	else if (port_index == Ports.PORT_PERCENTAGE_THRUST_INPUT)
+	{
+		SetEnginePercentageThrust(data);
+	}
+
 }
+
+// Attempt to resolve the associated engine hardpoint code to a hardpoint within our environment, or returns NULL if not possible
+HpEngine * DataObjectEngineThrustController::GetEngineHardpoint(void)
+{
+	if (!m_is_linked_to_engine || !m_parent) return NULL;
+
+	Hardpoint *hp = m_parent->GetHardpoints().Get(m_engine_hardpoint);
+	if (hp->GetType() != Equip::Class::Engine) return NULL;
+
+	return (HpEngine*)hp;
+}
+
+// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+void DataObjectEngineThrustController::SetEngineAbsoluteThrust(DataPorts::DataType data)
+{
+	// Attempt to make a connection to our associated engine hardpoint
+	HpEngine *engine = GetEngineHardpoint();
+	if (!engine) return;
+
+	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
+	engine->SetTargetThrust(data.FloatValue());
+	Game::Log << LOG_ERROR << "Absolute thrust value of engine set to " << data.FloatValue() << "\n";
+}
+
+// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+void DataObjectEngineThrustController::SetEnginePercentageThrust(DataPorts::DataType data)
+{
+	// Attempt to make a connection to our associated engine hardpoint
+	HpEngine *engine = GetEngineHardpoint();
+	if (!engine) return;
+
+	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
+	engine->SetTargetThrustPercentage(data.FloatValue());
+	Game::Log << LOG_ERROR << "Percentage thrust value of engine set to " << data.FloatValue() << "\n";
+}
+
+
+
+

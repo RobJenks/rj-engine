@@ -920,7 +920,7 @@ void RJMain::ProcessKeyboardInput(void)
 			}		
 			
 			Game::Log << LOG_DEBUG << "Connecting ports: " << 
-			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->InputPort(0)) << "\n";
+			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
 			
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 		}
@@ -2192,7 +2192,7 @@ void RJMain::__CreateDebugScenario(void)
 		XMVECTOR positions[2] = { XMVectorSet(150, 225, 100, 0), XMVectorSet(950, 200, 120, 0) };
 		XMVECTOR orients[2] = { ID_QUATERNION, XMQuaternionRotationAxis(UP_VECTOR, DegToRad(15.0f)) };
 		bool is_armed[2] = { true, false };
-		bool has_engine_control[2] = { true, true};
+		bool has_engine_control[2] = { false, false };
 		int create_count = 1; // 2
 
 		css[0] = NULL; css[1] = NULL;
@@ -2208,8 +2208,8 @@ void RJMain::__CreateDebugScenario(void)
 			css[c]->SetFaction(factions[c]);
 			css[c]->SetShipEngineControl(has_engine_control[c]);
 
-			//Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
-			//css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng);
+			Engine *eng = (Engine*)D::Equipment.Get("FRIGATE_HEAVY_ION_ENGINE1");
+			css[c]->GetHardpoints().GetHardpointsOfType(Equip::Class::Engine).at(0)->MountEquipment(eng->Clone());
 
 			if (is_armed[c])
 			{

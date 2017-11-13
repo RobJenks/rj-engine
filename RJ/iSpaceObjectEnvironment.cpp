@@ -546,12 +546,12 @@ void iSpaceObjectEnvironment::AddTile(ComplexShipTile **ppTile)
 
 	// Add to the tile collection
 	AddShipTile(tile_obj);
-	
-	// Add any terrain objects that come with this tile
-	AddTerrainObjectsFromTile(tile_obj);
 
 	// Add any hardpoints that come with this tile
 	InstantiateHardpointsFromTile(tile_obj);
+
+	// Add any terrain objects that come with this tile
+	AddTerrainObjectsFromTile(tile_obj);
 
 	// Raise the post-addition event
 	TileAdded(tile_obj);

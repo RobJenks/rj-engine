@@ -2,6 +2,7 @@
 
 #include "DynamicTerrain.h"
 #include "DataObjectInput.h"
+class HpEngine;
 
 
 /*
@@ -31,12 +32,28 @@ public:
 	// Component will respond by attempting to set the thrust levels of its associated engine hardpoint to the specified value
 	void								DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port);
 
+	// Attempt to resolve the associated engine hardpoint code to a hardpoint within our environment, or returns NULL if not possible
+	HpEngine *							GetEngineHardpoint(void);
+
+	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+	void								SetEngineAbsoluteThrust(DataPorts::DataType data);
+
+	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+	void								SetEnginePercentageThrust(DataPorts::DataType data);
+
+	// Ports exposed by this controller
+	struct
+	{
+		DataPorts::PortIndex			PORT_ABSOLUTE_THRUST_INPUT = DataPorts::NO_PORT_INDEX;
+		DataPorts::PortIndex			PORT_PERCENTAGE_THRUST_INPUT = DataPorts::NO_PORT_INDEX; 
+	
+		DataPorts::PortIndex			AbsoluteThrustTargetInput(void) const { return PORT_ABSOLUTE_THRUST_INPUT; }
+		DataPorts::PortIndex			PercentageThrustTargetInput(void) const { return PORT_PERCENTAGE_THRUST_INPUT; }
+
+	} Ports;
+
 
 private:
-
-	// Store port indices for convenience
-	DataPorts::PortIndex				PORT_ABSOLUTE_THRUST_INPUT = DataPorts::NO_PORT_INDEX;
-	DataPorts::PortIndex				PORT_PERCENTAGE_THRUST_INPUT = DataPorts::NO_PORT_INDEX;
 
 	// Properties applicable to this object
 	static const std::string			PROPERTY_ENGINE_HARDPOINT;

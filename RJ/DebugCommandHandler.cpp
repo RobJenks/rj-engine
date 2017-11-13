@@ -124,6 +124,14 @@ bool DebugCommandHandler::ProcessConsoleCommand(GameConsoleCommand & command)
 		return true;
 	}
 
+	/* Return the player to their ship */
+	else if (command.InputCommand == "return_to_ship")
+	{
+		Game::CurrentPlayer->ReturnToShip();
+		command.SetSuccessOutput("Returning to player ship");
+		return true;
+	}
+
 	/* Spawn the specified ships at the player location */
 	else if (command.InputCommand == "spawn_ships")
 	{
