@@ -95,5 +95,6 @@ void DataObjectEngineThrustController::SetLinkedHardpointCode(const std::string 
 // Component will respond by attempting to set the thrust levels of its associated engine hardpoint to the specified value
 void DataObjectEngineThrustController::DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port)
 {
-	Game::Log << LOG_ERROR << "Engine controller received input of " << data.IntValue << " at port index " << port_index << " from source port " << source_port << "\n";
+	Game::Log << LOG_ERROR << "Engine controller received input of [" << data.str() << " / " << data.IntValue() << " / " << data.UIntValue() << " / " << 
+		data.FloatValue() << " / " << data.BoolValue() << "] at port index " << port_index << " from source port " << source_port << "\n";
 }

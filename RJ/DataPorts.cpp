@@ -12,7 +12,7 @@ bool DataPorts::PortTypesAreCompatible(PortType port0, PortType port1)
 std::string DataPorts::DataType::str(void) const
 {
 	std::ostringstream ss;
-	ss << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw((sizeof(IntValue) / 4) * 8) << static_cast<int>(IntValue) << std::nouppercase << std::dec;
+	ss << std::fixed << std::setprecision(6) << Data;
 	return ss.str();
 }
 

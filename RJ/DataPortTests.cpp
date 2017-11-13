@@ -274,12 +274,12 @@ TestResult DataPortTests::BasicDataTransmissionTests()
 	single_output->SendOutput(SINGLE_OUTPUT, 12.0f);			// Connected output - this value should be transmitted
 	single_output->SendOutput(SINGLE_OUTPUT + 1U, 24.0f);		// Disconnected output
 	single_output->SendOutput(SINGLE_OUTPUT + 2U, 48.0f);		// Non-existent output
-	result.AssertEqual(registers->GetValue(SINGLE_INPUT).FloatValue, 12.0f, ERR("Correct value not tranmitted to and stored in data register"));
+	result.AssertEqual(registers->GetValue(SINGLE_INPUT).FloatValue(), 12.0f, ERR("Correct value not tranmitted to and stored in data register"));
 
 	// Send a value through the relay chain and make sure is transmitted all the way to the destination register
 	result.AssertEqual(registers->GetValue(CHAIN_INPUT), DataPorts::DataType::Zero(), ERR("Chain relay register input not correctly initialised on creation"));
 	chain_start->SendOutput(CHAIN_OUTPUT, 1024.0f);
-	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue, 1024.0f, ERR("Value not transmitted correctly through relay chain to destination register"));
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue(), 1024.0f, ERR("Value not transmitted correctly through relay chain to destination register"));
 
 	// Break two links in the relay chain and make sure that data is no longer transmitted
 	unsigned int break_start = (CHAIN_LENGTH / 2);
@@ -288,19 +288,19 @@ TestResult DataPortTests::BasicDataTransmissionTests()
 	res = relay_chain[break_start + 1U]->DisconnectPort(relay_chain[break_start + 1U]->OutputPort());
 	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to break relay chain at output point"));
 	chain_start->SendOutput(CHAIN_OUTPUT, 2048.0f);
-	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue, 1024.0f, ERR("Data incorrectly transmitted across disconnected relay chain"));
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue(), 1024.0f, ERR("Data incorrectly transmitted across disconnected relay chain"));
 
 	// Reconnect the broken ends of the relay, skipping relay[break_start + 1U], and make sure it can once again transmit data
 	res = relay_chain[break_start + 0U]->ConnectPort(relay_chain[break_start + 0U]->OutputPort(), relay_chain[break_start + 2U], relay_chain[break_start + 2U]->InputPort());
 	result.AssertEqual(res, ErrorCodes::NoError, ERR("Failed to reconnect relay chain at (break+0 -> break+2)"));
 	chain_start->SendOutput(CHAIN_OUTPUT, 4096.0f);
-	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue, 4096.0f, ERR("Value not transmitted correctly through re-connected relay chain to destination register"));
+	result.AssertEqual(registers->GetValue(CHAIN_INPUT).FloatValue(), 4096.0f, ERR("Value not transmitted correctly through re-connected relay chain to destination register"));
 
 	// Verify final state of unused data registers was not affected by any of the above activity
 	Game::Log << LOG_INFO << "Data transmission test results\n";
 	for (unsigned int i = 0U; i < 4U; ++i)
 	{
-		Game::Log << LOG_INFO << "   Final value of register " << i << ": " << registers->GetValue(i).str() << " (" << registers->GetValue(i).FloatValue << ")\n";
+		Game::Log << LOG_INFO << "   Final value of register " << i << ": " << registers->GetValue(i).str() << " (" << registers->GetValue(i).FloatValue() << ")\n";
 		if (i != SINGLE_INPUT && i != CHAIN_INPUT)
 		{
 			result.AssertEqual(registers->GetValue(i), DataPorts::DataType::Zero(), ERR("Unused data register was impacted by data transfer to other registers"));
