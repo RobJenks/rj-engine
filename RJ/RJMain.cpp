@@ -2517,110 +2517,15 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-		/*static XMFLOAT2 extent = XMFLOAT2(100.0f, 100.0f);
-		if (Game::Keyboard.GetKey(DIK_F)) extent.x += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
-		if (Game::Keyboard.GetKey(DIK_G)) extent.y += ((Game::Keyboard.GetKey(DIK_LCONTROL) ? -10.0f : +10.0f) * Game::TimeFactor);
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s", (Game::Keyboard.KeyHeld(DIK_E) ? "HELD" : "-"));
 
-		XMVECTOR viewpos = ss()->GetPosition();
-		XMVECTOR portal_bl = XMVectorSet(-extent.x, -extent.x, 400, 0);
-		XMVECTOR portal_tl = XMVectorSet(-extent.x, +extent.y, 400, 0);
-		XMVECTOR portal_tr = XMVectorSet(+extent.x, +extent.y, 400, 0);
-		XMVECTOR portal_br = XMVectorSet(+extent.x, -extent.y, 400, 0);
+		std::string msg = ((Game::Keyboard.KeyFirstUp(DIK_E) ? "First up" : (Game::Keyboard.KeyFirstDown(DIK_E) ? "First down" : (Game::Keyboard.GetKey(DIK_E) ? "" : ""))));
+		if (!msg.empty()) {
+			OutputDebugString(msg.c_str());
+			OutputDebugString("\n");
+		}
+
 			
-		ViewPortal portal = ViewPortal(portal_bl, portal_tl, portal_tr, portal_br);
-
-		Game::Engine->GetCamera()->ActivateDebugCamera();
-		Game::Engine->GetCamera()->SetDebugCameraPosition(ss()->GetPosition());
-		Frustum *f = Game::Engine->CreateClippedFrustum(viewpos, *(static_cast<Frustum*>(Game::Engine->GetViewFrustrum())), portal, ss()->GetWorldMatrix());
-		Game::Engine->GetCamera()->DeactivateDebugCamera();
-
-		XMVECTOR p0 = XMVector3TransformCoord(XMVectorSet(-extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BL
-		XMVECTOR p1 = XMVector3TransformCoord(XMVectorSet(-extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TL
-		XMVECTOR p2 = XMVector3TransformCoord(XMVectorSet(+extent.x, +extent.y, 400, 0), ss()->GetWorldMatrix());	// TR
-		XMVECTOR p3 = XMVector3TransformCoord(XMVectorSet(+extent.x, -extent.y, 400, 0), ss()->GetWorldMatrix());	// BR
-		XMVECTOR p[4] = { p0, p1, p2, p3 };
-		Frustum *manual = new Frustum(4U, Game::Engine->GetViewFrustrum()->GetNearPlane(), Game::Engine->GetViewFrustrum()->GetFarPlane());
-		for (size_t i = 0U; i < 4U; ++i)	// v/tr/tl   v/br/tr   v/bl/br   v/tl/bl
-		{
-			manual->SetPlane(Frustum::FIRST_SIDE + i, viewpos, p[((i + 1) % 4)], p[i]);
-		}
-		
-		if (Game::Keyboard.GetKey(DIK_LSHIFT)) std::swap(f, manual);
-
-		s2()->Highlight.SetColour(XMFLOAT4(0.0f, 1.0f, 0.0f, 0.0f));
-		s2()->Highlight.Activate();
-		XMVECTOR obj = s2()->GetPosition();
-		float radius = s2()->GetCollisionSphereRadius();
-
-		bool intersects = f->CheckSphere(obj, radius);
-		OverlayRenderer::RenderColour colour = (intersects ? OverlayRenderer::RenderColour::RC_Green : OverlayRenderer::RenderColour::RC_Red);
-
-		for (size_t i = 0U; i < 4U; ++i)
-		{
-		//	Game::Engine->GetOverlayRenderer()->RenderLine(viewpos, p[i], colour, 1.0f, -1.0f);
-		//	Game::Engine->GetOverlayRenderer()->RenderLine(p[i], p[((i + 1) % 4)], colour, 1.0f, -1.0f);
-
-			XMVECTOR p0 = XMVectorSetW(XMVectorMultiply(f->GetPlane(Frustum::FIRST_SIDE + i), XMVectorReplicate(-100.0f)), 1.0f);
-			XMVECTOR p1 = XMVectorSetW(XMVectorMultiply(f->GetPlane(Frustum::FIRST_SIDE + i), XMVectorReplicate(+100.0f)), 1.0f);
-			Game::Engine->GetOverlayRenderer()->RenderLine(XMVector3TransformCoord(p0, ss()->GetWorldMatrix()), XMVector3TransformCoord(p1, ss()->GetWorldMatrix()), colour, 1.0f, -1.0f);
-		}
-
-		std::string result = (intersects ? "INTERSECTS: " : "No intersection: ");
-		for (size_t i = 0U; i < f->GetPlaneCount(); ++i)
-		{
-			XMVECTOR plane_val = XMPlaneDotCoord(f->GetPlanes()[i], obj);
-			bool outside_plane = (XMVector2Less(plane_val, XMVectorReplicate(-radius)));
-			float rounded_val = ((int)(XMVectorGetX(plane_val) * 10)) * 0.1f;
-
-			result = concat(result)(outside_plane ? "OUT (" : "IN (")(rounded_val)(") ").str();
-		}
-
-		float spacing = 20.0f;
-		float node_size = 5.0f;
-		float node_radius = sqrtf(3.0f * pow(node_size * 0.5f, 2.0f)); // sqrt((n/2)^2 + (n/2)^2 + (n/2)^2)
-		int total = 0, success = 0;
-		for (int x = -5; x <= 5; ++x)
-		{
-			for (int y = -5; y <= 5; ++y)
-			{
-				for (int z = -5; z <= 5; ++z)
-				{
-					if (x == 0 && y == 0 && z == 0) continue;
-
-					XMVECTOR pos = XMVectorAdd(ss()->GetPosition(), XMVectorSet(x * spacing, y * spacing, z * spacing, 1.0f));
-					bool cell_result = f->CheckSphere(pos, node_radius);
-					
-					++total;
-					if (cell_result) ++success;
-
-					if (true) Game::Engine->GetOverlayRenderer()->RenderCuboid(XMMatrixTranslationFromVector(pos), node_size, node_size, node_size, 
-						(cell_result ? XMFLOAT4(0,1,0,1) : XMFLOAT4(1, 0, 0, 1)));
-				}
-			}
-		}
-		SafeDelete(f);
-		SafeDelete(manual);
-		*/
-		XMVECTOR pos = XMVectorReplicate(-1.0f);
-		for (const auto *t : cs()->TerrainObjects)
-		{
-			if (t->GetDefinition() && t->GetDefinition()->GetCode() == "tmp_terrain_cone")
-			{
-				pos = t->GetEnvironmentPosition();
-				break;
-			}
-		}
-
-		Terrain *selected = Game::CurrentPlayer->GetMouseSelectedTerrain();
-		std::vector<Terrain*> visible_terrain;
-		cs()->DetermineVisibleTerrain(visible_terrain);
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Selected: \"%s\" (%d) | Total: %d | Visible: %d | Cone: %s",
-			(!selected ? "<null>" : (!selected->GetDefinition() ? "<no-def>" : selected->GetDefinition()->GetCode().c_str())),
-			(!selected ? -1 : selected->GetID()),
-			(int)cs()->TerrainObjects.size(),
-			(int)visible_terrain.size(), 
-			Vector3ToString(pos).c_str()
-		);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
@@ -2629,7 +2534,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 }
 
-/*** (DONE) ALLOW DYNAMIC TERRAIN TO BE LOADED INTO TILE DEFS (DATAINPUT.CPP:1310) AND ADDED TO PARENT ENVIRONMENT (ISPACEOBJECTENVIRONMENT.CPP:642) AS WITH STATIC TERRAIN ***
- *** USE THIS TO ASSIGN A DATA OBJECT TO E.G. THE ENGINE ROOM TILE AND HAVE THE ENGINE ROOM CONTROL THE ENGINES IN RESPONSE TO IT ***/
-
-
+/*** ENGINE THRUST CONTROLLERS ARE WORKING CORRECTLY.  NOW IMPLEMENT EITHER 
+		'LEVER' TYPE SWITCH THAT CAN OUTPUT SOME VALUE IN THE RANGE [0.0 1.0] BASED ON HOW THE PLAYER IS INTERACTING -> EVENTUALLY, WOULD NEED TO USE ARTICULATEDMODEL
+		'SCREEN' COMPONENT THAT DISPLAYS RECEIVED DATA -> WOULD REQUIRE UPDATE TO TEXT RENDERING, PROBABLY REPLACEMENT, PROBABLY A LOT MORE WORK
+***/

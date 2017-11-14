@@ -44,7 +44,11 @@ public:
 
     BOOL Initialise( LPDIRECTINPUT8 pDI, HWND hWnd, DIRECTINPUTTYPE type );
     void Release();
+
     void Read();
+	void ReadMouseData(void);
+	void ReadKeyboardData(void);
+
 	CMPINLINE BOOL GetKey(DWORD key) { return m_pressedKeys[key]; }
     void LockKey(DWORD key);
 	void ConsumeKey(DWORD key);
@@ -67,7 +71,14 @@ public:
 	CMPINLINE const BasicRay &		GetWorldSpaceMouseBasicRay(void) const		{ return m_mouse_world_basicray; }
 	CMPINLINE const Ray &			GetWorldSpaceMouseRay(void) const			{ return m_mouse_world_ray; }
 	
-	CMPINLINE BOOL* GetKeys() { return m_pressedKeys; }
+	CMPINLINE BOOL * GetKeys() { return m_pressedKeys; }
+
+	CMPINLINE bool KeyFirstUp(DWORD key) { return m_keyfirstup[key]; }
+	CMPINLINE bool KeyFirstDown(DWORD key) { return m_keyfirstdown[key]; }
+	CMPINLINE BOOL * GetKeyFirstUpData(void) { return m_keyfirstup; }
+	CMPINLINE BOOL * GetKeyFirstDownData(void) { return m_keyfirstdown; }
+
+	CMPINLINE bool KeyHeld(DWORD key) { return (m_pressedKeys[key] || m_keyLock[key]); }
 	
 	CMPINLINE BOOL* GetButtons() { return m_pressedButtons; }
 	CMPINLINE bool LMB() { return (m_pressedButtons[0] == TRUE); }
@@ -103,6 +114,8 @@ private:
     char                  m_keyboardState[256];
     BOOL                  m_pressedKeys[256];
     BOOL                  m_keyLock[256];
+	BOOL				  m_keyfirstup[256];
+	BOOL				  m_keyfirstdown[256];
 	BOOL                  m_pressedButtons[4];			// Mouse buttons that are currently pressed
     long                  m_x, m_y;						// Cursor position	
 	long				  m_xdelta, m_ydelta, m_zdelta;	// Delta mouse movement this cycle
