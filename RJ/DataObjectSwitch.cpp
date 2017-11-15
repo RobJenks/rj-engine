@@ -31,7 +31,7 @@ void DataObjectSwitch::InitialiseDataPorts(void)
 }
 
 // Method invoked when this switch is used by an entity
-bool DataObjectSwitch::OnUsed(iObject *user)
+bool DataObjectSwitch::OnUsed(iObject *user, PlayerInteractionType interaction_type)
 {
 	// Activate the switch and return success
 	ActivateSwitch();

@@ -16,6 +16,7 @@
 #include "ArticulatedModel.h"
 #include "Modifiers.h"
 #include "ModifierDetails.h"
+#include "PlayerInteractionType.h"
 
 #include "Hardpoint.h"
 #include "Hardpoints.h"
@@ -1955,6 +1956,10 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 			const char *state = child->Attribute("state");
 			const char *next_state = child->Attribute("next_state");
 			if (state && next_state) def->AddDefaultStateTransition(std::string(state), std::string(next_state));
+		}
+		else if (hash == HashedStrings::H_PermittedInteractionType)
+		{
+			def->SetPermittedInteractionType(TranslatePlayerInteractionTypeFromString(child->GetText()));
 		}
 
 		/* Also check whether this is a property of the prototype instance, and assign it here instead if so */

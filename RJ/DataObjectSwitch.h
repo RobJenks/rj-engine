@@ -20,9 +20,6 @@ public:
 	// Method invoked when this object receives data through one of its public input ports; switches will not receive any data
 	CMPINLINE void								DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port) { }
 
-	// Method invoked when this switch is used by an entity
-	virtual bool								OnUsed(iObject *user);
-
 	// Activates the switch
 	void										ActivateSwitch(void);
 
@@ -34,5 +31,8 @@ protected:
 
 	// Maintain port indices for convenience
 	DataPorts::PortIndex						PORT_SEND;
+
+	// Method invoked when this switch is used by an entity
+	virtual bool								OnUsed(iObject *user, PlayerInteractionType interaction_type);
 	
 };

@@ -12,10 +12,6 @@ public:
 	// Default constructor
 	UsableObject(void);
 
-	// Event raised when a usable object is used; virtual method to be implemented by subclasses, does nothing if not implemented
-	// Should return a flag indicating whether the object was 'successfully' used; by default, when this does nothing, the method returns false
-	virtual bool									OnUsed(iObject *user);
-
 	// Return default audio to be played on interaction, if any
 	CMPINLINE AudioParameters						GetSuccessfulInteractionAudio(void) const				{ return m_successful_interaction_audio; }
 	CMPINLINE AudioParameters						GetFailedInteractionAudio(void) const					{ return m_failed_interaction_audio; }

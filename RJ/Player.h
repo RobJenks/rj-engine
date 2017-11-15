@@ -120,8 +120,6 @@ public:
 	CMPINLINE iObject *				GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }
 	CMPINLINE Terrain *				GetMouseSelectedTerrain(void)				{ return m_mouse_over_terrain; }
 
-	// Attempts to interact with an object immediately at the player focal point
-	void							AttemptPlayerInteraction(void);
 
 	// Constructor / destructor
 	Player(void);
@@ -196,6 +194,13 @@ private:
 	std::tuple<Terrain*, DynamicTerrain*, Terrain*, DynamicTerrain*>				
 												PerformPlayerRaycastForTerrain(iSpaceObjectEnvironment *environment);
 
+	// Handles the different types of player interaction
+	void										HandlePlayerInteraction(void);
+
+	// Get the entity that will be the target of a player interaction, or NULL if no applicable object is present
+	iObject *									TestForObjectInteractionTarget(void);
+	DynamicTerrain *							TestForTerrainInteractionTarget(void);
+
 	// Record the object current selected or being looked at by the player, for use throughout the frame
 	ObjectReference<iObject>					m_mouse_over_object;			// Current mouse-selected object
 	ObjectReference<iObject>					m_mouse_over_obj_nonplayer;		// Current mouse-selected object, excluding the player entity
@@ -210,6 +215,8 @@ private:
 	// TODO: Should be loaded as part of player data xml in future
 	static const std::string					AUDIO_INTERACTION_FAIL;
 
+	// Enumeration of possible interaction results, used internally by player interaction logic
+	enum PlayerInteractionResult { NoTarget = 0, InteractionFailed, InteractionSuccessful, ExtendedInteractionInProgress };
 };
 
 

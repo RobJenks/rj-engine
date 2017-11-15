@@ -284,7 +284,7 @@ float Terrain::GetImpactResistance(void) const
 
 // Called by objects that are attempting to interact with the object.  Returns a flag indicating whether any 
 // successful interaction was possible.  Forwards control to virtual subclass methods where terrain object is eligible
-bool Terrain::AttemptInteraction(iObject *interacting_object)
+CMPINLINE bool Terrain::AttemptInteraction(iObject *interacting_object, PlayerInteractionType interaction_type)
 {
 	// Only dynamic terrain objects can be interacted with
 	if (m_isdynamic)
@@ -293,7 +293,7 @@ bool Terrain::AttemptInteraction(iObject *interacting_object)
 		if (m_usable)
 		{
 			// This appears to be an eligible terrain object, so promote and pass control
-			return ToDynamicTerrain()->OnUsed(interacting_object);
+			return ToDynamicTerrain()->AttemptInteraction(interacting_object, interaction_type);
 		}
 	}
 

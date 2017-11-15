@@ -4,6 +4,7 @@
 #include "DataEnabledObject.h"
 #include "UsableObject.h"
 #include "DynamicTerrainClassData.h"
+#include "PlayerInteractionType.h"
 class TerrainDefinition;
 class DynamicTerrainDefinition;
 struct DynamicTerrainState;
@@ -24,8 +25,10 @@ public:
 	CMPINLINE const DynamicTerrainDefinition *		GetDynamicTerrainDefinition(void) const { return m_dynamic_terrain_def; }
 	CMPINLINE void									SetDynamicTerrainDefinition(const DynamicTerrainDefinition *def) { m_dynamic_terrain_def = def; }
 
-	// Event raised when an entity tries to interact with this object
-	virtual bool									OnUsed(iObject *user);
+	// Method called by external parties attempting to interact with this object.  An 'extended' interaction is one in which the 
+	// interaction key is held while the user takes some other actions, e.g. moving the mouse.  Filters interaction attempts
+	// and will only allow those which match the permitted terrain interaction type 
+	bool											AttemptInteraction(iObject *interacting_object, PlayerInteractionType interaction_type);
 
 	// Set a property of this dynamic terrain object
 	void											SetProperty(const std::string & key, const std::string & value);
@@ -77,6 +80,9 @@ protected:
 
 	// Default constructor
 	DynamicTerrain(void);
+
+	// Event raised when an entity tries to interact with this object; should be implemented by derived classes
+	virtual bool									OnUsed(iObject *user, PlayerInteractionType interaction_type);
 
 	// Apply a particular state definition to this terrain object
 	void											ApplyState(const DynamicTerrainState *state);

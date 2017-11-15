@@ -26,6 +26,8 @@
 
     <DefaultStateTransition state="off" next_state="on" />
     <DefaultStateTransition state="on" next_state="off" />
+
+    <PermittedInteractionType>Normal</PermittedInteractionType>
     
   </DynamicTerrainDefinition>
 

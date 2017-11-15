@@ -173,8 +173,10 @@ void Player::AcceptKeyboardInput(GameInputDevice *keyboard)
 		if (keys[DIK_A])				{ MovePlayerActor(Direction::Left, true); }
 		if (keys[DIK_S])				{ MovePlayerActor(Direction::Down, true); }
 		if (keys[DIK_D])				{ MovePlayerActor(Direction::Right, true); }
-		if (keys[DIK_E])				{ AttemptPlayerInteraction();								keyboard->LockKey(DIK_E); }
 		if (keys[DIK_SPACE])			{ ActorJump();												keyboard->LockKey(DIK_SPACE); }
+
+		// Handle the different types of player interaction separately
+		HandlePlayerInteraction();
 	}
 	else if (m_state == StateType::ShipPilot)
 	{
@@ -716,52 +718,61 @@ void Player::ExecuteOverrideOfPlayerEnvironment(void)
 	if (m_overrideship()) m_playership = m_overrideship();
 }
 
-// Attempts to interact with an object immediately at the player focal point
-void Player::AttemptPlayerInteraction(void)
+// Handles the different types of player interaction
+void Player::HandlePlayerInteraction(void)
 {
-	bool successful = false;
+	PlayerInteractionResult result = PlayerInteractionResult::NoTarget;
 	UsableObject *usable_object = NULL;
-
 	iObject *player = Game::CurrentPlayer->GetActivePlayerObject();
-	XMVECTOR player_pos = player->GetPosition();
 
-	// Preferentially check for object interaction	
-	iObject *target_obj = m_view_target_obj_nonplayer();
-	if (target_obj != NULL && 
-		XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(target_obj->GetPosition(), player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+	// TODO: To be updated based on configurable controls
+	DWORD use_key = DIK_E;
+
+	// In all cases, the key needs to either be pressed or held down.  Both are covered by KeyHeld
+	if (Game::Keyboard.KeyHeld(use_key) == false) return;
+	bool is_single_press = Game::Keyboard.GetKey(use_key);
+
+	// Lock the key to register this as a single key-down
+	Game::Keyboard.LockKey(use_key);
+	
+	// Preferentially check for interaction with objects
+	iObject *target_object = TestForObjectInteractionTarget();
+	if (target_object)
 	{
-		// usable_object = ...
-		Game::Log << LOG_DEBUG << "Usable object interaction not yet implemented\n";
+		// TODO: Interaction with objects not yet implemented
+		// usable_object = static_cast<UsableObject*>(...)
+		// result = ...
 	}
 	else
 	{
-		// Otherwise check for dynamic terrain interaction
-		DynamicTerrain *target_terrain = m_view_target_usable_terrain;
-		if (target_terrain && target_terrain->GetParentEnvironment())
+		// No object interaction, so test for player-terrain interaction
+		DynamicTerrain *target_terrain = TestForTerrainInteractionTarget();
+		if (target_terrain)
 		{
-			// Transform the object positions into other reference frames as required to perform a comparison
-			XMVECTOR player_local = XMVector3TransformCoord(player_pos, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
-			XMVECTOR terrain_world = XMVector3TransformCoord(target_terrain->GetEnvironmentPosition(), target_terrain->GetParentEnvironment()->GetZeroPointWorldMatrix());
+			usable_object = static_cast<UsableObject*>(target_terrain);
 
-			// Now get the closest point on the player bounding box to the target, and on the target bounding box to the player
-			XMVECTOR player_pt_world = Game::PhysicsEngine.ClosestPointOnOBB(player->CollisionOBB.Data(), terrain_world);		// OBB = world-space, so perform world-space comparison
-			XMVECTOR terrain_pt_local = Game::PhysicsEngine.ClosestPointOnOBB(target_terrain->GetOBBData(), player_local);		// OBB = local space, so perform local-space comparison
-			XMVECTOR player_pt_local = XMVector3TransformCoord(player_pt_world, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
-
-			// Test whether the distance between these points is within the use distance threshold
-			if (XMVector3LessOrEqual(XMVector3LengthSq(XMVectorSubtract(player_pt_local, terrain_pt_local)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+			// Raise the single-press event if this is a regular key press event (GetKey is a subset of KeyPressed)
+			if (is_single_press)
 			{
-				usable_object = static_cast<UsableObject*>(target_terrain);
-				successful = target_terrain->AttemptInteraction(player);
+				bool successful = target_terrain->AttemptInteraction(player, PlayerInteractionType::Normal);
+				result = (successful ? PlayerInteractionResult::InteractionSuccessful : PlayerInteractionResult::InteractionFailed);
+			}
+
+			// Whether or not this is the single-key press event, the key is down so pass the extended interaction event to the target
+			// This is lower priority than single interaction events so only do this if we have not already succeeded in an interaction
+			if (result != PlayerInteractionResult::InteractionSuccessful)
+			{
+				bool extended_successful = target_terrain->AttemptInteraction(player, PlayerInteractionType::Extended);
+				if (extended_successful) result = PlayerInteractionResult::ExtendedInteractionInProgress;
 			}
 		}
 	}
-	
-	// Provide feedback based on whether the interaction was successful
+
+	// Provide feedback based on whether the interaction was successful; no feedback for extended interactions
 	if (usable_object != NULL)
 	{
 		// We did interact with some object
-		if (successful)
+		if (result == PlayerInteractionResult::InteractionSuccessful)
 		{
 			// We successfully interacted with the object; play default success audio, if it is defined
 			if (usable_object->HasDefinedSuccessfulInteractionAudio())
@@ -769,7 +780,7 @@ void Player::AttemptPlayerInteraction(void)
 				Game::Engine->GetAudioManager()->CreateInstance(usable_object->GetSuccessfulInteractionAudio(), 1.0f);
 			}
 		}
-		else
+		else if (result == PlayerInteractionResult::InteractionFailed)
 		{
 			// We tried to interact with the object but failed for some reason
 			if (usable_object->HasDefinedFailedInteractionAudio())
@@ -781,10 +792,64 @@ void Player::AttemptPlayerInteraction(void)
 	else
 	{
 		// We did not interact with any object
-		Game::Engine->GetAudioManager()->CreateInstance(AUDIO_INTERACTION_FAIL, 1.0f, 1.0f);
+		if (is_single_press)
+		{
+			Game::Engine->GetAudioManager()->CreateInstance(AUDIO_INTERACTION_FAIL, 1.0f, 1.0f);
+		}
 	}
 
+
 }
+
+// Get the iObject entity that will be the target of a player interaction, or NULL if no applicable object is present
+iObject * Player::TestForObjectInteractionTarget(void)
+{
+	iObject *player = Game::CurrentPlayer->GetActivePlayerObject();
+	XMVECTOR player_pos = player->GetPosition();
+
+	iObject *target_obj = m_view_target_obj_nonplayer();
+	if (target_obj != NULL &&
+		XMVector2LessOrEqual(XMVector3LengthSq(XMVectorSubtract(target_obj->GetPosition(), player_pos)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+	{
+		// This is a usable iObject within interaction range.  
+		// TODO: However this is currently NOT SUPPORTED so return null with a warning for now
+		Game::Log << LOG_DEBUG << "Usable object interaction not yet implemented\n";
+		return NULL;
+	}
+
+	return NULL;
+}
+
+// Get the DynamicTerrain entity that will be the target of a player interaction, or NULL if no applicable object is present
+DynamicTerrain * Player::TestForTerrainInteractionTarget(void)
+{
+	iObject *player = Game::CurrentPlayer->GetActivePlayerObject();
+	XMVECTOR player_pos = player->GetPosition();
+
+	// Otherwise check for dynamic terrain interaction
+	DynamicTerrain *target_terrain = m_view_target_usable_terrain;
+	if (target_terrain && target_terrain->GetParentEnvironment())
+	{
+		// Transform the object positions into other reference frames as required to perform a comparison
+		XMVECTOR player_local = XMVector3TransformCoord(player_pos, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
+		XMVECTOR terrain_world = XMVector3TransformCoord(target_terrain->GetEnvironmentPosition(), target_terrain->GetParentEnvironment()->GetZeroPointWorldMatrix());
+
+		// Now get the closest point on the player bounding box to the target, and on the target bounding box to the player
+		XMVECTOR player_pt_world = Game::PhysicsEngine.ClosestPointOnOBB(player->CollisionOBB.Data(), terrain_world);		// OBB = world-space, so perform world-space comparison
+		XMVECTOR terrain_pt_local = Game::PhysicsEngine.ClosestPointOnOBB(target_terrain->GetOBBData(), player_local);		// OBB = local space, so perform local-space comparison
+		XMVECTOR player_pt_local = XMVector3TransformCoord(player_pt_world, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
+
+		// Test whether the distance between these points is within the use distance threshold
+		if (XMVector3LessOrEqual(XMVector3LengthSq(XMVectorSubtract(player_pt_local, terrain_pt_local)), Game::C_PLAYER_USE_DISTANCE_SQ_V))
+		{
+			// This object is within the interaction threshold
+			return target_terrain;
+		}
+	}
+
+	return NULL;
+}
+
 
 // Default destructor
 Player::~Player(void)

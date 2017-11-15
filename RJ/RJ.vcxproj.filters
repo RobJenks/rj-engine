@@ -754,6 +754,9 @@
     <ClCompile Include="DataObjectEngineThrustController.cpp">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClCompile>
+    <ClCompile Include="PlayerInteractionType.cpp">
+      <Filter>Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1743,6 +1746,9 @@
     </ClInclude>
     <ClInclude Include="DataObjectEngineThrustController.h">
       <Filter>Objects\Data\Objects\Engines</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerInteractionType.h">
+      <Filter>Player</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

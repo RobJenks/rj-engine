@@ -10,6 +10,7 @@
 #include "OrientedBoundingBox.h"
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
+#include "PlayerInteractionType.h"
 class Model;
 class TerrainDefinition;
 class EnvironmentTree;
@@ -134,7 +135,7 @@ public:
 
 	// Called by objects that are attempting to interact with the object.  Returns a flag indicating whether any 
 	// successful interaction was possible.  Forwards control to virtual subclass methods where terrain object is eligible
-	bool											AttemptInteraction(iObject *interacting_object);
+	CMPINLINE bool									AttemptInteraction(iObject *interacting_object, PlayerInteractionType interaction_type);
 
 	// Determines the vertices of the surrounding collision volume
 	void											DetermineCollisionBoxVertices(iSpaceObjectEnvironment *parent, AXMVECTOR_P(&pOutVertices)[8]) const;
@@ -222,7 +223,6 @@ protected:
 	bool									m_postponeupdates;					// Flag indicating whether the terrain object should postpone updates until it is released again
 																				// Used to make multiple adjustments without recalculating derived data each time
 
-																				
 	Terrain *								Clone(void) const;					// Clone method for regular static terrain objects; not applicable for dynamic terrain otherwise dynamic terrain data will be lost
 
 };

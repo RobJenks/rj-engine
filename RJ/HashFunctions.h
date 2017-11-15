@@ -299,6 +299,7 @@ namespace HashedStrings
 	DefineHash(H_Volume, "volume");
 	DefineHash(H_DefaultSuccessfulInteractionAudio, "defaultsuccessfulinteractionaudio");
 	DefineHash(H_DefaultFailedInteractionAudio, "defaultfailedinteractionaudio");
+	DefineHash(H_PermittedInteractionType, "permittedinteractiontype");
 
 }
 
