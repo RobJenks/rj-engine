@@ -8,7 +8,7 @@
     Inputs: 0
     Outputs: 1
   -->
-  <DynamicTerrainDefinition code="BasicElectronicSwitch" class="DataObjectSwitch" def="tmp_terrain_cone">
+  <DynamicTerrainDefinition code="switch_electronic_basic_01" class="DataObjectSwitch" def="tmp_terrain_cone">
     <DefaultSuccessfulInteractionAudio name="electronic_switch_use" volume="1.0" />
     <DefaultFailedInteractionAudio name="electronic_switch_fail_to_use" volume="1.0" />
 
@@ -31,4 +31,30 @@
     
   </DynamicTerrainDefinition>
 
+  
+  <!-- 
+    Name: Basic continuous lever switch
+    Description: Continuous switch; can be in a continuous range of positions from (by default) -1 to +1, with 
+                 initial value of zero.  Value range is configurable.
+    Value range: [-1 +1] (configurable)
+    Inputs: 0
+    Outputs: 1
+  -->
+  <DynamicTerrainDefinition code="switch_continuous_basic_lever_01" class="DataObjectContinuousSwitch">
+
+    <PermittedInteractionType>Extended</PermittedInteractionType>
+    <Property key="ValueRangeMin" value="-1.0" />
+    <Property key="ValueRangeMax" value="+1.0" />
+    <Property key="ValueDeltaThreshold" value="0.01" />
+
+    <Property key="ArticulatedModel" value="switch_continuous_basic_lever_01_model" />
+    <Property key="ModelSwitchComponent" value="switch_component" />
+    <Property key="ModelSwitchConstraint" value="switch_constraint" />
+    <Property key="SwitchConstraintMin" value="-0.785398" />
+    <Property key="SwitchConstraintMax" value="+0.785398" />
+    
+  </DynamicTerrainDefinition>
+
 </gamedata>
+
+

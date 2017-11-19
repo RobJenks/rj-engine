@@ -102,6 +102,9 @@ public:
 	void							RotateChildAboutConstraint(float d_rad);
 	void							SetChildRotationAboutConstraint(float rad);
 
+	// Return the current rotation about the constraint
+	CMPINLINE float					GetChildRotationAboutConstraint(void) const			{ return Constraint->Rotation; }
+
 	// Loads attachment data from XML specification
 	Result							LoadAttachmentData(TiXmlElement *node);
 

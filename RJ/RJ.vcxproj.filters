@@ -754,8 +754,14 @@
     <ClCompile Include="DataObjectEngineThrustController.cpp">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerInteractionType.cpp">
-      <Filter>Player</Filter>
+    <ClCompile Include="DataObjectContinuousSwitch.cpp">
+      <Filter>Objects\Data\Objects\Switches</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicTerrainInteractionType.cpp">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClCompile>
+    <ClCompile Include="DynamicTerrainInteraction.cpp">
+      <Filter>Objects\DynamicTerrain</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1747,8 +1753,14 @@
     <ClInclude Include="DataObjectEngineThrustController.h">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerInteractionType.h">
-      <Filter>Player</Filter>
+    <ClInclude Include="DataObjectContinuousSwitch.h">
+      <Filter>Objects\Data\Objects\Switches</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrainInteractionType.h">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicTerrainInteraction.h">
+      <Filter>Objects\DynamicTerrain</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

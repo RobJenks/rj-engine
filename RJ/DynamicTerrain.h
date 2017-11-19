@@ -4,7 +4,7 @@
 #include "DataEnabledObject.h"
 #include "UsableObject.h"
 #include "DynamicTerrainClassData.h"
-#include "PlayerInteractionType.h"
+#include "DynamicTerrainInteraction.h"
 class TerrainDefinition;
 class DynamicTerrainDefinition;
 struct DynamicTerrainState;
@@ -28,14 +28,10 @@ public:
 	// Method called by external parties attempting to interact with this object.  An 'extended' interaction is one in which the 
 	// interaction key is held while the user takes some other actions, e.g. moving the mouse.  Filters interaction attempts
 	// and will only allow those which match the permitted terrain interaction type 
-	bool											AttemptInteraction(iObject *interacting_object, PlayerInteractionType interaction_type);
+	bool											AttemptInteraction(iObject *interacting_object, DynamicTerrainInteraction interaction);
 
 	// Set a property of this dynamic terrain object
 	void											SetProperty(const std::string & key, const std::string & value);
-
-	// Set a property of this dynamic terrain object.  Called once the base class has registered the property.  Should 
-	// be overridden by any subclasses that wish to use properties
-	CMPINLINE virtual void							SetDynamicTerrainProperty(const std::string & key, const std::string & value) { };
 
 	// Return the state that this terrain object is currently in
 	CMPINLINE std::string							GetState(void) const { return m_state; }
@@ -81,8 +77,12 @@ protected:
 	// Default constructor
 	DynamicTerrain(void);
 
+	// Set a property of this dynamic terrain object.  Called once the base class has registered the property.  Should 
+	// be overridden by any subclasses that wish to use properties
+	CMPINLINE virtual void							SetDynamicTerrainProperty(const std::string & key, const std::string & value) { };
+
 	// Event raised when an entity tries to interact with this object; should be implemented by derived classes
-	virtual bool									OnUsed(iObject *user, PlayerInteractionType interaction_type);
+	virtual bool									OnUsed(iObject *user, DynamicTerrainInteraction && interaction);
 
 	// Apply a particular state definition to this terrain object
 	void											ApplyState(const DynamicTerrainState *state);

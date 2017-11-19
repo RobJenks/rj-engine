@@ -33,6 +33,6 @@ protected:
 	DataPorts::PortIndex						PORT_SEND;
 
 	// Method invoked when this switch is used by an entity
-	virtual bool								OnUsed(iObject *user, PlayerInteractionType interaction_type);
+	virtual bool								OnUsed(iObject *user, DynamicTerrainInteraction && interaction);
 	
 };

@@ -17,7 +17,8 @@
   <include file="Ships\TileModels.xml" />
 
   <!-- Load articulated model data (must be loaded after static models) -->
-  <include file="Models\TurretModels.xml" />
+  <include file="Models\Turrets\TurretModels.xml" />
+  <include file="Models\Switches\SwitchModels.xml" />
 
   <!-- Load all audio data -->
   <include file="Audio\Audio.xml" />

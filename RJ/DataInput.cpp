@@ -16,7 +16,7 @@
 #include "ArticulatedModel.h"
 #include "Modifiers.h"
 #include "ModifierDetails.h"
-#include "PlayerInteractionType.h"
+#include "DynamicTerrainInteractionType.h"
 
 #include "Hardpoint.h"
 #include "Hardpoints.h"
@@ -1959,7 +1959,7 @@ Result IO::Data::LoadDynamicTerrainDefinition(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_PermittedInteractionType)
 		{
-			def->SetPermittedInteractionType(TranslatePlayerInteractionTypeFromString(child->GetText()));
+			def->SetPermittedInteractionType(TranslateDynamicTerrainInteractionTypeFromString(child->GetText()));
 		}
 
 		/* Also check whether this is a property of the prototype instance, and assign it here instead if so */
@@ -2143,7 +2143,8 @@ Result IO::Data::LoadTurret(TiXmlElement *node)
 		else if (hash == HashedStrings::H_ArticulatedModel)
 		{
 			val = child->GetText(); StrLowerC(val);
-			turret->SetArticulatedModel(ArticulatedModel::GetModel(val));
+			ArticulatedModel *model = ArticulatedModel::GetModel(val);
+			if (model) turret->SetArticulatedModel(model->Copy());
 		}
 		else if (hash == HashedStrings::H_Yaw)
 		{

@@ -251,6 +251,16 @@ void ArticulatedModel::SetConstraintRotation(int constraint_index, float radians
 	m_attachments[constraint_index].SetChildRotationAboutConstraint(radians);
 }
 
+// Return the current rotation value for a particular constraint (or 0.0 if the given constraint is not valid or is fixed)
+float ArticulatedModel::GetConstraintRotation(int constraint_index)
+{
+	// Make sure the constraint is valid
+	if (constraint_index < 0 || constraint_index >= m_attachcount) return 0.0f;
+
+	// Return the current rotation about this constraint
+	return m_attachments[constraint_index].GetChildRotationAboutConstraint();
+}
+
 // Sets the rotation of this component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
 // the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)
 // then no action will be taken

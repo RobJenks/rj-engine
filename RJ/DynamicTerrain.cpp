@@ -151,18 +151,18 @@ void DynamicTerrain::RemovedFromEnvironment(iSpaceObjectEnvironment *environment
 // Method called by external parties attempting to interact with this object.  An 'extended' interaction is one in which the 
 // interaction key is held while the user takes some other actions, e.g. moving the mouse.  Filters interaction attempts
 // and will only allow those which match the permitted terrain interaction type 
-bool DynamicTerrain::AttemptInteraction(iObject *interacting_object, PlayerInteractionType interaction_type)
+bool DynamicTerrain::AttemptInteraction(iObject *interacting_object, DynamicTerrainInteraction interaction)
 {
 	const DynamicTerrainDefinition *def = GetDynamicTerrainDefinition();
 	if (!def) return false;
 
 	// Some objects will explicitly disallow interaction
-	if (def->GetPermittedInteractionType() == PlayerInteractionType::None) return false;
+	if (def->GetPermittedInteractionType() == DynamicTerrainInteractionType::None) return false;
 
 	// Otherwise we can proceed with the interaction as long as it is of a type permitted by the object definition
-	if (interaction_type == def->GetPermittedInteractionType())
+	if (interaction.GetType() == def->GetPermittedInteractionType())
 	{
-		return OnUsed(interacting_object, interaction_type);
+		return OnUsed(interacting_object, std::move(interaction));
 	}
 
 	return false;
@@ -170,7 +170,7 @@ bool DynamicTerrain::AttemptInteraction(iObject *interacting_object, PlayerInter
 
 
 // Event raised when an entity tries to interact with this object
-bool DynamicTerrain::OnUsed(iObject *user, PlayerInteractionType interaction_type)
+bool DynamicTerrain::OnUsed(iObject *user, DynamicTerrainInteraction && interaction)
 {
 	// Default behaviour if none is set by subclasses
 	return false;

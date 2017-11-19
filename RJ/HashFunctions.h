@@ -300,6 +300,13 @@ namespace HashedStrings
 	DefineHash(H_DefaultSuccessfulInteractionAudio, "defaultsuccessfulinteractionaudio");
 	DefineHash(H_DefaultFailedInteractionAudio, "defaultfailedinteractionaudio");
 	DefineHash(H_PermittedInteractionType, "permittedinteractiontype");
+	DefineHash(H_ValueRangeMin, "valuerangemin");
+	DefineHash(H_ValueRangeMax, "valuerangemax");
+	DefineHash(H_ValueDeltaThreshold, "valuedeltathreshold");
+	DefineHash(H_ModelSwitchComponent, "modelswitchcomponent");
+	DefineHash(H_ModelSwitchConstraint, "modelswitchconstraint");
+	DefineHash(H_SwitchConstraintMin, "switchconstraintmin");
+	DefineHash(H_SwitchConstraintMax, "switchconstraintmax");
 
 }
 

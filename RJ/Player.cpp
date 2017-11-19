@@ -754,7 +754,7 @@ void Player::HandlePlayerInteraction(void)
 			// Raise the single-press event if this is a regular key press event (GetKey is a subset of KeyPressed)
 			if (is_single_press)
 			{
-				bool successful = target_terrain->AttemptInteraction(player, PlayerInteractionType::Normal);
+				bool successful = target_terrain->AttemptInteraction(player, DynamicTerrainInteractionType::Normal);
 				result = (successful ? PlayerInteractionResult::InteractionSuccessful : PlayerInteractionResult::InteractionFailed);
 			}
 
@@ -762,7 +762,7 @@ void Player::HandlePlayerInteraction(void)
 			// This is lower priority than single interaction events so only do this if we have not already succeeded in an interaction
 			if (result != PlayerInteractionResult::InteractionSuccessful)
 			{
-				bool extended_successful = target_terrain->AttemptInteraction(player, PlayerInteractionType::Extended);
+				bool extended_successful = target_terrain->AttemptInteraction(player, DynamicTerrainInteractionType::Extended);
 				if (extended_successful) result = PlayerInteractionResult::ExtendedInteractionInProgress;
 			}
 		}

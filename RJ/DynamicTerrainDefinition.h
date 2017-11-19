@@ -5,7 +5,7 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "DynamicTerrainState.h"
-#include "PlayerInteractionType.h"
+#include "DynamicTerrainInteractionType.h"
 class DynamicTerrain;
 
 class DynamicTerrainDefinition
@@ -45,8 +45,8 @@ public:
 	std::string								GetDefaultStateTransition(const std::string & current_state) const;
 
 	// The type of player interaction that is permitted by this object type
-	CMPINLINE PlayerInteractionType			GetPermittedInteractionType(void) const { return m_permitted_interaction_type; }
-	CMPINLINE void							SetPermittedInteractionType(PlayerInteractionType interaction_type) { m_permitted_interaction_type = interaction_type; }
+	CMPINLINE DynamicTerrainInteractionType	GetPermittedInteractionType(void) const { return m_permitted_interaction_type; }
+	CMPINLINE void							SetPermittedInteractionType(DynamicTerrainInteractionType interaction_type) { m_permitted_interaction_type = interaction_type; }
 
 	// Explicit shutdown method is not required for definition objects; all deallocation is performed in the destructor
 	CMPINLINE void							Shutdown(void) { }
@@ -72,6 +72,6 @@ protected:
 	std::unordered_map<std::string, std::string>		m_default_state_transitions;
 
 	// The type of player interaction that is permitted by this object type
-	PlayerInteractionType								m_permitted_interaction_type;
+	DynamicTerrainInteractionType						m_permitted_interaction_type;
 
 };

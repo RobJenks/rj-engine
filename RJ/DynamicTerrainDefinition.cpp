@@ -5,7 +5,7 @@
 DynamicTerrainDefinition::DynamicTerrainDefinition(void)
 	:
 	m_code(NullString), m_prototype(NULL), m_default_state(NullString), 
-	m_permitted_interaction_type(PlayerInteractionType::Normal)
+	m_permitted_interaction_type(DynamicTerrainInteractionType::Normal)
 {
 }
 

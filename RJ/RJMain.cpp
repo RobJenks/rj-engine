@@ -117,6 +117,7 @@
 #include "TerrainDefinition.h"				// DBG
 #include "DataObjectRelay.h"				// DBG
 #include "DataObjectSwitch.h"				// DBG
+#include "DataObjectContinuousSwitch.h"		// DBG
 #include "DataObjectDebugLogger.h"			// DBG
 #include "DataObjectEngineThrustController.h"	// DBG
 #include "Frustum.h"						
@@ -886,7 +887,7 @@ void RJMain::ProcessKeyboardInput(void)
 	if (b[DIK_2]) {
 		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
 		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
+		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 		
 		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
 		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
@@ -900,13 +901,13 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("BasicElectronicSwitch");
-			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("switch_electronic_basic_01");
+			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-30.0f, 0.0f, -20.0f, 0.0f)));
 			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
 
-			/*DataObjectDebugLogger *tlog = (DataObjectDebugLogger*) DynamicTerrain::Create("DataObjectDebugLogger");
-			tlog->SetPosition(XMVectorAdd(centre, XMVectorSet(8.0f, 0.0f, -20.0f, 0.0f)));
-			cs()->AddTerrainObject(static_cast<Terrain*>(tlog));*/
+			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_basic_lever_01");
+			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
 
 			DynamicTerrain *target = NULL;
 			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();

@@ -1,4 +1,5 @@
 #include "DynamicTerrainDefinition.h"
+#include "DynamicTerrainInteraction.h"
 #include "DataObjectSwitch.h"
 
 
@@ -26,7 +27,7 @@ void DataObjectSwitch::InitialiseDataPorts(void)
 }
 
 // Method invoked when this switch is used by an entity
-bool DataObjectSwitch::OnUsed(iObject *user, PlayerInteractionType interaction_type)
+bool DataObjectSwitch::OnUsed(iObject *user, DynamicTerrainInteraction && interaction)
 {
 	// Activate the switch and return success
 	ActivateSwitch();

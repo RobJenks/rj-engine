@@ -405,6 +405,7 @@
     <ClCompile Include="D3DMain.cpp" />
     <ClCompile Include="Damage.cpp" />
     <ClCompile Include="DataEnabledEnvironmentObject.cpp" />
+    <ClCompile Include="DataObjectContinuousSwitch.cpp" />
     <ClCompile Include="DataObjectDebugLogger.cpp" />
     <ClCompile Include="DataEnabledObject.cpp" />
     <ClCompile Include="DataObjectEngineThrustController.cpp" />
@@ -423,6 +424,7 @@
     <ClCompile Include="DustParticle.cpp" />
     <ClCompile Include="DynamicTerrainClass.cpp" />
     <ClCompile Include="DynamicTerrainDefinition.cpp" />
+    <ClCompile Include="DynamicTerrainInteraction.cpp" />
     <ClCompile Include="DynamicTerrainState.cpp" />
     <ClCompile Include="DynamicTileSet.cpp" />
     <ClCompile Include="EffectBase.cpp" />
@@ -512,7 +514,7 @@
     <ClCompile Include="Order_ActorTravelToPosition.cpp" />
     <ClCompile Include="Order_AttackBasic.cpp" />
     <ClCompile Include="Oxygen.cpp" />
-    <ClCompile Include="PlayerInteractionType.cpp" />
+    <ClCompile Include="DynamicTerrainInteractionType.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="Ray.cpp" />
@@ -656,6 +658,7 @@
     <ClInclude Include="CompoundLoadoutMap.h" />
     <ClInclude Include="ConditionalCompilation.h" />
     <ClInclude Include="Constraint.h" />
+    <ClInclude Include="DataObjectContinuousSwitch.h" />
     <ClInclude Include="CopyObject.h" />
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="Crew.h" />
@@ -700,6 +703,7 @@
     <ClInclude Include="DynamicTerrainClass.h" />
     <ClInclude Include="DynamicTerrainClassData.h" />
     <ClInclude Include="DynamicTerrainDefinition.h" />
+    <ClInclude Include="DynamicTerrainInteraction.h" />
     <ClInclude Include="DynamicTerrainState.h" />
     <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="DataObjectEngineThrustController.h" />
@@ -749,7 +753,7 @@
     <ClInclude Include="ObjectReference.h" />
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
-    <ClInclude Include="PlayerInteractionType.h" />
+    <ClInclude Include="DynamicTerrainInteractionType.h" />
     <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
