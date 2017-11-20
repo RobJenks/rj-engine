@@ -1,4 +1,5 @@
 #include "ArticulatedModel.h"
+#include "iObject.h"
 
 #include "DataObjectContinuousSwitch.h"
 

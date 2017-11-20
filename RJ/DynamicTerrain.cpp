@@ -1,4 +1,5 @@
 #include "ArticulatedModel.h"
+#include "iObject.h"
 #include "DynamicTerrainDefinition.h"
 #include "DynamicTerrain.h"
 
@@ -6,12 +7,15 @@
 // Default constructor
 DynamicTerrain::DynamicTerrain(void)
 	: 
-	m_dynamic_terrain_def(NULL)
+	m_dynamic_terrain_def(NULL), m_interacting_object(0U)
 {
 	// Enable relevant flags on this terrain object
 	m_isdynamic = true;
 	m_dataenabled = true;
 	m_usable = true;
+
+	// Initialise other fields
+	m_interaction_in_progress.Clear();
 }
 
 // Static method to instantiate a new dynamic terrain object based upon its string definition code.  Shortcut
@@ -163,13 +167,21 @@ bool DynamicTerrain::AttemptInteraction(iObject *interacting_object, DynamicTerr
 	// Some objects will explicitly disallow interaction
 	if (def->GetPermittedInteractionType() == DynamicTerrainInteractionType::None) return false;
 
-	// Otherwise we can proceed with the interaction as long as it is of a type permitted by the object definition
-	if (interaction.GetType() == def->GetPermittedInteractionType())
-	{
-		return OnUsed(interacting_object, std::move(interaction));
-	}
+	// The interaction is not allowed if another entity is already interacting with the object
+	if (IsInteractionInProgress() && !(interacting_object && interacting_object->GetID() == m_interacting_object)) return false;
 
-	return false;
+	// Disallow the interaction if it is not of a type permitted by the object definition
+	if (interaction.GetType() != def->GetPermittedInteractionType()) return false;
+
+	/*** Perform the interaction ***/
+	bool result = OnUsed(interacting_object, std::move(interaction));
+	
+	// Update our properties to show that an interaction is now taking place
+	m_interaction_in_progress.Set();
+	m_interacting_object = (interacting_object ? interacting_object->GetID() : 0);
+
+	// Return the interaction result
+	return result;
 }
 
 

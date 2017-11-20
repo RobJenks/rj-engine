@@ -57,6 +57,12 @@ public:
 	// Event raised after the dynamic terrain object is removed from an environment
 	void											RemovedFromEnvironment(iSpaceObjectEnvironment *environment);
 
+	// Indicates whether an interaction is currently in progress with this object
+	CMPINLINE bool									IsInteractionInProgress(void) const { return m_interaction_in_progress.WasSetSincePriorFrame(); }
+
+	// Returns the ID of the object currently interacting with this terrain object, or 0 if no interaction is in progress
+	CMPINLINE Game::ID_TYPE							GetInteractingObject(void) const { return (IsInteractionInProgress() ? m_interacting_object : 0); }
+
 	// Pure virtual clone method for this object type; automatically implemented for subclasses
 	// by the DYNAMIC_TERRAIN_CLASS macro
 	virtual DynamicTerrain *						Clone(void) const = 0;
@@ -73,6 +79,10 @@ protected:
 	// Set of properties that have been assigned to this object (and which will be propogated to any new
 	// objects that are cloned to this one)
 	std::unordered_map<std::string, std::string>	m_properties;
+
+	// Flag which indicates whether the switch is currently being interacted with, and ID of the interacting object
+	FrameFlag										m_interaction_in_progress;
+	Game::ID_TYPE									m_interacting_object;
 
 	// Default constructor
 	DynamicTerrain(void);

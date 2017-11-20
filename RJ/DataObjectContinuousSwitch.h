@@ -48,6 +48,9 @@ protected:
 	float										m_last_value;
 	float										m_value_delta_threshold;
 
+	// Flag which indicates whether the switch is currently being interacted with
+	FrameFlag									m_interaction_in_progress;
+
 	// Maintain port indices for convenience
 	DataPorts::PortIndex						PORT_SEND;
 
