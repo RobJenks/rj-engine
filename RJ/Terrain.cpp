@@ -50,8 +50,8 @@ void Terrain::SetDefinition(const TerrainDefinition *d)
 	// We can derive further data if the definition is non-null (and if it has not been set manually already)
 	if (m_definition)
 	{
-		// Take the standard object size if not already specified; this will also recalculate e.g. the collision radius
-		if (IsZeroFloat3(m_data.ExtentF)) SetExtent(XMLoadFloat3(&m_definition->GetDefaultExtent()));
+		// Take the model extents as our new bounds; this will also recalculate e.g. the collision radius
+		SetExtent(XMLoadFloat3(&m_definition->GetDefaultExtent()));
 
 		// Also initialise the health of this instance to the max health specified in its definition, if it has not already been set
 		if (m_health == 0.0f) SetHealth(m_definition->GetMaxHealth());
@@ -87,7 +87,7 @@ void Terrain::SetArticulatedModel(ArticulatedModel *m)
 	UpdateModelFlag(); 
 
 	// Take the consolidated model size if not already specified; this will also recalculate e.g. the collision radius
-	if (m_articulated_model && IsZeroFloat3(m_data.ExtentF))
+	if (m_articulated_model)
 	{
 		SetExtent(XMLoadFloat3(&m_articulated_model->GetExtent()));
 	}

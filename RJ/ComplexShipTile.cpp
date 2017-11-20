@@ -248,6 +248,9 @@ void ComplexShipTile::RecalculateTileData(void)
 	// Recalculate the world matrix for this tile based on its current position
 	RecalculateWorldMatrix();
 
+	// Update the tile based on its model data if required
+	if (HasCompoundModel()) RecalculateCompoundModelData();
+
 	// Also recalculate the tile bounding box
 	RecalculateBoundingVolume();
 
@@ -1009,17 +1012,6 @@ Result ComplexShipTile::GenerateGeometry(void)
 
 	// If we have no definition to validate against then simply return success
 	return ErrorCodes::NoError;
-}
-
-// Indicates whether this tile has compound model data requiring post-processing with full model geometry
-bool ComplexShipTile::RequiresCompoundModelPostProcessing() const
-{
-	if (m_multiplemodels)
-	{
-		return m_models.RequiresPostProcessing();
-	}
-
-	return false;
 }
 
 // Recalculate compound model data, including geometry-dependent calculations that are performed 

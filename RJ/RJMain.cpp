@@ -1704,22 +1704,6 @@ Result RJMain::InitialiseLoadedGameData(void)
 {
 	Result res; bool failures = false;
 
-	// Ships: Load all ship geometry, AFTER the ship data itself has been retrieved
-	Game::Log << LOG_INFO << "Beginning load of all model geometry\n";
-	res = IO::Data::LoadAllModelGeometry();
-	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Completed load of all model geometry\n" : "ERRORS encountered during load of model geometry\n");
-
-	// Run post-processing of all model geometry as necessary
-	res = IO::Data::PostProcessAllModelGeometry();
-	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of all model geometry completed\n" : "ERRORS encountered during post-processing of model geometry\n");
-
-	// Update any compound model components that need to be recalculated based on model geometry data (now it has been loaded)
-	res = IO::Data::PostProcessCompoundModelData();
-	if (res != ErrorCodes::NoError) failures = true;
-	Game::Log << LOG_INFO << (res == ErrorCodes::NoError ? "Post-processing of compound model geometry data completed\n" : "ERRORS encountered during post-processing of compound model geometry\n");
-
 	// Load all audio resources.  TODO: in future, we may not want to load everything on startup
 	Game::Log << LOG_INFO << "Beginning load of all audio resource data\n";
 	res = Game::Engine->GetAudioManager()->LoadAllAudioResources();
@@ -2528,8 +2512,9 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s  ->  %.2f", (t ? Vector3ToString(t->GetPosition()) : "<null>").c_str(),
-			(t ? XMVectorGetX(XMVector3Length(XMVectorSubtract(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition(), t->GetPosition()))) : -1.0f));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %s, Ex: %s",
+			(t ? Vector3ToString(t->GetPosition()).c_str() : "<null>"),
+			(t ? Vector3ToString(t->GetExtentF()).c_str() : "<null>"));
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

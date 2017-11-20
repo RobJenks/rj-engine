@@ -101,7 +101,6 @@
 
 
 std::vector<ComplexShipSection*> IO::Data::__TemporaryCSSLoadingBuffer;
-IO::Data::compound_models_pending_postprocessing_T IO::Data::CompoundModelsPendingPostProcessing;
 
 
 TiXmlDocument *IO::Data::LoadXMLDocument(const std::string &filename)
@@ -480,7 +479,20 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	// Attempt to set the actual model size; method will handle missing/incomplete parameters itself, so pass whatever we have (incl 0,0,0 as default)
 	model->SetActualModelSize(acteffsize);
 
-	// TODO: Potentially add option to load geometry immediately here
+	// Load the model geometry immediately
+	Result result = LoadModelGeometry(model);
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_WARN << "Could not load geometry for model \"" << model->GetCode() << "\" [" << result << "]\n";
+	}
+
+	// Test whether this model has an element size specified; if so, override all size data from the xml data or geometry
+	elsize = model->GetElementSize();
+	if (elsize.x > 0 && elsize.y > 0 && elsize.z > 0)
+	{
+		// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
+		model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
+	}
 
 	// Add this model to the relevant static collection and return success
 	Model::AddModel(model);
@@ -758,9 +770,8 @@ Result IO::Data::LoadComplexShip(TiXmlElement *root)
 			else if (hash == HashedStrings::H_ComplexShipTile)
 			{
 				result = LoadComplexShipTile(node, &tile);
-				if (tile && (result == ErrorCodes::NoError || result == ErrorCodes::TileCompiledWithoutGeometryDataLoaded))
+				if (tile && (result == ErrorCodes::NoError))
 				{
-					// "TileCompiledWithoutGeometryDataLoaded" is an expected case and should still be treated as success
 					object->AddTile(&tile);
 				}
 			}
@@ -1427,78 +1438,17 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 
 	// Now attempt to compile and validate the tile based on the data that was loaded from XML
 	compilation_result = def->CompileAndValidateTile(tile);
-	if (compilation_result != ErrorCodes::NoError && compilation_result != ErrorCodes::TileCompiledWithoutGeometryDataLoaded)
+	if (compilation_result != ErrorCodes::NoError)
 	{
-		// In case of any error OTHER THAN geometry data being required (which we will fix during 
-		// post-processing), delete the partially-constructed tile and return the error code
+		// In case of any error, delete the partially-constructed tile and return the error code
 		Game::Log << LOG_WARN << "Tile " << tile->GetID() << " of type \"" << def->GetCode() << "\" failed load-time validation and will not be instantiated (" << compilation_result << ")\n";
 		SafeDelete(tile);
 		return compilation_result;
 	}
 	
-	// From this point onwards we will return a valid tile object.  We can therefore register the tile
-	// for post-processing if it was required
-	if (compilation_result == ErrorCodes::TileCompiledWithoutGeometryDataLoaded)
-	{
-		// If the tile was compiled based on any model data that does not have its geometry data
-		// loaded, it may require recalculation once the geometry data is available
-		RegisterCompoundModelRequiringGeometryCalculation(tile);
-	}
-
 	// Set a pointer to the new tile and return success to indicate that the tile was created successfully
 	(*pOutShipTile) = tile;
 	return compilation_result;
-}
-
-// Adds an object to the queue for post-processing of its compound model data, once model geometry 
-// has been loaded.  Method defined for each type of object that can contain compound models
-void IO::Data::RegisterCompoundModelRequiringGeometryCalculation(ComplexShipTile *tile)
-{
-	if (tile && tile->HasCompoundModel())
-		IO::Data::CompoundModelsPendingPostProcessing.tiles.push_back(tile);
-}
-
-// Post-process all compound model objects that did not have full geometry data available upon compilation
-// Must be called after LoadAllModelGeometry() and PostProcessAllModelGeometry() in the load sequence
-// to ensure all required geometry data is available
-Result IO::Data::PostProcessCompoundModelData(void)
-{
-	Result result, overallresult = ErrorCodes::NoError;
-
-	// Tile objects
-	result = PostProcessTileCompoundModelData();
-	if (result != ErrorCodes::NoError) overallresult = result;
-
-	// (Other object types...)
-
-
-	// Return the overall result from post-processing of all object types
-	return overallresult;
-}
-
-// Post-process all compound model objects that did not have full geometry data available upon compilation
-Result IO::Data::PostProcessTileCompoundModelData(void)
-{
-	// Process every tile that was registered for post-processing
-	std::vector<ComplexShipTile*>::size_type processed = 0U;
-	auto it_end = IO::Data::CompoundModelsPendingPostProcessing.tiles.end();
-	for (auto it = IO::Data::CompoundModelsPendingPostProcessing.tiles.begin(); it != it_end; ++it)
-	{
-		ComplexShipTile *tile = (*it);
-		if (tile && tile->HasCompoundModel())
-		{
-			tile->RecalculateCompoundModelData();
-			tile->RecalculateWorldMatrix();
-			++processed;
-		}
-	}
-
-	// Log the result and clear the list of pending objects since these have all now been processed
-	Game::Log << LOG_INFO << "Post-processed " << IO::Data::CompoundModelsPendingPostProcessing.tiles.size() << " compound tile models (" <<
-		processed << " of " << IO::Data::CompoundModelsPendingPostProcessing.tiles.size() << " succeeded)\n";
-
-	IO::Data::CompoundModelsPendingPostProcessing.tiles.clear();
-	return ErrorCodes::NoError;
 }
 
 Result IO::Data::LoadComplexShipTileCompoundModel(TiXmlElement *node, ComplexShipTileDefinition *tiledef)
@@ -3110,47 +3060,6 @@ CollisionSpatialDataF IO::Data::LoadCollisionSpatialData(TiXmlElement *node)
 	return data;
 }
 
-Result IO::Data::LoadAllModelGeometry(void)
-{
-	unsigned int processtime;
-	Result res			= ErrorCodes::NoError; 
-	Result overallres	= ErrorCodes::NoError;
-
-	// Iterate over each model in the central collection and load the geometry one by one
-	Model::ModelCollection::iterator it_end = Model::Models.end();
-	for (Model::ModelCollection::iterator it = Model::Models.begin(); it != it_end; ++it) 
-	{
-		// Record the time taken to process this model; store the start time before beginning
-		processtime = (unsigned int)timeGetTime();
-
-		if (it->second) 
-		{
-			// Load the model geometry
-			res = IO::Data::LoadModelGeometry(it->second);
-		} 
-		else 
-		{
-			/* If object is NULL then report an error and load no mesh */
-			res = ErrorCodes::CannotLoadMeshForNullObject;
-		}
-	
-		// After each iteration we need to report any error that arises and then move onto the next object
-		if (res != ErrorCodes::NoError) 
-		{
-			overallres = ErrorCodes::ErrorsOccuredWhileLoadingMeshes;
-			Game::Log << LOG_ERROR << "Error loading model geometry for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\"\n";
-		}
-		else
-		{
-			processtime = ((unsigned int)timeGetTime() - processtime);
-			Game::Log << LOG_INFO << "Geometry loaded for \"" << (it->second ? it->second->GetCode() : "(NULL)") << "\" [" << processtime << "ms]\n";
-		}
-	}
-
-	// Return the overall success (or otherwise) value once we have loaded as much as possible
-	return overallres;
-}
-
 // Loads the geometry for the specified model
 Result IO::Data::LoadModelGeometry(Model *model)
 {
@@ -3179,43 +3088,6 @@ Result IO::Data::LoadModelGeometry(Model *model)
 
 	// Return the result of the model loading operation
 	return r;
-}
-
-// Runs post-load-processing of all model geometry as necessary
-Result IO::Data::PostProcessAllModelGeometry(void)
-{
-	Model *model;
-	INTVECTOR3 elsize;
-
-	// Iterate over each model in the central collection and check whether each needs to be post-processed
-	Model::ModelCollection::const_iterator it_end = Model::Models.end();
-	for (Model::ModelCollection::const_iterator it = Model::Models.begin(); it != it_end; ++it) 
-	{
-		// Make sure this is a valid model
-		model = it->second;				if (!model) continue;
-			
-		// Test whether this model has an element size specified
-		elsize = model->GetElementSize();
-		if (elsize.x > 0 && elsize.y > 0 && elsize.z > 0)
-		{
-			// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
-			model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
-		}
-	}
-
-	// Now run post-processing of all articulated models, which relises on post-processed models in the static model
-	// collection above
-	for (const auto & articulated_model_entry : ArticulatedModel::Models)
-	{
-		ArticulatedModel *articulated_model = articulated_model_entry.second;
-		if (articulated_model)
-		{
-			articulated_model->PerformPostLoadInitialisation();
-		}
-	}
-
-	// Return success once all post-processing is complete
-	return ErrorCodes::NoError;
 }
 
 Result IO::Data::PostProcessResources(void)

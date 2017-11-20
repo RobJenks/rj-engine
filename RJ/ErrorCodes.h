@@ -578,8 +578,7 @@ namespace ErrorCodes {
 	const Result		TileConnectionStateIsInvalid					= 4034;
 	const Result		CannotEvaluateEnvironmentMapWithoutElementRef	= 4035;
 	const Result		InvalidTileClass								= 4036;
-	const Result		TileCompiledWithoutGeometryDataLoaded			= 4037;
-	const Result		CannotRevertInvalidTileToBaseDefinition			= 4038;
+	const Result		CannotRevertInvalidTileToBaseDefinition			= 4037;
 
 	// Ship designer errors												(4400-4599)
 	const Result		ShipDesignerCannotLoadInvalidShipCode			= 4400;

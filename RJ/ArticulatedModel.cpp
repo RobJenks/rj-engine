@@ -413,6 +413,9 @@ ArticulatedModel * ArticulatedModel::Copy(void)
 	// Copy all model tag data to the new instance
 	model->Tags = Tags;
 
+	// Recalculate model-related data, such as the consolidated model extents
+	model->PerformPostLoadInitialisation();
+
 	// Return a pointer to the new model
 	return model;
 }

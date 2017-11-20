@@ -281,31 +281,40 @@ void Model::RecalculateCompoundModelData(void)
 {
 	// Make sure we have the correct number of compound model components stored (should be redundant, but do this for safety)
 	m_compoundmodelcount = m_compoundmodels.size();
-
-	// We will recalculate the bounds of the model
-	XMFLOAT3 minbounds = XMFLOAT3(999999.0f, 999999.0f, 999999.0f);
-	XMFLOAT3 maxbounds = XMFLOAT3(-999999.0f, -999999.0f, -999999.0f);
-	XMFLOAT3 modelmin, modelmax;
-
-	// Iterate through the component of this compound model to determine the min and max bounds of the overall model
-	Model::CompoundModelComponentCollection::const_iterator it_end = m_compoundmodels.end();
-	for (Model::CompoundModelComponentCollection::const_iterator it = m_compoundmodels.begin(); it != it_end; ++it)
+	if (m_compoundmodelcount == 0U)
 	{
-		// Retrieve the bounds of this component, allowing for the per-component offset
-		modelmin = Float3Add(it->model->GetModelMinBounds(), it->offset);
-		modelmax = Float3Add(it->model->GetModelMaxBounds(), it->offset);
-		
-		// If this component expands the overall model bounds then record that here
-		if (modelmin.x < minbounds.x) minbounds.x = modelmin.x;
-		if (modelmin.y < minbounds.y) minbounds.y = modelmin.y;
-		if (modelmin.z < minbounds.z) minbounds.z = modelmin.z;
-		if (modelmax.x > maxbounds.x) maxbounds.x = modelmax.x;
-		if (modelmax.y > maxbounds.y) maxbounds.y = modelmax.y;
-		if (modelmax.z > maxbounds.z) maxbounds.z = modelmax.z;
+		// Assign default values if the model has no components
+		m_minbounds = m_maxbounds = NULL_FLOAT3;
+	}
+	else
+	{
+		// We will recalculate the bounds of the model
+		XMFLOAT3 minbounds = XMFLOAT3(999999.0f, 999999.0f, 999999.0f);
+		XMFLOAT3 maxbounds = XMFLOAT3(-999999.0f, -999999.0f, -999999.0f);
+		XMFLOAT3 modelmin, modelmax;
+
+		// Iterate through the component of this compound model to determine the min and max bounds of the overall model
+		Model::CompoundModelComponentCollection::const_iterator it_end = m_compoundmodels.end();
+		for (Model::CompoundModelComponentCollection::const_iterator it = m_compoundmodels.begin(); it != it_end; ++it)
+		{
+			// Retrieve the bounds of this component, allowing for the per-component offset
+			modelmin = Float3Add(it->model->GetModelMinBounds(), it->offset);
+			modelmax = Float3Add(it->model->GetModelMaxBounds(), it->offset);
+
+			// If this component expands the overall model bounds then record that here
+			if (modelmin.x < minbounds.x) minbounds.x = modelmin.x;
+			if (modelmin.y < minbounds.y) minbounds.y = modelmin.y;
+			if (modelmin.z < minbounds.z) minbounds.z = modelmin.z;
+			if (modelmax.x > maxbounds.x) maxbounds.x = modelmax.x;
+			if (modelmax.y > maxbounds.y) maxbounds.y = modelmax.y;
+			if (modelmax.z > maxbounds.z) maxbounds.z = modelmax.z;
+		}
+
+		// Store the overall model bounds
+		m_minbounds = minbounds; m_maxbounds = maxbounds;
 	}
 
-	// Store these overall model bounds, then recalculate the remaining model dimensions based on these bounds
-	m_minbounds = minbounds; m_maxbounds = maxbounds;
+	// Recalculate remaining model statistics based on this data
 	RecalculateDimensions();
 }
 
@@ -402,9 +411,9 @@ Result Model::LoadModel(const char *filename)
 	std::ifstream fin;
 	char input;
 
-	// Initialise min and max bounds before we start loading the model
-	m_minbounds = XMFLOAT3(99999.0f, 99999.0f, 99999.0f);
-	m_maxbounds = XMFLOAT3(-99999.0f, -99999.0f, -99999.0f);
+	// Default values if the model cannot be loaded for some reason
+	m_minbounds = NULL_FLOAT3;
+	m_maxbounds = NULL_FLOAT3;
 
 	// Open the model file.
 	fin.open(filename);
@@ -443,6 +452,10 @@ Result Model::LoadModel(const char *filename)
 	}
 	fin.get(input);
 	fin.get(input);
+
+	// Initialise min and max bounds before we start loading the model vertex data
+	m_minbounds = XMFLOAT3(99999.0f, 99999.0f, 99999.0f);
+	m_maxbounds = XMFLOAT3(-99999.0f, -99999.0f, -99999.0f);
 
 	// Read in the vertex data.
 	for (unsigned int i = 0; i < m_vertexCount; ++i)

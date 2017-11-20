@@ -90,14 +90,14 @@ void DataObjectContinuousSwitch::RefreshSwitchData(void)
 	if (m_value_min > m_value_max) std::swap(m_value_min, m_value_max);
 
 	// Make updates to the model, assuming it has been loaded
-	if (m_model)
+	if (m_articulated_model)
 	{
 		// Attempt to locate key components
-		m_switch_component = m_model->GetComponentWithTag(m_switch_component_tag);
-		m_switch_constraint = m_model->GetConstraintWithTag(m_switch_constraint_tag);
+		m_switch_component = m_articulated_model->GetComponentWithTag(m_switch_component_tag);
+		m_switch_constraint = m_articulated_model->GetConstraintWithTag(m_switch_constraint_tag);
 
 		// Make sure the switch rotation is valid within the current constraint range
-		float current_rotation = m_model->GetConstraintRotation(m_switch_constraint);
+		float current_rotation = m_articulated_model->GetConstraintRotation(m_switch_constraint);
 		if (current_rotation < m_constraint_min) SetSwitchRotation(m_constraint_min);
 		if (current_rotation > m_constraint_max) SetSwitchRotation(m_constraint_max);
 	}

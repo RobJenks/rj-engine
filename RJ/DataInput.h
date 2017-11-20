@@ -44,7 +44,12 @@ class ElementStateDefinition;
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data {
 
+	// Load model data (i.e. xml definitions) without loading the geometry itself
 	Result LoadModelData(TiXmlElement *node);
+
+	// Load geometry for a specific model
+	Result LoadModelGeometry(Model *model);
+
 
 	TiXmlDocument *LoadXMLDocument(const std::string &filename);
 	Result LoadGameDataFile(const std::string &filename, bool follow_indices);
@@ -96,19 +101,9 @@ namespace IO { namespace Data {
 	// Load a set of collision spatial data.  Returns a flag indicating whether the data could be loaded
 	CollisionSpatialDataF LoadCollisionSpatialData(TiXmlElement *node);
 
-	Result LoadAllModelGeometry(void);								// Iterates through all model collections and loads models one-by-one
-	Result LoadModelGeometry(Model *model);							// Method to load geometry for a specific model
-	Result PostProcessAllModelGeometry(void);						// Runs post-load manipulation of model geometry as necessary
-
 	// Adds an object to the queue for post-processing of its compound model data, once model geometry 
 	// has been loaded.  Method defined for each type of object that can contain compound models
 	void RegisterCompoundModelRequiringGeometryCalculation(ComplexShipTile *tile);
-
-	// Post-process all compound model objects that did not have full geometry data available upon compilation
-	// Must be called after LoadAllModelGeometry() and PostProcessAllModelGeometry() in the load sequence
-	// to ensure all required geometry data is available
-	Result PostProcessCompoundModelData(void);
-	Result PostProcessTileCompoundModelData(void);
 
 	// Post-processing methods for loaded game data, where data is dependent on other data (of the same or different class) that must be loaded first
 	Result PostProcessResources(void);					// Resources must be interlinked with their dependencies/ingredients, and also productioncost initialisation
@@ -173,14 +168,6 @@ namespace IO { namespace Data {
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
 	ComplexShipSection *FindInTemporaryCSSBuffer(const std::string & code);
 
-	// Collection of objects with compound models that require geometry-dependent data that wasn't available
-	// during loading.  These objects will be updated during the post-processing phase
-	struct compound_models_pending_postprocessing_T
-	{
-		std::vector<ComplexShipTile*> tiles;
-
-	};
-	extern IO::Data::compound_models_pending_postprocessing_T  CompoundModelsPendingPostProcessing;
 }}
 
 
