@@ -5,6 +5,7 @@
 
 #include "CompilerSettings.h"
 class Model;
+class ArticulatedModel;
 
 // This class has no special alignment requirements
 class TerrainDefinition
@@ -26,6 +27,7 @@ public:
 	// Returns or sets a reference to the renderable model associated with this terrain
 	CMPINLINE Model *						GetModel(void) const				{ return m_model; }
 	CMPINLINE void							SetModel(Model *m)					{ m_model = m; }
+	
 	CMPINLINE bool							HasModel(void) const				{ return (m_model != NULL); }
 
 	// Returns or sets the default extent for a terrain object of this type
@@ -53,9 +55,9 @@ public:
 protected:
 
 	std::string								m_code;							// Unique string code for this terrain class
-	Model *									m_model;						// Pointer to the model associated with this terrain
 	XMFLOAT3								m_defaultextent;				// Default extent for this terrain type; can be overridden by each instance
-
+	Model *									m_model;						// Pointer to the model associated with this terrain, if applicable
+	
 	bool									m_destructible;					// Determines whether the object can be damaged
 	float									m_maxhealth;					// Maximum health value, for destructible objects	
 

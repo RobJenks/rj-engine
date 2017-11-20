@@ -22,7 +22,7 @@ Terrain::Terrain()
 	:	m_definition(NULL), m_parent(NULL), m_sourcetype(TerrainSourceType::NoSource), m_orientation(ID_QUATERNION), m_worldmatrix(ID_MATRIX), 
 		m_collisionradius(0.0f), m_collisionradiussq(0.0f), m_health(0.0f), m_element_min(NULL_INTVECTOR3), m_element_max(NULL_INTVECTOR3), 
 		m_multielement(false), m_postponeupdates(false), m_env_treenode(NULL), m_parenttile(0), m_mass(1.0f), m_hardness(1.0f), 
-		m_isdynamic(false), m_dataenabled(false), m_usable(false)
+		m_isdynamic(false), m_dataenabled(false), m_usable(false), m_articulated_model(NULL), m_has_model(false)
 {
 	m_data.Centre = NULL_VECTOR;
 	m_data.ExtentF = NULL_FLOAT3;
@@ -62,8 +62,37 @@ void Terrain::SetDefinition(const TerrainDefinition *d)
 
 		// Recalculate positional data, since e.g. the range of elements this object covers may now be different
 		RecalculatePositionalData();
+
+		// Update the flag that identifies whether we have a renderable model or not
+		UpdateModelFlag();
 	}
 }
+
+// Indicates whether this terrain object has a static model reference in its terrain definition
+bool Terrain::HasStaticModel(void) const 
+{ 
+	return (m_definition && m_definition->HasModel()); 
+}
+
+// Return a reference to the static model assigned to this terrain object, or NULL if none is assigned
+const Model * Terrain::GetStaticModel(void) const 
+{ 
+	return (m_definition ? m_definition->GetModel() : NULL); 
+}
+
+void Terrain::SetArticulatedModel(ArticulatedModel *m) 
+{
+	// Store the new model and update the flag indicating whether we have a model
+	m_articulated_model = m; 
+	UpdateModelFlag(); 
+
+	// Take the consolidated model size if not already specified; this will also recalculate e.g. the collision radius
+	if (m_articulated_model && IsZeroFloat3(m_data.ExtentF))
+	{
+		SetExtent(XMLoadFloat3(&m_articulated_model->GetExtent()));
+	}
+}
+
 
 // Set the parent environment that contains this terrain object, or NULL if no environment
 void Terrain::SetParentEnvironment(iSpaceObjectEnvironment *env)
@@ -334,6 +363,9 @@ Terrain * Terrain::Clone(void) const
 	// Assign a new unique ID to the object, and remove its parent pointer since it does not initially belong to any environment
 	terrain->SetID(Terrain::GenerateNewUniqueID());
 	terrain->SetParentEnvironment(NULL);
+
+	// If any per-instance articulated model is present then clone it for this new instance
+	if (terrain->GetArticulatedModel()) terrain->SetArticulatedModel(terrain->GetArticulatedModel()->Copy());
 
 	// Return the new terrain instance
 	return terrain;

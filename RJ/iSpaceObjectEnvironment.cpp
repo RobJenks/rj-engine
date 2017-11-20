@@ -2871,7 +2871,7 @@ void iSpaceObjectEnvironment::GetAllVisibleObjectsWithinDistance(EnvironmentTree
 				for (std::vector<Terrain*>::const_iterator it = node->GetNodeTerrain().begin(); it != it_end; ++it)
 				{
 					// Terrain object must exist and be within the search radius
-					obj = (*it); if (!obj || !obj->GetDefinition() || !obj->GetDefinition()->HasModel()) continue;
+					obj = (*it); if (!obj || !obj->HasModel()) continue;
 					threshold_dist = XMVectorAdd(search_radius, XMVectorReplicate(obj->GetCollisionRadius()));
 					if (XMVector2Greater(XMVector3LengthSq(XMVectorSubtract(obj->GetEnvironmentPosition(), position)),
 						XMVectorMultiply(threshold_dist, threshold_dist))) continue;

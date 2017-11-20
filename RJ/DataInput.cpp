@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 #include <Windows.h>
 
 #include "GameDataExtern.h"
@@ -3199,6 +3200,17 @@ Result IO::Data::PostProcessAllModelGeometry(void)
 		{
 			// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
 			model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
+		}
+	}
+
+	// Now run post-processing of all articulated models, which relises on post-processed models in the static model
+	// collection above
+	for (const auto & articulated_model_entry : ArticulatedModel::Models)
+	{
+		ArticulatedModel *articulated_model = articulated_model_entry.second;
+		if (articulated_model)
+		{
+			articulated_model->PerformPostLoadInitialisation();
 		}
 	}
 

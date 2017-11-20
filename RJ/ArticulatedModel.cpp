@@ -1,4 +1,5 @@
 #include "GameVarsExtern.h"
+#include "Model.h"
 #include "ArticulatedModelComponent.h"
 
 #include "ArticulatedModel.h"
@@ -8,15 +9,12 @@ ArticulatedModel::ModelCollection ArticulatedModel::Models;
 
 // Constructor; must set the number of components at creation
 ArticulatedModel::ArticulatedModel(int componentcount)
+	:
+	m_code(NullString), m_componentcount(0), m_attachcount(0), m_components(NULL), 
+	m_rootcomponent(0), m_attachments(NULL), m_attachment_indices(NULL), m_extent(NULL_FLOAT3)
 {
 	// Validate parameters
-	if (componentcount < 1 || componentcount > Game::C_MAX_ARTICULATED_MODEL_SIZE)
-	{
-		m_componentcount = m_attachcount = m_rootcomponent = 0;
-		m_components = NULL; 
-		m_attachments = NULL;
-		return;
-	}
+	if (componentcount < 1 || componentcount > Game::C_MAX_ARTICULATED_MODEL_SIZE) return;
 
 	// Store the component counts (always one fewer attachment than number of components)
 	m_componentcount = componentcount;
@@ -175,16 +173,33 @@ void ArticulatedModel::ReplaceComponent(int index, const ArticulatedModelCompone
 // Initialises the model once all data has been loaded, to make sure it is ready for use in-game
 void ArticulatedModel::PerformPostLoadInitialisation(void)
 {
-	// Determine the root component for this model
+	XMVECTOR extent = NULL_VECTOR;
 	m_rootcomponent = 0;
+
+	// Process each component in turn
 	for (int i = 0; i < m_componentcount; ++i)
 	{
+		// Add component extents to the consolidate terrain bounding box
+		Model *model = m_components[i]->Model;
+		if (model)
+		{
+			XMVECTOR largest_bound = XMVectorMax(
+				XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), XMLoadFloat3(&model->GetModelMinBounds()))),
+				XMVectorAbs(XMVectorAdd(m_components[i]->GetPosition(), XMLoadFloat3(&model->GetModelMaxBounds()))));
+
+			extent = XMVectorMax(extent, largest_bound);
+		}
+
+		// Also attempt to determine the root component for this model
 		if (!m_components[i]->HasParentAttachment())
 		{
 			m_rootcomponent = i;
-			break;
 		}
 	}
+
+	// Update the consolidated model extent based on the per-component calculations above
+	XMStoreFloat3(&m_extent, extent);
+	
 }
 
 // Performs an update of all components in the articulated model before rendering

@@ -53,6 +53,9 @@ public:
 	// Attempts to create an attachment between the two specified components.  Returns an errorcode if not possible
 	Result										SetAttachment(int attach_index, int parent_index, int child_index);
 
+	// Return the extents of this consolidated model
+	CMPINLINE XMFLOAT3							GetExtent(void) const						{ return m_extent; }
+
 	// Initialises the model once all data has been loaded, to make sure it is ready for use in-game
 	void										PerformPostLoadInitialisation(void);
 
@@ -124,6 +127,9 @@ protected:
 
 	// Collection of integer pairs describing the attachments, for efficient lookup
 	int *										m_attachment_indices;
+
+	// Extents of the consolidated model
+	XMFLOAT3									m_extent;
 };
 
 

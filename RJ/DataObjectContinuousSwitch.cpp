@@ -41,7 +41,7 @@ void DataObjectContinuousSwitch::SetDynamicTerrainProperty(const std::string & k
 	if (hash == HashedStrings::H_ValueRangeMin)					SetValueRangeMin((float)atof(value.c_str()));
 	else if (hash == HashedStrings::H_ValueRangeMax)			SetValueRangeMax((float)atof(value.c_str()));
 	else if (hash == HashedStrings::H_ValueDeltaThreshold)		SetValueDeltaThreshold((float)atof(value.c_str()));
-	else if (hash == HashedStrings::H_ArticulatedModel)			SetArticulatedModel(value);
+	else if (hash == HashedStrings::H_ArticulatedModel)			SetArticulatedSwitchModel(value);
 	else if (hash == HashedStrings::H_ModelSwitchComponent)		SetSwitchComponentTag(value);
 	else if (hash == HashedStrings::H_ModelSwitchConstraint)	SetSwitchConstraintTag(value);
 	else if (hash == HashedStrings::H_SwitchConstraintMin)		SetConstraintMin((float)atof(value.c_str()));
@@ -59,12 +59,12 @@ bool DataObjectContinuousSwitch::OnUsed(iObject *user, DynamicTerrainInteraction
 }
 
 // Set the articulated model used for this switch component
-void DataObjectContinuousSwitch::SetArticulatedModel(const std::string & model_code)
+void DataObjectContinuousSwitch::SetArticulatedSwitchModel(const std::string & model_code)
 {
 	ArticulatedModel *model = ArticulatedModel::GetModel(model_code);
 	if (!model) return;
 
-	m_model = model->Copy();
+	SetArticulatedModel( model->Copy() );
 	RefreshSwitchData();
 }
 

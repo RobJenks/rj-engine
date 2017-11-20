@@ -60,7 +60,7 @@ protected:
 	virtual bool								OnUsed(iObject *user, DynamicTerrainInteraction && interaction);
 
 	// Set the articulated model used for this switch component
-	void										SetArticulatedModel(const std::string & model_code);
+	void										SetArticulatedSwitchModel(const std::string & model_code);
 
 	// Store required tags relating to the switch model
 	void										SetSwitchConstraintTag(const std::string & tag);

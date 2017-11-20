@@ -69,6 +69,8 @@
 #include "NavNode.h"
 #include "SentenceType.h"
 #include "PortalRenderingStep.h"
+#include "DynamicTerrain.h"						// DBG
+#include "DynamicTerrainDefinition.h"			// DBG
 #include <tchar.h>
 #include <unordered_map>
 
@@ -1589,14 +1591,15 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 	}
 }
 
-// Render an object with an articulated model.  Protected; called only from RenderObject()
+// Render an object with an articulated model
 void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 {
-	// Guaranteed: object != NULL, object->GetArticulatedModel() != NULL,  based on validation in RenderModel 
-    // method, which is the only method which can invoke this one.  Update to include NULL checks if this situation changes
+	// Parameter check
+	if (!object) return;
 
     // Perform an update of the articulated model to ensure all components are correctly positioned
 	ArticulatedModel *model = object->GetArticulatedModel();
+	if (!model) return;
 	model->Update(object->GetPosition(), object->GetOrientation(), object->GetWorldMatrix());
 	
     // Cache data for efficiency
@@ -1810,6 +1813,8 @@ RJ_PROFILED(void CoreEngine::RenderEnvironment, iSpaceObjectEnvironment *environ
 */
 Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment, const FXMVECTOR view_position, Frustum *initial_frustum, const Frustum **pOutGlobalFrustum)
 {
+	const TerrainDefinition *terrain_def = NULL;
+
 	// Parameter check
 	if (!environment || !initial_frustum) return ErrorCodes::CannotRenderNullEnvironment;
 
@@ -1876,21 +1881,47 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 		{
 			if (!terrain) continue;
 			if (terrain->IsRendered()) continue;
-			if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
+			if (terrain->IsDestroyed()) continue; 
+			
+			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01")
+			{
+				int a = 1;
+			}
 
-			// We should not render anything if the object has been destroyed
-			if (terrain->IsDestroyed()) continue;
+			terrain_def = terrain->GetDefinition();
+			if (terrain_def && terrain_def->HasModel())
+			{
+				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
+					));
 
-			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
-				XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-				RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
-			));
+				// This terrain object has been rendered
+				terrain->MarkAsRendered();
+				++m_renderinfo.TerrainRenderCount;
+			}
+			else if (terrain->HasArticulatedModel())
+			{
+				// Render each component of the articulated model
+				ArticulatedModel *model = terrain->GetArticulatedModel();
+				model->Update(XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix()),
+					XMQuaternionMultiply(terrain->GetOrientation(), environment->GetOrientation()),
+					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
 
-			// This terrain object has been rendered
-			terrain->MarkAsRendered();
-			++m_renderinfo.TerrainRenderCount;
+				int n = model->GetComponentCount();
+				ArticulatedModelComponent **component = model->GetComponents();
+				for (int i = 0; i < n; ++i, ++component)
+				{
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
+						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				}
+
+				// This terrain object has been rendered
+				terrain->MarkAsRendered();
+				++m_renderinfo.TerrainRenderCount;
+			}
 		}
 		DEBUG_PORTAL_TRAVERSAL_LOG(environment, concat("   Rendered ")(m_renderinfo.TerrainRenderCount - terrain_count_rendered)(" terrain objects in cell\n").str());
 
@@ -2135,6 +2166,8 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 	RJ_FRAME_PROFILER_PROFILE_BLOCK(concat("Rendered environment sector containing ")(node->GetNodeObjects().size())(" objects, ")(node->GetTerrainCount())(" terrain objects (")
 		(node->GetElementMin().ToString())(" to ")(node->GetElementMax().ToString())(")").str(), 
 	{
+		const TerrainDefinition *terrain_def = NULL;
+
 		// Render all objects within this node
 		iEnvironmentObject *object;
 		std::vector<iEnvironmentObject*>::const_iterator o_it_end = node->GetNodeObjects().end();
@@ -2160,21 +2193,44 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			terrain = (*t_it);
 			if (!terrain) continue;
 			if (terrain->IsRendered()) continue;
-			if (!terrain->GetDefinition() || !terrain->GetDefinition()->GetModel()) continue;
-
-			// We should not render anything if the object has been destroyed
 			if (terrain->IsDestroyed()) continue;
 
-			// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
-			// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-			SubmitForRendering(RenderQueueShader::RM_LightShader, terrain->GetDefinition()->GetModel(),
-				XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-				RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
-			));
+			terrain_def = terrain->GetDefinition();
+			if (terrain_def && terrain_def->HasModel())
+			{
+				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
+				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
+				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
+					));
 
-			// This terrain object has been rendered
-			terrain->MarkAsRendered();
-			++m_renderinfo.TerrainRenderCount;
+				// This terrain object has been rendered
+				terrain->MarkAsRendered();
+				++m_renderinfo.TerrainRenderCount;
+			}
+			else if (terrain->HasArticulatedModel())
+			{
+				// Render all components of the articulated model
+				ArticulatedModel *model = terrain->GetArticulatedModel();
+				model->Update(XMVector3TransformCoord(terrain->GetPosition(), environment->GetZeroPointWorldMatrix()),
+					XMQuaternionMultiply(terrain->GetOrientation(), environment->GetOrientation()),
+					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()));
+
+				int n = model->GetComponentCount();
+				ArticulatedModelComponent **component = model->GetComponents();
+				for (int i = 0; i < n; ++i, ++component)
+				{
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
+						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				}
+
+				// This terrain object has been rendered
+				terrain->MarkAsRendered();
+				++m_renderinfo.TerrainRenderCount;
+			}
+
+			
 		}
 	});
 }

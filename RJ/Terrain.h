@@ -12,6 +12,7 @@
 #include "RepairableObject.h"
 #include "DynamicTerrainInteractionType.h"
 class Model;
+class ArticulatedModel;
 class TerrainDefinition;
 class EnvironmentTree;
 class DynamicTerrain;
@@ -94,6 +95,19 @@ public:
 	
 	// Returns a value indicating whether this terrain object overlaps the specified element
 	bool											OverlapsElement(const INTVECTOR3 & el) const;
+
+	// Return a reference to the (shared, const) static model assigned to this terrain, if one exists, or NULL if not
+	bool											HasStaticModel(void) const;
+	const Model *									GetStaticModel(void) const;
+
+	// Special case where terrain may have a per-instance articulated model, instead of the default reference to
+	// a static model in the terrain definition
+	CMPINLINE bool									HasArticulatedModel(void) const					{ return (m_articulated_model != NULL); }
+	CMPINLINE ArticulatedModel *					GetArticulatedModel(void) const					{ return m_articulated_model; }
+	void											SetArticulatedModel(ArticulatedModel *m);
+
+	// Return a flag indicating whether this model has a model of any kind (and therefore is renderable)
+	CMPINLINE bool									HasModel(void) const							{ return m_has_model; }
 
 	// If this is a dynamic terrain object it can be promoted to access greater functionality
 	CMPINLINE bool									IsDynamic(void) const							{ return m_isdynamic; }
@@ -204,6 +218,11 @@ protected:
 	INTVECTOR3								m_element_min, m_element_max;		// Store the range of elements that this terrain object spans
 	bool									m_multielement;						// Flag indicating whether we span >1 element, for render-time efficiency
 
+	ArticulatedModel *						m_articulated_model;				// Special case: if a terrain object has a per-instance articulated model, instead of the normal
+																				// reference to a static model in the terrain definition
+
+	bool									m_has_model;						// Flag indicating whether this terrain has any kind of renderable model
+
 																				// TODO: All these bool flags can be consolidated to a bitstring if needed
 	bool									m_isdynamic;						// If this is a dynamic terrain object it can be promoted to access greater functionality
 
@@ -223,8 +242,12 @@ protected:
 	bool									m_postponeupdates;					// Flag indicating whether the terrain object should postpone updates until it is released again
 																				// Used to make multiple adjustments without recalculating derived data each time
 
-	Terrain *								Clone(void) const;					// Clone method for regular static terrain objects; not applicable for dynamic terrain otherwise dynamic terrain data will be lost
 
+	// Clone method for regular static terrain objects; not applicable for dynamic terrain otherwise dynamic terrain data will be lost
+	Terrain *								Clone(void) const;					
+
+	// Update the flag which indicates whether this terrain has a model of any kind (and therefore is renderable)
+	CMPINLINE void							UpdateModelFlag(void) { m_has_model = (HasStaticModel() || HasArticulatedModel()); }
 };
 
 

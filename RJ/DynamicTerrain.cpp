@@ -1,3 +1,4 @@
+#include "ArticulatedModel.h"
 #include "DynamicTerrainDefinition.h"
 #include "DynamicTerrain.h"
 
@@ -35,6 +36,9 @@ void DynamicTerrain::InitialiseDynamicTerrainBase(void)
 
 	// Revert the parent environment of this object since it is not initially assigned to any parent
 	SetParentEnvironment(NULL);
+
+	// If any per-instance articulated model is present then clone it for this new instance
+	if (GetArticulatedModel()) SetArticulatedModel(GetArticulatedModel()->Copy());
 
 	// Clear all port data since it has been cloned from the source and is not valid within this object.  We do 
 	// so silently since the data is not valid within this object, and we do not want to start raising disconnection

@@ -653,8 +653,9 @@ private:
 	// Render an object with a static model.  Protected; called only from RenderObject()
 	void                    RenderObjectWithStaticModel(iObject *object);
 
-	// Render an object with an articulated model.  Protected; called only from RenderObject()
+	// Render an object with an articulated model
 	void                    RenderObjectWithArticulatedModel(iObject *object);
+	void					RenderTerrainWithArticulatedModel(Terrain *object);
 
 	// Renders the entire contents of an environment tree node.  Internal method; no parameter checking
 	void					RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *environment, EnvironmentTree *node, const FXMVECTOR environment_relative_viewer_position);
