@@ -39,7 +39,6 @@ public:
 protected:
 
 	// Switch model and associated data
-	ArticulatedModel *							m_model;
 	std::string									m_switch_component_tag;
 	int											m_switch_component;
 	std::string									m_switch_constraint_tag;

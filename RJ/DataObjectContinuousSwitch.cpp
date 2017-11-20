@@ -5,7 +5,7 @@
 // Default constructor
 DataObjectContinuousSwitch::DataObjectContinuousSwitch(void)
 	:
-	m_model(NULL), m_switch_component_tag(NullString), m_switch_component(-1), m_switch_constraint_tag(NullString), m_switch_constraint(-1), 
+	m_switch_component_tag(NullString), m_switch_component(-1), m_switch_constraint_tag(NullString), m_switch_constraint(-1), 
 	m_constraint_min(-PI / 4.0f), m_constraint_max(+PI / 4.0f), 
 	m_value_min(-1.0f), m_value_max(+1.0f), m_value_delta_threshold(0.01f), 
 	PORT_SEND(DataPorts::NO_PORT_INDEX)
@@ -17,7 +17,6 @@ DataObjectContinuousSwitch::DataObjectContinuousSwitch(void)
 void DataObjectContinuousSwitch::InitialiseDynamicTerrain(void)
 {
 	// Clear any data that should be set per-instance
-	m_model = NULL;
 	m_last_value = FLT_MIN;		// So that the first change will always be above the delta threshold
 
 	// Initialise the data ports required for this object
@@ -147,9 +146,9 @@ void DataObjectContinuousSwitch::SetSwitchRotation(float rotation)
 	rotation = clamp(rotation, m_constraint_min, m_constraint_max);
 
 	// Set the switch model rotation
-	if (m_model)
+	if (m_articulated_model)
 	{
-		m_model->SetConstraintRotation(m_switch_constraint, rotation);
+		m_articulated_model->SetConstraintRotation(m_switch_constraint, rotation);
 	}
 
 	// Determine the value corresponding to this degree of rotation
@@ -167,9 +166,9 @@ void DataObjectContinuousSwitch::SetSwitchRotation(float rotation)
 // Adjust the switch by the specified delta
 void DataObjectContinuousSwitch::AdjustSwitchRotation(float rotation_delta)
 {
-	if (!m_model || m_switch_constraint < 0) return;
+	if (!m_articulated_model || m_switch_constraint < 0) return;
 
-	SetSwitchRotation( m_model->GetConstraintRotation(m_switch_constraint) + rotation_delta );
+	SetSwitchRotation( m_articulated_model->GetConstraintRotation(m_switch_constraint) + rotation_delta );
 }
 
 // Set the current value of the switch, rotating the switch component accordingly.  Will clamp the value
