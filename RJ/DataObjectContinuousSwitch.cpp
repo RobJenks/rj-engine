@@ -5,7 +5,7 @@
 
 // Initialise static data
 const float DataObjectContinuousSwitch::PLAYER_INPUT_RANGE_SCREEN_COORDS = 0.3f;
-const float DataObjectContinuousSwitch::PLAYER_INPUT_MAX_SPEED = PI / 4.0f; // rad/sec
+const float DataObjectContinuousSwitch::PLAYER_INPUT_MAX_SPEED = (PI / 4.0f); // rad/sec
 
 // Default constructor
 DataObjectContinuousSwitch::DataObjectContinuousSwitch(void)
@@ -95,12 +95,6 @@ float DataObjectContinuousSwitch::CalculatePlayerInteractionTargetRotation(iObje
 
 	// Translate this input into a target rotation value, based on the maximum player input speed
 	float rotation_delta = (input_delta_pc * PLAYER_INPUT_MAX_SPEED);
-
-	OutputDebugString(concat("Interact: StartX=")(m_player_interaction_mouse_start.x)(", CurrentX=")(Game::Mouse.GetNormalisedMousePos().x)(", DeltaPc=")(input_delta_pc)(", RotDelta=")(rotation_delta)("\n").str().c_str());
-	if (rotation_delta > 0.001f)
-	{
-		int a = 1;
-	}
 
 	// Set a rotation target based upon this delta
 	return (GetSwitchRotation() + rotation_delta);
@@ -229,8 +223,6 @@ void DataObjectContinuousSwitch::SetSwitchRotation(float rotation)
 	// Clamp the rotation parameter to a value within the acceptable switch rotation bounds
 	rotation = ValidateSwitchRotation(rotation);
 
-	OutputDebugString(concat("Setting constraint rotation to ")(rotation)("\n").str().c_str());
-
 	// Set the switch model rotation
 	if (m_articulated_model)
 	{
@@ -263,9 +255,7 @@ void DataObjectContinuousSwitch::AdjustSwitchRotation(float rotation_delta)
 void DataObjectContinuousSwitch::AdjustSwitchRotationTowardsTarget(float target_rotation)
 {
 	// Constrain the target rotation to lie withing acceptable component bounds
-	OutputDebugString(concat("Rotation before: ")(target_rotation)(", ").str().c_str());
 	target_rotation = ValidateSwitchRotation(target_rotation);
-	OutputDebugString(concat("after: ")(target_rotation)("\n").str().c_str());
 
 	// Calculate the delta between our current and target rotation
 	float delta = (target_rotation - GetSwitchRotation());
@@ -273,9 +263,6 @@ void DataObjectContinuousSwitch::AdjustSwitchRotationTowardsTarget(float target_
 	// Constrain the delta to our maximum rotation speed and apply it
 	float max_delta_abs = (GetSwitchMaxRotationSpeed() * Game::TimeFactor);
 	delta = clamp(delta, -max_delta_abs, max_delta_abs);
-	
-	OutputDebugString(concat("Adjusting from ")(GetSwitchRotation())(" to target rotation ")(target_rotation)(" by delta ")(delta)("\n").str().c_str());
-	
 	AdjustSwitchRotation(delta);
 }
 
@@ -321,7 +308,7 @@ float DataObjectContinuousSwitch::SwitchValueForRotation(float rotation) const
 	float percentage = (rotation - m_constraint_min) / (constraint_range);
 
 	// Translate to the corresponding output value
-	float value = percentage * (m_value_max - m_value_min);
+	float value = m_value_min + (percentage * (m_value_max - m_value_min));
 
 	// Clamp to a value within acceptable bounds and return
 	return ValidateSwitchValue(value);

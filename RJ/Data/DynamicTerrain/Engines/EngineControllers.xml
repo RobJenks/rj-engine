@@ -14,4 +14,17 @@
    
   </DynamicTerrainDefinition>
 
+    <!-- 
+      Name: Basic engine heading controller
+      Description: Controls the target heading levels of ship engines based on the signals received.  Controls 
+                   individual components of the heading vector separately.  Inputs should be floats in the range [-1 +1]
+      Inputs: 2 [TargetYawPc, TargetPitchPc]
+      Outputs: 0
+  -->
+  <DynamicTerrainDefinition code="BasicEngineHeadingController" class="DataObjectEngineHeadingController" def="tmp_terrain_cone">
+  
+  </DynamicTerrainDefinition>
+  
+  
+  
 </gamedata>

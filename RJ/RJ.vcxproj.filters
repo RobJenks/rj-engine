@@ -763,6 +763,9 @@
     <ClCompile Include="DynamicTerrainInteraction.cpp">
       <Filter>Objects\DynamicTerrain</Filter>
     </ClCompile>
+    <ClCompile Include="DataObjectEngineHeadingController.cpp">
+      <Filter>Objects\Data\Objects\Engines</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1764,6 +1767,9 @@
     </ClInclude>
     <ClInclude Include="DynamicTerrainPlayerInteraction.h">
       <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
+    <ClInclude Include="DataObjectEngineHeadingController.h">
+      <Filter>Objects\Data\Objects\Engines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

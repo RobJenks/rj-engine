@@ -122,6 +122,7 @@
 #include "DataObjectContinuousSwitch.h"		// DBG
 #include "DataObjectDebugLogger.h"			// DBG
 #include "DataObjectEngineThrustController.h"	// DBG
+#include "DataObjectEngineHeadingController.h"	// DBG
 #include "Frustum.h"						
 #include "Fonts.h"
 
@@ -912,6 +913,11 @@ void RJMain::ProcessKeyboardInput(void)
 			t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
 			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
 
+			DataObjectEngineHeadingController *t_head = (DataObjectEngineHeadingController*) DynamicTerrain::Create("BasicEngineHeadingController");
+			t_head->SetPosition(XMVectorAdd(t2->GetPosition(), XMVectorSet(0.0f, 0.5f, 15.0f, 0.0f)));
+			cs()->AddTerrainObject(static_cast<Terrain*>(t_head));
+
+
 			DynamicTerrain *target = NULL;
 			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
 			for (auto terrain : cs()->TerrainObjects)
@@ -926,6 +932,10 @@ void RJMain::ProcessKeyboardInput(void)
 			Game::Log << LOG_DEBUG << "Connecting ports: " << 
 			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
 			
+			Game::Log << LOG_DEBUG << "Connecting ports: " <<
+				t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
+
+
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 		}
 
@@ -2513,9 +2523,10 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = (DataObjectContinuousSwitch*)dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s,  Rotation: %.2f",  
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s,  Rotation: %.2f, TargetYaw: %.2f",  
 			Vector2ToString(Game::Mouse.GetNormalisedMousePos()).c_str(), 
-			(t ? t->GetSwitchRotation() : -999.999f));
+			(t ? t->GetSwitchRotation() : -999.999f), 
+			cs()->GetTargetYaw());
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

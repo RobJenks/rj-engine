@@ -35,12 +35,6 @@ public:
 	// Attempt to resolve the associated engine hardpoint code to a hardpoint within our environment, or returns NULL if not possible
 	HpEngine *							GetEngineHardpoint(void);
 
-	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
-	void								SetEngineAbsoluteThrust(DataPorts::DataType data);
-
-	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
-	void								SetEnginePercentageThrust(DataPorts::DataType data);
-
 	// Ports exposed by this controller
 	struct
 	{
@@ -61,6 +55,12 @@ private:
 	// Linked engine hardpoint that is controlled by this component
 	std::string							m_engine_hardpoint;
 	bool								m_is_linked_to_engine;
+
+	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+	void								SetEngineAbsoluteThrust(DataPorts::DataType data);
+
+	// Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
+	void								SetEnginePercentageThrust(DataPorts::DataType data);
 
 	// Assign this controller to an engine hardpoint, based upon its string code
 	void								AssignControllerToEngine(const std::string & hardpoint);

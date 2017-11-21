@@ -7,6 +7,7 @@
 #include "DataObjectSwitch.h"
 #include "DataObjectContinuousSwitch.h"
 #include "DataObjectEngineThrustController.h"
+#include "DataObjectEngineHeadingController.h"
 
 // Macro used to register dynamic terrain classes with this factory class
 #define REGISTER_DYNAMIC_TERRAIN_CLASS(DTClass) \
@@ -55,6 +56,7 @@ DynamicTerrain * DynamicTerrainClass::Create(const char *class_name)
 
 	// Engine-related components
 	REGISTER_DYNAMIC_TERRAIN_CLASS(DataObjectEngineThrustController);
+	REGISTER_DYNAMIC_TERRAIN_CLASS(DataObjectEngineHeadingController);
 
 
 	// Class could not be found

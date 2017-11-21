@@ -96,9 +96,6 @@ void DataObjectEngineThrustController::SetLinkedHardpointCode(const std::string 
 // Component will respond by attempting to set the thrust levels of its associated engine hardpoint to the specified value
 void DataObjectEngineThrustController::DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port)
 {
-	Game::Log << LOG_ERROR << "Engine controller received input of [" << data.str() << " / " << data.IntValue() << " / " << data.UIntValue() << " / " << 
-		data.FloatValue() << " / " << data.BoolValue() << "] at port index " << port_index << " from source port " << source_port << "\n";
-
 	if (port_index == Ports.PORT_ABSOLUTE_THRUST_INPUT)
 	{
 		SetEngineAbsoluteThrust(data);
@@ -107,7 +104,6 @@ void DataObjectEngineThrustController::DataReceieved(DataPorts::PortIndex port_i
 	{
 		SetEnginePercentageThrust(data);
 	}
-
 }
 
 // Attempt to resolve the associated engine hardpoint code to a hardpoint within our environment, or returns NULL if not possible
@@ -130,7 +126,6 @@ void DataObjectEngineThrustController::SetEngineAbsoluteThrust(DataPorts::DataTy
 
 	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
 	engine->SetTargetThrust(data.FloatValue());
-	Game::Log << LOG_ERROR << "Absolute thrust value of engine set to " << data.FloatValue() << "\n";
 }
 
 // Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
@@ -142,7 +137,6 @@ void DataObjectEngineThrustController::SetEnginePercentageThrust(DataPorts::Data
 
 	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
 	engine->SetTargetThrustPercentage(data.FloatValue());
-	Game::Log << LOG_ERROR << "Percentage thrust value of engine set to " << data.FloatValue() << "\n";
 }
 
 

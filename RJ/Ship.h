@@ -89,6 +89,9 @@ public:
 
 	// Methods to turn the ship by specified amounts, or to a specified heading
 	void				TurnShip(float yaw_pc, float pitch_pc, bool bank);
+	CMPINLINE void		YawShip(float yaw_pc, bool bank)						{ TurnShip(yaw_pc, m_targetpitch, bank); }
+	CMPINLINE void		PitchShip(float pitch_pc, bool bank)					{ TurnShip(m_targetyaw, pitch_pc, bank); }
+
 	void				TurnToTarget(iObject *target, bool bank);
 	void				TurnToTarget(FXMVECTOR target, bool bank);
 
@@ -203,7 +206,7 @@ public:
 
 	// Accessor methods for key properties
 	CMPINLINE bool				IsBraking(void)					{ return m_isbraking; }
-	CMPINLINE bool				IsTurning(void)					{ return m_isturning; }
+	//CMPINLINE bool				IsTurning(void)					{ return m_isturning; }
 	
 	// Methods to retrieve the target flight parameters, used by the flight computer to plan engine/turn activity
 	CMPINLINE float				GetTargetPitch(void) const						{ return m_targetpitch; }
@@ -356,7 +359,7 @@ protected:
 	float				m_targetspeedsqthreshold;	// Precalculated 90% threshold at which we start to reduce engine thrust
 
 	bool				m_isbraking;				// Indicates whether the ship is currently applying brakes to reduce momentum
-	bool				m_isturning;				// Determines whether the ship is currently turning, and therefore whether the orientation needs to be updated each cycle
+	//bool				m_isturning;				// Determines whether the ship is currently turning, and therefore whether the orientation needs to be updated each cycle
 	float				m_targetpitch, m_targetyaw;	// Current target pitch/yaw
 	AXMVECTOR	 		m_targetangularvelocity;	// The angular velocity that the ship's engines will try to attain
 	AXMVECTOR			m_engineangularvelocity;	// The angular velocity that the ship's engines are currently outputting

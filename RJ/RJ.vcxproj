@@ -408,6 +408,7 @@
     <ClCompile Include="DataObjectContinuousSwitch.cpp" />
     <ClCompile Include="DataObjectDebugLogger.cpp" />
     <ClCompile Include="DataEnabledObject.cpp" />
+    <ClCompile Include="DataObjectEngineHeadingController.cpp" />
     <ClCompile Include="DataObjectEngineThrustController.cpp" />
     <ClCompile Include="DataObjectSwitch.cpp" />
     <ClCompile Include="DynamicTerrain.cpp" />
@@ -681,6 +682,7 @@
     <ClInclude Include="DataEnabledEnvironmentObject.h" />
     <ClInclude Include="DataObjectDebugLogger.h" />
     <ClInclude Include="DataEnabledObject.h" />
+    <ClInclude Include="DataObjectEngineHeadingController.h" />
     <ClInclude Include="DataObjectInput.h" />
     <ClInclude Include="DataObjectSwitch.h" />
     <ClInclude Include="DynamicTerrain.h" />

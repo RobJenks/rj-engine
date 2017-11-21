@@ -46,7 +46,7 @@ Ship::Ship(void)
 	m_last_flight_comp_evaluation = 0U;
 	m_shipenginecontrol = true;
 	m_targetspeed = m_targetspeedsq = m_targetspeedsqthreshold = 0.0f;
-	m_isturning = false;
+	//m_isturning = false;
 	m_targetpitch = m_targetyaw = 0.0f;
 	m_targetangularvelocity = NULL_VECTOR;
 	m_engineangularvelocity = m_engineangularmomentum = NULL_VECTOR;
@@ -540,7 +540,7 @@ void Ship::RunEntityAI(void)
 void Ship::RunShipFlightComputer(void)
 {
 	// Reset any persistence flags that maintain an action between one execution of the flight computer and the next
-	m_isturning = false;
+	//m_isturning = false;
 
 	// Evaluate any orders in the queue
 	ProcessOrderQueue(m_last_flight_comp_evaluation);
@@ -1047,7 +1047,7 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 		if (IsZeroVector3(Bank))
 		{
 			m_new_bank = NULL_VECTOR;
-			m_isturning = true;
+		//	m_isturning = true;
 			return;
 		}
 
@@ -1070,7 +1070,7 @@ void Ship::TurnShip(float yaw_pc, float pitch_pc, bool bank)
 	m_new_bank = XMVectorClamp(XMVectorAdd(Bank, bank_inc), XMVectorNegate(BankExtent), BankExtent);
 
 	// Signal that the ship is currently turning (until next execution of the flight computer)
-	m_isturning = true;
+	//m_isturning = true;
 }
 
 // Turns the ship to a specified target object, banking if required
@@ -1456,7 +1456,7 @@ void Ship::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(AssessRelativeStrength, (iSpaceObject*)Game::FindObjectByIdentifier(command.Parameter(2)))
 	REGISTER_DEBUG_ACCESSOR_FN(FindBestTarget)
 	REGISTER_DEBUG_ACCESSOR_FN(IsBraking)
-	REGISTER_DEBUG_ACCESSOR_FN(IsTurning)
+//	REGISTER_DEBUG_ACCESSOR_FN(IsTurning)
 	REGISTER_DEBUG_ACCESSOR_FN(GetTargetPitch)
 	REGISTER_DEBUG_ACCESSOR_FN(GetTargetYaw)
 	REGISTER_DEBUG_ACCESSOR_FN(GetTargetAngularVelocity)
