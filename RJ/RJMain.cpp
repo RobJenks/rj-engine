@@ -909,6 +909,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_basic_lever_01");
 			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+			t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
 			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
 
 			DynamicTerrain *target = NULL;
@@ -2504,17 +2505,17 @@ void RJMain::DEBUGDisplayInfo(void)
 	// Debug info line 4 - temporary debug data as required
 	if (true)
 	{	
-		DynamicTerrain *t = NULL;
+		DataObjectContinuousSwitch *t = NULL;
 		for (const auto & terrain : cs()->TerrainObjects)
 		{
 			if (!terrain->IsDynamic()) continue;
 			DynamicTerrain *dt = terrain->ToDynamicTerrain();
-			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = dt;
+			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = (DataObjectContinuousSwitch*)dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %s, Ex: %s",
-			(t ? Vector3ToString(t->GetPosition()).c_str() : "<null>"),
-			(t ? Vector3ToString(t->GetExtentF()).c_str() : "<null>"));
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s,  Rotation: %.2f",  
+			Vector2ToString(Game::Mouse.GetNormalisedMousePos()).c_str(), 
+			(t ? t->GetSwitchRotation() : -999.999f));
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}

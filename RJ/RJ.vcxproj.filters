@@ -1762,6 +1762,9 @@
     <ClInclude Include="DynamicTerrainInteraction.h">
       <Filter>Objects\DynamicTerrain</Filter>
     </ClInclude>
+    <ClInclude Include="DynamicTerrainPlayerInteraction.h">
+      <Filter>Objects\DynamicTerrain</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

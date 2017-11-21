@@ -15,7 +15,8 @@
 const float PI = 3.14159265358979f;
 const float PIBY180 = 0.0174532925199433f;
 const float _180BYPI = 57.2957795130823208f;
-const float TWOPI = PI*2.0f;
+const float TWOPI = PI * 2.0f;
+const float NEG_TWOPI = -TWOPI;
 const float PIOVER2 = PI / 2.0f;
 const float ROOT2 = 1.414213562f;
 const float ONE_BY_ROOT2 = 1.0f / ROOT2;

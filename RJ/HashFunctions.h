@@ -307,6 +307,7 @@ namespace HashedStrings
 	DefineHash(H_ModelSwitchConstraint, "modelswitchconstraint");
 	DefineHash(H_SwitchConstraintMin, "switchconstraintmin");
 	DefineHash(H_SwitchConstraintMax, "switchconstraintmax");
+	DefineHash(H_MaxRotationSpeed, "maxrotationspeed");
 
 }
 

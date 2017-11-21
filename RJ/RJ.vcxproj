@@ -704,6 +704,7 @@
     <ClInclude Include="DynamicTerrainClassData.h" />
     <ClInclude Include="DynamicTerrainDefinition.h" />
     <ClInclude Include="DynamicTerrainInteraction.h" />
+    <ClInclude Include="DynamicTerrainPlayerInteraction.h" />
     <ClInclude Include="DynamicTerrainState.h" />
     <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="DataObjectEngineThrustController.h" />

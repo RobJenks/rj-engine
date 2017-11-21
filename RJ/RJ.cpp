@@ -78,7 +78,7 @@ int WINAPI WinMain(HINSTANCE hinstance,
 
 	// Terminate the debug log process as well, if it was active
 #	if defined(_DEBUG) && defined(RJ_SHOW_DEBUG_LOG)
-		OutputDebugString(concat("Attempting to termiante debug log window with window handle ")(debug_log_handle)("\n").str().c_str());
+		OutputDebugString(concat("Attempting to terminate debug log window with window handle ")(debug_log_handle)("\n").str().c_str());
 		TerminateDebugLogWindow(debug_log_handle);
 #	endif
 

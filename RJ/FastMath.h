@@ -15,6 +15,7 @@ extern const float PI;
 extern const float PIBY180;
 extern const float _180BYPI;
 extern const float TWOPI;
+extern const float NEG_TWOPI;
 extern const float PIOVER2;
 extern const float ROOT2;
 extern const float ONE_BY_ROOT2;

@@ -18,6 +18,12 @@ public:
 	// Initialise the data ports required for this object
 	void										InitialiseDataPorts(void);
 
+	// Return the current rotation of the switch component
+	float										GetSwitchRotation(void) const;
+
+	// Return the maximum rotation speed of the switch component, in rad/sec
+	CMPINLINE float								GetSwitchMaxRotationSpeed(void) const { return m_max_rotation_speed; }
+
 	// Set the current rotation of the switch about its constraint.  Will clamp the rotation within the bounds 
 	// of the switch constraint
 	void										SetSwitchRotation(float rotation);
@@ -25,9 +31,19 @@ public:
 	// Adjust the switch by the specified delta
 	void										AdjustSwitchRotation(float rotation_delta);
 
+	// Adjust the switch rotation towards the specified target point, accounting for e.g. max rotation
+	// speed of the switch component and the current time step
+	void										AdjustSwitchRotationTowardsTarget(float target_rotation);
+
 	// Set the current value of the switch, rotating the switch component accordingly.  Will clamp the value
 	// within the acceptable value range of the switch
 	void										SetSwitchValue(float value);
+
+	// Determines the switch rotation required in order to yield the given value
+	float										SwitchRotationForValue(float value) const;
+
+	// Determines the value corresponding to a rotation of the switch to the specified angle
+	float										SwitchValueForRotation(float rotation) const;
 
 	// Method invoked when this object receives data through one of its public input ports; switches will not receive any data
 	CMPINLINE void								DataReceieved(DataPorts::PortIndex port_index, DataPorts::DataType data, DataPorts::PortID source_port) { }
@@ -47,9 +63,15 @@ protected:
 	float										m_value_min, m_value_max;
 	float										m_last_value;
 	float										m_value_delta_threshold;
-
+	float										m_max_rotation_speed;		// rad/sec
+	
 	// Flag which indicates whether the switch is currently being interacted with
 	FrameFlag									m_interaction_in_progress;
+
+	// Data relating to player-specific interaction, where we also need to derive their intended input based on input device state
+	static const float							PLAYER_INPUT_RANGE_SCREEN_COORDS;
+	static const float							PLAYER_INPUT_MAX_SPEED;
+	XMFLOAT2									m_player_interaction_mouse_start;
 
 	// Maintain port indices for convenience
 	DataPorts::PortIndex						PORT_SEND;
@@ -83,10 +105,17 @@ protected:
 	void										SetConstraintMin(float constraint_min_rotation);
 	void										SetConstraintMax(float constraint_max_rotation);
 
-	// Determines the switch rotation required in order to yield the given value
-	float										SwitchRotationForValue(float value) const;
+	// Set the maximum possible rotation speed (rad/sec) for the switch component
+	void										SetSwitchMaxRotationSpeed(float max_rotation_speed);
 
-	// Determines the value corresponding to a rotation of the switch to the specified angle
-	float										SwitchValueForRotation(float rotation) const;
+	// Validate the provided switch rotation value and return a value which is valid
+	float										ValidateSwitchRotation(float rotation) const;
+
+	// Validate the provided switch value and return a value which is valid
+	float										ValidateSwitchValue(float value) const;
+
+	// Calculate the target rotation for player interactions, where it must be derived based on player input state
+	float										CalculatePlayerInteractionTargetRotation(iObject *player_object);
+
 };
 

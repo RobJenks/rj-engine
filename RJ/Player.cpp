@@ -17,6 +17,7 @@
 #include "ObjectPicking.h"
 #include "GameUniverse.h"
 #include "DynamicTerrain.h"
+#include "DynamicTerrainPlayerInteraction.h"
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -754,7 +755,7 @@ void Player::HandlePlayerInteraction(void)
 			// Raise the single-press event if this is a regular key press event (GetKey is a subset of KeyPressed)
 			if (is_single_press)
 			{
-				bool successful = target_terrain->AttemptInteraction(player, DynamicTerrainInteraction::Normal());
+				bool successful = target_terrain->AttemptInteraction(player, DynamicTerrainPlayerInteraction::Normal());
 				result = (successful ? PlayerInteractionResult::InteractionSuccessful : PlayerInteractionResult::InteractionFailed);
 			}
 
@@ -762,7 +763,7 @@ void Player::HandlePlayerInteraction(void)
 			// This is lower priority than single interaction events so only do this if we have not already succeeded in an interaction
 			if (result != PlayerInteractionResult::InteractionSuccessful)
 			{
-				bool extended_successful = target_terrain->AttemptInteraction(player, DynamicTerrainInteraction::Extended(0.0f));
+				bool extended_successful = target_terrain->AttemptInteraction(player, DynamicTerrainPlayerInteraction::Extended(0.0f));
 				if (extended_successful) result = PlayerInteractionResult::ExtendedInteractionInProgress;
 			}
 		}
