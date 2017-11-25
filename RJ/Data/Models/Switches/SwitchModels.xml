@@ -1,7 +1,8 @@
 <gamedata>
 
+  <!-- Horizontal lever switch -->
   <ArticulatedModel components="2">
-    <Code>switch_continuous_basic_lever_01_model</Code>
+    <Code>switch_continuous_lever_horizontal_01_model</Code>
 
     <Component index="0" model="unit_cone_model" />
     <Component index="1" model="unit_cone_model" />
@@ -9,6 +10,27 @@
     <Attachment parent="0" child="1">
       <Constraint>
         <Axis x="0.0" y="0.0" z="1.0" />
+        <ParentPoint x="0.0" y="0.0" z="0.0" />
+        <ChildPoint x="0.0" y="-5.0" z="0.0" />
+        <BaseOrientation x="0.0" y="0.0" z="0.0" w="1.0" />
+      </Constraint>
+    </Attachment>
+
+    <ConstraintTag parent="0" child="1" tag="switch_constraint" />
+    <ComponentTag component="1" tag="switch_component" />
+
+  </ArticulatedModel>
+
+  <!-- Vertical lever switch -->
+  <ArticulatedModel components="2">
+    <Code>switch_continuous_lever_vertical_01_model</Code>
+
+    <Component index="0" model="unit_cone_model" />
+    <Component index="1" model="unit_cone_model" />
+
+    <Attachment parent="0" child="1">
+      <Constraint>
+        <Axis x="1.0" y="0.0" z="0.0" />
         <ParentPoint x="0.0" y="0.0" z="0.0" />
         <ChildPoint x="0.0" y="-5.0" z="0.0" />
         <BaseOrientation x="0.0" y="0.0" z="0.0" w="1.0" />

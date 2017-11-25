@@ -59,6 +59,7 @@ protected:
 	int											m_switch_component;
 	std::string									m_switch_constraint_tag;
 	int											m_switch_constraint;
+	XMFLOAT3									m_constraint_axis;
 	float										m_constraint_min, m_constraint_max;
 	float										m_value_min, m_value_max;
 	float										m_last_value;
@@ -116,6 +117,14 @@ protected:
 
 	// Calculate the target rotation for player interactions, where it must be derived based on player input state
 	float										CalculatePlayerInteractionTargetRotation(iObject *player_object);
+
+	// Determine the input delta based on player input.  Returns a value indicating the degree of mouse movement 
+	// that aligns with the switch constraint, based on the current view orientation and mouse input state
+	float										DeterminePlayerInputDelta(const XMFLOAT2 & mouse_start_norm_pos, const XMFLOAT2 & mouse_norm_pos) const;
+
+	// Determine the input delta percentage based on player input.  Will return a value in the range [-1.0 +1.0] based
+	// on the player mouse input and current player view orientation
+	float										DeterminePlayerInputDeltaPercentage(const XMFLOAT2 & mouse_start_norm_pos, const XMFLOAT2 & mouse_norm_pos) const;
 
 };
 

@@ -37,7 +37,7 @@ public:
 	CMPINLINE AABB(const OrientedBoundingBox & obb) noexcept
 		:
 		P1(obb.ConstData().ExtentV),
-		P0(XMVectorNegate(P1))
+		P0(XMVectorNegate(obb.ConstData().ExtentV))
 	{
 	}
 
@@ -46,7 +46,7 @@ public:
 	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb) noexcept
 		:
 		P1(obb.ExtentV),
-		P0(XMVectorNegate(P1))	
+		P0(XMVectorNegate(obb.ExtentV))
 	{
 	}
 
@@ -54,9 +54,9 @@ public:
 	// bounds (centre-to-edge, i.e. half of overall size) by a specified amount on construction
 	CMPINLINE AABB(const OrientedBoundingBox::CoreOBBData & obb, const FXMVECTOR bounds_adjustment) noexcept
 		:
-		P1(XMVectorAdd(obb.ExtentV, bounds_adjustment)), 
-		P0(XMVectorNegate(P1))
+		P1(XMVectorAdd(obb.ExtentV, bounds_adjustment))
 	{
+		P0 = XMVectorNegate(P1);
 	}
 
 	// Constructor to build an AABB from a set of vertices.  Generates an AABB that encloses all vertices

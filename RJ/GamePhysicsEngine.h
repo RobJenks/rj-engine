@@ -628,8 +628,9 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 {
 	// We will keep track of the closest object that was intersected
 	T *closest = NULL;
-	XMVECTOR diff, dsq, a0, a1;
-	XMVECTOR closest_dsq = XMVectorReplicate(FLT_MAX);
+	float best_tmin = FLT_MAX;
+	XMVECTOR diff, dsq, /*dsq_to_bounds*/, a0, a1;
+	XMVECTOR closest_dsq_plus_bounds = XMVectorReplicate(FLT_MAX);
 	static const AXMVECTOR nullvec = XMVectorZero();
 
 	// We will also need a full ray object to perform narrowphase testing, so construct it once here
@@ -650,11 +651,22 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 		// than our current closest intersection
 		diff = XMVectorSubtract(ray.Origin, obj->GetPosition());
 		dsq = XMVector3LengthSq(diff);
-		if (XMVector2GreaterOrEqual(dsq, closest_dsq)) continue;							// Early-exit if the object is further away than our current best
-		a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));	// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+
+		// Early-exit if distance to (the object MINUS its bounding radius) is still further away than (the 
+		// current closest object PLUS its bounding radius), i.e. if it can never be closer than the best object
+		// TODO: We are currently using dist(objects)^2 - dist(radius)^2, instead of (dist(objects) - dist(radius))^2, 
+		// for efficiency.  See how well this works.  May need to rewrite this part since it is very hot code
+		a0 /*dsq_to_bounds*/ = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));
+		if (XMVector2GreaterOrEqual(a0, closest_dsq_plus_bounds)) continue;							
+		
+		// This is now equiv to "a0 = D3DXVec3Dot(&diff, &diff) - sphere_radiussq"
+		// We already require the value of a0 above, as "dsq_to_bounds", so use a0 everywhere and avoid recalculating
+		//a0 = XMVectorSubtract(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));
 
 		// If a0 is <= 0 then the ray began inside the sphere, so we have an immediate 0-distance intersection and cannot get better than that
-		if (XMVector2LessOrEqual(a0, nullvec)) return obj;
+		// Disabled: there can be multiple intersections within the collision sphere, and we stil need to find the closest, 
+		// so do not early exit here and instead perform the full calculation to see which is best
+		//if (XMVector2LessOrEqual(a0, nullvec)) return obj;
 
 		// Project object difference vector onto the ray
 		a1 = XMVector3Dot(ray.Direction, diff);												// Expanded "D3DXVec3Dot(&ray.Direction, &diff)"
@@ -665,16 +677,22 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 		// if (((a1 * a1) - a0) >= 0.0f)
 		if (XMVector2GreaterOrEqual(XMVectorSubtract(XMVectorMultiply(a1, a1), a0), nullvec))
 		{
-			// Test whether this intersection is closer than our current best
-			if (XMVector2Less(dsq, closest_dsq))
-			{
-				// We have a new best intersection bassed on broadphase testing.  Now also perform narrowphase
-				// on the candidate (if appropriate) before recording the result
-				if (PerformNarrowphaseRayIntersectionTest(ray, *obj) == false) continue;
+			// We have a new best intersection bassed on broadphase testing.  Now also perform narrowphase
+			// on the candidate (if appropriate) before recording the result
+			if (PerformNarrowphaseRayIntersectionTest(ray, *obj) == false) continue;
 
-				// The object has passed narrowphase collision detection and is closest, so record it
+			// The object has passed narrowphase collision detection.  Compare tmin (time t along the raycast
+			// at which the first intersection occurs) to determine if this is our closest intersection
+			if (RayIntersectionResult.tmin < best_tmin)
+			{
+				// Store the object and the new closest tmin value
 				closest = obj;
-				closest_dsq = dsq;
+				best_tmin = RayIntersectionResult.tmin;
+
+				// Also record the distance to this object PLUS its entire bounding radius; we can use this to reject
+				// other objects at broadphase where there is no chance of them being closer
+				// TODO: Again, using dist(objects)^2 + dist(radius)^2 instead of correctly dist(-everything-)^2
+				closest_dsq_plus_bounds = XMVectorAdd(dsq, XMVectorReplicate(obj->GetCollisionSphereRadiusSq()));
 			}
 		}
 	}

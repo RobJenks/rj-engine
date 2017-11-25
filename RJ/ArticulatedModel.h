@@ -77,7 +77,10 @@ public:
 	void										SetConstraintRotation(int constraint_index, float radians);
 
 	// Return the current rotation value for a particular constraint (or 0.0 if the given constraint is not valid or is fixed)
-	float										GetConstraintRotation(int constraint_index);
+	float										GetConstraintRotation(int constraint_index) const;
+
+	// Return the axis for a particular constraint (or [0,1,0] if the given constraint is not valid or is fixed)
+	XMVECTOR									GetConstraintAxis(int constraint_index) const;
 
 	// Sets the rotation of this component about its parent.  Marginally less efficient than RotateConstraint since we have to locate
 	// the appropriate constraint first.  If this component is not attached by a constraint (i.e. is the child of a fixed attachment)

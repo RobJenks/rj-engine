@@ -1,5 +1,7 @@
 #include "ArticulatedModel.h"
 #include "iObject.h"
+#include "CoreEngine.h"
+#include "CameraClass.h"
 
 #include "DataObjectContinuousSwitch.h"
 
@@ -11,7 +13,7 @@ const float DataObjectContinuousSwitch::PLAYER_INPUT_MAX_SPEED = (PI / 4.0f); //
 DataObjectContinuousSwitch::DataObjectContinuousSwitch(void)
 	:
 	m_switch_component_tag(NullString), m_switch_component(-1), m_switch_constraint_tag(NullString), m_switch_constraint(-1), 
-	m_constraint_min(-PI / 4.0f), m_constraint_max(+PI / 4.0f), m_max_rotation_speed(PI / 4.0f), 
+	m_constraint_axis(UP_VECTOR_F), m_constraint_min(-PI / 4.0f), m_constraint_max(+PI / 4.0f), m_max_rotation_speed(PI / 4.0f), 
 	m_value_min(-1.0f), m_value_max(+1.0f), m_value_delta_threshold(0.01f), 
 	m_player_interaction_mouse_start(NULL_FLOAT2), 
 	PORT_SEND(DataPorts::NO_PORT_INDEX)
@@ -85,19 +87,53 @@ float DataObjectContinuousSwitch::CalculatePlayerInteractionTargetRotation(iObje
 		m_player_interaction_mouse_start = Game::Mouse.GetNormalisedMousePos();
 	}
 
-	// For now, simply adjust at a speed proportional to the degree of x-movement from centre point
-	// TODO: should make this more sophisticated in future, e.g. project switch coords to screen-space, 
-	// determine target position within these bounds, show 2D overlay (e.g. semicircle with marker) of 
-	// the desired rotation value
-	float input_delta = (Game::Mouse.GetNormalisedMousePos().x - m_player_interaction_mouse_start.x);
-	float input_delta_pc = (input_delta / PLAYER_INPUT_RANGE_SCREEN_COORDS);
-	input_delta_pc = clamp(input_delta_pc, -1.0f, 1.0f);
-
+	// Project the player mouse input movement onto the switch constraint vector and determine the degree of
+	// movement in the relevant axis, accounting for the player view heading
+	float input_delta_pc = DeterminePlayerInputDeltaPercentage(m_player_interaction_mouse_start, Game::Mouse.GetNormalisedMousePos());
+	
 	// Translate this input into a target rotation value, based on the maximum player input speed
 	float rotation_delta = (input_delta_pc * PLAYER_INPUT_MAX_SPEED);
 
 	// Set a rotation target based upon this delta
 	return (GetSwitchRotation() + rotation_delta);
+}
+
+// Determine the input delta based on player input.  Returns a value indicating the degree of mouse movement 
+// that aligns with the switch constraint, based on the current view orientation and mouse input state
+float DataObjectContinuousSwitch::DeterminePlayerInputDelta(const XMFLOAT2 & mouse_start_norm_pos, const XMFLOAT2 & mouse_norm_pos) const
+{
+	// Take the dot product of current player view heading and the constraint axis.  This will allow us to determine 
+	// the relative orientation of the switch constraint and how the input movement should be mapped
+	XMVECTOR axis = XMLoadFloat3(&m_constraint_axis);
+	XMVECTOR dot_view_axis = XMVector3Dot(Game::Engine->GetCamera()->GetCameraHeading(), axis);
+	float dot = XMVectorGetX(dot_view_axis);
+	float dot_abs = fabsf(dot);
+
+	// We will use a weighted combination of both x- and y-input deltas.  If the dot product is negative
+	// we reverse the direction of this input movement vector since all actions will be mirrored with respect to the target
+	XMFLOAT2 input_delta;
+	if (dot >= 0.0f)	input_delta = Float2Subtract(Game::Mouse.GetNormalisedMousePos(), m_player_interaction_mouse_start);
+	else				input_delta = Float2Subtract(m_player_interaction_mouse_start, Game::Mouse.GetNormalisedMousePos());
+
+	// Now weight the delta based upon the dot product, i.e. the degree to which we align with the constraint axis
+	float result = ((dot_abs * input_delta.x) + ((1.0f - dot_abs) * input_delta.y));
+	OutputDebugString(concat("View: ")(Vector3ToString(Game::Engine->GetCamera()->GetCameraHeadingF()).c_str())(", Axis: ")(Vector3ToString(axis).c_str())(", Dot: ")(dot)
+		(", InputDelta: ")(Vector2ToString(input_delta).c_str())(", Result: ")(result)(", PcResult: ")(clamp(result / PLAYER_INPUT_RANGE_SCREEN_COORDS, -1.0f, 1.0f))("\n").str().c_str());
+	return result;
+}
+
+// Determine the input delta percentage based on player input.  Will return a value in the range [-1.0 +1.0] based
+// on the player mouse input and current player view orientation
+float DataObjectContinuousSwitch::DeterminePlayerInputDeltaPercentage(const XMFLOAT2 & mouse_start_norm_pos, const XMFLOAT2 & mouse_norm_pos) const
+{
+	// Determine the absolute delta figure
+	float delta = DeterminePlayerInputDelta(mouse_start_norm_pos, mouse_norm_pos);
+
+	// Convert to a percentage delta based on the defined screen-space movement range
+	float delta_pc = (delta / PLAYER_INPUT_RANGE_SCREEN_COORDS);
+
+	// Clamp within the bound [-1 +1] and return
+	return clamp(delta_pc, -1.0f, 1.0f);
 }
 
 // Set the articulated model used for this switch component
@@ -137,6 +173,10 @@ void DataObjectContinuousSwitch::RefreshSwitchData(void)
 		// Attempt to locate key components
 		m_switch_component = m_articulated_model->GetComponentWithTag(m_switch_component_tag);
 		m_switch_constraint = m_articulated_model->GetConstraintWithTag(m_switch_constraint_tag);
+
+		// Store the axis which this switch constraint will rotate about
+		XMVECTOR axis = m_articulated_model->GetConstraintAxis(m_switch_constraint);
+		XMStoreFloat3(&m_constraint_axis, axis);
 
 		// Make sure the switch rotation is valid within the current constraint range
 		float current_rotation = m_articulated_model->GetConstraintRotation(m_switch_constraint);

@@ -115,11 +115,17 @@ public:
 	// Fires any player ship weapons that are approximately aligned to the target firing vector
 	void							FireShipWeaponsAtVector(void);
 
-	// Returns the object currently selected by the player using the mouse
+	// Returns the closest object currently selected by the player using the mouse
 	CMPINLINE iObject *				GetMouseSelectedObject(void)				{ return m_mouse_over_object(); }
 	CMPINLINE iObject *				GetMouseSelectedNonPlayerObject(void)		{ return m_mouse_over_obj_nonplayer(); }
 	CMPINLINE Terrain *				GetMouseSelectedTerrain(void)				{ return m_mouse_over_terrain; }
+	CMPINLINE DynamicTerrain *		GetMouseSelectedUsableTerrain(void)			{ return m_mouse_over_usable_terrain; }
 
+	// Returns the closest object currently aligned with the player view vector
+	CMPINLINE iObject *				GetViewDirectionObject(void)				{ return m_view_target_obj(); }
+	CMPINLINE iObject *				GetViewDirectionNonPlayerObject(void)		{ return m_view_target_obj_nonplayer(); }
+	CMPINLINE Terrain *				GetViewDirectionTerrain(void)				{ return m_view_target_terrain; }
+	CMPINLINE DynamicTerrain *		GetViewDirectionUsableTerrain(void)			{ return m_view_target_usable_terrain; }
 
 	// Constructor / destructor
 	Player(void);

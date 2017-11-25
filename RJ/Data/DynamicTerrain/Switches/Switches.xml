@@ -33,26 +33,50 @@
 
   
   <!-- 
-    Name: Basic continuous lever switch
+    Name: Basic horizontal continuous lever switch
     Description: Continuous switch; can be in a continuous range of positions from (by default) -1 to +1, with 
-                 initial value of zero.  Value range is configurable.
+                 initial value of zero.  Value range is configurable.  Constraint is about the z-axis
     Value range: [-1 +1] (configurable)
     Inputs: 0
     Outputs: 1
   -->
-  <DynamicTerrainDefinition code="switch_continuous_basic_lever_01" class="DataObjectContinuousSwitch">
+  <DynamicTerrainDefinition code="switch_continuous_lever_horizontal_01" class="DataObjectContinuousSwitch">
 
     <PermittedInteractionType>Extended</PermittedInteractionType>
     <Property key="ValueRangeMin" value="-1.0" />
     <Property key="ValueRangeMax" value="+1.0" />
     <Property key="ValueDeltaThreshold" value="0.01" />
 
-    <Property key="ArticulatedModel" value="switch_continuous_basic_lever_01_model" />
+    <Property key="ArticulatedModel" value="switch_continuous_lever_horizontal_01_model" />
     <Property key="ModelSwitchComponent" value="switch_component" />
     <Property key="ModelSwitchConstraint" value="switch_constraint" />
     <Property key="SwitchConstraintMin" value="-0.785398" />
     <Property key="SwitchConstraintMax" value="+0.785398" />
     
+  </DynamicTerrainDefinition>
+
+  
+  <!-- 
+    Name: Basic vertical continuous lever switch
+    Description: Continuous switch; can be in a continuous range of positions from (by default) -1 to +1, with 
+                 initial value of zero.  Value range is configurable.  Constraint is about the x-axis
+    Value range: [-1 +1] (configurable)
+    Inputs: 0
+    Outputs: 1
+  -->
+  <DynamicTerrainDefinition code="switch_continuous_lever_vertical_01" class="DataObjectContinuousSwitch">
+
+    <PermittedInteractionType>Extended</PermittedInteractionType>
+    <Property key="ValueRangeMin" value="-1.0" />
+    <Property key="ValueRangeMax" value="+1.0" />
+    <Property key="ValueDeltaThreshold" value="0.01" />
+
+    <Property key="ArticulatedModel" value="switch_continuous_lever_vertical_01_model" />
+    <Property key="ModelSwitchComponent" value="switch_component" />
+    <Property key="ModelSwitchConstraint" value="switch_constraint" />
+    <Property key="SwitchConstraintMin" value="-0.785398" />
+    <Property key="SwitchConstraintMax" value="+0.785398" />
+
   </DynamicTerrainDefinition>
 
 </gamedata>

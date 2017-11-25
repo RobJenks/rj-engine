@@ -102,8 +102,11 @@ public:
 	void							RotateChildAboutConstraint(float d_rad);
 	void							SetChildRotationAboutConstraint(float rad);
 
-	// Return the current rotation about the constraint
-	CMPINLINE float					GetChildRotationAboutConstraint(void) const			{ return Constraint->Rotation; }
+	// Return the current rotation about the constraint (or 0.0 if we do not have a valid constraint)
+	float							GetChildRotationAboutConstraint(void) const;
+	
+	// Return the constraint axis between parent and child (or [0, 1, 0] if we do not have a valid constraint)
+	XMVECTOR						GetConstraintAxis(void) const;
 
 	// Loads attachment data from XML specification
 	Result							LoadAttachmentData(TiXmlElement *node);
@@ -223,6 +226,21 @@ void Attachment<T>::RemoveConstraint(void)
 {
 	// Delete the constraint if it exists
 	if (Constraint) SafeDelete(Constraint);
+}
+
+
+// Return the current rotation about the constraint (or 0.0 if we do not have a valid constraint)
+template <typename T>
+float Attachment<T>::GetChildRotationAboutConstraint(void) const 
+{ 
+	return (Constraint ? Constraint->Rotation : 0.0f); 
+}
+
+// Return the constraint axis between parent and child (or [0, 1, 0] if we do not have a valid constraint)
+template <typename T>
+XMVECTOR Attachment<T>::GetConstraintAxis(void) const
+{
+	return (Constraint ? Constraint->Axis : UP_VECTOR);
 }
 
 // Rotate the child object about the constraint by a delta rotation

@@ -18,6 +18,9 @@
 #include "GameUniverse.h"
 #include "DynamicTerrain.h"
 #include "DynamicTerrainPlayerInteraction.h"
+
+#include "OverlayRenderer.h" // TODO: REMOVE
+
 class ComplexShipElement;
 class ComplexShipSection;
 
@@ -839,6 +842,14 @@ DynamicTerrain * Player::TestForTerrainInteractionTarget(void)
 		XMVECTOR player_pt_world = Game::PhysicsEngine.ClosestPointOnOBB(player->CollisionOBB.Data(), terrain_world);		// OBB = world-space, so perform world-space comparison
 		XMVECTOR terrain_pt_local = Game::PhysicsEngine.ClosestPointOnOBB(target_terrain->GetOBBData(), player_local);		// OBB = local space, so perform local-space comparison
 		XMVECTOR player_pt_local = XMVector3TransformCoord(player_pt_world, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix());
+
+		// TODO: REMOVE
+		/*Game::Engine->GetOverlayRenderer()->RenderLineFlat(player_pt_world, XMVector3TransformCoord(terrain_pt_local, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix()),
+			XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f), 1.0f, -1.0f);*/
+		// player_pt_world, XMVector3TransformCoord(terrain_pt_local, target_terrain->GetParentEnvironment()->GetInverseZeroPointWorldMatrix())
+		float dist = XMVectorGetX(XMVector3Length(XMVectorSubtract(player_pt_local, terrain_pt_local)));
+		OutputDebugString(concat("Dist: ")(dist)("\n").str().c_str());
+		
 
 		// Test whether the distance between these points is within the use distance threshold
 		if (XMVector3LessOrEqual(XMVector3LengthSq(XMVectorSubtract(player_pt_local, terrain_pt_local)), Game::C_PLAYER_USE_DISTANCE_SQ_V))

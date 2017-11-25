@@ -83,6 +83,7 @@ public:
 	void											SetExtent(const FXMVECTOR e);
 
 	CMPINLINE float									GetCollisionRadius(void) const					{ return m_collisionradius; }
+	CMPINLINE float									GetCollisionSphereRadius(void) const			{ return m_collisionradius; }
 	CMPINLINE float									GetCollisionRadiusSq(void) const				{ return m_collisionradiussq; }		// Read-only; derived from extent
 	CMPINLINE float									GetCollisionSphereRadiusSq(void) const			{ return m_collisionradiussq; }		// Read-only; derived from extent
 

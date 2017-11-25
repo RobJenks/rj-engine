@@ -904,11 +904,12 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("switch_electronic_basic_01");
-			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-30.0f, 0.0f, -20.0f, 0.0f)));
+			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("switch_continuous_lever_vertical_01");
+			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
+			t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI)); 
 			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
 
-			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_basic_lever_01");
+			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
 			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 			t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
 			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
@@ -2523,10 +2524,18 @@ void RJMain::DEBUGDisplayInfo(void)
 			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = (DataObjectContinuousSwitch*)dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "%s,  Rotation: %.2f, TargetYaw: %.2f",  
-			Vector2ToString(Game::Mouse.GetNormalisedMousePos()).c_str(), 
-			(t ? t->GetSwitchRotation() : -999.999f), 
-			cs()->GetTargetYaw());
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "V.Obj: %s, NPObj: %s, T: %d, DT: %d  |  M.Obj: %s, NPObj: %s, T: %d, DT: %d",
+
+			(Game::CurrentPlayer->GetViewDirectionObject() ? Game::CurrentPlayer->GetViewDirectionObject()->GetInstanceCode().c_str() : "-"),
+			(Game::CurrentPlayer->GetViewDirectionNonPlayerObject() ? Game::CurrentPlayer->GetViewDirectionNonPlayerObject()->GetInstanceCode().c_str() : "-"),
+			(Game::CurrentPlayer->GetViewDirectionTerrain() ? Game::CurrentPlayer->GetViewDirectionTerrain()->GetID() : -1),
+			(Game::CurrentPlayer->GetViewDirectionUsableTerrain() ? Game::CurrentPlayer->GetViewDirectionUsableTerrain()->GetID() : -1),
+
+			(Game::CurrentPlayer->GetMouseSelectedObject() ? Game::CurrentPlayer->GetMouseSelectedObject()->GetInstanceCode().c_str() : "-"),
+			(Game::CurrentPlayer->GetMouseSelectedNonPlayerObject() ? Game::CurrentPlayer->GetMouseSelectedNonPlayerObject()->GetInstanceCode().c_str() : "-"),
+			(Game::CurrentPlayer->GetMouseSelectedTerrain() ? Game::CurrentPlayer->GetMouseSelectedTerrain()->GetID() : -1),
+			(Game::CurrentPlayer->GetMouseSelectedUsableTerrain() ? Game::CurrentPlayer->GetMouseSelectedUsableTerrain()->GetID() : -1)
+		);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 	}
