@@ -30,7 +30,7 @@
 
     <Attachment parent="0" child="1">
       <Constraint>
-        <Axis x="1.0" y="0.0" z="0.0" />
+        <Axis x="-1.0" y="0.0" z="0.0" />
         <ParentPoint x="0.0" y="0.0" z="0.0" />
         <ChildPoint x="0.0" y="-5.0" z="0.0" />
         <BaseOrientation x="0.0" y="0.0" z="0.0" w="1.0" />

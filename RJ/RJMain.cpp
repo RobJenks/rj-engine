@@ -904,7 +904,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
-			DataObjectSwitch *t1 = (DataObjectSwitch*) DynamicTerrain::Create("switch_continuous_lever_vertical_01");
+			DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_vertical_01");
 			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
 			t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI)); 
 			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
@@ -930,10 +930,10 @@ void RJMain::ProcessKeyboardInput(void)
 				}
 			}		
 			
-			Game::Log << LOG_DEBUG << "Connecting ports: " << 
+			Game::Log << LOG_DEBUG << "Connecting thrust controller: " << 
 			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
 			
-			Game::Log << LOG_DEBUG << "Connecting ports: " <<
+			Game::Log << LOG_DEBUG << "Connecting heading controller: " <<
 				t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
 
 

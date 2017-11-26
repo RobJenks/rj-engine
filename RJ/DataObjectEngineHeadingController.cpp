@@ -51,6 +51,7 @@ void DataObjectEngineHeadingController::SetTargetYawPc(DataPorts::DataType data)
 
 	// Pass input to the parent ship.  TODO: Should pass to engines in future
 	parent->YawShip(value, false);
+	Game::Log << LOG_DEBUG << "Setting target yaw to " << value << "\n";
 }
 
 // Attempt to set the ship pitch level to the specified value (capped to the range [-1 +1])
@@ -65,6 +66,7 @@ void DataObjectEngineHeadingController::SetTargetPitchPc(DataPorts::DataType dat
 
 	// Pass input to the parent ship.  TODO: Should pass to engines in future
 	parent->PitchShip(value, false);
+	Game::Log << LOG_DEBUG << "Setting target pitch to " << value << "\n";
 }
 
 

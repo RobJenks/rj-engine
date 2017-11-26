@@ -629,7 +629,7 @@ T * GamePhysicsEngine::PerformRaycastFull(const BasicRay & ray, std::vector<T*> 
 	// We will keep track of the closest object that was intersected
 	T *closest = NULL;
 	float best_tmin = FLT_MAX;
-	XMVECTOR diff, dsq, /*dsq_to_bounds*/, a0, a1;
+	XMVECTOR diff, dsq, /*dsq_to_bounds,*/ a0, a1;
 	XMVECTOR closest_dsq_plus_bounds = XMVectorReplicate(FLT_MAX);
 	static const AXMVECTOR nullvec = XMVectorZero();
 

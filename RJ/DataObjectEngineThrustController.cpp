@@ -126,6 +126,7 @@ void DataObjectEngineThrustController::SetEngineAbsoluteThrust(DataPorts::DataTy
 
 	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
 	engine->SetTargetThrust(data.FloatValue());
+	Game::Log << LOG_DEBUG << "Setting target engine thrust to " << data.FloatValue() << "\n";
 }
 
 // Attempt to set the absolute thrust level of our associated engine hardpoint to the received data value
@@ -137,6 +138,7 @@ void DataObjectEngineThrustController::SetEnginePercentageThrust(DataPorts::Data
 
 	// The engine will ensure this data is correctly bounded, so simply forward the data packet to the engine
 	engine->SetTargetThrustPercentage(data.FloatValue());
+	Game::Log << LOG_DEBUG << "Setting target engine thrust to " << data.FloatValue() * 100.0f << "%\n";
 }
 
 
