@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CoreEngine">
+    <Position X="3.25" Y="0.5" Width="4.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="CoreEngine::RenderStage" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CoreEngine.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="CoreEngine::RenderFlag" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CoreEngine.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Struct Name="CoreEngine::EngineRenderInfoData" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CoreEngine.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Enum Name="CoreEngine::DebugTerrainRenderMode" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CoreEngine.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Struct Name="CoreEngine::DebugIDRenderDetails" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CoreEngine.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>oa/ff3s5ZKrnrNdlwZ2P6v7UWvCO/Q31vpQqy7wq1nc=</HashCode>
+      <FileName>CoreEngine.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="AudioManager">
+    <Position X="9.75" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>gYwAFrAQVAhIAQgRIRlBBSgCgATEgpSIhc2DAwKghUM=</HashCode>
+      <FileName>AudioManager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CameraClass">
+    <Position X="9.75" Y="2" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="CameraClass::CameraState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CameraClass.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+      <Enum Name="CameraClass::ZoomToOverheadCompletionAction" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>CameraClass.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>oEdeYNACYqEJGYAAApAAigAAgDIQUgYxCS5gABAaAAg=</HashCode>
+      <FileName>CameraClass.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="D3DMain">
+    <Position X="9.25" Y="3.75" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="D3DMain::AlphaBlendState" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>D3DMain.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>SCEgpEgYEYQICUDAQNEEAQcBIgACWghABIAYGAEABgI=</HashCode>
+      <FileName>D3DMain.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

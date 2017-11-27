@@ -953,6 +953,7 @@
     <ClInclude Include="XML\tinyxml.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Engine components.cd" />
     <None Include="Object Hierarchy.cd" />
   </ItemGroup>
   <ItemGroup>

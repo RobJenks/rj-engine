@@ -2091,6 +2091,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
+    <None Include="Engine components.cd" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl" />
