@@ -1,7 +1,7 @@
 #if !defined(__light_calculationH__)
 #define __light_calculationH__
 
-#include "material_definition.h"
+#include "../../MaterialData.hlsl.h"
 #include "light_definition.h"
 
 // Returns the cosine of the angle between the two specified vectors, in the plane
@@ -20,7 +20,7 @@ float CosAngleBetweenNormalisedVectors(float3 a, float3 b)
 // 'world_position' is the world position of this pixel
 // 'light_direction' is the direction of light intersecting the pixel, in world space
 // 'normal' is the normalised vertex normal, calculated once and passed in for each method call here
-float4 CalculateLightBase(unsigned int index, MATERIAL_ID material, float3 world_position, float3 light_direction, float3 normal)
+float4 CalculateLightBase(unsigned int index, unsigned int material, float3 world_position, float3 light_direction, float3 normal)
 {
 	float4 ambient_colour = float4(Lights[index].Colour, 1.0f) * Lights[index].AmbientIntensity;
 	float4 diffuse_colour = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -38,7 +38,7 @@ float4 CalculateLightBase(unsigned int index, MATERIAL_ID material, float3 world
 		{
 #			pragma warning (disable: 3571)									// Disable warning for "x must be >=0 in pow(x,y)" since we have accounted for it here
 			specular_factor = pow(specular_factor, Lights[index].SpecularPower);
-			specular_colour = float4(Lights[index].Colour * Materials[material].Specular.w * specular_factor, 1.0f);
+			specular_colour = float4(Lights[index].Colour * Materials[material].SpecularColor.w * specular_factor, 1.0f);
 		}
 	}
 
@@ -51,7 +51,7 @@ float4 CalculateLightBase(unsigned int index, MATERIAL_ID material, float3 world
 // 'material' is the index of the material being illuminated
 // 'world_position' is the world position of this pixel
 // 'normal' is the normalised vertex normal, calculated once and passed in for each method call here
-float4 CalculateDirectionalLight(unsigned int index, MATERIAL_ID material, float3 world_position, float3 normal)
+float4 CalculateDirectionalLight(unsigned int index, unsigned int material, float3 world_position, float3 normal)
 {
 	return CalculateLightBase(index, material, world_position, Lights[index].Direction, normal);
 }
@@ -62,7 +62,7 @@ float4 CalculateDirectionalLight(unsigned int index, MATERIAL_ID material, float
 // 'material' is the index of the material being illuminated
 // 'world_position' is the world position of this pixel
 // 'normal' is the normalised vertex normal, calculated once and passed in for each method call here
-float4 CalculatePointLight(unsigned int index, MATERIAL_ID material, float3 world_position, float3 normal)
+float4 CalculatePointLight(unsigned int index, unsigned int material, float3 world_position, float3 normal)
 {
 	// Determine light vector and distance to this pixel in world space
 	float3 light_direction = (world_position - Lights[index].Position);
@@ -101,7 +101,7 @@ float4 CalculatePointLight(unsigned int index, MATERIAL_ID material, float3 worl
 }
 
 // Calculates the effect of a light on the given world-space pixel
-float4 CalculateLight(unsigned int index, MATERIAL_ID material, float3 world_position, float3 normal)
+float4 CalculateLight(unsigned int index, unsigned int material, float3 world_position, float3 normal)
 {
 	// Pass to the relevant method based on light type
 	if (Lights[index].Type == 0)		

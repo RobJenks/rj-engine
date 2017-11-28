@@ -3,7 +3,7 @@
 
 #include "render_constants.h"
 #include "light_definition.h"
-#include "material_definition.h"
+#include "../../MaterialData.hlsl.h"
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
 #ifdef __cplusplus

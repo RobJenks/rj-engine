@@ -745,6 +745,7 @@
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialData.hlsl.h" />
     <ClInclude Include="MemDebug.h" />
     <ClInclude Include="MemDebugCheck.h" />
     <ClInclude Include="Modifier.h" />

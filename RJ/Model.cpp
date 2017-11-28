@@ -478,11 +478,10 @@ Result Model::LoadModel(const char *filename)
 	// TODO: also load materials as part of this process
 	int nummat = 1;
 	Material m; 
-	m.Data.ID = 0U; 
-	m.Data.Ambient = XMFLOAT4(100.0f, 100.0f, 100.0f, 100.0f);
-	m.Data.Diffuse = XMFLOAT4(50.0f, 50.0f, 50.0f, 50.0f);
-	m.Data.Specular = XMFLOAT4(1.0f, 0.8f, 0.8f, 0.75f);
-	m.Data.Reflect = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
+	m.Data.AmbientColor = XMFLOAT4(100.0f, 100.0f, 100.0f, 100.0f);
+	m.Data.DiffuseColor = XMFLOAT4(50.0f, 50.0f, 50.0f, 50.0f);
+	m.Data.SpecularColor = XMFLOAT4(1.0f, 0.8f, 0.8f, 0.75f);
+	m.Data.Reflectance = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
 
 	m_buffer.SetMaterialCount(nummat);
 	m_buffer.SetMaterial(0U, m);

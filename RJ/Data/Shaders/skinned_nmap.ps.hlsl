@@ -1,5 +1,5 @@
 #include "light_definition.h"
-#include "material_definition.h"
+#include "../../MaterialData.hlsl.h"
 
 // Import a standard constant buffer holding data on materials, lighting etc
 #include "standard_ps_const_buffer.h"
@@ -64,7 +64,7 @@ void ComputeDirectionalLight(MaterialData mat, LightData L,
 	float3 lightVec = -L.Direction;
 
 	// Add ambient term.
-	ambient = mat.Ambient * L.AmbientIntensity;	
+	ambient = mat.AmbientColor * L.AmbientIntensity;	
 
 	// Add diffuse and specular term, provided the surface is in 
 	// the line of site of the light.
@@ -76,10 +76,10 @@ void ComputeDirectionalLight(MaterialData mat, LightData L,
 	if( diffuseFactor > 0.0f )
 	{
 		float3 v         = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.SpecularColor.w);
 					
-		diffuse = diffuseFactor * mat.Diffuse * L.DiffuseIntensity;
-		spec    = specFactor * mat.Specular * L.SpecularPower;
+		diffuse = diffuseFactor * mat.DiffuseColor * L.DiffuseIntensity;
+		spec    = specFactor * mat.SpecularColor * L.SpecularPower;
 	}
 }
 
@@ -253,7 +253,7 @@ bool gReflectionEnabled = false;
 	}
 
 	// Common to take alpha from diffuse material and texture.
-	litColor.a = Material.Diffuse.a * texColor.a;
+	litColor.a = Material.DiffuseColor.a * texColor.a;
 
     return litColor;
 }
