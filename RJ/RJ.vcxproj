@@ -388,6 +388,7 @@
     <ClCompile Include="ComplexShipTileClass.cpp" />
     <ClCompile Include="ComplexShipTileDefinition.cpp" />
     <ClCompile Include="CompoundLoadoutMap.cpp" />
+    <ClCompile Include="ConstantBufferDX11.cpp" />
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CoreEngine.cpp" />
     <ClCompile Include="Crew.cpp" />
