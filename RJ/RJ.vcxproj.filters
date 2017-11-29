@@ -1774,6 +1774,15 @@
     <ClInclude Include="MaterialData.hlsl.h">
       <Filter>HLSL\Common</Filter>
     </ClInclude>
+    <ClInclude Include="LightData.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\light_definition.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\render_constants.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2094,6 +2103,15 @@
     <Filter Include="HLSL\Common">
       <UniqueIdentifier>{af3c9063-9b1f-4e95-9ac1-0305955bd3f8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Engine\Rendering">
+      <UniqueIdentifier>{4f47e151-e33f-4251-b2bd-87a29202492a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11">
+      <UniqueIdentifier>{f24a97b6-c30a-45f2-9c21-cef25d3a77bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old">
+      <UniqueIdentifier>{d2412553-0518-43ff-975e-40be417b55e5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2187,6 +2205,9 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\light_flat_highlight_fade.vs.hlsl">
       <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\light_calculation.h.hlsl">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
