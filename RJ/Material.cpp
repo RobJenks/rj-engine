@@ -2,8 +2,8 @@
 #include "FastMath.h"
 #include "Material.h"
 
-// Maximum number of materials that can be rendered in one pass
-const unsigned int Material::MATERIAL_LIMIT = C_MATERIAL_LIMIT;
+// Initialise static variables
+Material::MaterialID Material::GlobalMaterialIDCount = 0U;
 
 
 // Default constructor
@@ -12,6 +12,13 @@ Material::Material(void)
 	AssignUniqueID();
 }
 
+// Default copy constructor
+Material::Material(const Material &other)
+	:
+	Data(other.Data)
+{
+	AssignUniqueID();
+}
 
 // Default destructor
 Material::~Material(void)

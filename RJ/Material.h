@@ -12,10 +12,12 @@ public:
 
 	typedef unsigned int		MaterialID;				// Custom type for material ID
 	static MaterialID			GlobalMaterialIDCount;	// Monotonically-increasing ID counter for material objects
-	static const MaterialID		MATERIAL_LIMIT;			// Maximum number of materials that can be rendered in one pass
 
 	// Default constructor
 	Material(void);
+
+	// Default copy constructor
+	Material(const Material &other);
 	
 	// Unique material ID
 	CMPINLINE MaterialID		GetID(void) const { return m_id; }
@@ -75,7 +77,7 @@ private:
 
 	// Unique material ID
 	MaterialID					m_id;
-	CMPINLINE void				AssignUniqueID(void) { m_id = ++GlobalMaterialIDCount; }
+	CMPINLINE void				AssignUniqueID(void) { m_id = ++Material::GlobalMaterialIDCount; }
 
 
 };

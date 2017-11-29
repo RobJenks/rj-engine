@@ -685,8 +685,8 @@
     <ClInclude Include="DataObjectEngineHeadingController.h" />
     <ClInclude Include="DataObjectInput.h" />
     <ClInclude Include="DataObjectSwitch.h" />
-    <ClInclude Include="Data\Shaders\light_definition.h" />
-    <ClInclude Include="Data\Shaders\render_constants.h" />
+    <ClInclude Include="Data\Shaders\old_light_definition.h" />
+    <ClInclude Include="Data\Shaders\old_render_constants.h" />
     <ClInclude Include="DynamicTerrain.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataObjectRegister.h" />
@@ -1081,7 +1081,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light_calculation.h.hlsl" />
+    <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl" />
     <FxCompile Include="Data\Shaders\light_fade.ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>

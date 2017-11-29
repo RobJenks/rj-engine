@@ -1777,10 +1777,10 @@
     <ClInclude Include="LightData.hlsl.h">
       <Filter>HLSL\Common</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Shaders\light_definition.h">
+    <ClInclude Include="Data\Shaders\old_light_definition.h">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Shaders\render_constants.h">
+    <ClInclude Include="Data\Shaders\old_render_constants.h">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2206,7 +2206,7 @@
     <FxCompile Include="Data\Shaders\light_flat_highlight_fade.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\light_calculation.h.hlsl">
+    <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </FxCompile>
   </ItemGroup>
