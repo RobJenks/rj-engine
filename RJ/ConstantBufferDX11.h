@@ -11,6 +11,9 @@ public:
 	// Constructor; create a new constant buffer of the given size
 	ConstantBufferDX11(UINT buffer_size);
 
+	// Map data into this constant buffer
+	void						Set(const void *data, UINT data_size);
+
 	// Bind this resource to the given shader target
 	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id);
 

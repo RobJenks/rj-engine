@@ -31,6 +31,22 @@ ConstantBufferDX11::ConstantBufferDX11(UINT buffer_size)
 	}
 }
 
+// Map data into this constant buffer
+void ConstantBufferDX11::Set(const void *data, UINT data_size)
+{
+	assert(data_size == m_buffersize);
+	ID3D11DeviceContext *devicecontext = Game::Engine->GetDeviceContext();
+
+	D3D11_MAPPED_SUBRESOURCE mappedresource;
+	if (FAILED(devicecontext->Map(m_buffer[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource)))
+	{
+		return;
+	}
+
+	memcpy(mappedresource.pData, data, m_buffersize);
+	devicecontext->Unmap(m_buffer[0], 0);
+}
+
 // Bind this resource to the given shader target
 void ConstantBufferDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id)
 {
