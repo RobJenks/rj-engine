@@ -766,6 +766,9 @@
     <ClCompile Include="DataObjectEngineHeadingController.cpp">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderParameterDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1782,6 +1785,33 @@
     </ClInclude>
     <ClInclude Include="Data\Shaders\old_render_constants.h">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderParameterDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderParameter.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

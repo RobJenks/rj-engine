@@ -528,6 +528,7 @@
     <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShaderParameterDX11.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
@@ -658,6 +659,7 @@
     <ClInclude Include="ComplexShipTileDefinition.h" />
     <ClInclude Include="CompoundLoadoutMap.h" />
     <ClInclude Include="ConditionalCompilation.h" />
+    <ClInclude Include="ConstantBufferDX11.h" />
     <ClInclude Include="Constraint.h" />
     <ClInclude Include="DataObjectContinuousSwitch.h" />
     <ClInclude Include="CopyObject.h" />
@@ -838,11 +840,17 @@
     <ClInclude Include="RM_InstanceData.h" />
     <ClInclude Include="RM_ModelDataCollection.h" />
     <ClInclude Include="RM_ZSortedInstance.h" />
+    <ClInclude Include="SamplerDX11.h" />
     <ClInclude Include="SentenceType.h" />
     <ClInclude Include="SequenceGenerationTests.h" />
+    <ClInclude Include="Shader.h" />
+    <ClInclude Include="ShaderDX11.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ObjectSearch.h" />
     <ClInclude Include="Ray.h" />
+    <ClInclude Include="ShaderParameter.h" />
+    <ClInclude Include="ShaderParameterDX11.h" />
+    <ClInclude Include="Shaders.h" />
     <ClInclude Include="SimulatedEnvironmentCollision.h" />
     <ClInclude Include="SpaceProjectile.h" />
     <ClInclude Include="SpaceProjectileDefinition.h" />
@@ -854,11 +862,13 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="StandardModifiers.h" />
+    <ClInclude Include="StructuredBufferDX11.h" />
     <ClInclude Include="TestApplication.h" />
     <ClInclude Include="TestBase.h" />
     <ClInclude Include="TestError.h" />
     <ClInclude Include="TestResult.h" />
     <ClInclude Include="TestRunner.h" />
+    <ClInclude Include="TextureDX11.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
     <ClInclude Include="ElementStateDefinition.h" />
