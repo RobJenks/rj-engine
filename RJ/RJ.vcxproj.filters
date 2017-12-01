@@ -790,6 +790,9 @@
     <ClCompile Include="TextureDX11Util.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="SamplerStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1828,9 +1831,6 @@
     <ClInclude Include="TextureDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
-    <ClInclude Include="SamplerDX11.h">
-      <Filter>Engine\Rendering\DirectX11</Filter>
-    </ClInclude>
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="StructuredBuffer.h" />
@@ -1850,6 +1850,12 @@
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="Rendering.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="SamplerState.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>

@@ -536,6 +536,7 @@
     <ClCompile Include="RM_Instance.cpp" />
     <ClCompile Include="RM_InstanceData.cpp" />
     <ClCompile Include="RM_ModelDataCollection.cpp" />
+    <ClCompile Include="SamplerStateDX11.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShaderParameterDX11.cpp" />
@@ -887,7 +888,8 @@
     <ClInclude Include="RM_InstanceData.h" />
     <ClInclude Include="RM_ModelDataCollection.h" />
     <ClInclude Include="RM_ZSortedInstance.h" />
-    <ClInclude Include="SamplerDX11.h" />
+    <ClInclude Include="SamplerState.h" />
+    <ClInclude Include="SamplerStateDX11.h" />
     <ClInclude Include="SentenceType.h" />
     <ClInclude Include="SequenceGenerationTests.h" />
     <ClInclude Include="Shader.h" />
