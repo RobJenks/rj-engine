@@ -404,7 +404,14 @@
     <ClCompile Include="CSPowerGeneratorTile.cpp" />
     <ClCompile Include="CSPowerGeneratorTileDefinition.cpp" />
     <ClCompile Include="CSQuartersTile.cpp" />
-    <ClCompile Include="CubeMapTexture.cpp" />
+    <ClCompile Include="CubeMapTexture.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="D3DMain.cpp" />
     <ClCompile Include="Damage.cpp" />
     <ClCompile Include="DataEnabledEnvironmentObject.cpp" />
@@ -539,6 +546,7 @@
     <ClCompile Include="SpaceTurret.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="StructuredBufferDX11.cpp" />
+    <ClCompile Include="TextureDX11.cpp" />
     <ClCompile Include="TileConnections.cpp" />
     <ClCompile Include="ElementStateDefinition.cpp" />
     <ClCompile Include="Timers.cpp" />
@@ -593,7 +601,14 @@
     <ClCompile Include="TexcubeShader.cpp" />
     <ClCompile Include="TextBlock.cpp" />
     <ClCompile Include="TextManager.cpp" />
-    <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="Old_Texture.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="TextureShader.cpp" />
     <ClCompile Include="TextureTransShader.cpp" />
     <ClCompile Include="TorpedoLauncher.cpp" />
@@ -650,6 +665,7 @@
     <ClInclude Include="CapabilityTester.h" />
     <ClInclude Include="CapitalShipPerimeterBeacon.h" />
     <ClInclude Include="CentralScheduler.h" />
+    <ClInclude Include="ClearFlags.h" />
     <ClInclude Include="Collections.h" />
     <ClInclude Include="CollisionDetectionResultsStruct.h" />
     <ClInclude Include="CollisionGeometry.h" />
@@ -686,7 +702,14 @@
     <ClInclude Include="CSPowerGeneratorTileDefinition.h" />
     <ClInclude Include="CSQuartersTile.h" />
     <ClInclude Include="CSQuartersTileDefinition.h" />
-    <ClInclude Include="CubeMapTexture.h" />
+    <ClInclude Include="CubeMapTexture.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="D3DMain.h" />
     <ClInclude Include="Damage.h" />
     <ClInclude Include="DataEnabledEnvironmentObject.h" />
@@ -695,8 +718,22 @@
     <ClInclude Include="DataObjectEngineHeadingController.h" />
     <ClInclude Include="DataObjectInput.h" />
     <ClInclude Include="DataObjectSwitch.h" />
-    <ClInclude Include="Data\Shaders\old_light_definition.h" />
-    <ClInclude Include="Data\Shaders\old_render_constants.h" />
+    <ClInclude Include="Data\Shaders\old_light_definition.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\old_render_constants.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="DynamicTerrain.h" />
     <ClInclude Include="DataInput.h" />
     <ClInclude Include="DataObjectRegister.h" />
@@ -877,6 +914,7 @@
     <ClInclude Include="TestError.h" />
     <ClInclude Include="TestResult.h" />
     <ClInclude Include="TestRunner.h" />
+    <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureDX11.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
@@ -951,7 +989,14 @@
     <ClInclude Include="TexcubeShader.h" />
     <ClInclude Include="TextBlock.h" />
     <ClInclude Include="TextManager.h" />
-    <ClInclude Include="Texture.h" />
+    <ClInclude Include="Old_Texture.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="TextureShader.h" />
     <ClInclude Include="TextureTransShader.h" />
     <ClInclude Include="TorpedoLauncher.h" />
@@ -1100,7 +1145,14 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl" />
+    <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Data\Shaders\light_fade.ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>

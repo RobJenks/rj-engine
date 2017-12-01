@@ -74,7 +74,7 @@
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClCompile>
     <ClCompile Include="CubeMapTexture.cpp">
-      <Filter>Engine\Textures</Filter>
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
     </ClCompile>
     <ClCompile Include="D3DMain.cpp">
       <Filter>Engine\D3D</Filter>
@@ -375,9 +375,6 @@
     </ClCompile>
     <ClCompile Include="TextManager.cpp">
       <Filter>Engine\Text</Filter>
-    </ClCompile>
-    <ClCompile Include="Texture.cpp">
-      <Filter>Engine\Textures</Filter>
     </ClCompile>
     <ClCompile Include="XML\tinystr.cpp">
       <Filter>XML</Filter>
@@ -784,6 +781,12 @@
     <ClCompile Include="StructuredBufferDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="Old_Texture.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -871,7 +874,7 @@
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClInclude>
     <ClInclude Include="CubeMapTexture.h">
-      <Filter>Engine\Textures</Filter>
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
     </ClInclude>
     <ClInclude Include="D3DMain.h">
       <Filter>Engine\D3D</Filter>
@@ -1250,9 +1253,6 @@
     </ClInclude>
     <ClInclude Include="TextManager.h">
       <Filter>Engine\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Texture.h">
-      <Filter>Engine\Textures</Filter>
     </ClInclude>
     <ClInclude Include="XML\tinystr.h">
       <Filter>XML</Filter>
@@ -1834,6 +1834,15 @@
     <ClInclude Include="CPUGraphicsResourceAccess.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="Old_Texture.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ClearFlags.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -1886,9 +1895,6 @@
     </Filter>
     <Filter Include="Objects\Ships\Tiles\TileClasses">
       <UniqueIdentifier>{cc9eb6d8-0f7d-4347-a294-c3107cd3332b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Textures">
-      <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\D3D">
       <UniqueIdentifier>{4bea18cf-fc13-4314-86bf-b43231d91279}</UniqueIdentifier>
@@ -2162,6 +2168,9 @@
     </Filter>
     <Filter Include="Engine\Rendering\DirectX11\Old">
       <UniqueIdentifier>{d2412553-0518-43ff-975e-40be417b55e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old\Textures">
+      <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
