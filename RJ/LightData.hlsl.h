@@ -9,13 +9,21 @@
 	using float4 = DirectX::XMFLOAT4;
 #endif
 
-	// Supported light types
+
+	// Supported light types; workaround lack of enumerations in HLSL
+#ifdef __cplusplus
 	enum LightType
 	{
 		Point = 0, 
 		Spotlight = 1, 
 		Directional = 2
 	};
+#else
+#	define LightType int
+#	define LightType::Point 0
+#	define LightType::Spotlight 1
+#	define LightType::Directional 2
+#endif
 
 	// Primary structure holding light data
 	struct LightData

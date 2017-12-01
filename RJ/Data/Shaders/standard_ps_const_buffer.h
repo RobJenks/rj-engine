@@ -1,9 +1,9 @@
 #if !defined(__standard_const_bufferH__)
 #define __standard_const_bufferH__
 
-#include "render_constants.h"
-#include "light_definition.h"
+#include "../../LightData.hlsl.h"
 #include "../../MaterialData.hlsl.h"
+#include "old_render_constants.h"
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
 #ifdef __cplusplus

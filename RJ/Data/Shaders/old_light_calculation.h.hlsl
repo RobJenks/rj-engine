@@ -2,7 +2,9 @@
 #define __light_calculationH__
 
 #include "../../MaterialData.hlsl.h"
-#include "light_definition.h"
+#include "../../LightData.hlsl.h"
+
+#if 0		// DOES NOT CURRENTLY COMPILE
 
 // Returns the cosine of the angle between the two specified vectors, in the plane
 // defined by their mutually-orthogonal normal
@@ -115,6 +117,9 @@ float4 CalculateLight(unsigned int index, unsigned int material, float3 world_po
 		return CalculatePointLight(index, material, world_position, normal);
 	}
 }
+
+
+#endif
 
 
 #endif

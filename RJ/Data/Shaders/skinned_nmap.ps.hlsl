@@ -1,4 +1,4 @@
-#include "light_definition.h"
+#include "LightData.hlsl.h"
 #include "../../MaterialData.hlsl.h"
 
 // Import a standard constant buffer holding data on materials, lighting etc

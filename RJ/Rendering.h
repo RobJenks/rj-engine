@@ -1,7 +1,7 @@
 #pragma once
 
-class ID3D11Device2;
-class ID3D11DeviceContext2;
+struct ID3D11Device2;
+struct ID3D11DeviceContext2;
 
 
 class Rendering

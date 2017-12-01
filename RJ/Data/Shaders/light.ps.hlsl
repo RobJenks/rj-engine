@@ -3,15 +3,15 @@ Texture2D shaderTexture;
 SamplerState SampleType;
 
 // Import all light structures and definitions from the external definition file
-#include "render_constants.h"
-#include "light_definition.h"
+
+#include "../../LightData.hlsl.h"
 #include "vertex_definitions.h.hlsl"
 
 // Import a standard constant buffer holding data on materials, lighting etc
 #include "standard_ps_const_buffer.h"
 
 // Import key lighting calcuations
-#include "light_calculation.h.hlsl"
+#include "old_light_calculation.h.hlsl"
 
 
 // Pixel input format
