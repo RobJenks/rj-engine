@@ -25,9 +25,10 @@ ConstantBufferDX11::ConstantBufferDX11(UINT buffer_size)
 	bufferdesc.StructureByteStride = 0;
 
 	m_buffer[0] = NULL;
-	if (FAILED(Game::Engine->GetDevice()->CreateBuffer(&bufferdesc, NULL, &(m_buffer[0]))))
+	HRESULT result = Game::Engine->GetDevice()->CreateBuffer(&bufferdesc, NULL, &(m_buffer[0]));
+	if (FAILED(result))
 	{
-		Game::Log << LOG_ERROR << "Failed to create constant buffer resource (size: " << m_buffersize << ")\n";
+		Game::Log << LOG_ERROR << "Failed to create constant buffer resource (hr: " << result << ", size: " << m_buffersize << ")\n";
 	}
 }
 
@@ -103,3 +104,4 @@ void ConstantBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id)
 ConstantBufferDX11::~ConstantBufferDX11(void)
 {
 }
+

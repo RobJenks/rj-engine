@@ -772,6 +772,18 @@
     <ClCompile Include="ConstantBufferDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="Buffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1815,6 +1827,12 @@
     </ClInclude>
     <ClInclude Include="SamplerDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h" />
+    <ClInclude Include="ConstantBuffer.h" />
+    <ClInclude Include="StructuredBuffer.h" />
+    <ClInclude Include="CPUGraphicsResourceAccess.h">
+      <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

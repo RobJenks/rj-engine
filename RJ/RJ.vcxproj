@@ -372,6 +372,7 @@
     <ClCompile Include="BasicProjectileSet.cpp" />
     <ClCompile Include="BasicRay.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
+    <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CameraClass.cpp" />
     <ClCompile Include="CameraPath.cpp" />
     <ClCompile Include="CapabilityTester.cpp" />
@@ -388,6 +389,7 @@
     <ClCompile Include="ComplexShipTileClass.cpp" />
     <ClCompile Include="ComplexShipTileDefinition.cpp" />
     <ClCompile Include="CompoundLoadoutMap.cpp" />
+    <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConstantBufferDX11.cpp" />
     <ClCompile Include="Constraint.cpp" />
     <ClCompile Include="CoreEngine.cpp" />
@@ -535,6 +537,8 @@
     <ClCompile Include="SpaceProjectileDefinition.cpp" />
     <ClCompile Include="ProjectileLauncher.cpp" />
     <ClCompile Include="SpaceTurret.cpp" />
+    <ClCompile Include="StructuredBuffer.cpp" />
+    <ClCompile Include="StructuredBufferDX11.cpp" />
     <ClCompile Include="TileConnections.cpp" />
     <ClCompile Include="ElementStateDefinition.cpp" />
     <ClCompile Include="Timers.cpp" />
@@ -640,6 +644,7 @@
     <ClInclude Include="BasicSphere.h" />
     <ClInclude Include="BinaryHeap.h" />
     <ClInclude Include="BoundingObject.h" />
+    <ClInclude Include="Buffer.h" />
     <ClInclude Include="CameraClass.h" />
     <ClInclude Include="CameraPath.h" />
     <ClInclude Include="CapabilityTester.h" />
@@ -660,8 +665,10 @@
     <ClInclude Include="ComplexShipTileDefinition.h" />
     <ClInclude Include="CompoundLoadoutMap.h" />
     <ClInclude Include="ConditionalCompilation.h" />
+    <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferDX11.h" />
     <ClInclude Include="Constraint.h" />
+    <ClInclude Include="CPUGraphicsResourceAccess.h" />
     <ClInclude Include="DataObjectContinuousSwitch.h" />
     <ClInclude Include="CopyObject.h" />
     <ClInclude Include="CoreEngine.h" />
@@ -863,6 +870,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="StandardModifiers.h" />
+    <ClInclude Include="StructuredBuffer.h" />
     <ClInclude Include="StructuredBufferDX11.h" />
     <ClInclude Include="TestApplication.h" />
     <ClInclude Include="TestBase.h" />

@@ -2,9 +2,10 @@
 
 #include "DX11_Core.h"
 #include "Shader.h"
+#include "ConstantBuffer.h"
 
 
-class ConstantBufferDX11
+class ConstantBufferDX11 : public ConstantBuffer
 {
 public:
 
