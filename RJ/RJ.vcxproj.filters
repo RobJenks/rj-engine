@@ -787,6 +787,9 @@
     <ClCompile Include="TextureDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="TextureDX11Util.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1842,6 +1845,9 @@
     </ClInclude>
     <ClInclude Include="ClearFlags.h">
       <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureDX11Util.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

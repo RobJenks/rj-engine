@@ -135,7 +135,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -172,7 +172,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -211,7 +211,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -247,7 +247,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -285,7 +285,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -321,7 +321,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -547,6 +547,7 @@
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="StructuredBufferDX11.cpp" />
     <ClCompile Include="TextureDX11.cpp" />
+    <ClCompile Include="TextureDX11Util.cpp" />
     <ClCompile Include="TileConnections.cpp" />
     <ClCompile Include="ElementStateDefinition.cpp" />
     <ClCompile Include="Timers.cpp" />
@@ -916,6 +917,7 @@
     <ClInclude Include="TestRunner.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureDX11.h" />
+    <ClInclude Include="TextureDX11Util.h" />
     <ClInclude Include="TileAdjacency.h" />
     <ClInclude Include="TileConnections.h" />
     <ClInclude Include="ElementStateDefinition.h" />

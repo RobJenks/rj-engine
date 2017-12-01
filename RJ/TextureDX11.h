@@ -4,6 +4,7 @@
 #include "DX11_Core.h"
 #include "ClearFlags.h"
 #include "Shader.h"
+#include "ShaderParameter.h"
 #include "CPUGraphicsResourceAccess.h"
 #include "Texture.h"
 
@@ -30,10 +31,10 @@ public:
 	TextureDX11(CubeMapConstructor, uint16_t size, uint16_t count, const TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool bUAV = false);
 
 	// Bind this resource to the given shader target
-	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id);
+	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype);
 
 	// Remove this (or any) binding from the given shader target
-	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id);
+	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype);
 
 	/**
 	* Load a 2D texture from a file path.
@@ -57,7 +58,7 @@ public:
 	* For 1D, and 2D textures, this function always returns the only
 	* face of the texture (the texture itself).
 	*/
-	TextureDX11 * GetFace(CubeFace face) const;
+	TextureDX11 * GetFace(CubeFace face);
 
 	/**
 	* 3D textures store several slices of 2D textures.
@@ -66,7 +67,7 @@ public:
 	* For 1D and 2D textures, this function will always return the texture
 	* itself.
 	*/
-	TextureDX11 * GetSlice(unsigned int slice) const;
+	TextureDX11 * GetSlice(unsigned int slice);
 
 	// Get the width of the textures in texels.
 	uint16_t GetWidth() const;
@@ -93,7 +94,7 @@ public:
 	* Copy the contents of one texture into another.
 	* Textures must both be the same size.
 	*/
-	void Copy(TextureDX11 *other);
+	void Copy(TextureDX11 *srcTexture);
 
 	/**
 	* Clear the texture.
@@ -101,7 +102,7 @@ public:
 	* @param depth The depth value to use for depth textures.
 	* @param stencil The stencil value to use for depth/stencil textures.
 	*/
-	void Clear(ClearFlags clearFlags = ClearFlags::All, const XMFLOAT4& color = XMFLOAT4(0), float depth = 1.0f, uint8_t stencil = 0);
+	void Clear(ClearFlags clearFlags = ClearFlags::All, const FLOAT * float4_colour = float4_zero, float depth = 1.0f, uint8_t stencil = 0);
 
 	// Gets the texture resource associated to this texture
 	ID3D11Resource* GetTextureResource() const;
@@ -152,24 +153,7 @@ private:
 	void Resize2D(uint16_t width, uint16_t height);
 	void Resize3D(uint16_t width, uint16_t height, uint16_t depth);
 	void ResizeCube(uint16_t size);
-	DXGI_FORMAT TranslateFormat(const TextureFormat& format);
-
-	DXGI_FORMAT GetTextureFormat(DXGI_FORMAT format);
-	DXGI_FORMAT GetDSVFormat(DXGI_FORMAT format);
-	DXGI_FORMAT GetSRVFormat(DXGI_FORMAT format);
-	DXGI_FORMAT GetRTVFormat(DXGI_FORMAT format);
-	DXGI_FORMAT GetUAVFormat(DXGI_FORMAT format);
-
-	uint8_t GetBPP(DXGI_FORMAT format);
-
-	TextureFormat TranslateFormat(DXGI_FORMAT format, uint8_t numSamples);
-
-	// Try to choose the best multi-sampling quality level that is supported for the given format.
-	DXGI_SAMPLE_DESC GetSupportedSampleCount(DXGI_FORMAT format, uint8_t numSamples);
-
-	// Reports a more detailed texture error with format information extracted from the texture resource
-#	define ReportTextureFormatError( textureformat, message ) LogTextureFormatError( (textureformat), __FILE__, __LINE__, __FUNCTION__, (message) )
-	static void LogTextureFormatError(const Texture::TextureFormat& format, const std::string& file, int line, const std::string& function, const std::string& message);
+	
 
 	// Instance fields
 	ID3D11Texture1D *						m_texture1d;
@@ -214,7 +198,9 @@ private:
 
 	std::wstring							m_filename;
 
-
+	static const FLOAT *						float4_zero;
+	static ID3D11ShaderResourceView * const		null_srv[1];
+	static ID3D11UnorderedAccessView * const	null_uav[1];
 
 };
 
