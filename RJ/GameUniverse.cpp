@@ -26,7 +26,7 @@ Result GameUniverse::InitialiseUniverse(void)
 	return ErrorCodes::NoError;
 }
 
-Result GameUniverse::ProcessLoadedSystems(ID3D11Device *device)
+Result GameUniverse::ProcessLoadedSystems(Rendering::RenderDeviceType  *device)
 {
 	Result overallresult = ErrorCodes::NoError;
 

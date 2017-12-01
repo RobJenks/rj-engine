@@ -8,6 +8,7 @@
 
 #include <fstream>
 #include <string>
+#include "Rendering.h"
 #include "Texture.h"
 #include "CompilerSettings.h"
 
@@ -33,7 +34,7 @@ public:
 	FontData(const FontData&);
 	~FontData();
 
-	Result Initialize(ID3D11Device* device, std::string name, const char *fontFilename, const char *textureFilename);
+	Result Initialize(Rendering::RenderDeviceType * device, std::string name, const char *fontFilename, const char *textureFilename);
 	void Shutdown();
 
 	ID3D11ShaderResourceView* GetTexture();
@@ -47,7 +48,7 @@ public:
 private:
 	Result LoadFontData(const char*);
 	void ReleaseFontData();
-	Result FontData::LoadTexture(ID3D11Device* device, const char *filename);
+	Result FontData::LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
 	void ReleaseTexture();
 
 private:

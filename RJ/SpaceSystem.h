@@ -5,7 +5,7 @@
 
 #include <string>
 #include "DX11_Core.h"
-
+#include "Rendering.h"
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "Texture.h"
@@ -28,7 +28,7 @@ public:
 	~SpaceSystem(void);
 
 	// Performs all initialisation for the system
-	Result						InitialiseSystem(ID3D11Device *device);
+	Result						InitialiseSystem(Rendering::RenderDeviceType  *device);
 
 	// Handles the entry of an object into the system, adding it to the system collections and updating the simulation state accordingly
 	Result						AddObjectToSystem(iSpaceObject * object);

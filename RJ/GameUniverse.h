@@ -6,6 +6,7 @@
 #include <string>
 #include <unordered_map>
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "iAcceptsConsoleCommands.h"
 class SpaceSystem;
 
@@ -17,7 +18,7 @@ public:
 	~GameUniverse(void);
 
 	Result						InitialiseUniverse(void);
-	Result						ProcessLoadedSystems(ID3D11Device *device);
+	Result						ProcessLoadedSystems(Rendering::RenderDeviceType  *device);
 
 	// Adds a new system to the universe
 	void						AddSystem(SpaceSystem *system);

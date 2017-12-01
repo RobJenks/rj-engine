@@ -39,7 +39,7 @@ public:
 					{ Ambient = ambient; Diffuse = diffuse; Specular = specular; Reflect = reflect; }
 	};
 
-	SkinnedModel(ID3D11Device* device, const std::string & code, const std::string & modelFilename, const std::string & texturePath);
+	SkinnedModel(Rendering::RenderDeviceType * device, const std::string & code, const std::string & modelFilename, const std::string & texturePath);
 	~SkinnedModel();
 
 	UINT SubsetCount;

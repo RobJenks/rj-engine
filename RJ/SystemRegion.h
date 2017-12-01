@@ -4,7 +4,7 @@
 #define __SystemRegionH__
 
 #include "DX11_Core.h"
-
+#include "Rendering.h"
 #include "ErrorCodes.h"
 #include "CubeMapTexture.h"
 class CameraClass;
@@ -28,10 +28,10 @@ public:
 		XMFLOAT3 texture;
 	};
 
-	Result				Initialise(ID3D11Device *device);
+	Result				Initialise(Rendering::RenderDeviceType  *device);
 
 	// Sets the system backdrop texture that will be rendered to the view frustrum far plane
-	Result				SetBackdropTexture(	ID3D11Device* device, const char *filename, 
+	Result				SetBackdropTexture(	Rendering::RenderDeviceType * device, const char *filename, 
 											const XMFLOAT2 & texturesize );
 	
 	// Returns a pointer to the texture resource that will be used for rendering the space backdrop
@@ -41,13 +41,13 @@ public:
 								GetBackdropTextureResource(void) { return m_backdroptexture->GetTexture(); }
 
 	// Main render function; renders all applicable objects to the vertex/index buffers
-	void				Render(ID3D11DeviceContext *devicecontext);
+	void				Render(Rendering::RenderDeviceContextType  *devicecontext);
 
-	void				RenderSystemScenery(ID3D11DeviceContext *devicecontext, const CameraClass *camera, 
+	void				RenderSystemScenery(Rendering::RenderDeviceContextType  *devicecontext, const CameraClass *camera, 
 											const ViewFrustrum *frustrum, float timefactor);
 
 	// Renders the vertex buffers to the DX output stream, once all data is prepared in the buffers
-	void				RenderBuffers(ID3D11DeviceContext *devicecontext);
+	void				RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
 
 	// Terminates the region
 	void				Terminate(void);

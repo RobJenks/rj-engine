@@ -24,7 +24,7 @@ SpaceSystem::SpaceSystem(void)
 	m_backdrop = NULL;
 }
 
-Result SpaceSystem::InitialiseSystem(ID3D11Device *device)
+Result SpaceSystem::InitialiseSystem(Rendering::RenderDeviceType  *device)
 {
 	// The system can only be initialised once
 	if (m_initialised) return ErrorCodes::CannotReinitialiseSystem;
@@ -164,7 +164,7 @@ void SpaceSystem::RegisterAllSystemLights(void)
 		obj = (*it)(); 
 		if (obj && obj->GetObjectType() == iObject::ObjectType::LightSourceObject)
 		{
-			if (((LightSource*)obj)->GetLight().Data.Type == Light::LightType::Directional)
+			if (((LightSource*)obj)->GetLight().Data.Type == LightType::Directional)
 			{
 				m_directional_lights.push_back((iObject*)obj);
 			}

@@ -7,7 +7,7 @@
 #include "CameraClass.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
-#include "Data\\Shaders\\light_definition.h"
+#include "LightData.hlsl.h"
 #include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "LightFlatHighlightFadeShader.h"
@@ -25,7 +25,7 @@ LightFlatHighlightFadeShader::LightFlatHighlightFadeShader(void)
 }
 
 
-Result LightFlatHighlightFadeShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result LightFlatHighlightFadeShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -42,7 +42,7 @@ Result LightFlatHighlightFadeShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result LightFlatHighlightFadeShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result LightFlatHighlightFadeShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -68,7 +68,7 @@ Result LightFlatHighlightFadeShader::InitialiseVertexShader(ID3D11Device *device
 
 
 // Initialise shader
-Result LightFlatHighlightFadeShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result LightFlatHighlightFadeShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -91,7 +91,7 @@ Result LightFlatHighlightFadeShader::InitialisePixelShader(ID3D11Device *device,
 	return ErrorCodes::NoError;
 }
 
-Result XM_CALLCONV LightFlatHighlightFadeShader::Render(ID3D11DeviceContext *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+Result XM_CALLCONV LightFlatHighlightFadeShader::Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 	const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

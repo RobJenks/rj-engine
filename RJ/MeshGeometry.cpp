@@ -16,7 +16,7 @@ MeshGeometry::~MeshGeometry()
 	ReleaseCOM(mIB);
 }
 
-Result MeshGeometry::SetIndices(ID3D11Device* device, const USHORT* indices, UINT count)
+Result MeshGeometry::SetIndices(Rendering::RenderDeviceType * device, const USHORT* indices, UINT count)
 {
 	D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;

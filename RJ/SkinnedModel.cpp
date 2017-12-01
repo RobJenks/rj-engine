@@ -5,7 +5,7 @@
 #include "LoadM3d.h"
 #include "Texture.h"
 
-SkinnedModel::SkinnedModel(ID3D11Device* device, const std::string &code, const std::string& modelFilename, const std::string& texturePath)
+SkinnedModel::SkinnedModel(Rendering::RenderDeviceType * device, const std::string &code, const std::string& modelFilename, const std::string& texturePath)
 {
 	m_code = code;
 

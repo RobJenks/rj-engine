@@ -9,7 +9,7 @@
 #include "CameraClass.h"
 #include "Material.h"
 #include "InputLayoutDesc.h"
-#include "Data\\Shaders\\light_definition.h"
+#include "LightData.hlsl.h"
 #include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "ShaderManager.h"
@@ -48,7 +48,7 @@ Result ShaderManager::LoadCompiledShader(const std::string & filename, byte **pp
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::string & filename, InputLayoutDesc *layout_desc,
+Result ShaderManager::CreateVertexShader(Rendering::RenderDeviceType  *device, const std::string & filename, InputLayoutDesc *layout_desc,
 											ID3D11VertexShader **ppOutShader, ID3D11InputLayout **ppOutInputLayout)
 {
 	// Paramter check
@@ -87,7 +87,7 @@ Result ShaderManager::CreateVertexShader(	ID3D11Device *device, const std::strin
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string & filename, ID3D11PixelShader **ppOutShader)
+Result ShaderManager::CreatePixelShader(Rendering::RenderDeviceType *device, const std::string & filename, ID3D11PixelShader **ppOutShader)
 {
 	// Paramter check
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
@@ -113,7 +113,7 @@ Result ShaderManager::CreatePixelShader(ID3D11Device *device, const std::string 
 }
 
 // Creates a new shader from the specified CSO
-Result ShaderManager::CreateGeometryShader(ID3D11Device *device, const std::string & filename, ID3D11GeometryShader **ppOutShader)
+Result ShaderManager::CreateGeometryShader(Rendering::RenderDeviceType *device, const std::string & filename, ID3D11GeometryShader **ppOutShader)
 {
 	// Paramter check
 	if (!device) return ErrorCodes::ShaderManagerCannotCreateShaderWithNullInput;
@@ -181,7 +181,7 @@ Result ShaderManager::GetStandardSamplerDescription(DefinedSamplerState type, D3
 }
 
 // Return a standard defined sampler state for use in shader initialisation
-Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, ID3D11Device *device, ID3D11SamplerState **ppOutSamplerState)
+Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, Rendering::RenderDeviceType *device, ID3D11SamplerState **ppOutSamplerState)
 {
 	// Parameter check
 	if (!device || !ppOutSamplerState) return ErrorCodes::ShaderManagerCannotCreateSamplerWithNullInput;
@@ -208,14 +208,14 @@ Result ShaderManager::CreateStandardSamplerState(DefinedSamplerState type, ID3D1
 
 // Create a standard dynamic constant buffer of the specified size (Usage=Dynamic, BindFlags=ConstantBuffer, CPUAccessFlags=Write, 
 // MiscFlags = 0, StructureByteStride = 0, ByteWidth = @bytewidth)
-Result ShaderManager::CreateStandardDynamicConstantBuffer(UINT bytewidth, ID3D11Device *device, ID3D11Buffer **ppOutConstantBuffer)
+Result ShaderManager::CreateStandardDynamicConstantBuffer(UINT bytewidth, Rendering::RenderDeviceType *device, ID3D11Buffer **ppOutConstantBuffer)
 {
 	return CreateBuffer(D3D11_USAGE_DYNAMIC, bytewidth, D3D11_BIND_CONSTANT_BUFFER, D3D11_CPU_ACCESS_WRITE, 0, 0, device, ppOutConstantBuffer);
 }
 
 // Create a buffer based on the specified parameters
 Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bindflags, UINT cpuaccessflags, UINT miscflags, UINT structurebytestride, 
-									ID3D11Device *device, ID3D11Buffer **ppOutBuffer)
+									Rendering::RenderDeviceType *device, ID3D11Buffer **ppOutBuffer)
 {
 	// Parameter check
 	if (!device || !ppOutBuffer) return ErrorCodes::ShaderManagerCannotCreateBufferWithNullInput;

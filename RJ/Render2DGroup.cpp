@@ -102,10 +102,9 @@ void XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
 {
 	TextureShader *tshader; 
 	iUIComponentRenderable *component;
-	ID3D11DeviceContext *devicecontext;
 
 	// Get a reference to the device context, texture shader & matrices _we will use for rendering
-	devicecontext = Game::Engine->GetDeviceContext();
+	auto devicecontext = Game::Engine->GetDeviceContext();
 	tshader = Game::Engine->GetTextureShader();
 	if (!devicecontext || !tshader) return;
 	

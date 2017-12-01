@@ -3,6 +3,7 @@
 
 #include "iShader.h"
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "ErrorCodes.h"
 
 class Texture;
@@ -48,16 +49,16 @@ public:
 	VolLineShader(void);
 
 	// Initialise the shader
-	Result							Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far);
+	Result							Initialise(Rendering::RenderDeviceType  *device, XMFLOAT2 viewport_size, float clip_near, float clip_far);
 
 	// Methods to initialise each shader in the pipeline in turn
-	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
-	Result							InitialiseGeometryShader(ID3D11Device *device, std::string filename);
-	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
-	Result							InitialisePixelShaderTextured(ID3D11Device *device, std::string filename);
+	Result							InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialiseGeometryShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialisePixelShaderTextured(Rendering::RenderDeviceType  *device, std::string filename);
 
 	// Renders the shader.
-	Result XM_CALLCONV				Render(ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+	Result XM_CALLCONV				Render(Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Adjust the radius of lines currently being drawn
@@ -67,7 +68,7 @@ public:
 	void							Shutdown();
 
 	// Initialise the static data used in volumetric line rendering
-	static Result					InitialiseStaticData(ID3D11Device *device);
+	static Result					InitialiseStaticData(Rendering::RenderDeviceType  *device);
 
 	// Deallocates all static data used in volumetric line rendering
 	static void						ShutdownStaticData(void);

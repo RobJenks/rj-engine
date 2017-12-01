@@ -15,7 +15,7 @@ const XMFLOAT2 ParticleEmitter::TexCoord[4][4] = {
 };
 
 // Initialises the particle emitter.  Properties should have been set first.
-Result ParticleEmitter::Initialise(ID3D11Device *device)
+Result ParticleEmitter::Initialise(Rendering::RenderDeviceType *device)
 {
 	Result result;
 
@@ -90,7 +90,7 @@ Result ParticleEmitter::InitialiseParticles(void)
 	return ErrorCodes::NoError;
 }
 
-Result ParticleEmitter::InitialiseBuffers(ID3D11Device *device)
+Result ParticleEmitter::InitialiseBuffers(Rendering::RenderDeviceType *device)
 {
 	INDEXFORMAT *indices;
 	int i;
@@ -281,7 +281,7 @@ void ParticleEmitter::AddParticle(int id)
 	//if (m_maxparticleidcreated >= m_particlelimit) m_maxparticleidcreated = m_particlelimit-1;
 }
 
-void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup)
+void ParticleEmitter::Render(Rendering::RenderDeviceContextType  *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup)
 {
 	// Update the particle data
 	UpdateParticles(vright, vup);
@@ -290,7 +290,7 @@ void ParticleEmitter::Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 
 	RenderBuffers(devicecontext);
 }
 
-void ParticleEmitter::RenderBuffers(ID3D11DeviceContext *devicecontext)
+void ParticleEmitter::RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -325,7 +325,7 @@ void ParticleEmitter::RenderBuffers(ID3D11DeviceContext *devicecontext)
 
 
 
-Result ParticleEmitter::LoadTexture(ID3D11Device* device, const char *filename)
+Result ParticleEmitter::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
 {
 	// If texture already exists then release and deallocate it first
 	if (m_texture)
@@ -398,7 +398,7 @@ ParticleEmitter *ParticleEmitter::CreateClone(void)
 	e->SetPositionAndOrientation(this->GetPosition(), this->GetOrientation());
 	
 	// Extract resource information from the source emitter texture, for use in creating the new one
-	ID3D11Device *tdev;
+	Rendering::RenderDeviceType  *tdev;
 	ID3D11Resource *tres;
 	D3D11_SHADER_RESOURCE_VIEW_DESC tdesc;
 	this->GetParticleTexture()->GetDevice(&tdev);

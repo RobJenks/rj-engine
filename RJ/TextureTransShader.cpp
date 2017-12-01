@@ -18,7 +18,7 @@ TextureTransShader::TextureTransShader(void)
 	m_sampleState = 0;
 }
 
-Result TextureTransShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result TextureTransShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -35,7 +35,7 @@ Result TextureTransShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result TextureTransShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result TextureTransShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -61,7 +61,7 @@ Result TextureTransShader::InitialiseVertexShader(ID3D11Device *device, std::str
 
 
 // Initialise shader
-Result TextureTransShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result TextureTransShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -97,7 +97,7 @@ void TextureTransShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV TextureTransShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result XM_CALLCONV TextureTransShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								float transX, float transY)
 {

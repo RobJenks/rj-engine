@@ -4,9 +4,9 @@
 #define __Image2DH__
 
 #include "DX11_Core.h"
-
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
+#include "Rendering.h"
 #include "Texture.h"
 #include "iUIComponentRenderable.h"
 
@@ -31,7 +31,7 @@ public:
 	Image2D(const Image2D&);
 	~Image2D();
 
-	Result Initialize(ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight);
+	Result Initialize(Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight);
 	void Shutdown();
 	
 	void Render(void);
@@ -54,12 +54,12 @@ public:
 	CMPINLINE int GetHeight(void) { return m_bitmapHeight; }
 
 private:
-	Result InitializeBuffers(ID3D11Device*);
+	Result InitializeBuffers(Rendering::RenderDeviceType *);
 	void ShutdownBuffers();
 	Result UpdateBuffers();
 	void RenderBuffers();
 
-	Result LoadTexture(ID3D11Device*, const char*);
+	Result LoadTexture(Rendering::RenderDeviceType *, const char*);
 	void ReleaseTexture();
 
 private:
@@ -67,8 +67,8 @@ private:
 	int m_x, m_y;
 	float m_z;
 
-	ID3D11Device *				m_device;
-	ID3D11DeviceContext *		m_devicecontext;
+	Rendering::RenderDeviceType  *				m_device;
+	Rendering::RenderDeviceContextType  *		m_devicecontext;
 
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;

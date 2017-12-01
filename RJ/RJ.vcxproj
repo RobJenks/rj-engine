@@ -813,6 +813,7 @@
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
+    <ClInclude Include="Rendering.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />

@@ -4,6 +4,7 @@
 #define __SkinnedNormalMapShaderH__
 
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "Light.h"
 #include "SkinnedModel.h"
 
@@ -35,25 +36,25 @@ public:
 	SkinnedNormalMapShader(void);
 	~SkinnedNormalMapShader();
 
-	Result Initialise(ID3D11Device*, HWND);
+	Result Initialise(Rendering::RenderDeviceType *, HWND);
 
 	// Methods to initialise each shader in the pipeline in turn
-	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
-	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
-	Result							InitialiseCommonConstantBuffers(ID3D11Device *device);
+	Result							InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialiseCommonConstantBuffers(Rendering::RenderDeviceType  *device);
 
 	void Shutdown();
 	
 	// Renders the shader.  Conforms to the iShader interface spec
-	Result XM_CALLCONV Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
+	Result XM_CALLCONV Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
 					XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
 
 private:
 
-	Result SetPerFrameShaderParameters(ID3D11DeviceContext *deviceContext);
+	Result SetPerFrameShaderParameters(Rendering::RenderDeviceContextType  *deviceContext);
 
-	Result SetPerObjectShaderParameters(	ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model, 
+	Result SetPerObjectShaderParameters(	Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model, 
 											XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
 private:

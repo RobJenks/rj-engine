@@ -3,6 +3,7 @@
 #include "ErrorCodes.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
+#include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "Texture.h"
 
@@ -28,7 +29,7 @@ Image2DRenderGroup::Image2DRenderGroup(void)
 }
 
 
-Result Image2DRenderGroup::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode)
+Result Image2DRenderGroup::Initialize(Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode)
 { 
 	Result result;
 
@@ -180,7 +181,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	return ErrorCodes::NoError;
 }
 
-Result Image2DRenderGroup::LoadTexture(ID3D11Device* device, const char *filename)
+Result Image2DRenderGroup::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
 {
 	Result result;
 

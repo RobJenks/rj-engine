@@ -9,7 +9,7 @@
 #include "CameraClass.h"
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
-#include "Data\\Shaders\\light_definition.h"
+#include "LightData.hlsl.h"
 #include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "SkinnedNormalMapShader.h"
@@ -27,7 +27,7 @@ SkinnedNormalMapShader::SkinnedNormalMapShader(void)
 }
 
 
-Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result SkinnedNormalMapShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -48,7 +48,7 @@ Result SkinnedNormalMapShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result SkinnedNormalMapShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result SkinnedNormalMapShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -74,7 +74,7 @@ Result SkinnedNormalMapShader::InitialiseVertexShader(ID3D11Device *device, std:
 
 
 // Initialise shader
-Result SkinnedNormalMapShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result SkinnedNormalMapShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -90,7 +90,7 @@ Result SkinnedNormalMapShader::InitialisePixelShader(ID3D11Device *device, std::
 }
 
 // Initialise constant buffers used across all pipeline shaders
-Result SkinnedNormalMapShader::InitialiseCommonConstantBuffers(ID3D11Device *device)
+Result SkinnedNormalMapShader::InitialiseCommonConstantBuffers(Rendering::RenderDeviceType  *device)
 {
 	Result result;
 
@@ -125,7 +125,7 @@ void SkinnedNormalMapShader::Shutdown()
 	ReleaseIfExists(m_pixelShader);
 }
 
-Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model,
+Result XM_CALLCONV SkinnedNormalMapShader::Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
 									  XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
 {
 	Result result;
@@ -178,7 +178,7 @@ Result XM_CALLCONV SkinnedNormalMapShader::Render(ID3D11DeviceContext *deviceCon
 }
 
 // Set the per-frame shader parameters in this method.  This includes only PS parameters
-Result SkinnedNormalMapShader::SetPerFrameShaderParameters(ID3D11DeviceContext *deviceContext)
+Result SkinnedNormalMapShader::SetPerFrameShaderParameters(Rendering::RenderDeviceContextType  *deviceContext)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -207,7 +207,7 @@ Result SkinnedNormalMapShader::SetPerFrameShaderParameters(ID3D11DeviceContext *
 }
 
 // Set the per-object parameters in this method.  This includes the per-object CB as well as the bone transform CB
-Result SkinnedNormalMapShader::SetPerObjectShaderParameters(ID3D11DeviceContext *deviceContext, SkinnedModelInstance &model, 
+Result SkinnedNormalMapShader::SetPerObjectShaderParameters(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model, 
 															XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
 {
 	HRESULT result;

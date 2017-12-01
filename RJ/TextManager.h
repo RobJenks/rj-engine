@@ -33,7 +33,7 @@ public:
 	~TextManager();
 
 	// Initialises the text manager
-	Result XM_CALLCONV Initialize(ID3D11Device*, ID3D11DeviceContext*, HWND, int, int, const FXMMATRIX, FontShader*);
+	Result XM_CALLCONV Initialize(Rendering::RenderDeviceType *, Rendering::RenderDeviceContextType *, HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
 	Result InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID);
@@ -72,8 +72,8 @@ private:
 	std::vector<FontData*> m_fonts;
 	std::vector<SentenceType*> m_sentences;
 
-	ID3D11Device *m_device;
-	ID3D11DeviceContext *m_devicecontext;
+	Rendering::RenderDeviceType  *m_device;
+	Rendering::RenderDeviceContextType  *m_devicecontext;
 
 	int m_screenWidth, m_screenHeight;
 	float m_sentencewidth;

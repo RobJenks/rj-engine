@@ -1,4 +1,4 @@
-
+#include "CoreEngine.h"
 #include "Model.h"
 #include "GameDataExtern.h"
 #include "Utility.h"
@@ -9,7 +9,7 @@
 
 
 // Initialisation function for the effect manager
-Result EffectManager::Initialise(ID3D11Device *device)
+Result EffectManager::Initialise(Rendering::RenderDeviceType *device)
 {
 	Result result;
 
@@ -22,7 +22,7 @@ Result EffectManager::Initialise(ID3D11Device *device)
 }
 
 // Loads and initialises all the models used for rendering effects.  Returns fatal error if any cannot be loaded
-Result EffectManager::InitialiseEffectModelData(ID3D11Device *device)
+Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *device)
 {
 	Result result;
 
@@ -102,7 +102,7 @@ void EffectManager::AddFireEffectType(FireEffect *e)
 }
 
 // Fire effect - Render
-Result XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, ID3D11DeviceContext* deviceContext,
+Result XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, Rendering::RenderDeviceContextType* deviceContext,
 										FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection)
 {
 	// Determine the model object to use in rendering this effect

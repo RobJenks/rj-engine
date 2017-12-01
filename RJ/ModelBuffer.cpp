@@ -22,7 +22,7 @@ ModelBuffer::ModelBuffer(void)
 }
 
 // Initialise the buffers based on the supplied model data
-Result ModelBuffer::Initialise(	ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+Result ModelBuffer::Initialise(Rendering::RenderDeviceType  *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
 								const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount)
 {
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;

@@ -26,7 +26,7 @@ Image2D::~Image2D()
 }
 
 
-Result Image2D::Initialize(ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight)
+Result Image2D::Initialize(Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight)
 { 
 	Result result;
 
@@ -102,7 +102,7 @@ void Image2D::Render(void)
 	RenderBuffers();
 }
 
-Result Image2D::InitializeBuffers(ID3D11Device* device)
+Result Image2D::InitializeBuffers(Rendering::RenderDeviceType * device)
 {
 	INDEXFORMAT *indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
@@ -303,7 +303,7 @@ void Image2D::RenderBuffers(void)
 }
 
 
-Result Image2D::LoadTexture(ID3D11Device* device, const char *filename)
+Result Image2D::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
 {
 	Result result;
 

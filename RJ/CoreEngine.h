@@ -9,6 +9,7 @@
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "D3DMain.h"
 
 #include "Profiler.h"
@@ -165,8 +166,8 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
 
 	// Pass-through accessor methods for key engine components
-	CMPINLINE ID3D11Device *		GetDevice(void)			{ return m_D3D->GetDevice(); }
-	CMPINLINE ID3D11DeviceContext *	GetDeviceContext(void)	{ return m_D3D->GetDeviceContext(); }
+	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_D3D->GetDevice(); }
+	CMPINLINE Rendering::RenderDeviceContextType *		GetDeviceContext(void)	{ return m_D3D->GetDeviceContext(); }
 
 	// Validation method to determine whether the engine has all critical frame-generatation components available
 	CMPINLINE bool			Operational()				{ return ( m_D3D && m_D3D->GetDevice() ); }
@@ -525,7 +526,8 @@ private:
 
 	// Render-cycle-specific parameters; denoted by r_*, these are valid for the current render cycle only 
 	// and are used for reasons of render efficiency
-	ID3D11DeviceContext *	r_devicecontext;		// The device context in use for this render cycle
+	Rendering::RenderDeviceContextType *	
+							r_devicecontext;		// The device context in use for this render cycle
 	AXMMATRIX				r_view;					// View matrix for the current render cycle
 	AXMMATRIX				r_projection;			// Projection matrix for the current render cycle
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle

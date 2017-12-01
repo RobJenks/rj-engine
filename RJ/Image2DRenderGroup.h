@@ -11,6 +11,7 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "Utility.h"
+#include "Rendering.h"
 #include "Texture.h"
 #include "iUIComponent.h"
 #include "iUIComponentRenderable.h"
@@ -147,7 +148,7 @@ public:
 	Image2DRenderGroup(void);
 	~Image2DRenderGroup(void);
 
-	Result								Initialize( ID3D11Device* device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode);
+	Result								Initialize( Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode);
 	Result								InitializeBuffers(void);
 
 	void								Render(void);
@@ -160,7 +161,7 @@ public:
 	void								Shutdown(void);
 	
 private:
-	Result								LoadTexture(ID3D11Device* device, const char *filename);
+	Result								LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
 	
 	Result								UpdateBuffers(void);
 	void								RenderBuffers(void);
@@ -188,8 +189,8 @@ private:
 
 	float								m_zorder;			// The z-order of this component *group*, which determines order of rendering by the render manager
 
-	ID3D11Device *						m_device;
-	ID3D11DeviceContext *				m_devicecontext;
+	Rendering::RenderDeviceType  *						m_device;
+	Rendering::RenderDeviceContextType  *				m_devicecontext;
 	int									m_screenWidth, m_screenHeight;
 	float								m_screenHalfWidth, m_screenHalfHeight;
 	float								m_screenLeft;

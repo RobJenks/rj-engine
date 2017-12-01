@@ -18,7 +18,7 @@ FontShader::FontShader(void)
 	m_sampleState = 0;
 }
 
-Result FontShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result FontShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -35,7 +35,7 @@ Result FontShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result FontShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result FontShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -61,7 +61,7 @@ Result FontShader::InitialiseVertexShader(ID3D11Device *device, std::string file
 
 
 // Initialise shader
-Result FontShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result FontShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -97,7 +97,7 @@ void FontShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV FontShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result XM_CALLCONV FontShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								XMFLOAT4 pixelColor)
 {

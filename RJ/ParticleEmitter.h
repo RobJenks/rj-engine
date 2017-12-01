@@ -5,7 +5,7 @@
 
 
 #include "DX11_Core.h"
-
+#include "Rendering.h"
 #include <vector>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
@@ -44,14 +44,14 @@ public:
 	static const XMFLOAT2	TexCoord[4][4];
 
 	// Initialisation function
-	Result						Initialise(ID3D11Device *device);
+	Result						Initialise(Rendering::RenderDeviceType  *device);
 
 	// Methods for adding and per-frame updating of particles
 	void						AddParticle(int id);
 	void						UpdateParticles(const XMFLOAT3 & rightbasisvector, const XMFLOAT3 & upbasisvector);
 
 	// Rendering method
-	void						Render(ID3D11DeviceContext *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup);
+	void						Render(Rendering::RenderDeviceContextType  *devicecontext, const XMFLOAT3 & vright, const XMFLOAT3 & vup);
 
 	// Shutdown functions
 	void						Shutdown(void);
@@ -112,7 +112,7 @@ public:
 
 
 	// Methods to get and set other emitter properties
-	Result						LoadTexture(ID3D11Device* device, const char *filename);
+	Result						LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
 	CMPINLINE ID3D11ShaderResourceView 
 								*GetParticleTexture(void) { return m_texture->GetTexture(); }
 	CMPINLINE void				SetParticleTexture(Texture *tex) { m_texture = tex; }
@@ -159,10 +159,10 @@ public:
 private:
 	// Initialisation functions
 	Result						InitialiseParticles(void);
-	Result						InitialiseBuffers(ID3D11Device *device);
+	Result						InitialiseBuffers(Rendering::RenderDeviceType  *device);
 
 	// Rendering methods
-	void						RenderBuffers(ID3D11DeviceContext *devicecontext);
+	void						RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
 
 	// Memory allocated for storage of particle & vertex data, plus buffers required for rendering
 	Particle					*m_particles;						// The array of Particle objects

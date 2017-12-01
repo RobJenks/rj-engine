@@ -1,3 +1,4 @@
+#include "DX11_Core.h"
 #include "FontData.h"
 #include "FontShader.h"
 #include "SentenceType.h"
@@ -5,7 +6,7 @@
 #include "TextManager.h"
 
 
-Result XM_CALLCONV TextManager::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, HWND hwnd, int screenWidth, int screenHeight,
+Result XM_CALLCONV TextManager::Initialize(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd, int screenWidth, int screenHeight,
 								const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
 	// Store pointers to the D3D device and device context

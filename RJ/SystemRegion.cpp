@@ -10,7 +10,7 @@
 #include "Model.h"
 #include "GameDataExtern.h"
 
-Result SystemRegion::Initialise(ID3D11Device *device)
+Result SystemRegion::Initialise(Rendering::RenderDeviceType  *device)
 {
 	Result result;
 
@@ -29,7 +29,7 @@ Result SystemRegion::Initialise(ID3D11Device *device)
 	return ErrorCodes::NoError;
 }
 
-Result SystemRegion::SetBackdropTexture(ID3D11Device* device, const char *filename, const XMFLOAT2 & texturesize)
+Result SystemRegion::SetBackdropTexture(Rendering::RenderDeviceType * device, const char *filename, const XMFLOAT2 & texturesize)
 {
 	// If we already have a texture set then release and deallocate it first
 	m_hasbackdrop = false;
@@ -55,7 +55,7 @@ Result SystemRegion::SetBackdropTexture(ID3D11Device* device, const char *filena
 	return ErrorCodes::NoError;
 }
 
-void SystemRegion::Render(ID3D11DeviceContext *devicecontext)
+void SystemRegion::Render(Rendering::RenderDeviceContextType  *devicecontext)
 {
 	// Render the skybox
 	m_skybox->Render();

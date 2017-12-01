@@ -39,7 +39,7 @@ VolLineShader::VolLineShader(void)
 }
 
 
-Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, float clip_near, float clip_far)
+Result VolLineShader::Initialise(Rendering::RenderDeviceType  *device, XMFLOAT2 viewport_size, float clip_near, float clip_far)
 {
 	Result result;
 
@@ -66,7 +66,7 @@ Result VolLineShader::Initialise(ID3D11Device *device, XMFLOAT2 viewport_size, f
 }
 
 // Initialise shader
-Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -95,7 +95,7 @@ Result VolLineShader::InitialiseVertexShader(ID3D11Device *device, std::string f
 }
 
 // Initialise shader
-Result VolLineShader::InitialiseGeometryShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialiseGeometryShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -115,7 +115,7 @@ Result VolLineShader::InitialiseGeometryShader(ID3D11Device *device, std::string
 }
 
 // Initialise shader
-Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -139,7 +139,7 @@ Result VolLineShader::InitialisePixelShader(ID3D11Device *device, std::string fi
 }
 
 // Initialise shader
-Result VolLineShader::InitialisePixelShaderTextured(ID3D11Device *device, std::string filename)
+Result VolLineShader::InitialisePixelShaderTextured(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -157,7 +157,7 @@ Result VolLineShader::InitialisePixelShaderTextured(ID3D11Device *device, std::s
 }
 
 // Renders the shader.
-Result XM_CALLCONV VolLineShader::Render(	ID3D11DeviceContext *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+Result XM_CALLCONV VolLineShader::Render(	Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
@@ -250,7 +250,7 @@ void VolLineShader::Shutdown()
 }
 
 // Initialise the static data used in volumetric line rendering
-Result VolLineShader::InitialiseStaticData(ID3D11Device *device)
+Result VolLineShader::InitialiseStaticData(Rendering::RenderDeviceType  *device)
 {
 	// Initialise the static model storage
 	VolLineShader::BaseModel = NULL;

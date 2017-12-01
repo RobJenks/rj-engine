@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cmath>
 #include "FastMath.h"
+#include "DX11_Core.h"
 #include "DustParticle.h"
 #include "ErrorCodes.h"
 #include "Texture.h"
@@ -14,7 +15,7 @@
 #include "ImmediateRegion.h"
 
 // Initialisation method
-Result ImmediateRegion::Initialise(	ID3D11Device *device, const char *particletexture,
+Result ImmediateRegion::Initialise(	Rendering::RenderDeviceType  *device, const char *particletexture,
 									const FXMVECTOR centre,
 									const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
 									const GXMVECTOR updatethreshold)
@@ -258,7 +259,7 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	m_dustdensity = dustdensity;
 }
 
-void XM_CALLCONV ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::Render(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view)
 {
 	// Render all dust particles to the vertex buffer
 	RenderDustParticles(devicecontext, view);
@@ -267,7 +268,7 @@ void XM_CALLCONV ImmediateRegion::Render(ID3D11DeviceContext *devicecontext, con
 	RenderBuffers(devicecontext);
 }
 
-void XM_CALLCONV ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::RenderDustParticles(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -288,7 +289,7 @@ void XM_CALLCONV ImmediateRegion::RenderDustParticles(ID3D11DeviceContext *devic
 	devicecontext->Unmap(m_vertexbuffer, NULL);	
 }
 
-void ImmediateRegion::RenderBuffers(ID3D11DeviceContext *devicecontext)
+void ImmediateRegion::RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -361,7 +362,7 @@ void XM_CALLCONV ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
 }
 
 
-Result ImmediateRegion::InitialiseBuffers(ID3D11Device* device)
+Result ImmediateRegion::InitialiseBuffers(Rendering::RenderDeviceType * device)
 {
 	INDEXFORMAT *indices;
 	int i;
@@ -452,7 +453,7 @@ void ImmediateRegion::Terminate(void)
 	ReleaseRegionObjects();
 }
 
-Result ImmediateRegion::LoadTexture(ID3D11Device* device, const char *filename)
+Result ImmediateRegion::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
 {
 	// Create the texture object
 	m_texture = new Texture();

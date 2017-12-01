@@ -582,7 +582,7 @@ void UI_ShipDesigner::BuildShipSectionImageMap(void)
 	int numloaded = 0;
 
 	// Get a device context reference for use in cloning the required texture resources
-	ID3D11DeviceContext *devicecontext = Game::Engine->GetDeviceContext();
+	auto devicecontext = Game::Engine->GetDeviceContext();
 	if (!devicecontext) return;
 
 	// Iterate through the set of all complex ship sections

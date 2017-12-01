@@ -6,6 +6,7 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "Texture.h"
 #include "Material.h"
 #include "RenderQueueShaders.h"
@@ -22,7 +23,7 @@ public:
 	ModelBuffer(void);
 
 	// Initialise the buffers based on the supplied model data
-	Result							Initialise(ID3D11Device *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
+	Result							Initialise(Rendering::RenderDeviceType  *device, const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
 												const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount);
 
 	// Sets the texture for this object

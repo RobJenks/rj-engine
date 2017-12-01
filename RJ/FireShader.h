@@ -5,6 +5,7 @@
 
 #include "DX11_Core.h"
 #include "iShader.h"
+#include "Rendering.h"
 
 // This class has no special alignment requirements
 class FireShader 
@@ -38,15 +39,15 @@ public:
 	FireShader(void);
 	~FireShader(void);
 
-	Result Initialise(ID3D11Device* device, HWND hwnd);
+	Result Initialise(Rendering::RenderDeviceType * device, HWND hwnd);
 
 	// Methods to initialise each shader in the pipeline in turn
-	Result							InitialiseVertexShader(ID3D11Device *device, std::string filename);
-	Result							InitialisePixelShader(ID3D11Device *device, std::string filename);
+	Result							InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename);
+	Result							InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename);
 
 	void Shutdown();
 
-	Result XM_CALLCONV Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix, 
+	Result XM_CALLCONV Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix, const CXMMATRIX viewMatrix,
 							 const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* fireTexture, 
 							 ID3D11ShaderResourceView* noiseTexture, ID3D11ShaderResourceView* alphaTexture, float frameTime,
 							 XMFLOAT3 scrollSpeeds, XMFLOAT3 scales, XMFLOAT2 distortion1, XMFLOAT2 distortion2,

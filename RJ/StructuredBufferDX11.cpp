@@ -20,7 +20,7 @@ StructuredBufferDX11::StructuredBufferDX11(UINT bindFlags, const void* data, siz
 	m_buffer_elementcount = element_count;								// Member of base class; assign here rather than in initialiser-list
 	m_is_dynamic = (m_cpu_access != CPUGraphicsResourceAccess::None);	// Dynamic if any CPU memory access required
 	m_isUAV = (isUAV && !m_is_dynamic);									// UAV resources cannot be dynamic
-	ID3D11Device *device = Game::Engine->GetDevice();
+	auto device = Game::Engine->GetDevice();
 
 	// Assign data to the system buffer
 	size_t bytecount = (m_buffer_elementcount * m_stride);

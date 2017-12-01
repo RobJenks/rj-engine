@@ -2,7 +2,7 @@
 #include "ErrorCodes.h"
 #include "FontData.h"
 
-Result FontData::Initialize(ID3D11Device* device, std::string name, const char *fontFilename, const char *textureFilename)
+Result FontData::Initialize(Rendering::RenderDeviceType * device, std::string name, const char *fontFilename, const char *textureFilename)
 {
 	Result result;
 
@@ -98,7 +98,7 @@ void FontData::ReleaseFontData()
 }
 
 
-Result FontData::LoadTexture(ID3D11Device* device, const char *filename)
+Result FontData::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
 {
 	Result result;
 

@@ -8,6 +8,7 @@
 #include "CompilerSettings.h"
 #include "DustParticle.h"
 #include "ErrorCodes.h"
+#include "Rendering.h"
 #include "Texture.h"
 class ParticleShader;
 
@@ -39,7 +40,7 @@ public:
 	const float				UPDATE_EPSILON;
 
 	// Initialisation method
-	Result					Initialise(	ID3D11Device *device, const char *particletexture,
+	Result					Initialise(	Rendering::RenderDeviceType  *device, const char *particletexture,
 										const FXMVECTOR centre, 
 										const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
 										const GXMVECTOR updatethreshold);
@@ -112,21 +113,21 @@ public:
 	void XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
 
 	// Method to render the everything in the region
-	void XM_CALLCONV 		Render(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void XM_CALLCONV 		Render(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view);
 
 	// Render each component of the region to the vertex buffer
-	void XM_CALLCONV 		RenderDustParticles(ID3D11DeviceContext *devicecontext, const FXMMATRIX view);
+	void XM_CALLCONV 		RenderDustParticles(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view);
 
 	// Methods to initialise and release the vertex/index buffers
-	Result					InitialiseBuffers(ID3D11Device* device);
+	Result					InitialiseBuffers(Rendering::RenderDeviceType * device);
 	void					ReleaseBuffers(void);
 
 	// Methods to initialise and release the texture resource
-	Result					LoadTexture(ID3D11Device* device, const char *filename);
+	Result					LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
 	void					ReleaseTexture(void);
 
 	// Renders the vertex buffers to the DX output stream, once all data is prepared in the buffers
-	void					RenderBuffers(ID3D11DeviceContext *devicecontext);
+	void					RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
 
 private:
 

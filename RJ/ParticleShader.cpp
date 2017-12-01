@@ -17,7 +17,7 @@ ParticleShader::ParticleShader(void)
 	m_sampleState = 0;
 }
 
-Result ParticleShader::Initialise(ID3D11Device* device, HWND hwnd)
+Result ParticleShader::Initialise(Rendering::RenderDeviceType * device, HWND hwnd)
 {
 	Result result;
 
@@ -34,7 +34,7 @@ Result ParticleShader::Initialise(ID3D11Device* device, HWND hwnd)
 
 
 // Initialise shader
-Result ParticleShader::InitialiseVertexShader(ID3D11Device *device, std::string filename)
+Result ParticleShader::InitialiseVertexShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -61,7 +61,7 @@ Result ParticleShader::InitialiseVertexShader(ID3D11Device *device, std::string 
 
 
 // Initialise shader
-Result ParticleShader::InitialisePixelShader(ID3D11Device *device, std::string filename)
+Result ParticleShader::InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename)
 {
 	Result result;
 
@@ -92,7 +92,7 @@ void ParticleShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV ParticleShader::Render(ID3D11DeviceContext* deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result XM_CALLCONV ParticleShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 	const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;
