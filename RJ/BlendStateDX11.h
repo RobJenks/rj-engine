@@ -2,6 +2,7 @@
 
 #include <array>
 #include "DX11_Core.h"
+#include "Rendering.h"
 #include "BlendState.h"
 
 class BlendStateDX11 : public BlendState
@@ -9,8 +10,7 @@ class BlendStateDX11 : public BlendState
 public:
 
 	// Max possible render targets is 8 under DX11
-	static const size_t									MAX_RENDER_TARGETS = 8U;
-	typedef std::array<BlendMode, MAX_RENDER_TARGETS>	TBlendModeArray;
+	typedef std::array<BlendMode, Rendering::MaxRenderTargets>	TBlendModeArray;
 	
 	BlendStateDX11(void);
 	BlendStateDX11(const BlendStateDX11& copy);

@@ -796,6 +796,9 @@
     <ClCompile Include="BlendStateDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="RasterizerStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1871,6 +1874,18 @@
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="BlendState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RasterizerStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Rect.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Viewport.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>

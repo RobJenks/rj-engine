@@ -51,7 +51,7 @@ void BlendStateDX11::SetBlendMode(const BlendState::BlendMode& blendMode)
 
 void BlendStateDX11::SetBlendMode(const BlendState::BlendMode& blendMode, BlendStateDX11::TBlendModeArray::size_type index)
 {
-	assert(index < BlendStateDX11::MAX_RENDER_TARGETS);
+	assert(index < Rendering::MaxRenderTargets);
 
 	m_blendmodes[index] = blendMode;
 	m_isdirty = true;
@@ -307,7 +307,7 @@ void BlendStateDX11::Bind()
 
 		blendDesc.AlphaToCoverageEnable = m_alphaToCoverageEnabled;
 		blendDesc.IndependentBlendEnable = m_independentBlendEnabled;
-		for (unsigned int i = 0; i < 8; ++i)
+		for (size_t i = 0; i < Rendering::MaxRenderTargets; ++i)
 		{
 			D3D11_RENDER_TARGET_BLEND_DESC1& rtBlendDesc = blendDesc.RenderTarget[i];
 			BlendMode& blendMode = m_blendmodes[i];

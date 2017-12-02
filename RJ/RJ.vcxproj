@@ -528,6 +528,7 @@
     <ClCompile Include="DynamicTerrainInteractionType.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="Power.cpp" />
+    <ClCompile Include="RasterizerStateDX11.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RenderQueue.cpp" />
     <ClCompile Include="RenderQueueShaders.cpp" />
@@ -819,6 +820,9 @@
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />
     <ClInclude Include="PrecalculatedRandomSequence.h" />
+    <ClInclude Include="RasterizerState.h" />
+    <ClInclude Include="RasterizerStateDX11.h" />
+    <ClInclude Include="Rect.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RepairableObject.h" />
@@ -1022,6 +1026,7 @@
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Utility\chrono_io.h" />
     <ClInclude Include="Utility\ratio_io.h" />
+    <ClInclude Include="Viewport.h" />
     <ClInclude Include="ViewPortal.h" />
     <ClInclude Include="VolLineShader.h" />
     <ClInclude Include="VolumetricLine.h" />
