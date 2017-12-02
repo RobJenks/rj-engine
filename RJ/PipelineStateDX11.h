@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include "Shader.h"
 #include "BlendStateDX11.h"
 #include "RasterizerStateDX11.h"
@@ -15,7 +16,9 @@ public:
 
 private:
 
-	Shader						m_shader[(int)Shader::Type::SHADER_TYPE_COUNT];
+	// Store references to (at most) one shader per pipeline stage
+	std::array<Shader*, (int)Shader::Type::SHADER_TYPE_COUNT> m_shaders;
+
 	BlendStateDX11 				m_blendstate;
 	RasterizerStateDX11			m_rasterizerstate;
 	DepthStencilStateDX11		m_depthstencilstate;
