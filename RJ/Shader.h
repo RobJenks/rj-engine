@@ -11,7 +11,9 @@ public:
 		HullShader,
 		DomainShader,
 		GeometryShader,
-		ComputeShader
+		ComputeShader, 
+
+		SHADER_TYPE_COUNT
 	};
 
 	typedef unsigned int SlotID;

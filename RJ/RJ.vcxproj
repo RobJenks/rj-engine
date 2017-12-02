@@ -532,6 +532,7 @@
     <ClCompile Include="RenderQueue.cpp" />
     <ClCompile Include="RenderQueueShaders.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
+    <ClCompile Include="BlendStateDX11.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="RM_Instance.cpp" />
     <ClCompile Include="RM_InstanceData.cpp" />
@@ -660,6 +661,8 @@
     <ClInclude Include="BasicRay.h" />
     <ClInclude Include="BasicSphere.h" />
     <ClInclude Include="BinaryHeap.h" />
+    <ClInclude Include="BlendState.h" />
+    <ClInclude Include="BlendStateDX11.h" />
     <ClInclude Include="BoundingObject.h" />
     <ClInclude Include="Buffer.h" />
     <ClInclude Include="CameraClass.h" />
@@ -810,6 +813,8 @@
     <ClInclude Include="Order_MoveAwayFromTarget.h" />
     <ClInclude Include="Oxygen.h" />
     <ClInclude Include="DynamicTerrainInteractionType.h" />
+    <ClInclude Include="PipelineState.h" />
+    <ClInclude Include="PipelineStateDX11.h" />
     <ClInclude Include="PortalRenderingStep.h" />
     <ClInclude Include="PortalRenderingSupport.h" />
     <ClInclude Include="Power.h" />

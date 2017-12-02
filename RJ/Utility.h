@@ -197,6 +197,10 @@ void MatrixToCharStreamHighPrecision(const XMFLOAT4X4 *m, char *out);
 std::string MatrixToString(const XMFLOAT4X4 & m);
 CMPINLINE std::string MatrixToString(const XMMATRIX & m) { XMFLOAT4X4 mf; XMStoreFloat4x4(&mf, m); return MatrixToString(mf); }
 
+// Value ptr is a pointer to the first element in contiguous structure data; in the case of XMFLOAT#, this is always the x component
+CMPINLINE const float* ValuePtr(const XMFLOAT2 & xmf) { return &(xmf.x); }
+CMPINLINE const float* ValuePtr(const XMFLOAT3 & xmf) { return &(xmf.x); }
+CMPINLINE const float* ValuePtr(const XMFLOAT4 & xmf) { return &(xmf.x); }
 
 // Generic 'ToString' method that can be specialised as required
 template <typename T> CMPINLINE std::string		StringValue(T value) { return concat(value).str(); }

@@ -793,6 +793,9 @@
     <ClCompile Include="SamplerStateDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="BlendStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1856,6 +1859,18 @@
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="SamplerState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="BlendState.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
