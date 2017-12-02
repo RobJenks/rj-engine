@@ -799,6 +799,9 @@
     <ClCompile Include="RasterizerStateDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTargetDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1886,6 +1889,12 @@
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="Viewport.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTargetDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderTarget.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,7 +5,7 @@
 #include "BlendStateDX11.h"
 #include "RasterizerStateDX11.h"
 #include "DepthStencilStateDX11.h"
-class RenderTarget;
+class RenderTargetDX11;
 
 
 class PipelineStateDX11
@@ -22,6 +22,7 @@ private:
 	BlendStateDX11 				m_blendstate;
 	RasterizerStateDX11			m_rasterizerstate;
 	DepthStencilStateDX11		m_depthstencilstate;
-	RenderTarget *				m_rendertarget;
+
+	RenderTargetDX11 *			m_rendertarget;
 
 };

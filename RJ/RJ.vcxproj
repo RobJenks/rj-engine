@@ -534,6 +534,7 @@
     <ClCompile Include="RenderQueueShaders.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
     <ClCompile Include="BlendStateDX11.cpp" />
+    <ClCompile Include="RenderTargetDX11.cpp" />
     <ClCompile Include="RJDebug.cpp" />
     <ClCompile Include="RM_Instance.cpp" />
     <ClCompile Include="RM_InstanceData.cpp" />
@@ -825,6 +826,8 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="RenderQueue.h" />
+    <ClInclude Include="RenderTarget.h" />
+    <ClInclude Include="RenderTargetDX11.h" />
     <ClInclude Include="RepairableObject.h" />
     <ClInclude Include="RJDebug.h" />
     <ClInclude Include="DustParticle.h" />
