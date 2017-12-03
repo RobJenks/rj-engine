@@ -527,6 +527,7 @@
     <ClCompile Include="Order_AttackBasic.cpp" />
     <ClCompile Include="Oxygen.cpp" />
     <ClCompile Include="DynamicTerrainInteractionType.cpp" />
+    <ClCompile Include="PipelineStateDX11.cpp" />
     <ClCompile Include="PortalRenderingStep.cpp" />
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />

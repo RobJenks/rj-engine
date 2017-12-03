@@ -805,6 +805,9 @@
     <ClCompile Include="DepthStencilStateDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
