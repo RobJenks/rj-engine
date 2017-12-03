@@ -25,6 +25,7 @@ public:
 
 	// Returns a pointer to the input layout data
 	CMPINLINE D3D11_INPUT_ELEMENT_DESC *				Data(void)					{ return (m_elements.empty() ? NULL : &(m_elements[0])); }
+	CMPINLINE const D3D11_INPUT_ELEMENT_DESC *			Data(void) const			{ return (m_elements.empty() ? NULL : &(m_elements[0])); }
 
 	// Returns the number of elements in the layout
 	CMPINLINE UINT										ElementCount(void) const	{ return (UINT)m_elements.size(); }

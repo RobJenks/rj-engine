@@ -6,7 +6,7 @@
 class ConstantBufferDX11;
 class StructuredBufferDX11;
 class TextureDX11;
-class SamplerDX11;
+class SamplerStateDX11;
 
 
 class ShaderParameterDX11 : ShaderParameter
@@ -25,7 +25,7 @@ public:
 	void								Set(ConstantBufferDX11 *buffer);
 	void								Set(StructuredBufferDX11 *buffer);
 	void								Set(TextureDX11 *texture);
-	void								Set(SamplerDX11 *sampler);
+	void								Set(SamplerStateDX11 *sampler);
 
 	// Bind the parameter to a given slot in the specified shader type
 	void								Bind(void);
@@ -44,7 +44,7 @@ private:
 	ConstantBufferDX11 *				m_cbuffer;
 	StructuredBufferDX11 *				m_sbuffer;
 	TextureDX11 *						m_texture;
-	SamplerDX11 *						m_sampler;
+	SamplerStateDX11 *					m_sampler;
 
 
 };

@@ -8,6 +8,7 @@
 #include "ErrorCodes.h"
 #include "DX11_Core.h"
 #include "Rendering.h"
+#include "ShaderMacros.h"
 #include "LightData.hlsl.h"
 class InputLayoutDesc;
 struct StandardPSConstBuffer;
@@ -50,11 +51,17 @@ public:
 	// Populate one of the standard constant buffer objects with appropriate data
 	static Result		PopulateConstantBuffer(StandardPSConstBuffer *buffer);
 
+	// Return a reference to the global shader macro set
+	static ShaderMacros &  GetGlobalShaderMacros(void) { return GlobalMacros; }
+
 
 protected:
 
 	// Limit the buffer size that can be allocated to prevent overflows etc. causing errors
 	static const UINT	MAX_BUFFER_ALLOCATION = 32768U;
+
+	// Set of macros that can be applied globally across all shaders during compilation
+	static ShaderMacros	GlobalMacros;
 
 };
 

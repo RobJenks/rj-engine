@@ -3,7 +3,7 @@
 #include "ConstantBufferDX11.h"
 #include "StructuredBufferDX11.h"
 #include "TextureDX11.h"
-#include "SamplerDX11.h"
+#include "SamplerStateDX11.h"
 
 
 // Constructor to create a new parameter with the given details
@@ -44,7 +44,7 @@ void ShaderParameterDX11::Set(TextureDX11 *texture)
 }
 
 // Assign a resource to this shader parameter
-void ShaderParameterDX11::Set(SamplerDX11 *sampler)
+void ShaderParameterDX11::Set(SamplerStateDX11 *sampler)
 {
 	assert(m_type == Type::Sampler);
 	assert(sampler != NULL);
@@ -57,13 +57,17 @@ void ShaderParameterDX11::Bind(void)
 	switch (m_type)
 	{
 		case Type::ConstantBuffer:
-			m_cbuffer->Bind(m_shadertype, m_slotid);			break;
+			m_cbuffer->Bind(m_shadertype, m_slotid);											
+			break;
 		case Type::StructuredBuffer:
-			m_sbuffer->Bind(m_shadertype, m_slotid);			break;
+			m_sbuffer->Bind(m_shadertype, m_slotid, ShaderParameter::Type::StructuredBuffer);	
+			break;
 		case Type::Texture:
-			m_texture->Bind(m_shadertype, m_slotid);			break;
+			m_texture->Bind(m_shadertype, m_slotid, ShaderParameter::Type::Texture);			
+			break;
 		case Type::Sampler:
-			m_sampler->Bind(m_shadertype, m_slotid);			break;
+			m_sampler->Bind(m_shadertype, m_slotid);											
+			break;
 	}
 }
 
@@ -73,13 +77,17 @@ void ShaderParameterDX11::Unbind(void)
 	switch (m_type)
 	{
 		case Type::ConstantBuffer:
-			m_cbuffer->Unbind(m_shadertype, m_slotid);			break;
+			m_cbuffer->Unbind(m_shadertype, m_slotid);											
+			break;
 		case Type::StructuredBuffer:
-			m_sbuffer->Unbind(m_shadertype, m_slotid);			break;
+			m_sbuffer->Unbind(m_shadertype, m_slotid, ShaderParameter::Type::StructuredBuffer);			
+			break;
 		case Type::Texture:
-			m_texture->Unbind(m_shadertype, m_slotid);			break;
+			m_texture->Unbind(m_shadertype, m_slotid, ShaderParameter::Type::Texture);			
+			break;
 		case Type::Sampler:
-			m_sampler->Unbind(m_shadertype, m_slotid);			break;
+			m_sampler->Unbind(m_shadertype, m_slotid);			
+			break;
 	}
 }
 

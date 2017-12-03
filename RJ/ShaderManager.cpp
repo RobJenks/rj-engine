@@ -14,6 +14,11 @@
 
 #include "ShaderManager.h"
 
+
+// Initialise static data
+ShaderMacros ShaderManager::GlobalMacros;
+
+
 // Loads a compiled shader object (*.cso) and returns the byte data
 Result ShaderManager::LoadCompiledShader(const std::string & filename, byte **ppOutShader, SIZE_T *pOutBufferSize)
 {
