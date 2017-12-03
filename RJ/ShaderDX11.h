@@ -18,9 +18,6 @@ public:
 private:
 
 	Shader::Type						m_type;
-	ID3D11InputLayout *					m_inputlayout;
-	std::vector<ShaderParameterDX11>	m_parameters;
-
 
 	// One pointer will be populated based on the shader type
 	ID3D11VertexShader *				m_vs;
@@ -29,5 +26,12 @@ private:
 	ID3D11DomainShader *				m_ds;
 	ID3D11GeometryShader * 				m_gs;
 	ID3D11ComputeShader	*				m_cs;
+
+	// Key shader parameters
+	std::vector<ShaderParameterDX11>	m_parameters;
+	ID3D11InputLayout *					m_inputlayout;
+	ID3DBlob * 							m_shaderblob;
+
+	
 
 };

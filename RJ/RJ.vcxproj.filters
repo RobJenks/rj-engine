@@ -808,6 +808,9 @@
     <ClCompile Include="PipelineStateDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="ShaderMacros.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1907,6 +1910,9 @@
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="DepthStencilState.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderMacros.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
