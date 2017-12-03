@@ -802,6 +802,9 @@
     <ClCompile Include="RenderTargetDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="DepthStencilStateDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1895,6 +1898,12 @@
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="RenderTarget.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilStateDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="DepthStencilState.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
   </ItemGroup>
