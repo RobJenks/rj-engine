@@ -33,6 +33,11 @@ public:
 	// Query for the latest supported shader profile
 	std::string GetLatestProfile(Shader::Type type) const;
 
+	// Specific slot number for key rendering data
+	CMPINLINE SlotID				GetMaterialSlot(void) const { return m_slot_material; }
+	CMPINLINE void					SetMaterialSlot(SlotID slot_id) { m_slot_material = slot_id; }
+
+
 	// Dispatch a compute shader using the specified thread group configuration
 	void Dispatch(const XMFLOAT3 & numGroups);
 
@@ -66,6 +71,8 @@ private:
 	std::string							m_entrypoint;
 	std::string							m_profile;
 	
+	// Slot indices for key data types
+	SlotID								m_slot_material;		// Slot for the material constant buffer data
 
 	static ShaderParameterSet::size_type	INVALID_SHADER_PARAMETER;
 

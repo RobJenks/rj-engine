@@ -9,10 +9,16 @@ class ConstantBufferDX11 : public ConstantBuffer
 {
 public:
 
+	// Static method to construct a new constant buffer for the given data
+	template <class T>
+	static ConstantBufferDX11 * Create(const T * data);
+
 	// Constructor; create a new constant buffer of the given size
 	ConstantBufferDX11(UINT buffer_size);
 
 	// Map data into this constant buffer
+	template <class T>
+	void						Set(const T *data);
 	void						Set(const void *data, UINT data_size);
 
 	// Bind this resource to the given shader target
@@ -34,3 +40,23 @@ private:
 	static ID3D11Buffer * const	m_null_buffer[1];
 
 };
+
+// Static method to construct a new constant buffer for the given data
+template <class T>
+static ConstantBufferDX11 * ConstantBufferDX11::Create<T>(const T *data)
+{
+	ConstantBufferDX11 *buffer = new ConstantBufferDX11(sizeof(T));
+	if (data)
+	{
+		buffer->Set((const void*)data, sizeof(T));
+	}
+
+	return buffer;
+}
+
+// Static method to update the contents of the buffer with the given object data
+template <class T>
+void ConstantBufferDX11::Set<T>(const T *data)
+{
+	Set((const void*)data, sizeof(T));
+}

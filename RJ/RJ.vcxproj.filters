@@ -523,9 +523,6 @@
     <ClCompile Include="LightingManagerObject.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
-    <ClCompile Include="Material.cpp">
-      <Filter>Engine\Materials</Filter>
-    </ClCompile>
     <ClCompile Include="InputLayoutDesc.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
@@ -813,6 +810,12 @@
     </ClCompile>
     <ClCompile Include="ShaderDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Engine\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1491,9 +1494,6 @@
     <ClInclude Include="LightingManagerObject.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
-    <ClInclude Include="Material.h">
-      <Filter>Engine\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="LightSource.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
@@ -1918,6 +1918,12 @@
     <ClInclude Include="ShaderMacros.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2159,9 +2165,6 @@
     </Filter>
     <Filter Include="AI\Pathfinding\Orders">
       <UniqueIdentifier>{ecc75235-e183-46ec-a189-ab23c77c3f89}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Engine\Materials">
-      <UniqueIdentifier>{89a23be2-347b-41a8-aac8-90ea8fef0e88}</UniqueIdentifier>
     </Filter>
     <Filter Include="Engine\Picking">
       <UniqueIdentifier>{0112f23b-bb53-447c-990b-ccff107fb515}</UniqueIdentifier>

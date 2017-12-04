@@ -516,6 +516,7 @@
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="Material.cpp" />
+    <ClCompile Include="MaterialDX11.cpp" />
     <ClCompile Include="MemDebug.cpp" />
     <ClCompile Include="MemDebugCheck.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
@@ -808,6 +809,7 @@
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Logging.h" />
     <ClInclude Include="Material.h" />
+    <ClInclude Include="MaterialDX11.h" />
     <ClInclude Include="MaterialData.hlsl.h" />
     <ClInclude Include="MemDebug.h" />
     <ClInclude Include="MemDebugCheck.h" />

@@ -19,7 +19,8 @@ ShaderDX11::ShaderDX11(void)
 	m_type(Shader::Type::SHADER_TYPE_COUNT), 
 	m_vs(NULL), m_ps(NULL), m_gs(NULL), m_hs(NULL), m_ds(NULL), m_cs(NULL), 
 	m_inputlayout(NULL), 
-	m_shaderblob(NULL)
+	m_shaderblob(NULL), 
+	m_slot_material(Shader::NO_SLOT_ID)
 {
 }
 
