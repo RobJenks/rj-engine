@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
 #include "DX11_Core.h"
 #include "ClearFlags.h"
 #include "Shader.h"
@@ -198,6 +199,15 @@ private:
 
 	std::wstring							m_filename;
 
+	// Global collection of unique texture resources
+	typedef std::unordered_map<std::string, TextureDX11*> IndexedTextureCollection;
+	static IndexedTextureCollection TextureResources;
+	static TextureDX11 *Get(const std::string & name);
+	static bool Exists(const std::string & name);
+	static bool Store(const std::string & name, TextureDX11 *texture);
+	static void ShutdownGlobalTextureCollection(void);
+
+	// Working data
 	static const FLOAT *						float4_zero;
 	static ID3D11ShaderResourceView * const		null_srv[1];
 	static ID3D11UnorderedAccessView * const	null_uav[1];

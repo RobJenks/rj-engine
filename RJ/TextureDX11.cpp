@@ -1,4 +1,5 @@
 #include <filesystem>
+#include <unordered_map>
 #include "TextureDX11.h"
 #include "Logging.h"
 #include "CoreEngine.h"
@@ -12,6 +13,10 @@ namespace fs = std::experimental::filesystem;
 const FLOAT * float4_zero = new FLOAT[4] { 0 };
 ID3D11ShaderResourceView * const null_srv[1] = { nullptr };
 ID3D11UnorderedAccessView * const null_uav[1] = { nullptr };
+
+// Global collection of unique texture resources
+std::unordered_map<std::string, TextureDX11*> TextureDX11::TextureResources;
+
 
 // Default constructor; empty texture
 TextureDX11::TextureDX11(void)
@@ -1314,6 +1319,52 @@ ID3D11RenderTargetView* TextureDX11::GetRenderTargetView() const
 ID3D11UnorderedAccessView* TextureDX11::GetUnorderedAccessView() const
 {
 	return m_uav;
+}
+
+
+// Global texture resources collection
+TextureDX11 *TextureDX11::Get(const std::string & name)
+{
+	IndexedTextureCollection::const_iterator it = TextureResources.find(name);
+	return (it != TextureResources.end() ? it->second : NULL);
+}
+
+// Global texture resources collection
+bool TextureDX11::Exists(const std::string & name)
+{
+	return (TextureResources.find(name) != TextureResources.end());
+}
+
+// Global texture resources collection
+bool TextureDX11::Store(const std::string & name, TextureDX11 *texture)
+{
+	if (name.empty() || texture == NULL) return false;
+	if (Exists(name)) return false;
+
+	TextureResources[name] = texture;
+}
+
+// Global texture resources collection
+void TextureDX11::ShutdownGlobalTextureCollection(void)
+{
+	for (auto & item : TextureResources)
+	{
+		SafeDelete(item.second);
+	}
+
+	TextureResources.clear();
+}
+
+// Default destructor
+TextureDX11::~TextureDX11(void)
+{
+	ReleaseIfExists(m_texture1d);
+	ReleaseIfExists(m_texture2d);
+	ReleaseIfExists(m_texture3d);
+	ReleaseIfExists(m_srv);
+	ReleaseIfExists(m_uav);
+	ReleaseIfExists(m_rendertarget_view);
+	ReleaseIfExists(m_depthstencil_view);
 }
 
 
