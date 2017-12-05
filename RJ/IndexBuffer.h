@@ -12,6 +12,10 @@ public:
 	IndexBuffer(void);
 	IndexBuffer(const void *data, UINT count, UINT stride);
 
+	CMPINLINE auto		GetIndexCount(void) const	{ return m_buffer_elementcount[0]; }
+	CMPINLINE auto		GetIndexSize(void) const	{ return m_stride[0]; }
+
+
 	~IndexBuffer(void);
 
 

@@ -22,10 +22,10 @@ public:
 	void						Set(const void *data, UINT data_size);
 
 	// Bind this resource to the given shader target
-	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id);
+	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id) const;
 
 	// Remove this (or any) binding from the given shader target
-	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id);
+	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id) const;
 
 	// Default destructor
 	~ConstantBufferDX11(void);

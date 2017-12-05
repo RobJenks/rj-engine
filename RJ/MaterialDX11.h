@@ -86,7 +86,7 @@ public:
 	void						CompileMaterial(void);
 
 	// Bind this material to the current rendering pipeline
-	void						Bind(ShaderDX11 *shader);
+	void						Bind(ShaderDX11 *shader) const;
 
 	// We can suspend recompilation of the material while setting multiple properties sequentially
 	CMPINLINE void				SuspendUpdates(void) { m_updates_suspended = true; }

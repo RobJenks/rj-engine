@@ -93,7 +93,7 @@ void MaterialDX11::UpdateTextureState(void)
 }
 
 // Bind this material to the current rendering pipeline
-void MaterialDX11::Bind(ShaderDX11 *shader)
+void MaterialDX11::Bind(ShaderDX11 *shader) const
 {
 	if (!shader) return;
 

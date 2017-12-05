@@ -49,7 +49,7 @@ void ConstantBufferDX11::Set(const void *data, UINT data_size)
 }
 
 // Bind this resource to the given shader target
-void ConstantBufferDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id)
+void ConstantBufferDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id) const
 {
 	switch (shadertype)
 	{
@@ -75,7 +75,7 @@ void ConstantBufferDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id)
 }
 
 // Remove this (or any) binding from the given shader target
-void ConstantBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id)
+void ConstantBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id) const
 {
 	switch (shadertype)
 	{

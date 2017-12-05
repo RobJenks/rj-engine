@@ -1197,7 +1197,7 @@ void TextureDX11::Clear(ClearFlags clearFlags, const FLOAT * float4_colour, floa
 	}
 }
 
-void TextureDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype)
+void TextureDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype) const
 {
 	// NOTE: Removed previous logic to reload texture data when dirty.  Can reimplement if required
 
@@ -1240,7 +1240,7 @@ void TextureDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderPa
 	}
 
 }
-void TextureDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype)
+void TextureDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype) const
 {
 	auto devicecontext = Game::Engine->GetDeviceContext();
 
