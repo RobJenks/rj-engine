@@ -817,6 +817,14 @@
     <ClCompile Include="Material.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
+    <ClCompile Include="VertexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1924,6 +1932,10 @@
     <ClInclude Include="Material.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
+    <ClInclude Include="IndexBuffer.h" />
+    <ClInclude Include="IndexBufferDX11.h" />
+    <ClInclude Include="VertexBuffer.h" />
+    <ClInclude Include="VertexBufferDX11.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
