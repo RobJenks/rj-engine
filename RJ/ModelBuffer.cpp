@@ -25,6 +25,27 @@ ModelBuffer::ModelBuffer(	const void **ppVertexdata, unsigned int vertexsize, un
 	ClearAllRenderSlots();
 }
 
+// Constructor to build a new buffer from existing buffer data that will be MOVED into the buffer
+ModelBuffer::ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && index_buffer, const MaterialDX11 * material)
+	:
+	VertexBuffer(std::move(vertex_buffer)), 
+	IndexBuffer(std::move(index_buffer)), 
+	Material(material)
+{
+	ClearAllRenderSlots();
+}
+
+// Constructor to build a new buffer from the provided data.  Index buffer will be automatically constructed as a sequential
+// buffer matching the vertex buffer length, using the standard index format
+ModelBuffer::ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material)
+	:
+	VertexBuffer(*ppVertexdata, vertexsize, vertexcount), 
+	IndexBuffer(vertexcount), 
+	Material(material)
+{
+	ClearAllRenderSlots();
+}
+
 
 // Default destructor
 ModelBuffer::~ModelBuffer(void)

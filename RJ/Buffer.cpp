@@ -23,7 +23,7 @@ Buffer::Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT
 	:
 	m_buffertype(buffertype)
 {
-	m_bindflags = Buffer::GetBindFlags(buffertype);
+	m_bindflags = Buffer::DetermineBindFlags(buffertype);
 	m_buffer[0] = NULL;
 	m_buffer_elementcount[0] = count;
 	m_stride[0] = stride;
@@ -57,7 +57,7 @@ void Buffer::InitialiseBuffer(UINT bindflags, const void *data, UINT count, UINT
 	}
 }
 
-UINT Buffer::GetBindFlags(Buffer::BufferType buffertype)
+UINT Buffer::DetermineBindFlags(Buffer::BufferType buffertype)
 {
 	switch (buffertype)
 	{

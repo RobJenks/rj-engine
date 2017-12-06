@@ -5,7 +5,9 @@
 #include "Utility.h"
 #include "HashFunctions.h"
 #include "CoreEngine.h"
-#include "Texture.h"
+#include "ModelBuffer.h"
+#include "VertexBufferDX11.h"
+#include "IndexBufferDX11.h"
 #include "Data\Shaders\vertex_definitions.h.hlsl"
 
 #include "Model.h"
@@ -15,25 +17,26 @@ Model::ModelCollection		Model::Models;
 
 // Constructor
 Model::Model()
+	:
+	m_model(NULL),
+	m_geometryloaded(false),
+	m_standardmodel(false),
+	m_minbounds(NULL_FLOAT3), 
+	m_maxbounds(NULL_FLOAT3), 
+	m_modelsize(NULL_FLOAT3), 
+	m_modelcentre(NULL_FLOAT3), 
+	m_effectivesize(NULL_FLOAT3), 
+	m_actualsize(NULL_FLOAT3), 
+	m_actualeffectivesize(NULL_FLOAT3), 
+	m_scalingfactor(NULL_FLOAT3), 
+	m_elementsize(NULL_INTVECTOR3), 
+	m_origin_centred(true), 
+	m_iscompound(false), 
+	m_compoundmodelcount(0U)
 {
 	// Assign a unique ID to this model
 	static int _Model_internalIDGenerator = 1;
 	m_id = _Model_internalIDGenerator++;
-
-	// Geometry is not initially loaded
-	m_geometryloaded = false;
-
-	// Initialise buffers and geometry data
-	m_vertexCount = 0;
-	m_indexCount = 0;
-	m_model = 0;
-	m_minbounds = m_maxbounds = m_modelsize = m_modelcentre = m_effectivesize = NULL_FLOAT3;
-	m_actualsize = m_actualeffectivesize = m_scalingfactor = NULL_FLOAT3;
-	m_elementsize = NULL_INTVECTOR3;
-	m_origin_centred = true;
-
-	m_iscompound = false; 
-	m_compoundmodelcount = 0;
 }
 
 
@@ -45,29 +48,33 @@ Model::~Model()
 
 }
 
-Result Model::Initialise(const char *modelFilename, const char *textureFilename)
+Result Model::Initialise(const char *modelFilename)
 {
 	Result result;
+
+	// ******************* REPLACE THIS METHOD.  NEED BETTER MESH FORMAT, AND NEED TO LOAD MATERIALS AS WELL BEFORE MESH SO WE CAN VERIFY VERTEX.MATERIAL IS VALID ON LOAD *****
 
 	// Parameter check; we need a model filename at minimum in order to load anything
 	if (!modelFilename || strcmp(modelFilename, "") == 0) return ErrorCodes::CannotLoadGeometryForNullModel;
 
 	// Load in the model data,
 	result = LoadModel(modelFilename);
-	if(result != ErrorCodes::NoError) return result;
+	if (result != ErrorCodes::NoError)
+	{
+		ReleaseModel();
+		return result;
+	}
 
 	// Initialise the vertex and index buffers.
 	result = InitialiseBuffers();
-	if(result != ErrorCodes::NoError) return result;
-
-	// Load the texture for this model (optional)
-	if (textureFilename)
+	if (result != ErrorCodes::NoError)
 	{
-		result = m_buffer.SetTexture(textureFilename);
-		if (result != ErrorCodes::NoError) return result;
+		ReleaseModel();
+		return result;
 	}
 
 	// Success, if we have run each of the above stages successfully
+	ReleaseModel();
 	return ErrorCodes::NoError;
 }
 
@@ -189,7 +196,8 @@ void Model::ScaleModelGeometry(const XMFLOAT3 & scale)
 	if (scale.x <= Game::C_EPSILON || scale.y <= Game::C_EPSILON || scale.z <= Game::C_EPSILON) return;
 
 	// Process each vertex in turn
-	for (unsigned int i = 0; i<m_vertexCount; i++)
+	auto vertexcount = GetVertexCount();
+	for (unsigned int i = 0U; i < vertexcount; ++i)
 	{
 		// Scale the vertex by this factor
 		m_model[i].x *= scale.x;
@@ -203,9 +211,10 @@ void Model::ScaleModelGeometry(const XMFLOAT3 & scale)
 	m_maxbounds.x *= scale.x; m_maxbounds.y *= scale.y; m_maxbounds.z *= scale.z;
 	RecalculateDimensions();
 	
-	// We have updated the model geometry, so discard and recreate the vertex buffers 
-	// now (not the most efficient method, but this is not a regular occurence)
-	m_buffer.ReleaseModelBufferResources();
+	// We have updated the model geometry, so discard and recreate the vertex buffer
+	// Only the vertex positions have changed, not the count or distribution, so we 
+	// can simply recreate the vertex buffer only
+	Data.VertexBuffer = VertexBufferDX11((const void*)m_model, vertexcount, sizeof(ModelType));
 	InitialiseBuffers();
 }
 
@@ -347,62 +356,29 @@ void Model::Render(void)
 
 Result Model::InitialiseBuffers(void)
 {
-	// Create the vertex array.
-	Vertex_Inst_TexNormMatLit *vertices = new Vertex_Inst_TexNormMatLit[m_vertexCount];
+	// Create the vertex array
+	auto vertexcount = Data.VertexBuffer.GetElementCount();
+	VertexFormat *vertices = new VertexFormat[vertexcount];
 	if (!vertices) return ErrorCodes::CouldNotAllocateModelVertexArray;
 
-	// Create the index array.
-	INDEXFORMAT *indices = new INDEXFORMAT[m_indexCount];
-	if (!indices) 
-	{
-		if (vertices) SafeDeleteArray(vertices);
-		return ErrorCodes::CouldNotAllocateModelIndexArray;
-	}
-
-	// Load the vertex array and index array with data.
-	for (unsigned int i = 0; i < m_vertexCount; ++i)
+	// Load the vertex array and index array with data
+	for (UINT i = 0; i < vertexcount; ++i)
 	{
 		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
 		vertices[i].tex = XMFLOAT2(m_model[i].tu, m_model[i].tv);
 		vertices[i].normal = XMFLOAT3(m_model[i].nx, m_model[i].ny, m_model[i].nz);
 		vertices[i].material = m_model[i].material;
-
-		indices[i] = i;
 	}
 
 	// Initialise the model buffers based on this raw data
-	Result result = m_buffer.Initialise(Game::Engine->GetDevice(), (const void**)&vertices, sizeof(Vertex_Inst_TexNormMatLit), m_vertexCount,
-																   (const void**)&indices, sizeof(INDEXFORMAT), m_indexCount);
-	if (result != ErrorCodes::NoError) return result;
+	Data.VertexBuffer = VertexBufferDX11((const void*)vertices, vertexcount, sizeof(VertexFormat));
+	Data.IndexBuffer = IndexBufferDX11(vertexcount);
 
-	// Release the arrays now that the vertex and index buffers have been created and loaded.
+	// Release the vertex data now that the buffers have been created and loaded
 	SafeDeleteArray(vertices);
-	SafeDeleteArray(indices);
 
 	// Return success
 	return ErrorCodes::NoError;
-}
-
-void Model::RenderBuffers(void)
-{
-	unsigned int stride;
-	unsigned int offset;
-
-
-	// Set vertex buffer stride and offset.
-	stride = m_buffer.GetVertexSize();
-	offset = 0;
-    
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	Game::Engine->GetDeviceContext()->IASetVertexBuffers(0, 1, &m_buffer.VertexBuffer, &stride, &offset);
-
-    // Set the index buffer to active in the input assembler so it can be rendered.
-	Game::Engine->GetDeviceContext()->IASetIndexBuffer(m_buffer.IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
-
-    // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	Game::Engine->GetDeviceContext()->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
 }
 
 
@@ -432,13 +408,14 @@ Result Model::LoadModel(const char *filename)
 	}
 
 	// Read in the vertex count.
-	fin >> m_vertexCount;
+	UINT vertexcount;
+	fin >> vertexcount;
 
 	// Set the number of indices to be the same as the vertex count.
-	m_indexCount = m_vertexCount;
+	UINT indexcount = vertexcount;
 
 	// Create the model using the vertex count that was read in.
-	m_model = new ModelType[m_vertexCount];
+	m_model = new ModelType[vertexcount];
 	if(!m_model)
 	{
 		return ErrorCodes::CouldNotAllocateModelDataStorage;
@@ -458,7 +435,7 @@ Result Model::LoadModel(const char *filename)
 	m_maxbounds = XMFLOAT3(-99999.0f, -99999.0f, -99999.0f);
 
 	// Read in the vertex data.
-	for (unsigned int i = 0; i < m_vertexCount; ++i)
+	for (unsigned int i = 0; i < vertexcount; ++i)
 	{
 		// Read in coordinates, texture coords and normals
 		fin >> m_model[i].x >> m_model[i].y >> m_model[i].z;
@@ -475,16 +452,14 @@ Result Model::LoadModel(const char *filename)
 		if (m_model[i].z > m_maxbounds.z) m_maxbounds.z = m_model[i].z;
 	}
 
-	// TODO: also load materials as part of this process
+	// TODO: also load materials as part of this process ************************* UPDATE THIS **************************************************************************************
 	int nummat = 1;
 	Material m; 
 	m.Data.AmbientColor = XMFLOAT4(100.0f, 100.0f, 100.0f, 100.0f);
 	m.Data.DiffuseColor = XMFLOAT4(50.0f, 50.0f, 50.0f, 50.0f);
 	m.Data.SpecularColor = XMFLOAT4(1.0f, 0.8f, 0.8f, 0.75f);
 	m.Data.Reflectance = XMFLOAT4(0.5f, 0.5f, 0.5f, 0.5f);
-
-	m_buffer.SetMaterialCount(nummat);
-	m_buffer.SetMaterial(0U, m);
+	Data.SetMaterial(0U, m);
 
 	// Recalculate other model dimensions based on these min and max bounds
 	RecalculateDimensions();
@@ -518,7 +493,8 @@ void Model::CentreModelAboutOrigin(void)
 	// Loop through all vertices and apply the offset
 	// Read in the vertex data.
 	Model::ModelType *v = &(m_model[0]);
-	for (unsigned int i = 0; i < m_vertexCount; ++i, ++v)
+	auto vertexcount = Data.VertexBuffer.GetVertexCount();
+	for (unsigned int i = 0; i < vertexcount; ++i, ++v)
 	{
 		v->x += offset.x;
 		v->y += offset.y;
@@ -538,11 +514,8 @@ void Model::ReleaseModel()
 {
 	if(m_model)
 	{
-		delete [] m_model;
-		m_model = 0;
+		SafeDelete(m_model);
 	}
-
-	return;
 }
 
 // Test whether a model exists in the central collection

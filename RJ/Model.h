@@ -2,7 +2,7 @@
 #ifndef __ModelH__
 #define __ModelH__
 
-#include "DX11_Core.h" // #include "FullDX11.h"
+#include "DX11_Core.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -10,7 +10,8 @@
 #include "Utility.h"
 #include "CompilerSettings.h"
 #include "ModelBuffer.h"
-#include "Texture.h"
+#include "VertexBufferDX11.h"
+#include "IndexBufferDX11.h"
 #include "CollisionSpatialDataF.h"
 
 
@@ -35,16 +36,17 @@ class Model
 		};
 
 	public:
-		// The data format used to hold index buffer data.  Note that DX11 (feature level 11.0) appears to support
-		// UINT32 sized indices, but feature level 9.1 only appears to support UINT16.  Using the latter for now
-		// to maintain compatibility; likely too major a change to handle via the localiser
-		typedef UINT16 INDEXFORMAT;		
+		
+		typedef Vertex_Inst_TexNormMatLit	VertexFormat;
 
 		Model(void);
 		~Model(void);
 
+		// Primary store of all compiled model data
+		ModelBuffer					Data;
+
 		// Public model manipulation methods
-		Result						Initialise(const char *filename, const char *texturefilename);
+		Result						Initialise(const char *filename);
 		void						Shutdown();
 		void						Render(void);
 
@@ -56,24 +58,25 @@ class Model
 			else return ErrorCodes::CouldNotInitialiseModelWithInvalidStringParams;
 		}
 
-		CMPINLINE ModelBuffer *				GetModelBuffer(void)	{ return &m_buffer; }
-		CMPINLINE ID3D11Buffer *			GetVertexBuffer(void)	{ return m_buffer.VertexBuffer; }
-		CMPINLINE ID3D11Buffer *			GetIndexBuffer(void)	{ return m_buffer.IndexBuffer; }
-
-		CMPINLINE UINT						GetIndexCount() const	{ return m_indexCount; }
-		CMPINLINE ID3D11ShaderResourceView*	GetTexture() 			{ return m_buffer.GetTexture()->GetTexture(); }
+		// Passthrough methods to model buffer for convenience
+		CMPINLINE ModelBuffer &				GetModelBuffer(void)				{ return Data; }
+		CMPINLINE const ID3D11Buffer *		GetCompiledVertexBuffer(void) const	{ return Data.VertexBuffer.GetCompiledBuffer(); }
+		CMPINLINE const ID3D11Buffer *		GetCompiledIndexBuffer(void) const	{ return Data.IndexBuffer.GetCompiledBuffer(); }
+		CMPINLINE auto						GetVertexCount(void) const			{ return Data.VertexBuffer.GetVertexCount(); }
+		CMPINLINE auto						GetIndexCount(void) const			{ return Data.IndexBuffer.GetIndexCount(); }
+		CMPINLINE auto						GetVertexMemorySize(void) const		{ return Data.VertexBuffer.GetVertexSize(); }
+		CMPINLINE auto						GetIndexMemorySize(void) const		{ return Data.IndexBuffer.GetIndexSize(); }
+		
 
 		// Public accessor/modifer methods for key variables
 		CMPINLINE int				GetID(void) { return m_id; }
 		CMPINLINE void				SetID(int id) { m_id = id; }
-		CMPINLINE std::string		GetCode(void) { return m_buffer.GetCode(); }
-		CMPINLINE void				SetCode(std::string code) { m_buffer.SetCode(code); }
+		CMPINLINE std::string		GetCode(void) { return Data.GetCode(); }
+		CMPINLINE void				SetCode(std::string code) { Data.SetCode(code); }
 		CMPINLINE std::string		GetFilename(void) { return m_filename; }
 		CMPINLINE void				SetFilename(std::string filename) { m_filename = filename; }
 		CMPINLINE ModelClass		GetModelClass(void) { return m_modelclass; }
 		CMPINLINE void				SetModelClass(ModelClass modelclass) { m_modelclass = modelclass; }
-		CMPINLINE std::string		GetTextureFilename(void) { return m_texturefilename; }
-		CMPINLINE void				SetTextureFilename(std::string filename) { m_texturefilename = filename; }
 		CMPINLINE bool				IsGeometryLoaded(void) const { return m_geometryloaded; }
 		CMPINLINE void				SetGeometryLoaded(bool loaded) { m_geometryloaded = loaded; }
 		CMPINLINE bool				IsStandardModel(void) { return m_standardmodel; }
@@ -110,12 +113,6 @@ class Model
 		void						ClearCompoundModelData(void);
 		void						RecalculateCompoundModelData(void);
 
-		// Methods providing public access to buffer data, for centralised instanced rendering by the core engine
-		CMPINLINE ID3D11Buffer *	GetVertexBuffer(void) const				{ return m_buffer.VertexBuffer; }
-		CMPINLINE ID3D11Buffer *	GetIndexBuffer(void) const				{ return m_buffer.IndexBuffer; }
-		CMPINLINE unsigned int		GetVertexMemorySize(void) const			{ return m_buffer.GetVertexSize(); }
-		CMPINLINE unsigned int		GetIndexMemorySize(void) const			{ return m_buffer.GetIndexSize(); }
-
 		// List of collision objects attached to this model
 		CMPINLINE std::vector<CollisionSpatialDataF> & CollisionData(void)	{ return m_collision; }
 		CMPINLINE void				SetCollisionData(const std::vector<CollisionSpatialDataF> & collision) { m_collision = collision; }
@@ -142,8 +139,7 @@ class Model
 
 		// Private methods for individual model class operations
 		Result		InitialiseBuffers(void);
-		void		RenderBuffers(void);
-
+		
 		Result		LoadModel(const char*);
 		void		ReleaseModel();
 
@@ -152,15 +148,10 @@ class Model
 	private:
 
 		// Private variables for buffer / model storage
-		ModelBuffer				m_buffer;
-		unsigned int			m_vertexCount, m_indexCount;
 		ModelType*				m_model;
-
-		// Private variables for other, supporting model information
 		int						m_id;
 		std::string				m_filename;
 		ModelClass				m_modelclass;
-		std::string				m_texturefilename;
 		bool					m_geometryloaded;
 		bool					m_standardmodel;
 		bool					m_origin_centred;

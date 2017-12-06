@@ -31,7 +31,7 @@ public:
 	CMPINLINE UINT				GetStride(void) const { return m_stride[0]; }
 	CMPINLINE UINT				GetBindFlags(void) const { return m_bindflags; }
 	
-	static UINT					GetBindFlags(Buffer::BufferType buffertype);
+	static UINT					DetermineBindFlags(Buffer::BufferType buffertype);
 
 	// Destructor
 	~Buffer(void);
