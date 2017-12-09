@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Console">
+      <UniqueIdentifier>{6711efba-bece-4658-91b7-2bfff9fba6e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Transformer\Data">
+      <UniqueIdentifier>{4dd9e5f2-6829-4f72-9fa4-c763751a6722}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Input">
+      <UniqueIdentifier>{8a498859-4c8d-4f34-bd5a-f22e897f8dc7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Output">
+      <UniqueIdentifier>{ca9b12fc-c1bd-4d4d-812a-7a36de1d0f49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Transforms">
+      <UniqueIdentifier>{e946e088-cb31-44f1-beff-4970dbd40e31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Transformer\Builder">
+      <UniqueIdentifier>{3f4ed8eb-5e43-4dec-9c45-238286e19f63}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ModelPipeline.cpp">
+      <Filter>Console</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformPipeline.cpp">
+      <Filter>Transformer</Filter>
+    </ClCompile>
+    <ClCompile Include="TransformPipelineBuilder.cpp">
+      <Filter>Transformer\Builder</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>Console</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipeline.h">
+      <Filter>Transformer</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Transformer\Data</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStage.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineInput.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineOutput.h">
+      <Filter>Transformer\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformerComponent.h">
+      <Filter>Transformer</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerAssimp.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="PassthroughPipelineStage.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="BinaryOutputTransform.h">
+      <Filter>Transformer\Output</Filter>
+    </ClInclude>
+    <ClInclude Include="TransformPipelineBuilder.h">
+      <Filter>Transformer\Builder</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -150,6 +150,11 @@
 #include "RJMain.h"
 
 
+// TODO: Several VC++ safety measures added to STL even in default release builds, should disable for release builds 
+// of this application.  Should set "_HAS_ITERATOR_DEBUGGING=0"  "_SECURE_SCL = 0".  See 
+// http://assimp.sourceforge.net/lib_html/install.html for details
+
+
 // Application window properties
 const char * RJMain::APPLICATION_WINDOW_CLASSNAME = "RJ-D3D11-Main";
 const char * RJMain::APPLICATION_WINDOW_WINDOWNAME = "RJ-D3D11-Main";
@@ -2543,5 +2548,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
-
-
