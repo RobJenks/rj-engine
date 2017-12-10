@@ -482,7 +482,7 @@ Result Model::LoadModel(const char *filename)
 	return ErrorCodes::NoError;
 }
 
-// Adjusts all vertex data to ensure that the model origin lies at (0,0,0), and recalculates
+// Adjusts all vertex d ata to ensure that the model origin lies at (0,0,0), and recalculates
 // all dependent data based on the new vertices
 void Model::CentreModelAboutOrigin(void)
 {

@@ -167,6 +167,9 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\Definitions\LightData.hlsl.h" />
+    <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
+    <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h" />
     <ClInclude Include="BinaryOutputTransform.h" />
     <ClInclude Include="InputTransformerAssimp.h" />
     <ClInclude Include="Model.h" />

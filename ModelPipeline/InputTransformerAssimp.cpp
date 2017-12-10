@@ -23,10 +23,10 @@ std::unique_ptr<Model> InputTransformerAssimp::Transform(fs::path file) const
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(fs::absolute(file).string(), 
 		aiProcess_ValidateDataStructure);
-
+	
 	// Build a model based upon this scene data
 	TRANSFORM_INFO << "Data loaded" << (scene == NULL ? " (WARNING: null scene data, likely import failure)" : "") << ", building model from ai scene data\n";
-	auto model = Model::FromAssimpScene(scene);
+	auto model = Model::FromAssimpScene(scene, importer);
 
 	// Return the new model data.  Assimp scene data is owned by the importer and will be properly
 	// deallocated once the importer goes out of scope

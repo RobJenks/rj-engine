@@ -1824,12 +1824,6 @@
     <ClInclude Include="DataObjectEngineHeadingController.h">
       <Filter>Objects\Data\Objects\Engines</Filter>
     </ClInclude>
-    <ClInclude Include="MaterialData.hlsl.h">
-      <Filter>HLSL\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="LightData.hlsl.h">
-      <Filter>HLSL\Common</Filter>
-    </ClInclude>
     <ClInclude Include="Data\Shaders\old_light_definition.h">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </ClInclude>
@@ -1936,6 +1930,15 @@
     <ClInclude Include="IndexBufferDX11.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferDX11.h" />
+    <ClInclude Include="..\Definitions\LightData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\MaterialData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2247,9 +2250,6 @@
     <Filter Include="Objects\Data\Objects\Engines">
       <UniqueIdentifier>{0aaa3089-0f5a-4e5a-8bc6-cb9ff41781eb}</UniqueIdentifier>
     </Filter>
-    <Filter Include="HLSL\Common">
-      <UniqueIdentifier>{af3c9063-9b1f-4e95-9ac1-0305955bd3f8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine\Rendering">
       <UniqueIdentifier>{4f47e151-e33f-4251-b2bd-87a29202492a}</UniqueIdentifier>
     </Filter>
@@ -2261,6 +2261,9 @@
     </Filter>
     <Filter Include="Engine\Rendering\DirectX11\Old\Textures">
       <UniqueIdentifier>{71a593e5-a1d4-43f9-b32c-2eac22c2d9ab}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Imported Definitions">
+      <UniqueIdentifier>{121be652-4e99-4a12-9982-4e3c064ae820}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

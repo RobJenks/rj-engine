@@ -27,6 +27,9 @@
     <Filter Include="Transformer\Builder">
       <UniqueIdentifier>{3f4ed8eb-5e43-4dec-9c45-238286e19f63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Imported Definitions">
+      <UniqueIdentifier>{fcf95953-7dee-45b6-8258-94ed5211915b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModelPipeline.cpp">
@@ -84,6 +87,15 @@
     </ClInclude>
     <ClInclude Include="TransformPipelineBuilder.h">
       <Filter>Transformer\Builder</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\LightData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\MaterialData.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
+      <Filter>Imported Definitions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

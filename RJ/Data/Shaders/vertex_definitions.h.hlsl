@@ -20,19 +20,19 @@
 
 
 // Standard vertex definition used by most shaders
-struct Vertex_Inst_TexNormMatLit
+struct Vertex_Inst_Standard
 {
 	// Per-vertex data
 	float3					position		RJ_SEMANTIC(POSITION);
-	float2					tex				RJ_SEMANTIC(TEXCOORD0);
 	float3					normal			RJ_SEMANTIC(NORMAL);
-	unsigned int			material		RJ_SEMANTIC(MATERIAL);
+	float3					binormal		RJ_SEMANTIC(BINORMAL);
+	float3					tangent			RJ_SEMANTIC(TANGENT);
+	float2					tex				RJ_SEMANTIC(TEXCOORD0);
 
 	// Per-instance data
 	RJ_ROW_MAJOR_MATRIX		mTransform		RJ_SEMANTIC(mTransform);
 	float4					iParams			RJ_SEMANTIC(iParams);
-	unsigned int			LightConfig		RJ_SEMANTIC(LightConfig);
-	float3					padding			RJ_SEMANTIC(padding);
+	
 };
 
 
