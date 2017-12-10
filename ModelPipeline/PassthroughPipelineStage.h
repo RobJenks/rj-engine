@@ -11,6 +11,7 @@ public:
 
 	std::unique_ptr<Model>				Transform(std::unique_ptr<Model> model) const
 	{
+		TRANSFORM_INFO << "Passing model data without modification\n";
 		return model;
 	}
 

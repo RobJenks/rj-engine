@@ -22,9 +22,11 @@ public:
 
 
 	void Transform(fs::path file, fs::path output_file) const;
+	void Transform(std::string input_data, fs::path output_file) const;
+	std::string Transform(std::string input_data) const;
+	std::string Transform(fs::path file) const;
 
-	std::string Transform(const std::string string_data) const;
-
+	
 
 
 private:

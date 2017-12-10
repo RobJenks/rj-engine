@@ -44,6 +44,12 @@
     <ClCompile Include="Model.cpp">
       <Filter>Transformer\Data</Filter>
     </ClCompile>
+    <ClCompile Include="TransformPipelineOutput.cpp">
+      <Filter>Transformer\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="BinaryOutputTransform.cpp">
+      <Filter>Transformer\Output</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">

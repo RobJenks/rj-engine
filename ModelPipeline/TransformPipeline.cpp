@@ -52,36 +52,9 @@ TransformPipeline::TransformPipeline(
 	std::cout << "\"" << m_output.get()->GetName() << "\"\n\n";
 }
 
-void TransformPipeline::Transform(fs::path file, fs::path output_file) const
+std::string TransformPipeline::Transform(std::string input_data) const
 {
-	std::cout << "Reading data from \"" << fs::absolute(file) << "\"\n";
-	
-	std::ifstream stream(file.c_str());
-	std::string str;
-
-	stream.seekg(0, std::ios::end);
-	str.reserve(stream.tellg());
-	stream.seekg(0, std::ios::beg);
-
-	str.assign((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-	stream.close();
-
-	std::cout << "Data read from file\n";
-
-	std::string result = Transform(str);
-
-	std::cout << "Writing results to output file \"" << fs::absolute(output_file) << "\"\n";
-	
-	std::ofstream output_stream(output_file, std::ofstream::binary);
-	output_stream.write(result.c_str(), result.size());
-	output_stream.close();
-
-	std::cout << "Output written to output file\n";
-}
-
-std::string TransformPipeline::Transform(const std::string string_data) const
-{
-	std::unique_ptr<Model> model = m_input.get()->Transform(string_data);
+	std::unique_ptr<Model> model = m_input.get()->Transform(input_data);
 
 	for (const auto & stage : m_stages)
 	{
@@ -92,12 +65,39 @@ std::string TransformPipeline::Transform(const std::string string_data) const
 	return output;
 }
 
+std::string TransformPipeline::Transform(fs::path file) const
+{
+	std::unique_ptr<Model> model = m_input.get()->Transform(file);
 
+	for (const auto & stage : m_stages)
+	{
+		model = stage->Transform(std::move(model));
+	}
 
+	std::string output = m_output.get()->Transform(std::move(model));
+	return output;
+}
 
+void TransformPipeline::Transform(fs::path file, fs::path output_file) const
+{
+	std::unique_ptr<Model> model = m_input.get()->Transform(file);
 
+	for (const auto & stage : m_stages)
+	{
+		model = stage->Transform(std::move(model));
+	}
 
+	m_output.get()->Transform(std::move(model), output_file);
+}
 
+void TransformPipeline::Transform(std::string input_data, fs::path output_file) const
+{
+	std::unique_ptr<Model> model = m_input.get()->Transform(input_data);
 
+	for (const auto & stage : m_stages)
+	{
+		model = stage->Transform(std::move(model));
+	}
 
-
+	m_output.get()->Transform(std::move(model), output_file);
+}

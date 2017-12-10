@@ -180,11 +180,13 @@
     <ClInclude Include="TransformPipelineOutput.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="BinaryOutputTransform.cpp" />
     <ClCompile Include="InputTransformerAssimp.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelPipeline.cpp" />
     <ClCompile Include="TransformPipeline.cpp" />
     <ClCompile Include="TransformPipelineBuilder.cpp" />
+    <ClCompile Include="TransformPipelineOutput.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

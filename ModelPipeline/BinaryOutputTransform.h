@@ -9,8 +9,8 @@ public:
 
 	inline std::string	GetName(void) const { return "BinaryOutputTransform"; }
 
-	std::string			Transform(std::unique_ptr<Model> model) const { return ""; }
-
+	std::string			Transform(std::unique_ptr<Model> model) const;
+	void				Transform(std::unique_ptr<Model> model, fs::path output_file) const;
 
 private:
 
