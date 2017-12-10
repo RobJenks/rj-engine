@@ -38,6 +38,12 @@
     <ClCompile Include="TransformPipelineBuilder.cpp">
       <Filter>Transformer\Builder</Filter>
     </ClCompile>
+    <ClCompile Include="InputTransformerAssimp.cpp">
+      <Filter>Transformer\Input</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Transformer\Data</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">

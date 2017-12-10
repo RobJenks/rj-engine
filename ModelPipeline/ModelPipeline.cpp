@@ -19,7 +19,7 @@ int main()
 		.Build();
 		
 
-	pipeline->Transform(fs::path("C:\\Users\\robje\\Documents\\Other\\Prop.txt"), fs::path("C:\\Users\\robje\\Documents\\Other\\Prop-output.txt"));
+	pipeline->Transform(fs::path("C:\\Users\\robje\\Downloads\\capsule.obj"), fs::path("C:\\Users\\robje\\Downloads\\capsule.out"));
 	
 	std::cin >> std::string();
     return 0;
