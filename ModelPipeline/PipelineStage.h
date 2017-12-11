@@ -2,13 +2,13 @@
 
 #include <memory>
 #include "TransformerComponent.h"
-#include "Model.h"
+#include "../Definitions/ModelData.h"
 
 class PipelineStage : public TransformerComponent
 {
 public:
 
-	virtual std::unique_ptr<Model>				Transform(std::unique_ptr<Model> model) const = 0;
+	virtual std::unique_ptr<ModelData>				Transform(std::unique_ptr<ModelData> model) const = 0;
 
 
 private:

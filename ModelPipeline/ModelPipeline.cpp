@@ -20,8 +20,10 @@ int main()
 		
 
 	pipeline->Transform(fs::path("C:\\Users\\robje\\Downloads\\capsule.obj"), fs::path("C:\\Users\\robje\\Downloads\\capsule.out"));
-	
-	std::cin >> std::string();
-    return 0;
+
+
+	std::cout << "\n";
+	system("PAUSE");
+	exit(0);
 }
 

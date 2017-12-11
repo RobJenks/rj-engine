@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Model.h"
+#include "../Definitions/ModelData.h"
 #include "TransformPipelineOutput.h"
+#include "../Definitions/ByteString.h"
 
 class BinaryOutputTransform : public TransformPipelineOutput
 {
@@ -9,8 +10,8 @@ public:
 
 	inline std::string	GetName(void) const { return "BinaryOutputTransform"; }
 
-	std::string			Transform(std::unique_ptr<Model> model) const;
-	void				Transform(std::unique_ptr<Model> model, fs::path output_file) const;
+	ByteString			Transform(std::unique_ptr<ModelData> model) const;
+	void				Transform(std::unique_ptr<ModelData> model, fs::path output_file) const;
 
 private:
 

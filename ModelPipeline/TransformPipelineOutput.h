@@ -2,9 +2,11 @@
 
 #include <string>
 #include <memory>
-#include  <filesystem>
+#include <vector>
+#include <filesystem>
+#include "../Definitions/ByteString.h"
 #include "TransformerComponent.h"
-#include "Model.h"
+#include "../Definitions/ModelData.h"
 namespace fs = std::experimental::filesystem;
 
 
@@ -12,9 +14,9 @@ class TransformPipelineOutput : public TransformerComponent
 {
 public:
 
-	virtual std::string			Transform(std::unique_ptr<Model> model) const = 0;
+	virtual ByteString			Transform(std::unique_ptr<ModelData> model) const = 0;
 
-	virtual void				Transform(std::unique_ptr<Model> model, fs::path output_file) const = 0;
+	virtual void				Transform(std::unique_ptr<ModelData> model, fs::path output_file) const = 0;
 
 
 protected:

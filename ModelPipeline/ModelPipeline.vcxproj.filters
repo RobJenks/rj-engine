@@ -12,9 +12,6 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
-    <Filter Include="Transformer\Data">
-      <UniqueIdentifier>{4dd9e5f2-6829-4f72-9fa4-c763751a6722}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Transformer\Input">
       <UniqueIdentifier>{8a498859-4c8d-4f34-bd5a-f22e897f8dc7}</UniqueIdentifier>
     </Filter>
@@ -44,14 +41,17 @@
     <ClCompile Include="InputTransformerAssimp.cpp">
       <Filter>Transformer\Input</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Transformer\Data</Filter>
-    </ClCompile>
     <ClCompile Include="TransformPipelineOutput.cpp">
       <Filter>Transformer\Output</Filter>
     </ClCompile>
     <ClCompile Include="BinaryOutputTransform.cpp">
       <Filter>Transformer\Output</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Definitions\ModelData.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
+    <ClCompile Include="AssimpIntegration.cpp">
+      <Filter>Transformer\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,9 +60,6 @@
     </ClInclude>
     <ClInclude Include="TransformPipeline.h">
       <Filter>Transformer</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Transformer\Data</Filter>
     </ClInclude>
     <ClInclude Include="PipelineStage.h">
       <Filter>Transformer\Transforms</Filter>
@@ -95,6 +92,15 @@
       <Filter>Imported Definitions</Filter>
     </ClInclude>
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelData.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpIntegration.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ByteString.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
   </ItemGroup>

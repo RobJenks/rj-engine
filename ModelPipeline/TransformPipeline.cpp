@@ -52,35 +52,35 @@ TransformPipeline::TransformPipeline(
 	std::cout << "\"" << m_output.get()->GetName() << "\"\n\n";
 }
 
-std::string TransformPipeline::Transform(std::string input_data) const
+ByteString TransformPipeline::Transform(std::string input_data) const
 {
-	std::unique_ptr<Model> model = m_input.get()->Transform(input_data);
+	std::unique_ptr<ModelData> model = m_input.get()->Transform(input_data);
 
 	for (const auto & stage : m_stages)
 	{
 		model = stage->Transform(std::move(model));
 	}
 
-	std::string output = m_output.get()->Transform(std::move(model));
+	auto output = m_output.get()->Transform(std::move(model));
 	return output;
 }
 
-std::string TransformPipeline::Transform(fs::path file) const
+ByteString TransformPipeline::Transform(fs::path file) const
 {
-	std::unique_ptr<Model> model = m_input.get()->Transform(file);
+	std::unique_ptr<ModelData> model = m_input.get()->Transform(file);
 
 	for (const auto & stage : m_stages)
 	{
 		model = stage->Transform(std::move(model));
 	}
 
-	std::string output = m_output.get()->Transform(std::move(model));
+	auto output = m_output.get()->Transform(std::move(model));
 	return output;
 }
 
 void TransformPipeline::Transform(fs::path file, fs::path output_file) const
 {
-	std::unique_ptr<Model> model = m_input.get()->Transform(file);
+	std::unique_ptr<ModelData> model = m_input.get()->Transform(file);
 
 	for (const auto & stage : m_stages)
 	{
@@ -92,7 +92,7 @@ void TransformPipeline::Transform(fs::path file, fs::path output_file) const
 
 void TransformPipeline::Transform(std::string input_data, fs::path output_file) const
 {
-	std::unique_ptr<Model> model = m_input.get()->Transform(input_data);
+	std::unique_ptr<ModelData> model = m_input.get()->Transform(input_data);
 
 	for (const auto & stage : m_stages)
 	{

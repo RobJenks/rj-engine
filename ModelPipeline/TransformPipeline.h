@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include "../Definitions/ByteString.h"
 class TransformPipelineInput;
 class TransformPipelineOutput;
 class PipelineStage;
@@ -23,8 +24,8 @@ public:
 
 	void Transform(fs::path file, fs::path output_file) const;
 	void Transform(std::string input_data, fs::path output_file) const;
-	std::string Transform(std::string input_data) const;
-	std::string Transform(fs::path file) const;
+	ByteString Transform(std::string input_data) const;
+	ByteString Transform(fs::path file) const;
 
 	
 
