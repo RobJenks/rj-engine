@@ -4,7 +4,11 @@ ModelData::ModelData(void)
 	:
 	VertexData(NULL),
 	VertexCount(0U),
-	ModelMaterialIndex(0U)
+	ModelMaterialIndex(0U), 
+	MinBounds(0.0f, 0.0f, 0.0f), 
+	MaxBounds(0.0f, 0.0f, 0.0f), 
+	ModelSize(0.0f, 0.0f, 0.0f), 
+	CentrePoint(0.0f, 0.0f, 0.0f)
 {
 }
 
@@ -38,6 +42,10 @@ ByteString ModelData::Serialize(void) const
 	// Header data
 	ByteString b;
 	b.WriteObject(this->ModelMaterialIndex);
+	b.WriteObject(this->MinBounds);
+	b.WriteObject(this->MaxBounds);
+	b.WriteObject(this->ModelSize);
+	b.WriteObject(this->CentrePoint);
 	b.WriteObject(this->VertexCount);
 
 	// Vertex data
@@ -57,6 +65,10 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 
 	// Header data
 	data.ReadObject(m->ModelMaterialIndex);
+	data.ReadObject(m->MinBounds);
+	data.ReadObject(m->MaxBounds);
+	data.ReadObject(m->ModelSize);
+	data.ReadObject(m->CentrePoint);
 	data.ReadObject(m->VertexCount);
 
 	// Vertex data

@@ -27,6 +27,9 @@
     <Filter Include="Imported Definitions">
       <UniqueIdentifier>{fcf95953-7dee-45b6-8258-94ed5211915b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{7036f300-3c02-4bfb-a0b6-b886bad6e8e1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ModelPipeline.cpp">
@@ -53,6 +56,12 @@
     <ClCompile Include="AssimpIntegration.cpp">
       <Filter>Transformer\Input</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStageCentreModel.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="PipelineUtil.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -75,9 +84,6 @@
     </ClInclude>
     <ClInclude Include="InputTransformerAssimp.h">
       <Filter>Transformer\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="PassthroughPipelineStage.h">
-      <Filter>Transformer\Transforms</Filter>
     </ClInclude>
     <ClInclude Include="BinaryOutputTransform.h">
       <Filter>Transformer\Output</Filter>
@@ -102,6 +108,15 @@
     </ClInclude>
     <ClInclude Include="..\Definitions\ByteString.h">
       <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageCentreModel.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStagePassthrough.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineUtil.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

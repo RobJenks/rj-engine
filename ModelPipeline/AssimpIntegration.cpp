@@ -1,4 +1,5 @@
 #include <iostream>
+#include "PipelineUtil.h"
 #include "AssimpIntegration.h"
 
 #include <assimp\Importer.hpp>
@@ -46,14 +47,31 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 	MODEL_INST_DEBUG("Allocating " << data_size << " bytes vertex data");
 
 	MODEL_INST_INFO("Populating vertex data");
+	XMFLOAT3 min_bounds = XMFLOAT3(+1e9, +1e9, +1e9);
+	XMFLOAT3 max_bounds = XMFLOAT3(-1e9, -1e9, -1e9);
+
 	for (unsigned int i = 0U; i < m->VertexCount; ++i)
 	{
+		// Read data into the vertex structure
 		ModelData::TVertex & v = m->VertexData[i];
 		v.position = GetFloat3(mesh->mVertices[i]);
 		v.normal = GetFloat3(mesh->mNormals[i]);
 		v.tangent = GetFloat3(mesh->mTangents[i]);
 		v.binormal = GetFloat3(mesh->mBitangents[i]);
+
+		// Perform other per-vertex calculation
+		if (v.position.x < min_bounds.x)		min_bounds.x = v.position.x;
+		else if (v.position.x > max_bounds.x)	max_bounds.x = v.position.x;
+		if (v.position.y < min_bounds.y)		min_bounds.y = v.position.y;
+		else if (v.position.y > max_bounds.y)	max_bounds.y = v.position.y;
+		if (v.position.z < min_bounds.z)		min_bounds.z = v.position.z;
+		else if (v.position.z > max_bounds.z)	max_bounds.z = v.position.z;
 	}
+
+	m->MinBounds = min_bounds;
+	m->MaxBounds = max_bounds;
+	m->ModelSize = PipelineUtil::Float3Subtract(max_bounds, min_bounds);
+	m->CentrePoint = PipelineUtil::Float3ScalarMultiply(PipelineUtil::Float3Add(min_bounds, max_bounds), 0.5f);
 
 	// Load texture data separately since components may not be available
 	// Can have up to [8] texcoords; just take[0] for now

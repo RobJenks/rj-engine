@@ -1,13 +1,14 @@
 #pragma once
 
+#include <iostream>
 #include "../Definitions/ModelData.h"
 #include "PipelineStage.h"
 
-class PassthroughPipelineStage : public PipelineStage
+class PipelineStagePassthrough : public PipelineStage
 {
 public:
 
-	inline std::string					GetName(void) const { return "PassthroughPipelineStage"; }
+	inline std::string						GetName(void) const { return "PipelineStagePassthrough"; }
 
 	std::unique_ptr<ModelData>				Transform(std::unique_ptr<ModelData> model) const
 	{
