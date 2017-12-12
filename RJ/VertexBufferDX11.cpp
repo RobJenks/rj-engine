@@ -1,5 +1,6 @@
 #include "VertexBufferDX11.h"
 #include "CoreEngine.h"
+#include "../Definitions/ModelData.h"
 
 
 VertexBufferDX11::VertexBufferDX11(void)
@@ -13,6 +14,14 @@ VertexBufferDX11::VertexBufferDX11(const void *data, UINT count, UINT stride)
 	VertexBuffer(data, count, stride)
 {
 }
+
+VertexBufferDX11::VertexBufferDX11(const ModelData & model_data)
+	:
+	VertexBuffer(model_data)
+{
+}
+
+
 
 void VertexBufferDX11::Bind(UINT slot_id)
 {

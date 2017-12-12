@@ -50,7 +50,6 @@ namespace ErrorCodes {
 	const Result		CouldNotCreateTextureObject						= 1106;
 	const Result		CouldNotOpenModelFile							= 1107;
 	const Result		CouldNotAllocateModelDataStorage				= 1108;
-	
 	const Result		CouldNotCreateShaderFromTextureFile				= 1109;
 	const Result		CouldNotCreateLightShader						= 1110;
 	const Result		LightVertexShaderCompilationFailed				= 1111;
@@ -293,6 +292,8 @@ namespace ErrorCodes {
 	const Result		CouldNotAllocateMemoryForRenderQueue			= 1348;
 	const Result		CouldNotCreateEffectManager						= 1349;
 	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1350;
+	const Result		CannotDeserializeModel							= 1351;
+	const Result		CannotCompileModel								= 1352;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;

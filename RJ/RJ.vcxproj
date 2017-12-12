@@ -463,6 +463,7 @@
     <ClCompile Include="FastMath.cpp" />
     <ClCompile Include="FileInput.cpp" />
     <ClCompile Include="FileSystem.cpp" />
+    <ClCompile Include="FileUtils.cpp" />
     <ClCompile Include="FireEffect.cpp" />
     <ClCompile Include="FireShader.cpp" />
     <ClCompile Include="FontData.cpp" />
@@ -521,6 +522,7 @@
     <ClCompile Include="MaterialDX11.cpp" />
     <ClCompile Include="MemDebug.cpp" />
     <ClCompile Include="MemDebugCheck.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="ModelBuffer.cpp" />
     <ClCompile Include="ModifierDetails.cpp" />
     <ClCompile Include="Modifiers.cpp" />
@@ -577,7 +579,7 @@
     <ClCompile Include="LoadoutMap.cpp" />
     <ClCompile Include="MeshGeometry.cpp" />
     <ClCompile Include="MissileLauncher.cpp" />
-    <ClCompile Include="Model.cpp" />
+    <ClCompile Include="__OLD_Model.cpp" />
     <ClCompile Include="MovementLogic.cpp" />
     <ClCompile Include="NavNetwork.cpp" />
     <ClCompile Include="Order.cpp" />
@@ -801,6 +803,7 @@
     <ClInclude Include="EnvironmentPowerMap.h" />
     <ClInclude Include="EnvironmentTree.h" />
     <ClInclude Include="FileSystem.h" />
+    <ClInclude Include="FileUtils.h" />
     <ClInclude Include="FrameFlag.h" />
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="Frustum.h" />
@@ -820,6 +823,7 @@
     <ClInclude Include="MaterialDX11.h" />
     <ClInclude Include="MemDebug.h" />
     <ClInclude Include="MemDebugCheck.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="ModifierDetails.h" />
@@ -972,7 +976,7 @@
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="MeshGeometry.h" />
     <ClInclude Include="MissileLauncher.h" />
-    <ClInclude Include="Model.h" />
+    <ClInclude Include="__OLD_Model.h" />
     <ClInclude Include="MovementLogic.h" />
     <ClInclude Include="NavNetwork.h" />
     <ClInclude Include="NavNode.h" />

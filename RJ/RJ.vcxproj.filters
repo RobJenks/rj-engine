@@ -337,9 +337,6 @@
     <ClCompile Include="MeshGeometry.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClCompile>
-    <ClCompile Include="Model.cpp">
-      <Filter>Engine\Models\Static</Filter>
-    </ClCompile>
     <ClCompile Include="SkinnedData.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClCompile>
@@ -825,6 +822,15 @@
     <ClCompile Include="IndexBufferDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="__OLD_Model.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
+    <ClCompile Include="FileUtils.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1249,9 +1255,6 @@
     </ClInclude>
     <ClInclude Include="MeshGeometry.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
-    </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Engine\Models\Static</Filter>
     </ClInclude>
     <ClInclude Include="SkinnedData.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
@@ -1938,6 +1941,15 @@
     </ClInclude>
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h">
       <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="__OLD_Model.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Engine\Models\Static</Filter>
+    </ClInclude>
+    <ClInclude Include="FileUtils.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

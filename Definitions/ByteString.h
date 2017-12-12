@@ -2,14 +2,14 @@
 
 #include <vector>
 
-class ByteString : public std::vector<unsigned char>
+class ByteString : public std::vector<char>
 {
 public:
 
 	// Default constructor
 	inline ByteString(void) 
 		: 
-		std::vector<unsigned char>(), 
+		std::vector<char>(), 
 		m_readpoint(0U)
 	{
 	}
