@@ -58,6 +58,13 @@ void ModelInstance::SetExactSize(const FXMVECTOR size)
 	SetScaleFactor(component_scale);
 }
 
+// Set the model definition.  Will reset any size/scaling factor that has already been applied
+CMPINLINE void ModelInstance::SetModel(const Model *model)
+{
+	m_model = model;
+	m_world = ID_MATRIX;
+}
+
 
 ModelInstance::~ModelInstance(void)
 {

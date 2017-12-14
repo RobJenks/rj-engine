@@ -166,14 +166,10 @@ void iObject::InitialiseCopiedObject(iObject *source)
 void iObject::SetModel(Model *model)
 {
 	// Store the new model
-	m_model = model;
+	m_model.SetModel(model);
 
-	// Derive additional data from the model if it was provided
-	if (model)
-	{
-		// Update the object size to match the model bounds
-		SetSize(XMLoadFloat3(&model->GetModelSize()));
-	}
+	// Attempt to default the model to our object size, maintaining proportions if not equal between the two
+	m_model.SetSize(GetSize());
 }
 
 // Sets the simulation state of this object.  Pending state change will be recorded, and it will then be actioned on the 
@@ -376,6 +372,10 @@ void iObject::SetSize(const FXMVECTOR size)
 
 	// Store the local float representation to allow us to perform per-component tests at runtime
 	XMStoreFloat3(&m_sizef, m_size);
+
+	// Update the model geometry to match this new size; this will override any scaling factor applied
+	// to the model at its original size
+	m_model.SetSize(m_size);
 
 	// Recalculate the object fast mover threshold
 	m_fastmoverthresholdsq = (min(m_sizef.x, min(m_sizef.y, m_sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);

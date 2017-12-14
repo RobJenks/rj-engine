@@ -23,7 +23,7 @@
 #include "AudioItem.h"
 #include "AudioParameters.h"
 #include "GameConsoleCommand.h"
-class Model;
+#include "ModelInstance.h"
 class ArticulatedModel;
 struct BasicProjectile;
 
@@ -284,8 +284,11 @@ public:
 	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }
 	CMPINLINE Game::BoundingVolumeType		MostAppropriateBoundingVolumeType(void) const { return m_best_bounding_volume; }
 
+	// Reference to the instance of this model and any per-instance data
+	CMPINLINE ModelInstance &				GetModelInstance(void)				{ return m_model; }
+
 	// The model used for rendering this object (or NULL if object is non-renderable)
-	CMPINLINE Model *						GetModel(void)						{ return m_model; }
+	CMPINLINE const Model *					GetModel(void) const				{ return m_model.GetModel(); }
 	void									SetModel(Model *model);
 
     // The articulated model used for rendering this object (or NULL if not applicable)
@@ -542,7 +545,7 @@ protected:
 	HashVal								m_instancecodehash;				// Hash value of the instance code, used for more efficient comparison
 	bool								m_standardobject;				// Flag indicating whether this is a 'standard', centrally-maintained template object
 	Faction::F_ID						m_faction;						// ID of the faction this object belongs to; will be 0 for the null faction if it has no affiliation
-	Model *								m_model;						// Pointer to the static model for this object, which is stored in 
+	ModelInstance						m_model;						// Pointer to the static model for this object, which is stored in 
 																		// the central collection.  Can be NULL if non-renderable.
 	ArticulatedModel *                  m_articulatedmodel;             // The articulated model to use for this object, if relevant.  If NULL, the object
                                                                         // will use its static model by default
@@ -613,7 +616,10 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 
 	m_orientationmatrix = XMMatrixRotationQuaternion(m_orientation);
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
-	SetWorldMatrix(XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position)));
+
+	// World = (BaseModelWorld * Rotation * Translation)
+	SetWorldMatrix(XMMatrixMultiply(m_model.GetWorldMatrix(), 
+		XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position))));
 }
 
 
