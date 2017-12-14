@@ -831,6 +831,9 @@
     <ClCompile Include="FileUtils.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="ModelInstance.cpp">
+      <Filter>Engine\Models\Static</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1950,6 +1953,9 @@
     </ClInclude>
     <ClInclude Include="FileUtils.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelInstance.h">
+      <Filter>Engine\Models\Static</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

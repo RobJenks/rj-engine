@@ -9,14 +9,17 @@
 #include "Model.h"
 namespace fs = std::experimental::filesystem;
 
+// Initialise static data
+Model::ModelID Model::GlobalModelIDCount = 0U;
 
+// Default constructor
 Model::Model(void)
+	:
+	m_id(++Model::GlobalModelIDCount)
 {
-
-
 }
 
-
+// Default destructor
 Model::~Model(void)
 {
 
@@ -103,6 +106,74 @@ Result Model::CompileModel(void)
 
 
 
+
+// Test whether a model exists in the central collection
+bool Model::ModelExists(const std::string & code)
+{
+	return (Models.find(code) != Models.end());
+}
+
+// Retrieve a model from the central collection based on its string code
+Model *Model::GetModel(const std::string & code)
+{
+	ModelCollection::const_iterator it = Models.find(code);
+	return (it != Models.end() ? it->second : NULL);
+}
+
+// Retrieve a model from the central collection based on its filename; requires linear search (on hash values) so less efficient than searching by code
+Model *Model::GetModelFromFilename(const std::string & filename)
+{
+	// Hash the input filename (assuming it is valid) for more efficient comparisons
+	if (filename == NullString) return NULL;
+	HashVal hash = HashString(filename);
+
+	// Iterate through the collection to look for a model with this filename
+	ModelCollection::const_iterator it_end = Model::Models.end();
+	for (ModelCollection::const_iterator it = Model::Models.begin(); it != it_end; ++it)
+	{
+		if (it->second && hash == HashString(it->second->GetFilename()))
+			return it->second;
+	}
+
+	// We could not find a model with this filename
+	return NULL;
+}
+
+// Add a new model to the central collection, indexed by its unique string code
+void Model::AddModel(Model *model)
+{
+	// Make sure the model is valid, and that we do not already have a model with its unique code
+	if (!model || model->GetCode() == NullString)
+	{
+		Game::Log << LOG_ERROR << "Could not register new model with global collection; null model or model code\n";
+		return;
+	}
+	else if (Model::ModelExists(model->GetCode()))
+	{
+		Game::Log << LOG_ERROR << "Could not register new model with global collection; model already exists with code \"" << model->GetCode() << "\"\n";
+		return;
+	}
+
+	// Add to the central collection, indexed by its string code
+	Model::Models[model->GetCode()] = model;
+}
+
+void Model::TerminateAllModelData(void)
+{
+	// All standard models are contained within the model collection, so we can iterate over it and dispose
+	// of objects one by one via their standard destructor
+	ModelCollection::iterator it_end = Model::Models.end();
+	for (ModelCollection::iterator it = Model::Models.begin(); it != it_end; ++it)
+	{
+		if (it->second)
+		{
+			SafeDelete(it->second);
+		}
+	}
+
+	// Clear the collection, now that it is simply full of null pointers
+	Model::Models.clear();
+}
 
 
 
