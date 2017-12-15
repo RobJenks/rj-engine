@@ -10,6 +10,7 @@
 #include "FrameProfiler.h"
 #include "Timers.h"
 #include "CameraClass.h"
+#include "TextureDX11.h"
 #include "InputLayoutDesc.h"
 #include "LightingManagerObject.h"
 #include "LightShader.h"
@@ -944,7 +945,7 @@ void CoreEngine::ShutdownRenderQueue(void)
 void CoreEngine::ShutdownTextureData(void)
 {	
 	// Shutdown all texture data in the static global collection
-	Texture::ShutdownAllTextureData();
+	TextureDX11::ShutdownGlobalTextureCollection();
 }
 
 void CoreEngine::ShutdownCamera(void)

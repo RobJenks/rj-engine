@@ -199,6 +199,9 @@ private:
 
 	std::wstring							m_filename;
 
+
+public:
+
 	// Global collection of unique texture resources
 	typedef std::unordered_map<std::string, TextureDX11*> IndexedTextureCollection;
 	static IndexedTextureCollection TextureResources;
@@ -206,6 +209,9 @@ private:
 	static bool Exists(const std::string & name);
 	static bool Store(const std::string & name, TextureDX11 *texture);
 	static void ShutdownGlobalTextureCollection(void);
+
+
+private:
 
 	// Working data
 	static const FLOAT *						float4_zero;
