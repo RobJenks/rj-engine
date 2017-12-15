@@ -249,54 +249,66 @@ public:
 	CMPINLINE void XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
-		SubmitForRendering(RenderQueueShader::RM_LightShader, model, world, RM_Instance::CalculateSortKey(position));
+		SubmitForRendering(RenderQueueShader::RM_LightShader, model, std::move(
+			RM_Instance(world, RM_Instance::CalculateSortKey(position))));
 	}
 
 	// Renders a standard model.  Applies highlighting to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const XMFLOAT4 & highlight, const CXMMATRIX world, const CXMVECTOR position)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, world, highlight, RM_Instance::CalculateSortKey(position));
+		SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, model, std::move(
+			RM_Instance(world, RM_Instance::CalculateSortKey(position), highlight)));
 	}
 
 	// Renders a standard model.  Applies alpha fade to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, float alpha, const CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams.x = alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams.x = alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, model, world, m_instanceparams, position);
+		
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT3 & highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModel(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = colour_alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = colour_alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModelFlat(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT3 & highlight, float alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = XMFLOAT4(highlight.x, highlight.y, highlight.z, alpha);
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 	
 	// Renders a standard model using flat lighting.  Applies highlighting and alpha fade to the model (specified in xyz and w components respectively)
 	CMPINLINE void			RenderModelFlat(ModelBuffer *model, const FXMVECTOR position, const XMFLOAT4 & colour_alpha, CXMMATRIX world)
 	{
 		// Use the highlight shader to apply a global highlight to the model.  Add to the queue for batched rendering
-		m_instanceparams = colour_alpha;
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+		//m_instanceparams = colour_alpha;
+		//SubmitForZSortedRendering(RenderQueueShader::RM_LightFlatHighlightFadeShader, model, world, m_instanceparams, position);
+
+		// TODO: Need to re-enable transparent object rendering
 	}
 
 	// Returns a reference to the model buffer currently being rendered
@@ -548,7 +560,7 @@ private:
 	ID3D11Buffer *				m_instancebuffer;
 	RenderQueue					m_renderqueue;
 	RM_ShaderCollection			m_renderqueueshaders;
-	ID3D11Buffer *				m_instancedbuffers[2];
+	const ID3D11Buffer *		m_instancedbuffers[2];
 	unsigned int				m_instancedstride[2], m_instancedoffset[2];
 	D3D_PRIMITIVE_TOPOLOGY		m_current_topology;
 
@@ -570,51 +582,17 @@ private:
 	void XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance);
 	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, RM_Instance && instance) 
 	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), std::move(instance));
+		if (model) SubmitForRendering(shader, &(model->Data), std::move(instance));
 	}
 
-	// Method to submit for rendering where only the transform matrix is required; no additional params.  Will submit directly to
-	// the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, RM_Instance::RM_SortKey sort_key)
-	{
-		SubmitForRendering(shader, model, std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), sort_key)));
-	}
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, RM_Instance::RM_SortKey sort_key) 
-	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), transform, sort_key);
-	}
-
-	// Method to submit for rendering that includes additional per-instance parameters beyond the world transform.  Will submit 
-	// directly to the render queue and bypass the z-sorting process.  Should be used wherever possible for efficiency
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform, const XMFLOAT4 & params, RM_Instance::RM_SortKey sort_key)
-	{
-		SubmitForRendering(shader, model, std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params, sort_key)));
-	}
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, const FXMMATRIX transform, const XMFLOAT4 & params, RM_Instance::RM_SortKey sort_key)
-	{
-		if (model) SubmitForRendering(shader, model->GetModelBuffer(), transform, params, sort_key);
-	}
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
 	void XM_CALLCONV				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position);
 	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
 	{
-		if (model) SubmitForZSortedRendering(shader, model->GetModelBuffer(), std::move(instance), position);
+		if (model) SubmitForZSortedRendering(shader, &(model->Data), std::move(instance), position);
 	}
 
-	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
-	// objects.  Performance overhead; should be used only where specifically required
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(	RenderQueueShader shader, ModelBuffer *model, const FXMMATRIX transform,
-																const XMFLOAT4 & params, const CXMVECTOR position)
-	{
-		SubmitForZSortedRendering(shader, model,
-			std::move(RM_Instance(transform, LightingManager.GetActiveLightingConfiguration(), params, RM_Instance::SORT_KEY_RENDER_LAST)), position);
-	}	
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(	RenderQueueShader shader, Model *model, const FXMMATRIX transform,
-																const XMFLOAT4 & params, const CXMVECTOR position)
-	{
-		if (model) SubmitForZSortedRendering(shader, model->GetModelBuffer(), transform, params, position);
-	}
 
 	/* Method to render the interior of an object environment including any tiles, for an environment
 	   which supports portal rendering

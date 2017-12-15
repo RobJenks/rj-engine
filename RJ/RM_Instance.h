@@ -20,10 +20,12 @@ struct RM_Instance
 		Flags(0U)
 	{}
 	
+	// Unsorted instance; will be sorted near the start of the queue and rendered approximately first (possible adding overdraw)
 	CMPINLINE RM_Instance(XMFLOAT4X4 && world) noexcept
 		:
 		Flags(0U), 
-		Transform(world)
+		Transform(world), 
+		SortKey(SORT_KEY_RENDER_FIRST)
 	{}
 
 	CMPINLINE RM_Instance(XMFLOAT4X4 && world, RM_SortKey sort_key) noexcept
@@ -40,6 +42,31 @@ struct RM_Instance
 		SortKey(sort_key), 
 		Highlight(highlight)
 	{}
+
+
+	CMPINLINE RM_Instance(const FXMMATRIX world) noexcept
+		:
+		Flags(0U)
+	{
+		XMStoreFloat4x4(&Transform, world);
+	}
+
+	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key) noexcept
+		:
+		Flags(0U),
+		SortKey(sort_key)
+	{
+		XMStoreFloat4x4(&Transform, world);
+	}
+
+	CMPINLINE RM_Instance(const FXMMATRIX world, RM_SortKey sort_key, const XMFLOAT4 & highlight) noexcept
+		:
+		Flags(0U),
+		SortKey(sort_key),
+		Highlight(highlight)
+	{
+		XMStoreFloat4x4(&Transform, world);
+	}
 
 
 	// Comparison operator for sorting; instances are sorted in ascending 'SortKey' order

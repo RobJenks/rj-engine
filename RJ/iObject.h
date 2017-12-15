@@ -288,7 +288,7 @@ public:
 	CMPINLINE ModelInstance &				GetModelInstance(void)				{ return m_model; }
 
 	// The model used for rendering this object (or NULL if object is non-renderable)
-	CMPINLINE const Model *					GetModel(void) const				{ return m_model.GetModel(); }
+	CMPINLINE Model *						GetModel(void) 						{ return m_model.GetModel(); }
 	void									SetModel(Model *model);
 
     // The articulated model used for rendering this object (or NULL if not applicable)

@@ -14,7 +14,7 @@ public:
 	ModelInstance(Model *model);
 	ModelInstance(const std::string & model);
 
-	CMPINLINE const Model *				GetModel(void) const { return m_model; }
+	CMPINLINE Model *					GetModel(void) { return m_model; }
 	CMPINLINE const XMMATRIX &			GetWorldMatrix(void) const { return m_world; }
 
 	// Set the model definition.  Will reset any size/scaling factor that has already been applied
@@ -44,7 +44,7 @@ public:
 
 private:
 
-	const Model *						m_model;		// Pointer to the central model definition
+	Model *								m_model;		// Pointer to the central model definition
 	XMMATRIX							m_world;		// Base world matrix, based upon e.g. desired model instance size
 
 };

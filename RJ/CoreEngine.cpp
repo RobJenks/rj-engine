@@ -1288,7 +1288,7 @@ void CoreEngine::Render(void)
 void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
 {
 	// Exclude any null-geometry objects
-	if (!model || model->VertexBuffer == NULL) return;
+	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;
 
 	// Retrieve the most appropriate render slot and move this instance into it
 	size_t render_slot = model->GetAssignedRenderSlot(shader);
@@ -1306,7 +1306,7 @@ void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelB
 void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, CXMVECTOR position)
 {
 	// Exclude any null-geometry objects
-	if (!model || model->VertexBuffer == NULL) return;
+	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;
 
 	// Determine the distance to this object so we can use it as a sort key
 	int z = (int)XMVectorGetX(XMVector3LengthSq(position - m_camera->GetPosition()));
@@ -1378,12 +1378,12 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
 				r_devicecontext->Unmap(m_instancebuffer, 0);
 
 				// Update the model VB pointer and then set vertex buffer data
-				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer;
-				m_instancedstride[0] = m_current_modelbuffer->GetVertexSize();
+				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer.GetCompiledBuffer();
+				m_instancedstride[0] = m_current_modelbuffer->VertexBuffer.GetStride();
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (rq_shader.PrimitiveTopology != m_current_topology) 
@@ -1539,9 +1539,6 @@ bool CoreEngine::RenderObject(iObject *object)
 		// We are rendering this object, so call its pre-render update method
 		object->PerformRenderUpdate();
 
-		// Set the lighting configuration to be used for rendering this object
-		LightingManager.SetActiveLightingConfigurationForObject(object);
-
 		// Render either articulated or static model depending on object properties
 		if (object->GetArticulatedModel())
 		{
@@ -1572,22 +1569,23 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		float alpha = object->Fade.GetFadeAlpha();
-		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
+		float alpha = object->Fade.GetFadeAlpha();	// TODO: need to use this value
+		if (alpha < Game::C_EPSILON) return;			
 
-		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), m_instanceparams, object->GetPosition());
+		SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, &(object->GetModel()->Data), 
+			std::move(RM_Instance(object->GetWorldMatrix())), object->GetPosition());
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
-			m_instanceparams = object->Highlight.GetColour();
-			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), m_instanceparams, RM_Instance::CalculateSortKey(object->GetPosition()));
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(object->GetModel()->Data),
+				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightShader, object->GetModel()->GetModelBuffer(), object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()));
+			SubmitForRendering(RenderQueueShader::RM_LightShader, &(object->GetModel()->Data),
+				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
 }
@@ -1610,30 +1608,29 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 	if (object->Fade.AlphaIsActive())
 	{
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-		float alpha = object->Fade.GetFadeAlpha();
+		float alpha = object->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
 
         // Submit each component for rendering in turn
 		ArticulatedModelComponent **component = model->GetComponents();
 		for (int i = 0; i < n; ++i, ++component)
 		{
-			SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(), 
-										m_instanceparams, (*component)->GetPosition());
+			SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
+				RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
 		}
 	}
 	else
 	{
 		if (object->Highlight.IsActive())
 		{
-			m_instanceparams = object->Highlight.GetColour();
+			const XMFLOAT4 & highlight = object->Highlight.GetColour();
 
 			// Submit each component for rendering in turn
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams,
-					RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), std::move(
+					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 			}
 		}
 		else
@@ -1642,8 +1639,8 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-					RM_Instance::CalculateSortKey((*component)->GetPosition()));
+				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 			}
 		}
 	}
@@ -1894,10 +1891,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition())))
-					));
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition()))))
+				)));
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -1915,8 +1912,8 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2201,10 +2198,10 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, terrain_def->GetModel(),
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
-					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition())))
-					));
+					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition()))))
+				)));
 
 				// This terrain object has been rendered
 				terrain->MarkAsRendered();
@@ -2222,8 +2219,8 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						RM_Instance::CalculateSortKey((*component)->GetPosition()));
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
 				// This terrain object has been rendered
@@ -2281,25 +2278,24 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			if (tile->Fade.AlphaIsActive())
 			{
 				// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
-				float alpha = tile->Fade.GetFadeAlpha();
+				float alpha = tile->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 				if (alpha < Game::C_EPSILON) return;
-				m_instanceparams.x = alpha;
 
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, tile->GetModel(), world, m_instanceparams, 
-											world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, &(tile->GetModel()->Data), std::move(
+					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
 			{
 				if (tile->Highlight.IsActive())
 				{
-					m_instanceparams = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, tile->GetModel(), world, m_instanceparams, 
-						RM_Instance::CalculateSortKey(world.r[3]));	// Position can be taken from trans. components of world matrix (_41 to _43)
+					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel()->Data), std::move(
+						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, tile->GetModel(), world, 
-						RM_Instance::CalculateSortKey(world.r[3]));	// Position can be taken from trans. components of world matrix (_41 to _43)
+					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel()->Data), std::move(
+						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 			}
 		}
@@ -2309,8 +2305,8 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		XMMATRIX modelwm; 
 
 		// Determine whether any effects are active on the tile; these will need to be propogated across to constituent parts here
-		bool fade = false;
-		if (tile->Fade.AlphaIsActive()) { fade = true; m_instanceparams.x = tile->Fade.GetFadeAlpha(); }
+		bool fade = false; float alpha;
+		if (tile->Fade.AlphaIsActive()) { fade = true; alpha = tile->Fade.GetFadeAlpha(); }
 
 		// Iterate through all models to be rendered
 		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
@@ -2325,15 +2321,16 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				world);
 			
 			// Submit the tile model for rendering using this adjusted world matrix
+			// Take pos from the trans components of the world matrix (_41 to _43)
 			if (fade)
 			{
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, item.model, modelwm, m_instanceparams,
-											modelwm.r[3]);									// Take pos from the trans components of the world matrix (_41 to _43)
+				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, item.model, std::move(
+					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))), modelwm.r[3]);
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, modelwm, 
-											RM_Instance::CalculateSortKey(modelwm.r[3]));	// Take pos from the trans components of the world matrix (_41 to _43)
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, std::move(
+					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))));
 			}
 		}
 	}
@@ -2374,7 +2371,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		// Reject (alpha-clip) the object if its alpha value is effectively zero.  Otherwise alpha is passed as param.x
 		float alpha = parent->Fade.GetFadeAlpha();
 		if (alpha < Game::C_EPSILON) return;
-		m_instanceparams.x = alpha;
+		
+		// TODO: need to use this alpha value
 
 		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects (with alpha)", 
 		{
@@ -2397,8 +2395,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 				component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model, (*component)->GetWorldMatrix(),
-						m_instanceparams, (*component)->GetPosition());
+					SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, (*component)->Model.GetModel(), std::move(
+						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))), (*component)->GetPosition());
 				}
 			}
 		});
@@ -2409,7 +2407,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 		{
 			if (parent->Highlight.IsActive())
 			{
-				m_instanceparams = parent->Highlight.GetColour();
+				const XMFLOAT4 & highlight = parent->Highlight.GetColour();
 
 				// Iterate through each turret in turn
 				TurretController::TurretCollection::iterator it_end = controller.Turrets().end();
@@ -2430,8 +2428,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model, (*component)->GetWorldMatrix(), m_instanceparams,
-							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), std::move(
+							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 					}
 				}
 			}
@@ -2456,8 +2454,8 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model, (*component)->GetWorldMatrix(),
-							RM_Instance::CalculateSortKey((*component)->GetPosition()));
+						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 					}
 				}
 			}
@@ -2502,10 +2500,10 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	XMStoreFloat4(&p2, line.P2);
 
 	// Store all data within the instance matrix; start pos in row 1, end pos in row 2, line colour and alpha in row 3, row4 = unused
-	m.World = XMFLOAT4X4(p1.x, p1.y, p1.z, 1.0f, p2.x, p2.y, p2.z, 1.0f, line.Colour.x, line.Colour.y, line.Colour.z, line.Colour.w, 0.0f, 0.0f, 0.0f, 0.0f);
+	m.Transform = XMFLOAT4X4(p1.x, p1.y, p1.z, 1.0f, p2.x, p2.y, p2.z, 1.0f, line.Colour.x, line.Colour.y, line.Colour.z, line.Colour.w, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	// Provide additional parameters as required.  x = line radius
-	m.Params = line.Params;
+	//m.Params = line.Params;		// TODO: need to re-enable this
 	
 	// Submit to the render queue
 	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), std::move(m), line.P1);
@@ -2548,7 +2546,7 @@ RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 		D::Regions::System->Render(m_D3D->GetDeviceContext());
 
 		// Render the buffers using the standard texture shader
-		m_texcubeshader->Render( r_devicecontext, D::Regions::System->GetBackdropSkybox()->GetIndexCount(), 
+		m_texcubeshader->Render( r_devicecontext, D::Regions::System->GetBackdropSkybox()->Data.IndexBuffer.GetIndexCount(), 
 								 world, r_view, r_projection,
 								 D::Regions::System->GetBackdropTextureResource() );
 
