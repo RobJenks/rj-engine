@@ -5,7 +5,7 @@
 
 #include <array>
 #include "Material.h"
-#include "MaterialData.hlsl.h"
+#include "../Definitions/MaterialData.hlsl.h"
 #include "CompilerSettings.h"
 class ShaderDX11;
 class TextureDX11;

@@ -1957,6 +1957,12 @@
     <ClInclude Include="ModelInstance.h">
       <Filter>Engine\Models\Static</Filter>
     </ClInclude>
+    <ClInclude Include="DefaultingFloat4.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\InstanceProperties.hlsl.h">
+      <Filter>Imported Definitions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

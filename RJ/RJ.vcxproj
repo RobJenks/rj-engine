@@ -650,6 +650,7 @@
     <ClCompile Include="XML\tinyxmlparser.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Definitions\InstanceProperties.hlsl.h" />
     <ClInclude Include="..\Definitions\LightData.hlsl.h" />
     <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h" />
@@ -756,6 +757,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
+    <ClInclude Include="DefaultingFloat4.h" />
     <ClInclude Include="DepthStencilState.h" />
     <ClInclude Include="DepthStencilStateDX11.h" />
     <ClInclude Include="DynamicTerrain.h" />
