@@ -65,6 +65,37 @@ CMPINLINE void ModelInstance::SetModel(const Model *model)
 	m_world = ID_MATRIX;
 }
 
+// Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
+XMVECTOR ModelInstance::DetermineModelInstanceSize(void) const
+{
+	if (!m_model) return NULL_VECTOR;
+	ModelData *data = m_model->Geometry.get();
+	if (!data) return NULL_VECTOR;
+
+	return XMVector3TransformCoord(XMLoadFloat3(&data->ModelSize), m_world);
+}
+
+// Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
+XMVECTOR ModelInstance::DetermineModelInstanceMinBounds(void) const
+{
+	if (!m_model) return NULL_VECTOR;
+	ModelData *data = m_model->Geometry.get();
+	if (!data) return NULL_VECTOR;
+
+	return XMVector3TransformCoord(XMLoadFloat3(&data->MinBounds), m_world);
+}
+
+// Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
+XMVECTOR ModelInstance::DetermineModelInstanceMaxBounds(void) const
+{
+	if (!m_model) return NULL_VECTOR;
+	ModelData *data = m_model->Geometry.get();
+	if (!data) return NULL_VECTOR;
+
+	return XMVector3TransformCoord(XMLoadFloat3(&data->MaxBounds), m_world);
+}
+
+
 
 ModelInstance::~ModelInstance(void)
 {

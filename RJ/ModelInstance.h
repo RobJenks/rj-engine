@@ -35,6 +35,11 @@ public:
 	CMPINLINE void						SetExactSize(const XMFLOAT3 & size) { return SetExactSize(XMLoadFloat3(&size)); }
 	CMPINLINE void						SetExactSize(float uniform_size) { return SetExactSize(XMVectorReplicate(uniform_size)); }
 
+	// Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
+	XMVECTOR							DetermineModelInstanceSize(void) const;
+	XMVECTOR							DetermineModelInstanceMinBounds(void) const;
+	XMVECTOR							DetermineModelInstanceMaxBounds(void) const;
+
 	~ModelInstance(void);
 
 private:

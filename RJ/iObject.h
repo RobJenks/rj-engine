@@ -618,8 +618,10 @@ CMPINLINE void							iObject::DeriveNewWorldMatrix(void)
 	m_inverseorientationmatrix = XMMatrixInverse(NULL, m_orientationmatrix);
 
 	// World = (BaseModelWorld * Rotation * Translation)
-	SetWorldMatrix(XMMatrixMultiply(m_model.GetWorldMatrix(), 
-		XMMatrixMultiply(m_orientationmatrix, XMMatrixTranslationFromVector(m_position))));
+	SetWorldMatrix(XMMatrixMultiply(XMMatrixMultiply(
+		m_model.GetWorldMatrix(), 
+		m_orientationmatrix), 
+		XMMatrixTranslationFromVector(m_position)));
 }
 
 

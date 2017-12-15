@@ -16,8 +16,9 @@ ArticulatedModelComponent::ArticulatedModelComponent(void)
 void ArticulatedModelComponent::RefreshPositionImmediate(void)
 {
 	// Set world matrix: World = Rotation * Translation
-	SetWorldMatrix(XMMatrixMultiply(
-		XMMatrixRotationQuaternion(m_orientation),
+	SetWorldMatrix(XMMatrixMultiply(XMMatrixMultiply(
+		Model.GetWorldMatrix(),
+		XMMatrixRotationQuaternion(m_orientation)),
 		XMMatrixTranslationFromVector(m_position)));
 }
 

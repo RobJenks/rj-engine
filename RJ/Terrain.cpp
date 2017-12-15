@@ -1,6 +1,7 @@
 #include "FastMath.h"
 #include "Utility.h"
 #include "Model.h"
+#include "ModelInstance.h"
 #include "iObject.h"
 #include "iSpaceObjectEnvironment.h"
 #include "TerrainDefinition.h"
@@ -156,28 +157,23 @@ void Terrain::RecalculatePositionalData(void)
 	// We do not want to execute this method if updates are suspended
 	if (m_postponeupdates) return;
 	
-	// Determine centre-translation; only relevant if we have a definition & associated model
-	XMMATRIX centretrans;
+	// Use a temporary ModelInstance object to calculate the required scaling factor for our current size.  Saves
+	// storing a permanent base world matrix (ModelInstance::m_world) alongside every terrain instance
+	XMMATRIX base_model_world;
 	if (m_definition && m_definition->GetModel())
 	{
-		XMFLOAT3 mcentre = (m_definition->GetModel()->GetModelCentre());
-		centretrans = XMMatrixTranslation(-mcentre.x, -mcentre.y, -mcentre.z);
-	}
-	else
-	{
-		centretrans = ID_MATRIX;
+		ModelInstance instance(m_definition->GetModel());
+		instance.SetSize(XMVectorScale(GetExtentV(), 2.0f));
+		base_model_world = instance.GetWorldMatrix();
 	}
 
-	// World = (centretrans * rotation * translate_to_position)
+	// World = (base_model_world * rotation * translate_to_position)
 	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(
-		centretrans,
+		base_model_world,
 		XMMatrixRotationQuaternion(m_orientation)),
 		XMMatrixTranslationFromVector(m_data.Centre));
 		
 	// Extract the basis vectors from the world matrix
-	/*m_data.Axis[0] = D3DXVECTOR3(m_worldmatrix._11, m_worldmatrix._12, m_worldmatrix._13);
-	  m_data.Axis[1] = D3DXVECTOR3(m_worldmatrix._21, m_worldmatrix._22, m_worldmatrix._23);
-	  m_data.Axis[2] = D3DXVECTOR3(m_worldmatrix._31, m_worldmatrix._32, m_worldmatrix._33);*/
 	m_data.Axis[0].value = m_worldmatrix.r[0];
 	m_data.Axis[1].value = m_worldmatrix.r[1];
 	m_data.Axis[2].value = m_worldmatrix.r[2];

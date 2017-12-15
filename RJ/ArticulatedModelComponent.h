@@ -4,6 +4,7 @@
 
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
+#include "ModelInstance.h"
 class Model;
 
 
@@ -18,7 +19,7 @@ public:
 	ArticulatedModelComponent(void);
 
 	// Reference to the model for this component
-	Model *								Model;
+	ModelInstance						Model;
 
 	// Retrieve or set the component position
 	CMPINLINE XMVECTOR					GetPosition(void) const							{ return m_position; }
@@ -30,7 +31,7 @@ public:
 
 	// Retrieve or set the component world matrix
 	CMPINLINE XMMATRIX					GetWorldMatrix(void) const						{ return m_worldmatrix; }
-	CMPINLINE void XM_CALLCONV			SetWorldMatrix(FXMMATRIX m)						{ m_worldmatrix = m; }
+	CMPINLINE void XM_CALLCONV			SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
 	// Set all spatial components at once, to reduce method calls when all information is known
 	CMPINLINE void						SetAllSpatialData(	const FXMVECTOR position, const FXMVECTOR orientation,
@@ -38,7 +39,7 @@ public:
 	{
 		m_position = position;
 		m_orientation = orientation;
-		m_worldmatrix = worldmatrix;
+		SetWorldMatrix(XMMatrixMultiply(Model.GetWorldMatrix(), worldmatrix));	// Account for inherent model transform first
 	}
 
 	// Performs an immediate recalculation of the world transform for this component
