@@ -44,9 +44,12 @@ public:
 
 	// Copy assignment
 	CMPINLINE DefaultingFloat4 & DefaultingFloat4::operator=(const DefaultingFloat4 & other) noexcept
-		:
-		x(other.x), y(other.y), z(other.z), w(other.w)
 	{
+		x = other.x; 
+		y = other.y;
+		z = other.z;
+		w = other.w;
+		return *this;
 	}
 
 
@@ -59,14 +62,14 @@ public:
 
 
 	// Move assignment
-	CMPINLINE DefaultingFloat4 & DefaultingFloat4::operator=(DefaultingFloat4 && other) noexcept
+	/*CMPINLINE DefaultingFloat4 & DefaultingFloat4::operator=(DefaultingFloat4 && other) noexcept
 	{
 		x = other.x;
 		y = other.y;
 		z = other.z;
 		w = other.w;
 		return *this;
-	}
+	}*/
 };
 
 // Explicit default constructor specialisations to allow compile-time specification of defaulted parameters
