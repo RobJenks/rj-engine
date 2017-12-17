@@ -300,7 +300,11 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 
 RenderDeviceDX11::~RenderDeviceDX11(void)
 {
+	Game::Log << LOG_INFO << "Terminating render device context \"" << Rendering::GetRenderDeviceContextTypeName() << "\"\n";
+	ReleaseIfExists(m_devicecontext);
 
+	Game::Log << LOG_INFO << "Terminating primary render device \"" << Rendering::GetRenderDeviceTypeName() << "\"\n";
+	ReleaseIfExists(m_device);
 }
 
 
