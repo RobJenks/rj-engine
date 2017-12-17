@@ -36,6 +36,7 @@ namespace ErrorCodes {
 	const Result		CannotCreate2DRenderManager						= 1005;
 	const Result		CannotCreateFXManager							= 1006;
 	const Result		CannotCreateOverlayRenderer						= 1007;
+	const Result		CannotCreateDirect3DFinalVersion				= 1008;
 
 	const Result		InvalidDXLevelPassedToLocaliser					= 1060;
 	const Result		CouldNotDetermineSupportedDXFeatureLevels		= 1061;

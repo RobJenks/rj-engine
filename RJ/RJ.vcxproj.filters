@@ -834,6 +834,15 @@
     <ClCompile Include="ModelInstance.cpp">
       <Filter>Engine\Models\Static</Filter>
     </ClCompile>
+    <ClCompile Include="RenderDeviceDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Rendering.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderDevice.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1962,6 +1971,12 @@
     </ClInclude>
     <ClInclude Include="..\Definitions\InstanceProperties.hlsl.h">
       <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDevice.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderDeviceDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

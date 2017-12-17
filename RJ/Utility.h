@@ -26,6 +26,9 @@ class iObject;
 #define MemDiffReport(c1, c2, c3) _CrtMemState c3; if ( _CrtMemDifference(&c3, &c1, &c2)) { OutputDebugString("\n\n*** WARNING: ACCUMULATING MEMORY ALLOCATIONS.  INCREMENTAL ALLOCATIONS BELOW ***\n\n"); _CrtMemDumpStatistics( &c3 ); } 
 #define MemDump(label,cp) MemReg(cp);OutputDebugString("**** ");OutputDebugString(label);OutputDebugString(": \n");_CrtMemDumpStatistics(&cp);
 
+// Convenience macro for generating string literal data
+#define STRING(x) #x
+
 // Convenience macro to combine multiple arguments, including commas, into one macro argument
 #define SINGLE_ARG(...) __VA_ARGS__
 

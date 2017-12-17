@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 struct ID3D11Device2;
 struct ID3D11DeviceContext2;
 
@@ -10,9 +12,17 @@ public:
 
 	// The device and context type in use for rendering.  Keep decoupled from core engine or renderer 
 	// to simplify component dependencies
-	typedef ID3D11Device2			RenderDeviceType;
-	typedef ID3D11DeviceContext2	RenderDeviceContextType;
-	
+#	define RENDER_DEVICE_TYPE		ID3D11Device2
+#	define RENDER_CONTEXT_TYPE		ID3D11DeviceContext2
+
+	// Type definitions for use in the core engine
+	typedef RENDER_DEVICE_TYPE		RenderDeviceType;
+	typedef RENDER_CONTEXT_TYPE		RenderDeviceContextType;
+
+	// Return the name of device & context implementation classes
+	static std::string				GetRenderDeviceTypeName(void);
+	static std::string				GetRenderDeviceContextTypeName(void);
+
 	// Maximum supported render targets.  RT count is capped at 8 in DX11 
 	static const size_t				MaxRenderTargets = 8U;
 

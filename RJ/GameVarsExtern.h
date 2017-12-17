@@ -147,6 +147,8 @@ namespace Game {
 	extern const int C_CONFIG_LOAD_RECURSION_LIMIT;		// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
+	extern const bool C_RENDER_DEBUG_LAYER;					// Flag indicating whether we should attempt to load a debug layer for the current rendering
+															// engine (e.g D3D_DEVICE_DEBUG). Only available in debug builds regardless of the state of this flag
 	typedef UINT32 LIGHT_CONFIG;							// Bitstring representing a particular lighting configuration
 	extern const unsigned int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine
 	extern const float C_MODEL_SIZE_LIMIT;					// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values

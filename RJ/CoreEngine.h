@@ -10,7 +10,7 @@
 #include "GlobalFlags.h"
 #include "DX11_Core.h"
 #include "Rendering.h"
-#include "D3DMain.h"
+#include "RenderDeviceDX11.h"
 
 #include "Profiler.h"
 #include "CameraClass.h"
@@ -127,7 +127,7 @@ public:
 	LightingManagerObject	LightingManager;
 	
 	// Accessor/modifier methods for key game engine components
-	CMPINLINE D3DMain		*GetDirect3D()				{ return m_D3D; }
+	CMPINLINE RenderDeviceDX11 * GetRenderDevice()		{ return m_renderdevice; }
 	CMPINLINE CameraClass	*GetCamera()				{ return m_camera; }
 	CMPINLINE Frustum		*GetViewFrustrum()			{ return m_frustrum; }
 	CMPINLINE TextManager	*GetTextManager()			{ return m_textmanager; }
@@ -166,15 +166,15 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
 
 	// Pass-through accessor methods for key engine components
-	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_D3D->GetDevice(); }
-	CMPINLINE Rendering::RenderDeviceContextType *		GetDeviceContext(void)	{ return m_D3D->GetDeviceContext(); }
+	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
+	CMPINLINE Rendering::RenderDeviceContextType *		GetDeviceContext(void)	{ return m_renderdevice->GetDeviceContext(); }
 
 	// Validation method to determine whether the engine has all critical frame-generatation components available
-	CMPINLINE bool			Operational()				{ return ( m_D3D && m_D3D->GetDevice() ); }
+	CMPINLINE bool			Operational()				{ return (m_renderdevice && m_renderdevice->GetDevice() ); }
 
 	// Pass-through methods to begin and end a scene; passes control directly through to the equivalent D3D methods
-	CMPINLINE void			BeginFrame()				{ m_D3D->BeginScene(); }
-	CMPINLINE void			EndFrame()					{ m_D3D->EndScene(); }
+	CMPINLINE void			BeginFrame()				{ m_renderdevice->BeginScene(); }
+	CMPINLINE void			EndFrame()					{ m_renderdevice->EndScene(); }
 
 
 	/* *** Main rendering function *** */
@@ -510,7 +510,7 @@ private:
 	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
 	// Pointer to each component that makes up this game engine
-	D3DMain							*m_D3D;
+	RenderDeviceDX11 *				m_renderdevice;
 	CameraClass						*m_camera;
 	LightShader						*m_lightshader;
 	LightFadeShader					*m_lightfadeshader;

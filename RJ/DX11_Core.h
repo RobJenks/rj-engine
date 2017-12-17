@@ -18,7 +18,7 @@
 
 // Include core DX11 headers for basic functionality
 //#include <d3d11.h>
-#include <d3d11_4.h>
+#include <d3d11_2.h>
 #include <DirectXMath.h>
 #include <dxgi.h>
 
