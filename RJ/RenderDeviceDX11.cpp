@@ -28,8 +28,49 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 
 Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth)
 {
-	Game::Log << "Initialising render device \"" << GetRenderDeviceName() << "\"\n";
+	Game::Log << "Initialising rendering engine \"" << GetRenderDeviceName() << "\"\n";
 
+	// Initialise the render device and context
+	Result result = InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync, screen_near, screen_depth);
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary render device\n";
+		return result;
+	}
+
+	// We can now determine the primary adapter output & capabilities, then initialise it for rendering
+	result = InitialisePrimaryGraphicsAdapter(screen_size, vsync);
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary graphics adapter\n";
+		return result;
+	}
+		
+	// Initialise input layout descriptors
+	result = InitialiseInputLayoutDefinitions();
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of input layout descriptors\n";
+		return result;
+	}
+
+	// Load all shaders from external resources
+	result = InitialiseShaderResources();
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of shader resources\n";
+		return result;
+	}
+
+
+
+
+	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";
+	return ErrorCodes::NoError;
+}
+
+Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth)
+{
 	// Device flags for initialisation; enable debug layer if required & only in debug builds
 	UINT deviceflags = 0U;
 #	ifdef _DEBUG
@@ -52,7 +93,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 		Game::Log << LOG_INFO << "Reverting to WARP render drivers\n";
 		m_drivertype = D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_WARP;
 	}
-	
+
 
 	// Attempt to initialise the base device and context
 	UINT feature_count = sizeof(SUPPORTED_FEATURE_LEVELS) / sizeof(D3D_FEATURE_LEVEL);
@@ -65,7 +106,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	if (hr == E_INVALIDARG)
 	{
 		Game::Log << LOG_WARN << "Render device reports unrecognised feature levels up to 11.2\n";
-		
+
 		UINT min_feature_req = 1U;
 		Game::Log << LOG_INFO << "Attempting reinitialisation of render device with reduced feature set (-" << min_feature_req <<
 			" level" << (min_feature_req == 1U ? "" : "s") << ")\n";
@@ -96,7 +137,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	Game::Log << LOG_INFO << "Successfully initialised final render device version \"" << Rendering::GetRenderDeviceTypeName() << "\"\n";
 	m_device->GetImmediateContext2(&m_devicecontext);
 	Game::Log << LOG_INFO << "Successfully initialised final render context version \"" << Rendering::GetRenderDeviceContextTypeName() << "\"\n";
-	
+
 	// Initialise D3D debug layer support if required & available (also based upon device flags above)
 	if (SUCCEEDED(m_device->QueryInterface<ID3D11Debug>(&m_debuglayer)))
 	{
@@ -111,7 +152,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 			debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, TRUE);
 #			endif
 
-			D3D11_MESSAGE_ID suppress_messages[] = 
+			D3D11_MESSAGE_ID suppress_messages[] =
 			{
 				D3D11_MESSAGE_ID_SETPRIVATEDATA_CHANGINGPARAMS
 			};
@@ -134,17 +175,6 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	{
 		Game::Log << LOG_INFO << "No D3D debug support, debug layer will not be initialised\n";
 	}
-
-	// We can now determine the primary adapter output & capabilities, then initialise it for rendering
-	Result res = InitialisePrimaryGraphicsAdapter(screen_size, vsync);
-	if (res != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_WARN << "Error encountered [" << res << "] during initialisation of primary graphics adapter\n";
-		return res;
-	}
-		
-	Game::Log << LOG_INFO << "Initialisation of primary render device completed successfully\n";
-	return ErrorCodes::NoError;
 }
 
 Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size, bool vsync)
@@ -300,15 +330,33 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 	ReleaseIfExists(factory);
 }
 
+Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
+{
+	Game::Log << LOG_INFO << "Loading standard shader input layouts\n";
+
+	// Input layouts to be loaded
+	std::vector<std::tuple<std::string, InputLayoutDesc &>> layout_definitions
+	{
+		{ "Vertex_Inst_Standard_Layout", m_standard_input_layout }
+	};
+
+	// Attempt to load each defintion in turn
+	for (auto & layout : layout_definitions)
+	{
+		if (InputLayoutDesc::GetStandardLayout(std::get<0>(layout), std::get<1>(layout)) == false)
+		{
+			Game::Log << LOG_ERROR << "Cannot load standard input layout \"" << std::get<0>(layout) << "\"\n";
+			return ErrorCodes::CouldNotCreateVertexShaderInputLayout;
+		}
+	}
+	
+	Game::Log << LOG_INFO << "All standard input layout definitions initialised\n";
+	return ErrorCodes::NoError;
+}
+
 Result RenderDeviceDX11::InitialiseShaderResources(void)
 {
-	// Attempt to load required input layouts first
-	Game::Log << LOG_INFO << "Loading standard shader input layouts\n";
-	if (InputLayoutDesc::GetStandardLayout("Vertex_Inst_Standard_Layout", m_standard_input_layout) == false)
-	{
-		Game::Log << LOG_ERROR << "Cannot load standard input layout\n";
-		return ErrorCodes::CouldNotCreateVertexShaderInputLayout;
-	}
+
 
 	// Shader definitions
 	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources

@@ -10,6 +10,7 @@
 #include "IntVector.h"
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
+#include "InputLayoutDesc.h"
 class ShaderDX11;
 
 class RenderDeviceDX11 : public RenderDevice
@@ -19,16 +20,19 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<ShaderDX11>> ShaderCollection;
 
 	RenderDeviceDX11(void);
-	Result Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
+	Result											Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
 	
-	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
-	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
-	
+	Result											InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
 	Result											InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size, bool vsync);
 
+	Result											InitialiseInputLayoutDefinitions(void);
+	Result											InitialiseShaderResources(void);
 	Result											InitialiseDeferredRenderingResources(void);
 
-	Result											InitialiseShaderResources(void);
+
+	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
+	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
+
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
 
 
@@ -44,7 +48,7 @@ public:
 private:
 
 	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, 
-																					 const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
+														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 
 private:
 
