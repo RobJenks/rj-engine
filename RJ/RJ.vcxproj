@@ -814,6 +814,7 @@
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObjects.h" />
+    <ClInclude Include="GBuffer.h" />
     <ClInclude Include="HashIndexedVector.h" />
     <ClInclude Include="iDataObjectEnvironment.h" />
     <ClInclude Include="IndexBuffer.h" />

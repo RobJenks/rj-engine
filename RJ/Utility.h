@@ -33,17 +33,17 @@ class iObject;
 #define SINGLE_ARG(...) __VA_ARGS__
 
 // Convenience macro for releasing COM objects.
-#define ReleaseCOM(x) { if(x){ x->Release(); x = 0; } }
+#define ReleaseCOM(x) { if(x){ x->Release(); (x) = 0; } }
 
 // Convenience macros for deleting objects.
-#define SafeDelete(x) { delete x; x = 0; }
-#define SafeDeleteArray(x) { delete[] x; x = 0; }
+#define SafeDelete(x) { delete (x); (x) = 0; }
+#define SafeDeleteArray(x) { delete[] (x); (x) = 0; }
 
 // Convenience macro for freeing malloc-ed memory
-#define SafeFree(x) { free(x); x = 0; }
+#define SafeFree(x) { free(x); (x) = 0; }
 
 // Convenience macro for releasing non-null COM resources
-#define ReleaseIfExists(x) { if (x) { x->Release(); x = 0; } }
+#define ReleaseIfExists(x) { if (x) { (x)->Release(); (x) = 0; } }
 
 // Debug logging macro; logs to the debug output stream before returning
 #ifdef _DEBUG

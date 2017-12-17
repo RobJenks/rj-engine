@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "DX11_Core.h"
+#include "CompilerSettings.h"
 #include "ClearFlags.h"
 #include "Shader.h"
 #include "ShaderParameter.h"
@@ -36,6 +37,9 @@ public:
 
 	// Remove this (or any) binding from the given shader target
 	void						Unbind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype) const;
+
+	// Return the SRV that would be bound to a shader slot during Bind(), so that it can be group-bound during an external call for efficiency
+	CMPINLINE const ID3D11ShaderResourceView * GetBindingSRV(void) const { return m_srv; }
 
 	/**
 	* Load a 2D texture from a file path.

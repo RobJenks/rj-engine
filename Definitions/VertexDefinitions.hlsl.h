@@ -2,7 +2,7 @@
 #define __VertexDefinitionsHLSLH__
 
 // Common type definitions
-using RM_SortKey = uint64_t;
+using RM_SortKey = uint32_t;
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
 #ifdef __cplusplus
@@ -39,7 +39,7 @@ typedef float4 Float4DefaultZeroW;
 	float3					normal			RJ_SEMANTIC(NORMAL); \
 	float3					tangent			RJ_SEMANTIC(TANGENT); \
 	float3					binormal		RJ_SEMANTIC(BINORMAL); \
-	float2					tex				RJ_SEMANTIC(TEXCOORD0); 
+	float2					tex				RJ_SEMANTIC(TEXCOORD0);
 
 
 #define PerInstanceData \
@@ -48,7 +48,7 @@ typedef float4 Float4DefaultZeroW;
 	/*--------------------------------------------------------------------- ( 64 bytes ) */ \
 	UINT32					Flags			RJ_SEMANTIC(Flags);									/* Flags defined in Definitions/InstanceProperties.hlsl.h */ \
 	RM_SortKey				SortKey			RJ_SEMANTIC(SortKey); \
-	float					_padding1		RJ_SEMANTIC(padding1); \
+	float2					_padding1		RJ_SEMANTIC(padding1); \
 	/*--------------------------------------------------------------------- ( 16 bytes ) */ \
 	Float4DefaultZeroW		Highlight		RJ_SEMANTIC(Highlight);								/* xyz = colour, w = [0.0 1.0] intensity of highlight.  w=0.0 = default = deactivated */
 	/*--------------------------------------------------------------------- ( 16 bytes ) */ \

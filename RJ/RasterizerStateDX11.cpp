@@ -392,7 +392,7 @@ void RasterizerStateDX11::Bind()
 	}
 
 	auto devicecontext = Game::Engine->GetDeviceContext();
-	devicecontext->RSSetViewports((UINT)Rendering::MaxRenderTargets, m_d3d_viewports.data());
-	devicecontext->RSSetScissorRects((UINT)Rendering::MaxRenderTargets, m_d3d_rects.data());
+	devicecontext->RSSetViewports((UINT)Rendering::MaxRenderTargets, m_d3d_viewports.data());	// TODO: can set less than max if relevant
+	devicecontext->RSSetScissorRects((UINT)Rendering::MaxRenderTargets, m_d3d_rects.data());	// TODO: can set less than max if relevant
 	devicecontext->RSSetState(m_rasterstate);
 }

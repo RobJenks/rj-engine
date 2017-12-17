@@ -295,6 +295,9 @@ namespace ErrorCodes {
 	const Result		CannotLinkAllRequiredShadersToEffectManager		= 1350;
 	const Result		CannotDeserializeModel							= 1351;
 	const Result		CannotCompileModel								= 1352;
+	const Result		InvalidShaderReferenceProvidedForInitialisation = 1353;
+	const Result		CannotLoadShaderFromFile						= 1354;
+	const Result		CannotLoadDuplicateShaderResource				= 1355;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;

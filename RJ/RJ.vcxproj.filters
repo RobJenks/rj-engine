@@ -1978,6 +1978,9 @@
     <ClInclude Include="RenderDeviceDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

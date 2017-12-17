@@ -2,6 +2,7 @@
 #include "GameVarsExtern.h"
 #include "Logging.h"
 #include "Utility.h"
+#include "ShaderDX11.h"
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
 const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] = 
@@ -17,7 +18,10 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN), 
 	m_debuglayer(NULL), 
 	m_devicename(NullString), 
-	m_devicememory(0U)
+	m_devicememory(0U), 
+
+	m_deferred_vs(NULL), 
+	m_deferred_geometry_ps(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -296,6 +300,96 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 	ReleaseIfExists(factory);
 }
 
+Result RenderDeviceDX11::InitialiseShaderResources(void)
+{
+	// Attempt to load required input layouts first
+	Game::Log << LOG_INFO << "Loading standard shader input layouts\n";
+	if (InputLayoutDesc::GetStandardLayout("Vertex_Inst_Standard_Layout", m_standard_input_layout) == false)
+	{
+		Game::Log << LOG_ERROR << "Cannot load standard input layout\n";
+		return ErrorCodes::CouldNotCreateVertexShaderInputLayout;
+	}
+
+	// Shader definitions
+	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
+	{
+		{ &m_deferred_vs, Shader::Type::VertexShader, "VS_Deferred", "Shaders\\deferred_vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
+		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, "PS_Deferred_Geometry", "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL }
+	};
+
+	// Attempt to load each shader resource in turn
+	Game::Log << LOG_INFO << "Loading all shader resources (" << shader_resources.size() << ")\n";
+	for (auto & shader : shader_resources)
+	{
+		Result result = InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), std::get<4>(shader), std::get<5>(shader));
+		if (result != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_ERROR << "Fatal error: shader initialisation failed, cannot recover from errors (res:" << result << ")\n";
+			return result;
+		}
+	}
+	
+	Game::Log << LOG_INFO << "All shader resources initialised\n";	
+}
+
+Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
+															const std::string & profile, const InputLayoutDesc *input_layout = NULL)
+{
+	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
+
+	// No duplicates allowed
+	if (m_shaders.find(entryPoint) != m_shaders.end())
+	{
+		Game::Log << LOG_ERROR << "Multiple shader resources detected with entry point \"" << entryPoint << "\"\n";
+		return ErrorCodes::CannotLoadDuplicateShaderResource;
+	}
+
+	// Verify shader pointer provided for initialisation
+	if (!ppOutShader) return ErrorCodes::InvalidShaderReferenceProvidedForInitialisation;
+	if (*ppOutShader)
+	{
+		Game::Log << LOG_WARN << "Shader resource already exists, existing resource will be deallocated and overwritten\n";
+		SafeDelete(*ppOutShader);
+	}
+
+	// Attempt to initialise from file
+	(*ppOutShader) = new ShaderDX11();
+	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(fileName), entryPoint, profile, input_layout);
+
+	// Deallocate the shader object if initialisation failed
+	if (!success)
+	{
+		Game::Log << LOG_ERROR << "Initialisation of shader \"" << entryPoint << "\" failed, cannot proceed\n";
+		SafeDelete(*ppOutShader);
+		return ErrorCodes::CannotLoadShaderFromFile;
+	}
+
+	// Add to the central shader collection and return success.  All shaders are owned by this collection and will
+	// be disposed by it during shutdown
+	m_shaders[entryPoint] = std::move(std::unique_ptr<ShaderDX11>(*ppOutShader));
+	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
+	return ErrorCodes::NoError;
+}
+
+// Initialise all resources (e.g. GBuffer) required for the deferred rendering process
+Result RenderDeviceDX11::InitialiseDeferredRenderingResources(void)
+{
+	
+}
+
+void RenderDeviceDX11::BeginDeferredRenderingFrame(void)
+{
+
+}
+
+
+
+
+
+void RenderDeviceDX11::EndDeferredRenderinFrame(void)
+{
+
+}
 
 
 RenderDeviceDX11::~RenderDeviceDX11(void)
