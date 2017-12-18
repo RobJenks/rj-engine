@@ -1969,9 +1969,6 @@
     <ClInclude Include="DefaultingFloat4.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="..\Definitions\InstanceProperties.hlsl.h">
-      <Filter>Imported Definitions</Filter>
-    </ClInclude>
     <ClInclude Include="RenderDevice.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
@@ -1980,6 +1977,12 @@
     </ClInclude>
     <ClInclude Include="GBuffer.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\Common\InstanceProperties.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\Common\CommonShaderPipelineStructures.hlsl">
+      <Filter>HLSL\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2307,6 +2310,9 @@
     <Filter Include="Imported Definitions">
       <UniqueIdentifier>{121be652-4e99-4a12-9982-4e3c064ae820}</UniqueIdentifier>
     </Filter>
+    <Filter Include="HLSL\Common">
+      <UniqueIdentifier>{06661c74-dd71-48e1-a79e-e27edcbc4389}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
@@ -2314,95 +2320,17 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl" />
-    <FxCompile Include="Data\Shaders\vol_line.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line.gs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_highlight_fade.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texture.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texture.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texcube.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texcube.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texturetrans.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\texturetrans.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_fade.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\particle.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\particle.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\font.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\font.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\fire.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\fire.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\skinned_nmap.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\skinned_nmap.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="volumetric_cloud.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\vol_line_tex.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.ps.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\light_flat_highlight_fade.vs.hlsl">
-      <Filter>HLSL</Filter>
-    </FxCompile>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\deferred_ps_geometry.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\deferred_vs_standard.vs.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\Common\CommonShaderBufferDefinitions.hlsl">
+      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

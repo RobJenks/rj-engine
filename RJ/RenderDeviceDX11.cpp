@@ -62,7 +62,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 		return result;
 	}
 
-
+	// TODO: REST
 
 
 	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";

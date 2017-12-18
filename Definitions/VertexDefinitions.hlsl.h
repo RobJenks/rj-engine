@@ -1,8 +1,6 @@
 #if !defined(__VertexDefinitionsHLSLH__)
 #define __VertexDefinitionsHLSLH__
 
-// Common type definitions
-using RM_SortKey = uint32_t;
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
 #ifdef __cplusplus
@@ -12,6 +10,8 @@ using RM_SortKey = uint32_t;
 using float2 = DirectX::XMFLOAT2;
 using float3 = DirectX::XMFLOAT3;
 using float4 = DirectX::XMFLOAT4;
+using _uint32 = uint32_t;
+using RM_SortKey = _uint32;
 typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::USE_DEFAULT> Float4DefaultZeroW;
 
 #	define RJ_ROW_MAJOR_MATRIX DirectX::XMFLOAT4X4
@@ -20,6 +20,8 @@ typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFA
 #else
 
 typedef float4 Float4DefaultZeroW;
+typedef uint _uint32;
+typedef _uint32 RM_SortKey;				// HLSL uint == uint32_t
 
 #	define RJ_ROW_MAJOR_MATRIX row_major float4x4
 #	define RJ_SEMANTIC(sem) : sem
@@ -46,7 +48,7 @@ typedef float4 Float4DefaultZeroW;
 \
 	RJ_ROW_MAJOR_MATRIX		Transform		RJ_SEMANTIC(Transform); \
 	/*--------------------------------------------------------------------- ( 64 bytes ) */ \
-	UINT32					Flags			RJ_SEMANTIC(Flags);									/* Flags defined in Definitions/InstanceProperties.hlsl.h */ \
+	_uint32					Flags			RJ_SEMANTIC(Flags);									/* Flags defined in Definitions/InstanceProperties.hlsl.h */ \
 	RM_SortKey				SortKey			RJ_SEMANTIC(SortKey); \
 	float2					_padding1		RJ_SEMANTIC(padding1); \
 	/*--------------------------------------------------------------------- ( 16 bytes ) */ \
