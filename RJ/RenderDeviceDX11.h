@@ -55,7 +55,7 @@ private:
 	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, 
 														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 	
-	Result											StoreNewSamplerState(const std::string & name, SamplerStateDX11 *sampler);
+	SamplerStateDX11 *								CreateSamplerState(const std::string & name);
 
 private:
 

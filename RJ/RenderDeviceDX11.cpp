@@ -429,36 +429,33 @@ Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 // Initialise all sampler states that will be bound during shader rendering
 Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 {
-	Result result = ErrorCodes::NoError;
 	Game::Log << LOG_INFO << "Initialising sampler state definitions\n";
 
-	m_sampler_linearclamp = new SamplerStateDX11();
+	m_sampler_linearclamp = CreateSamplerState("LinearClampSampler");
 	m_sampler_linearclamp->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
-	HandleErrors(StoreNewSamplerState("LinearClampSampler", m_sampler_linearclamp), result);
 
-	m_sampler_linearrepeat = new SamplerStateDX11();
+	m_sampler_linearrepeat = CreateSamplerState("LinearRepeatSampler");
 	m_sampler_linearrepeat->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
-	HandleErrors(StoreNewSamplerState("LinearRepeatSampler", m_sampler_linearrepeat), result);
 
 	Game::Log << LOG_INFO << "Sample state definitions initialised\n";
+	return ErrorCodes::NoError;
 }
 
-Result RenderDeviceDX11::StoreNewSamplerState(const std::string & name, SamplerStateDX11 *sampler)
+SamplerStateDX11 * RenderDeviceDX11::CreateSamplerState(const std::string & name)
 {
-	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise sampler state definition with null identifier\n"; return ErrorCodes::CouldNotCreateSamplerState; }
-	if (sampler == NULL) { Game::Log << LOG_ERROR << "Failed to initialise sampler state definition \"" << name << "\"\n"; return ErrorCodes::CouldNotCreateSamplerState; }
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise sampler state definition with null identifier\n"; return NULL; }
 
 	if (m_samplers.find(name) != m_samplers.end())
 	{
-		Game::Log << LOG_WARN << "Sample state definition for \"" << name << "\" already exists, cannot create duplicate\n";
-		return ErrorCodes::NoError;
+		Game::Log << LOG_ERROR << "Sample state definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		return NULL;
 	}
 
-	m_samplers[name] = std::move(std::unique_ptr<SamplerStateDX11>(sampler));
+	m_samplers[name] = std::make_unique<SamplerStateDX11>();
 	Game::Log << LOG_INFO << "Initialised sampler state \"" << name << "\" definition\n";
-	return ErrorCodes::NoError;
+	return m_samplers[name].get();
 }
 
 // Initialise all resources (e.g. GBuffer) required for the deferred rendering process
