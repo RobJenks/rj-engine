@@ -13,6 +13,9 @@
 #include "InputLayoutDesc.h"
 class ShaderDX11;
 class SamplerStateDX11;
+class RenderTargetDX11;
+class MaterialDX11;
+class PipelineStateDX11;
 
 class RenderDeviceDX11 : public RenderDevice
 {
@@ -20,6 +23,9 @@ public:
 
 	typedef std::unordered_map<std::string, std::unique_ptr<ShaderDX11>> ShaderCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<SamplerStateDX11>> SamplerStateCollection;
+	typedef std::vector<std::unique_ptr<RenderTargetDX11>> RenderTargetCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<MaterialDX11>> MaterialCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 
 
 	RenderDeviceDX11(void);
@@ -39,6 +45,9 @@ public:
 
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
 	CMPINLINE const SamplerStateCollection &		GetSamplerStates(void) const { return m_samplers; }
+	CMPINLINE const RenderTargetCollection &		GetRenderTargets(void) const { return m_rendertargets; }
+	CMPINLINE const MaterialCollection &			GetMaterials(void) const { return m_materials; }
+	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
 
 
 	/* Methods to initiate each stage of the deferred rendering process per-frame */
@@ -56,6 +65,9 @@ private:
 														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 	
 	SamplerStateDX11 *								CreateSamplerState(const std::string & name);
+	RenderTargetDX11 *								CreateRenderTarget(void);
+	MaterialDX11 *									CreateMaterial(const std::string & name);
+	PipelineStateDX11 *								CreatePipelineState(const std::string & name);
 
 private:
 
@@ -69,6 +81,9 @@ private:
 
 	ShaderCollection						m_shaders;
 	SamplerStateCollection					m_samplers;
+	RenderTargetCollection					m_rendertargets;
+	MaterialCollection						m_materials;
+	PipelineStateCollection					m_pipelinestates;
 
 	ShaderDX11 *							m_deferred_vs;
 	ShaderDX11 *							m_deferred_geometry_ps;

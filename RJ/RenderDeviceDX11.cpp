@@ -3,9 +3,11 @@
 #include "Logging.h"
 #include "Utility.h"
 #include "ShaderDX11.h"
+#include "MaterialDX11.h"
 #include "InputLayoutDesc.h"
 #include "SamplerStateDX11.h"
-
+#include "RenderTargetDX11.h"
+#include "PipelineStateDX11.h"
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
 const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] = 
@@ -454,8 +456,41 @@ SamplerStateDX11 * RenderDeviceDX11::CreateSamplerState(const std::string & name
 	}
 
 	m_samplers[name] = std::make_unique<SamplerStateDX11>();
-	Game::Log << LOG_INFO << "Initialised sampler state \"" << name << "\" definition\n";
 	return m_samplers[name].get();
+}
+
+RenderTargetDX11 * RenderDeviceDX11::CreateRenderTarget(void)
+{
+	m_rendertargets.push_back(std::make_unique<RenderTargetDX11>());
+	return m_rendertargets.back().get();
+}
+
+MaterialDX11 * RenderDeviceDX11::CreateMaterial(const std::string & name)
+{
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise material definition with null identifier\n"; return NULL; }
+
+	if (m_materials.find(name) != m_materials.end())
+	{
+		Game::Log << LOG_WARN << "Material definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		return NULL;
+	}
+
+	m_materials[name] = std::make_unique<MaterialDX11>();
+	return m_materials[name].get();
+}
+
+PipelineStateDX11 * RenderDeviceDX11::CreatePipelineState(const std::string & name)
+{
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot create pipeline state definition with null identifier\n"; return NULL; }
+
+	if (m_pipelinestates.find(name) != m_pipelinestates.end())
+	{
+		Game::Log << LOG_ERROR << "Pipeline state definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		return NULL;
+	}
+
+	m_pipelinestates[name] = std::make_unique<PipelineStateDX11>();
+	return m_pipelinestates[name].get();
 }
 
 // Initialise all resources (e.g. GBuffer) required for the deferred rendering process
