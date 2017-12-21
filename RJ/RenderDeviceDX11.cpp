@@ -3,6 +3,9 @@
 #include "Logging.h"
 #include "Utility.h"
 #include "ShaderDX11.h"
+#include "InputLayoutDesc.h"
+#include "SamplerStateDX11.h"
+
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
 const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] = 
@@ -21,7 +24,10 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_devicememory(0U), 
 
 	m_deferred_vs(NULL), 
-	m_deferred_geometry_ps(NULL)
+	m_deferred_geometry_ps(NULL), 
+
+	m_sampler_linearclamp(NULL), 
+	m_sampler_linearrepeat(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -62,7 +68,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 		return result;
 	}
 
-	// TODO: REST
+	
 
 
 	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";
@@ -413,9 +419,45 @@ Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	}
 
 	// Add to the central shader collection and return success.  All shaders are owned by this collection and will
-	// be disposed by it during shutdown
+	// be disposed by it during shutdown.  The RenderDeviceDX11::m_* pointers are for efficiency since we know they 
+	// will always be non-null
 	m_shaders[entryPoint] = std::move(std::unique_ptr<ShaderDX11>(*ppOutShader));
 	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
+	return ErrorCodes::NoError;
+}
+
+// Initialise all sampler states that will be bound during shader rendering
+Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
+{
+	Result result = ErrorCodes::NoError;
+	Game::Log << LOG_INFO << "Initialising sampler state definitions\n";
+
+	m_sampler_linearclamp = new SamplerStateDX11();
+	m_sampler_linearclamp->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
+	m_sampler_linearclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
+	HandleErrors(StoreNewSamplerState("LinearClampSampler", m_sampler_linearclamp), result);
+
+	m_sampler_linearrepeat = new SamplerStateDX11();
+	m_sampler_linearrepeat->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
+	m_sampler_linearrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
+	HandleErrors(StoreNewSamplerState("LinearRepeatSampler", m_sampler_linearrepeat), result);
+
+	Game::Log << LOG_INFO << "Sample state definitions initialised\n";
+}
+
+Result RenderDeviceDX11::StoreNewSamplerState(const std::string & name, SamplerStateDX11 *sampler)
+{
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise sampler state definition with null identifier\n"; return ErrorCodes::CouldNotCreateSamplerState; }
+	if (sampler == NULL) { Game::Log << LOG_ERROR << "Failed to initialise sampler state definition \"" << name << "\"\n"; return ErrorCodes::CouldNotCreateSamplerState; }
+
+	if (m_samplers.find(name) != m_samplers.end())
+	{
+		Game::Log << LOG_WARN << "Sample state definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		return ErrorCodes::NoError;
+	}
+
+	m_samplers[name] = std::move(std::unique_ptr<SamplerStateDX11>(sampler));
+	Game::Log << LOG_INFO << "Initialised sampler state \"" << name << "\" definition\n";
 	return ErrorCodes::NoError;
 }
 

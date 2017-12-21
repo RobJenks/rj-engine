@@ -12,12 +12,15 @@
 #include "CompilerSettings.h"
 #include "InputLayoutDesc.h"
 class ShaderDX11;
+class SamplerStateDX11;
 
 class RenderDeviceDX11 : public RenderDevice
 {
 public:
 
 	typedef std::unordered_map<std::string, std::unique_ptr<ShaderDX11>> ShaderCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<SamplerStateDX11>> SamplerStateCollection;
+
 
 	RenderDeviceDX11(void);
 	Result											Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
@@ -27,6 +30,7 @@ public:
 
 	Result											InitialiseInputLayoutDefinitions(void);
 	Result											InitialiseShaderResources(void);
+	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseDeferredRenderingResources(void);
 
 
@@ -34,6 +38,7 @@ public:
 	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
 
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
+	CMPINLINE const SamplerStateCollection &		GetSamplerStates(void) const { return m_samplers; }
 
 
 	/* Methods to initiate each stage of the deferred rendering process per-frame */
@@ -49,6 +54,8 @@ private:
 
 	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, 
 														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
+	
+	Result											StoreNewSamplerState(const std::string & name, SamplerStateDX11 *sampler);
 
 private:
 
@@ -61,11 +68,15 @@ private:
 	ID3D11Debug *							m_debuglayer;		// Only if required & initialised
 
 	ShaderCollection						m_shaders;
+	SamplerStateCollection					m_samplers;
 
 	ShaderDX11 *							m_deferred_vs;
 	ShaderDX11 *							m_deferred_geometry_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
+
+	SamplerStateDX11 *						m_sampler_linearclamp;
+	SamplerStateDX11 *						m_sampler_linearrepeat;
 
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device

@@ -61,7 +61,7 @@ namespace ErrorCodes {
 	const Result		CannotCreateLightPixelShader					= 1116;
 	const Result		CannotCreateLightObject							= 1117;
 	const Result		CouldNotCreateVertexShaderInputLayout			= 1118;
-	const Result		CouldNotCreateVertexShaderSamplerState			= 1119;
+	const Result		CouldNotCreateSamplerState						= 1119;
 	const Result		CouldNotCreateVertexShaderMatConstBuffer		= 1120;
 	const Result		CouldNotCreatePixelShaderLightConstBuffer		= 1121;
 	const Result		CouldNotObtainShaderBufferLock					= 1122;
