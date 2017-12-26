@@ -33,6 +33,8 @@ public:
 	
 	Result											InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync);
 	Result											InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size, bool vsync);
+	Result											InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync);
+	Result											InitialisePrimaryRenderTarget(INTVECTOR2 screen_size);
 
 	Result											InitialiseInputLayoutDefinitions(void);
 	Result											InitialiseShaderResources(void);
@@ -56,6 +58,7 @@ public:
 	void											SetDisplaySize(INTVECTOR2 display_size);
 	void											SetFOV(float fov);
 	void											SetDepthPlanes(float screen_near, float screen_far);
+	void											SetSampleDesc(UINT count, UINT quality);
 
 	void											RecalculateProjectionMatrix(void);
 	void											RecalculateOrthographicMatrix(void);
@@ -71,7 +74,9 @@ public:
 	void											BeginDeferredRenderingFrame(void);
 	// ...
 	void											EndDeferredRenderinFrame(void);
-	
+
+
+	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
 	~RenderDeviceDX11(void);
 	
@@ -86,10 +91,14 @@ private:
 	MaterialDX11 *									CreateMaterial(const std::string & name);
 	PipelineStateDX11 *								CreatePipelineState(const std::string & name);
 
+
 private:
 
 	Rendering::RenderDeviceType *			m_device;
 	Rendering::RenderDeviceContextType *	m_devicecontext;
+	Rendering::SwapChainInterfaceType *		m_swapchain;
+	ID3D11Texture2D *						m_backbuffer;
+	RenderTargetDX11 *						m_rendertarget;
 
 	std::string								m_devicename;
 	size_t									m_devicememory;
@@ -104,6 +113,7 @@ private:
 	float									m_screen_far;
 	XMMATRIX								m_projection;
 	XMMATRIX								m_orthographic;
+	DXGI_SAMPLE_DESC						m_sampledesc;
 
 	ShaderCollection						m_shaders;
 	SamplerStateCollection					m_samplers;

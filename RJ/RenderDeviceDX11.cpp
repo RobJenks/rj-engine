@@ -2,6 +2,7 @@
 #include "GameVarsExtern.h"
 #include "Logging.h"
 #include "Utility.h"
+#include "TextureDX11.h"
 #include "ShaderDX11.h"
 #include "MaterialDX11.h"
 #include "InputLayoutDesc.h"
@@ -20,6 +21,9 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	:
 	m_device(NULL),
 	m_devicecontext(NULL),
+	m_swapchain(NULL), 
+	m_backbuffer(NULL), 
+	m_rendertarget(NULL), 
 	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN),
 	m_debuglayer(NULL),
 	m_devicename(NullString),
@@ -51,6 +55,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	SetDisplaySize(screen_size);
 	SetFOV(Game::FOV);
 	SetDepthPlanes(screen_near, screen_far);
+	SetSampleDesc(1U, 0U);
 
 	// Initialise the render device and context
 	Result result = InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync);
@@ -67,7 +72,24 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary graphics adapter\n";
 		return result;
 	}
-		
+
+	// Swap chain and back buffer
+	result = InitialiseSwapChain(hwnd, screen_size, full_screen, vsync);
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of swap chain interfaces\n";
+		return result;
+	}
+
+	// Primary render target
+	result = InitialisePrimaryRenderTarget(screen_size);
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary render target\n";
+		return result;
+	}
+
+
 	// Initialise input layout descriptors
 	result = InitialiseInputLayoutDefinitions();
 	if (result != ErrorCodes::NoError)
@@ -352,6 +374,161 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 	ReleaseIfExists(factory);
 }
 
+Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync)
+{
+	Game::Log << LOG_INFO << "Initialising swap chain interfaces (target level: " << Rendering::GetSwapChainInterfaceTypeName() << ")\n";
+
+	IDXGIFactory2 *factory = NULL;
+	HRESULT hr = CreateDXGIFactory(__uuidof(Rendering::SwapChainInterfaceType), (void**)&factory);
+	{
+		Game::Log << LOG_ERROR << "Failed to create DXGI factory (hr: " << hr << ")\n";
+		return ErrorCodes::CouldNotCreateSwapChain;
+	}
+
+	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
+
+	swapChainDesc.Width = screen_size.x;
+	swapChainDesc.Height = screen_size.y;
+	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.Stereo = FALSE;
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapChainDesc.BufferCount = 1;
+	swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
+	swapChainDesc.SampleDesc = m_sampledesc;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // Use Alt-Enter to switch between full screen and windowed mode.
+
+	DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFullScreenDesc = {};
+
+	swapChainFullScreenDesc.RefreshRate = QueryRefreshRateForDisplaySize(screen_size.x, screen_size.y, vsync);
+	swapChainFullScreenDesc.Windowed = (full_screen ? TRUE : FALSE);
+
+	// Instantiate the base swap chain interface
+	HRESULT hr;
+	IDXGISwapChain1 *swapchain = NULL;
+
+	if (FAILED(hr = factory->CreateSwapChainForHwnd(m_device, hwnd,
+		&swapChainDesc, &swapChainFullScreenDesc, nullptr, &swapchain)))
+	{
+		Game::Log << LOG_ERROR << "Failed to create swap chain (hr: " << hr << ")\n";
+		return ErrorCodes::CouldNotCreateSwapChain;
+	}
+
+	// Attempt to uplift to require swap chain feature level
+	if (FAILED(hr = swapchain->QueryInterface<Rendering::SwapChainInterfaceType>(&m_swapchain)))
+	{
+		Game::Log << LOG_ERROR << "Failed to retrieve \"" << Rendering::GetSwapChainInterfaceTypeName() << "\" interface (hr: " << hr << ")\n";
+		return ErrorCodes::CouldNotCreateSwapChain;
+	}
+
+	if (FAILED(hr = m_swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&m_backbuffer)))
+	{
+		Game::Log << LOG_ERROR << "Failed to get back buffer reference from initialised swap chain (hr: " << hr << ")\n";
+		return ErrorCodes::CouldNotCreateSwapChain;
+	}
+
+	Game::Log << LOG_INFO << "Swap chain interfaces initialised successfully\n";
+	return ErrorCodes::NoError;
+}
+
+DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync)
+{
+	Game::Log << LOG_INFO << "Querying refresh rate for display size " << screenwidth << "x" << screenheight << (vsync ? " (vsync)" : "") << "\n";
+	DXGI_RATIONAL refreshRate = { 0, 1 };
+
+	if (vsync)
+	{
+		IDXGIFactory *factory = NULL;
+		IDXGIAdapter *adapter = NULL;
+		IDXGIOutput *adapterOutput = NULL;
+		DXGI_MODE_DESC* displayModeList;
+
+		// Create a DirectX graphics interface factory.
+		HRESULT hr;
+		if (FAILED(hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory)))
+		{
+			Game::Log << LOG_ERROR << "Failed to create DXGIFactory (hr: " << hr << ")\n";
+			return refreshRate;
+		}
+
+		if (FAILED(hr = factory->EnumAdapters(0, &adapter)))
+		{
+			Game::Log << LOG_ERROR << "Failed to enumerate adapters (hr: " << hr << ")\n";
+			return refreshRate;
+		}
+
+		if (FAILED(hr = adapter->EnumOutputs(0, &adapterOutput)))
+		{
+			Game::Log << LOG_ERROR << "Failed to enumerate adapter outputs (hr: " << hr << ")\n";
+			return refreshRate;
+		}
+
+		UINT numDisplayModes;
+		if (FAILED(adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numDisplayModes, NULL)))
+		{
+			Game::Log << LOG_ERROR << "Failed to query display modes (hr: " << hr << ")\n";
+			return refreshRate;
+		}
+
+		displayModeList = new DXGI_MODE_DESC[numDisplayModes];
+		assert(displayModeList);
+
+		if (FAILED(adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numDisplayModes, displayModeList)))
+		{
+			Game::Log << LOG_ERROR << "Failed to query dispaly mode list (hr: " << hr << ")\n";
+			return refreshRate;
+		}
+
+		// Now store the refresh rate of the monitor that matches the width and height of the requested screen.
+		for (UINT i = 0; i < numDisplayModes; ++i)
+		{
+			if (displayModeList[i].Width == screenwidth && displayModeList[i].Height == screenheight)
+			{
+				refreshRate = displayModeList[i].RefreshRate;
+				Game::Log << LOG_INFO << "Refresh rate of " << refreshRate.Numerator << "/" << refreshRate.Denominator <<
+					" supported for display size " << screenwidth << "x" << screenheight << "\n";
+			}
+		}
+
+		SafeDeleteArray(displayModeList);
+		ReleaseIfExists(adapterOutput);
+		ReleaseIfExists(adapter);
+		ReleaseIfExists(factory);
+	}
+
+	Game::Log << LOG_INFO << "Selected refresh rate of " << refreshRate.Numerator << "/" << refreshRate.Denominator <<
+							 " for display size " << screenwidth << "x" << screenheight << (vsync ? " (vsync)" : "") << "\n";
+	return refreshRate;
+}
+
+Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
+{
+	Game::Log << LOG_INFO << "Initialising primary render target\n";
+	m_rendertarget = CreateRenderTarget();
+
+	// Initialise depth/stencil buffer
+	Texture::TextureFormat depthStencilTextureFormat(
+		Texture::Components::DepthStencil,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		0, 0, 0, 0, 24, 8);
+	TextureDX11 *depthStencilTexture = CreateTexture2D(screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
+
+	// Initialise colour buffer (Color0)
+	Texture::TextureFormat colorTextureFormat(
+		Texture::Components::RGBA,
+		Texture::Type::UnsignedNormalized,
+		m_sampledesc.Count,
+		8, 8, 8, 8, 0, 0);
+	TextureDX11 *colorTexture = CreateTexture2D(screen_size.x, screen_size.y, 1, colorTextureFormat);
+
+	// Bind colour and depth/stencil to the primary render target
+	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, colorTexture);
+	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, depthStencilTexture);
+
+	Game::Log << LOG_INFO << "Initialised primary render target successfully\n";
+}
+
 Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 {
 	Game::Log << LOG_INFO << "Loading standard shader input layouts\n";
@@ -518,6 +695,8 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 
 	m_displaysize = display_size;
 	m_aspectratio = (display_size.x / display_size.y);
+
+	RecalculateOrthographicMatrix();
 }
 
 void RenderDeviceDX11::SetFOV(float fov)
@@ -538,6 +717,13 @@ void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
 	m_screen_far = screen_far;
 
 	RecalculateProjectionMatrix();
+	RecalculateOrthographicMatrix();
+}
+
+void RenderDeviceDX11::SetSampleDesc(UINT count, UINT quality)
+{
+	m_sampledesc.Count = count;
+	m_sampledesc.Quality = quality;
 }
 
 void RenderDeviceDX11::RecalculateProjectionMatrix(void)

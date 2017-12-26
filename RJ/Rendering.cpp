@@ -11,3 +11,8 @@ std::string Rendering::GetRenderDeviceContextTypeName(void)
 {
 	return STRING(RENDER_CONTEXT_TYPE);
 }
+
+std::string Rendering::GetSwapChainInterfaceTypeName(void)
+{
+	return STRING(SWAP_CHAIN_TYPE);
+}

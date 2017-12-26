@@ -74,7 +74,7 @@ namespace ErrorCodes {
 	const Result		CouldNotEnumerateAdapterDisplayModes			= 1129;
 	const Result		CouldNotDetermineAdapterDescription				= 1130;
 	const Result		CouldNotConvertAndStoreAdapterDescData			= 1131;
-	const Result		CouldNotCreateD3DDeviceAndSwapChain				= 1132;
+	const Result		CouldNotCreateSwapChain							= 1132;
 	const Result		CouldNotObtainPointerToBackBuffer				= 1133;
 	const Result		CouldNotCreateRenderTargetView					= 1134;
 	const Result		CouldNotCreateDepthBufferTextture				= 1135;
