@@ -81,40 +81,38 @@
 // Default constructor
 CoreEngine::CoreEngine(void)
 	:
-	m_rq_optimiser(m_renderqueue)
+	m_renderdevice(NULL),
+	m_rq_optimiser(m_renderqueue), 
+	m_camera(NULL),
+	m_lightshader(NULL),
+	m_lightfadeshader(NULL),
+	m_lighthighlightshader(NULL),
+	m_lighthighlightfadeshader(NULL),
+	m_particleshader(NULL),
+	m_textureshader(NULL),
+	m_texcubeshader(NULL),
+	m_frustrum(NULL),
+	m_textmanager(NULL),
+	m_fontshader(NULL),
+	m_fireshader(NULL),
+	m_skinnedshader(NULL),
+	m_vollineshader(NULL),
+	m_effectmanager(NULL),
+	m_particleengine(NULL),
+	m_render2d(NULL),
+	m_overlayrenderer(NULL),
+	m_instancebuffer(NULL),
+	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
+	m_hwnd( NULL ),
+	m_vsync( false )
 {
-	// Reset all component pointers to NULL, in advance of initialisation
-	m_D3D = NULL;
-	m_camera = NULL;
-	m_lightshader = NULL;
-	m_lightfadeshader = NULL;
-	m_lighthighlightshader = NULL;
-	m_lighthighlightfadeshader = NULL;
-	m_particleshader = NULL;
-	m_textureshader = NULL;
-	m_texcubeshader = NULL;
-	m_frustrum = NULL;
-	m_textmanager = NULL;
-	m_fontshader = NULL;
-	m_fireshader = NULL;
-	m_skinnedshader = NULL;
-	m_vollineshader = NULL;
-	m_effectmanager = NULL;
-	m_particleengine = NULL;
-	m_render2d = NULL;
-	m_overlayrenderer = NULL;
-	m_instancebuffer = NULL;
+	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
 	m_debug_portal_debugrender = m_debug_portal_debuglog = false;
 	m_debug_portal_render_initial_frustum = NULL;
 	m_debug_renderobjid_object = 0;
 	m_debug_renderobjid_distance = 1000.0f;
 	m_debug_terrain_render_mode = DebugTerrainRenderMode::Normal;
-	m_current_topology = D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
-
-	// Set default values for game engine parameters
-	m_hwnd = NULL;
-	m_vsync = false;
 
 	// Initialise all render stage flags to true at startup
 	m_renderstages = std::vector<bool>(CoreEngine::RenderStage::Render_STAGECOUNT, true);
@@ -145,6 +143,8 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 { 
 	Result res;
 
+	m_hwnd = hwnd;
+
 	// Initialise each component in turn; in case of failure, attempt to roll back anything possible and return an error
 	Game::Log << "\n" << LOG_INFO << "Beginning initialisation of game engine\n";
 
@@ -164,70 +164,25 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "DX Math initialised\n";
 
-	// Initialise the Direct3D component
-	res = InitialiseDirect3D(hwnd);
+	// Initialise the render device component
+	res = InitialiseRenderDevice(hwnd);
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Direct3D initialisation complete\n";
+	Game::Log << LOG_INFO << "Render device initialisation complete\n";
 
 	// Initialise the camera component
 	res = InitialiseCamera();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Camera initialised\n";
 
-	// Initialise the lighting manager
-	res = InitialiseLightingManager();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Lighting manager initialised\n";
-
 	// Initialise shader support data
 	res = InitialiseShaderSupport();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Shader support data initialised\n";
 
-	// Initialise the light shader
-	res = InitialiseLightShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light] initialisation complete\n";
-
-	// Initialise the light/fade shader
-	res = InitialiseLightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light fade] initialisation complete\n";
-
-	// Initialise the light/highlight shader
-	res = InitialiseLightHighlightShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light highlight] initialisation complete\n";
-
-	// Initialise the light/highlight/fade shader
-	res = InitialiseLightHighlightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light highlight fade] initialisation complete\n";
-
-	// Initialise the light(flat)/highlight/fade shader
-	res = InitialiseLightFlatHighlightFadeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Light flat highlight fade] initialisation complete\n";
-
-	// Initialise the particle shader
-	res = InitialiseParticleShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Particle] initialisation complete\n";
-
-	// Initialise the texture shader
-	res = InitialiseTextureShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Texture] initialisation complete\n";
-
 	// Initialise the view frustrum
 	res = InitialiseFrustrum();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "View frustum created\n";
-
-	// Initialise the font shader
-	res = InitialiseFontShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Font] initialisation complete\n";
 
 	// Initialise the audio manager
 	res = InitialiseAudioManager();
@@ -244,31 +199,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Font initialisation complete\n";
 
-	// Initialise the texcube shader
-	res = InitialiseTexcubeShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Texcube] initialisation complete\n";
-
-	// Initialise the fire shader
-	res = InitialiseFireShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Fire] initialisation complete\n";
-
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Effect manager initialised\n";
 
-	// Initialise the skinned normal map shader
-	res = InitialiseSkinnedNormalMapShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Skinned normal map] initialisation complete\n";
-
-	// Initialise the volumetric line shader
-	res = InitialiseVolLineShader();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader [Volumetric line] initialisation complete\n";
-	
 	// Initialise the particle engine
 	res = InitialiseParticleEngine();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -303,33 +238,20 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 void CoreEngine::ShutdownGameEngine()
 {
 	// Run the termination function for each component
-	ShutdownLightShader();
-	ShutdownLightFadeShader();
-	ShutdownLightHighlightShader();
-	ShutdownLightHighlightFadeShader();
-	ShutdownLightFlatHighlightFadeShader();
-	ShutdownParticleShader();
-	ShutdownTextureShader();
 	ShutdownCamera();
-	ShutdownLightingManager();
 	ShutdownShaderSupport();
 	ShutdownFrustrum();
 	ShutdownAudioManager();
 	ShutdownTextRendering();
-	ShutdownFontShader();
 	ShutdownFonts();
-	ShutdownTexcubeShader();
-	ShutdownFireShader();
 	ShutdownEffectManager();
-	ShutdownSkinnedNormalMapShader();
-	ShutdownVolLineShader();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
 	ShutdownOverlayRenderer();
 	ShutdownRenderQueue();
 	ShutdownEnvironmentRendering();
 	ShutdownTextureData();
-	ShutdownDirect3D();
+	ShutdownRenderDevice();
 }
 
 Result CoreEngine::InitialiseRenderFlags(void)
@@ -340,18 +262,15 @@ Result CoreEngine::InitialiseRenderFlags(void)
 	return ErrorCodes::NoError;
 }
 
-Result CoreEngine::InitialiseDirect3D(HWND hwnd)
+Result CoreEngine::InitialiseRenderDevice(HWND hwnd)
 {
-	// Store key window parameters
-	m_hwnd = hwnd; 
+	// Attempt to create the render device object.
+	m_renderdevice = new RenderDeviceDX11();
+	if ( !m_renderdevice ) return ErrorCodes::CannotCreateRenderDevice;
 
-	// Attempt to create the Direct3D object.
-	m_D3D = new D3DMain();
-	if ( !m_D3D ) return ErrorCodes::CannotCreateDirect3DDevice;
-
-	// Initialise the Direct3D object.
-	Result result = m_D3D->Initialise(Game::ScreenWidth, Game::ScreenHeight, m_vsync, m_hwnd, Game::FullScreen, 
-									  SCREEN_DEPTH, SCREEN_NEAR);
+	// Perform all render engine initialisation
+	Result result = m_renderdevice->Initialise(	hwnd, INTVECTOR2(Game::ScreenWidth, Game::ScreenHeight), Game::FullScreen, 
+												Game::VSync, Game::NearClipPlane, Game::FarClipPlane);
 	return result;
 }
 
@@ -395,7 +314,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	ibufdata.SysMemSlicePitch = 0;
 
 	// Create the instance buffer
-	HRESULT hr = m_D3D->GetDevice()->CreateBuffer(&ibufdesc, &ibufdata, &m_instancebuffer);
+	HRESULT hr = GetDevice()->CreateBuffer(&ibufdesc, &ibufdata, &m_instancebuffer);
 	if (FAILED(hr)) return ErrorCodes::CouldNotInitialiseInstanceBuffer;
 
 	// Release memory used to initialise the instance buffer
@@ -463,161 +382,12 @@ Result CoreEngine::InitialiseCamera(void)
 
 }
 
-Result CoreEngine::InitialiseLightingManager(void)
-{
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 Result CoreEngine::InitialiseShaderSupport(void)
 {
 	// Initialise all standard vertex input layouts
 	InputLayoutDesc::InitialiseStaticData();
 
 	// Returns success
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseLightShader(void)
-{
-	// Create the light shader object.
-	m_lightshader = new LightShader();
-	if(!m_lightshader)
-	{
-		return ErrorCodes::CouldNotCreateLightShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseLightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lightfadeshader = new LightFadeShader();
-	if(!m_lightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightHighlightShader(void)
-{
-	// Create the light shader object.
-	m_lighthighlightshader = new LightHighlightShader();
-	if(!m_lighthighlightshader)
-	{
-		return ErrorCodes::CouldNotCreateLightHighlightShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lighthighlightshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightHighlightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lighthighlightfadeshader = new LightHighlightFadeShader();
-	if (!m_lighthighlightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightHighlightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lighthighlightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-
-Result CoreEngine::InitialiseLightFlatHighlightFadeShader(void)
-{
-	// Create the light shader object.
-	m_lightflathighlightfadeshader = new LightFlatHighlightFadeShader();
-	if (!m_lightflathighlightfadeshader)
-	{
-		return ErrorCodes::CouldNotCreateLightFlatHighlightFadeShader;
-	}
-
-	// Initialise the light shader object.
-	Result result = m_lightflathighlightfadeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success code if we have reached this point
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseParticleShader(void)
-{
-	// Create the particle shader object
-	m_particleshader = new ParticleShader();
-	if (!m_particleshader)
-	{
-		return ErrorCodes::CouldNotCreateParticleShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_particleshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseTextureShader(void)
-{
-	// Create the texture shader object
-	m_textureshader = new TextureShader();
-	if (!m_textureshader)
-	{
-		return ErrorCodes::CouldNotCreateTextureShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_textureshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
 	return ErrorCodes::NoError;
 }
 
@@ -628,32 +398,10 @@ Result CoreEngine::InitialiseFrustrum()
 	if (!m_frustrum) return ErrorCodes::CannotCreateViewFrustrum;
 	
 	// Run the initialisation function with viewport/projection data that can be precaulcated
-	Result res = m_frustrum->InitialiseAsViewFrustum(m_D3D->GetProjectionMatrix(), SCREEN_DEPTH, m_D3D->GetDisplayFOV(), m_D3D->GetDisplayAspectRatio());
+	Result res = m_frustrum->InitialiseAsViewFrustum(m_renderdevice->GetProjectionMatrix(), Game::FarClipPlane, m_renderdevice->GetFOV(), m_renderdevice->GetAspectRatio());
 	if (res != ErrorCodes::NoError) return res;	
 
 	// Return success if the frustrum was created
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseFontShader(void)
-{
-	Result result;
-
-	// Create the font shader object.
-	m_fontshader = new FontShader();
-	if(!m_fontshader)
-	{
-		return ErrorCodes::CannotCreateFontShader;
-	}
-
-	// Initialize the font shader object.
-	result = m_fontshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
 }
 
@@ -692,7 +440,7 @@ Result CoreEngine::InitialiseTextRendering(void)
 	}
 
 	// Now attempt to initialise the text rendering object
-	result = m_textmanager->Initialize(	m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, 
+	result = m_textmanager->Initialize(	GetDevice(), GetDeviceContext(), m_hwnd, 
 										Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
 	if (result != ErrorCodes::NoError)
 	{
@@ -723,46 +471,6 @@ Result CoreEngine::InitialiseFonts(void)
 	return ErrorCodes::NoError;
 }
 
-Result CoreEngine::InitialiseTexcubeShader(void)
-{
-	// Create the texture shader object
-	m_texcubeshader = new TexcubeShader();
-	if (!m_texcubeshader)
-	{
-		return ErrorCodes::CouldNotCreateTexcubeShader;
-	}
-
-	// Initialise the particle shader
-	Result result = m_texcubeshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseFireShader(void)
-{
-	// Create the fire shader object
-	m_fireshader = new FireShader();
-	if (!m_fireshader)
-	{
-		return ErrorCodes::CouldNotCreateFireShader;
-	}
-
-	// Initialise the fire shader
-	Result result = m_fireshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
 Result CoreEngine::InitialiseEffectManager(void)
 {
 	Result result;
@@ -775,7 +483,7 @@ Result CoreEngine::InitialiseEffectManager(void)
 	}
 
 	// Initialise the effect manager
-	result = m_effectmanager->Initialise(m_D3D->GetDevice());
+	result = m_effectmanager->Initialise(GetDevice());
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -789,51 +497,6 @@ Result CoreEngine::InitialiseEffectManager(void)
 	}
 
 	// Return success if we got this far
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseSkinnedNormalMapShader(void)
-{
-	// Create a new instance of the shader object
-	m_skinnedshader = new SkinnedNormalMapShader();
-	if (!m_skinnedshader)
-	{
-		return ErrorCodes::CannotCreateSkinnedNormalMapShader;
-	}
-
-	// Now attempt to initialise the shader
-	Result result = m_skinnedshader->Initialise(m_D3D->GetDevice(), m_hwnd);
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
-Result CoreEngine::InitialiseVolLineShader(void)
-{
-	// Initialise the static data used in volumetric line rendering
-	Result result = VolLineShader::InitialiseStaticData(GetDevice());
-	if (result != ErrorCodes::NoError) return result;
-
-	// Create a new instance of the shader object
-	m_vollineshader = new VolLineShader();
-	if (!m_vollineshader)
-	{
-		return ErrorCodes::CannotCreateVolumetricLineShader;
-	}
-
-	// Now attempt to initialise the shader
-	result = m_vollineshader->Initialise(m_D3D->GetDevice(), XMFLOAT2((float)Game::ScreenWidth, (float)Game::ScreenHeight),
-										 m_frustrum->GetNearClipPlaneDistance(), m_frustrum->GetFarClipPlaneDistance());
-	if (result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
 }
 
@@ -876,7 +539,7 @@ Result CoreEngine::Initialise2DRenderManager(void)
 	}
 
 	// Now attempt to initialise the render manager
-	Result result = m_render2d->Initialise(m_D3D->GetDevice(), m_D3D->GetDeviceContext(), m_hwnd, 
+	Result result = m_render2d->Initialise(GetDevice(), GetDeviceContext(), m_hwnd, 
 										   Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix);
 	if (result != ErrorCodes::NoError)
 	{
@@ -919,13 +582,13 @@ Result CoreEngine::InitialiseEnvironmentRendering(void)
 }
 
 
-void CoreEngine::ShutdownDirect3D(void)
+void CoreEngine::ShutdownRenderDevice(void)
 {
-	// Attempt to release the Direct3D component
-	if ( m_D3D )
+	// Render engine destructor will release all related resources and centrally-maintained 
+	// components (shaders, states, buffers).  Should therefore be terminated late
+	if ( m_renderdevice )
 	{
-		m_D3D->Shutdown();
-		SafeDelete(m_D3D);
+		SafeDelete(m_renderdevice);
 	}
 }
 
@@ -957,82 +620,9 @@ void CoreEngine::ShutdownCamera(void)
 	}
 }
 
-void CoreEngine::ShutdownLightingManager(void)
-{
-	// Nothing required
-}
-
 void CoreEngine::ShutdownShaderSupport(void)
 {
 	// Nothing required
-}
-
-void CoreEngine::ShutdownLightShader(void)
-{
-	// Release the light shader object.
-	if(m_lightshader)
-	{
-		m_lightshader->Shutdown();
-		SafeDelete(m_lightshader);
-	}
-}
-
-void CoreEngine::ShutdownLightFadeShader(void)
-{
-	// Release the light shader object.
-	if(m_lightfadeshader)
-	{
-		m_lightfadeshader->Shutdown();
-		SafeDelete(m_lightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownLightHighlightShader(void)
-{
-	// Release the light shader object.
-	if(m_lighthighlightshader)
-	{
-		m_lighthighlightshader->Shutdown();
-		SafeDelete(m_lighthighlightshader);
-	}
-}
-
-void CoreEngine::ShutdownLightHighlightFadeShader(void)
-{
-	// Release the light shader object.
-	if (m_lighthighlightfadeshader)
-	{
-		m_lighthighlightfadeshader->Shutdown();
-		SafeDelete(m_lighthighlightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownLightFlatHighlightFadeShader(void)
-{
-	// Release the light shader object.
-	if (m_lightflathighlightfadeshader)
-	{
-		m_lightflathighlightfadeshader->Shutdown();
-		SafeDelete(m_lightflathighlightfadeshader);
-	}
-}
-
-void CoreEngine::ShutdownParticleShader(void)
-{
-	if (m_particleshader)
-	{
-		m_particleshader->Shutdown();
-		SafeDelete(m_particleshader);
-	}
-}
-
-void CoreEngine::ShutdownTextureShader(void)
-{
-	if (m_textureshader)
-	{
-		m_textureshader->Shutdown();
-		SafeDelete(m_textureshader);
-	}
 }
 
 void CoreEngine::ShutdownFrustrum(void)
@@ -1064,34 +654,6 @@ void CoreEngine::ShutdownTextRendering(void)
 	}
 }
 
-void CoreEngine::ShutdownFontShader(void)
-{
-	// Release the font shader object.
-	if(m_fontshader)
-	{
-		m_fontshader->Shutdown();
-		SafeDelete(m_fontshader);
-	}
-}
-
-void CoreEngine::ShutdownTexcubeShader(void)
-{
-	if (m_texcubeshader)
-	{
-		m_texcubeshader->Shutdown();
-		SafeDelete(m_texcubeshader);
-	}
-}
-
-void CoreEngine::ShutdownFireShader(void)
-{
-	if (m_fireshader)
-	{
-		m_fireshader->Shutdown();
-		SafeDelete(m_fireshader);
-	}
-}
-
 void CoreEngine::ShutdownFonts(void)
 {
 	// No actions to be taken; fonts are deallocated as part of the text manager shutdown
@@ -1103,28 +665,6 @@ void CoreEngine::ShutdownEffectManager(void)
 	{
 		m_effectmanager->Shutdown();
 		SafeDelete(m_effectmanager);
-	}
-}
-
-void CoreEngine::ShutdownSkinnedNormalMapShader(void)
-{
-	if (m_skinnedshader)
-	{
-		m_skinnedshader->Shutdown();
-		SafeDelete(m_skinnedshader);
-	}
-}
-
-void CoreEngine::ShutdownVolLineShader(void)
-{
-	// Deallocate all static data
-	VolLineShader::ShutdownStaticData();
-
-	// Deallocate the shader itself and any remaining resources
-	if (m_vollineshader)
-	{
-		m_vollineshader->Shutdown();
-		SafeDelete(m_vollineshader);
 	}
 }
 
@@ -1182,11 +722,11 @@ void CoreEngine::Render(void)
 	ResetRenderInfo();
 
 	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
-	r_devicecontext = m_D3D->GetDeviceContext();
-	m_D3D->GetProjectionMatrix(r_projection);
+	r_devicecontext = m_renderdevice->GetDeviceContext();
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
-	m_D3D->GetOrthoMatrix(r_orthographic);
+	r_projection = m_renderdevice->GetProjectionMatrix();
+	r_orthographic = m_renderdevice->GetOrthoMatrix();
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
 	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
@@ -2063,8 +1603,8 @@ void CoreEngine::DebugOverrideInitialPortalRenderingViewer(const iObject *viewer
 	
 	assert(m_debug_portal_render_initial_frustum == NULL);
 	m_debug_portal_render_initial_frustum = new Frustum(4U);
-	m_debug_portal_render_initial_frustum->InitialiseAsViewFrustum(	GetDirect3D()->GetProjectionMatrix(), Game::C_DEFAULT_CLIP_FAR_DISTANCE,
-																	GetDirect3D()->GetDisplayFOV(), GetDirect3D()->GetDisplayAspectRatio());
+	m_debug_portal_render_initial_frustum->InitialiseAsViewFrustum(	m_renderdevice->GetProjectionMatrix(), Game::FarClipPlane,
+																	m_renderdevice->GetFOV(), m_renderdevice->GetAspectRatio() );
 
 	m_debug_portal_render_initial_frustum->ConstructViewFrustrum(view, invview);
 	m_debug_portal_render_viewer_position = viewer->GetPosition();
@@ -2512,7 +2052,7 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 {
 	// Prepare all region particles, calculate vertex data and promote all to the buffer ready for shader rendering
-	D::Regions::Immediate->Render(m_D3D->GetDeviceContext(), r_view);
+	D::Regions::Immediate->Render(r_devicecontext, r_view);
 
 	// Enable alpha blending before rendering any particles
 	m_D3D->SetAlphaBlendModeEnabled();

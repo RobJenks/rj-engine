@@ -63,10 +63,6 @@ struct GameConsoleCommand;
 struct VolumetricLine;
 struct SentenceType;
 
-// Constant engine rendering values
-const float SCREEN_DEPTH = 5000.0f;
-const float SCREEN_NEAR = 0.1f;
-
 // Debug rendering compiler flags
 #define ENABLE_PORTAL_RENDERING_DEBUG_MODE
 
@@ -136,18 +132,6 @@ public:
 	CMPINLINE Render2DManager *Get2DRenderManager()		{ return m_render2d; }
 	CMPINLINE OverlayRenderer *GetOverlayRenderer()		{ return m_overlayrenderer; }
 	CMPINLINE AudioManager	  *GetAudioManager()		{ return m_audiomanager; }
-
-	// Methods to retrieve a reference to key shaders implemented by the engine
-	CMPINLINE	FireShader *				GetFireShader(void)						{ return m_fireshader; }
-	CMPINLINE	FontShader *				GetFontShader(void)						{ return m_fontshader; }
-	CMPINLINE	LightShader *				GetLightShader(void)					{ return m_lightshader; }
-	CMPINLINE	LightFadeShader *			GetLightFadeShader(void)				{ return m_lightfadeshader; }
-	CMPINLINE	LightHighlightShader *		GetLightHighlightShader(void)			{ return m_lighthighlightshader; }
-	CMPINLINE	LightHighlightFadeShader *	GetLightHighlightFadeShader(void)		{ return m_lighthighlightfadeshader; }
-	CMPINLINE	ParticleShader *			GetParticleShader(void)					{ return m_particleshader; }
-	CMPINLINE	TexcubeShader *				GetTexcubeShader(void)					{ return m_texcubeshader; }
-	CMPINLINE	TextureShader *				GetTextureShader(void)					{ return m_textureshader; }	
-	CMPINLINE	VolLineShader *				GetVolLineShader(void)					{ return m_vollineshader; }
 
 	// Methods to retrieve the key render matrices from the engine
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
@@ -447,60 +431,34 @@ public:
 private:
 	
 	// Private methods to initialise each component in turn
-	Result					InitialiseDirect3D(HWND hwnd);
+	Result					InitialiseRenderDevice(HWND hwnd);
 	Result					InitialiseDirectXMath(void);
 	Result					InitialiseRenderQueue(void);
 	Result					InitialiseRenderFlags(void);
 	Result					InitialiseCamera(void);
-	Result					InitialiseLightingManager(void);
 	Result					InitialiseShaderSupport(void);
-	Result					InitialiseLightShader(void);
-	Result					InitialiseLightFadeShader(void);
-	Result					InitialiseLightHighlightShader(void);
-	Result					InitialiseLightHighlightFadeShader(void);
-	Result					InitialiseLightFlatHighlightFadeShader(void);
-	Result					InitialiseParticleShader(void);
-	Result					InitialiseTextureShader(void);
 	Result					InitialiseFrustrum(void);
-	Result					InitialiseFontShader(void);
 	Result					InitialiseAudioManager(void);
 	Result					InitialiseTextRendering(void);
 	Result					InitialiseFonts(void);
-	Result					InitialiseTexcubeShader(void);
-	Result					InitialiseFireShader(void);
 	Result					InitialiseEffectManager(void);
-	Result					InitialiseSkinnedNormalMapShader(void);
-	Result					InitialiseVolLineShader(void);
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
 	Result					InitialiseOverlayRenderer(void);
 	Result					InitialiseEnvironmentRendering(void);
 
 	// Private methods to release each component in turn
-	void					ShutdownDirect3D(void);
+	void					ShutdownRenderDevice(void);
 	void					ShutdownDXMath(void);
 	void					ShutdownRenderQueue(void);
 	void					ShutdownTextureData(void);
 	void					ShutdownCamera(void);
-	void					ShutdownLightingManager(void);
 	void					ShutdownShaderSupport(void);
-	void					ShutdownLightShader(void);
-	void					ShutdownLightFadeShader(void);
-	void					ShutdownLightHighlightShader(void);
-	void					ShutdownLightHighlightFadeShader(void);
-	void					ShutdownLightFlatHighlightFadeShader(void);
-	void					ShutdownParticleShader(void);
-	void					ShutdownTextureShader(void);
 	void					ShutdownFrustrum(void);
-	void					ShutdownFontShader(void);
 	void					ShutdownAudioManager(void);
 	void					ShutdownTextRendering(void);
 	void					ShutdownFonts(void);
-	void					ShutdownTexcubeShader(void);
-	void					ShutdownFireShader(void);
 	void					ShutdownEffectManager(void);
-	void					ShutdownSkinnedNormalMapShader(void);
-	void					ShutdownVolLineShader(void);
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
 	void					ShutdownOverlayRenderer(void);

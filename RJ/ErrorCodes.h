@@ -28,7 +28,7 @@ namespace ErrorCodes {
 	const Result		CouldNotSetCOMInitialisationMethod				= 15;
 
 	// DirectX error codes												(1000-1999)
-	const Result		CannotCreateDirect3DDevice						= 1000;
+	const Result		CannotCreateRenderDevice						= 1000;
 	const Result		CannotCreateDXLocaliserComponent				= 1001;
 	const Result		CannotCreateCameraComponent						= 1002;
 	const Result		CannotCreateViewFrustrum						= 1003;

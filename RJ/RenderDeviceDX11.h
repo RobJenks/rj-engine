@@ -29,9 +29,9 @@ public:
 
 
 	RenderDeviceDX11(void);
-	Result											Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
+	Result											Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_far);
 	
-	Result											InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth);
+	Result											InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync);
 	Result											InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size, bool vsync);
 
 	Result											InitialiseInputLayoutDefinitions(void);
@@ -42,6 +42,23 @@ public:
 
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
 	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
+
+	CMPINLINE float									GetFOV(void) const { return m_fov; }
+	CMPINLINE float									GetAspectRatio(void) const { return m_aspectratio; }
+	CMPINLINE float									GetTanOfHalfFOV(void) const { return m_halffovtan; }
+	CMPINLINE float									GetNearClipDistance(void) const { return m_screen_near; }
+	CMPINLINE float									GetFarClipDistance(void) const { return m_screen_far; }
+
+	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
+	CMPINLINE XMMATRIX								GetOrthoMatrix(void) const { return m_orthographic; }
+	
+
+	void											SetDisplaySize(INTVECTOR2 display_size);
+	void											SetFOV(float fov);
+	void											SetDepthPlanes(float screen_near, float screen_far);
+
+	void											RecalculateProjectionMatrix(void);
+	void											RecalculateOrthographicMatrix(void);
 
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
 	CMPINLINE const SamplerStateCollection &		GetSamplerStates(void) const { return m_samplers; }
@@ -78,6 +95,15 @@ private:
 	size_t									m_devicememory;
 	D3D_DRIVER_TYPE							m_drivertype;		// Hardware (in almost all cases) or WARP (software backup)
 	ID3D11Debug *							m_debuglayer;		// Only if required & initialised
+
+	float									m_fov;
+	float									m_halffovtan;
+	INTVECTOR2								m_displaysize;
+	float									m_aspectratio;
+	float									m_screen_near;
+	float									m_screen_far;
+	XMMATRIX								m_projection;
+	XMMATRIX								m_orthographic;
 
 	ShaderCollection						m_shaders;
 	SamplerStateCollection					m_samplers;

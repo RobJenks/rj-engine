@@ -72,7 +72,11 @@ namespace Game {
 	INTVECTOR2 ScreenCentre = INTVECTOR2(Game::ScreenWidth / 2, Game::ScreenHeight / 2);
 	INTVECTOR2 FullWindowSize = NULL_INTVECTOR2;
 	INTVECTOR2 WindowPosition = NULL_INTVECTOR2;
+	float FOV = (PI / 4.0f);
+	float NearClipPlane = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
+	float FarClipPlane = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
 	bool FullScreen = false;
+	bool Vsync = false;
 	bool ForceWARPRenderDevice = false;
 
 

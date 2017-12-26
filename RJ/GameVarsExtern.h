@@ -83,7 +83,11 @@ namespace Game {
 	extern INTVECTOR2 ScreenCentre;
 	extern INTVECTOR2 FullWindowSize;
 	extern INTVECTOR2 WindowPosition;
+	extern float FOV;
+	extern float NearClipPlane;
+	extern float FarClipPlane;
 	extern bool FullScreen;
+	extern bool VSync;
 	extern bool ForceWARPRenderDevice;
 
 	// Central scheduler for all scheduled jobs

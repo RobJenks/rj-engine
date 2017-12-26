@@ -18,12 +18,21 @@ const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] =
 
 RenderDeviceDX11::RenderDeviceDX11(void)
 	:
-	m_device(NULL), 
+	m_device(NULL),
 	m_devicecontext(NULL),
-	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN), 
-	m_debuglayer(NULL), 
-	m_devicename(NullString), 
-	m_devicememory(0U), 
+	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN),
+	m_debuglayer(NULL),
+	m_devicename(NullString),
+	m_devicememory(0U),
+
+	m_fov(Game::FOV),
+	m_halffovtan(tanf(Game::FOV * 0.5f)),
+	m_displaysize(Game::ScreenWidth, Game::ScreenHeight),
+	m_aspectratio((float)Game::ScreenWidth / (float)Game::ScreenHeight),
+	m_screen_near(Game::NearClipPlane),
+	m_screen_far(Game::FarClipPlane), 
+	m_projection(ID_MATRIX), 
+	m_orthographic(ID_MATRIX),
 
 	m_deferred_vs(NULL), 
 	m_deferred_geometry_ps(NULL), 
@@ -34,12 +43,17 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
 
-Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth)
+Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_far)
 {
 	Game::Log << "Initialising rendering engine \"" << GetRenderDeviceName() << "\"\n";
 
+	// Store key data and calculated derived parameters
+	SetDisplaySize(screen_size);
+	SetFOV(Game::FOV);
+	SetDepthPlanes(screen_near, screen_far);
+
 	// Initialise the render device and context
-	Result result = InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync, screen_near, screen_depth);
+	Result result = InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync);
 	if (result != ErrorCodes::NoError)
 	{
 		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary render device\n";
@@ -77,7 +91,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	return ErrorCodes::NoError;
 }
 
-Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_depth)
+Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync)
 {
 	// Device flags for initialisation; enable debug layer if required & only in debug builds
 	UINT deviceflags = 0U;
@@ -127,7 +141,7 @@ Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_siz
 	if (FAILED(hr))
 	{
 		Game::Log << LOG_ERROR << "Fatal error: failed to initialise D3D11 render device (hr:" << hr << ")\n";
-		return ErrorCodes::CannotCreateDirect3DDevice;
+		return ErrorCodes::CannotCreateRenderDevice;
 	}
 
 	Game::Log << LOG_INFO << "D3D11 render device and context initialised successfully\n";
@@ -364,8 +378,6 @@ Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 
 Result RenderDeviceDX11::InitialiseShaderResources(void)
 {
-
-
 	// Shader definitions
 	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
 	{
@@ -499,6 +511,48 @@ Result RenderDeviceDX11::InitialiseDeferredRenderingResources(void)
 	
 }
 
+
+void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
+{
+	assert(display_size.x > 0 && display_size.y > 0);
+
+	m_displaysize = display_size;
+	m_aspectratio = (display_size.x / display_size.y);
+}
+
+void RenderDeviceDX11::SetFOV(float fov)
+{
+	assert(fov > 0.0f);
+
+	m_fov = fov;
+	m_halffovtan = tanf(fov * 0.5f);
+
+	RecalculateProjectionMatrix();
+}
+
+void RenderDeviceDX11::SetDepthPlanes(float screen_near, float screen_far)
+{
+	assert(screen_far > screen_near);
+
+	m_screen_near = screen_near;
+	m_screen_far = screen_far;
+
+	RecalculateProjectionMatrix();
+}
+
+void RenderDeviceDX11::RecalculateProjectionMatrix(void)
+{
+	// TODO: Flip near/far plane distances as part of inverted depth buffer for greater FP precision
+	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
+	m_projection = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+}
+
+void RenderDeviceDX11::RecalculateOrthographicMatrix(void)
+{
+	m_orthographic = XMMatrixOrthographicLH((float)m_displaysize.x, (float)m_displaysize.y, m_screen_near, m_screen_far);
+}
+
+
 void RenderDeviceDX11::BeginDeferredRenderingFrame(void)
 {
 
@@ -516,6 +570,12 @@ void RenderDeviceDX11::EndDeferredRenderinFrame(void)
 
 RenderDeviceDX11::~RenderDeviceDX11(void)
 {
+	if (m_debuglayer)
+	{
+		Game::Log << LOG_INFO << "Terminating render device debug layer\n";
+		ReleaseIfExists(m_debuglayer);
+	}
+
 	Game::Log << LOG_INFO << "Terminating render device context \"" << Rendering::GetRenderDeviceContextTypeName() << "\"\n";
 	ReleaseIfExists(m_devicecontext);
 
