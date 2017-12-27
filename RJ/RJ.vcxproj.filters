@@ -843,6 +843,9 @@
     <ClCompile Include="RenderDevice.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="DeferredRenderProcess.cpp">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1975,14 +1978,20 @@
     <ClInclude Include="RenderDeviceDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
-    <ClInclude Include="GBuffer.h">
-      <Filter>Engine\Rendering\DirectX11</Filter>
-    </ClInclude>
     <ClInclude Include="Data\Shaders\Common\InstanceProperties.hlsl.h">
       <Filter>HLSL\Common</Filter>
     </ClInclude>
     <ClInclude Include="Data\Shaders\Common\CommonShaderPipelineStructures.hlsl">
       <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderProcess.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="DeferredRenderProcess.h">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2312,6 +2321,9 @@
     </Filter>
     <Filter Include="HLSL\Common">
       <UniqueIdentifier>{06661c74-dd71-48e1-a79e-e27edcbc4389}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Deferred">
+      <UniqueIdentifier>{847bc2e4-6523-4c61-9832-eda5e92e19c0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -421,6 +421,7 @@
     <ClCompile Include="DataObjectEngineHeadingController.cpp" />
     <ClCompile Include="DataObjectEngineThrustController.cpp" />
     <ClCompile Include="DataObjectSwitch.cpp" />
+    <ClCompile Include="DeferredRenderProcess.cpp" />
     <ClCompile Include="DepthStencilStateDX11.cpp" />
     <ClCompile Include="DynamicTerrain.cpp" />
     <ClCompile Include="DataInput.cpp" />
@@ -769,6 +770,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="DefaultingFloat4.h" />
+    <ClInclude Include="DeferredRenderProcess.h" />
     <ClInclude Include="DepthStencilState.h" />
     <ClInclude Include="DepthStencilStateDX11.h" />
     <ClInclude Include="DynamicTerrain.h" />
@@ -862,6 +864,7 @@
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="RenderDeviceDX11.h" />
     <ClInclude Include="Rendering.h" />
+    <ClInclude Include="RenderProcess.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTargetDX11.h" />

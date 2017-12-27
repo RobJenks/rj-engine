@@ -1,16 +1,32 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <memory>
 #include "CompilerSettings.h"
 #include "DX11_Core.h"
+#include "RenderProcess.h"
+#include "Utility.h"
 
 class RenderDevice
 {
 public:
 
+	RenderDevice(void);
+
 	CMPINLINE std::string		GetRenderDeviceName(void) const { return m_renderdevice_name; }
 
-	std::string					DXDisplayModeToString(const DXGI_MODE_DESC & mode);
+	// Set the active render process
+	template <class TRenderProcess>
+	void						ActivateRenderProcess(void);
+
+	// Perform rendering; will delegate to the currently-active render process
+	void						Render(void);
+	
+
+	static std::string			DXDisplayModeToString(const DXGI_MODE_DESC & mode);
+
+	~RenderDevice(void);
 
 protected:
 
@@ -21,4 +37,42 @@ private:
 	// String identifier for the render device implementation currently in use
 	std::string					m_renderdevice_name;
 
+	// Currently-active render process
+	RenderProcess *				m_render_process;
+
+	// Collection of all render processes that have been activated at some point; can be reactivated during 
+	// normal rendering, and will all be deallocated automatically on shutdown
+	typedef std::unordered_map<std::string, std::unique_ptr<RenderProcess>> RenderProcessCollection;
+	RenderProcessCollection		m_render_processes;
 };
+
+
+
+// Set the active render process
+template <class TRenderProcess>
+void RenderDevice::ActivateRenderProcess(void)
+{
+	const std::string name = STRING(TRenderProcess);
+	Game::Log << LOG_INFO << "Attempting to change render process to \"" << name << "\"\n";
+
+	// Check whether we already have this process available; if so, reactivate it
+	auto it = m_render_processes.find(name);
+	if (it != m_render_processes.end())
+	{
+		Game::Log << LOG_INFO << "Reactivating suspended render process \"" << name << "\"\n";
+		m_render_process = it->second.get();
+		return;
+	}
+
+	// Process has not been activated before; create a new instance and activate it
+	Game::Log << LOG_INFO << "Render process \"" << name << "\" has not yet been initialised; creating and activating now\n";
+	m_render_processes[name] = std::make_unique<TRenderProcess>();
+	m_render_process = m_render_processes[name].get();
+}
+
+
+
+
+
+
+
