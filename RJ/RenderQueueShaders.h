@@ -6,7 +6,6 @@
 #include <vector>
 #include <unordered_map>
 #include "DX11_Core.h"
-#include "D3DMain.h"
 #include "GameVarsExtern.h"
 #include "RM_ZSortedInstance.h"
 class iShader;

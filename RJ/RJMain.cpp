@@ -20,7 +20,6 @@
 
 #include "iObject.h"
 #include "CoreEngine.h"
-#include "D3DMain.h"
 #include "CameraClass.h"
 #include "AudioManager.h"
 #include "LightShader.h"

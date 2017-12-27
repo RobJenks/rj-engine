@@ -4,7 +4,6 @@
 #include "ErrorCodes.h"
 #include "GlobalFlags.h"
 #include "Logging.h"
-#include "D3DMain.h"
 #include "RJMain.h"
 #include "Profiler.h"
 #include "FrameProfiler.h"

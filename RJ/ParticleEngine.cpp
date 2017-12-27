@@ -4,7 +4,6 @@
 
 #include "ErrorCodes.h"
 
-#include "D3DMain.h"
 #include "CameraClass.h"
 #include "ParticleEmitter.h"
 #include "ParticleShader.h"

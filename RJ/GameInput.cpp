@@ -4,7 +4,6 @@
 #include "GameDataExtern.h" //tmp
 #include "UserInterface.h" // tmp
 #include "CoreEngine.h"//tmp
-#include "D3DMain.h"//tmp
 
 
 // Null input key
