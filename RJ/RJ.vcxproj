@@ -482,6 +482,7 @@
     <ClCompile Include="GameSpatialPartitioningTrees.cpp" />
     <ClCompile Include="GameUniverse.cpp" />
     <ClCompile Include="GameVarsExtern.cpp" />
+    <ClCompile Include="DeferredGBuffer.cpp" />
     <ClCompile Include="Hardpoint.cpp" />
     <ClCompile Include="Hardpoints.cpp" />
     <ClCompile Include="HashFunctions.cpp" />
@@ -824,7 +825,7 @@
     <ClInclude Include="FrameProfiler.h" />
     <ClInclude Include="Frustum.h" />
     <ClInclude Include="GameObjects.h" />
-    <ClInclude Include="GBuffer.h" />
+    <ClInclude Include="DeferredGBuffer.h" />
     <ClInclude Include="HashIndexedVector.h" />
     <ClInclude Include="iDataObjectEnvironment.h" />
     <ClInclude Include="IndexBuffer.h" />

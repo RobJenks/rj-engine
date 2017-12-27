@@ -846,6 +846,9 @@
     <ClCompile Include="DeferredRenderProcess.cpp">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
     </ClCompile>
+    <ClCompile Include="DeferredGBuffer.cpp">
+      <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1987,10 +1990,10 @@
     <ClInclude Include="RenderProcess.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="GBuffer.h">
+    <ClInclude Include="DeferredRenderProcess.h">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
     </ClInclude>
-    <ClInclude Include="DeferredRenderProcess.h">
+    <ClInclude Include="DeferredGBuffer.h">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
     </ClInclude>
   </ItemGroup>

@@ -47,6 +47,9 @@ public:
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
 	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }
 
+	CMPINLINE RenderTargetDX11 *					GetPrimaryRenderTarget(void) { return m_rendertarget; }
+	CMPINLINE ID3D11Texture2D * 					GetBackBuffer(void) { return m_backbuffer; }
+
 	CMPINLINE float									GetFOV(void) const { return m_fov; }
 	CMPINLINE float									GetAspectRatio(void) const { return m_aspectratio; }
 	CMPINLINE float									GetTanOfHalfFOV(void) const { return m_halffovtan; }
@@ -81,25 +84,32 @@ public:
 
 	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
+	// The number of samples to be taken for multi-sample textures
+	static const uint8_t							TEXTURE_MULTISAMPLE_COUNT = 1U;
+	
 	~RenderDeviceDX11(void);
 	
 
-private:
+public:
 
-	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, 
-														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
-	
+
 	SamplerStateDX11 *								CreateSamplerState(const std::string & name);
 	RenderTargetDX11 *								CreateRenderTarget(void);
 	MaterialDX11 *									CreateMaterial(const std::string & name);
 	PipelineStateDX11 *								CreatePipelineState(const std::string & name);
-	
-	TextureDX11 *									RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture);
+
 	TextureDX11 *									CreateTexture(const std::string & name);
 	TextureDX11 *									CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 	TextureDX11 *									CreateTexture2D(const std::string & name, uint16_t width, uint16_t height, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 	TextureDX11 *									CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 	TextureDX11 *									CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
+
+private:
+
+	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, 
+														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
+
+	TextureDX11 *									RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture);
 
 private:
 
