@@ -512,7 +512,7 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 		Texture::Type::UnsignedNormalized,
 		m_sampledesc.Count,
 		0, 0, 0, 0, 24, 8);
-	TextureDX11 *depthStencilTexture = CreateTexture2D(screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
+	TextureDX11 *depthStencilTexture = CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
 
 	// Initialise colour buffer (Color0)
 	Texture::TextureFormat colorTextureFormat(
@@ -520,7 +520,7 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 		Texture::Type::UnsignedNormalized,
 		m_sampledesc.Count,
 		8, 8, 8, 8, 0, 0);
-	TextureDX11 *colorTexture = CreateTexture2D(screen_size.x, screen_size.y, 1, colorTextureFormat);
+	TextureDX11 *colorTexture = CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
 
 	// Bind colour and depth/stencil to the primary render target
 	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, colorTexture);
@@ -680,6 +680,58 @@ PipelineStateDX11 * RenderDeviceDX11::CreatePipelineState(const std::string & na
 
 	m_pipelinestates[name] = std::make_unique<PipelineStateDX11>();
 	return m_pipelinestates[name].get();
+}
+
+TextureDX11 * RenderDeviceDX11::CreateTexture(const std::string & name)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>()));
+}
+
+TextureDX11 * RenderDeviceDX11::CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, slices, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderDeviceDX11::CreateTexture2D(const std::string & name, uint16_t width, uint16_t height, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, height, slices, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderDeviceDX11::CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Tex3d, width, height, depth, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderDeviceDX11::CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Cube, size, numCubes, format, cpuAccess, gpuWrite)));
+}
+
+// Attempts to register the given texture.  Returns a pointer to the underlying resource if successful.  Will return NULL, 
+// deallocate any underlying resource and report an error if the registration fails
+TextureDX11 * RenderDeviceDX11::RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture)
+{
+	if (name.empty())
+	{
+		Game::Log << LOG_ERROR << "Cannot register texture resource with null identifier\n";
+		return  NULL;
+	}
+
+	if (texture.get() == NULL)
+	{
+		Game::Log << LOG_ERROR << "Cannot register \"" << name << "\" as null texture resource\n";
+		return NULL;
+	}
+
+	if (m_textures.find(name) != m_textures.end())
+	{
+		Game::Log << LOG_WARN << "Cannot register texxture \"" << name << "\"; resource already exists with this identifier\n";
+		return NULL;
+	}
+
+	m_textures[name] = std::move(texture);
+	Game::Log << LOG_INFO << "Registered new texture resource \"" << name << "\"\n";
+	return m_textures[name].get();
 }
 
 // Initialise all resources (e.g. GBuffer) required for the deferred rendering process

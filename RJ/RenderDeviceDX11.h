@@ -16,6 +16,7 @@ class SamplerStateDX11;
 class RenderTargetDX11;
 class MaterialDX11;
 class PipelineStateDX11;
+class TextureDX11;
 
 class RenderDeviceDX11 : public RenderDevice
 {
@@ -26,6 +27,7 @@ public:
 	typedef std::vector<std::unique_ptr<RenderTargetDX11>> RenderTargetCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<MaterialDX11>> MaterialCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
 
 
 	RenderDeviceDX11(void);
@@ -68,6 +70,7 @@ public:
 	CMPINLINE const RenderTargetCollection &		GetRenderTargets(void) const { return m_rendertargets; }
 	CMPINLINE const MaterialCollection &			GetMaterials(void) const { return m_materials; }
 	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
+	CMPINLINE const TextureCollection &				GetTextures(void) const { return m_textures; }
 
 
 	/* Methods to initiate each stage of the deferred rendering process per-frame */
@@ -90,7 +93,13 @@ private:
 	RenderTargetDX11 *								CreateRenderTarget(void);
 	MaterialDX11 *									CreateMaterial(const std::string & name);
 	PipelineStateDX11 *								CreatePipelineState(const std::string & name);
-
+	
+	TextureDX11 *									RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture);
+	TextureDX11 *									CreateTexture(const std::string & name);
+	TextureDX11 *									CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
+	TextureDX11 *									CreateTexture2D(const std::string & name, uint16_t width, uint16_t height, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
+	TextureDX11 *									CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
+	TextureDX11 *									CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
 
 private:
 
@@ -120,6 +129,7 @@ private:
 	RenderTargetCollection					m_rendertargets;
 	MaterialCollection						m_materials;
 	PipelineStateCollection					m_pipelinestates;
+	TextureCollection						m_textures;
 
 	ShaderDX11 *							m_deferred_vs;
 	ShaderDX11 *							m_deferred_geometry_ps;
