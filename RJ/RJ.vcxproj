@@ -359,6 +359,7 @@
     <ClCompile Include="ActorAttributes.cpp" />
     <ClCompile Include="ActorBase.cpp" />
     <ClCompile Include="AdjustableParameter.cpp" />
+    <ClCompile Include="ALIGN16.cpp" />
     <ClCompile Include="ArticulatedModel.cpp" />
     <ClCompile Include="ArticulatedModelComponent.cpp" />
     <ClCompile Include="Attachment.cpp" />
@@ -747,6 +748,7 @@
     <ClInclude Include="DataObjectEngineHeadingController.h" />
     <ClInclude Include="DataObjectInput.h" />
     <ClInclude Include="DataObjectSwitch.h" />
+    <ClInclude Include="Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h" />
     <ClInclude Include="Data\Shaders\Common\InstanceProperties.hlsl.h" />
     <ClInclude Include="Data\Shaders\Common\CommonShaderPipelineStructures.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -839,6 +841,7 @@
     <ClInclude Include="LightingManagerObject.h" />
     <ClInclude Include="LightSource.h" />
     <ClInclude Include="Logging.h" />
+    <ClInclude Include="ManagedPtr.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="MaterialDX11.h" />
     <ClInclude Include="MemDebug.h" />

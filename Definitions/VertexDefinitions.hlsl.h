@@ -1,18 +1,16 @@
-#if !defined(__VertexDefinitionsHLSLH__)
+#ifndef __VertexDefinitionsHLSLH__
 #define __VertexDefinitionsHLSLH__
+
+#include "CppHLSLLocalisation.hlsl.h"
 
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
 #ifdef __cplusplus
-#include <DirectXMath.h>
-#include "../RJ/DefaultingFloat4.h"
+	#include <DirectXMath.h>
+	#include "../RJ/DefaultingFloat4.h"
 
-using float2 = DirectX::XMFLOAT2;
-using float3 = DirectX::XMFLOAT3;
-using float4 = DirectX::XMFLOAT4;
-using _uint32 = uint32_t;
-using RM_SortKey = _uint32;
-typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::USE_DEFAULT> Float4DefaultZeroW;
+	using RM_SortKey = _uint32;
+	typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::USE_DEFAULT> Float4DefaultZeroW;
 
 #	define RJ_ROW_MAJOR_MATRIX DirectX::XMFLOAT4X4
 #	define RJ_SEMANTIC(sem) 
@@ -20,7 +18,6 @@ typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFA
 #else
 
 typedef float4 Float4DefaultZeroW;
-typedef uint _uint32;
 typedef _uint32 RM_SortKey;				// HLSL uint == uint32_t
 
 #	define RJ_ROW_MAJOR_MATRIX row_major float4x4

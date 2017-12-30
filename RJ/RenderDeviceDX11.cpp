@@ -2,6 +2,7 @@
 #include "GameVarsExtern.h"
 #include "Logging.h"
 #include "Utility.h"
+#include "ALIGN16.h"
 #include "GameDataExtern.h"
 #include "Shaders.h"
 #include "TextureDX11.h"
@@ -11,6 +12,7 @@
 #include "SamplerStateDX11.h"
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
+#include "ConstantBufferDX11.h"
 #include "BlendState.h"
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
@@ -47,13 +49,19 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_deferred_lighting_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
-	m_sampler_linearrepeat(NULL)
+	m_sampler_linearrepeat(NULL), 
+
+	m_cb_frame_data(NULL), 
+	m_cb_frame(NULL), 
+	m_cb_material_data(NULL), 
+	m_cb_material(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
 
 Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_far)
 {
+	Result result;
 	Game::Log << "Initialising rendering engine \"" << GetRenderDeviceName() << "\"\n";
 
 	// Store key data and calculated derived parameters
@@ -63,55 +71,28 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	SetSampleDesc(1U, 0U);
 
 	// Initialise the render device and context
-	Result result = InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary render device\n";
-		return result;
-	}
+	PERFORM_INIT( InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync), "primary render device" )
 
 	// We can now determine the primary adapter output & capabilities, then initialise it for rendering
-	result = InitialisePrimaryGraphicsAdapter(screen_size, vsync);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary graphics adapter\n";
-		return result;
-	}
+	PERFORM_INIT( InitialisePrimaryGraphicsAdapter(screen_size, vsync), "primary graphics adapter" )
 
 	// Swap chain and back buffer
-	result = InitialiseSwapChain(hwnd, screen_size, full_screen, vsync);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of swap chain interfaces\n";
-		return result;
-	}
+	PERFORM_INIT( InitialiseSwapChain(hwnd, screen_size, full_screen, vsync), "swap chain interfaces" )
 
 	// Primary render target
-	result = InitialisePrimaryRenderTarget(screen_size);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of primary render target\n";
-		return result;
-	}
-
+	PERFORM_INIT( InitialisePrimaryRenderTarget(screen_size), "primary render target" )
 
 	// Initialise input layout descriptors
-	result = InitialiseInputLayoutDefinitions();
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of input layout descriptors\n";
-		return result;
-	}
-
-	// Load all shaders from external resources
-	result = InitialiseShaderResources();
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of shader resources\n";
-		return result;
-	}
-
+	PERFORM_INIT( InitialiseInputLayoutDefinitions(), "input layout descriptors" )
 	
+	// Load all shaders from external resources
+	PERFORM_INIT( InitialiseShaderResources(), "shader resources" )
+
+	// Initialise all standard components that are common to many rendering methods
+	PERFORM_INIT( InitialiseStandardBuffers(), "common buffer resources" )
+	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
+	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
+
 
 
 	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";
@@ -381,7 +362,7 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 
 Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync)
 {
-	Game::Log << LOG_INFO << "Initialising swap chain interfaces (target level: " << Rendering::GetSwapChainInterfaceTypeName() << ")\n";
+	Game::Log << LOG_INFO << "Acquiring swap chain interfaces (target level: " << Rendering::GetSwapChainInterfaceTypeName() << ")\n";
 
 	IDXGIFactory2 *factory = NULL;
 	HRESULT hr = CreateDXGIFactory(__uuidof(Rendering::SwapChainInterfaceType), (void**)&factory);
@@ -508,7 +489,6 @@ DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth,
 
 Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 {
-	Game::Log << LOG_INFO << "Initialising primary render target\n";
 	m_rendertarget = CreateRenderTarget("PrimaryRenderTarget");
 
 	// Initialise depth/stencil buffer
@@ -536,8 +516,6 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 
 Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
 {
-	Game::Log << LOG_INFO << "Loading standard shader input layouts\n";
-
 	// Input layouts to be loaded
 	std::vector<std::tuple<std::string, InputLayoutDesc &>> layout_definitions
 	{
@@ -628,8 +606,6 @@ Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 // Initialise all sampler states that will be bound during shader rendering
 Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 {
-	Game::Log << LOG_INFO << "Initialising sampler state definitions\n";
-
 	m_sampler_linearclamp = CreateSamplerState("LinearClampSampler");
 	m_sampler_linearclamp->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
@@ -646,8 +622,6 @@ Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 // to reimplement each time
 Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 {
-	Game::Log << LOG_INFO << "Initialising standard render pipeline definitions\n";
-
 	PipelineStateDX11 * transparency = CreatePipelineState("Transparency");
 	transparency->SetShader(Shader::Type::VertexShader, GetShader(Shaders::StandardVertexShader));
 	transparency->SetShader(Shader::Type::PixelShader, GetShader(Shaders::StandardPixelShader));
@@ -657,6 +631,16 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 	transparency->SetRenderTarget(GetPrimaryRenderTarget());
 
 
+}
+
+// Initialise all standard constant buffers that are used across multiple rendering components
+Result RenderDeviceDX11::InitialiseStandardBuffers(void)
+{
+	m_cb_frame_data.RawPtr = { 0 };
+	m_cb_frame = CreateConstantBuffer<FrameDataBuffer>("FrameDataBuffer");
+
+	m_cb_material_data.RawPtr = { 0 };
+	m_cb_material = CreateConstantBuffer<MaterialBuffer>("MaterialBuffer");
 }
 
 

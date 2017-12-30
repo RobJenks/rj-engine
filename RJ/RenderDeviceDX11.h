@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include "ManagedPtr.h"
 #include "RenderDevice.h"
 #include "Shader.h"
 #include "DX11_Core.h"
@@ -13,12 +14,27 @@
 #include "InputLayoutDesc.h"
 #include "Texture.h"
 #include "CPUGraphicsResourceAccess.h"
+#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
 class ShaderDX11;
 class SamplerStateDX11;
 class RenderTargetDX11;
 class MaterialDX11;
 class PipelineStateDX11;
 class TextureDX11;
+class ConstantBufferDX11;
+
+// Initialisation step with error logging and immediate-exit
+#define PERFORM_INIT(initialisation, desc) \
+{ \
+Game::Log << LOG_INFO << "Initialising " << desc << "\n"; \
+result = initialisation; \
+if (result != ErrorCodes::NoError) \
+{ \
+	Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of " << desc << "\n"; \
+	return result; \
+} \
+}
+
 
 class RenderDeviceDX11 : public RenderDevice
 {
@@ -30,6 +46,7 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<MaterialDX11>> MaterialCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<ConstantBufferDX11>> ConstantBufferCollection;
 
 
 	RenderDeviceDX11(void);
@@ -44,6 +61,7 @@ public:
 	Result											InitialiseShaderResources(void);
 	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseStandardRenderPipelines(void);
+	Result											InitialiseStandardBuffers(void);
 
 
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
@@ -76,6 +94,7 @@ public:
 	CMPINLINE const MaterialCollection &			GetMaterials(void) const { return m_materials; }
 	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
 	CMPINLINE const TextureCollection &				GetTextures(void) const { return m_textures; }
+	CMPINLINE const ConstantBufferCollection &		GetConstantBuffers(void) const { return m_constantbuffers; }
 
 	CMPINLINE ShaderDX11 *							GetShader(const std::string & name)			{ return GetAsset<ShaderDX11>(name, m_shaders); }
 	CMPINLINE SamplerStateDX11 *					GetSamplerState(const std::string & name)	{ return GetAsset<SamplerStateDX11>(name, m_samplers); }
@@ -83,6 +102,7 @@ public:
 	CMPINLINE MaterialDX11 *						GetMaterial(const std::string & name)		{ return GetAsset<MaterialDX11>(name, m_materials); }
 	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name)	{ return GetAsset<PipelineStateDX11>(name, m_pipelinestates); }
 	CMPINLINE TextureDX11 *							GetTexture(const std::string & name)		{ return GetAsset<TextureDX11>(name, m_textures); }
+	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name, m_constantbuffers); }
 
 
 	/* Methods to initiate each stage of the deferred rendering process per-frame */
@@ -106,6 +126,13 @@ public:
 	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name)	{ return CreateAsset<RenderTargetDX11>(name, m_rendertargets); }
 	CMPINLINE MaterialDX11 *						CreateMaterial(const std::string & name)		{ return CreateAsset<MaterialDX11>(name, m_materials); }
 	CMPINLINE PipelineStateDX11 *					CreatePipelineState(const std::string & name)	{ return CreateAsset<PipelineStateDX11>(name, m_pipelinestates); }
+
+	template <typename T>
+	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
+
+	template <typename T>
+	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, const T *data);
+
 
 	TextureDX11 *									CreateTexture(const std::string & name);
 	TextureDX11 *									CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
@@ -155,6 +182,8 @@ private:
 	MaterialCollection						m_materials;
 	PipelineStateCollection					m_pipelinestates;
 	TextureCollection						m_textures;
+	ConstantBufferCollection				m_constantbuffers;
+
 
 	ShaderDX11 *							m_standard_vs;
 	ShaderDX11 *							m_standard_ps;
@@ -166,6 +195,12 @@ private:
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
 
+	// Standard constant buffers; keep single instance for binding efficiency
+	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
+	ManagedPtr<MaterialBuffer>				m_cb_material_data;
+	ConstantBufferDX11 *					m_cb_material;
+	
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device
 	static const D3D_FEATURE_LEVEL			SUPPORTED_FEATURE_LEVELS[];
@@ -177,18 +212,22 @@ private:
 template <class T>
 T *	RenderDeviceDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
 {
-	// Compile-type asset name
-	constexpr std::string type = STRING(T);
-	constexpr size_t ix = type.find_last_of("DX11");
-	constexpr if (ix != std::string::npos)
-	{
-		type = type.substr(0U, ix)
-	}
 
-	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; return NULL; }
+	if (name.empty()) 
+	{ 
+		constexpr std::string type = STRING(T);
+		constexpr size_t ix = type.find_last_of("DX11");
+		constexpr if (ix != std::string::npos) type = type.substr(0U, ix);
+
+		Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; return NULL; 
+	}
 
 	if (assetData.find(name) != assetData.end())
 	{
+		constexpr std::string type = STRING(T);
+		constexpr size_t ix = type.find_last_of("DX11");
+		constexpr if (ix != std::string::npos) type = type.substr(0U, ix);
+
 		Game::Log << LOG_WARN << type << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
 		return NULL;
 	}
@@ -204,6 +243,39 @@ T *	RenderDeviceDX11::GetAsset(const std::string & name, std::unordered_map<std:
 	return (it != assetData.end() ? it->second.get() : NULL);
 }
 
+
+
+template <typename T>
+ConstantBufferDX11 * RenderDeviceDX11::CreateConstantBuffer(const std::string & name)
+{
+	return CreateConstantBuffer<T>(name, NULL);
+}
+
+template <typename T>
+ConstantBufferDX11 * RenderDeviceDX11::CreateConstantBuffer(const std::string & name, const T *data)
+{
+	if (name.empty())
+	{
+		Game::Log << LOG_ERROR << "Cannot create constant buffer with null identifier\n";
+		return NULL;
+	}
+
+	if (m_constantbuffers.find(name) != m_constantbuffers.end())
+	{
+		Game::Log << LOG_ERROR << "Cannot create constant buffer \"" << name << "\"; buffer already exists with this identifier\n";
+		return NULL;
+	}
+
+	ConstantBufferDX11 *buffer = ConstantBufferDX11::Create(data);
+	if (!buffer)
+	{
+		Game::Log << LOG_ERROR << "Failed to create constant buffer \"" << name << "\" (sz:" << sizeof(T) << ", d" << (data ? "!=0" : "==0") << ")\n";
+		return NULL;
+	}
+	
+	m_constantbuffers[name] = std::unique_ptr<ConstantBufferDX11>(buffer);
+	return m_constantbuffers[name].get();
+}
 
 
 

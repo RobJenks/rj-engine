@@ -1,16 +1,10 @@
 #ifndef __LightDataHLSLH__
 #define __LightDataHLSLH__
 
-// Enable common usage across C++ and HLSL by making preprocessor adjustments
-#ifdef __cplusplus
-	#include <DirectXMath.h>
-
-	using float3 = DirectX::XMFLOAT3;
-	using float4 = DirectX::XMFLOAT4;
-#endif
+#include "CppHLSLLocalisation.hlsl.h"
 
 
-	// Supported light types; workaround lack of enumerations in HLSL
+// Supported light types; workaround for lack of enumerations in HLSL
 #ifdef __cplusplus
 	enum LightType
 	{

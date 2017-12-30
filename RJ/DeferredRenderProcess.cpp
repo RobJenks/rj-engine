@@ -166,8 +166,20 @@ void DeferredRenderProcess::Render(void)
 	/*
 		1. Clear GBuffer render target
 		2. Render all opaque geometry
-		3. 
+		3. Lighting pass 1: determine lit pixels (non-directional lights)
+		4. Lighting pass 2: render lit pixels (non-directional lights)
+		5: Lighting: render directional lights
+		6. Render transparent objects
 	*/
+
+	/* 1. Clear GBuffer RT */
+	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
+
+	/* 2. Render opaque geometry */
+
+	
+
+
 }
 
 

@@ -1,14 +1,7 @@
 #ifndef __MaterialDataHLSLH__
 #define __MaterialDataHLSLH__
 
-
-// Enable common usage across C++ and HLSL by making preprocessor adjustments
-#ifdef __cplusplus
-	#include <DirectXMath.h>
-	using float2 = DirectX::XMFLOAT2;
-	using float3 = DirectX::XMFLOAT3;
-	using float4 = DirectX::XMFLOAT4;
-#endif
+#include "CppHLSLLocalisation.hlsl.h"
 
 
 // Standard material definition

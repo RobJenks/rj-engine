@@ -139,6 +139,13 @@ public:
 
 		_aligned_free(static_cast<T*>(p));
 	}
+
+
+	// Static allocation/deallocation methods along 16-byte word boundaries
+	static T * New(void);
+	static void Delete(T *alloc);
+	static void SafeDelete(T *alloc);
+
 };
 
 

@@ -855,6 +855,9 @@
     <ClCompile Include="BlendState.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="ALIGN16.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2001,6 +2004,12 @@
     </ClInclude>
     <ClInclude Include="DeferredGBuffer.h">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
+    </ClInclude>
+    <ClInclude Include="Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ManagedPtr.h">
+      <Filter>Utility</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
