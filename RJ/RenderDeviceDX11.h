@@ -11,6 +11,8 @@
 #include "ErrorCodes.h"
 #include "CompilerSettings.h"
 #include "InputLayoutDesc.h"
+#include "Texture.h"
+#include "CPUGraphicsResourceAccess.h"
 class ShaderDX11;
 class SamplerStateDX11;
 class RenderTargetDX11;
@@ -24,7 +26,7 @@ public:
 
 	typedef std::unordered_map<std::string, std::unique_ptr<ShaderDX11>> ShaderCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<SamplerStateDX11>> SamplerStateCollection;
-	typedef std::vector<std::unique_ptr<RenderTargetDX11>> RenderTargetCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<RenderTargetDX11>> RenderTargetCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<MaterialDX11>> MaterialCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
@@ -41,7 +43,7 @@ public:
 	Result											InitialiseInputLayoutDefinitions(void);
 	Result											InitialiseShaderResources(void);
 	Result											InitialiseSamplerStateDefinitions(void);
-	Result											InitialiseDeferredRenderingResources(void);
+	Result											InitialiseStandardRenderPipelines(void);
 
 
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
@@ -75,6 +77,13 @@ public:
 	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
 	CMPINLINE const TextureCollection &				GetTextures(void) const { return m_textures; }
 
+	CMPINLINE ShaderDX11 *							GetShader(const std::string & name)			{ return GetAsset<ShaderDX11>(name, m_shaders); }
+	CMPINLINE SamplerStateDX11 *					GetSamplerState(const std::string & name)	{ return GetAsset<SamplerStateDX11>(name, m_samplers); }
+	CMPINLINE RenderTargetDX11 *					GetRenderTarget(const std::string & name)	{ return GetAsset<RenderTargetDX11>(name, m_rendertargets); }
+	CMPINLINE MaterialDX11 *						GetMaterial(const std::string & name)		{ return GetAsset<MaterialDX11>(name, m_materials); }
+	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name)	{ return GetAsset<PipelineStateDX11>(name, m_pipelinestates); }
+	CMPINLINE TextureDX11 *							GetTexture(const std::string & name)		{ return GetAsset<TextureDX11>(name, m_textures); }
+
 
 	/* Methods to initiate each stage of the deferred rendering process per-frame */
 	void											BeginDeferredRenderingFrame(void);
@@ -93,10 +102,10 @@ public:
 public:
 
 
-	SamplerStateDX11 *								CreateSamplerState(const std::string & name);
-	RenderTargetDX11 *								CreateRenderTarget(void);
-	MaterialDX11 *									CreateMaterial(const std::string & name);
-	PipelineStateDX11 *								CreatePipelineState(const std::string & name);
+	CMPINLINE SamplerStateDX11 *					CreateSamplerState(const std::string & name)	{ return CreateAsset<SamplerStateDX11>(name, m_samplers); }
+	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name)	{ return CreateAsset<RenderTargetDX11>(name, m_rendertargets); }
+	CMPINLINE MaterialDX11 *						CreateMaterial(const std::string & name)		{ return CreateAsset<MaterialDX11>(name, m_materials); }
+	CMPINLINE PipelineStateDX11 *					CreatePipelineState(const std::string & name)	{ return CreateAsset<PipelineStateDX11>(name, m_pipelinestates); }
 
 	TextureDX11 *									CreateTexture(const std::string & name);
 	TextureDX11 *									CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices = 1, const Texture::TextureFormat& format = Texture::TextureFormat(), CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool gpuWrite = false);
@@ -110,6 +119,12 @@ private:
 														const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 
 	TextureDX11 *									RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture);
+
+	template <class T>
+	T *												CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+
+	template <class T>
+	T *												GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
 
 private:
 
@@ -141,8 +156,10 @@ private:
 	PipelineStateCollection					m_pipelinestates;
 	TextureCollection						m_textures;
 
-	ShaderDX11 *							m_deferred_vs;
+	ShaderDX11 *							m_standard_vs;
+	ShaderDX11 *							m_standard_ps;
 	ShaderDX11 *							m_deferred_geometry_ps;
+	ShaderDX11 *							m_deferred_lighting_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
 
@@ -153,3 +170,41 @@ private:
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device
 	static const D3D_FEATURE_LEVEL			SUPPORTED_FEATURE_LEVELS[];
 };
+
+
+
+
+template <class T>
+T *	RenderDeviceDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+{
+	// Compile-type asset name
+	constexpr std::string type = STRING(T);
+	constexpr size_t ix = type.find_last_of("DX11");
+	constexpr if (ix != std::string::npos)
+	{
+		type = type.substr(0U, ix)
+	}
+
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; return NULL; }
+
+	if (assetData.find(name) != assetData.end())
+	{
+		Game::Log << LOG_WARN << type << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		return NULL;
+	}
+
+	assetData[name] = std::make_unique<T>();
+	return assetData[name].get();
+}
+
+template <class T>
+T *	RenderDeviceDX11::GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+{
+	auto it = assetData.find(name);
+	return (it != assetData.end() ? it->second.get() : NULL);
+}
+
+
+
+
+

@@ -3,7 +3,8 @@
 #include "../../../Definitions/VertexDefinitions.hlsl.h"
 
 
-VertexShaderStandardOutput VS_Deferred(Vertex_Inst_Standard input)
+// VS_Standard: Standard vertex shader
+VertexShaderStandardOutput VS_Standard(Vertex_Inst_Standard input)
 {
 	VertexShaderStandardOutput output;
 

@@ -72,7 +72,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 	// since we do not currently need any separation between final GBuffer colour accumulation and the backbuffer itself
 	Game::Log << LOG_INFO << "Initialising GBuffer RT\n";
 
-	RenderTarget = Game::Engine->GetRenderDevice()->CreateRenderTarget();
+	RenderTarget = Game::Engine->GetRenderDevice()->CreateRenderTarget("GBufferRenderTarget");
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0));
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color1, DiffuseTexture);

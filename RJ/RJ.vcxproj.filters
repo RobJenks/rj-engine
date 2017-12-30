@@ -849,6 +849,12 @@
     <ClCompile Include="DeferredGBuffer.cpp">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
     </ClCompile>
+    <ClCompile Include="Shaders.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="BlendState.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

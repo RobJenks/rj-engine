@@ -371,6 +371,7 @@
     <ClCompile Include="BasicProjectileDefinition.cpp" />
     <ClCompile Include="BasicProjectileSet.cpp" />
     <ClCompile Include="BasicRay.cpp" />
+    <ClCompile Include="BlendState.cpp" />
     <ClCompile Include="BoundingObject.cpp" />
     <ClCompile Include="Buffer.cpp" />
     <ClCompile Include="CameraClass.cpp" />
@@ -558,6 +559,7 @@
     <ClCompile Include="ShaderMacros.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="ShaderParameterDX11.cpp" />
+    <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />
     <ClCompile Include="SpaceProjectile.cpp" />
     <ClCompile Include="SpaceProjectileDefinition.cpp" />

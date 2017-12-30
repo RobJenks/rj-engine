@@ -2,6 +2,8 @@
 #include "GameVarsExtern.h"
 #include "Logging.h"
 #include "Utility.h"
+#include "GameDataExtern.h"
+#include "Shaders.h"
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
 #include "MaterialDX11.h"
@@ -9,6 +11,7 @@
 #include "SamplerStateDX11.h"
 #include "RenderTargetDX11.h"
 #include "PipelineStateDX11.h"
+#include "BlendState.h"
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
 const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] = 
@@ -38,8 +41,10 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_projection(ID_MATRIX), 
 	m_orthographic(ID_MATRIX),
 
-	m_deferred_vs(NULL), 
+	m_standard_vs(NULL), 
+	m_standard_ps(NULL),
 	m_deferred_geometry_ps(NULL), 
+	m_deferred_lighting_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
 	m_sampler_linearrepeat(NULL)
@@ -504,7 +509,7 @@ DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth,
 Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 {
 	Game::Log << LOG_INFO << "Initialising primary render target\n";
-	m_rendertarget = CreateRenderTarget();
+	m_rendertarget = CreateRenderTarget("PrimaryRenderTarget");
 
 	// Initialise depth/stencil buffer
 	Texture::TextureFormat depthStencilTextureFormat(
@@ -558,8 +563,11 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	// Shader definitions
 	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
 	{
-		{ &m_deferred_vs, Shader::Type::VertexShader, "VS_Deferred", "Shaders\\deferred_vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
-		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, "PS_Deferred_Geometry", "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL }
+		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
+		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL }, 
+
+		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },
+		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL },
 	};
 
 	// Attempt to load each shader resource in turn
@@ -599,7 +607,7 @@ Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 
 	// Attempt to initialise from file
 	(*ppOutShader) = new ShaderDX11();
-	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(fileName), entryPoint, profile, input_layout);
+	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
 
 	// Deallocate the shader object if initialisation failed
 	if (!success)
@@ -634,53 +642,23 @@ Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 	return ErrorCodes::NoError;
 }
 
-SamplerStateDX11 * RenderDeviceDX11::CreateSamplerState(const std::string & name)
+// Initialise all standard pipeline definitions, which can be referenced by render process without needing
+// to reimplement each time
+Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 {
-	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise sampler state definition with null identifier\n"; return NULL; }
+	Game::Log << LOG_INFO << "Initialising standard render pipeline definitions\n";
 
-	if (m_samplers.find(name) != m_samplers.end())
-	{
-		Game::Log << LOG_ERROR << "Sample state definition for \"" << name << "\" already exists, cannot create duplicate\n";
-		return NULL;
-	}
+	PipelineStateDX11 * transparency = CreatePipelineState("Transparency");
+	transparency->SetShader(Shader::Type::VertexShader, GetShader(Shaders::StandardVertexShader));
+	transparency->SetShader(Shader::Type::PixelShader, GetShader(Shaders::StandardPixelShader));
+	transparency->GetBlendState().SetBlendMode(BlendState::BlendModes::AlphaBlend);
+	transparency->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(true, DepthStencilState::DepthWrite::Disable));
+	transparency->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+	transparency->SetRenderTarget(GetPrimaryRenderTarget());
 
-	m_samplers[name] = std::make_unique<SamplerStateDX11>();
-	return m_samplers[name].get();
+
 }
 
-RenderTargetDX11 * RenderDeviceDX11::CreateRenderTarget(void)
-{
-	m_rendertargets.push_back(std::make_unique<RenderTargetDX11>());
-	return m_rendertargets.back().get();
-}
-
-MaterialDX11 * RenderDeviceDX11::CreateMaterial(const std::string & name)
-{
-	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot initialise material definition with null identifier\n"; return NULL; }
-
-	if (m_materials.find(name) != m_materials.end())
-	{
-		Game::Log << LOG_WARN << "Material definition for \"" << name << "\" already exists, cannot create duplicate\n";
-		return NULL;
-	}
-
-	m_materials[name] = std::make_unique<MaterialDX11>();
-	return m_materials[name].get();
-}
-
-PipelineStateDX11 * RenderDeviceDX11::CreatePipelineState(const std::string & name)
-{
-	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot create pipeline state definition with null identifier\n"; return NULL; }
-
-	if (m_pipelinestates.find(name) != m_pipelinestates.end())
-	{
-		Game::Log << LOG_ERROR << "Pipeline state definition for \"" << name << "\" already exists, cannot create duplicate\n";
-		return NULL;
-	}
-
-	m_pipelinestates[name] = std::make_unique<PipelineStateDX11>();
-	return m_pipelinestates[name].get();
-}
 
 TextureDX11 * RenderDeviceDX11::CreateTexture(const std::string & name)
 {
@@ -734,11 +712,6 @@ TextureDX11 * RenderDeviceDX11::RegisterNewTexture(const std::string & name, std
 	return m_textures[name].get();
 }
 
-// Initialise all resources (e.g. GBuffer) required for the deferred rendering process
-Result RenderDeviceDX11::InitialiseDeferredRenderingResources(void)
-{
-	
-}
 
 
 void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)

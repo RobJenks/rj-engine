@@ -186,8 +186,17 @@ public:
 			, WriteBlue(writeBlue)
 			, WriteAlpha(writeAlpha)
 		{}
+	};
 
-		// TODO: Define some default blend modes that are commonly, e.g. ( As * S + ( 1 - As ) * D, 1 * S + 1 * D, etc... )
+
+	// Set of standard blend modes
+	class BlendModes
+	{
+	public:
+
+		static const BlendMode		AlphaBlend;
+		static const BlendMode		AdditiveBlend;
+
 	};
 
 	protected:
