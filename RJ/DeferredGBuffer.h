@@ -16,7 +16,7 @@ public:
 	TextureDX11 *					DiffuseTexture;
 	TextureDX11 *					SpecularTexture;
 	TextureDX11 *					NormalTexture;
-	TextureDX11 *					DepthTexture;
+	TextureDX11 *					DepthStencilTexture;
 
 	~DeferredGBuffer(void);
 

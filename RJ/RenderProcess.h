@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ShaderDX11.h"
 
 class RenderProcess
 {
@@ -13,3 +14,5 @@ private:
 
 
 };
+
+

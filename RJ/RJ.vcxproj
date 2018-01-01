@@ -545,6 +545,7 @@
     <ClCompile Include="RenderDevice.cpp" />
     <ClCompile Include="RenderDeviceDX11.cpp" />
     <ClCompile Include="Rendering.cpp" />
+    <ClCompile Include="RenderProcess.cpp" />
     <ClCompile Include="RenderQueue.cpp" />
     <ClCompile Include="RenderQueueShaders.cpp" />
     <ClCompile Include="RenderQueueOptimiser.cpp" />
@@ -871,6 +872,7 @@
     <ClInclude Include="RenderDeviceDX11.h" />
     <ClInclude Include="Rendering.h" />
     <ClInclude Include="RenderProcess.h" />
+    <ClInclude Include="RenderProcessDX11.h" />
     <ClInclude Include="RenderQueue.h" />
     <ClInclude Include="RenderTarget.h" />
     <ClInclude Include="RenderTargetDX11.h" />

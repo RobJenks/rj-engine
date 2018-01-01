@@ -8,13 +8,11 @@
 DeferredGBuffer::DeferredGBuffer(void)
 	:
 	RenderTarget(NULL), 
-	DepthOnlyRenderTarget(NULL), 
-	ColourOnlyRenderTarget(NULL), 
-
+	
 	DiffuseTexture(NULL), 
 	SpecularTexture(NULL), 
 	NormalTexture(NULL), 
-	DepthTexture(NULL)
+	DepthStencilTexture(NULL)
 {
 	// First initialise all component texture resources
 	Game::Log << LOG_INFO << "Initialising GBuffer texture resources\n";
@@ -49,10 +47,10 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Type::UnsignedNormalized,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
 		0, 0, 0, 0, 24, 8);
-	DepthTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::Depth", Game::ScreenWidth, Game::ScreenHeight, 1, depthStencilTextureFormat);
+	DepthStencilTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::DepthStencil", Game::ScreenWidth, Game::ScreenHeight, 1, depthStencilTextureFormat);
 
 	// Verify all resources were created
-	std::vector<TextureDX11*> pTextureResources({ DiffuseTexture, SpecularTexture, NormalTexture, DepthTexture });
+	std::vector<TextureDX11*> pTextureResources({ DiffuseTexture, SpecularTexture, NormalTexture, DepthStencilTexture });
 	unsigned int loaded = std::accumulate(pTextureResources.begin(), pTextureResources.end(), 0, []
 		(unsigned int accum, TextureDX11 *item) { return (item ? accum + 1 : accum); });
 
@@ -78,7 +76,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color1, DiffuseTexture);
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color2, SpecularTexture);
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color3, NormalTexture);
-	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, DepthTexture);
+	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, DepthStencilTexture);
 
 	Game::Log << LOG_INFO << "GBuffer initialisation complete\n";
 }

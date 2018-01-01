@@ -3,6 +3,7 @@
 #include "RenderDeviceDX11.h"
 #include "PipelineStateDX11.h"
 #include "ShaderDX11.h"
+#include "TextureDX11.h"
 #include "RenderTargetDX11.h"
 #include "RasterizerStateDX11.h"
 #include "DepthStencilState.h"
@@ -166,21 +167,49 @@ void DeferredRenderProcess::Render(void)
 	/*
 		1. Clear GBuffer render target
 		2. Render all opaque geometry
-		3. Lighting pass 1: determine lit pixels (non-directional lights)
-		4. Lighting pass 2: render lit pixels (non-directional lights)
-		5: Lighting: render directional lights
-		6. Render transparent objects
+		3. Copy GBuffer depth/stencil to primary render target
+		4a. Lighting pass 1: determine lit pixels (non-directional lights)
+		4b. Lighting pass 2: render lit pixels (non-directional lights)
+		4c: Lighting: render directional lights
+		5. Render transparent objects
 	*/
 
 	/* 1. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 
 	/* 2. Render opaque geometry */
+	RenderGeometry();
 
-	
+	/* 3. Copy GBuffer depth/stencil to primary render target */
+	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
+		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
+		GBuffer.DepthStencilTexture);
 
+	/* 4. Perform deferred lighting */
+	PerformDeferredLighting();
+
+	/* Render transparent objects */
+	RenderTransparency();
+}
+
+
+void DeferredRenderProcess::RenderGeometry(void)
+{
 
 }
+
+void DeferredRenderProcess::PerformDeferredLighting(void)
+{
+
+}
+
+void DeferredRenderProcess::RenderTransparency(void)
+{
+
+}
+
+
+
 
 
 

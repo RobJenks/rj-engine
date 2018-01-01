@@ -1,11 +1,11 @@
 #pragma once
 
-#include "RenderProcess.h"
+#include "RenderProcessDX11.h"
 #include "DeferredGBuffer.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 
-class DeferredRenderProcess : public RenderProcess
+class DeferredRenderProcess : public RenderProcessDX11
 {
 public:
 
@@ -19,6 +19,14 @@ public:
 
 
 	DeferredRenderProcess(void);
+
+
+protected:
+
+	// Primary stages in deferred rendering process
+	void RenderGeometry(void);
+	void PerformDeferredLighting(void);
+	void RenderTransparency(void);
 
 
 private:

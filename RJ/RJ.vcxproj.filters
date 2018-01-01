@@ -858,6 +858,9 @@
     <ClCompile Include="ALIGN16.cpp">
       <Filter>Utility</Filter>
     </ClCompile>
+    <ClCompile Include="RenderProcess.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2010,6 +2013,9 @@
     </ClInclude>
     <ClInclude Include="ManagedPtr.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderProcessDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
