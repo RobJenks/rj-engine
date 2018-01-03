@@ -1,0 +1,99 @@
+#include "RenderAssetsDX11.h"
+#include "Logging.h"
+#include "GameDataExtern.h"
+#include "TextureDX11.h"
+#include "ShaderDX11.h"
+
+TextureDX11 * RenderAssetsDX11::CreateTexture(const std::string & name)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>()));
+}
+
+TextureDX11 * RenderAssetsDX11::CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, slices, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderAssetsDX11::CreateTexture2D(const std::string & name, uint16_t width, uint16_t height, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, height, slices, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderAssetsDX11::CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Tex3d, width, height, depth, format, cpuAccess, gpuWrite)));
+}
+
+TextureDX11 * RenderAssetsDX11::CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
+{
+	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Cube, size, numCubes, format, cpuAccess, gpuWrite)));
+}
+
+// Attempts to register the given texture.  Returns a pointer to the underlying resource if successful.  Will return NULL, 
+// deallocate any underlying resource and report an error if the registration fails
+TextureDX11 * RenderAssetsDX11::RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture)
+{
+	if (name.empty())
+	{
+		Game::Log << LOG_ERROR << "Cannot register texture resource with null identifier\n";
+		return  NULL;
+	}
+
+	if (texture.get() == NULL)
+	{
+		Game::Log << LOG_ERROR << "Cannot register \"" << name << "\" as null texture resource\n";
+		return NULL;
+	}
+
+	if (m_textures.find(name) != m_textures.end())
+	{
+		Game::Log << LOG_WARN << "Cannot register texxture \"" << name << "\"; resource already exists with this identifier\n";
+		return NULL;
+	}
+
+	m_textures[name] = std::move(texture);
+	Game::Log << LOG_INFO << "Registered new texture resource \"" << name << "\"\n";
+	return m_textures[name].get();
+}
+
+
+Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
+															const std::string & profile, const InputLayoutDesc *input_layout = NULL)
+{
+	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
+
+	// No duplicates allowed
+	if (GetShader(entryPoint) != NULL)
+	{
+		Game::Log << LOG_ERROR << "Multiple shader resources detected with entry point \"" << entryPoint << "\"\n";
+		return ErrorCodes::CannotLoadDuplicateShaderResource;
+	}
+
+	// Verify shader pointer provided for initialisation
+	if (!ppOutShader) return ErrorCodes::InvalidShaderReferenceProvidedForInitialisation;
+	if (*ppOutShader)
+	{
+		Game::Log << LOG_WARN << "Shader resource already exists, existing resource will be deallocated and overwritten\n";
+		SafeDelete(*ppOutShader);
+	}
+
+	// Attempt to initialise from file
+	(*ppOutShader) = new ShaderDX11();
+	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
+
+	// Deallocate the shader object if initialisation failed
+	if (!success)
+	{
+		Game::Log << LOG_ERROR << "Initialisation of shader \"" << entryPoint << "\" failed, cannot proceed\n";
+		SafeDelete(*ppOutShader);
+		return ErrorCodes::CannotLoadShaderFromFile;
+	}
+
+	// Add to the central shader collection and return success.  All shaders are owned by this collection and will
+	// be disposed by it during shutdown
+	m_shaders[entryPoint] = std::move(std::unique_ptr<ShaderDX11>(*ppOutShader));
+	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
+	return ErrorCodes::NoError;
+}
+
+

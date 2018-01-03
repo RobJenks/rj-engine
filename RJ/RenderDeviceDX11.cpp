@@ -489,7 +489,7 @@ DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth,
 
 Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 {
-	m_rendertarget = CreateRenderTarget("PrimaryRenderTarget");
+	m_rendertarget = Assets.CreateRenderTarget("PrimaryRenderTarget");
 
 	// Initialise depth/stencil buffer
 	Texture::TextureFormat depthStencilTextureFormat(
@@ -497,7 +497,7 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 		Texture::Type::UnsignedNormalized,
 		m_sampledesc.Count,
 		0, 0, 0, 0, 24, 8);
-	TextureDX11 *depthStencilTexture = CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
+	TextureDX11 *depthStencilTexture = Assets.CreateTexture2D("PrimaryDepthStencil", screen_size.x, screen_size.y, 1, depthStencilTextureFormat);
 
 	// Initialise colour buffer (Color0)
 	Texture::TextureFormat colorTextureFormat(
@@ -505,7 +505,7 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 		Texture::Type::UnsignedNormalized,
 		m_sampledesc.Count,
 		8, 8, 8, 8, 0, 0);
-	TextureDX11 *colorTexture = CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
+	TextureDX11 *colorTexture = Assets.CreateTexture2D("PrimaryColour", screen_size.x, screen_size.y, 1, colorTextureFormat);
 
 	// Bind colour and depth/stencil to the primary render target
 	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::Color0, colorTexture);
@@ -552,7 +552,7 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	Game::Log << LOG_INFO << "Loading all shader resources (" << shader_resources.size() << ")\n";
 	for (auto & shader : shader_resources)
 	{
-		Result result = InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), std::get<4>(shader), std::get<5>(shader));
+		Result result = Assets.InitialiseExternalShaderResource(std::get<0>(shader), std::get<1>(shader), std::get<3>(shader), std::get<2>(shader), std::get<4>(shader), std::get<5>(shader));
 		if (result != ErrorCodes::NoError)
 		{
 			Game::Log << LOG_ERROR << "Fatal error: shader initialisation failed, cannot recover from errors (res:" << result << ")\n";
@@ -563,54 +563,14 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	Game::Log << LOG_INFO << "All shader resources initialised\n";	
 }
 
-Result RenderDeviceDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
-															const std::string & profile, const InputLayoutDesc *input_layout = NULL)
-{
-	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
-
-	// No duplicates allowed
-	if (m_shaders.find(entryPoint) != m_shaders.end())
-	{
-		Game::Log << LOG_ERROR << "Multiple shader resources detected with entry point \"" << entryPoint << "\"\n";
-		return ErrorCodes::CannotLoadDuplicateShaderResource;
-	}
-
-	// Verify shader pointer provided for initialisation
-	if (!ppOutShader) return ErrorCodes::InvalidShaderReferenceProvidedForInitialisation;
-	if (*ppOutShader)
-	{
-		Game::Log << LOG_WARN << "Shader resource already exists, existing resource will be deallocated and overwritten\n";
-		SafeDelete(*ppOutShader);
-	}
-
-	// Attempt to initialise from file
-	(*ppOutShader) = new ShaderDX11();
-	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
-
-	// Deallocate the shader object if initialisation failed
-	if (!success)
-	{
-		Game::Log << LOG_ERROR << "Initialisation of shader \"" << entryPoint << "\" failed, cannot proceed\n";
-		SafeDelete(*ppOutShader);
-		return ErrorCodes::CannotLoadShaderFromFile;
-	}
-
-	// Add to the central shader collection and return success.  All shaders are owned by this collection and will
-	// be disposed by it during shutdown.  The RenderDeviceDX11::m_* pointers are for efficiency since we know they 
-	// will always be non-null
-	m_shaders[entryPoint] = std::move(std::unique_ptr<ShaderDX11>(*ppOutShader));
-	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
-	return ErrorCodes::NoError;
-}
-
 // Initialise all sampler states that will be bound during shader rendering
 Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 {
-	m_sampler_linearclamp = CreateSamplerState("LinearClampSampler");
+	m_sampler_linearclamp = Assets.CreateSamplerState("LinearClampSampler");
 	m_sampler_linearclamp->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearclamp->SetWrapMode(SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp, SamplerState::WrapMode::Clamp);
 
-	m_sampler_linearrepeat = CreateSamplerState("LinearRepeatSampler");
+	m_sampler_linearrepeat = Assets.CreateSamplerState("LinearRepeatSampler");
 	m_sampler_linearrepeat->SetFilter(SamplerState::MinFilter::MinLinear, SamplerState::MagFilter::MagLinear, SamplerState::MipFilter::MipLinear);
 	m_sampler_linearrepeat->SetWrapMode(SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat, SamplerState::WrapMode::Repeat);
 
@@ -622,9 +582,9 @@ Result RenderDeviceDX11::InitialiseSamplerStateDefinitions(void)
 // to reimplement each time
 Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 {
-	PipelineStateDX11 * transparency = CreatePipelineState("Transparency");
-	transparency->SetShader(Shader::Type::VertexShader, GetShader(Shaders::StandardVertexShader));
-	transparency->SetShader(Shader::Type::PixelShader, GetShader(Shaders::StandardPixelShader));
+	PipelineStateDX11 * transparency = Assets.CreatePipelineState("Transparency");
+	transparency->SetShader(Shader::Type::VertexShader, Assets.GetShader(Shaders::StandardVertexShader));
+	transparency->SetShader(Shader::Type::PixelShader, Assets.GetShader(Shaders::StandardPixelShader));
 	transparency->GetBlendState().SetBlendMode(BlendState::BlendModes::AlphaBlend);
 	transparency->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(true, DepthStencilState::DepthWrite::Disable));
 	transparency->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
@@ -637,64 +597,13 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 Result RenderDeviceDX11::InitialiseStandardBuffers(void)
 {
 	m_cb_frame_data.RawPtr = { 0 };
-	m_cb_frame = CreateConstantBuffer<FrameDataBuffer>("FrameDataBuffer");
+	m_cb_frame = Assets.CreateConstantBuffer<FrameDataBuffer>("FrameDataBuffer");
 
 	m_cb_material_data.RawPtr = { 0 };
-	m_cb_material = CreateConstantBuffer<MaterialBuffer>("MaterialBuffer");
+	m_cb_material = Assets.CreateConstantBuffer<MaterialBuffer>("MaterialBuffer");
 }
 
 
-TextureDX11 * RenderDeviceDX11::CreateTexture(const std::string & name)
-{
-	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>()));
-}
-
-TextureDX11 * RenderDeviceDX11::CreateTexture1D(const std::string & name, uint16_t width, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
-{
-	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, slices, format, cpuAccess, gpuWrite)));
-}
-
-TextureDX11 * RenderDeviceDX11::CreateTexture2D(const std::string & name, uint16_t width, uint16_t height, uint16_t slices, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
-{
-	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(width, height, slices, format, cpuAccess, gpuWrite)));
-}
-
-TextureDX11 * RenderDeviceDX11::CreateTexture3D(const std::string & name, uint16_t width, uint16_t height, uint16_t depth, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
-{
-	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Tex3d, width, height, depth, format, cpuAccess, gpuWrite)));
-}
-
-TextureDX11 * RenderDeviceDX11::CreateTextureCube(const std::string & name, uint16_t size, uint16_t numCubes, const Texture::TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool gpuWrite)
-{
-	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>(TextureDX11::Cube, size, numCubes, format, cpuAccess, gpuWrite)));
-}
-
-// Attempts to register the given texture.  Returns a pointer to the underlying resource if successful.  Will return NULL, 
-// deallocate any underlying resource and report an error if the registration fails
-TextureDX11 * RenderDeviceDX11::RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture)
-{
-	if (name.empty())
-	{
-		Game::Log << LOG_ERROR << "Cannot register texture resource with null identifier\n";
-		return  NULL;
-	}
-
-	if (texture.get() == NULL)
-	{
-		Game::Log << LOG_ERROR << "Cannot register \"" << name << "\" as null texture resource\n";
-		return NULL;
-	}
-
-	if (m_textures.find(name) != m_textures.end())
-	{
-		Game::Log << LOG_WARN << "Cannot register texxture \"" << name << "\"; resource already exists with this identifier\n";
-		return NULL;
-	}
-
-	m_textures[name] = std::move(texture);
-	Game::Log << LOG_INFO << "Registered new texture resource \"" << name << "\"\n";
-	return m_textures[name].get();
-}
 
 
 

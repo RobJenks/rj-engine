@@ -864,6 +864,9 @@
     <ClCompile Include="RenderProcessDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="RenderAssetsDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2018,6 +2021,9 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="RenderProcessDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderAssetsDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>

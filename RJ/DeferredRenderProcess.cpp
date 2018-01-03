@@ -210,7 +210,7 @@ void DeferredRenderProcess::Render(void)
 
 void DeferredRenderProcess::RenderGeometry(void)
 {
-
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(Game::Engine->GetRenderDevice()->)
 }
 
 void DeferredRenderProcess::PerformDeferredLighting(void)

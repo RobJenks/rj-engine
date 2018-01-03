@@ -542,6 +542,7 @@
     <ClCompile Include="Power.cpp" />
     <ClCompile Include="RasterizerStateDX11.cpp" />
     <ClCompile Include="Ray.cpp" />
+    <ClCompile Include="RenderAssetsDX11.cpp" />
     <ClCompile Include="RenderDevice.cpp" />
     <ClCompile Include="RenderDeviceDX11.cpp" />
     <ClCompile Include="Rendering.cpp" />
@@ -869,6 +870,7 @@
     <ClInclude Include="RasterizerState.h" />
     <ClInclude Include="RasterizerStateDX11.h" />
     <ClInclude Include="Rect.h" />
+    <ClInclude Include="RenderAssetsDX11.h" />
     <ClInclude Include="RenderDevice.h" />
     <ClInclude Include="RenderDeviceDX11.h" />
     <ClInclude Include="Rendering.h" />
