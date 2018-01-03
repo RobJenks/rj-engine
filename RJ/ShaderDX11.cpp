@@ -11,7 +11,7 @@
 namespace fs = std::experimental::filesystem;
 
 // Initialise static data
-ShaderDX11::ShaderParameterSet::size_type ShaderDX11::INVALID_SHADER_PARAMETER = (std::numeric_limits<ShaderParameterSet::size_type>::max)();
+ShaderDX11::ShaderParameterIndex ShaderDX11::INVALID_SHADER_PARAMETER = (std::numeric_limits<ShaderParameterIndex>::max)();
 
 
 ShaderDX11::ShaderDX11(void)

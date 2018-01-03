@@ -12,7 +12,7 @@ public:
 
 protected:
 
-
+	ShaderDX11::ShaderParameterIndex AttemptRetrievalOfShaderParameter(const ShaderDX11 *shader, const std::string & parameter_name);
 
 private:
 

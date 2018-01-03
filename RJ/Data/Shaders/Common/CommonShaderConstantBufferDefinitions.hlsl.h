@@ -1,9 +1,10 @@
 #ifndef __CommonShaderConstantBufferDefinitionsH__
 #define __CommonShaderConstantBufferDefinitionsH__
 
-#include "../../../../../Definitions/CppHLSLLocalisation.hlsl.h"
-#include "../../../../../Definitions/MaterialData.hlsl.h"
+#include "CppHLSLLocalisation.hlsl.h"
+#include "MaterialData.hlsl.h"
 
+#define BUFFER_NAME(buffer) #buffer
 
 // Holds standard per-frame data such as view/projection transforms
 cbuffer FrameDataBuffer REGISTER(b0) ALIGNED16(FrameDataBuffer)
@@ -24,6 +25,10 @@ cbuffer MaterialBuffer REGISTER(b2) ALIGNED16(MaterialBuffer)
 	MaterialData Mat;
 };
 
+
+// String references to each buffer for application parameter binding
+#define FrameDataBufferName BUFFER_NAME(FrameDataBuffer)
+#define MaterialBufferName BUFFER_NAME(MaterialBuffer)
 
 
 

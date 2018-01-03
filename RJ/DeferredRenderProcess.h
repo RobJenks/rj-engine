@@ -46,6 +46,13 @@ private:
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
 	RenderTargetDX11 *	m_depth_only_rt;
 
+	// Indices of required shader parameters
+	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_geom_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_geom_materialdata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_materialdata;
+
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);

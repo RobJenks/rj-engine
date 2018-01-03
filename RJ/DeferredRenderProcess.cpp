@@ -21,7 +21,13 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_lighting_pass1(NULL), 
 	m_pipeline_lighting_pass2(NULL), 
 	m_pipeline_lighting_directional(NULL), 
-	m_pipeline_transparency(NULL)
+	m_pipeline_transparency(NULL), 
+
+	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_geom_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_geom_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	InitialiseShaders();
 	InitialiseRenderTargets();
@@ -35,6 +41,7 @@ void DeferredRenderProcess::InitialiseShaders(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";
 
+	// Get a reference to all required shaders
 	m_vs = Game::Engine->GetRenderDevice()->GetShader(Shaders::StandardPixelShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
 
@@ -43,6 +50,14 @@ void DeferredRenderProcess::InitialiseShaders(void)
 
 	m_ps_lighting = Game::Engine->GetRenderDevice()->GetShader(Shaders::DeferredLightingPixelShader);
 	if (m_ps_lighting == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
+
+	// Ensure we have valid indices into the shader parameter sets
+	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
+	m_param_ps_geom_framedata = AttemptRetrievalOfShaderParameter(m_ps_geometry, FrameDataBufferName);
+	m_param_ps_geom_materialdata = AttemptRetrievalOfShaderParameter(m_ps_geometry, MaterialBufferName);
+	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
+	m_param_ps_light_materialdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, MaterialBufferName);
+
 }
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)

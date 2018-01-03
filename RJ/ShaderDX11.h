@@ -8,12 +8,14 @@
 #include "ShaderMacros.h"
 #include "InputLayoutDesc.h"
 
-class ShaderDX11 : Shader
+class ShaderDX11 : public Shader
 {
 public:
 
 	typedef std::vector<ShaderParameterDX11>						ShaderParameterSet;
-	typedef std::map<std::string, ShaderParameterSet::size_type>	ShaderParameterMapping;
+	typedef ShaderParameterSet::size_type							ShaderParameterIndex;
+	typedef std::map<std::string, ShaderParameterIndex>				ShaderParameterMapping;
+	static ShaderParameterIndex										INVALID_SHADER_PARAMETER;
 
 	ShaderDX11(void);
 	~ShaderDX11(void);
@@ -73,7 +75,5 @@ private:
 	
 	// Slot indices for key data types
 	SlotID								m_slot_material;		// Slot for the material constant buffer data
-
-	static ShaderParameterSet::size_type	INVALID_SHADER_PARAMETER;
 
 };

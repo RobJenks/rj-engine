@@ -9,7 +9,7 @@
 #include "DX11_Core.h"
 #include "Rendering.h"
 #include "ShaderMacros.h"
-#include "LightData.hlsl.h"
+#include "../Definitions/LightData.hlsl.h"
 class InputLayoutDesc;
 struct StandardPSConstBuffer;
 

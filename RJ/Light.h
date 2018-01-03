@@ -3,7 +3,7 @@
 #ifndef __LightH__
 #define __LightH__
 
-#include "LightData.hlsl.h"
+#include "../Definitions/LightData.hlsl.h"
 #include "ALIGN16.h"
 #include "DX11_Core.h"
 #include "GameConsoleCommand.h"
