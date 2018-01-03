@@ -4,6 +4,18 @@
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
 
+
+// Constructor
+RenderAssetsDX11::RenderAssetsDX11(void)
+{
+}
+
+
+
+
+
+
+
 TextureDX11 * RenderAssetsDX11::CreateTexture(const std::string & name)
 {
 	return RegisterNewTexture(name, std::move(std::make_unique<TextureDX11>()));

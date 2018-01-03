@@ -5,10 +5,12 @@
 #include <unordered_map>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
+#include "ManagedPtr.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "InputLayoutDesc.h"
 #include "CPUGraphicsResourceAccess.h"
+#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
 class ShaderDX11;
 class SamplerStateDX11;
 class RenderTargetDX11;
@@ -29,6 +31,9 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<ConstantBufferDX11>> ConstantBufferCollection;
+
+
+	RenderAssetsDX11(void);
 
 
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
@@ -71,7 +76,6 @@ public:
 	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName,
 															const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 	
-
 
 private:
 

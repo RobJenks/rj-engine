@@ -210,7 +210,18 @@ void DeferredRenderProcess::Render(void)
 
 void DeferredRenderProcess::RenderGeometry(void)
 {
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(Game::Engine->GetRenderDevice()->)
+	// Bind required buffer resources to shader parameters
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(Game::Engine->GetRenderDevice()->GetCommonFrameDataBuffer());
+
+	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
+	m_pipeline_geometry->Bind();
+
+	// Render all non-transparent objects
+	*** DO THIS ***
+
+	// Unbind the geometry rendering pipeline
+	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
+	m_pipeline_geometry->Unbind();
 }
 
 void DeferredRenderProcess::PerformDeferredLighting(void)

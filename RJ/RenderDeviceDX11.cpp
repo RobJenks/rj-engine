@@ -50,10 +50,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 
 	m_sampler_linearclamp(NULL), 
 	m_sampler_linearrepeat(NULL), 
-
-	m_cb_frame_data(NULL), 
 	m_cb_frame(NULL), 
-	m_cb_material_data(NULL), 
 	m_cb_material(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
@@ -89,7 +86,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseShaderResources(), "shader resources" )
 
 	// Initialise all standard components that are common to many rendering methods
-	PERFORM_INIT( InitialiseStandardBuffers(), "common buffer resources" )
+	PERFORM_INIT( InitialiseStandardBuffers(), "common buffer definitions")
 	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
@@ -596,15 +593,11 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 // Initialise all standard constant buffers that are used across multiple rendering components
 Result RenderDeviceDX11::InitialiseStandardBuffers(void)
 {
-	m_cb_frame_data.RawPtr = { 0 };
-	m_cb_frame = Assets.CreateConstantBuffer<FrameDataBuffer>("FrameDataBuffer");
+	Game::Log << LOG_INFO << "Initialising standard engine buffer resources\n";
 
-	m_cb_material_data.RawPtr = { 0 };
-	m_cb_material = Assets.CreateConstantBuffer<MaterialBuffer>("MaterialBuffer");
+	m_cb_frame = Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName);
+	m_cb_material = Assets.CreateConstantBuffer<MaterialBuffer>(MaterialBufferName);
 }
-
-
-
 
 
 void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)

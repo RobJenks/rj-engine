@@ -94,6 +94,17 @@ public:
 
 
 
+public:
+
+	ConstantBufferDX11 *							GetCommonFrameDataBuffer(void) { return m_cb_frame; }
+	FrameDataBuffer *								GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
+
+	ConstantBufferDX11 *							GetCommonMaterialBuffer(void) { return m_cb_material; }
+	MaterialBuffer *								GetCommonMaterialBufferData(void) { return m_cb_material_data.RawPtr; }
+
+
+
+
 private:
 
 	Rendering::RenderDeviceType *			m_device;
@@ -127,6 +138,7 @@ private:
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
+
 
 	// Standard constant buffers; keep single instance for binding efficiency
 	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
