@@ -42,13 +42,13 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->GetShader(Shaders::StandardPixelShader);
+	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardPixelShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
 
-	m_ps_geometry = Game::Engine->GetRenderDevice()->GetShader(Shaders::DeferredGeometryPixelShader);
+	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
 	if (m_ps_geometry == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_g]\n";
 
-	m_ps_lighting = Game::Engine->GetRenderDevice()->GetShader(Shaders::DeferredLightingPixelShader);
+	m_ps_lighting = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredLightingPixelShader);
 	if (m_ps_lighting == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [ps_l]\n";
 
 	// Ensure we have valid indices into the shader parameter sets
@@ -65,7 +65,7 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering render targets\n";
 
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_depth_only_rt = Game::Engine->GetRenderDevice()->CreateRenderTarget("Deferred_DepthOnly");
+	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly");
 	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
 }
@@ -75,7 +75,7 @@ void DeferredRenderProcess::InitialiseGeometryPipelines(void)
 {
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [g]\n";
 
-	m_pipeline_geometry = Game::Engine->GetRenderDevice()->CreatePipelineState("Deferred_Geometry");
+	m_pipeline_geometry = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Geometry");
 	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_geometry->SetShader(Shader::Type::PixelShader, m_ps_geometry);
 	m_pipeline_geometry->SetRenderTarget(GBuffer.RenderTarget);
@@ -94,7 +94,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass1Pipeline(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [l1]\n";
 
 	// First pass will only render depth information to an off-screen buffer
-	m_pipeline_lighting_pass1 = Game::Engine->GetRenderDevice()->CreatePipelineState("Deferred_Lighting_Pass1");
+	m_pipeline_lighting_pass1 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass1");
 	m_pipeline_lighting_pass1->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_pass1->SetRenderTarget(m_depth_only_rt);
 
@@ -121,7 +121,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [l2]\n";
 
 	// Second pass will render lighting information to the primary RT itself
-	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->CreatePipelineState("Deferred_Lighting_Pass2");
+	m_pipeline_lighting_pass2 = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Pass2");
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_pass2->SetShader(Shader::Type::PixelShader, m_ps_lighting);
 	m_pipeline_lighting_pass2->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
@@ -153,7 +153,7 @@ void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 
 	// Directional lighting pass will use a single full-screen quad at the far clip plane.  All pixels 
 	// forward of the plane will be lit using the same deferred lighting PS
-	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->CreatePipelineState("Deferred_Lighting_Directional");
+	m_pipeline_lighting_directional = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Lighting_Directional");
 	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
 	m_pipeline_lighting_directional->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
@@ -169,7 +169,7 @@ void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering pipeline [t]\n";
 
 	// Use a standard pipeline state here; nothing specific to deferred rendering
-	m_pipeline_transparency = Game::Engine->GetRenderDevice()->GetPipelineState("Transparency");
+	m_pipeline_transparency = Game::Engine->GetRenderDevice()->Assets.GetPipelineState("Transparency");
 	if (!m_pipeline_transparency)
 	{
 		Game::Log << LOG_ERROR << "Could not initialise deferred lighting transparency pass; pipeline state not found\n";
@@ -217,7 +217,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 	m_pipeline_geometry->Bind();
 
 	// Render all non-transparent objects
-	*** DO THIS ***
+	
 
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
