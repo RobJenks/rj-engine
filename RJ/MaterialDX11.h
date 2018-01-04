@@ -95,6 +95,19 @@ public:
 	// Default destructor
 	~MaterialDX11(void);
 
+
+private:
+
+	struct TextureBinding
+	{
+		TextureDX11 * texture;
+		unsigned int slot;
+
+		TextureBinding(void) : texture(NULL), slot(0U) { }
+		TextureBinding(TextureDX11 * _texture, unsigned int _slot) : texture(_texture), slot(_slot) { }
+	};
+
+
 private:
 
 	// Pointer to each texture that may be assigned to the material
@@ -102,6 +115,10 @@ private:
 
 	// Material data is compiled into a constant buffer following any change
 	ConstantBufferDX11 *		m_cbuffer;
+
+	// Smaller collapsed set of only textures which are attached to this material, for binding efficiency
+	std::array<TextureBinding, MaterialTextureTypeCount> m_texture_bindings;
+	std::array<TextureBinding, MaterialTextureTypeCount>::size_type m_texture_binding_count;
 
 	// Other material properties
 	bool						m_updates_suspended;

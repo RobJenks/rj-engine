@@ -11,9 +11,11 @@ MaterialDX11::MaterialID MaterialDX11::GlobalMaterialIDCount = 0U;
 // Default constructor
 MaterialDX11::MaterialDX11(void)
 	:
-	m_updates_suspended(false)
+	m_updates_suspended(false), 
+	m_texture_binding_count(0U)
 {
-	m_textures = {};
+	m_textures = { };
+	m_texture_bindings = { };
 
 	// Initialise the constant buffer
 	m_cbuffer = ConstantBufferDX11::Create(&Data);
@@ -89,6 +91,18 @@ void MaterialDX11::UpdateTextureState(void)
 	Data.HasBumpTexture = (m_textures[(int)TextureType::Bump] != NULL);
 	Data.HasOpacityTexture = (m_textures[(int)TextureType::Opacity] != NULL);
 
+	// Update the smaller set of bindable textures whenever the underlying textures change
+	m_texture_binding_count = 0U;
+	for (size_t i = 0; i < (size_t)TextureType::TEXTURE_TYPE_COUNT; ++i)
+	{
+		if (m_textures[i] == NULL) continue;
+
+		m_texture_bindings[m_texture_binding_count] = TextureBinding(m_textures[i], i);
+		++m_texture_binding_count;
+	}
+
+
+	// Compiile the constant buffer holding all non-texture material data (incl. texture-related flags)
 	CompileMaterial();
 }
 
@@ -98,11 +112,10 @@ void MaterialDX11::Bind(ShaderDX11 *shader) const
 	if (!shader) return;
 
 	// Bind each texture in turn
-	// TODO: Can unroll, or store smaller index list of textures that are set.  This Bind() happens a lot
 	Shader::Type shadertype = shader->GetType();
-	for (MaterialTextureSet::size_type i = 0U; i < MaterialDX11::MaterialTextureTypeCount; ++i)
+	for (size_t i = 0; i < m_texture_binding_count; ++i)
 	{
-		if (m_textures[i]) m_textures[i]->Bind(shadertype, i, ShaderParameter::Type::Texture);
+		m_texture_bindings[i].texture->Bind(shadertype, i, ShaderParameter::Type::Texture);
 	}
 
 	// Also bind the material constant buffer to the relevant shader parameter, if the shader requires it

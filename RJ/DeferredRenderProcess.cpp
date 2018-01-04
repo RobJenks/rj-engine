@@ -180,31 +180,41 @@ void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
 void DeferredRenderProcess::Render(void)
 {
 	/*
-		1. Clear GBuffer render target
-		2. Render all opaque geometry
-		3. Copy GBuffer depth/stencil to primary render target
-		4a. Lighting pass 1: determine lit pixels (non-directional lights)
-		4b. Lighting pass 2: render lit pixels (non-directional lights)
-		4c: Lighting: render directional lights
-		5. Render transparent objects
+		1. Populate common constant buffers
+		2. Clear GBuffer render target
+		3. Render all opaque geometry
+		4. Copy GBuffer depth/stencil to primary render target
+		5a. Lighting pass 1: determine lit pixels (non-directional lights)
+		5b. Lighting pass 2: render lit pixels (non-directional lights)
+		5c: Lighting: render directional lights
+		6. Render transparent objects
 	*/
 
-	/* 1. Clear GBuffer RT */
+	/* 1. Populate common constant buffers */
+	PopulateCommonConstantBuffers();
+
+	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 
-	/* 2. Render opaque geometry */
+	/* 3. Render opaque geometry */
 	RenderGeometry();
 
-	/* 3. Copy GBuffer depth/stencil to primary render target */
+	/* 4. Copy GBuffer depth/stencil to primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
 		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
 		GBuffer.DepthStencilTexture);
 
-	/* 4. Perform deferred lighting */
+	/* 5. Perform deferred lighting */
 	PerformDeferredLighting();
 
-	/* Render transparent objects */
+	/* 6. Render transparent objects */
 	RenderTransparency();
+}
+
+
+void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
+{
+	*** DO THIS ***
 }
 
 

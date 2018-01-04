@@ -24,6 +24,8 @@
 #include "Light.h"
 #include "Frustum.h"
 #include "BoundingObject.h"
+#include "MaterialDX11.h"
+#include "PipelineStateDX11.h"
 #include "FontShader.h"
 #include "AudioManager.h"
 #include "TextManager.h"
@@ -880,7 +882,10 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 		for (size_t mi = 0U; mi < model_count; ++mi)
 		{
 			auto & model = modelqueue.ModelData[mi];
-			auto instancecount = model.CurrentInstanceCount;
+			instancecount = model.CurrentInstanceCount;
+
+			// Store a reference to the model buffer currently being rendered
+			m_current_modelbuffer = model.ModelBufferInstance;
 
 			/// TODO: Sort instances here?
 
@@ -893,10 +898,41 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				// Update the instance buffer by mapping, updating and unmapping the memory
 				m_instancebuffer->Set(&(model.InstanceData[inst]), sizeof(RM_Instance) * n);
 
-				*** CONTINUE ***
+				// The render queue will take ownership for binding vertex buffers ({ vertices, instances}) so 
+				// that we can bind both to the shader in parallel.  m_instancedbuffers[1] = instancebuffer, so just 
+				// set [0] before binding
+				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer.GetCompiledBuffer();
+				m_instancedstride[0] = m_current_modelbuffer->VertexBuffer.GetStride();
+				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
-		}
+				// Set the model index buffer to active in the input assembler
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), IndexBufferDX11::INDEX_FORMAT, 0U);
 
+				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
+				if (rq_shader.PrimitiveTopology != m_current_topology)
+					r_devicecontext->IASetPrimitiveTopology(rq_shader.PrimitiveTopology);
+
+				// Bind the model material, which will populate the relevant constant buffer and bind all required texture resources
+				// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
+				model.ModelBufferInstance->Material->Bind(pipeline->GetShader(Shader::Type::VertexShader));
+				model.ModelBufferInstance->Material->Bind(pipeline->GetShader(Shader::Type::PixelShader));
+
+				// Issue a draw call to the currently active render pipeline
+				r_devicecontext->DrawIndexedInstanced(m_current_modelbuffer->IndexBuffer.GetIndexCount(), n, 0U, 0, 0);
+				++m_renderinfo.DrawCalls;
+
+			} /// per-instance
+
+			// Update the total count of instances that have been processed
+			m_renderinfo.InstanceCount += instancecount;
+
+			// Finally, clear the instance data for this shader/model now that we have fully processed it
+			m_renderqueue.UnregisterModelBuffer(i, mi);
+
+		} /// per-model
+
+		// Reset this render queue shader ready for the next frame
+		m_renderqueue[i].CurrentSlotCount = 0U;
 	}
 
 }

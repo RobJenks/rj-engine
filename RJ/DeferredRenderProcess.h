@@ -24,6 +24,7 @@ public:
 protected:
 
 	// Primary stages in deferred rendering process
+	void PopulateCommonConstantBuffers(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
 	void RenderTransparency(void);
