@@ -76,6 +76,9 @@
 
 #include "CoreEngine.h"
 
+// Forward declare allowed instances of render queue processing
+template void CoreEngine::ProcessRenderQueue<ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
+
 
 // Default constructor
 CoreEngine::CoreEngine(void)
@@ -295,7 +298,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	D3D11_SUBRESOURCE_DATA ibufdata;
 
 	// Create a new empty instance stream, for initialisation of the buffer
-	RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
+	/*RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
 	if (!idata) return ErrorCodes::CouldNotAllocateMemoryForRenderQueue;
 	memset(idata, 0, Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
 
@@ -318,6 +321,10 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Release memory used to initialise the instance buffer
 	free(idata); idata = NULL;
+	*/
+
+	// Create the instance buffer that will be reused by the render queue for all rendering
+	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", Game::C_INSTANCED_RENDER_LIMIT);
 
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB
@@ -854,8 +861,48 @@ void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader,
 	m_renderqueueshaders[shader].SortedInstances.push_back(std::move(RM_ZSortedInstance(z, model, std::move(instance))));
 }
 
+// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
+// will be rendered through the given rendering pipeline
+template <class TModelRenderPredicate>
+void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
+{
+	size_t instancecount, inst, n;
+	if (!pipeline) return;
+
+	// Iterate through each shader in the render queue (though not currently required; all will be mapped to 0)
+	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		auto & modelqueue = m_renderqueue[i];
+		auto model_count = modelqueue.CurrentSlotCount;
+		if (model_count == 0U) continue;
+
+		// Process each model separately
+		for (size_t mi = 0U; mi < model_count; ++mi)
+		{
+			auto & model = modelqueue.ModelData[mi];
+			auto instancecount = model.CurrentInstanceCount;
+
+			/// TODO: Sort instances here?
+
+			// Loop through the instances in batches, if the total count is larger than our limit
+			for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
+			{
+				// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
+				n = min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT);
+
+				// Update the instance buffer by mapping, updating and unmapping the memory
+				m_instancebuffer->Set(&(model.InstanceData[inst]), sizeof(RM_Instance) * n);
+
+				*** CONTINUE ***
+
+		}
+
+	}
+
+}
+
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
-RJ_PROFILED(void CoreEngine::ProcessRenderQueue, void)
+RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 	std::vector<RM_Instance>::size_type instancecount, inst, n;

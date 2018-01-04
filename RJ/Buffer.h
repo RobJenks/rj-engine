@@ -33,6 +33,13 @@ public:
 	
 	static UINT					DetermineBindFlags(Buffer::BufferType buffertype);
 
+
+	// Map data into this buffer
+	template <class T>
+	void						Set(const T *data);
+	void						Set(const void *data, UINT data_size);
+
+
 	// Destructor
 	~Buffer(void);
 
@@ -48,4 +55,14 @@ protected:
 	static UINT					m_offset[1];		// Always constant, so maintain as static field
 	static ID3D11Buffer *		null_buffer[1];		// For more efficient unbinding
 };
+
+
+
+// Static method to update the contents of the buffer with the given object data
+// Maps a single instance of T into the buffer, from the location pointed to by 'data'
+template <class T>
+void Buffer::Set(const T *data)
+{
+	Set((const void*)data, sizeof(T));
+}
 

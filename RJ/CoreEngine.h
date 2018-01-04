@@ -25,6 +25,7 @@
 #include "Frustum.h"
 #include "ViewPortal.h"
 #include "BasicColourDefinition.h"
+#include "ModelRenderPredicate.h"
 class iShader;
 class ModelBuffer;
 class LightShader;
@@ -515,7 +516,7 @@ private:
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 
 
-	ID3D11Buffer *				m_instancebuffer;
+	VertexBufferDX11 *			m_instancebuffer;
 	RenderQueue					m_renderqueue;
 	RM_ShaderCollection			m_renderqueueshaders;
 	const ID3D11Buffer *		m_instancedbuffers[2];
@@ -527,7 +528,12 @@ private:
 
 	// Process the full render queue for all shaders in scope
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ProcessRenderQueue, 
-		void, ProcessRenderQueue, void, );
+		void, ProcessRenderQueueOld, void, );
+
+	// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
+	// will be rendered through the given rendering pipeline
+	template <class TModelRenderPredicate=ModelRenderPredicate::RenderAll>
+	void								ProcessRenderQueue(PipelineStateDX11 *pipeline);
 
 	// Clear the render queue ready for the next frame
 	void								DeallocateRenderingQueue(void);

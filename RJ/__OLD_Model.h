@@ -15,7 +15,7 @@
 
 
 // This class has no special alignment requirements
-class Model
+class __OLD_Model
 {
 	public:
 		// Model data is stored in static unordered_map collections & indexed by unique string code

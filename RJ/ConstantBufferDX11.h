@@ -16,11 +16,6 @@ public:
 	// Constructor; create a new constant buffer of the given size
 	ConstantBufferDX11(UINT buffer_size);
 
-	// Map data into this constant buffer
-	template <class T>
-	void						Set(const T *data);
-	void						Set(const void *data, UINT data_size);
-
 	// Bind this resource to the given shader target
 	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id) const;
 
@@ -52,11 +47,4 @@ static ConstantBufferDX11 * ConstantBufferDX11::Create(const T *data)
 	}
 
 	return buffer;
-}
-
-// Static method to update the contents of the buffer with the given object data
-template <class T>
-void ConstantBufferDX11::Set(const T *data)
-{
-	Set((const void*)data, sizeof(T));
 }

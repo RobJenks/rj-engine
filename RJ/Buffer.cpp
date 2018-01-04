@@ -72,6 +72,22 @@ UINT Buffer::DetermineBindFlags(Buffer::BufferType buffertype)
 	}
 }
 
+// Map data into this buffer
+void Buffer::Set(const void *data, UINT data_size)
+{
+	auto devicecontext = Game::Engine->GetDeviceContext();
+
+	D3D11_MAPPED_SUBRESOURCE mappedresource;
+	if (FAILED(devicecontext->Map(m_buffer[0], 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource)))
+	{
+		return;
+	}
+
+	memcpy(mappedresource.pData, data, data_size);
+	devicecontext->Unmap(m_buffer[0], 0);
+}
+
+
 // Destructor
 Buffer::~Buffer(void)
 {

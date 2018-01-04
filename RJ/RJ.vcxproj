@@ -851,6 +851,7 @@
     <ClInclude Include="MemDebugCheck.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelInstance.h" />
+    <ClInclude Include="ModelRenderPredicate.h" />
     <ClInclude Include="Modifier.h" />
     <ClInclude Include="ModifiedValue.h" />
     <ClInclude Include="ModifierDetails.h" />

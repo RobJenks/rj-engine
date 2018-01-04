@@ -2026,6 +2026,9 @@
     <ClInclude Include="RenderAssetsDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
+    <ClInclude Include="ModelRenderPredicate.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">

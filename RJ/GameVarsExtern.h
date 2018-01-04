@@ -154,7 +154,7 @@ namespace Game {
 	extern const bool C_RENDER_DEBUG_LAYER;					// Flag indicating whether we should attempt to load a debug layer for the current rendering
 															// engine (e.g D3D_DEVICE_DEBUG). Only available in debug builds regardless of the state of this flag
 	typedef UINT32 LIGHT_CONFIG;							// Bitstring representing a particular lighting configuration
-	extern const unsigned int C_INSTANCED_RENDER_LIMIT;		// The maximum number of instances that can be rendered in any one draw call by the engine
+	extern const size_t C_INSTANCED_RENDER_LIMIT;			// The maximum number of instances that can be rendered in any one draw call by the engine
 	extern const float C_MODEL_SIZE_LIMIT;					// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values
 	extern const int C_MAX_ARTICULATED_MODEL_SIZE;			// The maximum number of components within any articulated model
 	extern const unsigned int C_DEFAULT_RENDERQUEUE_CHECK_INTERVAL;		// Time (ms) between pre-optimisation checks of the render queue

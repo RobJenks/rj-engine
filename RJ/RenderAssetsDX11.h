@@ -11,14 +11,15 @@
 #include "InputLayoutDesc.h"
 #include "CPUGraphicsResourceAccess.h"
 #include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "ConstantBufferDX11.h";
+#include "VertexBufferDX11.h"
 class ShaderDX11;
 class SamplerStateDX11;
 class RenderTargetDX11;
 class MaterialDX11;
 class PipelineStateDX11;
 class TextureDX11;
-class ConstantBufferDX11;
-
+class VertexBufferDX11;
 
 class RenderAssetsDX11
 {
@@ -31,6 +32,7 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<ConstantBufferDX11>> ConstantBufferCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<VertexBufferDX11>> VertexBufferCollection;
 
 
 	RenderAssetsDX11(void);
@@ -43,6 +45,7 @@ public:
 	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
 	CMPINLINE const TextureCollection &				GetTextures(void) const { return m_textures; }
 	CMPINLINE const ConstantBufferCollection &		GetConstantBuffers(void) const { return m_constantbuffers; }
+	CMPINLINE const VertexBufferCollection &		GetVertexBuffers(void) const { return m_vertexbuffers; }
 
 	CMPINLINE ShaderDX11 *							GetShader(const std::string & name) { return GetAsset<ShaderDX11>(name, m_shaders); }
 	CMPINLINE SamplerStateDX11 *					GetSamplerState(const std::string & name) { return GetAsset<SamplerStateDX11>(name, m_samplers); }
@@ -51,7 +54,7 @@ public:
 	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name) { return GetAsset<PipelineStateDX11>(name, m_pipelinestates); }
 	CMPINLINE TextureDX11 *							GetTexture(const std::string & name) { return GetAsset<TextureDX11>(name, m_textures); }
 	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name, m_constantbuffers); }
-
+	CMPINLINE VertexBufferDX11 *					GetVertexBuffer(const std::string & name) { return GetAsset<VertexBufferDX11>(name, m_vertexbuffers); }
 
 public:
 
@@ -62,9 +65,13 @@ public:
 
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
-
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, const T *data);
+
+	template <typename TVertex>
+	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride);
+	template <typename TVertex>
+	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, UINT count);
 
 
 	TextureDX11 *									CreateTexture(const std::string & name);
@@ -98,7 +105,7 @@ private:
 	PipelineStateCollection							m_pipelinestates;
 	TextureCollection								m_textures;
 	ConstantBufferCollection						m_constantbuffers;
-
+	VertexBufferCollection							m_vertexbuffers;
 
 
 };
@@ -106,7 +113,7 @@ private:
 
 
 template <class T>
-T *	RenderDeviceDX11::GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
 {
 	auto it = assetData.find(name);
 	return (it != assetData.end() ? it->second.get() : NULL);
@@ -115,13 +122,13 @@ T *	RenderDeviceDX11::GetAsset(const std::string & name, std::unordered_map<std:
 
 
 template <typename T>
-ConstantBufferDX11 * RenderDeviceDX11::CreateConstantBuffer(const std::string & name)
+ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & name)
 {
 	return CreateConstantBuffer<T>(name, NULL);
 }
 
 template <typename T>
-ConstantBufferDX11 * RenderDeviceDX11::CreateConstantBuffer(const std::string & name, const T *data)
+ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & name, const T *data)
 {
 	if (name.empty())
 	{
@@ -147,9 +154,52 @@ ConstantBufferDX11 * RenderDeviceDX11::CreateConstantBuffer(const std::string & 
 }
 
 
+template <typename TVertex>
+VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, UINT count)
+{
+	if (count == 0U)
+	{
+		Game::Log << LOG_ERROR << "Cannot create new vertex buffer with vcount == 0\n";
+		return NULL;
+	}
+
+	// Method does not request a pre-allocated buffer for initialisation.  We therefore perform a temporary allocation here
+	TVertex *data = new TVertex[count];
+	if (!data)
+	{
+		Game::Log << LOG_ERROR << "Failed to allocate vertex buffer data on initialisation (vc=" << count << ", vs=" << sizeof(TVertex) << ")\n";
+		return NULL;
+	}
+
+	VertexBufferDX11 *buffer = CreateVertexBuffer<TVertex>(name, data, count, sizeof(TVertex));
+
+	// Deallocate temporary data before returning
+	SafeDeleteArray(data);
+
+	return buffer;
+}
+
+template <typename TVertex>
+VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride)
+{
+	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot create vertex buffer with null identifier\n"; return NULL; }
+	if (!data) { Game::Log << LOG_ERROR << "Cannot create vertex buffer \"" << name << "\" with null data reference\n"; return NULL; }
+	if (count == 0U || stride == 0U) { Game::Log << LOG_ERROR << "Cannot create vertex buffer \"" << name << "\"; invalid size data (vc=" << count << ", vs=" << stride << ")\n"; return NULL; }
+
+	if (m_vertexbuffers.find(name) != m_vertexbuffers.end())
+	{
+		Game::Log << LOG_ERROR << "Cannot create vertex buffer \"" << name << "\"; asset already exists with this identifier\n";
+		return NULL;
+	}
+
+	m_vertexbuffers[name] = std::make_unique<VertexBufferDX11>((const void*)data, count, stride);
+	return m_vertexbuffers[name].get();
+}
+
+
 
 template <class T>
-T *	RenderDeviceDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
 {
 
 	if (name.empty())
