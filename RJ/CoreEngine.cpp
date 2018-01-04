@@ -869,6 +869,8 @@ template <class TModelRenderPredicate>
 void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 {
 	size_t instancecount, inst, n;
+	TModelRenderPredicate render_model;
+
 	if (!pipeline) return;
 
 	// Iterate through each shader in the render queue (though not currently required; all will be mapped to 0)
@@ -881,8 +883,9 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 		// Process each model separately
 		for (size_t mi = 0U; mi < model_count; ++mi)
 		{
+			// Assess the model rendering predicate and early-exit if this model is ineligible
 			auto & model = modelqueue.ModelData[mi];
-			instancecount = model.CurrentInstanceCount;
+			if (!render_model(model.ModelBufferInstance)) continue;
 
 			// Store a reference to the model buffer currently being rendered
 			m_current_modelbuffer = model.ModelBufferInstance;
@@ -890,6 +893,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 			/// TODO: Sort instances here?
 
 			// Loop through the instances in batches, if the total count is larger than our limit
+			instancecount = model.CurrentInstanceCount;
 			for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
 			{
 				// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
