@@ -535,6 +535,10 @@ private:
 	template <class TModelRenderPredicate=ModelRenderPredicate::RenderAll>
 	void								ProcessRenderQueue(PipelineStateDX11 *pipeline);
 
+	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
+	// queue items multiple times through e.g. different shader pipelines
+	void								ClearRenderQueue(void);
+
 	// Clear the render queue ready for the next frame
 	void								DeallocateRenderingQueue(void);
 

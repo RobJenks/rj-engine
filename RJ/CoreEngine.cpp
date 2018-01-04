@@ -930,15 +930,32 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 			// Update the total count of instances that have been processed
 			m_renderinfo.InstanceCount += instancecount;
 
-			// Finally, clear the instance data for this shader/model now that we have fully processed it
-			m_renderqueue.UnregisterModelBuffer(i, mi);
-
 		} /// per-model
+
+	} /// per-shader
+
+}
+
+// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
+// queue items multiple times through e.g. different shader pipelines
+void CoreEngine::ClearRenderQueue(void)
+{
+	// For each shader in the render queue
+	for (size_t i = 0U; i < (size_t)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		auto & modelqueue = m_renderqueue[i];
+		auto model_count = modelqueue.CurrentSlotCount;
+
+		// For each model being rendered by this shader
+		for (size_t mi = 0U; mi < model_count; ++mi)
+		{
+			// Unregister this model from the given render queue slot
+			m_renderqueue.UnregisterModelBuffer(i, mi);
+		}
 
 		// Reset this render queue shader ready for the next frame
 		m_renderqueue[i].CurrentSlotCount = 0U;
 	}
-
 }
 
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
