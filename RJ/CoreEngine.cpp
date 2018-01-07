@@ -108,7 +108,8 @@ CoreEngine::CoreEngine(void)
 	m_instancebuffer(NULL),
 	m_current_topology( D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED ), 
 	m_hwnd( NULL ),
-	m_vsync( false )
+	m_vsync( false ), 
+	m_render_device_failure_count(0U)
 {
 	// Reset all debug component pointers
 	m_debug_renderenvboxes = m_debug_renderenvtree = m_debug_renderportaltraversal = 0;
@@ -330,10 +331,10 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB
-	m_instancedbuffers[1] = m_instancebuffer;		
+	m_instancedbuffers[1] = m_instancebuffer->GetCompiledBuffer();	// Buffer[1] is the instance buffer
 	m_instancedstride[0] = 0U;										// Stride[0] will be populated with the model-specific vertex size
-	m_instancedstride[1] = sizeof(RM_Instance);
-	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;
+	m_instancedstride[1] = sizeof(RM_Instance);						// Buffer[1] is the instance buffer
+	m_instancedoffset[0] = 0; m_instancedoffset[1] = 0;				// No offsets in either buffer
 
 	// Initialise the render queue with a blank map for each shader in scope
 	m_renderqueue = RenderQueue(RenderQueueShader::RM_RENDERQUEUESHADERCOUNT);
@@ -341,23 +342,17 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3DMain::AlphaBlendState::AlphaBlendDisabled, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFlatHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal,
-		D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	
+		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
-		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3DMain::AlphaBlendState::AlphaBlendEnabledNormal, 
-		D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	// TODO: DEBUG: Remove variants on the light shader
 	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
@@ -605,12 +600,7 @@ void CoreEngine::ShutdownRenderQueue(void)
 	// Release any resources currently reserved by the render queue
 	DeallocateRenderingQueue();
 
-	// Free all resources held by the instance buffer
-	if ( m_instancebuffer )
-	{
-		m_instancebuffer->Release(); 
-		m_instancebuffer = NULL;
-	}
+	// Free all resources that are not automatically deallocated
 }
 
 void CoreEngine::ShutdownTextureData(void)
@@ -730,6 +720,53 @@ void CoreEngine::Render(void)
 	ResetRenderInfo();
 
 	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
+	RetrieveRenderCycleData();
+	
+	// Verify the render device is in a good state and report errors if not
+	if (GetRenderDevice()->VerifyState() == false)
+	{
+		++m_render_device_failure_count;
+		Game::Log << LOG_ERROR << "SEVERE: Render device failed state verification; frame skipped.  Failure " << m_render_device_failure_count << " of "
+			<< ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT << " allowable failure cases\n";
+		if (m_render_device_failure_count > ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT)
+		{
+			Game::Log << LOG_ERROR << "FATAL: Render device failures exceed allowable threshold; invoking application shutdown\n";
+			Game::Application.Quit();
+		}
+	}
+
+	// Run any pre-render debug processes
+#	ifdef _DEBUG
+		RunPreRenderDebugProcesses();
+#	endif
+
+	// Construct the view frustrum for this frame so we can perform culling calculations
+	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
+
+	/* Process the scene and populate the render queue (TODO: break out and add remainder; actors, particles, ...) */
+	SpaceSystem & system = Game::Universe->GetCurrentSystem();
+	RenderAllSystemObjects(system);
+
+	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
+	m_renderdevice->Render();
+
+
+	// Activate the render queue optimiser here if it is ready for its next cycle, then clear the render queue ready for Frame+1
+	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
+	ClearRenderQueue();
+	
+	// Run any post-render debug processes
+#	ifdef _DEBUG
+		RunPostRenderDebugProcesses();
+#	endif
+
+	// End the frame
+	
+}
+
+// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
+void CoreEngine::RetrieveRenderCycleData(void)
+{
 	r_devicecontext = m_renderdevice->GetDeviceContext();
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
@@ -749,89 +786,6 @@ void CoreEngine::Render(void)
 	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
 	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
-
-	// Validate render cycle parameters before continuing with the render process
-	if (!r_devicecontext) return;
-
-	// Run any pre-render debug processes
-#	ifdef _DEBUG
-		RunPreRenderDebugProcesses();
-#	endif
-
-	// Construct the view frustrum for this frame so we can perform culling calculations
-	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
-
-	// Determine which system we are currently rendering
-	SpaceSystem & system = Game::Universe->GetCurrentSystem();
-	
-	// Initialise the lighting manager for this frame
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Analysing frame lighting");
-	RJ_PROFILE_START(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting)
-	{
-		LightingManager.AnalyseNewFrame();
-	}
-	RJ_PROFILE_END(Profiler::ProfiledFunctions::Prf_Render_AnalyseFrameLighting);
-
-	/*** Perform rendering that is common to all player environment & states ***/
-
-	// Render the system region
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: System region");
-	if (RenderStageActive(RenderStage::Render_SystemRegion)) 
-		RenderSystemRegion();			// The system-wide rendering, e.g. space backdrop and scenery
-
-	// Render the immmediate player region, e.g. localised space dust
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Immediate region");
-	if (RenderStageActive(RenderStage::Render_ImmediateRegion)) 
-		RenderImmediateRegion();
-
-	// Render all objects in the current system; simulation state & visibility will be taken 
-	// into account to ensure we only render those items that are necessary
-	{
-		// Render all objects
-		RJ_FRAME_PROFILER_CHECKPOINT("Render: System objects");
-		if (RenderStageActive(RenderStage::Render_SystemObjects))
-			RenderAllSystemObjects(system);
-
-		// Render all visible basic projectiles
-		RJ_FRAME_PROFILER_CHECKPOINT("Render: Basic projectiles");
-		if (RenderStageActive(RenderStage::Render_BasicProjectiles))
-			RenderProjectileSet(system.Projectiles);
-	}
-
-	// Render effects and particle emitters
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Effects");
-	if (RenderStageActive(RenderStage::Render_Effects)) RenderEffects();
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Particles");
-	if (RenderStageActive(RenderStage::Render_ParticleEmitters)) RenderParticleEmitters();
-
-	// Perform all 2D rendering of text and UI components
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: User interface");
-	if (RenderStageActive(RenderStage::Render_UserInterface))
-		RenderUserInterface();	
-
-	// Perform any debug/special rendering 
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Debug data");
-	if (RenderStageActive(RenderStage::Render_DebugData))
-		RenderDebugData();
-
-	// Activate the render queue optimiser here if it is ready for its next cycle
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Optimising render queue");
-	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
-
-	// Final activity: process all items queued for rendering.  Any item that benefits from instanced/batched geometry rendering is
-	// added to the render queue during the process above.  We now use instanced rendering on the entire render queue.  The more 
-	// high-volume items that can be moved to use instanced rendering the better
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Processing render queue");
-	ProcessRenderQueue();
-
-	// Run any post-render debug processes
-#	ifdef _DEBUG
-		RunPostRenderDebugProcesses();
-#	endif
-
-	// End the frame
-	RJ_FRAME_PROFILER_CHECKPOINT("Render: Ending frame");
-	LightingManager.EndFrame();
 }
 
 // Submit a model buffer to the render queue manager for rendering this frame
@@ -961,7 +915,7 @@ void CoreEngine::ClearRenderQueue(void)
 }
 
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame
-RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
+/*RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
 {
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 	std::vector<RM_Instance>::size_type instancecount, inst, n;
@@ -1028,7 +982,7 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (rq_shader.PrimitiveTopology != m_current_topology) 
@@ -1063,13 +1017,13 @@ RJ_PROFILED(void CoreEngine::ProcessRenderQueueOld, void)
 
 	// Return any render parameters to their default if required, to avoid any downstream impact
 	if (m_D3D->GetAlphaBlendState() != D3DMain::AlphaBlendState::AlphaBlendDisabled) m_D3D->SetAlphaBlendModeDisabled();
-}
+}*/
 
 // Performs an intermediate z-sorting of instances before populating and processing the render queue.  Used only for 
 // shaders/techniques (e.g. alpha blending) that require instances to be z-sorted.  Takes the place of normal rendering
 void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader)
 {
-	unsigned int n;
+	/*unsigned int n;
 	std::vector<RM_Instance> renderbuffer;
 	D3D11_MAPPED_SUBRESOURCE mappedres;
 #	ifdef RJ_ENABLE_FRAME_PROFILER
@@ -1127,7 +1081,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
-				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, /*DXGI_FORMAT_R32_UINT*/ DXGI_FORMAT_R16_UINT, 0);
+				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
 				if (shader.PrimitiveTopology != m_current_topology)
@@ -1162,7 +1116,7 @@ void CoreEngine::PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails &
 	}
 
 	// Clear the sorted instance vector ready for the next frame
-	shader.SortedInstances.clear();
+	shader.SortedInstances.clear();*/
 }
 
 // Generic iObject rendering method; used by subclasses wherever possible.  Returns a flag indicating whether
@@ -2157,7 +2111,7 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 {
 	// Prepare all region particles, calculate vertex data and promote all to the buffer ready for shader rendering
-	D::Regions::Immediate->Render(r_devicecontext, r_view);
+	/*D::Regions::Immediate->Render(r_devicecontext, r_view);
 
 	// Enable alpha blending before rendering any particles
 	m_D3D->SetAlphaBlendModeEnabled();
@@ -2170,13 +2124,13 @@ RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)
 	// Disable alpha blending after rendering the particles
 	// TODO: Move to somewhere more global once we have further rendering that requires alpha effects.  Avoid multiple on/off switches
 	m_D3D->SetAlphaBlendModeDisabled();	
-	m_D3D->EnableZBuffer();
+	m_D3D->EnableZBuffer();*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 {
 	// Use ID for the world matrix, except use the last (translation) row of the inverse view matrix for r[3] (_41 to _43)
-	XMMATRIX world = ID_MATRIX;
+	/*XMMATRIX world = ID_MATRIX;
 	world.r[3] = r_invview.r[3];
 
 	// Render system backdrop using the standard texture shader, if there is a backdrop to render
@@ -2198,14 +2152,13 @@ RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 		// Re-enable culling and the z-buffer after rendering the skybox
 		m_D3D->EnableRasteriserCulling();
 		m_D3D->EnableZBuffer();
-	}
+	}*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderUserInterface, void)
 {
 	// Enable alpha-blending, and disable the z-buffer, in advance of any 2D UI rendering
-	m_D3D->SetAlphaBlendModeEnabled();
-//	m_D3D->DisableZBuffer();
+	/*m_D3D->SetAlphaBlendModeEnabled();
 
 	// Call the UI controller rendering function
 	D::UI->Render();
@@ -2218,41 +2171,27 @@ RJ_PROFILED(void CoreEngine::RenderUserInterface, void)
 
 	// Now disable alpha blending, and re-enable the z-buffer, to return to normal rendering
 	m_D3D->SetAlphaBlendModeDisabled();
-//	m_D3D->EnableZBuffer();
+	*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderEffects, void)
 {
 	// Enable alpha blending before rendering any effects
-	m_D3D->SetAlphaBlendModeEnabled();
+	/*m_D3D->SetAlphaBlendModeEnabled();
 
 	// Update the effect manager frame timer to ensure effects are rendered consistently regardless of FPS
 	m_effectmanager->BeginEffectRendering();
 	
-	//TODO: REMOVE
-	// Render a test fire effect
-	/*if (false) {
-		D3DXMATRIX world, tmpT, tmpR, tmpS;
-		D3DXQUATERNION *tmpQ;
-		D3DXMatrixTranslation(&tmpT, 0,0,125);
-		tmpQ = m_camera->GetDecomposedViewRotation();
-		//D3DXQuaternionIdentity(&tmpQ);
-		D3DXMatrixRotationQuaternion(&tmpR, tmpQ);
-		D3DXMatrixInverse(&tmpR, 0, &tmpR);
-		D3DXMatrixScaling(&tmpS, 15.0f, 15.0f, 15.0f);
-		D3DXMatrixMultiply(&tmpS, &tmpR, &tmpS);
-		D3DXMatrixMultiply(&world, &tmpS, &tmpT);
-		m_effectmanager->RenderFireEffect(0, r_devicecontext, world, r_view, r_projection);
-	}*/
-
 	// Disable alpha blending after all effects are rendered
-	m_D3D->SetAlphaBlendModeDisabled();
+	m_D3D->SetAlphaBlendModeDisabled();*/
 }
 
 RJ_PROFILED(void CoreEngine::RenderParticleEmitters, void)
 {
 	// Pass control to the particle engine to perform all required rendering
+	/*
 	m_particleengine->Render(r_view, r_projection, m_D3D, m_camera);
+	*/
 }
 
 // Push an actor onto the queue for rendering
@@ -2270,7 +2209,7 @@ void CoreEngine::QueueActorRendering(Actor *actor)
 RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 {
 	// Quit immediately if there are no queued actors to render
-	if (m_queuedactors.empty()) return;
+	/*if (m_queuedactors.empty()) return;
 
 	// Disable rasteriser culling to prevent loss of intermediate faces in skinned models; we only have to do this once before rendering all actors
 	m_D3D->DisableRasteriserCulling();
@@ -2308,7 +2247,7 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 	m_renderinfo.ActorRenderCount += count;
 
 	// Reset the queue now that it has been processed, so we are ready for adding new items in the next frame
-	m_queuedactors.clear();
+	m_queuedactors.clear();*/
 }
 
 // Resets the queue to a state before any rendering has taken place.  Deallocates reserved memory.  
@@ -2987,7 +2926,8 @@ void CoreEngine::DebugOutputRenderQueueContents(void)
 
 	for (int i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		ss << "\tShader " << i << " [AlphaBlend=" << m_renderqueueshaders[i].AlphaBlendRequired << ", ZSort=" << m_renderqueueshaders[i].RequiresZSorting <<
+		ss << "\tShader " << i << 
+			" [ZSort=" << m_renderqueueshaders[i].RequiresZSorting <<
 			", Topology=" << m_renderqueueshaders[i].PrimitiveTopology << "]\n";
 	}
 	ss << "}\n";

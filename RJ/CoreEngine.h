@@ -614,6 +614,9 @@ private:
 	void					RunPreRenderDebugProcesses(void);
 	void					RunPostRenderDebugProcesses(void);
 
+	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
+	void					RetrieveRenderCycleData(void);
+
 	// Lighting configuration is stored within the core engine and set for each object being rendered
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
@@ -664,6 +667,10 @@ private:
 	float						m_debug_renderobjid_distance;					// Distance from camera within which we should render the ID of objects
 	std::vector<SentenceType*> 
 								m_debug_renderobjid_text;						// Vector of text objects for debug render object identifiers
+
+	// Counter for allowable render device failures before application will consider it unrecoverable and terminate
+	unsigned int				m_render_device_failure_count;
+	static const unsigned int	ALLOWABLE_RENDER_DEVICE_FAILURE_COUNT = 10U;
 
 	// Enumeration of possible debug terain render modes
 	enum DebugTerrainRenderMode { Normal = 0, Solid };

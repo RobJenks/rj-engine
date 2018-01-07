@@ -16,7 +16,6 @@ struct							RM_InstancedShaderDetails
 {
 	iShader *					Shader;							// The shader itself
 	bool						RequiresZSorting;				// Flag determining whether instances must go through an intermediate z-sorting step
-	D3DMain::AlphaBlendState	AlphaBlendRequired;				// Flag indicating if/how alpha blending should be enabled for this shader
 	D3D11_PRIMITIVE_TOPOLOGY	PrimitiveTopology;				// The primitive topology to be used for rendering in this shader
 
 	std::vector<RM_ZSortedInstance>	SortedInstances;			// Vector used for the intermediate sorting step, where required, so that items 
@@ -24,13 +23,13 @@ struct							RM_InstancedShaderDetails
 
 	// Default constructor, no reference to shader, sets all parameters to defaults
 	RM_InstancedShaderDetails(void) : 
-		Shader(NULL), RequiresZSorting(false), AlphaBlendRequired(D3DMain::AlphaBlendState::AlphaBlendDisabled), 
+		Shader(NULL), RequiresZSorting(false),
 		PrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
 	{}
 
 	// Constructor allowing all parameters to be specified
-	RM_InstancedShaderDetails(iShader *shader, bool requiresZsorting, D3DMain::AlphaBlendState alphablend, D3D11_PRIMITIVE_TOPOLOGY primitive_topology) :
-		Shader(shader), RequiresZSorting(requiresZsorting), AlphaBlendRequired(alphablend), PrimitiveTopology(primitive_topology)
+	RM_InstancedShaderDetails(iShader *shader, bool requiresZsorting, D3D11_PRIMITIVE_TOPOLOGY primitive_topology) :
+		Shader(shader), RequiresZSorting(requiresZsorting), PrimitiveTopology(primitive_topology)
 	{}
 };
 

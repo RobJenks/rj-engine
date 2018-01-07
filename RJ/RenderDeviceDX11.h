@@ -49,6 +49,8 @@ public:
 	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseStandardRenderPipelines(void);
 
+	// Verify the render device is in a good state and report errors if not
+	bool											VerifyState(void);
 
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
 	CMPINLINE Rendering::RenderDeviceContextType *	GetDeviceContext() { return m_devicecontext; }

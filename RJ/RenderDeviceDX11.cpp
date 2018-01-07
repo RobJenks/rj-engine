@@ -640,19 +640,22 @@ void RenderDeviceDX11::RecalculateOrthographicMatrix(void)
 	m_orthographic = XMMatrixOrthographicLH((float)m_displaysize.x, (float)m_displaysize.y, m_screen_near, m_screen_far);
 }
 
-
-void RenderDeviceDX11::BeginDeferredRenderingFrame(void)
+// Verify the render device is in a good state and report errors if not
+bool RenderDeviceDX11::VerifyState(void)
 {
+	if (!m_device)
+	{
+		Game::Log << LOG_ERROR << "Lost render device \"" << Rendering::GetRenderDeviceTypeName() << "\"; cannot proceed\n";
+		return false;
+	}
 
-}
+	if (!m_devicecontext)
+	{
+		Game::Log << LOG_ERROR << "Lost render device context \"" << Rendering::GetRenderDeviceContextTypeName() << "\"; cannot proceed\n";
+		return false;
+	}
 
-
-
-
-
-void RenderDeviceDX11::EndDeferredRenderinFrame(void)
-{
-
+	return true;
 }
 
 
