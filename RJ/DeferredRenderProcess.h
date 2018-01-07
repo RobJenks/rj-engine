@@ -1,6 +1,7 @@
 #pragma once
 
 #include "RenderProcessDX11.h"
+#include "ManagedPtr.h"
 #include "DeferredGBuffer.h"
 #include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
 class PipelineStateDX11;
@@ -31,10 +32,10 @@ protected:
 	void RenderTransparency(void);
 
 	// Retrieve standard buffer data
-	ConstantBufferDX11 *							GetCommonFrameDataBuffer(void) { return m_cb_frame; }
-	FrameDataBuffer *								GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
-	ConstantBufferDX11 *							GetCommonMaterialBuffer(void) { return m_cb_material; }
-	MaterialBuffer *								GetCommonMaterialBufferData(void) { return m_cb_material_data.RawPtr; }
+	CMPINLINE ConstantBufferDX11 *					GetCommonFrameDataBuffer(void) { return m_cb_frame; }
+	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
+	CMPINLINE ConstantBufferDX11 *					GetCommonMaterialBuffer(void) { return m_cb_material; }
+	CMPINLINE MaterialBuffer *						GetCommonMaterialBufferData(void) { return m_cb_material_data.RawPtr; }
 
 private:
 

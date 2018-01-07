@@ -242,13 +242,13 @@ void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 void DeferredRenderProcess::RenderGeometry(void)
 {
 	// Bind required buffer resources to shader parameters
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(Game::Engine->GetRenderDevice()->GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(GetCommonFrameDataBuffer());
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	m_pipeline_geometry->Bind();
 
 	// Render all non-transparent objects
-	*** DO THIS ***
+	Game::Engine->ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(m_pipeline_geometry);
 
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds

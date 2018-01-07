@@ -167,6 +167,16 @@ public:
 	/* *** Main rendering function *** */
 	void					Render(void);
 
+	// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
+	// will be rendered through the given rendering pipeline
+	template <class TModelRenderPredicate = ModelRenderPredicate::RenderAll>
+	void					ProcessRenderQueue(PipelineStateDX11 *pipeline);
+
+	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
+	// queue items multiple times through e.g. different shader pipelines
+	void					ClearRenderQueue(void);
+
+
 	// Method to render the system region
 	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_SystemRegion, 
 		void, RenderSystemRegion, void, )
@@ -358,9 +368,6 @@ public:
 	CMPINLINE HWND GetHWND(void) const			{ return m_hwnd; }
 	CMPINLINE bool VsyncEnabled(void) const		{ return m_vsync; }
 
-	// Returns the alpha blending state.  Passthrough method to the D3D component
-	CMPINLINE D3DMain::AlphaBlendState GetAlphaBlendState(void) const		{ return m_D3D->GetAlphaBlendState(); }
-
 	// Central shader manager for the engine
 	ShaderManager			ShaderManager;
 
@@ -530,20 +537,8 @@ private:
 	// Optimiser performs periodic maintenance on the engine render queue
 	RenderQueueOptimiser		m_rq_optimiser;
 
-	// Process the full render queue for all shaders in scope
-	RJ_ADDPROFILE(Profiler::ProfiledFunctions::Prf_Render_ProcessRenderQueue, 
-		void, ProcessRenderQueueOld, void, );
 
-	// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
-	// will be rendered through the given rendering pipeline
-	template <class TModelRenderPredicate=ModelRenderPredicate::RenderAll>
-	void								ProcessRenderQueue(PipelineStateDX11 *pipeline);
-
-	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
-	// queue items multiple times through e.g. different shader pipelines
-	void								ClearRenderQueue(void);
-
-	// Clear the render queue ready for the next frame
+	// Clear the render queue.  Not required per-frame; invoked on shutdown to clear down resources
 	void								DeallocateRenderingQueue(void);
 
 	// Performs an intermediate z-sorting of instances before rendering via the render queue.  Used only for shaders/techniques (e.g. alpha
