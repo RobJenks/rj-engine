@@ -13,6 +13,8 @@ void RenderDevice::Render(void)
 {
 	assert(m_render_process != NULL);
 
+	// Pop
+
 	m_render_process->Render();
 }
 

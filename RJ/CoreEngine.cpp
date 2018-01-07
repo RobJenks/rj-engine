@@ -129,10 +129,10 @@ CoreEngine::CoreEngine(void)
 	m_instanceparams = NULL_FLOAT4;
 
 	// Initialise all key matrices to the identity
-	r_view = r_projection = r_orthographic = r_invview = r_viewproj = r_invviewproj = m_projscreen 
+	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_viewproj = r_invviewproj = m_projscreen 
 		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
-	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
-
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
+	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
 	
@@ -734,6 +734,7 @@ void CoreEngine::Render(void)
 	m_camera->GetViewMatrix(r_view);
 	m_camera->GetInverseViewMatrix(r_invview);
 	r_projection = m_renderdevice->GetProjectionMatrix();
+	r_invproj = m_renderdevice->GetInverseProjectionMatrix();
 	r_orthographic = m_renderdevice->GetOrthoMatrix();
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
@@ -744,6 +745,7 @@ void CoreEngine::Render(void)
 	XMStoreFloat4x4(&r_view_f, r_view);
 	XMStoreFloat4x4(&r_invview_f, r_invview);
 	XMStoreFloat4x4(&r_projection_f, r_projection);
+	XMStoreFloat4x4(&r_invproj_f, r_invproj);
 	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
 	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);

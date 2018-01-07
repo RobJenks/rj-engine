@@ -65,7 +65,7 @@ UINT Buffer::DetermineBindFlags(Buffer::BufferType buffertype)
 	case Buffer::BufferType::IndexBuffer:		return D3D11_BIND_INDEX_BUFFER;
 	case Buffer::BufferType::ConstantBuffer:	return D3D11_BIND_CONSTANT_BUFFER;
 
-	case Buffer::BufferType::StructuredBuffer:	/* Fallthrough: not relevant here*/
+	case Buffer::BufferType::StructuredBuffer:	/* Fallthrough: not relevant here */
 	default:
 		Game::Log << LOG_WARN << "Attempted to determine bind flags for unsupported buffer type " << buffertype << "; failure likely\n";
 		return 0U;

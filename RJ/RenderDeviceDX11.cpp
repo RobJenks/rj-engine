@@ -41,6 +41,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_screen_near(Game::NearClipPlane),
 	m_screen_far(Game::FarClipPlane), 
 	m_projection(ID_MATRIX), 
+	m_invproj(ID_MATRIX), 
 	m_orthographic(ID_MATRIX),
 
 	m_standard_vs(NULL), 
@@ -49,9 +50,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_deferred_lighting_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
-	m_sampler_linearrepeat(NULL), 
-	m_cb_frame(NULL), 
-	m_cb_material(NULL)
+	m_sampler_linearrepeat(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -86,7 +85,6 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseShaderResources(), "shader resources" )
 
 	// Initialise all standard components that are common to many rendering methods
-	PERFORM_INIT( InitialiseStandardBuffers(), "common buffer definitions")
 	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
@@ -590,21 +588,13 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 
 }
 
-// Initialise all standard constant buffers that are used across multiple rendering components
-Result RenderDeviceDX11::InitialiseStandardBuffers(void)
-{
-	Game::Log << LOG_INFO << "Initialising standard engine buffer resources\n";
-
-	m_cb_frame = Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName);
-	m_cb_material = Assets.CreateConstantBuffer<MaterialBuffer>(MaterialBufferName);
-}
-
 
 void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 {
 	assert(display_size.x > 0 && display_size.y > 0);
 
 	m_displaysize = display_size;
+	m_displaysize_f = XMFLOAT2((float)m_displaysize.x, (float)m_displaysize.y);
 	m_aspectratio = (display_size.x / display_size.y);
 
 	RecalculateOrthographicMatrix();
@@ -642,6 +632,7 @@ void RenderDeviceDX11::RecalculateProjectionMatrix(void)
 	// TODO: Flip near/far plane distances as part of inverted depth buffer for greater FP precision
 	// https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.matrix.xmmatrixperspectivefovlh(v=vs.85).aspx
 	m_projection = XMMatrixPerspectiveFovLH(m_fov, m_aspectratio, m_screen_near, m_screen_far);
+	m_invproj = XMMatrixInverse(NULL, m_projection);
 }
 
 void RenderDeviceDX11::RecalculateOrthographicMatrix(void)

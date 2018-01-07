@@ -4,6 +4,7 @@
 #include <memory>
 #include <unordered_map>
 #include "ManagedPtr.h"
+#include "IntVector.h"
 #include "RenderDevice.h"
 #include "RenderAssetsDX11.h"
 #include "Shader.h"
@@ -15,7 +16,6 @@
 #include "InputLayoutDesc.h"
 #include "Texture.h"
 #include "CPUGraphicsResourceAccess.h"
-#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
 class RenderTargetDX11;
 
 
@@ -48,7 +48,6 @@ public:
 	Result											InitialiseShaderResources(void);
 	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseStandardRenderPipelines(void);
-	Result											InitialiseStandardBuffers(void);
 
 
 	CMPINLINE Rendering::RenderDeviceType *			GetDevice() { return m_device; }
@@ -62,9 +61,12 @@ public:
 	CMPINLINE float									GetTanOfHalfFOV(void) const { return m_halffovtan; }
 	CMPINLINE float									GetNearClipDistance(void) const { return m_screen_near; }
 	CMPINLINE float									GetFarClipDistance(void) const { return m_screen_far; }
+	CMPINLINE INTVECTOR2							GetDisplaySize(void) const { return m_displaysize; }
+	CMPINLINE XMFLOAT2								GetDisplaySizeF(void) const { return m_displaysize_f; }
 
 	CMPINLINE XMMATRIX								GetProjectionMatrix(void) const { return m_projection; }
 	CMPINLINE XMMATRIX								GetOrthoMatrix(void) const { return m_orthographic; }
+	CMPINLINE XMMATRIX								GetInverseProjectionMatrix(void) const { return m_invproj; }
 	
 	// Rendering assets
 	RenderAssetsDX11								Assets;
@@ -94,17 +96,6 @@ public:
 
 
 
-public:
-
-	ConstantBufferDX11 *							GetCommonFrameDataBuffer(void) { return m_cb_frame; }
-	FrameDataBuffer *								GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
-
-	ConstantBufferDX11 *							GetCommonMaterialBuffer(void) { return m_cb_material; }
-	MaterialBuffer *								GetCommonMaterialBufferData(void) { return m_cb_material_data.RawPtr; }
-
-
-
-
 private:
 
 	Rendering::RenderDeviceType *			m_device;
@@ -121,10 +112,12 @@ private:
 	float									m_fov;
 	float									m_halffovtan;
 	INTVECTOR2								m_displaysize;
+	XMFLOAT2								m_displaysize_f;
 	float									m_aspectratio;
 	float									m_screen_near;
 	float									m_screen_far;
 	XMMATRIX								m_projection;
+	XMMATRIX								m_invproj;
 	XMMATRIX								m_orthographic;
 	DXGI_SAMPLE_DESC						m_sampledesc;
 
@@ -138,13 +131,6 @@ private:
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
-
-
-	// Standard constant buffers; keep single instance for binding efficiency
-	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
-	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
-	ManagedPtr<MaterialBuffer>				m_cb_material_data;
-	ConstantBufferDX11 *					m_cb_material;
 	
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device

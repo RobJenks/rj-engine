@@ -8,6 +8,7 @@
 #include "RasterizerStateDX11.h"
 #include "DepthStencilState.h"
 #include "BlendState.h"
+#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
 
 
 DeferredRenderProcess::DeferredRenderProcess(void)
@@ -16,6 +17,8 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_ps_geometry(NULL), 
 	m_ps_lighting(NULL), 
 	m_depth_only_rt(NULL), 
+	m_cb_frame(NULL), 
+	m_cb_material(NULL), 
 
 	m_pipeline_geometry(NULL), 
 	m_pipeline_lighting_pass1(NULL), 
@@ -31,6 +34,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 {
 	InitialiseShaders();
 	InitialiseRenderTargets();
+	InitialiseStandardBuffers();
 
 	InitialiseGeometryPipelines();
 	InitialiseDeferredLightingPipelines();
@@ -68,6 +72,17 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly");
 	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
+}
+
+void DeferredRenderProcess::InitialiseStandardBuffers(void)
+{
+	Game::Log << LOG_INFO << "Initialise deferred rendering standard buffer resources\n";
+
+	m_cb_frame_data = { 0 };
+	m_cb_material_data = { 0 };
+
+	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
+	m_cb_material = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<MaterialBuffer>(MaterialBufferName, m_cb_material_data.RawPtr);
 }
 
 // Geometry pipeline will render all opaque geomeetry to the GBuffer RT
@@ -214,7 +229,13 @@ void DeferredRenderProcess::Render(void)
 
 void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 {
-	*** DO THIS ***
+	// Frame data buffer
+	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
+	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
+	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
+	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+	m_cb_frame->Set(m_cb_frame_data.RawPtr);
+
 }
 
 
