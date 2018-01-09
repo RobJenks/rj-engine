@@ -1,7 +1,8 @@
 #include "ErrorCodes.h"
 #include "CoreEngine.h"
 #include "GameVarsExtern.h"
-#include "Texture.h"
+#include "CoreEngine.h"
+#include "TextureDX11.h"
 
 #include "Image2D.h"
 
@@ -26,7 +27,7 @@ Image2D::~Image2D()
 }
 
 
-Result Image2D::Initialize(Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight)
+Result Image2D::Initialize(int screenWidth, int screenHeight, const std::string & texture, int bitmapWidth, int bitmapHeight)
 { 
 	Result result;
 
@@ -46,33 +47,30 @@ Result Image2D::Initialize(Rendering::RenderDeviceType * device, int screenWidth
 	m_previousPosY = -1;
 	m_previousPosZ = -1.0f;
 
-	// Store a reference to the device and device context
-	m_device = Game::Engine->GetDevice();
-	m_devicecontext = Game::Engine->GetDeviceContext();
-
 	// Initialize the vertex and index buffers.
-	result = InitializeBuffers(device);
+	result = InitializeBuffers();
 	if(result != ErrorCodes::NoError)
 	{
 		return result;
 	}
 
 	// Load the texture for this bitmap.
-	result = LoadTexture(device, textureFilename);
-	if(result != ErrorCodes::NoError)
+	m_Texture = Game::Engine->GetAssets().GetTexture(texture);
+	if (!m_Texture)
 	{
-		return result;
+		Game::Log << LOG_WARN << "Cannot load texture \"" << texture << "\" for UI image \"" << m_code << "\"\n";
 	}
 
 	return ErrorCodes::NoError;
 }
 
+ID3D11ShaderResourceView * Image2D::GetTexture(void) 
+{ 
+	return (m_Texture ? m_Texture->GetShaderResourceView() : NULL);
+}
 
 void Image2D::Shutdown()
 {
-	// Release the bitmap texture.
-	ReleaseTexture();
-
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
 }
@@ -102,7 +100,7 @@ void Image2D::Render(void)
 	RenderBuffers();
 }
 
-Result Image2D::InitializeBuffers(Rendering::RenderDeviceType * device)
+Result Image2D::InitializeBuffers(void)
 {
 	INDEXFORMAT *indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
@@ -161,7 +159,8 @@ Result Image2D::InitializeBuffers(Rendering::RenderDeviceType * device)
 	vertexData.SysMemSlicePitch = 0;
 
 	// Now create the vertex buffer.
-    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
+	auto * device = Game::Engine->GetRenderDevice()->GetDevice();
+	result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CouldNotCreateImage2DVertexBuffer;
@@ -264,7 +263,8 @@ Result Image2D::UpdateBuffers(void)
 	m_vertices[5].position = XMFLOAT3(right, bottom, m_z);	// Bottom right.
 	
 	// Lock the vertex buffer so it can be written to.
-	result = m_devicecontext->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	auto *context = Game::Engine->GetRenderDevice()->GetDeviceContext();
+	result = context->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CouldNotObtainImage2DBufferLock;
@@ -277,7 +277,7 @@ Result Image2D::UpdateBuffers(void)
 	memcpy(verticesPtr, (void*)m_vertices, (sizeof(VertexType) * m_vertexCount));
 
 	// Unlock the vertex buffer.
-	m_devicecontext->Unmap(m_vertexBuffer, 0);
+	context->Unmap(m_vertexBuffer, 0);
 
 	return ErrorCodes::NoError;
 }
@@ -289,49 +289,16 @@ void Image2D::RenderBuffers(void)
 	unsigned int offset;
 
 	// Set vertex buffer stride and offset.
-	stride = sizeof(VertexType); 
+	auto *context = Game::Engine->GetRenderDevice()->GetDeviceContext(); 
+	stride = sizeof(VertexType);
 	offset = 0;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
+	context->IASetVertexBuffers(0, 1, &m_vertexBuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(m_indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	m_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-}
-
-
-Result Image2D::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
-{
-	Result result;
-
-	// Create the texture object.
-	m_Texture = new Texture();
-	if(!m_Texture)
-	{
-		return ErrorCodes::CouldNotAllocateImage2DTextureObject;
-	}
-
-	// Initialize the texture object.
-	result = m_Texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	return ErrorCodes::NoError;
-}
-
-
-void Image2D::ReleaseTexture()
-{
-	// Release the texture object.
-	if(m_Texture)
-	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
-	}
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

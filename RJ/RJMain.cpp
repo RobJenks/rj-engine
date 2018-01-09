@@ -1164,8 +1164,6 @@ void RJMain::Quit(void)
 }
 
 
-#include "Data\\Shaders\\standard_ps_const_buffer.h"
-
 Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 {
 	Result res;
@@ -1424,13 +1422,12 @@ Result RJMain::InitialiseRegions(void)
 
 	// Initialise the immediate region, centred around the player
 	D::Regions::Immediate = new ImmediateRegion();
-	res = D::Regions::Immediate->Initialise(
-		Game::Engine->GetDevice(),																		// Pointer to the D3D device
-		BuildStrFilename(D::IMAGE_DATA, "Particles\\dust_particle.dds").c_str(),						// Texture to be mapped onto all dust particles
-		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),											// Starting centre point = player location
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),										// Minimum region bounds
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),									// Maximum region bounds
-		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_THRESHOLD), 0.0f)								// Region update threshold
+	res = D::Regions::Immediate->Initialise(								// Pointer to the D3D device
+		"dust_particle.dds", 												// Texture to be mapped onto all dust particles
+		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),				// Starting centre point = player location
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),			// Minimum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),		// Maximum region bounds
+		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_THRESHOLD), 0.0f)	// Region update threshold
 		);
 
 	// If initialisation of the immediate region failed then return with an error here

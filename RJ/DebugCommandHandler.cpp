@@ -11,6 +11,7 @@
 #include "RJMain.h"
 #include "UserInterface.h"
 #include "Logging.h"
+#include "FrameProfiler.h"
 
 // Debug command handler needs to include the full object & tile hierarchies to support per-object command handling
 #include "Actor.h"

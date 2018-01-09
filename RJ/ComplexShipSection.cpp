@@ -1,4 +1,5 @@
 #include "Utility.h"
+#include "CoreEngine.h"
 #include "ComplexShip.h"
 #include "Hardpoint.h"
 #include "Hardpoints.h"
@@ -312,10 +313,14 @@ void ComplexShipSection::DestroyObject(void)
 }
 
 // Sets the preview image texture associated with this ship
-void ComplexShipSection::SetPreviewImage(const std::string & filename)
+void ComplexShipSection::SetPreviewImage(const std::string & name)
 {
 	// Texture manager logic will deal with loading an external texture if required, or returning a pointer to an existing resource if not
-	m_previewimage = new Texture(concat(D::IMAGE_DATA)("\\")(filename).str());
+	m_previewimage = Game::Engine->GetAssets().GetTexture(name);
+	if (!m_previewimage)
+	{
+		Game::Log << LOG_WARN << "Cannot load preview image \"" << name << "\" for ship section \"" << m_code << "\"\n";
+	}
 }
 
 // Returns the file path where XML data relating to this ship section should be stored.  This is either within the "Sections"

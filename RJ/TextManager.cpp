@@ -2,17 +2,13 @@
 #include "FontData.h"
 #include "FontShader.h"
 #include "SentenceType.h"
+#include "CoreEngine.h"
 
 #include "TextManager.h"
 
 
-Result XM_CALLCONV TextManager::Initialize(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd, int screenWidth, int screenHeight,
-								const FXMMATRIX baseViewMatrix, FontShader *fontshader)
+Result XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int screenHeight, const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
-	// Store pointers to the D3D device and device context
-	m_device = device;
-	m_devicecontext = deviceContext;
-
 	// Store the screen width and height.
 	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
@@ -39,7 +35,7 @@ Result TextManager::InitializeFont(std::string name, const char *fontdata, const
 	}
 
 	// Initialize the font object.
-	result = font->Initialize(m_device, name, fontdata, fonttexture);
+	result = font->Initialize(Game::Engine->GetRenderDevice()->GetDevice(), name, fontdata, fonttexture);
 	if(result != ErrorCodes::NoError)
 	{
 		return result;
@@ -204,7 +200,8 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 	vertexData.SysMemSlicePitch = 0;
 
 	// Create the vertex buffer.
-    result = m_device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer);
+	auto *device = Game::Engine->GetRenderDevice()->GetDevice();
+    result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &(*sentence)->vertexBuffer);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CannotCreateTextVertexBuffer;
@@ -224,7 +221,7 @@ Result TextManager::InitializeSentence(SentenceType** sentence, int maxLength, i
 	indexData.SysMemSlicePitch = 0;
 
 	// Create the index buffer.
-	result = m_device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
+	result = device->CreateBuffer(&indexBufferDesc, &indexData, &(*sentence)->indexBuffer);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CannotCreateTextIndexBuffer;
@@ -304,7 +301,8 @@ Result TextManager::SetSentenceText(SentenceType *sentence, const char *text, fl
 	font->BuildVertexArray((void*)vertices, text, drawX, drawY, size, &(sentence->sentencewidth), &(sentence->sentenceheight));
 
 	// Lock the vertex buffer so it can be written to.
-	result = m_devicecontext->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
+	result = context->Map(sentence->vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
 	{
 		return ErrorCodes::CouldNotObtainVertexBufferLock;
@@ -317,7 +315,7 @@ Result TextManager::SetSentenceText(SentenceType *sentence, const char *text, fl
 	memcpy(verticesPtr, (void*)vertices, (sizeof(VertexType) * sentence->vertexCount));
 
 	// Unlock the vertex buffer.
-	m_devicecontext->Unmap(sentence->vertexBuffer, 0);
+	context->Unmap(sentence->vertexBuffer, 0);
 
 	// Release the vertex array as it is no longer needed.
 	delete [] vertices;
@@ -357,24 +355,25 @@ Result XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXM
 	unsigned int stride, offset;
 
 	// Set vertex buffer stride and offset.
+	auto * context = Game::Engine->GetRenderDevice()->GetDeviceContext();
     stride = sizeof(VertexType); 
 	offset = 0;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetVertexBuffers(0, 1, &sentence->vertexBuffer, &stride, &offset);
+	context->IASetVertexBuffers(0, 1, &sentence->vertexBuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
-	m_devicecontext->IASetIndexBuffer(sentence->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
+	context->IASetIndexBuffer(sentence->indexBuffer, DXGI_FORMAT_R16_UINT, 0);
 
     // Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
-	m_devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Get a handle to the font object that will be used for rendering of the text
 	FontData *font = m_fonts.at(sentence->fontID);
 	if (!font) return ErrorCodes::FontDataNoLongerExistsForTextRendering;
 
 	// Render the text using the font shader.
-	return m_fontshader->Render( m_devicecontext, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix, 
+	return m_fontshader->Render( context, sentence->indexCount, worldMatrix, m_baseViewMatrix, orthoMatrix,
 								 font->GetTexture(), sentence->colour);
 }
 

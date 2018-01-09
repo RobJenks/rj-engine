@@ -9,7 +9,7 @@
 #include <vector>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
-#include "Texture.h"
+class Texture;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -44,7 +44,7 @@ public:
 	static const XMFLOAT2	TexCoord[4][4];
 
 	// Initialisation function
-	Result						Initialise(Rendering::RenderDeviceType  *device);
+	Result						Initialise(void);
 
 	// Methods for adding and per-frame updating of particles
 	void						AddParticle(int id);
@@ -112,10 +112,9 @@ public:
 
 
 	// Methods to get and set other emitter properties
-	Result						LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
-	CMPINLINE ID3D11ShaderResourceView 
-								*GetParticleTexture(void) { return m_texture->GetTexture(); }
-	CMPINLINE void				SetParticleTexture(Texture *tex) { m_texture = tex; }
+	ID3D11ShaderResourceView *	GetParticleTexture(void);
+	void						SetParticleTexture(const std::string & name);
+	CMPINLINE void				SetParticleTexture(TextureDX11 *texture) { m_texture = texture; }
 
 	CMPINLINE bool				Exists(void) { return m_exists; }
 	CMPINLINE void				SetExists(bool exists) { m_exists = exists; }
@@ -159,7 +158,7 @@ public:
 private:
 	// Initialisation functions
 	Result						InitialiseParticles(void);
-	Result						InitialiseBuffers(Rendering::RenderDeviceType  *device);
+	Result						InitialiseBuffers(void);
 
 	// Rendering methods
 	void						RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
@@ -186,7 +185,7 @@ private:
 
 	int							m_particlelimit;					// Maximum number of particles that can exist at any one time
 	int							m_vertexlimit;						// Similar limit for vertices; always equal to 6*particle limit
-	Texture						*m_texture;							// Texture applied to each particle (can be NULL for coloured particles)
+	TextureDX11 *				m_texture;							// Texture applied to each particle (can be NULL for coloured particles)
 
 	float						m_emissionfreq[2];					// Time between each particle emission (secs)
 	float						m_timetonextemission;				// Time until the next particle should be emitted (secs)

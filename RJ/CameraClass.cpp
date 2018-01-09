@@ -364,7 +364,7 @@ bool CameraClass::ZoomToOverheadShipView(iSpaceObject *target, ZoomToOverheadCom
 		//		d = distance to move from the ship
 		//		s = size of the object (z dimension will be considered)
 		//		a = camera FOV.  (use precalculated tan(FOV/2) exposed by frustum in GetTanOfHalfFOV())
-		float distance = ((XMVectorGetZ(objectsize) * 1.25f) / 2.0f) / Game::Engine->GetDirect3D()->GetTanOfHalfFOV();
+		float distance = ((XMVectorGetZ(objectsize) * 1.25f) / 2.0f) / Game::Engine->GetRenderDevice()->GetTanOfHalfFOV();
 		return ZoomToOverheadShipView(target, on_complete, distance, time);
 	}
 }

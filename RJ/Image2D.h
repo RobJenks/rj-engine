@@ -7,8 +7,8 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "Rendering.h"
-#include "Texture.h"
 #include "iUIComponentRenderable.h"
+class TextureDX11;
 
 
 // Class has no special alignment requirements
@@ -31,7 +31,7 @@ public:
 	Image2D(const Image2D&);
 	~Image2D();
 
-	Result Initialize(Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, int bitmapWidth, int bitmapHeight);
+	Result Initialize(int screenWidth, int screenHeight, const std::string & texture, int bitmapWidth, int bitmapHeight);
 	void Shutdown();
 	
 	void Render(void);
@@ -41,7 +41,7 @@ public:
 	CMPINLINE void SetRenderActive(bool render)		{ m_render = render; }
 
 	CMPINLINE int GetIndexCount() { return m_indexCount; }
-	CMPINLINE ID3D11ShaderResourceView* GetTexture() { return m_Texture->GetTexture(); }
+	ID3D11ShaderResourceView* GetTexture(void);
 
 	CMPINLINE int GetXPosition(void) { return m_x; }
 	CMPINLINE int GetYPosition(void) { return m_y; }
@@ -54,26 +54,21 @@ public:
 	CMPINLINE int GetHeight(void) { return m_bitmapHeight; }
 
 private:
-	Result InitializeBuffers(Rendering::RenderDeviceType *);
+	Result InitializeBuffers();
 	void ShutdownBuffers();
 	Result UpdateBuffers();
 	void RenderBuffers();
 
-	Result LoadTexture(Rendering::RenderDeviceType *, const char*);
-	void ReleaseTexture();
 
 private:
 
 	int m_x, m_y;
 	float m_z;
 
-	Rendering::RenderDeviceType  *				m_device;
-	Rendering::RenderDeviceContextType  *		m_devicecontext;
-
 	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
 	int m_vertexCount, m_indexCount;
 	VertexType *m_vertices;
-	Texture* m_Texture;
+	TextureDX11 * m_Texture;
 	int m_screenWidth, m_screenHeight;
 	float m_screenHalfWidth, m_screenHalfHeight;
 	float m_screenLeft;

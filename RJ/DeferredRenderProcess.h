@@ -3,7 +3,7 @@
 #include "RenderProcessDX11.h"
 #include "ManagedPtr.h"
 #include "DeferredGBuffer.h"
-#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "CommonShaderConstantBufferDefinitions.hlsl.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 
@@ -20,7 +20,7 @@ public:
 	virtual void Render(void);
 
 
-	DeferredRenderProcess(void);
+	~DeferredRenderProcess(void);
 
 
 protected:

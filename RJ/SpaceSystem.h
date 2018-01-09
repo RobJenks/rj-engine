@@ -8,12 +8,12 @@
 #include "Rendering.h"
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
-#include "Texture.h"
 #include "Octree.h"
 #include "ObjectReference.h"
 #include "iSpaceObject.h"
 #include "BasicProjectileSet.h"
 #include "LightSource.h"
+class TextureDX11;
 
 
 // Class is 16-bit aligned to allow use of SIMD member variables
@@ -76,7 +76,7 @@ public:
 	// Methods to get or change the system backdrop texture
 	CMPINLINE std::string					GetBackdropLocation(void) { return m_backdroplocation; }
 	CMPINLINE void							SetBackdropLocation(std::string loc) { m_backdroplocation = loc; }
-	CMPINLINE ID3D11ShaderResourceView *	GetBackdropTextureResource(void) { return m_backdrop->GetTexture(); }
+	CMPINLINE ID3D11ShaderResourceView *	GetBackdropTextureResource(void);
 
 	// Returns a short debug string representation of the system
 	CMPINLINE std::string					DebugString(void) const 
@@ -100,7 +100,7 @@ protected:
 
 	// Space backdrop texture
 	std::string					m_backdroplocation;
-	Texture						*m_backdrop;
+	TextureDX11 *				m_backdrop;
 
 	// Set of directional lights in this system
 	std::vector<ObjectReference<LightSource>> 	m_directional_lights;

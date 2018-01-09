@@ -1373,7 +1373,7 @@ TextureDX11::~TextureDX11(void)
 
 
 // Reports a more detailed texture error with format information extracted from the texture resource
-void LogTextureFormatError(const Texture::TextureFormat& format, const std::string& file, int line, const std::string& function, const std::string& message)
+void TextureDX11Util::LogTextureFormatError(const Texture::TextureFormat& format, const std::string& file, int line, const std::string& function, const std::string& message)
 {
 	std::stringstream ss;
 	ss << message << std::endl;

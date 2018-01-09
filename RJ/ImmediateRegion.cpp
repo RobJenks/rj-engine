@@ -4,18 +4,20 @@
 #include <sstream>
 #include <cmath>
 #include "FastMath.h"
+#include "Logging.h"
 #include "DX11_Core.h"
 #include "DustParticle.h"
 #include "ErrorCodes.h"
-#include "Texture.h"
+#include "TextureDX11.h"
 #include "Utility.h"
+#include "CoreEngine.h"
 #include "GameVarsExtern.h"
 #include <tchar.h>
 
 #include "ImmediateRegion.h"
 
 // Initialisation method
-Result ImmediateRegion::Initialise(	Rendering::RenderDeviceType  *device, const char *particletexture,
+Result ImmediateRegion::Initialise( const std::string & texture,
 									const FXMVECTOR centre,
 									const FXMVECTOR minbounds, const FXMVECTOR maxbounds,
 									const GXMVECTOR updatethreshold)
@@ -44,15 +46,14 @@ Result ImmediateRegion::Initialise(	Rendering::RenderDeviceType  *device, const 
 	SetDustSize(DEFAULT_DUST_SIZE);
 
 	// Load the texture resource that will be mapped to each particle
-	result = LoadTexture(device, particletexture);
-	if (result != ErrorCodes::NoError) return result;
+	SetParticleTexture(texture);
 
 	// Initialise dust density to the default value; this also allocates particle/vertex memory as required
 	SetDustDensity(DEFAULT_DUST_DENSITY);
 
 	// Initialise the vertex and index buffers.  Must be performed after the dust density is set, since that method
 	// also allocates & builds the memory storage that will be referenced when creating buffers
-	result = InitialiseBuffers(device);
+	result = InitialiseBuffers();
 	if (result != ErrorCodes::NoError) return result;
 
 	// Perform a one-off update of the region to populate with a full set of starting particles
@@ -60,6 +61,25 @@ Result ImmediateRegion::Initialise(	Rendering::RenderDeviceType  *device, const 
 
 	// Return success if we have set everything up
 	return ErrorCodes::NoError;
+}
+
+ID3D11ShaderResourceView * ImmediateRegion::GetParticleTextureResource(void)
+{
+	return (m_texture ? m_texture->GetShaderResourceView() : NULL);
+}
+
+void ImmediateRegion::SetParticleTexture(const std::string & name)
+{
+	SetParticleTexture(Game::Engine->GetAssets().GetTexture(name));
+}
+
+void ImmediateRegion::SetParticleTexture(TextureDX11 * texture)
+{
+	m_texture = texture;
+	if (!m_texture)
+	{
+		Game::Log << LOG_WARN << "Could not load texture resource for immediate region particles\n";
+	}
 }
 
 // Method to move the region to a new centre point; performs the logic to determine whether any updates are necessary
@@ -259,16 +279,16 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	m_dustdensity = dustdensity;
 }
 
-void XM_CALLCONV ImmediateRegion::Render(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::Render(const FXMMATRIX view)
 {
 	// Render all dust particles to the vertex buffer
-	RenderDustParticles(devicecontext, view);
+	RenderDustParticles(view);
 
 	// When all buffers are populated, render the buffers to the DX output stream
-	RenderBuffers(devicecontext);
+	RenderBuffers();
 }
 
-void XM_CALLCONV ImmediateRegion::RenderDustParticles(Rendering::RenderDeviceContextType  *devicecontext, const FXMMATRIX view)
+void XM_CALLCONV ImmediateRegion::RenderDustParticles(const FXMMATRIX view)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -278,6 +298,7 @@ void XM_CALLCONV ImmediateRegion::RenderDustParticles(Rendering::RenderDeviceCon
 	PrepareVertexBuffers(view);
 
 	// Lock the particle vertex buffer
+	auto * devicecontext = Game::Engine->GetRenderDevice()->GetDeviceContext();
 	result = devicecontext->Map(m_vertexbuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedresource);
 	if (FAILED(result)) return;
 
@@ -289,7 +310,7 @@ void XM_CALLCONV ImmediateRegion::RenderDustParticles(Rendering::RenderDeviceCon
 	devicecontext->Unmap(m_vertexbuffer, NULL);	
 }
 
-void ImmediateRegion::RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext)
+void ImmediateRegion::RenderBuffers(void)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -299,6 +320,7 @@ void ImmediateRegion::RenderBuffers(Rendering::RenderDeviceContextType  *devicec
 	offset = 0;
 
 	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	auto * devicecontext = Game::Engine->GetRenderDevice()->GetDeviceContext();
 	devicecontext->IASetVertexBuffers(0, 1, &m_vertexbuffer, &stride, &offset);
 
     // Set the index buffer to active in the input assembler so it can be rendered.
@@ -362,7 +384,7 @@ void XM_CALLCONV ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
 }
 
 
-Result ImmediateRegion::InitialiseBuffers(Rendering::RenderDeviceType * device)
+Result ImmediateRegion::InitialiseBuffers(void)
 {
 	INDEXFORMAT *indices;
 	int i;
@@ -397,6 +419,7 @@ Result ImmediateRegion::InitialiseBuffers(Rendering::RenderDeviceType * device)
 	vertexData.SysMemSlicePitch = 0;
 
 	// Now finally create the vertex buffer.
+	auto * device = Game::Engine->GetRenderDevice()->GetDevice();
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexbuffer);
 	if(FAILED(result))	return ErrorCodes::CouldNotCreateParticleVertexBuffer;
 
@@ -449,36 +472,7 @@ void ImmediateRegion::Terminate(void)
 
 	// Release the buffers and texture resource, and deallocate all memory
 	ReleaseBuffers();
-	ReleaseTexture();
 	ReleaseRegionObjects();
-}
-
-Result ImmediateRegion::LoadTexture(Rendering::RenderDeviceType * device, const char *filename)
-{
-	// Create the texture object
-	m_texture = new Texture();
-	if(!m_texture) return ErrorCodes::CouldNotCreateTextureObject;
-
-	// Initialize the texture object
-	Result result = m_texture->Initialise(filename);
-	if(result != ErrorCodes::NoError)
-	{
-		return result;
-	}
-
-	// Return success if we loaded the texture successfully
-	return ErrorCodes::NoError;
-}
-
-void ImmediateRegion::ReleaseTexture(void)
-{
-	// Release the texture object.
-	if(m_texture)
-	{
-		m_texture->Shutdown();
-		delete m_texture;
-		m_texture = NULL;
-	}
 }
 
 void ImmediateRegion::ReleaseRegionObjects(void)

@@ -11,6 +11,7 @@
 #include "DX11_Core.h"
 #include "Rendering.h"
 #include "RenderDeviceDX11.h"
+#include "RenderAssetsDX11.h"
 
 #include "Profiler.h"
 #include "CameraClass.h"
@@ -119,9 +120,6 @@ public:
 
 	// Release all components of the game engine as part of a controlled shutdown
 	void					ShutdownGameEngine();
-
-	// Key game engine components
-	LightingManagerObject	LightingManager;
 	
 	// Accessor/modifier methods for key game engine components
 	CMPINLINE RenderDeviceDX11 * GetRenderDevice()		{ return m_renderdevice; }
@@ -138,7 +136,7 @@ public:
 	CMPINLINE const XMMATRIX & GetRenderViewMatrix(void) const							{ return r_view; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewMatrix(void) const					{ return r_invview; }
 	CMPINLINE const XMMATRIX & GetRenderProjectionMatrix(void) const					{ return r_projection; }
-	CMPINLINE const XMMATRIX & GetRenderInverseProjectionMatrix(void) const				{ return r_invpproj; }
+	CMPINLINE const XMMATRIX & GetRenderInverseProjectionMatrix(void) const				{ return r_invproj; }
 	CMPINLINE const XMMATRIX & GetRenderOrthographicMatrix(void) const					{ return r_orthographic; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrix(void) const				{ return r_viewproj; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionMatrix(void) const			{ return r_invviewproj; }
@@ -156,12 +154,15 @@ public:
 	CMPINLINE Rendering::RenderDeviceType * 			GetDevice(void)			{ return m_renderdevice->GetDevice(); }
 	CMPINLINE Rendering::RenderDeviceContextType *		GetDeviceContext(void)	{ return m_renderdevice->GetDeviceContext(); }
 
+	// Pass-through accessor for engine assets, since they are used so frequently
+	CMPINLINE RenderAssetsDX11 &						GetAssets(void) { return m_renderdevice->Assets; }
+
 	// Validation method to determine whether the engine has all critical frame-generatation components available
 	CMPINLINE bool			Operational()				{ return (m_renderdevice && m_renderdevice->GetDevice() ); }
 
-	// Pass-through methods to begin and end a scene; passes control directly through to the equivalent D3D methods
-	CMPINLINE void			BeginFrame()				{ m_renderdevice->BeginScene(); }
-	CMPINLINE void			EndFrame()					{ m_renderdevice->EndScene(); }
+	// Methods to perform initialisation/tear-down for a frame; not currently used
+	CMPINLINE void			BeginFrame()				{ }
+	CMPINLINE void			EndFrame()					{ }
 
 
 	/* *** Main rendering function *** */

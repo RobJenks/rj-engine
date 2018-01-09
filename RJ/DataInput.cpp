@@ -385,7 +385,6 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
 	Model *model;
-	Model::ModelClass mclass;
 	std::string key, code, type, fname, tex, val;
 	XMFLOAT3 acteffsize, effsize;
 	INTVECTOR3 elsize; bool no_centre = false;
@@ -443,9 +442,6 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	// Make sure we have all mandatory fields 
 	if (code == NullString || type == NullString || fname == NullString || tex == NullString) return ErrorCodes::InsufficientDataToLoadModel;
 
-	// We need to take action depending on the type of model, so identify the model class here
-	mclass = Model::DetermineModelClass(type);
-
 	// Check whether we have an existing model; if we do, return an error since we will not load the same model twice
 	model = Model::GetModel(code);
 	if (model != NULL) return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
@@ -457,7 +453,6 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	// Otherwise create a new model here
 	model = new Model();
 	model->SetCode(code);
-	model->SetModelClass(mclass);
 	model->SetFilename(filename);
 	model->SetTextureFilename(texture);
 	model->SetEffectiveModelSize(effsize);

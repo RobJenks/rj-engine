@@ -67,7 +67,7 @@ UINT Buffer::DetermineBindFlags(Buffer::BufferType buffertype)
 
 	case Buffer::BufferType::StructuredBuffer:	/* Fallthrough: not relevant here */
 	default:
-		Game::Log << LOG_WARN << "Attempted to determine bind flags for unsupported buffer type " << buffertype << "; failure likely\n";
+		Game::Log << LOG_WARN << "Attempted to determine bind flags for unsupported buffer type " << (int)buffertype << "; failure likely\n";
 		return 0U;
 	}
 }

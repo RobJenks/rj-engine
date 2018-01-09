@@ -37,8 +37,8 @@ struct ManagedPtr
 	}
 
 	// Copy construction and assignment are disabled
-	CMPINLINE ManagedPtr(const ManagedPtr<T> & other) = 0;
-	CMPINLINE ManagedPtr & operator=(const ManagedPtr<T> & other) = 0;
+	CMPINLINE ManagedPtr(const ManagedPtr<T> & other) = delete;
+	CMPINLINE ManagedPtr & operator=(const ManagedPtr<T> & other) = delete;
 
 	// Move constructor
 	CMPINLINE ManagedPtr(ManagedPtr<T> && other)
@@ -50,10 +50,10 @@ struct ManagedPtr
 
 	// Move assignment
 	CMPINLINE ManagedPtr & operator=(ManagedPtr<T> && other)
-		:
-		UniquePtr(std::move(other.UniquePtr))
 	{
+		UniquePtr = std::move(other.UniquePtr);
 		RawPtr = UniquePtr.get();
+		return *this;
 	}
 
 	// Destructor

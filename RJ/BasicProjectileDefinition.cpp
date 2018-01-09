@@ -1,6 +1,9 @@
-#include "Texture.h"
+#include "TextureDX11.h"
 #include "VolLineShader.h"
 #include "BasicProjectileDefinition.h"
+#include "Logging.h"
+#include "CoreEngine.h"
+#include "RenderDeviceDX11.h"
 
 
 // Constructor
@@ -45,28 +48,32 @@ void BasicProjectileDefinition::GenerateProjectileRenderingData(void)
 }
 
 // Set the texture for this projectile type from an external texture resource
-Result BasicProjectileDefinition::SetTexture(const std::string & filename)
+Result BasicProjectileDefinition::SetTexture(const std::string & name)
 {
 	// Parameter check
-	if (filename == NullString) return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+	if (name.empty()) return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
 
 	// Attempt to initialise a new texture object from the specified file
-	Texture *tex = new Texture();
-	Result result = tex->Initialise(filename);
+	TextureDX11 *tex = Game::Engine->GetRenderDevice()->Assets.GetTexture(name);
 	
 	// We won't store the resulting texture if an error occured during initialisation
-	if (result != ErrorCodes::NoError)
+	if (tex == NULL)
 	{
-		SafeDelete(tex);
-		return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+		Game::Log << LOG_WARN << "Attempted to assign invalid texture \"" << name << "\" to basic projectile definition \"" << m_code << "\"\n";
 	}
 	
 	// Pass control to the overloaded method and return the result of storing this texture
 	return SetTexture(tex);
 }
 
-Result BasicProjectileDefinition::SetTexture(Texture *texture)
+Result BasicProjectileDefinition::SetTexture(TextureDX11 *texture)
 {
+	if (texture == NULL)
+	{
+		Game::Log << LOG_ERROR << "No valid texture provided to basic projectile definition \"" << m_code << "\"\n";
+		return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+	}
+
 	// If a texture already exists then deallocate it first
 	if (VolumetricLineData.RenderTexture)
 	{

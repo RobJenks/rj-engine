@@ -12,9 +12,9 @@
 #include "ErrorCodes.h"
 #include "Utility.h"
 #include "Rendering.h"
-#include "Texture.h"
 #include "iUIComponent.h"
 #include "iUIComponentRenderable.h"
+class TextureDX11;
 class iUIControl;
 
 // This class has no special alignment requirements
@@ -125,6 +125,14 @@ public:
 	CMPINLINE float						GetZOrder(void) { return m_zorder; }
 	CMPINLINE void						SetZOrder(float z) { m_zorder = z; }
 
+	// Texture repeat
+	CMPINLINE bool						IsTextureRepeating(void) const { return m_repeattexture; }
+	CMPINLINE void						SetTextureRepeat(bool repeat) 
+	{ 
+		m_repeattexture = repeat; 
+		m_forcefullupdate = true;
+	}
+
 	// Determines whether instances of this group will accept or ignore mouse input.  Default is false.
 	CMPINLINE bool						AcceptsMouseInput(void) { return m_acceptsmouse; }
 	CMPINLINE void						SetAcceptsMouseInput(bool flag) { m_acceptsmouse = flag; }
@@ -135,7 +143,7 @@ public:
 	CMPINLINE void ClearAllInstances(void) { if (m_instances.size() != 0) m_instances.clear(); }
 
 	CMPINLINE int GetIndexCount() { return m_indexCount; }
-	CMPINLINE ID3D11ShaderResourceView* GetTexture() { return m_Texture->GetTexture(); }
+	ID3D11ShaderResourceView* GetTexture();
 
 
 public:
@@ -148,20 +156,17 @@ public:
 	Image2DRenderGroup(void);
 	~Image2DRenderGroup(void);
 
-	Result								Initialize( Rendering::RenderDeviceType * device, int screenWidth, int screenHeight, const char *textureFilename, Texture::APPLY_MODE texturemode);
+	Result								Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat);
 	Result								InitializeBuffers(void);
 
 	void								Render(void);
 
-	void								SetTextureDirect(Texture *tex);
-
-	CMPINLINE Texture::APPLY_MODE		GetTextureMode(void) { return m_texturemode; }
-	void								SetTextureMode(Texture::APPLY_MODE mode);
+	void								SetTexture(const std::string & name);
+	void								SetTexture(TextureDX11 *tex);
 
 	void								Shutdown(void);
 	
 private:
-	Result								LoadTexture(Rendering::RenderDeviceType * device, const char *filename);
 	
 	Result								UpdateBuffers(void);
 	void								RenderBuffers(void);
@@ -170,7 +175,6 @@ private:
 
 	void								ShutdownBuffers(void);
 	void								ReleaseAllInstances(void);
-	void								ReleaseTexture(void);
 
 
 private:
@@ -180,17 +184,15 @@ private:
 	ID3D11Buffer *						m_vertexBuffer, *m_indexBuffer;
 	int									m_vertexCount, m_indexCount;
 	VertexType *						m_vertices;
-	Texture*							m_Texture;
-	Texture::APPLY_MODE					m_texturemode;		// Method to use for applying this texture to each instance
+	TextureDX11 *						m_Texture;
 	INTVECTOR2							m_texturesize;		// Size of the texture to be applied to this render group
 	XMFLOAT2							m_ftexturesize;		// Texture size, stored in floating point representation to avoid casts later
+	bool								m_repeattexture;
 
 	bool								m_forcefullupdate;
 
 	float								m_zorder;			// The z-order of this component *group*, which determines order of rendering by the render manager
 
-	Rendering::RenderDeviceType  *						m_device;
-	Rendering::RenderDeviceContextType  *				m_devicecontext;
 	int									m_screenWidth, m_screenHeight;
 	float								m_screenHalfWidth, m_screenHalfHeight;
 	float								m_screenLeft;

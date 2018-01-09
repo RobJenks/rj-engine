@@ -143,7 +143,7 @@ D3D11_STENCIL_OP DepthStencilStateDX11::TranslateStencilOperation(StencilOperati
 			result = D3D11_STENCIL_OP_DECR;
 			break;
 		default:
-			Game::Log << LOG_ERROR << "Unknown stencil operation (" << stencilOperation << ")\n";
+			Game::Log << LOG_ERROR << "Unknown stencil operation (" << static_cast<int>(stencilOperation) << ")\n";
 			break;
 	}
 

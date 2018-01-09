@@ -2,7 +2,7 @@
 
 #ifndef __D3DMainH__
 #define __D3DMainH__
-
+/*
 // Include all DX11-related headers
 #include <string>
 #include "DX11_Core.h" // #include "FullDX11.h"
@@ -98,11 +98,11 @@ public:
 	}
 
 	// Enables alpha blending and applies additive filters (for e.g. effect rendering)
-	/*CMPINLINE void					SetAlphaBlendModeAdditive(void)
-	{
-	m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
-	m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff);
-	}*/
+	//CMPINLINE void					SetAlphaBlendModeAdditive(void)
+	//{
+	//m_alphablendstate = AlphaBlendState::AlphaBlendEnabledAdditive;
+	//m_deviceContext->OMSetBlendState(m_alphaEnableAdditiveBlendingState, m_alphablendfactor, 0xffffffff);
+	//}
 
 	// Disables alpha blending
 	CMPINLINE void					SetAlphaBlendModeDisabled(void)
@@ -154,6 +154,6 @@ private:
 };
 
 
-
+*/
 
 #endif

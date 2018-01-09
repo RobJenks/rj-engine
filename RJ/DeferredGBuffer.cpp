@@ -23,7 +23,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Type::UnsignedNormalized,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
 		8, 8, 8, 8, 0, 0);
-	DiffuseTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::Diffuse", Game::ScreenWidth, Game::ScreenHeight, 1, diffuseTextureFormat);
+	DiffuseTexture = Game::Engine->GetAssets().CreateTexture2D("GBuffer::Diffuse", Game::ScreenWidth, Game::ScreenHeight, 1, diffuseTextureFormat);
 
 	// Specular buffer (Color2)
 	Texture::TextureFormat specularTextureFormat(
@@ -31,7 +31,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Type::UnsignedNormalized,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
 		8, 8, 8, 8, 0, 0);
-	SpecularTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::Specular", Game::ScreenWidth, Game::ScreenHeight, 1, specularTextureFormat);
+	SpecularTexture = Game::Engine->GetAssets().CreateTexture2D("GBuffer::Specular", Game::ScreenWidth, Game::ScreenHeight, 1, specularTextureFormat);
 
 	// Normal buffer (Color3)
 	Texture::TextureFormat normalTextureFormat(
@@ -39,7 +39,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Type::Float,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
 		32, 32, 32, 32, 0, 0);
-	NormalTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::Normal", Game::ScreenWidth, Game::ScreenHeight, 1, normalTextureFormat);
+	NormalTexture = Game::Engine->GetAssets().CreateTexture2D("GBuffer::Normal", Game::ScreenWidth, Game::ScreenHeight, 1, normalTextureFormat);
 
 	// Depth/stencil buffer
 	Texture::TextureFormat depthStencilTextureFormat(
@@ -47,7 +47,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 		Texture::Type::UnsignedNormalized,
 		RenderDeviceDX11::TEXTURE_MULTISAMPLE_COUNT,
 		0, 0, 0, 0, 24, 8);
-	DepthStencilTexture = Game::Engine->GetRenderDevice()->CreateTexture2D("GBuffer::DepthStencil", Game::ScreenWidth, Game::ScreenHeight, 1, depthStencilTextureFormat);
+	DepthStencilTexture = Game::Engine->GetAssets().CreateTexture2D("GBuffer::DepthStencil", Game::ScreenWidth, Game::ScreenHeight, 1, depthStencilTextureFormat);
 
 	// Verify all resources were created
 	std::vector<TextureDX11*> pTextureResources({ DiffuseTexture, SpecularTexture, NormalTexture, DepthStencilTexture });
@@ -70,7 +70,7 @@ DeferredGBuffer::DeferredGBuffer(void)
 	// since we do not currently need any separation between final GBuffer colour accumulation and the backbuffer itself
 	Game::Log << LOG_INFO << "Initialising GBuffer RT\n";
 
-	RenderTarget = Game::Engine->GetRenderDevice()->CreateRenderTarget("GBufferRenderTarget");
+	RenderTarget = Game::Engine->GetAssets().CreateRenderTarget("GBufferRenderTarget");
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0));
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color1, DiffuseTexture);

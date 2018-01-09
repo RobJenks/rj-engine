@@ -271,7 +271,7 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	}
 
 	// Tcentre = model translation to its centre point, prior to rotation about its centre
-	XMVECTOR centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : XMLoadFloat3(&m_model->GetModelCentre()));
+	XMVECTOR centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : XMLoadFloat3(&m_model->Geometry.get()->CentrePoint));
 	
 	// Telement = translation from model centre to top-left corner (0.5*numelements*elementsize in world coords) + translation to element position
 	// Will switch y and z coordinates since we are moving from element to world space
@@ -365,7 +365,7 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 &
 
 	// Offset of the model centre from the tile centre = ((element_pos + 1/2element) - tilecentre - model_centre_point)
 	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = ((25,15)-(15,15)-(0,0)) = (10,0).  Equals ((10,0)+(15,15)) in non-tile-centred space = (25,15) = el[2,1].centre
-	XMVECTOR model_centre = XMLoadFloat3(&model->GetModelCentre());
+	XMVECTOR model_centre = XMLoadFloat3(&model->Geometry.get()->CentrePoint);
 	XMVECTOR pos_offset = XMVectorSubtract(XMVectorSubtract(XMVectorAdd(Game::ElementLocationToPhysicalPosition(element_offset), Game::C_CS_ELEMENT_MIDPOINT_V), m_centre_point), model_centre);
 	XMVECTOR orient_offset = GetRotationQuaternion(rotation_offset);
 

@@ -12,6 +12,7 @@
 #include "Utility.h"
 #include "FastMath.h"
 #include "GameDataExtern.h"
+#include "ModelData.h"
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
 #include "Model.h"
@@ -80,7 +81,7 @@ public:
 			{
 				// Calculate temporary translation matrices to translate the model to its centre, so we can then rotate, and then translate back
 				// Most tile models will be zero-centred, so this offset does nothing, however this also accomodates cases with a non-zero centre
-				XMVECTOR centrepoint = XMLoadFloat3(&model->GetModelCentre());
+				XMVECTOR centrepoint = XMLoadFloat3(&model->Geometry.get()->CentrePoint);
 				XMMATRIX off = XMMatrixTranslationFromVector(XMVectorNegate(centrepoint));
 				XMMATRIX invoff = XMMatrixTranslationFromVector(centrepoint);
 				
@@ -401,8 +402,8 @@ public:
 				XMVECTOR position = XMVectorAdd(Game::ElementLocationToPhysicalPosition(Models[i].value.elementpos), Game::C_CS_ELEMENT_MIDPOINT_V);
 
 				// Update the model bounds if required
-				MinBounds = XMVectorMin(MinBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMinBounds())));	// MinBounds are usually -ve.  Add rather than subtract
-				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(position, XMLoadFloat3(&model->GetModelMaxBounds())));
+				MinBounds = XMVectorMin(MinBounds, XMVectorAdd(position, XMLoadFloat3(&model->Geometry.get()->MinBounds)));	// MinBounds are usually -ve.  Add rather than subtract
+				MaxBounds = XMVectorMax(MaxBounds, XMVectorAdd(position, XMLoadFloat3(&model->Geometry.get()->MaxBounds)));
 				updated = true;
 			}
 			
@@ -417,16 +418,6 @@ public:
 			CompoundModelCentre = XMVectorMultiply(XMVectorAdd(MinBounds, MaxBounds), HALF_VECTOR);
 		}
 
-		// Indicates whether this compound model was built using any pre-geometry-loading models.  If this is 
-		// the case it will be post-processed after geometry is loaded in the load sequence
-		CMPINLINE bool RequiresPostProcessing(void) const
-		{
-			auto it_end = Models.end();
-			for (auto it = Models.begin(); it != it_end; ++it)
-				if ((*it).value.model && (*it).value.model->IsGeometryLoaded() == false) return true;
-
-			return false;
-		}
 	};
 		
 	// Abstract method to return the type of tile this is.  Must be implemented by all subclasses

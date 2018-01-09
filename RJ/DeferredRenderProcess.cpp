@@ -8,7 +8,7 @@
 #include "RasterizerStateDX11.h"
 #include "DepthStencilState.h"
 #include "BlendState.h"
-#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "CommonShaderConstantBufferDefinitions.hlsl.h"
 
 
 DeferredRenderProcess::DeferredRenderProcess(void)
@@ -253,8 +253,6 @@ void DeferredRenderProcess::RenderGeometry(void)
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
 	m_pipeline_geometry->Unbind();
-
-	*** TODO: NEED TO CALL CLEARRENDERQUEUE IN THE ENGINE RENDER() METHOD ITSELF AFTER THIS RENDER() METHOD IS CALLED ***
 }
 
 void DeferredRenderProcess::PerformDeferredLighting(void)
@@ -272,7 +270,7 @@ void DeferredRenderProcess::RenderTransparency(void)
 
 
 
-DeferredRenderProcess::DeferredRenderProcess(void)
+DeferredRenderProcess::~DeferredRenderProcess(void)
 {
 
 }

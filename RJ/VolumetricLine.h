@@ -6,7 +6,7 @@
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
 #include "FastMath.h"
-class Texture;
+class TextureDX11;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))
@@ -23,7 +23,7 @@ struct VolumetricLine : public ALIGN16<VolumetricLine>
 	XMFLOAT4				Colour;
 
 	// Texture (if applicable; can be NULL for pure volumetric rendering)
-	Texture *				RenderTexture;
+	TextureDX11 *			RenderTexture;
 
 	// Additional parameters.  x = line radius
 	XMFLOAT4				Params;
@@ -50,21 +50,21 @@ struct VolumetricLine : public ALIGN16<VolumetricLine>
 	}
 
 	// Constructor
-	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, Texture *texture)
+	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, TextureDX11 *texture)
 		:
 		P1(_P1), P2(_P2), Colour(ONE_FLOAT4), RenderTexture(texture), Params(VolumetricLine::DEFAULT_PARAMS)
 	{
 	}
 
 	// Constructor
-	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, const XMFLOAT4 & colour, Texture *texture)
+	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, const XMFLOAT4 & colour, TextureDX11 *texture)
 		:
 		P1(_P1), P2(_P2), Colour(colour), RenderTexture(texture), Params(VolumetricLine::DEFAULT_PARAMS)
 	{
 	}
 
 	// Constructor
-	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, const XMFLOAT4 & colour, float radius, Texture *texture)
+	VolumetricLine(const FXMVECTOR _P1, const FXMVECTOR _P2, const XMFLOAT4 & colour, float radius, TextureDX11 *texture)
 		:
 		P1(_P1), P2(_P2), Colour(colour), RenderTexture(texture), Params(XMFLOAT4(radius, 0.0f, 0.0f, 0.0f))
 	{

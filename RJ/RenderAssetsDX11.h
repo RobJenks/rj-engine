@@ -5,13 +5,14 @@
 #include <unordered_map>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
+#include "Logging.h"
 #include "ManagedPtr.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "InputLayoutDesc.h"
 #include "CPUGraphicsResourceAccess.h"
-#include "Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h"
-#include "ConstantBufferDX11.h";
+#include "CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "ConstantBufferDX11.h"
 #include "VertexBufferDX11.h"
 class ShaderDX11;
 class SamplerStateDX11;
@@ -204,20 +205,17 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 
 	if (name.empty())
 	{
-		constexpr std::string type = STRING(T);
-		constexpr size_t ix = type.find_last_of("DX11");
-		constexpr if (ix != std::string::npos) type = type.substr(0U, ix);
-
-		Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; return NULL;
+		constexpr const char *type = STRING(T);
+		Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; 
+		
+		return NULL;
 	}
 
 	if (assetData.find(name) != assetData.end())
 	{
-		constexpr std::string type = STRING(T);
-		constexpr size_t ix = type.find_last_of("DX11");
-		constexpr if (ix != std::string::npos) type = type.substr(0U, ix);
-
+		constexpr const char *type = STRING(T);
 		Game::Log << LOG_WARN << type << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
+
 		return NULL;
 	}
 

@@ -739,7 +739,7 @@ void ComplexShip::CalculateShipSizeData(void)
 	{
 		// Make sure the section is valid
 		sec = (*it); 
-		if (!sec || !sec->GetModel() || !sec->GetModel()->IsGeometryLoaded()) continue;
+		if (!sec || !sec->GetModel()) continue;
 
 		// Have the section recalculate its own size
 		sec->CalculateShipSizeData();

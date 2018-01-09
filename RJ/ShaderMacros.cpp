@@ -37,7 +37,7 @@ const ShaderMacros::MacroData & ShaderMacros::GetMacros(void) const
 void ShaderMacros::RemoveMacro(const std::string & name)
 {
 	MacroData::const_iterator it = m_macros.find(name);
-	if (it != m_macros.end)
+	if (it != m_macros.end())
 	{
 		m_macros.erase(it);
 		m_isdirty = true;
@@ -45,7 +45,7 @@ void ShaderMacros::RemoveMacro(const std::string & name)
 }
 
 // Return a reference to the compiled macro set.  Will recompile if any changes have been made since the last compilation
-const ShaderMacros::CompiledMacroData & const ShaderMacros::GetCompiledData(void)
+const ShaderMacros::CompiledMacroData & ShaderMacros::GetCompiledData(void)
 {
 	if (m_isdirty)
 	{

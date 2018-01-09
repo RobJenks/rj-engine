@@ -1317,7 +1317,7 @@ RJ_PROFILED(void CoreEngine::RenderComplexShip, ComplexShip *ship, bool renderin
 		if (shiprendered)
 		{
 			// Set one active lighting configuration for the entire ship (rather than by turret) for efficiency
-			LightingManager.SetActiveLightingConfigurationForObject(ship);
+			//LightingManager.SetActiveLightingConfigurationForObject(ship);
 
 			// Render any turret objects on the exterior of the ship, if applicable
 			if (ship->TurretController.IsActive()) RenderTurrets(ship->TurretController);

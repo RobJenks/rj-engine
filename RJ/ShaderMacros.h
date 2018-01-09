@@ -28,7 +28,7 @@ public:
 	void											RemoveMacro(const std::string & name);
 
 	// Return a reference to the compiled macro set.  Will recompile if any changes have been made since the last compilation
-	const CompiledMacroData & const					GetCompiledData(void);
+	const CompiledMacroData &						GetCompiledData(void);
 
 
 private:

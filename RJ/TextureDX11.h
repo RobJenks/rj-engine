@@ -228,13 +228,13 @@ private:
 
 
 template< typename T >
-void Texture::Plot(XMFLOAT2 coord, const T& color)
+void TextureDX11::Plot(XMFLOAT2 coord, const T& color)
 {
 	Plot(coord, (const uint8_t*)(&color), sizeof(T));
 }
 
 template< typename T >
-T Texture::FetchPixel(XMFLOAT2 coord)
+T TextureDX11::FetchPixel(XMFLOAT2 coord)
 {
 	uint8_t* pixel = nullptr;
 	FetchPixel(coord, pixel, sizeof(T));
