@@ -1,5 +1,5 @@
-#include "Common/CommonShaderPipelineStructures.hlsl"
-#include "Common/CommonShaderBufferDefinitions.hlsl"
+#include "../../CommonShaderPipelineStructures.hlsl.h"
+#include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../../Definitions/VertexDefinitions.hlsl.h"
 
 

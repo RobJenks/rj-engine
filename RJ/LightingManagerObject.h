@@ -1,6 +1,6 @@
 #pragma once
 
-#ifndef __LightingManagerH__
+/*#ifndef __LightingManagerH__
 #define __LightingManagerH__
 
 #include "GameVarsExtern.h"
@@ -195,7 +195,7 @@ protected:
 };
 
 
-
+*/
 
 #endif
 

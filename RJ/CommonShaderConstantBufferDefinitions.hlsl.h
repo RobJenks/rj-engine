@@ -1,8 +1,8 @@
 #ifndef __CommonShaderConstantBufferDefinitionsH__
 #define __CommonShaderConstantBufferDefinitionsH__
 
-#include "CppHLSLLocalisation.hlsl.h"
-#include "MaterialData.hlsl.h"
+#include "../Definitions/CppHLSLLocalisation.hlsl.h"
+#include "../Definitions/MaterialData.hlsl.h"
 
 #define BUFFER_NAME(buffer) #buffer
 

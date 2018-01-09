@@ -1,7 +1,7 @@
 #ifndef __CommonShaderBufferDefinitionsHLSL__
 #define __CommonShaderBufferDefinitionsHLSL__
 
-#include "../../../../Definitions/MaterialData.hlsl.h"
+#include "../Definitions/MaterialData.hlsl.h"
 
 
 

@@ -1,4 +1,4 @@
-#include "Data\\Shaders\\render_constants.h"
+/*#include "Data\\Shaders\\render_constants.h"
 #include "Data\\Shaders\\light_definition.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
@@ -262,8 +262,8 @@ void LightingManagerObject::InitialiseStandardLightingOverrides(void)
 	LightData std_dim = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.075f, 0.075f, 0.035f, XMFLOAT3(0.0f, 0.0f, 1.0f));
 	LightData std_bright = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.15f, 0.15f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f));
 
-	/* Standard camera-facing override.  Directional lighting only which primarily shines out of the 
-	   camera, but also includes a more limited amount of ambient/surrounding light from other angles */
+	// Standard camera-facing override.  Directional lighting only which primarily shines out of the 
+	// camera, but also includes a more limited amount of ambient/surrounding light from other angles 
 	XMVECTOR orient[] = { 
 		XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f),						// Light 1: Facing directly forwards from the camera; e.g. (0,0,-10) to local (0,0,0)
 		XMVectorSet(0.330013f, 0.660026f, -0.0f, 0.674875f),		// Light 2: Facing from (10,-5,1) up+left to local (0,0,0)
@@ -370,4 +370,4 @@ bool LightingManagerObject::ProcessConsoleCommand(GameConsoleCommand & command)
 
 	// We did not recognise the command
 	return false;
-}
+}*/

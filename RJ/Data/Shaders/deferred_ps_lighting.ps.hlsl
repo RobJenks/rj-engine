@@ -1,5 +1,5 @@
-#include "Common/CommonShaderPipelineStructures.hlsl"
-#include "Common/CommonShaderBufferDefinitions.hlsl"
+#include "../../CommonShaderPipelineStructures.hlsl.h"
+#include "../../CommonShaderBufferDefinitions.hlsl.h"
 #include "../../../Definitions/MaterialData.hlsl.h"
 
 
@@ -12,7 +12,7 @@ Texture2D DepthTextureVS : register(t3);
 
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
-xxx PS_Deferred_Lighting(xxx IN)
+float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_TARGET
 {
-	return xxx;
+	return float4(0,0,0,0);
 }

@@ -517,9 +517,6 @@
     <ClCompile Include="UI_ShipBuilder.cpp">
       <Filter>UI\UI Controllers</Filter>
     </ClCompile>
-    <ClCompile Include="LightingManagerObject.cpp">
-      <Filter>Engine\Lighting</Filter>
-    </ClCompile>
     <ClCompile Include="InputLayoutDesc.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
@@ -866,6 +863,9 @@
     </ClCompile>
     <ClCompile Include="RenderAssetsDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="LightingManagerObject.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1538,9 +1538,6 @@
     <ClInclude Include="UI_ShipBuilder.h">
       <Filter>UI\UI Controllers</Filter>
     </ClInclude>
-    <ClInclude Include="LightingManagerObject.h">
-      <Filter>Engine\Lighting</Filter>
-    </ClInclude>
     <ClInclude Include="LightSource.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
@@ -1999,12 +1996,6 @@
     <ClInclude Include="RenderDeviceDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
-    <ClInclude Include="Data\Shaders\Common\InstanceProperties.hlsl.h">
-      <Filter>HLSL\Common</Filter>
-    </ClInclude>
-    <ClInclude Include="Data\Shaders\Common\CommonShaderPipelineStructures.hlsl">
-      <Filter>HLSL\Common</Filter>
-    </ClInclude>
     <ClInclude Include="RenderProcess.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
@@ -2013,9 +2004,6 @@
     </ClInclude>
     <ClInclude Include="DeferredGBuffer.h">
       <Filter>Engine\Rendering\DirectX11\Deferred</Filter>
-    </ClInclude>
-    <ClInclude Include="Data\Shaders\Common\CommonShaderConstantBufferDefinitions.hlsl.h">
-      <Filter>HLSL\Common</Filter>
     </ClInclude>
     <ClInclude Include="ManagedPtr.h">
       <Filter>Utility</Filter>
@@ -2028,6 +2016,21 @@
     </ClInclude>
     <ClInclude Include="ModelRenderPredicate.h">
       <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="LightingManagerObject.h">
+      <Filter>Engine\Rendering\DirectX11\Old</Filter>
+    </ClInclude>
+    <ClInclude Include="InstanceProperties.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderBufferDefinitions.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderConstantBufferDefinitions.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonShaderPipelineStructures.hlsl.h">
+      <Filter>HLSL\Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2374,11 +2377,14 @@
     <FxCompile Include="Data\Shaders\deferred_ps_geometry.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\deferred_vs_standard.vs.hlsl">
+    <FxCompile Include="Data\Shaders\deferred_ps_lighting.ps.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\Common\CommonShaderBufferDefinitions.hlsl">
-      <Filter>HLSL\Common</Filter>
+    <FxCompile Include="Data\Shaders\ps_standard.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
+      <Filter>HLSL</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

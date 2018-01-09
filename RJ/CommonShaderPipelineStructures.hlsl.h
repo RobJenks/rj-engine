@@ -1,3 +1,7 @@
+#ifndef __CommonShaderPipelineStructuresHlsl__
+#define __CommonShaderPipelineStructuresHlsl__
+
+
 
 // Output of the standard vertex shader
 struct VertexShaderStandardOutput
@@ -21,3 +25,6 @@ struct DeferredPixelShaderGeometryOutput
 };
 
 
+
+
+#endif
