@@ -104,7 +104,7 @@ void SimpleShip::RecalculateShipDataFromCurrentState(void)
 void SimpleShip::CalculateShipSizeData(void)
 {
 	// We need a base ship hull and mesh at least to calculate ship size
-	if (!m_model || !m_model->IsGeometryLoaded()) 
+	if (!m_model.GetModel())
 	{ 
 		this->MinBounds = XMVectorReplicate(-0.5f);
 		this->MaxBounds = XMVectorReplicate(0.5f);
@@ -114,8 +114,8 @@ void SimpleShip::CalculateShipSizeData(void)
 	}
 
 	// Retrieve the ship mesh size and use that for our size parameter
-	SetSize(XMLoadFloat3(&m_model->GetModelSize()));
-	SetCentreOffsetTranslation(XMVectorNegate(XMLoadFloat3(&m_model->GetModelCentre())));
+	SetSize(XMLoadFloat3(&m_model.GetModel()->Geometry.get()->ModelSize));
+	SetCentreOffsetTranslation(XMVectorNegate(XMLoadFloat3(&m_model.GetModel()->Geometry.get()->CentrePoint)));
 }
 
 void SimpleShip::CalculateShipMass()

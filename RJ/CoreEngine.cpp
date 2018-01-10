@@ -443,8 +443,7 @@ Result CoreEngine::InitialiseTextRendering(void)
 	}
 
 	// Now attempt to initialise the text rendering object
-	result = m_textmanager->Initialize(	GetDevice(), GetDeviceContext(), m_hwnd, 
-										Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
+	result = m_textmanager->Initialize(m_hwnd, Game::ScreenWidth, Game::ScreenHeight, m_baseviewmatrix, m_fontshader );
 	if (result != ErrorCodes::NoError)
 	{
 		return result;
@@ -832,15 +831,14 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 	// Iterate through each shader in the render queue (though not currently required; all will be mapped to 0)
 	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		auto & modelqueue = m_renderqueue[i];
-		auto model_count = modelqueue.CurrentSlotCount;
-		if (model_count == 0U) continue;
+		auto & rq_shader = m_renderqueue[i];
+		auto model_count = rq_shader.CurrentSlotCount;
 
 		// Process each model separately
 		for (size_t mi = 0U; mi < model_count; ++mi)
 		{
 			// Assess the model rendering predicate and early-exit if this model is ineligible
-			auto & model = modelqueue.ModelData[mi];
+			auto & model = rq_shader.ModelData[mi];
 			if (!render_model(model.ModelBufferInstance)) continue;
 
 			// Store a reference to the model buffer currently being rendered

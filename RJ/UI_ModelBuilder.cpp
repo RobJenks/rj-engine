@@ -9,6 +9,7 @@
 #include "Player.h"
 #include "GameUniverse.h"
 #include "Model.h"
+#include "ModelData.h"
 #include "FileSystem.h"
 #include "MultiLineTextBlock.h"
 #include "UIButton.h"
@@ -206,7 +207,7 @@ void UI_ModelBuilder::RenderCurrentSelection(void)
 		XMMATRIX removeoffset;
 		if (m_selected_terrain->GetDefinition() && m_selected_terrain->GetDefinition()->GetModel())
 		{
-			removeoffset = XMMatrixTranslationFromVector(XMLoadFloat3(&m_selected_terrain->GetDefinition()->GetModel()->GetModelCentre()));
+			removeoffset = XMMatrixTranslationFromVector(XMLoadFloat3(&m_selected_terrain->GetDefinition()->GetModel()->Geometry.get()->CentrePoint));
 		}
 		else
 		{
@@ -493,7 +494,7 @@ void UI_ModelBuilder::ProcessKeyboardInput(GameInputDevice *keyboard)
 	else if (keyboard->GetKey(DIK_R) && m_key_ctrl && m_key_shift)
 	{
 		if (!m_object || !m_object->GetModel()) return;
-		XMVECTOR adjust = XMLoadFloat3(&Float3MultiplyScalar(m_object->GetModel()->GetActualModelSize(), 0.5f));
+		XMVECTOR adjust = XMLoadFloat3(&Float3MultiplyScalar(m_object->GetModel()->Geometry.get()->ModelSize, 0.5f));
 		for (int i = 0; i < (int)m_terrain.size(); ++i)
 			if (m_terrain[i])
 				m_terrain[i]->SetPosition(XMVectorSubtract(m_terrain[i]->GetPosition(), adjust));

@@ -118,12 +118,6 @@
     <ClCompile Include="FireEffect.cpp">
       <Filter>Engine\Effects</Filter>
     </ClCompile>
-    <ClCompile Include="FireShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="FontShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="FontData.cpp">
       <Filter>Engine\Text</Filter>
     </ClCompile>
@@ -220,21 +214,6 @@
     <ClCompile Include="Image2DRenderGroupInstance.cpp">
       <Filter>UI\Components</Filter>
     </ClCompile>
-    <ClCompile Include="LightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightHighlightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightHighlightShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="LightShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="iShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Light.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
@@ -273,9 +252,6 @@
     </ClCompile>
     <ClCompile Include="OverlayRenderer.cpp">
       <Filter>Engine\Overlay</Filter>
-    </ClCompile>
-    <ClCompile Include="ParticleShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Player</Filter>
@@ -343,9 +319,6 @@
     <ClCompile Include="SkinnedModel.cpp">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClCompile>
-    <ClCompile Include="SkinnedNormalMapShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="SpaceEmitter.cpp">
       <Filter>Objects\Emitters</Filter>
     </ClCompile>
@@ -354,15 +327,6 @@
     </ClCompile>
     <ClCompile Include="SystemRegion.cpp">
       <Filter>Regions</Filter>
-    </ClCompile>
-    <ClCompile Include="TexcubeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="TextureTransShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="TextBlock.cpp">
       <Filter>UI\Components</Filter>
@@ -466,9 +430,6 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Engine\ShaderManager</Filter>
     </ClCompile>
-    <ClCompile Include="VolLineShader.cpp">
-      <Filter>Engine\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="ModelBuffer.cpp">
       <Filter>Engine\Models\Static</Filter>
     </ClCompile>
@@ -552,9 +513,6 @@
     </ClCompile>
     <ClCompile Include="DebugInvocation.cpp">
       <Filter>Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="LightFlatHighlightFadeShader.cpp">
-      <Filter>Engine\Shaders</Filter>
     </ClCompile>
     <ClCompile Include="EnvironmentOBBRegion.cpp">
       <Filter>Data structures</Filter>
@@ -867,6 +825,48 @@
     <ClCompile Include="LightingManagerObject.cpp">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </ClCompile>
+    <ClCompile Include="FireShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="FontShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="iShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightFlatHighlightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightFadeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightHighlightShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="LightShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="SkinnedNormalMapShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TexcubeShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureTransShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="VolLineShader.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -1013,12 +1013,6 @@
     <ClInclude Include="FireEffect.h">
       <Filter>Engine\Effects</Filter>
     </ClInclude>
-    <ClInclude Include="FireShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="FontShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="FontData.h">
       <Filter>Engine\Text</Filter>
     </ClInclude>
@@ -1136,21 +1130,6 @@
     <ClInclude Include="Image2DRenderGroupInstance.h">
       <Filter>UI\Components</Filter>
     </ClInclude>
-    <ClInclude Include="LightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHighlightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightHighlightShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="LightShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="iShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="Light.h">
       <Filter>Engine\Lighting</Filter>
     </ClInclude>
@@ -1216,9 +1195,6 @@
     </ClInclude>
     <ClInclude Include="OverlayRenderer.h">
       <Filter>Engine\Overlay</Filter>
-    </ClInclude>
-    <ClInclude Include="ParticleShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>Player</Filter>
@@ -1298,9 +1274,6 @@
     <ClInclude Include="SkinnedModel.h">
       <Filter>Engine\Models\Skinned mesh</Filter>
     </ClInclude>
-    <ClInclude Include="SkinnedNormalMapShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
     <ClInclude Include="SpaceEmitter.h">
       <Filter>Objects\Emitters</Filter>
     </ClInclude>
@@ -1312,15 +1285,6 @@
     </ClInclude>
     <ClInclude Include="SystemRegion.h">
       <Filter>Regions</Filter>
-    </ClInclude>
-    <ClInclude Include="TexcubeShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureShader.h">
-      <Filter>Engine\Shaders</Filter>
-    </ClInclude>
-    <ClInclude Include="TextureTransShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="TextBlock.h">
       <Filter>UI\Components</Filter>
@@ -1441,9 +1405,6 @@
     </ClInclude>
     <ClInclude Include="ShaderManager.h">
       <Filter>Engine\ShaderManager</Filter>
-    </ClInclude>
-    <ClInclude Include="VolLineShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="InputLayoutDesc.h">
       <Filter>Engine\ShaderManager</Filter>
@@ -1580,9 +1541,6 @@
     <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="DebugInvocation.h">
       <Filter>Debug</Filter>
-    </ClInclude>
-    <ClInclude Include="LightFlatHighlightFadeShader.h">
-      <Filter>Engine\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="EnvironmentOBBRegion.h">
       <Filter>Data structures</Filter>
@@ -2032,6 +1990,48 @@
     <ClInclude Include="CommonShaderPipelineStructures.hlsl.h">
       <Filter>HLSL\Common</Filter>
     </ClInclude>
+    <ClInclude Include="FireShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="FontShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="iShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightFlatHighlightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightFadeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightHighlightShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="LightShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="SkinnedNormalMapShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TexcubeShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureTransShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VolLineShader.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2363,6 +2363,9 @@
     </Filter>
     <Filter Include="Engine\Rendering\DirectX11\Deferred">
       <UniqueIdentifier>{847bc2e4-6523-4c61-9832-eda5e92e19c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\Old\Shaders">
+      <UniqueIdentifier>{72a9e836-b31a-4cd3-a9a6-dc44d4e03a0d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

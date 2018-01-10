@@ -13,8 +13,8 @@ Result iUIControl::InitialiseImageComponentDefault(	UIManagedControlDefinition *
 	(*component)->SetCode(concat(m_code)(".")(componentname).str());
 
 	// Initialise the control using default engine parameters
-	Result result = (*component)->Initialize(Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight,
-		def->GetComponent(componentname).c_str(), Texture::APPLY_MODE::Normal);
+	Result result = (*component)->Initialize(Game::ScreenWidth, Game::ScreenHeight,
+		def->GetComponent(componentname).c_str(), false);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Set other properties

@@ -148,12 +148,12 @@ std::string ShaderDX11::GetLatestProfile(Shader::Type type) const
 		}
 	} // switch( type )
 
-	Game::Log << LOG_ERROR << "Could not establish supported shader feature levels; unknown shader type code " << type << "\n";
+	Game::Log << LOG_ERROR << "Could not establish supported shader feature levels; unknown shader type code " << (int)type << "\n";
 	return "";
 }
 
 bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, 
-										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout = NULL)
+										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout)
 {
 	auto device = Game::Engine->GetDevice();
 	HRESULT hr;
@@ -168,7 +168,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			_profile = GetLatestProfile(shadertype);
 			if (_profile.empty())
 			{
-				Game::Log << LOG_ERROR << "Invalid shader type " << shadertype << " for \"" << entryPoint << "\", could not determine supported feature level (" << sourceFileName << ")\n";
+				Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for \"" << entryPoint << "\", could not determine supported feature level (" << sourceFileName << ")\n";
 				return false;
 			}
 		}
@@ -195,11 +195,11 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			Game::Log << LOG_ERROR << "Compilation of shader \"" << entryPoint << "\" failed (hr=" << hr << ", file=" << sourceFileName << ")\n";
 			if (errorBlob)
 			{
-				Game::Log << LOG_ERROR << "Error buffer ptr: " << (static_cast<char*>(errorBlob->GetBufferPointer()));
+				Game::Log << LOG_ERROR << "Error buffer ptr: " << (static_cast<char*>(errorBlob->GetBufferPointer())) << "\n";
 			}
 			else
 			{
-				Game::Log << LOG_ERROR << "No further error details available; no error buffer generated";
+				Game::Log << LOG_ERROR << "No further error details available; no error buffer generated\n";
 			}
 			return false;
 		}
@@ -233,7 +233,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			hr = device->CreateComputeShader(m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), nullptr, &m_cs);
 			break;
 		default:
-			Game::Log << LOG_ERROR << "Invalid shader type " << shadertype << " for " << entryPoint << "; cannnot create compiled shader object (" << sourceFileName << ")\n";
+			Game::Log << LOG_ERROR << "Invalid shader type " << (int)shadertype << " for " << entryPoint << "; cannnot create compiled shader object (" << sourceFileName << ")\n";
 			return false;
 	}
 
@@ -259,7 +259,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 }
 
 bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, 
-									const std::string& profile, const InputLayoutDesc *input_layout = NULL)
+									const std::string& profile, const InputLayoutDesc *input_layout)
 {
 	bool result = false;
 

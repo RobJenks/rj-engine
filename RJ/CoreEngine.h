@@ -27,6 +27,7 @@
 #include "ViewPortal.h"
 #include "BasicColourDefinition.h"
 #include "ModelRenderPredicate.h"
+#include "PipelineStateDX11.h"
 class iShader;
 class ModelBuffer;
 class LightShader;

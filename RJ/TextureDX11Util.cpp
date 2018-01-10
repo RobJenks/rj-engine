@@ -1596,3 +1596,70 @@ DXGI_SAMPLE_DESC TextureDX11Util::GetSupportedSampleCount(DXGI_FORMAT format, ui
 	return sampleDesc;
 }
 
+// Reports a more detailed texture error with format information extracted from the texture resource
+void TextureDX11Util::LogTextureFormatError(const Texture::TextureFormat& format, const std::string& file, int line, const std::string& function, const std::string& message)
+{
+	std::stringstream ss;
+	ss << message << std::endl;
+	ss << "Components: ";
+	switch (format.Components)
+	{
+	case Texture::Components::R:
+		ss << "R" << std::endl;
+		break;
+	case Texture::Components::RG:
+		ss << "RG" << std::endl;
+		break;
+	case Texture::Components::RGB:
+		ss << "RGB" << std::endl;
+		break;
+	case Texture::Components::RGBA:
+		ss << "RGBA" << std::endl;
+		break;
+	case Texture::Components::Depth:
+		ss << "Depth" << std::endl;
+		break;
+	case Texture::Components::DepthStencil:
+		ss << "DepthStencil" << std::endl;
+		break;
+	default:
+		ss << "Unknown" << std::endl;
+		break;
+	}
+
+	ss << "Type:";
+	switch (format.Type)
+	{
+	case Texture::Type::Typeless:
+		ss << "Typeless" << std::endl;
+		break;
+	case Texture::Type::UnsignedNormalized:
+		ss << "UnsignedNormalized" << std::endl;
+		break;
+	case Texture::Type::SignedNormalized:
+		ss << "SignedNormalized" << std::endl;
+		break;
+	case Texture::Type::Float:
+		ss << "Float" << std::endl;
+		break;
+	case Texture::Type::UnsignedInteger:
+		ss << "UnsignedInteger" << std::endl;
+		break;
+	case Texture::Type::SignedInteger:
+		ss << "SignedInteger" << std::endl;
+		break;
+	default:
+		ss << "Unknown" << std::endl;
+		break;
+	}
+
+	ss << "RedBits:     " << (int32_t)format.RedBits << std::endl;
+	ss << "GreenBits:   " << (int32_t)format.GreenBits << std::endl;
+	ss << "BlueBits:    " << (int32_t)format.BlueBits << std::endl;
+	ss << "AlphaBits:   " << (int32_t)format.AlphaBits << std::endl;
+	ss << "DepthBits:   " << (int32_t)format.DepthBits << std::endl;
+	ss << "StencilBits: " << (int32_t)format.StencilBits << std::endl;
+	ss << "Num Samples: " << (int32_t)format.NumSamples << std::endl;
+
+	Game::Log << LOG_ERROR << ss.str() << " [" << file << ":" << line << " (" << function << ")]\n";
+}

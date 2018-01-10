@@ -25,7 +25,7 @@ public:
 
 
 	// Reports a more detailed texture error with format information extracted from the texture resource
-#	define ReportTextureFormatError( textureformat, message ) LogTextureFormatError( (textureformat), __FILE__, __LINE__, __FUNCTION__, (message) )
+#	define ReportTextureFormatError( textureformat, message ) TextureDX11Util::LogTextureFormatError( (textureformat), __FILE__, __LINE__, __FUNCTION__, (message) )
 	static void LogTextureFormatError(const Texture::TextureFormat& format, const std::string & file, int line, const std::string & function, const std::string & message);
 
 

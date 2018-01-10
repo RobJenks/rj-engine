@@ -1436,14 +1436,12 @@ Result RJMain::InitialiseRegions(void)
 	// Initialise the system region, and set a default texture for now
 	// TODO: THIS SHOULD COME FROM THE SYSTEM DATA FILE WHEN IT IS LOADED
 	D::Regions::System = new SystemRegion();
-	res = D::Regions::System->Initialise(Game::Engine->GetDevice());
+	res = D::Regions::System->Initialise();
 	if (res != ErrorCodes::NoError) return res;
 
 	// DEBUG: SET BACKDROP
 	XMFLOAT2 texsize = XMFLOAT2(2048.0f, 1024.0f);
-	if (true) D::Regions::System->SetBackdropTexture(Game::Engine->GetDevice(),
-		BuildStrFilename(D::IMAGE_DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(),
-		texsize);
+	if (true) D::Regions::System->SetBackdropTexture(BuildStrFilename(D::IMAGE_DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(), texsize);
 
 
 	// Return success if we have reached the end
@@ -2339,7 +2337,7 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring nsew = (up | left | down | right);	// == 15
 
 	// Temp: Create a directional light source for the system
-	LightSource *l = LightSource::Create(LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
+	LightSource *l = LightSource::Create(LightData((int)LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 

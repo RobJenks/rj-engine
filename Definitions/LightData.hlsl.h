@@ -43,7 +43,7 @@
 		//------------------------------------------ ( 16 * 7 = 112 bytes)
 
 
-		// Default constructor for use within CPP classes
+		// Constructor for use within CPP classes
 #ifdef __cplusplus
 		inline LightData(void)
 			: PositionWS(0, 0, 0, 1)

@@ -8,19 +8,18 @@
 #include "Logging.h"
 #include "ManagedPtr.h"
 #include "Shader.h"
-#include "Texture.h"
 #include "InputLayoutDesc.h"
 #include "CPUGraphicsResourceAccess.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "ConstantBufferDX11.h"
 #include "VertexBufferDX11.h"
-class ShaderDX11;
-class SamplerStateDX11;
-class RenderTargetDX11;
-class MaterialDX11;
-class PipelineStateDX11;
-class TextureDX11;
-class VertexBufferDX11;
+#include "ShaderDX11.h"
+#include "SamplerStateDX11.h"
+#include "RenderTargetDX11.h"
+#include "MaterialDX11.h"
+#include "PipelineStateDX11.h"
+#include "TextureDX11.h"
+
 
 class RenderAssetsDX11
 {

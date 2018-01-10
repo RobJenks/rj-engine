@@ -9,7 +9,7 @@
 #include <vector>
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
-class Texture;
+class TextureDX11;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))

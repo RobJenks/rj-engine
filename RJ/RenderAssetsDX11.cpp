@@ -70,7 +70,7 @@ TextureDX11 * RenderAssetsDX11::RegisterNewTexture(const std::string & name, std
 
 
 Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName, const std::string & entryPoint,
-															const std::string & profile, const InputLayoutDesc *input_layout = NULL)
+															const std::string & profile, const InputLayoutDesc *input_layout)
 {
 	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
 

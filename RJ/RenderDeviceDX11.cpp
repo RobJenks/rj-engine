@@ -385,7 +385,6 @@ Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, 
 	swapChainFullScreenDesc.Windowed = (full_screen ? TRUE : FALSE);
 
 	// Instantiate the base swap chain interface
-	HRESULT hr;
 	IDXGISwapChain1 *swapchain = NULL;
 
 	if (FAILED(hr = factory->CreateSwapChainForHwnd(m_device, hwnd,
@@ -507,6 +506,7 @@ Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 	m_rendertarget->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil, depthStencilTexture);
 
 	Game::Log << LOG_INFO << "Initialised primary render target successfully\n";
+	return ErrorCodes::NoError;
 }
 
 Result RenderDeviceDX11::InitialiseInputLayoutDefinitions(void)
@@ -586,6 +586,7 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 	transparency->SetRenderTarget(GetPrimaryRenderTarget());
 
 
+	return ErrorCodes::NoError;
 }
 
 

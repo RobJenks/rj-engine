@@ -11,6 +11,7 @@ public:
 	/* Applies no filtering; all models will be rendered and predicate test should be inlined away */
 	class RenderAll
 	{
+	public:
 		CMPINLINE const bool operator()(const ModelBuffer *model) const { return true; }
 	};
 
@@ -18,6 +19,7 @@ public:
 	// TODO: Should have a test on [initialisation?] of objects to ensure Material is always != NULL
 	class RenderNonTransparent
 	{
+	public:
 		CMPINLINE const bool operator()(const ModelBuffer *model) const { return !model->Material->IsTransparent(); }
 	};
 

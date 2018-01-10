@@ -6,7 +6,7 @@
 #include "DX11_Core.h"
 #include "Rendering.h"
 #include "ErrorCodes.h"
-#include "CubeMapTexture.h"
+class TextureDX11;
 class CameraClass;
 class ViewFrustrum;
 class Model;
@@ -28,26 +28,18 @@ public:
 		XMFLOAT3 texture;
 	};
 
-	Result				Initialise(Rendering::RenderDeviceType  *device);
+	Result				Initialise(void);
 
 	// Sets the system backdrop texture that will be rendered to the view frustrum far plane
-	Result				SetBackdropTexture(	Rendering::RenderDeviceType * device, const char *filename, 
-											const XMFLOAT2 & texturesize );
+	Result				SetBackdropTexture(const std::string & name, const XMFLOAT2 & texturesize );
 	
 	// Returns a pointer to the texture resource that will be used for rendering the space backdrop
 	CMPINLINE bool		HasSystemBackdrop(void) { return m_hasbackdrop; }
 	CMPINLINE			Model *GetBackdropSkybox(void) { return m_skybox; }
-	CMPINLINE			ID3D11ShaderResourceView* 
-								GetBackdropTextureResource(void) { return m_backdroptexture->GetTexture(); }
+	ID3D11ShaderResourceView* GetBackdropTextureResource(void);
 
 	// Main render function; renders all applicable objects to the vertex/index buffers
-	void				Render(Rendering::RenderDeviceContextType  *devicecontext);
-
-	void				RenderSystemScenery(Rendering::RenderDeviceContextType  *devicecontext, const CameraClass *camera, 
-											const ViewFrustrum *frustrum, float timefactor);
-
-	// Renders the vertex buffers to the DX output stream, once all data is prepared in the buffers
-	void				RenderBuffers(Rendering::RenderDeviceContextType  *devicecontext);
+	void				Render(void);
 
 	// Terminates the region
 	void				Terminate(void);
@@ -59,8 +51,8 @@ private:
 
 	// Skybox model & texture resource that will be mapped to it
 	bool					m_hasbackdrop;
-	Model					*m_skybox;
-	CubeMapTexture			*m_backdroptexture;
+	Model *					m_skybox;
+	TextureDX11 *			m_backdroptexture;
 
 };
 
