@@ -398,8 +398,24 @@ INTVECTOR3 IO::GetInt3CoordinatesFromAttr(TiXmlElement *node)
 	return vec;
 }
 
+// Get the specified float attribute
+float IO::GetFloatAttribute(TiXmlElement *node, const char *attribute)
+{
+	float val = 0.0f;
+	node->QueryFloatAttribute(attribute, &val);
+	return val;
+}
+
+// Get the specified float attribute
+float IO::GetFloatAttribute(TiXmlElement *node, const char *attribute, float defaultvalue)
+{
+	float val = defaultvalue;
+	node->QueryFloatAttribute(attribute, &val);
+	return val;
+}
+
 // Get the specified integer attribute, returning 0 if the attribute does not exist
-// "node" and "attribute" must exist or exception is thrown
+// "node" and "attribute" must exist
 int IO::GetIntegerAttribute(TiXmlElement *node, const char *attribute)
 {
 	const char *cattr = node->Attribute(attribute);
@@ -408,7 +424,7 @@ int IO::GetIntegerAttribute(TiXmlElement *node, const char *attribute)
 }
 
 // Get the specified integer attribute, returning 'defaultvalue' if the attribute does not exist
-// "node" and "attribute" must exist or exception is thrown
+// "node" and "attribute" must exist
 int	IO::GetIntegerAttribute(TiXmlElement *node, const char *attribute, int defaultvalue)
 {
 	const char *cattr = node->Attribute(attribute);

@@ -37,15 +37,16 @@ bool MaterialDX11::IsTransparent(void) const
 void MaterialDX11::ResumeUpdates(void)
 {
 	m_updates_suspended = false;
-	CompileMaterial();
+	UpdateMaterialState();
 }
 
 // Compile the material into its constant buffer representation
 void MaterialDX11::CompileMaterial(void)
 {
-	if (m_updates_suspended) return;
-
-	m_cbuffer->Set(&Data);
+	if (!m_updates_suspended)
+	{
+		m_cbuffer->Set(&Data);
+	}
 }
 
 // Texture collection for this material
@@ -68,41 +69,44 @@ void MaterialDX11::SetTexture(TextureType type, TextureDX11 *texture)
 	assert((unsigned int)type < MaterialDX11::MaterialTextureTypeCount);
 
 	m_textures[(int)type] = texture;
-	UpdateTextureState();
+	UpdateMaterialState();
 }
 
 // Texture collection for this material
 void MaterialDX11::SetTextures(const MaterialTextureSet & textures)
 {
 	m_textures = textures;
-	UpdateTextureState();
+	UpdateMaterialState();
 }
 
 // Update the texture state flags following a change to the object texture resources
-void MaterialDX11::UpdateTextureState(void)
+void MaterialDX11::UpdateMaterialState(void)
 {
-	Data.HasDiffuseTexture = (m_textures[(int)TextureType::Diffuse] != NULL);
-	Data.HasNormalTexture = (m_textures[(int)TextureType::Normal] != NULL);
-	Data.HasAmbientTexture = (m_textures[(int)TextureType::Ambient] != NULL);
-	Data.HasEmissiveTexture = (m_textures[(int)TextureType::Emissive] != NULL);
-	Data.HasSpecularTexture = (m_textures[(int)TextureType::Specular] != NULL);
-	Data.HasSpecularPowerTexture = (m_textures[(int)TextureType::SpecularPower] != NULL);
-	Data.HasBumpTexture = (m_textures[(int)TextureType::Bump] != NULL);
-	Data.HasOpacityTexture = (m_textures[(int)TextureType::Opacity] != NULL);
-
-	// Update the smaller set of bindable textures whenever the underlying textures change
-	m_texture_binding_count = 0U;
-	for (size_t i = 0; i < (size_t)TextureType::TEXTURE_TYPE_COUNT; ++i)
+	if (!m_updates_suspended)
 	{
-		if (m_textures[i] == NULL) continue;
+		Data.HasDiffuseTexture = (m_textures[(int)TextureType::Diffuse] != NULL);
+		Data.HasNormalTexture = (m_textures[(int)TextureType::Normal] != NULL);
+		Data.HasAmbientTexture = (m_textures[(int)TextureType::Ambient] != NULL);
+		Data.HasEmissiveTexture = (m_textures[(int)TextureType::Emissive] != NULL);
+		Data.HasSpecularTexture = (m_textures[(int)TextureType::Specular] != NULL);
+		Data.HasSpecularPowerTexture = (m_textures[(int)TextureType::SpecularPower] != NULL);
+		Data.HasBumpTexture = (m_textures[(int)TextureType::Bump] != NULL);
+		Data.HasOpacityTexture = (m_textures[(int)TextureType::Opacity] != NULL);
 
-		m_texture_bindings[m_texture_binding_count] = TextureBinding(m_textures[i], i);
-		++m_texture_binding_count;
+		// Update the smaller set of bindable textures whenever the underlying textures change
+		m_texture_binding_count = 0U;
+		for (size_t i = 0; i < (size_t)TextureType::TEXTURE_TYPE_COUNT; ++i)
+		{
+			if (m_textures[i] == NULL) continue;
+
+			m_texture_bindings[m_texture_binding_count] = TextureBinding(m_textures[i], i);
+			++m_texture_binding_count;
+		}
+
+
+		// Compiile the constant buffer holding all non-texture material data (incl. texture-related flags)
+		CompileMaterial();
 	}
-
-
-	// Compiile the constant buffer holding all non-texture material data (incl. texture-related flags)
-	CompileMaterial();
 }
 
 // Bind this material to the current rendering pipeline

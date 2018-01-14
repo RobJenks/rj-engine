@@ -436,6 +436,10 @@ namespace ErrorCodes {
 	const Result		CannotLoadHardpointDataFromNullResources		= 2691;
 	const Result		CouldNotLoadUnrecognisedHardpointProperty		= 2692;
 	const Result		HardpointElementMissingRequiredAttributes		= 2693;
+	const Result		CannotLoadMaterialWithNullData					= 2694;
+	const Result		CannotLoadMaterialWithoutCode					= 2695;
+	const Result		CannotCreateMaterialAsset						= 2696;
+
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

@@ -82,8 +82,6 @@ public:
 	void						SetTexture(TextureType type, TextureDX11 *texture);
 	void						SetTextures(const MaterialTextureSet & textures);
 
-	// Compile the material into its constant buffer representation
-	void						CompileMaterial(void);
 
 	// Bind this material to the current rendering pipeline
 	void						Bind(ShaderDX11 *shader) const;
@@ -123,8 +121,11 @@ private:
 	// Other material properties
 	bool						m_updates_suspended;
 
-	// Update the texture state flags following a change to the object texture resources
-	void						UpdateTextureState(void);
+	// Update the material state and recompile following a change to the object resources
+	void						UpdateMaterialState(void);
+
+	// Compile the material into its constant buffer representation
+	void						CompileMaterial(void);
 };
 
 

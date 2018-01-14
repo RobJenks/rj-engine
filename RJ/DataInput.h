@@ -42,15 +42,8 @@ class TileConnections;
 class ElementStateDefinition;
 
 // This file contains no objects with special alignment requirements
-namespace IO { namespace Data {
-
-	// Load model data (i.e. xml definitions) without loading the geometry itself
-	Result LoadModelData(TiXmlElement *node);
-
-	// Load geometry for a specific model
-	Result LoadModelGeometry(Model *model);
-
-
+namespace IO { namespace Data 
+{
 	TiXmlDocument *LoadXMLDocument(const std::string &filename);
 	Result LoadGameDataFile(const std::string &filename, bool follow_indices);
 	Result LoadGameDataFile(const std::string &filename);
@@ -91,7 +84,9 @@ namespace IO { namespace Data {
 	CompoundLoadoutMap *LoadCompoundLoadoutMap(TiXmlElement *node, SimpleShipLoadout *L, SimpleShip *targetshiptype);
 	Result LoadEngine(TiXmlElement *node);
 
-	// Load an articulated model
+	// Load geomatry and material data
+	Result LoadModelData(TiXmlElement *node);
+	Result LoadMaterialData(TiXmlElement *node);
 	Result LoadArticulatedModel(TiXmlElement *node);
 
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached

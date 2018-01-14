@@ -384,7 +384,6 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
-	Model *model;
 	std::string key, code, filename, material;
 	std::vector<CollisionSpatialDataF> collision;
 	HashVal hash;
@@ -425,7 +424,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	}
 
 	// Check whether we have an existing model; if we do, return an error since we will not load the same model twice
-	model = Model::GetModel(code);
+	Model *model = Model::GetModel(code);
 	if (model != NULL)
 	{
 		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; model already exists\n";
@@ -446,6 +445,66 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	Model::AddModel(model);
 
 	Game::Log << LOG_INFO << "Loaded model \"" << code << "\"\n";
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::LoadMaterialData(TiXmlElement *node)
+{
+	std::string key; HashVal hash;
+	if (!node) return ErrorCodes::CannotLoadMaterialWithNullData;
+
+	// Validate material code and create the underlying resource before loading details
+	const char *ccode = node->Attribute("code");
+	if (!ccode) return ErrorCodes::CannotLoadMaterialWithoutCode;
+
+	MaterialDX11 *material = Game::Engine->GetAssets().CreateMaterial(ccode);
+	if (material == NULL)
+	{
+		Game::Log << LOG_WARN << "Failed to load material \"" << ccode << "\"\n";
+		return ErrorCodes::CannotCreateMaterialAsset;
+	}
+
+	// Suspend material updates until all properties are loaded
+	material->SuspendUpdates();
+
+	// Look at each child element in turn and pull data from them
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Retrieve the xml node key and hash it for more efficient comparison
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		// Load properties
+		if (hash == HashedStrings::H_GlobalAmbient) material->SetGlobalAmbient(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_AmbientColor) material->SetAmbientColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_EmissiveColor) material->SetEmissiveColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_DiffuseColor) material->SetDiffuseColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_SpecularColor) material->SetSpecularColour(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_Reflectance) material->SetReflectance(IO::GetFloat4FromAttr(child));
+		else if (hash == HashedStrings::H_Opacity) material->SetOpacity(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_SpecularPower) material->SetSpecularPower(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_SpecularScale) material->SetSpecularScale(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_IndexOfRefraction) material->SetIndexOfRefraction(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_BumpIntensity) material->SetBumpIntensity(IO::GetFloatValue(child));
+		else if (hash == HashedStrings::H_AlphaThreshold) material->SetAlphaThreshold(IO::GetFloatValue(child));
+
+		else if (hash == HashedStrings::H_AmbientTexture) material->SetTexture(Material::TextureType::Ambient, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_EmissiveTexture) material->SetTexture(Material::TextureType::Emissive, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_DiffuseTexture) material->SetTexture(Material::TextureType::Diffuse, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_SpecularTexture) material->SetTexture(Material::TextureType::Specular, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_SpecularPowerTexture) material->SetTexture(Material::TextureType::SpecularPower, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_NormalTexture) material->SetTexture(Material::TextureType::Normal, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_BumpTexture) material->SetTexture(Material::TextureType::Bump, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		else if (hash == HashedStrings::H_OpacityTexture) material->SetTexture(Material::TextureType::Opacity, Game::Engine->GetAssets().GetTexture(child->GetText()));
+		
+	}
+
+	// Resume updates and compile the material
+	material->ResumeUpdates();
+	
+	// Return success
+	Game::Log << LOG_INFO << "Loaded material \"" << ccode << "\"\n";
 	return ErrorCodes::NoError;
 }
 
@@ -3008,36 +3067,6 @@ CollisionSpatialDataF IO::Data::LoadCollisionSpatialData(TiXmlElement *node)
 	}
 
 	return data;
-}
-
-// Loads the geometry for the specified model
-Result IO::Data::LoadModelGeometry(Model *model)
-{
-	// Exit immediately if the geometry data has already been loaded
-	if (model->IsGeometryLoaded()) return ErrorCodes::NoError;
-
-	// Load the model geometry and textures
-	Result r = model->Initialise(model->GetFilename().c_str(), model->GetTextureFilename().c_str());
-
-	// Test the return code to see if the model could be successfully loaded
-	if (r == ErrorCodes::NoError)	model->SetGeometryLoaded(true); 
-	else							model->SetGeometryLoaded(false);
-
-	// If we did succeed in loading the model, scale the model to its target actual size now.  Actual size may already be 
-	// set, but this will actually initiate the scaling of model vertices since they were not previously loaded
-	if (model->IsGeometryLoaded())	
-	{
-		// If no effective model size was specified in the xml data, calculate a default now by exactly fitting bounds around the mesh data	
-		XMFLOAT3 size = model->GetEffectiveModelSize();
-		if (size.x < Game::C_EPSILON || size.y < Game::C_EPSILON || size.z < Game::C_EPSILON)
-			model->SetEffectiveModelSize(model->GetModelSize());
-
-		// Set the actual size now.  Method will take care of deriving missing parameters if required, so no validation needed here
-		model->SetActualModelSize(model->GetActualModelSize());
-	}
-
-	// Return the result of the model loading operation
-	return r;
 }
 
 Result IO::Data::PostProcessResources(void)

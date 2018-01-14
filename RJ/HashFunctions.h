@@ -309,6 +309,27 @@ namespace HashedStrings
 	DefineHash(H_SwitchConstraintMin, "switchconstraintmin");
 	DefineHash(H_SwitchConstraintMax, "switchconstraintmax");
 	DefineHash(H_MaxRotationSpeed, "maxrotationspeed");
+	DefineHash(H_GlobalAmbient, "globalambient");
+	DefineHash(H_AmbientColor, "ambientcolor");
+	DefineHash(H_EmissiveColor, "emissivecolor");
+	DefineHash(H_DiffuseColor, "diffusecolor");
+	DefineHash(H_SpecularColor, "specularcolor");
+	DefineHash(H_Reflectance, "reflectance");
+	DefineHash(H_Opacity, "opacity");
+	DefineHash(H_SpecularPower, "specularpower");
+	DefineHash(H_SpecularScale, "specularscale");
+	DefineHash(H_IndexOfRefraction, "indexofrefraction");
+	DefineHash(H_AmbientTexture, "ambienttexture");
+	DefineHash(H_EmissiveTexture, "emissivetexture");
+	DefineHash(H_DiffuseTexture, "diffusetexture");
+	DefineHash(H_SpecularTexture, "speculartexture");
+	DefineHash(H_SpecularPowerTexture, "specularpowertexture");
+	DefineHash(H_NormalTexture, "normaltexture");
+	DefineHash(H_BumpTexture, "bumptexture");
+	DefineHash(H_OpacityTexture, "opacitytexture");
+	DefineHash(H_BumpIntensity, "bumpintensity");
+	DefineHash(H_AlphaThreshold, "alphathreshold");
+
 
 }
 
