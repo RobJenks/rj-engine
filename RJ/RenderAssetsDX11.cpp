@@ -5,9 +5,20 @@
 #include "ShaderDX11.h"
 
 
+// Initialise static data
+std::string RenderAssetsDX11::DEFAULT_ASSET_ID = "DEFAULT";
+
+
 // Constructor
 RenderAssetsDX11::RenderAssetsDX11(void)
 {
+}
+
+void RenderAssetsDX11::InitialiseDefaultAssets(void)
+{
+	// Default material; uses all parameters set in default constructor so no initialisation required
+	CreateMaterial("DEFAULT");
+
 }
 
 

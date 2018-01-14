@@ -385,16 +385,12 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 Result IO::Data::LoadModelData(TiXmlElement *node)
 {
 	Model *model;
-	std::string key, code, type, fname, tex, val;
-	XMFLOAT3 acteffsize, effsize;
-	INTVECTOR3 elsize; bool no_centre = false;
+	std::string key, code, filename, material;
 	std::vector<CollisionSpatialDataF> collision;
 	HashVal hash;
 
 	// Set defaults before loading the model
-	code = type = fname = tex = "";
-	acteffsize = effsize = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	elsize = NULL_INTVECTOR3;
+	code = filename = material = NullString;
 
 	// Look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -409,30 +405,12 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 			code = child->GetText();
 			StrLowerC(code);
 		}
-		else if (hash == HashedStrings::H_Type) {							/* The model class for this object */
-			type = child->GetText();
-			StrLowerC(type);
-		}
 		else if (hash == HashedStrings::H_Filename) {						/* Filename of the ship model file */
-			fname = child->GetText();
-			StrLowerC(fname);
+			filename = child->GetText();
 		}
-		else if (hash == HashedStrings::H_Texture) {						/* Filename of the associated model texture */
-			tex = child->GetText();
-			StrLowerC(tex);
-		}
-		else if (hash == HashedStrings::H_NoModelCentering) {				/* Flag that overrides the default behaviour of centring all models about the origin */
-			val = child->GetText(); StrLowerC(val);
-			no_centre = (val == "true");
-		}
-		else if (hash == HashedStrings::H_EffectiveSize) {					/* Effective size (i.e. not just vertex max-min) for the model */
-			effsize = IO::GetFloat3FromAttr(child);
-		}
-		else if (hash == HashedStrings::H_ActualEffectiveSize) {			/* Actual (i.e. in-game) effective size.  Determines scaling if set */
-			acteffsize = IO::GetFloat3FromAttr(child);
-		}
-		else if (hash == HashedStrings::H_ElementSize) {					/* Mapping to element dimensions; optional, and used to scale to fit elements by load post-processing */
-			elsize = IO::GetInt3CoordinatesFromAttr(child);	
+		else if (hash == HashedStrings::H_Material) {						/* String code of the associated material */
+			material = child->GetText();
+			StrLowerC(material);
 		}
 		else if (hash == HashedStrings::H_Collision) {						/* List of collision objects attached to this model */
 			collision.push_back(IO::Data::LoadCollisionSpatialData(child));
@@ -440,57 +418,34 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	}
 
 	// Make sure we have all mandatory fields 
-	if (code == NullString || type == NullString || fname == NullString || tex == NullString) return ErrorCodes::InsufficientDataToLoadModel;
+	if (code == NullString || filename == NullString)
+	{
+		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; missing mandatory data\n";
+		return ErrorCodes::InsufficientDataToLoadModel;
+	}
 
 	// Check whether we have an existing model; if we do, return an error since we will not load the same model twice
 	model = Model::GetModel(code);
-	if (model != NULL) return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
+	if (model != NULL)
+	{
+		Game::Log << LOG_WARN << "Cannot load model \"" << code << "\"; model already exists\n";
+		return ErrorCodes::CannotLoadModelWhereDuplicateAlreadyExists;
+	}
 	
 	// Construct full filenames from the info specified
-	std::string filename = BuildStrFilename(D::DATA, fname);
-	std::string texture = BuildStrFilename(D::IMAGE_DATA, tex);
+	std::string full_filename = BuildStrFilename(D::DATA, filename);
 
 	// Otherwise create a new model here
 	model = new Model();
-	model->SetCode(code);
-	model->SetFilename(filename);
-	model->SetTextureFilename(texture);
-	model->SetEffectiveModelSize(effsize);
-	model->SetElementSize(elsize);
-	model->SetCentredAboutOrigin(!no_centre);
-	model->SetCollisionData(std::move(collision));
-
-	// Mark as a 'standard' model, i.e. one that will be shared as a template
-	// between multiple entities for performance reasons.  The entity only acquires an individual model
-	// if its geometry is changed / deformed in some way.  Setting this flag means that when an object
-	// with the model is deallocated it will not attempt to deallocate the model data, preserving it for
-	// other entities
-	model->SetStandardModel(true);
+	model->Initialise(full_filename, material);
 	
-	// If an effective model size is not specified, take the actual extent calculated from vertex data as a default
-	if (effsize.x <= Game::C_EPSILON || effsize.y <= Game::C_EPSILON || effsize.z <= Game::C_EPSILON)
-		model->SetEffectiveModelSize(model->GetModelSize());
-	
-	// Attempt to set the actual model size; method will handle missing/incomplete parameters itself, so pass whatever we have (incl 0,0,0 as default)
-	model->SetActualModelSize(acteffsize);
+	// Set other loaded properties after initialisation if required
 
-	// Load the model geometry immediately
-	Result result = LoadModelGeometry(model);
-	if (result != ErrorCodes::NoError)
-	{
-		Game::Log << LOG_WARN << "Could not load geometry for model \"" << model->GetCode() << "\" [" << result << "]\n";
-	}
-
-	// Test whether this model has an element size specified; if so, override all size data from the xml data or geometry
-	elsize = model->GetElementSize();
-	if (elsize.x > 0 && elsize.y > 0 && elsize.z > 0)
-	{
-		// An element size has been specified, so scale the mesh to be mapped onto the specified number of standard-sized game elements
-		model->SetActualModelSize(Game::ElementLocationToPhysicalPositionF(elsize));
-	}
 
 	// Add this model to the relevant static collection and return success
 	Model::AddModel(model);
+
+	Game::Log << LOG_INFO << "Loaded model \"" << code << "\"\n";
 	return ErrorCodes::NoError;
 }
 
@@ -3784,7 +3739,7 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 
 	// Create the new 2D image group object and attempt to initialise it
 	Image2DRenderGroup *igroup = new Image2DRenderGroup();
-	result = igroup->Initialize( Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
+	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, 
 								 texfile, Texture::TranslateTextureMode(tmode) );
 	if (result != ErrorCodes::NoError) return result;
 

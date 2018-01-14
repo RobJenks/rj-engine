@@ -33,18 +33,16 @@ public:
 	~Model(void);
 
 	// Load a model from disk and prepare it for use
-	Result								Initialise(const std::string & filename);
-	Result								Initialise(fs::path file);
+	Result								Initialise(const std::string & filename, const std::string & material);
+	Result								Initialise(fs::path file, const std::string & material);
 
 	// Return basic data on the model
 	CMPINLINE ModelID					GetID(void) const { return m_id; }
 	CMPINLINE std::string				GetCode(void) const { return m_code; }
 	CMPINLINE std::string				GetFilename(void) const { return m_filename; }
+	CMPINLINE std::string				GetMaterialCode(void) const { return m_materialcode; }
 
-	// Set model metadata
-	CMPINLINE void						SetCode(const std::string & code) { m_code = code; }
-	CMPINLINE void						SetFilename(const std::string & filename) { m_filename = filename; }
-
+	
 	// Reset all model geometry data
 	void								Reset(void);
 
@@ -73,6 +71,7 @@ private:
 	ModelID								m_id;
 	std::string							m_code;
 	std::string							m_filename;
+	std::string							m_materialcode;
 
 
 };

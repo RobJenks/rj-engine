@@ -7,7 +7,6 @@
 // Initialise static variables
 MaterialDX11::MaterialID MaterialDX11::GlobalMaterialIDCount = 0U;
 
-
 // Default constructor
 MaterialDX11::MaterialDX11(void)
 	:

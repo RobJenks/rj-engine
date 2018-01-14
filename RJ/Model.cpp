@@ -3,6 +3,8 @@
 #include "FileUtils.h"
 #include "../Definitions/ByteString.h"
 #include "../Definitions/ModelData.h"
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
 #include "MaterialDX11.h"
@@ -27,14 +29,14 @@ Model::~Model(void)
 
 
 // Load a model from disk and prepare it for use
-Result Model::Initialise(const std::string & filename)
+Result Model::Initialise(const std::string & filename, const std::string & material)
 {
-	return Initialise(fs::path(filename));
+	return Initialise(fs::path(filename), material);
 }
 
 
 // Load a model from disk and prepare it for use
-Result Model::Initialise(fs::path file)
+Result Model::Initialise(fs::path file, const std::string & material)
 {
 	// Reset all geometry data beforehand so that we don't ever half-load a model over an existing one
 	Reset();
@@ -62,6 +64,9 @@ Result Model::Initialise(fs::path file)
 		Game::Log << LOG_ERROR << "Could not deserialize model data from \"" << m_filename << "\"\n";
 		return ErrorCodes::CannotDeserializeModel;
 	}
+
+	// Store the material name, which will be resolved upon compilation
+	m_materialcode = material;
 	
 	// Compile the model based upon the loaded geometry data
 	Result compile_result = CompileModel();
@@ -88,8 +93,16 @@ Result Model::CompileModel(void)
 	ModelData *data = Geometry.get();
 	if (!data)
 	{
-		Game::Log << LOG_WARN << "Cannot compile model; no geometry data available\n";
+		Game::Log << LOG_WARN << "Cannot compile model \"" << m_code << "\"; no geometry data available\n";
 		return ErrorCodes::CannotCompileModel;
+	}
+
+	// Attempt to resolve the model material, otherwise use a default
+	const MaterialDX11 * pMaterial = Game::Engine->GetAssets().GetMaterial(m_materialcode);
+	if (!pMaterial)
+	{
+		Game::Log << LOG_WARN << "Cannot find material \"" << m_materialcode << "\" for model \"" << m_code << "\"\n";
+		pMaterial = Game::Engine->GetAssets().GetDefaultMaterial();
 	}
 
 	// Refresh the buffer with this new data
@@ -97,7 +110,7 @@ Result Model::CompileModel(void)
 	(
 		VertexBufferDX11(*data),
 		IndexBufferDX11(data->VertexCount),
-		NULL									// TODO: Assign material here
+		pMaterial
 	);
 
 	// Return success

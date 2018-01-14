@@ -34,8 +34,11 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<ConstantBufferDX11>> ConstantBufferCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<VertexBufferDX11>> VertexBufferCollection;
 
+	static std::string								DEFAULT_ASSET_ID;
 
 	RenderAssetsDX11(void);
+
+	void											InitialiseDefaultAssets(void);
 
 
 	CMPINLINE const ShaderCollection &				GetShaders(void) const { return m_shaders; }
@@ -55,6 +58,8 @@ public:
 	CMPINLINE TextureDX11 *							GetTexture(const std::string & name) { return GetAsset<TextureDX11>(name, m_textures); }
 	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name, m_constantbuffers); }
 	CMPINLINE VertexBufferDX11 *					GetVertexBuffer(const std::string & name) { return GetAsset<VertexBufferDX11>(name, m_vertexbuffers); }
+
+	CMPINLINE MaterialDX11 *						GetDefaultMaterial(void) { return GetDefaultAsset<MaterialDX11>(m_materials); }
 
 public:
 
@@ -94,6 +99,8 @@ private:
 	template <class T>
 	T *												GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
 
+	template <class T>
+	T *												GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
 
 
 private:
@@ -107,7 +114,6 @@ private:
 	ConstantBufferCollection						m_constantbuffers;
 	VertexBufferCollection							m_vertexbuffers;
 
-
 };
 
 
@@ -117,6 +123,12 @@ T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std:
 {
 	auto it = assetData.find(name);
 	return (it != assetData.end() ? it->second.get() : NULL);
+}
+
+template <class T>
+T *	RenderAssetsDX11::GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+{
+	return GetAsset<T>(RenderAssetsDX11::DEFAULT_ASSET_ID, assetData);
 }
 
 

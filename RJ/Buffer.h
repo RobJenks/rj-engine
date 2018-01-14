@@ -26,7 +26,7 @@ public:
 	void InitialiseBuffer(UINT bindflags, const void *data, UINT count, UINT stride, ID3D11Buffer **ppOutBuffer);
 
 	CMPINLINE BufferType		GetBufferType(void) const { return m_buffertype; }
-	CMPINLINE const ID3D11Buffer *	GetCompiledBuffer(void) const { return m_buffer[0]; }
+	CMPINLINE ID3D11Buffer *	GetCompiledBuffer(void) { return m_buffer[0]; }
 	CMPINLINE UINT				GetElementCount(void) const { return m_buffer_elementcount[0]; }
 	CMPINLINE UINT				GetStride(void) const { return m_stride[0]; }
 	CMPINLINE UINT				GetBindFlags(void) const { return m_bindflags; }
