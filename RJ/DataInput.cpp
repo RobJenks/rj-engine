@@ -3253,16 +3253,13 @@ Result IO::Data::LoadFireEffect(TiXmlElement *node)
 			e->SetEffectModel(child->GetText());							// The underlying effect model used for rendering
 		}
 		else if (key == "firetexture") {
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the fire texture used for this effect (no error handling)
-			e->SetFireTexture(filename.c_str());				
+			e->SetFireTexture(child->GetText());				
 		}
 		else if (key ==	"noisetexture") { 
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the noise texture used for this effect (no error handling)
-			e->SetNoiseTexture(filename.c_str());				
+			e->SetNoiseTexture(child->GetText());
 		}
 		else if (key == "alphatexture") {
-			std::string filename = BuildStrFilename(D::IMAGE_DATA, child->GetText());	// Attempt to load the alpha texture used for this effect (no error handling)
-			e->SetAlphaTexture(filename.c_str());				
+			e->SetAlphaTexture(child->GetText());
 		}
 		else if (key == "noisescrollspeed") {
 			e->SetScrollSpeeds(IO::GetFloat3FromAttr(child));				// 3x scroll speeds for the texture translation
@@ -3321,7 +3318,7 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 			e->SetParticleLimit(atoi(child->GetText()));					
 		}
 		else if (key == "particletexture") {
-			e->LoadTexture(Game::Engine->GetDevice(), BuildStrFilename(D::IMAGE_DATA, child->GetText()).c_str());
+			e->SetParticleTexture(child->GetText());
 		}
 		else if (key == "emissionfrequency") {
 			const char *mn = child->Attribute("min");
@@ -3795,24 +3792,24 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 	// This top-level node should contain all the info required to instantiate the render group
 	const char *code = node->Attribute("code");
 	const char *texture = node->Attribute("texture");
-	const char *tmode = node->Attribute("texturemode");
+	const char *trepeat = node->Attribute("repeat");
 	const char *brender = node->Attribute("render");
 	const char *smouse = node->Attribute("acceptsmouse");
 	const char *czorder = node->Attribute("z");
 
 	// Make sure we were able to retrieve all required information
-	if (!code || !texture || !tmode) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
+	if (!code || !texture) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
 
 	// Process the parameters and convert as required
 	std::string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
 	const char *texfile = stexfile.c_str();
 	std::string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
 	std::string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
+	bool repeat = (trepeat ? StrLower(std::string(trepeat)) == "true" : false);
 
 	// Create the new 2D image group object and attempt to initialise it
 	Image2DRenderGroup *igroup = new Image2DRenderGroup();
-	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, 
-								 texfile, Texture::TranslateTextureMode(tmode) );
+	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, texfile, repeat);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Set other properties at the group level

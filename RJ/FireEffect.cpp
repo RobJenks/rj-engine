@@ -1,8 +1,8 @@
 #include "DX11_Core.h"
 
 #include "ErrorCodes.h"
-#include "Texture.h"
-
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 
 #include "FireEffect.h"
 
@@ -14,49 +14,41 @@ Result FireEffect::Initialise(void)
 }
 
 // Loads the fire texture from file
-Result FireEffect::SetFireTexture(const char *texture)
+Result FireEffect::SetFireTexture(const std::string & texture)
 {
-	return LoadTexture(&m_firetexture, texture);
+	m_firetexture = Game::Engine->GetAssets().GetTexture(texture);
+	return ErrorCodes::NoError;
 }
 
 // Loads the noise texture from file
-Result FireEffect::SetNoiseTexture(const char *texture)
+Result FireEffect::SetNoiseTexture(const std::string & texture)
 {
-	return LoadTexture(&m_noisetexture, texture);
+	m_noisetexture = Game::Engine->GetAssets().GetTexture(texture);
+	return ErrorCodes::NoError;
 }
 
 // Loads the alpha texture from file
-Result FireEffect::SetAlphaTexture(const char *texture)
+Result FireEffect::SetAlphaTexture(const std::string & texture)
 {
-	return LoadTexture(&m_alphatexture, texture);
+	m_alphatexture = Game::Engine->GetAssets().GetTexture(texture);
+	return ErrorCodes::NoError;
 }
 
-void FireEffect::Shutdown(void)
+ID3D11ShaderResourceView * FireEffect::GetFireTexture(void)
 {
-	// Release the fire texture object
-	if (m_firetexture)
-	{
-		m_firetexture->Shutdown();
-		delete m_firetexture;
-		m_firetexture = NULL;
-	}
-	
-	// Release the alpha texture object
-	if (m_alphatexture)
-	{
-		m_alphatexture->Shutdown();
-		delete m_alphatexture;
-		m_alphatexture = NULL;
-	}
-	
-	// Release the noise texture object
-	if (m_noisetexture)
-	{
-		m_noisetexture->Shutdown();
-		delete m_noisetexture;
-		m_noisetexture = NULL;
-	}
+	return m_firetexture->GetShaderResourceView();
 }
+
+ID3D11ShaderResourceView * FireEffect::GetNoiseTexture(void)
+{
+	return m_noisetexture->GetShaderResourceView();
+}
+
+ID3D11ShaderResourceView * FireEffect::GetAlphaTexture(void)
+{
+	return m_alphatexture->GetShaderResourceView();
+}
+
 
 // Set other properties of the flame effect
 void FireEffect::SetScrollSpeeds(const XMFLOAT3 &scrollspeed) { m_scrollspeeds = scrollspeed; }
