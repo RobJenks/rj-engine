@@ -31,12 +31,12 @@ Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *dev
 	m_model_unitcone = new Model();
 
 	// 2D square model used for billboard rendering of effects
-	result = m_model_unitsquare->Initialise(BuildStrFilename(D::DATA, "Models\\Misc\\unit_square.rjm").c_str(), NULL);
-	if (result != ErrorCodes::NoError) return result;
+	m_model_unitsquare = Model::GetModel("unit_square");
+	if (!m_model_unitsquare) return ErrorCodes::CouldNotInitialiseEffectManager;
 
 	// Unit cone model used for rendering tapering effects, e.g. engine thrust 
-	result = m_model_unitcone->Initialise(BuildStrFilename(D::DATA, "Models\\Misc\\unit_cone.rjm").c_str(), NULL);
-	if (result != ErrorCodes::NoError) return result;
+	m_model_unitcone = Model::GetModel("unit_cone");
+	if (!m_model_unitcone) return ErrorCodes::CouldNotInitialiseEffectManager;
 
 	// Return success if all models have been loaded successfully
 	return ErrorCodes::NoError;
@@ -64,23 +64,7 @@ void EffectManager::Shutdown(void)
 	for (int i=0; i<n; i++)
 	{
 		FireEffect *e = m_fireeffects.at(i);
-		e->Shutdown();
-		delete e;
-		e = NULL;
-	}
-
-	// Deallocate the model objects that are used for effect rendering
-	if (m_model_unitsquare)
-	{
-		m_model_unitsquare->Shutdown();
-		delete m_model_unitsquare;
-		m_model_unitsquare = NULL;
-	}
-	if (m_model_unitcone) 
-	{
-		m_model_unitcone->Shutdown();
-		delete m_model_unitcone;
-		m_model_unitcone = NULL;
+		SafeDelete(e);
 	}
 }
 
@@ -115,16 +99,19 @@ Result XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, Rendering::Ren
 			model = m_model_unitsquare; break;
 	}
 	
+	/*** TODO: This will no longer work under the deferred rendering engine.  However we will likely be replacing it anyway ***/
+
 	// Render the effect model to vertex buffers now
-	model->Render();
+	//model->Render();
 
 	// Now render the fireshader onto these buffered vertices
-	return m_fireshader->Render(deviceContext, model->GetIndexCount(), world, view, projection, 
+	/*return m_fireshader->Render(deviceContext, model->GetIndexCount(), world, view, projection, 
 								e->GetFireTexture(), e->GetNoiseTexture(), e->GetAlphaTexture(),
 								m_effecttimer, e->GetScrollSpeeds(), e->GetScaling(),
 								e->GetDistortionParameters1(), e->GetDistortionParameters2(), e->GetDistortionParameters3(), 
-								e->GetDistortionScale(), e->GetDistortionBias());
+								e->GetDistortionScale(), e->GetDistortionBias());*/
 
+	return ErrorCodes::NoError;
 }
 
 

@@ -289,8 +289,7 @@ Image2D *UserInterface::NewComponent(std::string code, const char *filename, int
 {
 	// Create a new component and initialise with the supplied data
 	Image2D *item = new Image2D();
-	Result result = item->Initialize(Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
-									 filename, width, height);
+	Result result = item->Initialize(Game::ScreenWidth, Game::ScreenHeight, filename, width, height);
 
 	// Return NULL if the initialisation failed
 	if (result != ErrorCodes::NoError || !item)

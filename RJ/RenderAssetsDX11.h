@@ -229,7 +229,7 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 
 	if (assetData.find(name) != assetData.end())
 	{
-		Game::Log << LOG_WARN << type << " definition for \"" << STRING(T) << "\" already exists, cannot create duplicate\n";
+		Game::Log << LOG_WARN << STRING(T) << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
 		return NULL;
 	}
 

@@ -74,6 +74,10 @@ TextureDX11 * RenderAssetsDX11::RegisterNewTexture(const std::string & name, std
 		return NULL;
 	}
 
+	// Store the asset identifier within this texture as well
+	texture.get()->SetCode(name);
+
+	// Store the new asset and return a pointer
 	m_textures[name] = std::move(texture);
 	Game::Log << LOG_INFO << "Registered new texture resource \"" << name << "\"\n";
 	return m_textures[name].get();

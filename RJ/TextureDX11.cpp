@@ -347,7 +347,7 @@ bool TextureDX11::LoadTexture(const std::wstring & fileName, Texture::Dimension 
 		
 		default:
 
-			Game::Log << LOG_WARN << "Cannot load texture data for \"" << fileName << "\"; unsupported dimension type " << (int)dimension << "\n";
+			Game::Log << LOG_WARN << "Cannot load texture data for \"" << ConvertWStringToString(fileName) << "\"; unsupported dimension type " << (int)dimension << "\n";
 			return false;
 	}
 }

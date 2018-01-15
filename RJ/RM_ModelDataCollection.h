@@ -15,12 +15,13 @@ struct RM_ModelDataCollection
 	std::vector<RM_InstanceData>				ModelData;
 	std::vector<RM_InstanceData>::size_type		CurrentSlotCount;
 	std::vector<RM_InstanceData>::size_type		SlotCapacity;
+	D3D_PRIMITIVE_TOPOLOGY						PrimitiveTopology;
 
 
 	// Default constructor
 	CMPINLINE RM_ModelDataCollection(void) noexcept 
 		: 
-		CurrentSlotCount(0U), SlotCapacity(0U)
+		CurrentSlotCount(0U), SlotCapacity(0U), PrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
 	{
 		InitialiseCapacity(RENDER_QUEUE_INITIAL_MODEL_SLOT_ALLOCATION);
 	}

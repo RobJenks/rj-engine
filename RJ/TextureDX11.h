@@ -32,6 +32,10 @@ public:
 	enum CubeMapConstructor { Cube };		// Required to differentiate between 1D texture array and Cube textures
 	TextureDX11(CubeMapConstructor, uint16_t size, uint16_t count, const TextureFormat& format, CPUGraphicsResourceAccess cpuAccess, bool bUAV = false);
 
+	// Unique texture code; set by engine when creating the new asset, should not be set by other processes
+	CMPINLINE std::string		GetCode(void) const { return m_code; }
+	CMPINLINE void				SetCode(const std::string & code) { m_code = code; }
+
 	// Bind this resource to the given shader target
 	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype) const;
 
@@ -164,6 +168,7 @@ private:
 	
 
 	// Instance fields
+	std::string								m_code;
 	ID3D11Texture1D *						m_texture1d;
 	ID3D11Texture2D *						m_texture2d;
 	ID3D11Texture3D *						m_texture3d;

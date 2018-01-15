@@ -299,6 +299,7 @@ namespace ErrorCodes {
 	const Result		CannotLoadShaderFromFile						= 1354;
 	const Result		CannotLoadDuplicateShaderResource				= 1355;
 	const Result		CannotFindTextureResource						= 1356;
+	const Result		CouldNotInitialiseEffectManager					= 1357;
 
 	const Result		CannotRenderNullEnvironment						= 1375;
 	const Result		PortalRenderingNotPossibleInEnvironment			= 1376;

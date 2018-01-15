@@ -861,7 +861,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				// set [0] before binding
 				m_instancedbuffers[0] = m_current_modelbuffer->VertexBuffer.GetCompiledBuffer();
 				m_instancedstride[0] = m_current_modelbuffer->VertexBuffer.GetStride();
-				r_devicecontext->IASetVertexBuffers(0, 2, m_instancedbuffers, m_instancedstride, m_instancedoffset);
+				r_devicecontext->IASetVertexBuffers(0, 2, (ID3D11Buffer * const *)(&m_instancedbuffers[0]), m_instancedstride, m_instancedoffset);
 
 				// Set the model index buffer to active in the input assembler
 				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), IndexBufferDX11::INDEX_FORMAT, 0U);
