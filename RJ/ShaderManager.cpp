@@ -10,7 +10,6 @@
 #include "Material.h"
 #include "InputLayoutDesc.h"
 #include "LightData.hlsl.h"
-#include "Data\\Shaders\\standard_ps_const_buffer.h"
 
 #include "ShaderManager.h"
 
@@ -244,34 +243,5 @@ Result ShaderManager::CreateBuffer(	D3D11_USAGE usage, UINT bytewidth, UINT bind
 	}
 
 	// We have created the buffer so return success
-	return ErrorCodes::NoError;
-}
-
-
-// Populate one of the standard constant buffer objects with appropriate data
-Result ShaderManager::PopulateConstantBuffer(StandardPSConstBuffer *buffer)
-{
-	// Parameter check
-	if (!buffer) return ErrorCodes::CannotPopulateNullConstantBuffer;
-
-	// Populate each field in turn
-	buffer->EyeWorldPos = Game::Engine->GetCamera()->GetPositionF();
-
-	// Populate lighting data
-	unsigned int light_count = (unsigned int)Game::Engine->LightingManager.GetLightSourceCount(); 
-	buffer->LightCount = light_count; 
-
-	// Copy all lighting data into the buffer
-	memcpy(buffer->Lights, Game::Engine->LightingManager.GetLightData(), sizeof(LightData) * light_count);
-
-	// Copy all material data into the buffer
-	if (Game::Engine->GetCurrentModelBuffer())
-	{
-		unsigned int material_count = Game::Engine->GetCurrentModelBuffer()->GetMaterialCount();
-		buffer->MaterialCount = material_count;
-		memcpy(buffer->Materials, Game::Engine->GetCurrentModelBuffer()->GetMaterialData(), sizeof(Material) * material_count);
-	}
-
-	// Return success
 	return ErrorCodes::NoError;
 }

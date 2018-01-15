@@ -100,7 +100,9 @@ iUIComponent *Render2DGroup::FindUIComponent(std::string code, std::string key)
 // Renders the render group by processing its queue of renderable components in sequence
 void XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
 {
-	TextureShader *tshader; 
+	/* TODO: Replace this.  Should instead just be sumbitting to the render queue, with actual rendering taking place during CoreEngine::Render() */
+
+	/*TextureShader *tshader; 
 	iUIComponentRenderable *component;
 
 	// Get a reference to the device context, texture shader & matrices _we will use for rendering
@@ -122,7 +124,7 @@ void XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
 		// Now render these vertices using the engine texture shader
 		tshader->Render(devicecontext, component->GetIndexCount(), ID_MATRIX, baseviewmatrix, 
 						Game::Engine->GetRenderOrthographicMatrix(), component->GetTexture());
-	}
+	}*/
 }
 
 

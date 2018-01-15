@@ -26,7 +26,7 @@ public:
 	CMPINLINE void SetEffectModel(std::string modelname) { m_effectmodel = DeriveEffectModel(modelname); }
 	
 	// Derives the effect model type from a supplied string name
-	EffectBase::EffectModelType DeriveEffectModel(std::string & modelname);
+	EffectBase::EffectModelType DeriveEffectModel(const std::string & modelname);
 
 	// Constructors/destructors
 	EffectBase(void);

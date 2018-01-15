@@ -73,9 +73,6 @@
     <ClCompile Include="CSQuartersTile.cpp">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMapTexture.cpp">
-      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
-    </ClCompile>
     <ClCompile Include="D3DMain.cpp">
       <Filter>Engine\D3D</Filter>
     </ClCompile>
@@ -870,6 +867,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="CubeMapTexture.cpp">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -955,9 +955,6 @@
     </ClInclude>
     <ClInclude Include="CSQuartersTileDefinition.h">
       <Filter>Objects\Ships\Tiles\TileClasses</Filter>
-    </ClInclude>
-    <ClInclude Include="CubeMapTexture.h">
-      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
     </ClInclude>
     <ClInclude Include="D3DMain.h">
       <Filter>Engine\D3D</Filter>
@@ -2034,6 +2031,9 @@
     </ClInclude>
     <ClInclude Include="VolLineShader.h">
       <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMapTexture.h">
+      <Filter>Engine\Rendering\DirectX11\Old\Textures</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,6 @@
 #include "ShaderMacros.h"
 #include "../Definitions/LightData.hlsl.h"
 class InputLayoutDesc;
-struct StandardPSConstBuffer;
 
 // This class has no special alignment requirements
 class ShaderManager
@@ -47,9 +46,6 @@ public:
 	// Create a buffer based on the specified parameters
 	static Result		CreateBuffer(D3D11_USAGE usage, UINT bytewidth, UINT bindflags, UINT cpuaccessflags, UINT miscflags, UINT structurebytestride,
 									 Rendering::RenderDeviceType  *device, ID3D11Buffer **ppOutBuffer);
-
-	// Populate one of the standard constant buffer objects with appropriate data
-	static Result		PopulateConstantBuffer(StandardPSConstBuffer *buffer);
 
 	// Return a reference to the global shader macro set
 	static ShaderMacros &  GetGlobalShaderMacros(void) { return GlobalMacros; }

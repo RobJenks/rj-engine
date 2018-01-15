@@ -1,4 +1,4 @@
-#pragma once
+/*#pragma once
 
 #ifndef __CubeMapTextureH__
 #define __CubeMapTextureH__
@@ -17,4 +17,4 @@ public:
 };
 
 
-#endif
+#endif*/

@@ -1,4 +1,4 @@
-#include "DirectXTK\Inc\DDSTextureLoader.h"
+/*#include "DirectXTK\Inc\DDSTextureLoader.h"
 #include "ErrorCodes.h"
 #include "Utility.h"
 
@@ -46,3 +46,4 @@ CubeMapTexture::CubeMapTexture(void)
 CubeMapTexture::~CubeMapTexture(void)
 {
 }
+*/

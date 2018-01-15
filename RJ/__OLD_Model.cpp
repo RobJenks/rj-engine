@@ -8,7 +8,7 @@
 #include "ModelBuffer.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
-#include "Data\Shaders\vertex_definitions.h.hlsl"
+//#include "Data\Shaders\vertex_definitions.h.hlsl"
 
 #include "__OLD_Model.h"
 
