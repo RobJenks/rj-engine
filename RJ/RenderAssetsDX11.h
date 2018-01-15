@@ -88,6 +88,13 @@ public:
 	Result											InitialiseExternalShaderResource(ShaderDX11 ** ppOutShader, Shader::Type shadertype, const std::string & fileName,
 															const std::string & entryPoint, const std::string & profile, const InputLayoutDesc *input_layout = NULL);
 	
+public:
+
+	template <typename T>
+	void											DeleteAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+
+	CMPINLINE void									DeleteTexture(const std::string & name) { DeleteAsset<TextureDX11>(name, m_textures); }
+
 
 private:
 
@@ -216,22 +223,41 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 
 	if (name.empty())
 	{
-		constexpr const char *type = STRING(T);
-		Game::Log << LOG_ERROR << "Cannot initialise " << type << " definition with null identifier\n"; 
-		
+		Game::Log << LOG_ERROR << "Cannot initialise " << STRING(T) << " definition with null identifier\n"; 	
 		return NULL;
 	}
 
 	if (assetData.find(name) != assetData.end())
 	{
-		constexpr const char *type = STRING(T);
-		Game::Log << LOG_WARN << type << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
-
+		Game::Log << LOG_WARN << type << " definition for \"" << STRING(T) << "\" already exists, cannot create duplicate\n";
 		return NULL;
 	}
 
 	assetData[name] = std::make_unique<T>();
 	return assetData[name].get();
+}
+
+template <typename T>
+void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+{
+	if (name.empty())
+	{
+		Game::Log << LOG_ERROR << "Cannot delete " << STRING(T) << " definition with null identifier\n";
+		return;
+	}
+
+	std::unordered_map<std::string, std::unique_ptr<T>>::iterator it = assetData.find(name);
+	if (it != assetData.end())
+	{
+		assetData.erase(it);
+		Game::Log << LOG_INFO << "Deleted " << STRING(T) << " asset \"" << name << "\"\n";
+		return;
+	}
+	else
+	{
+		Game::Log << LOG_WARN << "Cannot delete " << STRING(T) << " asset; no asset exists with name \"" << name << "\"\n";
+		return;
+	}
 }
 
 

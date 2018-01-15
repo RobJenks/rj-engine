@@ -439,7 +439,10 @@ namespace ErrorCodes {
 	const Result		CannotLoadMaterialWithNullData					= 2694;
 	const Result		CannotLoadMaterialWithoutCode					= 2695;
 	const Result		CannotCreateMaterialAsset						= 2696;
-
+	const Result		CannotLoadTextureWithNullData					= 2697;
+	const Result		CannotLoadTextureWithMissingData				= 2698;
+	const Result		CannotInstantiateTexture						= 2699;
+	const Result		CannotLoadTextureResources						= 2700;
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

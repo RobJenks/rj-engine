@@ -1,14 +1,6 @@
 <GameData>
 
   <Model>
-    <Code>testship1_model</Code>
-    <Type>Ship</Type>
-    <Filename>Ships\Ghoul\Ghoul.obj.rjm</Filename>
-    <Texture>Ships\Ghoul\ghoul_map.dds</Texture>
-    <ActualEffectiveSize y="10.000000"/>
-  </Model>
-
-  <Model>
     <Code>frigate_small_midsection1</Code>
     <Type>ComplexShipSection</Type>
     <Filename>Ships\Sections\Frigate_Small\frigate_small_midsection1.rjm</Filename>

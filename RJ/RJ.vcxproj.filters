@@ -867,6 +867,9 @@
     <ClCompile Include="VolLineShader.cpp">
       <Filter>Engine\Rendering\DirectX11\Old\Shaders</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

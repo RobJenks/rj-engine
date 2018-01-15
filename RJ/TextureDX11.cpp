@@ -337,6 +337,21 @@ TextureDX11::TextureDX11(CubeMapConstructor, uint16_t size, uint16_t count, cons
 
 }
 
+// Load a texture based on the supplied dimension type
+bool TextureDX11::LoadTexture(const std::wstring & fileName, Texture::Dimension dimension)
+{
+	switch (dimension)
+	{
+		case Texture::Dimension::Texture2D:			return LoadTexture2D(fileName);
+		case Texture::Dimension::TextureCube:		return LoadTextureCube(fileName);
+		
+		default:
+
+			Game::Log << LOG_WARN << "Cannot load texture data for \"" << fileName << "\"; unsupported dimension type " << (int)dimension << "\n";
+			return false;
+	}
+}
+
 bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 {
 	auto device = Game::Engine->GetDevice();

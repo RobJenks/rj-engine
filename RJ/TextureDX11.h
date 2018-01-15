@@ -41,6 +41,9 @@ public:
 	// Return the SRV that would be bound to a shader slot during Bind(), so that it can be group-bound during an external call for efficiency
 	CMPINLINE const ID3D11ShaderResourceView * GetBindingSRV(void) const { return m_srv; }
 
+	// Load a texture based on the supplied dimension type
+	bool LoadTexture(const std::wstring & fileName, Texture::Dimension dimension);
+
 	/**
 	* Load a 2D texture from a file path.
 	*/

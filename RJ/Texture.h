@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "DX11_Core.h"
 
 
@@ -15,6 +16,7 @@ public:
 		Texture2DArray,
 		Texture3D,
 		TextureCube,
+		_COUNT
 	};
 
 	// The number of components used to create the texture.
@@ -94,6 +96,12 @@ public:
 		Front,  // +Z
 		Back,   // -Z
 	};
+
+	// Translate texture dimension to/from its string representation
+	static std::string TranslateDimensionToString(Dimension dim);
+	static Dimension TranslateDimensionFromString(const std::string & dim);
+
+
 
 
 protected:

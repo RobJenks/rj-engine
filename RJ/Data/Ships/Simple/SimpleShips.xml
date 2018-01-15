@@ -1,0 +1,5 @@
+<GameData>
+
+  <include file="\Ships\Simple\Testing\TestingShips.xml" />
+  
+</GameData>

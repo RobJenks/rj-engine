@@ -448,6 +448,53 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
+Result IO::Data::LoadTextureData(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadTextureWithNullData;
+
+	// All required data should exist in attributes
+	const char *ccode = node->Attribute("code");
+	const char *cdimension = node->Attribute("dimension");
+	const char *cfilename = node->Attribute("filename");
+
+	// Assert mandatory parameters
+	if (!ccode || !cfilename)
+	{
+		Game::Log << LOG_WARN << "Cannot load texture \"" << ccode << "\"; missing mandatory parameters\n";
+		return ErrorCodes::CannotLoadTextureWithMissingData;
+	}
+
+	// Attempt to resolve the dimension type
+	Texture::Dimension dimension = (cdimension ? Texture::TranslateDimensionFromString(cdimension) : Texture::Dimension::Texture2D);
+	if (dimension == Texture::Dimension::_COUNT)
+	{
+		Game::Log << LOG_WARN << "Cannot load texture \"" << ccode << "\" with invalid dimension specifier \"" << cdimension << "\"\n";
+		return ErrorCodes::CannotInstantiateTexture;
+	}
+
+	// Attempt to create the new texture resource
+	TextureDX11 *texture = Game::Engine->GetAssets().CreateTexture(ccode);
+	if (!texture)
+	{
+		Game::Log << LOG_WARN << "Failed to instantiate new texture \"" << ccode << "\", aborting loading of this item\n";
+		return ErrorCodes::CannotInstantiateTexture;
+	}
+
+	// Now attempt to load the texture data
+	std::string filename = cfilename;
+	bool loadresult = texture->LoadTexture(ConvertStringToWString(filename), dimension);
+	if (!loadresult)
+	{
+		Game::Log << LOG_WARN << "Failed to load texture resources for \"" << ccode << "\" from \"" << filename << "\"\n";
+		Game::Engine->GetAssets().DeleteTexture(ccode);
+		return ErrorCodes::CannotLoadTextureResources;
+	}
+
+	// Return success
+	Game::Log << LOG_INFO << "Loaded texture \"" << ccode << "\"\n";
+	return ErrorCodes::NoError;
+}
+
 Result IO::Data::LoadMaterialData(TiXmlElement *node)
 {
 	std::string key; HashVal hash;
@@ -519,8 +566,8 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 	else if (hash == HashedStrings::H_Orientation)					object->SetOrientation(IO::GetQuaternionFromAttr(node));
 	else if (hash == HashedStrings::H_Model)
 	{
-		___tmp_loading_string = node->GetText(); StrLowerC(___tmp_loading_string);
-		object->SetModel(Model::GetModel(___tmp_loading_string));
+		std::string modelcode = node->GetText(); StrLowerC(modelcode);
+		object->SetModel(Model::GetModel(modelcode));
 	}
 	else if (hash == HashedStrings::H_Visible)						object->SetIsVisible(GetBoolValue(node));
 	//else if (hash == HashedStrings::H_VisibilityTestingMode)		object->SetVisibilityTestingMode(TranslateVisibilityModeFromString(node->GetText()));
@@ -2422,11 +2469,7 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 		else if (hash == HashedStrings::H_Texture)
 		{
 			val = child->GetText();
-			if (val != NullString)
-			{
-				// Note: not testing return code of this method at the moment
-				proj->SetTexture(BuildStrFilename(D::IMAGE_DATA_S, val));
-			}
+			proj->SetTexture(val);
 		}
 		else if (hash == HashedStrings::H_DamageSet)
 		{

@@ -84,9 +84,10 @@ namespace IO { namespace Data
 	CompoundLoadoutMap *LoadCompoundLoadoutMap(TiXmlElement *node, SimpleShipLoadout *L, SimpleShip *targetshiptype);
 	Result LoadEngine(TiXmlElement *node);
 
-	// Load geomatry and material data
+	// Load geomatry, material, texture data
 	Result LoadModelData(TiXmlElement *node);
 	Result LoadMaterialData(TiXmlElement *node);
+	Result LoadTextureData(TiXmlElement *node);
 	Result LoadArticulatedModel(TiXmlElement *node);
 
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached

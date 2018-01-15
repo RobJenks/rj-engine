@@ -1,0 +1,70 @@
+<GameData>
+
+  <!-- Ship-specific textures -->
+  <Texture code="testship1_texture" dimension="Texture2D" filename="testship1_texture.dds" />
+
+  <!-- Ship material -->
+  <Material code="testship1_material">
+    <DiffuseTexture>testship1_texture</DiffuseTexture>
+  </Material>
+  
+  <!-- Ship model -->
+  <Model>
+    <Code>testship1_model</Code>
+    <Filename>Ships\Ships\Simple\Testing\testship1.rjm</Filename>
+    <Material>testship1_material</Material>
+  </Model>
+
+  <!-- Ship definition -->
+  <SimpleShip>
+    <Code>testship1</Code>
+    <Name>Testing Ship</Name>
+    <StandardObject>True</StandardObject>
+    <Model>testship1_model</Model>
+    <CameraPosition x="0.500000" y="25.000000" z="-90.000000" />
+    <CameraRotation x="0.400000" y="0.000000" z="0.000000" />
+    <CameraElasticity>5.0</CameraElasticity>
+    <Mass>50.0</Mass>
+    <VelocityLimit>200.0</VelocityLimit>
+    <AngularVelocityLimit>1.0</AngularVelocityLimit>
+    <BrakeFactor>0.25</BrakeFactor>
+    <TurnRate>8.000000</TurnRate>
+    <TurnAngle>2.000000</TurnAngle>
+    <BankExtent x="0.174500" y="0.174500" z="0.436300" />
+    <BankRate>1.0</BankRate>
+    <MaxHealth>100.0</MaxHealth>
+
+    <Hardpoint code="hpengine01" type="Engine">
+      <Position x="0.0000000" y="10.000000" z="-30.000000" />
+      <Orientation x="0.000000" y="0.000000" z="0.000000" w="1.000000" />
+    </Hardpoint>
+
+    <Hardpoint code="hpweapon01" type="Turret">
+      <Position x="-6.5000000" y="0.000000" z="1.000000" />
+      <Orientation x="0.000000" y="0.000000" z="0.000000" w="1.000000" />
+      <PitchLimit min="-0.2" max="0.2" />
+    </Hardpoint>
+
+    <Hardpoint code="hpweapon02" type="Turret">
+      <Position x="+6.5000000" y="0.000000" z="1.000000" />
+      <Orientation x="0.000000" y="0.000000" z="0.000000" w="1.000000" />
+      <PitchLimit min="-0.2" max="0.2" />
+    </Hardpoint>
+
+    <DefaultLoadout>testship1_loadout1</DefaultLoadout>
+  </SimpleShip>
+  
+  <!-- Ship loadouts -->
+  <SimpleShipLoadout>
+    <Code>testship1_loadout1</Code>
+    <Ship>testship1</Ship>
+    <Map hp="hpengine01" equip="ION_ENGINE1" />
+    <CompoundMap hp="hpweapon01">
+      <Option prob="0.5" equip="lightlaser01" />
+      <Option prob="0.25" equip="lightplasma01" />
+      <Option prob="0.25" equip="null" />
+    </CompoundMap>
+  </SimpleShipLoadout>
+
+
+</GameData>
