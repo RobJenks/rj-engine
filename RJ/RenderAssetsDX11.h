@@ -20,6 +20,8 @@
 #include "PipelineStateDX11.h"
 #include "TextureDX11.h"
 
+// Compiler flag which enables more verbose reporting of asset errors in debug mode
+#define PERFORM_ASSET_ERROR_LOGGING
 
 class RenderAssetsDX11
 {
@@ -129,7 +131,20 @@ template <class T>
 T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
 {
 	auto it = assetData.find(name);
+
+#if defined(_DEBUG) && defined(PERFORM_ASSET_ERROR_LOGGING)
+
+	if (it != assetData.end()) return it->second.get();
+	else
+	{
+		Game::Log << LOG_WARN << "Failed to retrieve " << STRING(T) << " asset \"" << name << "\"\n";
+		return NULL;
+	}
+
+#else
 	return (it != assetData.end() ? it->second.get() : NULL);
+#endif
+	
 }
 
 template <class T>

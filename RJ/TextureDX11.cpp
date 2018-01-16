@@ -663,6 +663,18 @@ uint16_t TextureDX11::GetDepth(void) const
 	return m_numslices;
 }
 
+// Return the image size in aggregate
+INTVECTOR2 TextureDX11::Get2DSize(void) const
+{
+	return INTVECTOR2(m_width, m_height);
+}
+
+// Return the image size in aggregate
+INTVECTOR3 TextureDX11::Get3DSize(void) const
+{
+	return INTVECTOR3(m_width, m_height, m_numslices);
+}
+
 uint8_t TextureDX11::GetBPP(void) const
 {
 	return m_bpp;

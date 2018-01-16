@@ -1,6 +1,7 @@
 #include "GameVarsExtern.h"
 #include "RJMain.h"
 #include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "CameraClass.h"
 #include "GameDataExtern.h"
 #include "VolumetricLine.h"
@@ -135,14 +136,12 @@ void UI_ShipBuilder::Activate(void)
 void UI_ShipBuilder::InitialiseRenderData(void)
 {
 	// Initialise the volumetric line used for rendering the editor grid
-	Texture *tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_editor_line_1.dds"));
 	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
-		(tex->GetTexture() != NULL ? tex : NULL));
+		Game::Engine->GetAssets().GetTexture("ui_editor_line_1"));
 
 	// Initialise the volumetric line used for rendering the collider trajectory in structural test mode
-	tex = new Texture(BuildStrFilename(D::IMAGE_DATA_S, "Rendering\\ui_intersection_test_trajectory.dds"));
 	m_intersect_test_trajectory = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 0.243f, 0.11f, 0.75f), 0.5f,
-		(tex->GetTexture() != NULL ? tex : NULL));
+		Game::Engine->GetAssets().GetTexture("ui_intersection_test_trajectory"));
 
 }
 
@@ -185,7 +184,7 @@ void UI_ShipBuilder::Render(void)
 void UI_ShipBuilder::PerformRenderUpdate(void)
 {
 	// Override lighting with a basic camera-oriented lighting override
-	Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
+	//Game::Engine->LightingManager.ApplyStandardCameraFacingLightOverride();
 }
 
 // Perform editor-mode-specific rendering

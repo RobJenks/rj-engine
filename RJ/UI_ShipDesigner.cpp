@@ -408,8 +408,7 @@ Result UI_ShipDesigner::Initialise2DRenderingGroup(Image2DRenderGroup **group, s
 
 	// Create a new render group
 	(*group) = new Image2DRenderGroup();
-	result = (*group)->Initialize(	Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
-									filename, Texture::APPLY_MODE::Normal );
+	result = (*group)->Initialize(	Game::ScreenWidth, Game::ScreenHeight, filename, false );
 	if (result != ErrorCodes::NoError) return result;
 	
 	// Set the rendering order
@@ -593,24 +592,20 @@ void UI_ShipDesigner::BuildShipSectionImageMap(void)
 		if (!it->second || !it->second->GetPreviewImage()) continue;
 
 		// Get a reference to the image associated with this ship section
-		Texture *sectiontexture = it->second->GetPreviewImage();
+		TextureDX11 *sectiontexture = it->second->GetPreviewImage();
 		if (!sectiontexture) continue;
 
 		// We only need to create a new render group per preview image, not per section, since many sections may 
 		// share the same image.  We can therefore skip this section if its preview image has already been loaded
 		if (m_css_images.count(sectiontexture) > 0) continue;
 
-		// Clone this texture for use in the SD render group
-		Texture *t = sectiontexture->Clone();
-
 		// Create a new image render group for this section, without loading a texture from file at this point
 		Image2DRenderGroup *rg = new Image2DRenderGroup();
-		result = rg->Initialize(Game::Engine->GetDevice(), Game::ScreenWidth, Game::ScreenHeight, 
-								NULL, Texture::APPLY_MODE::Normal);
+		result = rg->Initialize(Game::ScreenWidth, Game::ScreenHeight, NULL, false);
 		if (result != ErrorCodes::NoError) { delete rg; continue; }
 
 		// Assign the section preview image directly to this render group
-		rg->SetTextureDirect(t);
+		rg->SetTexture(sectiontexture);
 
 		// Set the rendering order for ship section images
 		rg->SetZOrder(z_shipsections);
@@ -1159,7 +1154,7 @@ void UI_ShipDesigner::ShipSectionSelectedInConstructionView(std::string code)
 	}
 
 	// The ship preview texture object is used as a key into the image instance collection
-	const Texture *imagetex = m_consview_selected->GetPreviewImage();
+	const TextureDX11 *imagetex = m_consview_selected->GetPreviewImage();
 
 	// Now create a new instance for the newly-selected ship section
 	if (imagetex && m_css_images.count(imagetex) > 0)
@@ -1184,7 +1179,7 @@ void UI_ShipDesigner::ShipSectionSelectedInConstructionView(std::string code)
 void UI_ShipDesigner::RecalculateShipSectionPreviewPositioning(void)
 {
 	// Calculate the size that the preview image should have, based on its dimensions
-	m_consview_selected_size = m_consview_selected->GetPreviewImage()->GetTextureSize();
+	m_consview_selected_size = m_consview_selected->GetPreviewImage()->Get2DSize();
 	if (m_consview_selected_size.x == 0 || m_consview_selected_size.y == 0) m_consview_selected_size = INTVECTOR2(1, 1);
 	float scalefactor = min( ((float)m_consview_preview_size.x / (float)m_consview_selected_size.x), 
 							 ((float)m_consview_preview_size.y)/ (float)m_consview_selected_size.y );

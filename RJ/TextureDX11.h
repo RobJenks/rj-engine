@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
+#include "IntVector.h"
 #include "ClearFlags.h"
 #include "Shader.h"
 #include "ShaderParameter.h"
@@ -87,6 +88,10 @@ public:
 	uint16_t GetHeight() const;
 	// Get the depth of the texture in texels.
 	uint16_t GetDepth() const;
+
+	// Return the image size in aggregate
+	INTVECTOR2 Get2DSize(void) const;
+	INTVECTOR3 Get3DSize(void) const;
 
 	// Get the bits-per-pixel of the texture.
 	uint8_t GetBPP() const;
