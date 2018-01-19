@@ -63,7 +63,7 @@ LightSource::LightSource(const Light & data)
 // Determine an object code for the light based on its properties
 void LightSource::DetermineObjectCode(void)
 {
-	SetCode(concat("LightSource-")(Light::TranslateLightTypeToString((Light::LightType)m_light.GetType())).str());
+	SetCode(concat("LightSource-")(Light::TranslateLightTypeToString((LightType)m_light.GetType())).str());
 }
 
 // Set the range of this light source
@@ -81,11 +81,11 @@ void LightSource::SetRange(float range)
 void LightSource::PerformPostSimulationUpdate(void)
 {
 	// Update the position of our internal light component
-	m_light.Data.Position = m_positionf;
+	m_light.Data.PositionWS = XMFLOAT4(m_positionf.x, m_positionf.y, m_positionf.z, 0.0f);
 
 	// Update light direction based on orientation of the light source object
 	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, (XMQuaternionMultiply(m_relativelightorient, m_orientation)));
-	XMStoreFloat3(&m_light.Data.Direction, dir);
+	XMStoreFloat4(&m_light.Data.DirectionWS, dir);
 }
 
 // Custom debug string function
@@ -97,7 +97,7 @@ std::string	LightSource::DebugString(void) const
 // Custom debug string function for light data specifically
 std::string LightSource::DebugLightDataString(void) const
 {
-	return concat("Type=")(Light::TranslateLightTypeToString((Light::LightType)m_light.Data.Type))
+	return concat("Type=")(Light::TranslateLightTypeToString((LightType)m_light.Data.Type))
 		(", Active=")((m_light.IsActive() ? "True" : "False")).str();
 	//	(", R=")(m_light.Data.Colour.x)(", G=")(m_light.Data.Colour.y)(", B=")(m_light.Data.Colour.z)
 	//	(", A=")(m_light.Data.AmbientIntensity)(", D=")(m_light.Data.DiffuseIntensity)(", S=")(m_light.Data.SpecularPower).str();

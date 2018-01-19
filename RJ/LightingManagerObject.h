@@ -1,11 +1,9 @@
 #pragma once
 
-/*#ifndef __LightingManagerH__
+#ifndef __LightingManagerH__
 #define __LightingManagerH__
 
 #include "GameVarsExtern.h"
-#include "Data\\Shaders\\render_constants.h"
-#include "Data\\Shaders\\light_definition.h"
 #include "Light.h"
 #include "LightSource.h"
 #include "iAcceptsConsoleCommands.h"
@@ -28,7 +26,8 @@ public:
 	typedef std::vector<LightSourceEntry>			LightSources;				// Collection of light source entries
 
 	// Limit on the number of lights that can contribute to a scene
-	static const unsigned int						LIGHT_LIMIT = C_LIGHT_LIMIT;
+	// TODO: Arbitrary constant set here to make class compile.  Needs replacing following engine refactor
+	static const unsigned int						LIGHT_LIMIT = 64U;
 
 	// Default constructor
 	LightingManagerObject(void);
@@ -169,28 +168,28 @@ protected:
 	class LightOfSpecificType
 	{
 	public:
-		LightOfSpecificType(Light::LightType _type) : type(_type){ }
+		LightOfSpecificType(LightType _type) : type(_type){ }
 		bool operator()(iObject* obj) const 
 		{ 
 			return (obj->GetObjectType() == iObject::ObjectType::LightSourceObject &&		// Object must be a LightSource...
-				((Light::LightType)((LightSource*)obj)->GetLight().Data.Type) == type);		// ...and have specific light type
+				((LightType)((LightSource*)obj)->GetLight().Data.Type) == type);		// ...and have specific light type
 		}
 	protected:
-		Light::LightType type;
+		LightType type;
 	};
 
 	// Unary predicate for excluding specific light objects
 	class LightNotOfSpecificType 
 	{
 	public:
-		LightNotOfSpecificType(Light::LightType _type) : type(_type){ }
+		LightNotOfSpecificType(LightType _type) : type(_type){ }
 		bool operator()(iObject* obj) const
 		{
 			return (obj->GetObjectType() == iObject::ObjectType::LightSourceObject &&		// Object must be a LightSource...
-				((Light::LightType)((LightSource*)obj)->GetLight().Data.Type) != type);		// ...and NOT be the specified light type
+				((LightType)((LightSource*)obj)->GetLight().Data.Type) != type);		// ...and NOT be the specified light type
 		}
 	protected:
-		Light::LightType type;
+		LightType type;
 	};
 };
 
@@ -198,6 +197,6 @@ protected:
 #endif
 
 
-*/
+
 
 

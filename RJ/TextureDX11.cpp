@@ -1369,6 +1369,7 @@ bool TextureDX11::Store(const std::string & name, TextureDX11 *texture)
 	if (Exists(name)) return false;
 
 	TextureResources[name] = texture;
+	return true;
 }
 
 // Global texture resources collection

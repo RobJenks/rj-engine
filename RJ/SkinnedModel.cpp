@@ -2,8 +2,10 @@
 #include "Utility.h"
 #include "SkinnedModel.h"
 #include "GameDataExtern.h"
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "LoadM3d.h"
-#include "Texture.h"
+#include "TextureDX11.h"
 
 SkinnedModel::SkinnedModel(Rendering::RenderDeviceType * device, const std::string &code, const std::string& modelFilename, const std::string& texturePath)
 {
@@ -23,11 +25,15 @@ SkinnedModel::SkinnedModel(Rendering::RenderDeviceType * device, const std::stri
 	{
 		Mat.push_back(mats[i].Mat);
 
-		ID3D11ShaderResourceView* diffuseMapSRV = Texture::CreateSRV(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str());
-		DiffuseMapSRV.push_back(diffuseMapSRV);		// TODO: Check for NULL in case of failure?  Or will render without texture if == NULL?
+		// TODO: Should replace this part in future, and avoid loading textures here
 
-		ID3D11ShaderResourceView* normalMapSRV = Texture::CreateSRV(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str());
-		NormalMapSRV.push_back(normalMapSRV);		// TODO: Check for NULL in case of failure?  Or will render without texture if == NULL?
+		TextureDX11 *diffuse = Game::Engine->GetAssets().CreateTexture(mats[i].DiffuseMapName);
+		diffuse->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str()));
+		DiffuseMapSRV.push_back(diffuse->GetShaderResourceView());
+
+		TextureDX11 *normal = Game::Engine->GetAssets().CreateTexture(mats[i].NormalMapName);
+		normal->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str()));
+		NormalMapSRV.push_back(normal->GetShaderResourceView());
 	}
 
 	// Set default values

@@ -30,6 +30,9 @@ public:
 	// Default constructor
 	Light(void);
 
+	// Constructor taking predefined light data
+	Light(const LightData & data);
+
 	// Default copy constructor
 	Light(const Light & source);
 

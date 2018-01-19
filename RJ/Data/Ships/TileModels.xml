@@ -4,8 +4,7 @@
     <Code>corridor_ns_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_ns.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_ns.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -13,8 +12,7 @@
     <Code>corridor_se_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_se.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_se.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
   
@@ -22,8 +20,7 @@
     <Code>corridor_nse_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nse.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nse.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -31,8 +28,7 @@
     <Code>corridor_nsew_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\CorridorTiles\corridor_nsew.rjm</Filename>
-    <Texture>Ships\Tiles\CorridorTiles\corridor_nsew.dds</Texture>
-    <EffectiveSize x="100" y="100" z="100" />
+    <Material>debug_material</Material>
     <ElementSize x="1" y="1" z="1" />
   </Model>
 
@@ -41,8 +37,7 @@
     <Code>quarters_dorm01_interior_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_interior.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
     <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
     <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
@@ -52,8 +47,7 @@
     <Code>quarters_dorm01_wall_straight_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
     <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
     <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
@@ -64,8 +58,7 @@
     <Code>quarters_dorm01_wall_corner_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
     <collision px="0.000000" py="-4.480027" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.360013" ey="0.540000" ez="5.495033" />
     <collision px="0.000000" py="4.540020" pz="0.000000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.405035" ey="0.550000" ez="5.285022" />
@@ -77,8 +70,7 @@
     <Code>quarters_dorm01_connection_model</Code>
     <Type>ComplexShipTile</Type>
     <Filename>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.rjm</Filename>
-    <Texture>Ships\Tiles\QuartersTiles\quarters_dorm01_connection.dds</Texture>
-    <ElementSize x="1" y="1" z="1" />
+    <Material>debug_material</Material>
 
     <collision px="0.005000" py="-4.655028" pz="-0.254996" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.590047" ey="0.205001" ez="5.755050" />
     <collision px="0.180000" py="4.490032" pz="0.325000" ox="0.000000" oy="0.000000" oz="0.000000" ow="1.000000" ex="5.575043" ey="0.200001" ez="5.720042" />

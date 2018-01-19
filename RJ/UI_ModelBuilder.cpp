@@ -399,7 +399,7 @@ void UI_ModelBuilder::CreateScenarioObjects(void)
 	}
 
 	// Create a basic directional light for the editor
-	m_lightsource = LightSource::Create(LightData(Light::LightType::Directional, ONE_FLOAT3, 0.2f, 0.5f, 2.0f, FORWARD_VECTOR_F));
+	m_lightsource = LightSource::Create(LightData(LightType::Directional, ONE_FLOAT3, 0.2f, 0.5f, 2.0f, FORWARD_VECTOR_F));
 	if (m_lightsource)
 	{
 		m_lightsource->SetPosition(NULL_VECTOR);

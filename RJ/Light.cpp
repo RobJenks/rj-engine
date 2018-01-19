@@ -13,6 +13,14 @@ Light::Light(void)
 	AssignNewUniqueID();
 }
 
+// Constructor taking predefined light data
+Light::Light(const LightData & data)
+	:
+	Data(data)
+{
+	AssignNewUniqueID();
+}
+
 // Default copy constructor
 Light::Light(const Light & source) 
 	: Data(source.Data)

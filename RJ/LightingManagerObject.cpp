@@ -1,5 +1,3 @@
-/*#include "Data\\Shaders\\render_constants.h"
-#include "Data\\Shaders\\light_definition.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "GameVarsExtern.h"
@@ -60,7 +58,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// Now perform a search of the local area for all NON-DIRECTIONAL light sources
 		const SpaceSystem & system = Game::Universe->GetCurrentSystem();
 		Game::Search<iObject>().CustomSearch(Game::Engine->GetCamera()->GetPosition(), system.SpatialPartitioningTree,
-			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(Light::LightType::Directional));
+			Game::C_LIGHT_RENDER_DISTANCE, _m_frame_light_sources, LightingManagerObject::LightNotOfSpecificType(LightType::Directional));
 
 		// Pre-register all directional system list sources since we know they will always be relevant, and they 
 		// will not be returned by the object search method above
@@ -82,7 +80,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 
 		// Check whether the light could impact the viewing frustum.   We can skip the range check for
 		// directional lights since they are defined to be unsituated
-		if (light->GetLight().GetType() == Light::LightType::Directional ||  
+		if (light->GetLight().GetType() == LightType::Directional ||  
 			Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
 		{
 			// Register this as a potentialy-important light source
@@ -113,7 +111,7 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 	// Determine a distance/priority for the light; directional lights always have top priority so set a distsq of -999
 	// This ensures that directional light sources will ALWAYS be at the start of the light vector
 	float distsq = -999.0f;
-	if ((Light::LightType)l.GetType() != Light::LightType::Directional)
+	if ((LightType)l.GetType() != LightType::Directional)
 	{
 		// Directional lights keep a distsq value of -999.  For all other light types, determine the actual squared
 		// distance here.  Will always be >= 0 and so always lower priority than the directional lights
@@ -185,7 +183,7 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 		if (light.IsActive() == false) continue;
 
 		// Take different action based on the type of light
-		if (light.Data.Type == (int)Light::LightType::Directional)
+		if (light.Data.Type == (int)LightType::Directional)
 		{
 			// If this is a directional light it should always be included
 			SetBit(config, m_config_lookup[i]);
@@ -216,51 +214,42 @@ void LightingManagerObject::EndFrame(void)
 void LightingManagerObject::GetDefaultDirectionalLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::Directional;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 0.82f);
-	outLight.AmbientIntensity = 0.1f;
-	outLight.DiffuseIntensity = 0.1f;
-	outLight.SpecularPower = 0.05f;
-	outLight.Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	outLight.Type = LightType::Directional;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 0.82f, 1.0f);
+	outLight.DirectionWS = XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	outLight.Enabled = true;
+	outLight.Intensity = 0.75f;
 }
 
 // Returns data for a basic, default point light
 void LightingManagerObject::GetDefaultPointLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::PointLight;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	outLight.AmbientIntensity = 30.0f;
-	outLight.DiffuseIntensity = 26.0f;
-	outLight.SpecularPower = 0.5f;
+	outLight.Type = LightType::Point;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
-	outLight.Attenuation.Constant = 1.0f;
-	outLight.Attenuation.Linear = 0.012f;
-	outLight.Attenuation.Exp = 0.0052f;
+	outLight.Enabled = true;
 }
 
 // Returns data for a basic, default spot light
 void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 {
 	// Populate with default values
-	outLight.Type = Light::LightType::SpotLight;
-	outLight.Colour = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	outLight.AmbientIntensity = 30.0f;
-	outLight.DiffuseIntensity = 26.0f;
-	outLight.SpecularPower = 0.5f;
+	outLight.Type = LightType::Spotlight;
+	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
-	outLight.Attenuation.Constant = 1.0f;
-	outLight.Attenuation.Linear = 0.012f;
-	outLight.Attenuation.Exp = 0.0052f;
-	outLight.SpotlightInnerHalfAngleCos = std::cosf(PIBY180 * 30.0f);
-	outLight.SpotlightOuterHalfAngleCos = std::cosf(PIBY180 * 35.0f);
+	outLight.Enabled = true;
+	outLight.SpotlightCosAngle = std::cosf(PIBY180 * 30.0f);
 }
 
 // Initialise the pre-configured lighting setups that can be used as a standard override
 void LightingManagerObject::InitialiseStandardLightingOverrides(void)
 {
-	LightData std_dim = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.075f, 0.075f, 0.035f, XMFLOAT3(0.0f, 0.0f, 1.0f));
-	LightData std_bright = LightData((int)Light::LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.15f, 0.15f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f));
+	LightData std_dim, std_bright;
+	GetDefaultDirectionalLightData(std_dim);
+	GetDefaultDirectionalLightData(std_bright);
+	std_dim.Intensity = 0.15f;
+	std_bright.Intensity = 0.75f;
 
 	// Standard camera-facing override.  Directional lighting only which primarily shines out of the 
 	// camera, but also includes a more limited amount of ambient/surrounding light from other angles 
@@ -370,4 +359,4 @@ bool LightingManagerObject::ProcessConsoleCommand(GameConsoleCommand & command)
 
 	// We did not recognise the command
 	return false;
-}*/
+}

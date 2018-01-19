@@ -35,7 +35,7 @@ Result TextManager::InitializeFont(std::string name, const char *fontdata, const
 	}
 
 	// Initialize the font object.
-	result = font->Initialize(Game::Engine->GetRenderDevice()->GetDevice(), name, fontdata, fonttexture);
+	result = font->Initialize(name, fontdata, fonttexture);
 	if(result != ErrorCodes::NoError)
 	{
 		return result;

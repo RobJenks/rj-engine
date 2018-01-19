@@ -4,6 +4,7 @@
 #include <filesystem>
 #include "../Definitions/ModelData.h"
 #include "ModelBuffer.h"
+#include "CollisionSpatialDataF.h"
 namespace fs = std::experimental::filesystem;
 
 class Model
@@ -42,12 +43,27 @@ public:
 	CMPINLINE std::string				GetFilename(void) const { return m_filename; }
 	CMPINLINE std::string				GetMaterialCode(void) const { return m_materialcode; }
 
+	// List of collision objects attached to this model
+	CMPINLINE std::vector<CollisionSpatialDataF> & CollisionData(void) { return m_collision; }
+	CMPINLINE void				SetCollisionData(const std::vector<CollisionSpatialDataF> & collision) { m_collision = collision; }
+	CMPINLINE void				SetCollisionData(std::vector<CollisionSpatialDataF> && collision) { m_collision = std::move(collision); }
 	
 	// Reset all model geometry data
 	void								Reset(void);
 
 	// Compile a model and generate all rendering buffer data
 	Result								CompileModel(void);
+
+
+private:
+
+	ModelID								m_id;
+	std::string							m_code;
+	std::string							m_filename;
+	std::string							m_materialcode;
+
+	// List of collision objects attached to this model
+	std::vector<CollisionSpatialDataF>	m_collision;
 
 
 public:
@@ -65,13 +81,6 @@ public:
 	static void						TerminateAllModelData(void);
 
 
-
-private:
-
-	ModelID								m_id;
-	std::string							m_code;
-	std::string							m_filename;
-	std::string							m_materialcode;
 
 
 };

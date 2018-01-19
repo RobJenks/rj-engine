@@ -107,7 +107,7 @@ class __OLD_Model
 		// List of collision objects attached to this model
 		CMPINLINE std::vector<CollisionSpatialDataF> & CollisionData(void)	{ return m_collision; }
 		CMPINLINE void				SetCollisionData(const std::vector<CollisionSpatialDataF> & collision) { m_collision = collision; }
-		CMPINLINE void				SetCollisionData(std::vector<CollisionSpatialDataF> && collision) { m_collision = collision; }
+		CMPINLINE void				SetCollisionData(std::vector<CollisionSpatialDataF> && collision) { m_collision = std::move(collision); }
 
 		// Central model storage methods
 		static bool					ModelExists(const std::string & code);
