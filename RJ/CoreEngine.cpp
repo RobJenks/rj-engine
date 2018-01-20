@@ -302,9 +302,6 @@ Result CoreEngine::InitialiseDirectXMath(void)
 
 Result CoreEngine::InitialiseRenderQueue(void)
 {
-	D3D11_BUFFER_DESC ibufdesc;
-	D3D11_SUBRESOURCE_DATA ibufdata;
-
 	// Create a new empty instance stream, for initialisation of the buffer
 	/*RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
 	if (!idata) return ErrorCodes::CouldNotAllocateMemoryForRenderQueue;
@@ -332,7 +329,7 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	*/
 
 	// Create the instance buffer that will be reused by the render queue for all rendering
-	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", Game::C_INSTANCED_RENDER_LIMIT);
+	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", static_cast<UINT>(Game::C_INSTANCED_RENDER_LIMIT));
 
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB
@@ -880,7 +877,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				n = min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT);
 
 				// Update the instance buffer by mapping, updating and unmapping the memory
-				m_instancebuffer->Set(&(model.InstanceData[inst]), sizeof(RM_Instance) * n);
+				m_instancebuffer->Set(&(model.InstanceData[inst]), static_cast<UINT>(sizeof(RM_Instance) * n));
 
 				// The render queue will take ownership for binding vertex buffers ({ vertices, instances}) so 
 				// that we can bind both to the shader in parallel.  m_instancedbuffers[1] = instancebuffer, so just 
@@ -902,7 +899,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				model.ModelBufferInstance->Material->Bind(pipeline->GetShader(Shader::Type::PixelShader));
 
 				// Issue a draw call to the currently active render pipeline
-				r_devicecontext->DrawIndexedInstanced(m_current_modelbuffer->IndexBuffer.GetIndexCount(), n, 0U, 0, 0);
+				r_devicecontext->DrawIndexedInstanced(m_current_modelbuffer->IndexBuffer.GetIndexCount(), static_cast<UINT>(n), 0U, 0, 0);
 				++m_renderinfo.DrawCalls;
 
 			} /// per-instance

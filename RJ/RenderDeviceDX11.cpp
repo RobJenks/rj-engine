@@ -200,6 +200,8 @@ Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_siz
 	{
 		Game::Log << LOG_INFO << "No D3D debug support, debug layer will not be initialised\n";
 	}
+
+	return ErrorCodes::NoError;
 }
 
 Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size, bool vsync)
@@ -353,6 +355,8 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 	ReleaseIfExists(adapterOutput);
 	ReleaseIfExists(adapter);
 	ReleaseIfExists(factory);
+
+	return ErrorCodes::NoError;
 }
 
 Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync)
@@ -556,6 +560,7 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	}
 	
 	Game::Log << LOG_INFO << "All shader resources initialised\n";	
+	return ErrorCodes::NoError;
 }
 
 // Initialise all sampler states that will be bound during shader rendering
@@ -596,7 +601,7 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 
 	m_displaysize = display_size;
 	m_displaysize_f = XMFLOAT2((float)m_displaysize.x, (float)m_displaysize.y);
-	m_aspectratio = (display_size.x / display_size.y);
+	m_aspectratio = (static_cast<float>(display_size.x )/ static_cast<float>(display_size.y));
 
 	RecalculateOrthographicMatrix();
 }

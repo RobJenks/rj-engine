@@ -24,8 +24,6 @@ Result EffectManager::Initialise(Rendering::RenderDeviceType *device)
 // Loads and initialises all the models used for rendering effects.  Returns fatal error if any cannot be loaded
 Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *device)
 {
-	Result result;
-
 	// Create the models that will be used to hold each set of model data
 	m_model_unitsquare = new Model();
 	m_model_unitcone = new Model();
