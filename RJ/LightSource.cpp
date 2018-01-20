@@ -9,7 +9,7 @@
 // Creates a new light source with default properties
 LightSource * LightSource::Create(void)
 {
-	return LightSource::Create(Light(Game::Engine->LightingManager.GetDefaultPointLightData()));
+	return LightSource::Create(Light(Game::Engine->LightingManager->GetDefaultPointLightData()));
 }
 
 // Creates a new light source based on the supplied light data

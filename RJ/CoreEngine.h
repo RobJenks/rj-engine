@@ -42,7 +42,7 @@ class FireShader;
 class SkinnedNormalMapShader;
 class Frustum;
 class Light;
-class LightingManager;
+class LightingManagerObject;
 class FontShader;
 class AudioManager;
 class TextManager;
@@ -373,6 +373,9 @@ public:
 	// Central shader manager for the engine
 	ShaderManager			ShaderManager;
 
+	// Manager for all lighting data
+	LightingManagerObject *	LightingManager;
+
 	// Return a flag indicating whether a particular render stage is active this cycle
 	CMPINLINE bool RenderStageActive(RenderStage stage) { return m_renderstages[(int)stage]; }
 
@@ -451,6 +454,7 @@ private:
 	Result					InitialiseShaderSupport(void);
 	Result					InitialiseFrustrum(void);
 	Result					InitialiseAudioManager(void);
+	Result					InitialiseLightingManager(void);
 	Result					InitialiseTextRendering(void);
 	Result					InitialiseFonts(void);
 	Result					InitialiseEffectManager(void);
@@ -468,6 +472,7 @@ private:
 	void					ShutdownShaderSupport(void);
 	void					ShutdownFrustrum(void);
 	void					ShutdownAudioManager(void);
+	void					ShutdownLightingManager(void);
 	void					ShutdownTextRendering(void);
 	void					ShutdownFonts(void);
 	void					ShutdownEffectManager(void);
@@ -618,8 +623,6 @@ private:
 
 	// Retrieve render-cycle-specific data that will not change for the duration of the cycle.  Prefixed r_*
 	void					RetrieveRenderCycleData(void);
-
-	// Lighting configuration is stored within the core engine and set for each object being rendered
 
 	// Render variants for specific scenarios, e.g. specifically for 2D rendering
 	AXMMATRIX				m_baseviewmatrix;		// Base view matrix for all 2D rendering

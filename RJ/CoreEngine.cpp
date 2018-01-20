@@ -194,6 +194,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Audio manager initialisation complete\n";
 
+	// Initialise the lighting manager
+	res = InitialiseLightingManager();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Lighting manager initialisation complete\n";
+
 	// Initialise the text rendering components
 	res = InitialiseTextRendering();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -431,6 +436,18 @@ Result CoreEngine::InitialiseAudioManager(void)
 
 }
 
+Result CoreEngine::InitialiseLightingManager(void)
+{
+	LightingManager = new LightingManagerObject();
+	if (!LightingManager)
+	{
+		return ErrorCodes::CannotInitialiseLightingManager;
+	}
+
+
+	return ErrorCodes::NoError;
+}
+
 Result CoreEngine::InitialiseTextRendering(void)
 {
 	Result result;
@@ -638,6 +655,15 @@ void CoreEngine::ShutdownAudioManager(void)
 	{
 		m_audiomanager->Shutdown();
 		SafeDelete(m_audiomanager);
+	}
+}
+
+void CoreEngine::ShutdownLightingManager(void)
+{
+	// Release the lighting manager object
+	if (LightingManager)
+	{
+		SafeDelete(LightingManager);
 	}
 }
 

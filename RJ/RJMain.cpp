@@ -2337,7 +2337,7 @@ void RJMain::__CreateDebugScenario(void)
 	bitstring nsew = (up | left | down | right);	// == 15
 
 	// Temp: Create a directional light source for the system
-	LightSource *l = LightSource::Create(LightData((int)LightType::Directional, XMFLOAT3(1.0f, 1.0f, 0.82f), 0.2f, 3.0f, 0.05f, XMFLOAT3(0.0f, 0.0f, 1.0f)));
+	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
 
