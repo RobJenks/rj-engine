@@ -112,6 +112,7 @@ private:
 	T *												GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
 
 
+
 private:
 
 	ShaderCollection								m_shaders;
@@ -234,8 +235,7 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 
 template <class T>
 T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
-{
-
+{ 
 	if (name.empty())
 	{
 		Game::Log << LOG_ERROR << "Cannot initialise " << STRING(T) << " definition with null identifier\n"; 	
@@ -249,7 +249,14 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 	}
 
 	assetData[name] = std::make_unique<T>();
-	return assetData[name].get();
+
+	T *asset = assetData[name].get();
+	__if_exists(T::SetCode)		// TODO: MSVC-specific, can use SFINAE if needed to make more generic
+	{
+		asset->SetCode(name);
+	}
+
+	return asset;
 }
 
 template <typename T>
@@ -264,7 +271,7 @@ void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<
 	std::unordered_map<std::string, std::unique_ptr<T>>::iterator it = assetData.find(name);
 	if (it != assetData.end())
 	{
-		assetData.erase(it);
+		assetData.erase(it); 
 		Game::Log << LOG_INFO << "Deleted " << STRING(T) << " asset \"" << name << "\"\n";
 		return;
 	}
@@ -274,6 +281,4 @@ void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<
 		return;
 	}
 }
-
-
 

@@ -1,4 +1,5 @@
 #include "TextureDX11.h"
+#include "MaterialDX11.h"
 #include "VolLineShader.h"
 #include "BasicProjectileDefinition.h"
 #include "Logging.h"
@@ -15,7 +16,7 @@ BasicProjectileDefinition::BasicProjectileDefinition(void)
 	SetProjectileBeamRadius(2.0f);
 	SetProjectileColour(ONE_FLOAT4);
 	SetProjectileLifetime(3000U);
-	SetTexture(NULL);
+	SetMaterial(NULL);
 	SetLaunchAudio(AudioParameters::Null);
 }
 
@@ -44,44 +45,40 @@ void BasicProjectileDefinition::SetProjectileBeamLength(float beam)
 void BasicProjectileDefinition::GenerateProjectileRenderingData(void)
 {
 	// Retrieve or create a model buffer for rendering of this line data
-	Buffer = VolLineShader::LineModel(VolumetricLineData.RenderTexture);
+	Buffer = VolLineShader::LineModel(VolumetricLineData.RenderMaterial);
 }
 
-// Set the texture for this projectile type from an external texture resource
-Result BasicProjectileDefinition::SetTexture(const std::string & name)
+// Set the material for this projectile type 
+Result BasicProjectileDefinition::SetMaterial(const std::string & name)
 {
 	// Parameter check
 	if (name.empty()) return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
 
 	// Attempt to initialise a new texture object from the specified file
-	TextureDX11 *tex = Game::Engine->GetRenderDevice()->Assets.GetTexture(name);
+	MaterialDX11 *material = Game::Engine->GetRenderDevice()->Assets.GetMaterial(name);
 	
 	// We won't store the resulting texture if an error occured during initialisation
-	if (tex == NULL)
+	if (material == NULL)
 	{
 		Game::Log << LOG_WARN << "Attempted to assign invalid texture \"" << name << "\" to basic projectile definition \"" << m_code << "\"\n";
 	}
 	
 	// Pass control to the overloaded method and return the result of storing this texture
-	return SetTexture(tex);
+	return SetMaterial(material);
 }
 
-Result BasicProjectileDefinition::SetTexture(TextureDX11 *texture)
+const TextureDX11 * BasicProjectileDefinition::GetTexture(void) const 
 {
-	if (texture == NULL)
+	return (VolumetricLineData.RenderMaterial ? VolumetricLineData.RenderMaterial->GetTexture(Material::TextureType::Diffuse) : NULL);
+}
+
+Result BasicProjectileDefinition::SetMaterial(MaterialDX11 *material)
+{
+	if (material != NULL)
 	{
-		Game::Log << LOG_ERROR << "No valid texture provided to basic projectile definition \"" << m_code << "\"\n";
-		return ErrorCodes::CouldNotInitialiseBasicProjectileTexture;
+		VolumetricLineData.RenderMaterial = material;
 	}
 
-	// If a texture already exists then deallocate it first
-	if (VolumetricLineData.RenderTexture)
-	{
-		SafeDelete(VolumetricLineData.RenderTexture);
-	}
-
-	// Simply store the texture reference and return success
-	VolumetricLineData.RenderTexture = texture; 
 	return ErrorCodes::NoError;
 }
 
@@ -89,11 +86,6 @@ Result BasicProjectileDefinition::SetTexture(TextureDX11 *texture)
 // Destructor
 BasicProjectileDefinition::~BasicProjectileDefinition(void)
 {
-	// Deallocate texture resource for the definition if applicable
-	if (VolumetricLineData.RenderTexture != NULL)
-	{
-		SafeDelete(VolumetricLineData.RenderTexture);
-	}
 }
 
 

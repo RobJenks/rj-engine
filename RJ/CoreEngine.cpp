@@ -2126,7 +2126,7 @@ void CoreEngine::RenderVolumetricLine(const VolumetricLine & line)
 	//m.Params = line.Params;		// TODO: need to re-enable this
 	
 	// Submit to the render queue
-	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderTexture), std::move(m), line.P1);
+	SubmitForZSortedRendering(RenderQueueShader::RM_VolLineShader, VolLineShader::LineModel(line.RenderMaterial), std::move(m), line.P1);
 }
 
 RJ_PROFILED(void CoreEngine::RenderImmediateRegion, void)

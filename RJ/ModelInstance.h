@@ -18,7 +18,7 @@ public:
 	CMPINLINE const XMMATRIX &			GetWorldMatrix(void) const { return m_world; }
 
 	// Set the model definition.  Will reset any size/scaling factor that has already been applied
-	CMPINLINE void						SetModel(Model *model);
+	void								SetModel(Model *model);
 
 	// Scales geometry by a multiple of its base size
 	void								SetScaleFactor(const FXMVECTOR scale);

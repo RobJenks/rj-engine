@@ -2466,10 +2466,10 @@ Result IO::Data::LoadBasicProjectileDefinition(TiXmlElement *node)
 			XMFLOAT4 vec = IO::GetColourFloatFromAttr(child);
 			proj->SetProjectileColour(vec);
 		}
-		else if (hash == HashedStrings::H_Texture)
+		else if (hash == HashedStrings::H_Material)
 		{
 			val = child->GetText();
-			proj->SetTexture(val);
+			proj->SetMaterial(val);
 		}
 		else if (hash == HashedStrings::H_DamageSet)
 		{

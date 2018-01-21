@@ -18,11 +18,16 @@ public:
 	typedef std::array<TextureDX11*, (size_t)TextureType::TEXTURE_TYPE_COUNT> MaterialTextureSet;
 	static const MaterialTextureSet::size_type MaterialTextureTypeCount = (MaterialTextureSet::size_type)Material::TextureType::TEXTURE_TYPE_COUNT;
 
-	// Default constructor
-	MaterialDX11(void);
+	// Constructors
+	MaterialDX11(const std::string & code);
+	CMPINLINE MaterialDX11(void) : MaterialDX11("") { }
 
 	// Default copy constructor
 	MaterialDX11(const MaterialDX11 &other);
+
+	// Unique string code for the material
+	CMPINLINE std::string		GetCode(void) const					{ return m_code; }
+	CMPINLINE void				SetCode(const std::string & code)	{ m_code = code; }
 
 	// Material data; held in structure common to both cpp and hlsl builds
 	// TODO: This data needs to be 16-bit aligned.  This is therefore currently only guaranteed to work
@@ -107,6 +112,9 @@ private:
 
 
 private:
+
+	// Unique string identifier for the material
+	std::string					m_code;
 
 	// Pointer to each texture that may be assigned to the material
 	MaterialTextureSet			m_textures;

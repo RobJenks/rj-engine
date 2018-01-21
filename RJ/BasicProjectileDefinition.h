@@ -7,6 +7,7 @@
 #include "VolumetricLine.h"
 #include "Damage.h"
 #include "AudioParameters.h"
+class MaterialDX11;
 class TextureDX11;
 class ModelBuffer;
 
@@ -71,9 +72,10 @@ public:
 	ModelBuffer *							Buffer;
 
 	// Return or store a reference to the texture for this projectile type
-	CMPINLINE TextureDX11 *					GetTexture(void) const			{ return VolumetricLineData.RenderTexture; }
-	Result									SetTexture(TextureDX11 *texture);
-	Result									SetTexture(const std::string & name);
+	CMPINLINE MaterialDX11 *				GetMaterial(void) const			{ return VolumetricLineData.RenderMaterial; }
+	const TextureDX11 *						GetTexture(void) const;
+	Result									SetMaterial(MaterialDX11 *material);
+	Result									SetMaterial(const std::string & name);
 
 	// Return or store the default projectile lifetime 
 	CMPINLINE unsigned int					GetProjectileLifetime(void) const				{ return Lifetime; }

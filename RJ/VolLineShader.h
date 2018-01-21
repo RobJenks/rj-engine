@@ -1,12 +1,13 @@
 #ifndef __VolLineShaderH__
 #define __VolLineShaderH__
 
+#include <unordered_map>
 #include "iShader.h"
 #include "DX11_Core.h"
 #include "Rendering.h"
 #include "ErrorCodes.h"
 
-class Texture;
+class TextureDX11;
 class ModelBuffer;
 class VolumetricLineRenderData;
 
@@ -73,13 +74,13 @@ public:
 	// Deallocates all static data used in volumetric line rendering
 	static void						ShutdownStaticData(void);
 
-	// Returns a model appropriate for rendering volumetric lines with the specified texture, or for pure
-	// non-textured volumetric lines if render_texture == NULL
-	static ModelBuffer *			LineModel(Texture *render_texture);
+	// Returns a model appropriate for rendering volumetric lines with the specified material, or for pure
+	// non-textured volumetric lines if render_material == NULL
+	static ModelBuffer *			LineModel(MaterialDX11 *render_material);
 
-	// Creates a new line model appropriate for rendering volumetric lines with the specified texture, or for pure
-	// non-textured volumetric lines if render_texture == NULL
-	static ModelBuffer *			CreateLineModel(Texture *render_texture);
+	// Creates a new line model appropriate for rendering volumetric lines with the specified material, or for pure
+	// non-textured volumetric lines if render_material == NULL
+	static ModelBuffer *			CreateLineModel(MaterialDX11 *render_material);
 
 protected:
 	
@@ -100,7 +101,7 @@ protected:
 
 
 	// Static texture resource for linear depth rendering across all line models
-	static Texture *											LinearDepthTextureObject;
+	static TextureDX11 *										LinearDepthTextureObject;
 	static ID3D11ShaderResourceView *							LinearDepthTexture;
 
 	// Staticx array of texture resource views for rendering efficiency when passing multiple textures to the renderer

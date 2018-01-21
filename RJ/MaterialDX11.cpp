@@ -8,8 +8,9 @@
 MaterialDX11::MaterialID MaterialDX11::GlobalMaterialIDCount = 0U;
 
 // Default constructor
-MaterialDX11::MaterialDX11(void)
+MaterialDX11::MaterialDX11(const std::string & code)
 	:
+	m_code(code), 
 	m_updates_suspended(false), 
 	m_texture_binding_count(0U)
 {
@@ -24,6 +25,7 @@ MaterialDX11::MaterialDX11(void)
 MaterialDX11::MaterialDX11(const MaterialDX11 &other)
 	:
 	Data(other.Data), 
+	m_code(other.GetCode()),
 	m_textures(other.m_textures)
 {
 	AssignNewUniqueID();
