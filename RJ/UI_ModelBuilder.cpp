@@ -2,6 +2,7 @@
 #include "DX11_Core.h"
 #include "CoreEngine.h"
 #include "OverlayRenderer.h"
+#include "LightingManagerObject.h"
 #include "RJMain.h"
 #include "GameVarsExtern.h"
 #include "UserInterface.h"

@@ -7,6 +7,7 @@
 #include "ShaderManager.h"
 #include "InputLayoutDesc.h"
 #include "ModelBuffer.h"
+#include "MaterialDX11.h"
 #include "CoreEngine.h"
 #include "TextureDX11.h"
 #include "VolumetricLine.h"

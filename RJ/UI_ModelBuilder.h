@@ -7,6 +7,7 @@
 #include "AlignedAllocator.h"
 #include "SimpleShip.h"
 #include "iUIController.h"
+class LightSource;
 
 // Class is 16-bit aligned to allow use of SIMD member variables
 __declspec(align(16))

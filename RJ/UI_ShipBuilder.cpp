@@ -137,22 +137,17 @@ void UI_ShipBuilder::InitialiseRenderData(void)
 {
 	// Initialise the volumetric line used for rendering the editor grid
 	m_gridline = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 1.0f, 1.0f, 0.75f), 0.5f,
-		Game::Engine->GetAssets().GetTexture("ui_editor_line_1"));
+		Game::Engine->GetAssets().GetMaterial("ui_editor_line_1"));
 
 	// Initialise the volumetric line used for rendering the collider trajectory in structural test mode
 	m_intersect_test_trajectory = VolumetricLine(NULL_VECTOR, NULL_VECTOR, XMFLOAT4(1.0f, 0.243f, 0.11f, 0.75f), 0.5f,
-		Game::Engine->GetAssets().GetTexture("ui_intersection_test_trajectory"));
+		Game::Engine->GetAssets().GetMaterial("ui_intersection_test_trajectory"));
 
 }
 
 // Revert any editor-specific render states and data
 void UI_ShipBuilder::RevertRenderData(void)
 {
-	// Deallocate the editor gridline objects
-	if (m_gridline.RenderTexture)
-	{
-		SafeDelete(m_gridline.RenderTexture);
-	}
 }
 
 

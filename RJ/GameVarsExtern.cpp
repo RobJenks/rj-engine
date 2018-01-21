@@ -76,7 +76,7 @@ namespace Game {
 	float NearClipPlane = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
 	float FarClipPlane = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
 	bool FullScreen = false;
-	bool Vsync = false;
+	bool VSync = false;
 	bool ForceWARPRenderDevice = false;
 
 

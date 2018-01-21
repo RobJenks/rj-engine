@@ -80,6 +80,7 @@
 
 // Forward declare allowed instances of render queue processing
 template void CoreEngine::ProcessRenderQueue<ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
+template void CoreEngine::ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(PipelineStateDX11*);
 
 
 // Default constructor

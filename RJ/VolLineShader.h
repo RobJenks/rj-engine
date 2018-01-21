@@ -8,6 +8,7 @@
 #include "ErrorCodes.h"
 
 class TextureDX11;
+class MaterialDX11;
 class ModelBuffer;
 class VolumetricLineRenderData;
 

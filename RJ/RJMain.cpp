@@ -50,6 +50,7 @@
 #include "CollisionDetectionResultsStruct.h"
 #include "GamePhysicsEngine.h"
 #include "ObjectSearch.h"
+#include "LightingManagerObject.h"
 #include "FactionManagerObject.h"
 #include "LogManager.h"
 #include "SpaceSystem.h"

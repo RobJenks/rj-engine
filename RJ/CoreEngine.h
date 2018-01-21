@@ -19,7 +19,6 @@
 #include "RenderQueue.h"
 #include "RenderQueueShaders.h"
 #include "RenderQueueOptimiser.h"
-#include "LightingManagerObject.h"
 #include "ShaderManager.h"
 #include "Model.h"
 #include "ModelBuffer.h"

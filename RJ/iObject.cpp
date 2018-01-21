@@ -708,7 +708,7 @@ void iObject::DebugRenderRayIntersectionTest(const BasicRay & world_ray)
 	}
 
 	Game::Engine->RenderVolumetricLine(VolumetricLine(world_ray.Origin, XMVectorAdd(world_ray.Origin, world_ray.Direction), 
-		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, Game::Engine->GetAssets().GetTexture("ui_intersection_test_trajectory.dds")));
+		XMFLOAT4(1.0f, 1.0f, 0.0f, 0.8f), 1.0f, Game::Engine->GetAssets().GetMaterial("ui_intersection_test_trajectory")));
 #endif
 }
 
