@@ -8,7 +8,7 @@ ID3D11UnorderedAccessView * const StructuredBufferDX11::m_null_uav[1] = { nullpt
 
 
 // Construct a new structured buffer resource
-StructuredBufferDX11::StructuredBufferDX11(UINT bindFlags, const void* data, size_t element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+StructuredBufferDX11::StructuredBufferDX11(UINT bindFlags, const void* data, UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
 	:
 	m_buffer(NULL), 
 	m_bindflags(bindFlags),
@@ -17,7 +17,7 @@ StructuredBufferDX11::StructuredBufferDX11(UINT bindFlags, const void* data, siz
 {
 	m_srv[0] = NULL;
 	m_uav[0] = NULL;
-	m_buffer_elementcount[0] = element_count;								// Member of base class; assign here rather than in initialiser-list
+	m_buffer_elementcount[0] = element_count;							// Member of base class; assign here rather than in initialiser-list
 	m_is_dynamic = (m_cpu_access != CPUGraphicsResourceAccess::None);	// Dynamic if any CPU memory access required
 	m_isUAV = (isUAV && !m_is_dynamic);									// UAV resources cannot be dynamic
 	auto device = Game::Engine->GetDevice();
@@ -193,6 +193,20 @@ void StructuredBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_i
 	}
 }
 
+// Return the UAV (if applicable)
+ID3D11UnorderedAccessView *	StructuredBufferDX11::GetUnorderedAccessView() const
+{
+	return m_uav[0];
+}
+
+
+// Default destructor
+StructuredBufferDX11::~StructuredBufferDX11(void)
+{
+	ReleaseIfExists(m_buffer);
+	ReleaseIfExists(m_srv[0]);
+	ReleaseIfExists(m_uav[0]);
+}
 
 
 

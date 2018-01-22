@@ -146,7 +146,7 @@ public:
 	* @param color The color to plot (RGBA).
 	*/
 	template< typename T >
-	void Plot(XMFLOAT2 coord, const T& color);
+	void Plot(UINTVECTOR2 coord, const T& color);
 
 	/**
 	* Retrieve the pixel at a particular location in the
@@ -156,16 +156,18 @@ public:
 	* @return The pixel cast to the requested type.
 	*/
 	template< typename T >
-	T FetchPixel(XMFLOAT2 coord);
+	T FetchPixel(UINTVECTOR2 coord);
 
+	// Releases all COM resources associated with this texture
+	void ReleaseResources(void);
 
 	// Default destructor
 	~TextureDX11(void);
 
 private:
 
-	void Plot(XMFLOAT2 coord, const uint8_t* pixel, size_t size);
-	void FetchPixel(XMFLOAT2 coord, uint8_t*& pixel, size_t size);
+	void Plot(UINTVECTOR2 coord, const uint8_t* pixel, size_t size);
+	void FetchPixel(UINTVECTOR2 coord, uint8_t*& pixel, size_t size);
 	void Resize1D(uint16_t width);
 	void Resize2D(uint16_t width, uint16_t height);
 	void Resize3D(uint16_t width, uint16_t height, uint16_t depth);
@@ -241,13 +243,13 @@ private:
 
 
 template< typename T >
-void TextureDX11::Plot(XMFLOAT2 coord, const T& color)
+void TextureDX11::Plot(UINTVECTOR2 coord, const T& color)
 {
 	Plot(coord, (const uint8_t*)(&color), sizeof(T));
 }
 
 template< typename T >
-T TextureDX11::FetchPixel(XMFLOAT2 coord)
+T TextureDX11::FetchPixel(UINTVECTOR2 coord)
 {
 	uint8_t* pixel = nullptr;
 	FetchPixel(coord, pixel, sizeof(T));

@@ -6,7 +6,7 @@
 
 
 // Initialise static data
-ID3D11SamplerState * const null_sampler_state[1] = { nullptr };
+ID3D11SamplerState * const SamplerStateDX11::null_sampler_state[1] = { nullptr };
 
 
 SamplerStateDX11::SamplerStateDX11(void)

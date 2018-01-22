@@ -1,5 +1,10 @@
 #include "Material.h"
 
+
+// Initialise static variables
+Material::MaterialID Material::GlobalMaterialIDCount = 0U;
+
+
 Material::Material(void)
 	:
 	m_id(NewID())

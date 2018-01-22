@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "IntVector.h"
 #include "Shaders.h"
 #include "DX11_Core.h"
 #include "Shader.h"
@@ -41,7 +42,7 @@ public:
 
 
 	// Dispatch a compute shader using the specified thread group configuration
-	void Dispatch(const XMFLOAT3 & numGroups);
+	void Dispatch(const UINTVECTOR3 & numGroups);
 
 	// Bind or unbind shader from the current rendering context
 	void Bind(void);

@@ -1,4 +1,4 @@
-#include "../Definitions/ModelData.h"
+#include "ModelData.h"
 
 ModelData::ModelData(void)
 	:

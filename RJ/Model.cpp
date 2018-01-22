@@ -1,8 +1,8 @@
 #include <filesystem>
 #include "Logging.h"
 #include "FileUtils.h"
-#include "../Definitions/ByteString.h"
-#include "../Definitions/ModelData.h"
+#include "ByteString.h"
+#include "ModelData.h"
 #include "CoreEngine.h"
 #include "RenderAssetsDX11.h"
 #include "VertexBufferDX11.h"

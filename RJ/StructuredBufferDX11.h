@@ -12,7 +12,7 @@ class StructuredBufferDX11 : public StructuredBuffer
 public:
 
 	// Construct a new structured buffer resource
-	StructuredBufferDX11(UINT bindFlags, const void* data, size_t element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+	StructuredBufferDX11(UINT bindFlags, const void* data, UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
 
 	// Update data within the buffer
 	void						SetData(void* data, size_t elementSize, size_t offset, size_t numElements);
@@ -27,7 +27,7 @@ public:
 	ID3D11UnorderedAccessView*	GetUnorderedAccessView() const;
 
 	// Default destructor
-	StructuredBufferDX11(void);
+	~StructuredBufferDX11(void);
 
 
 private:

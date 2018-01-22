@@ -4,8 +4,6 @@
 #include "MaterialDX11.h"
 #include "ConstantBufferDX11.h"
 
-// Initialise static variables
-MaterialDX11::MaterialID MaterialDX11::GlobalMaterialIDCount = 0U;
 
 // Default constructor
 MaterialDX11::MaterialDX11(const std::string & code)
@@ -97,7 +95,7 @@ void MaterialDX11::UpdateMaterialState(void)
 
 		// Update the smaller set of bindable textures whenever the underlying textures change
 		m_texture_binding_count = 0U;
-		for (size_t i = 0; i < (size_t)TextureType::TEXTURE_TYPE_COUNT; ++i)
+		for (UINT i = 0; i < (UINT)TextureType::TEXTURE_TYPE_COUNT; ++i)
 		{
 			if (m_textures[i] == NULL) continue;
 
@@ -118,7 +116,7 @@ void MaterialDX11::Bind(ShaderDX11 *shader) const
 
 	// Bind each texture in turn
 	Shader::Type shadertype = shader->GetType();
-	for (size_t i = 0; i < m_texture_binding_count; ++i)
+	for (UINT i = 0; i < m_texture_binding_count; ++i)
 	{
 		m_texture_bindings[i].texture->Bind(shadertype, i, ShaderParameter::Type::Texture);
 	}

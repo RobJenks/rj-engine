@@ -96,7 +96,7 @@
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
@@ -104,19 +104,19 @@
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
@@ -124,13 +124,13 @@
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(VCInstallDir)UnitTest\include;$(ProjectDir)\DirectXTK\Inc;$(IncludePath)</IncludePath>
     <SourcePath>$(ProjectDir)\DirectXTK\Src;$(SourcePath)</SourcePath>
     <TargetName>$(ProjectName)</TargetName>
-    <LibraryPath>$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(WindowsSDK_LibraryPath)\$(Platform);$(VCInstallDir)UnitTest\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

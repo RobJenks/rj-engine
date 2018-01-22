@@ -382,7 +382,7 @@ void ShaderDX11::Unbind()
 }
 
 // Dispatch a compute shader with the specified thread group configuration
-void ShaderDX11::Dispatch(const XMFLOAT3 & numGroups)
+void ShaderDX11::Dispatch(const UINTVECTOR3 & numGroups)
 {
 	if (m_cs)
 	{

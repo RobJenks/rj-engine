@@ -24,8 +24,6 @@ SystemRegion::SystemRegion(void)
 
 Result SystemRegion::Initialise(void)
 {
-	Result result;
-
 	// Create a new model to represent the space skybox
 	m_skybox = Model::GetModel("skybox");
 	if (!m_skybox)

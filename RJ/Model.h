@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <filesystem>
-#include "../Definitions/ModelData.h"
+#include "ModelData.h"
 #include "ModelBuffer.h"
 #include "CollisionSpatialDataF.h"
 namespace fs = std::experimental::filesystem;

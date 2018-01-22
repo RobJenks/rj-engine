@@ -51,8 +51,6 @@ OverlayRenderer::OverlayRenderer(void)
 // Initialises the overlay rendering component; includes loading of all required models
 Result OverlayRenderer::Initialise(void)
 {
-	Result result;
-
 	// All required models and their destination fields
 	std::string model_names[] = { "overlay_line_none", "overlay_line_green", "overlay_line_red", "overlay_line_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
 	Model ** models[] = { &m_models[0], &m_models[1], &m_models[2], &m_models[3], &m_blueprintoverlay, &m_blueprintcubeoverlay };

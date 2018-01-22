@@ -87,5 +87,6 @@ void ConstantBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id)
 // Default destructor
 ConstantBufferDX11::~ConstantBufferDX11(void)
 {
+	ReleaseIfExists(m_buffer[0]);
 }
 

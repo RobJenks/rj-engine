@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <unordered_map>
+#include "IntVector.h"
 #include "TextureDX11.h"
 #include "Logging.h"
 #include "CoreEngine.h"
@@ -870,16 +871,12 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 	if (m_width != width || m_height != height)
 	{
-		// Release resource before resizing
-		m_texture2d= NULL();
-		m_rendertarget_view= NULL();
-		m_depthstencil_view= NULL();
-		m_srv= NULL();
-		m_uav= NULL();
+		// Release resource before resizing since they will be recreated
+		ReleaseResources();
 
 		m_width = max(width, (uint16_t)1);
 		m_height = max(height, (uint16_t)1);
-
+		
 		// Create texture with the dimensions specified.
 		D3D11_TEXTURE2D_DESC textureDesc = { 0 };
 
@@ -1132,7 +1129,7 @@ void TextureDX11::Resize(uint16_t width, uint16_t height, uint16_t depth)
 	return;
 }
 
-void TextureDX11::Plot(XMFLOAT2 coord, const uint8_t* pixel, size_t size)
+void TextureDX11::Plot(UINTVECTOR2 coord, const uint8_t* pixel, size_t size)
 {
 	assert(m_bpp > 0 && m_bpp % 8 == 0);
 	assert(coord.x < m_width && coord.y < m_height && size == (m_bpp / 8));
@@ -1147,7 +1144,7 @@ void TextureDX11::Plot(XMFLOAT2 coord, const uint8_t* pixel, size_t size)
 	}
 }
 
-void TextureDX11::FetchPixel(XMFLOAT2 coord, uint8_t*& pixel, size_t size)
+void TextureDX11::FetchPixel(UINTVECTOR2 coord, uint8_t*& pixel, size_t size)
 {
 	assert(m_bpp > 0 && m_bpp % 8 == 0);
 	assert(coord.x < m_width && coord.y < m_height && size == (m_bpp / 8));
@@ -1383,8 +1380,8 @@ void TextureDX11::ShutdownGlobalTextureCollection(void)
 	TextureResources.clear();
 }
 
-// Default destructor
-TextureDX11::~TextureDX11(void)
+// Releases all COM resources associated with this texture
+void TextureDX11::ReleaseResources(void)
 {
 	ReleaseIfExists(m_texture1d);
 	ReleaseIfExists(m_texture2d);
@@ -1393,6 +1390,12 @@ TextureDX11::~TextureDX11(void)
 	ReleaseIfExists(m_uav);
 	ReleaseIfExists(m_rendertarget_view);
 	ReleaseIfExists(m_depthstencil_view);
+}
+
+// Default destructor
+TextureDX11::~TextureDX11(void)
+{
+	ReleaseResources();
 }
 
 

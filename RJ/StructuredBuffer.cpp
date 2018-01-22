@@ -1,4 +1,6 @@
 #include "StructuredBuffer.h"
+#include "DX11_Core.h"
+
 
 StructuredBuffer::StructuredBuffer(void)
 {
