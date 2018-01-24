@@ -34,9 +34,9 @@ public:
 	// Standard methods: Add, Get and Render a fire effect type
 	void					AddFireEffectType(FireEffect *e);
 	CMPINLINE FireEffect*	GetFireEffectType(int effectIndex) { return m_fireeffects.at(effectIndex); }
-	Result XM_CALLCONV 		RenderFireEffect(FireEffect *e, Rendering::RenderDeviceContextType* deviceContext,
+	Result RJ_XM_CALLCONV 		RenderFireEffect(FireEffect *e, Rendering::RenderDeviceContextType* deviceContext,
 											 FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection);
-	CMPINLINE Result XM_CALLCONV 	RenderFireEffect(int effectindex, Rendering::RenderDeviceContextType* deviceContext,
+	CMPINLINE Result RJ_XM_CALLCONV 	RenderFireEffect(int effectindex, Rendering::RenderDeviceContextType* deviceContext,
 											 FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection)
 											{ return RenderFireEffect(m_fireeffects.at(effectindex), deviceContext, world, view, projection); }
 

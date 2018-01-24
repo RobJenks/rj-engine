@@ -97,7 +97,7 @@ void FontShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV FontShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result FontShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								XMFLOAT4 pixelColor)
 {

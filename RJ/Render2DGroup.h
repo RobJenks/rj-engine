@@ -91,7 +91,7 @@ public:
 	iUIComponent *FindUIComponent(std::string code, std::string key);
 
 	// Render function, which will process each registered renderable component in turn
-	void XM_CALLCONV Render(const FXMMATRIX baseviewmatrix);
+	void RJ_XM_CALLCONV Render(const FXMMATRIX baseviewmatrix);
 
 	// Methods to add and remove specific renderable components, so they are handled correctly by the render queue
 	bool RegisterRenderableComponent(iUIComponentRenderable *component);

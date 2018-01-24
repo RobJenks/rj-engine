@@ -102,6 +102,7 @@ CoreEngine::CoreEngine(void)
 	m_fireshader(NULL),
 	m_skinnedshader(NULL),
 	m_vollineshader(NULL),
+	m_audiomanager(NULL), 
 	m_effectmanager(NULL),
 	m_particleengine(NULL),
 	m_render2d(NULL),
@@ -812,7 +813,7 @@ void CoreEngine::RetrieveRenderCycleData(void)
 }
 
 // Submit a model buffer to the render queue manager for rendering this frame
-void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
+void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
 {
 	// Exclude any null-geometry objects
 	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;
@@ -830,7 +831,7 @@ void XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelB
 
 // Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 // objects.  Performance overhead; should be used only where specifically required
-void XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, CXMVECTOR position)
+void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, CXMVECTOR position)
 {
 	// Exclude any null-geometry objects
 	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;

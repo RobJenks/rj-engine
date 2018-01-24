@@ -111,13 +111,13 @@ public:
 	void					SetParticleTexture(TextureDX11 * texture);
 
 	// Prepares the vertex buffers by filling in the render-time data (positon of vertices 1-5)
-	void XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		PrepareVertexBuffers(const FXMMATRIX view);
 
 	// Method to render the everything in the region
-	void XM_CALLCONV 		Render(const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		Render(const FXMMATRIX view);
 
 	// Render each component of the region to the vertex buffer
-	void XM_CALLCONV 		RenderDustParticles(const FXMMATRIX view);
+	void RJ_XM_CALLCONV 		RenderDustParticles(const FXMMATRIX view);
 
 	// Methods to initialise and release the vertex/index buffers
 	Result					InitialiseBuffers(void);

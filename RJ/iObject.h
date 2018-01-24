@@ -186,7 +186,7 @@ public:
 	// The world matrix of this object
 	CMPINLINE XMMATRIX						GetWorldMatrix(void) const { return m_worldmatrix; }
 	CMPINLINE XMMATRIX						GetInverseWorldMatrix(void)	const { return m_inverseworld; }
-	CMPINLINE void XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
+	CMPINLINE void RJ_XM_CALLCONV				SetWorldMatrix(const FXMMATRIX m)
 	{
 		// Store the new world matrix
 		m_worldmatrix = m;

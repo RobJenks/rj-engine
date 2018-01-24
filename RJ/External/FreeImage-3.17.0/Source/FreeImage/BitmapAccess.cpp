@@ -492,7 +492,7 @@ FreeImage_AllocateT(FREE_IMAGE_TYPE type, int width, int height, int bpp, unsign
 	return FreeImage_AllocateBitmap(FALSE, NULL, 0, type, width, height, bpp, red_mask, green_mask, blue_mask);
 }
 
-void DLL_CALLCONV
+void __vectorcall
 FreeImage_Unload(FIBITMAP *dib) {
 	if (NULL != dib) {	
 		if (NULL != dib->data) {

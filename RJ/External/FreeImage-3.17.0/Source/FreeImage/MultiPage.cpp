@@ -232,7 +232,7 @@ FreeImage_InternalGetPageCount(FIMULTIBITMAP *bitmap) {
 // Multipage functions
 // =====================================================================
 
-FIMULTIBITMAP * DLL_CALLCONV
+FIMULTIBITMAP * __vectorcall 
 FreeImage_OpenMultiBitmap(FREE_IMAGE_FORMAT fif, const char *filename, BOOL create_new, BOOL read_only, BOOL keep_cache_in_memory, int flags) {
 
 	FILE *handle = NULL;
@@ -590,7 +590,7 @@ FreeImage_CloseMultiBitmap(FIMULTIBITMAP *bitmap, int flags) {
 	return FALSE;
 }
 
-int DLL_CALLCONV
+int __vectorcall 
 FreeImage_GetPageCount(FIMULTIBITMAP *bitmap) {
 	if (bitmap) {
 		MULTIBITMAPHEADER *header = FreeImage_GetMultiBitmapHeader(bitmap);

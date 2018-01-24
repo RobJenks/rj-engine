@@ -98,7 +98,7 @@ iUIComponent *Render2DGroup::FindUIComponent(std::string code, std::string key)
 }
 
 // Renders the render group by processing its queue of renderable components in sequence
-void XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
+void RJ_XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
 {
 	/* TODO: Replace this.  Should instead just be sumbitting to the render queue, with actual rendering taking place during CoreEngine::Render() */
 

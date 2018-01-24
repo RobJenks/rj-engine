@@ -95,6 +95,7 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>
@@ -113,6 +114,7 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>
@@ -133,6 +135,7 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <DebugInformationFormat>None</DebugInformationFormat>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>
@@ -152,6 +155,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>

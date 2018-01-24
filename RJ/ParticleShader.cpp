@@ -92,7 +92,7 @@ void ParticleShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV ParticleShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result RJ_XM_CALLCONV ParticleShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 	const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

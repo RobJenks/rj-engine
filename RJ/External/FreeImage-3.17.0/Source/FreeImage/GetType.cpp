@@ -72,7 +72,7 @@ FreeImage_GetFileType(const char *filename, int size) {
 	return FIF_UNKNOWN;
 }
 
-FREE_IMAGE_FORMAT DLL_CALLCONV 
+FREE_IMAGE_FORMAT __vectorcall 
 FreeImage_GetFileTypeU(const wchar_t *filename, int size) {
 #ifdef _WIN32	
 	FreeImageIO io;

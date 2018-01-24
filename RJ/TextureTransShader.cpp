@@ -97,7 +97,7 @@ void TextureTransShader::Shutdown(void)
 }
 
 
-Result XM_CALLCONV TextureTransShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
+Result RJ_XM_CALLCONV TextureTransShader::Render(Rendering::RenderDeviceContextType * deviceContext, int indexCount, const FXMMATRIX worldMatrix,
 								const CXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, 
 								float transX, float transY)
 {

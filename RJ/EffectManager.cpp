@@ -84,7 +84,7 @@ void EffectManager::AddFireEffectType(FireEffect *e)
 }
 
 // Fire effect - Render
-Result XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, Rendering::RenderDeviceContextType* deviceContext,
+Result RJ_XM_CALLCONV EffectManager::RenderFireEffect(FireEffect *e, Rendering::RenderDeviceContextType* deviceContext,
 										FXMMATRIX world, CXMMATRIX view, CXMMATRIX projection)
 {
 	// Determine the model object to use in rendering this effect

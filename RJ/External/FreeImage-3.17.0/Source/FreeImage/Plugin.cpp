@@ -417,7 +417,7 @@ FreeImage_Load(FREE_IMAGE_FORMAT fif, const char *filename, int flags) {
 	return NULL;
 }
 
-FIBITMAP * DLL_CALLCONV
+FIBITMAP * __vectorcall 
 FreeImage_LoadU(FREE_IMAGE_FORMAT fif, const wchar_t *filename, int flags) {
 	FreeImageIO io;
 	SetDefaultIO(&io);
@@ -650,7 +650,7 @@ FreeImage_GetFIFRegExpr(FREE_IMAGE_FORMAT fif) {
 	return NULL;
 }
 
-BOOL DLL_CALLCONV
+BOOL __vectorcall 
 FreeImage_FIFSupportsReading(FREE_IMAGE_FORMAT fif) {
 	if (s_plugins != NULL) {
 		PluginNode *node = s_plugins->FindNodeFromFIF(fif);
@@ -776,7 +776,7 @@ FreeImage_GetFIFFromFilename(const char *filename) {
 	return FIF_UNKNOWN;
 }
 
-FREE_IMAGE_FORMAT DLL_CALLCONV 
+FREE_IMAGE_FORMAT __vectorcall 
 FreeImage_GetFIFFromFilenameU(const wchar_t *filename) {
 #ifdef _WIN32	
 	if (filename == NULL) return FIF_UNKNOWN;

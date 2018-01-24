@@ -7,7 +7,7 @@
 #include "TextManager.h"
 
 
-Result XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int screenHeight, const FXMMATRIX baseViewMatrix, FontShader *fontshader)
+Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int screenHeight, const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
 	// Store the screen width and height.
 	m_screenWidth = screenWidth;
@@ -99,7 +99,7 @@ void TextManager::Shutdown()
 }
 
 
-Result XM_CALLCONV TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result RJ_XM_CALLCONV TextManager::Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	Result result, overallresult;
 	SentenceType *sentence;
@@ -350,7 +350,7 @@ void TextManager::ReleaseSentence(SentenceType** sentence)
 }
 
 
-Result XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
+Result RJ_XM_CALLCONV TextManager::RenderSentence(SentenceType* sentence, const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix)
 {
 	unsigned int stride, offset;
 

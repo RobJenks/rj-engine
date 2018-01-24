@@ -91,7 +91,7 @@ Result LightFlatHighlightFadeShader::InitialisePixelShader(Rendering::RenderDevi
 	return ErrorCodes::NoError;
 }
 
-Result XM_CALLCONV LightFlatHighlightFadeShader::Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+Result RJ_XM_CALLCONV LightFlatHighlightFadeShader::Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 	const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

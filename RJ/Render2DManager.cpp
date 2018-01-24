@@ -20,7 +20,7 @@ Render2DManager::~Render2DManager(void)
 {
 }
 
-Result XM_CALLCONV Render2DManager::Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
+Result RJ_XM_CALLCONV Render2DManager::Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
 								   int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix)
 {
 	// Store references to the key supplied parameters

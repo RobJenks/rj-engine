@@ -279,7 +279,7 @@ void ImmediateRegion::SetDustDensity(float dustdensity)
 	m_dustdensity = dustdensity;
 }
 
-void XM_CALLCONV ImmediateRegion::Render(const FXMMATRIX view)
+void RJ_XM_CALLCONV ImmediateRegion::Render(const FXMMATRIX view)
 {
 	// Render all dust particles to the vertex buffer
 	RenderDustParticles(view);
@@ -288,7 +288,7 @@ void XM_CALLCONV ImmediateRegion::Render(const FXMMATRIX view)
 	RenderBuffers();
 }
 
-void XM_CALLCONV ImmediateRegion::RenderDustParticles(const FXMMATRIX view)
+void RJ_XM_CALLCONV ImmediateRegion::RenderDustParticles(const FXMMATRIX view)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedresource;
@@ -330,7 +330,7 @@ void ImmediateRegion::RenderBuffers(void)
     devicecontext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void XM_CALLCONV ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
+void RJ_XM_CALLCONV ImmediateRegion::PrepareVertexBuffers(const FXMMATRIX view)
 {
 	// Transpose the input view matrix since we want to retrieve columns of data (and have direct vector access to rows)
 	XMMATRIX viewT = XMMatrixTranspose(view);

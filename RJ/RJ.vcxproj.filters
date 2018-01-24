@@ -870,6 +870,9 @@
     <ClCompile Include="LightingManagerObject.cpp">
       <Filter>Engine\Lighting</Filter>
     </ClCompile>
+    <ClCompile Include="..\Definitions\ModelData.cpp">
+      <Filter>Imported Definitions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2034,6 +2037,9 @@
     </ClInclude>
     <ClInclude Include="LightingManagerObject.h">
       <Filter>Engine\Lighting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Definitions\ModelData.h">
+      <Filter>Imported Definitions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

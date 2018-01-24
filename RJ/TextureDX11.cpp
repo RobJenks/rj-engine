@@ -11,9 +11,9 @@
 namespace fs = std::experimental::filesystem;
 
 // Initialise static fields
-const FLOAT * float4_zero = new FLOAT[4] { 0 };
-ID3D11ShaderResourceView * const null_srv[1] = { nullptr };
-ID3D11UnorderedAccessView * const null_uav[1] = { nullptr };
+const FLOAT * TextureDX11::float4_zero = new FLOAT[4] { 0 };
+ID3D11ShaderResourceView * const TextureDX11::null_srv[1] = { nullptr };
+ID3D11UnorderedAccessView * const TextureDX11::null_uav[1] = { nullptr };
 
 // Global collection of unique texture resources
 std::unordered_map<std::string, TextureDX11*> TextureDX11::TextureResources;

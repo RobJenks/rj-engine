@@ -60,7 +60,7 @@ public:
 	Result							InitialisePixelShaderTextured(Rendering::RenderDeviceType  *device, std::string filename);
 
 	// Renders the shader.
-	Result XM_CALLCONV				Render(Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+	Result RJ_XM_CALLCONV				Render(Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Adjust the radius of lines currently being drawn
@@ -82,6 +82,9 @@ public:
 	// Creates a new line model appropriate for rendering volumetric lines with the specified material, or for pure
 	// non-textured volumetric lines if render_material == NULL
 	static ModelBuffer *			CreateLineModel(MaterialDX11 *render_material);
+
+	// Destructor
+	CMPINLINE ~VolLineShader(void) { }
 
 protected:
 	

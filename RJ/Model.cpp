@@ -12,6 +12,7 @@
 namespace fs = std::experimental::filesystem;
 
 // Initialise static data
+Model::ModelCollection Model::Models;
 Model::ModelID Model::GlobalModelIDCount = 0U;
 
 // Default constructor

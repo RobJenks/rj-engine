@@ -95,7 +95,7 @@ public:
 
 	// We also allow setting of the world matrix directly, if it has been calculated elsewhere.  Note this could leave it
 	// out of sync with the pos/orient unless these are also updated
-	CMPINLINE void	XM_CALLCONV 			SetEmitterWorldMatrix(const FXMMATRIX world)			{ m_worldmatrix = world; }
+	CMPINLINE void	RJ_XM_CALLCONV 			SetEmitterWorldMatrix(const FXMMATRIX world)			{ m_worldmatrix = world; }
 
 
 	// Set the position, orientation and world matrix directly.  Used for efficiency when a parent object has already done these calculations

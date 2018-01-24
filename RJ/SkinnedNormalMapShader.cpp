@@ -125,7 +125,7 @@ void SkinnedNormalMapShader::Shutdown()
 	ReleaseIfExists(m_pixelShader);
 }
 
-Result XM_CALLCONV SkinnedNormalMapShader::Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
+Result RJ_XM_CALLCONV SkinnedNormalMapShader::Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
 									  XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix)
 {
 	Result result;

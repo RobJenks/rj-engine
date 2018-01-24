@@ -244,7 +244,7 @@ public:
 		void, RenderParticleEmitters, void, )
 
 	// Renders a standard model.  Processed via the instanced render queue for efficiency
-	CMPINLINE void XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
+	CMPINLINE void RJ_XM_CALLCONV			RenderModel(ModelBuffer *model, const FXMMATRIX world, const CXMVECTOR position)
 	{
 		// Render using the standard light shader.  Add to the queue for batched rendering.
 		SubmitForRendering(RenderQueueShader::RM_LightShader, model, std::move(
@@ -552,16 +552,16 @@ private:
 	void								PerformZSortedRenderQueueProcessing(RM_InstancedShaderDetails & shader);
 
 	// Submit a model buffer to the render queue manager for rendering this frame
-	void XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance);
-	CMPINLINE void XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, RM_Instance && instance) 
+	void RJ_XM_CALLCONV					SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance);
+	CMPINLINE void RJ_XM_CALLCONV			SubmitForRendering(RenderQueueShader shader, Model *model, RM_Instance && instance) 
 	{
 		if (model) SubmitForRendering(shader, &(model->Data), std::move(instance));
 	}
 
 	// Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
 	// objects.  Performance overhead; should be used only where specifically required
-	void XM_CALLCONV				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position);
-	CMPINLINE void XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
+	void RJ_XM_CALLCONV				SubmitForZSortedRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance, const CXMVECTOR position);
+	CMPINLINE void RJ_XM_CALLCONV		SubmitForZSortedRendering(RenderQueueShader shader, Model *model, RM_Instance && instance, const CXMVECTOR position)
 	{
 		if (model) SubmitForZSortedRendering(shader, &(model->Data), std::move(instance), position);
 	}

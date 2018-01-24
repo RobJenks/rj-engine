@@ -105,7 +105,7 @@ void ParticleEngine::ShutdownParticleEmitter(std::string key)
 	m_emitters[key] = NULL;
 }
 
-void XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
+void RJ_XM_CALLCONV ParticleEngine::Render(const FXMMATRIX view, const CXMMATRIX proj, D3DMain *D3D, CameraClass *camera)
 {
 	/* TODO: Disabled since this does not work within the deferred rendering engine; replace with compliant implementation */
 

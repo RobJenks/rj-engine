@@ -10,7 +10,6 @@ C:\Users\robje\Documents\Visual Studio 2013\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\bin\Debug\RJ-Log.exe.config
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\bin\Debug\RJ-Log.exe
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\bin\Debug\RJ-Log.pdb
-C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.csprojResolveAssemblyReference.cache
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ_Log.RJLogWindow.resources
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ_Log.Properties.Resources.resources
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.csproj.GenerateResource.Cache

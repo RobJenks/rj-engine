@@ -40,7 +40,7 @@ public:
 
 	void ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice *mouse);
 
-	Result XM_CALLCONV Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
+	Result RJ_XM_CALLCONV Initialise(Rendering::RenderDeviceType * device, Rendering::RenderDeviceContextType * deviceContext, HWND hwnd,
 					  int screenWidth, int screenHeight, const FXMMATRIX baseviewmatrix);
 
 	void Render(void);

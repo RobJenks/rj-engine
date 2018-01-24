@@ -37,7 +37,7 @@ public:
 	Result							InitialisePixelShader(Rendering::RenderDeviceType  *device, std::string filename);
 
 	// Renders the shader.  Conforms to the iShader interface spec
-	Result XM_CALLCONV				Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
+	Result RJ_XM_CALLCONV				Render(Rendering::RenderDeviceContextType  *deviceContext, UINT vertexCount, UINT indexCount, UINT instanceCount,
 		const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	// Shut down the shader and deallocate all associated resources

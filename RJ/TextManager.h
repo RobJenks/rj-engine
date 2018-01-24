@@ -33,7 +33,7 @@ public:
 	~TextManager();
 
 	// Initialises the text manager
-	Result XM_CALLCONV Initialize(HWND, int, int, const FXMMATRIX, FontShader*);
+	Result RJ_XM_CALLCONV Initialize(HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
 	Result InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID);
@@ -46,7 +46,7 @@ public:
 							const XMFLOAT4 & textcolour, float size);
 
 	// Renders all text sentences (dependent on render flag) using the font shader instance
-	Result XM_CALLCONV Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix);
+	Result RJ_XM_CALLCONV Render(const FXMMATRIX worldMatrix, const CXMMATRIX orthoMatrix);
 
 	// Shuts down the text manager instance and releases all resources (including fonts and text sentences)
 	void Shutdown(void);
@@ -66,7 +66,7 @@ public:
 private:
 	Result InitializeSentence(SentenceType** sentence, int maxLength, int fontID);
 	void ReleaseSentence(SentenceType**);
-	Result XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
+	Result RJ_XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
 
 private:
 	std::vector<FontData*> m_fonts;

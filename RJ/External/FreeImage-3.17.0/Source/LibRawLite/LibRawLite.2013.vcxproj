@@ -96,6 +96,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
     <PostBuildEvent>
@@ -119,6 +120,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
     <PostBuildEvent>
@@ -144,6 +146,7 @@
       <DebugInformationFormat>None</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>
@@ -169,6 +172,7 @@
       <CompileAs>Default</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
       <Optimization>Full</Optimization>
+      <CallingConvention>Cdecl</CallingConvention>
     </ClCompile>
     <Lib />
   </ItemDefinitionGroup>

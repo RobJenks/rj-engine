@@ -184,7 +184,7 @@ FreeImage_ConvertLine8To32MapTransparency(BYTE *target, BYTE *source, int width_
 
 // ----------------------------------------------------------
 
-FIBITMAP * DLL_CALLCONV
+FIBITMAP * __vectorcall 
 FreeImage_ConvertTo32Bits(FIBITMAP *dib) {
 	if(!FreeImage_HasPixels(dib)) return NULL;
 

@@ -413,7 +413,7 @@ CMPINLINE float fast_abs(float v)
 }
 
 // Calculate the inverse transpose of a matrix
-CMPINLINE XMMATRIX XM_CALLCONV MatrixInverseTranspose(FXMMATRIX M)
+CMPINLINE XMMATRIX RJ_XM_CALLCONV MatrixInverseTranspose(FXMMATRIX M)
 {
 	// Inverse-transpose is just applied to normals.  So zero out 
 	// translation row so that it doesn't get into our inverse-transpose

@@ -70,7 +70,7 @@ public:
 	CMPINLINE const OrientedBoundingBox::CoreOBBData &	GetOBBData(void) const						{ return m_data; }
 
 	CMPINLINE XMMATRIX								GetWorldMatrix(void) const						{ return m_worldmatrix; }
-	CMPINLINE void XM_CALLCONV						SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
+	CMPINLINE void RJ_XM_CALLCONV						SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
 	CMPINLINE XMFLOAT3								GetExtentF(void) const							{ return m_data.ExtentF; }
 	CMPINLINE XMVECTOR								GetExtentV(void) const							{ return m_data.ExtentV; }

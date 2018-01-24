@@ -161,7 +161,7 @@ Result VolLineShader::InitialisePixelShaderTextured(Rendering::RenderDeviceType 
 }
 
 // Renders the shader.
-Result XM_CALLCONV VolLineShader::Render(	Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
+Result RJ_XM_CALLCONV VolLineShader::Render(	Rendering::RenderDeviceContextType  *deviceContext, unsigned int vertexCount, unsigned int indexCount, unsigned int instanceCount,
 											const FXMMATRIX viewMatrix, const CXMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT hr;

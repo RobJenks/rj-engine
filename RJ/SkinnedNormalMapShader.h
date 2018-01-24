@@ -46,7 +46,7 @@ public:
 	void Shutdown();
 	
 	// Renders the shader.  Conforms to the iShader interface spec
-	Result XM_CALLCONV Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
+	Result RJ_XM_CALLCONV Render(Rendering::RenderDeviceContextType  *deviceContext, SkinnedModelInstance &model,
 					XMFLOAT3 eyepos, XMFLOAT4X4 viewMatrix, XMFLOAT4X4 projectionMatrix);
 
 

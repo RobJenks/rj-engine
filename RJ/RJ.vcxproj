@@ -135,7 +135,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -152,11 +152,14 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -172,7 +175,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -191,11 +194,14 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -211,7 +217,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -228,10 +234,13 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -247,7 +256,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Test|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -265,10 +274,13 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -285,7 +297,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -299,12 +311,15 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -321,7 +336,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Dist\$(Platform);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Definitions;$(ProgramFiles)\Visual Leak Detector\include;$(ProjectDir)\External\FreeImage-3.17.0\Source;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <WarningLevel>Level3</WarningLevel>
@@ -337,11 +352,14 @@
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ShowProgress>NotSet</ShowProgress>
+      <GenerateMapFile>true</GenerateMapFile>
+      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -355,6 +373,7 @@
     </ImageContentTask>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Definitions\ModelData.cpp" />
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorAttributes.cpp" />
     <ClCompile Include="ActorBase.cpp" />
@@ -478,14 +497,7 @@
     </ClCompile>
     <ClCompile Include="FontData.cpp" />
     <ClCompile Include="Fonts.cpp" />
-    <ClCompile Include="FontShader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="FontShader.cpp" />
     <ClCompile Include="FrameProfiler.cpp" />
     <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="GameConsole.cpp" />
@@ -523,14 +535,7 @@
     <ClCompile Include="Image2DRenderGroup.cpp" />
     <ClCompile Include="Image2DRenderGroupInstance.cpp" />
     <ClCompile Include="ImmediateRegion.cpp" />
-    <ClCompile Include="iShader.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="iShader.cpp" />
     <ClCompile Include="iObject.cpp" />
     <ClCompile Include="iSpaceObject.cpp" />
     <ClCompile Include="iStaticObject.cpp" />
@@ -762,6 +767,7 @@
   <ItemGroup>
     <ClInclude Include="..\Definitions\LightData.hlsl.h" />
     <ClInclude Include="..\Definitions\MaterialData.hlsl.h" />
+    <ClInclude Include="..\Definitions\ModelData.h" />
     <ClInclude Include="..\Definitions\VertexDefinitions.hlsl.h" />
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Actor.h" />
@@ -1009,14 +1015,7 @@
     <ClInclude Include="FiringArc.h" />
     <ClInclude Include="FontData.h" />
     <ClInclude Include="Fonts.h" />
-    <ClInclude Include="FontShader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="FontShader.h" />
     <ClInclude Include="GameConsole.h" />
     <ClInclude Include="GameConsoleCommand.h" />
     <ClInclude Include="GameDataExtern.h" />
@@ -1050,14 +1049,7 @@
     <ClInclude Include="Image2DRenderGroup.h" />
     <ClInclude Include="Image2DRenderGroupInstance.h" />
     <ClInclude Include="ImmediateRegion.h" />
-    <ClInclude Include="iShader.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
+    <ClInclude Include="iShader.h" />
     <ClInclude Include="iObject.h" />
     <ClInclude Include="iSpaceObject.h" />
     <ClInclude Include="iStaticObject.h" />
@@ -1379,6 +1371,9 @@
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="External\FreeImage-3.17.0\Source\FreeImageLib\FreeImageLib.2013.vcxproj">
+      <Project>{9e219df2-315d-478e-8a07-8960c377ce1e}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
