@@ -157,9 +157,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -199,9 +196,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -238,9 +232,6 @@
       <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -278,9 +269,6 @@
       <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -317,9 +305,6 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>
@@ -357,9 +342,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <ShowProgress>NotSet</ShowProgress>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(ProjectDir)linker-map.txt</MapFileName>
     </Link>
     <FxCompile>
       <ObjectFileOutput>$(OutDir)\Data\Shaders\%(Filename).cso</ObjectFileOutput>

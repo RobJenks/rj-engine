@@ -363,8 +363,9 @@ Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, 
 {
 	Game::Log << LOG_INFO << "Acquiring swap chain interfaces (target level: " << Rendering::GetSwapChainInterfaceTypeName() << ")\n";
 
-	IDXGIFactory2 *factory = NULL;
-	HRESULT hr = CreateDXGIFactory(__uuidof(Rendering::SwapChainInterfaceType), (void**)&factory);
+	Rendering::DXGIFactoryType *factory = NULL;
+	HRESULT hr = CreateDXGIFactory(__uuidof(Rendering::DXGIFactoryType), (void**)&factory);
+	if (FAILED(hr))
 	{
 		Game::Log << LOG_ERROR << "Failed to create DXGI factory (hr: " << hr << ")\n";
 		return ErrorCodes::CouldNotCreateSwapChain;
@@ -386,7 +387,7 @@ Result RenderDeviceDX11::InitialiseSwapChain(HWND hwnd, INTVECTOR2 screen_size, 
 	DXGI_SWAP_CHAIN_FULLSCREEN_DESC swapChainFullScreenDesc = {};
 
 	swapChainFullScreenDesc.RefreshRate = QueryRefreshRateForDisplaySize(screen_size.x, screen_size.y, vsync);
-	swapChainFullScreenDesc.Windowed = (full_screen ? TRUE : FALSE);
+	swapChainFullScreenDesc.Windowed = (full_screen ? FALSE : TRUE);
 
 	// Instantiate the base swap chain interface
 	IDXGISwapChain1 *swapchain = NULL;

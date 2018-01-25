@@ -29,6 +29,9 @@ class iObject;
 // Convenience macro for generating string literal data
 #define STRING(x) #x
 
+// String macro to force macro expansion before resolving as string (https://stackoverflow.com/questions/2653214/stringification-of-a-macro-value)
+#define MSTRING(x) STRING(x)
+
 // Convenience macro to combine multiple arguments, including commas, into one macro argument
 #define SINGLE_ARG(...) __VA_ARGS__
 

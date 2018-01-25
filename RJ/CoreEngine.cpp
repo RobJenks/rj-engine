@@ -171,6 +171,11 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "DX Math initialised\n";
 
+	// Initialise shader support data
+	res = InitialiseShaderSupport();
+	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
+	Game::Log << LOG_INFO << "Shader support data initialised\n";
+
 	// Initialise the render device component
 	res = InitialiseRenderDevice(hwnd);
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -180,11 +185,6 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	res = InitialiseCamera();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Camera initialised\n";
-
-	// Initialise shader support data
-	res = InitialiseShaderSupport();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Shader support data initialised\n";
 
 	// Initialise the view frustrum
 	res = InitialiseFrustrum();
@@ -2278,7 +2278,8 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 void CoreEngine::DeallocateRenderingQueue(void)
 {
 	// Iterate through each shader in the render queue
-	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	size_t count = m_renderqueue.size();
+	for (size_t i = 0U; i < count; ++i)
 	{
 		// Iterate through each model currently registered with the shader
 		auto model_count = m_renderqueue[i].CurrentSlotCount;

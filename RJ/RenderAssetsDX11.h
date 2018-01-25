@@ -112,6 +112,18 @@ private:
 	T *												GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
 
 
+private:
+
+	template <typename T> CMPINLINE constexpr const char *		AssetName(void) const { return "<unknown-asset-type>"; }
+	template <> CMPINLINE constexpr const char *				AssetName<ShaderDX11>(void) const { return "Shader"; }
+	template <> CMPINLINE constexpr const char *				AssetName<SamplerStateDX11>(void) const { return "SamplerState"; }
+	template <> CMPINLINE constexpr const char *				AssetName<RenderTargetDX11>(void) const { return "RenderTarget"; }
+	template <> CMPINLINE constexpr const char *				AssetName<MaterialDX11>(void) const { return "Material"; }
+	template <> CMPINLINE constexpr const char *				AssetName<PipelineStateDX11>(void) const { return "PipelineState"; }
+	template <> CMPINLINE constexpr const char *				AssetName<TextureDX11>(void) const { return "Texture"; }
+	template <> CMPINLINE constexpr const char *				AssetName<ConstantBufferDX11>(void) const { return "ConstantBuffer"; }
+	template <> CMPINLINE constexpr const char *				AssetName<VertexBufferDX11>(void) const { return "VertexBuffer"; }
+
 
 private:
 
@@ -138,7 +150,7 @@ T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std:
 	if (it != assetData.end()) return it->second.get();
 	else
 	{
-		Game::Log << LOG_WARN << "Failed to retrieve " << STRING(T) << " asset \"" << name << "\"\n";
+		Game::Log << LOG_WARN << "Failed to retrieve " << AssetName<T>() << " asset \"" << name << "\"\n";
 		return NULL;
 	}
 
@@ -238,13 +250,13 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 { 
 	if (name.empty())
 	{
-		Game::Log << LOG_ERROR << "Cannot initialise " << STRING(T) << " definition with null identifier\n"; 	
+		Game::Log << LOG_ERROR << "Cannot initialise " << AssetName<T>() << " definition with null identifier\n"; 	
 		return NULL;
 	}
 
 	if (assetData.find(name) != assetData.end())
 	{
-		Game::Log << LOG_WARN << STRING(T) << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
+		Game::Log << LOG_WARN << AssetName<T>() << " definition for \"" << name << "\" already exists, cannot create duplicate\n";
 		return NULL;
 	}
 
@@ -264,7 +276,7 @@ void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<
 {
 	if (name.empty())
 	{
-		Game::Log << LOG_ERROR << "Cannot delete " << STRING(T) << " definition with null identifier\n";
+		Game::Log << LOG_ERROR << "Cannot delete " << AssetName<T>() << " definition with null identifier\n";
 		return;
 	}
 
@@ -272,12 +284,12 @@ void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<
 	if (it != assetData.end())
 	{
 		assetData.erase(it); 
-		Game::Log << LOG_INFO << "Deleted " << STRING(T) << " asset \"" << name << "\"\n";
+		Game::Log << LOG_INFO << "Deleted " << AssetName<T>() << " asset \"" << name << "\"\n";
 		return;
 	}
 	else
 	{
-		Game::Log << LOG_WARN << "Cannot delete " << STRING(T) << " asset; no asset exists with name \"" << name << "\"\n";
+		Game::Log << LOG_WARN << "Cannot delete " << AssetName<T>() << " asset; no asset exists with name \"" << name << "\"\n";
 		return;
 	}
 }
