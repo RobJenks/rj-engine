@@ -52,23 +52,27 @@ public:
 	CMPINLINE const ConstantBufferCollection &		GetConstantBuffers(void) const { return m_constantbuffers; }
 	CMPINLINE const VertexBufferCollection &		GetVertexBuffers(void) const { return m_vertexbuffers; }
 
-	CMPINLINE ShaderDX11 *							GetShader(const std::string & name) { return GetAsset<ShaderDX11>(name, m_shaders); }
-	CMPINLINE SamplerStateDX11 *					GetSamplerState(const std::string & name) { return GetAsset<SamplerStateDX11>(name, m_samplers); }
-	CMPINLINE RenderTargetDX11 *					GetRenderTarget(const std::string & name) { return GetAsset<RenderTargetDX11>(name, m_rendertargets); }
-	CMPINLINE MaterialDX11 *						GetMaterial(const std::string & name) { return GetAsset<MaterialDX11>(name, m_materials); }
-	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name) { return GetAsset<PipelineStateDX11>(name, m_pipelinestates); }
-	CMPINLINE TextureDX11 *							GetTexture(const std::string & name) { return GetAsset<TextureDX11>(name, m_textures); }
-	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name, m_constantbuffers); }
-	CMPINLINE VertexBufferDX11 *					GetVertexBuffer(const std::string & name) { return GetAsset<VertexBufferDX11>(name, m_vertexbuffers); }
+	CMPINLINE ShaderDX11 *							GetShader(const std::string & name) { return GetAsset<ShaderDX11>(name); }
+	CMPINLINE SamplerStateDX11 *					GetSamplerState(const std::string & name) { return GetAsset<SamplerStateDX11>(name); }
+	CMPINLINE RenderTargetDX11 *					GetRenderTarget(const std::string & name) { return GetAsset<RenderTargetDX11>(name); }
+	CMPINLINE MaterialDX11 *						GetMaterial(const std::string & name) { return GetAsset<MaterialDX11>(name); }
+	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name) { return GetAsset<PipelineStateDX11>(name); }
+	CMPINLINE TextureDX11 *							GetTexture(const std::string & name) { return GetAsset<TextureDX11>(name); }
+	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name); }
+	CMPINLINE VertexBufferDX11 *					GetVertexBuffer(const std::string & name) { return GetAsset<VertexBufferDX11>(name); }
 
-	CMPINLINE MaterialDX11 *						GetDefaultMaterial(void) { return GetDefaultAsset<MaterialDX11>(m_materials); }
+	template <typename T>
+	bool											AssetExists(std::string name);
+	
+
+	CMPINLINE MaterialDX11 *						GetDefaultMaterial(void) { return GetDefaultAsset<MaterialDX11>(); }
 
 public:
 
-	CMPINLINE SamplerStateDX11 *					CreateSamplerState(const std::string & name) { return CreateAsset<SamplerStateDX11>(name, m_samplers); }
-	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name) { return CreateAsset<RenderTargetDX11>(name, m_rendertargets); }
-	CMPINLINE MaterialDX11 *						CreateMaterial(const std::string & name) { return CreateAsset<MaterialDX11>(name, m_materials); }
-	CMPINLINE PipelineStateDX11 *					CreatePipelineState(const std::string & name) { return CreateAsset<PipelineStateDX11>(name, m_pipelinestates); }
+	CMPINLINE SamplerStateDX11 *					CreateSamplerState(const std::string & name) { return CreateAsset<SamplerStateDX11>(name); }
+	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name) { return CreateAsset<RenderTargetDX11>(name); }
+	CMPINLINE MaterialDX11 *						CreateMaterial(const std::string & name) { return CreateAsset<MaterialDX11>(name); }
+	CMPINLINE PipelineStateDX11 *					CreatePipelineState(const std::string & name) { return CreateAsset<PipelineStateDX11>(name); }
 
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
@@ -93,9 +97,9 @@ public:
 public:
 
 	template <typename T>
-	void											DeleteAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+	void											DeleteAsset(const std::string & name);
 
-	CMPINLINE void									DeleteTexture(const std::string & name) { DeleteAsset<TextureDX11>(name, m_textures); }
+	CMPINLINE void									DeleteTexture(const std::string & name) { DeleteAsset<TextureDX11>(name); }
 
 
 private:
@@ -103,14 +107,25 @@ private:
 	TextureDX11 *									RegisterNewTexture(const std::string & name, std::unique_ptr<TextureDX11> texture);
 
 	template <class T>
-	T *												CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+	T *												CreateAsset(const std::string & name);
 
 	template <class T>
-	T *												GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+	T *												GetAsset(const std::string & name);
 
 	template <class T>
-	T *												GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData);
+	T *												GetDefaultAsset(void);
 
+private:
+
+	template <typename T> CMPINLINE constexpr std::unordered_map<std::string, std::unique_ptr<T>> & 	GetAssetData(void) { throw("Invalid asset data type"); }
+	template <> CMPINLINE constexpr ShaderCollection & 			GetAssetData<ShaderDX11>(void) { return m_shaders; }
+	template <> CMPINLINE constexpr SamplerStateCollection & 	GetAssetData<SamplerStateDX11>(void) { return m_samplers; }
+	template <> CMPINLINE constexpr RenderTargetCollection & 	GetAssetData<RenderTargetDX11>(void) { return m_rendertargets; }
+	template <> CMPINLINE constexpr MaterialCollection & 		GetAssetData<MaterialDX11>(void) { return m_materials; }
+	template <> CMPINLINE constexpr PipelineStateCollection & 	GetAssetData<PipelineStateDX11>(void) { return m_pipelinestates; }
+	template <> CMPINLINE constexpr TextureCollection & 		GetAssetData<TextureDX11>(void) { return m_textures; }
+	template <> CMPINLINE constexpr ConstantBufferCollection & 	GetAssetData<ConstantBufferDX11>(void) { return m_constantbuffers; }
+	template <> CMPINLINE constexpr VertexBufferCollection & 	GetAssetData<VertexBufferDX11>(void) { return m_vertexbuffers; }
 
 private:
 
@@ -141,8 +156,9 @@ private:
 
 
 template <class T>
-T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+T *	RenderAssetsDX11::GetAsset(const std::string & name)
 {
+	auto & assetData = GetAssetData<T>();
 	auto it = assetData.find(name);
 
 #if defined(_DEBUG) && defined(PERFORM_ASSET_ERROR_LOGGING)
@@ -161,11 +177,17 @@ T *	RenderAssetsDX11::GetAsset(const std::string & name, std::unordered_map<std:
 }
 
 template <class T>
-T *	RenderAssetsDX11::GetDefaultAsset(std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+T *	RenderAssetsDX11::GetDefaultAsset(void)
 {
-	return GetAsset<T>(RenderAssetsDX11::DEFAULT_ASSET_ID, assetData);
+	return GetAsset<T>(RenderAssetsDX11::DEFAULT_ASSET_ID);
 }
 
+template <typename T>
+bool RenderAssetsDX11::AssetExists(std::string name)
+{
+	auto & data = GetAssetData<T>();
+	return (data.find(name) != data.end());
+}
 
 
 template <typename T>
@@ -246,8 +268,10 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 
 
 template <class T>
-T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+T *	RenderAssetsDX11::CreateAsset(const std::string & name)
 { 
+	auto & assetData = GetAssetData<T>();
+
 	if (name.empty())
 	{
 		Game::Log << LOG_ERROR << "Cannot initialise " << AssetName<T>() << " definition with null identifier\n"; 	
@@ -272,8 +296,10 @@ T *	RenderAssetsDX11::CreateAsset(const std::string & name, std::unordered_map<s
 }
 
 template <typename T>
-void RenderAssetsDX11::DeleteAsset(const std::string & name, std::unordered_map<std::string, std::unique_ptr<T>> & assetData)
+void RenderAssetsDX11::DeleteAsset(const std::string & name)
 {
+	auto & assetData = GetAssetData<T>();
+
 	if (name.empty())
 	{
 		Game::Log << LOG_ERROR << "Cannot delete " << AssetName<T>() << " definition with null identifier\n";

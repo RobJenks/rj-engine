@@ -187,8 +187,12 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		fs::path filePath(sourceFileName);
 		std::string sourceFilePath = filePath.string();
 
+		// Enclosed in preprocessor defines to force the use of HLSL definitions during inline C++ compilation, rather than
+		// the C++ defines which woul otherwise be used since __cplusplus is defined here
+#		define RJ_COMPILING_HLSL
 		hr = D3DCompile((LPCVOID)shaderSource.c_str(), shaderSource.size(), sourceFilePath.c_str(), macros.data(), 
 			D3D_COMPILE_STANDARD_FILE_INCLUDE, entryPoint.c_str(), _profile.c_str(), flags, 0, &shaderBlob, &errorBlob);
+#		undef RJ_COMPILING_HLSL
 
 		// Check compilation results and report any errors
 		if (FAILED(hr))

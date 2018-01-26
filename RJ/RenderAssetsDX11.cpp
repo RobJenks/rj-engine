@@ -90,7 +90,7 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	Game::Log << LOG_INFO << "Initialising shader \"" << entryPoint << "\" from \"" << fileName << "\"\n";
 
 	// No duplicates allowed
-	if (GetShader(entryPoint) != NULL)
+	if (AssetExists<ShaderDX11>(entryPoint))
 	{
 		Game::Log << LOG_ERROR << "Multiple shader resources detected with entry point \"" << entryPoint << "\"\n";
 		return ErrorCodes::CannotLoadDuplicateShaderResource;
@@ -105,7 +105,7 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	}
 
 	// Attempt to initialise from file
-	(*ppOutShader) = new ShaderDX11();
+	(*ppOutShader) = CreateAsset<ShaderDX11>(entryPoint);
 	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
 
 	// Deallocate the shader object if initialisation failed
@@ -116,9 +116,6 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 		return ErrorCodes::CannotLoadShaderFromFile;
 	}
 
-	// Add to the central shader collection and return success.  All shaders are owned by this collection and will
-	// be disposed by it during shutdown
-	m_shaders[entryPoint] = std::move(std::unique_ptr<ShaderDX11>(*ppOutShader));
 	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
 	return ErrorCodes::NoError;
 }

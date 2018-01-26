@@ -110,6 +110,7 @@ private:
 	size_t									m_devicememory;
 	D3D_DRIVER_TYPE							m_drivertype;		// Hardware (in almost all cases) or WARP (software backup)
 	ID3D11Debug *							m_debuglayer;		// Only if required & initialised
+	ID3D11InfoQueue *						m_debuginfoqueue;	// Only if required & initialised
 
 	float									m_fov;
 	float									m_halffovtan;

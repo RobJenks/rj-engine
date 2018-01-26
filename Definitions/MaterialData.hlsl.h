@@ -1,7 +1,7 @@
 #ifndef __MaterialDataHLSLH__
 #define __MaterialDataHLSLH__
 
-#include "CppHLSLLocalisation.hlsl.h"
+#include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
 // Standard material definition
@@ -42,7 +42,7 @@ struct MaterialData
 
 
 	// Default constructor for use within CPP classes
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 	inline MaterialData(void)
 		: GlobalAmbient(0.1f, 0.1f, 0.15f, 1.0f)
 		, AmbientColor(0.0f, 0.0f, 0.0f, 1.0f)

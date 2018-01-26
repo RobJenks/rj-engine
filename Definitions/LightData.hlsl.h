@@ -5,7 +5,7 @@
 
 
 // Supported light types; workaround for lack of enumerations in HLSL
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 	enum LightType
 	{
 		Point = 0, 
@@ -44,7 +44,7 @@
 
 
 		// Constructor for use within CPP classes
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 		inline LightData(void)
 			: PositionWS(0, 0, 0, 1)
 			, DirectionWS(0, 0, -1, 0)

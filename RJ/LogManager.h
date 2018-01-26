@@ -4,6 +4,7 @@
 #define __LogManagerH__
 
 #include <fstream>
+#include <sstream>
 #include "CompilerSettings.h"
 #include "GlobalFlags.h"
 #include "ScheduledObject.h"
@@ -19,6 +20,10 @@
 #define LOG_WARN "WARNING: " << LOG_PREFIX_BODY
 #define LOG_ERROR "ERROR: " << LOG_PREFIX_BODY
 #define LOG_DEBUG "DEBUG: " << LOG_PREFIX_BODY
+
+// Preprocessor define which will mirror all log output to the developer console if set
+#define REPLICATE_LOG_TO_DEVELOPER_CONSOLE
+
 
 // This class has no special alignment requirements
 class LogManager : public ScheduledObject
@@ -37,6 +42,13 @@ public:
 	{
 		m_stream << data;
 		if (m_alwaysflush) m_stream.flush();
+
+		#if defined( REPLICATE_LOG_TO_DEVELOPER_CONSOLE) && defined(_DEBUG)
+			m_stringstream.clear();
+			m_stringstream << data;
+			OutputDebugString(m_stringstream.str().c_str());
+#		endif
+
 		return (*this);
 	}
 
@@ -113,6 +125,11 @@ protected:
 		std::ofstream			m_profilingstream;
 	#endif
 	
+	// Stream stream used for redirecting log output to the developer console if required
+	#if defined( REPLICATE_LOG_TO_DEVELOPER_CONSOLE) && defined(_DEBUG)
+		std::ostringstream		m_stringstream;
+	#endif
+
 	// Flag indicating whether the primary log should flush after every stream operation.  Used during initialisation
 	// to make sure that all data is output before any potential crash
 	bool						m_alwaysflush;

@@ -1,11 +1,11 @@
 #ifndef __VertexDefinitionsHLSLH__
 #define __VertexDefinitionsHLSLH__
 
-#include "CppHLSLLocalisation.hlsl.h"
+#include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
 // Enable common usage across C++ and HLSL by making preprocessor adjustments
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 	#include <DirectXMath.h>
 	#include "../RJ/DefaultingFloat4.h"
 
@@ -47,9 +47,9 @@ typedef _uint32 RM_SortKey;				// HLSL uint == uint32_t
 	/*--------------------------------------------------------------------- ( 64 bytes ) */ \
 	_uint32					Flags			RJ_SEMANTIC(Flags);									/* Flags defined in Definitions/InstanceProperties.hlsl.h */ \
 	RM_SortKey				SortKey			RJ_SEMANTIC(SortKey); \
-	float2					_padding1		RJ_SEMANTIC(padding1); \
+	float2					_padding		RJ_SEMANTIC(padding); \
 	/*--------------------------------------------------------------------- ( 16 bytes ) */ \
-	Float4DefaultZeroW		Highlight		RJ_SEMANTIC(Highlight);								/* xyz = colour, w = [0.0 1.0] intensity of highlight.  w=0.0 = default = deactivated */
+	Float4DefaultZeroW		Highlight		RJ_SEMANTIC(Highlight);								/* xyz = colour, w = [0.0 1.0] intensity of highlight.  w=0.0 = default = deactivated */ \
 	/*--------------------------------------------------------------------- ( 16 bytes ) */ \
 	/*--------------------------------------------------------------------- ( 16 * 6 = 96 bytes ) */ 
 

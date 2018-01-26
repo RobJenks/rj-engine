@@ -129,7 +129,7 @@ namespace Game {
 	const int C_CONFIG_LOAD_RECURSION_LIMIT = 25;			// Maximum recursion depth when loading config files, to prevent infinite loops
 
 	// Rendering constants
-	const bool C_RENDER_DEBUG_LAYER = false;				// Flag indicating whether we should attempt to load a debug layer for the current rendering 
+	const bool C_RENDER_DEBUG_LAYER = true;					// Flag indicating whether we should attempt to load a debug layer for the current rendering 
 															// engine (e.g D3D_DEVICE_DEBUG). Only available in debug builds regardless of the state of this flag
 	const size_t C_INSTANCED_RENDER_LIMIT = 1000U;			// The maximum number of instances that can be rendered in any one draw call by the engine
 	const float C_MODEL_SIZE_LIMIT = 10000.0f;				// The maximum size of any model; prevents overflow / accidental scaling to unreasonble values

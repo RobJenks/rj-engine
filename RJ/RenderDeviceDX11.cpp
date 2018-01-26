@@ -31,6 +31,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_rendertarget(NULL), 
 	m_drivertype(D3D_DRIVER_TYPE::D3D_DRIVER_TYPE_UNKNOWN),
 	m_debuglayer(NULL),
+	m_debuginfoqueue(NULL), 
 	m_devicename(NullString),
 	m_devicememory(0U),
 
@@ -168,13 +169,12 @@ Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_siz
 	{
 		Game::Log << LOG_INFO << "Initialising D3D11 debug layer components\n";
 
-		ID3D11InfoQueue *debuginfoqueue = NULL;
-		if (SUCCEEDED(m_debuglayer->QueryInterface<ID3D11InfoQueue>(&debuginfoqueue)))
+		if (SUCCEEDED(m_debuglayer->QueryInterface<ID3D11InfoQueue>(&m_debuginfoqueue)))
 		{
 #			ifdef _DEBUG
-			debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, TRUE);
-			debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, TRUE);
-			debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, TRUE);
+			m_debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			m_debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_ERROR, TRUE);
+			m_debuginfoqueue->SetBreakOnSeverity(D3D11_MESSAGE_SEVERITY_WARNING, TRUE);
 #			endif
 
 			D3D11_MESSAGE_ID suppress_messages[] =
@@ -187,9 +187,7 @@ Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_siz
 			memset((void *)&filter, 0, sizeof(D3D11_INFO_QUEUE_FILTER));
 			filter.DenyList.NumIDs = suppress_count;
 			filter.DenyList.pIDList = suppress_messages;
-			debuginfoqueue->AddStorageFilterEntries(&filter);
-
-			ReleaseIfExists(debuginfoqueue);
+			m_debuginfoqueue->AddStorageFilterEntries(&filter);
 		}
 		else
 		{
@@ -668,9 +666,10 @@ bool RenderDeviceDX11::VerifyState(void)
 
 RenderDeviceDX11::~RenderDeviceDX11(void)
 {
-	if (m_debuglayer)
+	if (m_debuglayer || m_debuginfoqueue)
 	{
 		Game::Log << LOG_INFO << "Terminating render device debug layer\n";
+		ReleaseIfExists(m_debuginfoqueue);
 		ReleaseIfExists(m_debuglayer);
 	}
 

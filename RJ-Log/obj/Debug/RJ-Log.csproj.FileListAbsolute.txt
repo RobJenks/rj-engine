@@ -16,3 +16,4 @@ C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.csproj.CoreCompileInputs.cache
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.exe
 C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.pdb
+C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\RJ-Log\obj\Debug\RJ-Log.csprojResolveAssemblyReference.cache
