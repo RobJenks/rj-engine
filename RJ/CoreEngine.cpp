@@ -437,7 +437,7 @@ Result CoreEngine::InitialiseLightingManager(void)
 		return ErrorCodes::CannotInitialiseLightingManager;
 	}
 
-
+	Game::Log << LOG_INFO << "Lightingg manager initialised";
 	return ErrorCodes::NoError;
 }
 

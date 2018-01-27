@@ -24,19 +24,23 @@ Result EffectManager::Initialise(Rendering::RenderDeviceType *device)
 // Loads and initialises all the models used for rendering effects.  Returns fatal error if any cannot be loaded
 Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *device)
 {
-	// Create the models that will be used to hold each set of model data
-	m_model_unitsquare = new Model();
-	m_model_unitcone = new Model();
+	// Static map of models required for effect rendering
+	static const std::vector<std::pair<std::string, Model**>> model_requirements = {
+		{ "unit_square", &m_model_unitsquare }, 
+		{ "unit_cone", &m_model_unitcone }
+	};
 
-	// 2D square model used for billboard rendering of effects
-	m_model_unitsquare = Model::GetModel("unit_square");
-	if (!m_model_unitsquare) return ErrorCodes::CouldNotInitialiseEffectManager;
+	// Attempt to load each required model in turn
+	for (auto & modelreq : model_requirements)
+	{
+		*(modelreq.second) = Model::GetModel(modelreq.first);
+		if (!(*modelreq.second))
+		{
+			Game::Log << LOG_WARN << "Could not locate effect manager base model \"" << modelreq.first << "\"\n";
+		}
+	}
 
-	// Unit cone model used for rendering tapering effects, e.g. engine thrust 
-	m_model_unitcone = Model::GetModel("unit_cone");
-	if (!m_model_unitcone) return ErrorCodes::CouldNotInitialiseEffectManager;
-
-	// Return success if all models have been loaded successfully
+	// Return success regardless of whether all models have been loaded successfully
 	return ErrorCodes::NoError;
 }
 
@@ -45,7 +49,7 @@ Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *dev
 Result EffectManager::LinkEffectShaders(FireShader *fireshader)
 {
 	// Validate that all references are valid
-	if (!fireshader) return ErrorCodes::CannotLinkAllRequiredShadersToEffectManager;
+	if (!fireshader) Game::Log << LOG_WARN << "Cannot link fire shader to effect manager\n";
 
 	// Store references to all required shader components
 	m_fireshader = fireshader;
