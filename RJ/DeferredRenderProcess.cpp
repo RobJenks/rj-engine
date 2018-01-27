@@ -78,9 +78,6 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 {
 	Game::Log << LOG_INFO << "Initialise deferred rendering standard buffer resources\n";
 
-	m_cb_frame_data = { 0 };
-	m_cb_material_data = { 0 };
-
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
 	m_cb_material = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<MaterialBuffer>(MaterialBufferName, m_cb_material_data.RawPtr);
 }

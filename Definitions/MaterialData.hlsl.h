@@ -24,15 +24,15 @@ struct MaterialData
 	float					SpecularScale;						// Value used to scale all specular power values, since power <= 1.0 does not make sense
 	float					IndexOfRefraction;					// Degree of refraction for light passing through this object.  For transparent objects only.  For env mapping; not currently used
 	//------------------------------------------ ( 16 bytes )
-	bool					HasAmbientTexture;					// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasEmissiveTexture;					// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasDiffuseTexture;					// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasSpecularTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasAmbientTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasEmissiveTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasDiffuseTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasSpecularTexture;					// Indicates whether this material will bind the specified texture resource to the shader
 	//------------------------------------------ ( 16 bytes )
-	bool					HasSpecularPowerTexture;			// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasNormalTexture;					// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasBumpTexture;						// Indicates whether this material will bind the specified texture resource to the shader
-	bool					HasOpacityTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasSpecularPowerTexture;			// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasNormalTexture;					// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasBumpTexture;						// Indicates whether this material will bind the specified texture resource to the shader
+	_bool					HasOpacityTexture;					// Indicates whether this material will bind the specified texture resource to the shader
 	//------------------------------------------ ( 16 bytes )
 	float					BumpIntensity;						// Scale factor to apply to all height values from the material bump map
 	float					AlphaThreshold;						// Opacity threshold below which pixels will be discarded without shading

@@ -27,12 +27,11 @@ public:
 
 private:
 
-	// Constant buffers should always be limited to one item.  Buffersize is the preallocated size on construction
-	ID3D11Buffer *				m_buffer[1];
+	// Buffersize is the preallocated size on construction
 	UINT						m_buffersize;
 
 	// Static null buffer resource, used for more efficient unbinding
-	static ID3D11Buffer * const	m_null_buffer[1];
+	//static ID3D11Buffer * const	m_null_buffer[1];
 
 };
 

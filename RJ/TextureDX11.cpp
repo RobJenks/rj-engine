@@ -91,23 +91,23 @@ TextureDX11::TextureDX11(uint16_t width, uint16_t slices, const TextureFormat& f
 	// Query for texture format support.
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query texture resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query texture resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_DepthStencilViewFormat, &m_DepthStencilViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query depth/stencil view format support.");
+		Game::Log << LOG_ERROR << ("Failed to query depth/stencil view format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_ShaderResourceViewFormat, &m_ShaderResourceViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query shader resource view format support.");
+		Game::Log << LOG_ERROR << ("Failed to query shader resource view format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_RenderTargetViewFormat, &m_RenderTargetViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target view format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target view format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_UnorderedAccessViewFormat, &m_UnorderedAccessViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query unordered access view format support.");
+		Game::Log << LOG_ERROR << ("Failed to query unordered access view format support\n");
 	}
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE1D) == 0)
 	{
@@ -171,23 +171,23 @@ TextureDX11::TextureDX11(uint16_t width, uint16_t height, uint16_t slices, const
 	// Query for texture format support.
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query texture resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query texture resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_DepthStencilViewFormat, &m_DepthStencilViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support.");
+		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_ShaderResourceViewFormat, &m_ShaderResourceViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query shader resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query shader resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_RenderTargetViewFormat, &m_RenderTargetViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_UnorderedAccessViewFormat, &m_UnorderedAccessViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D) == 0)
 	{
@@ -237,23 +237,23 @@ TextureDX11::TextureDX11(Texture3DConstructor, uint16_t width, uint16_t height, 
 	// Query for texture format support.
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query texture resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query texture resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_DepthStencilViewFormat, &m_DepthStencilViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support.");
+		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_ShaderResourceViewFormat, &m_ShaderResourceViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query shader resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query shader resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_RenderTargetViewFormat, &m_RenderTargetViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_UnorderedAccessViewFormat, &m_UnorderedAccessViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE3D) == 0)
@@ -301,27 +301,27 @@ TextureDX11::TextureDX11(CubeMapConstructor, uint16_t size, uint16_t count, cons
 	// Query for texture format support.
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query texture resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query texture resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_DepthStencilViewFormat, &m_DepthStencilViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support.");
+		Game::Log << LOG_ERROR << ("Failed to query depth/stencil format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_ShaderResourceViewFormat, &m_ShaderResourceViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query shader resource format support.");
+		Game::Log << LOG_ERROR << ("Failed to query shader resource format support\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_RenderTargetViewFormat, &m_RenderTargetViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURECUBE) == 0)
 	{
-		ReportTextureFormatError(m_format, "Unsupported texture format for cubemap textures");
+		ReportTextureFormatError(m_format, "Unsupported texture format for cubemap textures\n");
 	}
 	if (FAILED(device->CheckFormatSupport(m_UnorderedAccessViewFormat, &m_UnorderedAccessViewFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query render target format support.");
+		Game::Log << LOG_ERROR << ("Failed to query render target format support\n");
 	}
 
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURECUBE) == 0)
@@ -361,7 +361,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 	fs::path filePath(fileName);
 	if (!fs::exists(filePath) || !fs::is_regular_file(filePath))
 	{
-		Game::Log << LOG_ERROR << ("Could not load texture: " + filePath.string());
+		Game::Log << LOG_ERROR << "Could not load texture: " << filePath.string() << "\n";
 		return false;
 	}
 
@@ -376,14 +376,14 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (fif == FIF_UNKNOWN || !FreeImage_FIFSupportsReading(fif))
 	{
-		Game::Log << LOG_ERROR << ("Unknown file format: " + filePath.string());
+		Game::Log << LOG_ERROR << "Unknown file format: " << filePath.string() << "\n";
 		return false;
 	}
 
 	FIBITMAP* dib = FreeImage_LoadU(fif, filePath.c_str());
 	if (dib == nullptr || FreeImage_HasPixels(dib) == FALSE)
 	{
-		Game::Log << LOG_ERROR << ("Failed to load image: " + filePath.string());
+		Game::Log << LOG_ERROR << "Failed to load image: " << filePath.string() << "\n";
 		return false;
 	}
 
@@ -412,7 +412,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format.");
+			Game::Log << LOG_ERROR << ("Unknown image format\n");
 		}
 		break;
 		}
@@ -439,7 +439,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format.");
+			Game::Log << LOG_ERROR << ("Unknown image format\n");
 		}
 		break;
 		}
@@ -475,7 +475,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format.");
+			Game::Log << LOG_ERROR << ("Unknown image format\n");
 		}
 		break;
 		}
@@ -513,11 +513,11 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query format support.");
+		Game::Log << LOG_ERROR << ("Failed to query format support\n");
 	}
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D) == 0)
 	{
-		ReportTextureFormatError(m_format, "Unsupported texture format for 2D textures.");
+		ReportTextureFormatError(m_format, "Unsupported texture format for 2D textures\n");
 		return false;
 	}
 
@@ -557,7 +557,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CreateTexture2D(&textureDesc, m_generate_mipmaps ? nullptr : &subresourceData, &m_texture2d)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to create texture.");
+		Game::Log << LOG_ERROR << ("Failed to create texture\n");
 		return false;
 	}
 
@@ -571,7 +571,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CreateShaderResourceView(m_texture2d, &resourceViewDesc, &m_srv)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to create texture resource view.");
+		Game::Log << LOG_ERROR << ("Failed to create texture resource view\n");
 		return false;
 	}
 
@@ -596,7 +596,7 @@ bool TextureDX11::LoadTextureCube(const std::wstring& fileName)
 	fs::path filePath(fileName);
 	if (!fs::exists(filePath) || !fs::is_regular_file(filePath))
 	{
-		Game::Log << LOG_ERROR << ("Could not load texture: " + filePath.string());
+		Game::Log << LOG_ERROR << "Could not load texture: " << filePath.string() << "\n";
 		return false;
 	}
 
@@ -611,14 +611,14 @@ bool TextureDX11::LoadTextureCube(const std::wstring& fileName)
 
 	if (fif == FIF_UNKNOWN || !FreeImage_FIFSupportsReading(fif))
 	{
-		Game::Log << LOG_ERROR << ("Unknown file format: " + filePath.string());
+		Game::Log << LOG_ERROR << "Unknown file format: " << filePath.string() << "\n";
 		return false;
 	}
 
 	FIMULTIBITMAP* dib = FreeImage_OpenMultiBitmap(fif, filePath.string().c_str(), FALSE, TRUE, TRUE);
 	if (dib == nullptr || FreeImage_GetPageCount(dib) == 0)
 	{
-		Game::Log << LOG_ERROR << ("Failed to load image: " + filePath.string());
+		Game::Log << LOG_ERROR << "Failed to load image: " << filePath.string() << "\n";
 		return false;
 	}
 
@@ -746,7 +746,7 @@ void TextureDX11::Resize1D(uint16_t width)
 
 		if (FAILED(device->CreateTexture1D(&textureDesc, nullptr, &m_texture1d)))
 		{
-			Game::Log << LOG_ERROR << ("Failed to create texture.");
+			Game::Log << LOG_ERROR << ("Failed to create texture\n");
 			return;
 		}
 
@@ -772,7 +772,7 @@ void TextureDX11::Resize1D(uint16_t width)
 
 			if (FAILED(device->CreateDepthStencilView(m_texture1d, &depthStencilViewDesc, &m_depthstencil_view)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create depth/stencil view.");
+				Game::Log << LOG_ERROR << ("Failed to create depth/stencil view\n");
 			}
 		}
 
@@ -799,7 +799,7 @@ void TextureDX11::Resize1D(uint16_t width)
 
 			if (FAILED(device->CreateShaderResourceView(m_texture1d, &resourceViewDesc, &m_srv)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create shader resource view.");
+				Game::Log << LOG_ERROR << ("Failed to create shader resource view\n");
 			}
 			else if (m_generate_mipmaps)
 			{
@@ -828,7 +828,7 @@ void TextureDX11::Resize1D(uint16_t width)
 
 			if (FAILED(device->CreateRenderTargetView(m_texture1d, &renderTargetViewDesc, &m_rendertarget_view)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create render target view.");
+				Game::Log << LOG_ERROR << ("Failed to create render target view\n");
 			}
 		}
 		if ((textureDesc.BindFlags & D3D11_BIND_UNORDERED_ACCESS) != 0)
@@ -855,7 +855,7 @@ void TextureDX11::Resize1D(uint16_t width)
 
 			if (FAILED(device->CreateUnorderedAccessView(m_texture1d, &unorderedAccessViewDesc, &m_uav)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create unordered access view.");
+				Game::Log << LOG_ERROR << ("Failed to create unordered access view\n");
 			}
 		}
 
@@ -925,7 +925,7 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 		if (FAILED(device->CreateTexture2D(&textureDesc, nullptr, &m_texture2d)))
 		{
-			Game::Log << LOG_ERROR << ("Failed to create texture.");
+			Game::Log << LOG_ERROR << ("Failed to create texture\n");
 			return;
 		}
 
@@ -967,7 +967,7 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 			if (FAILED(device->CreateDepthStencilView(m_texture2d, &depthStencilViewDesc, &m_depthstencil_view)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create depth/stencil view.");
+				Game::Log << LOG_ERROR << ("Failed to create depth/stencil view\n");
 			}
 		}
 
@@ -1010,7 +1010,7 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 			if (FAILED(device->CreateShaderResourceView(m_texture2d, &resourceViewDesc, &m_srv)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create texture resource view.");
+				Game::Log << LOG_ERROR << ("Failed to create texture resource view\n");
 			}
 			else if (m_generate_mipmaps)
 			{
@@ -1056,7 +1056,7 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 			if (FAILED(device->CreateRenderTargetView(m_texture2d, &renderTargetViewDesc, &m_rendertarget_view)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create render target view.");
+				Game::Log << LOG_ERROR << ("Failed to create render target view\n");
 			}
 		}
 
@@ -1084,7 +1084,7 @@ void TextureDX11::Resize2D(uint16_t width, uint16_t height)
 
 			if (FAILED(device->CreateUnorderedAccessView(m_texture2d, &unorderedAccessViewDesc, &m_uav)))
 			{
-				Game::Log << LOG_ERROR << ("Failed to create unordered access view.");
+				Game::Log << LOG_ERROR << ("Failed to create unordered access view\n");
 			}
 		}
 
@@ -1122,7 +1122,7 @@ void TextureDX11::Resize(uint16_t width, uint16_t height, uint16_t depth)
 			ResizeCube(width);
 			break;
 		default:
-			Game::Log << LOG_ERROR << ("Unknown texture dimension.");
+			Game::Log << LOG_ERROR << ("Unknown texture dimension\n");
 			break;
 	}
 
@@ -1182,7 +1182,7 @@ void TextureDX11::Copy(TextureDX11 * srcTexture)
 		}
 		else
 		{
-			Game::Log << LOG_ERROR << ("Incompatible source texture.");
+			Game::Log << LOG_ERROR << ("Incompatible source texture\n");
 		}
 	}
 
@@ -1193,7 +1193,7 @@ void TextureDX11::Copy(TextureDX11 * srcTexture)
 		// Copy the texture data from the texture resource
 		if (FAILED(devicecontext->Map(m_texture2d, 0, D3D11_MAP_READ, 0, &mappedResource)))
 		{
-			Game::Log << LOG_ERROR << ("Failed to map texture resource for reading.");
+			Game::Log << LOG_ERROR << ("Failed to map texture resource for reading\n");
 		}
 
 		memcpy_s(m_buffer.data(), m_buffer.size(), mappedResource.pData, m_buffer.size());

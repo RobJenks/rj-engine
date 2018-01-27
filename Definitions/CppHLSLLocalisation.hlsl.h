@@ -5,6 +5,7 @@
 // Enable localisation to both C++ & HLSL
 #ifdef __cplusplus
 
+#	include <windows.h>
 #	include <DirectXMath.h>
 #	include "../RJ/ALIGN16.h"
 #	define cbuffer struct
@@ -17,6 +18,7 @@
 	typedef DirectX::XMFLOAT3X3 float3x3;
 	typedef DirectX::XMFLOAT4X4 float4x4;
 	typedef uint32_t _uint32;
+	typedef BOOL _bool;							// We must use BOOL/int for bool values when crossing CPU/GPU border since sizeof(bool) in HLSL == 1, sizeof(bool) in C++ == 4
 
 #else
 
@@ -24,6 +26,7 @@
 #	define ALIGNED16(T)
 
 	typedef uint _uint32;
+	typedef int _bool;
 
 #endif
 

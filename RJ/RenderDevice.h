@@ -52,8 +52,8 @@ private:
 template <class TRenderProcess>
 void RenderDevice::ActivateRenderProcess(void)
 {
-	const std::string name = STRING(TRenderProcess);
-	Game::Log << LOG_INFO << "Attempting to change render process to \"" << name << "\"\n";
+	const std::string name = RenderProcess::Name<TRenderProcess>();
+	Game::Log << LOG_INFO << "Attempting to enable render process \"" << name << "\"\n";
 
 	// Check whether we already have this process available; if so, reactivate it
 	auto it = m_render_processes.find(name);

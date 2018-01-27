@@ -14,7 +14,12 @@ RenderTargetDX11::RenderTargetDX11(void)
 	, m_compiled_dsv(NULL)
 	, m_isdirty(false)
 {
-	for (int i = 0; i < Rendering::MaxRenderTargets; ++i)
+	for (size_t i = 0; i < static_cast<size_t>(AttachmentPoint::NumAttachmentPoints); ++i)
+	{
+		m_textures[i] = NULL;
+	}
+
+	for (size_t i = 0; i < Rendering::MaxRenderTargets; ++i)
 	{
 		m_compiled_rtvs[i] = NULL;
 		m_compiled_uavs[i] = NULL;

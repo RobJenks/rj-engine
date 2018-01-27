@@ -4,7 +4,7 @@
 
 
 // Static null buffer resource, used for more efficient unbinding
-ID3D11Buffer * const ConstantBufferDX11::m_null_buffer[1] = { nullptr };
+//ID3D11Buffer * const ConstantBufferDX11::null_buffer[1] = { nullptr };
 
 
 // Constructor; create a new constant buffer of the given size
@@ -64,22 +64,22 @@ void ConstantBufferDX11::Unbind(Shader::Type shadertype, Shader::SlotID slot_id)
 	switch (shadertype)
 	{
 		case Shader::Type::VertexShader:
-			Game::Engine->GetDeviceContext()->VSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->VSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 		case Shader::Type::PixelShader:
-			Game::Engine->GetDeviceContext()->PSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->PSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 		case Shader::Type::HullShader:
-			Game::Engine->GetDeviceContext()->HSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->HSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 		case Shader::Type::DomainShader:
-			Game::Engine->GetDeviceContext()->DSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->DSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 		case Shader::Type::GeometryShader:
-			Game::Engine->GetDeviceContext()->GSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->GSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 		case Shader::Type::ComputeShader:
-			Game::Engine->GetDeviceContext()->CSSetConstantBuffers(slot_id, 1, m_null_buffer);
+			Game::Engine->GetDeviceContext()->CSSetConstantBuffers(slot_id, 1, null_buffer);
 			break;
 	}
 }

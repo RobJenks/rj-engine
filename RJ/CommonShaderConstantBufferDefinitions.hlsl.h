@@ -13,6 +13,7 @@ cbuffer FrameDataBuffer REGISTER(b0) ALIGNED16(FrameDataBuffer)
 	float4x4 Projection;
 	float4x4 InvProjection;
 	float2 ScreenDimensions;
+	float2 padding;
 };
 
 // Holds material data for the current render pass.  Currently accepts only one material.  Could

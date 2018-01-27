@@ -5,6 +5,7 @@
 #include "GlobalFlags.h"
 #include "Logging.h"
 #include "RJMain.h"
+#include "DeferredRenderProcess.h"
 #include "Profiler.h"
 #include "FrameProfiler.h"
 #include "Timers.h"
@@ -236,6 +237,8 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Environment rendering initialised\n";
 
+	// Activate the default render process
+	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>();
 
 	// If we succeed in all initialisation functions then return success now
 	Game::Log << LOG_INFO << "All game engine initialisation completed successfully\n\n";
@@ -437,7 +440,6 @@ Result CoreEngine::InitialiseLightingManager(void)
 		return ErrorCodes::CannotInitialiseLightingManager;
 	}
 
-	Game::Log << LOG_INFO << "Lightingg manager initialised";
 	return ErrorCodes::NoError;
 }
 

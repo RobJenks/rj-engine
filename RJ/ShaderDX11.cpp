@@ -304,7 +304,7 @@ ShaderDX11::ShaderParameterSet::size_type ShaderDX11::GetParameterIndexByName(co
 	}
 	else
 	{
-		Game::Log << LOG_WARN << "Attempted to retrieve shader parameter \"" << name << "\" from \"" << m_entrypoint << "\"; does not exist";
+		Game::Log << LOG_WARN << "Attempted to retrieve shader parameter \"" << name << "\" from \"" << m_entrypoint << "\"; does not exist\n";
 		return INVALID_SHADER_PARAMETER;
 	}
 }
