@@ -68,6 +68,9 @@ private:
 	void ReleaseSentence(SentenceType**);
 	Result RJ_XM_CALLCONV RenderSentence(SentenceType*, const FXMMATRIX, const CXMMATRIX);
 
+	// Static map of standard fonts that will have space & index preallocated within the font collection
+	static const std::vector<std::pair<std::string, int*>> m_standard_font_indices;
+
 private:
 	std::vector<FontData*> m_fonts;
 	std::vector<SentenceType*> m_sentences;

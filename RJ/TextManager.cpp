@@ -8,6 +8,12 @@
 #include "TextManager.h"
 
 
+// Initialise static map of standard fonts that will have space & index preallocated within the font collection
+const std::vector<std::pair<std::string, int*>> TextManager::m_standard_font_indices = {
+	{ "font_basic1", &Game::Fonts::FONT_BASIC1 }
+};
+
+
 Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int screenHeight, const FXMMATRIX baseViewMatrix, FontShader *fontshader)
 {
 	// Store the screen width and height.
@@ -20,6 +26,13 @@ Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int sc
 	// Store a pointer to the font shader that this text manager will use for rendering
 	m_fontshader = fontshader;
 
+	// Preallocate space and indices for all standard fonts
+	for (auto & font_index : m_standard_font_indices)
+	{
+		m_fonts.push_back(new FontData());
+		*(font_index.second) = (int)m_fonts.size() - 1;
+	}
+
 	// Return success if all initialisation has been completed
 	return ErrorCodes::NoError;
 }
@@ -27,12 +40,6 @@ Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int sc
 Result TextManager::InitializeFont(const std::string & code, const std::string & fontdata, const std::string & fonttexture)
 {
 	Result result;
-
-	// Static map; some fonts indices are currently maintained directly for runtime efficiency
-	static const std::vector<std::pair<std::string, int*>> font_indices = {
-		{ "font_basic1", &Game::Fonts::FONT_BASIC1 }
-	};
-
 
 	// Create the font object.
 	FontData *font = new FontData;
@@ -42,25 +49,34 @@ Result TextManager::InitializeFont(const std::string & code, const std::string &
 	result = font->Initialize(code.c_str(), fontdata.c_str(), fonttexture.c_str());
 	if(result != ErrorCodes::NoError)
 	{
+		SafeDelete(font);
 		Game::Log << LOG_WARN << "Failed to initialise font \"" << code << "\"\n";
 		return result;
 	}
 
-	// Add to the font collection.  Also store the direct index to this font if required
-	Game::Log << LOG_INFO << "Initialised font \"" << code << "\"\n";
-	m_fonts.push_back(font);
-
-	for (auto & font_index : font_indices)
+	// Get the index for this font; either the next unused value, or a specific index if this is recognised as a 'standard' font
+	int index = -1;
+	for (auto & font_index : m_standard_font_indices)
 	{
 		if (font_index.first == code)
 		{
-			int index = (int)m_fonts.size() - 1;
-			*(font_index.second) = index; 
-			Game::Log << LOG_INFO << "Added font \"" << code << "\" index mapping " << index << "\n";
+			index = *(font_index.second);
 			break;
 		}
 	}
-	
+
+	if (index == -1)
+	{
+		m_fonts.push_back(font);
+		Game::Log << LOG_INFO << "Initialised font \"" << code << "\" (" << m_fonts.size()-1 << ")\n";
+	}
+	else
+	{
+		if (m_fonts[index]) SafeDelete(m_fonts[index]);
+		m_fonts[index] = font;
+		Game::Log << LOG_INFO << "Initialised font \"" << code << "\"; mapped to standard index " << index << "\n";
+	}
+
 	// Return success
 	return ErrorCodes::NoError;	
 }

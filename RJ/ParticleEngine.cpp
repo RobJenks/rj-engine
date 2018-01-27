@@ -20,7 +20,7 @@ Result ParticleEngine::Initialise(void)
 Result ParticleEngine::LinkParticleShader(ParticleShader *pshader)
 {
 	// Make sure we have valid references
-	if (!pshader) return ErrorCodes::CannotLinkAllRequiredShadersToParticleEngine;
+	if (!pshader) Game::Log << LOG_WARN << "Cannot link particle shader to particle engine\n";
 
 	// Store reference to the particle shader that we will use for rendering
 	m_pshader = pshader;

@@ -499,10 +499,7 @@ Result CoreEngine::InitialiseParticleEngine(void)
 
 	// Create the particle engine object
 	m_particleengine = new ParticleEngine();
-	if (!m_particleengine)
-	{
-		return ErrorCodes::CouldNotCreateParticleEngine;
-	}
+	if (!m_particleengine) return ErrorCodes::CouldNotCreateParticleEngine;
 
 	// Attempt to initialise the particle engine
 	result = m_particleengine->Initialise();
