@@ -1,7 +1,7 @@
 <GameData>
 
   <!-- Ship-specific textures -->
-  <Texture code="testship1_texture" dimension="Texture2D" filename="testship1_texture.dds" />
+  <Texture code="testship1_texture" dimension="Texture2D" filename="Ships\Simple\Testing\testship1\testship1_texture.dds" />
 
   <!-- Ship material -->
   <Material code="testship1_material">
@@ -11,7 +11,7 @@
   <!-- Ship model -->
   <Model>
     <Code>testship1_model</Code>
-    <Filename>Ships\Ships\Simple\Testing\testship1.rjm</Filename>
+    <Filename>Ships\Simple\Testing\testship1\testship1.rjm</Filename>
     <Material>testship1_material</Material>
   </Model>
 

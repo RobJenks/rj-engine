@@ -3386,6 +3386,36 @@ Result IO::Data::LoadParticleEmitter(TiXmlElement *node)
 	}
 }
 
+Result IO::Data::LoadFont(TiXmlElement *node)
+{
+	if (!node) return ErrorCodes::CannotLoadNullFontData;
+
+	// Look at each child node in turn
+	std::string key, code, datafilename, texturename; HashVal hash;
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// Hash the value for more efficient lookups
+		key = child->Value(); StrLowerC(key);
+		hash = HashString(key);
+
+		// Test for each required field
+		if (hash == HashedStrings::H_Code)
+		{
+			code = child->GetText();
+			StrLowerC(code);
+		}
+		else if (hash == HashedStrings::H_Data)		datafilename = child->GetText();
+		else if (hash == HashedStrings::H_Texture)	texturename = child->GetText();
+	}
+
+	// Make sure we have all mandatory parameters
+	if (code.empty() || datafilename.empty() || texturename.empty()) return ErrorCodes::CannotLoadFontWithMissingData;
+
+	// Attempt to initialise the new font and return the result
+	Result result = Game::Engine->GetTextManager()->InitializeFont(code, datafilename, texturename);
+	return result;
+}
 
 Result IO::Data::LoadUILayout(TiXmlElement *node)
 {

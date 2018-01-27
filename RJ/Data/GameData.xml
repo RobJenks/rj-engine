@@ -41,6 +41,9 @@
   <include file="Effects.xml" />
   <include file="ParticleEmitters.xml" />
 
+  <!-- Load fonts -->
+  <include file="Fonts\Fonts.xml" />
+
   <!-- Load ship data -->
   <include file="Ships\Ships.xml" />
 

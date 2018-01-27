@@ -446,6 +446,9 @@ namespace ErrorCodes {
 	const Result		CannotLoadTextureWithMissingData				= 2698;
 	const Result		CannotInstantiateTexture						= 2699;
 	const Result		CannotLoadTextureResources						= 2700;
+	const Result		CannotLoadNullFontData							= 2701;
+	const Result		CannotLoadFontWithMissingData					= 2702;
+
 
 	// Data output errors												(2800-2899)
 	const Result		CannotSaveSimpleShipWithNullReferences			= 2801;

@@ -36,7 +36,7 @@ public:
 	Result RJ_XM_CALLCONV Initialize(HWND, int, int, const FXMMATRIX, FontShader*);
 
 	// Initialises a new font data object.  ID of the new font is returned through fontID, if successfull (return value == 0)
-	Result InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID);
+	Result InitializeFont(const std::string & code, const std::string & fontdata, const std::string & fonttexture);
 
 	// Creates a new sentence object, allocating memory and building a vertex buffer
 	SentenceType *CreateSentence(int fontID, int maxlength);

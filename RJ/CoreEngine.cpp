@@ -206,11 +206,6 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Text rendering initialised\n";
 
-	// Initialise all game fonts
-	res = InitialiseFonts();
-	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
-	Game::Log << LOG_INFO << "Font initialisation complete\n";
-
 	// Initialise the effect manager
 	res = InitialiseEffectManager();
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
@@ -255,7 +250,6 @@ void CoreEngine::ShutdownGameEngine()
 	ShutdownFrustrum();
 	ShutdownAudioManager();
 	ShutdownTextRendering();
-	ShutdownFonts();
 	ShutdownEffectManager();
 	ShutdownParticleEngine();
 	Shutdown2DRenderManager();
@@ -470,25 +464,6 @@ Result CoreEngine::InitialiseTextRendering(void)
 
 }
 
-Result CoreEngine::InitialiseFonts(void)
-{
-	Result result;
-
-	// Make sure the text manager has been successfully initialised first
-	if (!m_textmanager) return ErrorCodes::CannotInitialiseFontsWithoutTextManager;
-
-	// Initialise each font in turn from its data file and composite texture
-	// TODO: To be loaded from external file?  How to set Game::Fonts::* IDs?
-	result = m_textmanager->InitializeFont(	"Font_Basic1", 
-											concat(D::DATA)("/Fonts/font_basic1.txt").str().c_str(), 
-											"font_basic1.dds", 
-											Game::Fonts::FONT_BASIC1);
-	if (result != ErrorCodes::NoError) return result;
-
-	// Return success when all fonts are loaded
-	return ErrorCodes::NoError;
-}
-
 Result CoreEngine::InitialiseEffectManager(void)
 {
 	Result result;
@@ -674,11 +649,6 @@ void CoreEngine::ShutdownTextRendering(void)
 		m_textmanager->Shutdown();
 		SafeDelete(m_textmanager);
 	}
-}
-
-void CoreEngine::ShutdownFonts(void)
-{
-	// No actions to be taken; fonts are deallocated as part of the text manager shutdown
 }
 
 void CoreEngine::ShutdownEffectManager(void)

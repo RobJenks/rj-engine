@@ -1,4 +1,5 @@
 #include "DX11_Core.h"
+#include "Fonts.h"
 #include "FontData.h"
 #include "FontShader.h"
 #include "SentenceType.h"
@@ -23,27 +24,42 @@ Result RJ_XM_CALLCONV TextManager::Initialize(HWND hwnd, int screenWidth, int sc
 	return ErrorCodes::NoError;
 }
 
-Result TextManager::InitializeFont(std::string name, const char *fontdata, const char *fonttexture, int &fontID)
+Result TextManager::InitializeFont(const std::string & code, const std::string & fontdata, const std::string & fonttexture)
 {
 	Result result;
 
+	// Static map; some fonts indices are currently maintained directly for runtime efficiency
+	static const std::vector<std::pair<std::string, int*>> font_indices = {
+		{ "font_basic1", &Game::Fonts::FONT_BASIC1 }
+	};
+
+
 	// Create the font object.
 	FontData *font = new FontData;
-	if(!font)
-	{
-		return ErrorCodes::CannotCreateFontObject;
-	}
+	if (!font) return ErrorCodes::CannotCreateFontObject;
 
 	// Initialize the font object.
-	result = font->Initialize(name, fontdata, fonttexture);
+	result = font->Initialize(code.c_str(), fontdata.c_str(), fonttexture.c_str());
 	if(result != ErrorCodes::NoError)
 	{
+		Game::Log << LOG_WARN << "Failed to initialise font \"" << code << "\"\n";
 		return result;
 	}
 
-	// If all completed successfully then add to the collection and pass the ID of this font back to the calling function
+	// Add to the font collection.  Also store the direct index to this font if required
+	Game::Log << LOG_INFO << "Initialised font \"" << code << "\"\n";
 	m_fonts.push_back(font);
-	fontID = ((int)m_fonts.size()-1);
+
+	for (auto & font_index : font_indices)
+	{
+		if (font_index.first == code)
+		{
+			int index = (int)m_fonts.size() - 1;
+			*(font_index.second) = index; 
+			Game::Log << LOG_INFO << "Added font \"" << code << "\" index mapping " << index << "\n";
+			break;
+		}
+	}
 	
 	// Return success
 	return ErrorCodes::NoError;	

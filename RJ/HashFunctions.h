@@ -329,7 +329,7 @@ namespace HashedStrings
 	DefineHash(H_OpacityTexture, "opacitytexture");
 	DefineHash(H_BumpIntensity, "bumpintensity");
 	DefineHash(H_AlphaThreshold, "alphathreshold");
-
+	DefineHash(H_Data, "data");
 
 }
 

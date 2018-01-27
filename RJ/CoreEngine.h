@@ -455,7 +455,6 @@ private:
 	Result					InitialiseAudioManager(void);
 	Result					InitialiseLightingManager(void);
 	Result					InitialiseTextRendering(void);
-	Result					InitialiseFonts(void);
 	Result					InitialiseEffectManager(void);
 	Result					InitialiseParticleEngine(void);
 	Result					Initialise2DRenderManager(void);
@@ -473,7 +472,6 @@ private:
 	void					ShutdownAudioManager(void);
 	void					ShutdownLightingManager(void);
 	void					ShutdownTextRendering(void);
-	void					ShutdownFonts(void);
 	void					ShutdownEffectManager(void);
 	void					ShutdownParticleEngine(void);
 	void					Shutdown2DRenderManager(void);
