@@ -1634,7 +1634,7 @@ void UI_ShipDesigner::RefreshSDShipSectionInstances(void)
 		// Create a new section mapping, link it up and add it; if we couldn't create an image instance the R.I. will simply be set to NULL
 		UI_ShipDesigner::SDShipSection map;
 		map.Section = sec;
-		map.RenderInstance = rg->GetInstanceReferenceByCode(key);
+		map.RenderInstance = (rg ? rg->GetInstanceReferenceByCode(key) : Image2DRenderGroup::InstanceReference());
 		m_sdshipsections.push_back(map);
 	}
 }

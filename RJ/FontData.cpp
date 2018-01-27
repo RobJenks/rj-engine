@@ -19,6 +19,7 @@ Result FontData::Initialize(const std::string & name, const char *fontFilename, 
 	result = LoadFontData(fontFilename);
 	if (result != ErrorCodes::NoError)
 	{
+		Game::Log << LOG_WARN << "Could not load descriptor data for font \"" << name << "\" (" << fontFilename << ")\n";
 		return result;
 	}
 
@@ -111,6 +112,9 @@ void FontData::BuildVertexArray(void* vertices, const char *sentence, float draw
 	int numLetters, index, i, letter;
 	float spacingpixels, letterwidth, letterheight;
 	FontType fontitem;
+
+	// Take no action if we have not yet initailised the required font data
+	if (!m_Font) return;
 
 	// Store the starting point of this sentence, for use in calculating sentence width later
 	float startX = drawX;

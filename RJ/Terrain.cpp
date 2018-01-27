@@ -166,6 +166,10 @@ void Terrain::RecalculatePositionalData(void)
 		instance.SetSize(XMVectorScale(GetExtentV(), 2.0f));
 		base_model_world = instance.GetWorldMatrix();
 	}
+	else
+	{
+		base_model_world = ID_MATRIX;
+	}
 
 	// World = (base_model_world * rotation * translate_to_position)
 	m_worldmatrix = XMMatrixMultiply(XMMatrixMultiply(

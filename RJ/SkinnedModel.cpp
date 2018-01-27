@@ -28,12 +28,20 @@ SkinnedModel::SkinnedModel(Rendering::RenderDeviceType * device, const std::stri
 		// TODO: Should replace this part in future, and avoid loading textures here
 
 		TextureDX11 *diffuse = Game::Engine->GetAssets().CreateTexture(mats[i].DiffuseMapName);
-		diffuse->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str()));
-		DiffuseMapSRV.push_back(diffuse->GetShaderResourceView());
+		if (diffuse)
+		{
+			diffuse->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].DiffuseMapName).str()));
+			DiffuseMapSRV.push_back(diffuse->GetShaderResourceView());
+		}
+		else Game::Log << LOG_WARN << "Cannot initialise skinned model diffuse map \"" << mats[i].DiffuseMapName << "\"\n";
 
 		TextureDX11 *normal = Game::Engine->GetAssets().CreateTexture(mats[i].NormalMapName);
-		normal->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str()));
-		NormalMapSRV.push_back(normal->GetShaderResourceView());
+		if (normal)
+		{
+			normal->LoadTexture2D(ConvertStringToWString(concat(D::IMAGE_DATA)("\\")(texturePath)("\\")(mats[i].NormalMapName).str()));
+			NormalMapSRV.push_back(normal->GetShaderResourceView());
+		}
+		else Game::Log << LOG_WARN << "Cannot initialise skinned model normal map \"" << mats[i].NormalMapName << "\"\n";
 	}
 
 	// Set default values

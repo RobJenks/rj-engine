@@ -46,7 +46,7 @@ Result TextManager::InitializeFont(const std::string & code, const std::string &
 	if (!font) return ErrorCodes::CannotCreateFontObject;
 
 	// Initialize the font object.
-	result = font->Initialize(code.c_str(), fontdata.c_str(), fonttexture.c_str());
+	result = font->Initialize(code, fontdata.c_str(), fonttexture);
 	if(result != ErrorCodes::NoError)
 	{
 		SafeDelete(font);
