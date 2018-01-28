@@ -56,20 +56,25 @@ void ShaderParameterDX11::Set(SamplerStateDX11 *sampler)
 // Bind the parameter to a given slot in the specified shader type
 void ShaderParameterDX11::Bind(void)
 {
-	switch (m_type)
+	if (m_cbuffer)
 	{
-		case Type::ConstantBuffer:
-			m_cbuffer->Bind(m_shadertype, m_slotid);											
-			break;
-		case Type::StructuredBuffer:
-			m_sbuffer->Bind(m_shadertype, m_slotid, ShaderParameter::Type::StructuredBuffer);	
-			break;
-		case Type::Texture:
-			m_texture->Bind(m_shadertype, m_slotid, ShaderParameter::Type::Texture);			
-			break;
-		case Type::Sampler:
-			m_sampler->Bind(m_shadertype, m_slotid);											
-			break;
+		assert(m_type == Type::ConstantBuffer);
+		m_cbuffer->Bind(m_shadertype, m_slotid);
+	}
+	else if (m_sbuffer)
+	{
+		assert(m_type == Type::StructuredBuffer);
+		m_sbuffer->Bind(m_shadertype, m_slotid, ShaderParameter::Type::StructuredBuffer);
+	}
+	else if (m_texture)
+	{
+		assert(m_type == Type::Texture);
+		m_texture->Bind(m_shadertype, m_slotid, ShaderParameter::Type::Texture);
+	}
+	else if (m_sampler)
+	{
+		assert(m_type == Type::Sampler);
+		m_sampler->Bind(m_shadertype, m_slotid);
 	}
 }
 
