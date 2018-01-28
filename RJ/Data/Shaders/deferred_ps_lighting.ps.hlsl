@@ -17,5 +17,5 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_TARGET
 	float4x4 tmp = View * Projection;			// Temporary: to force the inclusion of FrameDataBuffer into the compiled shader
 	float4 tmp2 = Mat.GlobalAmbient * 0.5f;		// Temporary: to force the inclusion of MaterialBuffer into the compiled shader
 
-	return float4(0,0,0,0);
+	return mul(tmp, tmp2);
 }
