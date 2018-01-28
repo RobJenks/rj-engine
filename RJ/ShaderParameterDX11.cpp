@@ -7,9 +7,10 @@
 
 
 // Constructor to create a new parameter with the given details
-ShaderParameterDX11::ShaderParameterDX11(Type type, Shader::Type shader_target_type, Shader::SlotID shader_target_slotid)
+ShaderParameterDX11::ShaderParameterDX11(Type type, const std::string & name, Shader::Type shader_target_type, Shader::SlotID shader_target_slotid)
 	: 
 	m_type(type), 
+	m_name(name), 
 	m_shadertype(shader_target_type), 
 	m_slotid(shader_target_slotid), 
 	m_cbuffer(NULL), 

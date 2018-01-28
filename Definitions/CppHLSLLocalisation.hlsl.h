@@ -3,14 +3,19 @@
 
 
 // Enable localisation to both C++ & HLSL
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 
 #	include <windows.h>
 #	include <DirectXMath.h>
 #	include "../RJ/ALIGN16.h"
-#	define cbuffer struct
+#	include "../RJ/DefaultingFloat4.h"
+
+#	define CBUFFER struct
 #	define REGISTER(x) 
 #	define ALIGNED16(T) : public ALIGN16<T>
+
+#	define RJ_ROW_MAJOR_MATRIX DirectX::XMFLOAT4X4
+#	define RJ_SEMANTIC(sem) 
 
 	typedef DirectX::XMFLOAT2 float2;
 	typedef DirectX::XMFLOAT3 float3;
@@ -19,14 +24,23 @@
 	typedef DirectX::XMFLOAT4X4 float4x4;
 	typedef uint32_t _uint32;
 	typedef BOOL _bool;							// We must use BOOL/int for bool values when crossing CPU/GPU border since sizeof(bool) in HLSL == 1, sizeof(bool) in C++ == 4
+	using RM_SortKey = _uint32;
+	typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::USE_DEFAULT> Float4DefaultZeroW;
 
 #else
 
+#	define CBUFFER cbuffer
 #	define REGISTER(x) : register(x)
 #	define ALIGNED16(T)
 
+#	define RJ_ROW_MAJOR_MATRIX row_major float4x4
+#	define RJ_SEMANTIC(sem) : sem
+
 	typedef uint _uint32;
-	typedef int _bool;
+	typedef int _bool;							// We must use BOOL/int for bool values when crossing CPU/GPU border since sizeof(bool) in HLSL == 1, sizeof(bool) in C++ == 4
+	typedef float4 Float4DefaultZeroW;
+	typedef _uint32 RM_SortKey;					// HLSL uint == uint32_t
+
 
 #endif
 

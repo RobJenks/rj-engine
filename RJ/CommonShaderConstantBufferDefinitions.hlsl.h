@@ -7,7 +7,7 @@
 #define BUFFER_NAME(buffer) #buffer
 
 // Holds standard per-frame data such as view/projection transforms
-cbuffer FrameDataBuffer REGISTER(b0) ALIGNED16(FrameDataBuffer)
+CBUFFER FrameDataBuffer REGISTER(b0) //ALIGNED16(FrameDataBuffer)
 {
 	float4x4 View;
 	float4x4 Projection;
@@ -21,7 +21,7 @@ cbuffer FrameDataBuffer REGISTER(b0) ALIGNED16(FrameDataBuffer)
 // both buffer and vertex structure, plus would require changing ModelBuffer impl.  Perhaps better
 // to continue rendering all of a single material before moving to the next, even if a model 
 // has >1 material
-cbuffer MaterialBuffer REGISTER(b2) ALIGNED16(MaterialBuffer)
+CBUFFER MaterialBuffer REGISTER(b2) //ALIGNED16(MaterialBuffer)
 {
 	MaterialData Mat;
 };

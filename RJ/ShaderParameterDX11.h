@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include "CompilerSettings.h"
 #include "ShaderParameter.h"
 #include "Shader.h"
@@ -14,10 +15,11 @@ class ShaderParameterDX11 : ShaderParameter
 public:
 
 	// Constructor to create a new parameter with the given details
-	ShaderParameterDX11(Type type, Shader::Type shader_target_type, Shader::SlotID shader_target_slotid);
+	ShaderParameterDX11(Type type,  const std::string & name, Shader::Type shader_target_type, Shader::SlotID shader_target_slotid);
 
 	// Return basic details on the shader parameter
 	CMPINLINE ShaderParameter::Type		GetType(void) const { return m_type; }
+	CMPINLINE std::string				GetName(void) const { return m_name; }
 	CMPINLINE Shader::Type				GetShaderType(void) const { return m_shadertype; }
 	CMPINLINE Shader::SlotID			GetSlotID(void) const { return m_slotid; }
 
@@ -37,6 +39,7 @@ public:
 private:
 
 	ShaderParameter::Type				m_type;
+	std::string							m_name;
 	Shader::Type						m_shadertype;
 	Shader::SlotID						m_slotid;
 

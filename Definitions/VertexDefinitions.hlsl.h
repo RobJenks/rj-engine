@@ -4,30 +4,6 @@
 #include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
-// Enable common usage across C++ and HLSL by making preprocessor adjustments
-#if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
-	#include <DirectXMath.h>
-	#include "../RJ/DefaultingFloat4.h"
-
-	using RM_SortKey = _uint32;
-	typedef DefaultingFloat4<DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::NO_DEFAULT, DefaultComponent::USE_DEFAULT> Float4DefaultZeroW;
-
-#	define RJ_ROW_MAJOR_MATRIX DirectX::XMFLOAT4X4
-#	define RJ_SEMANTIC(sem) 
-
-#else
-
-typedef float4 Float4DefaultZeroW;
-typedef _uint32 RM_SortKey;				// HLSL uint == uint32_t
-
-#	define RJ_ROW_MAJOR_MATRIX row_major float4x4
-#	define RJ_SEMANTIC(sem) : sem
-
-#endif
-
-
-
-
 // 
 // Components of standard vertex definition
 // 

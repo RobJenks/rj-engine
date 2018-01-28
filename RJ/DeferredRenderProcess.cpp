@@ -27,7 +27,6 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_pipeline_transparency(NULL), 
 
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_geom_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_geom_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER)
@@ -46,7 +45,7 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering shaders\n";
 
 	// Get a reference to all required shaders
-	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardPixelShader);
+	m_vs = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::StandardVertexShader);
 	if (m_vs == NULL) Game::Log << LOG_ERROR << "Cannot load deferred rendering shader resources [vs]\n";
 
 	m_ps_geometry = Game::Engine->GetRenderDevice()->Assets.GetShader(Shaders::DeferredGeometryPixelShader);
@@ -57,11 +56,9 @@ void DeferredRenderProcess::InitialiseShaders(void)
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
-	m_param_ps_geom_framedata = AttemptRetrievalOfShaderParameter(m_ps_geometry, FrameDataBufferName);
 	m_param_ps_geom_materialdata = AttemptRetrievalOfShaderParameter(m_ps_geometry, MaterialBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_materialdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, MaterialBufferName);
-
 }
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
@@ -239,7 +236,7 @@ void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 void DeferredRenderProcess::RenderGeometry(void)
 {
 	// Bind required buffer resources to shader parameters
-	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_ps_geom_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 
 	// Bind the entire geometry rendering pipeline, including all shaders, render targets & states
 	m_pipeline_geometry->Bind();

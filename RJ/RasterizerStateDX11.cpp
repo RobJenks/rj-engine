@@ -3,7 +3,8 @@
 #include "RasterizerStateDX11.h"
 
 RasterizerStateDX11::RasterizerStateDX11(void)
-	: m_FrontFaceFillMode(FillMode::Solid)
+	: m_rasterstate(NULL)
+	, m_FrontFaceFillMode(FillMode::Solid)
 	, m_BackFaceFillMode(FillMode::Solid)
 	, m_CullMode(CullMode::Back)
 	, m_FrontFace(FrontFace::Clockwise)
@@ -23,7 +24,8 @@ RasterizerStateDX11::RasterizerStateDX11(void)
 }
 
 RasterizerStateDX11::RasterizerStateDX11(const RasterizerStateDX11& copy)
-	: m_d3d_rects(copy.m_d3d_rects)
+	: m_rasterstate(NULL)
+	, m_d3d_rects(copy.m_d3d_rects)
 	, m_d3d_viewports(copy.m_d3d_viewports)
 	, m_FrontFaceFillMode(copy.m_FrontFaceFillMode)
 	, m_BackFaceFillMode(copy.m_BackFaceFillMode)
@@ -47,7 +49,7 @@ RasterizerStateDX11::RasterizerStateDX11(const RasterizerStateDX11& copy)
 
 RasterizerStateDX11::~RasterizerStateDX11()
 {
-
+	ReleaseIfExists(m_rasterstate);
 }
 
 const RasterizerStateDX11& RasterizerStateDX11::operator=(const RasterizerStateDX11& other)

@@ -21,6 +21,7 @@ RenderTargetDX11::RenderTargetDX11(void)
 
 	for (size_t i = 0; i < Rendering::MaxRenderTargets; ++i)
 	{
+		m_structured_buffers[i] = NULL;
 		m_compiled_rtvs[i] = NULL;
 		m_compiled_uavs[i] = NULL;
 	}

@@ -6,7 +6,8 @@ public:
 
 	enum class Type
 	{
-		ConstantBuffer = 0,			// Standard constant buffer
+		Unknown = 0, 
+		ConstantBuffer,				// Standard constant buffer
 		StructuredBuffer,			// Structured buffer
 		Texture,					// Standard texture resource
 		Sampler,					// Texture sampler

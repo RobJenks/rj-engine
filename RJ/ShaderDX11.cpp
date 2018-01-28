@@ -200,13 +200,17 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 			Game::Log << LOG_ERROR << "Compilation of shader \"" << entryPoint << "\" failed (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
 			if (errorBlob)
 			{
-				Game::Log << LOG_ERROR << "Error buffer ptr: " << (static_cast<char*>(errorBlob->GetBufferPointer())) << "\n";
+				Game::Log << LOG_ERROR << "Error buffer: " << (static_cast<char*>(errorBlob->GetBufferPointer())) << "\n";
 			}
 			else
 			{
 				Game::Log << LOG_ERROR << "No further error details available; no error buffer generated\n";
 			}
 			return false;
+		}
+		else
+		{
+			Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" compiled successfully\n";
 		}
 
 		m_shaderblob = shaderBlob;
@@ -247,6 +251,65 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 		Game::Log << LOG_ERROR << "Failed to create shader \"" << entryPoint << "\" from compiled source (hr=" << hr << ", file=" << ConvertWStringToString(sourceFileName) << ")\n";
 		return false;
 	}
+
+	// Use D3D reflection to retrieve parameter details from the shader
+	ID3D11ShaderReflection *reflect;
+	hr = D3DReflect(m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), IID_ID3D11ShaderReflection, (void**)&reflect);
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Failed to reflect shader parameters for \"" << entryPoint << "\" (hr=" << hr << ")\n";
+		return false;
+	}
+
+	D3D11_SHADER_DESC shaderdesc;
+	hr = reflect->GetDesc(&shaderdesc);
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Failed to retrieve shader descriptor for \"" << entryPoint << "\" (hr=" << hr << ")\n";
+		return false;
+	}
+
+	/// Can potentially reflect the input layout here via shaderdesc->InputParameters(), though not clear whether instancing is fully-supported
+
+	// Query resource binding sites using the descriptor
+	Game::Log << LOG_INFO << "Registering " << shaderdesc.BoundResources << " resource binding sites from \"" << entryPoint << "\" shader descriptor\n";
+	for (UINT i = 0; i < shaderdesc.BoundResources; ++i)
+	{
+		D3D11_SHADER_INPUT_BIND_DESC bindDesc;
+		reflect->GetResourceBindingDesc(i, &bindDesc);
+		std::string resourceName = bindDesc.Name;
+
+		ShaderParameter::Type parameterType = ShaderParameter::Type::Unknown;
+
+		switch (bindDesc.Type)
+		{
+		case D3D_SIT_TEXTURE:
+			parameterType = ShaderParameter::Type::Texture;
+			break;
+		case D3D_SIT_SAMPLER:
+			parameterType = ShaderParameter::Type::Sampler;
+			break;
+		case D3D_SIT_CBUFFER:
+			parameterType = ShaderParameter::Type::ConstantBuffer;
+			break;
+		case D3D_SIT_STRUCTURED:
+			parameterType = ShaderParameter::Type::StructuredBuffer;
+			break;
+		case D3D_SIT_UAV_RWSTRUCTURED:
+			parameterType = ShaderParameter::Type::RWBuffer;
+			break;
+		case D3D_SIT_UAV_RWTYPED:
+			parameterType = ShaderParameter::Type::RWTexture;
+			break;
+		default:
+			Game::Log << LOG_WARN << "Encountered unknown shader parameter type of " << (int)parameterType << " for \"" << entryPoint << "::" << resourceName << "\" (ix: " << i << ")\n";
+		}
+
+		// Record both the parameter and a mapping from (parameter name -> index in m_parameters)
+		m_parameters.push_back(ShaderParameterDX11(parameterType, resourceName, shadertype, bindDesc.BindPoint));
+		m_parameter_mapping[resourceName] = i;
+	}
+
 
 	// Compile the shader input layout, if applicable
 	if (input_layout)

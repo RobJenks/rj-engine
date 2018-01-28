@@ -12,7 +12,7 @@ class RenderTargetDX11 : public RenderTarget
 {
 public:
 
-	typedef std::array<TextureDX11*, static_cast<uint8_t>(AttachmentPoint::NumAttachmentPoints) + 1U>		TextureList;			// TODO: +1 is required?
+	typedef std::array<TextureDX11*, static_cast<uint8_t>(AttachmentPoint::NumAttachmentPoints)>			TextureList;
 	typedef std::array<StructuredBufferDX11*, Rendering::MaxRenderTargets>									StructuredBufferList;
 
 	RenderTargetDX11(void);

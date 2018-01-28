@@ -4,7 +4,8 @@
 
 
 BlendStateDX11::BlendStateDX11(void)
-	: m_alphaToCoverageEnabled(false)
+	: m_blendstate(NULL)
+	, m_alphaToCoverageEnabled(false)
 	, m_independentBlendEnabled(false)
 	, m_samplemask(0xffffffff)
 	, m_constblendfactor(1.0f, 1.0f, 1.0f, 1.0f)
@@ -13,7 +14,8 @@ BlendStateDX11::BlendStateDX11(void)
 }
 
 BlendStateDX11::BlendStateDX11(const BlendStateDX11& copy)
-	: m_blendmodes(copy.m_blendmodes)
+	: m_blendstate(NULL)
+	, m_blendmodes(copy.m_blendmodes)
 	, m_alphaToCoverageEnabled(copy.m_alphaToCoverageEnabled)
 	, m_independentBlendEnabled(copy.m_independentBlendEnabled)
 	, m_samplemask(copy.m_samplemask)
@@ -24,7 +26,7 @@ BlendStateDX11::BlendStateDX11(const BlendStateDX11& copy)
 
 BlendStateDX11::~BlendStateDX11()
 {
-
+	ReleaseIfExists(m_blendstate);
 }
 
 const BlendStateDX11& BlendStateDX11::operator=(const BlendStateDX11& other)

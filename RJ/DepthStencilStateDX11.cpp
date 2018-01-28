@@ -4,20 +4,21 @@
 #include "CoreEngine.h"
 
 DepthStencilStateDX11::DepthStencilStateDX11(void)
-	: 
-	m_isdirty(true)
+	: m_depthstencilstate(NULL)
+	, m_isdirty(true)
 {
 }
 
 DepthStencilStateDX11::DepthStencilStateDX11(const DepthStencilStateDX11& copy)
-	: m_depthmode(copy.m_depthmode)
+	: m_depthstencilstate(NULL)
+	, m_depthmode(copy.m_depthmode)
 	, m_stencilmode(copy.m_stencilmode)
 	, m_isdirty(true)
 {}
 
 DepthStencilStateDX11::~DepthStencilStateDX11()
 {
-
+	ReleaseIfExists(m_depthstencilstate);
 }
 
 const DepthStencilStateDX11& DepthStencilStateDX11::operator=(const DepthStencilStateDX11& other)
