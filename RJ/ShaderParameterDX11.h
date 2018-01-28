@@ -35,6 +35,8 @@ public:
 	// Unbind the (any) resource from this shader slot
 	void								Unbind(void);
 
+	// Validate the content of this shader parameter
+	bool								Validate(void);
 
 private:
 

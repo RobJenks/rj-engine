@@ -457,6 +457,64 @@ void ShaderDX11::Dispatch(const UINTVECTOR3 & numGroups)
 	}
 }
 
+// Validate the shader & resource bindings and report any errors
+bool ShaderDX11::ValidateShader(void)
+{
+	/* Verify shader type is valid */
+	bool valid_type = true;
+	if ((int)m_type < 0 || (int)m_type >= (int)Shader::Type::SHADER_TYPE_COUNT)
+	{
+		Game::Log << LOG_ERROR << "Shader \"" << m_entrypoint << "\" has invalid type: " << (int)m_type << "\n";
+		valid_type = false;
+	}
+
+	/* Verify shader binary is correctly compiled */
+	bool valid_binary = false;
+	switch (m_type)
+	{
+		case Type::ComputeShader:		valid_binary = !!m_cs;		break;
+		case Type::DomainShader:		valid_binary = !!m_ds;		break;
+		case Type::GeometryShader:		valid_binary = !!m_gs;		break;
+		case Type::HullShader:			valid_binary = !!m_hs;		break;
+		case Type::PixelShader:			valid_binary = !!m_ps;		break;
+		case Type::VertexShader:		valid_binary = !!m_vs;		break;
+	}
+
+	if (!valid_binary)
+	{
+		Game::Log << LOG_ERROR << "Shader \"" << m_entrypoint << "\" is of type \"" << Shader::ShaderTypeToString(m_type)
+			<< " shader\" but has no compiled " << Shader::ShaderTypeToString(m_type) << " shader resource\n";
+	}
+
+	/* Now validate all shader parameters */
+	unsigned int invalid_params = 0U;
+	size_t n = m_parameters.size();
+	for (size_t i = 0U; i < n; ++i)
+	{
+		// Have the parameter validate its own content.  Parameter will log any errors if they exist
+		auto & parameter = m_parameters[i];
+		bool valid = parameter.Validate();
+
+		// Also make sure we have a valid mapping for this parameter to the correct parameter index
+		auto mappedindex = GetParameterIndexByName(parameter.GetName());
+		bool indexvalid = (mappedindex == i);
+		if (!indexvalid)
+		{
+			Game::Log << LOG_ERROR << "Invalid parameter mapping index for \"" << m_entrypoint << "::" << parameter.GetName() << 
+				"\"; parameter has index " << i << " but is mapped to index " << mappedindex << "\n";
+		}
+
+		if (!valid || !indexvalid) ++invalid_params;
+	}
+
+	if (invalid_params != 0U)
+	{
+		Game::Log << LOG_ERROR << "Validation of shader \"" << m_entrypoint << "\" failed with " << invalid_params << " invalid parameters\n";
+	}
+
+	return ( valid_type && valid_binary && invalid_params == 0U );
+}
+
 
 // Determine DXGI format
 // Info from: http://takinginitiative.net/2011/12/11/directx-1011-basic-shader-reflection-automatic-input-layout-creation/

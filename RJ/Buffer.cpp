@@ -51,7 +51,7 @@ void Buffer::InitialiseBuffer(UINT bindflags, const void *data, UINT count, UINT
 	HRESULT result = Game::Engine->GetDevice()->CreateBuffer(&bufferDesc, &resourceData, ppOutBuffer);
 	if (FAILED(result))
 	{
-		Game::Log << "Failed to create D3D buffer (hr=" << result << ", bindflags=" << bindflags << ", count=" << count << ", stride=" << stride <<
+		Game::Log << LOG_ERROR << "Failed to create D3D buffer (hr=" << result << ", bindflags=" << bindflags << ", count=" << count << ", stride=" << stride <<
 			", data=" << (data ? "non-null" : "NULL") << ", ppB=" << (ppOutBuffer ? "non-null" : "NULL") << 
 			", *ppB=" << (ppOutBuffer ? (*ppOutBuffer ? "non-null" : "NULL") : "N/A") << ")\n";
 	}

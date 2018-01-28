@@ -15,6 +15,7 @@ public:
 		RWBuffer					// GPU-read-write structure buffer, i.e. allowing write operations within the shader
 	};
 
+	static std::string ParameterTypeToString(ShaderParameter::Type type);
 
 private:
 

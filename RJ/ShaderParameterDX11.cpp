@@ -1,4 +1,5 @@
 #include <cassert>
+#include "Logging.h"
 #include "ShaderParameterDX11.h"
 #include "ConstantBufferDX11.h"
 #include "StructuredBufferDX11.h"
@@ -91,4 +92,50 @@ void ShaderParameterDX11::Unbind(void)
 			break;
 	}
 }
+
+// Validate the content of this shader parameter
+bool ShaderParameterDX11::Validate(void)
+{
+	unsigned int errors = 0U;
+
+	std::vector<std::tuple<ShaderParameter::Type, void**>> parameters = {
+		std::make_tuple(ShaderParameter::Type::ConstantBuffer, (void**)&m_cbuffer), 
+		std::make_tuple(ShaderParameter::Type::StructuredBuffer, (void**)&m_sbuffer),
+		std::make_tuple(ShaderParameter::Type::Texture, (void**)&m_texture),
+		std::make_tuple(ShaderParameter::Type::Sampler, (void**)&m_sampler),
+	};
+
+	for (auto & entry : parameters)
+	{
+		if (*(std::get<1>(entry)))				// If the resource pointer is non-null
+		{
+			if (m_type != std::get<0>(entry))	// But the parameter is not of this type
+			{
+				++errors;
+				Game::Log << LOG_ERROR << "Shader parameter \"" << m_name << "\" has mapped " << ShaderParameter::ParameterTypeToString(std::get<0>(entry))
+					<< " resource but is of type " << ShaderParameter::ParameterTypeToString(m_type) << "\n";
+			}
+		}
+		/* Currently disabled, since no parameter types are guaranteed to be non-null on initialisation */
+		/*else									// If the resource pointer is null
+		{
+			if (m_type == std::get<0>(entry))	// But the parameter is of this type
+			{
+				++errors;
+				Game::Log << LOG_ERROR << "Shader parameter \"" << m_name << "\" is of type " << ShaderParameter::ParameterTypeToString(std::get<0>(entry))
+					<< " but has no mapped resource of this type\n";
+			}
+		}*/
+	}
+
+	if (errors != 0U)
+	{
+		Game::Log << LOG_ERROR << "Shader parameter validation for \"" << m_name << "\" failed with " << errors << " errors\n";
+		return false;
+	}
+
+	return true;
+}
+
+
 

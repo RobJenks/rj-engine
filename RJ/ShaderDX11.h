@@ -48,6 +48,9 @@ public:
 	void Bind(void);
 	void Unbind(void);
 
+	// Validate the shader resource bindings and report any errors
+	bool ValidateShader(void);
+
 private:
 
 	// Release any compiled shaders (during destruction or if we are loading a new shader)

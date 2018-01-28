@@ -873,6 +873,12 @@
     <ClCompile Include="..\Definitions\ModelData.cpp">
       <Filter>Imported Definitions</Filter>
     </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderParameter.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <string>
 #include <limits>
 
 class Shader
@@ -17,6 +18,8 @@ public:
 
 		SHADER_TYPE_COUNT
 	};
+
+	static std::string ShaderTypeToString(Shader::Type type);
 
 	typedef unsigned int SlotID;
 	static const SlotID NO_SLOT_ID = (std::numeric_limits<SlotID>::max)();

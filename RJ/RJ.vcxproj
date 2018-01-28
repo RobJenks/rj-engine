@@ -581,9 +581,11 @@
     <ClCompile Include="RM_ModelDataCollection.cpp" />
     <ClCompile Include="SamplerStateDX11.cpp" />
     <ClCompile Include="SequenceGenerationTests.cpp" />
+    <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderDX11.cpp" />
     <ClCompile Include="ShaderMacros.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
+    <ClCompile Include="ShaderParameter.cpp" />
     <ClCompile Include="ShaderParameterDX11.cpp" />
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="SimulatedEnvironmentCollision.cpp" />

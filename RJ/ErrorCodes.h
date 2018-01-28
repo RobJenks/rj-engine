@@ -318,6 +318,7 @@ namespace ErrorCodes {
 	const Result		ReceivedNullParticleEmitterKey					= 1510;
 	const Result		CouldNotCreateParticleEngine					= 1511;
 	const Result		CannotLinkAllRequiredShadersToParticleEngine	= 1512;
+	const Result		ShaderValidationFailed							= 1513;
 	
 	
 

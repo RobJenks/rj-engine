@@ -4,6 +4,7 @@
 #include "Utility.h"
 #include "ALIGN16.h"
 #include "GameDataExtern.h"
+#include "CoreEngine.h"
 #include "Shaders.h"
 #include "TextureDX11.h"
 #include "ShaderDX11.h"
@@ -59,7 +60,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync, float screen_near, float screen_far)
 {
 	Result result;
-	Game::Log << "Initialising rendering engine \"" << GetRenderDeviceName() << "\"\n";
+	Game::Log << LOG_INFO << "Initialising rendering engine \"" << GetRenderDeviceName() << "\"\n";
 
 	// Store key data and calculated derived parameters
 	SetDisplaySize(screen_size);
@@ -89,7 +90,11 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
+	/* Now perform validation of the initialised engine */
 
+	// Validate all shaders and associated resources
+	PERFORM_VALIDATION( ValidateShaders(), "shader resources");
+	
 
 	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";
 	return ErrorCodes::NoError;
@@ -593,6 +598,26 @@ Result RenderDeviceDX11::InitialiseStandardRenderPipelines(void)
 	return ErrorCodes::NoError;
 }
 
+
+// Validate all shaders and their associated resources, reporting any errors that are encountered
+Result RenderDeviceDX11::ValidateShaders(void)
+{
+	unsigned int errors = 0U;
+	for (auto & entry : Game::Engine->GetAssets().GetShaders())
+	{
+		bool valid = entry.second.get()->ValidateShader();
+		if (!valid) ++errors;
+	}
+
+	if (errors != 0U)
+	{
+		Game::Log << LOG_ERROR << "Shader validation failed with " << errors << " shaders in error\n";
+		return ErrorCodes::ShaderValidationFailed;
+	}
+	
+	Game::Log << LOG_INFO << "Shader validation successful; all shaders valid\n";
+	return ErrorCodes::NoError;
+}
 
 void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 {

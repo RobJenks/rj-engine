@@ -19,17 +19,21 @@
 class RenderTargetDX11;
 
 
-// Initialisation step with error logging and immediate-exit
-#define PERFORM_INIT(initialisation, desc) \
+// Initialisation steps with error logging and immediate-exit
+#define PERFORM_INIT_STEP(action_name, desc_name, expression, desc) \
 { \
-Game::Log << LOG_INFO << "Initialising " << desc << "\n"; \
-result = initialisation; \
+Game::Log << LOG_INFO << action_name << " " << desc << "\n"; \
+result = expression; \
 if (result != ErrorCodes::NoError) \
 { \
-	Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during initialisation of " << desc << "\n"; \
+	Game::Log << LOG_ERROR << "Rendering engine startup failed [" << result << "] during " << desc_name << " of " << desc << "\n"; \
 	return result; \
 } \
 }
+
+#define PERFORM_INIT(initialisation, desc) PERFORM_INIT_STEP("Initialising", "initialisation", initialisation, desc);
+#define PERFORM_VALIDATION(validation, desc) PERFORM_INIT_STEP("Validating", "validation", validation, desc);
+
 
 
 class RenderDeviceDX11 : public RenderDevice
@@ -48,6 +52,8 @@ public:
 	Result											InitialiseShaderResources(void);
 	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseStandardRenderPipelines(void);
+
+	Result											ValidateShaders(void);
 
 	// Verify the render device is in a good state and report errors if not
 	bool											VerifyState(void);
