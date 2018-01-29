@@ -245,6 +245,16 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	return ErrorCodes::NoError;
 }
 
+// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+Result CoreEngine::PerformPostDataLoadInitialisation(void)
+{
+	// Certain components require the ability to complete initialisation after all game data is loaded
+	GetEffectManager()->PerformPostDataLoadInitialisation();
+	GetOverlayRenderer()->PerformPostDataLoadInitialisation();
+
+	return ErrorCodes::NoError;
+}
+
 void CoreEngine::ShutdownGameEngine()
 {
 	// Run the termination function for each component

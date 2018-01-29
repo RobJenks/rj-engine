@@ -12,6 +12,7 @@ ByteString FileUtils::ReadBinaryFile(fs::path file)
 
 	ByteString result;
 	result.reserve(file_size);
+	result.resize(file_size);
 
 	input.seekg(0, std::ios::beg);				// Seek to beginning
 	input.read(result.data(), file_size);

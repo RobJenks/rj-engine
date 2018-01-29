@@ -30,20 +30,23 @@ Model::~Model(void)
 
 
 // Load a model from disk and prepare it for use
-Result Model::Initialise(const std::string & filename, const std::string & material)
+Result Model::Initialise(const std::string & code, const std::string & filename, const std::string & material)
 {
-	return Initialise(fs::path(filename), material);
+	return Initialise(code, fs::path(filename), material);
 }
 
 
 // Load a model from disk and prepare it for use
-Result Model::Initialise(fs::path file, const std::string & material)
+Result Model::Initialise(const std::string & code, fs::path file, const std::string & material)
 {
 	// Reset all geometry data beforehand so that we don't ever half-load a model over an existing one
 	Reset();
 
-	// Parameter check
+	// Store key parameters
+	m_code = code;
 	m_filename = fs::absolute(file).string();
+
+	// Parameter check
 	if (m_filename.empty() || !fs::exists(file))
 	{
 		Game::Log << LOG_ERROR << "Model file does not exist: \"" << m_filename << "\"\n";

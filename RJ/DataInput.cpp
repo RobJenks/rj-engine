@@ -436,7 +436,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 
 	// Otherwise create a new model here
 	model = new Model();
-	model->Initialise(full_filename, material);
+	model->Initialise(code, full_filename, material);
 	
 	// Set other loaded properties after initialisation if required
 

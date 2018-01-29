@@ -21,8 +21,12 @@ public:
 
 	// Initialisation and preparation functions
 	Result Initialise(Rendering::RenderDeviceType *device);
-	Result InitialiseEffectModelData(Rendering::RenderDeviceType *device);
+	Result InitialiseEffectModelData(void);
 	Result LinkEffectShaders(FireShader *fireshader);
+	
+	// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+	Result PerformPostDataLoadInitialisation(void);
+
 	void BeginEffectRendering(void);
 
 	// Shutdown functions
@@ -52,6 +56,7 @@ private:
 	FireShader					*m_fireshader;
 
 	// Model objects used for rendering to the world
+	bool						m_models_initialised;
 	Model						*m_model_unitsquare;
 	Model						*m_model_unitcone;
 };

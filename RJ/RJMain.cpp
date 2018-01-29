@@ -1300,6 +1300,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Perform post-load initialisation of any data just loaded from game files
 	InitialiseLoadedGameData();
 
+	// Allow the core engine to perform any post-data-load activities, e.g. retrieving models that have now been loaded
+	Game::Engine->PerformPostDataLoadInitialisation();
+
 	// Initialise the simulation state manager
 	InitialiseStateManager();
 

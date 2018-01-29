@@ -38,8 +38,12 @@ SpaceProjectile::SpaceProjectile(const SpaceProjectileDefinition *definition) : 
 		// Projectile size is derived from the projectile model
 		if (m_model.GetModel())
 		{
-			this->SetSize(XMLoadFloat3(&m_model.GetModel()->Geometry.get()->ModelSize));
-			FloorVector(m_size, 1.0f);
+			const auto *geometry = m_model.GetModel()->Geometry.get();
+			if (geometry)
+			{
+				this->SetSize(XMLoadFloat3(&geometry->ModelSize));
+				FloorVector(m_size, 1.0f);
+			}
 		}
 			
 	}

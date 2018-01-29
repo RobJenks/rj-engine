@@ -51,20 +51,6 @@ OverlayRenderer::OverlayRenderer(void)
 // Initialises the overlay rendering component; includes loading of all required models
 Result OverlayRenderer::Initialise(void)
 {
-	// All required models and their destination fields
-	std::string model_names[] = { "overlay_line_none", "overlay_line_green", "overlay_line_red", "overlay_line_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
-	Model ** models[] = { &m_models[0], &m_models[1], &m_models[2], &m_models[3], &m_blueprintoverlay, &m_blueprintcubeoverlay };
-
-	// Retrieve all models required for overlay rendering
-	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
-	{
-		*(models[i]) = Model::GetModel(model_names[i]);
-		if (*(models[i]) == NULL)
-		{
-			Game::Log << LOG_WARN << "Failed to initialise overlay rendering model \"" << model_names[i] << "\"\n";
-		}
-	}
-
 	// Initialise all pre-cached transform matrices for render efficiency
 	InitialiseCachedMatrices();
 
@@ -118,6 +104,26 @@ void OverlayRenderer::InitialiseCachedMatrices()
 	m_matrix_nodeorigin = XMMatrixTranslationFromVector(XMVectorNegate(OverlayRenderer::PATH_NODE_RENDER_ORIGIN));
 	m_matrix_nodescale_and_origin = XMMatrixMultiply(m_matrix_nodescale, m_matrix_nodeorigin);
 	SetNodeSpinSpeed(0.5f);
+}
+
+// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+Result OverlayRenderer::PerformPostDataLoadInitialisation(void)
+{
+	// All required models and their destination fields
+	std::string model_names[] = { "overlay_line_none", "overlay_line_green", "overlay_line_red", "overlay_line_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
+	Model ** models[] = { &m_models[0], &m_models[1], &m_models[2], &m_models[3], &m_blueprintoverlay, &m_blueprintcubeoverlay };
+
+	// Retrieve all models required for overlay rendering
+	for (int i = 0; i < (int)OverlayRenderer::RenderColour::RC_COUNT; ++i)
+	{
+		*(models[i]) = Model::GetModel(model_names[i]);
+		if (*(models[i]) == NULL)
+		{
+			Game::Log << LOG_WARN << "Failed to initialise overlay rendering model \"" << model_names[i] << "\"\n";
+		}
+	}
+
+	return ErrorCodes::NoError;
 }
 
 void OverlayRenderer::SetNodeSpinSpeed(float speed)

@@ -12,6 +12,8 @@ public:
 
 	typedef Vertex_Standard				TVertex;
 
+	static const unsigned int			VERTEX_COUNT_LIMIT = 10000000;		// 10e6
+
 	// Header data
 	unsigned int						ModelMaterialIndex;		// Note: not the same as MaterialId.  This is the index of materials loaded within this single model
 	XMFLOAT3							MinBounds;
@@ -34,7 +36,7 @@ public:
 	ByteString							Serialize(void) const;
 	static std::unique_ptr<ModelData>	Deserialize(ByteString & data);
 
-	void								AllocateVertexData(unsigned int vertex_count);
+	bool								AllocateVertexData(unsigned int vertex_count);
 	void								DeallocateVertexData(void);
 
 

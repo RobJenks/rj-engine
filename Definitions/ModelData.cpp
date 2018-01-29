@@ -1,5 +1,10 @@
 #include "ModelData.h"
 
+#ifdef LOGGING_AVAILABLE
+#	include "Logging.h"
+#endif
+
+
 ModelData::ModelData(void)
 	:
 	VertexData(NULL),
@@ -17,15 +22,21 @@ ModelData::~ModelData(void)
 	DeallocateVertexData();
 }
 
-void ModelData::AllocateVertexData(unsigned int vertex_count)
+bool ModelData::AllocateVertexData(unsigned int vertex_count)
 {
 	DeallocateVertexData();
 	
-	if (vertex_count > 0U)
+	if (vertex_count > ModelData::VERTEX_COUNT_LIMIT)
 	{
-		VertexData = new TVertex[vertex_count];
-		memset(VertexData, 0, sizeof(TVertex) * vertex_count);
+#		ifdef LOGGING_AVAILABLE
+			Game::Log << LOG_ERROR << "Cannot allocate vertex data for model data; specified vertex count of " << vertex_count << " is out of acceptable bounds\n";
+#		endif
+		return false;
 	}
+
+	VertexData = new TVertex[vertex_count];
+	memset(VertexData, 0, sizeof(TVertex) * vertex_count);
+	return true;
 }
 
 void ModelData::DeallocateVertexData(void)
@@ -71,8 +82,14 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 	data.ReadObject(m->CentrePoint);
 	data.ReadObject(m->VertexCount);
 
+	// Attempt to allocate vertex data
+	if (m->AllocateVertexData(m->VertexCount) == false)
+	{
+		delete(m);
+		return NULL;
+	}
+	
 	// Vertex data
-	m->AllocateVertexData(m->VertexCount);
 	for (unsigned int i = 0U; i < m->VertexCount; ++i)
 	{
 		data.ReadObject(m->VertexData[i]);
@@ -80,7 +97,5 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 
 	return std::unique_ptr<ModelData>(m);
 }
-
-
 
 

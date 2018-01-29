@@ -12,6 +12,9 @@
 #include "Utility.h"
 #include "DataPorts.h"
 
+// Indicates that logging is supported in the current compilation context if defined
+#define LOGGING_AVAILABLE
+
 // Common body of a log prefix
 #define LOG_PREFIX_BODY "[" << (unsigned int)timeGetTime() << "|" << __FILE__ << ":" << __LINE__ << "] "
 

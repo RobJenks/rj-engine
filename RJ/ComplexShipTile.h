@@ -73,7 +73,7 @@ public:
 			offset = Game::ElementLocationToPhysicalPosition(elementpos);
 
 			// Derive a rotation matrix for this part of the model
-			if (rotation == Rotation90Degree::Rotate0 || !model)
+			if (rotation == Rotation90Degree::Rotate0 || !model || !model->Geometry.get())
 			{
 				rotmatrix = ID_MATRIX;
 			}
@@ -394,7 +394,7 @@ public:
 			{
 				// Check this model is valid
 				model = Models[i].value.model;
-				if (!model) continue;
+				if (!model || !model->Geometry.get()) continue;
 
 				// Check whether the min or max bounds for this model would push out the overall bounds
 				// Swap y and z coordinates since we are moving from element to world space

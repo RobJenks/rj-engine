@@ -34,8 +34,8 @@ public:
 	~Model(void);
 
 	// Load a model from disk and prepare it for use
-	Result								Initialise(const std::string & filename, const std::string & material);
-	Result								Initialise(fs::path file, const std::string & material);
+	Result								Initialise(const std::string & code, const std::string & filename, const std::string & material);
+	Result								Initialise(const std::string & code, fs::path file, const std::string & material);
 
 	// Return basic data on the model
 	CMPINLINE ModelID					GetID(void) const { return m_id; }

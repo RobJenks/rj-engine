@@ -11,18 +11,21 @@
 // Initialisation function for the effect manager
 Result EffectManager::Initialise(Rendering::RenderDeviceType *device)
 {
-	Result result;
-
-	// Load and initialise all the models used for rendering effects
-	result = InitialiseEffectModelData(device);
-	if (result != ErrorCodes::NoError) return result;
-
 	// Nothing to do right now, simply return success
 	return ErrorCodes::NoError;
 }
 
+Result EffectManager::PerformPostDataLoadInitialisation(void)
+{
+	Result result;
+	
+	result = InitialiseEffectModelData();
+
+	return result;
+}
+
 // Loads and initialises all the models used for rendering effects.  Returns fatal error if any cannot be loaded
-Result EffectManager::InitialiseEffectModelData(Rendering::RenderDeviceType *device)
+Result EffectManager::InitialiseEffectModelData(void)
 {
 	// Static map of models required for effect rendering
 	static const std::vector<std::pair<std::string, Model**>> model_requirements = {

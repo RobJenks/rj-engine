@@ -36,6 +36,9 @@ public:
 	// Initialise all pre-cached transform matrices for render efficiency
 	void				InitialiseCachedMatrices(void);
 
+	// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+	Result				PerformPostDataLoadInitialisation(void);
+
 	// Methods to get and set the spin rate for nodes rendered by the overlay renderer
 	CMPINLINE float		GetNodeSpinSpeed(void) { return m_nodespinspeed; }
 	void				SetNodeSpinSpeed(float speed);

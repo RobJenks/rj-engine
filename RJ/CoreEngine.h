@@ -118,6 +118,9 @@ public:
 	// Initialise all components of the game engine
 	Result					InitialiseGameEngine(HWND hwnd);
 
+	// Perform any post-data-load activities, e.g.retrieving models that have now been loaded
+	Result					PerformPostDataLoadInitialisation(void);
+
 	// Release all components of the game engine as part of a controlled shutdown
 	void					ShutdownGameEngine();
 	

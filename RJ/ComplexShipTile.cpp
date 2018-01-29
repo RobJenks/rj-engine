@@ -262,16 +262,23 @@ void ComplexShipTile::RecalculateTileData(void)
 void ComplexShipTile::RecalculateWorldMatrix(void)
 { 
 	// Make sure that we have model data, for either single- or compound-model mode.  If not, simply set WM = ID
-	if ((!m_multiplemodels && !m_model) || (m_multiplemodels && !m_models.AllocationPerformed()))
+	// Tcentre = model translation to its centre point, prior to rotation about its centre
+	XMVECTOR centrepoint;
+	if (!m_multiplemodels && m_model && m_model->Geometry.get())
+	{
+		centrepoint = XMLoadFloat3(&m_model->Geometry.get()->CentrePoint);
+	}
+	else if (m_multiplemodels && m_models.AllocationPerformed())
+	{
+		centrepoint = m_models.CompoundModelCentre;
+	}
+	else
 	{
 		m_relativeposition = NULL_VECTOR;
 		m_relativepositionmatrix = ID_MATRIX;
 		m_worldmatrix = ID_MATRIX;
 		return;
 	}
-
-	// Tcentre = model translation to its centre point, prior to rotation about its centre
-	XMVECTOR centrepoint = (m_multiplemodels ? m_models.CompoundModelCentre : XMLoadFloat3(&m_model->Geometry.get()->CentrePoint));
 	
 	// Telement = translation from model centre to top-left corner (0.5*numelements*elementsize in world coords) + translation to element position
 	// Will switch y and z coordinates since we are moving from element to world space

@@ -13,6 +13,12 @@
   </Model>
 
   <Model>
+    <Code>unit_square_model</Code>
+    <Filename>Models\Misc\unit_square.rjm</Filename>
+    <Material>debug_material</Material>
+  </Model>
+
+  <Model>
     <Code>unit_cone_model_alt</Code>
     <Filename>Models\Misc\unit_cone.rjm</Filename>
     <Material>debug_material</Material>
