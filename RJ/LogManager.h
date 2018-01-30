@@ -47,9 +47,9 @@ public:
 		if (m_alwaysflush) m_stream.flush();
 
 		#if defined( REPLICATE_LOG_TO_DEVELOPER_CONSOLE) && defined(_DEBUG)
-			m_stringstream.clear();
-			m_stringstream << data;
-			OutputDebugString(m_stringstream.str().c_str());
+			std::ostringstream stringstream;
+			stringstream << data;
+			OutputDebugString(stringstream.str().c_str());
 #		endif
 
 		return (*this);
@@ -126,11 +126,6 @@ protected:
 	// Output file stream for the profiling log (only relevant when profiling is enabled)
 	#ifdef RJ_PROFILER_ACTIVE
 		std::ofstream			m_profilingstream;
-	#endif
-	
-	// Stream stream used for redirecting log output to the developer console if required
-	#if defined( REPLICATE_LOG_TO_DEVELOPER_CONSOLE) && defined(_DEBUG)
-		std::ostringstream		m_stringstream;
 	#endif
 
 	// Flag indicating whether the primary log should flush after every stream operation.  Used during initialisation
