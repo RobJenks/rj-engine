@@ -1,0 +1,49 @@
+<gamedata>
+
+  <!-- Stepped colour (grad1) -->
+  <Texture code="grad_stepped" dimension="Texture2D" filename="Rendering/grad_stepped.dds" />
+  <Material code="grad_stepped">
+    <DiffuseTexture>grad_stepped</DiffuseTexture>
+  </Material>
+
+  <!-- Fire gradient (grad2-copy) -->
+  <Texture code="grad_fire" dimension="Texture2D" filename="Rendering/grad_fire.dds" />
+  <Material code="grad_fire">
+    <DiffuseTexture>grad_fire</DiffuseTexture>
+  </Material>
+
+  <!-- Yellow-green gradient (grad2) -->
+  <Texture code="grad_yellowgreen" dimension="Texture2D" filename="Rendering/grad_yellowgreen.dds" />
+  <Material code="grad_yellowgreen">
+    <DiffuseTexture>grad_yellowgreen</DiffuseTexture>
+  </Material>
+
+  <!-- Blue gradient (grad3) -->
+  <Texture code="grad_blue" dimension="Texture2D" filename="Rendering/grad_blue.dds" />
+  <Material code="grad_blue">
+    <DiffuseTexture>grad_blue</DiffuseTexture>
+  </Material>
+
+  <!-- Black/white dashed (grad4) -->
+  <Texture code="grad_dashed" dimension="Texture2D" filename="Rendering/grad_dashed.dds" />
+  <Material code="grad_dashed">
+    <DiffuseTexture>grad_dashed</DiffuseTexture>
+  </Material>
+
+  <!-- Fire gradient 2 (grad22) -->
+  <Texture code="grad_fire2" dimension="Texture2D" filename="Rendering/grad_fire2.dds" />
+  <Material code="grad_fire2">
+    <DiffuseTexture>grad_fire2</DiffuseTexture>
+  </Material>
+
+  <!-- Linear depth gradient (linear_depth) -->
+  <Texture code="grad_linear_depth" dimension="Texture2D" filename="Rendering/grad_linear_depth.dds" />
+  <Material code="grad_linear_depth">
+    <DiffuseTexture>grad_linear_depth</DiffuseTexture>
+  </Material>
+
+  
+
+
+
+</gamedata>

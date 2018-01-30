@@ -60,7 +60,7 @@ Result BasicProjectileDefinition::SetMaterial(const std::string & name)
 	// We won't store the resulting texture if an error occured during initialisation
 	if (material == NULL)
 	{
-		Game::Log << LOG_WARN << "Attempted to assign invalid texture \"" << name << "\" to basic projectile definition \"" << m_code << "\"\n";
+		Game::Log << LOG_WARN << "Attempted to assign invalid material \"" << name << "\" to basic projectile definition \"" << m_code << "\"\n";
 	}
 	
 	// Pass control to the overloaded method and return the result of storing this texture

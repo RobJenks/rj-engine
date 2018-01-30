@@ -43,7 +43,10 @@
 
   <!-- Load fonts -->
   <include file="Fonts\Fonts.xml" />
-
+  
+  <!-- General rendering resources -->
+  <include file="Rendering\misc_rendering_materials.xml" />
+  
   <!-- Load ship data -->
   <include file="Ships\Ships.xml" />
 

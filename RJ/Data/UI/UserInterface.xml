@@ -1,4 +1,8 @@
 <gamedata>
+
+  <!-- Load all resources -->
+  <include file="UI/Common/Content/ui_resources.xml" />
+  
   
   <!-- Load all managed control definitions -->
   <include file="UI/Common/Controls/ComboBox1/ui_control_combobox1.xml" />

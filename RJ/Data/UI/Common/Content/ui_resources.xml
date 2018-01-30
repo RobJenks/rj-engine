@@ -1,0 +1,27 @@
+<gamedata>
+
+  <!-- UI component textures -->
+  <Texture code="button1" dimension="Texture2D" filename="UI/Common/Content/button1.dds" />
+  <Texture code="button1_down" dimension="Texture2D" filename="UI/Common/Content/button1_down.dds" />
+  <Texture code="frame_corner" dimension="Texture2D" filename="UI/Common/Content/frame_corner.dds" />
+  <Texture code="frame_edge" dimension="Texture2D" filename="UI/Common/Content/frame_edge.dds" />
+  <Texture code="mltb_back" dimension="Texture2D" filename="UI/Common/Content/mltb_back.dds" />
+  <Texture code="panel_back" dimension="Texture2D" filename="UI/Common/Content/panel_back.dds" />
+  <Texture code="panel_corner" dimension="Texture2D" filename="UI/Common/Content/panel_corner.dds" />
+  <Texture code="panel_edge" dimension="Texture2D" filename="UI/Common/Content/panel_edge.dds" />
+  <Texture code="panel_tab_blank_active" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_active.dds" />
+  <Texture code="panel_tab_blank_inactive" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive.dds" />
+  <Texture code="panel_tab_blank_inactive_down" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive_down.dds" />
+  <Texture code="solid_black" dimension="Texture2D" filename="UI/Common/Content/solid_black.dds" />
+  <Texture code="textbox_focus" dimension="Texture2D" filename="UI/Common/Content/textbox_focus.dds" />
+  <Texture code="textbox_normal" dimension="Texture2D" filename="UI/Common/Content/textbox_normal.dds" />
+  
+  
+  <!-- Rendering for debug intersection test -->
+  <Texture code="ui_intersection_test_trajectory" dimension="Texture2D" filename="UI/ui_intersection_test_trajectory.dds" />
+  <Material code="ui_intersection_test_trajectory">
+    <DiffuseTexture>ui_intersection_test_trajectory</DiffuseTexture>
+  </Material>
+
+
+</gamedata>

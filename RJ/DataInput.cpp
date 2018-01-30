@@ -487,7 +487,7 @@ Result IO::Data::LoadTextureData(TiXmlElement *node)
 	}
 
 	// Now attempt to load the texture data
-	std::string filename = cfilename;
+	std::string filename = D::DATA_S + "\\" + cfilename;
 	bool loadresult = texture->LoadTexture(ConvertStringToWString(filename), dimension);
 	if (!loadresult)
 	{
@@ -3985,17 +3985,14 @@ Result IO::Data::LoadUIManagedControlDefinition(TiXmlElement *node)
 		{
 			// Pull data on this item
 			citemkey = child->Attribute("key");
-			citemval = child->Attribute("file");
+			citemval = child->Attribute("value");
 
 			// Make sure the required parameters exist
 			if (!citemkey) continue; else itemkey = citemkey;
 			if (!citemval) continue; else itemval = citemval;
 
-			// Build a complete filename from the relative path supplied
-			std::string filename = BuildStrFilename(D::DATA, itemval);
-
 			// Add this mapping to the collection
-			def->AddComponent(itemkey, filename);
+			def->AddComponent(itemkey, itemval);
 		}
 	}
 

@@ -1,19 +1,30 @@
 <gamedata>
+  
+  <!-- Texture resources for this control -->
+  <Texture code="combobox1_expand" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expand.dds" />
+  <Texture code="combobox1_expandback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expandback.dds" />
+  <Texture code="combobox1_mainback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_mainback.dds" />
+  <Texture code="combobox1_scrollbarback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarback.dds" />
+  <Texture code="combobox1_scrollbarhandle" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarhandle.dds" />
+  <Texture code="combobox1_scrollbarupdown" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarupdown.dds" />
+  
+
+  <!-- Control definition -->
   <UIManagedControlDefinition>
     <Code>UI_CONTROL_COMBOBOX1</Code>
     <Class>Combobox</Class>
 
     <!-- Components for when control is in its default mode, i.e. not expanded -->
-    <Component key="mainback" file="UI\Common\Controls\ComboBox1\mainback.dds" />
-    <Component key="expand" file="UI\Common\Controls\ComboBox1\expand.dds" />
+    <Component key="mainback" value="combobox1_mainback" />
+    <Component key="expand" value="combobox1_expand" />
 
     <!-- Additional component for when the control is expanded, but when no scrolling is required to view all items -->
-    <Component key="expandback" file="UI\Common\Controls\ComboBox1\expandback.dds" />
+    <Component key="expandback" value="combobox1_expandback" />
 
     <!-- Additional components for when scrolling is required to view all items in the collection -->
-    <Component key="scrollbarback" file="UI\Common\Controls\ComboBox1\scrollbarback.dds" />
-    <Component key="scrollbarupdown" file="UI\Common\Controls\ComboBox1\scrollbarupdown.dds" />
-    <Component key="scrollbarhandle" file="UI\Common\Controls\ComboBox1\scrollbarhandle.dds" />
+    <Component key="scrollbarback" value="combobox1_scrollbarback" />
+    <Component key="scrollbarupdown" value="combobox1_scrollbarupdown" />
+    <Component key="scrollbarhandle" value="combobox1_scrollbarhandle" />
 
   </UIManagedControlDefinition>
 </gamedata>
