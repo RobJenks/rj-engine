@@ -12,6 +12,7 @@ public:
 
 	typedef Vertex_Standard				TVertex;
 
+	static const std::string 			GEOMETRY_FILE_IDENTIFIER;
 	static const unsigned int			VERTEX_COUNT_LIMIT = 10000000;		// 10e6
 
 	// Header data

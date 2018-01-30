@@ -1,8 +1,10 @@
 #include "ModelData.h"
 
-#ifdef LOGGING_AVAILABLE
-#	include "Logging.h"
+#ifdef RJ_MODULE_RJ
+#	include "../RJ/Logging.h"
 #endif
+
+const std::string ModelData::GEOMETRY_FILE_IDENTIFIER = { 'R', 'j', 'G', 'e', 'o' };
 
 
 ModelData::ModelData(void)
@@ -52,6 +54,7 @@ ByteString ModelData::Serialize(void) const
 {
 	// Header data
 	ByteString b;
+	b.WriteObject(ModelData::GEOMETRY_FILE_IDENTIFIER);
 	b.WriteObject(this->ModelMaterialIndex);
 	b.WriteObject(this->MinBounds);
 	b.WriteObject(this->MaxBounds);
@@ -70,11 +73,18 @@ ByteString ModelData::Serialize(void) const
 
 std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 {
-	// Start reading from buffer start and deserialize into a new model data object
-	ModelData *m = new ModelData();
+	// Start reading from buffer start and make sure file identifier is present
 	data.ResetRead();
+	if (!data.ReadAndVerifyIdentifier(ModelData::GEOMETRY_FILE_IDENTIFIER))
+	{
+#		ifdef LOGGING_AVAILABLE
+			Game::Log << LOG_ERROR << "Model geometry data file is invalid, cannot process further\n";
+#		endif
+		return NULL;
+	}
 
-	// Header data
+	// File appears valid so process the header data
+	ModelData *m = new ModelData();
 	data.ReadObject(m->ModelMaterialIndex);
 	data.ReadObject(m->MinBounds);
 	data.ReadObject(m->MaxBounds);

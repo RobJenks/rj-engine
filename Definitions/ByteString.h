@@ -1,6 +1,12 @@
 #pragma once
 
 #include <vector>
+#include <string>
+
+#ifdef RJ_MODULE_RJ
+#	include "../RJ/Logging.h"
+#endif
+
 
 class ByteString : public std::vector<char>
 {
@@ -30,6 +36,29 @@ public:
 	void					ReadObject(T & object);
 
 
+	// Attempt to read a file identifier from the byte string and validate it against the given required value
+	inline bool				ReadAndVerifyIdentifier(const std::string & expected)
+	{
+		auto length = expected.size();
+		for (std::string::size_type i = 0U; i < length; ++i)
+		{
+			char id = ReadObject<char>();
+			if (id != expected[i])
+			{
+#			ifdef LOGGING_AVAILABLE
+#				ifdef _DEBUG
+				Game::Log << LOG_ERROR << "File failed \"" << expected << "\" identifier validation; id[" << i << "] == " << id << " which is != " << expected[i] << "\n";
+#				else
+				Game::Log << LOG_ERROR << "File is not of expected type\n";
+#				endif
+#			endif
+
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 
 private:
@@ -56,6 +85,7 @@ template <typename T>
 T ByteString::ReadObject(void)
 {
 	constexpr size_t n = sizeof(T);
+	if ((m_readpoint + n) >= size()) return T();
 
 	T obj;
 	memcpy((void*)&obj, (const void*)&(data()[m_readpoint]), n);
@@ -69,5 +99,8 @@ void ByteString::ReadObject(T & object)
 {
 	object = ReadObject<T>();
 }
+
+
+
 
 
