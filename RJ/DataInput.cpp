@@ -487,7 +487,7 @@ Result IO::Data::LoadTextureData(TiXmlElement *node)
 	}
 
 	// Now attempt to load the texture data
-	std::string filename = D::DATA_S + "\\" + cfilename;
+	std::string filename = D::IMAGE_DATA_S + "\\" + cfilename;
 	bool loadresult = texture->LoadTexture(ConvertStringToWString(filename), dimension);
 	if (!loadresult)
 	{
