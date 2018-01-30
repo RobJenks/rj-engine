@@ -167,77 +167,82 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 		if (!(rname == D::NODE_GameData)) { delete doc; return ErrorCodes::InvalidXMLRootNode; }
 
 		// Now iterate through each child element in turn; these elements at level one should denote the type of object
-		std::string name = "";
+		std::string name = ""; HashVal hash;
 		TiXmlElement *child = root->FirstChildElement();
 		for (child; child; child = child->NextSiblingElement())
 		{
 			// Test the type of this node
 			// TODO: Add error handling if a function returns =/= 0
 			name = child->Value(); StrLowerC(name);
+			hash = HashString(name);
 
-			if (name == D::NODE_FileIndex) {
+			if (hash == HashedStrings::H_Include) {
 				res = IO::Data::LoadXMLFileIndex(child);
 
 				// If we caught and terminated an infinite file loop we need to propogate the error backwards to stop it simply repeating
 				if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
 					return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 			}
-			else if (name == D::NODE_SimpleShip) {
+			else if (hash == HashedStrings::H_SimpleShip) {
 				res = IO::Data::LoadSimpleShip(child);
-			} else if (name == D::NODE_SimpleShipLoadout) {
+			} else if (hash == HashedStrings::H_SimpleShipLoadout) {
 				res = IO::Data::LoadSimpleShipLoadout(child);
-			} else if (name == D::NODE_ComplexShip) {
+			} else if (hash == HashedStrings::H_ComplexShip) {
 				res = IO::Data::LoadComplexShip(child);
-			} else if (name == D::NODE_ComplexShipSection) {
+			} else if (hash == HashedStrings::H_ComplexShipSection) {
 				res = IO::Data::LoadComplexShipSection(child);
-			} else if (name == D::NODE_Engine) {
+			} else if (hash == HashedStrings::H_Engine) {
 				res = IO::Data::LoadEngine(child);
-			} else if (name == D::NODE_System) {
+			} else if (hash == HashedStrings::H_System) {
 				res = IO::Data::LoadSystem(child);
-			} else if (name == D::NODE_FireEffect) {
+			} else if (hash == HashedStrings::H_FireEffect) {
 				res = IO::Data::LoadFireEffect(child);
-			} else if (name == D::NODE_ParticleEmitter) {
+			} else if (hash == HashedStrings::H_ParticleEmitter) {
 				res = IO::Data::LoadParticleEmitter(child);
-			} else if (name == D::NODE_UILayout) {
+			} else if (hash == HashedStrings::H_UILayout) {
 				res = IO::Data::LoadUILayout(child);
-			} else if (name == D::NODE_Model) {
+			} else if (hash == HashedStrings::H_Model) {
 				res = IO::Data::LoadModelData(child);
-			} else if (name == D::NODE_ArticulatedModel) {
+			} else if (hash == HashedStrings::H_ArticulatedModel) {
 				res = IO::Data::LoadArticulatedModel(child);
-			} else if (name == D::NODE_UIManagedControlDefinition) {
+			} else if (hash == HashedStrings::H_UIManagedControlDefinition) {
 				res = IO::Data::LoadUIManagedControlDefinition(child);
-			} else if (name == D::NODE_ComplexShipTileClass) {
+			} else if (hash == HashedStrings::H_ComplexShipTileClass) {
 				res = IO::Data::LoadComplexShipTileClass(child);
-			} else if (name == D::NODE_ComplexShipTileDefinition) {
+			} else if (hash == HashedStrings::H_ComplexShipTileDefinition) {
 				res = IO::Data::LoadComplexShipTileDefinition(child);
-			} else if (name == D::NODE_Resource) {
+			} else if (hash == HashedStrings::H_Resource) {
 				res = IO::Data::LoadResource(child);
-			} else if (name == D::NODE_SkinnedModel) {
+			} else if (hash == HashedStrings::H_SkinnedModel) {
 				res = IO::Data::LoadSkinnedModel(child);
-			} else if (name == D::NODE_ActorAttributeGeneration) {
+			} else if (hash == HashedStrings::H_ActorAttributeGeneration) {
 				res = IO::Data::LoadActorAttributeGenerationData(child);
-			} else if (name == D::NODE_ActorBase) {
+			} else if (hash == HashedStrings::H_ActorBase) {
 				res = IO::Data::LoadActor(child);
-			} else if (name == D::NODE_TerrainDefinition) {
+			} else if (hash == HashedStrings::H_TerrainDefinition) {
 				res = IO::Data::LoadTerrainDefinition(child);
-			} else if (name == D::NODE_DynamicTerrainDefinition) { 
+			} else if (hash == HashedStrings::H_DynamicTerrainDefinition) {
 				res = IO::Data::LoadDynamicTerrainDefinition(child);
-			} else if (name == D::NODE_Faction) {
+			} else if (hash == HashedStrings::H_Faction) {
 				res = IO::Data::LoadFaction(child);
-			} else if (name == D::NODE_Turret) {
+			} else if (hash == HashedStrings::H_Turret) {
 				res = IO::Data::LoadTurret(child);
-			} else if (name == D::NODE_ProjectileLauncher) {
+			} else if (hash == HashedStrings::H_ProjectileLauncher) {
 				res = IO::Data::LoadProjectileLauncher(child);
-			} else if (name == D::NODE_BasicProjectileDefinition) {
+			} else if (hash == HashedStrings::H_BasicProjectileDefinition) {
 				res = IO::Data::LoadBasicProjectileDefinition(child);
-			} else if (name == D::NODE_SpaceProjectileDefinition) {
+			} else if (hash == HashedStrings::H_SpaceProjectileDefinition) {
 				res = IO::Data::LoadSpaceProjectileDefinition(child);
-			} else if (name == D::NODE_DynamicTileSet) {
+			} else if (hash == HashedStrings::H_DynamicTileSet) {
 				res = IO::Data::LoadDynamicTileSet(child);
-			} else if (name == D::NODE_ModifierDetails) {
+			} else if (hash == HashedStrings::H_ModifierDetails) {
 				res = IO::Data::LoadModifier(child);
-			} else if (name == D::NODE_Audio) { 
+			} else if (hash == HashedStrings::H_Audio) {
 				res = IO::Data::LoadAudioItem(child);
+			} else if (hash == HashedStrings::H_Texture) {
+				res = IO::Data::LoadTextureData(child);
+			} else if (hash == HashedStrings::H_Material) {
+				res = IO::Data::LoadMaterialData(child);
 			} else {
 				// Unknown level one node type
 				res = ErrorCodes::UnknownDataNodeType;
@@ -329,14 +334,15 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 	}
 
 	// Now iterate through each child element in turn and pull the relevant configuration
-	std::string name = "";
+	std::string name = ""; HashVal hash;
 	TiXmlElement *child = root->FirstChildElement();
 	for (child; child; child=child->NextSiblingElement())
 	{
 		// Test the type of this node
 		name = child->Value(); StrLowerC(name);
+		hash = HashString(name);
 
-		if (name == D::NODE_FileIndex) {
+		if (hash == HashedStrings::H_Include) {
 			const char *file = child->Attribute("file"); if (!file) continue;
 			std::string sfile = file;
 			res = IO::Data::LoadConfigFile(sfile);
@@ -345,7 +351,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 			if (res == ErrorCodes::ForceTerminatedInfiniteCircularFileIndices)
 				return ErrorCodes::ForceTerminatedInfiniteCircularFileIndices;
 		}
-		else if (name == "data") {
+		else if (hash == HashedStrings::H_Data) {
 			const char *path = child->Attribute("path");
 			if (path && FileSystem::DirectoryExists(path))
 			{
@@ -353,7 +359,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 				D::DATA_S = std::string(path);
 			}
 		}
-		else if (name == "screenresolution") {
+		else if (hash == HashedStrings::H_ScreenResolution) {
 			int x = 1024, y = 768, hz = 0;
 			child->Attribute("x", &x);
 			child->Attribute("y", &y);
@@ -362,7 +368,7 @@ Result IO::Data::LoadConfigFile(const std::string &filename)
 			Game::ScreenHeight = y;
 			if (hz > 0) Game::ScreenRefresh = hz;
 		}
-		else if (name == "softwarerasterizeroverride")
+		else if (hash == HashedStrings::H_SoftwareRasterizerOverride)
 		{
 			const char *enabled = child->Attribute("enable");
 			if (enabled && strcmp(enabled, "true") == 0)
@@ -3479,7 +3485,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			group->Components.Image2D.AddItem(code, item);
 			group->RegisterRenderableComponent(item);
 		}
-		else if (key == D::NODE_Image2DGroup) {
+		else if (key == "image2dgroup") {
 			result = IO::Data::LoadImage2DGroup(child, group);
 		}
 		else if (key == "constant")
@@ -4384,7 +4390,7 @@ Result IO::Data::LoadDamageSet(TiXmlElement *node, DamageSet & outDamageSet)
 	for (child; child; child = child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == D::NODE_Damage)
+		if (key == "damage")
 		{
 			res = LoadDamage(child, damage);
 			if (res == ErrorCodes::NoError) outDamageSet.push_back(damage);
@@ -4426,7 +4432,7 @@ Result IO::Data::LoadDamageResistanceSet(TiXmlElement *node, DamageResistanceSet
 	for (child; child; child = child->NextSiblingElement())
 	{
 		key = child->Value(); StrLowerC(key);
-		if (key == D::NODE_DamageResistance)
+		if (key == "damageresistance")
 		{
 			res = LoadDamageResistance(child, dr);
 			if (res == ErrorCodes::NoError) outDRSet.push_back(dr);

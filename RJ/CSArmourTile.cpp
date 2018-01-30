@@ -20,7 +20,7 @@ ComplexShipTile * CSArmourTile::Copy(void) const
 TiXmlElement * CSArmourTile::GenerateXML(void)
 {
 	// Create a new node to hold this data
-	TiXmlElement *node = new TiXmlElement(D::NODE_ComplexShipTile);
+	TiXmlElement *node = new TiXmlElement("ComplexShipTile");
 	node->SetAttribute("code", m_definition->GetCode().c_str());
 
 	// First, have the base class generate XML for all common tile properties

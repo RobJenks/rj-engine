@@ -61,6 +61,7 @@ public:
 namespace HashedStrings
 {
 	DefineHash(H_SimpleShip, "simpleship");
+	DefineHash(H_SimpleShipLoadout, "simpleshiploadout");
 	DefineHash(H_ComplexShip, "complexship");
 	DefineHash(H_ComplexShipSection, "complexshipsection");
 	DefineHash(H_ComplexShipSectionInstance, "complexshipsectioninstance");
@@ -330,6 +331,26 @@ namespace HashedStrings
 	DefineHash(H_BumpIntensity, "bumpintensity");
 	DefineHash(H_AlphaThreshold, "alphathreshold");
 	DefineHash(H_Data, "data");
+	DefineHash(H_Engine, "engine");
+	DefineHash(H_System, "system");
+	DefineHash(H_FireEffect, "fireeffect");
+	DefineHash(H_ParticleEmitter, "particleemitter");
+	DefineHash(H_UILayout, "uilayout");
+	DefineHash(H_UIManagedControlDefinition, "uimanagedcontroldefinition");
+	DefineHash(H_Resource, "resource");
+	DefineHash(H_SkinnedModel, "skinnedmodel");
+	DefineHash(H_ActorAttributeGeneration, "actorattributegeneration");
+	DefineHash(H_ActorBase, "actorbase");
+	DefineHash(H_TerrainDefinition, "terraindefinition");
+	DefineHash(H_DynamicTerrainDefinition, "dynamicterraindefinition");
+	DefineHash(H_Faction, "faction");
+	DefineHash(H_Turret, "turret");
+	DefineHash(H_BasicProjectileDefinition, "basicprojectiledefinition");
+	DefineHash(H_SpaceProjectileDefinition, "spaceprojectiledefinition");
+	DefineHash(H_ModifierDetails, "modifierdetails");
+	DefineHash(H_Audio, "audio");
+	DefineHash(H_ScreenResolution, "screenresolution");
+	DefineHash(H_SoftwareRasterizerOverride, "softwarerasterizeroverride");
 
 }
 

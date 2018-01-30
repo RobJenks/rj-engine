@@ -38,7 +38,7 @@
   <include file="Engines.xml" />
 
   <!-- Load effects and particle emitter data -->
-  <include file="Effects.xml" />
+  <include file="Effects\Effects.xml" />
   <include file="ParticleEmitters.xml" />
 
   <!-- Load fonts -->
