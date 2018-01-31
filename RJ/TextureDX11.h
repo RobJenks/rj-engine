@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <filesystem>
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
 #include "IntVector.h"
@@ -10,6 +11,10 @@
 #include "ShaderParameter.h"
 #include "CPUGraphicsResourceAccess.h"
 #include "Texture.h"
+
+// TODO: VS2017 is still implementing as exp branch; convert to std library once available
+namespace fs = std::experimental::filesystem;
+
 
 
 class TextureDX11 : public Texture
@@ -58,6 +63,7 @@ public:
 	* Load a cubemap texture from a file path.
 	*/
 	bool LoadTextureCube(const std::wstring& fileName);
+
 
 	/**
 	* Generate mip maps for a texture.
@@ -172,6 +178,11 @@ private:
 	void Resize2D(uint16_t width, uint16_t height);
 	void Resize3D(uint16_t width, uint16_t height, uint16_t depth);
 	void ResizeCube(uint16_t size);
+
+	bool LoadDDSTexture2D(const fs::path & filePath);			// DDS resources using DirectXTK
+	bool LoadNonDDSTexture2D(const fs::path & filePath);		// Non-DDS resources using FreeImage
+	static bool IsDDSFile(const fs::path & filePath);			// Determines whether a texture resource is DDS or not (based solely on the filename)
+
 	
 
 	// Instance fields

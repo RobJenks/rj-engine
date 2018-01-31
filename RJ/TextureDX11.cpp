@@ -1,14 +1,13 @@
-#include <filesystem>
 #include <unordered_map>
 #include "IntVector.h"
 #include "TextureDX11.h"
 #include "Logging.h"
 #include "CoreEngine.h"
-#include "FreeImage.h"		// External dependency; used to read image/texture metadata and properties
+
+#include "DirectXTK\Inc\DDSTextureLoader.h"		// For loading DDS resource data
+#include "FreeImage.h"							// External dependency; used to read image/texture metadata and properties
 #include "TextureDX11Util.h"
 
-// TODO: VS2017 is still implementing as exp branch; convert to std library once available
-namespace fs = std::experimental::filesystem;
 
 // Initialise static fields
 const FLOAT * TextureDX11::float4_zero = new FLOAT[4] { 0 };
@@ -355,9 +354,6 @@ bool TextureDX11::LoadTexture(const std::wstring & fileName, Texture::Dimension 
 
 bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 {
-	auto device = Game::Engine->GetDevice();
-	auto devicecontext = Game::Engine->GetDeviceContext();
-
 	fs::path filePath(fileName);
 	if (!fs::exists(filePath) || !fs::is_regular_file(filePath))
 	{
@@ -366,6 +362,85 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 	}
 
 	m_filename = fileName;
+
+	// Use different components depending on the type of resource
+	if (TextureDX11::IsDDSFile(filePath))
+	{
+		return LoadDDSTexture2D(filePath);
+	}
+	else
+	{
+		return LoadNonDDSTexture2D(filePath);
+	}
+}
+
+// Determines whether a texture resource is DDS or not (based solely on the filename)
+bool TextureDX11::IsDDSFile(const fs::path & filePath)
+{
+	static const std::string DDS_EXT = ".dds";
+
+	if (!filePath.has_extension()) return false;
+	std::string ext = filePath.extension().string();
+	StrLowerC(ext);
+
+	return (ext == DDS_EXT);
+}
+
+
+bool TextureDX11::LoadDDSTexture2D(const fs::path & filePath)
+{
+	// Attempt to load both the resource and an SRV
+	ID3D11Resource *resource = NULL;
+	HRESULT hr = CreateDDSTextureFromFile(Game::Engine->GetDevice(), filePath.wstring().c_str(), &resource, &m_srv);
+	if (FAILED(hr) || !resource || !m_srv)
+	{
+		Game::Log << LOG_ERROR << "Failed to load texture resources and SRV for \"" << filePath.string() << "\" [D]\n";
+		return false;
+	}
+
+	// Resolve the resource to its texture data
+	hr = resource->QueryInterface(IID_ID3D11Texture2D, (void **)&m_texture2d);
+	if (FAILED(hr) || !m_texture2d) 
+	{
+		Game::Log << LOG_ERROR << "Failed to resolve texture resource data for \"" << filePath.string() << "\" [D]\n";
+		return false;
+	}
+
+	// Now retrieve data on the loaded resources
+	D3D11_TEXTURE2D_DESC desc;
+	m_texture2d->GetDesc(&desc);
+	
+	m_dimension = Texture::Dimension::Texture2D;
+	m_width = desc.Width;
+	m_height = desc.Height;
+	m_numslices = 1U;
+	
+	m_TextureResourceFormat = desc.Format;
+	m_ShaderResourceViewFormat = m_RenderTargetViewFormat = m_TextureResourceFormat;
+	m_SampleDesc = TextureDX11Util::GetSupportedSampleCount(m_TextureResourceFormat, 1);
+
+	if (FAILED(Game::Engine->GetDevice()->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
+	{
+		Game::Log << LOG_ERROR << ("Failed to query format support [F]\n");
+	}
+	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D) == 0)
+	{
+		ReportTextureFormatError(m_format, "Unsupported texture format for 2D textures [F]\n");
+		return false;
+	}
+
+	m_ShaderResourceViewFormatSupport = m_RenderTargetViewFormatSupport = m_TextureResourceFormatSupport;
+
+	// Can mipmaps be automatically generated for this texture format?  No, we don't want to do this right now.  Not at runtime
+	m_generate_mipmaps = false; // !m_isdynamic && (m_ShaderResourceViewFormatSupport & D3D11_FORMAT_SUPPORT_MIP_AUTOGEN) != 0;
+
+	return true;
+}
+
+bool TextureDX11::LoadNonDDSTexture2D(const fs::path & filePath)
+{
+	auto device = Game::Engine->GetDevice();
+	auto devicecontext = Game::Engine->GetDeviceContext();
 
 	// Try to determine the file type from the image file.
 	FREE_IMAGE_FORMAT fif = FreeImage_GetFileTypeU(filePath.c_str());
@@ -376,14 +451,14 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (fif == FIF_UNKNOWN || !FreeImage_FIFSupportsReading(fif))
 	{
-		Game::Log << LOG_ERROR << "Unknown file format: " << filePath.string() << "\n";
+		Game::Log << LOG_ERROR << "Unknown file format: " << filePath.string() << " [F]\n";
 		return false;
 	}
 
 	FIBITMAP* dib = FreeImage_LoadU(fif, filePath.c_str());
 	if (dib == nullptr || FreeImage_HasPixels(dib) == FALSE)
 	{
-		Game::Log << LOG_ERROR << "Failed to load image: " << filePath.string() << "\n";
+		Game::Log << LOG_ERROR << "Failed to load image: " << filePath.string() << " [F]\n";
 		return false;
 	}
 
@@ -412,7 +487,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format\n");
+			Game::Log << LOG_ERROR << ("Unknown image format [F]\n");
 		}
 		break;
 		}
@@ -439,7 +514,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format\n");
+			Game::Log << LOG_ERROR << ("Unknown image format [F]\n");
 		}
 		break;
 		}
@@ -475,7 +550,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 		break;
 		default:
 		{
-			Game::Log << LOG_ERROR << ("Unknown image format\n");
+			Game::Log << LOG_ERROR << ("Unknown image format [F]\n");
 		}
 		break;
 		}
@@ -513,11 +588,11 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CheckFormatSupport(m_TextureResourceFormat, &m_TextureResourceFormatSupport)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to query format support\n");
+		Game::Log << LOG_ERROR << ("Failed to query format support [F]\n");
 	}
 	if ((m_TextureResourceFormatSupport & D3D11_FORMAT_SUPPORT_TEXTURE2D) == 0)
 	{
-		ReportTextureFormatError(m_format, "Unsupported texture format for 2D textures\n");
+		ReportTextureFormatError(m_format, "Unsupported texture format for 2D textures [F]\n");
 		return false;
 	}
 
@@ -557,7 +632,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CreateTexture2D(&textureDesc, m_generate_mipmaps ? nullptr : &subresourceData, &m_texture2d)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to create texture\n");
+		Game::Log << LOG_ERROR << ("Failed to create texture [F]\n");
 		return false;
 	}
 
@@ -571,7 +646,7 @@ bool TextureDX11::LoadTexture2D(const std::wstring& fileName)
 
 	if (FAILED(device->CreateShaderResourceView(m_texture2d, &resourceViewDesc, &m_srv)))
 	{
-		Game::Log << LOG_ERROR << ("Failed to create texture resource view\n");
+		Game::Log << LOG_ERROR << ("Failed to create texture resource view [F]\n");
 		return false;
 	}
 
