@@ -39,7 +39,7 @@
 
   <!-- Load effects and particle emitter data -->
   <include file="Effects\Effects.xml" />
-  <include file="ParticleEmitters.xml" />
+  <include file="Particles\ParticleEmitters.xml" />
 
   <!-- Load fonts -->
   <include file="Fonts\Fonts.xml" />
