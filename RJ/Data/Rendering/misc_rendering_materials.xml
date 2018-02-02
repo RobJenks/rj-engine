@@ -42,7 +42,11 @@
     <DiffuseTexture>grad_linear_depth</DiffuseTexture>
   </Material>
 
-  
+  <!-- Solid black material -->
+  <Texture code="solid_black" dimension="Texture2D" filename="Rendering/solid_black.dds" />
+  <Material code="solid_black">
+    <DiffuseTexture>solid_black</DiffuseTexture>
+  </Material>
 
 
 

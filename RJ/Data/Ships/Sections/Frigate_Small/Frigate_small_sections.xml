@@ -1,4 +1,7 @@
 <GameData>
+
+  <Texture code="frigate_small_midsection1_prev" dimension="Texture2D" filename="Ships\Sections\Frigate_Small\frigate_small_midsection1_prev.dds" />
+  
   <ComplexShipSection>
     <Code>SFRIG_MIDSECTION_01</Code>
     <Name>Small Frigate Midsection 1</Name>
@@ -11,7 +14,7 @@
     <TurnAngle>0.001000</TurnAngle>
     <BankExtent x="5.000000" y="5.000000" z="2.500000" />
     <BankRate>0.500000</BankRate>
-    <Image w="64" h="96">Ships\Sections\Frigate_Small\frigate_small_midsection1_prev.dds</Image>
+    <PreviewImage w="64" h="96">frigate_small_midsection1_prev</PreviewImage>
 
     <AllocateBoundingObjects>1</AllocateBoundingObjects>
     <BoundingObject id="0" type="cuboid" sizex="200.000000" sizey="50.000000" sizez="350.000000" />

@@ -67,13 +67,14 @@ Result UserInterface::BuildUILayouts(void)
 {
 	Result result, overallresult = ErrorCodes::NoError;
 
+	/* Ship designer UI is currently disabled; expected to be replaced by the ShipBuilder UI*/
 	// Perform post-load initialisation of the ship designer UI
-	result = InitialiseShipDesignerUI();
+	/*result = InitialiseShipDesignerUI();
 	if (result != ErrorCodes::NoError)
 	{
 		overallresult = result; 
 		Game::Log << LOG_ERROR << "Error building ship designer UI layout\n";
-	}
+	}*/
 
 	// Initialise the model builder UI
 	result = InitialiseModelBuilderUI();

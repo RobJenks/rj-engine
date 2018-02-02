@@ -118,6 +118,8 @@ std::string StrUpper(std::string);		// Converts a std::string to uppercase as a 
 char *BuildFilename(const char *, const char *);
 std::string BuildStrFilename(const std::string &, const std::string &);
 
+std::string DataRelativeFile(const std::string & relative_path);
+
 // Enumeration of possible comparison results
 enum ComparisonResult { Equal = 0, LessThan, GreaterThan };
 

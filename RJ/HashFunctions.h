@@ -351,6 +351,7 @@ namespace HashedStrings
 	DefineHash(H_Audio, "audio");
 	DefineHash(H_ScreenResolution, "screenresolution");
 	DefineHash(H_SoftwareRasterizerOverride, "softwarerasterizeroverride");
+	DefineHash(H_Font, "font");
 
 }
 

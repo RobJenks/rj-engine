@@ -4,6 +4,7 @@
 #include <cmath>
 #include <shlwapi.h>
 #include "FastMath.h"
+#include "GameDataExtern.h"
 
 #include "Utility.h"
 
@@ -66,6 +67,11 @@ std::string BuildStrFilename(const std::string &path, const std::string &filenam
 {
 	std::string result = path + "\\" + filename;
 	return result;
+}
+
+std::string DataRelativeFile(const std::string & relative_path)
+{
+	return (D::DATA_S + "\\" + relative_path);
 }
 
 void StrLowerC(std::string &str)

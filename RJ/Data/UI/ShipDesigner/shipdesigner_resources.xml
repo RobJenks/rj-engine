@@ -1,0 +1,21 @@
+<gamedata>
+
+  <!-- Texture resources specific to the ship designer UI -->
+  <Texture code="sd_connectionchangetool" dimension="Texture2D" filename="UI/ShipBuilder/Content/sd_connectionchangetool.dds" />
+  <Texture code="sdgrid_active" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_active.dds" />
+  <Texture code="sdgrid_apoint_standard" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_apoint_standard.dds" />
+  <Texture code="sdgrid_apoint_turret" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_apoint_turret.dds" />
+  <Texture code="sdgrid_blueprint" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_blueprint.dds" />
+  <Texture code="sdgrid_buildable" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_buildable.dds" />
+  <Texture code="sdgrid_corridor" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_corridor.dds" />
+  <Texture code="sdgrid_null" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_null.dds" />
+  <Texture code="sdgrid_placementconflict" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_placementconflict.dds" />
+  <Texture code="sdgrid_tile_border" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_tile_border.dds" />
+  <Texture code="sdgrid_tile_civilian" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_tile_civilian.dds" />
+  <Texture code="sdgrid_tile_engineering" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_tile_engineering.dds" />
+  <Texture code="sdgrid_tile_military" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_tile_military.dds" />
+  <Texture code="sdgrid_walkable_connect" dimension="Texture2D" filename="UI/ShipBuilder/Content/sdgrid_walkable_connect.dds" />
+
+
+
+</gamedata>

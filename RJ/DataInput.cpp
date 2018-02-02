@@ -243,6 +243,8 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 				res = IO::Data::LoadTextureData(child);
 			} else if (hash == HashedStrings::H_Material) {
 				res = IO::Data::LoadMaterialData(child);
+			} else if (hash == HashedStrings::H_Font) {
+				res = IO::Data::LoadFont(child);
 			} else {
 				// Unknown level one node type
 				res = ErrorCodes::UnknownDataNodeType;
@@ -3419,7 +3421,8 @@ Result IO::Data::LoadFont(TiXmlElement *node)
 	if (code.empty() || datafilename.empty() || texturename.empty()) return ErrorCodes::CannotLoadFontWithMissingData;
 
 	// Attempt to initialise the new font and return the result
-	Result result = Game::Engine->GetTextManager()->InitializeFont(code, datafilename, texturename);
+	std::string fullDataFilename = DataRelativeFile(datafilename);
+	Result result = Game::Engine->GetTextManager()->InitializeFont(code, fullDataFilename, texturename);
 	return result;
 }
 
@@ -3837,19 +3840,17 @@ Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
 	if (!code || !texture) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
 
 	// Process the parameters and convert as required
-	std::string stexfile = BuildStrFilename(D::IMAGE_DATA, texture);
-	const char *texfile = stexfile.c_str();
 	std::string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
 	std::string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
 	bool repeat = (trepeat ? StrLower(std::string(trepeat)) == "true" : false);
 
 	// Create the new 2D image group object and attempt to initialise it
 	Image2DRenderGroup *igroup = new Image2DRenderGroup();
-	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, texfile, repeat);
+	igroup->SetCode(code);
+	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, texture, repeat);
 	if (result != ErrorCodes::NoError) return result;
 
 	// Set other properties at the group level
-	igroup->SetCode(code);
 	igroup->SetRenderActive( (grouprender == "true") );
 	igroup->SetAcceptsMouseInput( (acceptsmouse == "true") );
 	

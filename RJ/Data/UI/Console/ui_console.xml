@@ -1,18 +1,21 @@
 <gamedata>
+
+  <include file="UI/Console/console_resources.xml" />
+  
   <uilayout>
     <Code>UI_CONSOLE</Code>
     <Description>Debug Console</Description>
 
     <!-- Console background -->
-    <Image2DGroup code="console_back" texture="UI\Console\Content\console_back.dds" texturemode="Repeat" render="true">
+    <Image2DGroup code="console_back" texture="console_back" texturemode="Repeat" render="true">
       <Instance x="0" y="0" z="0.0015" width="1366" height="300" render="true" />
     </Image2DGroup>
 
     <!-- Textbox components -->
-    <Image2DGroup code="textbox_frame" texture="UI\Common\Content\textbox_normal.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame" texture="textbox_normal" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_input_fr" x="0" y="268" z="0.001" width="1366" height="32" render="true" />
     </Image2DGroup>
-    <Image2DGroup code="textbox_frame_focus" texture="UI\Common\Content\textbox_focus.dds" texturemode="Normal" acceptsmouse="true" render="true">
+    <Image2DGroup code="textbox_frame_focus" texture="textbox_focus" texturemode="Normal" acceptsmouse="true" render="true">
       <Instance code="txt_input_frf" x="0" y="268" z="0.001" width="1366" height="32" render="true" />
     </Image2DGroup>
 

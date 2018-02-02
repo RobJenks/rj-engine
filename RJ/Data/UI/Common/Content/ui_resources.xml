@@ -12,13 +12,12 @@
   <Texture code="panel_tab_blank_active" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_active.dds" />
   <Texture code="panel_tab_blank_inactive" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive.dds" />
   <Texture code="panel_tab_blank_inactive_down" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive_down.dds" />
-  <Texture code="solid_black" dimension="Texture2D" filename="UI/Common/Content/solid_black.dds" />
   <Texture code="textbox_focus" dimension="Texture2D" filename="UI/Common/Content/textbox_focus.dds" />
   <Texture code="textbox_normal" dimension="Texture2D" filename="UI/Common/Content/textbox_normal.dds" />
   
   
   <!-- Rendering for debug intersection test -->
-  <Texture code="ui_intersection_test_trajectory" dimension="Texture2D" filename="UI/ui_intersection_test_trajectory.dds" />
+  <Texture code="ui_intersection_test_trajectory" dimension="Texture2D" filename="UI/Common/Content/ui_intersection_test_trajectory.dds" />
   <Material code="ui_intersection_test_trajectory">
     <DiffuseTexture>ui_intersection_test_trajectory</DiffuseTexture>
   </Material>

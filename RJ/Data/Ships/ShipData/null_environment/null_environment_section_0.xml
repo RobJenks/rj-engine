@@ -5,7 +5,7 @@
         <StandardObject>True</StandardObject>
         <Model>null_model</Model>
         <ElementSize x="1" y="1" z="1" />
-        <PreviewImage w="64" h="64">ui\common\content\solid_black.dds</PreviewImage>
+        <PreviewImage w="64" h="64">solid_black</PreviewImage>
         <Mass>100.0</Mass>
         <VelocityLimit>1.0</VelocityLimit>
         <AngularVelocityLimit>0.1</AngularVelocityLimit>

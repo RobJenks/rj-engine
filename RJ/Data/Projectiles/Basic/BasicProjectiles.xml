@@ -8,7 +8,7 @@
     <ProjectileBeamRadius>3.0</ProjectileBeamRadius>
     <Lifetime>3000</Lifetime>
     <ProjectileBeamColour r="1.0" g="1.0" b="1.0" a="0.5" />
-    <Material>grad2</Material>
+    <Material>grad_yellowgreen</Material>
     <DamageSet>
       <Damage type="LASER" amount="2.0" />
     </DamageSet>

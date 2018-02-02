@@ -5,7 +5,7 @@
         <StandardObject>True</StandardObject>
         <Model>frigate_medium_midsection1</Model>
         <ElementSize x="10" y="24" z="2" />
-        <PreviewImage w="64" h="96">ships\sections\frigate_medium\frigate_medium_midsection1_prev.dds</PreviewImage>
+        <PreviewImage w="64" h="96">frigate_medium_midsection1_prev</PreviewImage>
         <Mass>50000.0</Mass>
         <VelocityLimit>100.0</VelocityLimit>
         <AngularVelocityLimit>0.4</AngularVelocityLimit>

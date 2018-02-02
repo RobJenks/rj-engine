@@ -1,0 +1,6 @@
+<GameData>
+  
+  <!-- Texture resources specific to the debug controle UI -->
+  <Texture code="console_back" dimension="Texture2D" filename="UI/Console/Content/console_back.dds" />
+  
+</GameData>

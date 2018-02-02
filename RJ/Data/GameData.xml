@@ -10,7 +10,10 @@
 
   <!-- Load modifier data -->
   <include file="Modifiers\Modifiers.xml" />
-  
+
+  <!-- General rendering resources -->
+  <include file="Rendering\misc_rendering_materials.xml" />
+
   <!-- Load shared static model data -->
   <include file="Models\BasicModels.xml" />
   <include file="Ships\ShipModels.xml" />
@@ -43,9 +46,6 @@
 
   <!-- Load fonts -->
   <include file="Fonts\Fonts.xml" />
-  
-  <!-- General rendering resources -->
-  <include file="Rendering\misc_rendering_materials.xml" />
   
   <!-- Load ship data -->
   <include file="Ships\Ships.xml" />
