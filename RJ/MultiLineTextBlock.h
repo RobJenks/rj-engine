@@ -85,7 +85,7 @@ public:
 
 	// Static constants
 	static const int							TEXT_MARGIN = 6;
-	static const char *							BACKDROP_COMPONENT;
+	static const std::string					BACKDROP_COMPONENT;
 
 protected:
 

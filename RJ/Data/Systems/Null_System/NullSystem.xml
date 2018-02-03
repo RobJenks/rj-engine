@@ -1,10 +1,13 @@
 <gamedata>
-    <system>
-        <Name>Null System</Name>
-        <Code>NULLSYS</Code>
-        <Size x="100000.0" y="100000.0" z="100000.0"/>
-        <SpaceBackdrop>Systems/Null_System/nullsys_backdrop.jpg</SpaceBackdrop>
 
+  <Texture code="nullsys_backdrop" dimension="Texture2D" filename="Systems/Null_System/nullsys_backdrop.dds" />
 
-    </system>
+  <system>
+    <Name>Null System</Name>
+    <Code>NULLSYS</Code>
+    <Size x="100000.0" y="100000.0" z="100000.0"/>
+    <SpaceBackdrop>nullsys_backdrop</SpaceBackdrop>
+  
+  </system>
+  
 </gamedata>

@@ -1429,7 +1429,7 @@ Result RJMain::InitialiseRegions(void)
 	// Initialise the immediate region, centred around the player
 	D::Regions::Immediate = new ImmediateRegion();
 	res = D::Regions::Immediate->Initialise(								// Pointer to the D3D device
-		"dust_particle.dds", 												// Texture to be mapped onto all dust particles
+		"dust_particle", 													// Texture to be mapped onto all dust particles
 		Game::CurrentPlayer->GetPlayerShip()->GetPosition(),				// Starting centre point = player location
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_MIN), 0.0f),			// Minimum region bounds
 		XMVectorSetW(XMVectorReplicate(Game::C_IREGION_BOUNDS), 0.0f),		// Maximum region bounds
@@ -1447,7 +1447,7 @@ Result RJMain::InitialiseRegions(void)
 
 	// DEBUG: SET BACKDROP
 	XMFLOAT2 texsize = XMFLOAT2(2048.0f, 1024.0f);
-	if (true) D::Regions::System->SetBackdropTexture(BuildStrFilename(D::IMAGE_DATA, "Systems\\Omega\\omega_backdrop.dds").c_str(), texsize);
+	if (true) D::Regions::System->SetBackdropTexture("omega_backdrop", texsize);
 
 
 	// Return success if we have reached the end

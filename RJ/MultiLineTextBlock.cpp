@@ -9,7 +9,7 @@
 #include "MultiLineTextBlock.h"
 
 // Initialise constant values
-const char *MultiLineTextBlock::BACKDROP_COMPONENT = "\\UI\\Common\\Content\\mltb_back.dds";
+const std::string MultiLineTextBlock::BACKDROP_COMPONENT = "mltb_back";
 
 // Default constructor
 MultiLineTextBlock::MultiLineTextBlock(void)
@@ -109,9 +109,8 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 	SetRenderActive(m_render);
 
 	// Create a backdrop component for the control
-	std::string back_filename = concat(D::IMAGE_DATA)(MultiLineTextBlock::BACKDROP_COMPONENT).str();
 	m_backcode = concat(m_code)(".back").str();
-	m_back = D::UI->NewComponent(m_backcode, back_filename.c_str(), m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
+	m_back = D::UI->NewComponent(m_backcode, MultiLineTextBlock::BACKDROP_COMPONENT, m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
 	if (m_back)
 	{
 		// Set the render state based on this control state

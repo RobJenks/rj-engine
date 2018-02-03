@@ -70,7 +70,7 @@ public:
 										   int x, int y, int maxlength, float size, const XMFLOAT4 & colour, bool render);
 
 	// Creates a new component, for addition to one of the UI component sets
-	Image2D *				NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height);
+	Image2D *				NewComponent(std::string code, const std::string & texture, int x, int y, float z, int width, int height);
 
 	// Initialise the different components sets used for rendering the UI in different scenarios
 	Result					InitialiseUIComponentSets(void);

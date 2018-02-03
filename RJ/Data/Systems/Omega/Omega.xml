@@ -1,10 +1,13 @@
 <gamedata>
-    <system>
-        <Name>Omega</Name>
-        <Code>AB01</Code>
-        <Size x="100000.0" y="100000.0" z="100000.0"/>
-        <SpaceBackdrop>Systems/Omega/omega_backdrop.jpg</SpaceBackdrop>
 
+  <Texture code="omega_backdrop" dimension="Texture2D" filename="Systems/Omega/omega_backdrop.dds" />
+  
+  <system>
+    <Name>Omega</Name>
+    <Code>AB01</Code>
+    <Size x="100000.0" y="100000.0" z="100000.0"/>
+    <SpaceBackdrop>omega_backdrop</SpaceBackdrop>
+  
+  </system>
 
-    </system>
 </gamedata>

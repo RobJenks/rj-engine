@@ -3469,12 +3469,11 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 
 			// Process relevant fields to get the correct format
 			StrLowerC(code); 
-			std::string texfile = BuildStrFilename(D::IMAGE_DATA, texture);
 			int width = (int)floor(atof(cwidth));
 			int height = (int)floor(atof(cheight));
 
 			// Initialise a new component using this data
-			Image2D *item = D::UI->NewComponent(code, texfile.c_str(), (int)floor(pos.x), (int)floor(pos.y), pos.z, width, height);
+			Image2D *item = D::UI->NewComponent(code, texture, (int)floor(pos.x), (int)floor(pos.y), pos.z, width, height);
 			if (!item) continue;
 			
 			// Only process the render flag if it has been set, otherwise use the Image2D object default

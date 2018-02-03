@@ -286,11 +286,12 @@ std::string UserInterface::GetActiveUIControllerCode(void) const
 	else				return NullString;
 }
 
-Image2D *UserInterface::NewComponent(std::string code, const char *filename, int x, int y, float z, int width, int height)
+Image2D *UserInterface::NewComponent(std::string code, const std::string & texture, int x, int y, float z, int width, int height)
 {
 	// Create a new component and initialise with the supplied data
 	Image2D *item = new Image2D();
-	Result result = item->Initialize(Game::ScreenWidth, Game::ScreenHeight, filename, width, height);
+	item->SetCode(code);
+	Result result = item->Initialize(Game::ScreenWidth, Game::ScreenHeight, texture, width, height);
 
 	// Return NULL if the initialisation failed
 	if (result != ErrorCodes::NoError || !item)
@@ -300,7 +301,6 @@ Image2D *UserInterface::NewComponent(std::string code, const char *filename, int
 	}
 
 	// Set properties and the initial position
-	item->SetCode(code);
 	item->SetPosition(x, y);
 	item->SetZOrder(z);
 

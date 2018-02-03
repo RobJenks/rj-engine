@@ -64,6 +64,8 @@ public:
 	template <typename T>
 	bool											AssetExists(std::string name);
 	
+	template <typename T>
+	T *												GetOrCreateAsset(const std::string & name);
 
 	CMPINLINE MaterialDX11 *						GetDefaultMaterial(void) { return GetDefaultAsset<MaterialDX11>(); }
 
@@ -187,6 +189,22 @@ bool RenderAssetsDX11::AssetExists(std::string name)
 {
 	auto & data = GetAssetData<T>();
 	return (data.find(name) != data.end());
+}
+
+template <typename T>
+T * RenderAssetsDX11::GetOrCreateAsset(const std::string & name)
+{
+	auto & data = GetAssetData<T>();
+	auto it = data.find(name);
+
+	if (it != data.end())
+	{
+		return it->second.get();
+	}
+	else
+	{
+		return CreateAsset<T>(name);
+	}
 }
 
 
