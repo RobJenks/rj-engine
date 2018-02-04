@@ -22,6 +22,10 @@ std::unique_ptr<ModelData> InputTransformerRjm::Transform(fs::path file) const
 	std::string data = PipelineUtil::ReadFileToString(file);
 
 	std::string obj_data = ConvertRjmToObj(data, file);
+	if (obj_data.empty())
+	{
+		return NULL;
+	}
 
 	// Generate a new temporary file alongside the RJM and apply transformations using that data
 	fs::path obj_path = PipelineUtil::NewTemporaryFileWithExistingFile(file);
@@ -63,6 +67,15 @@ std::string InputTransformerRjm::ConvertRjmToObj(const std::string & data, fs::p
 	static const std::string HEADER_END = "Data:";
 
 	TRANSFORM_INFO << "Attempting conversion of RJM data to OBJ format\n";
+
+	// Basic verification that this is in fact an RJM file
+	if (data.find(HEADER_START, 0U) == std::string::npos ||
+		data.find(HEADER_END, 0U) == std::string::npos ||
+		data.find("vn ", 0U) != std::string::npos)
+	{
+		TRANSFORM_ERROR << "File \"" << source_file.string() << "\" does not appear to be an RJM file, terminating\n";
+		return "";
+	}
 
 	std::vector<XMFLOAT3> v;
 	std::vector<XMFLOAT3> n;

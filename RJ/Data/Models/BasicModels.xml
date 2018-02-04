@@ -2,7 +2,7 @@
 
   <Model>
     <Code>null_model</Code>
-    <Filename>Models\Misc\unit_squaare.rjm</Filename>
+    <Filename>Models\Misc\unit_square.rjm</Filename>
     <Material>null_material</Material>
   </Model>
 

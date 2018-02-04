@@ -13,9 +13,9 @@ class ByteString : public std::vector<char>
 public:
 
 	// Default constructor
-	inline ByteString(void) 
-		: 
-		std::vector<char>(), 
+	inline ByteString(void)
+		:
+		std::vector<char>(),
 		m_readpoint(0U)
 	{
 	}
@@ -24,6 +24,11 @@ public:
 	template <typename T>
 	void					WriteObject(const T & object);
 
+	// Write a string character-by-character
+	inline void				WriteString(std::string data)
+	{
+		for (auto ch : data) WriteObject<std::string::value_type>(ch);
+	}
 
 	// Reset the object deserialisation pointer for a new read from the start of the buffer
 	inline void				ResetRead(void) { m_readpoint = 0U; }

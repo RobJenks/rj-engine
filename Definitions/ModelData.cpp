@@ -54,7 +54,7 @@ ByteString ModelData::Serialize(void) const
 {
 	// Header data
 	ByteString b;
-	b.WriteObject(ModelData::GEOMETRY_FILE_IDENTIFIER);
+	b.WriteString(ModelData::GEOMETRY_FILE_IDENTIFIER);
 	b.WriteObject(this->ModelMaterialIndex);
 	b.WriteObject(this->MinBounds);
 	b.WriteObject(this->MaxBounds);

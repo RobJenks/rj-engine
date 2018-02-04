@@ -13,6 +13,12 @@ ByteString BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model) co
 
 void BinaryOutputTransform::Transform(std::unique_ptr<ModelData> model, fs::path output_file) const
 {
+	if (!model.get())
+	{
+		TRANSFORM_ERROR << "No valid model data provided, terminating output stage\n";
+		return;
+	}
+
 	TRANSFORM_INFO << "Serializing model data\n";
 	ByteString output = Transform(std::move(model));
 

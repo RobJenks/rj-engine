@@ -50,6 +50,8 @@ void RjmObjConversionTest(void)
 
 void BulkRjmObjConversion(void)
 {
+	bool overwrite_backups = true;
+
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("", true)))
@@ -59,10 +61,24 @@ void BulkRjmObjConversion(void)
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
+
 	// Set of models to be converted
 	std::vector<fs::path> source_files = 
 	{
-		fs::path("C:\\Users\\robje\\Downloads\\testship1.rjm")
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Models/Misc/unit_cone.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Models/Misc/unit_square.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Models/Misc/unit_line.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Sections/Frigate_Small/frigate_small_midsection1.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Sections/Frigate_Medium/frigate_medium_midsection1.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/CorridorTiles/corridor_ns.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/CorridorTiles/corridor_se.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/CorridorTiles/corridor_nse.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/CorridorTiles/corridor_nsew.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/QuartersTiles/quarters_dorm01_interior.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/QuartersTiles/quarters_dorm01_wall_straight.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/QuartersTiles/quarters_dorm01_wall_corner.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Tiles/QuartersTiles/quarters_dorm01_connection.rjm"), 
+		fs::path("C:/Users/robje/Documents/Visual Studio 2017/Projects/RJ/RJ/Data/Ships/Simple/Testing/testship1/testship1.rjm")
 	};
 
 	int index = 0;
@@ -74,8 +90,15 @@ void BulkRjmObjConversion(void)
 		fs::path target(fs::absolute(path.parent_path()).string() + "/" + path.stem().string() + ".out");
 		pipeline->Transform(path, target);
 
+		// If the transformation failed we should skip the model here
+		if (!fs::exists(target))
+		{
+			std::cerr << "Transformation failed, moving to next model\n";
+			continue;
+		}
+
 		// Rename the original file in order to retain a backup (do not overwrite so that multiple runs will not eliminate backups)
-		fs::copy_file(path, fs::path(path.string() + ".backup"), fs::copy_options::skip_existing);
+		fs::copy_file(path, fs::path(path.string() + ".backup"), (overwrite_backups ? fs::copy_options::overwrite_existing : fs::copy_options::skip_existing));
 
 		// Rename the target file to the original file to perform an in-place swap
 		fs::copy_file(target, path, fs::copy_options::overwrite_existing);
