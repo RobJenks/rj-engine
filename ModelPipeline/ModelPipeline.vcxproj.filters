@@ -32,9 +32,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ModelPipeline.cpp">
-      <Filter>Console</Filter>
-    </ClCompile>
     <ClCompile Include="TransformPipeline.cpp">
       <Filter>Transformer</Filter>
     </ClCompile>
@@ -61,6 +58,10 @@
     </ClCompile>
     <ClCompile Include="PipelineUtil.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelPipeline.cpp" />
+    <ClCompile Include="InputTransformerRjm.cpp">
+      <Filter>Transformer\Input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -117,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="PipelineUtil.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerRjm.h">
+      <Filter>Transformer\Input</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

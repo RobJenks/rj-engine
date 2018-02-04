@@ -2,6 +2,7 @@
 #include <iostream>
 #include "AssimpIntegration.h"
 #include "InputTransformerAssimp.h"
+#include "PipelineUtil.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -10,11 +11,12 @@
 
 std::unique_ptr<ModelData> InputTransformerAssimp::Transform(const std::string & data) const
 {
-	// Not (currently) implemented; should just save to a tmp file and use the fs::path method, 
-	// to preserve the file hints and ability of assimp to process file dependencies in the same 
-	// directory (though this won't work in the case of a single string input)
-	TRANSFORM_ERROR << "Transform from string is not implemented\n";
-	return NULL;
+	// Save data to a temporary file, then process as normal and clean up the temporary file
+	fs::path file = PipelineUtil::NewTemporaryFile();
+	auto model_data = Transform(file);
+	PipelineUtil::DeleteTemporaryFile(file);
+
+	return model_data;
 }
 
 std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) const

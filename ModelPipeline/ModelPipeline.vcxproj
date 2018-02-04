@@ -191,6 +191,7 @@
     <ClInclude Include="AssimpIntegration.h" />
     <ClInclude Include="BinaryOutputTransform.h" />
     <ClInclude Include="InputTransformerAssimp.h" />
+    <ClInclude Include="InputTransformerRjm.h" />
     <ClInclude Include="PipelineStagePassthrough.h" />
     <ClInclude Include="PipelineStage.h" />
     <ClInclude Include="PipelineStageCentreModel.h" />
@@ -207,6 +208,7 @@
     <ClCompile Include="AssimpIntegration.cpp" />
     <ClCompile Include="BinaryOutputTransform.cpp" />
     <ClCompile Include="InputTransformerAssimp.cpp" />
+    <ClCompile Include="InputTransformerRjm.cpp" />
     <ClCompile Include="ModelPipeline.cpp" />
     <ClCompile Include="PipelineStageCentreModel.cpp" />
     <ClCompile Include="PipelineUtil.cpp" />
