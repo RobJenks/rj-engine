@@ -25,19 +25,32 @@ public:
 	static const size_t				NO_RENDER_SLOT;
 
 	// Default constructor
-	ModelBuffer(void);
+	ModelBuffer(void) noexcept;
 
 	// Constructor to build a new buffer from the provided data
 	ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount,
-				const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount, const MaterialDX11 * material);
+				const void **ppIndexdata, unsigned int indexsize, unsigned int indexcount, const MaterialDX11 * material) noexcept;
 
-	// Constructor to build a new buffer from existing buffer data that will be MOVED into the buffer
-	ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && index_buffer, const MaterialDX11 * material);
+	// Constructor to build a new buffer from existing buffer data, which will be MOVED into the buffer
+	ModelBuffer(VertexBufferDX11 && vertex_buffer, IndexBufferDX11 && index_buffer, const MaterialDX11 * material) noexcept;
 
 	// Constructor to build a new buffer from the provided data.  Index buffer will be automatically constructed as a sequential
 	// buffer matching the vertex buffer length, using the standard index format
-	ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material);
+	ModelBuffer(const void **ppVertexdata, unsigned int vertexsize, unsigned int vertexcount, const MaterialDX11 * material) noexcept;
 	
+	// Copy construction and assignment must be disallowed, since this buffer owns several single-instance COM buffers
+	CMPINLINE ModelBuffer(const ModelBuffer & other) = delete;
+	CMPINLINE ModelBuffer & operator=(const ModelBuffer & other) = delete;
+
+	// Move constructor
+	ModelBuffer(ModelBuffer && other) noexcept;
+
+	// Move assignment
+	ModelBuffer & operator=(ModelBuffer && other) noexcept;
+
+
+
+
 	// Vertex buffer
 	VertexBufferDX11				VertexBuffer;
 
@@ -66,7 +79,7 @@ public:
 	}
 
 	// Default destructor
-	~ModelBuffer(void);
+	~ModelBuffer(void) noexcept;
 
 
 protected:

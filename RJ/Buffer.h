@@ -17,10 +17,21 @@ public:
 	};
 
 	// Default constructor
-	Buffer(void);
+	Buffer(void) noexcept;
 
 	// Construct a new buffer of the given type, and with the given parameters
-	Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT stride);
+	Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT stride) noexcept;
+
+	// Copy construction and assignment must be disallowed, since this buffer manages a single COM resource
+	CMPINLINE					Buffer(const Buffer & other) = delete;
+	CMPINLINE					Buffer & operator=(const Buffer & other) = delete;
+
+	// Move constructor
+	Buffer(Buffer && other) noexcept;
+
+	// Move assignment
+	Buffer & operator=(Buffer && other) noexcept;
+
 
 	// Initialise a new D3D buffer with the given data
 	void InitialiseBuffer(UINT bindflags, const void *data, UINT count, UINT stride, ID3D11Buffer **ppOutBuffer);
@@ -41,7 +52,7 @@ public:
 
 
 	// Destructor
-	~Buffer(void);
+	~Buffer(void) noexcept;
 
 protected:
 

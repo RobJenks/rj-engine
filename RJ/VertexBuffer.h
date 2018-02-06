@@ -8,15 +8,28 @@ class VertexBuffer : public Buffer
 {
 public:
 
-	VertexBuffer(void);
-	VertexBuffer(const void *data, UINT count, UINT stride);
-	VertexBuffer(const ModelData & model_data);
+	// Constructors
+	VertexBuffer(void) noexcept;
+	VertexBuffer(const void *data, UINT count, UINT stride) noexcept;
+	VertexBuffer(const ModelData & model_data) noexcept;
+
+	// Copy construction and assignment must be disallowed, since this VertexBuffer manages a single COM resource
+	CMPINLINE			VertexBuffer(const VertexBuffer & other) = delete;
+	CMPINLINE			VertexBuffer & operator=(const VertexBuffer & other) = delete;
+
+	// Move constructor; simply delegate
+	CMPINLINE			VertexBuffer(VertexBuffer && other) noexcept : Buffer(std::move(other)) { }
+
+	// Move assignment; simply delegate
+	CMPINLINE VertexBuffer & operator=(VertexBuffer && other) noexcept { return static_cast<VertexBuffer&>(Buffer::operator=(std::move(other))); }
+
 
 	CMPINLINE auto		GetVertexCount(void) const { return m_buffer_elementcount[0]; }
 	CMPINLINE auto		GetVertexSize(void) const { return m_stride[0]; }
 
 
-	~VertexBuffer(void);
+	// Destructor
+	~VertexBuffer(void) noexcept;
 
 
 private:

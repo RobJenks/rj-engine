@@ -3,13 +3,13 @@
 
 
 // Construct an empty buffer
-IndexBuffer::IndexBuffer(void)
+IndexBuffer::IndexBuffer(void) noexcept
 {
 	m_buffertype = Buffer::BufferType::IndexBuffer;
 }
 
 // Construct an index buffer with the specified data
-IndexBuffer::IndexBuffer(const void *data, UINT count, UINT stride)
+IndexBuffer::IndexBuffer(const void *data, UINT count, UINT stride) noexcept
 	:
 	Buffer(Buffer::BufferType::IndexBuffer, data, count, stride)
 {
@@ -31,7 +31,7 @@ IndexBuffer IndexBuffer::CreateSequentialIndexBuffer(UINT count)
 	return IndexBuffer((const void*)data.data(), count, sizeof(IndexBuffer::INDEX_TYPE));
 }
 
-IndexBuffer::~IndexBuffer(void)
+IndexBuffer::~IndexBuffer(void) noexcept
 {
 
 }

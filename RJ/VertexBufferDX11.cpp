@@ -3,19 +3,19 @@
 #include "../Definitions/ModelData.h"
 
 
-VertexBufferDX11::VertexBufferDX11(void)
+VertexBufferDX11::VertexBufferDX11(void) noexcept
 	:
 	VertexBuffer()
 {
 }
 
-VertexBufferDX11::VertexBufferDX11(const void *data, UINT count, UINT stride)
+VertexBufferDX11::VertexBufferDX11(const void *data, UINT count, UINT stride) noexcept
 	:
 	VertexBuffer(data, count, stride)
 {
 }
 
-VertexBufferDX11::VertexBufferDX11(const ModelData & model_data)
+VertexBufferDX11::VertexBufferDX11(const ModelData & model_data) noexcept
 	:
 	VertexBuffer(model_data)
 {
@@ -32,3 +32,11 @@ void VertexBufferDX11::Unbind(UINT slot_id)
 {
 	Game::Engine->GetDeviceContext()->IASetVertexBuffers(slot_id, 1, null_buffer, nullptr, nullptr);
 }
+
+
+
+VertexBufferDX11::~VertexBufferDX11(void) noexcept
+{
+}
+
+

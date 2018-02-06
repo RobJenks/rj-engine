@@ -3,25 +3,24 @@
 
 
 
-VertexBuffer::VertexBuffer(void)
+VertexBuffer::VertexBuffer(void) noexcept
 {
 	m_buffertype = Buffer::BufferType::VertexBuffer;
 }
 
-VertexBuffer::VertexBuffer(const void *data, UINT count, UINT stride)
+VertexBuffer::VertexBuffer(const void *data, UINT count, UINT stride) noexcept
 	: 
 	Buffer(Buffer::BufferType::VertexBuffer, data, count, stride)
 {
 }
 
-VertexBuffer::VertexBuffer(const ModelData & model_data)
+VertexBuffer::VertexBuffer(const ModelData & model_data) noexcept
 	:
 	Buffer(Buffer::BufferType::VertexBuffer, (const void *)model_data.VertexData, model_data.VertexCount, sizeof(ModelData::TVertex))
 {
 }
 
 
-VertexBuffer::~VertexBuffer(void)
+VertexBuffer::~VertexBuffer(void) noexcept
 {
-
 }

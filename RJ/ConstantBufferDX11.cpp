@@ -3,9 +3,6 @@
 #include "CoreEngine.h"
 
 
-// Static null buffer resource, used for more efficient unbinding
-//ID3D11Buffer * const ConstantBufferDX11::null_buffer[1] = { nullptr };
-
 
 // Constructor; create a new constant buffer of the given size
 ConstantBufferDX11::ConstantBufferDX11(UINT buffer_size)

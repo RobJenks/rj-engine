@@ -8,7 +8,7 @@ ID3D11Buffer * Buffer::null_buffer[1] = { nullptr };	// For more efficient unbin
 
 
 // Default constructor; create a null buffer with all default values
-Buffer::Buffer(void)
+Buffer::Buffer(void) noexcept 
 	:
 	m_buffertype(BufferType::Unknown), 
 	m_bindflags(0U)
@@ -19,7 +19,7 @@ Buffer::Buffer(void)
 }
 
 // Construct a new buffer of the given type, and with the given parameters
-Buffer::Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT stride)
+Buffer::Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT stride) noexcept 
 	:
 	m_buffertype(buffertype)
 {
@@ -29,6 +29,35 @@ Buffer::Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT
 	m_stride[0] = stride;
 
 	InitialiseBuffer(m_bindflags, data, count, stride, &(m_buffer[0]));
+}
+
+// Move constructor
+Buffer::Buffer(Buffer && other) noexcept
+	:
+	m_bindflags(other.m_bindflags), 
+	m_buffertype(other.m_buffertype)
+{
+	m_buffer_elementcount[0] = other.m_buffer_elementcount[0];
+	m_stride[0] = other.m_stride[0];
+
+	// Buffer resource is MOVED to prevent it being deallocated from the source class later (double-release -> fatal error)
+	m_buffer[0] = other.m_buffer[0];
+	other.m_buffer[0] = NULL;
+}
+
+// Move assignment
+Buffer & Buffer::operator=(Buffer && other) noexcept
+{
+	m_bindflags = other.m_bindflags;
+	m_buffertype = other.m_buffertype;
+	m_buffer_elementcount[0] = other.m_buffer_elementcount[0];
+	m_stride[0] = other.m_stride[0];
+
+	// Buffer resource is MOVED to prevent it being deallocated from the source class later (double-release -> fatal error)
+	m_buffer[0] = other.m_buffer[0];
+	other.m_buffer[0] = NULL;
+
+	return *this;
 }
 
 // Initialise a new D3D buffer with the given data
@@ -47,6 +76,8 @@ void Buffer::InitialiseBuffer(UINT bindflags, const void *data, UINT count, UINT
 	resourceData.pSysMem = data;
 	resourceData.SysMemPitch = 0;
 	resourceData.SysMemSlicePitch = 0;
+
+	assert(m_buffer[0] == NULL);	// We should not be silently overwriting an existing allocated COM buffer
 
 	HRESULT result = Game::Engine->GetDevice()->CreateBuffer(&bufferDesc, &resourceData, ppOutBuffer);
 	if (FAILED(result))
@@ -89,7 +120,7 @@ void Buffer::Set(const void *data, UINT data_size)
 
 
 // Destructor
-Buffer::~Buffer(void)
+Buffer::~Buffer(void) noexcept
 {
 	ReleaseIfExists(m_buffer[0]);
 }
