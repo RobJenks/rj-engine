@@ -90,12 +90,18 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
+
 	/* Now perform validation of the initialised engine */
 
 	// Validate all shaders and associated resources
 	PERFORM_VALIDATION( ValidateShaders(), "shader resources");
 	
 
+	/* Initialise the associated asset data store*/
+	Assets.Initialise();
+
+
+	/* Initialisation complete */
 	Game::Log << LOG_INFO << "Initialisation of rendering engine completed successfully\n";
 	return ErrorCodes::NoError;
 }

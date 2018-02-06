@@ -105,7 +105,7 @@ Result Model::CompileModel(void)
 	const MaterialDX11 * pMaterial = Game::Engine->GetAssets().GetMaterial(m_materialcode);
 	if (!pMaterial)
 	{
-		Game::Log << LOG_WARN << "Cannot find material \"" << m_materialcode << "\" for model \"" << m_code << "\"\n";
+		Game::Log << LOG_WARN << "Cannot find material \"" << m_materialcode << "\" for model \"" << m_code << "\"; using default\n";
 		pMaterial = Game::Engine->GetAssets().GetDefaultMaterial();
 	}
 

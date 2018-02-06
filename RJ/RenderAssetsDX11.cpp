@@ -12,12 +12,23 @@ std::string RenderAssetsDX11::DEFAULT_ASSET_ID = "DEFAULT";
 // Constructor
 RenderAssetsDX11::RenderAssetsDX11(void)
 {
+
+}
+
+// Primary initialisation method; called by the render device that owns this asset data
+void RenderAssetsDX11::Initialise(void)
+{
+	Game::Log << LOG_INFO << "Initialising render device asset data store\n";
+
+	InitialiseDefaultAssets();
+
+	Game::Log << LOG_INFO << "Render device asset data store initialised\n";
 }
 
 void RenderAssetsDX11::InitialiseDefaultAssets(void)
 {
 	// Default material; uses all parameters set in default constructor so no initialisation required
-	CreateMaterial("DEFAULT");
+	CreateMaterial(RenderAssetsDX11::DEFAULT_ASSET_ID);
 
 }
 

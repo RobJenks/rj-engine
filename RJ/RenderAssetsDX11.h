@@ -40,6 +40,9 @@ public:
 
 	RenderAssetsDX11(void);
 
+	// Primary initialisation method; called by the render device that owns this asset data
+	void											Initialise(void);
+
 	void											InitialiseDefaultAssets(void);
 
 
