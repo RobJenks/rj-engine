@@ -1,5 +1,14 @@
 <gamedata>
 
+  <!-- Null, untextured material -->
+  <Material code="null_material"></Material>
+
+  <!-- Debug diffuse-only material -->
+  <Texture code="debug_texture" dimension="Texture2D" filename="Rendering/debug_texture.dds" />
+  <Material code="debug_material">
+    <DiffuseTexture>debug_texture</DiffuseTexture>
+  </Material>
+
   <!-- Stepped colour (grad1) -->
   <Texture code="grad_stepped" dimension="Texture2D" filename="Rendering/grad_stepped.dds" />
   <Material code="grad_stepped">
