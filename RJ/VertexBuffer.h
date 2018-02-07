@@ -8,8 +8,10 @@ class VertexBuffer : public Buffer
 {
 public:
 
+	// Default constructor; will not allocate any resources
+	CMPINLINE VertexBuffer(void) : Buffer() { }
+
 	// Constructors
-	VertexBuffer(void) noexcept;
 	VertexBuffer(const void *data, UINT count, UINT stride) noexcept;
 	VertexBuffer(const ModelData & model_data) noexcept;
 

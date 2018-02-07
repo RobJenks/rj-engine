@@ -7,7 +7,7 @@ class ConstantBuffer : public Buffer
 {
 public:
 
-	ConstantBuffer(void);
+	ConstantBuffer(UINT buffer_size);
 
 private:
 

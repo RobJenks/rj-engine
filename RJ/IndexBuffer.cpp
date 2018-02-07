@@ -2,12 +2,6 @@
 #include "IndexBuffer.h"
 
 
-// Construct an empty buffer
-IndexBuffer::IndexBuffer(void) noexcept
-{
-	m_buffertype = Buffer::BufferType::IndexBuffer;
-}
-
 // Construct an index buffer with the specified data
 IndexBuffer::IndexBuffer(const void *data, UINT count, UINT stride) noexcept
 	:

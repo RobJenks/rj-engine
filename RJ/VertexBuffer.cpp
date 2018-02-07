@@ -2,12 +2,6 @@
 #include "../Definitions/ModelData.h"
 
 
-
-VertexBuffer::VertexBuffer(void) noexcept
-{
-	m_buffertype = Buffer::BufferType::VertexBuffer;
-}
-
 VertexBuffer::VertexBuffer(const void *data, UINT count, UINT stride) noexcept
 	: 
 	Buffer(Buffer::BufferType::VertexBuffer, data, count, stride)

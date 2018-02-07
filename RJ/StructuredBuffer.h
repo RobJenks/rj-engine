@@ -6,7 +6,7 @@ class StructuredBuffer : public Buffer
 {
 public:
 
-	StructuredBuffer(void);
+	StructuredBuffer(const D3D11_BUFFER_DESC & buffer_desc, const void *data, UINT count, UINT stride);
 
 
 private:

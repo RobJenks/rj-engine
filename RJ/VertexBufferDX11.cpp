@@ -3,12 +3,6 @@
 #include "../Definitions/ModelData.h"
 
 
-VertexBufferDX11::VertexBufferDX11(void) noexcept
-	:
-	VertexBuffer()
-{
-}
-
 VertexBufferDX11::VertexBufferDX11(const void *data, UINT count, UINT stride) noexcept
 	:
 	VertexBuffer(data, count, stride)

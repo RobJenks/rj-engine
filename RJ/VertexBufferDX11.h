@@ -11,8 +11,10 @@ class VertexBufferDX11 : public VertexBuffer
 {
 public:
 
+	// Default constructor; will not allocate any resources
+	CMPINLINE VertexBufferDX11(void) : VertexBuffer() { }
+
 	// Constructors
-	VertexBufferDX11(void) noexcept;
 	VertexBufferDX11(const void *data, UINT count, UINT stride) noexcept;
 	VertexBufferDX11(const ModelData & model_data) noexcept;
 

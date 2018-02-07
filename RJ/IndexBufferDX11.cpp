@@ -2,13 +2,6 @@
 #include "CoreEngine.h"
 
 
-// Construct an empty buffer
-IndexBufferDX11::IndexBufferDX11(void) noexcept
-	:
-	IndexBuffer()
-{
-}
-
 // Construct an index buffer with the specified data
 IndexBufferDX11::IndexBufferDX11(const void *data, UINT count, UINT stride) noexcept
 	:

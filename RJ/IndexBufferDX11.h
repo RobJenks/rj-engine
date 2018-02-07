@@ -6,8 +6,8 @@ class IndexBufferDX11 : public IndexBuffer
 {
 public:
 
-	// Construct an empty buffer
-	IndexBufferDX11(void) noexcept;
+	// Default constructor; will not allocate any resources
+	CMPINLINE IndexBufferDX11(void) : IndexBuffer() { }
 
 	// Construct an index buffer with the specified data
 	IndexBufferDX11(const void *data, UINT count, UINT stride) noexcept;

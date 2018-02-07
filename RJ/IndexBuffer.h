@@ -10,8 +10,9 @@ public:
 	typedef UINT32				INDEX_TYPE; 
 	static const DXGI_FORMAT	INDEX_FORMAT = DXGI_FORMAT_R32_UINT;
 
-	// Construct an empty buffer
-	IndexBuffer(void) noexcept;
+	
+	// Default constructor; will not allocate any resources
+	CMPINLINE IndexBuffer(void) : Buffer() { }
 
 	// Construct an index buffer with the specified data
 	IndexBuffer(const void *data, UINT count, UINT stride) noexcept;

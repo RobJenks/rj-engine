@@ -27,8 +27,6 @@ public:
 
 private:
 
-	// Buffersize is the preallocated size on construction
-	UINT						m_buffersize;
 
 	// Static null buffer resource, used for more efficient unbinding
 	//static ID3D11Buffer * const	m_null_buffer[1];
