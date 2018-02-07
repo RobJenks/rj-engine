@@ -13,6 +13,7 @@
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "ConstantBufferDX11.h"
 #include "VertexBufferDX11.h"
+#include "DynamicVertexBufferDX11.h"
 #include "ShaderDX11.h"
 #include "SamplerStateDX11.h"
 #include "RenderTargetDX11.h"
@@ -85,9 +86,9 @@ public:
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, const T *data);
 
 	template <typename TVertex>
-	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride);
+	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride, bool dynamic_vb = false);
 	template <typename TVertex>
-	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, UINT count);
+	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, UINT count, bool dynamic_vb = false);
 
 
 	TextureDX11 *									CreateTexture(const std::string & name);
@@ -245,7 +246,7 @@ ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & 
 
 
 template <typename TVertex>
-VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, UINT count)
+VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, UINT count, bool dynamic_vb)
 {
 	if (count == 0U)
 	{
@@ -261,7 +262,7 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 		return NULL;
 	}
 
-	VertexBufferDX11 *buffer = CreateVertexBuffer<TVertex>(name, data, count, sizeof(TVertex));
+	VertexBufferDX11 *buffer = CreateVertexBuffer<TVertex>(name, data, count, sizeof(TVertex), dynamic_vb);
 
 	// Deallocate temporary data before returning
 	SafeDeleteArray(data);
@@ -270,7 +271,7 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 }
 
 template <typename TVertex>
-VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride)
+VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride, bool dynamic_vb)
 {
 	if (name.empty()) { Game::Log << LOG_ERROR << "Cannot create vertex buffer with null identifier\n"; return NULL; }
 	if (!data) { Game::Log << LOG_ERROR << "Cannot create vertex buffer \"" << name << "\" with null data reference\n"; return NULL; }
@@ -282,7 +283,16 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 		return NULL;
 	}
 
-	m_vertexbuffers[name] = std::make_unique<VertexBufferDX11>((const void*)data, count, stride);
+	if (dynamic_vb)
+	{
+		m_vertexbuffers[name] = std::make_unique<DynamicVertexBufferDX11>((const void*)data, count, stride);
+	}
+	else
+	{
+		m_vertexbuffers[name] = std::make_unique<VertexBufferDX11>((const void*)data, count, stride);
+	}
+	
+	
 	return m_vertexbuffers[name].get();
 }
 

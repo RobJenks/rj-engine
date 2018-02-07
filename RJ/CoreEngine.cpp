@@ -338,7 +338,8 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	*/
 
 	// Create the instance buffer that will be reused by the render queue for all rendering
-	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", static_cast<UINT>(Game::C_INSTANCED_RENDER_LIMIT));
+	// This must be a DYNAMIC vertex buffer since we will be re-mapping instance data multiple times every frame
+	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", static_cast<UINT>(Game::C_INSTANCED_RENDER_LIMIT), true);
 
 	// Initialise the buffer pointers, stride and offset values
 	m_instancedbuffers[0] = NULL;									// Buffer[0] will be populated with each VB

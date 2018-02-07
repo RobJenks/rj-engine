@@ -138,20 +138,34 @@ Buffer::~Buffer(void) noexcept
 
 
 
+// Static method to construct a buffer descriptor based on the given parameters
+D3D11_BUFFER_DESC Buffer::CreateBufferDescriptor(UINT bind_flags, D3D11_USAGE usage_type, UINT cpu_access, UINT misc_flags, UINT bytewidth, UINT structure_stride)
+{
+	D3D11_BUFFER_DESC desc;
+
+	desc.BindFlags = bind_flags;
+	desc.ByteWidth = bytewidth;
+	desc.CPUAccessFlags = cpu_access;
+	desc.MiscFlags = misc_flags;
+	desc.StructureByteStride = structure_stride;
+	desc.Usage = usage_type;
+
+	return desc;
+}
+
+
 // Static methods to construct default buffer descriptors for a given type of buffer.  Descriptor
 // provided will have a zero bytewidth that must be completed by the calling function before submission to the device
 D3D11_BUFFER_DESC Buffer::DetermineDefaultBufferDescriptor(Buffer::BufferType buffertype)
 {
-	D3D11_BUFFER_DESC desc;
-
-	desc.BindFlags = Buffer::DetermineDefaultBindFlags(buffertype);
-	desc.ByteWidth = 0U;				// To be completed by caller
-	desc.CPUAccessFlags = Buffer::DetermineDefaultCpuAccessFlags(buffertype);
-	desc.MiscFlags = Buffer::DetermineDefaultMiscFlags(buffertype);
-	desc.StructureByteStride = 0U;		// To be completed by StructuredBuffer types directly
-	desc.Usage = Buffer::DetermineDefaultUsageType(buffertype);
-
-	return desc;
+	return CreateBufferDescriptor(
+		Buffer::DetermineDefaultBindFlags(buffertype),
+		Buffer::DetermineDefaultUsageType(buffertype), 
+		Buffer::DetermineDefaultCpuAccessFlags(buffertype),
+		Buffer::DetermineDefaultMiscFlags(buffertype),
+		0U,				// Bytewidth: To be completed by caller
+		0U				// StructureStride: To be completed by StructuredBuffer types directly
+	);
 }
 
 UINT Buffer::DetermineDefaultBindFlags(Buffer::BufferType buffertype)

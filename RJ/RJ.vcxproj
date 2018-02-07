@@ -447,6 +447,7 @@
     <ClCompile Include="DynamicTerrainInteraction.cpp" />
     <ClCompile Include="DynamicTerrainState.cpp" />
     <ClCompile Include="DynamicTileSet.cpp" />
+    <ClCompile Include="DynamicVertexBufferDX11.cpp" />
     <ClCompile Include="EffectBase.cpp" />
     <ClCompile Include="EffectManager.cpp" />
     <ClCompile Include="EnvironmentElementStrengthOverlay.cpp" />
@@ -892,6 +893,7 @@
     <ClInclude Include="DynamicTerrainState.h" />
     <ClInclude Include="DynamicTileSet.h" />
     <ClInclude Include="DataObjectEngineThrustController.h" />
+    <ClInclude Include="DynamicVertexBufferDX11.h" />
     <ClInclude Include="EnvironmentElementStrengthOverlay.h" />
     <ClInclude Include="EnvironmentHealthOverlay.h" />
     <ClInclude Include="ElementIntersection.h" />

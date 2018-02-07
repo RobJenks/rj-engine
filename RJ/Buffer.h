@@ -44,6 +44,9 @@ public:
 	CMPINLINE UINT				GetStride(void) const { return m_stride[0]; }
 	
 
+	// Static method to construct a buffer descriptor based on the given parameters
+	static D3D11_BUFFER_DESC	CreateBufferDescriptor(UINT bind_flags, D3D11_USAGE usage_type, UINT cpu_access, UINT misc_flags, UINT bytewidth = 0U, UINT structure_stride = 0U);
+
 	// Static methods to construct default buffer descriptors for a given type of buffer
 	static D3D11_BUFFER_DESC	DetermineDefaultBufferDescriptor(Buffer::BufferType buffertype);
 	static UINT					DetermineDefaultBindFlags(Buffer::BufferType buffertype);

@@ -13,6 +13,7 @@ public:
 
 	// Constructors
 	VertexBuffer(const void *data, UINT count, UINT stride) noexcept;
+	VertexBuffer(const D3D11_BUFFER_DESC & buffer_desc, const void *data, UINT count, UINT stride) noexcept;
 	VertexBuffer(const ModelData & model_data) noexcept;
 
 	// Copy construction and assignment must be disallowed, since this VertexBuffer manages a single COM resource

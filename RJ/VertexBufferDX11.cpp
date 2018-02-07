@@ -9,6 +9,12 @@ VertexBufferDX11::VertexBufferDX11(const void *data, UINT count, UINT stride) no
 {
 }
 
+VertexBufferDX11::VertexBufferDX11(const D3D11_BUFFER_DESC & buffer_desc, const void *data, UINT count, UINT stride) noexcept
+	:
+	VertexBuffer(buffer_desc, data, count, stride)
+{
+}
+
 VertexBufferDX11::VertexBufferDX11(const ModelData & model_data) noexcept
 	:
 	VertexBuffer(model_data)

@@ -879,6 +879,9 @@
     <ClCompile Include="ShaderParameter.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="DynamicVertexBufferDX11.cpp">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2046,6 +2049,9 @@
     </ClInclude>
     <ClInclude Include="..\Definitions\ModelData.h">
       <Filter>Imported Definitions</Filter>
+    </ClInclude>
+    <ClInclude Include="DynamicVertexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
