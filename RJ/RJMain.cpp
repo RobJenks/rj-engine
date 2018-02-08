@@ -926,7 +926,7 @@ void RJMain::ProcessKeyboardInput(void)
 
 			DynamicTerrain *target = NULL;
 			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
-			for (auto terrain : cs()->TerrainObjects)
+			for (auto * terrain : cs()->TerrainObjects)
 			{
 				if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
 				{

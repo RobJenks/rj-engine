@@ -48,110 +48,6 @@ Shader::Type ShaderDX11::GetType() const
 }
 
 
-std::string ShaderDX11::GetLatestProfile(Shader::Type type) const
-{
-	// Query the current feature level:
-	D3D_FEATURE_LEVEL featureLevel = Game::Engine->GetDevice()->GetFeatureLevel();
-
-	switch (type)
-	{
-	case Shader::Type::VertexShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "vs_5_0";
-			break;
-		case D3D_FEATURE_LEVEL_10_1:
-			return "vs_4_1";
-			break;
-		case D3D_FEATURE_LEVEL_10_0:
-			return "vs_4_0";
-			break;
-		case D3D_FEATURE_LEVEL_9_3:
-			return "vs_4_0_level_9_3";
-			break;
-		case D3D_FEATURE_LEVEL_9_2:
-		case D3D_FEATURE_LEVEL_9_1:
-			return "vs_4_0_level_9_1";
-			break;
-		}
-		break;
-	case Shader::Type::DomainShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "ds_5_0";
-			break;
-		}
-		break;
-	case Shader::Type::HullShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "hs_5_0";
-			break;
-		}
-		break;
-	case Shader::Type::GeometryShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "gs_5_0";
-			break;
-		case D3D_FEATURE_LEVEL_10_1:
-			return "gs_4_1";
-			break;
-		case D3D_FEATURE_LEVEL_10_0:
-			return "gs_4_0";
-			break;
-		}
-		break;
-	case Shader::Type::PixelShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "ps_5_0";
-			break;
-		case D3D_FEATURE_LEVEL_10_1:
-			return "ps_4_1";
-			break;
-		case D3D_FEATURE_LEVEL_10_0:
-			return "ps_4_0";
-			break;
-		case D3D_FEATURE_LEVEL_9_3:
-			return "ps_4_0_level_9_3";
-			break;
-		case D3D_FEATURE_LEVEL_9_2:
-		case D3D_FEATURE_LEVEL_9_1:
-			return "ps_4_0_level_9_1";
-			break;
-		}
-		break;
-	case Shader::Type::ComputeShader:
-		switch (featureLevel)
-		{
-		case D3D_FEATURE_LEVEL_11_1:
-		case D3D_FEATURE_LEVEL_11_0:
-			return "cs_5_0";
-			break;
-		case D3D_FEATURE_LEVEL_10_1:
-			return "cs_4_1";
-			break;
-		case D3D_FEATURE_LEVEL_10_0:
-			return "cs_4_0";
-			break;
-		}
-	} // switch( type )
-
-	Game::Log << LOG_ERROR << "Could not establish supported shader feature levels; unknown shader type code " << (int)type << "\n";
-	return "";
-}
-
 bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::string& shaderSource, const std::wstring& sourceFileName, 
 										const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout)
 {
@@ -353,6 +249,32 @@ bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring&
 	return result;
 }
 
+// Initialise any shader parameters that can be assigned prior to rendering
+Result ShaderDX11::InitialisePreAssignableParameters(void)
+{
+	// Process each parameter in turn
+	for (auto & param : m_parameters)
+	{
+		switch (param.GetType())
+		{
+			/* Sampler states can all be pre-assigned */
+			case ShaderParameter::Type::Sampler:
+
+				auto * sampler = Game::Engine->GetAssets().GetSamplerState(param.GetName());
+				if (!sampler)
+				{
+					Game::Log << LOG_ERROR << "Cannot locate sampler \"" << param.GetName() << "\" for pre-render initialisation of shader \"" << m_entrypoint << "\"\n";
+					return ErrorCodes::CannotPreInitialiseShaderParameter;
+				}
+				param.Set(sampler);
+				break;
+		}
+	}
+
+	return ErrorCodes::NoError;
+}
+
+
 bool ShaderDX11::HasParameter(const std::string & name) const 
 {
 	return (m_parameter_mapping.find(name) != m_parameter_mapping.end());
@@ -377,7 +299,7 @@ void ShaderDX11::Bind()
 	auto devicecontext = Game::Engine->GetDeviceContext();
 
 	// Bind all required shader parameters
-	for (auto parameter : m_parameters)
+	for (auto & parameter : m_parameters)
 	{
 		parameter.Bind();
 	}
@@ -415,7 +337,7 @@ void ShaderDX11::Unbind()
 	auto devicecontext = Game::Engine->GetDeviceContext();
 
 	// Unbind all shader parameters
-	for (auto parameter : m_parameters)
+	for (auto & parameter : m_parameters)
 	{
 		parameter.Unbind();
 	}
@@ -607,4 +529,108 @@ DXGI_FORMAT GetDXGIFormat(const D3D11_SIGNATURE_PARAMETER_DESC& paramDesc)
 	}
 
 	return format;
+}
+
+std::string ShaderDX11::GetLatestProfile(Shader::Type type) const
+{
+	// Query the current feature level:
+	D3D_FEATURE_LEVEL featureLevel = Game::Engine->GetDevice()->GetFeatureLevel();
+
+	switch (type)
+	{
+	case Shader::Type::VertexShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "vs_5_0";
+			break;
+		case D3D_FEATURE_LEVEL_10_1:
+			return "vs_4_1";
+			break;
+		case D3D_FEATURE_LEVEL_10_0:
+			return "vs_4_0";
+			break;
+		case D3D_FEATURE_LEVEL_9_3:
+			return "vs_4_0_level_9_3";
+			break;
+		case D3D_FEATURE_LEVEL_9_2:
+		case D3D_FEATURE_LEVEL_9_1:
+			return "vs_4_0_level_9_1";
+			break;
+		}
+		break;
+	case Shader::Type::DomainShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "ds_5_0";
+			break;
+		}
+		break;
+	case Shader::Type::HullShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "hs_5_0";
+			break;
+		}
+		break;
+	case Shader::Type::GeometryShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "gs_5_0";
+			break;
+		case D3D_FEATURE_LEVEL_10_1:
+			return "gs_4_1";
+			break;
+		case D3D_FEATURE_LEVEL_10_0:
+			return "gs_4_0";
+			break;
+		}
+		break;
+	case Shader::Type::PixelShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "ps_5_0";
+			break;
+		case D3D_FEATURE_LEVEL_10_1:
+			return "ps_4_1";
+			break;
+		case D3D_FEATURE_LEVEL_10_0:
+			return "ps_4_0";
+			break;
+		case D3D_FEATURE_LEVEL_9_3:
+			return "ps_4_0_level_9_3";
+			break;
+		case D3D_FEATURE_LEVEL_9_2:
+		case D3D_FEATURE_LEVEL_9_1:
+			return "ps_4_0_level_9_1";
+			break;
+		}
+		break;
+	case Shader::Type::ComputeShader:
+		switch (featureLevel)
+		{
+		case D3D_FEATURE_LEVEL_11_1:
+		case D3D_FEATURE_LEVEL_11_0:
+			return "cs_5_0";
+			break;
+		case D3D_FEATURE_LEVEL_10_1:
+			return "cs_4_1";
+			break;
+		case D3D_FEATURE_LEVEL_10_0:
+			return "cs_4_0";
+			break;
+		}
+	} // switch( type )
+
+	Game::Log << LOG_ERROR << "Could not establish supported shader feature levels; unknown shader type code " << (int)type << "\n";
+	return "";
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "ErrorCodes.h"
 #include "IntVector.h"
 #include "Shaders.h"
 #include "DX11_Core.h"
@@ -28,13 +29,16 @@ public:
 								const std::string& profile, const InputLayoutDesc *input_layout = NULL);
 	bool LoadShaderFromFile(Shader::Type shadertype, const std::wstring& fileName, const std::string& entryPoint, const std::string& profile, const InputLayoutDesc *input_layout = NULL);
 
+	// Initialise any shader parameters that can be assigned prior to rendering
+	Result							InitialisePreAssignableParameters(void);
+
 	// Retrieve parameter references
 	bool							HasParameter(const std::string & name) const; 
 	ShaderParameterSet::size_type	GetParameterIndexByName(const std::string& name) const; 
 	CMPINLINE ShaderParameterDX11 & GetParameter(ShaderParameterSet::size_type index) { return m_parameters[index]; }
 
 	// Query for the latest supported shader profile
-	std::string GetLatestProfile(Shader::Type type) const;
+	std::string						GetLatestProfile(Shader::Type type) const;
 
 	// Specific slot number for key rendering data
 	CMPINLINE SlotID				GetMaterialSlot(void) const { return m_slot_material; }

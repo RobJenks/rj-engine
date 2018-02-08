@@ -319,8 +319,9 @@ namespace ErrorCodes {
 	const Result		CouldNotCreateParticleEngine					= 1511;
 	const Result		CannotLinkAllRequiredShadersToParticleEngine	= 1512;
 	const Result		ShaderValidationFailed							= 1513;
-	
-	
+	const Result		CannotLocateShader								= 1514;
+	const Result		CannotPreInitialiseShaderParameter				= 1515;
+
 
 	// External data read/write errors									(2000-2199)
 	const Result		FileDoesNotExist								= 2000;

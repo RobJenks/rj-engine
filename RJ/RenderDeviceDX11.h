@@ -50,6 +50,7 @@ public:
 
 	Result											InitialiseInputLayoutDefinitions(void);
 	Result											InitialiseShaderResources(void);
+	Result											InitialisePreAssignableShaderParameters(void);
 	Result											InitialiseSamplerStateDefinitions(void);
 	Result											InitialiseStandardRenderPipelines(void);
 

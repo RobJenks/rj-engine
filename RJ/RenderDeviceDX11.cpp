@@ -90,6 +90,9 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	PERFORM_INIT( InitialiseSamplerStateDefinitions(), "sampler state definitions" )
 	PERFORM_INIT( InitialiseStandardRenderPipelines(), "standard render pipelines" )
 
+	// Initialise any shader parameters that can be set pre-render time
+	PERFORM_INIT(InitialisePreAssignableShaderParameters(), "pre-assignable shader parameters")
+
 
 	/* Now perform validation of the initialised engine */
 
@@ -570,6 +573,27 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	}
 	
 	Game::Log << LOG_INFO << "All shader resources initialised\n";	
+	return ErrorCodes::NoError;
+}
+
+// Initialise any shader parameters that can be set pre-render time
+Result RenderDeviceDX11::InitialisePreAssignableShaderParameters(void)
+{
+	// Process each shader in turn
+	auto & shaders = Assets.GetShaders();
+	for (auto & shader_entry : shaders)
+	{
+		auto * shader = shader_entry.second.get();
+		if (!shader)
+		{
+			Game::Log << LOG_ERROR << "Null shader encountered during initialisation of \"" << shader_entry.first << "\"\n";
+			return ErrorCodes::CannotLocateShader;
+		}
+
+		Result result = shader->InitialisePreAssignableParameters();
+		if (result != ErrorCodes::NoError) return result;
+	}
+	
 	return ErrorCodes::NoError;
 }
 

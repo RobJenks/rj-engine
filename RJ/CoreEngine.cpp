@@ -1579,10 +1579,10 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 	m_tmp_frustums.clear();
 	
 	// If we are debug-rendering the portal data, also render all portals in tiles which were not processed
-	DEBUG_PORTAL_TRAVERSAL(environment, { for (auto tile : environment->GetTiles()) {
+	DEBUG_PORTAL_TRAVERSAL(environment, { for (auto & tile : environment->GetTiles()) {
 		if (tile.value && !tile.value->IsRendered()) {
 			XMMATRIX cell_world = XMMatrixMultiply(tile.value->GetWorldMatrix(), environment->GetZeroPointWorldMatrix());
-			for (auto portal : tile.value->GetPortals()) DEBUG_PORTAL_RENDER(portal, cell_world, false); 
+			for (auto & portal : tile.value->GetPortals()) DEBUG_PORTAL_RENDER(portal, cell_world, false); 
 		}
 	}});
 

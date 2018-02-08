@@ -69,7 +69,7 @@ void RenderTargetDX11::Clear(ClearFlags clearFlags, const XMFLOAT4 & color, floa
 
 void RenderTargetDX11::GenerateMipMaps()
 {
-	for (auto texture : m_textures)
+	for (auto * texture : m_textures)
 	{
 		if (texture)
 		{
@@ -106,7 +106,7 @@ void RenderTargetDX11::Resize(uint16_t width, uint16_t height)
 		m_height = max(height, (uint16_t)1);
 
 		// Resize the attached textures.
-		for (auto texture : m_textures)
+		for (auto * texture : m_textures)
 		{
 			if (texture)
 			{
@@ -169,7 +169,7 @@ bool RenderTargetDX11::IsValid() const
 	int width = -1;
 	int height = -1;
 
-	for (auto texture : m_textures)
+	for (auto * texture : m_textures)
 	{
 		if (texture)
 		{

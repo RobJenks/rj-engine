@@ -90,7 +90,7 @@ void PipelineStateDX11::Bind()
 	m_rasterizerstate.Bind();
 	m_depthstencilstate.Bind();
 
-	for (auto shader : m_shaders)
+	for (auto * shader : m_shaders)
 	{
 		if (shader)
 		{
@@ -106,7 +106,7 @@ void PipelineStateDX11::Unbind()
 		m_rendertarget->Unbind();
 	}
 
-	for (auto shader : m_shaders)
+	for (auto * shader : m_shaders)
 	{
 		if (shader)
 		{
