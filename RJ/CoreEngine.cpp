@@ -872,8 +872,8 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				r_devicecontext->IASetIndexBuffer(m_current_modelbuffer->IndexBuffer.GetCompiledBuffer(), IndexBufferDX11::INDEX_FORMAT, 0U);
 
 				// Set the type of primitive that should be rendered from this vertex buffer, if it differs from the current topology
-				if (rq_shader.PrimitiveTopology != m_current_topology)
-					r_devicecontext->IASetPrimitiveTopology(rq_shader.PrimitiveTopology);
+				if (rq_shader.PrimitiveTopology != GetCurrentPrimitiveTopology())
+					ChangePrimitiveTopology(rq_shader.PrimitiveTopology);
 
 				// Bind the model material, which will populate the relevant constant buffer and bind all required texture resources
 				// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
@@ -915,6 +915,12 @@ void CoreEngine::ClearRenderQueue(void)
 		// Reset this render queue shader ready for the next frame
 		m_renderqueue[i].CurrentSlotCount = 0U;
 	}
+}
+
+void CoreEngine::ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology)
+{
+	r_devicecontext->IASetPrimitiveTopology(primitive_topology);
+	m_current_topology = primitive_topology;
 }
 
 // Processes all items in the render queue using instanced rendering, to minimise the number of render calls required per frame

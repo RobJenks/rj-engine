@@ -6,6 +6,8 @@
 #include "Logging.h"
 #include "DX11_Core.h"
 #include "CoreEngine.h"
+#include "CommonShaderConstantBufferDefinitions.hlsl.h"
+
 
 // TODO: VS2017 is still implementing as exp branch; convert to std library once available
 namespace fs = std::experimental::filesystem;
@@ -252,7 +254,7 @@ bool ShaderDX11::LoadShaderFromFile(Shader::Type shadertype, const std::wstring&
 // Initialise any shader parameters that can be assigned prior to rendering
 Result ShaderDX11::InitialisePreAssignableParameters(void)
 {
-	// Process each parameter in turn
+	// Process each parameter in turn and attempt to resolve it wherever possible
 	for (auto & param : m_parameters)
 	{
 		switch (param.GetType())
@@ -268,6 +270,21 @@ Result ShaderDX11::InitialisePreAssignableParameters(void)
 				}
 				param.Set(sampler);
 				break;
+		}
+	}
+
+	// Also store key slot references that we want to avoid finding every frame
+	std::vector<std::pair<std::string, Shader::SlotID&>> resolve_slots = {
+		{ MaterialBufferName, m_slot_material }
+	};
+
+	for (auto & resolve : resolve_slots)
+	{
+		// Not all shaders will require all parameters, so silently ignore those that are not present
+		if (HasParameter(resolve.first))
+		{
+			auto param_index = GetParameterIndexByName(resolve.first);
+			resolve.second = GetParameter(param_index).GetSlotID();
 		}
 	}
 

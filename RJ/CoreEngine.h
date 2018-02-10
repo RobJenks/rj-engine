@@ -315,6 +315,11 @@ public:
 	// Returns a reference to the model buffer currently being rendered
 	CMPINLINE ModelBuffer *	GetCurrentModelBuffer(void) const			{ return m_current_modelbuffer; }
 
+	// Primitive topology is managed by the render queue in an attempt to minimise state changes
+	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
+	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
+
+
 	// Performs rendering of debug/special data
 	void RenderDebugData(void);
 	void DebugRenderSpaceCollisionBoxes(void);
