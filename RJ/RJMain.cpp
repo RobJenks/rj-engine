@@ -2546,7 +2546,7 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
-		auto renderinfo = Game::Engine->GetRenderInfo();
+/*		auto renderinfo = Game::Engine->GetRenderInfo();
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: Draw Calls: %zu, Instances: %zu, ZSortedInstances: %zu, SkinnedInstances: %zu [%s %s %s %s %s %s ]",
 			renderinfo.DrawCalls, renderinfo.InstanceCount, renderinfo.InstanceCountZSorted, renderinfo.InstanceCountSkinnedModel,
 			(renderinfo.ShipRenderCount == 0 ? "" : concat(" S.Ship = ")(renderinfo.ShipRenderCount).str().c_str()),
@@ -2556,7 +2556,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			(renderinfo.ActorRenderCount == 0 ? "" : concat(" Actor = ")(renderinfo.ActorRenderCount).str().c_str()),
 			(renderinfo.TerrainRenderCount == 0 ? "" : concat(" Terrain = ")(renderinfo.TerrainRenderCount).str().c_str())
 		);
-		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";
+		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";*/
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 
 	}

@@ -67,6 +67,7 @@ public:
 
 	CMPINLINE float									GetFOV(void) const { return m_fov; }
 	CMPINLINE float									GetAspectRatio(void) const { return m_aspectratio; }
+	CMPINLINE bool									IsVsyncEnabled(void) const { return m_vsync; }
 	CMPINLINE float									GetTanOfHalfFOV(void) const { return m_halffovtan; }
 	CMPINLINE float									GetNearClipDistance(void) const { return m_screen_near; }
 	CMPINLINE float									GetFarClipDistance(void) const { return m_screen_far; }
@@ -82,6 +83,7 @@ public:
 
 
 	void											SetDisplaySize(INTVECTOR2 display_size);
+	void											SetVsyncEnabled(bool vsync_enabled);
 	void											SetFOV(float fov);
 	void											SetDepthPlanes(float screen_near, float screen_far);
 	void											SetSampleDesc(UINT count, UINT quality);
@@ -90,11 +92,8 @@ public:
 	void											RecalculateOrthographicMatrix(void);
 
 
-	/* Methods to initiate each stage of the deferred rendering process per-frame */
-	void											BeginDeferredRenderingFrame(void);
-	// ...
-	void											EndDeferredRenderinFrame(void);
-
+	// Present backbuffer to the primary display by cycling the swap chain
+	HRESULT											PresentFrame(void);
 
 	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
@@ -124,6 +123,8 @@ private:
 	INTVECTOR2								m_displaysize;
 	XMFLOAT2								m_displaysize_f;
 	float									m_aspectratio;
+	bool									m_vsync;
+	UINT									m_sync_interval;
 	float									m_screen_near;
 	float									m_screen_far;
 	XMMATRIX								m_projection;

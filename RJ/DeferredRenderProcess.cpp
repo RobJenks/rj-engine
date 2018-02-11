@@ -188,15 +188,20 @@ void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
 // Primary rendering method; executes all deferred rendering operations
 void DeferredRenderProcess::Render(void)
 {
+	BeginFrame();
+
+	RenderFrame();
+
+	EndFrame();
+}
+
+
+// Begin the frame; clear per-frame RTs and other resources ready for rendering
+void DeferredRenderProcess::BeginFrame(void)
+{
 	/*
 		1. Populate common constant buffers
 		2. Clear GBuffer render target
-		3. Render all opaque geometry
-		4. Copy GBuffer depth/stencil to primary render target
-		5a. Lighting pass 1: determine lit pixels (non-directional lights)
-		5b. Lighting pass 2: render lit pixels (non-directional lights)
-		5c: Lighting: render directional lights
-		6. Render transparent objects
 	*/
 
 	/* 1. Populate common constant buffers */
@@ -205,21 +210,56 @@ void DeferredRenderProcess::Render(void)
 	/* 2. Clear GBuffer RT */
 	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 
-	/* 3. Render opaque geometry */
+}
+
+// Perform all rendering of the frame
+void DeferredRenderProcess::RenderFrame(void)
+{
+	/*
+		1. Render all opaque geometry
+		2. Copy GBuffer depth/stencil to primary render target
+		3a. Lighting pass 1: determine lit pixels (non-directional lights)
+		3b. Lighting pass 2: render lit pixels (non-directional lights)
+		3c: Lighting: render directional lights
+		4. Render transparent objects
+	*/
+	
+	/* 1. Render opaque geometry */
 	RenderGeometry();
 
-	/* 4. Copy GBuffer depth/stencil to primary render target */
+	/* 2. Copy GBuffer depth/stencil to primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
 		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
 		GBuffer.DepthStencilTexture);
 
-	/* 5. Perform deferred lighting */
+	/* 3. Perform deferred lighting */
 	PerformDeferredLighting();
 
-	/* 6. Render transparent objects */
+	/* 4. Render transparent objects */
 	RenderTransparency();
 }
 
+// End the frame, including presentation of swap chain to the primary display
+void DeferredRenderProcess::EndFrame(void)
+{
+	/*
+		1. Present backbuffer to the primary display by cycling the swap chain
+	*/
+
+
+	// Present the back buffer to the screen.  Either lock to screen refresh rate (sync 
+	// interval = 1, if vsync is enabled) or present as fast as possible (sync 
+	// interval = 0, if it is not)
+	HRESULT hr = Game::Engine->GetRenderDevice()->PresentFrame();
+
+	// Log presentation failures in debug mode only
+#	ifdef _DEBUG
+		if (FAILED(hr))
+		{
+			Game::Log << LOG_ERROR << "Critical: Frame presentation failed with hr=" << hr << "\n";
+		}
+#	endif
+}
 
 void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 {

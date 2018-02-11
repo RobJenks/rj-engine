@@ -40,6 +40,8 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_halffovtan(tanf(Game::FOV * 0.5f)),
 	m_displaysize(Game::ScreenWidth, Game::ScreenHeight),
 	m_aspectratio((float)Game::ScreenWidth / (float)Game::ScreenHeight),
+	m_vsync(true), 
+	m_sync_interval(1U), 
 	m_screen_near(Game::NearClipPlane),
 	m_screen_far(Game::FarClipPlane), 
 	m_projection(ID_MATRIX), 
@@ -67,6 +69,7 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	SetFOV(Game::FOV);
 	SetDepthPlanes(screen_near, screen_far);
 	SetSampleDesc(1U, 0U);
+	SetVsyncEnabled(vsync);
 
 	// Initialise the render device and context
 	PERFORM_INIT( InitialiseRenderDevice(hwnd, screen_size, full_screen, vsync), "primary render device" )
@@ -660,6 +663,16 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 	RecalculateOrthographicMatrix();
 }
 
+void RenderDeviceDX11::SetVsyncEnabled(bool vsync_enabled)
+{
+	// Store new vsync state
+	m_vsync = vsync_enabled;
+
+	// Either lock sync interval to screen refresh rate (sync interval = 1, if vsync is enabled) or 
+	// present as fast as possible (sync interval = 0, if it is not)
+	m_sync_interval = (vsync_enabled ? 1U : 0U);
+}
+
 void RenderDeviceDX11::SetFOV(float fov)
 {
 	assert(fov > 0.0f);
@@ -716,6 +729,14 @@ bool RenderDeviceDX11::VerifyState(void)
 	}
 
 	return true;
+}
+
+// Present backbuffer to the primary display by cycling the swap chain
+HRESULT RenderDeviceDX11::PresentFrame(void)
+{
+	// Present the back buffer to the screen by cycling the swap chain.  Sync interval
+	// is determined based on the vsync state
+	return m_swapchain->Present(m_sync_interval, 0U);
 }
 
 

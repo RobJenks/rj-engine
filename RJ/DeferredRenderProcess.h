@@ -19,6 +19,15 @@ public:
 	// Primary rendering method; executes all deferred rendering operations
 	virtual void Render(void);
 
+	// Begin the frame; clear per-frame RTs and other resources ready for rendering
+	void BeginFrame(void);
+
+	// Perform all rendering of the frame
+	void RenderFrame(void);
+
+	// End the frame, including presentation of swap chain to the primary display
+	void EndFrame(void);
+
 
 	~DeferredRenderProcess(void);
 

@@ -5,5 +5,5 @@
 // PS_Standard: Standard pixel shader
 float4 PS_Standard(VertexShaderStandardOutput IN) : SV_TARGET
 {
-	return (DiffuseTexture.Sample(LinearRepeatSampler, IN.texCoord));
+	return DiffuseTexture.Sample(LinearRepeatSampler, IN.texCoord);
 }
