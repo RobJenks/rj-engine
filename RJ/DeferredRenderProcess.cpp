@@ -208,7 +208,7 @@ void DeferredRenderProcess::BeginFrame(void)
 	PopulateCommonConstantBuffers();
 
 	/* 2. Clear GBuffer RT */
-	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
+	GBuffer.RenderTarget->Clear(ClearFlags::All, /*NULL_FLOAT4*/XMFLOAT4(0.0f,0.0f,1.0f,0.5f), 1.0f, 0U);
 
 }
 
@@ -231,6 +231,8 @@ void DeferredRenderProcess::RenderFrame(void)
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
 		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
 		GBuffer.DepthStencilTexture);
+
+	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(GBuffer.DiffuseTexture);
 
 	/* 3. Perform deferred lighting */
 	PerformDeferredLighting();

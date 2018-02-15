@@ -734,6 +734,13 @@ bool RenderDeviceDX11::VerifyState(void)
 // Present backbuffer to the primary display by cycling the swap chain
 HRESULT RenderDeviceDX11::PresentFrame(void)
 {
+	// Copy the primary render target to the back buffer (TODO: if no differentiation is required between primary
+	// render target and backbuffer in future, there is a possible optimisation to render directly to backbuffer
+	// instead of the primary render target first.  GetPrimaryRenderTarget() could potentially redirect
+	// to m_backbuffer based on some flag)
+	m_devicecontext->CopyResource(m_backbuffer, 
+		m_rendertarget->GetTexture(RenderTarget::AttachmentPoint::Color0)->GetTextureResource());
+
 	// Present the back buffer to the screen by cycling the swap chain.  Sync interval
 	// is determined based on the vsync state
 	return m_swapchain->Present(m_sync_interval, 0U);
