@@ -87,10 +87,7 @@ void DeferredRenderProcess::InitialiseGeometryPipelines(void)
 	m_pipeline_geometry = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("Deferred_Geometry");
 	m_pipeline_geometry->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_geometry->SetShader(Shader::Type::PixelShader, m_ps_geometry);
-
-	// TODO: REMOVE
 	m_pipeline_geometry->SetRenderTarget(GBuffer.RenderTarget);
-	//m_pipeline_geometry->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
 
 }
 
@@ -237,9 +234,6 @@ void DeferredRenderProcess::RenderFrame(void)
 		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
 		GBuffer.DepthStencilTexture);
 
-	// TODO: REMOVE
-	//Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0)->Copy(GBuffer.DiffuseTexture);
-
 	/* 3. Perform deferred lighting */
 	PerformDeferredLighting();
 
@@ -272,12 +266,6 @@ void DeferredRenderProcess::EndFrame(void)
 void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 {
 	// Frame data buffer
-
-	// TODO: REMOVE
-	/*XMStoreFloat4x4(&m_cb_frame_data.RawPtr->View, XMMatrixTranspose(Game::Engine->GetRenderViewMatrix()));
-	XMStoreFloat4x4(&m_cb_frame_data.RawPtr->Projection, XMMatrixTranspose(Game::Engine->GetRenderProjectionMatrix()));
-	XMStoreFloat4x4(&m_cb_frame_data.RawPtr->InvProjection, XMMatrixTranspose(Game::Engine->GetRenderInverseProjectionMatrix()));*/
-
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();

@@ -25,9 +25,9 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	if (1 < 2)
 	{
 		OUT.Diffuse = float4(1, 0, 0, 1);
-		OUT.Specular = float4(0.5, 0, 0.5, 1);
+		OUT.Specular = float4(0, 1, 0, 1);
 		OUT.NormalVS = float4(0, 0, 1, 0);
-		OUT.LightAccumulation = float4(1, 0, 0, 1);
+		OUT.LightAccumulation = float4(0, 0, 1, 1);
 		return OUT;
 	}
 
