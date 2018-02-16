@@ -76,9 +76,11 @@ public:
 public:
 
 	CMPINLINE SamplerStateDX11 *					CreateSamplerState(const std::string & name) { return CreateAsset<SamplerStateDX11>(name); }
-	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name) { return CreateAsset<RenderTargetDX11>(name); }
 	CMPINLINE MaterialDX11 *						CreateMaterial(const std::string & name) { return CreateAsset<MaterialDX11>(name); }
 	CMPINLINE PipelineStateDX11 *					CreatePipelineState(const std::string & name) { return CreateAsset<PipelineStateDX11>(name); }
+
+	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name) { return CreateAsset<RenderTargetDX11>(name); }
+	CMPINLINE RenderTargetDX11 *					CreateRenderTarget(const std::string & name, INTVECTOR2 size);
 
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
@@ -294,6 +296,19 @@ VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name
 	
 	
 	return m_vertexbuffers[name].get();
+}
+
+CMPINLINE RenderTargetDX11 * RenderAssetsDX11::CreateRenderTarget(const std::string & name, INTVECTOR2 size)
+{
+	assert(size.x > 0 && size.y > 0);
+
+	RenderTargetDX11 *rt = CreateRenderTarget(name);
+	if (rt)
+	{
+		rt->Resize((uint16_t)size.x, (uint16_t)size.y);
+	}
+
+	return rt;
 }
 
 

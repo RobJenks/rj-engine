@@ -503,7 +503,7 @@ DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth,
 
 Result RenderDeviceDX11::InitialisePrimaryRenderTarget(INTVECTOR2 screen_size)
 {
-	m_rendertarget = Assets.CreateRenderTarget("PrimaryRenderTarget");
+	m_rendertarget = Assets.CreateRenderTarget("PrimaryRenderTarget", screen_size);
 
 	// Initialise depth/stencil buffer
 	Texture::TextureFormat depthStencilTextureFormat(

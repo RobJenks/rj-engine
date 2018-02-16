@@ -69,8 +69,8 @@ DeferredGBuffer::DeferredGBuffer(void)
 	// The light accumulation buffer in Color0 can be bound directly to the primary colour RT (i.e. backbuffer)
 	// since we do not currently need any separation between final GBuffer colour accumulation and the backbuffer itself
 	Game::Log << LOG_INFO << "Initialising GBuffer RT\n";
-
-	RenderTarget = Game::Engine->GetAssets().CreateRenderTarget("GBufferRenderTarget");
+	
+	RenderTarget = Game::Engine->GetAssets().CreateRenderTarget("GBufferRenderTarget", Game::Engine->GetRenderDevice()->GetDisplaySize());
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color0,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::Color0));
 	RenderTarget->AttachTexture(RenderTarget::AttachmentPoint::Color1, DiffuseTexture);

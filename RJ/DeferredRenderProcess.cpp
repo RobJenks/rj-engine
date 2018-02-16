@@ -66,7 +66,7 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering render targets\n";
 
 	// Depth-only render target will be attached to the primary RT depth/stencil buffer
-	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly");
+	m_depth_only_rt = Game::Engine->GetRenderDevice()->Assets.CreateRenderTarget("Deferred_DepthOnly", Game::Engine->GetRenderDevice()->GetDisplaySize());
 	m_depth_only_rt->AttachTexture(RenderTarget::AttachmentPoint::DepthStencil,
 		Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->GetTexture(RenderTarget::AttachmentPoint::DepthStencil));
 }
