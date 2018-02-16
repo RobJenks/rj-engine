@@ -91,6 +91,13 @@ public:
 	void											RecalculateProjectionMatrix(void);
 	void											RecalculateOrthographicMatrix(void);
 
+	// Return a reference to the primary viewport
+	CMPINLINE const Viewport &						GetPrimaryViewport(void) const { return m_viewport; }
+
+	// Update the primary viewport; this will propogate to all resources which have already been 
+	// created and associated with the default viewport
+	void											UpdatePrimaryViewportSize(XMFLOAT2 size);
+
 
 	// Present backbuffer to the primary display by cycling the swap chain
 	HRESULT											PresentFrame(void);
@@ -122,6 +129,7 @@ private:
 	float									m_halffovtan;
 	INTVECTOR2								m_displaysize;
 	XMFLOAT2								m_displaysize_f;
+	Viewport								m_viewport;			// Primary, full-screen viewport
 	float									m_aspectratio;
 	bool									m_vsync;
 	UINT									m_sync_interval;

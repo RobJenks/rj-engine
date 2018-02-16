@@ -121,7 +121,7 @@ private:
 	template <class T>
 	T *												GetDefaultAsset(void);
 
-private:
+public:
 
 	template <typename T> CMPINLINE constexpr std::unordered_map<std::string, std::unique_ptr<T>> & 	GetAssetData(void) { throw("Invalid asset data type"); }
 	template <> CMPINLINE constexpr ShaderCollection & 			GetAssetData<ShaderDX11>(void) { return m_shaders; }

@@ -9,9 +9,9 @@
 // Holds standard per-frame data such as view/projection transforms
 CBUFFER FrameDataBuffer REGISTER(b0) //ALIGNED16(FrameDataBuffer)
 {
-	float4x4 View;
-	float4x4 Projection;
-	float4x4 InvProjection;
+	RJ_ROW_MAJOR_MATRIX View;
+	RJ_ROW_MAJOR_MATRIX Projection;
+	RJ_ROW_MAJOR_MATRIX InvProjection;
 	float2 ScreenDimensions;
 	float2 padding;
 };

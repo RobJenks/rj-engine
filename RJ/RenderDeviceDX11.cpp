@@ -656,11 +656,39 @@ void RenderDeviceDX11::SetDisplaySize(INTVECTOR2 display_size)
 {
 	assert(display_size.x > 0 && display_size.y > 0);
 
+	// Calculate derived fields
 	m_displaysize = display_size;
 	m_displaysize_f = XMFLOAT2((float)m_displaysize.x, (float)m_displaysize.y);
 	m_aspectratio = (static_cast<float>(display_size.x )/ static_cast<float>(display_size.y));
 
+	// Generate a new ortho matrix based on the screen dimensions
 	RecalculateOrthographicMatrix();
+
+	// Update the primary viewport; this will propogate to all resources which have already been 
+	// created and associated with the default viewport
+	UpdatePrimaryViewportSize(m_displaysize_f);
+
+}
+
+// Update the primary viewport; this will propogate to all resources which have already been 
+// created and associated with the default viewport
+void RenderDeviceDX11::UpdatePrimaryViewportSize(XMFLOAT2 size)
+{
+	assert( size.x > 0.0f && size.y > 0.0f );
+
+	// Update the viewport itself
+	m_viewport = Viewport(0.0f, 0.0f, m_displaysize_f.x, m_displaysize_f.y);
+
+	// Now update all resources which may already have been created and associated with the primary viewport
+	// TODO: Not currently doing this.  Probably also need some "uses custom viewport" flag to differentiate 
+	// those which should NOT be updated to exactly correspond with the primary viewport.  Those should 
+	// probabaly instead scale based on the degree of change in viewport size
+
+	// Rasterizer states within each render pipeline
+	/*for (auto & it : Assets.GetAssetData<PipelineStateDX11>())
+		if (it.second.get()) it.second.get()->GetRasterizerState().SetViewport(m_viewport);*/
+
+
 }
 
 void RenderDeviceDX11::SetVsyncEnabled(bool vsync_enabled)

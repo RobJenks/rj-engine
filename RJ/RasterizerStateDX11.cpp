@@ -21,6 +21,7 @@ RasterizerStateDX11::RasterizerStateDX11(void)
 	, m_viewportsdirty(true)
 	, m_rectsdirty(true)
 {
+	SetViewport(Game::Engine->GetRenderDevice()->GetPrimaryViewport());
 }
 
 RasterizerStateDX11::RasterizerStateDX11(const RasterizerStateDX11& copy)

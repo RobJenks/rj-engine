@@ -9,14 +9,14 @@ VertexShaderStandardOutput VS_Standard(Vertex_Inst_Standard input)
 	VertexShaderStandardOutput output;
 
 	float4x4 WorldView = mul(input.Transform, View);
-	float4 pos_view = mul(WorldView, float4(input.position, 1.0f));
+	float4 pos_view = mul(float4(input.position, 1.0f), WorldView);
 
 	output.positionVS = pos_view.xyz;				// View-space position
-	output.position = mul(Projection, pos_view);	// Clip-space position
+	output.position = mul(pos_view, Projection);	// Clip-space position
 
-	output.tangentVS = mul((float3x3)WorldView, input.tangent);
-	output.binormalVS = mul((float3x3)WorldView, input.binormal);
-	output.normalVS = mul((float3x3)WorldView, input.normal);
+	output.tangentVS = mul(input.tangent, (float3x3)WorldView);
+	output.binormalVS = mul(input.binormal, (float3x3)WorldView);
+	output.normalVS = mul(input.normal, (float3x3)WorldView);
 
 	output.texCoord = input.tex;
 
