@@ -1,7 +1,7 @@
 #ifndef __LightDataHLSLH__
 #define __LightDataHLSLH__
 
-#include "CppHLSLLocalisation.hlsl.h"
+#include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
 // Supported light types; workaround for lack of enumerations in HLSL
@@ -33,7 +33,7 @@
 		float4					Colour;								// Light colour.  Incorporates diffuse + specular components; we don't currently differentiate
 		//------------------------------------------ ( 16 bytes )
 		LightType				Type;								// The type of light being rendered
-		bool					Enabled;							// Disabled light will be skipped entirely during lighting calculations.  TODO: bool portable across cpp/hlsl?
+		_bool					Enabled;							// Disabled light will be skipped entirely during lighting calculations
 		float					Range;								// Range at which light is fully-attenuated and no longer has any effect
 		float					Intensity;							// Overall intensity of the light
 		//------------------------------------------ ( 16 bytes )
@@ -52,7 +52,7 @@
 			, DirectionVS(0, 0, 1, 0)
 			, Colour(1, 1, 1, 1)
 			, Type(LightType::Point)
-			, Enabled(true)
+			, Enabled(TRUE)
 			, Range(100.0f)
 			, Intensity(1.0f)
 			, SpotlightCosAngle(0.7854) // == PI/4 == 45 degrees
