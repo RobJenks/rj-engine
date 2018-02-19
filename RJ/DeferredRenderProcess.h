@@ -64,6 +64,8 @@ private:
 	// Standard constant buffers; keep single instance for binding efficiency
 	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
+	ManagedPtr<LightIndexBuffer>			m_cb_lightindex_data;		// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *					m_cb_lightindex;			// Compiled CB
 
 
 	// Indices of required shader parameters

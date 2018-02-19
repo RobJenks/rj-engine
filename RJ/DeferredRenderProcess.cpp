@@ -21,6 +21,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_ps_lighting(NULL), 
 	m_depth_only_rt(NULL), 
 	m_cb_frame(NULL), 
+	m_cb_lightindex(NULL), 
 
 	m_pipeline_geometry(NULL), 
 	m_pipeline_lighting_pass1(NULL), 
@@ -79,6 +80,7 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 	Game::Log << LOG_INFO << "Initialise deferred rendering standard buffer resources\n";
 
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
+	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
 }
 
 // Geometry pipeline will render all opaque geomeetry to the GBuffer RT
@@ -299,6 +301,9 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 
 	// Bind required buffer resources to each pipeline
 	BindDeferredLightingShaderResources();
+
+	// Process each light in turn
+	
 
 	
 
