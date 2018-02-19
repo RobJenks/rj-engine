@@ -1,5 +1,6 @@
 #include "DeferredRenderProcess.h"
 #include "CoreEngine.h"
+#include "LightingManagerObject.h"
 #include "RenderDeviceDX11.h"
 #include "PipelineStateDX11.h"
 #include "ShaderDX11.h"
@@ -9,6 +10,8 @@
 #include "DepthStencilState.h"
 #include "BlendState.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "Data/Shaders/LightDataBuffers.hlsl"
+#include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 
 
 DeferredRenderProcess::DeferredRenderProcess(void)
@@ -18,7 +21,6 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_ps_lighting(NULL), 
 	m_depth_only_rt(NULL), 
 	m_cb_frame(NULL), 
-	m_cb_material(NULL), 
 
 	m_pipeline_geometry(NULL), 
 	m_pipeline_lighting_pass1(NULL), 
@@ -29,7 +31,9 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_geom_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_ps_light_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
 	InitialiseShaders();
 	InitialiseRenderTargets();
@@ -59,6 +63,8 @@ void DeferredRenderProcess::InitialiseShaders(void)
 	m_param_ps_geom_materialdata = AttemptRetrievalOfShaderParameter(m_ps_geometry, MaterialBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
 	m_param_ps_light_materialdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, MaterialBufferName);
+	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
+	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
 }
 
 void DeferredRenderProcess::InitialiseRenderTargets(void)
@@ -76,7 +82,6 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 	Game::Log << LOG_INFO << "Initialise deferred rendering standard buffer resources\n";
 
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
-	m_cb_material = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<MaterialBuffer>(MaterialBufferName, m_cb_material_data.RawPtr);
 }
 
 // Geometry pipeline will render all opaque geomeetry to the GBuffer RT
@@ -271,7 +276,6 @@ void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 	m_cb_frame_data.RawPtr->InvProjection = Game::Engine->GetRenderInverseProjectionMatrixF();
 	m_cb_frame_data.RawPtr->ScreenDimensions = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_cb_frame->Set(m_cb_frame_data.RawPtr);
-
 }
 
 
@@ -293,6 +297,36 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 void DeferredRenderProcess::PerformDeferredLighting(void)
 {
+	// Bind the GBuffer generated in the geometry phase to the deferred lighting pixel shader
+	GBuffer.Bind(Shader::Type::PixelShader);
+
+	// Bind required buffer resources to each pipeline
+	BindDeferredLightingShaderResources();
+
+	
+
+}
+
+// Bind shader resources required for the deferred lighting stage
+void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
+{
+	// TODO: Required for all pipelines when shader/buffer is the same?  E.g. all pipelines use the same frame data param in the same VS
+	// TODO: Required every frame?  Only setting buffer pointer in shader.  May only be required on shader reload in case param indices change
+
+	// Lighting pass 1 is VS-only and does not output fragments
+	m_pipeline_lighting_pass1->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+
+	// Lighting pass 2 uses both VS and PS
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
+
+	// Directional lighting pass uses both VS and PS
+	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
 
 }
 

@@ -1271,6 +1271,9 @@
     <None Include="Object Hierarchy.cd" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl">
+      <FileType>Document</FileType>
+    </None>
     <FxCompile Include="Data\Shaders\deferred_ps_geometry.ps.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">false</ExcludedFromBuild>
@@ -1320,6 +1323,9 @@
       </DeploymentContent>
     </None>
     <None Include="Data\Shaders\lighting_calculations.hlsl">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Data\Shaders\LightDataBuffers.hlsl">
       <FileType>Document</FileType>
     </None>
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">

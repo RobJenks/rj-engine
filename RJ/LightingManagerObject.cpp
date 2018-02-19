@@ -6,6 +6,8 @@
 #include "GameUniverse.h"
 #include "SpaceSystem.h"
 #include "LightSource.h"
+#include "CPUGraphicsResourceAccess.h"
+#include "Data/Shaders/LightDataBuffers.hlsl"
 
 #include "LightingManagerObject.h"
 
@@ -16,22 +18,22 @@ LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject
 // Default constructor
 LightingManagerObject::LightingManagerObject(void)
 	:
-	m_source_count(0U), m_active_config(0U), m_lighting_is_overridden(false), m_source_vector_is_sorted(false)
+	m_source_count(0U), m_lighting_is_overridden(false), m_source_vector_is_sorted(false)
 {
 	// Initialise space in the light source vector to hold the maximum possible number of lights
 	m_sources.clear();
 	for (int i = 0; i < LightingManagerObject::LIGHT_LIMIT; ++i) m_sources.push_back(NULL);
 
-	// Initialise the light config lookup table
-	for (int i = 0; i < LightingManagerObject::LIGHT_LIMIT; ++i)
-	{
-		// Each light uses one bit, e.g. light #0 = 0x0, #1 = 0x1, #2 = 0x2, #3 = 0x4, ...
-		m_config_lookup[i] = (1 << i);
-	}
-
 	// Initialise space in the lighting override vector to hold the maximum possible number of lights
 	m_override_lights.clear();
 	m_override_lights.reserve(LightingManagerObject::LIGHT_LIMIT);
+
+	// Create the structured buffer that will hold compiiled frame lighting data
+	m_sb_lights = Game::Engine->GetRenderDevice()->Assets.CreateStructuredBuffer<LightData>(LightBufferName, LightingManagerObject::LIGHT_LIMIT, CPUGraphicsResourceAccess::Write);
+	if (!m_sb_lights)
+	{
+		Game::Log << LOG_ERROR << "Failed to instantiate lighting manager buffers for frame lighting data\n";
+	}
 
 	// Initialise the pre-configured lighting setups that can be used as a standard override
 	InitialiseStandardLightingOverrides();
@@ -93,6 +95,9 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	{
 		m_light_data[i] = m_sources[i].Source->GetLight().Data;
 	}
+
+	// Update contents of the structured buffer in texture memory, ready for rendering
+	m_sb_lights->Set(&(m_light_data[0]), static_cast<UINT>(sizeof(LightData) * m_source_count));
 }
 
 // Register a new light source for this scene
@@ -169,7 +174,7 @@ void LightingManagerObject::ClearAllLightSources(void)
 
 
 // Return the light configuration relevant to the specified object
-Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(const iObject *object)
+/*Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(const iObject *object)
 {
 	// Results will be returned in a light config bitstring
 	Game::LIGHT_CONFIG config = 0U;
@@ -203,7 +208,7 @@ Game::LIGHT_CONFIG LightingManagerObject::GetLightingConfigurationForObject(cons
 
 	// Return the relevant lighting configuration
 	return config;
-}
+}*/
 
 // Called at the end of a frame to perform any final lighting-related activities
 void LightingManagerObject::EndFrame(void)

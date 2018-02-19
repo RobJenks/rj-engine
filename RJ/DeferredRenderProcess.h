@@ -43,8 +43,6 @@ protected:
 	// Retrieve standard buffer data
 	CMPINLINE ConstantBufferDX11 *					GetCommonFrameDataBuffer(void) { return m_cb_frame; }
 	CMPINLINE FrameDataBuffer *						GetCommonFrameDataBufferData(void) { return m_cb_frame_data.RawPtr; }
-	CMPINLINE ConstantBufferDX11 *					GetCommonMaterialBuffer(void) { return m_cb_material; }
-	CMPINLINE MaterialBuffer *						GetCommonMaterialBufferData(void) { return m_cb_material_data.RawPtr; }
 
 private:
 
@@ -66,14 +64,15 @@ private:
 	// Standard constant buffers; keep single instance for binding efficiency
 	ManagedPtr<FrameDataBuffer>				m_cb_frame_data;			// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
-	ManagedPtr<MaterialBuffer>				m_cb_material_data;
-	ConstantBufferDX11 *					m_cb_material;
+
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_geom_materialdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_materialdata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
+	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
 
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
@@ -86,6 +85,7 @@ private:
 	void InitialiseDeferredDirectionalLightingPipeline(void);
 	void InitialiseTransparentRenderingPipelines(void);
 
-
+	// Bind shader resources required for the deferred lighting stage
+	void BindDeferredLightingShaderResources(void);
 
 };

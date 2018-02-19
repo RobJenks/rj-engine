@@ -12,8 +12,16 @@ class StructuredBufferDX11 : public StructuredBuffer
 public:
 
 	// Construct a new structured buffer resource
-	static StructuredBufferDX11	* Create(	UINT bindFlags, const void* data, UINT element_count, UINT stride, 
+	static StructuredBufferDX11	* Create(	const void* data, UINT element_count, UINT stride, 
 											CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+	template <typename T>
+	static StructuredBufferDX11	* Create(const void* data, UINT element_count, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+
+	static StructuredBufferDX11	* Create(UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+	template <typename T>
+	static StructuredBufferDX11	* Create(UINT element_count, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+	template <typename T>
+	static StructuredBufferDX11	* Create(const std::vector<T> & data, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
 
 	// Update data within the buffer
 	void						SetData(void* data, size_t elementSize, size_t offset, size_t numElements);
@@ -56,3 +64,25 @@ private:
 	static ID3D11UnorderedAccessView * const m_null_uav[1];
 
 };
+
+
+template <typename T>
+static StructuredBufferDX11	* StructuredBufferDX11::Create(const std::vector<T> & data, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	return StructuredBufferDX11::Create(&(data[0]), data.size(), sizeof(T), cpuAccess, isUAV);
+}
+
+template <typename T>
+static StructuredBufferDX11	* StructuredBufferDX11::Create(const void* data, UINT element_count, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	return StructuredBufferDX11::Create(data, element_count, sizeof(T), cpuAccess, isUAV);
+}
+
+template <typename T>
+static StructuredBufferDX11	* StructuredBufferDX11::Create(UINT element_count, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	return StructuredBufferDX11::Create(NULL, element_count, sizeof(T), cpuAccess, isUAV);
+}
+
+
+

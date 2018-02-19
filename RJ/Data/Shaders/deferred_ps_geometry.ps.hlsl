@@ -8,13 +8,6 @@ float4 DoBumpMapping(float3x3 TBN, Texture2D tex, sampler s, float2 uv, float bu
 float3 ExpandNormal(float3 n);
 
 
-// GBuffer texture target bindings
-Texture2D DiffuseTextureVS : register(t0);
-Texture2D SpecularTextureVS : register(t1);
-Texture2D NormalTextureVS : register(t2);
-Texture2D DepthTextureVS : register(t3);
-
-
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
 DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutput IN)

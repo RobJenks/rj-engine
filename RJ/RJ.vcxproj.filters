@@ -2392,6 +2392,9 @@
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
     <None Include="Engine components.cd" />
+    <None Include="Data\Shaders\hlsl_common.hlsl" />
+    <None Include="Data\Shaders\lighting_calculations.hlsl" />
+    <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl" />
@@ -2410,10 +2413,7 @@
     <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
-    <FxCompile Include="Data\Shaders\lighting_calculations.hlsl">
-      <Filter>HLSL\Common</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\hlsl_common.hlsl.h">
+    <FxCompile Include="Data\Shaders\LightDataBuffers.hlsl">
       <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>

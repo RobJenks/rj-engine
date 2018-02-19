@@ -82,6 +82,22 @@ DeferredGBuffer::DeferredGBuffer(void)
 }
 
 
+void DeferredGBuffer::Bind(Shader::Type shader_type)
+{
+	DiffuseTexture->Bind(shader_type, 0U, ShaderParameter::Type::Texture);
+	SpecularTexture->Bind(shader_type, 1U, ShaderParameter::Type::Texture);
+	NormalTexture->Bind(shader_type, 2U, ShaderParameter::Type::Texture);
+	DepthStencilTexture->Bind(shader_type, 3U, ShaderParameter::Type::Texture);
+}
+
+void DeferredGBuffer::Unbind(Shader::Type shader_type)
+{
+	DiffuseTexture->Unbind(shader_type, 0U, ShaderParameter::Type::Texture);
+	SpecularTexture->Unbind(shader_type, 1U, ShaderParameter::Type::Texture);
+	NormalTexture->Unbind(shader_type, 2U, ShaderParameter::Type::Texture);
+	DepthStencilTexture->Unbind(shader_type, 3U, ShaderParameter::Type::Texture);
+}
+
 
 DeferredGBuffer::~DeferredGBuffer(void)
 {

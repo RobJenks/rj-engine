@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "Shader.h"
 class TextureDX11;
 class RenderTargetDX11;
 
@@ -17,6 +18,9 @@ public:
 	TextureDX11 *					SpecularTexture;
 	TextureDX11 *					NormalTexture;
 	TextureDX11 *					DepthStencilTexture;
+
+	void							Bind(Shader::Type shader_type);
+	void							Unbind(Shader::Type shader_type);
 
 	~DeferredGBuffer(void);
 

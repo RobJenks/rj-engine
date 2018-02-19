@@ -5,7 +5,8 @@
 #include "../../../Definitions/CppHLSLLocalisation.hlsl.h"
 #include "hlsl_common.hlsl"
 #include "lighting_calculations.hlsl"
-
+#include "LightDataBuffers.hlsl"
+#include "DeferredRenderingBuffers.hlsl"
 
 // GBuffer texture target bindings
 Texture2D DiffuseTextureVS : register(t0);
@@ -13,15 +14,6 @@ Texture2D SpecularTextureVS : register(t1);
 Texture2D NormalTextureVS : register(t2);
 Texture2D DepthTextureVS : register(t3);
 
-// Structured buffer holding light data (in texture memory, not constant buffer memory)
-StructuredBuffer<LightData> Lights : register(t8);
-
-// Constant buffer holding current index into the light buffer (TODO: Can be combined with other cbuffer data?)
-CBUFFER LightIndexBuffer REGISTER(b4)
-{
-	// The index of the light in the 'Lights' buffer
-	_uint32 LightIndex;
-}
 
 
 // Pixel shader that generates the G-Buffer

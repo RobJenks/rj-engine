@@ -747,13 +747,15 @@ void CoreEngine::Render(void)
 	// Construct the view frustrum for this frame so we can perform culling calculations
 	m_frustrum->ConstructViewFrustrum(r_view, r_invview);
 
+	// Determine the lighting configuration visible in the current frame
+	LightingManager->AnalyseNewFrame();
+
 	/* Process the scene and populate the render queue (TODO: break out and add remainder; actors, particles, ...) */
 	SpaceSystem & system = Game::Universe->GetCurrentSystem();
 	RenderAllSystemObjects(system);
 
 	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
 	m_renderdevice->Render();
-
 
 	// Activate the render queue optimiser here if it is ready for its next cycle, then clear the render queue ready for Frame+1
 	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();

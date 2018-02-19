@@ -8,7 +8,7 @@ ID3D11UnorderedAccessView * const StructuredBufferDX11::m_null_uav[1] = { nullpt
 
 
 // Construct a new structured buffer resource
-StructuredBufferDX11 * StructuredBufferDX11::Create(UINT bindFlags, const void* data, UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+StructuredBufferDX11 * StructuredBufferDX11::Create(const void* data, UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
 {
 	// Create an appropriate buffer descriptor based on the given parameters
 	D3D11_BUFFER_DESC bufferdesc = {};
@@ -41,6 +41,12 @@ StructuredBufferDX11 * StructuredBufferDX11::Create(UINT bindFlags, const void* 
 	// Now construct the buffer using this custom descriptor
 	return new StructuredBufferDX11(bufferdesc, data, element_count, stride);
 }
+
+StructuredBufferDX11 * StructuredBufferDX11::Create(UINT element_count, UINT stride, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	return StructuredBufferDX11::Create(NULL, element_count, stride, cpuAccess, isUAV);
+}
+
 
 // Private constructor; new structured buffers should be instantiated through StructuredBufferDX11::Create()
 StructuredBufferDX11::StructuredBufferDX11(const D3D11_BUFFER_DESC & buffer_desc, const void* data, UINT element_count, UINT stride)

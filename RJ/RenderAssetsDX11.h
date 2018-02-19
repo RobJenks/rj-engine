@@ -12,6 +12,7 @@
 #include "CPUGraphicsResourceAccess.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "ConstantBufferDX11.h"
+#include "StructuredBufferDX11.h"
 #include "VertexBufferDX11.h"
 #include "DynamicVertexBufferDX11.h"
 #include "ShaderDX11.h"
@@ -35,6 +36,7 @@ public:
 	typedef std::unordered_map<std::string, std::unique_ptr<PipelineStateDX11>> PipelineStateCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<TextureDX11>> TextureCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<ConstantBufferDX11>> ConstantBufferCollection;
+	typedef std::unordered_map<std::string, std::unique_ptr<StructuredBufferDX11>> StructuredBufferCollection;
 	typedef std::unordered_map<std::string, std::unique_ptr<VertexBufferDX11>> VertexBufferCollection;
 
 	static std::string								DEFAULT_ASSET_ID;
@@ -54,6 +56,7 @@ public:
 	CMPINLINE const PipelineStateCollection &		GetPipelineStates(void) const { return m_pipelinestates; }
 	CMPINLINE const TextureCollection &				GetTextures(void) const { return m_textures; }
 	CMPINLINE const ConstantBufferCollection &		GetConstantBuffers(void) const { return m_constantbuffers; }
+	CMPINLINE const StructuredBufferCollection &	GetStructuredBuffers(void) const { return m_structuredbuffers; }
 	CMPINLINE const VertexBufferCollection &		GetVertexBuffers(void) const { return m_vertexbuffers; }
 
 	CMPINLINE ShaderDX11 *							GetShader(const std::string & name) { return GetAsset<ShaderDX11>(name); }
@@ -63,6 +66,7 @@ public:
 	CMPINLINE PipelineStateDX11 *					GetPipelineState(const std::string & name) { return GetAsset<PipelineStateDX11>(name); }
 	CMPINLINE TextureDX11 *							GetTexture(const std::string & name) { return GetAsset<TextureDX11>(name); }
 	CMPINLINE ConstantBufferDX11 *					GetConstantBuffer(const std::string & name) { return GetAsset<ConstantBufferDX11>(name); }
+	CMPINLINE StructuredBufferDX11 *				GetStructuredBuffer(const std::string & name) { return GetAsset<StructuredBufferDX11>(name); }
 	CMPINLINE VertexBufferDX11 *					GetVertexBuffer(const std::string & name) { return GetAsset<VertexBufferDX11>(name); }
 
 	template <typename T>
@@ -86,6 +90,13 @@ public:
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, const T *data);
+
+	template <typename T>
+	StructuredBufferDX11 *							CreateStructuredBuffer(	const std::string & name, const T *data, UINT element_count, 
+																			CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
+	template <typename T>
+	StructuredBufferDX11 *							CreateStructuredBuffer(	const std::string & name, UINT element_count, 
+																			CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
 
 	template <typename TVertex>
 	VertexBufferDX11 *								CreateVertexBuffer(const std::string & name, const TVertex *data, UINT count, UINT stride, bool dynamic_vb = false);
@@ -126,14 +137,15 @@ private:
 public:
 
 	template <typename T> CMPINLINE constexpr std::unordered_map<std::string, std::unique_ptr<T>> & 	GetAssetData(void) { throw("Invalid asset data type"); }
-	template <> CMPINLINE constexpr ShaderCollection & 			GetAssetData<ShaderDX11>(void) { return m_shaders; }
-	template <> CMPINLINE constexpr SamplerStateCollection & 	GetAssetData<SamplerStateDX11>(void) { return m_samplers; }
-	template <> CMPINLINE constexpr RenderTargetCollection & 	GetAssetData<RenderTargetDX11>(void) { return m_rendertargets; }
-	template <> CMPINLINE constexpr MaterialCollection & 		GetAssetData<MaterialDX11>(void) { return m_materials; }
-	template <> CMPINLINE constexpr PipelineStateCollection & 	GetAssetData<PipelineStateDX11>(void) { return m_pipelinestates; }
-	template <> CMPINLINE constexpr TextureCollection & 		GetAssetData<TextureDX11>(void) { return m_textures; }
-	template <> CMPINLINE constexpr ConstantBufferCollection & 	GetAssetData<ConstantBufferDX11>(void) { return m_constantbuffers; }
-	template <> CMPINLINE constexpr VertexBufferCollection & 	GetAssetData<VertexBufferDX11>(void) { return m_vertexbuffers; }
+	template <> CMPINLINE constexpr ShaderCollection & 				GetAssetData<ShaderDX11>(void) { return m_shaders; }
+	template <> CMPINLINE constexpr SamplerStateCollection &		GetAssetData<SamplerStateDX11>(void) { return m_samplers; }
+	template <> CMPINLINE constexpr RenderTargetCollection & 		GetAssetData<RenderTargetDX11>(void) { return m_rendertargets; }
+	template <> CMPINLINE constexpr MaterialCollection & 			GetAssetData<MaterialDX11>(void) { return m_materials; }
+	template <> CMPINLINE constexpr PipelineStateCollection & 		GetAssetData<PipelineStateDX11>(void) { return m_pipelinestates; }
+	template <> CMPINLINE constexpr TextureCollection & 			GetAssetData<TextureDX11>(void) { return m_textures; }
+	template <> CMPINLINE constexpr ConstantBufferCollection & 		GetAssetData<ConstantBufferDX11>(void) { return m_constantbuffers; }
+	template <> CMPINLINE constexpr StructuredBufferCollection &	GetAssetData<StructuredBufferDX11>(void) { return m_structuredbuffers; }
+	template <> CMPINLINE constexpr VertexBufferCollection & 		GetAssetData<VertexBufferDX11>(void) { return m_vertexbuffers; }
 
 private:
 
@@ -145,6 +157,7 @@ private:
 	template <> CMPINLINE constexpr const char *				AssetName<PipelineStateDX11>(void) const { return "PipelineState"; }
 	template <> CMPINLINE constexpr const char *				AssetName<TextureDX11>(void) const { return "Texture"; }
 	template <> CMPINLINE constexpr const char *				AssetName<ConstantBufferDX11>(void) const { return "ConstantBuffer"; }
+	template <> CMPINLINE constexpr const char *				AssetName<StructuredBufferDX11>(void) const { return "StructuredBuffer"; }
 	template <> CMPINLINE constexpr const char *				AssetName<VertexBufferDX11>(void) const { return "VertexBuffer"; }
 
 
@@ -157,6 +170,7 @@ private:
 	PipelineStateCollection							m_pipelinestates;
 	TextureCollection								m_textures;
 	ConstantBufferCollection						m_constantbuffers;
+	StructuredBufferCollection						m_structuredbuffers;
 	VertexBufferCollection							m_vertexbuffers;
 
 };
@@ -246,6 +260,38 @@ ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & 
 	return m_constantbuffers[name].get();
 }
 
+template <typename T>
+StructuredBufferDX11 * RenderAssetsDX11::CreateStructuredBuffer(const std::string & name, const T *data, UINT element_count, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	if (name.empty())
+	{
+		Game::Log << LOG_ERROR << "Cannot create structured buffer with null identifier\n";
+		return NULL;
+	}
+
+	if (m_constantbuffers.find(name) != m_constantbuffers.end())
+	{
+		Game::Log << LOG_ERROR << "Cannot create constant buffer \"" << name << "\"; buffer already exists with this identifier\n";
+		return NULL;
+	}
+
+	StructuredBufferDX11 * buffer = StructuredBufferDX11::Create<T>(data, element_count, cpuAccess, isUAV);
+	if (!buffer)
+	{
+		Game::Log << LOG_ERROR << "Failed to create structured buffer \"" << name << "\" (n=" << element_count << ", strd=" << sizeof(T) << ", cpu=" << (int)cpuAccess
+			<< ", uav=" << (isUAV ? "true" : "false") << ", d" << (data ? "!=0" : "==0") << "\n";
+		return NULL;
+	}
+
+	m_structuredbuffers[name] = std::unique_ptr<StructuredBufferDX11>(buffer);
+	return m_structuredbuffers[name].get();
+}
+
+template <typename T>
+StructuredBufferDX11 * RenderAssetsDX11::CreateStructuredBuffer(const std::string & name, UINT element_count, CPUGraphicsResourceAccess cpuAccess, bool isUAV)
+{
+	return CreateStructuredBuffer<T>(name, NULL, element_count, cpuAccess, isUAV);
+}
 
 template <typename TVertex>
 VertexBufferDX11 * RenderAssetsDX11::CreateVertexBuffer(const std::string & name, UINT count, bool dynamic_vb)

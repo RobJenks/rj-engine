@@ -21,7 +21,7 @@ CBUFFER FrameDataBuffer REGISTER(b0) //ALIGNED16(FrameDataBuffer)
 // both buffer and vertex structure, plus would require changing ModelBuffer impl.  Perhaps better
 // to continue rendering all of a single material before moving to the next, even if a model 
 // has >1 material
-CBUFFER MaterialBuffer REGISTER(b2) //ALIGNED16(MaterialBuffer)
+CBUFFER MaterialBuffer REGISTER(b2)
 {
 	MaterialData Mat;
 };
