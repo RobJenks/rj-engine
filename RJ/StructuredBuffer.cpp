@@ -4,6 +4,6 @@
 
 StructuredBuffer::StructuredBuffer(const D3D11_BUFFER_DESC & buffer_desc, const void *data, UINT count, UINT stride)
 	:
-	Buffer(Buffer::BufferType::StructuredBuffer, data, count, stride)
+	Buffer(Buffer::BufferType::StructuredBuffer, buffer_desc, data, count, stride)
 {
 }

@@ -68,9 +68,7 @@ private:
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_geom_materialdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
-	ShaderDX11::ShaderParameterIndex		m_param_ps_light_materialdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
 

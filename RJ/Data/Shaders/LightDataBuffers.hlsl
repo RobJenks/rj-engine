@@ -9,5 +9,5 @@
 
 
 // String references to each buffer binding
-#define LightBufferName "LightBuffer"
+#define LightBufferName BUFFER_NAME(Lights)
 

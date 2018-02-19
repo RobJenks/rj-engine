@@ -30,8 +30,6 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_geom_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_materialdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER)
 {
@@ -41,6 +39,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	InitialiseGeometryPipelines();
 	InitialiseDeferredLightingPipelines();
+	InitialiseDeferredDirectionalLightingPipeline();
 	InitialiseTransparentRenderingPipelines();
 }
 
@@ -60,9 +59,7 @@ void DeferredRenderProcess::InitialiseShaders(void)
 
 	// Ensure we have valid indices into the shader parameter sets
 	m_param_vs_framedata = AttemptRetrievalOfShaderParameter(m_vs, FrameDataBufferName);
-	m_param_ps_geom_materialdata = AttemptRetrievalOfShaderParameter(m_ps_geometry, MaterialBufferName);
 	m_param_ps_light_framedata = AttemptRetrievalOfShaderParameter(m_ps_lighting, FrameDataBufferName);
-	m_param_ps_light_materialdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, MaterialBufferName);
 	m_param_ps_light_lightdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightBufferName);
 	m_param_ps_light_lightindexdata = AttemptRetrievalOfShaderParameter(m_ps_lighting, LightIndexBufferName);
 }
@@ -305,6 +302,9 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 
 	
 
+
+	// Unbind the GBuffer following all deferred lighting rendering
+	GBuffer.Unbind(Shader::Type::PixelShader);
 }
 
 // Bind shader resources required for the deferred lighting stage

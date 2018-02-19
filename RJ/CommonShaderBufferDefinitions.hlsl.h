@@ -1,10 +1,6 @@
 #ifndef __CommonShaderBufferDefinitionsHLSL__
 #define __CommonShaderBufferDefinitionsHLSL__
 
-#include "../Definitions/MaterialData.hlsl.h"
-
-
-
 // Standard constant buffer definitions
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 
