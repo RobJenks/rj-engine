@@ -63,6 +63,9 @@
     <ClCompile Include="InputTransformerRjm.cpp">
       <Filter>Transformer\Input</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStageOutputModelInfo.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="InputTransformerRjm.h">
       <Filter>Transformer\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageOutputModelInfo.h">
+      <Filter>Transformer\Transforms</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

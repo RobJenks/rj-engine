@@ -11,7 +11,7 @@
 #include "InputTransformerAssimp.h"
 #include "InputTransformerRjm.h"
 #include "BinaryOutputTransform.h"
-#include "PipelineStagePassthrough.h"
+#include "PipelineStageOutputModelInfo.h"
 #include "PipelineStageCentreModel.h"
 
 
@@ -48,9 +48,8 @@ void ObjToRjm(const std::string & input, const std::string & target, unsigned in
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerAssimp>(operations)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
@@ -81,9 +80,8 @@ void RjmToObj(const std::string & input, const std::string & target, const std::
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>(generate_material, true)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
@@ -111,9 +109,8 @@ void ProcessRjm(const std::string & input, const std::string & target, unsigned 
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("", false, operations)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
@@ -177,9 +174,8 @@ void RjmObjConversionTest(void)
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("testship1_texture.dds", true)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
@@ -197,9 +193,8 @@ void BulkRjmObjConversion(void)
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("", true)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStagePassthrough>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
 
