@@ -41,7 +41,7 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) cons
 	
 	// Build a model based upon this scene data
 	TRANSFORM_INFO << "Data loaded" << (scene == NULL ? " (WARNING: null scene data, likely import failure)" : "") << ", building model from ai scene data\n";
-	auto model = AssimpIntegration::ParseAssimpScene(scene, importer);
+	auto model = AssimpIntegration::ParseAssimpScene(scene, importer, m_operations, true);
 
 	// Return the new model data.  Assimp scene data is owned by the importer and will be properly
 	// deallocated once the importer goes out of scope

@@ -8,9 +8,11 @@
 using namespace DirectX;
 
 
-std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, bool debug_info)
+std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, unsigned int operation_config, bool debug_info)
 {
 	if (!scene) MODEL_INST_ERROR("Cannot build model; null ai data provided");
+	if (!importer.GetScene()) MODEL_INST_ERROR("Importer has no valid scene reference");
+	if (scene != importer.GetScene()) MODEL_INST_ERROR("Importer scene reference does not match expected data");
 
 	auto model = std::make_unique<ModelData>();
 
@@ -27,13 +29,24 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 	if (!mesh->mNormals) MODEL_INST_ERROR("No normal data is present");
 	if (!mesh->mTextureCoords) MODEL_INST_ERROR("No UV data is present");
 
+	// Tangent-space data can be calculated as a post-process if required
 	if (!mesh->mTangents || !mesh->mBitangents)
 	{
-		MODEL_INST_INFO("Mesh does not contain tangent and/or binormal data; post-processing to generate data");
-		importer.ApplyPostProcessing(aiProcess_CalcTangentSpace);
-		MODEL_INST_INFO("Tangent-space data calculated");
+		MODEL_INST_INFO("Mesh does not contain tangent and/or binormal data");
+		if (operation_config & aiPostProcessSteps::aiProcess_CalcTangentSpace)
+		{
+			scene = importer.ApplyPostProcessing(aiProcess_CalcTangentSpace);
+			if (mesh->mTangents && mesh->mBitangents)
+			{
+				MODEL_INST_INFO("Tangent-space data calculated");
+			}
+			else
+			{
+				MODEL_INST_INFO("WARNING: Calculation of tangent-space data appears to have failed, results may not be correct");
+			}
+		}
 	}
-
+	
 	// Assign header data
 	ModelData *m = model.get();
 	m->VertexCount = mesh->mNumVertices;
@@ -56,8 +69,8 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 		ModelData::TVertex & v = m->VertexData[i];
 		v.position = GetFloat3(mesh->mVertices[i]);
 		v.normal = GetFloat3(mesh->mNormals[i]);
-		v.tangent = GetFloat3(mesh->mTangents[i]);
-		v.binormal = GetFloat3(mesh->mBitangents[i]);
+		v.tangent = (mesh->mTangents ? GetFloat3(mesh->mTangents[i]) : XMFLOAT3(0.0f, 0.0f, 0.0f));
+		v.binormal = (mesh->mBitangents ? GetFloat3(mesh->mBitangents[i]) : XMFLOAT3(0.0f, 0.0f, 0.0f));
 
 		// Perform other per-vertex calculation
 		if (v.position.x < min_bounds.x)		min_bounds.x = v.position.x;
@@ -97,12 +110,12 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 
 
 
-DirectX::XMFLOAT2 AssimpIntegration::GetFloat2(aiVector2D & vector)
+DirectX::XMFLOAT2 AssimpIntegration::GetFloat2(const aiVector2D & vector)
 {
 	return XMFLOAT2(vector.x, vector.y);
 }
 
-DirectX::XMFLOAT3 AssimpIntegration::GetFloat3(aiVector3D & vector)
+DirectX::XMFLOAT3 AssimpIntegration::GetFloat3(const aiVector3D & vector)
 {
 	return XMFLOAT3(vector.x, vector.y, vector.z);
 }

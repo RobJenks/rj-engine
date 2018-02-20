@@ -293,9 +293,6 @@ unsigned int GetOperation(const std::string & op)
 
 int main(int argc, const char *argv[])
 {
-	//ObjTransformTest();
-	//RjmObjConversionTest();
-	//BulkRjmObjConversion();
 	if (argc < 2 || ((argc - 1) % 2 != 0))
 	{
 		PrintUsage();
@@ -304,7 +301,7 @@ int main(int argc, const char *argv[])
 
 	std::vector<std::string> input;
 	std::string output;
-	std::string type = "obj-to-rjm";
+	std::string type = "process-rjm";
 	std::string gen_mat = "";
 	bool inplace = false;
 	bool inplace_backup = true;
@@ -370,7 +367,31 @@ int main(int argc, const char *argv[])
 
 
 	// Return success
-	std::cout << "\n";
+	std::cout << "\nModel pipeline operations completed, exiting\n";
 	exit(0);
 }
+
+
+
+
+/* Test arguments:
+
+const unsigned int COUNT = 11;
+argv = new const char*[COUNT] { argv[0],
+"-type", "obj-to-rjm",
+"-i", "C:/Users/robje/Downloads/sphere.obj",
+"-o", "C:/Users/robje/Downloads/sphere.out",
+"-op", "gen-normals",
+"-op", "gen-tangents"};
+argc = COUNT;
+
+*/
+
+/* Test methods: 
+
+//ObjTransformTest();
+//RjmObjConversionTest();
+//BulkRjmObjConversion();
+
+*/
 
