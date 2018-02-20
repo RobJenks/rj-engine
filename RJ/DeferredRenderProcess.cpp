@@ -9,6 +9,7 @@
 #include "RasterizerStateDX11.h"
 #include "DepthStencilState.h"
 #include "BlendState.h"
+#include "Model.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
@@ -37,6 +38,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseShaders();
 	InitialiseRenderTargets();
 	InitialiseStandardBuffers();
+	InitialiseRenderVolumes();
 
 	InitialiseGeometryPipelines();
 	InitialiseDeferredLightingPipelines();
@@ -77,10 +79,30 @@ void DeferredRenderProcess::InitialiseRenderTargets(void)
 
 void DeferredRenderProcess::InitialiseStandardBuffers(void)
 {
-	Game::Log << LOG_INFO << "Initialise deferred rendering standard buffer resources\n";
+	Game::Log << LOG_INFO << "Initialising deferred rendering standard buffer resources\n";
 
 	m_cb_frame = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<FrameDataBuffer>(FrameDataBufferName, m_cb_frame_data.RawPtr);
 	m_cb_lightindex = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<LightIndexBuffer>(LightIndexBufferName, m_cb_lightindex_data.RawPtr);
+}
+
+void DeferredRenderProcess::InitialiseRenderVolumes(void)
+{
+	Game::Log << LOG_INFO << "Initialising deferred rendering standard render volumes\n";
+
+	std::vector<std::tuple<std::string, std::string, Model**>> models = {
+		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere }
+	};
+
+	for (auto & model : models)
+	{
+		Model *m = Model::GetModel(std::get<1>(model));
+		if (!m)
+		{
+			Game::Log << LOG_ERROR << "Could not load " << std::get<0>(model) << " model (\"" << std::get<1>(model) << "\") during deferred render process initialisation\n";
+		}
+
+		*(std::get<2>(model)) = m;
+	}
 }
 
 // Geometry pipeline will render all opaque geomeetry to the GBuffer RT

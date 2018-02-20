@@ -4,8 +4,10 @@
 #include "ManagedPtr.h"
 #include "DeferredGBuffer.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
+#include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 class PipelineStateDX11;
 class RenderTargetDX11;
+class Model;
 
 class DeferredRenderProcess : public RenderProcessDX11
 {
@@ -67,6 +69,8 @@ private:
 	ManagedPtr<LightIndexBuffer>			m_cb_lightindex_data;		// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_lightindex;			// Compiled CB
 
+	// Model buffers used for rendering light volumes
+	Model *									m_model_sphere;
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
@@ -78,6 +82,7 @@ private:
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseStandardBuffers(void);
+	void InitialiseRenderVolumes(void);
 	void InitialiseGeometryPipelines(void);
 	void InitialiseDeferredLightingPipelines(void);
 	void InitialiseDeferredLightingPass1Pipeline(void);
