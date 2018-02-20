@@ -291,7 +291,6 @@ unsigned int GetOperation(const std::string & op)
 }
 
 
-
 int main(int argc, const char *argv[])
 {
 	//ObjTransformTest();
@@ -325,13 +324,26 @@ int main(int argc, const char *argv[])
 		else if (key == "-ot")					inplace = (val == "inplace");
 		else if (key == "-bk")					inplace_backup = (val == "true");
 		else if (key == "-mat")					gen_mat = val;
-		else if (key == "-op")
+		else if (key == "-op" || key == "-skip")
 		{
-			operations |= GetOperation(val);
-		}
-		else if (key == "-skip")
-		{
-			operations &= ~(GetOperation(val));
+			auto op = GetOperation(val);
+			if (op == 0U)
+			{
+				std::cerr << "Unknown model pipeline operation \"" << val << "\"; ignoring\n";
+			}
+			else
+			{
+				if (key == "-op")
+				{
+					std::cout << "Adding operation \"" << val << "\" (" << op << ") to pipeline transformation\n";
+					operations |= op;
+				}
+				else
+				{
+					std::cout << "Excluding operation  \"" << val << "\" (" << op << ") from pipeline transformation\n";
+					operations &= (~op);
+				}
+			}
 		}
 	}
 
