@@ -15,6 +15,34 @@
 #include "PipelineStageCentreModel.h"
 
 
+static const std::vector<std::tuple<std::string, std::string, aiPostProcessSteps>> MESH_OPERATIONS 
+{
+	{ "gen-uv", "Generate UV coords for the model data", aiPostProcessSteps::aiProcess_GenUVCoords },
+	{ "gen-normals", "Generate vertex normals; ignored if normals are already present", aiPostProcessSteps::aiProcess_GenNormals },
+	{ "gen-smooth-normals", "Generate smooth vertex normals; incompatible with gen-normals", aiPostProcessSteps::aiProcess_GenSmoothNormals },
+	{ "gen-tangents", "Generate tangent space data; requires normal data to be present", aiPostProcessSteps::aiProcess_CalcTangentSpace },
+	{ "convert-lh", "Convert to a left-handed coordinate system", aiPostProcessSteps::aiProcess_MakeLeftHanded },
+	{ "debone", "Losslessly removes bone data", aiPostProcessSteps::aiProcess_Debone },
+	{ "remove-degen", "Remove degenerate points from model data", aiPostProcessSteps::aiProcess_FindDegenerates },
+	{ "fix-invalid", "Attempt to fix common exporter errors", aiPostProcessSteps::aiProcess_FindInvalidData },
+	{ "fix-inward-norm", "Attempt to fix inward-facing normals", aiPostProcessSteps::aiProcess_FixInfacingNormals },
+	{ "flip-uv", "Flips all UVs along the y-axis; incorporated in \"convert-lh\" already", aiPostProcessSteps::aiProcess_FlipUVs },
+	{ "cw-winding", "Change winding order from default CCW to CW", aiPostProcessSteps::aiProcess_FlipWindingOrder },
+	{ "improve-cache-local", "Attempt to improve vertex cache locality based on 'tipsify' algorithm (O(n))", aiPostProcessSteps::aiProcess_ImproveCacheLocality },
+	{ "merge-identical", "Merge identical vertices; only for indexed models", aiPostProcessSteps::aiProcess_JoinIdenticalVertices },
+	{ "limit-bone-weights", "Limit number of bones affecting any vertex to 4 (configurable)", aiPostProcessSteps::aiProcess_LimitBoneWeights },
+	{ "collapse-scene", "Attempt to simplify the scene graph by collapsing as far as possible", aiPostProcessSteps::aiProcess_OptimizeGraph },
+	{ "optimise-mesh", "Attempt to optimise mesh data to reduce the number of draw calls", aiPostProcessSteps::aiProcess_OptimizeMeshes },
+	{ "bake-scene-transform", "Remove scene hierarchy and bake transforms into vertex data", aiPostProcessSteps::aiProcess_PreTransformVertices },
+	{ "minimise-mats", "Remove any materials not required by the model", aiPostProcessSteps::aiProcess_RemoveRedundantMaterials },
+	{ "split-ptype", "Split model data into meshes based on primitive type", aiPostProcessSteps::aiProcess_SortByPType },
+	{ "minimise-mesh-bones", "Split meshes if required to minimise the number of bone influences per vertex", aiPostProcessSteps::aiProcess_LimitBoneWeights },
+	{ "split-large-meshes", "Split any large meshes into multiple sub-meshes (with configurable thresholds)", aiPostProcessSteps::aiProcess_SplitLargeMeshes },
+	{ "bake-uv-transforms", "Bake any UK transformations directly into UV coords", aiPostProcessSteps::aiProcess_TransformUVCoords },
+	{ "triangulate", "Triangulate any faces with more than three vertices", aiPostProcessSteps::aiProcess_Triangulate },
+	{ "validation", "Perform validation of model data during transformation; enabled by default", aiPostProcessSteps::aiProcess_ValidateDataStructure }
+};
+
 void ObjToRjm(const std::string & input, const std::string & target, unsigned int operations)
 {
 	// Basic pipeline configuration
@@ -238,67 +266,25 @@ void PrintUsage()
 	std::cout << "   -n <type>\t\tNumber of items to be processed; <type> may be \"single\" (default) or \"bulk\"\n";
 	std::cout << "   -ot <otype>\t\tOutput type; either \"target\" (default) or \"inplace\"\n";
 	std::cout << "   -bk <bool>\t\tDetermines whether backup is created.  Only if ot=inplace.  Default=true\n";
-	std::cout << "   -mat <texture>\t\tGenerates a material definition for the given texture.  Only if -type=rjm-to-obj\n";
-	std::cout << "   -op <operation>\t\tIncludes the given operation during transformation, where <operation> may be\n";
-	std::cout << "       gen-uv\t\tGenerate UV coords for the model data\n";
-	std::cout << "       gen-normals\t\tGenerate vertex normals; ignored if normals are already present\n";
-	std::cout << "       gen-smooth-normals\t\tGenerate smooth vertex normals; incompatible with gen-normals\n";
-	std::cout << "       gen-tangents\t\tGenerate tangent space data; requires normal data to be present\n";
-	std::cout << "       convert-lh\t\tConvert to a left-handed coordinate system\n";
-	std::cout << "       debone\t\tLosslessly removes bone data\n";
-	std::cout << "       remove-degen\t\tRemove degenerate points from model data\n";
-	std::cout << "       fix-invalid\t\tAttempt to fix common exporter errors\n";
-	std::cout << "       fix-inward-norm\t\tAttempt to fix inward-facing normals\n";
-	std::cout << "       flip-uv\t\tFlips all UVs along the y-axis; incorporated in \"convert-lh\" already\n";
-	std::cout << "       cw-winding\t\tChange winding order from default CCW to CW\n";
-	std::cout << "       improve-cache-local\t\tAttempt to improve vertex cache locality based on 'tipsify' algorithm (O(n))\n";
-	std::cout << "       merge-identical\n\nMerge identical vertices; only for indexed models\n";
-	std::cout << "       limit-bone-weights\t\tLimit nnumber of bones affecting any vertex to 4 (configurable)\n";
-	std::cout << "       collapse-scene\t\tAttempt to simplify the scene graph by collapsing as far as possible\n";
-	std::cout << "       optimise-mesh\t\tAttempt to optimise mesh data to reduce the number of draw calls\n";
-	std::cout << "       bake-scene-transform\t\tRemove scene hierarchy and bake transforms into vertex data\n";
-	std::cout << "       minimise-mats\t\tRemove any materials not required by the model\n";
-	std::cout << "       split-ptype\t\tSplit model data into meshes based on primitive type\n";
-	std::cout << "       minimise-mesh-bones\t\tSplit meshes if required to minimise the number of bone influences per vertex\n";
-	std::cout << "       split-large-meshes\t\tSplt any large meshes into multiple sub-meshes (with configurable thresholds)\n";
-	std::cout << "       bake-uv-transforms\t\tBake any UK transformations directly into UV coords\n";
-	std::cout << "       triangulate\t\tTriangulate any faces with more than three vertices\n";
-	std::cout << "       validation\t\tPerform validation of model data during transformation; enabled by default\n";
-	std::cout << "   -skip <operation>\t\tSkip the given operation, where <operation> may be any value available to \"-op\"\n";
+	std::cout << "   -mat <texture>\tGenerates a material definition for the given texture.  Only if -type=rjm-to-obj\n";
+	std::cout << "   -op <operation>\tIncludes the given operation during transformation, where <operation> may be\n";
+
+	for (const auto & op : MESH_OPERATIONS)
+	{
+		std::cout << "       " << std::get<0>(op) << "\t";
+		for (unsigned int i = 0; i < 2U - (unsigned int)((float)std::get<0>(op).size() / 8.0f); ++i) std::cout << "\t";
+		std::cout << std::get<1>(op) << "\n";
+	}
+
+	std::cout << "   -skip <operation>\tSkip the given operation, where <operation> may be any value available to \"-op\"\n";
 	std::cout << "\n";
 }
 
 unsigned int GetOperation(const std::string & op)
 {
-	static const std::vector<std::tuple<std::string, aiPostProcessSteps>> ops 
+	for (const auto & operation : MESH_OPERATIONS)
 	{
-		{ "gen-uv", aiPostProcessSteps::aiProcess_GenUVCoords }, 
-		{ "gen-normals", aiPostProcessSteps::aiProcess_GenNormals }, 
-		{ "gen-smooth-normals", aiPostProcessSteps::aiProcess_GenSmoothNormals }, 
-		{ "gen-tangents", aiPostProcessSteps::aiProcess_CalcTangentSpace }, 
-		{ "convert-lh", aiPostProcessSteps::aiProcess_MakeLeftHanded }, 
-		{ "debone", aiPostProcessSteps::aiProcess_Debone }, 
-		{ "remove-degen", aiPostProcessSteps::aiProcess_FindDegenerates },
-		{ "fix-invalid", aiPostProcessSteps::aiProcess_FindInvalidData }, 
-		{ "fix-inward-norm", aiPostProcessSteps::aiProcess_FixInfacingNormals }, 
-		{ "flip-uv", aiPostProcessSteps::aiProcess_FlipUVs }, 
-		{ "cw-winding", aiPostProcessSteps::aiProcess_FlipWindingOrder }, 
-		{ "improve-cache-local", aiPostProcessSteps::aiProcess_ImproveCacheLocality }, 
-		{ "merge-identival", aiPostProcessSteps::aiProcess_JoinIdenticalVertices }, 
-		{ "limit-bone-weights", aiPostProcessSteps::aiProcess_LimitBoneWeights }, 
-		{ "collapse-scene", aiPostProcessSteps::aiProcess_OptimizeGraph }, 
-		{ "optimise-mesh", aiPostProcessSteps::aiProcess_OptimizeMeshes }, 
-		{ "bake-scene-transform", aiPostProcessSteps::aiProcess_PreTransformVertices }, 
-		{ "minimise-mats", aiPostProcessSteps::aiProcess_RemoveRedundantMaterials }, 
-		{ "split-large-meshes", aiPostProcessSteps::aiProcess_SplitLargeMeshes }, 
-		{ "bake-uv-transforms", aiPostProcessSteps::aiProcess_TransformUVCoords }, 
-		{ "triangulate", aiPostProcessSteps::aiProcess_Triangulate }, 
-		{ "validation", aiPostProcessSteps::aiProcess_ValidateDataStructure }
-	};
-
-	for (auto & operation : ops)
-	{
-		if (std::get<0>(operation) == op) return std::get<1>(operation);
+		if (std::get<0>(operation) == op) return std::get<2>(operation);
 	}
 
 	return 0U;
