@@ -11,7 +11,7 @@ class InputTransformerRjm : public InputTransformerAssimp
 
 public:
 
-	InputTransformerRjm(const std::string & texture = "", bool generate_obj = false);
+	InputTransformerRjm(const std::string & texture = "", bool generate_obj = false, unsigned int operations = InputTransformerAssimp::DefaultOperations());
 
 
 	inline std::string						GetName(void) const { return "InputTransformRjm"; }

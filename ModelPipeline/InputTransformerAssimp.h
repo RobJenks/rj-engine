@@ -8,14 +8,18 @@ class InputTransformerAssimp : public TransformPipelineInput
 {
 public:
 
+	InputTransformerAssimp(void);
+	InputTransformerAssimp(unsigned int operations);
+
 	inline std::string						GetName(void) const { return "InputTransformAssimp"; }
 
 	virtual std::unique_ptr<ModelData>		Transform(fs::path file) const;
 	virtual std::unique_ptr<ModelData>		Transform(const std::string & data) const;
 
+	static unsigned int						DefaultOperations(void);
 	
 private:
 
-
+	unsigned int m_operations;
 
 };

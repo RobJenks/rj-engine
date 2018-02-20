@@ -5,8 +5,9 @@
 #include "PipelineUtil.h"
 
 
-InputTransformerRjm::InputTransformerRjm(const std::string & texture, bool generate_obj)
+InputTransformerRjm::InputTransformerRjm(const std::string & texture, bool generate_obj, unsigned int operations)
 	:
+	InputTransformerAssimp(operations), 
 	m_texture(texture), 
 	m_generate_obj(generate_obj)
 {

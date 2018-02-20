@@ -8,6 +8,19 @@
 #include <assimp\scene.h>
 #include <assimp\postprocess.h>
 
+InputTransformerAssimp::InputTransformerAssimp(void)
+	:
+	TransformPipelineInput()
+{
+	m_operations = DefaultOperations();
+}
+
+InputTransformerAssimp::InputTransformerAssimp(unsigned int operations)
+	:
+	TransformPipelineInput()
+{
+	m_operations = operations;
+}
 
 std::unique_ptr<ModelData> InputTransformerAssimp::Transform(const std::string & data) const
 {
@@ -24,8 +37,7 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) cons
 	// Attempt to import the data into an Assimp scene
 	TRANSFORM_INFO << "Attempting to import data via assimp\n";
 	Assimp::Importer importer;
-	const aiScene *scene = importer.ReadFile(fs::absolute(file).string(), 
-		aiProcess_ValidateDataStructure);
+	const aiScene *scene = importer.ReadFile(fs::absolute(file).string(), m_operations);
 	
 	// Build a model based upon this scene data
 	TRANSFORM_INFO << "Data loaded" << (scene == NULL ? " (WARNING: null scene data, likely import failure)" : "") << ", building model from ai scene data\n";
@@ -37,5 +49,9 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) cons
 	return model;
 }
 
+unsigned int InputTransformerAssimp::DefaultOperations(void)
+{
+	return aiProcess_ValidateDataStructure;
+}
 
 
