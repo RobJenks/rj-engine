@@ -71,6 +71,7 @@ private:
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
+	Model *									m_model_cone;
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
@@ -92,5 +93,8 @@ private:
 
 	// Bind shader resources required for the deferred lighting stage
 	void BindDeferredLightingShaderResources(void);
+
+	// Render a subset of the deferred lighting phase using the given pipeline and light render volume
+	void RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume);
 
 };

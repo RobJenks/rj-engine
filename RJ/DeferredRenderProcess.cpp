@@ -33,7 +33,10 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER)
+	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+
+	m_model_sphere(NULL), 
+	m_model_cone(NULL)
 {
 	InitialiseShaders();
 	InitialiseRenderTargets();
@@ -90,7 +93,8 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 	Game::Log << LOG_INFO << "Initialising deferred rendering standard render volumes\n";
 
 	std::vector<std::tuple<std::string, std::string, Model**>> models = {
-		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere }
+		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere }, 
+		{ "spot light cone volume", "unit_cone_model", &m_model_cone}
 	};
 
 	for (auto & model : models)
@@ -325,8 +329,40 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 	BindDeferredLightingShaderResources();
 
 	// Process each light in turn
-	
+	unsigned int light_count = static_cast<unsigned int>(Game::Engine->LightingManager->GetLightSourceCount());
+	const auto * lights = Game::Engine->LightingManager->GetLightData();
 
+	for (unsigned int i = 0U; i < light_count; ++i)
+	{
+		// Only process active lights
+		const auto & light = lights[i];
+		if (!light.Enabled) continue;
+
+		// Update the light index buffer
+		m_cb_lightindex_data.RawPtr->LightIndex = i;
+		m_cb_lightindex->Set(m_cb_lightindex_data.RawPtr);
+
+		// Clear the stencil buffer for rendering of the new light.  Only call for the first
+		// pipeline since all three pipelines share the same render target
+		m_pipeline_lighting_pass1->GetRenderTarget()->Clear(ClearFlags::Stencil, NULL_FLOAT4, 1.0f, 1);
+
+		// Render based upon light type
+		switch (light.Type)
+		{
+			case LightType::Point:
+				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere);
+				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere);
+				break;
+
+			case LightType::Spotlight:
+				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone);
+				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone);
+
+			case LightType::Directional:
+				RenderLightPipeline(m_pipeline_lighting_directional, /* TODO: REQUIRED */ NULL);
+				break;
+		}
+	}
 	
 
 
@@ -355,6 +391,14 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
 
+}
+
+// Render a subset of the deferred lighting phase using the given pipeline and light render volume
+void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume)
+{
+	pipeline->Bind();
+
+	pipeline->Unbind();
 }
 
 void DeferredRenderProcess::RenderTransparency(void)

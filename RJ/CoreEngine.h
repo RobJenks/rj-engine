@@ -176,6 +176,10 @@ public:
 	template <class TModelRenderPredicate = ModelRenderPredicate::RenderAll>
 	void					ProcessRenderQueue(PipelineStateDX11 *pipeline);
 
+	// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
+	// invoked by other processes (e.g. for deferred light volume rendering)
+	void					RenderInstanced(PipelineStateDX11 *pipeline, ModelBuffer & model, RM_Instance & instance_data, UINT instance_count);
+
 	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
 	// queue items multiple times through e.g. different shader pipelines
 	void					ClearRenderQueue(void);
@@ -312,12 +316,10 @@ public:
 		// TODO: Need to re-enable transparent object rendering
 	}
 
-	// Returns a reference to the model buffer currently being rendered
-	CMPINLINE ModelBuffer *	GetCurrentModelBuffer(void) const			{ return m_current_modelbuffer; }
-
 	// Primitive topology is managed by the render queue in an attempt to minimise state changes
 	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
 	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
+	void									ChangePrimitiveTopologyIfRequired(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
 
 
 	// Performs rendering of debug/special data
@@ -638,9 +640,6 @@ private:
 
 	// Pre-populated parameter sets for greater efficiency at render time, since only specific components need to be updated
 	XMFLOAT4				m_instanceparams;
-
-	// Reference to the model buffer currently being rendered by the render queue
-	ModelBuffer *			m_current_modelbuffer;
 
 	// Vector used to queue up actors for rendering.  This allows us to render them all at once, avoiding multiple state changes
 	std::vector<Actor*>		m_queuedactors;
