@@ -60,7 +60,7 @@ public:
 	CMPINLINE XMFLOAT4 GetColour(void) const					{ return Data.Colour; }
 	CMPINLINE float GetRange(void) const						{ return Data.Range; }
 	CMPINLINE float GetIntensity(void) const					{ return Data.Intensity; }
-	CMPINLINE float GetSpotlightCosAngle(void) const			{ return Data.SpotlightCosAngle; }
+	CMPINLINE float GetSpotlightAngle(void) const				{ return Data.SpotlightAngle; }
 
 	// Mutator functions which operate on the underlying LightData structure
 	CMPINLINE void SetType(LightType value) { Data.Type = value; }
@@ -71,12 +71,8 @@ public:
 	CMPINLINE void SetColour(const XMFLOAT4 & value) { Data.Colour = value; }
 	CMPINLINE void SetRange(float value) { Data.Range = value; }
 	CMPINLINE void SetIntensity(float value) { Data.Intensity = value; }
-	CMPINLINE void SetSpotlightCosAngle(float value) { Data.SpotlightCosAngle = value; }
-	CMPINLINE void SetSpotlightAngle(float value) 
-	{ 
-		Data.SpotlightCosAngle = std::cosf(clamp(value, 0.0f, PI));		// Spotlight angles must be in the range [0, PI]
-	}	
-
+	CMPINLINE void SetSpotlightAngle(float value) { Data.SpotlightAngle = value; }
+	
 	// Default destructor
 	~Light(void);
 

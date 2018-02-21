@@ -38,7 +38,7 @@ float CalculateSpotCone(LightData light, float4 L)
 	// If the cosine angle of the light's direction 
 	// vector and the vector from the light source to the point being 
 	// shaded is less than minCos, then the spotlight contribution will be 0
-	float minCos = light.SpotlightCosAngle;
+	float minCos = cos(light.SpotlightAngle);
 
 	// If the cosine angle of the light's direction vector
 	// and the vector from the light source to the point being shaded

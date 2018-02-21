@@ -109,7 +109,7 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_ACCESSOR_FN(GetColour)
 	REGISTER_DEBUG_ACCESSOR_FN(GetRange)
 	REGISTER_DEBUG_ACCESSOR_FN(GetIntensity)
-	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightCosAngle)
+	REGISTER_DEBUG_ACCESSOR_FN(GetSpotlightAngle)
 
 	// Mutator methods
 	REGISTER_DEBUG_FN(Activate)
@@ -124,7 +124,6 @@ void Light::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetRange, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetIntensity, command.ParameterAsFloat(3))
 	REGISTER_DEBUG_FN(SetSpotlightAngle, command.ParameterAsFloat(3))
-	REGISTER_DEBUG_FN(SetSpotlightCosAngle, command.ParameterAsFloat(3))
 
 }
 

@@ -244,7 +244,7 @@ void LightingManagerObject::GetDefaultSpotLightData(LightData & outLight)
 	outLight.Colour = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	outLight.Range = 500.0f;
 	outLight.Enabled = true;
-	outLight.SpotlightCosAngle = std::cosf(PIBY180 * 30.0f);
+	outLight.SpotlightAngle = (PIBY180 * 30.0f);
 }
 
 // Initialise the pre-configured lighting setups that can be used as a standard override

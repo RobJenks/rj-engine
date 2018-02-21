@@ -37,7 +37,7 @@
 		float					Range;								// Range at which light is fully-attenuated and no longer has any effect
 		float					Intensity;							// Overall intensity of the light
 		//------------------------------------------ ( 16 bytes )
-		float					SpotlightCosAngle;					// Cosine of the spotlight angle.  Relevant to spotlights only
+		float					SpotlightAngle;						// Spotlight angle (radians).  Must be in the range [0 PI].  Relevant to spotlights only
 		float3					_padding;							// To maintain alignment and packing requirements
 		//------------------------------------------ ( 16 bytes )
 		//------------------------------------------ ( 16 * 7 = 112 bytes)
@@ -55,7 +55,7 @@
 			, Enabled(TRUE)
 			, Range(100.0f)
 			, Intensity(1.0f)
-			, SpotlightCosAngle(0.7854) // == PI/4 == 45 degrees
+			, SpotlightAngle(0.7854) // == PI/4 == 45 degrees
 		{}
 #endif
 

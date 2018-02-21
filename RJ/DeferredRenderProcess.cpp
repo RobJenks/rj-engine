@@ -322,6 +322,8 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 void DeferredRenderProcess::PerformDeferredLighting(void)
 {
+	XMMATRIX transform;
+
 	// Bind the GBuffer generated in the geometry phase to the deferred lighting pixel shader
 	GBuffer.Bind(Shader::Type::PixelShader);
 
@@ -350,24 +352,45 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		switch (light.Type)
 		{
 			case LightType::Point:
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere);
+				transform = PointLightTransform(light);
+				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
+				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
 				break;
 
 			case LightType::Spotlight:
-				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone);
-				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone);
+				transform = SpotLightTransform(light);
+				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
+				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
 
 			case LightType::Directional:
-				RenderLightPipeline(m_pipeline_lighting_directional, /* TODO: REQUIRED */ NULL);
+				//RenderLightPipeline(m_pipeline_lighting_directional, /* TODO: REQUIRED */ NULL, ID_MATRIX);
 				break;
 		}
 	}
 	
-
-
 	// Unbind the GBuffer following all deferred lighting rendering
 	GBuffer.Unbind(Shader::Type::PixelShader);
+}
+
+// Generate a transform matrix for the given light source
+XMMATRIX DeferredRenderProcess::PointLightTransform(const LightData & light)
+{
+	return XMMatrixMultiply(
+		XMMatrixScaling(light.Range, light.Range, light.Range), 
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
+}
+
+// Generate a transform matrix for the given light source
+XMMATRIX DeferredRenderProcess::SpotLightTransform(const LightData & light)
+{
+	// Spotlight cone radius: tan(x) = O/A -> O = Atan(x)
+	float cone_radius = light.Range * std::tanf(light.SpotlightAngle);
+	return XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(cone_radius, cone_radius, light.Range), 
+		XMMatrixRotationQuaternion(QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)))),	// TODO: Can likely make this more efficient
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
 }
 
 // Bind shader resources required for the deferred lighting stage
@@ -394,15 +417,11 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 }
 
 // Render a subset of the deferred lighting phase using the given pipeline and light render volume
-void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume)
+void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume, const FXMMATRIX transform)
 {
+	// Simply render a single instance of the light volume within the bound pipeline
 	pipeline->Bind();
-
-	/***
-		Generate instance data for the model based on light range/position/etc. as per INFOSPEC::DeferredLightingPass::Visit
-		We can now render using "CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const RM_Instance & instance_data, UINT instance_count)"
-	***/
-
+	Game::Engine->RenderInstanced(*pipeline, light_render_volume->Data, RM_Instance(transform), 1U);
 	pipeline->Unbind();
 }
 

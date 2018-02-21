@@ -5,6 +5,7 @@
 #include "DeferredGBuffer.h"
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
+#include "LightData.hlsl.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
@@ -95,6 +96,9 @@ private:
 	void BindDeferredLightingShaderResources(void);
 
 	// Render a subset of the deferred lighting phase using the given pipeline and light render volume
-	void RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume);
+	void RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume, const FXMMATRIX transform);
 
+	// Generate a transform matrix for the given light source
+	XMMATRIX PointLightTransform(const LightData & light);
+	XMMATRIX SpotLightTransform(const LightData & light);
 };
