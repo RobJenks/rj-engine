@@ -398,6 +398,11 @@ void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Mod
 {
 	pipeline->Bind();
 
+	/***
+		Generate instance data for the model based on light range/position/etc. as per INFOSPEC::DeferredLightingPass::Visit
+		We can now render using "CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const RM_Instance & instance_data, UINT instance_count)"
+	***/
+
 	pipeline->Unbind();
 }
 

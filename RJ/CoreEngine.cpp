@@ -861,7 +861,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 				batch_size = static_cast<UINT>(min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT));
 
 				// Pass control to the core instanced rendering method to issue a draw call
-				RenderInstanced(pipeline, *(model.ModelBufferInstance), model.InstanceData[inst], batch_size);
+				RenderInstanced(*pipeline, *(model.ModelBufferInstance), model.InstanceData[inst], batch_size);
 
 			} /// per-instance
 
@@ -873,7 +873,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 
 // Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
 // invoked by other processes (e.g. for deferred light volume rendering)
-void CoreEngine::RenderInstanced(PipelineStateDX11 *pipeline, ModelBuffer & model, RM_Instance & instance_data, UINT instance_count)
+void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const RM_Instance & instance_data, UINT instance_count)
 {
 	// Update the instance buffer by mapping, updating and unmapping the memory
 	m_instancebuffer->Set(&instance_data, static_cast<UINT>(sizeof(RM_Instance)) * instance_count);
@@ -892,8 +892,8 @@ void CoreEngine::RenderInstanced(PipelineStateDX11 *pipeline, ModelBuffer & mode
 	// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
 	if (model.Material)
 	{
-		model.Material->Bind(pipeline->GetShader(Shader::Type::VertexShader));
-		model.Material->Bind(pipeline->GetShader(Shader::Type::PixelShader));
+		model.Material->Bind(pipeline.GetShader(Shader::Type::VertexShader));
+		model.Material->Bind(pipeline.GetShader(Shader::Type::PixelShader));
 	}
 
 	// Issue a draw call to the currently active render pipeline

@@ -39,7 +39,7 @@ public:
 
 
 	CMPINLINE BufferType		GetBufferType(void) const { return m_buffertype; }
-	CMPINLINE ID3D11Buffer *	GetCompiledBuffer(void) { return m_buffer[0]; }
+	CMPINLINE ID3D11Buffer *	GetCompiledBuffer(void) const { return m_buffer[0]; }
 	CMPINLINE UINT				GetElementCount(void) const { return m_buffer_elementcount[0]; }
 	CMPINLINE UINT				GetStride(void) const { return m_stride[0]; }
 	

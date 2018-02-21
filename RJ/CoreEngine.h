@@ -178,7 +178,7 @@ public:
 
 	// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
 	// invoked by other processes (e.g. for deferred light volume rendering)
-	void					RenderInstanced(PipelineStateDX11 *pipeline, ModelBuffer & model, RM_Instance & instance_data, UINT instance_count);
+	void					RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const RM_Instance & instance_data, UINT instance_count);
 
 	// Clear the render queue.  No longer performed during render queue processing since we need to be able to process all render
 	// queue items multiple times through e.g. different shader pipelines
