@@ -23,6 +23,9 @@ public:
 	// Perform rendering; will delegate to the currently-active render process
 	void						Render(void);
 	
+	// Perform any late initialisation that requires access to loaded game data
+	void						PerformPostDataLoadInitialisation(void);
+
 
 	static std::string			DXDisplayModeToString(const DXGI_MODE_DESC & mode);
 
@@ -67,6 +70,11 @@ void RenderDevice::ActivateRenderProcess(void)
 	// Process has not been activated before; create a new instance and activate it
 	Game::Log << LOG_INFO << "Render process \"" << name << "\" has not yet been initialised; creating and activating now\n";
 	m_render_processes[name] = std::make_unique<TRenderProcess>();
+	
+	// Run post-load initialisation if we are instantiating a new process after application startup 
+	if (Game::GameDataLoaded) m_render_processes[name].get()->PerformPostDataLoadInitialisation();
+	
+	// Store the newly-active render process
 	m_render_process = m_render_processes[name].get();
 }
 

@@ -1300,6 +1300,9 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Perform post-load initialisation of any data just loaded from game files
 	InitialiseLoadedGameData();
 
+	// All game data has now been loaded & initialised
+	Game::GameDataLoaded = true;
+
 	// Allow the core engine to perform any post-data-load activities, e.g. retrieving models that have now been loaded
 	Game::Engine->PerformPostDataLoadInitialisation();
 
@@ -2183,7 +2186,8 @@ void RJMain::__CreateDebugScenario(void)
 	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
 	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	ss_ship->SetPosition(XMVectorSet(600, 200, -200, 0.0f));
+	//ss_ship->SetPosition(XMVectorSet(600, 200, -200, 0.0f));
+	ss_ship->SetPosition(XMVectorSet(300, 225, 100, 0));
 	ss_ship->SetOrientation(ID_QUATERNION);
 	ss_ship->SetInvulnerabilityFlag(true);
 	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
@@ -2346,6 +2350,12 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
+
+	// Temp: Create a point light source near the player
+	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
+	l2->SetRange(200.0f);
+	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	l2->SetPosition(XMVectorSet(250, 225, 100, 0));
 
 	// Add a spotlight to the player actor
 	/*Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);

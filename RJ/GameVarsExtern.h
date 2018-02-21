@@ -90,6 +90,9 @@ namespace Game {
 	extern bool VSync;
 	extern bool ForceWARPRenderDevice;
 
+	// Indicates whether the primary data load & initialisation process has been completed on startup
+	extern bool GameDataLoaded;
+
 	// Central scheduler for all scheduled jobs
 	extern CentralScheduler Scheduler;
 

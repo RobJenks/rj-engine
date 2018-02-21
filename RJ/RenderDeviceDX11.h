@@ -56,6 +56,9 @@ public:
 
 	Result											ValidateShaders(void);
 
+	// Perform any late initialisation that requires access to loaded game data
+	void											PerformPostDataLoadInitialisation(void);
+
 	// Verify the render device is in a good state and report errors if not
 	bool											VerifyState(void);
 

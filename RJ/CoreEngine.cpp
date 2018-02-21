@@ -248,6 +248,7 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 Result CoreEngine::PerformPostDataLoadInitialisation(void)
 {
 	// Certain components require the ability to complete initialisation after all game data is loaded
+	GetRenderDevice()->PerformPostDataLoadInitialisation();
 	GetEffectManager()->PerformPostDataLoadInitialisation();
 	GetOverlayRenderer()->PerformPostDataLoadInitialisation();
 

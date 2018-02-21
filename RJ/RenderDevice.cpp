@@ -1,5 +1,6 @@
 #include "RenderDevice.h"
 #include "Utility.h"
+#include "Logging.h"
 
 
 RenderDevice::RenderDevice(void)
@@ -16,7 +17,19 @@ void RenderDevice::Render(void)
 	m_render_process->Render();
 }
 
+// Perform any late initialisation that requires access to loaded game data
+void RenderDevice::PerformPostDataLoadInitialisation(void)
+{
+	Game::Log << LOG_INFO << "Performing post-data load initialisation of base render device\n";
+	
+	// Run post-data load initialisation for any render processes which were initialised before game data was available
+	for (auto & entry : m_render_processes)
+	{
+		entry.second->PerformPostDataLoadInitialisation();
+	}
 
+	Game::Log << LOG_INFO << "Completed post-data load initialisation of base render device\n";
+}
 
 
 // Static method to convert a display mode to readable string

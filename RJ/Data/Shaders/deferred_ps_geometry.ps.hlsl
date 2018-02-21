@@ -15,14 +15,14 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	DeferredPixelShaderGeometryOutput OUT;
 
 	// TODO: REMOVE
-	if (1 < 2)
+	/*if (1 < 2)
 	{
 		OUT.Diffuse = float4(1, 0, 0, 1);
 		OUT.Specular = Mat.SpecularColor;
 		OUT.NormalVS = float4(0, 0, 1, 0);
 		OUT.LightAccumulation = float4(0, 0, 1, 1);
 		return OUT;
-	}
+	}*/
 
 
 	float4 diffuse = Mat.DiffuseColor;

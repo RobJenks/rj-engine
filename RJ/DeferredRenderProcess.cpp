@@ -41,12 +41,21 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseShaders();
 	InitialiseRenderTargets();
 	InitialiseStandardBuffers();
-	InitialiseRenderVolumes();
 
 	InitialiseGeometryPipelines();
 	InitialiseDeferredLightingPipelines();
 	InitialiseDeferredDirectionalLightingPipeline();
 	InitialiseTransparentRenderingPipelines();
+}
+
+// Perform any initialisation that cannot be completed on construction, e.g. because it requires
+// data that is read in from disk during the data load process
+void DeferredRenderProcess::PerformPostDataLoadInitialisation(void)
+{
+	Game::Log << LOG_INFO << "Performing post-data load initialisation of deferred render process\n";
+
+	// Can only be performed once model data is read from external data files
+	InitialiseRenderVolumes();
 }
 
 void DeferredRenderProcess::InitialiseShaders(void)

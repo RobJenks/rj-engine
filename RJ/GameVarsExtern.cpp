@@ -79,6 +79,8 @@ namespace Game {
 	bool VSync = false;
 	bool ForceWARPRenderDevice = false;
 
+	// Indicates whether the primary data load & initialisation process has been completed on startup
+	bool GameDataLoaded = false;
 
 	// Central scheduler for all scheduled jobs
 	CentralScheduler 				Scheduler = CentralScheduler();

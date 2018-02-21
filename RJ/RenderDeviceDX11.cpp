@@ -112,6 +112,18 @@ Result RenderDeviceDX11::Initialise(HWND hwnd, INTVECTOR2 screen_size, bool full
 	return ErrorCodes::NoError;
 }
 
+// Perform any late initialisation that requires access to loaded game data
+void RenderDeviceDX11::PerformPostDataLoadInitialisation(void)
+{
+	// Allow base device to perform initialisaton
+	RenderDevice::PerformPostDataLoadInitialisation();
+
+	// Perform any device-specific initialisation
+	Game::Log << LOG_INFO << "Performing post-data load initialisation of render device \"" << GetRenderDeviceName() << "\"\n";
+	/// Initialisation here
+	Game::Log << LOG_INFO << "Completed post-data load initialisation of render device \"" << GetRenderDeviceName() << "\"\n";
+}
+
 Result RenderDeviceDX11::InitialiseRenderDevice(HWND hwnd, INTVECTOR2 screen_size, bool full_screen, bool vsync)
 {
 	// Device flags for initialisation; enable debug layer if required & only in debug builds

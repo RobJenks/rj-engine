@@ -16,6 +16,10 @@ public:
 
 	DeferredRenderProcess(void);
 
+	// Perform any initialisation that cannot be completed on construction, e.g. because it requires
+	// data that is read in from disk during the data load process
+	virtual void PerformPostDataLoadInitialisation(void);
+
 	// GBuffer holding all deferred rendering data and render targets
 	DeferredGBuffer GBuffer;
 
