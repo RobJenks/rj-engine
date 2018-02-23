@@ -46,6 +46,17 @@ struct Vertex_Inst_Standard
 	PerInstanceData
 };
 
+//
+// Standard index buffer format
+//
+
+typedef _uint32				INDEX_BUFFER_TYPE;
+
+
+
+
+
+
 
 #endif
 

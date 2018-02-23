@@ -15,6 +15,7 @@ public:
 
 	static std::unique_ptr<ModelData>		ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, unsigned int operation_config, bool debug_info = false);
 
+	static unsigned int						DefaultOperations(void);
 
 
 private:

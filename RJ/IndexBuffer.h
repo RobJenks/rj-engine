@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Definitions/VertexDefinitions.hlsl.h"
 #include "Buffer.h"
 
 class IndexBuffer : public Buffer 
@@ -7,7 +8,7 @@ class IndexBuffer : public Buffer
 public:
 
 	// Index format in use globally by the application; use 32- rather than 16-bit for more complex mesh support
-	typedef UINT32				INDEX_TYPE; 
+	typedef INDEX_BUFFER_TYPE	INDEX_TYPE;
 	static const DXGI_FORMAT	INDEX_FORMAT = DXGI_FORMAT_R32_UINT;
 
 	

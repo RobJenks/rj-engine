@@ -93,7 +93,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;$(VC_VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,7 +116,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;$(VC_VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,7 +141,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;$(VC_VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,7 +168,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\Assimp-3.3.1\include;$(VC_VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -195,7 +195,12 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClInclude Include="AssimpIntegration.h" />
     <ClInclude Include="BinaryOutputTransform.h" />
     <ClInclude Include="InputTransformerAssimp.h" />
+    <ClInclude Include="InputTransformerLegacyRjm.h" />
     <ClInclude Include="InputTransformerRjm.h" />
+    <ClInclude Include="ModelPipelineConstants.h" />
+    <ClInclude Include="ObjFormatIntegration.h" />
+    <ClInclude Include="ObjFormatOutputTransform.h" />
+    <ClInclude Include="PipelineStageAssimpTransform.h" />
     <ClInclude Include="PipelineStageOutputModelInfo.h" />
     <ClInclude Include="PipelineStagePassthrough.h" />
     <ClInclude Include="PipelineStage.h" />
@@ -213,8 +218,13 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClCompile Include="AssimpIntegration.cpp" />
     <ClCompile Include="BinaryOutputTransform.cpp" />
     <ClCompile Include="InputTransformerAssimp.cpp" />
+    <ClCompile Include="InputTransformerLegacyRjm.cpp" />
     <ClCompile Include="InputTransformerRjm.cpp" />
     <ClCompile Include="ModelPipeline.cpp" />
+    <ClCompile Include="ModelPipelineConstants.cpp" />
+    <ClCompile Include="ObjFormatIntegration.cpp" />
+    <ClCompile Include="ObjFormatOutputTransform.cpp" />
+    <ClCompile Include="PipelineStageAssimpTransform.cpp" />
     <ClCompile Include="PipelineStageCentreModel.cpp" />
     <ClCompile Include="PipelineStageOutputModelInfo.cpp" />
     <ClCompile Include="PipelineUtil.cpp" />

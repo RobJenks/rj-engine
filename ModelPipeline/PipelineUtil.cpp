@@ -27,17 +27,18 @@ XMFLOAT3 PipelineUtil::Float3ScalarMultiply(const XMFLOAT3 & v, float scalar)
 ByteString PipelineUtil::ReadBinaryFile(fs::path file)
 {
 	if (!fs::exists(file)) return ByteString();
+	std::ifstream in(fs::absolute(file).string(), std::ios::binary);
+	if (in.fail()) return ByteString();
 
-	std::ifstream input(fs::absolute(file).string(), std::ios::binary | std::ios::ate);	// ios::ate == seek to end on opening
-	std::ifstream::pos_type file_size = input.tellg();
+	auto const start_pos = in.tellg();
+	in.ignore((std::numeric_limits<std::streamsize>::max)());
 
-	ByteString result;
-	result.reserve(file_size);
+	auto const char_count = in.gcount();
+	in.seekg(start_pos);
 
-	input.seekg(0, std::ios::beg);				// Seek to beginning
-	input.read(result.data(), file_size);
-
-	return result;
+	ByteString b(char_count);
+	in.read(&b[0], b.size());
+	return b;
 }
 
 

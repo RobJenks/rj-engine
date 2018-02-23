@@ -16,6 +16,7 @@ class ComplexShip;
 class SpaceProjectile;
 class SpaceTurret;
 class TurretController;
+class LightSource;
 
 
 // This class has no special alignment requirements
@@ -173,6 +174,7 @@ public:
 	ObjectReference<ComplexShip> cs, cs2;
 	ObjectReference<Actor> a1;
 	ObjectReference<SpaceProjectile> proj;
+	ObjectReference<LightSource> lt;
 
 	ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
 	UINT					m_vertexcount;

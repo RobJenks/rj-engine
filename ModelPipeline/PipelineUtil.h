@@ -27,4 +27,22 @@ public:
 	static fs::path				NewTemporaryFileWithExistingFile(fs::path existing_file);
 	static fs::path				SaveToNewTemporaryFile(const std::string & data);
 	static void					DeleteTemporaryFile(fs::path file);
+
+	template <typename T>
+	static inline bool			ArrayContainsData(const T *_array, unsigned int array_size);
 };
+
+
+template <typename T>
+inline bool PipelineUtil::ArrayContainsData(const T *_array, unsigned int array_size)
+{
+	const char *bytes = (const char*)_array;
+	unsigned int bytelength = (sizeof(T) * array_size);
+
+	for (unsigned int i = 0U; i < bytelength; ++i)
+	{
+		if (bytes[i] != 0) return true;
+	}
+
+	return false;
+}

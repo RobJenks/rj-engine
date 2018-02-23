@@ -9,7 +9,8 @@ const size_t ModelBuffer::NO_RENDER_SLOT = ((size_t)0U - (size_t)1U);
 // Default constructor
 ModelBuffer::ModelBuffer(void) noexcept
 	:
-	Material(NULL)
+	Material(NULL), 
+	m_parentmodel(NULL)
 {
 	ClearAllRenderSlots();
 }

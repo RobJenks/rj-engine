@@ -47,9 +47,16 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 		}
 	}
 	
-	// Assign header data
+	// Verify whether we have face data available; if not, we can only assume a sequential index buffer by default
+	if (!mesh->HasFaces())
+	{
+		MODEL_INST_INFO("Warning: mesh does not contain face data; assuming sequential index buffer\n");
+	}
+
+	// Assign vertex header data
 	ModelData *m = model.get();
 	m->VertexCount = mesh->mNumVertices;
+	m->IndexCount = mesh->mNumFaces * 3U;
 	m->ModelMaterialIndex = mesh->mMaterialIndex;
 	MODEL_INST_DEBUG("Mesh contains " << m->VertexCount << " vertices");
 	MODEL_INST_DEBUG("Material index = " << m->ModelMaterialIndex);
@@ -102,6 +109,36 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 		MODEL_INST_INFO("No texture coordinate data available");
 	}
 
+	// Verify whether we have face data available; if not, we can only assume a sequential index buffer by default
+	if (!mesh->HasFaces())
+	{
+		m->IndexCount = m->VertexCount;
+		MODEL_INST_INFO("Warning: mesh does not contain face data; assuming sequential index buffer (" << m->IndexCount << " indices)");
+		m->AllocateIndexData(m->IndexCount);
+
+		for (unsigned int i = 0U; i < m->IndexCount; ++i) m->IndexData[i] = i;
+	}
+	else
+	{
+		m->IndexCount = (mesh->mNumFaces * 3U);
+		MODEL_INST_INFO("Mesh contains " << mesh->mNumFaces << " faces; transforming to " << m->IndexCount << " indices");
+		m->AllocateIndexData(m->IndexCount);
+
+		unsigned int ix = 0U;
+		for (unsigned int i = 0U; i < mesh->mNumFaces; ++i)
+		{
+			if (mesh->mFaces[i].mNumIndices != 3U)
+			{
+				MODEL_INST_ERROR("Mesh face " << i << " has " << mesh->mFaces[i].mNumIndices << " face indices.  Make sure mesh is correct triangulated");
+			}
+
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[0] + 1;		// OBJ face indices are 1-based; we want 0-based vertex indices for the index buffer
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[1] + 1;
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[2] + 1;
+		}
+
+	}
+
 
 	// Model successfully created; return an owning pointer and quit
 	MODEL_INST_INFO("Model data instantiated successfully");
@@ -109,6 +146,10 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 }
 
 
+unsigned int AssimpIntegration::DefaultOperations(void)
+{
+	return aiProcess_ValidateDataStructure;
+}
 
 DirectX::XMFLOAT2 AssimpIntegration::GetFloat2(const aiVector2D & vector)
 {

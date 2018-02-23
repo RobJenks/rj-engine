@@ -12,7 +12,7 @@ InputTransformerAssimp::InputTransformerAssimp(void)
 	:
 	TransformPipelineInput()
 {
-	m_operations = DefaultOperations();
+	m_operations = AssimpIntegration::DefaultOperations();
 }
 
 InputTransformerAssimp::InputTransformerAssimp(unsigned int operations)
@@ -26,6 +26,7 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(const std::string &
 {
 	// Save data to a temporary file, then process as normal and clean up the temporary file
 	fs::path file = PipelineUtil::NewTemporaryFile();
+	PipelineUtil::WriteDataTofile(file, data);
 	auto model_data = Transform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 
@@ -49,9 +50,5 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) cons
 	return model;
 }
 
-unsigned int InputTransformerAssimp::DefaultOperations(void)
-{
-	return aiProcess_ValidateDataStructure;
-}
 
 

@@ -22,6 +22,7 @@ ModelData::ModelData(void)
 ModelData::~ModelData(void)
 {
 	DeallocateVertexData();
+	DeallocateIndexData();
 }
 
 bool ModelData::AllocateVertexData(unsigned int vertex_count)
@@ -50,6 +51,32 @@ void ModelData::DeallocateVertexData(void)
 	}
 }
 
+bool ModelData::AllocateIndexData(unsigned int index_count)
+{
+	DeallocateIndexData();
+
+	if (index_count > ModelData::INDEX_COUNT_LIMIT)
+	{
+#		ifdef LOGGING_AVAILABLE
+			Game::Log << LOG_ERROR << "Cannot allocate index data for model data; specified index count of " << index_count << " is out of acceptable bounds\n";
+#		endif
+		return false;
+	}
+
+	IndexData = new INDEX_BUFFER_TYPE[index_count];
+	memset(IndexData, 0, sizeof(INDEX_BUFFER_TYPE) * index_count);
+	return true;
+}
+
+void ModelData::DeallocateIndexData(void)
+{
+	if (IndexData)
+	{
+		delete[] IndexData;
+		IndexData = NULL;
+	}
+}
+
 ByteString ModelData::Serialize(void) const
 {
 	// Header data
@@ -61,11 +88,18 @@ ByteString ModelData::Serialize(void) const
 	b.WriteObject(this->ModelSize);
 	b.WriteObject(this->CentrePoint);
 	b.WriteObject(this->VertexCount);
+	b.WriteObject(this->IndexCount);
 
 	// Vertex data
 	for (unsigned int i = 0U; i < VertexCount; ++i)
 	{
 		b.WriteObject(VertexData[i]);
+	}
+
+	// Index data
+	for (unsigned int i = 0U; i < IndexCount; ++i)
+	{
+		b.WriteObject(IndexData[i]);
 	}
 
 	return b;
@@ -91,6 +125,7 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 	data.ReadObject(m->ModelSize);
 	data.ReadObject(m->CentrePoint);
 	data.ReadObject(m->VertexCount);
+	data.ReadObject(m->IndexCount);
 
 	// Attempt to allocate vertex data
 	if (m->AllocateVertexData(m->VertexCount) == false)
@@ -105,7 +140,58 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 		data.ReadObject(m->VertexData[i]);
 	}
 
+	// Attempt to allocate index data
+	if (m->AllocateIndexData(m->IndexCount) == false)
+	{
+		delete(m);
+		return NULL;
+	}
+
+	// Index data
+	for (unsigned int i = 0U; i < m->IndexCount; ++i)
+	{
+		data.ReadObject(m->IndexData[i]);
+	}
+
+
 	return std::unique_ptr<ModelData>(m);
 }
+
+
+
+bool ModelData::DetrmineIfTextureCoordsPresent(void) const
+{
+	for (unsigned int i = 0U; i < VertexCount; ++i)
+	{
+		if (VertexData[i].tex.x != 0.0f || VertexData[i].tex.y != 0.0f) return true;
+	}
+
+	return false;
+}
+
+bool ModelData::DetemineIfNormalDataPresent(void) const
+{
+	for (unsigned int i = 0U; i < VertexCount; ++i)
+	{
+		if (VertexData[i].normal.x != 0.0f || VertexData[i].normal.y != 0.0f || VertexData[i].normal.z != 0.0f) return true;
+	}
+
+	return false;
+}
+
+bool ModelData::DetermineIfTangentSpaceDataPresent(void) const
+{
+	for (unsigned int i = 0U; i < VertexCount; ++i)
+	{
+		if (VertexData[i].binormal.x != 0.0f || VertexData[i].binormal.y != 0.0f || VertexData[i].binormal.z != 0.0f) return true;
+		if (VertexData[i].tangent.x != 0.0f  || VertexData[i].tangent.y != 0.0f  || VertexData[i].tangent.z != 0.0f) return true;
+	}
+
+	return false;
+}
+
+
+
+
 
 

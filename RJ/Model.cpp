@@ -117,6 +117,9 @@ Result Model::CompileModel(void)
 		pMaterial
 	);
 
+	// Store reference back to this model within the buffer; useful mostly for debugging
+	Data.SetParentModel(this);
+
 	// Return success
 	return ErrorCodes::NoError;
 }

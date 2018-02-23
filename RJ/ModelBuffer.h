@@ -11,6 +11,8 @@
 #include "MaterialDX11.h"
 #include "VertexBufferDX11.h"
 #include "IndexBufferDX11.h"
+class Model;
+
 
 // This class has no special alignment requirements
 // Model buffer encapsulates a { VB, IB, Material } with a few other properties.  It is intended to be entirely sufficient for rendering
@@ -65,6 +67,9 @@ public:
 	CMPINLINE std::string			GetCode(void) const					{ return m_code; }
 	CMPINLINE void					SetCode(const std::string & code)	{ m_code = code; }
 	
+	// Pointer back to the parent Model class for this buffer.  Not always set.  Mostly useful for debugging
+	CMPINLINE Model *				GetParentModel(void) const				{ return m_parentmodel; }
+	CMPINLINE void					SetParentModel(Model *parentmodel)			{ m_parentmodel = parentmodel; }
 
 
 	// TODO: Probably need to remove this
@@ -85,6 +90,9 @@ public:
 protected:
 
 	std::string				m_code;
+
+	// Reference back to a parent model; only set in some cases, useful mostly for debugging
+	Model *					m_parentmodel;
 
 	// Render queue slot assigned to this buffer for the current frame, or (0U-1) if none
 	size_t					m_render_slot[RenderQueueShader::RM_RENDERQUEUESHADERCOUNT];		

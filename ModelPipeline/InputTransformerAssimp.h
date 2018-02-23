@@ -16,7 +16,6 @@ public:
 	virtual std::unique_ptr<ModelData>		Transform(fs::path file) const;
 	virtual std::unique_ptr<ModelData>		Transform(const std::string & data) const;
 
-	static unsigned int						DefaultOperations(void);
 	
 private:
 

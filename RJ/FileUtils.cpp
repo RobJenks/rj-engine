@@ -3,21 +3,53 @@
 #include "FileUtils.h"
 
 
-ByteString FileUtils::ReadBinaryFile(fs::path file)
+
+
+std::string FileUtils::ReadFile(fs::path file)
 {
-	if (!fs::exists(file)) return ByteString();
+	if (!fs::exists(file)) return "";
+	std::ifstream in(fs::absolute(file).string());
+	if (in.fail()) return "";
 
-	std::ifstream input(fs::absolute(file).string(), std::ios::binary | std::ios::ate);	// ios::ate == seek to end on opening
-	std::ifstream::pos_type file_size = input.tellg();
+	auto ss = std::ostringstream{};
+	ss << in.rdbuf();
+	in.close();
 
-	ByteString result;
-	result.reserve(file_size);
-	result.resize(file_size);
+	return ss.str();
+}
 
-	input.seekg(0, std::ios::beg);				// Seek to beginning
-	input.read(result.data(), file_size);
+std::string FileUtils::ReadLargeFile(fs::path file)
+{
+	if (!fs::exists(file)) return "";
+	std::ifstream in(fs::absolute(file).string());
+	if (in.fail()) return "";
 
-	return result;
+	auto const start_pos = in.tellg();
+	in.ignore((std::numeric_limits<std::streamsize>::max)());
+	
+	auto const char_count = in.gcount();
+	in.seekg(start_pos);
+	
+	auto s = std::string(char_count, char{});
+	in.read(&s[0], s.size());
+	return s;
 }
 
 
+
+ByteString FileUtils::ReadBinaryFile(fs::path file)
+{
+	if (!fs::exists(file)) return ByteString();
+	std::ifstream in(fs::absolute(file).string(), std::ios::binary);
+	if (in.fail()) return ByteString();
+
+	auto const start_pos = in.tellg();
+	in.ignore((std::numeric_limits<std::streamsize>::max)());
+
+	auto const char_count = in.gcount();
+	in.seekg(start_pos);
+
+	ByteString b(char_count);
+	in.read(&b[0], b.size());
+	return b;
+}

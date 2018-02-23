@@ -20,6 +20,14 @@ public:
 	{
 	}
 
+	// Constructor with pre-allocated space
+	inline ByteString(size_type pre_allocated_size)
+		:
+		std::vector<char>(pre_allocated_size),
+		m_readpoint(0U)
+	{
+	}
+
 	// Write a new object into the serialisation buffer
 	template <typename T>
 	void					WriteObject(const T & object);

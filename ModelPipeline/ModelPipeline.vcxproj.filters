@@ -50,9 +50,6 @@
     <ClCompile Include="..\Definitions\ModelData.cpp">
       <Filter>Imported Definitions</Filter>
     </ClCompile>
-    <ClCompile Include="AssimpIntegration.cpp">
-      <Filter>Transformer\Input</Filter>
-    </ClCompile>
     <ClCompile Include="PipelineStageCentreModel.cpp">
       <Filter>Transformer\Transforms</Filter>
     </ClCompile>
@@ -60,11 +57,29 @@
       <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="ModelPipeline.cpp" />
+    <ClCompile Include="PipelineStageOutputModelInfo.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="InputTransformerLegacyRjm.cpp">
+      <Filter>Transformer\Input</Filter>
+    </ClCompile>
     <ClCompile Include="InputTransformerRjm.cpp">
       <Filter>Transformer\Input</Filter>
     </ClCompile>
-    <ClCompile Include="PipelineStageOutputModelInfo.cpp">
+    <ClCompile Include="PipelineStageAssimpTransform.cpp">
       <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
+    <ClCompile Include="AssimpIntegration.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjFormatIntegration.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelPipelineConstants.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjFormatOutputTransform.cpp">
+      <Filter>Transformer\Output</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -107,9 +122,6 @@
     <ClInclude Include="..\Definitions\ModelData.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
-    <ClInclude Include="AssimpIntegration.h">
-      <Filter>Transformer\Input</Filter>
-    </ClInclude>
     <ClInclude Include="..\Definitions\ByteString.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
@@ -122,11 +134,29 @@
     <ClInclude Include="PipelineUtil.h">
       <Filter>Utility</Filter>
     </ClInclude>
+    <ClInclude Include="PipelineStageOutputModelInfo.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="InputTransformerLegacyRjm.h">
+      <Filter>Transformer\Input</Filter>
+    </ClInclude>
     <ClInclude Include="InputTransformerRjm.h">
       <Filter>Transformer\Input</Filter>
     </ClInclude>
-    <ClInclude Include="PipelineStageOutputModelInfo.h">
+    <ClInclude Include="PipelineStageAssimpTransform.h">
       <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="AssimpIntegration.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFormatIntegration.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelPipelineConstants.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjFormatOutputTransform.h">
+      <Filter>Transformer\Output</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

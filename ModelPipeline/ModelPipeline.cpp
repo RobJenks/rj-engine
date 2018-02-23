@@ -11,8 +11,10 @@
 #include "InputTransformerAssimp.h"
 #include "InputTransformerRjm.h"
 #include "BinaryOutputTransform.h"
+#include "ObjFormatOutputTransform.h"
 #include "PipelineStageOutputModelInfo.h"
 #include "PipelineStageCentreModel.h"
+#include "PipelineStageAssimpTransform.h"
 
 
 static const std::vector<std::tuple<std::string, std::string, aiPostProcessSteps>> MESH_OPERATIONS 
@@ -79,10 +81,10 @@ void RjmToObj(const std::string & input, const std::string & target, const std::
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
-		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>(generate_material, true)))
+		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
-		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
+		.WithOutputTransformer(std::move(std::make_unique<ObjFormatOutputTransform>(generate_material)))
 		.Build();
 
 	// Execute the transformation pipeline
@@ -108,8 +110,10 @@ void ProcessRjm(const std::string & input, const std::string & target, unsigned 
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
-		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("", false, operations)))
+		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageAssimpTransform>(operations)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
 		.Build();
@@ -173,7 +177,7 @@ void RjmObjConversionTest(void)
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
-		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("testship1_texture.dds", true)))
+		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
@@ -192,7 +196,7 @@ void BulkRjmObjConversion(void)
 
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
-		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>("", true)))
+		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithOutputTransformer(std::move(std::make_unique<BinaryOutputTransform>()))
@@ -288,6 +292,40 @@ unsigned int GetOperation(const std::string & op)
 
 int main(int argc, const char *argv[])
 {
+	int ix = 3;
+	const unsigned int COUNT = 11;
+	if (ix == 1)
+	{
+		argv = new const char*[COUNT] { argv[0],
+			"-type", "obj-to-rjm", 
+			"-i", "C:/Users/robje/Downloads/sphere.obj",
+			"-o", "C:/Users/robje/Downloads/sphere.out",
+			"-op", "gen-normals",
+			"-op", "triangulate"};
+		argc = COUNT;
+	}
+	else if (ix == 2)
+	{
+		argv = new const char*[COUNT] { argv[0],
+			"-type", "rjm-to-obj",
+			"-i", "C:/Users/robje/Downloads/sphere.out",
+			"-o", "C:/Users/robje/Downloads/sphere2.obj",
+			"xxx-op", "gen-normals",
+			"xxx-op", "gen-tangents"};
+		argc = COUNT;
+	}
+	else if (ix == 3)
+	{
+		argv = new const char*[COUNT] { argv[0],
+			"-type", "process-rjm",
+			"-i", "C:/Users/robje/Downloads/sphere.out",
+			"-o", "C:/Users/robje/Downloads/sphere2.out",
+			"-op", "gen-tangents",
+			"xxx-op", "gen-tangents"};
+		argc = COUNT;
+	}
+
+
 	if (argc < 2 || ((argc - 1) % 2 != 0))
 	{
 		PrintUsage();
@@ -301,7 +339,7 @@ int main(int argc, const char *argv[])
 	bool inplace = false;
 	bool inplace_backup = true;
 	bool bulk = false;
-	unsigned int operations = InputTransformerAssimp::DefaultOperations();
+	unsigned int operations = AssimpIntegration::DefaultOperations();
 
 	// Process each argument pair in turn
 	for (int i = 0; i < (argc - 1) - 1; i += 2)
@@ -337,6 +375,7 @@ int main(int argc, const char *argv[])
 				}
 			}
 		}
+		else std::cerr << "Unrecognised argument \"" << key << "\"; ignoring\n";
 	}
 
 	// Validate inputs
