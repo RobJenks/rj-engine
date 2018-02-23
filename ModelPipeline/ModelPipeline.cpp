@@ -75,7 +75,7 @@ void ObjToRjmBulk(std::vector<std::string> & input, unsigned int operations)
 		fs::path in_path(in);
 		std::cout << "Processing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
-		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out");
+		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".rjm");
 		ObjToRjm(in, target.string(), operations);
 	}
 }
@@ -279,6 +279,7 @@ void PrintUsage()
 	}
 
 	std::cout << "   -skip <operation>\tSkip the given operation, where <operation> may be any value available to \"-op\"\n";
+	std::cout << "   -args <file>\t\tArguments will be read from the given external file\n";
 	std::cout << "\n";
 }
 
@@ -316,22 +317,45 @@ void SetLogging(const std::string & mode)
 	Assimp::DefaultLogger::get()->attachStream(new AssimpLogStream(), severity);
 }
 
+void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsvector)
+{
+	fs::path argfile(file);
+	if (!fs::exists(argfile))
+	{
+		std::cerr << "Cannot load args from external file \"" << fs::absolute(argfile) << "\"; file does not exist\n";
+		return;
+	}
+
+	std::string argstring = PipelineUtil::ReadFileToString(argfile);
+
+	// Split on spaces
+	std::vector<std::string> args;
+	PipelineUtil::SplitString(argstring, ' ', true, args);
+	for (auto & arg : args)
+	{
+		arg = PipelineUtil::TrimString(arg);
+	}
+
+	argsvector.insert(argsvector.end(), args.begin(), args.end());
+	std::cout << "Loaded " << args.size() << " arguments from file \"" << fs::absolute(argfile) << "\"\n";
+}
+
 
 int main(int argc, const char *argv[])
 {
-	int ix = 3;
-	const char *loglevel = "debug-verbose";
+	int ix = 1;
+	const char *loglevel = "normal"; // "debug-verbose";
 	const unsigned int COUNT = 15;
 	if (ix == 1)
 	{
 		argv = new const char*[COUNT] { argv[0],
 			"-type", "obj-to-rjm", 
 			"-i", "C:/Users/robje/Downloads/sphere.obj",
-			"-o", "C:/Users/robje/Downloads/sphere.out",
-			"-op", "gen-normals",
-			"-op", "triangulate",
+			"xxx-o", "C:/Users/robje/Downloads/sphere.out",
+			"xxx-op", "gen-normals",
+			"xxx-op", "triangulate",
 			"-log", loglevel,
-			"xxx-op", "triangulate"};
+			"-args", "C:/Users/robje/Downloads/test-args.txt"};
 		argc = COUNT;
 	}
 	else if (ix == 2)
@@ -375,11 +399,14 @@ int main(int argc, const char *argv[])
 	bool bulk = false;
 	unsigned int operations = AssimpIntegration::DefaultOperations();
 
+	// Arguments vector
+	std::vector<std::string> args(argv, argv + argc);
+
 	// Process each argument pair in turn
-	for (int i = 0; i < (argc - 1) - 1; i += 2)
+	for (int i = 1; i < args.size(); i += 2)
 	{
-		std::string key = argv[i + 1];
-		std::string val = argv[i + 2];
+		std::string key = args[i + 0U];
+		std::string val = args[i + 1U];
 
 		if (key == "-i")						input.push_back(val);
 		else if (key == "-o")					output = val;
@@ -389,6 +416,7 @@ int main(int argc, const char *argv[])
 		else if (key == "-bk")					inplace_backup = (val == "true");
 		else if (key == "-mat")					gen_mat = val;
 		else if (key == "-log")					SetLogging(val);
+		else if (key == "-args")				ReadArgsFromFile(val, args);
 		else if (key == "-op" || key == "-skip")
 		{
 			auto op = GetOperation(val);

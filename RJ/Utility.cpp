@@ -201,7 +201,7 @@ bool PointWithinBounds(INTVECTOR2 point, INTVECTOR2 arealocation, INTVECTOR2 are
 void SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements)
 {
 	// Return if there is no data to process
-	if (input == NullString) return;
+	if (input.empty()) return;
 
 	// Use a string stream to process each element in turn
 	std::string item;
@@ -210,6 +210,14 @@ void SplitString(const std::string & input, char delimiter, bool skip_empty, std
 		if (!skip_empty || !item.empty()) 
 			outElements.push_back(item);
 	}
+}
+
+// Return a new string with spaces removed
+std::string TrimString(const std::string & str)
+{
+	auto start = str.find_first_not_of(' ');
+	auto end = str.find_last_not_of(' ');
+	return str.substr(start, end - start + 1U);
 }
 
 // Concatenates a series of strings together, optionally with the supplied string as a delimiter

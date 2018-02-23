@@ -28,6 +28,9 @@ public:
 	static fs::path				SaveToNewTemporaryFile(const std::string & data, const std::string & extension = "");
 	static void					DeleteTemporaryFile(fs::path file);
 
+	static void					SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements);
+	static std::string			TrimString(const std::string & str);
+
 	template <typename T>
 	static inline bool			ArrayContainsData(const T *_array, unsigned int array_size);
 };
