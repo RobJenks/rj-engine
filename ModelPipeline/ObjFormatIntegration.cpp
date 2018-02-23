@@ -25,7 +25,8 @@ std::string ObjFormatIntegration::GenerateObjData(const ModelData & model, const
 	}
 
 	// Texture coordinates
-	if (!model.DetrmineIfTextureCoordsPresent())
+	bool has_tex_coords = model.DetrmineIfTextureCoordsPresent();
+	if (!has_tex_coords)
 	{
 		str << "# WARNING: Model does not contain any texture coordinate data\n";
 	}
@@ -39,7 +40,8 @@ std::string ObjFormatIntegration::GenerateObjData(const ModelData & model, const
 	}
 
 	// Normal data
-	if (!model.DetemineIfNormalDataPresent())
+	bool has_normals = model.DetemineIfNormalDataPresent();
+	if (!has_normals)
 	{
 		str << "# WARNING: Model does not contain any vertex normal data\n";
 	}
@@ -73,7 +75,9 @@ std::string ObjFormatIntegration::GenerateObjData(const ModelData & model, const
 			for (unsigned int ix = 0U; ix < 3U; ++ix)
 			{
 				unsigned int index = (model.IndexData[i + ix] + 1);		// Obj face indices are 1-based, so convert from 0-based index buffer data
-				str << " " << index << "/" << index << "/" << index;
+				str << " " << index;
+				if (has_tex_coords) str << "/" << index;								// Only if indexable data is present
+				if (has_normals) str << (!has_tex_coords ? "/" : "") << "/" << index;	// Need to add extra "/" if we have the v & vn of "v/vt/vn"
 			}
 			str << "\n";
 		}

@@ -158,5 +158,8 @@
     <ClInclude Include="ObjFormatOutputTransform.h">
       <Filter>Transformer\Output</Filter>
     </ClInclude>
+    <ClInclude Include="AssimpLogStream.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

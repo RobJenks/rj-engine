@@ -33,7 +33,7 @@ std::unique_ptr<ModelData> InputTransformerRjm::Transform(fs::path file) const
 
 std::unique_ptr<ModelData> InputTransformerRjm::Transform(const std::string & data) const
 {
-	fs::path file = PipelineUtil::SaveToNewTemporaryFile(data);
+	fs::path file = PipelineUtil::SaveToNewTemporaryFile(data, "rjm");
 	auto result = Transform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 

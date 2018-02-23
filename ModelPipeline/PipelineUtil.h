@@ -23,9 +23,9 @@ public:
 
 	static std::string			ReadFileToString(fs::path file);
 	static void					WriteDataTofile(fs::path file, const std::string & data);
-	static fs::path				NewTemporaryFile(void);
-	static fs::path				NewTemporaryFileWithExistingFile(fs::path existing_file);
-	static fs::path				SaveToNewTemporaryFile(const std::string & data);
+	static fs::path				NewTemporaryFile(const std::string & extensions = "");
+	static fs::path				NewTemporaryFileWithExistingFile(fs::path existing_file, const std::string & extension = "");
+	static fs::path				SaveToNewTemporaryFile(const std::string & data, const std::string & extension = "");
 	static void					DeleteTemporaryFile(fs::path file);
 
 	template <typename T>

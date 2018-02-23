@@ -2,6 +2,7 @@
 #include <iostream>
 #include "AssimpIntegration.h"
 #include "InputTransformerAssimp.h"
+#include "ModelPipelineConstants.h"
 #include "PipelineUtil.h"
 
 #include <assimp\Importer.hpp>
@@ -25,7 +26,7 @@ InputTransformerAssimp::InputTransformerAssimp(unsigned int operations)
 std::unique_ptr<ModelData> InputTransformerAssimp::Transform(const std::string & data) const
 {
 	// Save data to a temporary file, then process as normal and clean up the temporary file
-	fs::path file = PipelineUtil::NewTemporaryFile();
+	fs::path file = PipelineUtil::NewTemporaryFile("obj");
 	PipelineUtil::WriteDataTofile(file, data);
 	auto model_data = Transform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
@@ -40,9 +41,15 @@ std::unique_ptr<ModelData> InputTransformerAssimp::Transform(fs::path file) cons
 	Assimp::Importer importer;
 	const aiScene *scene = importer.ReadFile(fs::absolute(file).string(), m_operations);
 	
+	// Log any error that may have been reported
+	if (!scene)
+	{
+		TRANSFORM_ERROR << "Transformation error: " << importer.GetErrorString() << "\n";
+	}
+
 	// Build a model based upon this scene data
 	TRANSFORM_INFO << "Data loaded" << (scene == NULL ? " (WARNING: null scene data, likely import failure)" : "") << ", building model from ai scene data\n";
-	auto model = AssimpIntegration::ParseAssimpScene(scene, importer, m_operations, true);
+	auto model = AssimpIntegration::ParseAssimpScene(scene, importer, m_operations, (ModelPipelineConstants::LogLevel != ModelPipelineConstants::LoggingType::Normal));
 
 	// Return the new model data.  Assimp scene data is owned by the importer and will be properly
 	// deallocated once the importer goes out of scope

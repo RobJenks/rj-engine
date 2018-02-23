@@ -63,13 +63,13 @@ void PipelineUtil::WriteDataTofile(fs::path file, const std::string & data)
 	out.close();
 }
 
-fs::path PipelineUtil::NewTemporaryFile(void)
+fs::path PipelineUtil::NewTemporaryFile(const std::string & extension)
 {
 	fs::path tmp = fs::temp_directory_path();
 	
 	for (unsigned int i = 0; i < 1000U; ++i)
 	{
-		std::string tmp_file_name = (fs::absolute(tmp).string() + "/rj_modelpipeline_tmp_" + std::to_string(i));
+		std::string tmp_file_name = (fs::absolute(tmp).string() + "/rj_modelpipeline_tmp_" + std::to_string(i) + (extension.empty() ? "" : (std::string(".") + extension)));
 		fs::path tmp_file = fs::path(tmp_file_name);
 		if (!fs::exists(tmp_file))
 		{
@@ -80,14 +80,14 @@ fs::path PipelineUtil::NewTemporaryFile(void)
 	return fs::path("<invalid>");
 }
 
-fs::path PipelineUtil::NewTemporaryFileWithExistingFile(fs::path existing_file)
+fs::path PipelineUtil::NewTemporaryFileWithExistingFile(fs::path existing_file, const std::string & extension)
 {
 	fs::path filename = existing_file.filename();
 	fs::path dir = existing_file.parent_path();
 
 	for (unsigned int i = 0; i < 1000U; ++i)
 	{
-		std::string new_file_name = (fs::absolute(dir).string() + "/" + filename.string() + "." + std::to_string(i));
+		std::string new_file_name = (fs::absolute(dir).string() + "/" + filename.string() + "." + std::to_string(i) + (extension.empty() ? "" : (std::string(".") + extension)));
 		fs::path new_file = fs::path(new_file_name);
 		if (!fs::exists(new_file))
 		{
@@ -98,9 +98,9 @@ fs::path PipelineUtil::NewTemporaryFileWithExistingFile(fs::path existing_file)
 	return fs::path("<invalid>");
 }
 
-fs::path PipelineUtil::SaveToNewTemporaryFile(const std::string & data)
+fs::path PipelineUtil::SaveToNewTemporaryFile(const std::string & data, const std::string & extension)
 {
-	fs::path file = NewTemporaryFile();
+	fs::path file = NewTemporaryFile(extension);
 	WriteDataTofile(file, data);
 	return file;
 }

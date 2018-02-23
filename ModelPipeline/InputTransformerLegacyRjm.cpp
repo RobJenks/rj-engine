@@ -29,7 +29,7 @@ std::unique_ptr<ModelData> InputTransformerLegacyRjm::Transform(fs::path file) c
 	}
 
 	// Generate a new temporary file alongside the RJM and apply transformations using that data
-	fs::path obj_path = PipelineUtil::NewTemporaryFileWithExistingFile(file);
+	fs::path obj_path = PipelineUtil::NewTemporaryFileWithExistingFile(file, "obj");
 	PipelineUtil::WriteDataTofile(obj_path, obj_data);
 
 	// Generate a material file if a texture resource was provided.  This is not strictly 'input' but is relevant when creating an OBJ file
@@ -55,7 +55,7 @@ std::unique_ptr<ModelData> InputTransformerLegacyRjm::Transform(fs::path file) c
 std::unique_ptr<ModelData> InputTransformerLegacyRjm::Transform(const std::string & data) const
 {
 	// Save data to a temporary file, then process as normal and clean up the temporary file
-	fs::path file = PipelineUtil::NewTemporaryFile();
+	fs::path file = PipelineUtil::NewTemporaryFile("rjm");
 	auto model_data = Transform(file);
 	PipelineUtil::DeleteTemporaryFile(file);
 

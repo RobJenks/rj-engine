@@ -1,0 +1,9 @@
+Info,  T18536: Load C:\Users\robje\AppData\Local\Temp\\rj_modelpipeline_tmp_0.obj
+Info,  T18536: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T18536: Import root directory is 'C:\Users\robje\AppData\Local\Temp\'
+Info,  T18536: Entering post processing pipeline
+Error, T18536: Failed to compute tangents; need UV data in channel0
+Info,  T18536: Leaving post processing pipeline
+Info,  T18536: Entering post processing pipeline
+Error, T18536: Failed to compute tangents; need UV data in channel0
+Info,  T18536: Leaving post processing pipeline

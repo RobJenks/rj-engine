@@ -5,7 +5,10 @@
 #include <iostream>
 #include <tchar.h>
 #include <assimp\postprocess.h>
+#include <assimp\DefaultLogger.hpp>
 #include "PipelineUtil.h"
+#include "AssimpLogStream.h"
+#include "ModelPipelineConstants.h"
 #include "TransformPipeline.h"
 #include "TransformPipelineBuilder.h"
 #include "InputTransformerAssimp.h"
@@ -289,11 +292,36 @@ unsigned int GetOperation(const std::string & op)
 	return 0U;
 }
 
+void SetLogging(const std::string & mode)
+{
+	unsigned int severity = 0U;
+	if (mode == "verbose")
+	{
+		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::Verbose;
+		std::cout << "Enabling verbose logging\n";
+		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info;
+	}
+	else if (mode == "debug-verbose")
+	{
+		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::DebugVerbose;
+		std::cout << "Enabling debug & verbose logging\n";
+		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info | Assimp::Logger::ErrorSeverity::Debugging;
+	}
+	else
+	{
+		return;
+	}
+
+	Assimp::DefaultLogger::create();
+	Assimp::DefaultLogger::get()->attachStream(new AssimpLogStream(), severity);
+}
+
 
 int main(int argc, const char *argv[])
 {
 	int ix = 3;
-	const unsigned int COUNT = 11;
+	const char *loglevel = "debug-verbose";
+	const unsigned int COUNT = 15;
 	if (ix == 1)
 	{
 		argv = new const char*[COUNT] { argv[0],
@@ -301,7 +329,9 @@ int main(int argc, const char *argv[])
 			"-i", "C:/Users/robje/Downloads/sphere.obj",
 			"-o", "C:/Users/robje/Downloads/sphere.out",
 			"-op", "gen-normals",
-			"-op", "triangulate"};
+			"-op", "triangulate",
+			"-log", loglevel,
+			"xxx-op", "triangulate"};
 		argc = COUNT;
 	}
 	else if (ix == 2)
@@ -310,6 +340,8 @@ int main(int argc, const char *argv[])
 			"-type", "rjm-to-obj",
 			"-i", "C:/Users/robje/Downloads/sphere.out",
 			"-o", "C:/Users/robje/Downloads/sphere2.obj",
+			"-log", loglevel,
+			"xxx-op", "gen-normals",
 			"xxx-op", "gen-normals",
 			"xxx-op", "gen-tangents"};
 		argc = COUNT;
@@ -321,6 +353,8 @@ int main(int argc, const char *argv[])
 			"-i", "C:/Users/robje/Downloads/sphere.out",
 			"-o", "C:/Users/robje/Downloads/sphere2.out",
 			"-op", "gen-tangents",
+			"-log", loglevel,
+			"xxx-op", "gen-normals",
 			"xxx-op", "gen-tangents"};
 		argc = COUNT;
 	}
@@ -354,6 +388,7 @@ int main(int argc, const char *argv[])
 		else if (key == "-ot")					inplace = (val == "inplace");
 		else if (key == "-bk")					inplace_backup = (val == "true");
 		else if (key == "-mat")					gen_mat = val;
+		else if (key == "-log")					SetLogging(val);
 		else if (key == "-op" || key == "-skip")
 		{
 			auto op = GetOperation(val);
