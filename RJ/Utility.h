@@ -476,8 +476,14 @@ CMPINLINE std::string GetLocalDateTimeString(void)
 // Splits a string based upon the supplied delimeter, optionally skipping empty items
 void SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements);
 
+// Splits a string around spaces, observing the presence of quote marks
+void SplitStringQuoted(const std::string & input, std::vector<std::string> & outElements);
+
 // Concatenates a series of strings together, optionally with the supplied string as a delimiter
 std::string ConcatenateStrings(const std::vector<std::string> & elements, const std::string & delimiter);
+
+// Replace all instances of a substring in a string with another; returns a copy, original string is unmodified
+std::string StringReplace(std::string str, const std::string & original, const std::string & replacement);
 
 // Normalise the given string into one suitable for use in object codes
 std::string NormaliseString(const std::string & string_value);

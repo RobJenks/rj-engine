@@ -1,6 +1,7 @@
 #include "malloc.h"
 #include <string>
 #include <sstream>
+#include <iomanip>
 #include <cmath>
 #include <shlwapi.h>
 #include "FastMath.h"
@@ -212,6 +213,18 @@ void SplitString(const std::string & input, char delimiter, bool skip_empty, std
 	}
 }
 
+// Splits a string around spaces, observing the presence of quote marks
+void SplitStringQuoted(const std::string & input, std::vector<std::string> & outElements)
+{
+	std::string item;
+	std::istringstream ss(input);
+
+	while (ss >> std::quoted(item, '\"', (char)0))		// Escape=0 seems to prevent this choking on \\ in path strings
+	{
+		outElements.push_back(item);
+	}
+}
+
 // Return a new string with spaces removed
 std::string TrimString(const std::string & str)
 {
@@ -219,6 +232,23 @@ std::string TrimString(const std::string & str)
 	auto end = str.find_last_not_of(' ');
 	return str.substr(start, end - start + 1U);
 }
+
+// Replace all instances of a substring in a string with another; returns a copy, original string is unmodified
+std::string StringReplace(std::string str, const std::string & original, const std::string & replacement)
+{
+	size_t index = 0U;
+	while (true)
+	{
+		index = str.find(original, index);
+		if (index == std::string::npos) break;
+
+		str.replace(index, original.size(), replacement);
+		index += replacement.size();
+	}
+
+	return str;
+}
+
 
 // Concatenates a series of strings together, optionally with the supplied string as a delimiter
 std::string ConcatenateStrings(const std::vector<std::string> & elements, const std::string & delimiter)

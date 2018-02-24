@@ -29,6 +29,7 @@ public:
 	static void					DeleteTemporaryFile(fs::path file);
 
 	static void					SplitString(const std::string & input, char delimiter, bool skip_empty, std::vector<std::string> & outElements);
+	static void					SplitStringQuoted(const std::string & input, std::vector<std::string> & outElements);
 	static std::string			TrimString(const std::string & str);
 
 	template <typename T>

@@ -1,19 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LocalDebuggerCommandArguments>-args "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\ModelBuilderConfig.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>all log:debug-verbose</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerCommandArguments>-args "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\ModelBuilderConfig.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>all log:debug-verbose</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>-args "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\ModelBuilderConfig.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>all log:debug-verbose</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerCommandArguments>-args "C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\ModelBuilderConfig.txt"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>all log:debug-verbose</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(OutputPath)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

@@ -330,7 +330,7 @@ void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsv
 
 	// Split on spaces
 	std::vector<std::string> args;
-	PipelineUtil::SplitString(argstring, ' ', true, args);
+	PipelineUtil::SplitStringQuoted(argstring, args);
 	for (auto & arg : args)
 	{
 		arg = PipelineUtil::TrimString(arg);
@@ -343,47 +343,6 @@ void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsv
 
 int main(int argc, const char *argv[])
 {
-	int ix = 1;
-	const char *loglevel = "normal"; // "debug-verbose";
-	const unsigned int COUNT = 15;
-	if (ix == 1)
-	{
-		argv = new const char*[COUNT] { argv[0],
-			"-type", "obj-to-rjm", 
-			"-i", "C:/Users/robje/Downloads/sphere.obj",
-			"xxx-o", "C:/Users/robje/Downloads/sphere.out",
-			"xxx-op", "gen-normals",
-			"xxx-op", "triangulate",
-			"-log", loglevel,
-			"-args", "C:/Users/robje/Downloads/test-args.txt"};
-		argc = COUNT;
-	}
-	else if (ix == 2)
-	{
-		argv = new const char*[COUNT] { argv[0],
-			"-type", "rjm-to-obj",
-			"-i", "C:/Users/robje/Downloads/sphere.out",
-			"-o", "C:/Users/robje/Downloads/sphere2.obj",
-			"-log", loglevel,
-			"xxx-op", "gen-normals",
-			"xxx-op", "gen-normals",
-			"xxx-op", "gen-tangents"};
-		argc = COUNT;
-	}
-	else if (ix == 3)
-	{
-		argv = new const char*[COUNT] { argv[0],
-			"-type", "process-rjm",
-			"-i", "C:/Users/robje/Downloads/sphere.out",
-			"-o", "C:/Users/robje/Downloads/sphere2.out",
-			"-op", "gen-tangents",
-			"-log", loglevel,
-			"xxx-op", "gen-normals",
-			"xxx-op", "gen-tangents"};
-		argc = COUNT;
-	}
-
-
 	if (argc < 2 || ((argc - 1) % 2 != 0))
 	{
 		PrintUsage();
@@ -481,6 +440,45 @@ argv = new const char*[COUNT] { argv[0],
 "-op", "gen-normals",
 "-op", "gen-tangents"};
 argc = COUNT;
+
+const unsigned int COUNT = 15;
+if (ix == 1)
+{
+argv = new const char*[COUNT] { argv[0],
+"-type", "obj-to-rjm",
+"-i", "C:/Users/robje/Downloads/sphere.obj",
+"xxx-o", "C:/Users/robje/Downloads/sphere.out",
+"xxx-op", "gen-normals",
+"xxx-op", "triangulate",
+"-log", loglevel,
+"-args", "C:/Users/robje/Downloads/test-args.txt"};
+argc = COUNT;
+}
+else if (ix == 2)
+{
+argv = new const char*[COUNT] { argv[0],
+"-type", "rjm-to-obj",
+"-i", "C:/Users/robje/Downloads/sphere.out",
+"-o", "C:/Users/robje/Downloads/sphere2.obj",
+"-log", loglevel,
+"xxx-op", "gen-normals",
+"xxx-op", "gen-normals",
+"xxx-op", "gen-tangents"};
+argc = COUNT;
+}
+else if (ix == 3)
+{
+argv = new const char*[COUNT] { argv[0],
+"-type", "process-rjm",
+"-i", "C:/Users/robje/Downloads/sphere.out",
+"-o", "C:/Users/robje/Downloads/sphere2.out",
+"-op", "gen-tangents",
+"-log", loglevel,
+"xxx-op", "gen-normals",
+"xxx-op", "gen-tangents"};
+argc = COUNT;
+}
+
 
 */
 

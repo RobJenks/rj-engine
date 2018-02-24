@@ -1,0 +1,95 @@
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_cone.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_line.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_sphere.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: TriangulateProcess finished. All polygons have been triangulated.
+Info,  T9900: GenFaceNormalsProcess finished. Face normals have been calculated
+Error, T9900: Failed to compute tangents; need UV data in channel0
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Entering post processing pipeline
+Error, T9900: Failed to compute tangents; need UV data in channel0
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\unit_square.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Models\Misc\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Medium\frigate_medium_midsection1.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Medium\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Small\frigate_small_midsection1.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Sections\Frigate_Small\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Simple\Testing\testship1\testship1.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Simple\Testing\testship1\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\corridor_ns.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\corridor_nse.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\corridor_nsew.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\corridor_se.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\CorridorTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\quarters_dorm01_connection.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\quarters_dorm01_interior.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\quarters_dorm01_wall_corner.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline
+Info,  T9900: Load C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\quarters_dorm01_wall_straight.obj
+Info,  T9900: Found a matching importer for this file format: Wavefront Object Importer.
+Info,  T9900: Import root directory is 'C:\Users\robje\Documents\Visual Studio 2017\Projects\RJ\x64\Debug\..\..\RJ\Data\Ships\Tiles\QuartersTiles\'
+Info,  T9900: Entering post processing pipeline
+Info,  T9900: CalcTangentsProcess finished. Tangents have been calculated
+Info,  T9900: Leaving post processing pipeline

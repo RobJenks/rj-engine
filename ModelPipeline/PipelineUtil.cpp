@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <ios>
+#include <iomanip>
 #include <filesystem>
 #include <DirectXMath.h>
 #include "../Definitions/ByteString.h"
@@ -125,6 +126,19 @@ void PipelineUtil::SplitString(const std::string & input, char delimiter, bool s
 	while (std::getline(ss, item, delimiter)) {
 		if (!skip_empty || !item.empty())
 			outElements.push_back(item);
+	}
+}
+
+
+// Splits a string around spaces, observing the presence of quote marks
+void PipelineUtil::SplitStringQuoted(const std::string & input, std::vector<std::string> & outElements)
+{
+	std::string item;
+	std::istringstream ss(input);
+
+	while (ss >> std::quoted(item, '\"', (char)0))		// Escape=0 seems to prevent this choking on \\ in path strings
+	{
+		outElements.push_back(item);
 	}
 }
 
