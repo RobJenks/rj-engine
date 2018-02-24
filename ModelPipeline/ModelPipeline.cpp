@@ -48,8 +48,122 @@ static const std::vector<std::tuple<std::string, std::string, aiPostProcessSteps
 	{ "validation", "Perform validation of model data during transformation; enabled by default", aiPostProcessSteps::aiProcess_ValidateDataStructure }
 };
 
+
+unsigned int GetOperation(const std::string & op)
+{
+	for (const auto & operation : MESH_OPERATIONS)
+	{
+		if (std::get<0>(operation) == op) return std::get<2>(operation);
+	}
+
+	return 0U;
+}
+
+void SetLogging(const std::string & mode)
+{
+	unsigned int severity = 0U;
+	if (mode == "verbose")
+	{
+		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::Verbose;
+		std::cout << "Enabling verbose logging\n";
+		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info;
+	}
+	else if (mode == "debug-verbose")
+	{
+		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::DebugVerbose;
+		std::cout << "Enabling debug & verbose logging\n";
+		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info | Assimp::Logger::ErrorSeverity::Debugging;
+	}
+	else
+	{
+		return;
+	}
+
+	Assimp::DefaultLogger::create();
+	Assimp::DefaultLogger::get()->attachStream(new AssimpLogStream(), severity);
+}
+
+void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsvector, int insert_point = -1)
+{
+	fs::path argfile(file);
+	if (!fs::exists(argfile))
+	{
+		std::cerr << "Cannot load args from external file \"" << fs::absolute(argfile) << "\"; file does not exist\n";
+		return;
+	}
+
+	std::string argstring = PipelineUtil::ReadFileToString(argfile);
+
+	// Split on spaces
+	std::vector<std::string> args;
+	PipelineUtil::SplitStringQuoted(argstring, args);
+	for (auto & arg : args)
+	{
+		arg = PipelineUtil::TrimString(arg);
+	}
+
+	// Either insert at the specified point or at the end of the arguments vector
+	if (insert_point >= 0 && insert_point < argsvector.size())
+	{
+		argsvector.insert(argsvector.begin() + insert_point, args.begin(), args.end());
+	}
+	else
+	{
+		argsvector.insert(argsvector.end(), args.begin(), args.end());
+	}
+
+	std::cout << "Loaded " << args.size() << " arguments from file \"" << fs::absolute(argfile) << "\"\n";
+}
+
+unsigned int AddModelSpecificOperations(fs::path model_file, unsigned int current_operations)
+{
+	if (!fs::exists(model_file)) return 0U;
+
+	fs::path config_file = fs::path(fs::absolute(model_file).string() + ".pipeline");
+	if (!fs::exists(config_file)) return 0U;
+	std::cout << "Model \"" << model_file.filename().string() << "\" has model-specific operation config\n";
+
+	std::vector<std::string> args;
+	ReadArgsFromFile(fs::absolute(config_file).string(), args);
+
+	unsigned int operations = current_operations;
+	bool add_next = false, skip_next = false;
+	for (const auto & arg : args)
+	{
+		if (arg == "-op")	{ add_next = true; skip_next = false; continue; }
+		if (arg == "-skip") { skip_next = true; add_next = false; continue; }
+
+		if (add_next || skip_next)
+		{
+			unsigned int op = GetOperation(arg);
+			if (op != 0U)
+			{
+				if (add_next)
+				{
+					std::cout << "Adding model-specific operation for \"" << model_file.filename().string() << "\" of \"" << arg << "\" (" << op << ")\n";
+					operations |= op;
+				}
+				else if (skip_next)
+				{
+					std::cout << "Excluding model-specific operation for \"" << model_file.filename().string() << "\" of \"" << arg << "\" (" << op << ")\n";
+					operations &= ~op;
+				}
+			}
+			add_next = skip_next = false;
+		}
+	}
+
+	if (operations != current_operations)		std::cout << "Operations set updated from " << current_operations << " to " << operations << " by model-specific config\n";
+	else										std::cout << "Operation set remains unchanged at " << operations << " after applying model-specific config\n";
+
+	return operations;
+}
+
 void ObjToRjm(const std::string & input, const std::string & target, unsigned int operations)
 {
+	// Append any model-specific operations if they exist
+	operations = AddModelSpecificOperations(fs::path(input), operations);
+
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerAssimp>(operations)))
@@ -73,7 +187,7 @@ void ObjToRjmBulk(std::vector<std::string> & input, unsigned int operations)
 	for (const std::string & in : input)
 	{
 		fs::path in_path(in);
-		std::cout << "Processing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
+		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".rjm");
 		ObjToRjm(in, target.string(), operations);
@@ -102,7 +216,7 @@ void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate
 	for (const std::string & in : input)
 	{
 		fs::path in_path(in);
-		std::cout << "Processing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
+		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out");
 		RjmToObj(in, target.string(), generate_material);
@@ -111,6 +225,9 @@ void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate
 
 void ProcessRjm(const std::string & input, const std::string & target, unsigned int operations, bool in_place = false, bool in_place_backup = true)
 {
+	// Append any model-specific operations if they exist
+	operations = AddModelSpecificOperations(fs::path(input), operations);
+
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
@@ -167,7 +284,7 @@ void ProcessRjmBulk(std::vector<std::string> & input, unsigned int operations, b
 	for (const std::string & in : input)
 	{
 		fs::path in_path(in);
-		std::cout << "Processing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
+		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		// Target is only relevant if this is not an in-place swap
 		std::string target = (in_place ? "" : (fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out"));
@@ -283,72 +400,6 @@ void PrintUsage()
 	std::cout << "\n";
 }
 
-unsigned int GetOperation(const std::string & op)
-{
-	for (const auto & operation : MESH_OPERATIONS)
-	{
-		if (std::get<0>(operation) == op) return std::get<2>(operation);
-	}
-
-	return 0U;
-}
-
-void SetLogging(const std::string & mode)
-{
-	unsigned int severity = 0U;
-	if (mode == "verbose")
-	{
-		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::Verbose;
-		std::cout << "Enabling verbose logging\n";
-		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info;
-	}
-	else if (mode == "debug-verbose")
-	{
-		ModelPipelineConstants::LogLevel = ModelPipelineConstants::LoggingType::DebugVerbose;
-		std::cout << "Enabling debug & verbose logging\n";
-		severity = Assimp::Logger::ErrorSeverity::Err | Assimp::Logger::ErrorSeverity::Warn | Assimp::Logger::ErrorSeverity::Info | Assimp::Logger::ErrorSeverity::Debugging;
-	}
-	else
-	{
-		return;
-	}
-
-	Assimp::DefaultLogger::create();
-	Assimp::DefaultLogger::get()->attachStream(new AssimpLogStream(), severity);
-}
-
-void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsvector, int insert_point = -1)
-{
-	fs::path argfile(file);
-	if (!fs::exists(argfile))
-	{
-		std::cerr << "Cannot load args from external file \"" << fs::absolute(argfile) << "\"; file does not exist\n";
-		return;
-	}
-
-	std::string argstring = PipelineUtil::ReadFileToString(argfile);
-
-	// Split on spaces
-	std::vector<std::string> args;
-	PipelineUtil::SplitStringQuoted(argstring, args);
-	for (auto & arg : args)
-	{
-		arg = PipelineUtil::TrimString(arg);
-	}
-
-	// Either insert at the specified point or at the end of the arguments vector
-	if (insert_point >= 0 && insert_point < argsvector.size())
-	{
-		argsvector.insert(argsvector.begin() + insert_point, args.begin(), args.end());
-	}
-	else
-	{
-		argsvector.insert(argsvector.end(), args.begin(), args.end());
-	}
-
-	std::cout << "Loaded " << args.size() << " arguments from file \"" << fs::absolute(argfile) << "\"\n";
-}
-
 
 int main(int argc, const char *argv[])
 {
@@ -412,6 +463,9 @@ int main(int argc, const char *argv[])
 	// Validate inputs
 	if (input.empty()) {								std::cerr << "No input file(s) provided (use -i)\n"; exit(1); }
 	else if (output.empty() && !(inplace || bulk)) {	std::cerr << "Ouptut file must be specified unless -ot=inplace or -n=bulk\n"; exit(1); }
+
+	// Output current operation set for info
+	std::cout << "Consolidated operation set: " << operations << "\n";
 
 	// Perform the requested operation
 	if (type == "process-rjm")
