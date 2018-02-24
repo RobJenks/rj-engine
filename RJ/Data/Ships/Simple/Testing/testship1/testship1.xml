@@ -20,7 +20,7 @@
     <Code>testship1</Code>
     <Name>Testing Ship</Name>
     <StandardObject>True</StandardObject>
-    <Model>unit_sphere_model</Model>
+    <Model>testship1_model</Model>
     <CameraPosition x="0.500000" y="25.000000" z="-90.000000" />
     <CameraRotation x="0.400000" y="0.000000" z="0.000000" />
     <CameraElasticity>5.0</CameraElasticity>

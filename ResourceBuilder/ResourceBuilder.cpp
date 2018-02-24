@@ -151,8 +151,14 @@ void ResourceBuilder::GenerateDefaultConfiguration(fs::path path)
 		<< "-n bulk "
 		<< "-log normal "
 		<< "-op triangulate "
+		<< "-op gen-uv "
 		<< "-op gen-normals "
-		<< "-op gen-tangents ";
+		<< "-op gen-tangents "
+		<< "-op fix-invalid "
+		<< "-op fix-inward-norm "
+		<< "-op improve-cache-local "
+		<< "-op remove-degen "
+		<< "-op minimise-mats";
 
 	ResourceBuilderUtil::WriteDataTofile(path, str.str());
 }
