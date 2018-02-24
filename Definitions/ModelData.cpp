@@ -10,6 +10,7 @@ const std::string ModelData::GEOMETRY_FILE_IDENTIFIER = { 'R', 'j', 'G', 'e', 'o
 ModelData::ModelData(void)
 	:
 	VertexData(NULL),
+	IndexData(NULL), 
 	VertexCount(0U),
 	ModelMaterialIndex(0U), 
 	MinBounds(0.0f, 0.0f, 0.0f), 

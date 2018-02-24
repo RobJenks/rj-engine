@@ -1,6 +1,7 @@
 #pragma once
 
-#include "../Definitions/VertexDefinitions.hlsl.h"
+#include "VertexDefinitions.hlsl.h"
+#include "ModelData.h"
 #include "Buffer.h"
 
 class IndexBuffer : public Buffer 
@@ -17,6 +18,9 @@ public:
 
 	// Construct an index buffer with the specified data
 	IndexBuffer(const void *data, UINT count, UINT stride) noexcept;
+
+	// Construct an index buffer based on the given model data
+	IndexBuffer(const ModelData & model_data) noexcept;
 	
 	// Copy construction and assignment must be disallowed, since this IndexBuffer manages a single COM resource
 	CMPINLINE			IndexBuffer(const IndexBuffer & other) = delete;

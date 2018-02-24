@@ -113,7 +113,7 @@ Result Model::CompileModel(void)
 	Data = ModelBuffer
 	(
 		VertexBufferDX11(*data),
-		IndexBufferDX11(data->VertexCount),
+		IndexBufferDX11(*data),
 		pMaterial
 	);
 

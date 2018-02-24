@@ -1,1 +1,1 @@
--type obj-to-rjm -n bulk -log normal -op triangulate -op gen-normals -op gen-tangents 
+-type obj-to-rjm -n bulk -log normal -op triangulate -op gen-normals -op gen-tangents

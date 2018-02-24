@@ -12,6 +12,9 @@ public:
 	// Construct an index buffer with the specified data
 	IndexBufferDX11(const void *data, UINT count, UINT stride) noexcept;
 
+	// Construct an index buffer based on the given model data
+	IndexBufferDX11(const ModelData & model_data) noexcept;
+
 	// Construct a sequential index buffer of the specified length, using the default index format
 	IndexBufferDX11(UINT count) noexcept;
 

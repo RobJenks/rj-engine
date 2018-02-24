@@ -132,9 +132,9 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 				MODEL_INST_ERROR("Mesh face " << i << " has " << mesh->mFaces[i].mNumIndices << " face indices.  Make sure mesh is correct triangulated");
 			}
 
-			m->IndexData[ix++] = mesh->mFaces[i].mIndices[0] + 1;		// OBJ face indices are 1-based; we want 0-based vertex indices for the index buffer
-			m->IndexData[ix++] = mesh->mFaces[i].mIndices[1] + 1;
-			m->IndexData[ix++] = mesh->mFaces[i].mIndices[2] + 1;
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[0] - 1;		// OBJ face indices are 1-based; we want 0-based vertex indices for the index buffer
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[1] - 1;
+			m->IndexData[ix++] = mesh->mFaces[i].mIndices[2] - 1;
 		}
 
 	}
