@@ -317,7 +317,7 @@ void SetLogging(const std::string & mode)
 	Assimp::DefaultLogger::get()->attachStream(new AssimpLogStream(), severity);
 }
 
-void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsvector)
+void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsvector, int insert_point = -1)
 {
 	fs::path argfile(file);
 	if (!fs::exists(argfile))
@@ -336,7 +336,16 @@ void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsv
 		arg = PipelineUtil::TrimString(arg);
 	}
 
-	argsvector.insert(argsvector.end(), args.begin(), args.end());
+	// Either insert at the specified point or at the end of the arguments vector
+	if (insert_point >= 0 && insert_point < argsvector.size())
+	{
+		argsvector.insert(argsvector.begin() + insert_point, args.begin(), args.end());
+	}
+	else
+	{
+		argsvector.insert(argsvector.end(), args.begin(), args.end());
+	}
+
 	std::cout << "Loaded " << args.size() << " arguments from file \"" << fs::absolute(argfile) << "\"\n";
 }
 
@@ -375,7 +384,7 @@ int main(int argc, const char *argv[])
 		else if (key == "-bk")					inplace_backup = (val == "true");
 		else if (key == "-mat")					gen_mat = val;
 		else if (key == "-log")					SetLogging(val);
-		else if (key == "-args")				ReadArgsFromFile(val, args);
+		else if (key == "-args")				ReadArgsFromFile(val, args, i + 2U);
 		else if (key == "-op" || key == "-skip")
 		{
 			auto op = GetOperation(val);
