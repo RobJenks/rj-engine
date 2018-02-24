@@ -370,6 +370,7 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 				transform = SpotLightTransform(light);
 				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
 				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
+				break;
 
 			case LightType::Directional:
 				//RenderLightPipeline(m_pipeline_lighting_directional, /* TODO: REQUIRED */ NULL, ID_MATRIX);

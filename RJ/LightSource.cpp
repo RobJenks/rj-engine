@@ -88,6 +88,18 @@ void LightSource::PerformPostSimulationUpdate(void)
 	XMStoreFloat4(&m_light.Data.DirectionWS, dir);
 }
 
+// Calculates all derived data for the light required for rendering, for example view-space equivalent data.  We only need to calculate
+// these fields if the light is being rendered this frame
+void LightSource::RecalculateRenderingData(void)
+{
+	// View-space light position
+	const XMMATRIX & view = Game::Engine->GetRenderViewMatrix();
+	XMStoreFloat4(&m_light.Data.PositionVS, XMVector3TransformCoord(m_position, view));
+
+	// View-space light direction
+	XMStoreFloat4(&m_light.Data.DirectionVS, XMVector3TransformCoord(XMLoadFloat4(&m_light.Data.DirectionWS), view));
+}
+
 // Custom debug string function
 std::string	LightSource::DebugString(void) const
 {

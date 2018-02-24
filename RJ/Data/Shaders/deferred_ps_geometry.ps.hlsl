@@ -15,7 +15,7 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	DeferredPixelShaderGeometryOutput OUT;
 
 	// TODO: REMOVE
-	if (1 < 2)
+	if (11 < 2)
 	{
 		OUT.Diffuse = float4(1, 0, 0, 1);
 		OUT.Specular = Mat.SpecularColor;
@@ -112,7 +112,7 @@ DeferredPixelShaderGeometryOutput PS_Deferred_Geometry(VertexShaderStandardOutpu
 	// Just use the normal from the model
 	else
 	{
-		N = normalize(float4(IN.normalVS, 0));
+		N = normalize(float4(IN.normalVS, 0));	// TODO: Can guarantee that all normals are already pre-normalised via model pipeline?
 	}
 
 	OUT.NormalVS = N;

@@ -101,7 +101,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 }
 
 // Register a new light source for this scene
-bool LightingManagerObject::RegisterLightSource(const LightSource *light)
+bool LightingManagerObject::RegisterLightSource(LightSource *light)
 {
 	// Parameter check
 	if (!light) return false;
@@ -109,6 +109,10 @@ bool LightingManagerObject::RegisterLightSource(const LightSource *light)
 
 	// We only want to register lights that are currently active
 	if (l.IsActive() == false) return false;
+
+	// This light is likely to be included in the rendered scene; recalculate any per-frame rendering data at this
+	// point so it is available (assuming the light is not deprioritised later, but it is neater to do this once here)
+	light->RecalculateRenderingData();
 
 	// Lights are prioritised in part based on their position relative to the camera
 	const XMVECTOR & cam_pos = Game::Engine->GetCamera()->GetPosition();

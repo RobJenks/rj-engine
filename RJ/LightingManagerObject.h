@@ -38,7 +38,7 @@ public:
 	void								AnalyseNewFrame(void);
 
 	// Register a new light source for this scene
-	bool								RegisterLightSource(const LightSource *light);
+	bool								RegisterLightSource(LightSource *light);
 
 	// Clear all registered light sources
 	void								ClearAllLightSources(void);

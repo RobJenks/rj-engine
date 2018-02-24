@@ -50,6 +50,13 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_TARGET
 	mat.SpecularColor = specular;
 	mat.SpecularPower = specularPower;
 
+	if (11 < 2)
+	{
+		float4 result = float4(0, 0, mul(light.PositionVS, View).x * 0.001f, 1.0f);
+		result += diffuse;
+		return result;
+	}
+
 	// Perform lighting calculations based on light type
 	LightingResult lit = (LightingResult)0;
 	switch (light.Type)

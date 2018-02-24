@@ -48,6 +48,11 @@ public:
 	// Light sources do implement a post-simulation update method to reposition their internal light component
 	virtual void										PerformPostSimulationUpdate(void);
 
+	// Calculates all derived data for the light required for rendering, for example view-space equivalent data.  We only need to calculate
+	// these fields if the light is being rendered this frame
+	void												RecalculateRenderingData(void);
+
+
 	// Inherited virtual method.  Destruction method triggered when object HP hits zero
 	CMPINLINE void										DestroyObject(void) { }
 

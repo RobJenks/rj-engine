@@ -2571,10 +2571,9 @@ void RJMain::DEBUGDisplayInfo(void)
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 
 		lt()->SetModel(Model::GetModel("unit_sphere_model"));
-		lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 50.0f), ss()->GetWorldMatrix()));
+		lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
 		lt()->SetSize(XMVectorReplicate(45.0f));
 		Game::Engine->RenderObject(lt());
-		OutputDebugString(concat(Vector4ToString(lt()->GetLight().GetPositionWS()))("\n").str().c_str());
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
