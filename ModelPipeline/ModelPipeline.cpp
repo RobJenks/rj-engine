@@ -49,12 +49,25 @@ static const std::vector<std::tuple<std::string, std::string, aiPostProcessSteps
 };
 
 
+unsigned int GetAllOperations(void)
+{
+	unsigned int all = 0U;
+	for (auto & op : MESH_OPERATIONS)
+	{
+		all |= std::get<2>(op);
+	}
+
+	return all;
+}
+
 unsigned int GetOperation(const std::string & op)
 {
 	for (const auto & operation : MESH_OPERATIONS)
 	{
 		if (std::get<0>(operation) == op) return std::get<2>(operation);
 	}
+
+	if (op == "all") return GetAllOperations();
 
 	return 0U;
 }
