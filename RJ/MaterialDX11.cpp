@@ -118,7 +118,7 @@ void MaterialDX11::Bind(ShaderDX11 *shader) const
 	Shader::Type shadertype = shader->GetType();
 	for (UINT i = 0; i < m_texture_binding_count; ++i)
 	{
-		m_texture_bindings[i].texture->Bind(shadertype, i, ShaderParameter::Type::Texture);
+		m_texture_bindings[i].texture->Bind(shadertype, m_texture_bindings[i].slot, ShaderParameter::Type::Texture);
 	}
 
 	// Also bind the material constant buffer to the relevant shader parameter, if the shader requires it

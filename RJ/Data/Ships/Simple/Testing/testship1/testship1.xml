@@ -5,9 +5,11 @@
 
   <!-- Ship material -->
   <Material code="testship1_material">
-    <DiffuseColor x="0.00005" y="0" z="0" w="0.5" />
-    <AmbientColor x="0" y="0.00005" z="0" w="0.5" />
+    <DiffuseColor x="0.5" y="0" z="0" w="0.5" />
+    <AmbientColor x="0" y="0.5" z="0" w="0.5" />
     <EmissiveColor x="0" y="0" z="0.25" w="0.5" />
+    <SpecularPower>20.0f</SpecularPower>
+    <SpecularColor x="0" y="0.5" z="0" w="0.5" />
     <!--DiffuseTexture>testship1_texture</DiffuseTexture>
     <AmbientTexture>testship1_texture</AmbientTexture-->
   </Material>

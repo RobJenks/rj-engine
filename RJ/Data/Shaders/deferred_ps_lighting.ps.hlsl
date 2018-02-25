@@ -18,7 +18,7 @@ Texture2D DepthTextureVS : register(t3);
 
 // Pixel shader that generates the G-Buffer
 [earlydepthstencil]
-float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_TARGET
+float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 {
 	// All calculations are performed in view space
 	float4 eyePos = { 0, 0, 0, 1 };
@@ -73,5 +73,7 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_TARGET
 	}
 
 	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
-	return (diffuse * lit.Diffuse) + (specular * lit.Specular);
+	//return (diffuse * lit.Diffuse) + (specular * lit.Specular);
+	//return float4(0,1,0,0.5) + (diffuse * lit.Diffuse) + (specular * lit.Specular);
+	return diffuse + (0.00001f * (diffuse * lit.Diffuse) + (specular * lit.Specular));
 }

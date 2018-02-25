@@ -97,7 +97,8 @@ void LightSource::RecalculateRenderingData(void)
 	XMStoreFloat4(&m_light.Data.PositionVS, XMVector3TransformCoord(m_position, view));
 
 	// View-space light direction
-	XMStoreFloat4(&m_light.Data.DirectionVS, XMVector3TransformCoord(XMLoadFloat4(&m_light.Data.DirectionWS), view));
+	XMStoreFloat4(&m_light.Data.DirectionVS, 
+		XMVector3NormalizeEst(XMVector3TransformCoord(XMLoadFloat4(&m_light.Data.DirectionWS), view)));
 }
 
 // Custom debug string function

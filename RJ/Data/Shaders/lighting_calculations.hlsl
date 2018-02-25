@@ -13,7 +13,7 @@ struct LightingResult
 // Determine diffuse component
 float4 CalculateDiffuse(LightData light, float4 L, float4 N)
 {
-	float NdotL = max(dot(N, L), 0);
+	float NdotL = 1.0f;// max(dot(N, L), 0);
 	return light.Colour * NdotL;
 }
 
@@ -21,7 +21,7 @@ float4 CalculateDiffuse(LightData light, float4 L, float4 N)
 float4 CalculateSpecular(LightData light, MaterialData material, float4 V, float4 L, float4 N)
 {
 	float4 R = normalize(reflect(-L, N));
-	float RdotV = max(dot(R, V), 0);
+	float RdotV = 1.0f;// max(dot(R, V), 0);
 
 	return light.Colour * pow(RdotV, material.SpecularPower);
 }
@@ -29,7 +29,7 @@ float4 CalculateSpecular(LightData light, MaterialData material, float4 V, float
 // Compute attenuation based on the range of the light
 float CalculateAttenuation(LightData light, float d)
 {
-	return 1.0f - smoothstep(light.Range * 0.75f, light.Range, d);
+	return 1.0f;// -smoothstep(light.Range * 0.75f, light.Range, d);
 }
 
 // Calculate extent of the spotlight cone and influence on the current fragment
@@ -50,10 +50,6 @@ float CalculateSpotCone(LightData light, float4 L)
 	float cosAngle = dot(light.DirectionVS, -L);
 	return smoothstep(minCos, maxCos, cosAngle);
 }
-
-
-
-
 
 // Perform lighting calculations for an infinitesimal point light
 LightingResult CalculatePointLight(LightData light, MaterialData mat, float4 V, float4 P, float4 N)
@@ -102,6 +98,4 @@ LightingResult CalculateSpotLight(LightData light, MaterialData mat, float4 V, f
 
 	return result;
 }
-
-
 

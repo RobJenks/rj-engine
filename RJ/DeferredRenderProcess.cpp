@@ -181,6 +181,7 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 
 	// All light rendering will be additive
 	m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
+	//m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendMode(true, false, BlendState::BlendFactor::One, BlendState::BlendFactor::Zero)); // TODO: REMOVE (DEBUG TO RENDER *ONLY* OUTPUT OF PASS2)
 
 	// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
 	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);

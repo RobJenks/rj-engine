@@ -2353,7 +2353,8 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
-	l2->SetRange(200.0f);
+	l2->SetRange(750.0f);
+	l2->LightObject().SetIntensity(1000.0f);
 	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l2->SetPosition(XMVectorSet(250, 225, 100, 0));
 	lt = l2;
@@ -2570,10 +2571,10 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";*/
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 
-		lt()->SetModel(Model::GetModel("unit_sphere_model"));
+/*		lt()->SetModel(Model::GetModel("unit_sphere_model"));
 		lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
 		lt()->SetSize(XMVectorReplicate(45.0f));
-		Game::Engine->RenderObject(lt());
+		Game::Engine->RenderObject(lt());*/
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
