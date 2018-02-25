@@ -44,6 +44,8 @@ public:
 	CMPINLINE SlotID				GetMaterialSlot(void) const { return m_slot_material; }
 	CMPINLINE void					SetMaterialSlot(SlotID slot_id) { m_slot_material = slot_id; }
 
+	// Attempt to reload the shader from disk
+	Result							Reload(void);
 
 	// Dispatch a compute shader using the specified thread group configuration
 	void Dispatch(const UINTVECTOR3 & numGroups);
@@ -57,8 +59,15 @@ public:
 
 private:
 
+	// Unmap any resources currently assigned to parameter slots.  Use primarily when re-loading shaders to avoid
+	// any leftover pointers being used inadvertantly before they are re-assigned (should never happen, but to be safe)
+	void							UnmapAllParameters(void);
+
 	// Release any compiled shaders (during destruction or if we are loading a new shader)
-	void ReleaseShaders(void);
+	void							ReleaseShaders(void);
+
+	// Release all resources, including any compiled shaders
+	void							ReleaseAllResources(void);
 
 private:
 
@@ -75,7 +84,8 @@ private:
 	// Key shader parameters
 	ShaderParameterSet					m_parameters;			// Linear collection of parameters
 	ShaderParameterMapping				m_parameter_mapping;	// Mapping from parameter name to parameter set index
-	ID3D11InputLayout *					m_inputlayout;
+	const InputLayoutDesc *				m_inputlayout_desc;		// Application description of the shader input layout (for VS only)
+	ID3D11InputLayout *					m_inputlayout;			// Compiled D3D input layout (for VS only)
 	ID3DBlob * 							m_shaderblob;
 	std::wstring						m_filename; 
 	std::string							m_entrypoint;

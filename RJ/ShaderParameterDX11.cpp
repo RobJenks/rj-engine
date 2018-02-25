@@ -53,6 +53,15 @@ void ShaderParameterDX11::Set(SamplerStateDX11 *sampler)
 	m_sampler = sampler;
 }
 
+// Remove any resource currently assigned to the parameter (will not be deallocated, only unmapped)
+void ShaderParameterDX11::UnmapResources(void)
+{
+	m_cbuffer = NULL;
+	m_sbuffer = NULL;
+	m_texture = NULL;
+	m_sampler = NULL;
+}
+
 // Bind the parameter to a given slot in the specified shader type
 void ShaderParameterDX11::Bind(void)
 {

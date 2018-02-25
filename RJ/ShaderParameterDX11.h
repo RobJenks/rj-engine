@@ -29,6 +29,9 @@ public:
 	void								Set(TextureDX11 *texture);
 	void								Set(SamplerStateDX11 *sampler);
 
+	// Remove any resource currently assigned to the parameter (will not be deallocated, only unmapped)
+	void								UnmapResources(void);
+
 	// Bind the parameter to a given slot in the specified shader type
 	void								Bind(void);
 

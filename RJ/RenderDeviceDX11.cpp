@@ -786,6 +786,41 @@ HRESULT RenderDeviceDX11::PresentFrame(void)
 	return m_swapchain->Present(m_sync_interval, 0U);
 }
 
+// Attempt to hot-load all shaders and recompile them in-place
+void RenderDeviceDX11::ReloadAllShaders(void)
+{
+	Game::Log << LOG_INFO << "Attempting reload of all shaders\n";
+
+	unsigned int failcount = 0U;
+	for (auto & shader_entry : Assets.GetShaders())
+	{
+		// Get a reference to each shader in turn
+		auto * shader = shader_entry.second.get();
+		if (!shader)
+		{
+			Game::Log << LOG_ERROR << "Encountered null shader resource \"" << shader_entry.first << "\" while realoading shaders\n";
+			continue;
+		}
+
+		// Attempt to reload from disk and report any errors
+		Result result = shader->Reload();
+		if (result != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_ERROR << "Failed to reload shader \"" << shader_entry.first << "\" from disk (" << result << ")\n";
+			++failcount;
+		}
+	}
+
+	if (failcount == 0U)
+	{
+		Game::Log << LOG_INFO << "All shader resources (" << Assets.GetShaders().size() << "/" << Assets.GetShaders().size() << ") reloaded successfully\n";
+	}
+	else
+	{
+		Game::Log << LOG_ERROR << "Failed to reload " << failcount << " of " << Assets.GetShaders().size() << " shader resources\n";
+	}
+}
+
 
 RenderDeviceDX11::~RenderDeviceDX11(void)
 {

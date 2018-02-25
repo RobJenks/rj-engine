@@ -20,6 +20,7 @@ ShaderDX11::ShaderDX11(void)
 	: 
 	m_type(Shader::Type::SHADER_TYPE_COUNT), 
 	m_vs(NULL), m_ps(NULL), m_gs(NULL), m_hs(NULL), m_ds(NULL), m_cs(NULL), 
+	m_inputlayout_desc(NULL), 
 	m_inputlayout(NULL), 
 	m_shaderblob(NULL), 
 	m_slot_material(Shader::NO_SLOT_ID)
@@ -27,6 +28,11 @@ ShaderDX11::ShaderDX11(void)
 }
 
 ShaderDX11::~ShaderDX11()
+{
+	ReleaseAllResources();
+}
+
+void ShaderDX11::ReleaseAllResources()
 {
 	ReleaseShaders();
 
@@ -169,6 +175,9 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 
 	/// Can potentially reflect the input layout here via shaderdesc->InputParameters(), though not clear whether instancing is fully-supported
 
+	// We are assigning new shader parameters based on the reflected shader bytecode, so remove any existing parameter data
+	m_parameters.clear();
+
 	// Query resource binding sites using the descriptor
 	Game::Log << LOG_INFO << "Registering " << shaderdesc.BoundResources << " resource binding sites from \"" << entryPoint << "\" shader descriptor\n";
 	for (UINT i = 0; i < shaderdesc.BoundResources; ++i)
@@ -212,6 +221,7 @@ bool ShaderDX11::LoadShaderFromString(	Shader::Type shadertype, const std::strin
 	// Compile the shader input layout, if applicable
 	if (input_layout)
 	{
+		m_inputlayout_desc = input_layout;
 		hr = device->CreateInputLayout(input_layout->Data(), input_layout->ElementCount(), m_shaderblob->GetBufferPointer(), m_shaderblob->GetBufferSize(), &m_inputlayout);
 		if (FAILED(hr))
 		{
@@ -291,6 +301,35 @@ Result ShaderDX11::InitialisePreAssignableParameters(void)
 	return ErrorCodes::NoError;
 }
 
+// Attempt to reload the shader from disk
+Result ShaderDX11::Reload(void)
+{
+	Game::Log << LOG_INFO << "Reloading shader \"" << m_entrypoint << "\" from \"" << ConvertWStringToString(m_filename) << "\"\n";
+
+	// Release any data that will be reloaded
+	ReleaseAllResources();
+
+	// Attempt to reload the shader from disk
+	bool success = LoadShaderFromFile(m_type, m_filename, m_entrypoint, m_profile, m_inputlayout_desc);
+	if (success)
+	{
+		Game::Log << LOG_INFO << "Reloaded and recompiled shader \"" << m_entrypoint << "\"\n";
+	}
+	else
+	{
+		Game::Log << LOG_ERROR << "SEVERE: Failed to reload and recompile shader \"" << m_entrypoint << "\"\n";
+		return ErrorCodes::CouldNotReloadAndRecompileShader;
+	}
+
+	// Also attempt to reassign fixed parameter indices, since these may have changed with the signature of the shader
+	UnmapAllParameters();
+	InitialisePreAssignableParameters();
+	Game::Log << LOG_INFO << "Reinitialised shader parameters for shader \"" << m_entrypoint << "\"\n";
+
+	// Return success
+	return ErrorCodes::NoError;
+}
+
 
 bool ShaderDX11::HasParameter(const std::string & name) const 
 {
@@ -308,6 +347,16 @@ ShaderDX11::ShaderParameterSet::size_type ShaderDX11::GetParameterIndexByName(co
 	{
 		Game::Log << LOG_WARN << "Attempted to retrieve shader parameter \"" << name << "\" from \"" << m_entrypoint << "\"; does not exist\n";
 		return INVALID_SHADER_PARAMETER;
+	}
+}
+
+// Unmap any resources currently assigned to parameter slots.  Use primarily when re-loading shaders to avoid
+// any leftover pointers being used inadvertantly before they are re-assigned (should never happen, but to be safe)
+void ShaderDX11::UnmapAllParameters(void)
+{
+	for (auto & param : m_parameters)
+	{
+		param.UnmapResources();
 	}
 }
 

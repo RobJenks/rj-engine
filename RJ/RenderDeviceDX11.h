@@ -105,6 +105,9 @@ public:
 	// Present backbuffer to the primary display by cycling the swap chain
 	HRESULT											PresentFrame(void);
 
+	// Attempt to hot-load all shaders and recompile them in-place
+	void											ReloadAllShaders(void);
+
 	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
 	// The number of samples to be taken for multi-sample textures

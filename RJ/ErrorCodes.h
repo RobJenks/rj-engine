@@ -321,6 +321,7 @@ namespace ErrorCodes {
 	const Result		ShaderValidationFailed							= 1513;
 	const Result		CannotLocateShader								= 1514;
 	const Result		CannotPreInitialiseShaderParameter				= 1515;
+	const Result		CouldNotReloadAndRecompileShader				= 1516;
 
 
 	// External data read/write errors									(2000-2199)

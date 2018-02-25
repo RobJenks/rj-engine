@@ -585,6 +585,11 @@ void RJMain::ProcessKeyboardInput(void)
 		D::UI->ToggleConsole();
 		Game::Keyboard.LockKey(DIK_GRAVE);
 	}
+	if (b[DIK_F1])
+	{
+		Game::Engine->GetRenderDevice()->ReloadAllShaders();
+		Game::Keyboard.LockKey(DIK_F1);
+	}
 
 	// Additional debug controls below this point
 	if (b[DIK_U])
