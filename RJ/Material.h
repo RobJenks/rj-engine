@@ -13,12 +13,12 @@ public:
 	// Texture indices.  Texture resources will be bound to these registers in all shader programs, if they exist
 	enum class TextureType
 	{
-		Diffuse = 0,
-		Normal = 1,
-		Ambient = 2,
-		Emissive = 3,
-		Specular = 4,
-		SpecularPower = 5,
+		Ambient = 0, 
+		Emissive = 1, 
+		Diffuse = 2,
+		Specular = 3,
+		SpecularPower = 4,
+		Normal = 5, 
 		Bump = 6,
 		Opacity = 7,
 

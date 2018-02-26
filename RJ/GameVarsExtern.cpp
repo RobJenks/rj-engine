@@ -76,7 +76,7 @@ namespace Game {
 	float NearClipPlane = Game::C_DEFAULT_CLIP_NEAR_DISTANCE;
 	float FarClipPlane = Game::C_DEFAULT_CLIP_FAR_DISTANCE;
 	bool FullScreen = false;
-	bool VSync = false;
+	bool VSync = true;	// TODO: Render output is flickering when vsync == false, need to determine why
 	bool ForceWARPRenderDevice = false;
 
 	// Indicates whether the primary data load & initialisation process has been completed on startup

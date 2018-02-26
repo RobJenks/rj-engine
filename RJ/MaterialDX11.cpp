@@ -27,6 +27,7 @@ MaterialDX11::MaterialDX11(const MaterialDX11 &other)
 	m_textures(other.m_textures)
 {
 	AssignNewUniqueID();
+	ResumeUpdates();
 }
 
 bool MaterialDX11::IsTransparent(void) const

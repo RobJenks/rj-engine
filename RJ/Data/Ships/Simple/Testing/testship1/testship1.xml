@@ -5,14 +5,14 @@
 
   <!-- Ship material -->
   <Material code="testship1_material">
-	<GlobalAmbient x="1.0" y="1.0" z="1.0" w="1.0" />
-    <DiffuseColor x="0.5" y="0.5" z="0.5" w="0.5" />
-    <AmbientColor x="0.25" y="0.25" z="0.25" w="0.5" />
+	<!--GlobalAmbient x="0.1" y="0.09" z="0.057" w="1.0" /-->
+    <!--DiffuseColor x="0.5" y="0.5" z="0.0" w="0.5" /-->
+    <AmbientColor x="1.0" y="0.9" z="0.57" w="1.0" />
     <!--EmissiveColor x="0" y="0" z="0.0" w="0.0" /-->
-    <!--SpecularPower>3.0f</SpecularPower>
-    <SpecularColor x="0" y="0.5" z="0" w="0.5" /-->
+    <!--SpecularPower>2.0f</SpecularPower>
+    <SpecularColor x="0.5" y="0.5" z="0.5" w="0.5" /-->
     <DiffuseTexture>testship1_texture</DiffuseTexture>
-    <AmbientTexture>testship1_texture</AmbientTexture>
+    <!--AmbientTexture>testship1_texture</AmbientTexture-->
   </Material>
   
   <!-- Ship model -->
