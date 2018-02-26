@@ -50,13 +50,6 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	mat.SpecularColor = specular;
 	mat.SpecularPower = specularPower;
 
-	if (11 < 2)
-	{
-		float4 result = float4(0, 0, mul(light.PositionVS, View).x * 0.001f, 1.0f);
-		result += diffuse;
-		return result;
-	}
-
 	// Perform lighting calculations based on light type
 	LightingResult lit = (LightingResult)0;
 	switch (light.Type)
@@ -73,7 +66,5 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	}
 
 	// Return the total lighting contribution from both GBuffer/Material and lighting calculation data
-	//return (diffuse * lit.Diffuse) + (specular * lit.Specular);
-	//return float4(0,1,0,0.5) + (diffuse * lit.Diffuse) + (specular * lit.Specular);
-	return diffuse + (0.00001f * (diffuse * lit.Diffuse) + (specular * lit.Specular));
+	return (diffuse * lit.Diffuse) + (specular * lit.Specular);
 }

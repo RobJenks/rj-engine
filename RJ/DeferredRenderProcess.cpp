@@ -416,13 +416,13 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 	// Lighting pass 2 uses both VS and PS
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
 	m_pipeline_lighting_pass2->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
 
 	// Directional lighting pass uses both VS and PS
 	m_pipeline_lighting_directional->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_framedata).Set(GetCommonFrameDataBuffer());
-	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(GetCommonFrameDataBuffer());
+	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightindexdata).Set(m_cb_lightindex);
 	m_pipeline_lighting_directional->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_light_lightdata).Set(Game::Engine->LightingManager->GetLightDataBuffer());
 
 }
