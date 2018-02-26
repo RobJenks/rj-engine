@@ -333,8 +333,9 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 		// Output all the available display modes
 		modestr = concat(modestr)(i == 0 ? "" : ", ")(RenderDevice::DXDisplayModeToString(displayModeList[i])).str();
 
+		/* Below is no longer required: handled as part of swap chain creation */
 		// Use the display mode if it matches our desired resolution
-		if (displayModeList[i].Width == (unsigned int)screen_size.x)
+		/*if (displayModeList[i].Width == (unsigned int)screen_size.x)
 		{
 			if (displayModeList[i].Height == (unsigned int)screen_size.y)
 			{
@@ -348,17 +349,18 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 
 				// This display mode will work for us, so store it
 				modeindex = (int)i;
-				numerator = displayModeList[i].RefreshRate.Numerator;
-				denominator = displayModeList[i].RefreshRate.Denominator;
+				//numerator = displayModeList[i].RefreshRate.Numerator;
+				//denominator = displayModeList[i].RefreshRate.Denominator;
 			}
-		}
+		}*/
 	}
 
 	// Output the available display modes to the log
 	Game::Log << LOG_INFO << numModes << " display modes found for primary adapter (" << modestr << ")\n";
 
+	/* Below is no longer required: handled as part of swap chain creation */
 	// Make sure we found at least one matching display mode
-	if (modeindex == -1 || (numerator == 0 && denominator == 0))
+	/*if (modeindex == -1 || (numerator == 0 && denominator == 0))
 	{
 		if (!vsync)
 		{
@@ -376,7 +378,7 @@ Result RenderDeviceDX11::InitialisePrimaryGraphicsAdapter(INTVECTOR2 screen_size
 	{
 		Game::Log << LOG_INFO << "Enabling display mode of "
 			<< RenderDevice::DXDisplayModeToString(displayModeList[modeindex]) << " on primary adapter\n";
-	}
+	}*/
 
 	// Release all relevant COM objects
 	SafeDeleteArray(displayModeList);
@@ -448,6 +450,12 @@ DXGI_RATIONAL RenderDeviceDX11::QueryRefreshRateForDisplaySize(UINT screenwidth,
 {
 	Game::Log << LOG_INFO << "Querying refresh rate for display size " << screenwidth << "x" << screenheight << (vsync ? " (vsync)" : "") << "\n";
 	DXGI_RATIONAL refreshRate = { 0, 1 };
+
+	// Zero the refresh rate and use it.  As per https://msdn.microsoft.com/en-us/library/windows/desktop/ee417025(v=vs.85).aspx, if
+	// a 0/0 refresh rate is provided then the DXGI runtime will automatically calculate the appropriate refresh rate.  Attempting to
+	// specify this manually can lead to flickering where numerator/denominator do not exactly match the hardware-support refresh rate
+	Game::Log << LOG_INFO << "Setting descriptor refresh rate to {0, 0} for calculation by runtime\n";
+	refreshRate = { 0, 0 };
 
 	if (vsync)
 	{
