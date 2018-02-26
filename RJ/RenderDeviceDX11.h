@@ -108,6 +108,11 @@ public:
 	// Attempt to hot-load all shaders and recompile them in-place
 	void											ReloadAllShaders(void);
 
+	// Attempt to reload material data from disk
+	Result											ReloadMaterial(MaterialDX11 * material);
+	Result											ReloadMaterial(const std::string & material);
+	void											ReloadAllMaterials(void);
+
 	static DXGI_RATIONAL							QueryRefreshRateForDisplaySize(UINT screenwidth, UINT screenheight, bool vsync);
 	
 	// The number of samples to be taken for multi-sample textures

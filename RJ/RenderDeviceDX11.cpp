@@ -4,6 +4,7 @@
 #include "Utility.h"
 #include "ALIGN16.h"
 #include "GameDataExtern.h"
+#include "DataInput.h"
 #include "CoreEngine.h"
 #include "Shaders.h"
 #include "TextureDX11.h"
@@ -818,6 +819,66 @@ void RenderDeviceDX11::ReloadAllShaders(void)
 	else
 	{
 		Game::Log << LOG_ERROR << "Failed to reload " << failcount << " of " << Assets.GetShaders().size() << " shader resources\n";
+	}
+}
+
+// Attempt to reload material data from disk
+Result RenderDeviceDX11::ReloadMaterial(MaterialDX11 * material)
+{
+	if (!material) return ErrorCodes::CannotReloadMaterialWhichDoesNotExist;
+	if (material->GetFilename().empty())
+	{
+		Game::Log << LOG_ERROR << "Failed to reload mateiral \"" << material->GetCode() << "; no source filename is available\n";
+		return ErrorCodes::CannotReloadMaterialWithoutSourceFilename;
+	}
+
+	// Perform a restricted reload of only this material from the single file in which it is defined
+	Result result = IO::Data::ReloadEntityData(material->GetFilename(), HashedStrings::H_Material.Hash, material->GetCode());
+
+	// Test whether the reload was successful
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Failed to reload material \"" << material->GetCode() << "\" from \"" << material->GetFilename() << "\" (" << result << ")\n";
+	}
+	else
+	{
+		Game::Log << LOG_INFO << "Material \"" << material->GetCode() << "\" was reloaded from \"" << material->GetFilename() << "\"\n";
+	}
+
+	return result;
+}
+
+Result RenderDeviceDX11::ReloadMaterial(const std::string & material)
+{
+	return ReloadMaterial(Assets.GetMaterial(material));
+}
+
+void RenderDeviceDX11::ReloadAllMaterials(void)
+{
+	Result result;
+	unsigned int total = 0U, failcount = 0U;
+
+	for (auto & material_entry : Assets.GetMaterials())
+	{
+		if (material_entry.second.get() == Assets.GetDefaultMaterial()) continue;
+
+		result = ReloadMaterial(material_entry.second.get());
+		++total;
+
+		if (result != ErrorCodes::NoError)
+		{
+			Game::Log << LOG_ERROR << "Failed to reload material \"" << material_entry.first << "\" (" << result << ")\n";
+			++failcount;
+		}
+	}
+
+	if (failcount == 0U)
+	{
+		Game::Log << LOG_INFO << "All materials (" << total << "/" << total << ") reloaded successfully\n";
+	}
+	else
+	{
+		Game::Log << LOG_WARN << "Failed to reload " << failcount << " of " << total << " material definitions\n";
 	}
 }
 

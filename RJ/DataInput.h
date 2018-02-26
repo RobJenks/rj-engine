@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <filesystem>
 #include <unordered_map>
 #include "DX11_Core.h"
 #include "XML\\tinyxml.h"
@@ -13,6 +14,7 @@
 #include "GameDataExtern.h"
 #include "HashFunctions.h"
 #include "CollisionSpatialDataF.h"
+#include "AudioParameters.h"
 class iStaticObject;
 class iActiveObject;
 class iSpaceObject;
@@ -26,8 +28,10 @@ class SimpleShip;
 class ComplexShip;
 class ComplexShipSection;
 class ComplexShipElement;
+class ComplexShipTile;
 class iSpaceObjectEnvironment;
 class BoundingObject;
+class ViewPortal;
 class SimpleShipLoadout;
 class CompoundLoadoutMap;
 class Render2DGroup;
@@ -40,6 +44,11 @@ class EffectBase;
 class FireEffect;
 class TileConnections;
 class ElementStateDefinition;
+class Damage;
+class DamageSet;
+class DamageResistance;
+class DamageResistanceSet;
+namespace fs = std::experimental::filesystem;
 
 // This file contains no objects with special alignment requirements
 namespace IO { namespace Data 
@@ -164,6 +173,23 @@ namespace IO { namespace Data
 	// Temporary buffer used to store non-standard sections during initialisation of the complex ship itself.  Cleared after each CS is loaded
 	extern std::vector<ComplexShipSection*> __TemporaryCSSLoadingBuffer;
 	ComplexShipSection *FindInTemporaryCSSBuffer(const std::string & code);
+
+	// Data input logic will always maintain a record of the file currently being processed
+	extern std::string FileBeingProcessed;
+	CMPINLINE std::string GetFileCurrentlyBeingProcessed(void) { return FileBeingProcessed; }
+	CMPINLINE void SetFileCurrentlyBeingProcessed(const std::string & file) { FileBeingProcessed = file; }
+
+	// We have the option of specifying an entity type and code; during reload of resources, we will ONLY load
+	// the item matching this combination and will ignore all others
+	extern bool AllowReloadOfExistingEntities;
+	extern HashVal ReloadOnlyType;
+	extern std::string ReloadOnlyCode;
+	CMPINLINE bool ReloadOfExistingResourcesIsPermitted(void) { return AllowReloadOfExistingEntities; }
+
+	// Attempt to reload the single entity with given type/code, from the specified file.  All other definitions
+	// in data file will be ignored.  File indices will not be followed
+	Result ReloadEntityData(const std::string & filename, HashVal type, const std::string & code);
+
 
 }}
 

@@ -29,6 +29,10 @@ public:
 	CMPINLINE std::string		GetCode(void) const					{ return m_code; }
 	CMPINLINE void				SetCode(const std::string & code)	{ m_code = code; }
 
+	// File which holds the material definition, for hot-reloading at runtime if required
+	CMPINLINE std::string		GetFilename(void) const						{ return m_filename; }
+	CMPINLINE void				SetFilename(const std::string & filename)	{ m_filename = filename; }
+
 	// Material data; held in structure common to both cpp and hlsl builds
 	// TODO: This data needs to be 16-bit aligned.  This is therefore currently only guaranteed to work
 	// in 64-bit where alignment is always to 16-bit word boundaries.  If we want to support 32-bit this
@@ -86,7 +90,7 @@ public:
 	const MaterialTextureSet &	GetTextures(void) const;
 	void						SetTexture(TextureType type, TextureDX11 *texture);
 	void						SetTextures(const MaterialTextureSet & textures);
-
+	void						ResetTextures(void);
 
 	// Bind this material to the current rendering pipeline
 	void						Bind(ShaderDX11 *shader) const;
@@ -94,6 +98,9 @@ public:
 	// We can suspend recompilation of the material while setting multiple properties sequentially
 	CMPINLINE void				SuspendUpdates(void) { m_updates_suspended = true; }
 	void						ResumeUpdates(void);
+
+	// Reset all material resource data
+	void						ResetMaterialData(void);
 
 	// Default destructor
 	~MaterialDX11(void);
@@ -115,6 +122,9 @@ private:
 
 	// Unique string identifier for the material
 	std::string					m_code;
+	
+	// Maintain a record of the file which holds this material
+	std::string					m_filename;
 
 	// Pointer to each texture that may be assigned to the material
 	MaterialTextureSet			m_textures;

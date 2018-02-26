@@ -100,6 +100,11 @@
 #include "DataInput.h"
 
 
+std::string IO::Data::FileBeingProcessed;
+bool IO::Data::AllowReloadOfExistingEntities = false;
+HashVal IO::Data::ReloadOnlyType;
+std::string IO::Data::ReloadOnlyCode;
+
 std::vector<ComplexShipSection*> IO::Data::__TemporaryCSSLoadingBuffer;
 
 
@@ -121,12 +126,15 @@ Result IO::Data::LoadGameDataFile(const std::string &filename) { return LoadGame
 
 Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 {
-	// Record the time taken to process this file; store the start time before beginning
-	unsigned int processtime = (unsigned int)timeGetTime();
-
 	// Build full filename
 	if (file == NullString) return ErrorCodes::NullFilenamePointer;
-	std::string & filename = BuildStrFilename(D::DATA, file);
+	std::string filename = (D::DATA_S + "\\" + file);
+
+	// Always maintain a record of the file currently being processed
+	SetFileCurrentlyBeingProcessed(file);
+
+	// Record the time taken to process this file; store the start time before beginning
+	unsigned int processtime = (unsigned int)timeGetTime();
 
 	// Locate the file system object and make sure it is valid
 	FileSystem::FileSystemObjectType fso_type = FileSystem::GetFileSystemObjectType(filename.c_str());
@@ -171,11 +179,14 @@ Result IO::Data::LoadGameDataFile(const std::string &file, bool follow_indices)
 		TiXmlElement *child = root->FirstChildElement();
 		for (child; child; child = child->NextSiblingElement())
 		{
-			// Test the type of this node
-			// TODO: Add error handling if a function returns =/= 0
 			name = child->Value(); StrLowerC(name);
 			hash = HashString(name);
 
+			// Perform early-rejection if we have a reload restriction currently in place and this is not the desired entity type
+			if (ReloadOnlyType != 0U && hash != ReloadOnlyType) continue;
+
+			// Test the type of this node
+			// TODO: Add error handling if a function returns =/= 0
 			if (hash == HashedStrings::H_Include) {
 				res = IO::Data::LoadXMLFileIndex(child);
 
@@ -512,15 +523,40 @@ Result IO::Data::LoadMaterialData(TiXmlElement *node)
 	const char *ccode = node->Attribute("code");
 	if (!ccode) return ErrorCodes::CannotLoadMaterialWithoutCode;
 
-	MaterialDX11 *material = Game::Engine->GetAssets().CreateMaterial(ccode);
-	if (material == NULL)
+	// This entity type supports hot-reloading.  Make sure it therefore complies with any restriction, if one exists
+	if (!ReloadOnlyCode.empty() && ReloadOnlyCode != ccode) return ErrorCodes::NoError;
+
+	// Either create a new resource, or use an existing one (if we are allowing updates to existing resources here)
+	std::string operation = "Loaded";
+	MaterialDX11 * material = Game::Engine->GetAssets().GetMaterial(ccode);
+	if (material != NULL)
 	{
-		Game::Log << LOG_WARN << "Failed to load material \"" << ccode << "\"\n";
-		return ErrorCodes::CannotCreateMaterialAsset;
+		if (ReloadOfExistingResourcesIsPermitted())
+		{
+			material->ResetMaterialData();
+			operation = "Reloaded";
+		}
+		else
+		{
+			Game::Log << LOG_WARN << "Cannot load material \"" << ccode << "\"; resource with that name already exists\n";
+			return ErrorCodes::CannotCreateMaterialAsset;
+		}
+	}
+	else // Material does not exist, so create a new one
+	{
+		material = Game::Engine->GetAssets().CreateMaterial(ccode);
+		if (material == NULL)
+		{
+			Game::Log << LOG_WARN << "Failed to load material \"" << ccode << "\"\n";
+			return ErrorCodes::CannotCreateMaterialAsset;
+		}
 	}
 
 	// Suspend material updates until all properties are loaded
 	material->SuspendUpdates();
+
+	// Store the filename that this material is defined in, for reloading in future if required
+	material->SetFilename(GetFileCurrentlyBeingProcessed());
 
 	// Look at each child element in turn and pull data from them
 	TiXmlElement *child = node->FirstChildElement();
@@ -559,7 +595,7 @@ Result IO::Data::LoadMaterialData(TiXmlElement *node)
 	material->ResumeUpdates();
 	
 	// Return success
-	Game::Log << LOG_INFO << "Loaded material \"" << ccode << "\"\n";
+	Game::Log << LOG_INFO << operation << " material \"" << ccode << "\"\n";
 	return ErrorCodes::NoError;
 }
 
@@ -4484,6 +4520,29 @@ AudioParameters IO::Data::LoadAudioParameters(TiXmlElement *node)
 		
 	return AudioParameters(audio_name, (audio_volume ? (float)atof(audio_volume) : 0.0f));
 }
+
+
+// Attempt to reload the single entity with given type/code, from the specified file.  All other definitions
+// in data file will be ignored.  File indices will not be followed
+Result IO::Data::ReloadEntityData(const std::string & filename, HashVal type, const std::string & code)
+{
+	// Set details for the reload of this single entity
+	AllowReloadOfExistingEntities = true;
+	ReloadOnlyType = type;
+	ReloadOnlyCode = code;
+
+	// Load the specified game data file with these restrictions in place
+	Result result = IO::Data::LoadGameDataFile(filename, false);
+
+	// Revert all single-entity reload restrictions
+	AllowReloadOfExistingEntities = false;
+	ReloadOnlyType = (HashVal)0U;
+	ReloadOnlyCode = NullString;
+
+	// Return result of the single-reload operation
+	return result;
+}
+
 
 // Atempts to locate a ship section in the temporary loading buffer, returning NULL if no match exists
 ComplexShipSection *IO::Data::FindInTemporaryCSSBuffer(const std::string & code)

@@ -590,6 +590,10 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Engine->GetRenderDevice()->ReloadAllShaders();
 		Game::Keyboard.LockKey(DIK_F1);
 	}
+	if (b[DIK_F2])
+	{
+		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
+	}
 
 	// Additional debug controls below this point
 	if (b[DIK_U])
@@ -2358,8 +2362,8 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
-	l2->SetRange(200.0f);
-	l2->LightObject().SetIntensity(1.0f);
+	l2->SetRange(500.0f);
+	l2->LightObject().SetIntensity(10.0f);
 	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l2->SetPosition(XMVectorSet(250, 225, 100, 0));
 	lt = l2;

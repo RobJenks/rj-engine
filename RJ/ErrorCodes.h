@@ -322,6 +322,8 @@ namespace ErrorCodes {
 	const Result		CannotLocateShader								= 1514;
 	const Result		CannotPreInitialiseShaderParameter				= 1515;
 	const Result		CouldNotReloadAndRecompileShader				= 1516;
+	const Result		CannotReloadMaterialWhichDoesNotExist			= 1517;
+	const Result		CannotReloadMaterialWithoutSourceFilename		= 1518;
 
 
 	// External data read/write errors									(2000-2199)

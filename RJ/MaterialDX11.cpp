@@ -12,7 +12,7 @@ MaterialDX11::MaterialDX11(const std::string & code)
 	m_updates_suspended(false), 
 	m_texture_binding_count(0U)
 {
-	m_textures = { };
+	m_textures = { 0 };
 	m_texture_bindings = { };
 
 	// Initialise the constant buffer
@@ -79,6 +79,16 @@ void MaterialDX11::SetTextures(const MaterialTextureSet & textures)
 	UpdateMaterialState();
 }
 
+// Reset all references to texture data
+void MaterialDX11::ResetTextures(void)
+{
+	for (unsigned int i = 0; i < (unsigned int)MaterialDX11::MaterialTextureTypeCount; ++i)
+	{
+		m_textures[i] = NULL;
+	}
+	UpdateMaterialState();
+}
+
 // Update the texture state flags following a change to the object texture resources
 void MaterialDX11::UpdateMaterialState(void)
 {
@@ -127,6 +137,19 @@ void MaterialDX11::Bind(ShaderDX11 *shader) const
 	{
 		m_cbuffer->Bind(shadertype, material_slot);
 	}
+}
+
+// Reset all material resource data
+void MaterialDX11::ResetMaterialData(void)
+{
+	// Revert all data using the default model data constructor, then run a full recalculation of material 
+	// state based upon this new data
+	SuspendUpdates();
+	{
+		Data = MaterialData();
+		ResetTextures();
+	}
+	ResumeUpdates();	
 }
 
 
