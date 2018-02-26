@@ -528,9 +528,10 @@ Result IO::Data::LoadMaterialData(TiXmlElement *node)
 
 	// Either create a new resource, or use an existing one (if we are allowing updates to existing resources here)
 	std::string operation = "Loaded";
-	MaterialDX11 * material = Game::Engine->GetAssets().GetMaterial(ccode);
-	if (material != NULL)
+	MaterialDX11 * material = NULL;
+	if (Game::Engine->GetAssets().AssetExists<MaterialDX11>(ccode))
 	{
+		material = Game::Engine->GetAssets().GetMaterial(ccode);
 		if (ReloadOfExistingResourcesIsPermitted())
 		{
 			material->ResetMaterialData();
