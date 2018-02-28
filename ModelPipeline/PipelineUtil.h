@@ -24,6 +24,8 @@ public:
 	static XMFLOAT3				Float3Max(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
 	static XMFLOAT3				Float3Replicate(float v);
 	static bool					Float3Equal(const XMFLOAT3 & v0, const XMFLOAT3 & v1, float epsilon = 0.0f);
+	static bool					Float3AnyEqual(const XMFLOAT3 & v, float value, float epsilon = 0.0f);
+	static bool					Float3AllEqual(const XMFLOAT3 & v, float value, float epsilon = 0.0f);
 
 	static ByteString			ReadBinaryFile(fs::path file);
 

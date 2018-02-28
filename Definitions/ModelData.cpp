@@ -1,3 +1,4 @@
+#include <sstream>
 #include "ModelData.h"
 
 #ifdef RJ_MODULE_RJ
@@ -158,6 +159,24 @@ std::unique_ptr<ModelData> ModelData::Deserialize(ByteString & data)
 	return std::unique_ptr<ModelData>(m);
 }
 
+void ModelData::RecalculateDerivedData(void)
+{
+	// Determine minimum and maximum vertex bounds
+	XMFLOAT3 min_bounds = XMFLOAT3(+1e6, +1e6, +1e6);
+	XMFLOAT3 max_bounds = XMFLOAT3(-1e6, -1e6, -1e6);
+	for (unsigned int i = 0U; i < VertexCount; ++i)
+	{
+		const auto & p = VertexData[i].position;
+		min_bounds = XMFLOAT3(std::fmin(min_bounds.x, p.x), fmin(min_bounds.y, p.y), fmin(min_bounds.z, p.z));
+		max_bounds = XMFLOAT3(std::fmax(max_bounds.x, p.x), fmax(max_bounds.y, p.y), fmax(max_bounds.z, p.z));
+	}
+
+	// Update other derived data
+	MinBounds = min_bounds;
+	MaxBounds = max_bounds;
+	ModelSize = XMFLOAT3(max_bounds.x - min_bounds.x, max_bounds.y - min_bounds.y, max_bounds.z - min_bounds.z);
+	CentrePoint = XMFLOAT3(min_bounds.x + (ModelSize.x * 0.5f), min_bounds.y + (ModelSize.y * 0.5f), min_bounds.z + (ModelSize.z * 0.5f));
+}
 
 
 bool ModelData::DetrmineIfTextureCoordsPresent(void) const
@@ -191,7 +210,15 @@ bool ModelData::DetermineIfTangentSpaceDataPresent(void) const
 	return false;
 }
 
+std::string ModelData::str(void) const
+{
+	std::ostringstream ss;
+	ss << "{ Vertices: " << VertexCount << ", Indices: " << IndexCount << ", Bounds: [" << MinBounds.x << ", " << MinBounds.y << ", " << MinBounds.z
+		<< "] to [" << MaxBounds.x << ", " << MaxBounds.y << ", " << MaxBounds.z << "], Size: [" << ModelSize.x << ", " << ModelSize.y << ", "
+		<< ModelSize.z << "], Centre: [" << CentrePoint.x << ", " << CentrePoint.y << ", " << CentrePoint.z << "], Mat: " << ModelMaterialIndex << " }";
 
+	return ss.str();
+}
 
 
 

@@ -56,6 +56,17 @@ bool PipelineUtil::Float3Equal(const XMFLOAT3 & v0, const XMFLOAT3 & v1, float e
 	return (abs_diff.x < epsilon && abs_diff.y < epsilon && abs_diff.z < epsilon);
 }
 
+bool PipelineUtil::Float3AnyEqual(const XMFLOAT3 & v, float value, float epsilon)
+{
+	XMFLOAT3 abs_diff = XMFLOAT3(std::fabsf(v.x - value), std::fabsf(v.y - value), std::fabsf(v.z - value));
+	return (abs_diff.x < epsilon || abs_diff.y < epsilon || abs_diff.z < epsilon);
+}
+
+bool PipelineUtil::Float3AllEqual(const XMFLOAT3 & v, float value, float epsilon)
+{
+	return PipelineUtil::Float3Equal(v, XMFLOAT3(value, value, value), epsilon);
+}
+
 ByteString PipelineUtil::ReadBinaryFile(fs::path file)
 {
 	if (!fs::exists(file)) return ByteString();

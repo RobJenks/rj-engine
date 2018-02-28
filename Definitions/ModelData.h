@@ -31,6 +31,7 @@ public:
 	// Index data; structured to map directly into the trianglelist primitive topology (i.e. face -> { v1, v2, v3})
 	INDEX_BUFFER_TYPE *					IndexData;				// Will always be IndexCount elements of type INDEX_BUFFER_TYPE
 
+	std::string							str(void) const;
 
 public:
 
@@ -45,6 +46,8 @@ public:
 
 	bool								AllocateIndexData(unsigned int vertex_count);
 	void								DeallocateIndexData(void);
+
+	void								RecalculateDerivedData(void);
 
 	bool								DetrmineIfTextureCoordsPresent(void) const;
 	bool								DetemineIfNormalDataPresent(void) const;
