@@ -17,7 +17,13 @@ public:
 
 	static XMFLOAT3				Float3Add(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
 	static XMFLOAT3				Float3Subtract(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static XMFLOAT3				Float3Multiply(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
 	static XMFLOAT3				Float3ScalarMultiply(const XMFLOAT3 & v, float scalar);
+	static XMFLOAT3				Float3Abs(const XMFLOAT3 & v);
+	static XMFLOAT3				Float3Min(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static XMFLOAT3				Float3Max(const XMFLOAT3 & v0, const XMFLOAT3 & v1);
+	static XMFLOAT3				Float3Replicate(float v);
+	static bool					Float3Equal(const XMFLOAT3 & v0, const XMFLOAT3 & v1, float epsilon = 0.0f);
 
 	static ByteString			ReadBinaryFile(fs::path file);
 

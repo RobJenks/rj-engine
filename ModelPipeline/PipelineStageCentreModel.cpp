@@ -27,7 +27,17 @@ std::unique_ptr<ModelData> PipelineStageCentreModel::Transform(std::unique_ptr<M
 	m->MaxBounds = PipelineUtil::Float3Add(m->MaxBounds, offset);
 	m->CentrePoint = PipelineUtil::Float3Add(m->CentrePoint, offset);
 
+	// Verify transformation
+	TRANSFORM_INFO << "Transformation complete; model bounds = " << FLOAT3_STR(m->MinBounds) << "-" << FLOAT3_STR(m->MaxBounds) << 
+		", size = " << FLOAT3_STR(m->ModelSize) << ", centre = " << FLOAT3_STR(m->CentrePoint) << "\n";
+	if (!PipelineUtil::Float3Equal(m->CentrePoint, XMFLOAT3(0.0f, 0.0f, 0.0f), epsilon) || 
+		!PipelineUtil::Float3Equal(m->MinBounds, PipelineUtil::Float3ScalarMultiply(m->MaxBounds, -1.0f), epsilon))
+	{
+		TRANSFORM_ERROR << "Model data does not appear to be correctly centred post-transformation; verify output\n";
+	}
+
 	// Return success
 	TRANSFORM_INFO << "Model centre offset applied\n";
 	return model;
 }
+

@@ -206,6 +206,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClInclude Include="PipelineStagePassthrough.h" />
     <ClInclude Include="PipelineStage.h" />
     <ClInclude Include="PipelineStageCentreModel.h" />
+    <ClInclude Include="PipelineStageUnitScaleModel.h" />
     <ClInclude Include="PipelineUtil.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TransformerComponent.h" />
@@ -228,6 +229,7 @@ copy /Y  "$(SolutionDir)\Assimp-3.3.1\build\$(Platform)\$(Configuration)\code\as
     <ClCompile Include="PipelineStageAssimpTransform.cpp" />
     <ClCompile Include="PipelineStageCentreModel.cpp" />
     <ClCompile Include="PipelineStageOutputModelInfo.cpp" />
+    <ClCompile Include="PipelineStageUnitScaleModel.cpp" />
     <ClCompile Include="PipelineUtil.cpp" />
     <ClCompile Include="TransformPipeline.cpp" />
     <ClCompile Include="TransformPipelineBuilder.cpp" />

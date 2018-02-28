@@ -81,6 +81,9 @@
     <ClCompile Include="ObjFormatOutputTransform.cpp">
       <Filter>Transformer\Output</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStageUnitScaleModel.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -160,6 +163,9 @@
     </ClInclude>
     <ClInclude Include="AssimpLogStream.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageUnitScaleModel.h">
+      <Filter>Transformer\Transforms</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

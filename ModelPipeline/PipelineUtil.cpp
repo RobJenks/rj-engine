@@ -20,9 +20,40 @@ XMFLOAT3 PipelineUtil::Float3Subtract(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
 	return XMFLOAT3(v0.x - v1.x, v0.y - v1.y, v0.z - v1.z);
 }
 
+XMFLOAT3 PipelineUtil::Float3Multiply(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return XMFLOAT3(v0.x * v1.x, v0.y * v1.y, v0.z * v1.z);
+}
+
 XMFLOAT3 PipelineUtil::Float3ScalarMultiply(const XMFLOAT3 & v, float scalar)
 {
 	return XMFLOAT3(v.x * scalar, v.y * scalar, v.z * scalar);
+}
+
+XMFLOAT3 PipelineUtil::Float3Abs(const XMFLOAT3 & v)
+{
+	return XMFLOAT3(fabs(v.x), fabs(v.y), fabs(v.z));
+}
+
+XMFLOAT3 PipelineUtil::Float3Min(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return XMFLOAT3(std::min(v0.x, v1.x), std::min(v0.y, v1.y), std::min(v0.z, v1.z));
+}
+
+XMFLOAT3 PipelineUtil::Float3Max(const XMFLOAT3 & v0, const XMFLOAT3 & v1)
+{
+	return XMFLOAT3(std::max(v0.x, v1.x), std::max(v0.y, v1.y), std::max(v0.z, v1.z));
+}
+
+XMFLOAT3 PipelineUtil::Float3Replicate(float v)
+{
+	return XMFLOAT3(v, v, v);
+}
+
+bool PipelineUtil::Float3Equal(const XMFLOAT3 & v0, const XMFLOAT3 & v1, float epsilon)
+{
+	XMFLOAT3 abs_diff = Float3Abs(Float3Subtract(v0, v1));
+	return (abs_diff.x < epsilon && abs_diff.y < epsilon && abs_diff.z < epsilon);
 }
 
 ByteString PipelineUtil::ReadBinaryFile(fs::path file)
