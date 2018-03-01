@@ -103,19 +103,13 @@ void SimpleShip::RecalculateShipDataFromCurrentState(void)
 
 void SimpleShip::CalculateShipSizeData(void)
 {
-	// We need a base ship hull and mesh at least to calculate ship size
-	if (!m_model.GetModel() || !m_model.GetModel()->Geometry.get())
-	{ 
-		this->MinBounds = XMVectorReplicate(-0.5f);
-		this->MaxBounds = XMVectorReplicate(0.5f);
-		this->SetSize(ONE_VECTOR);
-		this->SetCentreOffsetTranslation(NULL_VECTOR);
-		return; 
-	}
-
-	// Retrieve the ship mesh size and use that for our size parameter
-	SetSize(XMLoadFloat3(&m_model.GetModel()->Geometry.get()->ModelSize));
-	SetCentreOffsetTranslation(XMVectorNegate(XMLoadFloat3(&m_model.GetModel()->Geometry.get()->CentrePoint)));
+	// There is no longer much to do here for simple ships.  We no longer calculate object size based
+	// upon geometry size; we now do the reverse and model size is recalculated in iObject::SetSize().  All
+	// models are also now origin-centred.  We simply need to recalculate any Ship subclass-specific fields
+	XMVECTOR half_size = XMVectorMultiply(GetSize(), HALF_VECTOR);
+	MinBounds = XMVectorNegate(half_size);
+	MaxBounds = half_size;
+	SetCentreOffsetTranslation(NULL_VECTOR);
 }
 
 void SimpleShip::CalculateShipMass()

@@ -284,6 +284,12 @@ public:
 	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }
 	CMPINLINE Game::BoundingVolumeType		MostAppropriateBoundingVolumeType(void) const { return m_best_bounding_volume; }
 
+	// We can set the object size with a single parameter; the largest object dimension will be scaled
+	// to this value, maintaining proportions, based on the underlying model size.  If the object has no 
+	// model then the size will be uniformly scaled by this value
+	void									SetSize(float max_dimension);
+	CMPINLINE void							SetMaxSize(float max_dimension) { SetSize(max_dimension); }		// For DEBUG_FN which can't handle the overload
+
 	// Reference to the instance of this model and any per-instance data
 	CMPINLINE ModelInstance &				GetModelInstance(void)				{ return m_model; }
 

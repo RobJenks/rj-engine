@@ -4,13 +4,15 @@
 #define __SpaceProjectileDefinitionH__
 
 #include <string>
+#include "DX11_Core.h"
+#include "ALIGN16.h"
 #include "CompilerSettings.h"
 #include "AudioParameters.h"
 class SpaceProjectile;
 class Model;
 
-// Class does not have any special alignment requirements
-class SpaceProjectileDefinition
+// Class is 16-byte aligned for SSE optimisations
+class SpaceProjectileDefinition : public ALIGN16<SpaceProjectileDefinition>
 {
 public:
 
@@ -24,21 +26,25 @@ public:
 	// Default constructor
 	SpaceProjectileDefinition(void);
 
-	// Return or set the unique string code for this projectile type
+	// The unique string code for this projectile type
 	CMPINLINE const std::string & 		GetCode(void) const							{ return m_code; }
 	CMPINLINE void						SetCode(const std::string & code)			{ m_code = code; }
 
-	// Return or set the descriptive string name for this projectile type
+	// The descriptive string name for this projectile type
 	CMPINLINE const std::string & 		GetName(void) const							{ return m_name; }
 	CMPINLINE void						SetName(const std::string & name)			{ m_name = name; }
 
-	// Set or return the model for this projectile type
+	// The model for this projectile type
 	CMPINLINE Model *					GetModel(void) const						{ return m_model; }
 	CMPINLINE void						SetModel(Model *model)						{ m_model = model; }
 
-	// Set or return other key definition fields
+	// Projectile mass
 	CMPINLINE float						GetMass(void) const							{ return m_mass; }
 	CMPINLINE void						SetMass(float m)							{ m_mass = m; }
+
+	// Projectile size
+	CMPINLINE XMVECTOR					GetSize(void) const							{ return m_size; }
+	CMPINLINE void						SetSize(const FXMVECTOR size)				{ m_size = size; }
 
 	// Set or return the projectile type
 	CMPINLINE ProjectileType			GetProjectileType(void) const				{ return m_projtype; }
@@ -76,6 +82,7 @@ protected:
 	std::string									m_name;								// Descriptive string name of the projectile type
 	Model *										m_model;							// Geometry for this projectile type
 	float										m_mass;								// Mass of the projectile
+	AXMVECTOR									m_size;								// Default size of each projectile
 
 	ProjectileType								m_projtype;							// Type of projectile
 	float										m_defaultlifetime;					// The default lifetime (secs) for this projectile type to exist

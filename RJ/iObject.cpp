@@ -398,6 +398,27 @@ void iObject::SetSize(const FXMVECTOR size)
 	}
 }
 
+// We can set the object size with a single parameter; the largest object dimension will be scaled
+// to this value, maintaining proportions, based on the underlying model size.  If the object has no 
+// model then the size will be uniformly scaled by this value
+void iObject::SetSize(float max_dimension)
+{
+	// Apply uniform scaling if we have no model geometry
+	if (!m_model.GetModel())
+	{
+		SetSize(XMVectorReplicate(max_dimension));
+		return;
+	}
+
+	// Set the size of the underlying model, which will cause a recalculation of the required object proportions 
+	m_model.SetSize(max_dimension);
+
+	// Now call the primary object SetSize method using these calculated dimensions; these will exist
+	// in the scale diagonal of the world matrix
+	XMMATRIX world = m_model.GetWorldMatrix();
+	SetSize(XMVectorSet(XMVectorGetX(world.r[0]), XMVectorGetY(world.r[1]), XMVectorGetZ(world.r[2]), 0.0f));
+}
+
 // Set a new collision sphere radius, recalcuating all derived fieds
 void iObject::SetCollisionSphereRadius(float radius)
 {
@@ -873,6 +894,7 @@ void iObject::ProcessDebugCommand(GameConsoleCommand & command)
 	REGISTER_DEBUG_FN(SetAsSimulationHub)
 	REGISTER_DEBUG_FN(RemoveSimulationHub)
 	REGISTER_DEBUG_FN(SetSize, XMFLOAT3(command.ParameterAsFloat(2), command.ParameterAsFloat(3), command.ParameterAsFloat(4)))
+	REGISTER_DEBUG_FN(SetMaxSize, command.ParameterAsFloat(2))
 	REGISTER_DEBUG_FN(SetFaction, (Faction::F_ID)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(SetCollisionMode, (Game::CollisionMode)command.ParameterAsInt(2))
 	REGISTER_DEBUG_FN(SetColliderType, (Game::ColliderType)command.ParameterAsInt(2))

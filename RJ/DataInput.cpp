@@ -614,6 +614,11 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 		std::string modelcode = node->GetText(); StrLowerC(modelcode);
 		object->SetModel(Model::GetModel(modelcode));
 	}
+	else if (hash == HashedStrings::H_Size)
+	{
+		if (node->Attribute("max"))									object->SetSize(IO::GetFloatAttribute(node, "max"));
+		else														object->SetSize(IO::GetVector3FromAttr(node));
+	}
 	else if (hash == HashedStrings::H_Visible)						object->SetIsVisible(GetBoolValue(node));
 	//else if (hash == HashedStrings::H_VisibilityTestingMode)		object->SetVisibilityTestingMode(TranslateVisibilityModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
@@ -2579,6 +2584,10 @@ Result IO::Data::LoadSpaceProjectileDefinition(TiXmlElement *node)
 			const char *cmass = child->GetText();
 			float fmass = (float)atof(cmass); fmass = clamp(fmass, 1.0f, 10000000.0f);
 			proj->SetMass(fmass);
+		}
+		else if (hash == HashedStrings::H_Size)
+		{
+			proj->SetSize(IO::GetVector3FromAttr(child));
 		}
 		else if (hash == HashedStrings::H_ProjectileType)
 		{

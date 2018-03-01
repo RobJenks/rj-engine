@@ -4,7 +4,7 @@
 
 // Default constructor; set default values
 SpaceProjectileDefinition::SpaceProjectileDefinition(void)
-	: m_code(NullString), m_model(NULL), m_projtype(ProjectileType::Impactor), 
+	: m_code(NullString), m_model(NULL), m_size(ONE_VECTOR), m_projtype(ProjectileType::Impactor), 
 	m_defaultlifetime(10.0f), m_lifeendaction(LifetimeEndAction::Disappear), 
 	m_launch_audio(AudioParameters::Null)
 {

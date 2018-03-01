@@ -32,6 +32,7 @@
     <CameraRotation x="0.400000" y="0.000000" z="0.000000" />
     <CameraElasticity>5.0</CameraElasticity>
     <Mass>50.0</Mass>
+    <Size max="36.0" />
     <VelocityLimit>200.0</VelocityLimit>
     <AngularVelocityLimit>1.0</AngularVelocityLimit>
     <BrakeFactor>0.25</BrakeFactor>

@@ -2589,4 +2589,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 }
 
-
