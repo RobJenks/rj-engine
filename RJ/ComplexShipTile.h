@@ -16,6 +16,7 @@
 #include "iTakesDamage.h"
 #include "RepairableObject.h"
 #include "Model.h"
+#include "ModelInstance.h"
 #include "ComplexShipElement.h"
 #include "TileConnections.h"
 #include "Damage.h"
@@ -518,6 +519,9 @@ public:
 	CMPINLINE unsigned int				GetElementCount(void) const { return m_elementcount; }
 	CMPINLINE XMVECTOR					GetWorldSize(void) const { return m_worldsize; }
 	
+	// Method which recalculates derived size data following a change to the element size (e.g. world size)
+	void								ElementSizeChanged(void);
+
 	// Methods to get and set the string code of this tile
 	CMPINLINE std::string				GetCode(void) const { return m_code; }
 	CMPINLINE void						SetCode(std::string code) { m_code = code; }
@@ -531,7 +535,7 @@ public:
 	CMPINLINE void						SetStandardTile(bool standard) { m_standardtile = standard; }
 
 	// Methods to access and set the geometry of this ship tile
-	CMPINLINE Model *					GetModel(void) const { return m_model; }
+	CMPINLINE ModelInstance				GetModel(void) const { return m_model; }
 
 	// Set the tile to use a single (specified) tile model, and perform any dependent initialisation
 	void								SetSingleModel(Model *model);
@@ -736,7 +740,7 @@ public:
 
 	// Set the single model data for this tile.  Should not be used directly by callers; model should be instantiated via either
 	// SetSingleModel() or SetMultipleModels()
-	CMPINLINE void						SetModel(Model *m) { m_model = m; }
+	CMPINLINE void						SetModel(Model *m) { m_model.SetModel(m); }
 
 	// Set the flag indicating whether this tile uses a compound or single model set.  Should not be used directly by callers; model 
 	// should be instantiated via either SetSingleModel() or SetMultipleModels()
@@ -844,7 +848,7 @@ protected:
 
 	// The geometry associated with this ship tile
 	bool						m_multiplemodels;
-	Model *						m_model;
+	ModelInstance				m_model;
 	TileCompoundModelSet		m_models;
 
 	// Flag indicating whether the tile has been rendered this frame

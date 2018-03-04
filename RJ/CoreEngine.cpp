@@ -1899,7 +1899,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 	if (!tile->HasCompoundModel())
 	{
 		// Add the single tile model to the render queue, for either normal or z-sorted processing
-		if (tile->GetModel()) 
+		if (tile->GetModel().GetModel()) 
 		{
 			if (tile->Fade.AlphaIsActive())
 			{
@@ -1907,7 +1907,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				float alpha = tile->Fade.GetFadeAlpha();	// TODO: need to use this alpha value
 				if (alpha < Game::C_EPSILON) return;
 
-				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, &(tile->GetModel()->Data), std::move(
+				SubmitForZSortedRendering(	RenderQueueShader::RM_LightFadeShader, &(tile->GetModel().GetModel()->Data), std::move(
 					RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))), world.r[3]);			// Position can be taken from trans. components of world matrix (_41 to _43)
 			}
 			else
@@ -1915,12 +1915,12 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (tile->Highlight.IsActive())
 				{
 					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel()->Data), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel().GetModel()->Data), std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel()->Data), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel().GetModel()->Data), std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 			}

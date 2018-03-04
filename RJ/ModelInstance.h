@@ -14,6 +14,13 @@ public:
 	ModelInstance(Model *model);
 	ModelInstance(const std::string & model);
 
+	ModelInstance(const ModelInstance & other);
+	ModelInstance & operator=(const ModelInstance & other);
+	
+	ModelInstance(ModelInstance && other);
+	ModelInstance & operator=(ModelInstance && other);
+
+
 	CMPINLINE Model *					GetModel(void) { return m_model; }
 	CMPINLINE const XMMATRIX &			GetWorldMatrix(void) const { return m_world; }
 

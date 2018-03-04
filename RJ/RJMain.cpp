@@ -598,18 +598,11 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		XMVECTOR v1 = XMVectorSet(-5, -5, 0, 1);	// BL
-		XMVECTOR v2 = XMVectorSetY(v1, +5);			// TL
-		XMVECTOR v3 = XMVectorSetX(v2, +5);			// TR
-
-		XMVECTOR normal = XMVector3Cross(XMVectorSubtract(v2, v1), XMVectorSubtract(v3, v2));
-
-		XMVECTOR camera = XMVectorSet(-1, 0, 0.1, 1);
-
-		float dot1 = XMVectorGetX(XMVector3Dot(camera, normal));
-		float dot2 = XMVectorGetX(XMVector3Dot(normal, camera));
-
-		OutputDebugString(concat("Dot: ")(dot1)(", ")(dot2)("\n").str().c_str());
+		for (const auto & tile : cs()->GetTiles())
+		{
+			OutputDebugString(concat(tile.value->GetCode())(": ")(tile.value->GetElementSize().ToString())(" = ")
+				(Vector3ToString(tile.value->GetWorldSize()))(" = ")(MatrixToString(tile.value->GetModel().GetWorldMatrix()))("\n").str().c_str());
+		}
 
 		Game::Keyboard.LockKey(DIK_U);
 	}

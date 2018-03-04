@@ -3,6 +3,7 @@
 #include "Model.h"
 using namespace DirectX;
 
+// Constructor
 ModelInstance::ModelInstance(void)
 	:
 	m_model(NULL), 
@@ -10,6 +11,7 @@ ModelInstance::ModelInstance(void)
 {
 }
 
+// Constructor
 ModelInstance::ModelInstance(Model *model)
 	:
 	m_model(model), 
@@ -17,11 +19,42 @@ ModelInstance::ModelInstance(Model *model)
 {
 }
 
+// Constructor
 ModelInstance::ModelInstance(const std::string & model)
 	:
 	m_model(Model::GetModel(model)), 
 	m_world(ID_MATRIX)
 {
+}
+
+// Copy constructor
+ModelInstance::ModelInstance(const ModelInstance & other)
+	:
+	m_model(other.m_model), 
+	m_world(other.m_world)
+{}
+
+// Copy assignment
+ModelInstance & ModelInstance::operator=(const ModelInstance & other)
+{
+	m_model = other.m_model;
+	m_world = other.m_world;
+	return *this;
+}
+
+// Move constructor
+ModelInstance::ModelInstance(ModelInstance && other)
+	:
+	m_model(std::move(other.m_model)), 
+	m_world(std::move(other.m_world))
+{}
+
+// Move assignment
+ModelInstance & ModelInstance::operator=(ModelInstance && other)
+{
+	m_model = std::move(other.m_model);
+	m_world = std::move(other.m_world);
+	return *this;
 }
 
 void ModelInstance::SetScaleFactor(const FXMVECTOR scale)
@@ -96,7 +129,7 @@ XMVECTOR ModelInstance::DetermineModelInstanceMaxBounds(void) const
 }
 
 
-
+// Destructor
 ModelInstance::~ModelInstance(void)
 {
 }
