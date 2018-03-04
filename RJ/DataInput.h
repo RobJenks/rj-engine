@@ -14,6 +14,7 @@
 #include "GameDataExtern.h"
 #include "HashFunctions.h"
 #include "CollisionSpatialDataF.h"
+#include "VariableSizeValue.h"
 #include "AudioParameters.h"
 class iStaticObject;
 class iActiveObject;
@@ -80,6 +81,7 @@ namespace IO { namespace Data
 	// Loads an instance of a CS section (which should already be loaded) and adds it to the complex ship, assuming it is valid
 	Result LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip *object);
 
+	VariableSizeValue LoadSizeValue(TiXmlElement *node);
 	Result LoadFaction(TiXmlElement *node);
 	
 	Result LoadTurret(TiXmlElement *node);
@@ -98,6 +100,7 @@ namespace IO { namespace Data
 	Result LoadMaterialData(TiXmlElement *node);
 	Result LoadTextureData(TiXmlElement *node);
 	Result LoadArticulatedModel(TiXmlElement *node);
+	Result LoadArticulatedModelComponent(TiXmlElement *node, ArticulatedModel & parent_model);
 
 	// Load an element in an OBB hierarchy; proceeds recursively until all data is read, or until the maximum depth is reached
 	// 'obb' is the node to be updated

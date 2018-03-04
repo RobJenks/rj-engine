@@ -642,6 +642,7 @@
     <ClCompile Include="LoadoutMap.cpp" />
     <ClCompile Include="MeshGeometry.cpp" />
     <ClCompile Include="MissileLauncher.cpp" />
+    <ClCompile Include="VariableSizeValue.cpp" />
     <ClCompile Include="__OLD_Model.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>
@@ -1140,6 +1141,7 @@
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="MeshGeometry.h" />
     <ClInclude Include="MissileLauncher.h" />
+    <ClInclude Include="VariableSizeValue.h" />
     <ClInclude Include="__OLD_Model.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">true</ExcludedFromBuild>

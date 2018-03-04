@@ -2377,6 +2377,13 @@ void RJMain::__CreateDebugScenario(void)
 	Game::RegisterObject(player_light);
 	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);*/
 
+	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixRotationAxis(UP_VECTOR, 0.0f), 
+		XMMatrixScaling(3.0, 3.0, 3.0)), 
+		XMMatrixTranslation(2.0, 2.0, 2.0));
+	float coord = 5.0f;
+	XMVECTOR v = XMVector3TransformCoord(XMVectorReplicate(coord), transform);
+	XMVECTOR v2 = XMVector3TransformCoord(XMVectorReplicate(1.0f), transform);
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
@@ -2587,5 +2594,6 @@ void RJMain::DEBUGDisplayInfo(void)
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
+
 }
 

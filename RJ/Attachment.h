@@ -63,7 +63,12 @@ public:
 	void							Apply(void)
 	{
 		// Update the child object position based on the parent world matrix
-		Child->SetPosition(XMVector3TransformCoord(m_posoffset, Parent->GetWorldMatrix()));
+		// TODO: We must rotate by parent orientation rather than multiplying by the parent world matrix, since the 
+		// parent world matrix now incorporates model scaling and this would also scale the translation distance of
+		// m_posoffet.  However rotating by a quaternion may not be as efficient.  If not, consider updating the
+		// way spatial data/transforms are stored in iObjects so we can do this more efficiently
+		//Child->SetPosition(XMVector3TransformCoord(m_posoffset, Parent->GetWorldMatrix()));
+		Child->SetPosition(XMVectorAdd(Parent->GetPosition(), XMVector3Rotate(m_posoffset, Parent->GetOrientation())));
 
 		// Multiply the parent orientation by our offset quaternion to yield the child orientation
 		// TODO: Does not currently account for the Ship::OrientationAdjustment since this was

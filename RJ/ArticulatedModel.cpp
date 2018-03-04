@@ -40,13 +40,15 @@ ArticulatedModel::ArticulatedModel(int componentcount)
 }
 
 // Set the definition of a particular model component.  Returns a value indicating whether the definition could be set
-bool ArticulatedModel::SetComponentDefinition(int index, Model *model)
+bool ArticulatedModel::SetComponentDefinition(int index, Model *model, const VariableSizeValue & size)
 {
 	// Parameter check
 	if (index < 0 || index >= m_componentcount || !m_components[index]) return false;
+	if (!model) return false;
 
 	// Set the model definition and return success
 	m_components[index]->Model.SetModel(model);
+	size.ApplyToObject(*m_components[index]);
 	return true;
 }
 

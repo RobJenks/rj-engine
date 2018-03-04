@@ -29,9 +29,14 @@ public:
 	CMPINLINE XMVECTOR					GetOrientation(void) const						{ return m_orientation; }
 	CMPINLINE void 						SetOrientation(const FXMVECTOR orient)			{ m_orientation = orient; }
 
+	// Set the component size
+	CMPINLINE void						SetSize(const FXMVECTOR size)					{ Model.SetSize(size); }
+	CMPINLINE void						SetSize(const XMFLOAT3 & size)					{ SetSize(XMLoadFloat3(&size)); }
+	CMPINLINE void						SetSize(float max_dimension)					{ Model.SetSize(max_dimension); }
+
 	// Retrieve or set the component world matrix
 	CMPINLINE XMMATRIX					GetWorldMatrix(void) const						{ return m_worldmatrix; }
-	CMPINLINE void RJ_XM_CALLCONV			SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
+	CMPINLINE void RJ_XM_CALLCONV		SetWorldMatrix(const FXMMATRIX m)				{ m_worldmatrix = m; }
 
 	// Set all spatial components at once, to reduce method calls when all information is known
 	CMPINLINE void						SetAllSpatialData(	const FXMVECTOR position, const FXMVECTOR orientation,

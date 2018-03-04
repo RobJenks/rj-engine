@@ -614,11 +614,7 @@ bool IO::Data::LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object)
 		std::string modelcode = node->GetText(); StrLowerC(modelcode);
 		object->SetModel(Model::GetModel(modelcode));
 	}
-	else if (hash == HashedStrings::H_Size)
-	{
-		if (node->Attribute("max"))									object->SetSize(IO::GetFloatAttribute(node, "max"));
-		else														object->SetSize(IO::GetVector3FromAttr(node));
-	}
+	else if (hash == HashedStrings::H_Size)							IO::Data::LoadSizeValue(node).ApplyToObject(*object);
 	else if (hash == HashedStrings::H_Visible)						object->SetIsVisible(GetBoolValue(node));
 	//else if (hash == HashedStrings::H_VisibilityTestingMode)		object->SetVisibilityTestingMode(TranslateVisibilityModeFromString(node->GetText()));
 	else if (hash == HashedStrings::H_SimulationState)				object->SetSimulationState(iObject::TranslateSimulationStateFromString(node->GetText()));	// Takes immediate effect
@@ -2080,6 +2076,13 @@ Result IO::Data::LoadDynamicTerrainStateDefinition(TiXmlElement *node, DynamicTe
 
 	// Return success if we have loaded all data
 	return ErrorCodes::NoError;
+}
+
+VariableSizeValue IO::Data::LoadSizeValue(TiXmlElement *node)
+{
+	if (!node)													return VariableSizeValue();
+	if (node->Attribute("max"))									return VariableSizeValue(IO::GetFloatAttribute(node, "max"));
+	else														return VariableSizeValue(IO::GetVector3FromAttr(node));
 }
 
 // Load a single view portal definition and return it
@@ -4269,27 +4272,10 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 		}
 		else if (hash == HashedStrings::H_Component)
 		{
-			// Pull data from each required attribute
-			const char *cindex = child->Attribute("index");
-			const char *cmodel = child->Attribute("model");
-			if (!cindex || !cmodel)
+			if (Result result = LoadArticulatedModelComponent(child, *model); result != ErrorCodes::NoError)
 			{
-				SafeDelete(model);
-				return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+				Game::Log << LOG_WARN << "Failed to load articulated model component for \"" << model->GetCode() << "\"; component definition is invalid\n";
 			}
-
-			// Validate the parameters
-			int index = atoi(cindex);
-			std::string smodel = cmodel; StrLowerC(smodel);
-			if (index < 0 || index >= count)
-			{
-				SafeDelete(model);
-				return ErrorCodes::ArticulatedModelContainsInvalidComponentDef;
-			}
-
-			// Set the component definition
-			Model *m = Model::GetModel(smodel);
-			model->SetComponentDefinition(index, m);
 		}
 		else if (hash == HashedStrings::H_Attachment)
 		{
@@ -4375,6 +4361,33 @@ Result IO::Data::LoadArticulatedModel(TiXmlElement *node)
 
 	// Otherwise the model is valid; add to the central collection and return success
 	ArticulatedModel::AddModel(model);
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::LoadArticulatedModelComponent(TiXmlElement *node, ArticulatedModel & parent_model)
+{
+	if (!node) return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+
+	if (!node->Attribute("index")) return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+	int index = IO::GetIntegerAttribute(node, "index");
+
+	Model *model = NULL; VariableSizeValue size;
+	std::string key; 
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		key = child->Value(); StrLowerC(key);
+
+		if (key == "model")			model = Model::GetModel(child->GetText());
+		else if (key == "size")		size = IO::Data::LoadSizeValue(child);
+	}
+
+	bool result = parent_model.SetComponentDefinition(index, model, size);
+	if (!result)
+	{
+		return ErrorCodes::InvalidComponentDataInArticulatedModelNode;
+	}
+
 	return ErrorCodes::NoError;
 }
 

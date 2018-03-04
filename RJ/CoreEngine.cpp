@@ -2029,7 +2029,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 	}
 	else
 	{
-		RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects",
+		//RJ_FRAME_PROFILER_PROFILE_BLOCK("Rendered turret objects",
 		{
 			if (parent->Highlight.IsActive())
 			{
@@ -2085,7 +2085,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					}
 				}
 			}
-		});
+		}//);
 	}
 }
 

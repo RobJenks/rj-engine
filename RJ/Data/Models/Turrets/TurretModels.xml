@@ -2,10 +2,19 @@
   
   <ArticulatedModel components="3">
     <Code>turret_basic01_model</Code>
-    
-    <Component index="0" model="unit_cone_model" />
-    <Component index="1" model="unit_cone_model" />
-    <Component index="2" model="unit_cone_model" />
+
+    <Component index="0">
+      <Model>unit_cone_model</Model>
+      <Size max="12" />
+    </Component>
+    <Component index="1">
+      <Model>unit_cone_model</Model>
+      <Size max="12" />
+    </Component>
+    <Component index="2">
+      <Model>unit_cone_model</Model>
+      <Size max="12" />
+    </Component>
 
     <Attachment parent="0" child="1">
       <Constraint>
@@ -20,7 +29,7 @@
       <Constraint>
         <Axis x="1.0" y="0.0" z="0.0" />
         <ParentPoint x="0.0" y="5.0" z="0.0" />
-        <ChildPoint x="0.0" y="-5.0" z="5.0" />
+        <ChildPoint x="0.0" y="-5.0" z="3.5" />
         <BaseOrientation x="0.707106709" y="0.0" z="0.0" w="0.707106769" />
       </Constraint>
     </Attachment>

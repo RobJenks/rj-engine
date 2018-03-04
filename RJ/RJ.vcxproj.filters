@@ -882,6 +882,9 @@
     <ClCompile Include="DynamicVertexBufferDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
+    <ClCompile Include="VariableSizeValue.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2053,6 +2056,9 @@
     <ClInclude Include="DynamicVertexBufferDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
+    <ClInclude Include="VariableSizeValue.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2395,6 +2401,7 @@
     <None Include="Data\Shaders\hlsl_common.hlsl" />
     <None Include="Data\Shaders\lighting_calculations.hlsl" />
     <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl" />
+    <None Include="Data\Shaders\LightDataBuffers.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl" />
@@ -2412,9 +2419,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\LightDataBuffers.hlsl">
-      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
