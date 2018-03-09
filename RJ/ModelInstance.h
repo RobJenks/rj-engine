@@ -22,6 +22,7 @@ public:
 
 
 	CMPINLINE Model *					GetModel(void) { return m_model; }
+	CMPINLINE const Model *				GetModel(void) const { return m_model; }
 	CMPINLINE const XMMATRIX &			GetWorldMatrix(void) const { return m_world; }
 
 	// Set the model definition.  Will reset any size/scaling factor that has already been applied

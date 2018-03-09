@@ -363,7 +363,7 @@ void ComplexShipTile::RemoveAllCollisionDataFromModels()
 
 // Handle the import of additional collision data from the models that comprise this tile
 // Import collision data from the single specified model, with no location or rotation offset required
-void ComplexShipTile::AddCollisionDataFromModel(Model *model)
+void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model)
 {
 	AddCollisionDataFromModel(model, NULL_INTVECTOR3, Rotation90Degree::Rotate0);
 }
@@ -371,22 +371,24 @@ void ComplexShipTile::AddCollisionDataFromModel(Model *model)
 // Handle the import of additional collision data from the models that comprise this tile
 // Import collision data from the single specified model, with the given element location
 // and rotation offsets applied during calculation of the collision volumes
-void ComplexShipTile::AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
+void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
-	if (!model || !m_parent || model->CollisionData().empty()) return;
+	const Model *m = model.GetModel();
+	if (!m || !m_parent || m->CollisionData().empty()) return;
 
 	// Offset of the model centre from the tile centre = ((element_pos + 1/2element) - tilecentre - model_centre_point)
 	// E.g. 3x3 tile, 1x1 zero-centred model in (2,1), offset = ((25,15)-(15,15)-(0,0)) = (10,0).  Equals ((10,0)+(15,15)) in non-tile-centred space = (25,15) = el[2,1].centre
-	XMVECTOR model_centre = XMLoadFloat3(&model->Geometry.get()->CentrePoint);
+	XMVECTOR model_centre = XMLoadFloat3(&m->Geometry.get()->CentrePoint);
 	XMVECTOR pos_offset = XMVectorSubtract(XMVectorSubtract(XMVectorAdd(Game::ElementLocationToPhysicalPosition(element_offset), Game::C_CS_ELEMENT_MIDPOINT_V), m_centre_point), model_centre);
 	XMVECTOR orient_offset = GetRotationQuaternion(rotation_offset);
 
 	// Process every collision volume separately
-	for (const auto & collision : model->CollisionData())
+	for (const auto & collision : m->CollisionData())
 	{
-		XMVECTOR position = XMVectorAdd(XMVector3Rotate(XMLoadFloat3(&collision.Position), orient_offset), pos_offset);
+		XMVECTOR basepos = XMVector3TransformCoord(XMLoadFloat3(&collision.Position), model.GetWorldMatrix());	// Scale pos by model size
+		XMVECTOR position = XMVectorAdd(XMVector3Rotate(basepos, orient_offset), pos_offset);
 		XMVECTOR orient = XMQuaternionMultiply(XMLoadFloat4(&collision.Orientation), orient_offset);
-		XMVECTOR extent = XMLoadFloat3(&collision.Extent);
+		XMVECTOR extent = XMVector3TransformCoord(XMLoadFloat3(&collision.Extent), model.GetWorldMatrix());		// Scale extent by model size
 
 		Terrain *terrain = Terrain::Create();
 		terrain->PostponeUpdates();

@@ -670,12 +670,12 @@ public:
 
 	// Handle the import of additional collision data from the models that comprise this tile
 	// Import collision data from the single specified model, with no location or rotation offset required
-	void								AddCollisionDataFromModel(Model *model);
+	void								AddCollisionDataFromModel(const ModelInstance & model);
 
 	// Handle the import of additional collision data from the models that comprise this tile
 	// Import collision data from the single specified model, with the given element location
 	// and rotation offsets applied during calculation of the collision volumes
-	void								AddCollisionDataFromModel(Model *model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset);
+	void								AddCollisionDataFromModel(const ModelInstance & model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset);
 
 
 	// Get the approximate radius of a bounding sphere that encompasses this tile

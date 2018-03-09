@@ -45,6 +45,7 @@ public:
 
 	// List of collision objects attached to this model
 	CMPINLINE std::vector<CollisionSpatialDataF> & CollisionData(void) { return m_collision; }
+	CMPINLINE const std::vector<CollisionSpatialDataF> & CollisionData(void) const { return m_collision; }
 	CMPINLINE void				SetCollisionData(const std::vector<CollisionSpatialDataF> & collision) { m_collision = collision; }
 	CMPINLINE void				SetCollisionData(std::vector<CollisionSpatialDataF> && collision) { m_collision = std::move(collision); }
 	
