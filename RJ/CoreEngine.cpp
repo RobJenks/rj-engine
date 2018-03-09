@@ -1941,8 +1941,9 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			// Get a reference to the model
 			const ComplexShipTile::TileModel & item = (*it).value;
 			
-			// Apply a transformation of (ModelRotation * ModelTranslationToElementCentre * CurrentWorldMatrix)
-			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.rotmatrix, 
+			// Apply a transformation of (BaseMatrix * ModelTranslationToElementCentre * CurrentWorldMatrix), where
+			// BaseMatrix = (Scale * Rotation)
+			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.basematrix, 
 				XMMatrixTranslationFromVector(XMVectorAdd(item.offset, Game::C_CS_ELEMENT_MIDPOINT_V))), 
 				world);
 			

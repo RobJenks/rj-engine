@@ -60,8 +60,8 @@ public:
 			WallConnection
 		};
 
-		AXMMATRIX rotmatrix; AXMVECTOR offset; Model * model; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type;
-		TileModel(void) { model = NULL; offset = NULL_VECTOR; elementpos = NULL_INTVECTOR3; rotation = Rotation90Degree::Rotate0; type = TileModelType::Unknown; rotmatrix = ID_MATRIX; }
+		AXMMATRIX basematrix; AXMVECTOR offset; Model * model; INTVECTOR3 elementpos; Rotation90Degree rotation; TileModelType type;
+		TileModel(void) : model(NULL), offset(NULL_VECTOR), elementpos(NULL_INTVECTOR3), rotation(Rotation90Degree::Rotate0), type(TileModelType::Unknown), basematrix(ID_MATRIX) { }
 		TileModel(Model *_model, INTVECTOR3 _elementpos, Rotation90Degree _rotation, TileModelType _type) 
 		{ 
 			// Set the supplied parameters
@@ -73,10 +73,13 @@ public:
 			// Calculate derived parameters from this data
 			offset = Game::ElementLocationToPhysicalPosition(elementpos);
 
-			// Derive a rotation matrix for this part of the model
+			// Derive a base matrix (scale + rotation) for this part of the model.  We assume all compound tile model
+			// components are one element in size for now
+			// TODO: This may not be sufficient in future, in which case we should replace the compound tile logic 
+			// since it is old and not very scalable
 			if (rotation == Rotation90Degree::Rotate0 || !model || !model->Geometry.get())
 			{
-				rotmatrix = ID_MATRIX;
+				basematrix = XMMatrixScalingFromVector(Game::C_CS_ELEMENT_SCALE_V);
 			}
 			else
 			{
@@ -87,7 +90,11 @@ public:
 				XMMATRIX invoff = XMMatrixTranslationFromVector(centrepoint);
 				
 				// Derive and store the rotation matrix for this model
-				rotmatrix = XMMatrixMultiply(XMMatrixMultiply(off, GetRotationMatrix(rotation)), invoff);
+				basematrix = XMMatrixMultiply(XMMatrixMultiply(XMMatrixMultiply(
+					off,															// Translate to centre point (likely always [0,0,0] now)
+					XMMatrixScalingFromVector(Game::C_CS_ELEMENT_SCALE_V)),			// Scale to 1x1x1 element size
+					GetRotationMatrix(rotation)),									// Rotate
+					invoff);														// Inverse centre translation
 			}
 		}
 	};
@@ -932,6 +939,5 @@ public:
 	#endif
 
 };
-
 
 #endif
