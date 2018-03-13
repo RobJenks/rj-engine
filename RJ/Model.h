@@ -78,6 +78,11 @@ public:
 	static Model *					GetModelFromFilename(const std::string & filename);
 	static void						AddModel(Model *model);
 
+	// Runtime reloading of model geometry data
+	static void						ReloadModel(const std::string & code);
+	static void						ReloadModel(Model *model);
+	static void						ReloadAllModels(void);
+
 	// Deallocates all centrally-maintained model data
 	static void						TerminateAllModelData(void);
 

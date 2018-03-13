@@ -178,6 +178,45 @@ void Model::AddModel(Model *model)
 	Model::Models[model->GetCode()] = model;
 }
 
+// Runtime reloading of model geometry data
+void Model::ReloadModel(const std::string & code)
+{
+	ReloadModel(Model::GetModel(code));
+}
+
+// Runtime reloading of model geometry data
+void Model::ReloadModel(Model *model)
+{
+	if (!model) return;
+	Game::Log << LOG_DEBUG << "Reloading model geometry for \"" << model->GetCode() << "\"\n";
+
+	// We can simply re-execute the initialisation and compilation steps; all source data is already available 
+	Result result = model->Initialise(model->GetCode(), model->GetFilename(), model->GetMaterialCode());
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Failed to re-initialise model \"" << model->GetCode() << "\"; error code " << (int)result << "\n";
+	}
+
+	result = model->CompileModel();
+	if (result != ErrorCodes::NoError)
+	{
+		Game::Log << LOG_ERROR << "Failed to re-compile model \"" << model->GetCode() << "\"; error code " << (int)result << "\n";
+	}
+}
+
+// Runtime reloading of model geometry data
+void Model::ReloadAllModels(void)
+{
+	Game::Log << LOG_DEBUG << "Reloading all model geometry\n";
+
+	for (auto & entry : Model::Models)
+	{
+		if (entry.second) ReloadModel(entry.second);
+	}
+
+	Game::Log << LOG_DEBUG << "All model geometry reloaded\n";
+}
+
 void Model::TerminateAllModelData(void)
 {
 	// All standard models are contained within the model collection, so we can iterate over it and dispose

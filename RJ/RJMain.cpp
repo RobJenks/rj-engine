@@ -624,6 +624,11 @@ void RJMain::ProcessKeyboardInput(void)
 		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
 		Game::Keyboard.LockKey(DIK_F7);
 	}
+	if (b[DIK_F8])
+	{
+		Model::ReloadAllModels();
+		Game::Keyboard.LockKey(DIK_F8);
+	}
 
 	// Additional debug controls below this point
 	if (b[DIK_U])
