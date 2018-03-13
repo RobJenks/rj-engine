@@ -16,6 +16,9 @@
 #include "PipelineStateDX11.h"
 #include "ConstantBufferDX11.h"
 #include "BlendState.h"
+#include "DeferredRenderProcess.h"
+#include "DeferredGBuffer.h"
+
 
 // We will negotiate the highest possible supported feature level when attempting to initialise the render device
 const D3D_FEATURE_LEVEL RenderDeviceDX11::SUPPORTED_FEATURE_LEVELS[] = 
@@ -53,6 +56,7 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_standard_ps(NULL),
 	m_deferred_geometry_ps(NULL), 
 	m_deferred_lighting_ps(NULL),
+	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
 	m_sampler_linearrepeat(NULL)
@@ -577,11 +581,19 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 	// Shader definitions
 	std::vector<std::tuple<ShaderDX11**, Shader::Type, std::string, std::string, std::string, InputLayoutDesc*>> shader_resources
 	{
+		// Standard shaders
 		{ &m_standard_vs, Shader::Type::VertexShader, Shaders::StandardVertexShader, "Shaders\\vs_standard.vs.hlsl", "latest", &m_standard_input_layout }, 
 		{ &m_standard_ps, Shader::Type::PixelShader, Shaders::StandardPixelShader, "Shaders\\ps_standard.ps.hlsl", "latest", NULL }, 
 
+		// Deferred rendering shaders
 		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },
 		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL },
+
+		// Debug-only shaders
+#ifdef _DEBUG
+		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL },
+#endif
+
 	};
 
 	// Attempt to load each shader resource in turn
@@ -790,9 +802,24 @@ HRESULT RenderDeviceDX11::PresentFrame(void)
 	m_devicecontext->CopyResource(m_backbuffer, 
 		m_rendertarget->GetTexture(RenderTarget::AttachmentPoint::Color0)->GetTextureResource());
 
+
 	// Present the back buffer to the screen by cycling the swap chain.  Sync interval
 	// is determined based on the vsync state
 	return m_swapchain->Present(m_sync_interval, 0U);
+}
+
+// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
+bool RenderDeviceDX11::RepointBackbufferRenderTargetAttachment(const std::string & target)
+{
+	// Handle each supported render process that allows redirect of alternative buffer data
+	auto * render_process = GetActiveRenderProcess();
+	if (render_process->GetName() == RenderProcess::Name<DeferredRenderProcess>())
+	{
+		return ((DeferredRenderProcess*)render_process)->RepointBackbufferRenderTargetAttachment(target);
+	}
+
+	// Unsupported render process type
+	return false;
 }
 
 // Attempt to hot-load all shaders and recompile them in-place

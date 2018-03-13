@@ -6,6 +6,7 @@
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 #include "LightData.hlsl.h"
+#include "ModelInstance.h"
 class PipelineStateDX11;
 class RenderTargetDX11;
 class Model;
@@ -14,6 +15,10 @@ class DeferredRenderProcess : public RenderProcessDX11
 {
 public:
 
+	// Possible debug rendering modes
+	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Depth = 8 };
+
+	// Default construcotr
 	DeferredRenderProcess(void);
 
 	// Perform any initialisation that cannot be completed on construction, e.g. because it requires
@@ -35,7 +40,10 @@ public:
 	// End the frame, including presentation of swap chain to the primary display
 	void EndFrame(void);
 
+	// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer
+	bool RepointBackbufferRenderTargetAttachment(const std::string & target);
 
+	// Destructor
 	~DeferredRenderProcess(void);
 
 
@@ -43,6 +51,7 @@ protected:
 
 	// Primary stages in deferred rendering process
 	void PopulateCommonConstantBuffers(void);
+	void PopulateFrameBufferForFullscreenQuadRendering(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
 	void RenderTransparency(void);
@@ -57,6 +66,7 @@ private:
 	ShaderDX11 *		m_vs;
 	ShaderDX11 *		m_ps_geometry;
 	ShaderDX11 *		m_ps_lighting;
+	ShaderDX11 *		m_ps_debug;
 
 	// Render pipelines
 	PipelineStateDX11 * m_pipeline_geometry;
@@ -64,6 +74,7 @@ private:
 	PipelineStateDX11 * m_pipeline_lighting_pass2;
 	PipelineStateDX11 *	m_pipeline_lighting_directional;
 	PipelineStateDX11 * m_pipeline_transparency;
+	PipelineStateDX11 * m_pipeline_debug_rendering;
 
 	// Additional render targets (in addition to the GBuffer and backbuffer itself)
 	RenderTargetDX11 *	m_depth_only_rt;
@@ -73,17 +84,22 @@ private:
 	ConstantBufferDX11 *					m_cb_frame;					// Compiled CB
 	ManagedPtr<LightIndexBuffer>			m_cb_lightindex_data;		// Raw CB data & responsible for deallocation
 	ConstantBufferDX11 *					m_cb_lightindex;			// Compiled CB
+	ManagedPtr<DeferredDebugBuffer>			m_cb_debug_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *					m_cb_debug;					// Compiled CB
 
 	// Model buffers used for rendering light volumes
 	Model *									m_model_sphere;
 	Model *									m_model_cone;
+	Model *									m_model_quad;
+	XMMATRIX								m_transform_fullscreen_quad;
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_framedata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightdata;
 	ShaderDX11::ShaderParameterIndex		m_param_ps_light_lightindexdata;
-
+	ShaderDX11::ShaderParameterIndex		m_param_ps_debug_debugdata;
+	
 	// Initialise components of the deferred rendering process
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
@@ -95,6 +111,7 @@ private:
 	void InitialiseDeferredLightingPass2Pipeline(void);
 	void InitialiseDeferredDirectionalLightingPipeline(void);
 	void InitialiseTransparentRenderingPipelines(void);
+	void InitialiseDebugRenderingPipelines(void);
 
 	// Bind shader resources required for the deferred lighting stage
 	void BindDeferredLightingShaderResources(void);
@@ -105,4 +122,10 @@ private:
 	// Generate a transform matrix for the given light source
 	XMMATRIX PointLightTransform(const LightData & light);
 	XMMATRIX SpotLightTransform(const LightData & light);
+
+	// Perform debug rendering of GBuffer data, if enabled.  Returns a flag indicating whether debug rendering was performed
+	bool GBufferDebugRendering(void);
+	TextureDX11 * GetDebugTexture(DeferredRenderProcess::DebugRenderMode debug_mode);
+	DebugRenderMode m_debug_render_mode;
+	
 };

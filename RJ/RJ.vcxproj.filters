@@ -2420,5 +2420,8 @@
     <FxCompile Include="Data\Shaders\vs_standard.vs.hlsl">
       <Filter>HLSL</Filter>
     </FxCompile>
+    <FxCompile Include="Data\Shaders\deferred_ps_debug.ps.hlsl">
+      <Filter>HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

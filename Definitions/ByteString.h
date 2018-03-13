@@ -98,7 +98,7 @@ template <typename T>
 T ByteString::ReadObject(void)
 {
 	constexpr size_t n = sizeof(T);
-	if ((m_readpoint + n) >= size()) return T();
+	if ((m_readpoint + n) > size()) return T();
 
 	T obj;
 	memcpy((void*)&obj, (const void*)&(data()[m_readpoint]), n);

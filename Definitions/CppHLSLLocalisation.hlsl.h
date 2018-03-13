@@ -45,6 +45,12 @@
 #endif
 
 
+// Values common to both CPP and HLSL
+static const _bool _true = 1;
+static const _bool _false = 0;
+
+
+
 
 
 #endif

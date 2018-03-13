@@ -102,3 +102,22 @@ void DeferredGBuffer::Unbind(Shader::Type shader_type)
 DeferredGBuffer::~DeferredGBuffer(void)
 {
 }
+
+
+TextureDX11 * DeferredGBuffer::LookupTexture(GBufferTexture texture)
+{
+	switch (texture)
+	{
+		case GBufferTexture::Diffuse:			return DiffuseTexture;
+		case GBufferTexture::Specular:			return SpecularTexture;
+		case GBufferTexture::Normal:			return NormalTexture;
+		case GBufferTexture::Depth:				return DepthStencilTexture;
+
+		default:								return NULL;
+	}
+}
+
+bool DeferredGBuffer::IsDepthTexture(GBufferTexture texture)
+{
+	return (texture == GBufferTexture::Depth);
+}

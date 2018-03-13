@@ -132,9 +132,9 @@ CoreEngine::CoreEngine(void)
 	m_instanceparams = NULL_FLOAT4;
 
 	// Initialise all key matrices to the identity
-	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_viewproj = r_invviewproj = m_projscreen 
+	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
 		= r_viewprojscreen = r_invviewprojscreen = ID_MATRIX;
-	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
+	r_view_f = r_projection_f = r_orthographic_f = r_invview_f = r_invproj_f = r_invorthographic_f = r_viewproj_f = r_invviewproj_f = ID_MATRIX_F;
 	
 	// Initialise all temporary/cache fields that are used for more efficient intermediate calculations
 	m_cache_zeropoint = m_cache_el_inc[0].value = m_cache_el_inc[1].value = m_cache_el_inc[2].value = NULL_VECTOR;
@@ -779,6 +779,7 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	r_projection = m_renderdevice->GetProjectionMatrix();
 	r_invproj = m_renderdevice->GetInverseProjectionMatrix();
 	r_orthographic = m_renderdevice->GetOrthoMatrix();
+	r_invorthographic = XMMatrixInverse(NULL, r_orthographic);
 	r_viewproj = XMMatrixMultiply(r_view, r_projection);
 	r_invviewproj = XMMatrixInverse(NULL, r_viewproj);
 	r_viewprojscreen = XMMatrixMultiply(r_viewproj, m_projscreen);
@@ -790,6 +791,7 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	XMStoreFloat4x4(&r_projection_f, r_projection);
 	XMStoreFloat4x4(&r_invproj_f, r_invproj);
 	XMStoreFloat4x4(&r_orthographic_f, r_orthographic);
+	XMStoreFloat4x4(&r_invorthographic_f, r_invorthographic);
 	XMStoreFloat4x4(&r_viewproj_f, r_viewproj);
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
 }
@@ -2779,6 +2781,19 @@ bool CoreEngine::ProcessConsoleCommand(GameConsoleCommand & command)
 			command.SetSuccessOutput("Enabling render of environment spatial partitioning tree");
 			return true;
 		}
+	}
+	else if (command.InputCommand == "backbuffer_attach")
+	{
+		if (GetRenderDevice()->RepointBackbufferRenderTargetAttachment(command.Parameter(0)))
+		{
+			command.SetSuccessOutput(concat("Redirected primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
+		}
+		else
+		{
+			command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidParameters,
+				concat("Failed to redirect primary render target buffer \"")(command.Parameter(0))("\" to backbuffer").str());
+		}
+		return true;
 	}
 	else if (command.InputCommand == "hull_render")
 	{

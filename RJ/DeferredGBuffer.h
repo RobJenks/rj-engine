@@ -10,6 +10,8 @@ class DeferredGBuffer
 {
 public:
 
+	enum class GBufferTexture { Diffuse = 0, Specular = 1, Normal = 2, Depth = 3 };
+
 	DeferredGBuffer(void);
 
 	RenderTargetDX11 *				RenderTarget;
@@ -19,10 +21,16 @@ public:
 	TextureDX11 *					NormalTexture;
 	TextureDX11 *					DepthStencilTexture;
 
+	TextureDX11 *					LookupTexture(GBufferTexture texture);
+	
 	void							Bind(Shader::Type shader_type);
 	void							Unbind(Shader::Type shader_type);
 
 	~DeferredGBuffer(void);
+
+
+	
+	static bool						IsDepthTexture(GBufferTexture texture);
 
 private:
 

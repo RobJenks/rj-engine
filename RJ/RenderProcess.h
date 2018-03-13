@@ -8,20 +8,27 @@ class RenderProcess
 {
 public:
 
+	// Constructor
+	RenderProcess(void);
+
+	// Virtual render method; must be implemented by all derived render processess
 	virtual void					Render(void) = 0;
 
 	// Perform any initialisation that cannot be completed on construction, e.g. because it requires
 	// data that is read in from disk during the data load process
 	virtual void					PerformPostDataLoadInitialisation(void) = 0;
 
+	// Return the name of this render process instance
+	std::string						GetName(void) const { return m_name; }
 
-	// Static method which returns the name of a given render process
+	// Static method which returns the name of a given render process class
 	template <class T>
 	static constexpr const char *	Name(void);
 
-private:
 
+protected:
 
+	std::string						m_name;
 
 };
 

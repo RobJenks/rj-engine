@@ -585,14 +585,44 @@ void RJMain::ProcessKeyboardInput(void)
 		D::UI->ToggleConsole();
 		Game::Keyboard.LockKey(DIK_GRAVE);
 	}
+
+	// Debug rendering of GBuffer data
 	if (b[DIK_F1])
 	{
-		Game::Engine->GetRenderDevice()->ReloadAllShaders();
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("none");
 		Game::Keyboard.LockKey(DIK_F1);
 	}
 	if (b[DIK_F2])
 	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("diffuse");
+		Game::Keyboard.LockKey(DIK_F2);
+	}
+	if (b[DIK_F3])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("specular");
+		Game::Keyboard.LockKey(DIK_F3);
+	}
+	if (b[DIK_F4])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("normal");
+		Game::Keyboard.LockKey(DIK_F4);
+	}
+	if (b[DIK_F5])
+	{
+		Game::Engine->GetRenderDevice()->RepointBackbufferRenderTargetAttachment("depth");
+		Game::Keyboard.LockKey(DIK_F5);
+	}
+
+	// Debug resource loading
+	if (b[DIK_F6])
+	{
+		Game::Engine->GetRenderDevice()->ReloadAllShaders();
+		Game::Keyboard.LockKey(DIK_F6);
+	}
+	if (b[DIK_F7])
+	{
 		Game::Engine->GetRenderDevice()->ReloadAllMaterials();
+		Game::Keyboard.LockKey(DIK_F7);
 	}
 
 	// Additional debug controls below this point

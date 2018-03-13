@@ -141,6 +141,7 @@ public:
 	CMPINLINE const XMMATRIX & GetRenderProjectionMatrix(void) const					{ return r_projection; }
 	CMPINLINE const XMMATRIX & GetRenderInverseProjectionMatrix(void) const				{ return r_invproj; }
 	CMPINLINE const XMMATRIX & GetRenderOrthographicMatrix(void) const					{ return r_orthographic; }
+	CMPINLINE const XMMATRIX & GetRenderInverseOrthographicMatrix(void) const			{ return r_invorthographic; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionMatrix(void) const				{ return r_viewproj; }
 	CMPINLINE const XMMATRIX & GetRenderInverseViewProjectionMatrix(void) const			{ return r_invviewproj; }
 	CMPINLINE const XMMATRIX & GetRenderViewProjectionScreenMatrix(void) const			{ return r_viewprojscreen; }
@@ -150,6 +151,7 @@ public:
 	CMPINLINE const XMFLOAT4X4 & GetRenderProjectionMatrixF(void) const					{ return r_projection_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseProjectionMatrixF(void) const			{ return r_invproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderOrthographicMatrixF(void) const				{ return r_orthographic_f; }
+	CMPINLINE const XMFLOAT4X4 & GetRenderInverseOrthographicMatrixF(void) const		{ return r_invorthographic_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderViewProjectionMatrixF(void) const				{ return r_viewproj_f; }
 	CMPINLINE const XMFLOAT4X4 & GetRenderInverseViewProjectionMatrixF(void) const		{ return r_invviewproj_f; }
 
@@ -527,6 +529,7 @@ private:
 	AXMMATRIX				r_orthographic;			// Orthographic matrix for the current render cycle
 	AXMMATRIX				r_invview;				// We will also store the inverse view matrix
 	AXMMATRIX				r_invproj;				// We will also store the inverse projection matrix
+	AXMMATRIX				r_invorthographic;		// We will also store the inverse orthographic matrix
 	AXMMATRIX				r_viewproj;				// Store the combined (view * proj) matrix
 	AXMMATRIX				r_invviewproj;			// Also store the inverse viewproj matrix, i.e. (view * proj)^-1
 	AXMMATRIX				m_projscreen;			// Adjustment matrix from projection to screen coordinates (only recalculated when screen parameters change)
@@ -537,6 +540,7 @@ private:
 	XMFLOAT4X4				r_orthographic_f;		// Local float representation of the current frame orthographic matrix
 	XMFLOAT4X4				r_invview_f;			// Local float representation of the current frame inverse view matrix
 	XMFLOAT4X4				r_invproj_f;			// Local float representation of the current frame inverse projection matrix
+	XMFLOAT4X4				r_invorthographic_f;	// Local float representation of the current frame inverse orthographic matrix
 	XMFLOAT4X4				r_viewproj_f;			// Local float representation of the current frame (view * proj) matrix
 	XMFLOAT4X4				r_invviewproj_f;		// Local float representation of the current frame inverse (view * proj) matrix
 

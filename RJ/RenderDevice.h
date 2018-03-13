@@ -35,7 +35,9 @@ protected:
 
 	CMPINLINE void				SetRenderDeviceName(const std::string & name) { m_renderdevice_name = name; }
 
-private:
+	CMPINLINE RenderProcess *	GetActiveRenderProcess(void) { return m_render_process; }
+
+protected:
 
 	// String identifier for the render device implementation currently in use
 	std::string					m_renderdevice_name;
