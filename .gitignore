@@ -2,7 +2,7 @@
 *.slo
 *.lo
 *.o
-*.obj
+#*.obj
 
 # Precompiled Headers
 *.gch
@@ -46,14 +46,19 @@
 *.lastcodeanalysissucceeded
 *.GenerateResource.Cache
 
+# Exclude the debug/release directories and all contents for all projects within the solution
+**/Win32/Debug/*
+**/Win32/Release/*
+**/Win32/Test/*
+**/x64/Debug/*
+**/x64/Release/*
+**/x64/Test/*
+
 # Exclude debug, release & any other intermediate build directories
 /.vs/*
 /RJ/Debug/*
 /RJ/Release/*
 /RJ/Test/*
-/RJ/x64/Debug/*
-/RJ/x64/Release/*
-/RJ/x64/Test/*
 /RJ-VS10/RJ-VS10/Debug/*
 /RJ-VS10/RJ-VS10/Release/*
 /RJ-VS10/ipch/*
