@@ -12,9 +12,11 @@ Texture2D DebugSourceTextureVS : register(t0);
 [earlydepthstencil]
 float4 PS_Deferred_Debug(VertexShaderStandardOutput IN) : SV_Target0
 {
+	static const float DEPTH_EXP_FACTOR = 6.0f;
+
 	if (is_depth_texture)
 	{
-		return DebugSourceTextureVS.Sample(LinearRepeatSampler, IN.texCoord).rrrr;
+		return pow(DebugSourceTextureVS.Sample(LinearRepeatSampler, IN.texCoord).rrrr, DEPTH_EXP_FACTOR);
 	}
 	else
 	{
