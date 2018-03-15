@@ -8,7 +8,7 @@
 float4 ClipToView(float4 clip)
 {
 	// View space position
-	float4 view = mul(InvProjection, clip);
+	float4 view = mul(clip, InvProjection);
 
 	// Perspective projection
 	view = view / view.w;

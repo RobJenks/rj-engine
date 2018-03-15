@@ -2390,10 +2390,10 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
-	l2->SetRange(500.0f);
-	l2->LightObject().SetIntensity(10.0f);
+	l2->SetRange(600.0f);
+	l2->LightObject().SetIntensity(1.0f);
 	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	l2->SetPosition(XMVectorSet(250, 225, 100, 0));
+	l2->SetPosition(XMVectorSet(400, 300, 100, 0));
 	lt = l2;
 
 	// Add a spotlight to the player actor
