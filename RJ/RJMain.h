@@ -117,6 +117,7 @@ public:
 	void RunAllTests(void);
 
 	// *** DEBUG ***
+	Ship * InitialiseTemporaryPlayerShip(void);
 	void __CreateDebugScenario(void);
 	void DEBUGDisplayInfo(void);
 	void DebugRenderSpaceCollisionBoxes(void);

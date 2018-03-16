@@ -1346,11 +1346,11 @@ Result RJMain::Initialise(HINSTANCE hinstance, WNDPROC wndproc)
 	// Initialise the simulation state manager
 	InitialiseStateManager();
 
-	// *** DEBUG ***
-	__CreateDebugScenario();
-
 	// Initialise the active player object
 	InitialisePlayer();
+
+	// *** DEBUG ***
+	__CreateDebugScenario();
 
 	// Initialise the primary region objects
 	res = InitialiseRegions();
@@ -1546,8 +1546,12 @@ Result RJMain::InitialisePlayer(void)
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 
+	// Temporary: create a player ship.  Also assign to an application variable so we can reference it in global scope
+	Ship *ship = InitialiseTemporaryPlayerShip();
+	ss = ship;
+
 	// Place the player in a default (already created) ship and the current system
-	Game::CurrentPlayer->SetPlayerShip(ss());
+	Game::CurrentPlayer->SetPlayerShip(ship);
 	Game::CurrentPlayer->EnterEnvironment(Game::Universe->GetSystem("AB01"));
 
 	// Return success
@@ -2208,6 +2212,27 @@ void RJMain::DebugFireBasicProjectile(const BasicRay & trajectory) const
 		QuaternionBetweenVectors(FORWARD_VECTOR, vel_n), trajectory.Direction);
 }
 
+Ship * RJMain::InitialiseTemporaryPlayerShip(void)
+{
+	// Temp: Create a new ship for the player to use
+	SimpleShip *ss_ship = SimpleShip::Create("testship1");
+	ss_ship->SetName("Player ship ss");
+	ss_ship->OverrideInstanceCode("ss");
+	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
+	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
+	
+	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	ss_ship->SetPosition(XMVectorSet(300, 225, 100, 0));
+	ss_ship->SetOrientation(ID_QUATERNION);
+	
+	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
+
+	// Also assign to a temporary application variable so we can reference in global scopes
+	ss = ss_ship;
+
+	return ss_ship;
+}
+
 void RJMain::__CreateDebugScenario(void)
 {
 	// Temp: Set the US/PRC factions to be hostile towards each other for testing purposes
@@ -2215,20 +2240,6 @@ void RJMain::__CreateDebugScenario(void)
 		Game::FactionManager.GetFactionIDByCode("faction_prc"), Faction::FactionDisposition::Hostile);
 	Game::FactionManager.FactionDispositionChanged(Game::FactionManager.GetFactionIDByCode("faction_prc"),
 		Game::FactionManager.GetFactionIDByCode("faction_us"), Faction::FactionDisposition::Hostile);
-
-	// Temp: Create a new ship for the player to use
-	SimpleShip *ss_ship = SimpleShip::Create("testship1");
-	ss_ship->SetName("Player ship ss");
-	ss_ship->OverrideInstanceCode("ss");
-	ss_ship->ChangeEntityAIState(EntityAIStates::EntityAIState::NoAI);
-	ss_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
-	ss_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	//ss_ship->SetPosition(XMVectorSet(600, 200, -200, 0.0f));
-	ss_ship->SetPosition(XMVectorSet(300, 225, 100, 0));
-	ss_ship->SetOrientation(ID_QUATERNION);
-	ss_ship->SetInvulnerabilityFlag(true);
-	SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(ss_ship);
-	ss = ss_ship;
 
 	// Temp: Create two complex ships in this scenario
 	if (true) {
@@ -2397,21 +2408,13 @@ void RJMain::__CreateDebugScenario(void)
 	lt = l2;
 
 	// Add a spotlight to the player actor
-	/*Light pl; Game::Engine->LightingManager.GetDefaultSpotLightData(pl.Data);
-	LightSource *player_light = LightSource::Create(pl);
+	LightSource *player_light = LightSource::Create(Game::Engine->LightingManager->GetDefaultSpotLightData());
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
-	a1()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);*/
+	Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 
-	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixRotationAxis(UP_VECTOR, 0.0f), 
-		XMMatrixScaling(3.0, 3.0, 3.0)), 
-		XMMatrixTranslation(2.0, 2.0, 2.0));
-	float coord = 5.0f;
-	XMVECTOR v = XMVector3TransformCoord(XMVectorReplicate(coord), transform);
-	XMVECTOR v2 = XMVector3TransformCoord(XMVectorReplicate(1.0f), transform);
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }

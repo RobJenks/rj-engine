@@ -18,6 +18,12 @@
   </Model>
 
   <Model>
+    <Code>spotlight_cone_model</Code>
+    <Filename>Models\Misc\spotlight_cone_model.rjm</Filename>
+    <Material>debug_material</Material>
+  </Model>
+  
+  <Model>
     <Code>unit_square_model</Code>
     <Filename>Models\Misc\unit_square.rjm</Filename>
     <Material>debug_material</Material>

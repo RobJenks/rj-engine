@@ -125,7 +125,7 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 	// Load all required model geometry
 	std::vector<std::tuple<std::string, std::string, Model**>> models = {
 		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere }, 
-		{ "spot light cone volume", "unit_cone_model", &m_model_cone}, 
+		{ "spot light cone volume", "spotlight_cone_model", &m_model_cone}, 
 		{ "fullscreen quad", "unit_square_model", &m_model_quad }
 	};
 
