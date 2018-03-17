@@ -175,7 +175,7 @@ public:
 	ObjectReference<ComplexShip> cs, cs2;
 	ObjectReference<Actor> a1;
 	ObjectReference<SpaceProjectile> proj;
-	ObjectReference<LightSource> lt;
+	ObjectReference<LightSource> lt, lt2;
 
 	ID3D11Buffer			*m_vertexBuffer, *m_indexBuffer;
 	UINT					m_vertexcount;

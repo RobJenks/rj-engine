@@ -388,7 +388,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 	// Render all non-transparent objects
 	Game::Engine->ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(m_pipeline_geometry);
-
+	
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
 	m_pipeline_geometry->Unbind();
@@ -459,10 +459,13 @@ XMMATRIX DeferredRenderProcess::PointLightTransform(const LightData & light)
 // Generate a transform matrix for the given light source
 XMMATRIX DeferredRenderProcess::SpotLightTransform(const LightData & light)
 {
+	*** WE LOSE ATTENUATED BORDER ILLUMINATION WHEN TRANSLATION TO RANGE/2 BELOW IS INCLUDED - FIX ***
+
 	// Spotlight cone radius: tan(x) = O/A -> O = Atan(x)
 	float cone_radius = light.Range * std::tanf(light.SpotlightAngle);
-	return XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixScaling(cone_radius, cone_radius, light.Range), 
+	return XMMatrixMultiply(XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(cone_radius, cone_radius, light.Range),
+		XMMatrixTranslation(0.0f, 0.0f, (0 * light.Range * 0.5f))),														// Translate forward so cone tip is at light pos
 		XMMatrixRotationQuaternion(QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)))),	// TODO: Can likely make this more efficient
 		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
 	);

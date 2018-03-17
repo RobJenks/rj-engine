@@ -9,6 +9,7 @@
   <Model>
     <Code>unit_sphere_model</Code>
     <Filename>Models\Misc\unit_sphere.rjm</Filename>
+    <Material>null_material</Material>
   </Model>
 
   <Model>
@@ -20,7 +21,7 @@
   <Model>
     <Code>spotlight_cone_model</Code>
     <Filename>Models\Misc\spotlight_cone_model.rjm</Filename>
-    <Material>debug_material</Material>
+    <Material>null_material</Material>
   </Model>
   
   <Model>

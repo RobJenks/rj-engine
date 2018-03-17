@@ -988,7 +988,7 @@ void RJMain::ProcessKeyboardInput(void)
 		
 		if (b[DIK_LSHIFT])
 		{
-			int a = 1;
+			Game::Console.ProcessRawCommand(GameConsoleCommand("debug_camera 0"));
 		}
 		else
 		{
@@ -997,9 +997,10 @@ void RJMain::ProcessKeyboardInput(void)
 
 		Game::Keyboard.LockKey(DIK_3);
 	}
-	if (b[DIK_4]) {
-		
-		cs()->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_prc"));
+	if (b[DIK_4]) 
+	{
+		lt2()->LightObject().SetType(lt2()->GetLight().GetType() == LightType::Point ? LightType::Spotlight : LightType::Point);
+		OutputDebugString(concat("Light type is now ")(Light::TranslateLightTypeToString(lt2()->GetLight().GetType()))("\n").str().c_str());
 
 		Game::Keyboard.LockKey(DIK_4);
 		
@@ -2414,7 +2415,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
 	Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
-
+	lt2 = player_light;
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
 }
@@ -2618,10 +2619,10 @@ void RJMain::DEBUGDisplayInfo(void)
 		Game::Log << LOG_INFO << D::UI->TextStrings.C_DBG_FLIGHTINFO_2 << "\n";*/
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 
-/*		lt()->SetModel(Model::GetModel("unit_sphere_model"));
-		lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
-		lt()->SetSize(XMVectorReplicate(45.0f));
-		Game::Engine->RenderObject(lt());*/
+		//lt2()->SetModel(Model::GetModel("spotlight_cone_model"));
+		//lt()->SetPosition(XMVector3TransformCoord(XMVectorSetZ(NULL_VECTOR, 150.0f), ss()->GetWorldMatrix()));
+		//lt()->SetSize(XMVectorReplicate(45.0f));
+		//Game::Engine->RenderObject(lt2());
 	}
 
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
