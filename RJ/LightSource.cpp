@@ -76,29 +76,54 @@ void LightSource::SetRange(float range)
 	SetCollisionSphereRadius(m_light.Data.Range);
 }
 
-
-// Light sources do implement a post-simulation update method to reposition their internal light component
-void LightSource::PerformPostSimulationUpdate(void)
+// Calculate point light volume transform for the given light
+XMMATRIX LightSource::CalculatePointLightTransform(const LightData & light)
 {
-	// Update the position of our internal light component
-	m_light.Data.PositionWS = XMFLOAT4(m_positionf.x, m_positionf.y, m_positionf.z, 0.0f);
+	return XMMatrixMultiply(
+		XMMatrixScaling(light.Range, light.Range, light.Range),
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
+}
 
-	// Update light direction based on orientation of the light source object
-	XMVECTOR dir = XMVector3Rotate(FORWARD_VECTOR, (XMQuaternionMultiply(m_relativelightorient, m_orientation)));
-	XMStoreFloat4(&m_light.Data.DirectionWS, dir);
+// Calculate spotlight light volume transform for the given light
+XMMATRIX LightSource::CalculateSpotlightTransform(const LightData & light)
+{
+	// Spotlight cone radius: tan(x) = O/A -> O = Atan(x)
+	float cone_radius = light.Range * std::tanf(light.SpotlightAngle);
+	return XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(cone_radius, cone_radius, light.Range),
+		XMMatrixRotationQuaternion(QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)))),	// TODO: Can likely make this more efficient
+		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
+	);
 }
 
 // Calculates all derived data for the light required for rendering, for example view-space equivalent data.  We only need to calculate
 // these fields if the light is being rendered this frame
 void LightSource::RecalculateRenderingData(void)
 {
+	/** Position: common to all light types **/
+
+	// World-space light position
+	XMStoreFloat4(&m_light.Data.PositionWS, m_position);
+
 	// View-space light position
 	const XMMATRIX & view = Game::Engine->GetRenderViewMatrix();
 	XMStoreFloat4(&m_light.Data.PositionVS, XMVector3TransformCoord(m_position, view));
 
-	// View-space light direction
-	XMStoreFloat4(&m_light.Data.DirectionVS, 
-		XMVector3NormalizeEst(XMVector3TransformCoord(/*XMLoadFloat4*/(/*&m_light.Data.DirectionWS*/this->GetHeading()), XMMatrixTranspose(view))));
+	/** Direction: We can skip these calculations for point lights **/
+	if (m_light.GetType() != LightType::Point)
+	{
+		// We need to derive the heading for lighting calcs.  Also store within the object given that we are doing the work
+		PhysicsState.Heading = XMVector3Rotate(FORWARD_VECTOR, m_orientation);
+
+		// World space light direction
+		XMVECTOR dirWS = XMVector3Rotate(PhysicsState.Heading, m_relativelightorient);
+		XMStoreFloat4(&m_light.Data.DirectionWS, dirWS);
+
+		// View-space light direction
+		XMStoreFloat4(&m_light.Data.DirectionVS, XMVector3NormalizeEst(XMVector3TransformCoord(dirWS, view)));
+	}
+
 }
 
 // Custom debug string function

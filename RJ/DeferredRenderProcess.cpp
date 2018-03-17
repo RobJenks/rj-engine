@@ -426,13 +426,13 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		switch (light.Type)
 		{
 			case LightType::Point:
-				transform = PointLightTransform(light);
+				transform = LightSource::CalculatePointLightTransform(light);
 				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
 				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
 				break;
 
 			case LightType::Spotlight:
-				transform = SpotLightTransform(light);
+				transform = LightSource::CalculateSpotlightTransform(light);
 				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
 				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
 				break;
@@ -447,29 +447,6 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 	GBuffer.Unbind(Shader::Type::PixelShader);
 }
 
-// Generate a transform matrix for the given light source
-XMMATRIX DeferredRenderProcess::PointLightTransform(const LightData & light)
-{
-	return XMMatrixMultiply(
-		XMMatrixScaling(light.Range, light.Range, light.Range), 
-		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
-	);
-}
-
-// Generate a transform matrix for the given light source
-XMMATRIX DeferredRenderProcess::SpotLightTransform(const LightData & light)
-{
-	*** WE LOSE ATTENUATED BORDER ILLUMINATION WHEN TRANSLATION TO RANGE/2 BELOW IS INCLUDED - FIX ***
-
-	// Spotlight cone radius: tan(x) = O/A -> O = Atan(x)
-	float cone_radius = light.Range * std::tanf(light.SpotlightAngle);
-	return XMMatrixMultiply(XMMatrixMultiply(XMMatrixMultiply(
-		XMMatrixScaling(cone_radius, cone_radius, light.Range),
-		XMMatrixTranslation(0.0f, 0.0f, (0 * light.Range * 0.5f))),														// Translate forward so cone tip is at light pos
-		XMMatrixRotationQuaternion(QuaternionBetweenVectors(FORWARD_VECTOR, XMLoadFloat4(&light.DirectionWS)))),	// TODO: Can likely make this more efficient
-		XMMatrixTranslation(light.PositionWS.x, light.PositionWS.y, light.PositionWS.z)
-	);
-}
 
 // Bind shader resources required for the deferred lighting stage
 void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
