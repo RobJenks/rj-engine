@@ -78,6 +78,12 @@ public:
 	CMPINLINE XMFLOAT3					GetPositionF(void) const		{ return m_positionf; }
 	CMPINLINE XMVECTOR					GetOrientation(void) const		{ return m_orientation; }
 
+	// Return the camera orientation including any adjustments made by the view offset matrix
+	CMPINLINE XMVECTOR					DetermineAdjustedOrientation(void) const 
+	{ 
+		return QuaternionBetweenVectors(FORWARD_VECTOR, GetCameraHeading());
+	}
+
 	// Methods to change (and retrieve) the current camera state
 	CMPINLINE CameraClass::CameraState	GetCameraState(void) const		{ return m_camerastate; }
 	void								ReleaseCamera(void);

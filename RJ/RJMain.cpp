@@ -1543,7 +1543,6 @@ Result RJMain::InitialisePlayer(void)
 	actor->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::CurrentPlayer->SetActor(actor);
 	if (Game::CurrentPlayer->GetActor() == NULL) return ErrorCodes::CouldNotCreatePlayerActor;
-
 	Game::CurrentPlayer->GetActor()->SetName("Player actor");
 	Game::CurrentPlayer->GetActor()->MoveIntoEnvironment(cs());
 
@@ -2414,7 +2413,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
 	Game::RegisterObject(player_light);
-	Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
+	//Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 	lt2 = player_light;
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
@@ -2603,6 +2602,15 @@ void RJMain::DEBUGDisplayInfo(void)
 		);
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
+
+
+		// Tmp: Update player spotlight position and orientation to match camera
+		if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
+		{
+			lt2()->SetPosition(Game::Engine->GetCamera()->GetPosition());
+			lt2()->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
+			OutputDebugString(concat("Orient: ")(Vector4ToString(Game::Engine->GetCamera()->DetermineAdjustedOrientation()))("\n").str().c_str());
+		}
 
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */

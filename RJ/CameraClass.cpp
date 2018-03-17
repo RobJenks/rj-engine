@@ -76,7 +76,7 @@ void CameraClass::CalculateViewMatrix(void)
 		{
 			// Otherwise calculate the view matrix based upon the current camera path position & orientation
 			ConstructCameraFromPositionData(m_camerapath->GetCurrentCameraPosition(),
-												m_camerapath->GetCurrentCameraOrientation(), ID_MATRIX);
+											m_camerapath->GetCurrentCameraOrientation(), ID_MATRIX);
 		}
 	}
 	else if (m_camerastate == CameraClass::CameraState::DebugCamera)
