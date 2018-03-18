@@ -3856,7 +3856,7 @@
             <attachpoint type="1">0</attachpoint>
         </complexshipelement>
         <complexshipsectioninstance>
-            <Code>testfrigate12_section_0</Code>
+            <Code>mfrig_midsection_01</Code>
             <ElementLocation x="0" y="0" z="0" />
             <Rotation>0</Rotation>
         </complexshipsectioninstance>

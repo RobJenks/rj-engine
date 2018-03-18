@@ -1,12 +1,32 @@
 <GameData>
 
-  <Texture code="frigate_medium_midsection1_prev" dimension="Texture2D" filename="Ships\Sections\Frigate_Medium\frigate_medium_midsection1_prev.dds" />
+  <!-- Texture resources -->
+  <Texture code="frigate_medium_midsection1_texture" dimension="Texture2D" filename="Ships\Sections\Frigate_Medium\frigate_medium_midsection1_prev.dds" />
+
+  <!-- Material -->
+  <Material code="frigate_medium_midsection1_material">
+    <AmbientColor x="1.0" y="0.9" z="0.57" w="1.0" />
+    <DiffuseTexture>debug_texture</DiffuseTexture>
+    <!--GlobalAmbient x="0.1" y="0.09" z="0.057" w="1.0" /-->
+    <!--DiffuseColor x="0.5" y="0.5" z="0.0" w="0.5" / -->
+    <!--EmissiveColor x="0" y="0" z="0.0" w="0.0" /-->
+    <!--SpecularPower>2.0f</SpecularPower-->
+    <!--SpecularColor x="0.5" y="0.5" z="0.5" w="0.5" /-->
+    <!--AmbientTexture>testship1_texture</AmbientTexture-->
+  </Material>-->
+  
+  <!-- Model -->
+  <Model>
+    <Code>frigate_medium_midsection1_model</Code>
+    <Filename>Ships\Sections\Frigate_Medium\frigate_medium_midsection1.rjm</Filename>
+    <Material>frigate_medium_midsection1_material</Material>
+  </Model>-->
 
   <ComplexShipSection>
     <Code>MFRIG_MIDSECTION_01</Code>
     <Name>Medium Frigate Midsection 1</Name>
-    <StandardSection>True</StandardSection>
-    <Model>frigate_medium_midsection1</Model>
+    <StandardObject>True</StandardObject>
+    <Model>frigate_medium_midsection1_model</Model>
     <Mass>10000.000000</Mass>
     <VelocityLimit>200.000000</VelocityLimit>
     <BrakeFactor>0.1</BrakeFactor>
@@ -14,7 +34,7 @@
     <TurnAngle>0.001000</TurnAngle>
     <BankExtent x="5.000000" y="5.000000" z="2.500000" />
     <BankRate>0.500000</BankRate>
-    <PreviewImage w="64" h="96">frigate_medium_midsection1_prev</PreviewImage>
+    <PreviewImage w="64" h="96">frigate_medium_midsection1_texture</PreviewImage>
 
     <AllocateBoundingObjects>1</AllocateBoundingObjects>
     <BoundingObject id="0" type="cuboid" sizex="200.000000" sizey="50.000000" sizez="350.000000" />

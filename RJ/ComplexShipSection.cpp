@@ -119,6 +119,9 @@ void ComplexShipSection::ResizeSection(const INTVECTOR3 & size)
 	m_elementsize = size;
 	m_elementcount = (size.x * size.y * size.z);
 
+	// Set the base object size to match our element size.  This will also resize the model geometry to fit
+	SetSize(Game::ElementLocationToPhysicalPosition(m_elementsize));
+
 	// Reallocate the element state collection to match this new size
 	DefaultElementState.Initialise(m_elementsize);
 }
