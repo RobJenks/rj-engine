@@ -930,56 +930,63 @@ void RJMain::ProcessKeyboardInput(void)
 		}
 	}
 	if (b[DIK_2]) {
-		//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
-		
-		Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
-		Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
-		Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
-		//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
-
-		if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
+		if (b[DIK_LSHIFT])
 		{
-			ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
-			XMVECTOR centre = tile->GetRelativePosition();
+			Game::Console.ProcessRawCommand(GameConsoleCommand("enter_system_env AB01"));
+		}
+		else
+		{
+			//Game::Console.ProcessRawCommand(GameConsoleCommand("render_obb 1"));
+			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("terrain_debug_render_mode solid").str()));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+			Game::Console.ProcessRawCommand(GameConsoleCommand("obj cs1 OverrideLocalGravity 9.8"));
+			Game::Console.ProcessRawCommand(GameConsoleCommand(concat("enter_ship_env ")(cs()->GetInstanceCode()).str()));
+			Game::CurrentPlayer->GetActor()->SetWorldMomentum(NULL_VECTOR);
+			//Game::Console.ProcessRawCommand(GameConsoleCommand(concat("render_terrainboxes ")(cs()->GetInstanceCode())(" true").str()));
 
-			DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_vertical_01");
-			t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
-			t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI)); 
-			cs()->AddTerrainObject(static_cast<Terrain*>(t1));
-
-			DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*) DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
-			t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
-			t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
-			cs()->AddTerrainObject(static_cast<Terrain*>(t2));
-
-			DataObjectEngineHeadingController *t_head = (DataObjectEngineHeadingController*) DynamicTerrain::Create("BasicEngineHeadingController");
-			t_head->SetPosition(XMVectorAdd(t2->GetPosition(), XMVectorSet(0.0f, 0.5f, 15.0f, 0.0f)));
-			cs()->AddTerrainObject(static_cast<Terrain*>(t_head));
-
-
-			DynamicTerrain *target = NULL;
-			Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
-			for (auto * terrain : cs()->TerrainObjects)
+			if (!cs()->GetTilesOfType(D::TileClass::Quarters).empty())
 			{
-				if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
+				ComplexShipTile *tile = cs()->GetTilesOfType(D::TileClass::Quarters).at(0).value;
+				XMVECTOR centre = tile->GetRelativePosition();
+
+				Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+
+				DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_vertical_01");
+				t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
+				t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t1));
+
+				DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
+				t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+				t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t2));
+
+				DataObjectEngineHeadingController *t_head = (DataObjectEngineHeadingController*)DynamicTerrain::Create("BasicEngineHeadingController");
+				t_head->SetPosition(XMVectorAdd(t2->GetPosition(), XMVectorSet(0.0f, 0.5f, 15.0f, 0.0f)));
+				cs()->AddTerrainObject(static_cast<Terrain*>(t_head));
+
+
+				DynamicTerrain *target = NULL;
+				Game::ID_TYPE engine_room = cs()->GetTilesOfType(D::TileClass::EngineRoom).at(0).value->GetID();
+				for (auto * terrain : cs()->TerrainObjects)
 				{
-					target = terrain->ToDynamicTerrain();
-					break;
+					if (terrain && terrain->GetParentTileID() == engine_room && terrain->IsDynamic())
+					{
+						target = terrain->ToDynamicTerrain();
+						break;
+					}
 				}
-			}		
-			
-			Game::Log << LOG_DEBUG << "Connecting thrust controller: " << 
-			t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
-			
-			Game::Log << LOG_DEBUG << "Connecting heading controller: " <<
-				t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
+
+				Game::Log << LOG_DEBUG << "Connecting thrust controller: " <<
+					t1->ConnectPort(t1->OutputPort(), target, ((DataObjectEngineThrustController*)target)->Ports.PercentageThrustTargetInput()) << "\n";
+
+				Game::Log << LOG_DEBUG << "Connecting heading controller: " <<
+					t2->ConnectPort(t2->OutputPort(), t_head, ((DataObjectEngineHeadingController*)target)->Ports.TargetYawPercentageInput()) << "\n";
 
 
-			Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+				Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
+			}
 		}
 
 		Game::Keyboard.LockKey(DIK_2);

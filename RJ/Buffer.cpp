@@ -36,7 +36,7 @@ Buffer::Buffer(Buffer::BufferType buffertype, const void *data, UINT count, UINT
 // the given parameters for buffer content
 Buffer::Buffer(Buffer::BufferType buffertype, const D3D11_BUFFER_DESC & buffer_desc, const void *data, UINT count, UINT stride) noexcept
 	:
-m_buffertype(buffertype)
+	m_buffertype(buffertype)
 {
 	m_buffer[0] = NULL;
 	m_buffer_elementcount[0] = count;

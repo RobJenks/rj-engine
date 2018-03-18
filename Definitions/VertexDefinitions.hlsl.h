@@ -10,10 +10,10 @@
 
 #define PerVertexData \
 \
-	float3					position		RJ_SEMANTIC(POSITION); \
-	float3					normal			RJ_SEMANTIC(NORMAL); \
-	float3					tangent			RJ_SEMANTIC(TANGENT); \
-	float3					binormal		RJ_SEMANTIC(BINORMAL); \
+	float3					position		RJ_SEMANTIC(POSITION0); \
+	float3					normal			RJ_SEMANTIC(NORMAL0); \
+	float3					tangent			RJ_SEMANTIC(TANGENT0); \
+	float3					binormal		RJ_SEMANTIC(BINORMAL0); \
 	float2					tex				RJ_SEMANTIC(TEXCOORD0);
 
 
