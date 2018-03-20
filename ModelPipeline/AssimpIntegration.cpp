@@ -8,7 +8,7 @@
 using namespace DirectX;
 
 
-std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, unsigned int operation_config, bool debug_info)
+std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, PostProcess operation_config, bool debug_info)
 {
 	if (!scene) MODEL_INST_ERROR("Cannot build model; null ai data provided");
 	if (!importer.GetScene()) MODEL_INST_ERROR("Importer has no valid scene reference");
@@ -133,7 +133,7 @@ std::unique_ptr<ModelData> AssimpIntegration::ParseAssimpScene(const aiScene *sc
 }
 
 
-unsigned int AssimpIntegration::DefaultOperations(void)
+PostProcess AssimpIntegration::DefaultOperations(void)
 {
 	return aiProcess_ValidateDataStructure;
 }

@@ -3,6 +3,7 @@
 #include <memory>
 #include <DirectXMath.h>
 #include "../Definitions/ModelData.h"
+#include "CustomPostProcess.h"
 
 #include <assimp\Importer.hpp>
 #include <assimp\scene.h>
@@ -13,9 +14,9 @@ class AssimpIntegration
 {
 public:
 
-	static std::unique_ptr<ModelData>		ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, unsigned int operation_config, bool debug_info);
+	static std::unique_ptr<ModelData>		ParseAssimpScene(const aiScene *scene, Assimp::Importer & importer, PostProcess operation_config, bool debug_info);
 
-	static unsigned int						DefaultOperations(void);
+	static PostProcess						DefaultOperations(void);
 
 
 private:

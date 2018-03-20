@@ -84,6 +84,9 @@
     <ClCompile Include="PipelineStageUnitScaleModel.cpp">
       <Filter>Transformer\Transforms</Filter>
     </ClCompile>
+    <ClCompile Include="PipelineStageDirectPostprocess.cpp">
+      <Filter>Transformer\Transforms</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -165,6 +168,12 @@
       <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="PipelineStageUnitScaleModel.h">
+      <Filter>Transformer\Transforms</Filter>
+    </ClInclude>
+    <ClInclude Include="CustomPostProcess.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="PipelineStageDirectPostprocess.h">
       <Filter>Transformer\Transforms</Filter>
     </ClInclude>
   </ItemGroup>

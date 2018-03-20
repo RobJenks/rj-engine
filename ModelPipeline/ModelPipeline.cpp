@@ -9,6 +9,7 @@
 #include "PipelineUtil.h"
 #include "AssimpLogStream.h"
 #include "ModelPipelineConstants.h"
+#include "CustomPostProcess.h"
 #include "TransformPipeline.h"
 #include "TransformPipelineBuilder.h"
 #include "InputTransformerAssimp.h"
@@ -19,40 +20,43 @@
 #include "PipelineStageUnitScaleModel.h"
 #include "PipelineStageCentreModel.h"
 #include "PipelineStageAssimpTransform.h"
+#include "PipelineStageDirectPostprocess.h"
 
 
-static const std::vector<std::tuple<std::string, std::string, aiPostProcessSteps>> MESH_OPERATIONS 
+static const std::vector<std::tuple<std::string, std::string, PostProcess>> MESH_OPERATIONS 
 {
-	{ "gen-uv", "Generate UV coords for the model data", aiPostProcessSteps::aiProcess_GenUVCoords },
-	{ "gen-normals", "Generate vertex normals; ignored if normals are already present", aiPostProcessSteps::aiProcess_GenNormals },
-	{ "gen-smooth-normals", "Generate smooth vertex normals; incompatible with gen-normals", aiPostProcessSteps::aiProcess_GenSmoothNormals },
-	{ "gen-tangents", "Generate tangent space data; requires normal data to be present", aiPostProcessSteps::aiProcess_CalcTangentSpace },
-	{ "convert-lh", "Convert to a left-handed coordinate system", aiPostProcessSteps::aiProcess_MakeLeftHanded },
-	{ "debone", "Losslessly removes bone data", aiPostProcessSteps::aiProcess_Debone },
-	{ "remove-degen", "Remove degenerate points from model data", aiPostProcessSteps::aiProcess_FindDegenerates },
-	{ "fix-invalid", "Attempt to fix common exporter errors", aiPostProcessSteps::aiProcess_FindInvalidData },
-	{ "fix-inward-norm", "Attempt to fix inward-facing normals", aiPostProcessSteps::aiProcess_FixInfacingNormals },
-	{ "flip-uv", "Flips all UVs along the y-axis; incorporated in \"convert-lh\" already", aiPostProcessSteps::aiProcess_FlipUVs },
-	{ "cw-winding", "Change winding order from default CCW to CW", aiPostProcessSteps::aiProcess_FlipWindingOrder },
-	{ "improve-cache-local", "Attempt to improve vertex cache locality based on 'tipsify' algorithm (O(n))", aiPostProcessSteps::aiProcess_ImproveCacheLocality },
-	{ "merge-identical", "Merge identical vertices; only for indexed models", aiPostProcessSteps::aiProcess_JoinIdenticalVertices },
-	{ "limit-bone-weights", "Limit number of bones affecting any vertex to 4 (configurable)", aiPostProcessSteps::aiProcess_LimitBoneWeights },
-	{ "collapse-scene", "Attempt to simplify the scene graph by collapsing as far as possible", aiPostProcessSteps::aiProcess_OptimizeGraph },
-	{ "optimise-mesh", "Attempt to optimise mesh data to reduce the number of draw calls", aiPostProcessSteps::aiProcess_OptimizeMeshes },
-	{ "bake-scene-transform", "Remove scene hierarchy and bake transforms into vertex data", aiPostProcessSteps::aiProcess_PreTransformVertices },
-	{ "minimise-mats", "Remove any materials not required by the model", aiPostProcessSteps::aiProcess_RemoveRedundantMaterials },
-	{ "split-ptype", "Split model data into meshes based on primitive type", aiPostProcessSteps::aiProcess_SortByPType },
-	{ "minimise-mesh-bones", "Split meshes if required to minimise the number of bone influences per vertex", aiPostProcessSteps::aiProcess_LimitBoneWeights },
-	{ "split-large-meshes", "Split any large meshes into multiple sub-meshes (with configurable thresholds)", aiPostProcessSteps::aiProcess_SplitLargeMeshes },
-	{ "bake-uv-transforms", "Bake any UK transformations directly into UV coords", aiPostProcessSteps::aiProcess_TransformUVCoords },
-	{ "triangulate", "Triangulate any faces with more than three vertices", aiPostProcessSteps::aiProcess_Triangulate },
-	{ "validation", "Perform validation of model data during transformation; enabled by default", aiPostProcessSteps::aiProcess_ValidateDataStructure }
+	{ "gen-uv", "Generate UV coords for the model data", (PostProcess)aiPostProcessSteps::aiProcess_GenUVCoords },
+	{ "gen-normals", "Generate vertex normals; ignored if normals are already present", (PostProcess)aiPostProcessSteps::aiProcess_GenNormals },
+	{ "gen-smooth-normals", "Generate smooth vertex normals; incompatible with gen-normals", (PostProcess)aiPostProcessSteps::aiProcess_GenSmoothNormals },
+	{ "gen-tangents", "Generate tangent space data; requires normal data to be present", (PostProcess)aiPostProcessSteps::aiProcess_CalcTangentSpace },
+	{ "convert-lh", "Convert to a left-handed coordinate system", (PostProcess)aiPostProcessSteps::aiProcess_MakeLeftHanded },
+	{ "debone", "Losslessly removes bone data", (PostProcess)aiPostProcessSteps::aiProcess_Debone },
+	{ "remove-degen", "Remove degenerate points from model data", (PostProcess)aiPostProcessSteps::aiProcess_FindDegenerates },
+	{ "fix-invalid", "Attempt to fix common exporter errors", (PostProcess)aiPostProcessSteps::aiProcess_FindInvalidData },
+	{ "fix-inward-norm", "Attempt to fix inward-facing normals", (PostProcess)aiPostProcessSteps::aiProcess_FixInfacingNormals },
+	{ "flip-uv", "Flips all UVs along the y-axis; incorporated in \"convert-lh\" already", (PostProcess)aiPostProcessSteps::aiProcess_FlipUVs },
+	{ "cw-winding", "Change winding order from default CCW to CW", (PostProcess)aiPostProcessSteps::aiProcess_FlipWindingOrder },
+	{ "improve-cache-local", "Attempt to improve vertex cache locality based on 'tipsify' algorithm (O(n))", (PostProcess)aiPostProcessSteps::aiProcess_ImproveCacheLocality },
+	{ "merge-identical", "Merge identical vertices; only for indexed models", (PostProcess)aiPostProcessSteps::aiProcess_JoinIdenticalVertices },
+	{ "limit-bone-weights", "Limit number of bones affecting any vertex to 4 (configurable)", (PostProcess)aiPostProcessSteps::aiProcess_LimitBoneWeights },
+	{ "collapse-scene", "Attempt to simplify the scene graph by collapsing as far as possible", (PostProcess)aiPostProcessSteps::aiProcess_OptimizeGraph },
+	{ "optimise-mesh", "Attempt to optimise mesh data to reduce the number of draw calls", (PostProcess)aiPostProcessSteps::aiProcess_OptimizeMeshes },
+	{ "bake-scene-transform", "Remove scene hierarchy and bake transforms into vertex data", (PostProcess)aiPostProcessSteps::aiProcess_PreTransformVertices },
+	{ "minimise-mats", "Remove any materials not required by the model", (PostProcess)aiPostProcessSteps::aiProcess_RemoveRedundantMaterials },
+	{ "split-ptype", "Split model data into meshes based on primitive type", (PostProcess)aiPostProcessSteps::aiProcess_SortByPType },
+	{ "minimise-mesh-bones", "Split meshes if required to minimise the number of bone influences per vertex", (PostProcess)aiPostProcessSteps::aiProcess_LimitBoneWeights },
+	{ "split-large-meshes", "Split any large meshes into multiple sub-meshes (with configurable thresholds)", (PostProcess)aiPostProcessSteps::aiProcess_SplitLargeMeshes },
+	{ "bake-uv-transforms", "Bake any UK transformations directly into UV coords", (PostProcess)aiPostProcessSteps::aiProcess_TransformUVCoords },
+	{ "triangulate", "Triangulate any faces with more than three vertices", (PostProcess)aiPostProcessSteps::aiProcess_Triangulate },
+	{ "validation", "Perform validation of model data during transformation; enabled by default", (PostProcess)aiPostProcessSteps::aiProcess_ValidateDataStructure }, 
+	{ "invert-u", "Invert all U coordinates of the mesh UV mapping (i.e. u' = (1.0f - u)", (PostProcess)CustomPostProcess::InvertU },
+	{ "invert-v", "Invert all V coordinates of the mesh UV mapping (i.e. v' = (1.0f - v)", (PostProcess)CustomPostProcess::InvertV }
 };
 
 
-unsigned int GetAllOperations(void)
+PostProcess GetAllOperations(void)
 {
-	unsigned int all = 0U;
+	PostProcess all = 0U;
 	for (auto & op : MESH_OPERATIONS)
 	{
 		all |= std::get<2>(op);
@@ -61,7 +65,7 @@ unsigned int GetAllOperations(void)
 	return all;
 }
 
-unsigned int GetOperation(const std::string & op)
+PostProcess GetOperation(const std::string & op)
 {
 	for (const auto & operation : MESH_OPERATIONS)
 	{
@@ -129,7 +133,7 @@ void ReadArgsFromFile(const std::string & file, std::vector<std::string> & argsv
 	std::cout << "Loaded " << args.size() << " arguments from file \"" << fs::absolute(argfile) << "\"\n";
 }
 
-unsigned int AddModelSpecificOperations(fs::path model_file, unsigned int current_operations)
+PostProcess AddModelSpecificOperations(fs::path model_file, PostProcess current_operations)
 {
 	if (!fs::exists(model_file)) return 0U;
 
@@ -140,7 +144,7 @@ unsigned int AddModelSpecificOperations(fs::path model_file, unsigned int curren
 	std::vector<std::string> args;
 	ReadArgsFromFile(fs::absolute(config_file).string(), args);
 
-	unsigned int operations = current_operations;
+	PostProcess operations = current_operations;
 	bool add_next = false, skip_next = false;
 	for (const auto & arg : args)
 	{
@@ -149,7 +153,7 @@ unsigned int AddModelSpecificOperations(fs::path model_file, unsigned int curren
 
 		if (add_next || skip_next)
 		{
-			unsigned int op = GetOperation(arg);
+			PostProcess op = GetOperation(arg);
 			if (op != 0U)
 			{
 				if (add_next)
@@ -173,7 +177,7 @@ unsigned int AddModelSpecificOperations(fs::path model_file, unsigned int curren
 	return operations;
 }
 
-void ObjToRjm(const std::string & input, const std::string & target, unsigned int operations)
+void ObjToRjm(const std::string & input, const std::string & target, PostProcess operations)
 {
 	// Append any model-specific operations if they exist
 	operations = AddModelSpecificOperations(fs::path(input), operations);
@@ -181,6 +185,7 @@ void ObjToRjm(const std::string & input, const std::string & target, unsigned in
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerAssimp>(operations)))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
@@ -194,7 +199,7 @@ void ObjToRjm(const std::string & input, const std::string & target, unsigned in
 	// auto m = ModelData::Deserialize(PipelineUtil::ReadBinaryFile(fs::path("C:\\Users\\robje\\Downloads\\capsule.out")));
 }
 
-void ObjToRjmBulk(std::vector<std::string> & input, unsigned int operations)
+void ObjToRjmBulk(std::vector<std::string> & input, PostProcess operations)
 {
 	// Exectute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
@@ -209,11 +214,12 @@ void ObjToRjmBulk(std::vector<std::string> & input, unsigned int operations)
 	}
 }
 
-void RjmToObj(const std::string & input, const std::string & target, const std::string & generate_material)
+void RjmToObj(const std::string & input, const std::string & target, const std::string & generate_material, PostProcess operations)
 {
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
@@ -224,7 +230,7 @@ void RjmToObj(const std::string & input, const std::string & target, const std::
 	pipeline->Transform(fs::path(input), fs::path(target));
 }
 
-void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate_material)
+void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate_material, PostProcess operations)
 {
 	// Exectute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
@@ -235,11 +241,11 @@ void RjmToObjBulk(std::vector<std::string> & input, const std::string & generate
 		std::cout << "\nProcessing file " << ++index << " of " << input.size() << " (" << fs::absolute(in) << ")\n";
 
 		fs::path target(fs::absolute(in_path.parent_path()).string() + "/" + in_path.stem().string() + ".out");
-		RjmToObj(in, target.string(), generate_material);
+		RjmToObj(in, target.string(), generate_material, operations);
 	}
 }
 
-void ProcessRjm(const std::string & input, const std::string & target, unsigned int operations, bool in_place = false, bool in_place_backup = true)
+void ProcessRjm(const std::string & input, const std::string & target, PostProcess operations, bool in_place = false, bool in_place_backup = true)
 {
 	// Append any model-specific operations if they exist
 	operations = AddModelSpecificOperations(fs::path(input), operations);
@@ -247,6 +253,7 @@ void ProcessRjm(const std::string & input, const std::string & target, unsigned 
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
@@ -293,7 +300,7 @@ void ProcessRjm(const std::string & input, const std::string & target, unsigned 
 	}
 }
 
-void ProcessRjmBulk(std::vector<std::string> & input, unsigned int operations, bool in_place = false, bool in_place_backup = true)
+void ProcessRjmBulk(std::vector<std::string> & input, PostProcess operations, bool in_place = false, bool in_place_backup = true)
 {
 	// Exectute the transformation pipeline
 	std::cout << "Performing bulk transformation\n";
@@ -435,7 +442,7 @@ int main(int argc, const char *argv[])
 	bool inplace = false;
 	bool inplace_backup = true;
 	bool bulk = false;
-	unsigned int operations = AssimpIntegration::DefaultOperations();
+	PostProcess operations = AssimpIntegration::DefaultOperations();
 
 	// Arguments vector
 	std::vector<std::string> args(argv, argv + argc);
@@ -499,8 +506,8 @@ int main(int argc, const char *argv[])
 	}
 	else if (type == "rjm-to-obj")
 	{
-		if (bulk)		RjmToObjBulk(input, gen_mat);
-		else			RjmToObj(input.at(0), output, gen_mat);
+		if (bulk)		RjmToObjBulk(input, gen_mat, operations);
+		else			RjmToObj(input.at(0), output, gen_mat, operations);
 	}
 
 
