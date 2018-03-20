@@ -2612,11 +2612,11 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		// Tmp: Update player spotlight position and orientation to match camera
-		if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
+		//if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
 		{
 			lt2()->SetPosition(Game::Engine->GetCamera()->GetPosition());
 			lt2()->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
-			OutputDebugString(concat("Orient: ")(Vector4ToString(Game::Engine->GetCamera()->DetermineAdjustedOrientation()))("\n").str().c_str());
+			if (Game::Keyboard.GetKey(DIK_CAPSLOCK)) lt2()->LightObject().SetRange(200.0f); else lt2()->LightObject().SetRange(20.0f);
 		}
 
 
