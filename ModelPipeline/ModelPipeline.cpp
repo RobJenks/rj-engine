@@ -50,7 +50,8 @@ static const std::vector<std::tuple<std::string, std::string, PostProcess>> MESH
 	{ "triangulate", "Triangulate any faces with more than three vertices", (PostProcess)aiPostProcessSteps::aiProcess_Triangulate },
 	{ "validation", "Perform validation of model data during transformation; enabled by default", (PostProcess)aiPostProcessSteps::aiProcess_ValidateDataStructure }, 
 	{ "invert-u", "Invert all U coordinates of the mesh UV mapping (i.e. u' = (1.0f - u)", (PostProcess)CustomPostProcess::InvertU },
-	{ "invert-v", "Invert all V coordinates of the mesh UV mapping (i.e. v' = (1.0f - v)", (PostProcess)CustomPostProcess::InvertV }
+	{ "invert-v", "Invert all V coordinates of the mesh UV mapping (i.e. v' = (1.0f - v)", (PostProcess)CustomPostProcess::InvertV }, 
+	{ "custom-transform", "Apply a custom transformation given in \"<modelfile>.transform\" to the model geometry", (PostProcess)CustomPostProcess::CustomTransform }
 };
 
 
@@ -185,7 +186,7 @@ void ObjToRjm(const std::string & input, const std::string & target, PostProcess
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerAssimp>(operations)))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations, input)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
@@ -219,7 +220,7 @@ void RjmToObj(const std::string & input, const std::string & target, const std::
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations, input)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
@@ -253,7 +254,7 @@ void ProcessRjm(const std::string & input, const std::string & target, PostProce
 	// Basic pipeline configuration
 	std::unique_ptr<TransformPipeline> pipeline = TransformPipelineBuilder()
 		.WithInputTransformer(std::move(std::make_unique<InputTransformerRjm>()))
-		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations)))
+		.WithPipelineStage(std::move(std::make_unique<PipelineStageDirectPostprocess>(operations, input)))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageOutputModelInfo>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageUnitScaleModel>()))
 		.WithPipelineStage(std::move(std::make_unique<PipelineStageCentreModel>()))
