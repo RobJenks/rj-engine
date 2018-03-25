@@ -271,7 +271,7 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_debug_rendering->SetShader(Shader::Type::PixelShader, m_ps_debug);
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
-	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);				// No culling for fullscreen quad rendering
+	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);	
 	m_pipeline_debug_rendering->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
 }
 
