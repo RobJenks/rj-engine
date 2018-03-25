@@ -14,35 +14,43 @@
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
 
+/* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
+   those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
+   only be rendered in a small upper-left corner square corresponding to the dimensions of the material texture.  If it 
+   becomes necessary to allow textures light volume models in future, need to ensure the slots for material textures and 
+   GBuffer textures do not overlap */
+
 
 DeferredRenderProcess::DeferredRenderProcess(void)
 	:
-	m_vs(NULL), 
-	m_ps_geometry(NULL), 
-	m_ps_lighting(NULL), 
-	m_ps_debug(NULL), 
-	m_depth_only_rt(NULL), 
-	m_cb_frame(NULL), 
-	m_cb_lightindex(NULL), 
-	m_cb_debug(NULL), 
+	m_vs(NULL),
+	m_ps_geometry(NULL),
+	m_ps_lighting(NULL),
+	m_ps_debug(NULL),
+	m_depth_only_rt(NULL),
+	m_cb_frame(NULL),
+	m_cb_lightindex(NULL),
+	m_cb_debug(NULL),
 
-	m_pipeline_geometry(NULL), 
-	m_pipeline_lighting_pass1(NULL), 
-	m_pipeline_lighting_pass2(NULL), 
-	m_pipeline_lighting_directional(NULL), 
-	m_pipeline_transparency(NULL), 
-	m_pipeline_debug_rendering(NULL), 
+	m_pipeline_geometry(NULL),
+	m_pipeline_lighting_pass1(NULL),
+	m_pipeline_lighting_pass2(NULL),
+	m_pipeline_lighting_directional(NULL),
+	m_pipeline_transparency(NULL),
+	m_pipeline_debug_rendering(NULL),
 
-	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_vs_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
 	m_param_ps_light_framedata(ShaderDX11::INVALID_SHADER_PARAMETER),
-	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
-	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER), 
+	m_param_ps_light_lightdata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_light_lightindexdata(ShaderDX11::INVALID_SHADER_PARAMETER),
+	m_param_ps_debug_debugdata(ShaderDX11::INVALID_SHADER_PARAMETER),
 
-	m_model_sphere(NULL), 
+	m_model_sphere(NULL),
 	m_model_cone(NULL),
-	m_model_quad(NULL), 
-	m_transform_fullscreen_quad(ID_MATRIX), 
+	m_model_quad(NULL),
+	m_transform_fullscreen_quad(ID_MATRIX),
+	m_transform_fullscreen_quad_farplane(ID_MATRIX),
+	m_frame_buffer_state(FrameBufferState::Unknown),
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
@@ -124,8 +132,8 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 
 	// Load all required model geometry
 	std::vector<std::tuple<std::string, std::string, Model**>> models = {
-		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere }, 
-		{ "spot light cone volume", "spotlight_cone_model", &m_model_cone}, 
+		{ "point light sphere volume", "unit_sphere_model", &m_model_sphere },
+		{ "spot light cone volume", "spotlight_cone_model", &m_model_cone },
 		{ "fullscreen quad", "unit_square_model", &m_model_quad }
 	};
 
@@ -143,7 +151,7 @@ void DeferredRenderProcess::InitialiseRenderVolumes(void)
 	// Also precalculate a fullscreen quad transform for rendering directional lights via the quad model
 	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
 	m_transform_fullscreen_quad = XMMatrixMultiply(
-		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f), 
+		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
 		XMMatrixTranslation(0.0f, 0.0f, 10.0f)
 	);
 }
@@ -211,7 +219,6 @@ void DeferredRenderProcess::InitialiseDeferredLightingPass2Pipeline(void)
 
 	// All light rendering will be additive
 	m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
-	//m_pipeline_lighting_pass2->GetBlendState().SetBlendMode(BlendState::BlendMode(true, false, BlendState::BlendFactor::One, BlendState::BlendFactor::Zero)); // TODO: REMOVE (DEBUG TO RENDER *ONLY* OUTPUT OF PASS2)
 
 	// Enable depth testing (pass if in front of / greater than light volume back faces), disable depth writes
 	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::GreaterOrEqual);
@@ -237,11 +244,19 @@ void DeferredRenderProcess::InitialiseDeferredDirectionalLightingPipeline(void)
 	m_pipeline_lighting_directional->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_lighting_directional->SetShader(Shader::Type::PixelShader, m_ps_lighting);
 	m_pipeline_lighting_directional->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+	m_pipeline_lighting_directional->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
 	m_pipeline_lighting_directional->GetBlendState().SetBlendMode(BlendState::BlendModes::AdditiveBlend);
 
 	// Enable depth testing (pass all pixels in front of the far plane), disable writes to the depth buffer
 	DepthStencilState::DepthMode depthMode(true, DepthStencilState::DepthWrite::Disable, DepthStencilState::CompareFunction::Greater);
 	m_pipeline_lighting_directional->GetDepthStencilState().SetDepthMode(depthMode);
+
+	// Also initialise the fullscreen quad transform for rendering at the far plane
+	auto displaysize = Game::Engine->GetRenderDevice()->GetDisplaySizeF();
+	m_transform_fullscreen_quad_farplane = XMMatrixMultiply(
+		XMMatrixScaling(displaysize.x, displaysize.y, 1.0f),
+		XMMatrixTranslation(0.0f, 0.0f, Game::Engine->GetRenderDevice()->GetFarClipDistance())
+	);
 }
 
 void DeferredRenderProcess::InitialiseTransparentRenderingPipelines(void)
@@ -271,7 +286,7 @@ void DeferredRenderProcess::InitialiseDebugRenderingPipelines(void)
 	m_pipeline_debug_rendering->SetShader(Shader::Type::VertexShader, m_vs);
 	m_pipeline_debug_rendering->SetShader(Shader::Type::PixelShader, m_ps_debug);
 	m_pipeline_debug_rendering->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false));		// Disable all depth testing
-	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);	
+	m_pipeline_debug_rendering->GetRasterizerState().SetCullMode(RasterizerState::CullMode::Back);
 	m_pipeline_debug_rendering->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
 }
 
@@ -290,16 +305,18 @@ void DeferredRenderProcess::Render(void)
 void DeferredRenderProcess::BeginFrame(void)
 {
 	/*
-		1. Populate common constant buffers
-		2. Clear GBuffer render target
+	1. Initialise per-frame data
+	2. Clear GBuffer render target
 	*/
 
-	/* 1. Populate common constant buffers */
-	PopulateCommonConstantBuffers();
+	/* 1. Initialise per-frame data */
+
+	// Reset frame buffer state to ensure re-initialisation at least once at the start of the frame
+	PopulateFrameBuffer(FrameBufferState::Unknown);
 
 	/* 2. Clear GBuffer RT */
 	// TODO: REMOVE
-	GBuffer.RenderTarget->Clear(ClearFlags::All, /*NULL_FLOAT4*/XMFLOAT4(0.7f,0.7f,0.7f,0.5f), 1.0f, 0U);
+	GBuffer.RenderTarget->Clear(ClearFlags::All, /*NULL_FLOAT4*/XMFLOAT4(0.7f, 0.7f, 0.7f, 0.5f), 1.0f, 0U);
 
 }
 
@@ -307,22 +324,22 @@ void DeferredRenderProcess::BeginFrame(void)
 void DeferredRenderProcess::RenderFrame(void)
 {
 	/*
-		1. Render all opaque geometry
-		2. Copy GBuffer depth/stencil to primary render target
-		3a. Lighting pass 1: determine lit pixels (non-directional lights)
-		3b. Lighting pass 2: render lit pixels (non-directional lights)
-		3c: Lighting: render directional lights
-		4. Render transparent objects
-		5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
+	1. Render all opaque geometry
+	2. Copy GBuffer depth/stencil to primary render target
+	3a. Lighting pass 1: determine lit pixels (non-directional lights)
+	3b. Lighting pass 2: render lit pixels (non-directional lights)
+	3c: Lighting: render directional lights
+	4. Render transparent objects
+	5. [Debug only] If debug GBuffer rendering is enabled, overwrite all primary RT data with the debug output
 	*/
-	
+
 	/* 1. Render opaque geometry */
 	RenderGeometry();
 
 	/* 2. Copy GBuffer depth/stencil to primary render target */
 	Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget()->
 		GetTexture(RenderTarget::AttachmentPoint::DepthStencil)->Copy(
-		GBuffer.DepthStencilTexture);
+			GBuffer.DepthStencilTexture);
 
 	/* 3. Perform deferred lighting */
 	PerformDeferredLighting();
@@ -340,7 +357,7 @@ void DeferredRenderProcess::RenderFrame(void)
 void DeferredRenderProcess::EndFrame(void)
 {
 	/*
-		1. Present backbuffer to the primary display by cycling the swap chain
+	1. Present backbuffer to the primary display by cycling the swap chain
 	*/
 
 
@@ -351,15 +368,42 @@ void DeferredRenderProcess::EndFrame(void)
 
 	// Log presentation failures in debug mode only
 #	ifdef _DEBUG
-		if (FAILED(hr))
-		{
-			Game::Log << LOG_ERROR << "Critical: Frame presentation failed with hr=" << hr << "\n";
-		}
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Critical: Frame presentation failed with hr=" << hr << "\n";
+	}
 #	endif
 }
 
-void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
+// TODO: Should make sure lights are sorted in future, so that directional lights come at the end of the light array, 
+// to minimise the number of times we need to perform this state change and switch the frame buffer data
+void DeferredRenderProcess::PopulateFrameBuffer(FrameBufferState state)
 {
+	// We only need to update the buffer data is the desired state has changed
+	if (state == m_frame_buffer_state) return;
+
+	// Populate the frame buffer based on the new state
+	switch (state)
+	{
+		case FrameBufferState::Normal:
+			PopulateFrameBufferBufferForNormalRendering();
+			return;
+
+		case FrameBufferState::Fullscreen:
+			PopulateFrameBufferForFullscreenQuadRendering();
+			return;
+
+		default:
+			SetFrameBufferState(FrameBufferState::Unknown);
+			return;
+	}
+}
+
+void DeferredRenderProcess::PopulateFrameBufferBufferForNormalRendering(void)
+{
+	// Store the new state
+	SetFrameBufferState(FrameBufferState::Normal);
+
 	// Frame data buffer
 	m_cb_frame_data.RawPtr->View = Game::Engine->GetRenderViewMatrixF();
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderProjectionMatrixF();
@@ -370,6 +414,9 @@ void DeferredRenderProcess::PopulateCommonConstantBuffers(void)
 
 void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 {
+	// Store the new state
+	SetFrameBufferState(FrameBufferState::Fullscreen);
+
 	// Frame data buffer
 	m_cb_frame_data.RawPtr->View = ID_MATRIX_F;														// View matrix == identity
 	m_cb_frame_data.RawPtr->Projection = Game::Engine->GetRenderOrthographicMatrixF();				// Proj matrix == orthographic
@@ -380,6 +427,9 @@ void DeferredRenderProcess::PopulateFrameBufferForFullscreenQuadRendering(void)
 
 void DeferredRenderProcess::RenderGeometry(void)
 {
+	// Populate common buffer data
+	PopulateFrameBuffer(FrameBufferState::Normal);
+
 	// Bind required buffer resources to shader parameters
 	m_pipeline_geometry->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 
@@ -388,7 +438,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 
 	// Render all non-transparent objects
 	Game::Engine->ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(m_pipeline_geometry);
-	
+
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds
 	m_pipeline_geometry->Unbind();
@@ -426,23 +476,26 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		switch (light.Type)
 		{
 			case LightType::Point:
+				PopulateFrameBuffer(FrameBufferState::Normal);
 				transform = LightSource::CalculatePointLightTransform(light);
 				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_sphere, transform);
 				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_sphere, transform);
 				break;
 
 			case LightType::Spotlight:
+				PopulateFrameBuffer(FrameBufferState::Normal);
 				transform = LightSource::CalculateSpotlightTransform(light);
 				RenderLightPipeline(m_pipeline_lighting_pass1, m_model_cone, transform);
 				RenderLightPipeline(m_pipeline_lighting_pass2, m_model_cone, transform);
 				break;
 
 			case LightType::Directional:
-				//RenderLightPipeline(m_pipeline_lighting_directional, /* TODO: REQUIRED */ NULL, ID_MATRIX);
+				PopulateFrameBuffer(FrameBufferState::Fullscreen);
+				RenderLightPipeline(m_pipeline_lighting_directional, m_model_quad, m_transform_fullscreen_quad_farplane);
 				break;
 		}
 	}
-	
+
 	// Unbind the GBuffer following all deferred lighting rendering
 	GBuffer.Unbind(Shader::Type::PixelShader);
 }
@@ -512,16 +565,16 @@ TextureDX11 * DeferredRenderProcess::GetDebugTexture(DeferredRenderProcess::Debu
 	switch (debug_mode)
 	{
 		// GBuffer textures
-		case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
-		case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
-		case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
-		case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
+	case DebugRenderMode::Diffuse:		return GBuffer.DiffuseTexture;
+	case DebugRenderMode::Specular:		return GBuffer.SpecularTexture;
+	case DebugRenderMode::Normal:		return GBuffer.NormalTexture;
+	case DebugRenderMode::Depth:		return GBuffer.DepthStencilTexture;
 
 		// Other textures
 
 
 		// Unknown texture
-		default:							return NULL;
+	default:							return NULL;
 	}
 }
 
@@ -536,13 +589,13 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	if (!texture) return false;
 	texture->Bind(Shader::Type::PixelShader, 0U, ShaderParameter::Type::Texture);
 
-	// Populate frame data buffer for fullscreen rendering
-	PopulateFrameBufferForFullscreenQuadRendering();
+	// Debug views are generated via full-screen rendering
+	PopulateFrameBuffer(FrameBufferState::Fullscreen);
 
 	// Populate debug rendering constant buffer
 	m_cb_debug_data.RawPtr->is_depth_texture = (m_debug_render_mode == DebugRenderMode::Depth ? TRUE : FALSE);
 	m_cb_debug->Set(m_cb_debug_data.RawPtr);
-	
+
 	// Bind shader parameters to the debug pipeline
 	m_pipeline_debug_rendering->GetShader(Shader::Type::VertexShader)->GetParameter(m_param_vs_framedata).Set(GetCommonFrameDataBuffer());
 	m_pipeline_debug_rendering->GetShader(Shader::Type::PixelShader)->GetParameter(m_param_ps_debug_debugdata).Set(m_cb_debug);
@@ -552,9 +605,6 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
 	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, m_model_quad->Data, RM_Instance(m_transform_fullscreen_quad), 1U);
-
-	// Repopulate the frame data buffer with normal data
-	PopulateCommonConstantBuffers();
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();

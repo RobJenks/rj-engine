@@ -27,7 +27,7 @@
   <Model>
     <Code>unit_square_model</Code>
     <Filename>Models\Misc\unit_square.rjm</Filename>
-    <Material>debug_material</Material>
+    <Material>null_material</Material>
   </Model>
 
   <Model>

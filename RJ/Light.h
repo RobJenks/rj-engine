@@ -26,6 +26,7 @@ public:
 	CMPINLINE void					Activate(void) 				{ Data.Enabled = true; }
 	CMPINLINE void					Deactivate(void)			{ Data.Enabled = false; }
 	CMPINLINE void					SetIsActive(bool active)	{ Data.Enabled = active; }
+	CMPINLINE void					Toggle(void)				{ SetIsActive(!IsActive()); }
 
 	// Default constructor
 	Light(void);

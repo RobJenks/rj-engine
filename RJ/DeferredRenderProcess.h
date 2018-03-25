@@ -49,8 +49,18 @@ public:
 
 protected:
 
+	// Record which set of data is active in the frame buffer to minimise rebinding and state changes
+	enum class FrameBufferState				{ Unknown = 0, Normal, Fullscreen };
+	FrameBufferState						m_frame_buffer_state;
+	CMPINLINE FrameBufferState				GetFrameBufferState(void) const { return m_frame_buffer_state; }
+	CMPINLINE void							SetFrameBufferState(FrameBufferState state) { m_frame_buffer_state = state; }
+
+
+protected:
+
 	// Primary stages in deferred rendering process
-	void PopulateCommonConstantBuffers(void);
+	void PopulateFrameBuffer(FrameBufferState state);
+	void PopulateFrameBufferBufferForNormalRendering(void);
 	void PopulateFrameBufferForFullscreenQuadRendering(void);
 	void RenderGeometry(void);
 	void PerformDeferredLighting(void);
@@ -92,6 +102,7 @@ private:
 	Model *									m_model_cone;
 	Model *									m_model_quad;
 	XMMATRIX								m_transform_fullscreen_quad;
+	XMMATRIX								m_transform_fullscreen_quad_farplane;
 
 	// Indices of required shader parameters
 	ShaderDX11::ShaderParameterIndex		m_param_vs_framedata;

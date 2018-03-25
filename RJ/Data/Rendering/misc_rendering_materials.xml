@@ -1,7 +1,9 @@
 <gamedata>
 
   <!-- Null, untextured material -->
-  <Material code="null_material" />
+  <Material code="null_material">
+    <DiffuseColor x="1.0" y="1.0" z="1.0" w="1.0" />
+  </Material>
 
   <!-- Debug diffuse-only material -->
   <Texture code="debug_texture" dimension="Texture2D" filename="Rendering/debug_texture.dds" />

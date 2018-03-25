@@ -633,10 +633,18 @@ void RJMain::ProcessKeyboardInput(void)
 	// Additional debug controls below this point
 	if (b[DIK_U])
 	{
-		for (const auto & tile : cs()->GetTiles())
+		auto & objects = Game::CurrentPlayer->GetPlayerSystem()->Objects;
+		for (auto & obj : objects)
 		{
-			OutputDebugString(concat(tile.value->GetCode())(": ")(tile.value->GetElementSize().ToString())(" = ")
-				(Vector3ToString(tile.value->GetWorldSize()))(" = ")(MatrixToString(tile.value->GetModel().GetWorldMatrix()))("\n").str().c_str());
+			if (obj()->GetObjectType() == iObject::ObjectType::LightSourceObject)
+			{
+				LightSource *ls = (LightSource*)obj();
+				if (ls->GetLight().GetType() == LightType::Directional)
+				{
+					ls->LightObject().Toggle();
+					break;
+				}
+			}
 		}
 
 		Game::Keyboard.LockKey(DIK_U);
@@ -2405,6 +2413,7 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
+	l->LightObject().SetIntensity(1.25f);
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
