@@ -11,6 +11,9 @@
 
 #include "LightingManagerObject.h"
 
+#include "GameInput.h"	// TODO: REMOVE
+
+
 // Initialise static comparator for binary search comparisons
 LightingManagerObject::_LightSourceEntryPriorityComparator LightingManagerObject::LightSourceEntryPriorityComparator = LightingManagerObject::_LightSourceEntryPriorityComparator();
 
@@ -80,10 +83,12 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// We know that all search results will be light sources
 		light = (LightSource*)(*it); if (!light) continue;
 
+		// Skip any directional lights; we have already unconditionally included them
+		if (light->GetLight().GetType() == LightType::Directional) continue;			// TODO: should be unneccessary due to predicate above
+
 		// Check whether the light could impact the viewing frustum.   We can skip the range check for
 		// directional lights since they are defined to be unsituated
-		if (light->GetLight().GetType() == LightType::Directional ||  
-			Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
+		if (Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
 		{
 			// Register this as a potentialy-important light source
 			RegisterLightSource(light);
@@ -97,7 +102,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 	}
 
 	// Update contents of the structured buffer in texture memory, ready for rendering
-	m_sb_lights->Set(&(m_light_data[0]), static_cast<UINT>(sizeof(LightData) * m_source_count));
+	m_sb_lights->SetData((void*)&m_light_data[0], sizeof(LightData), 0U, m_source_count);
 }
 
 // Register a new light source for this scene

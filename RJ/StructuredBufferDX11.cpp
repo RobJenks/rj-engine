@@ -51,7 +51,8 @@ StructuredBufferDX11 * StructuredBufferDX11::Create(UINT element_count, UINT str
 // Private constructor; new structured buffers should be instantiated through StructuredBufferDX11::Create()
 StructuredBufferDX11::StructuredBufferDX11(const D3D11_BUFFER_DESC & buffer_desc, const void* data, UINT element_count, UINT stride)
 	:
-	StructuredBuffer(buffer_desc, data, element_count, stride)
+	StructuredBuffer(buffer_desc, data, element_count, stride), 
+	m_sb_dirty(true)
 {
 	HRESULT result;
 	m_srv[0] = NULL;
@@ -60,7 +61,7 @@ StructuredBufferDX11::StructuredBufferDX11(const D3D11_BUFFER_DESC & buffer_desc
 	// Assign data to the system buffer
 	if (data)
 	{
-		m_data.assign((BufferElementType*)data, (BufferElementType*)data + m_buffersize);
+		m_data.assign((uint8_t*)data, (uint8_t*)data + m_buffersize);
 	}
 	else
 	{
@@ -108,16 +109,33 @@ StructuredBufferDX11::StructuredBufferDX11(const D3D11_BUFFER_DESC & buffer_desc
 void StructuredBufferDX11::SetData(void* data, size_t elementSize, size_t offset, size_t numElements)
 {
 	// Make the assumption that sizeof(char) == 1
-	unsigned char *first = (unsigned char*)data + (offset * elementSize);
-	unsigned char *last = first + (numElements * elementSize);
+	uint8_t *first = (uint8_t*)data + (offset * elementSize);
+	uint8_t *last = first + (numElements * elementSize);
 	m_data.assign(first, last);
 
-	/// This may not be complete; may need to add an SB-specific Map() of data into the buffer from the vector here
+	LightData * tmp = (LightData*)&(m_data[0]);
+
+	// Data needs to be re-mapped into GPU memory
+	m_sb_dirty = true;
+}
+
+// Commit buffer data to GPU memory
+void StructuredBufferDX11::Commit(void)
+{
+	Set(&(m_data[0]), m_buffersize);
+
+	m_sb_dirty = false;
 }
 
 // Bind this resource to the given shader target
 void StructuredBufferDX11::Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype)
 {
+	// Re-commit data first if required
+	if (m_sb_dirty)
+	{
+		Commit();
+	}
+
 	if (parametertype == ShaderParameter::Type::StructuredBuffer && m_srv[0])
 	{
 		switch (shadertype)

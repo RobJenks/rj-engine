@@ -642,6 +642,7 @@ void RJMain::ProcessKeyboardInput(void)
 				if (ls->GetLight().GetType() == LightType::Directional)
 				{
 					ls->LightObject().Toggle();
+					Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
 					break;
 				}
 			}
@@ -2419,7 +2420,7 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
 	l2->SetRange(600.0f);
 	l2->LightObject().SetIntensity(1.0f);
-	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	//l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l2->SetPosition(XMVectorSet(400, 300, 100, 0));
 	lt = l2;
 
@@ -2428,6 +2429,7 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	//player_light->LightObject().Deactivate();
 	Game::RegisterObject(player_light);
 	//Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 	lt2 = player_light;

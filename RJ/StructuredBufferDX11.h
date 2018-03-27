@@ -45,6 +45,9 @@ private:
 	// Private constructor; new structured buffers should be instantiated through StructuredBufferDX11::Create()
 	StructuredBufferDX11(const D3D11_BUFFER_DESC & buffer_desc, const void* data, UINT element_count, UINT stride);
 
+	// Commit buffer data to GPU memory
+	void								Commit(void);
+
 
 	// GPU resources
 	ID3D11ShaderResourceView *			m_srv[1];
@@ -58,6 +61,9 @@ private:
 	// The last slot the UAV was bound to
 	UINT								m_last_slot;
 
+	// Indicates whether the structured buffer data needs to be recommitted; allows multiple data updates
+	// per map into GPU memory
+	bool								m_sb_dirty;
 		
 	// Static null buffer resources, used for more efficient unbinding
 	static ID3D11ShaderResourceView * const	m_null_srv[1];

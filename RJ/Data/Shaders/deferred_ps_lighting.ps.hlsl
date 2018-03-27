@@ -42,7 +42,7 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	
 	// Retrieve the light being processed
 	LightData light = Lights[LightIndex];
-
+	
 	// Generate a temorary material and populate the GBuffer data, for use in lighting calculations
 	// (TODO: Use smaller, more targeted structure to minimise resource copying cost?)
 	MaterialData mat = (MaterialData)0;
