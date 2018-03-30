@@ -766,8 +766,6 @@
     <ClCompile Include="Material.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
-    <ClCompile Include="IndexBuffer.cpp" />
-    <ClCompile Include="VertexBuffer.cpp" />
     <ClCompile Include="VertexBufferDX11.cpp">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClCompile>
@@ -884,6 +882,12 @@
     </ClCompile>
     <ClCompile Include="VariableSizeValue.cpp">
       <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="IndexBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBuffer.cpp">
+      <Filter>Engine\Rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1553,7 +1557,6 @@
     <ClInclude Include="Utility\chrono_io.h">
       <Filter>Utility</Filter>
     </ClInclude>
-    <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="DebugInvocation.h">
       <Filter>Debug</Filter>
     </ClInclude>
@@ -1863,9 +1866,6 @@
     <ClInclude Include="TextureDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
-    <ClInclude Include="Buffer.h" />
-    <ClInclude Include="ConstantBuffer.h" />
-    <ClInclude Include="StructuredBuffer.h" />
     <ClInclude Include="CPUGraphicsResourceAccess.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
@@ -1935,10 +1935,6 @@
     <ClInclude Include="Material.h">
       <Filter>Engine\Rendering</Filter>
     </ClInclude>
-    <ClInclude Include="IndexBuffer.h" />
-    <ClInclude Include="IndexBufferDX11.h" />
-    <ClInclude Include="VertexBuffer.h" />
-    <ClInclude Include="VertexBufferDX11.h" />
     <ClInclude Include="..\Definitions\LightData.hlsl.h">
       <Filter>Imported Definitions</Filter>
     </ClInclude>
@@ -2058,6 +2054,27 @@
     </ClInclude>
     <ClInclude Include="VariableSizeValue.h">
       <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="Buffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="IndexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBuffer.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferDX11.h">
+      <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2398,15 +2415,23 @@
   <ItemGroup>
     <None Include="Object Hierarchy.cd" />
     <None Include="Engine components.cd" />
-    <None Include="Data\Shaders\hlsl_common.hlsl" />
-    <None Include="Data\Shaders\lighting_calculations.hlsl" />
-    <None Include="Data\Shaders\LightDataBuffers.hlsl" />
     <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\DeferredRenderingGBuffer.hlsl.h">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\hlsl_common.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\LightDataBuffers.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
+    <None Include="Data\Shaders\lighting_calculations.hlsl">
       <Filter>HLSL\Common</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="VertexShader.hlsl" />
     <FxCompile Include="Data\Shaders\old_light_calculation.h.hlsl">
       <Filter>Engine\Rendering\DirectX11\Old</Filter>
     </FxCompile>
@@ -2424,9 +2449,6 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\deferred_ps_debug.ps.hlsl">
       <Filter>HLSL</Filter>
-    </FxCompile>
-    <FxCompile Include="Data\Shaders\DeferredRenderingGBuffer.hlsl">
-      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

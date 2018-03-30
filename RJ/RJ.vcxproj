@@ -1256,7 +1256,6 @@
     <ClInclude Include="UserInterface.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="Utility\chrono_io.h" />
-    <ClInclude Include="Utility\ratio_io.h" />
     <ClInclude Include="VertexBuffer.h" />
     <ClInclude Include="VertexBufferDX11.h" />
     <ClInclude Include="Viewport.h" />
@@ -1381,14 +1380,6 @@
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Test|x64'">VS_Standard</EntryPointName>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Vertex</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">VS_Standard</EntryPointName>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-    </FxCompile>
-    <FxCompile Include="VertexShader.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Test|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
     </FxCompile>
   </ItemGroup>
