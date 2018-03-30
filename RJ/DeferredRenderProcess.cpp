@@ -344,9 +344,7 @@ void DeferredRenderProcess::BeginFrame(void)
 	PopulateFrameBuffer(FrameBufferState::Unknown);
 
 	/* 2. Clear GBuffer RT */
-	// TODO: REMOVE
-	GBuffer.RenderTarget->Clear(ClearFlags::All, /*NULL_FLOAT4*/XMFLOAT4(0.7f, 0.7f, 0.7f, 0.5f), 1.0f, 0U);
-
+	GBuffer.RenderTarget->Clear(ClearFlags::All, NULL_FLOAT4, 1.0f, 0U);
 }
 
 // Perform all rendering of the frame

@@ -2412,15 +2412,17 @@ void RJMain::__CreateDebugScenario(void)
 
 	// Temp: Create a directional light source for the system
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
+	l->OverrideInstanceCode("syslight");
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
-	l->LightObject().SetIntensity(1.25f);
+	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
+	l->LightObject().SetIntensity(0.75f);
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
 	l2->SetRange(600.0f);
 	l2->LightObject().SetIntensity(0.75f);
-	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	//l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l2->SetPosition(XMVectorSet(400, 300, 100, 0));
 	lt = l2;
 
@@ -2429,9 +2431,9 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
-	player_light->LightObject().SetIntensity(10.0f);
+	player_light->LightObject().SetColour(Float4MultiplyScalar(XMFLOAT4(213, 242, 241, 244), (1.0f / 255.0f)));
+	player_light->LightObject().SetIntensity(1.0f);
 	//player_light->LightObject().Deactivate();
-	//Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 	lt2 = player_light;
 	
 	Game::Log << LOG_INFO << "--- Debug scenario created\n";
