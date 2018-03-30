@@ -7,13 +7,7 @@
 #include "lighting_calculations.hlsl"
 #include "LightDataBuffers.hlsl"
 #include "DeferredRenderingBuffers.hlsl"
-
-// GBuffer texture target bindings
-Texture2D DiffuseTextureVS : register(t0);
-Texture2D SpecularTextureVS : register(t1);
-Texture2D NormalTextureVS : register(t2);
-Texture2D DepthTextureVS : register(t3);
-
+#include "DeferredRenderingGBuffer.hlsl.h"
 
 
 // Pixel shader that generates the G-Buffer
@@ -26,15 +20,15 @@ float4 PS_Deferred_Lighting(VertexShaderStandardOutput IN) : SV_Target0
 	// Read all non-depth GBuffer information for this fragment
 	int2 texCoord = IN.position.xy;
 
-	float4 diffuse = DiffuseTextureVS.Load(int3(texCoord, 0));
-	float4 specular = SpecularTextureVS.Load(int3(texCoord, 0));
-	float4 N = NormalTextureVS.Load(int3(texCoord, 0));
+	float4 diffuse = GBuffer_DiffuseTextureVS.Load(int3(texCoord, 0));
+	float4 specular = GBuffer_SpecularTextureVS.Load(int3(texCoord, 0));
+	float4 N = GBuffer_NormalTextureVS.Load(int3(texCoord, 0));
 
 	// Specular power is stored in the alpha component of the specular color; unpack by reversing compression
 	float specularPower = exp2(specular.a * 10.5f);
 
 	// Read depth information from the GBuffer for the fragment
-	float depth = DepthTextureVS.Load(int3(texCoord, 0)).r;
+	float depth = GBuffer_DepthTextureVS.Load(int3(texCoord, 0)).r;
 
 	// Now determine the view vector from this x/y/depth point to the eye position
 	float4 P = ScreenToView(float4(texCoord, depth, 1.0f));

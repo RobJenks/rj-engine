@@ -90,6 +90,10 @@ public:
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name);
 	template <typename T>
 	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, const T *data);
+	template <typename T>
+	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, UINT size);
+	template <typename T>
+	ConstantBufferDX11 *							CreateConstantBuffer(const std::string & name, UINT size, const T *data);
 
 	template <typename T>
 	StructuredBufferDX11 *							CreateStructuredBuffer(	const std::string & name, const T *data, UINT element_count, 
@@ -235,7 +239,19 @@ ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & 
 }
 
 template <typename T>
+ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & name, UINT size)
+{
+	return CreateConstantBuffer<T>(name, size, NULL);
+}
+
+template <typename T>
 ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & name, const T *data)
+{
+	return CreateConstantBuffer<T>(name, sizeof(T), data);
+}
+
+template <typename T>
+ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & name, UINT size, const T *data)
 {
 	if (name.empty())
 	{
@@ -249,10 +265,10 @@ ConstantBufferDX11 * RenderAssetsDX11::CreateConstantBuffer(const std::string & 
 		return NULL;
 	}
 
-	ConstantBufferDX11 *buffer = ConstantBufferDX11::Create(data);
+	ConstantBufferDX11 *buffer = ConstantBufferDX11::Create(size, data);
 	if (!buffer)
 	{
-		Game::Log << LOG_ERROR << "Failed to create constant buffer \"" << name << "\" (sz:" << sizeof(T) << ", d" << (data ? "!=0" : "==0") << ")\n";
+		Game::Log << LOG_ERROR << "Failed to create constant buffer \"" << name << "\" (sz:" << size << ", d" << (data ? "!=0" : "==0") << ")\n";
 		return NULL;
 	}
 

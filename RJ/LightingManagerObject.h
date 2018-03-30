@@ -29,7 +29,7 @@ public:
 
 	// Limit on the number of lights that can contribute to a scene.  Should be far less of a 
 	// constraint under deferred rendering system
-	static const unsigned int						LIGHT_LIMIT = 512U;
+	static const unsigned int						LIGHT_LIMIT = LIGHT_RENDER_LIMIT;
 
 	// Default constructor
 	LightingManagerObject(void);

@@ -1285,11 +1285,12 @@ void TextureDX11::Clear(ClearFlags clearFlags, const FLOAT * float4_colour, floa
 		devicecontext->ClearRenderTargetView(m_rendertarget_view, float4_colour);
 	}
 
+	if (m_depthstencil_view)
 	{
 		UINT flags = 0;
 		flags |= ((int)clearFlags & (int)ClearFlags::Depth) != 0 ? D3D11_CLEAR_DEPTH : 0;
 		flags |= ((int)clearFlags & (int)ClearFlags::Stencil) != 0 ? D3D11_CLEAR_STENCIL : 0;
-		if (m_depthstencil_view && flags > 0)
+		if (flags > 0)
 		{
 			devicecontext->ClearDepthStencilView(m_depthstencil_view, flags, depth, stencil);
 		}

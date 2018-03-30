@@ -13,6 +13,7 @@
 #include "CommonShaderConstantBufferDefinitions.hlsl.h"
 #include "Data/Shaders/LightDataBuffers.hlsl"
 #include "Data/Shaders/DeferredRenderingBuffers.hlsl"
+#include "Data/Shaders/DeferredRenderingGBuffer.hlsl.h"
 
 /* Info: known problem.  If an object is rendered in the deferred LIGHTING phasee with textures assigned in its material, 
    those textures are bound over the top of the existing GBuffer textures (i.e. slots 0-3).  This can cause lighting to 
@@ -59,6 +60,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 	InitialiseShaders();
 	InitialiseRenderTargets();
 	InitialiseStandardBuffers();
+	InitialiseGBufferResourceMappings();
 
 	InitialiseGeometryPipelines();
 	InitialiseDeferredLightingPipelines();
@@ -124,6 +126,33 @@ void DeferredRenderProcess::InitialiseStandardBuffers(void)
 #ifdef _DEBUG
 	m_cb_debug = Game::Engine->GetRenderDevice()->Assets.CreateConstantBuffer<DeferredDebugBuffer>(DeferredDebugBufferName, m_cb_debug_data.RawPtr);
 #endif
+}
+
+void DeferredRenderProcess::InitialiseGBufferResourceMappings(void)
+{
+	// GBuffer textures will be bound as shader resource view to all lighting (not geometry) pixel shaders
+	std::vector<ShaderDX11*> shaders = { &m_ps_lighting, &m_ps_debug };
+
+	// Mapping from resource names to GBuffer components
+	std::vector<std::tuple<std::string, TextureDX11*>> resource_mapping = {
+		{ GBufferDiffuseTextureName, GBuffer.DiffuseTexture },
+		{ GBufferSpecularTextureName, GBuffer.SpecularTexture },
+		{ GBufferNormalTextureName, GBuffer.NormalTexture },
+		{ GBufferDepthTextureName, GBuffer.DepthStencilTexture },
+	};
+
+	// Map all resources that can be assigned
+	for (auto * shader : shaders)
+	{
+		for (auto & mapping : resource_mapping)
+		{
+			if (shader->HasParameter(std::get<0>(mapping)))
+			{
+				size_t index = shader->GetParameterIndexByName(std::get<0>(mapping));
+				shader->GetParameter(index).Set(std::get<1>(mapping));
+			}
+		}
+	}
 }
 
 void DeferredRenderProcess::InitialiseRenderVolumes(void)
@@ -448,9 +477,6 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 {
 	XMMATRIX transform;
 
-	// Bind the GBuffer generated in the geometry phase to the deferred lighting pixel shader
-	GBuffer.Bind(Shader::Type::PixelShader);
-
 	// Bind required buffer resources to each pipeline
 	BindDeferredLightingShaderResources();
 
@@ -496,8 +522,6 @@ void DeferredRenderProcess::PerformDeferredLighting(void)
 		}
 	}
 
-	// Unbind the GBuffer following all deferred lighting rendering
-	GBuffer.Unbind(Shader::Type::PixelShader);
 }
 
 
@@ -528,10 +552,13 @@ void DeferredRenderProcess::BindDeferredLightingShaderResources(void)
 void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Model *light_render_volume, const FXMMATRIX transform)
 {
 	// Simply render a single instance of the light volume within the bound pipeline
+	// TODO: In general, optimise the sequence of bind/unbind calls; allow transition directly from Bind()->Bind() without Unbind() in the middle where possible
 	pipeline->Bind();
 	Game::Engine->RenderInstanced(*pipeline, light_render_volume->Data, RM_Instance(transform), 1U);
 	pipeline->Unbind();
 }
+
+// TODO: Add a non-instanced rendering method to the CoreEngine and use it for rendering the single light volumes above
 
 void DeferredRenderProcess::RenderTransparency(void)
 {

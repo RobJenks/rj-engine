@@ -31,6 +31,10 @@ LightingManagerObject::LightingManagerObject(void)
 	m_override_lights.clear();
 	m_override_lights.reserve(LightingManagerObject::LIGHT_LIMIT);
 
+	// Initialise all final light buffer data to zero
+	UINT light_buffer_size = (LightingManagerObject::LIGHT_LIMIT * sizeof(m_light_data[0]));
+	memset(&(m_light_data[0]), 0, light_buffer_size);
+
 	// Create the structured buffer that will hold compiiled frame lighting data
 	m_sb_lights = Game::Engine->GetRenderDevice()->Assets.CreateStructuredBuffer<LightData>(LightBufferName, LightingManagerObject::LIGHT_LIMIT, CPUGraphicsResourceAccess::Write);
 	if (!m_sb_lights)
@@ -90,7 +94,7 @@ void LightingManagerObject::AnalyseNewFrame(void)
 		// directional lights since they are defined to be unsituated
 		if (Game::Engine->GetViewFrustrum()->CheckSphere(light->GetPosition(), light->GetLight().Data.Range))
 		{
-			// Register this as a potentialy-important light source
+			// Register this as a potentially-important light source
 			RegisterLightSource(light);
 		}
 	}

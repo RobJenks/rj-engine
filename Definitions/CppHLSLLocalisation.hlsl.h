@@ -11,6 +11,7 @@
 #	include "../RJ/DefaultingFloat4.h"
 
 #	define CBUFFER struct
+#	define TEXTURE2D struct
 #	define REGISTER(x) 
 #	define ALIGNED16(T) : public ALIGN16<T>
 
@@ -30,6 +31,7 @@
 #else
 
 #	define CBUFFER cbuffer
+#	define TEXTURE2D Texture2D
 #	define REGISTER(x) : register(x)
 #	define ALIGNED16(T)
 

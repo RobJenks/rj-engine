@@ -4,6 +4,10 @@
 #include "../Definitions/CppHLSLLocalisation.hlsl.h"
 
 
+// Limit on the number of lights that can contribute to a scene.  Should be far less of a 
+// constraint under deferred rendering system
+static const unsigned int LIGHT_RENDER_LIMIT = 512U;
+
 // Supported light types; workaround for lack of enumerations in HLSL
 #if defined(__cplusplus) && !defined(RJ_COMPILING_HLSL)
 	enum LightType

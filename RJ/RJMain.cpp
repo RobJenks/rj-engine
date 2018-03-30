@@ -2419,8 +2419,8 @@ void RJMain::__CreateDebugScenario(void)
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());
 	l2->SetRange(600.0f);
-	l2->LightObject().SetIntensity(1.0f);
-	//l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
+	l2->LightObject().SetIntensity(0.75f);
+	l2->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	l2->SetPosition(XMVectorSet(400, 300, 100, 0));
 	lt = l2;
 
@@ -2429,8 +2429,8 @@ void RJMain::__CreateDebugScenario(void)
 	player_light->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
 	player_light->SetPosition(NULL_VECTOR);
 	player_light->SetSimulationState(iObject::ObjectSimulationState::FullSimulation);
+	player_light->LightObject().SetIntensity(10.0f);
 	//player_light->LightObject().Deactivate();
-	Game::RegisterObject(player_light);
 	//Game::CurrentPlayer->GetActor()->AddChildAttachment(player_light, XMVectorSet(0.0f, a1()->GetSizeF().y * 0.4f, a1()->GetSizeF().z * 0.35f, 0.0f), ID_QUATERNION);
 	lt2 = player_light;
 	
@@ -2623,11 +2623,16 @@ void RJMain::DEBUGDisplayInfo(void)
 
 
 		// Tmp: Update player spotlight position and orientation to match camera
-		//if (Game::CurrentPlayer->GetState() == Player::StateType::OnFoot)
+		LightSource *lights[2] = { lt(), lt2() };
+		for (LightSource *active : lights)
 		{
-			lt2()->SetPosition(Game::Engine->GetCamera()->GetPosition());
-			lt2()->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
-			if (Game::Keyboard.GetKey(DIK_CAPSLOCK)) lt2()->LightObject().SetRange(200.0f); else lt2()->LightObject().SetRange(20.0f);
+			active->SetPosition(Game::Engine->GetCamera()->GetPosition());
+			active->SetOrientation(Game::Engine->GetCamera()->DetermineAdjustedOrientation());
+			if (Game::Keyboard.GetKey(DIK_CAPSLOCK))
+			{
+				active->LightObject().SetRange(active->LightObject().GetRange() < 100.0f ? 200.0f : 20.0f);
+				Game::Keyboard.LockKey(DIK_CAPSLOCK);
+			}
 		}
 
 

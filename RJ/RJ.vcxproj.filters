@@ -2400,8 +2400,10 @@
     <None Include="Engine components.cd" />
     <None Include="Data\Shaders\hlsl_common.hlsl" />
     <None Include="Data\Shaders\lighting_calculations.hlsl" />
-    <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl" />
     <None Include="Data\Shaders\LightDataBuffers.hlsl" />
+    <None Include="Data\Shaders\DeferredRenderingBuffers.hlsl">
+      <Filter>HLSL\Common</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="VertexShader.hlsl" />
@@ -2422,6 +2424,9 @@
     </FxCompile>
     <FxCompile Include="Data\Shaders\deferred_ps_debug.ps.hlsl">
       <Filter>HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Data\Shaders\DeferredRenderingGBuffer.hlsl">
+      <Filter>HLSL\Common</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

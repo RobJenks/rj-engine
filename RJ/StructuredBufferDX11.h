@@ -24,7 +24,12 @@ public:
 	static StructuredBufferDX11	* Create(const std::vector<T> & data, CPUGraphicsResourceAccess cpuAccess = CPUGraphicsResourceAccess::None, bool isUAV = false);
 
 	// Update data within the buffer
+	template<typename T>
+	void						SetData(const std::vector<T> & values);
+	template<typename T>
+	void						SetData(const std::vector<T> & values, typename std::vector<T>::size_type numElements);
 	void						SetData(void* data, size_t elementSize, size_t offset, size_t numElements);
+	
 
 	// Bind this resource to the given shader target
 	void						Bind(Shader::Type shadertype, Shader::SlotID slot_id, ShaderParameter::Type parametertype);
@@ -90,5 +95,14 @@ static StructuredBufferDX11	* StructuredBufferDX11::Create(UINT element_count, C
 	return StructuredBufferDX11::Create(NULL, element_count, sizeof(T), cpuAccess, isUAV);
 }
 
+template<typename T>
+void StructuredBufferDX11::SetData(const std::vector<T> & values)
+{
+	SetData(values, values.size());
+}
 
-
+template<typename T>
+void StructuredBufferDX11::SetData(const std::vector<T> & values, typename std::vector<T>::size_type numElements)
+{
+	SetData((void*)&values[0], sizeof(T), 0, numElements);
+}

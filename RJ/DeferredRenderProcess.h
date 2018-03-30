@@ -18,7 +18,7 @@ public:
 	// Possible debug rendering modes
 	enum class DebugRenderMode { None = 0, Diffuse = 1, Specular = 2, Normal = 4, Depth = 8 };
 
-	// Default construcotr
+	// Default constructor
 	DeferredRenderProcess(void);
 
 	// Perform any initialisation that cannot be completed on construction, e.g. because it requires
@@ -115,6 +115,7 @@ private:
 	void InitialiseShaders(void);
 	void InitialiseRenderTargets(void);
 	void InitialiseStandardBuffers(void);
+	void InitialiseGBufferResourceMappings(void);
 	void InitialiseRenderVolumes(void);
 	void InitialiseGeometryPipelines(void);
 	void InitialiseDeferredLightingPipelines(void);

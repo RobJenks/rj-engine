@@ -12,6 +12,8 @@ public:
 	// Static method to construct a new constant buffer for the given data
 	template <class T>
 	static ConstantBufferDX11 * Create(const T * data);
+	template <class T>
+	static ConstantBufferDX11 * Create(UINT size, const T * data);
 
 	// Constructor; create a new constant buffer of the given size
 	ConstantBufferDX11(UINT buffer_size);
@@ -37,10 +39,17 @@ private:
 template <class T>
 static ConstantBufferDX11 * ConstantBufferDX11::Create(const T *data)
 {
-	ConstantBufferDX11 *buffer = new ConstantBufferDX11(sizeof(T));
+	return Create(sizeof(T), data);
+}
+
+// Static method to construct a new constant buffer for the given data
+template <class T>
+static ConstantBufferDX11 * ConstantBufferDX11::Create(UINT size, const T *data)
+{
+	ConstantBufferDX11 *buffer = new ConstantBufferDX11(size);
 	if (data)
 	{
-		buffer->Set((const void*)data, sizeof(T));
+		buffer->Set((const void*)data, size);
 	}
 
 	return buffer;
