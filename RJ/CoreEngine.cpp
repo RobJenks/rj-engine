@@ -6,6 +6,7 @@
 #include "Logging.h"
 #include "RJMain.h"
 #include "DeferredRenderProcess.h"
+#include "UIRenderProcess.h"
 #include "Profiler.h"
 #include "FrameProfiler.h"
 #include "Timers.h"
@@ -13,6 +14,7 @@
 #include "TextureDX11.h"
 #include "InputLayoutDesc.h"
 #include "LightingManagerObject.h"
+#include "ShaderFlags.h"
 #include "LightShader.h"
 #include "LightFadeShader.h"
 #include "LightHighlightShader.h"
@@ -80,9 +82,10 @@
 #include "CoreEngine.h"
 
 // Forward declare allowed instances of render queue processing
-template void CoreEngine::ProcessRenderQueue<ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
-template void CoreEngine::ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(PipelineStateDX11*);
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderNonTransparent>(PipelineStateDX11*);
 
+template void CoreEngine::ProcessRenderQueue<ShaderRenderPredicate::RenderUI, ModelRenderPredicate::RenderAll>(PipelineStateDX11*);
 
 // Default constructor
 CoreEngine::CoreEngine(void)
@@ -236,8 +239,9 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 	if (res != ErrorCodes::NoError) { ShutdownGameEngine(); return res; }
 	Game::Log << LOG_INFO << "Environment rendering initialised\n";
 
-	// Activate the default render process
+	// Activate the required render processes for this configuration
 	Game::Engine->GetRenderDevice()->ActivateRenderProcess<DeferredRenderProcess>();
+	Game::Engine->GetRenderDevice()->ActivateUIRenderProcess<UIRenderProcess>();
 
 	// If we succeed in all initialisation functions then return success now
 	Game::Log << LOG_INFO << "All game engine initialisation completed successfully\n\n";
@@ -354,17 +358,17 @@ Result CoreEngine::InitialiseRenderQueue(void)
 
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		RM_InstancedShaderDetails((iShader*)m_lighthighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFlatHighlightFadeShader] =
-		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);	
+		RM_InstancedShaderDetails((iShader*)m_lightflathighlightfadeshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_VolLineShader] =
-		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		RM_InstancedShaderDetails((iShader*)m_vollineshader, true, D3D11_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 
 	// TODO: DEBUG: Remove variants on the light shader
 	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
@@ -829,7 +833,7 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 
 // Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
 // will be rendered through the given rendering pipeline
-template <class TModelRenderPredicate>
+template <class TShaderRenderPredicate, class TModelRenderPredicate>
 void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 {
 	size_t instancecount, inst;

@@ -2414,7 +2414,8 @@ void RJMain::__CreateDebugScenario(void)
 	LightSource *l = LightSource::Create(Game::Engine->LightingManager->GetDefaultDirectionalLightData());
 	l->OverrideInstanceCode("syslight");
 	l->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
-	l->SetPositionAndOrientation(NULL_VECTOR, XMQuaternionRotationAxis(UP_VECTOR, PI + PI*0.25f));	// 225-degree rotation about Y
+	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
+		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
 	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
 	l->LightObject().SetIntensity(0.75f);
 
@@ -2661,4 +2662,3 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
-

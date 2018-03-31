@@ -607,6 +607,7 @@
     <ClCompile Include="ElementStateDefinition.cpp" />
     <ClCompile Include="Timers.cpp" />
     <ClCompile Include="TurretController.cpp" />
+    <ClCompile Include="UIRenderProcess.cpp" />
     <ClCompile Include="UI_Console.cpp" />
     <ClCompile Include="UI_ModelBuilder.cpp" />
     <ClCompile Include="RJMain.cpp" />
@@ -1069,12 +1070,14 @@
     <ClInclude Include="SequenceGenerationTests.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderDX11.h" />
+    <ClInclude Include="ShaderFlags.h" />
     <ClInclude Include="ShaderMacros.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="ObjectSearch.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="ShaderParameter.h" />
     <ClInclude Include="ShaderParameterDX11.h" />
+    <ClInclude Include="ShaderRenderPredicate.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="SimulatedEnvironmentCollision.h" />
     <ClInclude Include="SpaceProjectile.h" />
@@ -1102,6 +1105,7 @@
     <ClInclude Include="ElementStateDefinition.h" />
     <ClInclude Include="Timers.h" />
     <ClInclude Include="TurretController.h" />
+    <ClInclude Include="UIRenderProcess.h" />
     <ClInclude Include="UI_Console.h" />
     <ClInclude Include="UI_ModelBuilder.h" />
     <ClInclude Include="RJMain.h" />

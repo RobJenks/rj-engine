@@ -464,7 +464,7 @@ void DeferredRenderProcess::RenderGeometry(void)
 	m_pipeline_geometry->Bind();
 
 	// Render all non-transparent objects
-	Game::Engine->ProcessRenderQueue<ModelRenderPredicate::RenderNonTransparent>(m_pipeline_geometry);
+	Game::Engine->ProcessRenderQueue<ShaderRenderPredicate::RenderGeometry, ModelRenderPredicate::RenderNonTransparent>(m_pipeline_geometry);
 
 	// Unbind the geometry rendering pipeline
 	// TODO: Avoid bind/unbind/bind/unbind/... ; in future, add more sensible transitions that can eliminate bind(null) calls [for unbinding] in between two normal binds

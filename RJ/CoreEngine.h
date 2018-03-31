@@ -25,6 +25,7 @@
 #include "Frustum.h"
 #include "ViewPortal.h"
 #include "BasicColourDefinition.h"
+#include "ShaderRenderPredicate.h"
 #include "ModelRenderPredicate.h"
 #include "PipelineStateDX11.h"
 class iShader;
@@ -175,7 +176,7 @@ public:
 
 	// Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
 	// will be rendered through the given rendering pipeline
-	template <class TModelRenderPredicate = ModelRenderPredicate::RenderAll>
+	template <class TShaderRenderPredicate = ShaderRenderPredicate::RenderAll, class TModelRenderPredicate = ModelRenderPredicate::RenderAll>
 	void					ProcessRenderQueue(PipelineStateDX11 *pipeline);
 
 	// Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 

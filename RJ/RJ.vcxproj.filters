@@ -889,6 +889,9 @@
     <ClCompile Include="VertexBuffer.cpp">
       <Filter>Engine\Rendering</Filter>
     </ClCompile>
+    <ClCompile Include="UIRenderProcess.cpp">
+      <Filter>Engine\Rendering\DirectX11\UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2076,6 +2079,15 @@
     <ClInclude Include="VertexBufferDX11.h">
       <Filter>Engine\Rendering\DirectX11</Filter>
     </ClInclude>
+    <ClInclude Include="UIRenderProcess.h">
+      <Filter>Engine\Rendering\DirectX11\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderRenderPredicate.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderFlags.h">
+      <Filter>Engine\Rendering</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2410,6 +2422,9 @@
     </Filter>
     <Filter Include="Engine\Rendering\DirectX11\Old\Shaders">
       <UniqueIdentifier>{72a9e836-b31a-4cd3-a9a6-dc44d4e03a0d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Engine\Rendering\DirectX11\UI">
+      <UniqueIdentifier>{59c642a1-d59c-47ea-a0b7-85f37d65508b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -5,16 +5,23 @@
 
 RenderDevice::RenderDevice(void)
 	:
-	m_render_process(NULL)
+	m_render_process(NULL), 
+	m_ui_render_process(NULL)
 {
 }
 
 // Perform rendering; will delegate to the currently-active render process
 void RenderDevice::Render(void)
 {
+	// We must have active render processes at all times
 	assert(m_render_process != NULL);
+	assert(m_ui_render_process != NULL);
 
-	m_render_process->Render();
+	// Perform primary rendering of all scene geometry through the active render process
+	GetActiveRenderProcess()->Render();
+
+	// Perform UI and other orthographic/textured rendering
+	GetActiveUIRenderProcess()->Render();
 }
 
 // Perform any late initialisation that requires access to loaded game data

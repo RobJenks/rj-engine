@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include "Utility.h"
+#include "ShaderFlags.h"
 #include "RM_InstanceData.h"
 class ModelBuffer;
 
@@ -16,12 +18,12 @@ struct RM_ModelDataCollection
 	std::vector<RM_InstanceData>::size_type		CurrentSlotCount;
 	std::vector<RM_InstanceData>::size_type		SlotCapacity;
 	D3D_PRIMITIVE_TOPOLOGY						PrimitiveTopology;
-
+	ShaderFlags									Flags;
 
 	// Default constructor
 	CMPINLINE RM_ModelDataCollection(void) noexcept 
 		: 
-		CurrentSlotCount(0U), SlotCapacity(0U), PrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+		CurrentSlotCount(0U), SlotCapacity(0U), PrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST), Flags(0U)
 	{
 		InitialiseCapacity(RENDER_QUEUE_INITIAL_MODEL_SLOT_ALLOCATION);
 	}
@@ -68,7 +70,8 @@ struct RM_ModelDataCollection
 		: 
 		ModelData(std::move(other.ModelData)), 
 		CurrentSlotCount(other.CurrentSlotCount), 
-		SlotCapacity(other.SlotCapacity)
+		SlotCapacity(other.SlotCapacity), 
+		Flags(other.Flags)
 	{
 	}
 
@@ -78,6 +81,7 @@ struct RM_ModelDataCollection
 		ModelData = std::move(other.ModelData);
 		CurrentSlotCount = other.CurrentSlotCount;
 		SlotCapacity = other.SlotCapacity;
+		Flags = other.Flags;
 		return *this;
 	}
 
