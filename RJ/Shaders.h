@@ -14,4 +14,7 @@ public:
 	static const std::string DeferredLightingPixelShader;
 	static const std::string DeferredLightingDebug;
 
+	static const std::string BasicTextureVertexShader;
+	static const std::string BasicTexturePixelShader;
+
 };

@@ -108,24 +108,26 @@ Result RenderAssetsDX11::InitialiseExternalShaderResource(	ShaderDX11 ** ppOutSh
 	}
 
 	// Verify shader pointer provided for initialisation
-	if (!ppOutShader) return ErrorCodes::InvalidShaderReferenceProvidedForInitialisation;
-	if (*ppOutShader)
+	if (ppOutShader && (*ppOutShader != NULL))
 	{
 		Game::Log << LOG_WARN << "Shader resource already exists, existing resource will be deallocated and overwritten\n";
 		SafeDelete(*ppOutShader);
 	}
 
 	// Attempt to initialise from file
-	(*ppOutShader) = CreateAsset<ShaderDX11>(entryPoint);
-	bool success = (*ppOutShader)->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
+	ShaderDX11 *shader = CreateAsset<ShaderDX11>(entryPoint);
+	bool success = shader->LoadShaderFromFile(shadertype, ConvertStringToWString(BuildStrFilename(D::DATA, fileName)), entryPoint, profile, input_layout);
 
 	// Deallocate the shader object if initialisation failed
 	if (!success)
 	{
 		Game::Log << LOG_ERROR << "Initialisation of shader \"" << entryPoint << "\" failed, cannot proceed\n";
-		SafeDelete(*ppOutShader);
+		SafeDelete(shader);
 		return ErrorCodes::CannotLoadShaderFromFile;
 	}
+
+	// Return a pointer to the shader if required
+	if (ppOutShader) (*ppOutShader) = shader;
 
 	Game::Log << LOG_INFO << "Shader \"" << entryPoint << "\" loaded successfully\n";
 	return ErrorCodes::NoError;

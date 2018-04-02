@@ -69,7 +69,7 @@ public:
 	
 	// Pointer back to the parent Model class for this buffer.  Not always set.  Mostly useful for debugging
 	CMPINLINE Model *				GetParentModel(void) const				{ return m_parentmodel; }
-	CMPINLINE void					SetParentModel(Model *parentmodel)			{ m_parentmodel = parentmodel; }
+	CMPINLINE void					SetParentModel(Model *parentmodel)		{ m_parentmodel = parentmodel; }
 
 
 	// TODO: Probably need to remove this

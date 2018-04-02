@@ -84,7 +84,11 @@ public:
 	// Rendering assets
 	RenderAssetsDX11								Assets;
 
+	// Direct access to common or core engine assets
+	const MaterialDX11 *							NullMaterial(void) const { return m_material_null; }
+	const MaterialDX11 *							DefaultMaterial(void) const { return m_material_null; }
 
+	// Viewport configuration
 	void											SetDisplaySize(INTVECTOR2 display_size);
 	void											SetVsyncEnabled(bool vsync_enabled);
 	void											SetFOV(float fov);
@@ -160,12 +164,16 @@ private:
 	ShaderDX11 *							m_deferred_geometry_ps;
 	ShaderDX11 *							m_deferred_lighting_ps;
 	ShaderDX11 *							m_deferred_debug_ps;
+	ShaderDX11 *							m_texture_vs;
+	ShaderDX11 *							m_texture_ps;
 
 	InputLayoutDesc							m_standard_input_layout;
 
 	SamplerStateDX11 *						m_sampler_linearclamp;
 	SamplerStateDX11 *						m_sampler_linearrepeat;
-	
+
+	const MaterialDX11 *					m_material_null;
+	const MaterialDX11 *					m_material_default;
 
 	// We will negotiate the highest possible supported feature level when attempting to initialise the render device
 	static const D3D_FEATURE_LEVEL			SUPPORTED_FEATURE_LEVELS[];

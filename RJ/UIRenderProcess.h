@@ -1,9 +1,16 @@
 #pragma once
 
-#include "RenderProcess.h"
+#include "RenderProcessDX11.h"
+#include "ManagedPtr.h"
+#include "Data/Shaders/UIRenderingCommonData.hlsl.h"
+class PipelineStateDX11;
+class RenderTargetDX11;
+class ConstantBufferDX11;
+class ShaderDX11;
+class Model;
 
 
-class UIRenderProcess : public RenderProcess
+class UIRenderProcess : public RenderProcessDX11
 {
 public:
 
@@ -20,5 +27,40 @@ public:
 
 private:
 
+	void							InitialiseShaders(void);
+	void							InitialiseStandardBuffers(void);
+	void							InitialiseRenderGeometry(void);
+	void 							InitialisePipelines(void);
+
+	void							PopulateFrameBuffer(void);
+
+	CMPINLINE ConstantBufferDX11 *	GetFrameDataBuffer(void) { return m_cb_frame; }
+
+private:
+
+	// Shaders
+	ShaderDX11 *						m_vs;
+	ShaderDX11 *						m_ps;
+
+	// Render pipeline for standard orthographic texture rendering
+	PipelineStateDX11 *					m_pipeline;
+
+	// Frame data buffer
+	ManagedPtr<UIRenderingFrameBuffer>	m_cb_frame_data;			// Raw CB data & responsible for deallocation
+	ConstantBufferDX11 *				m_cb_frame;					// Compiled CB
+
+	// Pre-cached models for orthographic screen rendering
+	Model *								m_model_quad;
+
+	// Indices of required shader parameters
+	ShaderDX11::ShaderParameterIndex	m_param_vs_framedata;
+
 
 };
+
+
+
+
+
+
+

@@ -115,7 +115,7 @@ void MaterialDX11::UpdateMaterialState(void)
 		}
 
 
-		// Compiile the constant buffer holding all non-texture material data (incl. texture-related flags)
+		// Compile the constant buffer holding all non-texture material data (incl. texture-related flags)
 		CompileMaterial();
 	}
 }

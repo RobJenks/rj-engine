@@ -46,6 +46,8 @@ enum RenderQueueShader
 	RM_LightShader = 0,					// Requires: none
 	RM_LightHighlightShader,			// Requires: none
 
+	RM_OrthographicTexture,				// Orthographic texture/UI rendering, managed separately by the engine
+
 	/* Alpha blending cutoff; perform all alpha blend-enabled operations after this point */
 
 	RM_LightFadeShader,					// Requires: alpha blending

@@ -55,7 +55,7 @@ DeferredRenderProcess::DeferredRenderProcess(void)
 
 	m_debug_render_mode(DeferredRenderProcess::DebugRenderMode::None)
 {
-	m_name = RenderProcess::Name<DeferredRenderProcess>();
+	SetName( RenderProcess::Name<DeferredRenderProcess>() );
 
 	InitialiseShaders();
 	InitialiseRenderTargets();
@@ -380,26 +380,10 @@ void DeferredRenderProcess::RenderFrame(void)
 #endif
 }
 
-// End the frame, including presentation of swap chain to the primary display
+// End the frame; perform any post-render cleanup for the render process
 void DeferredRenderProcess::EndFrame(void)
 {
-	/*
-	1. Present backbuffer to the primary display by cycling the swap chain
-	*/
-
-
-	// Present the back buffer to the screen.  Either lock to screen refresh rate (sync 
-	// interval = 1, if vsync is enabled) or present as fast as possible (sync 
-	// interval = 0, if it is not)
-	HRESULT hr = Game::Engine->GetRenderDevice()->PresentFrame();
-
-	// Log presentation failures in debug mode only
-#	ifdef _DEBUG
-	if (FAILED(hr))
-	{
-		Game::Log << LOG_ERROR << "Critical: Frame presentation failed with hr=" << hr << "\n";
-	}
-#	endif
+	
 }
 
 // TODO: Should make sure lights are sorted in future, so that directional lights come at the end of the light array, 
@@ -552,7 +536,7 @@ void DeferredRenderProcess::RenderLightPipeline(PipelineStateDX11 *pipeline, Mod
 	// Simply render a single instance of the light volume within the bound pipeline
 	// TODO: In general, optimise the sequence of bind/unbind calls; allow transition directly from Bind()->Bind() without Unbind() in the middle where possible
 	pipeline->Bind();
-	Game::Engine->RenderInstanced(*pipeline, light_render_volume->Data, RM_Instance(transform), 1U);
+	Game::Engine->RenderInstanced(*pipeline, light_render_volume->Data, NULL, RM_Instance(transform), 1U);
 	pipeline->Unbind();
 }
 
@@ -629,7 +613,7 @@ bool DeferredRenderProcess::GBufferDebugRendering(void)
 	m_pipeline_debug_rendering->Bind();
 
 	// Render a full-screen quad through the debug pipeline.  Debug texture will be rendered directly to this quad
-	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, m_model_quad->Data, RM_Instance(m_transform_fullscreen_quad), 1U);
+	Game::Engine->RenderInstanced(*m_pipeline_debug_rendering, m_model_quad->Data, NULL, RM_Instance(m_transform_fullscreen_quad), 1U);
 
 	// Unbind the debug pipeline following rendering
 	m_pipeline_debug_rendering->Unbind();

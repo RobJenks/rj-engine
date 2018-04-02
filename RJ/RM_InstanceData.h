@@ -11,7 +11,6 @@ struct RM_InstanceData
 	static const size_t					RENDER_QUEUE_INITIAL_INSTANCE_SLOT_ALLOCATION;
 
 	// Structure data
-	ModelBuffer *						ModelBufferInstance;
 	std::vector<RM_Instance>			InstanceData;
 	std::vector<RM_Instance>::size_type	CurrentInstanceCount;
 	std::vector<RM_Instance>::size_type	InstanceCapacity;
@@ -22,7 +21,6 @@ struct RM_InstanceData
 	// Constructor
 	CMPINLINE							RM_InstanceData(void) noexcept		
 		: 
-		ModelBufferInstance(NULL), 
 		CurrentInstanceCount(0U), 
 		InstanceCapacity(0U), 
 		TimeoutCounter(0) 
@@ -56,6 +54,9 @@ struct RM_InstanceData
 	// Add a new instance for rendering
 	void								NewInstance(RM_Instance && instance);
 
+	// Reset the instance collection ready for the next frame
+	void								Reset(void);
+
 	// Sort instances based on their sort key, in preparation for rendering
 	// TODO: Can test whether maintaining a separate sorted index vector {sortkey, instance_index} 
 	// and lower_bound inserting into it with each instance is faster than one post-sort.  For now
@@ -69,7 +70,6 @@ struct RM_InstanceData
 	// Move constructor; no-exception guarantee to ensure these objects are moved rather than copied by STL containers
 	CMPINLINE							RM_InstanceData(RM_InstanceData && other) noexcept
 		:
-		ModelBufferInstance(other.ModelBufferInstance), 
 		InstanceData(std::move(other.InstanceData)), 
 		CurrentInstanceCount(other.CurrentInstanceCount), 
 		InstanceCapacity(other.InstanceCapacity), 
@@ -80,7 +80,6 @@ struct RM_InstanceData
 	// Move assignment
 	CMPINLINE RM_InstanceData &			RM_InstanceData::operator=(RM_InstanceData && other) noexcept
 	{
-		ModelBufferInstance = other.ModelBufferInstance;
 		InstanceData = std::move(other.InstanceData);
 		CurrentInstanceCount = other.CurrentInstanceCount;
 		InstanceCapacity = other.InstanceCapacity;

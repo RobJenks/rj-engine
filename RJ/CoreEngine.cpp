@@ -315,32 +315,6 @@ Result CoreEngine::InitialiseDirectXMath(void)
 
 Result CoreEngine::InitialiseRenderQueue(void)
 {
-	// Create a new empty instance stream, for initialisation of the buffer
-	/*RM_Instance *idata = (RM_Instance*)malloc(Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
-	if (!idata) return ErrorCodes::CouldNotAllocateMemoryForRenderQueue;
-	memset(idata, 0, Game::C_INSTANCED_RENDER_LIMIT * sizeof(RM_Instance));
-
-	// Create the instance buffer description
-	ibufdesc.Usage = D3D11_USAGE_DYNAMIC;
-	ibufdesc.ByteWidth = sizeof(RM_Instance) * Game::C_INSTANCED_RENDER_LIMIT;
-	ibufdesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	ibufdesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	ibufdesc.MiscFlags = 0;
-	ibufdesc.StructureByteStride = 0;
-
-	// Link the subresource object to the initial empty instance stream
-	ibufdata.pSysMem = idata;
-	ibufdata.SysMemPitch = 0;
-	ibufdata.SysMemSlicePitch = 0;
-
-	// Create the instance buffer
-	HRESULT hr = GetDevice()->CreateBuffer(&ibufdesc, &ibufdata, &m_instancebuffer);
-	if (FAILED(hr)) return ErrorCodes::CouldNotInitialiseInstanceBuffer;
-
-	// Release memory used to initialise the instance buffer
-	free(idata); idata = NULL;
-	*/
-
 	// Create the instance buffer that will be reused by the render queue for all rendering
 	// This must be a DYNAMIC vertex buffer since we will be re-mapping instance data multiple times every frame
 	m_instancebuffer = GetRenderDevice()->Assets.CreateVertexBuffer<RM_Instance>("InstanceBuffer", static_cast<UINT>(Game::C_INSTANCED_RENDER_LIMIT), true);
@@ -359,6 +333,10 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	// Set the reference and parameters for each shader in turn
 	m_renderqueueshaders[RenderQueueShader::RM_LightShader] = 
 		RM_InstancedShaderDetails((iShader*)m_lightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
+
+	m_renderqueueshaders[RenderQueueShader::RM_OrthographicTexture] =
+		RM_InstancedShaderDetails((iShader*)NULL, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeUI);
+
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = 
 		RM_InstancedShaderDetails((iShader*)m_lighthighlightshader, false, D3D11_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST, (ShaderFlags)ShaderFlag::ShaderTypeGeometry);
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] =
@@ -761,6 +739,9 @@ void CoreEngine::Render(void)
 	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
 	m_renderdevice->Render();
 
+	/* Present the scene once all rendering is complete */
+	m_renderdevice->PresentFrame();
+
 	// Activate the render queue optimiser here if it is ready for its next cycle, then clear the render queue ready for Frame+1
 	if (m_rq_optimiser.Ready()) m_rq_optimiser.Run();
 	ClearRenderQueue();
@@ -800,11 +781,13 @@ void CoreEngine::RetrieveRenderCycleData(void)
 	XMStoreFloat4x4(&r_invviewproj_f, r_invviewproj);
 }
 
-// Submit a model buffer to the render queue manager for rendering this frame
-void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, RM_Instance && instance)
+// Submit a model buffer to the render queue manager for rendering this frame.  A material can be supplied that
+// overrides any default material specified in the model buffer.  A material of NULL will use the default 
+// material in the model buffer
+void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, ModelBuffer *model, MaterialDX11 *material, RM_Instance && instance)
 {
 	// Exclude any null-geometry objects
-	if (!model || model->VertexBuffer.GetCompiledBuffer() == NULL) return;
+	if (!model) return;
 
 	// Retrieve the most appropriate render slot and move this instance into it
 	size_t render_slot = model->GetAssignedRenderSlot(shader);
@@ -814,7 +797,7 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForRendering(RenderQueueShader shader, Mod
 		m_renderqueue.RegisterModelBuffer(shader, render_slot, model);
 	}
 
-	m_renderqueue[shader].ModelData[render_slot].NewInstance(std::move(instance));
+	m_renderqueue[shader].ModelData[render_slot].GetInstances(material).NewInstance(std::move(instance));
 }
 
 // Method to submit for z-sorted rendering.  Should be used for any techniques (e.g. alpha blending) that require reverse-z-sorted 
@@ -831,14 +814,22 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 	m_renderqueueshaders[shader].SortedInstances.push_back(std::move(RM_ZSortedInstance(z, model, std::move(instance))));
 }
 
+// Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
+void RJ_XM_CALLCONV CoreEngine::SubmitMaterialForScreenRendering(const MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation)
+{
+	*** DO THIS, S.T. IT DELEGATES TO SUBMITFORRENDERING.  THEN UPDATE UI-DRAWING COMPONENTS TO CALL THIS METHOD ***
+}
+
+
 // Process all items in the queue via instanced rendering.  All instances for models passing the supplied render predicates
 // will be rendered through the given rendering pipeline
 template <class TShaderRenderPredicate, class TModelRenderPredicate>
 void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 {
-	size_t instancecount, inst;
+	size_t model_count, material_count, instancecount, inst;
 	UINT batch_size;
 	TModelRenderPredicate render_model;
+	ModelBuffer * modelbuffer;
 
 	if (!pipeline) return;
 
@@ -846,7 +837,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
 		auto & rq_shader = m_renderqueue[i];
-		auto model_count = rq_shader.CurrentSlotCount;
+		model_count = rq_shader.CurrentSlotCount;
 
 		// Set the type of primitive that should be rendered through this shader, if it needs to be changed
 		ChangePrimitiveTopologyIfRequired(rq_shader.PrimitiveTopology);
@@ -854,23 +845,33 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 		// Process each model separately
 		for (size_t mi = 0U; mi < model_count; ++mi)
 		{
-			// Assess the model rendering predicate and early-exit if this model is ineligible
-			auto & model = rq_shader.ModelData[mi];
-			if (!render_model(model.ModelBufferInstance)) continue;
+			// Early-exit if this model has no compiled geometry or fails the model rendering predicate
+			RM_ModelData & model = rq_shader.ModelData[mi];
+			modelbuffer = model.ModelBufferInstance;
+			if (!modelbuffer || !modelbuffer->VertexBuffer.GetCompiledBuffer()) continue;
+			if (!render_model(modelbuffer)) continue;
 
-			/// TODO: Sort instances here?
-
-			// Loop through the instances in batches, if the total count is larger than our limit
-			instancecount = model.CurrentInstanceCount;
-			for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
+			// Process each material that will be used to render the instances
+			material_count = model.CurrentMaterialCount;
+			for (size_t mat = 0U; mat < material_count; ++mat)
 			{
-				// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
-				batch_size = static_cast<UINT>(min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT));
+				auto & model_data = model.Data[mat];
 
-				// Pass control to the core instanced rendering method to issue a draw call
-				RenderInstanced(*pipeline, *(model.ModelBufferInstance), model.InstanceData[inst], batch_size);
+				/// TODO: Sort instances here?
 
-			} /// per-instance
+				// Loop through the instances in batches, if the total count is larger than our limit
+				instancecount = model_data.InstanceCollection.CurrentInstanceCount;
+				for (inst = 0U; inst < instancecount; inst += Game::C_INSTANCED_RENDER_LIMIT)
+				{
+					// Determine the number of instances to render; either the per-batch limit, or fewer if we do not have that many
+					batch_size = static_cast<UINT>(min(instancecount - inst, Game::C_INSTANCED_RENDER_LIMIT));
+
+					// Pass control to the core instanced rendering method to issue a draw call
+					RenderInstanced(*pipeline, *modelbuffer, model_data.Material, model_data.InstanceCollection.InstanceData[inst], batch_size);
+
+				} /// per-instance
+
+			} /// per-material
 
 		} /// per-model
 
@@ -879,8 +880,9 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 }
 
 // Perform instanced rendering for a model and a set of instance data; generally called by the render queue but can be 
-// invoked by other processes (e.g. for deferred light volume rendering)
-void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const RM_Instance & instance_data, UINT instance_count)
+// invoked by other processes (e.g. for deferred light volume rendering).  A material can be supplied that will override
+// the material specified in the model buffer; a null material will fall back to the default model buffer material
+void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const ModelBuffer & model, const MaterialDX11 * material, const RM_Instance & instance_data, UINT instance_count)
 {
 	// Update the instance buffer by mapping, updating and unmapping the memory
 	m_instancebuffer->Set(&instance_data, static_cast<UINT>(sizeof(RM_Instance)) * instance_count);
@@ -897,10 +899,12 @@ void CoreEngine::RenderInstanced(const PipelineStateDX11 & pipeline, const Model
 
 	// Bind the model material, which will populate the relevant constant buffer and bind all required texture resources
 	// TODO: For now, bind explicitly to the VS and PS.  In future we may want to add more, or make this specifiable per shader
-	if (model.Material)
+	// Use override material if available, otherwise fall back to the model buffer material (which may also be null in [error] cases)
+	if (!material) material = model.Material;
+	if (material)
 	{
-		model.Material->Bind(pipeline.GetShader(Shader::Type::VertexShader));
-		model.Material->Bind(pipeline.GetShader(Shader::Type::PixelShader));
+		material->Bind(pipeline.GetShader(Shader::Type::VertexShader));
+		material->Bind(pipeline.GetShader(Shader::Type::PixelShader));
 	}
 
 	// Issue a draw call to the currently active render pipeline
@@ -926,6 +930,9 @@ void CoreEngine::ClearRenderQueue(void)
 		{
 			// Unregister this model from the given render queue slot
 			m_renderqueue.UnregisterModelBuffer(i, mi);
+
+			// Reset the per-material data back to default state
+			m_renderqueue[i].ModelData[mi].Reset();
 		}
 
 		// Reset this render queue shader ready for the next frame
@@ -1211,12 +1218,12 @@ void CoreEngine::RenderObjectWithStaticModel(iObject *object)
 	{
 		if (object->Highlight.IsActive())
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(object->GetModel()->Data),
+			SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(object->GetModel()->Data), NULL, 
 				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()), object->Highlight.GetColour())));
 		}
 		else
 		{
-			SubmitForRendering(RenderQueueShader::RM_LightShader, &(object->GetModel()->Data),
+			SubmitForRendering(RenderQueueShader::RM_LightShader, &(object->GetModel()->Data), NULL, 
 				std::move(RM_Instance(object->GetWorldMatrix(), RM_Instance::CalculateSortKey(object->GetPosition()))));
 		}
 	}
@@ -1261,7 +1268,7 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), std::move(
+				SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
 					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 			}
 		}
@@ -1271,7 +1278,7 @@ void CoreEngine::RenderObjectWithArticulatedModel(iObject *object)
 			ArticulatedModelComponent **component = model->GetComponents();
 			for (int i = 0; i < n; ++i, ++component)
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
 					RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 			}
 		}
@@ -1523,7 +1530,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), std::move(RM_Instance(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(env_local_viewer, terrain->GetPosition()))))
 				)));
@@ -1544,7 +1551,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
 						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
@@ -1830,7 +1837,7 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 			{
 				// We want to render this terrain object; compose the terrain world matrix with its parent environment world matrix to get the final transform
 				// Submit directly to the rendering pipeline.  Terrain objects are (currently) just a static model
-				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), std::move(RM_Instance(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, &(terrain_def->GetModel()->Data), NULL, std::move(RM_Instance(
 					XMMatrixMultiply(terrain->GetWorldMatrix(), environment->GetZeroPointWorldMatrix()),
 					RM_Instance::CalculateSortKey(XMVectorGetX(XMVector3LengthSq(XMVectorSubtract(environment_relative_viewer_position, terrain->GetPosition()))))
 				)));
@@ -1851,7 +1858,7 @@ void CoreEngine::RenderObjectEnvironmentNodeContents(iSpaceObjectEnvironment *en
 				ArticulatedModelComponent **component = model->GetComponents();
 				for (int i = 0; i < n; ++i, ++component)
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
 						RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 				}
 
@@ -1921,12 +1928,12 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 				if (tile->Highlight.IsActive())
 				{
 					const XMFLOAT4 & highlight = tile->Highlight.GetColour();
-					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel().GetModel()->Data), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]), highlight)));			// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 				else
 				{
-					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel().GetModel()->Data), std::move(
+					SubmitForRendering(RenderQueueShader::RM_LightShader, &(tile->GetModel().GetModel()->Data), NULL, std::move(
 						RM_Instance(world, RM_Instance::CalculateSortKey(world.r[3]))));					// Position can be taken from trans. components of world matrix (_41 to _43)
 				}
 			}
@@ -1962,7 +1969,7 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, std::move(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, NULL, std::move(
 					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))));
 			}
 		}
@@ -2061,7 +2068,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), std::move(
+						SubmitForRendering(RenderQueueShader::RM_LightHighlightShader, (*component)->Model.GetModel(), NULL, std::move(
 							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()), highlight)));
 					}
 				}
@@ -2087,7 +2094,7 @@ void CoreEngine::RenderTurrets(TurretController & controller)
 					component = model->GetComponents();
 					for (int i = 0; i < n; ++i, ++component)
 					{
-						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), std::move(
+						SubmitForRendering(RenderQueueShader::RM_LightShader, (*component)->Model.GetModel(), NULL, std::move(
 							RM_Instance((*component)->GetWorldMatrix(), RM_Instance::CalculateSortKey((*component)->GetPosition()))));
 					}
 				}
@@ -2290,23 +2297,34 @@ void CoreEngine::DeallocateRenderingQueue(void)
 {
 	// Iterate through each shader in the render queue
 	size_t count = m_renderqueue.size();
-	for (size_t i = 0U; i < count; ++i)
+	for (size_t shader = 0U; shader < count; ++shader)
 	{
 		// Iterate through each model currently registered with the shader
-		auto model_count = m_renderqueue[i].CurrentSlotCount;
-		for (auto mi = 0U; mi < model_count; ++mi)
+		auto model_count = m_renderqueue[shader].CurrentSlotCount;
+		for (auto model = 0U; model < model_count; ++model)
 		{
-			m_renderqueue[i].ModelData[mi].InstanceData.clear();
-			m_renderqueue[i].ModelData[mi].InstanceData.shrink_to_fit();
-
-			if (m_renderqueue[i].ModelData[mi].ModelBufferInstance != NULL)
+			// Iterate through each material registered for this model
+			for (auto & material : m_renderqueue[shader].ModelData[model].Data)
 			{
-				m_renderqueue.UnregisterModelBuffer(i, mi);
+				// Clear all instance data
+				material.InstanceCollection.InstanceData.clear();
+				material.InstanceCollection.InstanceData.shrink_to_fit();
+
+			} /// per-material
+
+			// Unregister any model buffer associated with this entry
+			if (m_renderqueue[shader].ModelData[model].ModelBufferInstance != NULL)
+			{
+				m_renderqueue.UnregisterModelBuffer(shader, model);
 			}
-		}
-		m_renderqueue[i].ModelData.clear();
-		m_renderqueue[i].ModelData.shrink_to_fit();
-	}
+		
+		} /// per-model
+
+		m_renderqueue[shader].ModelData.clear();
+		m_renderqueue[shader].ModelData.shrink_to_fit();
+
+	} /// per-shader
+
 	m_renderqueue.clear();
 	m_renderqueue.shrink_to_fit();
 }

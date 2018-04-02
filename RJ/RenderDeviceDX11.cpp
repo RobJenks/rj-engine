@@ -56,10 +56,15 @@ RenderDeviceDX11::RenderDeviceDX11(void)
 	m_standard_ps(NULL),
 	m_deferred_geometry_ps(NULL), 
 	m_deferred_lighting_ps(NULL),
+	m_texture_vs(NULL), 
+	m_texture_ps(NULL), 
 	m_deferred_debug_ps(NULL),
 
 	m_sampler_linearclamp(NULL), 
-	m_sampler_linearrepeat(NULL)
+	m_sampler_linearrepeat(NULL), 
+
+	m_material_null(NULL), 
+	m_material_default(NULL)
 {
 	SetRenderDeviceName("RenderDeviceDX11 (Direct3D 11.2)");
 }
@@ -125,7 +130,12 @@ void RenderDeviceDX11::PerformPostDataLoadInitialisation(void)
 
 	// Perform any device-specific initialisation
 	Game::Log << LOG_INFO << "Performing post-data load initialisation of render device \"" << GetRenderDeviceName() << "\"\n";
-	/// Initialisation here
+	
+	// Retrieve pre-cached objects that are common to many processes (and were loaded in game data)
+	m_material_default = Assets.GetDefaultMaterial();
+	m_material_null = Assets.GetMaterial("null_material");
+
+
 	Game::Log << LOG_INFO << "Completed post-data load initialisation of render device \"" << GetRenderDeviceName() << "\"\n";
 }
 
@@ -589,6 +599,11 @@ Result RenderDeviceDX11::InitialiseShaderResources(void)
 		{ &m_deferred_geometry_ps, Shader::Type::PixelShader, Shaders::DeferredGeometryPixelShader, "Shaders\\deferred_ps_geometry.ps.hlsl", "latest", NULL },
 		{ &m_deferred_lighting_ps, Shader::Type::PixelShader, Shaders::DeferredLightingPixelShader, "Shaders\\deferred_ps_lighting.ps.hlsl", "latest", NULL },
 
+		// Basic texture/UI rendering shaders
+		{ &m_texture_vs, Shader::Type::VertexShader, Shaders::BasicTextureVertexShader, "Shaders\\vs_basic_texture.vs.hlsl", "latest", &m_standard_input_layout },
+		{ &m_texture_ps, Shader::Type::PixelShader, Shaders::BasicTexturePixelShader, "Shaders\\ps_basic_texture.ps.hlsl", "latest", NULL },
+
+
 		// Debug-only shaders
 #ifdef _DEBUG
 		{ &m_deferred_debug_ps, Shader::Type::PixelShader, Shaders::DeferredLightingDebug, "Shaders\\deferred_ps_debug.ps.hlsl", "latest", NULL },
@@ -805,7 +820,17 @@ HRESULT RenderDeviceDX11::PresentFrame(void)
 
 	// Present the back buffer to the screen by cycling the swap chain.  Sync interval
 	// is determined based on the vsync state
-	return m_swapchain->Present(m_sync_interval, 0U);
+	HRESULT hr = m_swapchain->Present(m_sync_interval, 0U);
+
+	// Log presentation failures in debug mode only
+#	ifdef _DEBUG
+	if (FAILED(hr))
+	{
+		Game::Log << LOG_ERROR << "Critical: Frame presentation failed with hr=" << hr << "\n";
+	}
+#	endif
+
+	return hr;
 }
 
 // Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer

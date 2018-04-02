@@ -15,6 +15,13 @@ struct VertexShaderStandardOutput
 	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip space position
 };
 
+// Output of basic texture-sampling VS stage; returns only pos/texcoord basic data
+struct BasicTextureSamplingVertexShaderOutput
+{
+	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
+	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);		// Texture coordinate
+};
+
 
 // Output of the deferred geometry PS; mapping into the textures comprising the GBuffer
 struct DeferredPixelShaderGeometryOutput

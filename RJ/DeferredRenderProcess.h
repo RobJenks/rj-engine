@@ -37,7 +37,7 @@ public:
 	// Perform all rendering of the frame
 	void RenderFrame(void);
 
-	// End the frame, including presentation of swap chain to the primary display
+	// End the frame; perform any post-render cleanup for the render process
 	void EndFrame(void);
 
 	// Redirect an alternative render output to the primary render target Color0, and ultimately the backbuffer

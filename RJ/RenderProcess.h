@@ -30,6 +30,8 @@ protected:
 
 	std::string						m_name;
 
+	CMPINLINE void					SetName(const std::string & name) { m_name = name; }
+
 };
 
 

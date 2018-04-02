@@ -7,7 +7,7 @@
 #define BUFFER_NAME(buffer) #buffer
 
 // Holds standard per-frame data such as view/projection transforms
-CBUFFER FrameDataBuffer REGISTER(b0) //ALIGNED16(FrameDataBuffer)
+CBUFFER FrameDataBuffer REGISTER(b0)
 {
 	RJ_ROW_MAJOR_MATRIX View;
 	RJ_ROW_MAJOR_MATRIX Projection;

@@ -26,10 +26,24 @@ bool InputLayoutDesc::GetStandardLayout(const std::string & name, InputLayoutDes
 	}
 }
 
+// Standard render queue instancing layout
+#define ADD_INSTANCING_LAYOUT \
+	.Add("Transform", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	.Add("Transform", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	.Add("Transform", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	.Add("Transform", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	\
+	.Add("Flags", 0, DXGI_FORMAT_R32_UINT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	.Add("SortKey", 0, DXGI_FORMAT_R32_UINT, 1, 68, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	.Add("padding", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 72, D3D11_INPUT_PER_INSTANCE_DATA, 1) \
+	\
+	.Add("Highlight", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 80, D3D11_INPUT_PER_INSTANCE_DATA, 1)
+
+
 // Initialises the standard input layouts that are reusable across multiple shader scenarios
 void InputLayoutDesc::InitialiseStaticData(void)
 {
-	// Standard input layout for instanced, textured and fully-lit models
+	/* Standard input layout for instanced, textured and fully-lit models */
 	InputLayoutDesc::AddStandardLayout("Vertex_Inst_Standard_Layout", InputLayoutDesc()
 
 		// Vertex input layout
@@ -39,19 +53,8 @@ void InputLayoutDesc::InitialiseStaticData(void)
 		.Add("BINORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0)
 		.Add("TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D11_INPUT_PER_VERTEX_DATA, 0)
 
-		// Instancing input layout
-		.Add("Transform", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 0, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("Transform", 1, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 16, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("Transform", 2, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 32, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("Transform", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 48, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		///
-		.Add("Flags", 0,	 DXGI_FORMAT_R32_UINT, 1, 64, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("SortKey", 0,	 DXGI_FORMAT_R32_UINT, 1, 68, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		.Add("padding", 0,	 DXGI_FORMAT_R32G32_FLOAT, 1, 72, D3D11_INPUT_PER_INSTANCE_DATA, 1)
-		///
-		.Add("Highlight", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 1, 80, D3D11_INPUT_PER_INSTANCE_DATA, 1));
-		
-		
-
+		// Standard instancing input layout
+		ADD_INSTANCING_LAYOUT
+	);
 }
 
