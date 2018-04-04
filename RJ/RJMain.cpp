@@ -2639,6 +2639,10 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 
 
+		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(10, 10), XMFLOAT2(300, 300), 0.0f);
+
+
+
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */
 /*		auto renderinfo = Game::Engine->GetRenderInfo();
 		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_2, "Render Info: Draw Calls: %zu, Instances: %zu, ZSortedInstances: %zu, SkinnedInstances: %zu [%s %s %s %s %s %s ]",

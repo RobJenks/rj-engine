@@ -5,6 +5,7 @@
 #include "ShaderFlags.h"
 #include "RM_ModelData.h"
 class ModelBuffer;
+struct RM_InstancedShaderDetails;
 
 
 // Collection holding a vector of models to be rendered by the current shader
@@ -84,6 +85,9 @@ struct RM_ModelDataCollection
 		Flags = other.Flags;
 		return *this;
 	}
+
+	// Assigns data from a shader definition
+	void SetShaderDetails(const RM_InstancedShaderDetails & shader);
 
 
 	// Default destructor

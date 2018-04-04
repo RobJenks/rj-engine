@@ -320,6 +320,9 @@ public:
 		// TODO: Need to re-enable transparent object rendering
 	}
 
+	// Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
+	void RJ_XM_CALLCONV						RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation = 0.0f);
+
 	// Primitive topology is managed by the render queue in an attempt to minimise state changes
 	CMPINLINE D3D_PRIMITIVE_TOPOLOGY		GetCurrentPrimitiveTopology(void) const { return m_current_topology; }
 	void									ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitive_topology);
@@ -492,6 +495,9 @@ private:
 	void					ShutdownOverlayRenderer(void);
 	void					ShutdownEnvironmentRendering(void);
 
+	// Post-data load initialisation for the core engine component itself
+	Result					PerformInternalEnginePostDataLoadInitialisation(void);
+
 	// Update window size details based on these parameters, recalculating for windowed mode as required
 	//void					UpdateWindowSizeParameters(int screenWidth, int screenHeight, bool fullscreen);
 
@@ -557,6 +563,8 @@ private:
 	// Optimiser performs periodic maintenance on the engine render queue
 	RenderQueueOptimiser		m_rq_optimiser;
 
+	// Cached reference to unit quad model, used for direct screen-space rendering of materials
+	Model *						m_unit_quad_model;
 
 	// Clear the render queue.  Not required per-frame; invoked on shutdown to clear down resources
 	void								DeallocateRenderingQueue(void);
@@ -582,9 +590,6 @@ private:
 	{
 		if (model) SubmitForZSortedRendering(shader, &(model->Data), std::move(instance), position);
 	}
-
-	// Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
-	void RJ_XM_CALLCONV					SubmitMaterialForScreenRendering(const MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation = 0.0f);
 
 
 	/* Method to render the interior of an object environment including any tiles, for an environment

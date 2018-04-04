@@ -84,8 +84,13 @@ void UIRenderProcess::InitialisePipelines()
 
 	m_pipeline = Game::Engine->GetRenderDevice()->Assets.CreatePipelineState("UI_Rendering");
 	m_pipeline->SetShader(Shader::Type::VertexShader, m_vs);
-	m_pipeline->SetShader(Shader::Type::PixelShader, m_vs);
+	m_pipeline->SetShader(Shader::Type::PixelShader, m_ps);
 	m_pipeline->SetRenderTarget(Game::Engine->GetRenderDevice()->GetPrimaryRenderTarget());
+
+	m_pipeline->GetRasterizerState().SetCullMode(RasterizerState::CullMode::None);
+	m_pipeline->GetRasterizerState().SetDepthClipEnabled(false);
+	m_pipeline->GetDepthStencilState().SetDepthMode(DepthStencilState::DepthMode(false, DepthStencilState::DepthWrite::Disable));
+	m_pipeline->GetBlendState().SetBlendMode(BlendState::BlendModes::AlphaBlend);
 }
 
 // Virtual render method; must be implemented by all derived render processess

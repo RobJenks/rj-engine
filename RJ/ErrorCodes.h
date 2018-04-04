@@ -453,6 +453,7 @@ namespace ErrorCodes {
 	const Result		CannotLoadTextureResources						= 2700;
 	const Result		CannotLoadNullFontData							= 2701;
 	const Result		CannotLoadFontWithMissingData					= 2702;
+	const Result		ModelDoesNotExist								= 2703;
 
 
 	// Data output errors												(2800-2899)

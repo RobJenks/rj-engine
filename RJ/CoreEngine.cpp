@@ -131,8 +131,9 @@ CoreEngine::CoreEngine(void)
 	// Initialise all special render flags at startup
 	m_renderflags = std::vector<bool>(CoreEngine::RenderFlag::_RFLAG_COUNT, false);
 
-	// Set pre-populated parameter values for render-time efficiency
+	// Initialise miscellaneous cached data
 	m_instanceparams = NULL_FLOAT4;
+	m_unit_quad_model = NULL;
 
 	// Initialise all key matrices to the identity
 	r_view = r_projection = r_orthographic = r_invview = r_invproj = r_invorthographic = r_viewproj = r_invviewproj = m_projscreen 
@@ -251,12 +252,40 @@ Result CoreEngine::InitialiseGameEngine(HWND hwnd)
 // Perform any post-data-load activities, e.g.retrieving models that have now been loaded
 Result CoreEngine::PerformPostDataLoadInitialisation(void)
 {
-	// Certain components require the ability to complete initialisation after all game data is loaded
+	// Perform post-load initialisation for the core engine itself
+	PerformInternalEnginePostDataLoadInitialisation();
+
+	// Perform post-load initialisation for all sub-components which require it
 	GetRenderDevice()->PerformPostDataLoadInitialisation();
 	GetEffectManager()->PerformPostDataLoadInitialisation();
 	GetOverlayRenderer()->PerformPostDataLoadInitialisation();
 
 	return ErrorCodes::NoError;
+}
+
+// Post-data load initialisation for the core engine component itself
+Result CoreEngine::PerformInternalEnginePostDataLoadInitialisation(void)
+{
+	Result result = ErrorCodes::NoError;
+
+	// Load all required model geometry
+	std::vector<std::tuple<std::string, std::string, Model**>> models = {
+		{ "unit quad", "unit_square_model", &m_unit_quad_model }
+	};
+
+	for (auto & model : models)
+	{
+		Model *m = Model::GetModel(std::get<1>(model));
+		if (!m)
+		{
+			Game::Log << LOG_ERROR << "Could not load " << std::get<0>(model) << " model (\"" << std::get<1>(model) << "\") during deferred render process initialisation\n";
+			result = ErrorCodes::ModelDoesNotExist;
+		}
+
+		*(std::get<2>(model)) = m;
+	}
+
+	return result;
 }
 
 void CoreEngine::ShutdownGameEngine()
@@ -352,6 +381,21 @@ Result CoreEngine::InitialiseRenderQueue(void)
 	/*m_renderqueueshaders[RenderQueueShader::RM_LightHighlightShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
 	m_renderqueueshaders[RenderQueueShader::RM_LightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];
 	m_renderqueueshaders[RenderQueueShader::RM_LightHighlightFadeShader] = m_renderqueueshaders[RenderQueueShader::RM_LightShader];*/
+
+	// Initialise render queue slots with this data
+	// TODO: a little redundant to have both...?
+	for (int i = 0; i < (int)RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
+	{
+		m_renderqueue[i].SetShaderDetails(m_renderqueueshaders[i]);
+	}
+
+
+	// Set an initial primitive topology as a default
+	// TODO: Temporary fix for actual problem: if RenderInstanced was called before ProcessRenderQueue, no topology had been set and 
+	// engine failed with D3D exception.  In general, should not rely on this being set only by render queue.  Should perhaps be set
+	// as part of pipeline binding?
+	r_devicecontext = m_renderdevice->GetDeviceContext();
+	ChangePrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Return success
 	return ErrorCodes::NoError;
@@ -579,9 +623,6 @@ void CoreEngine::ShutdownRenderDevice(void)
 
 void CoreEngine::ShutdownRenderQueue(void)
 {
-	// Release any resources currently reserved by the render queue
-	DeallocateRenderingQueue();
-
 	// Free all resources that are not automatically deallocated
 }
 
@@ -815,9 +856,16 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 }
 
 // Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
-void RJ_XM_CALLCONV CoreEngine::SubmitMaterialForScreenRendering(const MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation)
+void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation)
 {
-	*** DO THIS, S.T. IT DELEGATES TO SUBMITFORRENDERING.  THEN UPDATE UI-DRAWING COMPONENTS TO CALL THIS METHOD ***
+	// Build a transform matrix based on the given screen-space properties
+	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
+		XMMatrixScaling(size.x, size.y, 1.0f),
+		XMMatrixRotationZ(rotation)),
+		XMMatrixTranslation(position.x, position.y, 0.0f));
+
+	// Delegate to the primary submission method
+	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material, RM_Instance(transform));
 }
 
 
@@ -828,6 +876,7 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 {
 	size_t model_count, material_count, instancecount, inst;
 	UINT batch_size;
+	TShaderRenderPredicate render_shader;
 	TModelRenderPredicate render_model;
 	ModelBuffer * modelbuffer;
 
@@ -836,8 +885,13 @@ void CoreEngine::ProcessRenderQueue(PipelineStateDX11 *pipeline)
 	// Iterate through each shader in the render queue (though not currently required; all will be mapped to 0)
 	for (auto i = 0; i < RenderQueueShader::RM_RENDERQUEUESHADERCOUNT; ++i)
 	{
-		auto & rq_shader = m_renderqueue[i];
+		// Verfy against the shader rendering predicate before proceeding
+		RM_ModelDataCollection & rq_shader = m_renderqueue[i];
+		if (!render_shader(rq_shader)) continue;
+
+		// Early-exit for empty shader queues, before changing any state below
 		model_count = rq_shader.CurrentSlotCount;
+		if (model_count == 0U) continue;
 
 		// Set the type of primitive that should be rendered through this shader, if it needs to be changed
 		ChangePrimitiveTopologyIfRequired(rq_shader.PrimitiveTopology);
@@ -2292,7 +2346,7 @@ RJ_PROFILED(void CoreEngine::ProcessQueuedActorRendering, void)
 }
 
 // Resets the queue to a state before any rendering has taken place.  Deallocates reserved memory.  
-// Should generally only be called during application shutdown to ensure all resources are released
+// Not reuired at shutdown since all resources are automatically deallocated; only for debug purposes
 void CoreEngine::DeallocateRenderingQueue(void)
 {
 	// Iterate through each shader in the render queue
