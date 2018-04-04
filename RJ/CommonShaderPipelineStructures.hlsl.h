@@ -20,6 +20,7 @@ struct BasicTextureSamplingVertexShaderOutput
 {
 	float4 position				RJ_SEMANTIC(SV_POSITION);	// Clip-space position
 	float2 texCoord				RJ_SEMANTIC(TEXCOORD0);		// Texture coordinate
+	float opacity				RJ_SEMANTIC(OPACITY);		// Opacity in the range [0.0 1.0]
 };
 
 

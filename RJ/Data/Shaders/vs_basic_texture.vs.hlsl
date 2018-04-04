@@ -13,8 +13,9 @@ BasicTextureSamplingVertexShaderOutput VS_Basic_Texture(Vertex_Inst_Standard inp
 	output.position = mul(float4(input.position, 1.0f), input.Transform);	// Model -> World space
 	output.position = mul(output.position, ViewProjection);					// -> View -> Projection space
 
-	// Texture coordinates are simply passed through
+	// Other required data is simply passed through
 	output.texCoord = input.tex;
+	output.opacity = input.Highlight.x;		// Param[0] == opacity.  TODO: Rename from 'highlight' to 'params'
 
 	return output;
 }

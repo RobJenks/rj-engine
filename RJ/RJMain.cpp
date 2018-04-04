@@ -2639,8 +2639,9 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 
 
-		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(10, 10), XMFLOAT2(300, 300), 0.0f);
-
+		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(10, 10), XMFLOAT2(300, 300),
+			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));
+		
 
 
 		/* DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY DEBUG ONLY */

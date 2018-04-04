@@ -856,7 +856,7 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 }
 
 // Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
-void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation)
+void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity)
 {
 	// Build a transform matrix based on the given screen-space properties
 	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
@@ -865,7 +865,8 @@ void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, 
 		XMMatrixTranslation(position.x, position.y, 0.0f));
 
 	// Delegate to the primary submission method
-	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material, RM_Instance(transform));
+	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material,
+		RM_Instance(transform, RM_Instance::SORT_KEY_RENDER_FIRST, XMFLOAT4(opacity, 0.0f, 0.0f, 0.0f)));;
 }
 
 
