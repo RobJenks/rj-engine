@@ -126,7 +126,6 @@ namespace IO { namespace Data
 
 	Result LoadFont(TiXmlElement *node);
 	Result LoadUILayout(TiXmlElement *node);
-	Result LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group);
 	Result LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group);
 	Result LoadUIManagedControlDefinition(TiXmlElement *node);
 

@@ -63,7 +63,7 @@ void UIRenderProcess::InitialiseRenderGeometry()
 
 	// Load all required model geometry
 	std::vector<std::tuple<std::string, std::string, Model**>> models = {
-		{ "texture quad", "unit_square_mdoel", &m_model_quad }
+		{ "texture quad", "unit_square_model", &m_model_quad }
 	};
 
 	for (auto & model : models)

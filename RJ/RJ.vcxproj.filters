@@ -895,6 +895,12 @@
     <ClCompile Include="RM_ModelData.cpp">
       <Filter>Engine\Render Queue</Filter>
     </ClCompile>
+    <ClCompile Include="iUIComponentRenderable.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="iUIComponent.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">

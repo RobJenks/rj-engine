@@ -5,6 +5,7 @@
 
 #include <string>
 #include "CompilerSettings.h"
+#include "ErrorCodes.h"
 #include "Utility.h"
 #include "iUIComponent.h"
 class Render2DGroup;

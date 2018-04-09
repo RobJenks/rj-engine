@@ -1,12 +1,35 @@
 <gamedata>
-  
+
   <!-- Texture resources for this control -->
-  <Texture code="combobox1_expand" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expand.dds" />
-  <Texture code="combobox1_expandback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expandback.dds" />
-  <Texture code="combobox1_mainback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_mainback.dds" />
-  <Texture code="combobox1_scrollbarback" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarback.dds" />
-  <Texture code="combobox1_scrollbarhandle" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarhandle.dds" />
-  <Texture code="combobox1_scrollbarupdown" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarupdown.dds" />
+  <Texture code="combobox1_expand_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expand.dds" />
+  <Material code="combobox1_expand">
+    <DiffuseTexture>combobox1_expand_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="combobox1_expandback_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_expandback.dds" />
+  <Material code="combobox1_expandback">
+    <DiffuseTexture>combobox1_expandback_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="combobox1_mainback_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_mainback.dds" />
+  <Material code="combobox1_mainback">
+    <DiffuseTexture>combobox1_mainback_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="combobox1_scrollbarback_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarback.dds" />
+  <Material code="combobox1_scrollbarback">
+    <DiffuseTexture>combobox1_scrollbarback_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="combobox1_scrollbarhandle_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarhandle.dds" />
+  <Material code="combobox1_scrollbarhandle">
+    <DiffuseTexture>combobox1_scrollbarhandle_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="combobox1_scrollbarupdown_texture" dimension="Texture2D" filename="UI/Common/Controls/ComboBox1/combobox1_scrollbarupdown.dds" />
+  <Material code="combobox1_scrollbarupdown">
+    <DiffuseTexture>combobox1_scrollbarupdown_texture</DiffuseTexture>
+  </Material>
   
 
   <!-- Control definition -->

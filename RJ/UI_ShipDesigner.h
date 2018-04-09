@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef __UI_ShipDesignerH__
-#define __UI_ShipDesignerH__
+#if 0
 
 #include <vector>
 #include "iUIController.h"

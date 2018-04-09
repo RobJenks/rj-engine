@@ -1,5 +1,8 @@
-#include "DX11_Core.h"
+#include "Image2DRenderGroup.h"
 
+#if 0
+
+#include "DX11_Core.h"
 #include "ErrorCodes.h"
 #include "GameVarsExtern.h"
 #include "Utility.h"
@@ -7,11 +10,10 @@
 #include "CoreEngine.h"
 #include "TextureDX11.h"
 
-#include "Image2DRenderGroup.h"
 
-Image2DRenderGroup::Image2DRenderGroup(void)
+_OLD_Image2DRenderGroup::_OLD_Image2DRenderGroup(void)
 {
-	m_instances = Image2DRenderGroup::InstanceCollection();
+	m_instances = _OLD_Image2DRenderGroup::InstanceCollection();
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
 	m_Texture = 0;
@@ -27,7 +29,7 @@ Image2DRenderGroup::Image2DRenderGroup(void)
 }
 
 
-Result Image2DRenderGroup::Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat)
+Result _OLD_Image2DRenderGroup::Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat)
 { 
 	Result result;
 
@@ -52,18 +54,18 @@ Result Image2DRenderGroup::Initialize(int screenWidth, int screenHeight, const s
 	return ErrorCodes::NoError;
 }
 
-ID3D11ShaderResourceView * Image2DRenderGroup::GetTexture(void)
+ID3D11ShaderResourceView * _OLD_Image2DRenderGroup::GetTexture(void)
 {
 	return (m_Texture ? m_Texture->GetShaderResourceView() : NULL);
 }
 
 
-void Image2DRenderGroup::SetTexture(const std::string & name)
+void _OLD_Image2DRenderGroup::SetTexture(const std::string & name)
 {
 	SetTexture(Game::Engine->GetAssets().GetTexture(name));
 }
 
-void Image2DRenderGroup::SetTexture(TextureDX11 *tex)
+void _OLD_Image2DRenderGroup::SetTexture(TextureDX11 *tex)
 {
 	m_Texture = tex;
 
@@ -81,7 +83,7 @@ void Image2DRenderGroup::SetTexture(TextureDX11 *tex)
 	m_ftexturesize = XMFLOAT2((float)m_texturesize.x, (float)m_texturesize.y);
 }
 
-Result Image2DRenderGroup::InitializeBuffers(void)
+Result _OLD_Image2DRenderGroup::InitializeBuffers(void)
 {
 	INDEXFORMAT *indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
@@ -105,14 +107,14 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	m_vertices = new VertexType[m_vertexCount];
 	if(!m_vertices)
 	{
-		return ErrorCodes::CouldNotAllocateImage2DRenderGroupVertexArray;
+		return ErrorCodes::CouldNotAllocate_OLD_Image2DRenderGroupVertexArray;
 	}
 
 	// Create the index array.
 	indices = new INDEXFORMAT[m_indexCount];
 	if(!indices)
 	{
-		return ErrorCodes::CouldNotAllocateImage2DRenderGroupIndexArray;
+		return ErrorCodes::CouldNotAllocate_OLD_Image2DRenderGroupIndexArray;
 	}
 
 	// Initialize vertex array to zeros at first.
@@ -166,7 +168,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
     result = device->CreateBuffer(&vertexBufferDesc, &vertexData, &m_vertexBuffer);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotCreateImage2DRenderGroupVertexBuffer;
+		return ErrorCodes::CouldNotCreate_OLD_Image2DRenderGroupVertexBuffer;
 	}
 
 	// Set up the description of the static index buffer.
@@ -186,7 +188,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	result = device->CreateBuffer(&indexBufferDesc, &indexData, &m_indexBuffer);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotCreateImage2DRenderGroupIndexBuffer;
+		return ErrorCodes::CouldNotCreate_OLD_Image2DRenderGroupIndexBuffer;
 	}
 
 	// Release the index array now that the buffer has been created and loaded.
@@ -196,7 +198,7 @@ Result Image2DRenderGroup::InitializeBuffers(void)
 	return ErrorCodes::NoError;
 }
 
-void Image2DRenderGroup::Render(void)
+void _OLD_Image2DRenderGroup::Render(void)
 {
 	// If there are no instances in the collection then we have nothing to render
 	int numinstances = (int)m_instances.size();
@@ -218,7 +220,7 @@ void Image2DRenderGroup::Render(void)
 }
 
 
-Result Image2DRenderGroup::UpdateBuffers(void)
+Result _OLD_Image2DRenderGroup::UpdateBuffers(void)
 {
 	float left, right, top, bottom, zorder;
 	float umax, vmax;
@@ -317,7 +319,7 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 	result = context->Map(m_vertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if(FAILED(result))
 	{
-		return ErrorCodes::CouldNotObtainImage2DRenderGroupBufferLock;
+		return ErrorCodes::CouldNotObtain_OLD_Image2DRenderGroupBufferLock;
 	}
 
 	// Get a pointer to the data in the vertex buffer.
@@ -332,7 +334,7 @@ Result Image2DRenderGroup::UpdateBuffers(void)
 	return ErrorCodes::NoError;
 }
 
-void Image2DRenderGroup::RenderBuffers(void)
+void _OLD_Image2DRenderGroup::RenderBuffers(void)
 {
 	unsigned int stride;
 	unsigned int offset;
@@ -352,7 +354,7 @@ void Image2DRenderGroup::RenderBuffers(void)
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void Image2DRenderGroup::Shutdown()
+void _OLD_Image2DRenderGroup::Shutdown()
 {
 	// Release each instance within the render group in turn
 	ReleaseAllInstances();
@@ -361,7 +363,7 @@ void Image2DRenderGroup::Shutdown()
 	ShutdownBuffers();
 }
 
-void Image2DRenderGroup::ReleaseAllInstances()
+void _OLD_Image2DRenderGroup::ReleaseAllInstances()
 {
 	// Loop through each instance in turn
 	InstanceCollection::size_type n = m_instances.size();
@@ -375,7 +377,7 @@ void Image2DRenderGroup::ReleaseAllInstances()
 	m_instances.clear();
 }
 
-void Image2DRenderGroup::ShutdownBuffers()
+void _OLD_Image2DRenderGroup::ShutdownBuffers()
 {
 	// Release the index buffer.
 	if(m_indexBuffer)
@@ -399,10 +401,10 @@ void Image2DRenderGroup::ShutdownBuffers()
 	}
 }
 
-Image2DRenderGroup::Instance *Image2DRenderGroup::AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation)
+_OLD_Image2DRenderGroup::Instance *_OLD_Image2DRenderGroup::AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation)
 {
 	// Create a new instance object and push onto the instance vector
-	m_instances.push_back(Image2DRenderGroup::Instance(pos, zorder, size, render, rotation));
+	m_instances.push_back(_OLD_Image2DRenderGroup::Instance(pos, zorder, size, render, rotation));
 
 	// Now return a pointer to this new element in the vector
 	return &(m_instances.at(m_instances.size()-1));	
@@ -410,7 +412,7 @@ Image2DRenderGroup::Instance *Image2DRenderGroup::AddInstance(INTVECTOR2 pos, fl
 
 // Removes an instance from the instance collection.  NOTE: this has undefined behaviour if 
 // the instance in question doesn't already exist in the collection
-void Image2DRenderGroup::RemoveInstance(Instance *instance)
+void _OLD_Image2DRenderGroup::RemoveInstance(Instance *instance)
 {
 	InstanceCollection::size_type size = m_instances.size();
 
@@ -418,14 +420,14 @@ void Image2DRenderGroup::RemoveInstance(Instance *instance)
 	if (size == 0) return;
 
 	// If we have more than one instance then we need to swap this instance with the end one
-	Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
+	_OLD_Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
 	if (size > 1) std::swap(instance, lastinstance);
 	
 	// Now pop the last element off the vector to remove it from the collection
 	m_instances.pop_back();
 }
 
-void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
+void _OLD_Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 {
 	InstanceCollection::size_type size = m_instances.size();
 
@@ -435,8 +437,8 @@ void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 	// If this instance is not already the last one then move it to the end now
 	if (index != (size-1))
 	{
-		Image2DRenderGroup::Instance *instance = &(m_instances[index]);
-		Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
+		_OLD_Image2DRenderGroup::Instance *instance = &(m_instances[index]);
+		_OLD_Image2DRenderGroup::Instance *lastinstance = &(m_instances[size - 1]);
 		std::swap(instance, lastinstance);
 	}
 
@@ -444,7 +446,7 @@ void Image2DRenderGroup::RemoveInstance(InstanceCollection::size_type index)
 	m_instances.pop_back();
 }
 
-Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(std::string code)
+_OLD_Image2DRenderGroup::Instance * _OLD_Image2DRenderGroup::GetInstanceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();
@@ -457,7 +459,7 @@ Image2DRenderGroup::Instance * Image2DRenderGroup::GetInstanceByCode(std::string
 	return NULL;
 }
 
-Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceByCode(std::string code)
+_OLD_Image2DRenderGroup::InstanceReference _OLD_Image2DRenderGroup::GetInstanceReferenceByCode(std::string code)
 {
 	// Loop through the collection to find a matching code
 	InstanceCollection::size_type n = m_instances.size();
@@ -466,15 +468,15 @@ Image2DRenderGroup::InstanceReference Image2DRenderGroup::GetInstanceReferenceBy
 		if (m_instances[i].code == code)
 		{
 			// If we have a match, build a new instance reference object and return it
-			return Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, (int)i, code);
+			return _OLD_Image2DRenderGroup::InstanceReference(&(m_instances[i]), this, (int)i, code);
 		}
 	}
 
 	// Otherwise return a null instance reference
-	return Image2DRenderGroup::InstanceReference();
+	return _OLD_Image2DRenderGroup::InstanceReference();
 }
 
-void Image2DRenderGroup::UpdateVertexTextureMappingCoords(Image2DRenderGroup::VertexType *v, Rotation90Degree rotation, float umax, float vmax)
+void _OLD_Image2DRenderGroup::UpdateVertexTextureMappingCoords(_OLD_Image2DRenderGroup::VertexType *v, Rotation90Degree rotation, float umax, float vmax)
 {
 	// Apply different texture coords depending on the rotation of this instance (allowed in 90-degree increments)
 	switch (rotation)
@@ -518,6 +520,8 @@ void Image2DRenderGroup::UpdateVertexTextureMappingCoords(Image2DRenderGroup::Ve
 }
 
 
-Image2DRenderGroup::~Image2DRenderGroup(void)
+_OLD_Image2DRenderGroup::~_OLD_Image2DRenderGroup(void)
 {
 }
+
+#endif

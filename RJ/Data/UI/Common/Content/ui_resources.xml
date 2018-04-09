@@ -1,26 +1,79 @@
 <gamedata>
 
   <!-- UI component textures -->
-  <Texture code="button1" dimension="Texture2D" filename="UI/Common/Content/button1.dds" />
-  <Texture code="button1_down" dimension="Texture2D" filename="UI/Common/Content/button1_down.dds" />
-  <Texture code="frame_corner" dimension="Texture2D" filename="UI/Common/Content/frame_corner.dds" />
-  <Texture code="frame_edge" dimension="Texture2D" filename="UI/Common/Content/frame_edge.dds" />
-  <Texture code="mltb_back" dimension="Texture2D" filename="UI/Common/Content/mltb_back.dds" />
-  <Texture code="panel_back" dimension="Texture2D" filename="UI/Common/Content/panel_back.dds" />
-  <Texture code="panel_corner" dimension="Texture2D" filename="UI/Common/Content/panel_corner.dds" />
-  <Texture code="panel_edge" dimension="Texture2D" filename="UI/Common/Content/panel_edge.dds" />
-  <Texture code="panel_tab_blank_active" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_active.dds" />
-  <Texture code="panel_tab_blank_inactive" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive.dds" />
-  <Texture code="panel_tab_blank_inactive_down" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive_down.dds" />
-  <Texture code="textbox_focus" dimension="Texture2D" filename="UI/Common/Content/textbox_focus.dds" />
-  <Texture code="textbox_normal" dimension="Texture2D" filename="UI/Common/Content/textbox_normal.dds" />
-  
-  
+  <Texture code="button1_texture" dimension="Texture2D" filename="UI/Common/Content/button1.dds" />
+  <Material code="button1">
+    <DiffuseTexture>button1_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="button1_down_texture" dimension="Texture2D" filename="UI/Common/Content/button1_down.dds" />
+  <Material code="button1_down">
+    <DiffuseTexture>button1_down_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="frame_corner_texture" dimension="Texture2D" filename="UI/Common/Content/frame_corner.dds" />
+  <Material code="frame_corner">
+    <DiffuseTexture>frame_corner_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="frame_edge_texture" dimension="Texture2D" filename="UI/Common/Content/frame_edge.dds" />
+  <Material code="frame_edge">
+    <DiffuseTexture>frame_edge_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="mltb_back_texture" dimension="Texture2D" filename="UI/Common/Content/mltb_back.dds" />
+  <Material code="mltb_back">
+    <DiffuseTexture>mltb_back_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_back_texture" dimension="Texture2D" filename="UI/Common/Content/panel_back.dds" />
+  <Material code="panel_back">
+    <DiffuseTexture>panel_back_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_corner_texture" dimension="Texture2D" filename="UI/Common/Content/panel_corner.dds" />
+  <Material code="panel_corner">
+    <DiffuseTexture>panel_corner_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_edge_texture" dimension="Texture2D" filename="UI/Common/Content/panel_edge.dds" />
+  <Material code="panel_edge">
+    <DiffuseTexture>panel_edge_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_tab_blank_active_texture" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_active.dds" />
+  <Material code="panel_tab_blank_active">
+    <DiffuseTexture>panel_tab_blank_active_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_tab_blank_inactive_texture" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive.dds" />
+  <Material code="panel_tab_blank_inactive">
+    <DiffuseTexture>panel_tab_blank_inactive_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="panel_tab_blank_inactive_down_texture" dimension="Texture2D" filename="UI/Common/Content/panel_tab_blank_inactive_down.dds" />
+  <Material code="panel_tab_blank_inactive_down">
+    <DiffuseTexture>panel_tab_blank_inactive_down_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="textbox_focus_texture" dimension="Texture2D" filename="UI/Common/Content/textbox_focus.dds" />
+  <Material code="textbox_focus">
+    <DiffuseTexture>textbox_focus_texture</DiffuseTexture>
+  </Material>
+
+  <Texture code="textbox_normal_texture" dimension="Texture2D" filename="UI/Common/Content/textbox_normal.dds" />
+  <Material code="textbox_normal">
+    <DiffuseTexture>textbox_normal_texture</DiffuseTexture>
+  </Material>
+
+
+
   <!-- Rendering for debug intersection test -->
   <Texture code="ui_intersection_test_trajectory" dimension="Texture2D" filename="UI/Common/Content/ui_intersection_test_trajectory.dds" />
   <Material code="ui_intersection_test_trajectory">
     <DiffuseTexture>ui_intersection_test_trajectory</DiffuseTexture>
   </Material>
+
 
 
 </gamedata>

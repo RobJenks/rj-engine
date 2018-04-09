@@ -25,7 +25,6 @@ Render2DGroup::Render2DGroup(void)
 
 	// Link render groups to the relevant item collections
 	Components.Image2D.LinkToCollection(&m_components);
-	Components.Image2DGroup.LinkToCollection(&m_componentgroups);
 	Components.MouseEvents.LinkToCollection(&m_mouseevents);
 	Components.TextBlocks.LinkToCollection(&m_textblocks);
 	Components.MultiLineTextBlocks.LinkToCollection(&m_multilinetextblocks);
@@ -71,26 +70,18 @@ void Render2DGroup::PerformManagedControlRenderingOnControlClass(iUIControl *foc
 
 // Searches the render group for the item identified by 'code' (and potentially indexed by 'key'), 
 // across all iUIComponent-derived classes
-iUIComponent *Render2DGroup::FindUIComponent(std::string code, std::string key)
+iUIComponent *Render2DGroup::FindUIComponent(const std::string & code)
 {
 	iUIComponent *item;
 
-	// Try each component group in turn, in the order of likelihood that it will be the relevant group (for efficiency)
-	// First of all, try the I2D render groups which are a special case because they are also indexed by a string key per instance
-	Image2DRenderGroup *group = Components.Image2DGroup.GetItem(code);
-	if (group && key != NullString) {
-		item = group->GetInstanceByCode(key);
-		if (item) return item;
-	}
-
-	// Now try each of the other simple (non-indexed groups) in turn, again in order of likelihood
+	// Try each component type in turn, in order of likelihood
+	item = (iUIComponent*)Components.Image2D.GetItem(code);				if (item) return item;
 	item = (iUIComponent*)Components.Buttons.GetItem(code);				if (item) return item;
 	item = (iUIComponent*)Components.TextBoxes.GetItem(code);			if (item) return item;
 	item = (iUIComponent*)Components.ComboBoxes.GetItem(code);			if (item) return item;
 	item = (iUIComponent*)Components.TextBlocks.GetItem(code);			if (item) return item;
 	item = (iUIComponent*)Components.MultiLineTextBlocks.GetItem(code);	if (item) return item;
 	item = (iUIComponent*)Components.ComponentGroups.GetItem(code);		if (item) return item;
-	item = (iUIComponent*)Components.Image2D.GetItem(code);				if (item) return item;
 	item = (iUIComponent*)Components.MouseEvents.GetItem(code);			if (item) return item;
 
 	// We could not locate the item in any collection, so return NULL and quit
@@ -98,33 +89,16 @@ iUIComponent *Render2DGroup::FindUIComponent(std::string code, std::string key)
 }
 
 // Renders the render group by processing its queue of renderable components in sequence
-void RJ_XM_CALLCONV Render2DGroup::Render(const FXMMATRIX baseviewmatrix)
+void RJ_XM_CALLCONV Render2DGroup::Render(void)
 {
-	/* TODO: Replace this.  Should instead just be sumbitting to the render queue, with actual rendering taking place during CoreEngine::Render() */
-
-	/*TextureShader *tshader; 
-	iUIComponentRenderable *component;
-
-	// Get a reference to the device context, texture shader & matrices _we will use for rendering
-	auto devicecontext = Game::Engine->GetDeviceContext();
-	tshader = Game::Engine->GetTextureShader();
-	if (!devicecontext || !tshader) return;
-	
-	// Now process each item registered for rendering in turn
-	RenderQueueCollection::const_iterator it_end = m_renderqueue.end();
-	for (RenderQueueCollection::const_iterator it = m_renderqueue.begin(); it != it_end; ++it)
+	Image2D *comp = NULL;
+	for (auto & entry : m_components)
 	{
-		// Get a reference to this component and make sure it should be rendered this frame
-		component = (*it);
-		if (!component || !component->GetRenderActive()) continue;
-
-		// Render the component vertex buffer to the pipeline
-		component->Render();
-
-		// Now render these vertices using the engine texture shader
-		tshader->Render(devicecontext, component->GetIndexCount(), ID_MATRIX, baseviewmatrix, 
-						Game::Engine->GetRenderOrthographicMatrix(), component->GetTexture());
-	}*/
+		comp = entry.second;
+		if (!comp || !comp->GetMaterial()) continue;
+		
+		Game::Engine->RenderMaterialToScreen(*comp->GetMaterial(), comp->GetPosition(), comp->GetSize(), comp->GetRotation(), comp->GetOpacity(), comp->GetZOrder());
+	}
 }
 
 
@@ -186,37 +160,35 @@ void Render2DGroup::ProcessUserEvents(GameInputDevice *keyboard, GameInputDevice
 // Returns a pointer to any component group instance that contains this point within its bounds.
 // NOTE: returns the first instance found, and ignores any subsequent (i.e. overlapping) instances
 // Allows us to specify that only those components accepting mouse input should be considered
-Image2DRenderGroup::InstanceReference Render2DGroup::GetComponentInstanceAtLocation(INTVECTOR2 location, bool only_components_which_accept_mouse_input)
+iUIComponent * Render2DGroup::GetComponentAtLocation(XMFLOAT2 location, bool only_components_which_accept_mouse_input)
 {
-	Image2DRenderGroup::Instance *instance;
+	/* For now, only process Image2D components (since this only processed Image2DGroups before they were refactored out) */
+	
+	// Always return top-most component if multiple match the criteria
+	iUIComponent *result = NULL;
+	float best_z = 9999.0f;
 
 	// Iterate over the component collection to see if any contains the point above within its bounds
-	Image2DRenderGroupCollection::const_iterator it_end = m_componentgroups.end();
-	for (Image2DRenderGroupCollection::const_iterator it = m_componentgroups.begin(); it != it_end; ++it)
+	for (const auto & entry : m_components)
 	{
-		// Make sure this component group is being rendered, that it has components to be tested, and that it accepts mouse input (if relevant)
-		std::deque<Image2DRenderGroup::Instance>::size_type count = it->second->GetInstanceCount();
-		if (!it->second->GetRenderActive() || count == 0) continue;
-		if (only_components_which_accept_mouse_input && !it->second->AcceptsMouseInput()) continue;
+		// Reject all components that are not valid
+		Image2D *component = entry.second;
+		if (!component->GetRenderActive()) continue;
+		if (only_components_which_accept_mouse_input && !component->AcceptsMouseInput()) continue;
 
-		// Look at each instance in the collection in turn
-		for (std::deque<Image2DRenderGroup::Instance>::size_type i = 0; i < count; ++i)
+		// Check whether this is within bounds
+		if (!(Float2GreaterThanOrEqualTo(location, component->GetPosition()) &&
+			 (Float2LessThan(location, Float2Add(component->GetPosition(), component->GetSize()))))) continue;
+
+		// Always return the top-most matching result
+		if (component->GetZOrder() < best_z)
 		{
-			instance = it->second->GetInstance(i);
-
-			if ( (instance->render) && 
-				 (location.x > instance->position.x) && (location.y > instance->position.y) &&
-				 (location.x < (instance->position.x + instance->size.x)) &&
-				 (location.y < (instance->position.y + instance->size.y)) )
-			{
-				// The point is within the bounds of this component, so return a reference now
-				return Image2DRenderGroup::InstanceReference(instance, it->second, (int)i, instance->code);
-			}
+			result = static_cast<iUIComponent*>(component);
+			best_z = component->GetZOrder();
 		}
 	}
 
-	// If no match then return a NULL reference
-	return Image2DRenderGroup::InstanceReference();
+	return result;
 }
 
 // Adds a renderable component to the group render queue, maintaining the ordering by Z value
@@ -280,7 +252,6 @@ void Render2DGroup::Shutdown(void)
 {
 	// Shutdown, delete & deallocate each iUIComponent group in turn
 	Components.Image2D.ShutdownUIComponentGroup();
-	Components.Image2DGroup.ShutdownUIComponentGroup();
 	Components.MouseEvents.ShutdownUIComponentGroup();
 	Components.TextBlocks.ShutdownUIComponentGroup();
 	Components.MultiLineTextBlocks.ShutdownUIComponentGroup();

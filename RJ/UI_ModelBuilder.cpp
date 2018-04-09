@@ -566,7 +566,7 @@ void UI_ModelBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 }
 
 // Process the mouse-up event for this component
-void UI_ModelBuilder::ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void UI_ModelBuilder::ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// If we were rotating the model via a right mouse drag then stop the rotation here
 	if (m_rotatingmodel)
@@ -716,7 +716,7 @@ void UI_ModelBuilder::AddNewTerrain(void)
 	std::string code = NullString;
 
 	// Get a reference to the model name text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_terraincode", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_terraincode");
 	if (tb) code = tb->GetText();
 	
 	// Create a new static terrain object with this definition (or NULL) and default parameters
@@ -1077,7 +1077,7 @@ void UI_ModelBuilder::PerformZoom(float zoom)
 Result UI_ModelBuilder::LoadModel_ButtonClicked(void)
 {
 	// Get a reference to the model name text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_modelcode", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_modelcode");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the model code that we are trying to load and make sure it is valid
@@ -1097,7 +1097,7 @@ Result UI_ModelBuilder::LoadModel_ButtonClicked(void)
 // Processes the user request to save the current model
 Result UI_ModelBuilder::SaveModel_ButtonClicked(void)
 {
-	MultiLineTextBlock *tb = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_test", NullString);
+	MultiLineTextBlock *tb = (MultiLineTextBlock*)m_render->FindUIComponent("mltb_test");
 	if (!tb) return 1;
 
 	if (tb->GetOperationMode() == MultiLineTextBlock::OperationMode::IndividualLines)
@@ -1118,7 +1118,7 @@ Result UI_ModelBuilder::SaveModel_ButtonClicked(void)
 Result UI_ModelBuilder::LoadCollData_ButtonClicked(void)
 {
 	// Get a reference to the collision data text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the filename that we are trying to load and make sure it is valid
@@ -1139,7 +1139,7 @@ Result UI_ModelBuilder::SaveCollData_ButtonClicked(void)
 	Result result;
 
 	// Get a reference to the collision data text field
-	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata", NullString);
+	UITextBox *tb = (UITextBox*)m_render->FindUIComponent("txt_colldata");
 	if (!tb) return ErrorCodes::CannotGetHandleToModelViewerUIComponent;
 
 	// Retrieve the filename that we are trying to save and make sure it is valid

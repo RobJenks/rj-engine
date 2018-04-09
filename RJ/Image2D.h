@@ -1,82 +1,59 @@
 #pragma once
 
-#ifndef __Image2DH__
-#define __Image2DH__
-
+#include <string>
 #include "DX11_Core.h"
 #include "CompilerSettings.h"
-#include "ErrorCodes.h"
-#include "Rendering.h"
 #include "iUIComponentRenderable.h"
-class TextureDX11;
+class MaterialDX11;
 
 
 // Class has no special alignment requirements
 class Image2D : public iUIComponentRenderable
 {
-private:
-	struct VertexType
-	{
-		XMFLOAT3 position;
-	    XMFLOAT2 texture;
-	};
-
 public:
-	// The data format used to hold index buffer data.  Note that DX11 (feature level 11.0) appears to support
-	// UINT32 sized indices, but feature level 9.1 only appears to support UINT16.  Using the latter for now
-	// to maintain compatibility; likely too major a change to handle via the localiser
-	typedef UINT16 INDEXFORMAT;		
 
-	Image2D();
-	Image2D(const Image2D&);
-	~Image2D();
+	// Default constructor
+	Image2D(void) noexcept;
 
-	Result Initialize(int screenWidth, int screenHeight, const std::string & texture, int bitmapWidth, int bitmapHeight);
-	void Shutdown();
-	
-	void Render(void);
-	void Render(int xPosition, int yPosition, float zOrder);
+	// Constructor providing all data
+	Image2D(const std::string & code, MaterialDX11 *material, XMFLOAT2 position, XMFLOAT2 size, float rotation = 0.0f, float opacity = 1.0f, float zorder = 0.0f) noexcept;
 
-	CMPINLINE bool GetRenderActive(void) const		{ return m_render; }
-	CMPINLINE void SetRenderActive(bool render)		{ m_render = render; }
+	// Copy construction and assignment
+	Image2D(const Image2D & other) noexcept;
+	Image2D & operator=(const Image2D & other) noexcept;
 
-	CMPINLINE int GetIndexCount() { return m_indexCount; }
-	ID3D11ShaderResourceView* GetTexture(void);
+	// Move construction and assignment
+	Image2D(Image2D && other) noexcept;
+	Image2D & operator=(Image2D && other) noexcept;
 
-	CMPINLINE int GetXPosition(void) { return m_x; }
-	CMPINLINE int GetYPosition(void) { return m_y; }
-	CMPINLINE void SetPosition(int x, int y) { m_x = x; m_y = y; }
+	// Return or set key parameters
+	CMPINLINE MaterialDX11 *		GetMaterial(void) const { return m_material; }
+	CMPINLINE float					GetRotation(void) const { return m_rotation; }
+	CMPINLINE float					GetOpacity(void) const { return m_opacity; }
+	CMPINLINE float					GetZOrder(void) const { return m_zorder; }
 
-	CMPINLINE float GetZOrder(void) { return m_z; }
-	CMPINLINE void SetZOrder(float z) { m_z = z; }
+	void							SetMaterial(const std::string & material);
+	CMPINLINE void					SetMaterial(MaterialDX11 *material) { m_material = material; }
+	CMPINLINE void					SetRotation(float rotation) { m_rotation = rotation; }
+	CMPINLINE void					SetOpacity(float opacity) { m_opacity = opacity; }
+	CMPINLINE void					SetZOrder(float zorder) { m_zorder = zorder; }
 
-	CMPINLINE int GetWidth(void) { return m_bitmapWidth; }
-	CMPINLINE int GetHeight(void) { return m_bitmapHeight; }
 
-private:
-	Result InitializeBuffers();
-	void ShutdownBuffers();
-	Result UpdateBuffers();
-	void RenderBuffers();
+	// Render image component to the primary RT
+	void							Render(void);
+
+	// Destructor
+	~Image2D(void) noexcept;
 
 
 private:
 
-	int m_x, m_y;
-	float m_z;
+	void							Swap(const Image2D & other);
 
-	ID3D11Buffer *m_vertexBuffer, *m_indexBuffer;
-	int m_vertexCount, m_indexCount;
-	VertexType *m_vertices;
-	TextureDX11 * m_Texture;
-	int m_screenWidth, m_screenHeight;
-	float m_screenHalfWidth, m_screenHalfHeight;
-	float m_screenLeft;
-	int m_bitmapWidth, m_bitmapHeight;
+private:
 
-	int m_previousPosX, m_previousPosY;
-	float m_previousPosZ;
+	MaterialDX11 *					m_material;
+	float							m_rotation;
+	float							m_opacity;
 };
 
-
-#endif

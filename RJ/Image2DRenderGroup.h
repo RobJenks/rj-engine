@@ -1,7 +1,6 @@
 #pragma once
 
-#ifndef __Image2DRenderGroupH__
-#define __Image2DRenderGroupH__
+#if 0
 
 #include <vector>
 #include <deque>
@@ -18,7 +17,7 @@ class TextureDX11;
 class iUIControl;
 
 // This class has no special alignment requirements
-class Image2DRenderGroup : public iUIComponentRenderable
+class _OLD_Image2DRenderGroup : public iUIComponentRenderable
 {
 private:
 
@@ -92,13 +91,13 @@ public:
 	struct InstanceReference
 	{
 		Instance *				instance;
-		Image2DRenderGroup *	rendergroup;
+		_OLD_Image2DRenderGroup *	rendergroup;
 		int						index;
 		std::string				code;
 	
 		InstanceReference(void) { instance = NULL; rendergroup = NULL; index = -1; code = ""; }
 
-		InstanceReference(Instance *_instance, Image2DRenderGroup *_rendergroup, int _index, std::string _code) {
+		InstanceReference(Instance *_instance, _OLD_Image2DRenderGroup *_rendergroup, int _index, std::string _code) {
 			instance = _instance; rendergroup = _rendergroup; index = _index; code = _code;
 		}
 	};
@@ -106,9 +105,9 @@ public:
 	// Methods to add/remove/change instances
 	CMPINLINE InstanceCollection *			GetInstances(void) { return &m_instances; }
 	CMPINLINE Instance *					GetInstanceDirect(InstanceCollection::size_type index) { return &(m_instances[index]); }
-	Image2DRenderGroup::Instance *			GetInstanceByCode(std::string code);
-	Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(std::string code);
-	Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
+	_OLD_Image2DRenderGroup::Instance *			GetInstanceByCode(std::string code);
+	_OLD_Image2DRenderGroup::InstanceReference 	GetInstanceReferenceByCode(std::string code);
+	_OLD_Image2DRenderGroup::Instance *			AddInstance(INTVECTOR2 pos, float zorder, INTVECTOR2 size, bool render, Rotation90Degree rotation);
 	void									RemoveInstance(Instance *instance);
 	void									RemoveInstance(InstanceCollection::size_type index);
 	CMPINLINE InstanceCollection::size_type	GetInstanceCount(void) { return m_instances.size(); }	
@@ -153,8 +152,8 @@ public:
 	// to maintain compatibility; likely too major a change to handle via the localiser
 	typedef UINT16 INDEXFORMAT;	
 
-	Image2DRenderGroup(void);
-	~Image2DRenderGroup(void);
+	_OLD_Image2DRenderGroup(void);
+	~_OLD_Image2DRenderGroup(void);
 
 	Result								Initialize(int screenWidth, int screenHeight, const std::string & texture, bool texture_repeat);
 	Result								InitializeBuffers(void);

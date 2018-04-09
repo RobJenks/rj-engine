@@ -777,6 +777,9 @@ void CoreEngine::Render(void)
 	SpaceSystem & system = Game::Universe->GetCurrentSystem();
 	RenderAllSystemObjects(system);
 
+	/* Render all user interface components */
+	RenderUserInterface();
+
 	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
 	m_renderdevice->Render();
 
@@ -856,13 +859,13 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 }
 
 // Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
-void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity)
+void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity, float zorder)
 {
 	// Build a transform matrix based on the given screen-space properties
 	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
 		XMMatrixScaling(size.x, size.y, 1.0f),
 		XMMatrixRotationZ(rotation)),
-		XMMatrixTranslation(position.x, position.y, 0.0f));
+		XMMatrixTranslation(position.x, position.y, zorder));
 
 	// Delegate to the primary submission method
 	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material,
@@ -2253,21 +2256,16 @@ RJ_PROFILED(void CoreEngine::RenderSystemRegion, void)
 
 RJ_PROFILED(void CoreEngine::RenderUserInterface, void)
 {
-	// Enable alpha-blending, and disable the z-buffer, in advance of any 2D UI rendering
-	/*m_D3D->SetAlphaBlendModeEnabled();
-
-	// Call the UI controller rendering function
+	// Call the UI controller rendering function; this will invoke the Render() method of all UI controllers, 
+	// allowing them to perform any render updates for the frame, as well as handling managed control state updates
 	D::UI->Render();
 
-	// Render all 2D components to the screen
+	// Render all active 2D components to the engine render queue
 	m_render2d->Render();
 
-	// Render the text strings to the interface
-	m_textmanager->Render(ID_MATRIX, r_orthographic);
-
-	// Now disable alpha blending, and re-enable the z-buffer, to return to normal rendering
-	m_D3D->SetAlphaBlendModeDisabled();
-	*/
+	// Render text strings to the interface
+	// TODO: DISABLED
+	//m_textmanager->Render(ID_MATRIX, r_orthographic);
 }
 
 RJ_PROFILED(void CoreEngine::RenderEffects, void)

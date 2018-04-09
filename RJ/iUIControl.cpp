@@ -1,36 +1,25 @@
 #include "GameVarsExtern.h"
 #include "UIManagedControlDefinition.h"
 #include "CoreEngine.h"
+#include "Image2D.h"
 #include "iUIControl.h"
 
 
-// Initialises an image component of this control using default parameters
-Result iUIControl::InitialiseImageComponentDefault(	UIManagedControlDefinition *def, Image2DRenderGroup **component,
-													std::string componentname, int instancecount, float zorder)
+// Method to initialise an image component for this control with default parameters
+Image2D *iUIControl::InitialiseImageComponentDefault(UIManagedControlDefinition *def, const std::string & componentname, float zorder)
 {
 	// Create a new component object and set the unique code
-	(*component) = new Image2DRenderGroup();
-	(*component)->SetCode(concat(m_code)(".")(componentname).str());
+	Image2D *component = new Image2D();
+	component->SetCode(concat(m_code)(".")(componentname).str());
 
-	// Initialise the control using default engine parameters
-	Result result = (*component)->Initialize(Game::ScreenWidth, Game::ScreenHeight,
-		def->GetComponent(componentname).c_str(), false);
-	if (result != ErrorCodes::NoError) return result;
+	// Set properties of the component
+	component->SetMaterial(def->GetComponent(componentname));
+	component->SetZOrder(zorder);
+	component->SetAcceptsMouseInput(true);
+	component->SetParentControl(this);
 
-	// Set other properties
-	(*component)->SetZOrder(zorder);
-	(*component)->SetAcceptsMouseInput(true);
-
-	// Add as many instances as required.  All are given default values to begin with; expectation is that instances are updated later
-	Image2DRenderGroup::Instance *inst = NULL;
-	for (int i = 0; i<instancecount; i++)
-	{
-		inst = (*component)->AddInstance(INTVECTOR2(i, i), zorder, INTVECTOR2(10, 10), true, Rotation90Degree::Rotate0);
-		if (inst) inst->control = this;
-	}
-
-	// Return success
-	return ErrorCodes::NoError;
+	// Return the new component
+	return component;
 }
 
 

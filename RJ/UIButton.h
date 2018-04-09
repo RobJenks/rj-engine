@@ -6,7 +6,7 @@
 #include <string>
 #include "Utility.h"
 #include "iUIControl.h"
-#include "Image2DRenderGroup.h"
+class Image2D;
 class TextBlock;
 class GameInputDevice;
 
@@ -21,11 +21,12 @@ public:
 	CMPINLINE static bool						PerformsManagedRendering(void) { return false; }
 
 	// Constructor
+	// TODO: All UI components currently store pos/size as int vectors, but we can change to float vectors which will match the engine rendering
 	UIButton(std::string code,
-					 Image2DRenderGroup::InstanceReference upcomponent, 
-					 Image2DRenderGroup::InstanceReference downcomponent, 
-					 TextBlock *textcomponent,
-					 INTVECTOR2 pos, INTVECTOR2 size, bool render);
+		Image2D *upcomponent, 
+		Image2D *downcomponent,
+		TextBlock *textcomponent,
+		INTVECTOR2 pos, INTVECTOR2 size, bool render);
 
 	// Destructor
 	~UIButton(void);
@@ -37,9 +38,9 @@ public:
 	INTVECTOR2									GetTextOffset(void) { return m_textoffset; }
 
 	// Methods to retrieve components that make up the button control
-	CMPINLINE const Image2DRenderGroup::InstanceReference *	GetUpComponent(void) { return &m_upcomponent; }
-	CMPINLINE const Image2DRenderGroup::InstanceReference *	GetDownComponent(void) { return &m_downcomponent; }
-	CMPINLINE TextBlock *									GetTextComponent(void) { return m_textcomponent; }
+	CMPINLINE const Image2D *					GetUpComponent(void) { return m_upcomponent; }
+	CMPINLINE const Image2D *					GetDownComponent(void) { return m_downcomponent; }
+	CMPINLINE TextBlock *						GetTextComponent(void) { return m_textcomponent; }
 
 	// Methods to change properties, which will also propogate to component parts as required
 	void										SetPosition(INTVECTOR2 pos);
@@ -51,17 +52,15 @@ public:
 
 	// Core control methods, implemented to satisfy the iUIControl interface
 	bool										WithinControlBounds(INTVECTOR2 point);
-	void										HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
+	void										HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation);
 
 	// Methods to handle mouse clicks on the components making up this control
-	void HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-							   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
-	void HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
 
 	// Flag determining whether this control can accept user input focus
 	CMPINLINE bool								CanAcceptFocus(void) { return m_canacceptfocus; }		
@@ -96,8 +95,8 @@ private:
 	iUIControl::ControlState					m_state;
 
 	// The components that make up this button
-	Image2DRenderGroup::InstanceReference		m_upcomponent;
-	Image2DRenderGroup::InstanceReference		m_downcomponent;
+	Image2D *									m_upcomponent;
+	Image2D *									m_downcomponent;
 	TextBlock *									m_textcomponent;
 
 	// Collection in which to store the component pointers, for more efficient parsing of all constituent components

@@ -2,6 +2,8 @@
 #include "FastMath.h"
 #include "Utility.h"
 #include "GameDataExtern.h"
+#include "CoreEngine.h"
+#include "RenderAssetsDX11.h"
 #include "UserInterface.h"
 #include "Render2DGroup.h"
 #include "TextBlock.h"
@@ -110,7 +112,9 @@ Result MultiLineTextBlock::Initialise(Render2DGroup *parent, std::string code, M
 
 	// Create a backdrop component for the control
 	m_backcode = concat(m_code)(".back").str();
-	m_back = D::UI->NewComponent(m_backcode, MultiLineTextBlock::BACKDROP_COMPONENT, m_location.x, m_location.y, m_zvalue, m_size.x, m_size.y);
+	m_back = new Image2D(m_backcode, Game::Engine->GetAssets().GetMaterial(MultiLineTextBlock::BACKDROP_COMPONENT), 
+		m_location.ToFloat(), m_size.ToFloat(), 0.0f, 1.0f, m_zvalue);
+
 	if (m_back)
 	{
 		// Set the render state based on this control state
@@ -268,7 +272,7 @@ void MultiLineTextBlock::SetPosition(INTVECTOR2 pos)
 	}
 
 	// Update the backdrop component
-	m_back->SetPosition(m_location.x, m_location.y);
+	m_back->SetPosition(m_location.ToFloat());
 }
 
 // Sets the unique string code for this component

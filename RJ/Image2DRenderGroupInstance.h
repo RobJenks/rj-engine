@@ -8,7 +8,7 @@
 #include "Image2DRenderGroup.h"
 #include "iUIComponent.h"
 
-class Image2DRenderGroupInstance : public iUIComponent
+/*class Image2DRenderGroupInstance : public iUIComponent
 {
 public:
 	Image2DRenderGroupInstance(void);
@@ -42,7 +42,7 @@ private:
 	Image2DRenderGroup *		m_rendergroup;
 	std::string					m_key;
 
-};
+};*/
 
 
 #endif

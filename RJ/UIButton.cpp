@@ -1,13 +1,13 @@
 #include <string>
 #include "Utility.h"
-#include "Image2DRenderGroup.h"
+#include "Image2D.h"
 #include "TextManager.h"
 #include "TextBlock.h"
 #include "UIButton.h"
 
 UIButton::UIButton(std::string code,
-					Image2DRenderGroup::InstanceReference upcomponent, 
-					Image2DRenderGroup::InstanceReference downcomponent, 
+					Image2D *upcomponent, 
+					Image2D *downcomponent, 
 					TextBlock *textcomponent, 
 					INTVECTOR2 pos, INTVECTOR2 size, bool render)
 {
@@ -20,8 +20,8 @@ UIButton::UIButton(std::string code,
 
 	// Also store references to these pointers in the component collection
 	m_components.clear();
-	m_components.push_back(m_upcomponent.instance);
-	m_components.push_back(m_downcomponent.instance);
+	m_components.push_back(m_upcomponent);
+	m_components.push_back(m_downcomponent);
 	m_components.push_back(m_textcomponent);
 
 	// Now set properties of these components as per the default button state
@@ -40,10 +40,10 @@ UIButton::UIButton(std::string code,
 void UIButton::CentreTextInControl(void)
 {
 	// We can only perform centring if we have a text and a button frame component to manipulate
-	if (m_textcomponent && m_upcomponent.instance)
+	if (m_textcomponent && m_upcomponent)
 	{
 		// Get the size of the text string and the component
-		INTVECTOR2 csize = m_upcomponent.instance->size;
+		INTVECTOR2 csize(m_upcomponent->GetSize());
 		float twidth = m_textcomponent->GetTextWidth();
 		float theight = m_textcomponent->GetTextHeight();
 
@@ -52,9 +52,10 @@ void UIButton::CentreTextInControl(void)
 		float yoffset = (csize.y / 2.0f) - (theight / 2.0f) + 2.0f; // Calculate y offset (note: includes small offset to account for misalignment)
 
 		// Set the text position using these offsets
+		auto pos = m_upcomponent->GetPosition();
 		m_textcomponent->UpdateTextBlock(	m_textcomponent->GetText().c_str(), 
-											m_upcomponent.instance->position.x + (int)xoffset,			// New x position
-											m_upcomponent.instance->position.y + (int)yoffset,			// New y position
+											pos.x + (int)xoffset,					// New x position
+											pos.y + (int)yoffset,					// New y position
 											m_textcomponent->GetRenderActive(), 
 											m_textcomponent->GetTextColour(), m_textcomponent->GetSize() );
 
@@ -66,8 +67,8 @@ void UIButton::CentreTextInControl(void)
 // Recalculates the text offset based on the relative position of button and text controls
 void UIButton::CalculateTextOffset(void)
 {
-	if (m_textcomponent && m_upcomponent.instance)
-		m_textoffset = (m_textcomponent->GetPosition() - m_upcomponent.instance->position);
+	if (m_textcomponent && m_upcomponent)
+		m_textoffset = (m_textcomponent->GetPosition() - INTVECTOR2(m_upcomponent->GetPosition()));
 	else
 		m_textoffset = INTVECTOR2(0, 0);
 }
@@ -78,8 +79,8 @@ void UIButton::SetPosition(INTVECTOR2 pos)
 	m_position = pos;
 
 	// Set the position of all components to match
-	if (m_upcomponent.instance) m_upcomponent.instance->position = pos;
-	if (m_downcomponent.instance) m_downcomponent.instance->position = pos;
+	if (m_upcomponent) m_upcomponent->SetPosition(pos.ToFloat());
+	if (m_downcomponent) m_downcomponent->SetPosition(pos.ToFloat());
 
 	// Also incorporate the text offset when positioning the text block
 	if (m_textcomponent) 
@@ -96,8 +97,8 @@ void UIButton::SetSize(INTVECTOR2 size)
 	m_size = size;
 
 	// Set the size of all components to match
-	if (m_upcomponent.instance) m_upcomponent.instance->size = size;
-	if (m_downcomponent.instance) m_downcomponent.instance->size = size;
+	if (m_upcomponent) m_upcomponent->SetSize(size.ToFloat());
+	if (m_downcomponent) m_downcomponent->SetSize(size.ToFloat());
 }
 
 void UIButton::SetRenderActive(bool render)
@@ -108,14 +109,14 @@ void UIButton::SetRenderActive(bool render)
 	// Set the render value of each component according to the overall button render state
 	if (m_render)
 	{
-		if (m_upcomponent.instance) m_upcomponent.instance->render = true;
-		if (m_downcomponent.instance) m_downcomponent.instance->render = false;
+		if (m_upcomponent) m_upcomponent->SetRenderActive(true);
+		if (m_downcomponent) m_downcomponent->SetRenderActive(false);
 		if (m_textcomponent) m_textcomponent->SetRenderActive(true);
 	}
 	else 
 	{
-		if (m_upcomponent.instance) m_upcomponent.instance->render = false;
-		if (m_downcomponent.instance) m_downcomponent.instance->render = false;
+		if (m_upcomponent) m_upcomponent->SetRenderActive(false);
+		if (m_downcomponent) m_downcomponent->SetRenderActive(false);
 		if (m_textcomponent) m_textcomponent->SetRenderActive(false);
 	}
 }
@@ -142,13 +143,13 @@ bool UIButton::WithinControlBounds(INTVECTOR2 point)
 }
 
 // Handles changes in control state in response to a mouse hover event over the control
-void UIButton::HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIButton::HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 
 }
 
 // Handles changes in control state in response to a mouse down event over the control
-void UIButton::HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIButton::HandleMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	// Only take action if we are not currently in this state
 	if (m_state == iUIControl::ControlState::LMBDown) return;
@@ -157,18 +158,18 @@ void UIButton::HandleMouseDownEvent(Image2DRenderGroup::InstanceReference compon
 	m_state = iUIControl::ControlState::LMBDown;
 
 	// Set the button appearance to reflect the LMB being held down
-	if (m_upcomponent.instance)		m_upcomponent.instance->render = false;
-	if (m_downcomponent.instance)	m_downcomponent.instance->render = m_render;
+	if (m_upcomponent)		m_upcomponent->SetRenderActive(false);
+	if (m_downcomponent)	m_downcomponent->SetRenderActive(m_render);
 }
 
 // Handles changes in control state in response to a right mouse down event over the control
-void UIButton::HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIButton::HandleRightMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	// Normal buttons do not respond to a RMB-down event
 }
 
 // Handles changes in control state in response to a mouse up event
-void UIButton::HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIButton::HandleMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	// Only take action if we are not currently in this state
 	if (m_state == iUIControl::ControlState::Default) return;
@@ -177,26 +178,24 @@ void UIButton::HandleMouseUpEvent(Image2DRenderGroup::InstanceReference componen
 	m_state = iUIControl::ControlState::Default;
 
 	// Set the button appearance to reflect the LMB being released down
-	if (m_upcomponent.instance)		m_upcomponent.instance->render = m_render;
-	if (m_downcomponent.instance)	m_downcomponent.instance->render = false;
+	if (m_upcomponent)		m_upcomponent->SetRenderActive(m_render);
+	if (m_downcomponent)	m_downcomponent->SetRenderActive(false);
 }
 
 // Handles changes in control state in response to a right mouse up event
-void UIButton::HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation)
+void UIButton::HandleRightMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation)
 {
 	// Normal buttons do not respond to a RMB-down event
 }
 
 
 // Event handler for left mouse clicks on the components making up this control
-void UIButton::HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									 INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UIButton::HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
 }
 
 // Event handler for right mouse clicks on the components making up this control
-void UIButton::HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-								 		  INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
+void UIButton::HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation)
 {
 }
 

@@ -66,6 +66,12 @@ namespace IO
 	float			GetFloatAttribute(TiXmlElement *node, const char *attribute);
 	float			GetFloatAttribute(TiXmlElement *node, const char *attribute, float defaultvalue);
 
+	// Get the specified bool attribute
+	bool			GetBoolAttribute(TiXmlElement *node, const char *attribute, bool defaultvalue = false);
+
+	// Get the specified attribute and return as a std::string, or the default value if no attribute with that key exisfts
+	std::string		GetStringAttribute(TiXmlElement *node, const char *attribute, const std::string & defaultValue = NullString);
+
 	// Get the specified integer attribute, returning 0 if the attribute does not exist.  "node" must exist
 	int				GetIntegerAttribute(TiXmlElement *node, const char *attribute);
 

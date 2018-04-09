@@ -9,7 +9,7 @@
 #include "CompilerSettings.h"
 #include "ErrorCodes.h"
 #include "Utility.h"
-class Image2DRenderGroup;
+class Image2D;
 class TextBlock;
 class UIManagedControlDefinition;
 class GameInputDevice;
@@ -158,17 +158,15 @@ public:
 	void										ProcessKeyboardInput(GameInputDevice *keyboard);
 
 	// Methods to handle user input to the control
-	void										HandleMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseDownEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
-	void										HandleRightMouseUpEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 mouselocation);
+	void										HandleMouseHoverEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseDownEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation);
+	void										HandleRightMouseUpEvent(iUIComponent *component, INTVECTOR2 mouselocation);
 
 	// Methods to handle mouse clicks on the components making up this control
-	void HandleMouseClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-							   INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
-	void HandleMouseRightClickEvent(Image2DRenderGroup *componentgroup, Image2DRenderGroup::Instance *component,
-									INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
+	void HandleMouseRightClickEvent(iUIComponent *component, INTVECTOR2 mouselocation, INTVECTOR2 mousestartlocation);
 
 	// Shutdown method to satisfy the interface requirement (only basic components, e.g. Image2Ds & text, need to be disposed of)
 	void Shutdown(void) { }
@@ -199,18 +197,19 @@ private:
 	bool														m_suspendupdates;
 
 	// The components making up this control in default view, i.e. when not expanded
-	Image2DRenderGroup *										m_mainback;
+	Image2D *													m_mainback;
 	TextBlock *													m_maintext;
-	Image2DRenderGroup *										m_expand;
+				Image2D *										m_expand;
 	
 	// The additional controls shown when the control is expanded (but no scrolling required)
-	Image2DRenderGroup *										m_expandback;
+	Image2D *													m_expandback;
 	std::vector<TextBlock*>										m_expandtext;
 
 	// The additional controls shown when control is expanded and also requires scrolling to view all items
-	Image2DRenderGroup *										m_scrollbarback;
-	Image2DRenderGroup *										m_scrollbarupdown;
-	Image2DRenderGroup *										m_scrollbarhandle;
+	Image2D *													m_scrollbarback;
+	Image2D *													m_scrollbarup;
+	Image2D *													m_scrollbardown;
+	Image2D *													m_scrollbarhandle;
 
 	// Collection in which to store the component pointers, for more efficient parsing of all constituent components
 	std::vector<iUIComponent*>									m_components;

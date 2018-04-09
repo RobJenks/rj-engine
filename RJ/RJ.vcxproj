@@ -528,6 +528,8 @@
     <ClCompile Include="iStaticObject.cpp" />
     <ClCompile Include="iTakesDamage.cpp" />
     <ClCompile Include="iTakesDamageSimple.cpp" />
+    <ClCompile Include="iUIComponent.cpp" />
+    <ClCompile Include="iUIComponentRenderable.cpp" />
     <ClCompile Include="iUIController.cpp" />
     <ClCompile Include="LightFlatHighlightFadeShader.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

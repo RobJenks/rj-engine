@@ -18,6 +18,7 @@ struct IntegralVector2
 
 	IntegralVector2 Abs(void) const { return IntegralVector2(std::abs(x), std::abs(y)); }
 	bool IsZeroVector(void) { return (x == 0 && y == 0); }
+	XMFLOAT2 ToFloat(void) const { return XMFLOAT2(static_cast<float>(x), static_cast<float>(y)); }
 	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << "]"; return s.str(); }
 
 	IntegralVector2& operator +=(const IntegralVector2& rhs) { this->x += rhs.x; this->y += rhs.y; return *this; }
@@ -49,6 +50,7 @@ struct IntegralVector3
 
 	IntegralVector3 Abs(void) const { return IntegralVector3(std::abs(x), std::abs(y), std::abs(z)); }
 	bool IsZeroVector(void) { return (x == 0 && y == 0 && z == 0); }
+	XMFLOAT3 ToFloat(void) const { return XMFLOAT3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z)); }
 
 	IntegralVector3 & operator +=(const IntegralVector3 & rhs) { this->x += rhs.x; this->y += rhs.y; this->z += rhs.z; return *this; }
 	IntegralVector3 & operator -=(const IntegralVector3 & rhs) { this->x -= rhs.x; this->y -= rhs.y; this->z -= rhs.z; return *this; }
@@ -74,7 +76,6 @@ struct IntegralVector3
 	bool operator>(const IntegralVector3 & rhs) const { return (x > rhs.x && y > rhs.y && z > rhs.z); }
 	bool operator>=(const IntegralVector3 & rhs) const { return (x >= rhs.x && y >= rhs.y && z >= rhs.z); }
 
-	XMFLOAT3 ToFloat3(void) const { return XMFLOAT3((float)x, (float)y, (float)z); }
 	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << z << "]"; return s.str(); }
 };
 template <typename T> inline IntegralVector3<T> operator +(IntegralVector3<T> lhs, const IntegralVector3<T>& rhs) { lhs += rhs; return lhs; }

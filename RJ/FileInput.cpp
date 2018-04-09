@@ -462,6 +462,20 @@ Result IO::TryGetIntegerAttribute(TiXmlElement *node, const char *attribute, int
 	return ErrorCodes::NoError;
 }
 
+// Get the specified bool attribute
+bool IO::GetBoolAttribute(TiXmlElement *node, const char *attribute, bool defaultvalue)
+{
+	const char *cattr = node->Attribute(attribute);
+	return (cattr ? (StrLower(cattr) == "true") : defaultvalue);
+}
+
+// Get the specified attribute and return as a std::string, or the default value if no attribute with that key exisfts
+std::string IO::GetStringAttribute(TiXmlElement *node, const char *attribute, const std::string & defaultValue)
+{
+	const char *cattr = node->Attribute(attribute);
+	return (cattr ? cattr : defaultValue);
+}
+
 // Read a Direction attribute, which will either be the string name of the direction (preferred) or the integer index (secondary)
 Direction IO::GetDirectionAttribute(TiXmlElement *node, const char *attribute)
 {

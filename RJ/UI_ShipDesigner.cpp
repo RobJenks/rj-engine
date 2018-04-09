@@ -1,3 +1,5 @@
+#if 0
+
 #include <math.h>
 #include <windows.h>
 #include <vector>
@@ -2909,3 +2911,5 @@ std::string UI_ShipDesigner::TranslateCorridorViewModeToString(CorridorViewMode 
 			return "";
 	}
 }
+
+#endif

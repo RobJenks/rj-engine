@@ -138,21 +138,21 @@ public:
 	void ProcessKeyboardInput(GameInputDevice *keyboard);
 
 	// Methods to accept mouse events from the UI manager
-	void ProcessMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
-	void ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
-	void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component) { }
+	void ProcessMouseDownEvent(INTVECTOR2 location, iUIComponent *component) { }
+	void ProcessMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component) { }
+	void ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component) { }
 
-	void ProcessRightMouseDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
-	void ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component) { }
-	void ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component);
+	void ProcessRightMouseDownEvent(INTVECTOR2 location, iUIComponent *component) { }
+	void ProcessRightMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component) { }
+	void ProcessRightMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component);
 
 	// Methods to accept generic mouse click events at the specified location
 	void ProcessMouseClickAtLocation(INTVECTOR2 location);
 	void ProcessRightMouseClickAtLocation(INTVECTOR2 location) { }
 
 	// Methods to accept the processed mouse click events for particular components
-	void ProcessMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
-	void ProcessRightMouseClickEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
+	void ProcessMouseClickEvent(iUIComponent *component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
+	void ProcessRightMouseClickEvent(iUIComponent *component, INTVECTOR2 location, INTVECTOR2 startlocation) { }
 
 	// Methods to accept the processed mouse click events for managed components, e.g. buttons
 	void ProcessControlClickEvent(iUIControl *control);
@@ -166,7 +166,7 @@ public:
 
 	// Method to accept mouse move events, and also mouse hover events for specific components
 	void ProcessMouseMoveEvent(INTVECTOR2 location);
-	void ProcessMouseHoverEvent(Image2DRenderGroup::InstanceReference component, INTVECTOR2 location, bool lmb, bool rmb) { }
+	void ProcessMouseHoverEvent(iUIComponent *component, INTVECTOR2 location, bool lmb, bool rmb) { }
 
 	// Methods to process specific events raised from individual controls, and routed through the UserInterface
 	void ComboBox_SelectedIndexChanged(UIComboBox *control, int selectedindex, int previousindex) { }

@@ -85,6 +85,7 @@
 #include "Render2DManager.h"
 #include "Render2DGroup.h"
 #include "RenderMouseEvent.h"
+#include "Image2D.h"
 #include "Image2DRenderGroup.h"
 #include "Image2DRenderGroupInstance.h"
 #include "iUIComponent.h"
@@ -3506,38 +3507,28 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		else if (key == "image2d") 
 		{
 			// Attempt to retrieve all the required data for an Image2D component
-			std::string code = child->Attribute("code");
-			std::string texture = child->Attribute("texture");
+			std::string code = IO::GetStringAttribute(child, "code", NullString);
+			std::string material = IO::GetStringAttribute(child, "material", NullString);
 			XMFLOAT3 pos = IO::GetFloat3FromAttr(child);
-			const char *cwidth = child->Attribute("width");
-			const char *cheight = child->Attribute("height");
-			std::string brender = child->Attribute("render");
+			float width = IO::GetFloatAttribute(child, "width", 1.0f);
+			float height = IO::GetFloatAttribute(child, "height", 1.0f);
+			float rot = IO::GetFloatAttribute(child, "rotation", 0.0f);
+			float opacity = IO::GetFloatAttribute(child, "opacity", 1.0f);
+			bool render = IO::GetBoolAttribute(child, "render", true);
+			bool acceptsmouse = IO::GetBoolAttribute(child, "acceptsmouse", false);
 
 			// Make sure we were able to retrieve all required information
-			if (code == NullString || texture == NullString || !cwidth || !cheight) continue;
-
-			// Process relevant fields to get the correct format
-			StrLowerC(code); 
-			int width = (int)floor(atof(cwidth));
-			int height = (int)floor(atof(cheight));
-
-			// Initialise a new component using this data
-			Image2D *item = D::UI->NewComponent(code, texture, (int)floor(pos.x), (int)floor(pos.y), pos.z, width, height);
-			if (!item) continue;
-			
-			// Only process the render flag if it has been set, otherwise use the Image2D object default
-			if (brender != NullString) 
-			{
-				StrLowerC(brender);
-				item->SetRenderActive(brender == "true");
-			}
+			if (code.empty() || material.empty()) continue;
+	
+			// Create the new component
+			Image2D *component = new Image2D(code, Game::Engine->GetAssets().GetMaterial(material),
+				XMFLOAT2(pos.x, pos.y), XMFLOAT2(width, height), rot, opacity, pos.z);
+			component->SetRenderActive(render);
+			component->SetAcceptsMouseInput(acceptsmouse);
 
 			// Add this new component to the render group
-			group->Components.Image2D.AddItem(code, item);
-			group->RegisterRenderableComponent(item);
-		}
-		else if (key == "image2dgroup") {
-			result = IO::Data::LoadImage2DGroup(child, group);
+			group->Components.Image2D.AddItem(code, component);
+			group->RegisterRenderableComponent(component);
 		}
 		else if (key == "constant")
 		{
@@ -3725,84 +3716,59 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 		{
 			// Pull required fields for a button control
 			const char *code = child->Attribute("code");
-			const char *upcomp = child->Attribute("up");
-			const char *upkey = child->Attribute("up_key");
-			const char *downcomp = child->Attribute("down");
-			const char *downkey = child->Attribute("down_key");
-			const char *textcomp = child->Attribute("text");
-			const char *crender = child->Attribute("render");
+			const char *upcode = child->Attribute("up");
+			const char *downcode = child->Attribute("down");
+			const char *textcode = child->Attribute("text");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 
 			// Make sure we have all required fields
-			if (!code || !upcomp || !upkey || !downcomp || !downkey) continue;
-
-			// Convert data to the format we require
-			bool render = true;
-			if (crender && strcmp(crender, "false") == 0) render = false;
+			if (!code || !upcode || !downcode) continue;
 
 			// Attempt to get a reference to each component group
-			Image2DRenderGroup *upgroup = group->Components.Image2DGroup.GetItem(upcomp);
-			Image2DRenderGroup *downgroup = group->Components.Image2DGroup.GetItem(downcomp);
-			if (!upgroup || !downgroup) continue;
+			auto *up = group->Components.Image2D.GetItem(upcode);
+			auto *down = group->Components.Image2D.GetItem(downcode);
+			TextBlock *text = (textcode ? group->Components.TextBlocks.GetItem(textcode) : NULL);
 
-			// Now make sure the key is valid, and if so get references to the specific instances
-			Image2DRenderGroup::InstanceReference upinst = upgroup->GetInstanceReferenceByCode(upkey);
-			Image2DRenderGroup::InstanceReference downinst = downgroup->GetInstanceReferenceByCode(downkey);
-			if (!upinst.instance || !downinst.instance) continue;
+			if (!up || !down) continue;
 
-			// Also get a reference to the button text component, if one has been specified
-			TextBlock *textinst = NULL;
-			if (textcomp) textinst = group->Components.TextBlocks.GetItem(textcomp);
-
-			// Create a new button component and add links to these components.  Note derived properties are taken from the up componnet
-			UIButton *button = new UIButton(code, upinst, downinst, textinst, upinst.instance->position, upinst.instance->size, render);
+			// Create a new button component and add links to these components.  Note derived properties are taken from the up component
+			UIButton *button = new UIButton(code, up, down, text, up->GetPosition(), up->GetSize(), render);
 			group->Components.Buttons.AddItem(code, button);
 
 			// Also add links from the individual components back to this button, for more efficient event handling
-			upinst.instance->control = button;
-			downinst.instance->control = button;
+			up->SetParentControl(button);
+			down->SetParentControl(button);
 		}
 		else if (key == "textbox")
 		{
 			// Pull required fields for a button control
 			const char *code = child->Attribute("code");
-			const char *framecomp = child->Attribute("frame");
-			const char *framekey = child->Attribute("frame_key");
-			const char *framefocuscomp = child->Attribute("frame_focus");
-			const char *framefocuskey = child->Attribute("frame_focus_key");
-			const char *textcomp = child->Attribute("text");
-			const char *crender = child->Attribute("render");
+			const char *framecode = child->Attribute("frame");
+			const char *framefocuscode = child->Attribute("frame_focus");
+			const char *textcode = child->Attribute("text");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 
 			// Make sure we have all required fields
-			if (!code || !framecomp || !framekey || !textcomp) continue;
+			if (!code || !framecode || !textcode) continue;
 
 			// If we don't have a distinct 'focus' appearance then copy the normal appearance
-			if (!framefocuscomp) { framefocuscomp = framecomp; framefocuskey = framekey; }
+			if (!framefocuscode) framefocuscode = framecode;
 
-			// Convert data to the format we require
-			bool render = true;
-			if (crender && strcmp(crender, "false") == 0) render = false;
+			// Attempt to get a reference to each component 
+			auto *frame = group->Components.Image2D.GetItem(framecode);
+			auto *framefocus = group->Components.Image2D.GetItem(framefocuscode);
+			auto *text = group->Components.TextBlocks.GetItem(textcode);
 
-			// Attempt to get a reference to each component group
-			Image2DRenderGroup *frgroup = group->Components.Image2DGroup.GetItem(framecomp);
-			Image2DRenderGroup *frfocusgroup = group->Components.Image2DGroup.GetItem(framefocuscomp);
-			if (!frgroup || !frfocusgroup) continue;
-
-			// Now make sure the key is valid, and if so get references to the specific instances
-			Image2DRenderGroup::InstanceReference frinst = frgroup->GetInstanceReferenceByCode(framekey);
-			Image2DRenderGroup::InstanceReference frfocusinst = frfocusgroup->GetInstanceReferenceByCode(framefocuskey);
-			if (!frinst.instance || !frfocusinst.instance) continue;
-
-			// Also get a reference to the button text component, if one has been specified
-			TextBlock *textinst = NULL;
-			if (textcomp) textinst = group->Components.TextBlocks.GetItem(textcomp);
+			if (!frame || !framefocus || !text) continue;
 
 			// Create a new textbox component and add links to these components.  Derived properties are taken from the frame component
-			UITextBox *tbox = new UITextBox(code, frinst, frfocusinst, textinst, frinst.instance->position, frinst.instance->size, render);
+			UITextBox *tbox = new UITextBox(code, frame, framefocus, text, frame->GetPosition(), frame->GetSize(), render);
 			group->Components.TextBoxes.AddItem(code, tbox);
 
 			// Also add links from the individual components back to this button, for more efficient event handling
-			frinst.instance->control = tbox;
-			frfocusinst.instance->control = tbox;
+			frame->SetParentControl(tbox);
+			framefocus->SetParentControl(tbox);
+			text->SetParentControl(tbox);
 		}
 		else if (key == "combobox")
 		{
@@ -3815,7 +3781,7 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			const char *swidth = child->Attribute("width");
 			const char *sheight = child->Attribute("height");
 			const char *sexpandsize = child->Attribute("expandsize");
-			const char *crender = child->Attribute("render");
+			bool render = IO::GetBoolAttribute(child, "render", true);
 	
 			// Make sure all mandatory fields exist
 			if (!cdef || !code || !sx || !sy || !sz || !swidth || !sheight) continue;
@@ -3827,7 +3793,6 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 			int height = atoi(sheight);
 
 			// Convert optional fields or default as necessary
-			bool render = true; if (crender && strcmp(crender, "false") == 0) render = false;
 			int expandsize = UIComboBox::DEFAULT_EXPAND_SIZE; if (sexpandsize) expandsize = atoi(sexpandsize);
 
 			// Make sure this is a valid definition 
@@ -3867,96 +3832,10 @@ Result IO::Data::LoadUILayout(TiXmlElement *node)
 	return ErrorCodes::NoError;
 }
 
-// Loads a 2D image group and, if successful, registers with the specified render group
-Result IO::Data::LoadImage2DGroup(TiXmlElement *node, Render2DGroup *group)
-{
-	std::string key;
-	Result result;
-
-	// Parameter check 
-	if (!node || !group) return ErrorCodes::CannotLoadImage2DGroupWithNullParameters;
-
-	// This top-level node should contain all the info required to instantiate the render group
-	const char *code = node->Attribute("code");
-	const char *texture = node->Attribute("texture");
-	const char *trepeat = node->Attribute("repeat");
-	const char *brender = node->Attribute("render");
-	const char *smouse = node->Attribute("acceptsmouse");
-	const char *czorder = node->Attribute("z");
-
-	// Make sure we were able to retrieve all required information
-	if (!code || !texture) return ErrorCodes::InsufficientDataToConstructImage2DGroup;
-
-	// Process the parameters and convert as required
-	std::string grouprender = (brender ? brender : ""); StrLowerC(grouprender);
-	std::string acceptsmouse = (smouse ? smouse : ""); StrLowerC(acceptsmouse);
-	bool repeat = (trepeat ? StrLower(std::string(trepeat)) == "true" : false);
-
-	// Create the new 2D image group object and attempt to initialise it
-	Image2DRenderGroup *igroup = new Image2DRenderGroup();
-	igroup->SetCode(code);
-	result = igroup->Initialize( Game::ScreenWidth, Game::ScreenHeight, texture, repeat);
-	if (result != ErrorCodes::NoError) return result;
-
-	// Set other properties at the group level
-	igroup->SetRenderActive( (grouprender == "true") );
-	igroup->SetAcceptsMouseInput( (acceptsmouse == "true") );
-	
-	// Attempt to convert the z value for this group
-	float z = 0.0f; if (czorder) z = (float)atof(czorder);
-	igroup->SetZOrder(z);
-
-	// Now look at each child element in turn (each should correspond to an instance) and pull data from them
-	TiXmlElement *child = node->FirstChildElement();
-	for (child; child; child=child->NextSiblingElement())
-	{
-		// Extract data from the node
-		key = child->Value(); StrLowerC(key);
-
-		// If this is a new instance
-		if (key == "instance")
-		{
-			// Pull data on this instance
-			INTVECTOR2 pos = IO::GetInt2CoordinatesFromAttr(child);
-			const char *cz = child->Attribute("z");
-			const char *cwidth = child->Attribute("width");
-			const char *cheight = child->Attribute("height");
-			const char *instrender = child->Attribute("render");
-			const char *rotate = child->Attribute("rotation");
-			const char *instcode = child->Attribute("code");
-			
-			// Make sure we have all required data
-			if (!cwidth || !cheight) continue;
-
-			// Convert data if required
-			std::string srender = (instrender ? instrender : "");
-			std::string srotate = (rotate ? rotate : "");
-			INTVECTOR2 size = INTVECTOR2( atoi(cwidth), atoi(cheight) );
-			float zorder = (cz ? (float)atof(cz) : 0.0f);
-			Rotation90Degree rot = TranslateRotation90Degree(srotate);
-			StrLowerC(srender);
-
-			// Create a new instance with this data
-			Image2DRenderGroup::Instance *i = igroup->AddInstance(INTVECTOR2(pos.x, pos.y), zorder, size, (srender == "true"), rot );			
-
-			// Add any additional properties
-			i->code = (instcode ? instcode : "");
-		}
-	}
-
-	// Add this image group to the render group now that we have created it successfully
-	group->Components.Image2DGroup.AddItem(code, igroup);
-	group->RegisterRenderableComponent(igroup);
-
-	// Return success
-	return ErrorCodes::NoError;
-}
-
 // Loads a component grouping into a UI layout
 Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 {
 	std::string key;
-	const char *citemcode, *citemkey;
 	std::string itemcode, itemkey;
 
 	// Parameter check 
@@ -3981,15 +3860,12 @@ Result IO::Data::LoadUIComponentGroup(TiXmlElement *node, Render2DGroup *group)
 		if (key == "include")
 		{
 			// Pull data on this item
-			citemcode = child->Attribute("code");
-			citemkey = child->Attribute("key");
-
-			// Make sure the required parameters exist
-			if (!citemcode) continue; else itemcode = citemcode;
-			if (!citemkey) itemkey = ""; else itemkey = citemkey;
+			const char *citemcode = child->Attribute("code");
+			if (!citemcode) continue; 
+			itemcode = citemcode;
 
 			// Attempt to locate the item in the render group
-			iUIComponent *component = group->FindUIComponent(itemcode, itemkey);
+			iUIComponent *component = group->FindUIComponent(itemcode);
 			if (component) 
 			{
 				// If we have found a matching component then add it now

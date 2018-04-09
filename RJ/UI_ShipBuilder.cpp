@@ -1064,7 +1064,7 @@ void UI_ShipBuilder::RevertPlacementTileUpdates(void)
 }
 
 // Event raised when the LMB is first depressed
-void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component)
 {
 	// Take different action depending on the editor mode
 	if (m_mode == EditorMode::StructuralTestMode)
@@ -1074,7 +1074,7 @@ void UI_ShipBuilder::ProcessMouseFirstDownEvent(INTVECTOR2 location, Image2DRend
 }
 
 // Event raised when the RMB is first depressed
-void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessRightMouseFirstDownEvent(INTVECTOR2 location, iUIComponent *component)
 {
 	// Store the current camera centre point when the RMB is first depressed, for use when panning the camera
 	if (m_rmb_down_component == NULL) m_rmb_down_start_centre = m_centre;
@@ -1113,7 +1113,7 @@ void UI_ShipBuilder::ProcessMouseMoveEvent(INTVECTOR2 location)
 }
 
 // Method to handle the mouse up event
-void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, Image2DRenderGroup::InstanceReference component)
+void UI_ShipBuilder::ProcessMouseUpEvent(INTVECTOR2 location, INTVECTOR2 startlocation, iUIComponent *component)
 {
 	// Take different action depending on the active editor mode
 	if (m_mode == EditorMode::StructuralTestMode)

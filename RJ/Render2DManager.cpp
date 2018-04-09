@@ -90,7 +90,7 @@ void Render2DManager::Render(void)
 		if (!group || !(group->GetRenderActive())) continue;
 
 		// Call the render function for this group
-		group->Render(m_baseviewmatrix);
+		group->Render();
 	}
 }
 

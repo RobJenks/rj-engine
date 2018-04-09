@@ -170,15 +170,52 @@ XMVECTOR			Vector4Random(const FXMVECTOR vmin, const FXMVECTOR vmax);
 bool				Float3NearEqual(const XMFLOAT3 & v1, const XMFLOAT3 & v2);
 bool				IsZeroFloat3(const XMFLOAT3 &v);
 
-CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+
+CMPINLINE XMFLOAT2	Float2Add(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 {
-	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+	return XMFLOAT2(v1.x + v2.x, v1.y + v2.y);
 }
 
 CMPINLINE XMFLOAT2	Float2Subtract(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
 {
 	return XMFLOAT2(v1.x - v2.x, v1.y - v2.y);
 }
+
+CMPINLINE bool		Float2Equal(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x == v2.x && v1.y == v2.y);
+}
+
+CMPINLINE bool		Float2NotEqual(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2Equal(v1, v2);
+}
+
+CMPINLINE bool		Float2LessThan(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x < v2.x && v1.y < v2.y);
+}
+
+CMPINLINE bool		Float2GreaterThan(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2LessThan(v1, v2);
+}
+
+CMPINLINE bool		Float2LessThanOrEqualTo(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return (v1.x <= v2.x && v1.y <= v2.y);
+}
+
+CMPINLINE bool		Float2GreaterThanOrEqualTo(const XMFLOAT2 & v1, const XMFLOAT2 & v2)
+{
+	return !Float2LessThanOrEqualTo(v1, v2);
+}
+
+CMPINLINE XMFLOAT3	Float3Add(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
+{
+	return XMFLOAT3(v1.x + v2.x, v1.y + v2.y, v1.z + v2.z);
+}
+
 CMPINLINE XMFLOAT3	Float3Subtract(const XMFLOAT3 & v1, const XMFLOAT3 & v2)
 {
 	return XMFLOAT3(v1.x - v2.x, v1.y - v2.y, v1.z - v2.z);
