@@ -861,11 +861,15 @@ void RJ_XM_CALLCONV CoreEngine::SubmitForZSortedRendering(RenderQueueShader shad
 // Submit a material directly for orthographic rendering (of its diffuse texture) to the screen
 void RJ_XM_CALLCONV CoreEngine::RenderMaterialToScreen(MaterialDX11 & material, const XMFLOAT2 & position, const XMFLOAT2 size, float rotation, float opacity, float zorder)
 {
+	// Constant adjustment such that screen rendering has (0,0) at top-left corner.  Adjusts (0,0) to (-ScreenWidth/2, +ScreenHeight/2)
+	// and (ScreenWidth, ScreenHeight) to (+ScreenWidth/2, -ScreenHeight/2)
+	const XMFLOAT2 adjust = XMFLOAT2(Game::ScreenWidth * -0.5f, Game::ScreenHeight - (Game::ScreenHeight * 0.5f));
+
 	// Build a transform matrix based on the given screen-space properties
 	XMMATRIX transform = XMMatrixMultiply(XMMatrixMultiply(
 		XMMatrixScaling(size.x, size.y, 1.0f),
 		XMMatrixRotationZ(rotation)),
-		XMMatrixTranslation(position.x, position.y, zorder));
+		XMMatrixTranslation(adjust.x + position.x + (size.x * 0.5f), adjust.y - (position.y + (size.y * 0.5f)), zorder));
 
 	// Delegate to the primary submission method
 	SubmitForRendering(RenderQueueShader::RM_OrthographicTexture, &(m_unit_quad_model->Data), &material,

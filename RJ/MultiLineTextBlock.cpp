@@ -11,7 +11,7 @@
 #include "MultiLineTextBlock.h"
 
 // Initialise constant values
-const std::string MultiLineTextBlock::BACKDROP_COMPONENT = "mltb_back";
+const std::string MultiLineTextBlock::BACKDROP_COMPONENT = "(DISABLED)mltb_back";
 
 // Default constructor
 MultiLineTextBlock::MultiLineTextBlock(void)
