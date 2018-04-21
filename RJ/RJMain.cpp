@@ -641,9 +641,24 @@ void RJMain::ProcessKeyboardInput(void)
 				LightSource *ls = (LightSource*)obj();
 				if (ls->GetLight().GetType() == LightType::Directional)
 				{
-					ls->LightObject().Toggle();
-					Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
-					break;
+					if (b[DIK_LALT])
+					{
+						ls->LightObject().Toggle();
+						Game::Log << "Directional light is now " << (ls->GetLight().IsActive() ? "enabled" : "disabled") << "\n";
+						break;
+					}
+					else if (b[DIK_LSHIFT])
+					{
+						ls->LightObject().ChangeIntensity(+0.1f);
+						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
+						break;
+					}
+					else if (b[DIK_LCONTROL])
+					{
+						ls->LightObject().ChangeIntensity(-0.1f);
+						Game::Log << "Directional light intensity now has intensity " << ls->GetLight().GetIntensity() << "\n";
+						break;
+					}
 				}
 			}
 		}
@@ -2417,7 +2432,7 @@ void RJMain::__CreateDebugScenario(void)
 	l->SetPositionAndOrientation(NULL_VECTOR, QuaternionBetweenVectors(FORWARD_VECTOR, 
 		XMVector3Normalize(XMVectorSubtract(cs()->GetPosition(), ss()->GetPosition()))));	// System light direction is initial vector from (ss -> cs)
 	l->LightObject().SetColour(XMFLOAT4(1.0f, 224.0f / 255.0f, 163.0f / 255.0f, 1.0f));
-	l->LightObject().SetIntensity(0.75f);
+	l->LightObject().SetIntensity(0.95f);
 
 	// Temp: Create a point light source near the player
 	LightSource *l2 = LightSource::Create(Game::Engine->LightingManager->GetDefaultPointLightData());

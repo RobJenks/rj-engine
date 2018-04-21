@@ -72,6 +72,7 @@ public:
 	CMPINLINE void SetColour(const XMFLOAT4 & value) { Data.Colour = value; }
 	CMPINLINE void SetRange(float value) { Data.Range = value; }
 	CMPINLINE void SetIntensity(float value) { Data.Intensity = value; }
+	CMPINLINE void ChangeIntensity(float delta) { SetIntensity(GetIntensity() + delta); }
 	CMPINLINE void SetSpotlightAngle(float value) { Data.SpotlightAngle = value; }
 	
 	// Default destructor
