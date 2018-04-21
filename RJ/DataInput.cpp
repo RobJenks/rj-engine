@@ -788,11 +788,50 @@ bool IO::Data::LoadHardpointContainerData(TiXmlElement *node, HashVal hash, iCon
 
 Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 {
-	// Create a new SimpleShip instance to hold the data
+	// Create a new object and load all data from XML
+	if (!root) return ErrorCodes::CannotLoadFromNullDataNode;
 	SimpleShip *object = new SimpleShip();
-	object->SetShipClass(Ship::ShipClass::Simple);
+	object = LoadSimpleShipData(root, object);
+
+	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
+	if (object->GetCode() == NullString || D::SimpleShips.Exists(object->GetCode()))
+	{
+		SafeDelete(object);
+		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
+	}
+
+	// Otherwise store in the central collection and return success
+	D::SimpleShips.Store(object);
+	return ErrorCodes::NoError;
+}
+
+Result IO::Data::ReloadSimpleShip(TiXmlElement *root)
+{
+	if (!root) return ErrorCodes::CannotLoadFromNullDataNode;
+
+	std::string code = LookaheadNodeTextField(root, "code");
+	if (code.empty()) return ErrorCodes::CannotReloadObjectWithMissingCode;
+
+	SimpleShip *object = D::SimpleShips.Get(code);
+	if (!object)
+	{
+		Game::Log << LOG_WARN << "Cannot reload object \"" << code << "\"; object does not exist\n";
+		return ErrorCodes::CannotReloadObjectWithUnrecognisedCode;
+	}
+
+	object = LoadSimpleShipData(root, object);
+	Game::Log << LOG_INFO << "Reloaded object \"" << code << "\" from file\n";
+
+	return ErrorCodes::NoError;
+}
+
+
+SimpleShip * IO::Data::LoadSimpleShipData(TiXmlElement *root, SimpleShip *object)
+{
+	if (!root || !object) return NULL;
 
 	// Suspend updates while loading the data
+	object->SetShipClass(Ship::ShipClass::Simple);
 	object->GetHardpoints().SuspendUpdates();
 
 	// Now look at each child element in turn
@@ -822,23 +861,31 @@ Result IO::Data::LoadSimpleShip(TiXmlElement *root)
 			}
 		}
 	}
-
-	// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
-	if (object->GetCode() == NullString || D::SimpleShips.Exists(object->GetCode()))
-	{
-		SafeDelete(object);
-		return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
-	}
-
-	// Otherwise, resume updates, recalculate the ship data and store in the central collection
+	// Resume updates and recalculate the ship data
 	object->GetHardpoints().ResumeUpdates();
 	object->RecalculateAllShipData();
-	D::SimpleShips.Store(object);
-
-	// Return success
-	return ErrorCodes::NoError;
+	
+	// Return the ship
+	return object;
 }
 
+/****** TODO: Implement fully-templated model for Load<T>, Reload<T> which both rely on LoadData<T>.  Do as part of refactor DataInput.cpp -> proper central class ******/
+
+ComplexShip *						IO::Data::LoadComplexShipData(TiXmlElement *root, ComplexShip *object) { /* Not yet implemented */ return NULL; }
+ComplexShipSection *				IO::Data::LoadComplexShipSectionData(TiXmlElement *root, ComplexShipSection *object) { /* Not yet implemented */ return NULL; }
+Faction *							IO::Data::LoadFactionData(TiXmlElement *node, Faction *object) { /* Not yet implemented */ return NULL; }
+SpaceTurret *						IO::Data::LoadTurretData(TiXmlElement *node, SpaceTurret *object) { /* Not yet implemented */ return NULL; }
+BasicProjectileDefinition *			IO::Data::LoadBasicProjectileDefinitionData(TiXmlElement *node, BasicProjectileDefinition *object) { /* Not yet implemented */ return NULL; }
+SpaceProjectileDefinition *			IO::Data::LoadSpaceProjectileDefinitionData(TiXmlElement *node, SpaceProjectileDefinition *object) { /* Not yet implemented */ return NULL; }
+Engine *							IO::Data::LoadEngineData(TiXmlElement *node, Engine *object) { /* Not yet implemented */ return NULL; }
+
+Result								IO::Data::ReloadComplexShip(TiXmlElement *root) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadComplexShipSection(TiXmlElement *root) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadFaction(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadTurret(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadBasicProjectileDefinition(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadSpaceProjectileDefinition(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
+Result 								IO::Data::ReloadEngine(TiXmlElement *node) { /* Not yet implemented */ return ErrorCodes::NoError; }
 
 Result IO::Data::LoadComplexShip(TiXmlElement *root)
 {
@@ -1089,6 +1136,27 @@ void IO::Data::LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds
 	}
 	else { delete obj; }	// If not a valid bounding object type then deallocate the memory
 
+}
+
+// Look ahead within a node definition to locate the given string property
+std::string IO::Data::LookaheadNodeTextField(TiXmlElement *node, const std::string & field)
+{
+	if (!node) return NULL;
+	HashVal hash = HashString(StrLower(field));
+	std::string key;
+
+	TiXmlElement *child = node->FirstChildElement();
+	for (child; child; child = child->NextSiblingElement())
+	{
+		// All key comparisons are case-insensitive
+		key = child->Value(); StrLowerC(key);
+		if (HashString(key) == hash)
+		{
+			return child->GetText();
+		}
+	}
+
+	return NullString;
 }
 
 

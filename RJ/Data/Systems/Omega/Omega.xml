@@ -1,13 +1,44 @@
 <gamedata>
 
   <Texture code="omega_backdrop" dimension="Texture2D" filename="Systems/Omega/omega_backdrop.dds" />
+  <Material code="omega_backdrop">
+    <DiffuseTexture>omega_backdrop</DiffuseTexture>
+  </Material>
   
-  <system>
+  <System>
     <Name>Omega</Name>
     <Code>AB01</Code>
     <Size x="100000.0" y="100000.0" z="100000.0"/>
     <SpaceBackdrop>omega_backdrop</SpaceBackdrop>
-  
-  </system>
+
+    <LightSource>
+      <Code>omega_system_light</Code>
+      <Position x="0" y="0" z="0" />
+      <Orientation x="0" y="0" z="0" w="1" />
+      
+
+    </LightSource>
+    
+
+
+
+    <SimpleShip code="testship1">
+      <Code>ship2</Code>
+      <Name>Test ship s2</Name>
+      <Faction>faction_us</Faction>
+      <Position x="300" y="225" z="220" />
+      <Orientation x="0" y="0" z="0" w="1" />
+    </SimpleShip>
+    
+    <ComplexShip code="testfrigate2">
+      <Code>cs1</Code>
+      <Name>Test frigate cs1</Name>
+      <Position x="150" y="225" z="100" />
+      <Invulnerable>true</Invulnerable>
+      <Faction>faction_us</Faction>
+      <ShipEngineControl>false</ShipEngineControl>
+    </ComplexShip>
+    
+  </System>
 
 </gamedata>

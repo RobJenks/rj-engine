@@ -454,6 +454,9 @@ namespace ErrorCodes {
 	const Result		CannotLoadNullFontData							= 2701;
 	const Result		CannotLoadFontWithMissingData					= 2702;
 	const Result		ModelDoesNotExist								= 2703;
+	const Result		CannotLoadFromNullDataNode						= 2704;
+	const Result		CannotReloadObjectWithMissingCode				= 2705;
+	const Result		CannotReloadObjectWithUnrecognisedCode			= 2706;
 
 
 	// Data output errors												(2800-2899)

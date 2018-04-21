@@ -54,8 +54,8 @@ void UIButton::CentreTextInControl(void)
 		// Set the text position using these offsets
 		auto pos = m_upcomponent->GetPosition();
 		m_textcomponent->UpdateTextBlock(	m_textcomponent->GetText().c_str(), 
-											pos.x + (int)xoffset,					// New x position
-											pos.y + (int)yoffset,					// New y position
+											static_cast<int>(pos.x + xoffset),					// New x position
+											static_cast<int>(pos.y + yoffset),					// New y position
 											m_textcomponent->GetRenderActive(), 
 											m_textcomponent->GetTextColour(), m_textcomponent->GetSize() );
 

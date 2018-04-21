@@ -24,6 +24,7 @@ class iContainsHardpoints;
 class Model;
 class ArticulatedModel;
 class Hardpoint;
+class Engine;
 class OrientedBoundingBox;
 class SimpleShip;
 class ComplexShip;
@@ -37,6 +38,7 @@ class SimpleShipLoadout;
 class CompoundLoadoutMap;
 class Render2DGroup;
 class ProductionCost;
+class Faction;
 class Terrain;
 class DynamicTerrain;
 struct DynamicTerrainState;
@@ -59,7 +61,6 @@ namespace IO { namespace Data
 	Result LoadGameDataFile(const std::string &filename);
 	Result LoadXMLFileIndex(TiXmlElement *node);
 	Result LoadConfigFile(const std::string &filename);
-
 	
 	// Common methods to load intermediate class data
 	bool LoadObjectData(TiXmlElement *node, HashVal hash, iObject *object);									// Loads iObject class data
@@ -72,28 +73,74 @@ namespace IO { namespace Data
 	bool LoadShipData(TiXmlElement *node, HashVal hash, Ship *object);										// Loads base ship class data
 	bool LoadHardpointContainerData(TiXmlElement *node, HashVal hash, iContainsHardpoints *object);			// Load iContainsHardpoints class data
 
-	// Load final class data, for non-inherited classes
-	Result LoadSimpleShip(TiXmlElement *root);																// Loads simple ship data
-	Result LoadComplexShip(TiXmlElement *root);																// Loads complex ship data
-	Result LoadComplexShipSection(TiXmlElement *root);														// Loads complex ship section data
+
+	/*** Primary load/reload-enabled object types ***/
+
+
+	// Load internal data and return an instance, either created or updated depending on input parameters
+	SimpleShip *						LoadSimpleShipData(TiXmlElement *root, SimpleShip *object = NULL);
+	ComplexShip *						LoadComplexShipData(TiXmlElement *root, ComplexShip *object = NULL);
+	ComplexShipSection *				LoadComplexShipSectionData(TiXmlElement *root, ComplexShipSection *object = NULL);
+	Faction *							LoadFactionData(TiXmlElement *node, Faction *object = NULL);
+	SpaceTurret *						LoadTurretData(TiXmlElement *node, SpaceTurret *object = NULL);
+	BasicProjectileDefinition *			LoadBasicProjectileDefinitionData(TiXmlElement *node, BasicProjectileDefinition *object = NULL);
+	SpaceProjectileDefinition *			LoadSpaceProjectileDefinitionData(TiXmlElement *node, SpaceProjectileDefinition *object = NULL);
+	Engine *							LoadEngineData(TiXmlElement *node, Engine *object = NULL);
+
+	// Load an instance of the given primary object class
+	/****** TODO: Implement fully-templated model for Load<T>, Reload<T> which both rely on LoadData<T>.  Do as part of ****** 
+	 ****** refactor DataInput.cpp -> proper central class.  This method is not currently used but shows the principle  ******/
+	template <typename T>
+	CMPINLINE Result					LoadObject(TiXmlElement *root)
+	{
+		// Create a new object and load all data from XML
+		if (!root) return ErrorCodes::CannotLoadFromNullDataNode;
+		T *object = new T();
+		object = LoadPrimaryObjectData(root, object);
+
+		// Validation; make sure key mandatory fields are supplied, and the code is not already in use, otherwise we will not create the ship
+		if (object->GetCode() == NullString || D::GetDataRegister<T>().Exists(object->GetCode()))
+		{
+			SafeDelete(object);
+			return ErrorCodes::CannotLoadSimpleShipDetailsWithDuplicateCode;
+		}
+
+		// Otherwise store in the central collection and return success
+		D::GetDataRegister<T>().Store(object);
+		return ErrorCodes::NoError;
+	}
+
+	Result								LoadSimpleShip(TiXmlElement *root);																
+	Result								LoadComplexShip(TiXmlElement *root);
+	Result 								LoadComplexShipSection(TiXmlElement *root);
+	Result 								LoadFaction(TiXmlElement *node);
+	Result 								LoadTurret(TiXmlElement *node);
+	Result 								LoadBasicProjectileDefinition(TiXmlElement *node);
+	Result 								LoadSpaceProjectileDefinition(TiXmlElement *node);
+	Result 								LoadEngine(TiXmlElement *node);
+
+	Result								ReloadSimpleShip(TiXmlElement *root);
+	Result								ReloadComplexShip(TiXmlElement *root);
+	Result 								ReloadComplexShipSection(TiXmlElement *root);
+	Result 								ReloadFaction(TiXmlElement *node);
+	Result 								ReloadTurret(TiXmlElement *node);
+	Result 								ReloadBasicProjectileDefinition(TiXmlElement *node);
+	Result 								ReloadSpaceProjectileDefinition(TiXmlElement *node);
+	Result 								ReloadEngine(TiXmlElement *node);
+
+
+	/*** End primary object classes which support runtime load/reload ***/
 
 
 	// Loads an instance of a CS section (which should already be loaded) and adds it to the complex ship, assuming it is valid
 	Result LoadComplexShipSectionInstance(TiXmlElement *root, ComplexShip *object);
-
 	VariableSizeValue LoadSizeValue(TiXmlElement *node);
-	Result LoadFaction(TiXmlElement *node);
-	
-	Result LoadTurret(TiXmlElement *node);
 	Result LoadTurretLaunchers(TiXmlElement *node, SpaceTurret *turret);
 	Result LoadProjectileLauncher(TiXmlElement *node);
-	Result LoadBasicProjectileDefinition(TiXmlElement *node);
-	Result LoadSpaceProjectileDefinition(TiXmlElement *node);
-
 	Hardpoint *LoadHardpoint(TiXmlElement *node);
 	Result LoadSimpleShipLoadout(TiXmlElement *node);
 	CompoundLoadoutMap *LoadCompoundLoadoutMap(TiXmlElement *node, SimpleShipLoadout *L, SimpleShip *targetshiptype);
-	Result LoadEngine(TiXmlElement *node);
+	
 
 	// Load geomatry, material, texture data
 	Result LoadModelData(TiXmlElement *node);
@@ -109,16 +156,16 @@ namespace IO { namespace Data
 	// Load a set of collision spatial data.  Returns a flag indicating whether the data could be loaded
 	CollisionSpatialDataF LoadCollisionSpatialData(TiXmlElement *node);
 
-	// Adds an object to the queue for post-processing of its compound model data, once model geometry 
-	// has been loaded.  Method defined for each type of object that can contain compound models
-	void RegisterCompoundModelRequiringGeometryCalculation(ComplexShipTile *tile);
-
 	// Post-processing methods for loaded game data, where data is dependent on other data (of the same or different class) that must be loaded first
 	Result PostProcessResources(void);					// Resources must be interlinked with their dependencies/ingredients, and also productioncost initialisation
 	Result PostProcessComplexShipTileData(void);		// Tiles must have their productioncost data initialised, with e.g. links to component resources/tile dependencies
 
 	// Load bounding box data into the supplied bounding object
 	void   LoadBoundingObjectData(TiXmlElement *node, BoundingObject *bounds, int boundscapacity);
+
+	// Look ahead within a node definition to locate the given string property
+	std::string LookaheadNodeTextField(TiXmlElement *node, const std::string & field);
+
 
 	Result LoadFireEffect(TiXmlElement *node);
 	Result LoadParticleEmitter(TiXmlElement *node);

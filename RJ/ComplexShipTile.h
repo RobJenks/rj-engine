@@ -560,15 +560,13 @@ public:
 
 	// Methods to get and set the tile class type
 	CMPINLINE D::TileClass				GetTileClass(void) const		{ return m_classtype; }
+	CMPINLINE int						GetTileClassIndex(void) const	{ return static_cast<int>(m_classtype); }
 	CMPINLINE void						SetTileClass(D::TileClass cls)	{ m_classtype = cls; }
 
 	// Methods to access compound model data
 	CMPINLINE bool						HasCompoundModel(void) const		{ return m_multiplemodels; }
 	CMPINLINE TileCompoundModelSet *	GetCompoundModelSet(void)			{ return &m_models; }
 	CMPINLINE const TileCompoundModelSet *	GetCompoundModelSet(void) const	{ return &m_models; }
-
-	// Indicates whether this tile has compound model data requiring post-processing with full model geometry
-	bool								RequiresCompoundModelPostProcessing(void) const;
 
 	// Recalculate compound model data, including geometry-dependent calculations that are performed during the post-processing load sequence
 	void								RecalculateCompoundModelData(void);

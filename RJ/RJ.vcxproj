@@ -151,6 +151,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -190,6 +191,7 @@
       <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -228,6 +230,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -265,6 +268,7 @@
       <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -300,6 +304,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>

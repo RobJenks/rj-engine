@@ -326,7 +326,7 @@ void DebugCommandHandler::ExecuteDebugCommandOnObjectTile(iObject *object, GameC
 
 	// Return error since we cannot currently handle this tile class
 	command.SetOutput(GameConsoleCommand::CommandResult::Failure, ErrorCodes::InvalidTileClass,
-		concat("Failed to execute debug command; unrecognised tile class with index ")(tile->GetTileClass()).str().c_str());
+		concat("Failed to execute debug command; unrecognised tile class with index ")(static_cast<int>(tile->GetTileClass())).str().c_str());
 }
 
 // Debug spawn a set of ships near the player

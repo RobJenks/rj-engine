@@ -1104,7 +1104,7 @@ void ComplexShipTile::ProcessDebugTileCommand(GameConsoleCommand & command)
 
 	// Accessor methods
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetClass)
-	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTileClass)
+	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetTileClassIndex)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetID)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(GetSimulationState)
 	REGISTER_DEBUG_TILE_ACCESSOR_FN(SimulationIsActive)

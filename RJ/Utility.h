@@ -150,12 +150,13 @@ CMPINLINE std::string ConvertWStringToString(const std::wstring & utf16_string)
 class concat
 {
 public:
+
+	// Append to string stream
 	template <typename T>
 	explicit concat(const T & t)
 	{
 		m_out << t ;
 	}
-
 	template <typename T>
 	concat & operator()(const T & t)
 	{
@@ -163,6 +164,7 @@ public:
 		return *this ;
 	}
 
+	// String output
 	std::string str() const
 	{
 		return m_out.str() ;
