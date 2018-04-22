@@ -2269,6 +2269,9 @@ void iSpaceObjectEnvironment::SetElementSize(const INTVECTOR3 & size)
 	// Store the new element size
 	m_elementsize = size;
 
+	// Set the actual object size based on these element bounds
+	SetSize(Game::ElementLocationToPhysicalPosition(size));
+
 	// Cache intermediate values based on this element size for efficiency at runtime
 	m_elementcount = (size.x * size.y * size.z);
 	m_elementbounds = (m_elementsize - ONE_INTVECTOR3);

@@ -56,8 +56,8 @@ LightSource::LightSource(const Light & data)
 	// Determine an object code for the light based on its properties
 	DetermineObjectCode();
 
-	// Light sources do perform a post-simulation update to reposition their internal light component
-	SetPostSimulationUpdateFlag(true);
+	// Light sources do not require any post-simulation update
+	SetPostSimulationUpdateFlag(false);
 }
 
 // Determine an object code for the light based on its properties

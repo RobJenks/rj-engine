@@ -1616,7 +1616,7 @@ Result IO::Data::LoadComplexShipTile(TiXmlElement *node, ComplexShipTile **pOutS
 		SafeDelete(tile);
 		return compilation_result;
 	}
-	
+
 	// Set a pointer to the new tile and return success to indicate that the tile was created successfully
 	(*pOutShipTile) = tile;
 	return compilation_result;

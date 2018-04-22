@@ -1030,8 +1030,13 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_4]) 
 	{
-		lt2()->LightObject().SetType(lt2()->GetLight().GetType() == LightType::Point ? LightType::Spotlight : LightType::Point);
-		OutputDebugString(concat("Light type is now ")(Light::TranslateLightTypeToString(lt2()->GetLight().GetType()))("\n").str().c_str());
+		s2()->SetPosition(XMVector3TransformCoord(XMVectorSet(
+			Game::ElementLocationToPhysicalPosition(cs()->GetElementSize().x-1), 
+			cs()->GetPositionF().y + cs()->GetSizeF().y, 
+			Game::ElementLocationToPhysicalPosition(cs()->GetElementSize().y-1), 
+			1.0f),
+			
+			cs()->GetZeroPointWorldMatrix()));
 
 		Game::Keyboard.LockKey(DIK_4);
 		
@@ -2621,12 +2626,14 @@ void RJMain::DEBUGDisplayInfo(void)
 		{
 			if (!terrain->IsDynamic()) continue;
 			DynamicTerrain *dt = terrain->ToDynamicTerrain();
-			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01") t = (DataObjectContinuousSwitch*)dt;
+			if (dt->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_lever_vertical_01") t = (DataObjectContinuousSwitch*)dt;
 		}
 
-		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "V.Obj: %s, NPObj: %s, T: %d, DT: %d  |  M.Obj: %s, NPObj: %s, T: %d, DT: %d",
-
-			(Game::CurrentPlayer->GetViewDirectionObject() ? Game::CurrentPlayer->GetViewDirectionObject()->GetInstanceCode().c_str() : "-"),
+		if (t)
+		sprintf(D::UI->TextStrings.C_DBG_FLIGHTINFO_4, "Pos: %s, Dist: %.2f", Vector3ToString(t->GetPosition()).c_str(),
+			XMVectorGetX(XMVector3LengthEst(XMVectorSubtract(Game::CurrentPlayer->GetActor()->GetPosition(), t->GetPosition()))));
+		
+			/*(Game::CurrentPlayer->GetViewDirectionObject() ? Game::CurrentPlayer->GetViewDirectionObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetViewDirectionNonPlayerObject() ? Game::CurrentPlayer->GetViewDirectionNonPlayerObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetViewDirectionTerrain() ? Game::CurrentPlayer->GetViewDirectionTerrain()->GetID() : -1),
 			(Game::CurrentPlayer->GetViewDirectionUsableTerrain() ? Game::CurrentPlayer->GetViewDirectionUsableTerrain()->GetID() : -1),
@@ -2635,7 +2642,7 @@ void RJMain::DEBUGDisplayInfo(void)
 			(Game::CurrentPlayer->GetMouseSelectedNonPlayerObject() ? Game::CurrentPlayer->GetMouseSelectedNonPlayerObject()->GetInstanceCode().c_str() : "-"),
 			(Game::CurrentPlayer->GetMouseSelectedTerrain() ? Game::CurrentPlayer->GetMouseSelectedTerrain()->GetID() : -1),
 			(Game::CurrentPlayer->GetMouseSelectedUsableTerrain() ? Game::CurrentPlayer->GetMouseSelectedUsableTerrain()->GetID() : -1)
-		);
+		);*/
 
 		Game::Engine->GetTextManager()->SetSentenceText(D::UI->TextStrings.S_DBG_FLIGHTINFO_4, D::UI->TextStrings.C_DBG_FLIGHTINFO_4, 1.0f);
 
@@ -2654,7 +2661,7 @@ void RJMain::DEBUGDisplayInfo(void)
 		}
 
 
-		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2((Game::ScreenWidth * -0.5f), (Game::ScreenHeight * -0.5f)), XMFLOAT2(300, 300),
+		Game::Engine->RenderMaterialToScreen(*Game::Engine->GetAssets().GetMaterial("debug_material"), XMFLOAT2(0.0f, (float)Game::ScreenHeight), XMFLOAT2(300, 300),
 			((float)(Game::ClockMs % 750)) * (TWOPI / 750.0f), ((float)((Game::ClockMs % 1000)) / 1000.0f));
 		
 		
@@ -2683,3 +2690,5 @@ void RJMain::DEBUGDisplayInfo(void)
 	// 1. Add idea of maneuvering thrusters that are used to Brake(), rather than simple universal decrease to momentum today, and which will counteract e.g. CS impact momentum? ***
 
 }
+
+

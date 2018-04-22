@@ -232,7 +232,7 @@ void ComplexShipSection::CalculateShipSizeData(void)
 	else
 	{
 		// Otherwise determine the ship section size from its underlying model
-		this->SetSize(Game::ElementLocationToPhysicalPosition(m_elementsize));
+		SetSize(Game::ElementLocationToPhysicalPosition(m_elementsize));
 	}
 }
 
