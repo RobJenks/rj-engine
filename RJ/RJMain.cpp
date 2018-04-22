@@ -1030,13 +1030,10 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_4]) 
 	{
-		s2()->SetPosition(XMVector3TransformCoord(XMVectorSet(
-			Game::ElementLocationToPhysicalPosition(cs()->GetElementSize().x-1), 
-			cs()->GetPositionF().y + cs()->GetSizeF().y, 
-			Game::ElementLocationToPhysicalPosition(cs()->GetElementSize().y-1), 
-			1.0f),
-			
-			cs()->GetZeroPointWorldMatrix()));
+		ss()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), HALF_VECTOR_N)));
+		s2()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), HALF_VECTOR_P)));
+		s3[0]()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), XMVectorSet(-0.5f, 0, +0.5f, 1))));
+		s3[1]()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), XMVectorSet(+0.5f, 0, -0.5f, 1))));
 
 		Game::Keyboard.LockKey(DIK_4);
 		
@@ -2367,7 +2364,7 @@ void RJMain::__CreateDebugScenario(void)
 	}
 
 	if (true) {
-		SimpleShip *s3_1_ship = SimpleShip::Create("test_placeholder_ship");
+		SimpleShip *s3_1_ship = SimpleShip::Create("testship1");
 		SimpleShipLoadout::AssignDefaultLoadoutToSimpleShip(s3_1_ship);
 		s3_1_ship->SetFaction(Game::FactionManager.GetFactionIDByCode("faction_us"));
 		s3_1_ship->MoveIntoSpaceEnvironment(Game::Universe->GetSystem("AB01"));
