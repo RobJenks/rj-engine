@@ -156,16 +156,16 @@ XMVECTOR IO::GetVector4FromAttr(TiXmlElement *node)
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
 		name = lower(attr->Name());
-		if (strcmp(name, "x") == 0) {
+		if (strcmp(name, "x") == 0 || strcmp(name, "r") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.x = (FLOAT)val;
 		}
-		else if (strcmp(name, "y") == 0) {
+		else if (strcmp(name, "y") == 0 || strcmp(name, "g") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.y = (FLOAT)val;
 		}
-		else if (strcmp(name, "z") == 0) {
+		else if (strcmp(name, "z") == 0 || strcmp(name, "b") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.z = (FLOAT)val;
 		}
-		else if (strcmp(name, "w") == 0) {
+		else if (strcmp(name, "w") == 0 || strcmp(name, "a") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.w = (FLOAT)val;
 		}
 		
@@ -184,16 +184,16 @@ XMFLOAT4 IO::GetFloat4FromAttr(TiXmlElement *node)
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
 		name = lower(attr->Name());
-		if (strcmp(name, "x") == 0) {
+		if (strcmp(name, "x") == 0 || strcmp(name, "r") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) x = (FLOAT)val;
 		}
-		else if (strcmp(name, "y") == 0) {
+		else if (strcmp(name, "y") == 0 || strcmp(name, "g") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) y = (FLOAT)val;
 		}
-		else if (strcmp(name, "z") == 0) {
+		else if (strcmp(name, "z") == 0 || strcmp(name, "b") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) z = (FLOAT)val;
 		}
-		else if (strcmp(name, "w") == 0) {
+		else if (strcmp(name, "w") == 0 || strcmp(name, "a") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) w = (FLOAT)val;
 		}
 
@@ -211,97 +211,16 @@ void IO::GetFloat4FromAttr(TiXmlElement *node, XMFLOAT4 *out)
 	TiXmlAttribute *attr = node->FirstAttribute();
 	while (attr) {
 		name = lower(attr->Name());
-		if (strcmp(name, "x") == 0) {
+		if (strcmp(name, "x") == 0 || strcmp(name, "r") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->x = (FLOAT)val;
 		}
-		else if (strcmp(name, "y") == 0) {
+		else if (strcmp(name, "y") == 0 || strcmp(name, "g") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->y = (FLOAT)val;
 		}
-		else if (strcmp(name, "z") == 0) {
+		else if (strcmp(name, "z") == 0 || strcmp(name, "b") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->z = (FLOAT)val;
 		}
-		else if (strcmp(name, "w") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->w = (FLOAT)val;
-		}
-
-		free(name);
-		attr = attr->Next();
-	}
-}
-
-XMVECTOR IO::GetColourVectorFromAttr(TiXmlElement *node)
-{
-	char *name; double val;
-	XMFLOAT4 vec = NULL_FLOAT4;
-
-	TiXmlAttribute *attr = node->FirstAttribute();
-	while (attr) {
-		name = lower(attr->Name());
-		if (strcmp(name, "r") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.x = (FLOAT)val;
-		}
-		else if (strcmp(name, "g") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.y = (FLOAT)val;
-		}
-		else if (strcmp(name, "b") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.z = (FLOAT)val;
-		}
-		else if (strcmp(name, "a") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) vec.w = (FLOAT)val;
-		}
-
-		free(name);
-		attr = attr->Next();
-	}
-
-	return XMLoadFloat4(&vec);
-}
-
-XMFLOAT4 IO::GetColourFloatFromAttr(TiXmlElement *node)
-{
-	char *name; double val;
-	float x = 0.0f, y = 0.0f, z = 0.0f, w = 0.0f;
-
-	TiXmlAttribute *attr = node->FirstAttribute();
-	while (attr) {
-		name = lower(attr->Name());
-		if (strcmp(name, "r") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) x = (FLOAT)val;
-		}
-		else if (strcmp(name, "g") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) y = (FLOAT)val;
-		}
-		else if (strcmp(name, "b") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) z = (FLOAT)val;
-		}
-		else if (strcmp(name, "a") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) w = (FLOAT)val;
-		}
-
-		free(name);
-		attr = attr->Next();
-	}
-
-	return XMFLOAT4(x, y, z, w);
-}
-
-void IO::GetColourFloatFromAttr(TiXmlElement *node, XMFLOAT4 *out)
-{
-	char *name; double val;
-
-	TiXmlAttribute *attr = node->FirstAttribute();
-	while (attr) {
-		name = lower(attr->Name());
-		if (strcmp(name, "r") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->x = (FLOAT)val;
-		}
-		else if (strcmp(name, "g") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->y = (FLOAT)val;
-		}
-		else if (strcmp(name, "b") == 0) {
-			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->z = (FLOAT)val;
-		}
-		else if (strcmp(name, "a") == 0) {
+		else if (strcmp(name, "w") == 0 || strcmp(name, "a") == 0) {
 			if (attr->QueryDoubleValue(&val) == TIXML_SUCCESS) out->w = (FLOAT)val;
 		}
 

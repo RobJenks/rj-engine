@@ -780,6 +780,9 @@ void CoreEngine::Render(void)
 	/* Render all user interface components */
 	RenderUserInterface();
 
+	/* Perform debug rendering */
+	RenderDebugData();
+
 	/* Invoke the active render process which will orchestrate all rendering activities for the frame */
 	m_renderdevice->Render();
 

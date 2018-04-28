@@ -1,0 +1,21 @@
+<gamedata>
+
+  <Model>
+    <Code>unit_line_model_green</Code>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Material>emissive_green</Material>
+  </Model>
+
+  <Model>
+    <Code>unit_line_model_red</Code>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Material>emissive_red</Material>
+  </Model>
+
+  <Model>
+    <Code>unit_line_model_lblue</Code>
+    <Filename>Models\Misc\unit_line.rjm</Filename>
+    <Material>emissive_cyan</Material>
+  </Model>
+
+</gamedata>

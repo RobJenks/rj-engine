@@ -36,22 +36,4 @@
     <Material>debug_material</Material>
   </Model>
 
-   <Model>
-    <Code>unit_line_model_green</Code>
-    <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>debug_material</Material>
-  </Model>
-
-   <Model>
-    <Code>unit_line_model_red</Code>
-    <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>debug_material</Material>
-  </Model>
-
-   <Model>
-    <Code>unit_line_model_lblue</Code>
-    <Filename>Models\Misc\unit_line.rjm</Filename>
-    <Material>debug_material</Material>
-  </Model>
-
 </GameData>

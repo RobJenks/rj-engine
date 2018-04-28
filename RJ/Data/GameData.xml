@@ -12,6 +12,7 @@
   <include file="Modifiers\Modifiers.xml" />
 
   <!-- General rendering resources -->
+  <include file="Rendering\emissive_materials.xml" />
   <include file="Rendering\misc_rendering_materials.xml" />
 
   <!-- Load shared static model data -->
@@ -46,6 +47,9 @@
 
   <!-- Load fonts -->
   <include file="Fonts\Fonts.xml" />
+
+  <!-- Load overlay renderer resources -->
+  <include file="Overlay\OverlayResources.xml" />
   
   <!-- Load ship data -->
   <include file="Ships\Ships.xml" />

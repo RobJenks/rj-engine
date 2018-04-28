@@ -110,7 +110,7 @@ void OverlayRenderer::InitialiseCachedMatrices()
 Result OverlayRenderer::PerformPostDataLoadInitialisation(void)
 {
 	// All required models and their destination fields
-	std::string model_names[] = { "overlay_line_none", "overlay_line_green", "overlay_line_red", "overlay_line_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
+	std::string model_names[] = { "overlay_line_none", "unit_line_model_green", "unit_line_model_red", "unit_line_model_lblue", "OverlayBlueprintModel", "OverlayBlueprintCubeModel" };
 	Model ** models[] = { &m_models[0], &m_models[1], &m_models[2], &m_models[3], &m_blueprintoverlay, &m_blueprintcubeoverlay };
 
 	// Retrieve all models required for overlay rendering
@@ -153,7 +153,8 @@ void RJ_XM_CALLCONV OverlayRenderer::RenderLine(const FXMMATRIX world, const FXM
 void RJ_XM_CALLCONV OverlayRenderer::RenderLineFlat(const FXMMATRIX world, const FXMVECTOR position, const XMFLOAT4 & colour_alpha)
 {
 	// Add a request to the core engine to render this line
-	Game::Engine->RenderModelFlat(&m_models[RenderColour::RC_None]->Data, position, colour_alpha, world);
+	//Game::Engine->RenderModelFlat(&m_models[RenderColour::RC_None]->Data, position, colour_alpha, world);
+	Game::Engine->RenderModel(&m_models[RenderColour::RC_LightBlue]->Data, world, position);		// TODO: Temporary, fix this
 }
 
 // Method to add a line for rendering.  Accepts a world matrix for the line, plus scaling length & thickness parameters
@@ -206,9 +207,10 @@ void OverlayRenderer::DetermineLineWorldMatrix(XMMATRIX & outMatrix, const FXMVE
 	// Now determine the quaternion rotation from the basis vector to the desired heading difference, and apply via rotation matrix
 	XMMATRIX rot = XMMatrixRotationQuaternion(QuaternionBetweenVectors(BASIS_VECTOR, vdiff));
 	
-	// Finally apply a translation matrix to move the transformed model into position, with pt1 at the origin and pt2
-	// successfully transformed to its desired position (world = scale * rot * trans)
-	outMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), XMMatrixTranslationFromVector(pt1));
+	// Finally apply a translation matrix to move the transformed model into position, with (pt1+pt2)/2 at the origin and both points
+	// successfully transformed to their desired position (world = scale * rot * trans)
+	XMVECTOR midpoint = XMVectorMultiply(XMVectorAdd(pt1, pt2), HALF_VECTOR_P);
+	outMatrix = XMMatrixMultiply(XMMatrixMultiply(scale, rot), XMMatrixTranslationFromVector(midpoint));
 }
 
 // Method to render a box at the specified location.  World matrix specifies transforming to the target location/orientation.  Size/thickness
