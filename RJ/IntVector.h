@@ -27,6 +27,9 @@ struct IntegralVector2
 	IntegralVector2& operator *=(const float scalar) { this->x = static_cast<T>(this->x * scalar); this->y = static_cast<T>(this->y * scalar); return *this; }
 	bool operator ==(const IntegralVector2& rhs) { return (this->x == rhs.x && this->y == rhs.y); }
 	bool operator !=(const IntegralVector2& rhs) { return (this->x != rhs.x || this->y != rhs.y); }
+
+	template <typename U>
+	IntegralVector2<U> Convert(void) const { return IntegralVector2<U>(static_cast<U>(x), static_cast<U>(y)); }
 };
 template <typename T> inline IntegralVector2<T> operator +(IntegralVector2<T> lhs, const IntegralVector2<T> & rhs) { lhs += rhs; return lhs; }
 template <typename T> inline IntegralVector2<T> operator -(IntegralVector2<T> lhs, const IntegralVector2<T> & rhs) { lhs -= rhs; return lhs; }
@@ -77,6 +80,9 @@ struct IntegralVector3
 	bool operator>=(const IntegralVector3 & rhs) const { return (x >= rhs.x && y >= rhs.y && z >= rhs.z); }
 
 	std::string ToString(void) const { std::ostringstream s; s << "[" << x << ", " << y << ", " << z << "]"; return s.str(); }
+
+	template <typename U>
+	IntegralVector3<U> Convert(void) const { return IntegralVector3<U>(static_cast<U>(x), static_cast<U>(y), static_cast<U>(z)); }
 };
 template <typename T> inline IntegralVector3<T> operator +(IntegralVector3<T> lhs, const IntegralVector3<T>& rhs) { lhs += rhs; return lhs; }
 template <typename T> inline IntegralVector3<T> operator -(IntegralVector3<T> lhs, const IntegralVector3<T>& rhs) { lhs -= rhs; return lhs; }
