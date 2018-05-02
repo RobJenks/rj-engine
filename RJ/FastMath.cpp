@@ -31,10 +31,14 @@ const float INF_FLOAT = std::numeric_limits<float>::infinity();
 const double INF_DOUBLE = std::numeric_limits<double>::infinity();
 
 
-const INTVECTOR2 NULL_INTVECTOR2 = INTVECTOR2(0, 0);
-const INTVECTOR3 NULL_INTVECTOR3 = INTVECTOR3(0, 0, 0);
-const INTVECTOR2 ONE_INTVECTOR2 = INTVECTOR2(1, 1);
-const INTVECTOR3 ONE_INTVECTOR3 = INTVECTOR3(1, 1, 1);
+const INTVECTOR2 NULL_INTVECTOR2(0);
+const INTVECTOR3 NULL_INTVECTOR3(0);
+const UINTVECTOR2 NULL_UINTVECTOR2(0U);
+const UINTVECTOR3 NULL_UINTVECTOR3(0U);
+const INTVECTOR2 ONE_INTVECTOR2(1);
+const INTVECTOR3 ONE_INTVECTOR3(1);
+const UINTVECTOR2 ONE_UINTVECTOR2(1U);
+const UINTVECTOR3 ONE_UINTVECTOR3(1U);
 const XMVECTOR NULL_VECTOR = XMVectorZero();
 const XMVECTOR NULL_VECTOR2 = XMVectorZero();
 const XMVECTOR NULL_VECTOR3 = XMVectorZero();
@@ -145,7 +149,7 @@ const XMFLOAT4X4 ROT_MATRIX_270_F = XMFLOAT4X4(0.000000, 0.000000, 1.000000, 0.0
 	-1.000000, 0.000000, 0.000000, 0.000000,
 	0.000000, 0.000000, 0.000000, 1.000000);
 
-const XMMATRIX* ROT_MATRICES[4] = { &ROT_MATRIX_0, &ROT_MATRIX_90, &ROT_MATRIX_180, &ROT_MATRIX_270 };
+const XMMATRIX ROT_MATRICES[4] = { ROT_MATRIX_0, ROT_MATRIX_90, ROT_MATRIX_180, ROT_MATRIX_270 };
 XMVECTOR ROT_QUATERNIONS[4];
 
 // Orthornormal unit basis vectors
@@ -280,6 +284,19 @@ XMFLOAT4X4 GetRotationMatrixInstanceF(Rotation90Degree rot)
 		case Rotation90Degree::Rotate270:		return ROT_MATRIX_270_F;	break;
 		default:								return ROT_MATRIX_0_F;		break;
 	}
+}
+
+
+const XMMATRIX & GetRotationMatrixUnchecked(Rotation90Degree rot)
+{
+	assert((int)rot >= 0 && (int)rot < 4);
+	return ROT_MATRICES[(int)rot];
+}
+
+const XMMATRIX GetRotationMatrixInstanceUnchecked(Rotation90Degree rot)
+{
+	assert((int)rot >= 0 && (int)rot < 4);
+	return ROT_MATRICES[(int)rot];
 }
 
 // Returns a quaternion that represents the rotation value specified

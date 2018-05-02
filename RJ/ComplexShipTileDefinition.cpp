@@ -6,6 +6,7 @@
 #include "ComplexShipTile.h"
 #include "ComplexShipTileClass.h"
 #include "ComplexShipElement.h"
+#include "CompoundElementModel.h"
 #include "BoundingObject.h"
 #include "ProductionCost.h"
 #include "Hardpoint.h"
@@ -159,9 +160,9 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 	tile->SetMultipleModels();
 
 	// Get a reference to the tile model collection and tile size for convenience
-	ComplexShipTile::TileCompoundModelSet *models = tile->GetCompoundModelSet();
-	const INTVECTOR3 & size = tile->GetElementSize();
-	assert(models->Size == size);
+	auto & models = tile->GetCompoundModelSet();
+	const UINTVECTOR3 & size = tile->GetElementSize().Convert<UINT>();
+	assert(models.GetSize() == size);
 
 	// Get a pointer to each of the key model types for efficiency before looping.
 	const ComplexShipTileDefinition::ProbabilityWeightedModelCollection *medge = GetModelSet("wall_straight");
@@ -176,92 +177,100 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 		TileConnections::TileConnectionType type = TileConnections::TileConnectionType::Walkable;
 
 		// Iterate over each element in turn
-		INTVECTOR3 location;
-		for (int x = 0; x < size.x; ++x)
+		for (UINT x = 0U; x < size.x; ++x)
 		{
-			for (int y = 0; y < size.y; ++y)
+			for (UINT y = 0U; y < size.y; ++y)
 			{
-				for (int z = 0; z < size.z; ++z)
+				for (UINT z = 0U; z < size.z; ++z)
 				{
 					// Check whether there are any connections from this element; if not, skip it immediately
-					location = INTVECTOR3(x, y, z);
-					if (!tile->Connections.ConnectionExistsInAnyDirection(type, location)) continue;
+					UINTVECTOR3 location(x, y, z);
+					INTVECTOR3 intlocation = location.Convert<int>();
+					if (!tile->Connections.ConnectionExistsInAnyDirection(type, intlocation)) continue;
 
 					// There is at least one connection; process each possible direction in turn
-					bitstring data = tile->Connections.GetConnectionState(type, location);
+					// TODO: Right now all model components are restricted to 1x1x1 size; may need to make this more flexible
+					bitstring data = tile->Connections.GetConnectionState(type, intlocation);
 					if (CheckBit_Any(data, DirectionBS::Up_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate90, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models.AddModel(UnitModelInstance(GetModelFromSet(mconn)), CompoundTileModelType::WallConnection, location, Rotation90Degree::Rotate90);
 
 					if (CheckBit_Any(data, DirectionBS::Right_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate180, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models.AddModel(UnitModelInstance(GetModelFromSet(mconn)), CompoundTileModelType::WallConnection, location, Rotation90Degree::Rotate180);
 
 					if (CheckBit_Any(data, DirectionBS::Down_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate270, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models.AddModel(UnitModelInstance(GetModelFromSet(mconn)), CompoundTileModelType::WallConnection, location, Rotation90Degree::Rotate270);
 
 					if (CheckBit_Any(data, DirectionBS::Left_BS))
-						models->AddModel(x, y, z, GetModelFromSet(mconn), Rotation90Degree::Rotate0, ComplexShipTile::TileModel::TileModelType::WallConnection, false);
+						models.AddModel(UnitModelInstance(GetModelFromSet(mconn)), CompoundTileModelType::WallConnection, location, Rotation90Degree::Rotate0);
 				}
 			}
 		}
 	}
 
 	// Now consider each corner in turn; may require composition of edge/connection pieces depending on the location of connection tiles
-	ComplexShipTile::ModelLinkedList *mlink = NULL;
 	bool have1 = false, have2 = false;
-	for (int z = 0; z<size.z; z++)
+	for (UINT z = 0; z<size.z; z++)
 	{
 		// Iterate over the set of corner adjacency data for each corner
 		for (int i = 0; i < 4; i++)
 		{
 			// Check whether we have either edge already placed at the corner, as a connection, using the x/y and edge rotation values
 			have1 = have2 = false;
-			mlink = models->ModelLayout[CornerData[i].x * (size.x - 1)][CornerData[i].y * (size.y - 1)][z];
-			if (mlink)
+			auto mlink = models.GetModelsAtLocation(UINTVECTOR3(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z));
+			if (!mlink.empty())
 			{
 				// Check for connection or wall tiles at this corner
-				have1 = (mlink->HasItem(CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallConnection)) ||
-					(mlink->HasItem(CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
-				have2 = (mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallConnection)) ||
-					(mlink->HasItem(CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight));
+				have1 = (mlink.HasItem(CompoundTileModelType::WallConnection, CornerData[i].Edge1Rotation) ||
+						 mlink.HasItem(CompoundTileModelType::WallStraight, CornerData[i].Edge1Rotation));
+				
+				have2 = (mlink.HasItem(CompoundTileModelType::WallConnection, CornerData[i].Edge2Rotation) ||
+						 mlink.HasItem(CompoundTileModelType::WallStraight, CornerData[i].Edge2Rotation));
 			}
-
+			
 			// If we have neither edge covered then we can add a normal corner tile at this position
 			if (!have1 && !have2)
 			{
-				models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(mcorner),
-					CornerData[i].CornerRotation, ComplexShipTile::TileModel::TileModelType::WallCorner, false);
+				models.AddModel(UnitModelInstance(GetModelFromSet(mcorner)), CompoundTileModelType::WallCorner,
+					UINTVECTOR3(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z), CornerData[i].CornerRotation);
 				continue;
 			}
 
 			// Otherwise, we have at least one edge covered.  We therefore fill in in the missing edges 
-			if (!have1) models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(medge),
-				CornerData[i].Edge1Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-			if (!have2) models->AddModel(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z, GetModelFromSet(medge),
-				CornerData[i].Edge2Rotation, ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+			if (!have1) models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight,
+				UINTVECTOR3(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z), CornerData[i].Edge1Rotation);
+			
+			if (!have2) models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight,
+				UINTVECTOR3(CornerData[i].x * (size.x - 1), CornerData[i].y * (size.y - 1), z), CornerData[i].Edge2Rotation);
 		}
 	}
 
 	// Set any remaining edge tiles
 	if (medge)
 	{
-		for (int z = 0; z < size.z; z++)
+		for (UINT z = 0; z < size.z; z++)
 		{
 			// Traverse the y dimension and fill in the left (x=0) and right (x=n-1) columns
-			for (int y = 1; y<size.y - 1; y++)
+			for (UINT y = 1; y<size.y - 1; y++)
 			{
-				if (!(models->ModelLayout[0][y][z]))		models->AddModel(0, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate0,
-					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-				if (!(models->ModelLayout[size.x - 1][y][z])) models->AddModel(size.x - 1, y, z, GetModelFromSet(medge), Rotation90Degree::Rotate180,
-					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+				UINTVECTOR3 loc(0U, y, z);
+				if (!models.HasModelAtLocation(loc))
+					models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight, loc, Rotation90Degree::Rotate0);
+
+				loc = UINTVECTOR3(size.x - 1U, y, z);
+				if (!models.HasModelAtLocation(loc))
+					models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight, loc, Rotation90Degree::Rotate180);
 			}
 
 			// Traverse the x dimension and fill in the top (y=0) and bottom (y=n-1) rows
-			for (int x = 1; x<size.x - 1; x++)
+			for (UINT x = 1; x<size.x - 1; x++)
 			{
-				if (!(models->ModelLayout[x][0][z]))		models->AddModel(x, 0, z, GetModelFromSet(medge), Rotation90Degree::Rotate270,
-					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
-				if (!(models->ModelLayout[x][size.y - 1][z])) models->AddModel(x, size.y - 1, z, GetModelFromSet(medge), Rotation90Degree::Rotate90,
-					ComplexShipTile::TileModel::TileModelType::WallStraight, false);
+				UINTVECTOR3 loc(x, 0U, z);
+				if (!models.HasModelAtLocation(loc))
+					models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight, loc, Rotation90Degree::Rotate270);
+
+				loc = UINTVECTOR3(x, size.y - 1U, z);
+				if (!models.HasModelAtLocation(loc))
+					models.AddModel(UnitModelInstance(GetModelFromSet(medge)), CompoundTileModelType::WallStraight, loc, Rotation90Degree::Rotate90);
 			}
 		}
 	}
@@ -269,12 +278,15 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 	// Finally loop across the tile and set all other elements as interior elements		
 	if (minterior)
 	{
-		for (int z = 0; z<size.z; z++)
+		for (UINT z = 0; z<size.z; z++) 
 		{
-			for (int x = 1; x<size.x - 1; x++) {
-				for (int y = 1; y<size.y - 1; y++)
+			for (UINT x = 1; x<size.x - 1; x++)
+			{
+				for (UINT y = 1; y<size.y - 1; y++)
 				{
-					if (!(models->ModelLayout[x][y][z])) models->AddModel(x, y, z, GetModelFromSet(minterior), Rotation90Degree::Rotate0);
+					UINTVECTOR3 loc(x, y, z);
+					if (!models.HasModelAtLocation(loc))
+						models.AddModel(UnitModelInstance(GetModelFromSet(minterior)), CompoundTileModelType::Unknown, loc, Rotation90Degree::Rotate0);
 				}
 			}
 		}
@@ -282,6 +294,16 @@ Result ComplexShipTileDefinition::GenerateGeometry(ComplexShipTile *tile) const
 
 	// Return success
 	return ErrorCodes::NoError;
+}
+
+// Returns a unit-element-scale model instance for the given Model, for use when generating compound tile geometry
+// TODO: All compound tile components are currently restricted to 1x1x1 element; may need to make this more flexible
+ModelInstance ComplexShipTileDefinition::UnitModelInstance(Model *model)
+{
+	ModelInstance instance(model);
+	instance.SetSize(Game::C_CS_ELEMENT_SCALE);
+	
+	return instance;
 }
 
 // Validates a tile based on hard stop requirements of the class

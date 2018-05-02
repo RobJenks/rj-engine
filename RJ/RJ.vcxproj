@@ -150,7 +150,7 @@
       <ShowIncludes>false</ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -188,13 +188,13 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ShowIncludes>false</ShowIncludes>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_WIN32;RJ_RUN_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\Debug\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <TargetMachine>MachineX86</TargetMachine>
@@ -229,7 +229,7 @@
       <ShowIncludes>false</ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -265,13 +265,13 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <ShowIncludes>false</ShowIncludes>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_X64;RJ_RUN_TESTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\Debug\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(ProjectDir)External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration);$(ProjectDir)\DirectXTK\Audio\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTKAudioWin8.lib;$(ProjectDir)\DirectXTK\Bin\Desktop_2015\$(Platform)\$(Configuration)\DirectXTK.lib;$(ProgramFiles)\Visual Leak Detector\lib\Win64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
@@ -303,7 +303,7 @@
       <ShowIncludes>false</ShowIncludes>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
     </ClCompile>
     <Link>
@@ -343,7 +343,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <PreprocessToFile>false</PreprocessToFile>
-      <PreprocessorDefinitions>RJ_MODULE_RJ;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>RJ_MODULE_RJ;RJ_X64;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>winmm.lib;$(ProjectDir)\External\FreeImage-3.17.0\Source\FreeImageLib\$(Platform)\$(Configuration)\FreeImageLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -400,7 +400,9 @@
     <ClCompile Include="ComplexShipTile.cpp" />
     <ClCompile Include="ComplexShipTileClass.cpp" />
     <ClCompile Include="ComplexShipTileDefinition.cpp" />
+    <ClCompile Include="CompoundElementModelTests.cpp" />
     <ClCompile Include="CompoundLoadoutMap.cpp" />
+    <ClCompile Include="CompoundElementModel.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConstantBufferDX11.cpp" />
     <ClCompile Include="Constraint.cpp" />
@@ -819,7 +821,10 @@
     <ClInclude Include="ComplexShipTile.h" />
     <ClInclude Include="ComplexShipTileClass.h" />
     <ClInclude Include="ComplexShipTileDefinition.h" />
+    <ClInclude Include="CompoundElementModelTests.h" />
     <ClInclude Include="CompoundLoadoutMap.h" />
+    <ClInclude Include="CompoundElementModel.h" />
+    <ClInclude Include="CompoundTileModelType.h" />
     <ClInclude Include="ConditionalCompilation.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConstantBufferDX11.h" />

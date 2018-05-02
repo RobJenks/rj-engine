@@ -901,6 +901,12 @@
     <ClCompile Include="iUIComponent.cpp">
       <Filter>UI</Filter>
     </ClCompile>
+    <ClCompile Include="CompoundElementModel.cpp">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClCompile>
+    <ClCompile Include="CompoundElementModelTests.cpp">
+      <Filter>_Tests\Models</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h">
@@ -2106,6 +2112,15 @@
     <ClInclude Include="RM_MaterialInstanceMapping.h">
       <Filter>Engine\Render Queue</Filter>
     </ClInclude>
+    <ClInclude Include="CompoundElementModel.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundTileModelType.h">
+      <Filter>Objects\Ships\Tiles</Filter>
+    </ClInclude>
+    <ClInclude Include="CompoundElementModelTests.h">
+      <Filter>_Tests\Models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Objects">
@@ -2449,6 +2464,9 @@
     </Filter>
     <Filter Include="HLSL\Common\UI">
       <UniqueIdentifier>{a4c657e9-401c-4fc2-92c1-1b328c70844c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="_Tests\Models">
+      <UniqueIdentifier>{fd51e35b-114e-44e7-a09d-e4c795e190f7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

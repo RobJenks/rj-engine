@@ -459,7 +459,7 @@ Result IO::Data::LoadModelData(TiXmlElement *node)
 	model->Initialise(code, full_filename, material);
 	
 	// Set other loaded properties after initialisation if required
-
+	model->SetCollisionData(std::move(collision));
 
 	// Add this model to the relevant static collection and return success
 	Model::AddModel(model);

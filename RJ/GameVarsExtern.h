@@ -327,10 +327,11 @@ namespace Game {
 										{ return ((float)location * Game::C_CS_ELEMENT_SCALE); }
 	
 	// Convert from three dimensional element location to position in 3D space
-	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const INTVECTOR3 & location)
+	template <typename T>
+	CMPINLINE XMVECTOR					ElementLocationToPhysicalPosition(const IntegralVector3<T> & location)
 	{
 		// NOTE: y & z coordinates are swapped when moving between grid & physical space, due to the coordinate systems used in each
-		return XMVectorMultiply(XMVectorSet((float)location.x, (float)location.z, (float)location.y, 0.0f), Game::C_CS_ELEMENT_SCALE_V);
+		return XMVectorMultiply(XMVectorSet(static_cast<float>(location.x), static_cast<float>(location.z), static_cast<float>(location.y), 0.0f), Game::C_CS_ELEMENT_SCALE_V);
 	}
 
 	// Convert from three dimensional element location to position in 3D space, returning a float representation of the resulting vector

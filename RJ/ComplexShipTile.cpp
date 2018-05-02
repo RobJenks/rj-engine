@@ -109,7 +109,7 @@ ComplexShipTile::ComplexShipTile(const ComplexShipTile &C)
 	m_hardness = C.GetHardness();
 	m_boundingbox = BoundingObject::Copy(C.GetBoundingObject());
 	m_multiplemodels = C.HasCompoundModel();
-	m_models.CopyFrom(C.GetCompoundModelSet());
+	m_models = C.GetCompoundModelSet();
 	DefaultProperties = C.DefaultProperties;
 	m_connections_fixed = C.ConnectionsAreFixed();
 	m_powerrequirement = C.GetPowerRequirement();
@@ -272,9 +272,9 @@ void ComplexShipTile::RecalculateWorldMatrix(void)
 	{
 		centrepoint = XMLoadFloat3(&m_model.GetModel()->Geometry.get()->CentrePoint);
 	}
-	else if (m_multiplemodels && m_models.AllocationPerformed())
+	else if (m_multiplemodels)
 	{
-		centrepoint = m_models.CompoundModelCentre;
+		centrepoint = m_models.GetCompoundModelCentre();
 	}
 	else
 	{
@@ -341,12 +341,9 @@ void ComplexShipTile::UpdateCollisionDataFromModels()
 	else
 	{
 		// We have a compound model; add from each in turn
-		for (const auto & model_element : m_models.Models)
+		for (const auto & model_element : m_models.GetModels())
 		{
-			Model *model = model_element.value.model;
-			if (!model) continue;
-
-			AddCollisionDataFromModel(model, model_element.value.elementpos, model_element.value.rotation);
+			AddCollisionDataFromModel(model_element.Model, model_element.Location, model_element.Rotation);
 		}
 	}
 }
@@ -365,13 +362,13 @@ void ComplexShipTile::RemoveAllCollisionDataFromModels()
 // Import collision data from the single specified model, with no location or rotation offset required
 void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model)
 {
-	AddCollisionDataFromModel(model, NULL_INTVECTOR3, Rotation90Degree::Rotate0);
+	AddCollisionDataFromModel(model, NULL_UINTVECTOR3, Rotation90Degree::Rotate0);
 }
 
 // Handle the import of additional collision data from the models that comprise this tile
 // Import collision data from the single specified model, with the given element location
 // and rotation offsets applied during calculation of the collision volumes
-void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model, const INTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
+void ComplexShipTile::AddCollisionDataFromModel(const ModelInstance & model, const UINTVECTOR3 & element_offset, Rotation90Degree rotation_offset)
 {
 	const Model *m = model.GetModel();
 	if (!m || !m_parent || m->CollisionData().empty()) return;
@@ -992,7 +989,7 @@ void ComplexShipTile::SetSingleModel(Model *model)
 	// Shut down any compound-model data if it has previously been allocated, and set this tile to single-model mode
 	if (HasCompoundModel())
 	{
-		m_models.Shutdown();
+		m_models.Reset();
 		SetHasCompoundModel(false);
 	}
 
@@ -1010,10 +1007,8 @@ void ComplexShipTile::SetMultipleModels(void)
 	SetHasCompoundModel(true);
 
 	// Reset and deallocate any existing compound model data
-	m_models.ResetModelSet();
+	m_models = CompoundElementModel(GetElementSize().Convert<UINT>());
 
-	// Allocate sufficient space for a compound model covering the entire tile area
-	m_models.Allocate(GetElementSize());
 }
 
 // Static method to look up a tile definition and create a new tile based upon it
@@ -1054,7 +1049,7 @@ void ComplexShipTile::RecalculateCompoundModelData(void)
 	// Make sure this tile does have compound model data
 	if (m_multiplemodels)
 	{
-		m_models.RecalculateBounds();
+		m_models.RecalculateModelData();
 	}
 }
 

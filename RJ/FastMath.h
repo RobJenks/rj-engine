@@ -40,8 +40,12 @@ extern const double INF_DOUBLE;
 
 extern const INTVECTOR2 NULL_INTVECTOR2;
 extern const INTVECTOR3 NULL_INTVECTOR3;
+extern const UINTVECTOR2 NULL_UINTVECTOR2;
+extern const UINTVECTOR3 NULL_UINTVECTOR3;
 extern const INTVECTOR2 ONE_INTVECTOR2;
 extern const INTVECTOR3 ONE_INTVECTOR3;
+extern const UINTVECTOR2 ONE_UINTVECTOR2;
+extern const UINTVECTOR3 ONE_UINTVECTOR3;
 extern const XMVECTOR NULL_VECTOR;
 extern const XMVECTOR NULL_VECTOR2;
 extern const XMVECTOR NULL_VECTOR3;
@@ -395,6 +399,8 @@ const XMMATRIX & GetRotationMatrix(Rotation90Degree rot);
 XMMATRIX GetRotationMatrixInstance(Rotation90Degree rot);
 const XMFLOAT4X4 * GetRotationMatrixF(Rotation90Degree rot);
 XMFLOAT4X4 GetRotationMatrixInstanceF(Rotation90Degree rot);
+const XMMATRIX & GetRotationMatrixUnchecked(Rotation90Degree rot);
+const XMMATRIX GetRotationMatrixInstanceUnchecked(Rotation90Degree rot);
 
 extern const XMMATRIX ROT_MATRIX_0;
 extern const XMMATRIX ROT_MATRIX_90;
@@ -404,7 +410,7 @@ extern const XMFLOAT4X4 ROT_MATRIX_0_F;
 extern const XMFLOAT4X4 ROT_MATRIX_90_F;
 extern const XMFLOAT4X4 ROT_MATRIX_180_F;
 extern const XMFLOAT4X4 ROT_MATRIX_270_F;
-extern const XMMATRIX* ROT_MATRICES[4];
+extern const XMMATRIX ROT_MATRICES[4];
 extern XMVECTOR ROT_QUATERNIONS[4];
 
 // Orthornormal unit basis vectors;

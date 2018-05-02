@@ -2013,28 +2013,24 @@ void CoreEngine::RenderComplexShipTile(ComplexShipTile *tile, iSpaceObjectEnviro
 		if (tile->Fade.AlphaIsActive()) { fade = true; alpha = tile->Fade.GetFadeAlpha(); }
 
 		// Iterate through all models to be rendered
-		ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it_end = tile->GetCompoundModelSet()->Models.end();
-		for (ComplexShipTile::TileCompoundModelSet::TileModelCollection::const_iterator it = tile->GetCompoundModelSet()->Models.begin(); it != it_end; ++it)
-		{
-			// Get a reference to the model
-			const ComplexShipTile::TileModel & item = (*it).value;
-			
-			// Apply a transformation of (BaseMatrix * ModelTranslationToElementCentre * CurrentWorldMatrix), where
-			// BaseMatrix = (Scale * Rotation)
-			modelwm = XMMatrixMultiply(XMMatrixMultiply(item.basematrix, 
-				XMMatrixTranslationFromVector(XMVectorAdd(item.offset, Game::C_CS_ELEMENT_MIDPOINT_V))), 
-				world);
+		for (auto & item : tile->GetCompoundModelSet().GetModels())
+		{	
+			// Calculate the full world transformation for this item
+			modelwm = XMMatrixMultiply(
+				item.LocalWorld,			// (Scale * LocalRotationWithinEnv * LocalTranslationWithinEnv * ...
+				world						// ... WorldMatrixOfEnvironment)
+			);
 			
 			// Submit the tile model for rendering using this adjusted world matrix
 			// Take pos from the trans components of the world matrix (_41 to _43)
 			if (fade)
 			{
-				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, item.model, std::move(
+				SubmitForZSortedRendering(RenderQueueShader::RM_LightFadeShader, item.Model.GetModel(), std::move(
 					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))), modelwm.r[3]);
 			}
 			else
 			{
-				SubmitForRendering(RenderQueueShader::RM_LightShader, item.model, NULL, std::move(
+				SubmitForRendering(RenderQueueShader::RM_LightShader, item.Model.GetModel(), NULL, std::move(
 					RM_Instance(modelwm, RM_Instance::CalculateSortKey(modelwm.r[3]))));
 			}
 		}
