@@ -7,6 +7,20 @@
 #include <memory>
 
 
+// Enable or disable aligned allocations
+//#define ALIGNED_ALLOCATORS_ENABLED
+
+#ifndef ALIGNED_ALLOCATORS_ENABLED
+
+	/*** DISABLED ***/
+
+	template <class T, size_t Alignment> struct AlignedAllocator : public std::allocator<T> { };
+
+#else
+
+	/*** ENABLED ***/
+
+
 /**
 * STL-compliant allocator that allocates aligned memory.
 * @tparam T Type of the element to allocate.
@@ -109,3 +123,6 @@ bool operator != (const AlignedAllocator<T1, A1> &, const AlignedAllocator<T2, A
 
 
 #endif 
+
+
+#endif

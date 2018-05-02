@@ -1,6 +1,8 @@
 #include "ALIGN16.h"
 #include <allocators>
 
+#ifdef ALIGN16_ENABLED
+
 // Static allocation method along 16-byte word boundaries
 template <typename T>
 T * ALIGN16<T>::New(void)
@@ -23,3 +25,4 @@ void ALIGN16<T>::SafeDelete(T *alloc)
 	alloc = NULL;
 }
 
+#endif

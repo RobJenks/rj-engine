@@ -6,6 +6,23 @@
 #include <new>
 #include <malloc.h>
 
+
+// Global enable/disable of ALIGN functionality - currently disabled
+//#define ALIGN16_ENABLED
+#ifndef ALIGN16_ENABLED
+
+	/*** DISABLED ***/
+
+	// Null class
+	template <typename T> class ALIGN16 { };
+
+	// Null-define global macros
+#	define USE_ALIGN16_ALLOCATORS(T)
+
+#else 
+
+	/*** ENABLED ***/
+
 // Debug option to log all allocation and deallocations performed through this interface
 //#define RJ_LOG_ALIGN_ALLOCS
 
@@ -149,6 +166,6 @@ public:
 };
 
 
-
+#endif
 
 #endif
