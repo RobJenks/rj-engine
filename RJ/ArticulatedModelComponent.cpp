@@ -11,7 +11,6 @@ ArticulatedModelComponent::ArticulatedModelComponent(void)
 {
 }
 
-
 // Performs an immediate recalculation of the world transform for this component
 void ArticulatedModelComponent::RefreshPositionImmediate(void)
 {

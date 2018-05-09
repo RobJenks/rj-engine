@@ -30,9 +30,9 @@ public:
 	CMPINLINE void 						SetOrientation(const FXMVECTOR orient)			{ m_orientation = orient; }
 
 	// Set the component size
-	CMPINLINE void						SetSize(const FXMVECTOR size)					{ Model.SetSize(size); }
-	CMPINLINE void						SetSize(const XMFLOAT3 & size)					{ SetSize(XMLoadFloat3(&size)); }
-	CMPINLINE void						SetSize(float max_dimension)					{ Model.SetSize(max_dimension); }
+	CMPINLINE void						SetSize(const FXMVECTOR size, bool preserve_proportions = true)		{ Model.SetSize(size, preserve_proportions); }
+	CMPINLINE void						SetSize(const XMFLOAT3 & size, bool preserve_proportions = true)	{ SetSize(XMLoadFloat3(&size), preserve_proportions); }
+	CMPINLINE void						SetSize(float max_dimension)										{ Model.SetSize(max_dimension); }
 
 	// Retrieve or set the component world matrix
 	CMPINLINE XMMATRIX					GetWorldMatrix(void) const						{ return m_worldmatrix; }

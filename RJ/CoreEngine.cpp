@@ -1585,7 +1585,7 @@ Result CoreEngine::RenderPortalEnvironment(iSpaceObjectEnvironment *environment,
 			if (terrain->IsRendered()) continue;
 			if (terrain->IsDestroyed()) continue; 
 			
-			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_basic_lever_01")
+			if (terrain->IsDynamic() && terrain->ToDynamicTerrain()->GetDynamicTerrainDefinition()->GetCode() == "switch_continuous_lever_vertical_01")
 			{
 				int a = 1;
 			}

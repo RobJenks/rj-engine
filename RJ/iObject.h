@@ -277,8 +277,8 @@ public:
 	virtual void							Shutdown(void);
 
 	// The size of this object in world coordinates
-	void									SetSize(const FXMVECTOR size);
-	CMPINLINE void							SetSize(const XMFLOAT3 & size)		{ SetSize(XMLoadFloat3(&size)); }
+	void									SetSize(const FXMVECTOR size, bool preserve_proportions = true);
+	CMPINLINE void							SetSize(const XMFLOAT3 & size, bool preserve_proportions = true)	{ SetSize(XMLoadFloat3(&size), preserve_proportions); }
 	CMPINLINE XMVECTOR						GetSize(void) const					{ return m_size; }
 	CMPINLINE const XMFLOAT3 &				GetSizeF(void) const				{ return m_sizef; }
 	CMPINLINE float							GetSizeRatio(void) const			{ return m_size_ratio; }

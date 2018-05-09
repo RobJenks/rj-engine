@@ -91,6 +91,19 @@ void ModelInstance::SetExactSize(const FXMVECTOR size)
 	SetScaleFactor(component_scale);
 }
 
+// Sets the size of the model, with an additional parameter specifying whether to preserve relative model proportions
+void ModelInstance::SetSize(const FXMVECTOR size, bool preserve_proportions)
+{
+	if (preserve_proportions)
+	{
+		SetSize(size);
+	}
+	else
+	{
+		SetExactSize(size);
+	}
+}
+
 // Set the model definition.  Will reset any size/scaling factor that has already been applied
 void ModelInstance::SetModel(Model *model)
 {

@@ -358,7 +358,7 @@ iObject::~iObject(void)
 }
 
 // Set the size of this object.  Recalculates any dependent fields, e.g. those involved in collision detection
-void iObject::SetSize(const FXMVECTOR size)
+void iObject::SetSize(const FXMVECTOR size, bool preserve_proportions)
 {
 	// Store the size parameter
 	m_size = size;
@@ -375,8 +375,8 @@ void iObject::SetSize(const FXMVECTOR size)
 
 	// Update the model geometry to match this new size; this will override any scaling factor applied
 	// to the model at its original size
-	m_model.SetSize(m_size);
-
+	m_model.SetSize(m_size, preserve_proportions);
+	
 	// Recalculate the object fast mover threshold
 	m_fastmoverthresholdsq = (min(m_sizef.x, min(m_sizef.y, m_sizef.z)) * Game::C_OBJECT_FAST_MOVER_THRESHOLD);
 	m_fastmoverthresholdsq *= m_fastmoverthresholdsq;

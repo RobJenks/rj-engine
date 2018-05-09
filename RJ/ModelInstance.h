@@ -43,6 +43,12 @@ public:
 	CMPINLINE void						SetExactSize(const XMFLOAT3 & size) { return SetExactSize(XMLoadFloat3(&size)); }
 	CMPINLINE void						SetExactSize(float uniform_size) { return SetExactSize(XMVectorReplicate(uniform_size)); }
 
+	// Sets the size of the model, with an additional parameter specifying whether to preserve relative model proportions
+	void								SetSize(const FXMVECTOR size, bool preserve_proportions);
+	CMPINLINE void						SetSize(const XMFLOAT3 & size, bool preserve_proportions) { return SetSize(XMLoadFloat3(&size), preserve_proportions); }
+	CMPINLINE void						SetSize(float uniform_size, bool preserve_proportions) { return SetSize(XMVectorReplicate(uniform_size), preserve_proportions); }
+
+
 	// Derive properties of this model instance, based upon the underlying model definition and our per-instance parameters
 	XMVECTOR							DetermineModelInstanceSize(void) const;
 	XMVECTOR							DetermineModelInstanceMinBounds(void) const;

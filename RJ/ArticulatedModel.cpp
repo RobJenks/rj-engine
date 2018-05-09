@@ -48,7 +48,7 @@ bool ArticulatedModel::SetComponentDefinition(int index, Model *model, const Var
 
 	// Set the model definition and return success
 	m_components[index]->Model.SetModel(model);
-	size.ApplyToObject(*m_components[index]);
+	size.ApplyToObject(&(m_components[index]->Model));
 	return true;
 }
 

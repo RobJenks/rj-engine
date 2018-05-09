@@ -977,12 +977,12 @@ void RJMain::ProcessKeyboardInput(void)
 				Game::Log << LOG_DEBUG << "Terrain count = " << cs()->TerrainObjects.size() << "\n";
 
 				DataObjectContinuousSwitch *t1 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_vertical_01");
-				t1->SetPosition(XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
+				t1->SetPosition(XMVectorSet(63.74f, 1.4f, 64.25f, 0.0f)); // XMVectorAdd(centre, XMVectorSet(-12.0f, 0.0f, -20.0f, 0.0f)));
 				t1->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
 				cs()->AddTerrainObject(static_cast<Terrain*>(t1));
 
 				DataObjectContinuousSwitch *t2 = (DataObjectContinuousSwitch*)DynamicTerrain::Create("switch_continuous_lever_horizontal_01");
-				t2->SetPosition(XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
+				t2->SetPosition(XMVectorSet(67.2f, 1.4f, 64.25f, 0.0f)); // XMVectorAdd(centre, XMVectorSet(-3.0f, 0.0f, -20.0f, 0.0f)));
 				t2->SetOrientation(XMQuaternionRotationAxis(UP_VECTOR, PI));
 				cs()->AddTerrainObject(static_cast<Terrain*>(t2));
 
@@ -1030,10 +1030,8 @@ void RJMain::ProcessKeyboardInput(void)
 	}
 	if (b[DIK_4]) 
 	{
-		ss()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), HALF_VECTOR_N)));
-		s2()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), HALF_VECTOR_P)));
-		s3[0]()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), XMVectorSet(-0.5f, 0, +0.5f, 1))));
-		s3[1]()->SetPosition(XMVectorAdd(cs()->GetPosition(), XMVectorMultiply(cs()->GetSize(), XMVectorSet(+0.5f, 0, -0.5f, 1))));
+		Game::Log << LOG_DEBUG << "Pos: " << Vector3ToString(Game::CurrentPlayer->GetActivePlayerObject()->GetPositionF()) << ", EnvPos: " <<
+			Vector3ToString(Game::CurrentPlayer->GetActor()->GetEnvironmentPosition()) << "\n";
 
 		Game::Keyboard.LockKey(DIK_4);
 		
